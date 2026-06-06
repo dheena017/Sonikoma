@@ -1831,10 +1831,37 @@ app.post("/api/process-url", async (req, res) => {
 });
 
 // Start the fullstack environment integration
+//
+// Two modes are supported:
+//
+//   STANDALONE_SERVER=true  →  Express API only on port 3000 (no Vite)
+//                               Vite runs separately on port 5173 and proxies /api here.
+//                               Use this with: npm run server  +  npm run frontend
+//
+//   (default)               →  Express + Vite middleware together on port 3000
+//                               Use this with: npm run dev:all  OR  the old single-process mode
+//
 async function startServer() {
-  // Mount Vite middleware in development mode
-  if (process.env.NODE_ENV !== "production") {
-    console.log('Mounting dynamic Vite dev middleware on port 3000...');
+  const isStandalone = process.env.STANDALONE_SERVER === 'true';
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  if (isProduction) {
+    // Production: serve pre-built static files
+    console.log('[Server] Production mode — serving static build from /dist');
+    const distPath = path.join(process.cwd(), 'dist');
+    app.use(express.static(distPath));
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(distPath, 'index.html'));
+    });
+
+  } else if (isStandalone) {
+    // Standalone backend mode: API only, Vite runs separately on port 5173
+    console.log('[Server] Standalone backend mode — API available at http://localhost:' + PORT);
+    console.log('[Server] Start frontend separately with: npm run frontend');
+
+  } else {
+    // Combined dev mode: Express + Vite middleware on single port
+    console.log('[Server] Combined dev mode — mounting Vite middleware on port ' + PORT);
     const vite = await createViteServer({
       configFile: path.resolve(process.cwd(), 'frontend', 'vite.config.ts'),
       root: path.resolve(process.cwd(), 'frontend'),
@@ -1845,17 +1872,16 @@ async function startServer() {
       appType: "spa"
     });
     app.use(vite.middlewares);
-  } else {
-    console.log('Serving production static build folders...');
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Host runtime active. Full-stack App available at http://localhost:${PORT}`);
+    if (isStandalone) {
+      console.log(`[Server] Backend API running at http://localhost:${PORT}/api`);
+    } else if (!isProduction) {
+      console.log(`[Server] Full-stack app available at http://localhost:${PORT}`);
+    } else {
+      console.log(`[Server] Production server running at http://localhost:${PORT}`);
+    }
   });
 }
 
