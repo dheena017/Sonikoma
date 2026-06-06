@@ -5,13 +5,9 @@ import {
   Terminal, 
   ChevronDown, 
   ChevronUp, 
-  Wrench, 
   RefreshCw, 
   Copy, 
-  Check, 
-  Sliders, 
-  Layers,
-  HelpCircle
+  Check
 } from "lucide-react";
 
 export interface ErrorPopupDetail {
@@ -20,21 +16,7 @@ export interface ErrorPopupDetail {
   technicalDetails?: string;
   suggestion?: string;
   type?: "error" | "warning" | "info" | "success";
-  parameters?: {
-    method?: string;
-    sensitivity?: number;
-    dilation?: number;
-    inpaint_radius?: number;
-    detection_style?: string;
-    url?: string;
-  };
-  onRetry?: (overrideParams: {
-    method: string;
-    sensitivity: number;
-    dilation: number;
-    inpaint_radius: number;
-    detection_style: string;
-  }) => void;
+  onRetry?: () => void;
 }
 
 interface ErrorPopupModalProps {
@@ -47,33 +29,19 @@ export default function ErrorPopupModal({ error, onClose }: ErrorPopupModalProps
 
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
-  
-  // Interactive parameters override state inside the error modal
-  const [method, setMethod] = useState(error.parameters?.method || "inpaint");
-  const [sensitivity, setSensitivity] = useState(error.parameters?.sensitivity !== undefined ? error.parameters?.sensitivity : 50);
-  const [dilation, setDilation] = useState(error.parameters?.dilation !== undefined ? error.parameters?.dilation : -1);
-  const [inpaintRadius, setInpaintRadius] = useState(error.parameters?.inpaint_radius !== undefined ? error.parameters?.inpaint_radius : 3);
-  const [detectionStyle, setDetectionStyle] = useState(error.parameters?.detection_style || "all");
 
   const handleCopy = () => {
-    const textToCopy = `[Error Diagnosis]\nTitle: ${error.title}\nMessage: ${error.message}\nTechnical logs:\n${error.technicalDetails || "None"}\nActive settings: Method=${method}, Sensitivity=${sensitivity}%, Dilation=${dilation}, InpaintRadius=${inpaintRadius}px, Style=${detectionStyle}`;
+    const textToCopy = `[Error Diagnosis]\nTitle: ${error.title}\nMessage: ${error.message}\nTechnical logs:\n${error.technicalDetails || "None"}`;
     navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const isWarning = error.type === "warning";
-  const accentColor = isWarning ? "amber" : "red";
   
   const handleApplyRetry = () => {
     if (error.onRetry) {
-      error.onRetry({
-        method,
-        sensitivity,
-        dilation,
-        inpaint_radius: inpaintRadius,
-        detection_style: detectionStyle
-      });
+      error.onRetry();
     }
     onClose();
   };
@@ -126,84 +94,13 @@ export default function ErrorPopupModal({ error, onClose }: ErrorPopupModalProps
           </div>
 
           {/* Solution & Corrective Auto-Tuner Section */}
-          <div className="bg-neutral-950/60 rounded-2xl border border-neutral-800/40 p-5 space-y-4">
-            <div className="flex items-center gap-2 text-xs font-mono font-bold text-neutral-300">
-              <Wrench className="h-4 w-4 text-purple-400" />
-              <span>Corrective Parameters Workshop</span>
-            </div>
-            
-            {error.suggestion && (
+          {error.suggestion && (
+            <div className="bg-neutral-950/60 rounded-2xl border border-neutral-800/40 p-5 space-y-4">
               <p className="text-xs text-neutral-300 leading-relaxed font-sans bg-purple-950/10 border border-purple-900/15 p-3 rounded-xl">
                 💡 <span className="font-semibold text-purple-300">Diagnostic Suggestion:</span> {error.suggestion}
               </p>
-            )}
-
-            {/* Quick adjust grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-              
-              <div className="space-y-1">
-                <label className="block text-[10.5px] font-mono text-neutral-400">Restoration Method</label>
-                <select
-                  value={method}
-                  onChange={(e) => setMethod(e.target.value)}
-                  className="w-full bg-neutral-900 border border-neutral-800 rounded-xl p-2 text-xs text-neutral-200 focus:border-purple-500 font-sans outline-none"
-                >
-                  <option value="inpaint">Telea Inpaint (Smart filling)</option>
-                  <option value="inpaint_ns">Navier-Stokes (Fluid blur)</option>
-                  <option value="blur">Heavy selective Smudge</option>
-                  <option value="solid_white font-mono">Solid White Block</option>
-                  <option value="solid_black font-mono">Solid Black Block</option>
-                  <option value="transparent font-mono">Transparent Alpha Drop-out</option>
-                </select>
-              </div>
-
-              <div className="space-y-1">
-                <label className="block text-[10.5px] font-mono text-neutral-400">Dialogue Selection Target</label>
-                <select
-                  value={detectionStyle}
-                  onChange={(e) => setDetectionStyle(e.target.value)}
-                  className="w-full bg-neutral-900 border border-neutral-800 rounded-xl p-2 text-xs text-neutral-200 focus:border-purple-500 font-sans outline-none"
-                >
-                  <option value="all">Automatic Hybrid (AI/Vision/Hues)</option>
-                  <option value="white_only">White Speech Bubbles Only</option>
-                  <option value="text_only">Floating Dialogue Letters Only</option>
-                </select>
-              </div>
-
-              <div className="space-y-1 bg-neutral-900/45 p-3 rounded-xl border border-neutral-800/25">
-                <div className="flex items-center justify-between text-[10.5px] font-mono">
-                  <span className="text-neutral-400">Sensitivity:</span>
-                  <span className="text-purple-400 font-bold">{sensitivity}%</span>
-                </div>
-                <input 
-                  type="range"
-                  min={0}
-                  max={100}
-                  step={5}
-                  value={sensitivity}
-                  onChange={(e) => setSensitivity(Number(e.target.value))}
-                  className="w-full h-1 accent-purple-500 bg-neutral-950 rounded cursor-pointer mt-1"
-                />
-              </div>
-
-              <div className="space-y-1 bg-neutral-900/45 p-3 rounded-xl border border-neutral-800/25">
-                <div className="flex items-center justify-between text-[10.5px] font-mono">
-                  <span className="text-neutral-400">Search Radius:</span>
-                  <span className="text-purple-400 font-bold">{inpaintRadius}px</span>
-                </div>
-                <input 
-                  type="range"
-                  min={1}
-                  max={20}
-                  step={1}
-                  value={inpaintRadius}
-                  onChange={(e) => setInpaintRadius(Number(e.target.value))}
-                  className="w-full h-1 accent-purple-500 bg-neutral-950 rounded cursor-pointer mt-1"
-                />
-              </div>
-
             </div>
-          </div>
+          )}
 
           {/* Technical Traceback Accordion */}
           {error.technicalDetails && (

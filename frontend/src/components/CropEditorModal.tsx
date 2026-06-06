@@ -119,8 +119,7 @@ export default function CropEditorModal({
   const [selectedSliceId, setSelectedSliceId] = React.useState<string | null>(null);
   const [autoPushOnDraw, setAutoPushOnDraw] = React.useState<boolean>(false);
 
-  const [isRemovingSpeechBubbles, setIsRemovingSpeechBubbles] = React.useState<boolean>(false);
-  const [activeSpeechBubbleMethod, setActiveSpeechBubbleMethod] = React.useState<'inpaint' | 'blur' | 'ocr' | null>(null);
+
 
   const [isCroppingSlice, setIsCroppingSlice] = React.useState<string | null>(null);
   const [slicesCroppedCount, setSlicesCroppedCount] = React.useState(0);
@@ -161,149 +160,7 @@ export default function CropEditorModal({
     }
   }, [editCropTop, editCropBottom, editCropLeft, editCropRight, selectedSliceId]);
 
-  const handleRemoveSpeechBubbles = async (method: 'inpaint' | 'blur' | 'ocr') => {
-    if (editingImageIdx === null) return;
-    const imgUrl = scrapedImages[editingImageIdx];
-    setIsRemovingSpeechBubbles(true);
-    setActiveSpeechBubbleMethod(method);
-    
-    const associatedPanel = panels?.find(p => p.image_url === imgUrl);
-    const sensitivity = associatedPanel?.bubble_sensitivity !== undefined ? associatedPanel.bubble_sensitivity : 50;
-    const dilation = associatedPanel?.bubble_dilation !== undefined ? associatedPanel.bubble_dilation : -1;
-    const inpaint_radius = associatedPanel?.inpaint_radius !== undefined ? associatedPanel.inpaint_radius : 3;
-    const detection_style = associatedPanel?.detection_style || "all";
-    const activeMethod = method; 
-    
-    if (setConsoleLogs) {
-      setConsoleLogs(prev => [
-        `[Speech Bubbles Editor] Erasing speech boxes via ${activeMethod} (sensitivity: ${sensitivity}%, dilation: ${dilation !== -1 ? dilation + "px" : "auto"}, radius: ${inpaint_radius}px, style: ${detection_style}) on this panel...`,
-        ...prev
-      ]);
-    }
 
-    try {
-    console.log(`[Speech Bubbles Editor] Request Body:`, JSON.stringify({
-          url: imgUrl,
-          method: activeMethod,
-          sensitivity: sensitivity,
-          dilation: dilation,
-          inpaint_radius: inpaint_radius,
-          detection_style: detection_style
-        }));
-
-      const response = await activeFetch("/api/remove-speech-bubbles", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          url: imgUrl,
-          method: activeMethod,
-          sensitivity: sensitivity,
-          dilation: dilation,
-          inpaint_radius: inpaint_radius,
-          detection_style: detection_style
-        })
-      });
-
-      if (!response.ok) {
-        let errMsg = "Speech bubble removal system error";
-        try {
-          const errData = await response.json();
-          if (errData && errData.error) {
-            errMsg = errData.error;
-          }
-        } catch (e) {}
-        throw new Error(errMsg);
-      }
-
-      const data = await response.json();
-      if (data.success && data.url) {
-        // Update in scrapedImages lists
-        if (setScrapedImages) {
-          setScrapedImages(prev => prev.map(img => img === imgUrl ? data.url : img));
-        }
-        // Update in selectedScraped
-        if (setSelectedScraped && selectedScraped) {
-          setSelectedScraped(prev => prev.map(img => img === imgUrl ? data.url : img));
-        }
-        // Update in panels storyboard
-        if (setPanels && panels) {
-          setPanels(prev => prev.map(panel => panel.image_url === imgUrl ? { 
-            ...panel, 
-            image_url: data.url,
-            bubble_method: method
-          } : panel));
-        }
-
-        const isBlur = method === "blur";
-        const isOcr = method === "ocr";
-        let successMsg = "";
-        if (data.bubbles_detected === false) {
-          successMsg = "No distinct speech text candidates were detected, but the process completed successfully.";
-        } else if (isBlur) {
-          successMsg = "Blur Successful! The speech text has been smudged together into a fuzzy, grayish-white blob.";
-        } else if (isOcr) {
-          successMsg = "AI Erase Successful! The text has been removed using OCR detection and inpainting.";
-        } else {
-          successMsg = "Inpaint Successful! The speech bubble vanishes, and the missing space is filled with matching background art.";
-        }
-
-        if (setConsoleLogs) {
-          setConsoleLogs(prev => [
-            `[Speech Bubbles Editor] ${successMsg} (${isBlur ? "Smudge" : "Healing"} method)`,
-            ...prev
-          ]);
-        }
-        addNotification(successMsg, "success");
-      } else {
-        throw new Error(data.error || "Erase failed");
-      }
-    } catch (err: any) {
-      console.error("[Speech Bubbles Editor] Error:", err);
-      addNotification(err.message || "Failed to remove speech bubbles.", "error");
-      if (setConsoleLogs) {
-        setConsoleLogs(prev => [
-          `[Speech Bubbles Editor ERROR] Bubble removal failed: ${err.message || err}`,
-          ...prev
-        ]);
-      }
-      if (setErrorPopup) {
-        setErrorPopup({
-          title: "Speech Bubble Eraser Interrupted",
-          message: err.message || "The OpenCV image processing pipeline encountered an issue attempting to find and erase speech bubbles.",
-          type: "error",
-          technicalDetails: `Error Message: ${err.message || "Unknown"}\nImage URL: ${imgUrl}\nActive Parameters:\n- Method: ${activeMethod}\n- Sensitivity: ${sensitivity}%\n- Dilation: ${dilation}px\n- Inpaint Radius: ${inpaint_radius}px\n- Style: ${detection_style}`,
-          suggestion: "OpenCV's white bubble segmentation algorithm did not return a clean mask region. Try reducing 'Boundary Sensitivity' to 50% or below, or switch the Restoration Method to 'Gaussian Smudge' or 'Solid White Fill' for robust speech block coverage.",
-          parameters: {
-            method: activeMethod,
-            sensitivity,
-            dilation,
-            inpaint_radius: inpaint_radius,
-            detection_style
-          },
-          onRetry: (overrideParams) => {
-            if (setPanels && panels) {
-              setPanels(prev => prev.map(panel => panel.image_url === imgUrl ? { 
-                ...panel, 
-                bubble_method: overrideParams.method,
-                bubble_sensitivity: overrideParams.sensitivity,
-                bubble_dilation: overrideParams.dilation,
-                inpaint_radius: overrideParams.inpaint_radius,
-                detection_style: overrideParams.detection_style
-              } : panel));
-            }
-            setTimeout(() => {
-              handleRemoveSpeechBubbles(overrideParams.method as any);
-            }, 100);
-          }
-        });
-      }
-    } finally {
-      setIsRemovingSpeechBubbles(false);
-      setActiveSpeechBubbleMethod(null);
-    }
-  };
 
   const handleAiCrop = async () => {
     if (editingImageIdx === null) return;
@@ -752,29 +609,7 @@ export default function CropEditorModal({
                 className="relative border border-neutral-800 hover:border-purple-500/30 rounded-xl bg-neutral-950 overflow-hidden h-[480px] flex items-center justify-center p-1 select-none transition-colors"
                 style={{ cursor: isPointInsideSelection(0, 0) ? "default" : "crosshair" }}
               >
-                {isRemovingSpeechBubbles && (
-                  <div className="absolute inset-0 bg-neutral-950/85 backdrop-blur-md z-50 flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-200">
-                    <div className="relative flex items-center justify-center h-20 w-20">
-                      <div className="absolute inset-0 rounded-full bg-purple-500/10 blur-xl animate-pulse" />
-                      <div className="absolute inset-2 rounded-full border border-purple-500/20 border-t-purple-500 animate-spin" />
-                      <Sparkles className="h-8 w-8 text-purple-400 animate-pulse" />
-                    </div>
-                    <div className="space-y-2 mt-4 max-w-sm">
-                      <h4 className="text-sm font-bold text-white font-sans tracking-wide">
-                        {activeSpeechBubbleMethod === "blur" 
-                          ? "Executing Selective Gaussian Smudge..." 
-                          : "Erase & Inpaint Speech Bubbles..."}
-                      </h4>
-                      <p className="text-[11px] text-neutral-400 leading-normal font-sans">
-                        Deploying Python OpenCV algorithms to isolate luminance-contrast contours, segment white speech bubble shapes, and reconstruct background art textures.
-                      </p>
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-950/40 rounded-full border border-purple-900/30 font-mono text-[9.5px] text-purple-300 mt-2">
-                        <span className="h-1.5 w-1.5 rounded-full bg-purple-400 animate-ping" />
-                        <span>Processing with {activeSpeechBubbleMethod === "blur" ? "SMUDGE_VAL" : "TELEA_HEALING"}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
+
 
                 <div
                   ref={containerRef}
