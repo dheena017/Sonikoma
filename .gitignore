@@ -11,3 +11,25 @@ coverage/
 *.db-wal
 *.db-shm
 .llm-chat-history/
+
+# Python cache & bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Editor & IDE settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Test images / temp assets
+test_panel_input.png
+*.png_cropped
+*.png_clean_bubbles
