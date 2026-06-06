@@ -37,7 +37,21 @@ webtoon-to-video-backend/
 ├── frontend/                         ← FRONTEND — React/TypeScript UI
 │   ├── src/
 │   │   ├── components/               ← All reusable React UI components (.tsx)
+│   │   │   ├── crop/                 ← Modular crop components (canvas, registry, splitters)
+│   │   │   │   ├── AutoSlicer.tsx
+│   │   │   │   ├── CleanBubblesPanel.tsx
+│   │   │   │   ├── CropCanvas.tsx
+│   │   │   │   ├── CutsRegistry.tsx
+│   │   │   │   ├── EnhancementsPanel.tsx
+│   │   │   │   ├── HorizontalSplitter.tsx
+│   │   │   │   └── types.ts
+│   │   │   ├── scraper/              ← Modular scraper deck card & toolbar components
+│   │   │   │   ├── PanelCard.tsx
+│   │   │   │   ├── ScraperControls.tsx
+│   │   │   │   └── types.ts
 │   │   │   ├── AdvancedSettings.tsx
+│   │   │   ├── AutoCropModal.tsx
+│   │   │   ├── BubbleCleanerModal.tsx
 │   │   │   ├── CropEditorModal.tsx
 │   │   │   ├── ErrorPopupModal.tsx
 │   │   │   ├── Header.tsx
@@ -419,6 +433,7 @@ At the **end of every conversation**, append one row to the Session Changelog ta
 
 | Date | Summary | Files Affected |
 |---|---|---|
+| 2026-06-07 | Modularized LiveScraperDeck & CropEditorModal, added CleanBubblesPanel and AutoCropModal | `frontend/src/components/LiveScraperDeck.tsx`, `frontend/src/components/CropEditorModal.tsx`, `frontend/src/components/AutoCropModal.tsx`, `frontend/src/components/scraper/*`, `frontend/src/components/crop/*`, `frontend/src/App.tsx`, `RULES.md` |
 | 2026-06-07 | Implemented sequential auto-decision speech bubble cleaner and specialized cleaning functions | `backend/services/cleaner.py`, `backend/routes/process.py`, `backend/services/test_cleaner.py`, `RULES.md` |
 | 2026-06-07 | Split server.ts into modular files; added self-healing validation fallback to scraperRoutes | `backend/server.ts`, `backend/config/*`, `backend/utils/*`, `backend/routes/*`, `RULES.md`, `README.md` |
 | 2026-06-07 | Created requirements.txt with all Python pip dependencies and ran pip install | `requirements.txt` |

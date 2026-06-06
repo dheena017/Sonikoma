@@ -27,16 +27,15 @@ router.post(["/ai-detect-panels", "/detect-panels", "/ai-smart-crop"], async (re
     const contentType = resolved.contentType;
     const base64Image = imageBuffer.toString("base64");
 
-    if (!ai) {
-      throw new Error("Gemini AI client is not initialized.");
-    }
-
-    const targetModel = model || "gemini-2.5-flash";
-    console.log(`[AI Smart Crop API] Using model: ${targetModel}`);
-    const prompt = "Analyze this comic image page. Identify the main illustrations/panels that contain scenes. Detect the outer borders and give me the precise percentage coordinates (0 to 100) for cropping each panel out properly, removing any extra whitespace or gutters. Return a JSON array of panel crops, where each object has properties: cropTop, cropBottom, cropLeft, cropRight.";
-
     let aiResultText = "";
     try {
+      if (!ai) {
+        throw new Error("Gemini AI client is not initialized.");
+      }
+      const targetModel = model || "gemini-2.5-flash";
+      console.log(`[AI Smart Crop API] Using model: ${targetModel}`);
+      const prompt = "Analyze this comic image page. Identify the main illustrations/panels that contain scenes. Detect the outer borders and give me the precise percentage coordinates (0 to 100) for cropping each panel out properly, removing any extra whitespace or gutters. Return a JSON array of panel crops, where each object has properties: cropTop, cropBottom, cropLeft, cropRight.";
+
       const response = await callGeminiWithRetry(() => ai!.models.generateContent({
         model: targetModel,
         contents: {
@@ -163,13 +162,14 @@ router.post("/analyze-image", async (req, res) => {
     }
     const base64Image = imageBuffer.toString("base64");
 
-    if (!ai) {
-      throw new Error("Gemini AI client is not initialized.");
-    }
-
-    const targetModel = model || "gemini-2.5-flash";
-    console.log(`[Analyze Image API] Using model: ${targetModel}`);
-    const prompt = `Analyze this comic illustration panel in detail. Generate dramatic subtitles/speech transcripts, appropriate timing, sound effect, and recommended camera motion for cinematic storytelling.
+    let responseText = "";
+    try {
+      if (!ai) {
+        throw new Error("Gemini AI client is not initialized.");
+      }
+      const targetModel = model || "gemini-2.5-flash";
+      console.log(`[Analyze Image API] Using model: ${targetModel}`);
+      const prompt = `Analyze this comic illustration panel in detail. Generate dramatic subtitles/speech transcripts, appropriate timing, sound effect, and recommended camera motion for cinematic storytelling.
 Return a JSON object with properties:
 - speech_text: A caption, subtitle, or character dialogue suited for this panel (max 25 words).
 - sfx: Brackets style on-screen sound effect (e.g., "[Whoosh]", "[Slash]", "[Crash]", "[Gasps]").
@@ -177,8 +177,6 @@ Return a JSON object with properties:
 - motion_type: Camera motion type. Must choose from list: "zoom_in", "zoom_out", "pan_left", "pan_right", "pan_up", "pan_down".
 - visual_description: A short one-sentence summary of what's happening.`;
 
-    let responseText = "";
-    try {
       const response = await callGeminiWithRetry(() => ai!.models.generateContent({
         model: targetModel,
         contents: {

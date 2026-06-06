@@ -114,9 +114,21 @@ router.get("/download-zip/get/:id", (req, res) => {
   res.send(buffer);
 });
 
-// Endpoint to edit image properties (crop top, bottom, left, right, autoTrim)
+// Endpoint to edit image properties (crop top, bottom, left, right, autoTrim, rotate, flipHorizontal)
 router.post("/edit-image", async (req, res) => {
-  const { url, cropTop = 0, cropBottom = 0, cropLeft = 0, cropRight = 0, autoTrim = true, sensitivity, padding, backgroundColorMode } = req.body;
+  const { 
+    url, 
+    cropTop = 0, 
+    cropBottom = 0, 
+    cropLeft = 0, 
+    cropRight = 0, 
+    autoTrim = true, 
+    sensitivity, 
+    padding, 
+    backgroundColorMode,
+    rotate = 0,
+    flipHorizontal = false
+  } = req.body;
   if (!url) {
     return res.status(400).json({ error: "Parameter 'url' is required." });
   }
@@ -125,6 +137,17 @@ router.post("/edit-image", async (req, res) => {
     const resolved = await resolveImageToBuffer(url);
     let imgBuffer = resolved.data;
     let contentType = resolved.contentType;
+
+    // Apply rotation if requested
+    const rotateAngle = Number(rotate) || 0;
+    if (rotateAngle !== 0) {
+      imgBuffer = await sharp(imgBuffer).rotate(rotateAngle).toBuffer();
+    }
+
+    // Apply horizontal flip if requested
+    if (flipHorizontal) {
+      imgBuffer = await sharp(imgBuffer).flop().toBuffer();
+    }
 
     const pTop = Math.max(0, Math.min(100, Number(cropTop) || 0));
     const pBottom = Math.max(0, Math.min(100, Number(cropBottom) || 0));

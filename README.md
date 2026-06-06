@@ -34,6 +34,11 @@ webtoon-to-video-backend/
 ├── frontend/                         ← React + TypeScript UI (Vite)
 │   ├── src/
 │   │   ├── components/               ← All UI components (.tsx)
+│   │   │   ├── crop/                 ← Modular crop components (canvas, registry, splitters)
+│   │   │   ├── scraper/              ← Modular scraper deck card & toolbar components
+│   │   │   ├── AutoCropModal.tsx     ← Workspace Auto-Crop modal
+│   │   │   ├── CropEditorModal.tsx   ← Workspace single/multi cut editor
+│   │   │   └── BubbleCleanerModal.tsx← Workspace Speech bubble cleaner modal
 │   │   ├── App.tsx                   ← Root page component
 │   │   ├── types.ts                  ← Shared TypeScript types
 │   │   ├── models.ts                 ← AI model registry

@@ -26,6 +26,8 @@ import StoryboardTimeline from "./components/StoryboardTimeline";
 import VideoMonitor from "./components/VideoMonitor";
 import VolumeAndProgressPanel from "./components/VolumeAndProgressPanel";
 import CropEditorModal from "./components/CropEditorModal";
+import BubbleCleanerModal from "./components/BubbleCleanerModal";
+import AutoCropModal from "./components/AutoCropModal";
 import TerminalLogs from "./components/TerminalLogs";
 import ModelStatusTable from "./components/ModelStatusTable";
 import NotificationStack, { Notification, NotificationType } from "./components/NotificationStack";
@@ -242,9 +244,180 @@ export default function App() {
   const [editAutoTrim, setEditAutoTrim] = useState<boolean>(true);
   const [isSavingEdit, setIsSavingEdit] = useState<boolean>(false);
 
+  // Bubble cleaner states (lifted to App level so the modal is rendered at the same
+  // level as CropEditorModal — replacing the main workspace, not overlaying it)
+  const [showBubbleModal, setShowBubbleModal] = useState<boolean>(false);
+  const [bubbleDetectionStyle, setBubbleDetectionStyle] = useState<"all" | "white_only" | "text_only">("all");
+  const [bubbleEraseMethod, setBubbleEraseMethod] = useState<"auto" | "inpaint" | "blur" | "solid_white" | "solid_black">("auto");
+  const [bubbleSensitivity, setBubbleSensitivity] = useState<number>(50);
+  const [isCleaningBubbles, setIsCleaningBubbles] = useState<boolean>(false);
+  const [cleanProgress, setCleanProgress] = useState<{ current: number; total: number } | null>(null);
+  const [bubbleCroppingImgUrl, setBubbleCroppingImgUrl] = useState<string | null>(null);
+
+  // Auto crop states (lifted to App level)
+  const [showAutoCropModal, setShowAutoCropModal] = useState<boolean>(false);
+  const [cropSensitivity, setCropSensitivity] = useState<number>(30);
+  const [cropPaddingPx, setCropPaddingPx] = useState<number>(10);
+  const [cropBackgroundMode, setCropBackgroundMode] = useState<string>("auto");
+  const [autoSplitTallStrips, setAutoSplitTallStrips] = useState<boolean>(true);
+  const [processingStrategy, setProcessingStrategy] = useState<string>("balanced");
+  const [isBatchCropping, setIsBatchCropping] = useState<boolean>(false);
+  const [batchProgress, setBatchProgress] = useState<{ current: number; total: number } | null>(null);
+  const [croppingImgUrl, setCroppingImgUrl] = useState<string | null>(null);
+
   // References
   const playTimerRef = useRef<NodeJS.Timeout | null>(null);
   const videoPlayerRef = useRef<HTMLVideoElement | null>(null);
+
+  // ── Bubble Cleaner: runs the API call for all selected panels ────────────────
+  const handleCleanBubblesSelected = async () => {
+    if (selectedScraped.length === 0) return;
+    setIsCleaningBubbles(true);
+    setConsoleLogs(prev => [
+      `[Bubble Cleaner] Initiating AI Speech Bubble removal for ${selectedScraped.length} selected panels...`,
+      `[Bubble Cleaner] Settings → Detection: "${bubbleDetectionStyle}" | Method: "${bubbleEraseMethod}" | Sensitivity: ${bubbleSensitivity}%`,
+      ...prev
+    ]);
+    try {
+      let updatedImages = [...scrapedImages];
+      let updatedSelected = [...selectedScraped];
+      setCleanProgress({ current: 0, total: selectedScraped.length });
+
+      for (let i = 0; i < selectedScraped.length; i++) {
+        const imgUrl = selectedScraped[i];
+        setCleanProgress({ current: i + 1, total: selectedScraped.length });
+        setBubbleCroppingImgUrl(imgUrl);
+
+        const idx = updatedImages.indexOf(imgUrl);
+        if (idx === -1) continue;
+
+        const response = await fetchWithInterceptor("/api/remove-speech-bubbles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            url: imgUrl,
+            method: bubbleEraseMethod,
+            sensitivity: bubbleSensitivity,
+            dilation: -1,
+            inpaint_radius: 3,
+            detection_style: bubbleDetectionStyle,
+          }),
+        });
+
+        if (!response.ok) throw new Error(`Speech bubble removal failed with status ${response.status}`);
+
+        const data = await response.json();
+        if (data.success && data.url) {
+          const ci = updatedImages.indexOf(imgUrl);
+          if (ci !== -1) updatedImages[ci] = data.url;
+          const si = updatedSelected.indexOf(imgUrl);
+          if (si !== -1) updatedSelected[si] = data.url;
+
+          setPanels(prev => prev.map(p => p.image_url === imgUrl ? { ...p, image_url: data.url } : p));
+          setScrapedImages([...updatedImages]);
+          setSelectedScraped([...updatedSelected]);
+        }
+      }
+
+      setConsoleLogs(prev => [
+        `[Bubble Cleaner] ✓ Completed speech bubble cleaning for ${selectedScraped.length} panel(s)!`,
+        ...prev
+      ]);
+      addNotification("Speech bubble cleaning completed!", "success");
+    } catch (err: any) {
+      console.error("[Bubble Cleaner] Failed:", err);
+      if (!err.intercepted) addNotification(err.message || "Speech bubble cleaning failed.", "error");
+    } finally {
+      setIsCleaningBubbles(false);
+      setCleanProgress(null);
+      setBubbleCroppingImgUrl(null);
+    }
+  };
+
+  // ── Auto Cropper: runs the API call for all selected panels ────────────────
+  const handleAutoCropSelected = async () => {
+    if (selectedScraped.length === 0) return;
+    setIsBatchCropping(true);
+    setConsoleLogs(prev => [
+      `[Auto Cropper] Initiating enhanced auto-crop pipeline with ${selectedScraped.length} selected assets...`,
+      ...prev
+    ]);
+
+    try {
+      let updatedImages = [...scrapedImages];
+      let updatedSelected = [...selectedScraped];
+      setBatchProgress({ current: 0, total: selectedScraped.length });
+
+      for (let i = 0; i < selectedScraped.length; i++) {
+        const imgUrl = selectedScraped[i];
+        setBatchProgress({ current: i + 1, total: selectedScraped.length });
+        setCroppingImgUrl(imgUrl);
+        
+        const idx = updatedImages.indexOf(imgUrl);
+        if (idx === -1) continue;
+
+        const response = await fetchWithInterceptor("/api/edit-image", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            url: imgUrl,
+            cropTop: 0,
+            cropBottom: 0,
+            cropLeft: 0,
+            cropRight: 0,
+            autoTrim: true,
+            sensitivity: cropSensitivity,
+            padding: cropPaddingPx,
+            backgroundColorMode: cropBackgroundMode
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Auto-trim request failed with status ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success && data.url) {
+          const currentIdx = updatedImages.indexOf(imgUrl);
+          if (currentIdx !== -1) {
+            updatedImages[currentIdx] = data.url;
+          }
+          
+          const selIdx = updatedSelected.indexOf(imgUrl);
+          if (selIdx !== -1) {
+            updatedSelected[selIdx] = data.url;
+          }
+
+          setPanels(prevPanels => 
+            prevPanels.map(p => p.image_url === imgUrl ? { ...p, image_url: data.url } : p)
+          );
+          
+          setScrapedImages([...updatedImages]);
+          setSelectedScraped([...updatedSelected]);
+        }
+      }
+
+      setConsoleLogs(prev => [
+        `[Auto Cropper] Successfully completed smart layout auto-crops for all checked images!`,
+        ...prev
+      ]);
+      addNotification("Auto-crop completed!", "success");
+    } catch (err: any) {
+      console.error("[Auto Cropper] Batch process failed:", err);
+      setConsoleLogs(prev => [
+        `[Auto Cropper ERROR] Smart trimming operation failed: ${err.message || err}`,
+        ...prev
+      ]);
+      addNotification(err.message || "Auto-crop failed. Please try again.", "error");
+    } finally {
+      setIsBatchCropping(false);
+      setBatchProgress(null);
+      setCroppingImgUrl(null);
+    }
+  };
+  // ─────────────────────────────────────────────────────────────────────────────
 
   // Load preview images and panels immediately when targetUrl changes (either pasted or typed or clicked)
   useEffect(() => {
@@ -789,8 +962,38 @@ export default function App() {
         totalCalculatedDuration={totalCalculatedDuration} 
       />
 
-      {/* WORKSPACE AREA OR EDITOR PAGE */}
-      {editingImageIdx !== null ? (
+      {/* WORKSPACE AREA — AutoCropModal / BubbleCleanerModal / CropEditorModal / Main */}
+      {showAutoCropModal ? (
+        <AutoCropModal
+          onClose={() => setShowAutoCropModal(false)}
+          onApply={() => { setShowAutoCropModal(false); handleAutoCropSelected(); }}
+          sensitivity={cropSensitivity}
+          setSensitivity={setCropSensitivity}
+          padding={cropPaddingPx}
+          setPadding={setCropPaddingPx}
+          backgroundColorMode={cropBackgroundMode}
+          setBackgroundColorMode={setCropBackgroundMode}
+          autoSplitTallStrips={autoSplitTallStrips}
+          setAutoSplitTallStrips={setAutoSplitTallStrips}
+          processingStrategy={processingStrategy}
+          setProcessingStrategy={setProcessingStrategy}
+          selectedCount={selectedScraped.length}
+          isApplying={isBatchCropping}
+        />
+      ) : showBubbleModal ? (
+        <BubbleCleanerModal
+          onClose={() => setShowBubbleModal(false)}
+          onApply={() => { setShowBubbleModal(false); handleCleanBubblesSelected(); }}
+          detectionStyle={bubbleDetectionStyle}
+          setDetectionStyle={setBubbleDetectionStyle}
+          eraseMethod={bubbleEraseMethod}
+          setEraseMethod={setBubbleEraseMethod}
+          sensitivity={bubbleSensitivity}
+          setSensitivity={setBubbleSensitivity}
+          selectedCount={selectedScraped.length}
+          isApplying={isCleaningBubbles}
+        />
+      ) : editingImageIdx !== null ? (
         <CropEditorModal
           editingImageIdx={editingImageIdx}
           setEditingImageIdx={setEditingImageIdx}
@@ -923,6 +1126,16 @@ export default function App() {
             addNotification={addNotification}
             fetchWithInterceptor={fetchWithInterceptor}
             setErrorPopup={setErrorPopup}
+            showBubbleModal={showBubbleModal}
+            setShowBubbleModal={setShowBubbleModal}
+            isCleaningBubbles={isCleaningBubbles}
+            cleanProgress={cleanProgress}
+            bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+            showAutoCropModal={showAutoCropModal}
+            setShowAutoCropModal={setShowAutoCropModal}
+            isBatchCropping={isBatchCropping}
+            batchProgress={batchProgress}
+            croppingImgUrl={croppingImgUrl}
           />
 
           {/* ACTIVE QUEUE / LIVE PIPELINE PROGRESS */}
