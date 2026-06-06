@@ -211,6 +211,15 @@ export default function CropEditorModal({
     }
   }, [editCropTop, editCropBottom, editCropLeft, editCropRight, selectedSliceId]);
 
+  // Automatically switch mouse mode based on selected tab: "slice" (cut) turns split line on, others turn it off
+  useEffect(() => {
+    if (activeTab === "slice") {
+      setShowSplitPosition(true);
+    } else {
+      setShowSplitPosition(false);
+    }
+  }, [activeTab]);
+
   const handleAiCrop = async () => {
     if (editingImageIdx === null) return;
     const currentUrl = scrapedImages[editingImageIdx];
@@ -753,6 +762,22 @@ export default function CropEditorModal({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [editingImageIdx, slices, editCropTop, editCropBottom, editCropLeft, editCropRight, handleUndo]);
 
+  // Global mouse listeners while dragging — keeps the drag alive even when
+  // the mouse moves outside the image element boundaries.
+  useEffect(() => {
+    if (!dragType) return;
+
+    const onMouseMove = (e: MouseEvent) => handleMove(e.clientX, e.clientY);
+    const onMouseUp = () => handleEnd();
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, [dragType, handleMove, handleEnd]);
+
   if (editingImageIdx === null) return null;
 
   return (
@@ -772,10 +797,10 @@ export default function CropEditorModal({
             </div>
             <div>
               <h3 className="font-bold text-sm text-white tracking-tight">
-                Advanced Drop & Drag Multiple-Cut Generator
+                Advanced Drop & Drag Crop Tools Generator
               </h3>
               <p className="text-[10px] text-neutral-500 font-mono mt-0.5">
-                Slicing and Trimming Frame #{editingImageIdx + 1} with custom
+                Cutting and Trimming Frame #{editingImageIdx + 1} with custom
                 coordinates drag-and-drop
               </p>
             </div>
@@ -861,6 +886,7 @@ export default function CropEditorModal({
               handleSelectSlice={handleSelectSlice}
               handleDeleteSlice={handleDeleteSlice}
               handleRemoveSplitLine={handleRemoveSplitLine}
+              dragType={dragType}
             />
 
             <span className="text-[10px] text-neutral-500 text-center italic font-sans block pt-1">
@@ -875,8 +901,8 @@ export default function CropEditorModal({
             <div className="flex gap-1 bg-black/40 backdrop-blur-sm p-1.5 rounded-2xl border border-white/5">
               {([
                 { key: "adjust", label: "Adjust & Clean", emoji: "✨" },
-                { key: "slice", label: "Slicing Tools", emoji: "✂️" },
-                { key: "cuts", label: `Cuts (${slices.length})`, emoji: "🎯" },
+                { key: "slice", label: "Cut", emoji: "✂️" },
+                { key: "cuts", label: `Crop Tools (${slices.length})`, emoji: "🎯" },
               ] as { key: "adjust" | "slice" | "cuts"; label: string; emoji: string }[]).map((tab) => (
                 <button
                   key={tab.key}
@@ -1026,12 +1052,12 @@ export default function CropEditorModal({
               {isSavingEdit ? (
                 <>
                   <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                  <span>Processing Cuts...</span>
+                  <span>Processing Crop Tools...</span>
                 </>
               ) : slices.length > 0 ? (
                 <>
                   <Layers className="h-4 w-4 text-purple-200" />
-                  <span>Execute {slices.length} Cuts</span>
+                  <span>Execute {slices.length} Crop Tools</span>
                 </>
               ) : (
                 <>

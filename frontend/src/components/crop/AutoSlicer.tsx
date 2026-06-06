@@ -17,11 +17,11 @@ export default function AutoSlicer({
           <Sparkles className="h-3 w-3 text-emerald-400" />
         </div>
         <span className="text-[10px] uppercase font-mono font-bold text-neutral-400 tracking-widest">
-          Contours-Detection Auto Slicer
+          Contours-Detection Auto Cutter
         </span>
       </div>
       <p className="text-[10px] text-neutral-600 leading-relaxed">
-        Contour scans look for white gutters to identify individual panel slices.
+        Contour scans look for white gutters to identify individual panel cuts.
         Detected panels are instantly loaded into the Targets list for fine-tuning.
       </p>
       <button
@@ -37,7 +37,7 @@ export default function AutoSlicer({
           <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
         )}
         <span>
-          {isDetecting ? "Executing Scan..." : "Detect & Populate Slices List"}
+          {isDetecting ? "Executing Scan..." : "Detect & Populate Crop Tools List"}
         </span>
       </button>
     </div>

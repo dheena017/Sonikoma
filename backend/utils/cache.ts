@@ -5,6 +5,6 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-export const stitchedCache = new Map<string, { data: Buffer; contentType: string }>();
+export const mergedCache = new Map<string, { data: Buffer; contentType: string }>();
 export const editHistory = new Map<string, string>();
 export const zipCache = new Map<string, Buffer>();

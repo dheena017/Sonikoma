@@ -132,7 +132,7 @@ export default function App() {
                 message: "The backend server encountered an unexpected error while executing this request.",
                 type: "error",
                 technicalDetails: `HTTP 500 Internal Server Error\nRequested path: ${input}`,
-                suggestion: "This usually points to a backend error, temporary memory constraints during image stitching, or model processing issues. Make sure the scraped panel matches general dimensions and click Retry.",
+                suggestion: "This usually points to a backend error, temporary memory constraints during image merging, or model processing issues. Make sure the scraped panel matches general dimensions and click Retry.",
                 onRetry: () => {
                   executeFetch();
                 }
@@ -219,7 +219,7 @@ export default function App() {
   const [scrapedImages, setScrapedImages] = useState<string[]>([]);
   const [isScraping, setIsScraping] = useState<boolean>(false);
   const [selectedScraped, setSelectedScraped] = useState<string[]>([]);
-  const [stitchingIndices, setStitchingIndices] = useState<number[]>([]);
+  const [mergingIndices, setMergingIndices] = useState<number[]>([]);
 
   // Tab View for Preview ("video" for MP4 player, "storyboard" for step-by-step)
   const [activePreviewTab, setActivePreviewTab] = useState<"video" | "storyboard">("video");
@@ -842,14 +842,14 @@ export default function App() {
     }
   };
 
-  // Vertically stitch a panel image with its successor to prevent cutoff artifacts
-  const handleStitchWithNext = async (idx: number) => {
+  // Vertically merge a panel image with its successor to prevent cutoff artifacts
+  const handleMergeWithNext = async (idx: number) => {
     if (idx < 0 || idx >= scrapedImages.length - 1) return;
-    console.log('[Stitcher] Initiating merge of frames', idx + 1, 'and', idx + 2);
+    console.log('[Merger] Initiating merge of frames', idx + 1, 'and', idx + 2);
     
-    setStitchingIndices(prev => [...prev, idx]);
+    setMergingIndices(prev => [...prev, idx]);
     setConsoleLogs(prev => [
-      `[Stitcher] Merging Frame #${idx + 1} with Frame #${idx + 2} vertically...`,
+      `[Merger] Merging Frame #${idx + 1} with Frame #${idx + 2} vertically...`,
       ...prev
     ]);
 
@@ -857,7 +857,7 @@ export default function App() {
       const img1 = scrapedImages[idx];
       const img2 = scrapedImages[idx + 1];
       
-      const response = await fetchWithInterceptor("/api/stitch-images", {
+      const response = await fetchWithInterceptor("/api/merge-images", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -866,12 +866,13 @@ export default function App() {
       });
       
       const data = await response.json();
-      const stitchedUrl = data.url;
+      if (!response.ok) throw new Error(data.error || `Merge failed with status ${response.status}`);
+      const mergedUrl = data.url;
       
-      // Replace the two original frames on the deck with the single stitched result
+      // Replace the two original frames on the deck with the single merged result
       setScrapedImages(prev => {
         const copy = [...prev];
-        copy.splice(idx, 2, stitchedUrl);
+        copy.splice(idx, 2, mergedUrl);
         return copy;
       });
 
@@ -881,24 +882,24 @@ export default function App() {
         const hasImg2 = prev.includes(img2);
         const filtered = prev.filter(img => img !== img1 && img !== img2);
         if (hasImg1 || hasImg2) {
-          return [...filtered, stitchedUrl];
+          return [...filtered, mergedUrl];
         }
         return filtered;
       });
 
       setConsoleLogs(prev => [
-        `[Stitcher] Successfully merged Frame #${idx + 1} and Frame #${idx + 2} vertically into a new seamless frame asset!`,
+        `[Merger] Successfully merged Frame #${idx + 1} and Frame #${idx + 2} vertically into a new seamless frame asset!`,
         ...prev
       ]);
-      console.log('[Stitcher] Merge completed successfully');
-      addNotification('Frames #' + (idx + 1) + ' and #' + (idx + 2) + ' stitched successfully!', 'success');
+      console.log('[Merger] Merge completed successfully');
+      addNotification('Frames #' + (idx + 1) + ' and #' + (idx + 2) + ' merged successfully!', 'success');
     } catch (err: any) {
-      console.error("[Stitcher] Merging failed:", err);
+      console.error("[Merger] Merging failed:", err);
       if (!err.intercepted) {
-        addNotification(`Stitching failed. Please try again or refresh the page.`, "error");
+        addNotification(`Merging failed. Please try again or refresh the page.`, "error");
       }
     } finally {
-      setStitchingIndices(prev => prev.filter(i => i !== idx));
+      setMergingIndices(prev => prev.filter(i => i !== idx));
     }
   };
 
@@ -1111,12 +1112,12 @@ export default function App() {
             selectedScraped={selectedScraped}
             setSelectedScraped={setSelectedScraped}
             setScrapedImages={setScrapedImages}
-            stitchingIndices={stitchingIndices}
+            mergingIndices={mergingIndices}
             setConsoleLogs={setConsoleLogs}
             panels={panels}
             setPanels={setPanels}
             currentPanelIndex={currentPanelIndex}
-            handleStitchWithNext={handleStitchWithNext}
+            handleMergeWithNext={handleMergeWithNext}
             setEditingImageIdx={setEditingImageIdx}
             setEditCropTop={setEditCropTop}
             setEditCropBottom={setEditCropBottom}

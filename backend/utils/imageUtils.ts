@@ -6,7 +6,7 @@
  */
 
 import sharp from 'sharp';
-import { stitchedCache } from './cache.js';
+import { mergedCache } from './cache.js';
 
 /**
  * Safely resolve ANY absolute, relative, proxied, or cached image URL into a raw Buffer and contentType.
@@ -20,10 +20,10 @@ export async function resolveImageToBuffer(urlStr: string): Promise<{ data: Buff
   let workingUrl = urlStr.trim();
 
   // 1. First check if it is a local cached memory asset
-  if (workingUrl.includes("/api/stitch-images/cached/")) {
-    const idMatched = workingUrl.match(/\/api\/stitch-images\/cached\/([^\/\s\?&]+)/);
+  if (workingUrl.includes("/api/merge-images/cached/") || workingUrl.includes("/api/stitch-images/cached/")) {
+    const idMatched = workingUrl.match(/\/(?:merge|stitch)-images\/cached\/([^\/\s\?&]+)/);
     if (idMatched && idMatched[1]) {
-      const cached = stitchedCache.get(idMatched[1]);
+      const cached = mergedCache.get(idMatched[1]);
       if (cached) {
         return { data: cached.data, contentType: cached.contentType || "image/png" };
       }

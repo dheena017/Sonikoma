@@ -9,12 +9,12 @@ export interface ScraperDeckProps {
   selectedScraped: string[];
   setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
   setScrapedImages: React.Dispatch<React.SetStateAction<string[]>>;
-  stitchingIndices: number[];
+  mergingIndices: number[];
   setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>>;
   panels: GeneratedPanel[];
   setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
   currentPanelIndex: number;
-  handleStitchWithNext: (idx: number) => Promise<void>;
+  handleMergeWithNext: (idx: number) => Promise<void>;
   setEditingImageIdx: (idx: number | null) => void;
   setEditCropTop: (val: number) => void;
   setEditCropBottom: (val: number) => void;

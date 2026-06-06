@@ -14,8 +14,8 @@ interface PanelCardProps
     | "setScrapedImages"
     | "setSelectedScraped"
     | "setConsoleLogs"
-    | "stitchingIndices"
-    | "handleStitchWithNext"
+    | "mergingIndices"
+    | "handleMergeWithNext"
     | "scrapedImages"
     | "bubbleCroppingImgUrl"
   > {
@@ -36,8 +36,8 @@ export default function PanelCard({
   croppingImgUrl,
   bubbleCroppingImgUrl,
   scrapedImages,
-  stitchingIndices,
-  handleStitchWithNext,
+  mergingIndices,
+  handleMergeWithNext,
   setEditingImageIdx,
   setEditCropTop,
   setEditCropBottom,
@@ -261,16 +261,16 @@ export default function PanelCard({
 
         {idx < scrapedImages.length - 1 && (
           <button
-            onClick={() => handleStitchWithNext(idx)}
-            disabled={stitchingIndices.includes(idx)}
+            onClick={() => handleMergeWithNext(idx)}
+            disabled={mergingIndices.includes(idx)}
             className="w-full bg-indigo-950/40 hover:bg-indigo-900 border border-indigo-900/60 text-indigo-300 hover:text-indigo-100 text-[9px] py-1 rounded font-mono transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
           >
-            {stitchingIndices.includes(idx) ? (
+            {mergingIndices.includes(idx) ? (
               <RefreshCw className="h-2.5 w-2.5 animate-spin" />
             ) : (
               <span className="text-[10px] font-bold">🔗</span>
             )}
-            <span>Stitch with #{idx + 2}</span>
+            <span>Merge with #{idx + 2}</span>
           </button>
         )}
 
@@ -290,17 +290,6 @@ export default function PanelCard({
             <Scissors className="h-3 w-3" />
             <span>Edit</span>
           </button>
-
-          {imgUrl.includes("/cached/") && (
-            <button
-              onClick={handleUndo}
-              title="Undo Last Edit"
-              className="flex-1 flex items-center justify-center gap-1 bg-neutral-900 hover:bg-neutral-850 hover:text-amber-400 text-neutral-400 py-1 rounded border border-neutral-800 hover:border-neutral-700 transition-colors cursor-pointer text-[10px] font-mono animate-fadeIn"
-            >
-              <Undo2 className="h-3 w-3" />
-              <span>Undo</span>
-            </button>
-          )}
 
           <button
             onClick={() => {

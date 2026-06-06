@@ -1,163 +1,155 @@
-import React, { useRef, useEffect } from "react";
-import { Terminal, Trash2, Copy, Sparkles } from "lucide-react";
+import React, { useEffect, useRef } from "react";
+import { Terminal, Trash2, Copy, Check, ChevronDown } from "lucide-react";
 
 interface TerminalLogsProps {
   consoleLogs: string[];
   setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-/** Generates a HH:MM:SS timestamp string for the current moment. */
 function getTimestamp(): string {
   const now = new Date();
-  return [now.getHours(), now.getMinutes(), now.getSeconds()]
-    .map((n) => String(n).padStart(2, "0"))
-    .join(":");
+  return now.toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
-/** Returns Tailwind classes + optional border-accent for a given log line. */
-function getLogStyle(log: string): { text: string; border: string; icon?: string } {
-  // — Errors (highest priority)
-  if (log.startsWith("[ERROR]"))
-    return { text: "text-red-400 font-semibold", border: "border-red-500/60" };
+function getLogColor(log: string): string {
+  // Error states
+  if (log.includes("[ERROR]") || log.includes("ERROR]")) return "text-red-400 font-semibold";
+  if (log.includes("[FATAL]")) return "text-red-500 font-bold";
 
-  // — Warnings
-  if (log.startsWith("[WARNING]"))
-    return { text: "text-amber-400 font-bold", border: "border-amber-500/60" };
+  // Success states
+  if (log.includes("[SUCCESS]") || log.includes("completed cleanly") || log.includes("Successfully")) return "text-emerald-400 font-medium";
 
-  // — Success / completion
-  if (log.startsWith("[SUCCESS]") || log.includes("completed cleanly"))
-    return { text: "text-emerald-400 font-medium", border: "border-emerald-500/50" };
+  // Warning states
+  if (log.includes("[WARNING]") || log.includes("[WARN]")) return "text-amber-400 font-semibold";
 
-  // — Scraper
-  if (log.startsWith("[Scraper]"))
-    return { text: "text-cyan-400", border: "border-cyan-500/40" };
+  // AI / Model related
+  if (log.includes("[AI Auto-Analysis]") || log.includes("[AI Model]") || log.includes("[Gemini]")) return "text-purple-300 font-medium";
+  if (log.includes("[AI Smart Crop]")) return "text-violet-400 font-medium";
 
-  // — Control
-  if (log.startsWith("[Control]"))
-    return { text: "text-blue-400", border: "border-blue-500/40" };
+  // OCR / Vision
+  if (log.includes("[OCR/CV Engine]") || log.includes("[Vision OCR]") || log.includes("[CV")) return "text-purple-300";
 
-  // — MoviePy
-  if (log.startsWith("[MoviePy]"))
-    return { text: "text-amber-300", border: "border-amber-400/40" };
+  // Scraper
+  if (log.includes("[Scraper]")) return "text-cyan-400";
 
-  // — Vision OCR / OCR CV Engine
-  if (log.startsWith("[Vision OCR]") || log.startsWith("[OCR/CV Engine]"))
-    return { text: "text-indigo-400", border: "border-indigo-500/40" };
+  // Control / Pipeline
+  if (log.includes("[Control]") || log.includes("[Pipeline]")) return "text-blue-400";
 
-  // — Image Editor
-  if (log.startsWith("[Image Editor]"))
-    return { text: "text-orange-400", border: "border-orange-500/40" };
+  // MoviePy / Video
+  if (log.includes("[MoviePy]") || log.includes("[Video]") || log.includes("[FFmpeg]")) return "text-amber-300";
 
-  // — Stitcher
-  if (log.startsWith("[Stitcher]") || log.startsWith("[STITCH]") || log.includes("Combined"))
-    return { text: "text-indigo-300", border: "border-indigo-400/40" };
+  // Image Editor
+  if (log.includes("[Image Editor]")) return "text-orange-400";
 
-  // — Auto Cropper
-  if (log.startsWith("[Auto Cropper]"))
-    return { text: "text-green-400", border: "border-green-500/40" };
+  // Stitcher
+  if (log.includes("[Stitcher]") || log.includes("Combined") || log.includes("[Stitch]")) return "text-indigo-300";
 
-  // — Speech Bubbles
-  if (log.startsWith("[Speech Bubbles]"))
-    return { text: "text-pink-400", border: "border-pink-500/40" };
+  // Auto Cropper
+  if (log.includes("[Auto Cropper]") || log.includes("[Crop]")) return "text-green-400";
 
-  // — AI Auto-Analysis (sparkle treatment applied via icon below)
-  if (log.startsWith("[AI Auto-Analysis]"))
-    return { text: "text-purple-400 font-medium", border: "border-purple-500/50", icon: "sparkle" };
+  // Speech Bubbles
+  if (log.includes("[Speech Bubbles]")) return "text-pink-400";
 
-  // — SCIME (legacy)
-  if (log.startsWith("[SCIME]"))
-    return { text: "text-purple-300", border: "border-purple-400/40" };
+  // Network / API
+  if (log.includes("[API]") || log.includes("[Network]") || log.includes("[HTTP]")) return "text-sky-400";
 
-  // — Preloader
-  if (log.startsWith("[Preloader]"))
-    return { text: "text-neutral-500", border: "border-neutral-700" };
+  // GUI / User actions
+  if (log.includes("[GUI]")) return "text-neutral-300";
 
-  // — GUI
-  if (log.startsWith("[GUI]"))
-    return { text: "text-neutral-300", border: "border-neutral-700" };
+  // Preloader
+  if (log.includes("[Preloader]")) return "text-neutral-500";
 
-  // — Default
-  return { text: "text-neutral-400", border: "border-neutral-800" };
+  // Model info
+  if (log.includes("[Model]")) return "text-violet-300";
+
+  // Database
+  if (log.includes("[Database]") || log.includes("[DB]")) return "text-teal-400";
+
+  return "text-neutral-400";
+}
+
+function getLogBorderColor(log: string): string {
+  if (log.includes("[ERROR]") || log.includes("ERROR]") || log.includes("[FATAL]")) return "border-red-500/60";
+  if (log.includes("[SUCCESS]") || log.includes("Successfully")) return "border-emerald-500/60";
+  if (log.includes("[WARNING]") || log.includes("[WARN]")) return "border-amber-500/60";
+  if (log.includes("[AI") || log.includes("[Gemini]")) return "border-purple-500/50";
+  if (log.includes("[Scraper]")) return "border-cyan-500/40";
+  if (log.includes("[Control]") || log.includes("[Pipeline]")) return "border-blue-500/40";
+  return "border-neutral-800";
 }
 
 export default function TerminalLogs({ consoleLogs, setConsoleLogs }: TerminalLogsProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const timestampCache = useRef<Map<number, string>>(new Map());
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const [copied, setCopied] = React.useState(false);
+  const [autoScroll, setAutoScroll] = React.useState(true);
 
-  // Auto-scroll to bottom whenever new logs arrive
+  // Auto-scroll to bottom when new logs arrive
   useEffect(() => {
-    const el = scrollRef.current;
-    if (el) {
-      el.scrollTop = el.scrollHeight;
+    if (autoScroll && scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [consoleLogs.length]);
+  }, [consoleLogs, autoScroll]);
 
-  // Stable timestamp per log index – assigned once when a log entry first appears
-  const getStableTimestamp = (index: number): string => {
-    if (!timestampCache.current.has(index)) {
-      timestampCache.current.set(index, getTimestamp());
-    }
-    return timestampCache.current.get(index)!;
-  };
-
-  // Reset timestamp cache when logs are cleared (length shrinks)
-  useEffect(() => {
-    if (consoleLogs.length <= 1) {
-      timestampCache.current.clear();
-    }
-  }, [consoleLogs.length]);
-
-  const handleCopyAll = async () => {
-    const allText = consoleLogs.join("\n");
-    try {
-      await navigator.clipboard.writeText(allText);
-    } catch {
-      // Fallback for older browsers
-      const textarea = document.createElement("textarea");
-      textarea.value = allText;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textarea);
-    }
+  const handleCopyAll = () => {
+    const allLogs = consoleLogs.join("\n");
+    navigator.clipboard.writeText(allLogs).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   return (
     <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-3.5">
-      {/* Header Row */}
       <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
         <div className="flex items-center gap-2">
           <Terminal className="h-4 w-4 text-purple-400" />
           <div>
-            <h3 className="font-bold text-sm text-white flex items-center gap-2">
-              Real-Time Compilation Shell Logs
+            <div className="flex items-center gap-2">
+              <h3 className="font-bold text-sm text-white">Real-Time Compilation Shell Logs</h3>
               {consoleLogs.length > 0 && (
-                <span className="text-[9px] font-mono font-normal bg-purple-500/20 text-purple-300 border border-purple-500/30 px-1.5 py-0.5 rounded-full">
-                  {consoleLogs.length}
+                <span className="text-[9px] px-1.5 py-0.5 font-mono font-bold bg-purple-950/60 text-purple-400 rounded border border-purple-800/40">
+                  {consoleLogs.length} entries
                 </span>
               )}
-            </h3>
-            <p className="text-[10px] text-neutral-400 font-mono">Live background status of parser compiles</p>
+            </div>
+            <p className="text-[10px] text-neutral-400 font-mono">Live background status of parser compiles &amp; AI operations</p>
           </div>
         </div>
-
         <div className="flex items-center gap-1.5">
+          {/* Auto-scroll toggle */}
+          <button
+            onClick={() => setAutoScroll(!autoScroll)}
+            className={`text-[10px] font-mono border px-2 py-1 rounded-lg cursor-pointer flex items-center gap-1 transition-colors ${
+              autoScroll
+                ? "text-purple-400 border-purple-800/50 bg-purple-950/30 hover:bg-purple-950/50"
+                : "text-neutral-500 border-neutral-800/80 bg-neutral-950 hover:bg-neutral-900"
+            }`}
+            title={autoScroll ? "Auto-scroll enabled" : "Auto-scroll disabled"}
+          >
+            <ChevronDown className="h-3 w-3" />
+            Auto
+          </button>
           {/* Copy All */}
           <button
             onClick={handleCopyAll}
             disabled={consoleLogs.length === 0}
             className="text-[10px] text-neutral-400 hover:text-blue-400 font-mono border border-neutral-800/80 px-2.5 py-1 rounded-lg bg-neutral-950 hover:bg-neutral-900 cursor-pointer flex items-center gap-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <Copy className="h-3 w-3" />
-            Copy All
+            {copied ? (
+              <>
+                <Check className="h-3 w-3 text-emerald-400" />
+                <span className="text-emerald-400">Copied!</span>
+              </>
+            ) : (
+              <>
+                <Copy className="h-3 w-3" />
+                Copy All
+              </>
+            )}
           </button>
-
-          {/* Clear Logs */}
+          {/* Clear */}
           <button
-            onClick={() => {
-              timestampCache.current.clear();
-              setConsoleLogs(["[GUI] Active shell cleared at user prompt."]);
-            }}
+            onClick={() => setConsoleLogs([`[GUI] ${getTimestamp()} — Active shell cleared at user prompt.`])}
             className="text-[10px] text-neutral-400 hover:text-red-400 font-mono border border-neutral-800/80 px-2.5 py-1 rounded-lg bg-neutral-950 hover:bg-neutral-900 cursor-pointer flex items-center gap-1.5 transition-colors"
           >
             <Trash2 className="h-3 w-3" />
@@ -166,30 +158,27 @@ export default function TerminalLogs({ consoleLogs, setConsoleLogs }: TerminalLo
         </div>
       </div>
 
-      {/* Log Output Area — always visible */}
       <div
         ref={scrollRef}
         className="bg-neutral-950 rounded-xl p-4 border border-neutral-850 h-52 overflow-y-auto font-mono text-[10px] space-y-1.5 scrollbar-thin"
       >
         {consoleLogs.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-neutral-600 select-none gap-1.5">
-            <Terminal className="h-5 w-5 opacity-40" />
-            <span className="text-[11px]">No logs yet — waiting for activity…</span>
+          <div className="flex flex-col items-center justify-center h-full text-neutral-600 space-y-2">
+            <Terminal className="h-6 w-6 opacity-40" />
+            <p className="text-[11px] font-mono">Waiting for pipeline activity...</p>
+            <p className="text-[9px] text-neutral-700">Console logs will appear here when operations start</p>
           </div>
         ) : (
           consoleLogs.map((log, index) => {
-            const style = getLogStyle(log);
-            const ts = getStableTimestamp(index);
+            const logColor = getLogColor(log);
+            const borderColor = getLogBorderColor(log);
 
             return (
               <div
                 key={index}
-                className={`leading-relaxed border-l-2 pl-2 hover:border-purple-500/50 transition-colors ${style.border} ${style.text}`}
+                className={`leading-relaxed border-l-2 pl-2 hover:bg-neutral-900/30 rounded-r transition-colors ${logColor} ${borderColor}`}
               >
-                <span className="text-neutral-600 select-none mr-1.5">{ts}</span>
-                {style.icon === "sparkle" && (
-                  <Sparkles className="inline h-2.5 w-2.5 mr-1 text-purple-400 animate-pulse" />
-                )}
+                <span className="text-neutral-600 mr-1.5 select-none">{String(consoleLogs.length - index).padStart(3, '0')}</span>
                 {log}
               </div>
             );

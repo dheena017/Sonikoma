@@ -10,7 +10,7 @@ import sharp from 'sharp';
 import { ai, Type, callGeminiWithRetry, DYNAMIC_BACKGROUND_VIDEOS } from '../config/clients.js';
 import { resolveImageToBuffer } from '../utils/imageUtils.js';
 import { parseWebtoonUrl } from '../utils/urlUtils.js';
-import { stitchedCache, editHistory } from '../utils/cache.js';
+import { mergedCache, editHistory } from '../utils/cache.js';
 
 const router = Router();
 
@@ -111,9 +111,9 @@ router.post(["/ai-detect-panels", "/detect-panels", "/ai-smart-crop"], async (re
           .toBuffer();
       }
 
-      const uniqueId = `stitched_${Date.now()}_smartcrop_${i}`;
-      const cachedUrl = `/api/stitch-images/cached/${uniqueId}`;
-      stitchedCache.set(uniqueId, { data: croppedBuffer, contentType });
+      const uniqueId = `merged_${Date.now()}_smartcrop_${i}`;
+      const cachedUrl = `/api/merge-images/cached/${uniqueId}`;
+      mergedCache.set(uniqueId, { data: croppedBuffer, contentType });
       editHistory.set(cachedUrl, url);
 
       croppedPanels.push({

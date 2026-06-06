@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import { Move, Trash2 } from "lucide-react";
 import { Slice } from "./types";
 
@@ -21,6 +21,7 @@ interface CropCanvasProps {
   handleSelectSlice: (slice: Slice) => void;
   handleDeleteSlice: (id: string, e: React.MouseEvent) => void;
   handleRemoveSplitLine: (yVal: number) => void;
+  dragType: "draw" | "move" | "split" | null;
 }
 
 export default function CropCanvas({
@@ -42,12 +43,35 @@ export default function CropCanvas({
   handleSelectSlice,
   handleDeleteSlice,
   handleRemoveSplitLine,
+  dragType,
 }: CropCanvasProps) {
   const hasCropSelection =
     editCropTop !== 0 ||
     editCropBottom !== 0 ||
     editCropLeft !== 0 ||
     editCropRight !== 0;
+
+  // Track mouse position for dynamic cursor
+  const [hoverPct, setHoverPct] = useState<{ x: number; y: number } | null>(null);
+
+  const getClientPct = useCallback(
+    (clientX: number, clientY: number) => {
+      if (!containerRef.current) return null;
+      const rect = containerRef.current.getBoundingClientRect();
+      const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+      const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
+      return { x, y };
+    },
+    [containerRef]
+  );
+
+  const getCursor = () => {
+    if (showSplitPosition) return "ns-resize";
+    if (dragType === "move") return "grabbing";
+    if (dragType === "draw") return "crosshair";
+    if (hoverPct && isPointInsideSelection(hoverPct.x, hoverPct.y)) return "grab";
+    return "crosshair";
+  };
 
   return (
     <div
@@ -61,32 +85,35 @@ export default function CropCanvas({
           handleStart(e.clientX, e.clientY);
         }}
         onMouseMove={(e) => {
-          handleMove(e.clientX, e.clientY);
+          // Update hover position for cursor
+          const pct = getClientPct(e.clientX, e.clientY);
+          if (pct) setHoverPct(pct);
+          // NOTE: actual move tracking is done via global listeners in the parent
         }}
-        onMouseUp={handleEnd}
-        onMouseLeave={handleEnd}
+        onMouseLeave={() => {
+          setHoverPct(null);
+          // Do NOT call handleEnd here — global window listeners handle mouseup
+          // so the drag continues even when the mouse leaves the image
+        }}
         onTouchStart={(e) => {
           if (e.touches && e.touches[0]) {
             handleStart(e.touches[0].clientX, e.touches[0].clientY);
           }
         }}
-        onTouchMove={(e) => {
-          if (e.touches && e.touches[0]) {
-            handleMove(e.touches[0].clientX, e.touches[0].clientY);
-          }
-        }}
         onTouchEnd={handleEnd}
         className="relative inline-block max-h-full max-w-full"
-        style={{ cursor: isPointInsideSelection(0, 0) ? "default" : "crosshair" }}
+        style={{ cursor: getCursor(), userSelect: "none" }}
       >
-        {/* The raw image source */}
+        {/* Raw image */}
         <img
           src={imgUrl}
           alt="Crop segment preview"
           className="max-h-[470px] max-w-full pointer-events-none select-none block"
           referrerPolicy="no-referrer"
+          draggable={false}
         />
 
+        {/* Split guidelines */}
         {showSplitPosition && (
           <>
             {/* Active sliding guideline */}

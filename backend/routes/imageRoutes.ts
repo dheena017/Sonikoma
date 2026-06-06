@@ -13,7 +13,7 @@ import path from 'path';
 import fs from 'fs';
 import { exec } from 'child_process';
 import { resolveImageToBuffer, cropAutoBorders } from '../utils/imageUtils.js';
-import { stitchedCache, editHistory, zipCache } from '../utils/cache.js';
+import { mergedCache, editHistory, zipCache } from '../utils/cache.js';
 
 const router = Router();
 
@@ -184,9 +184,9 @@ router.post("/edit-image", async (req, res) => {
       imgBuffer = trimmed.data;
     }
 
-    const uniqueId = `stitched_${Date.now()}_cropped`;
-    const newUrl = `/api/stitch-images/cached/${uniqueId}`;
-    stitchedCache.set(uniqueId, { data: imgBuffer, contentType });
+    const uniqueId = `merged_${Date.now()}_cropped`;
+    const newUrl = `/api/merge-images/cached/${uniqueId}`;
+    mergedCache.set(uniqueId, { data: imgBuffer, contentType });
     editHistory.set(newUrl, url);
 
     return res.json({
@@ -200,6 +200,66 @@ router.post("/edit-image", async (req, res) => {
 });
 
 
+
+// Endpoint to merge/stitch two images vertically
+router.post(["/merge-images", "/stitch-images"], async (req, res) => {
+  const { imageUrl1, imageUrl2, url1, url2, urls } = req.body;
+  const img1 = imageUrl1 || url1 || (Array.isArray(urls) && urls[0]);
+  const img2 = imageUrl2 || url2 || (Array.isArray(urls) && urls[1]);
+
+  if (!img1 || !img2) {
+    return res.status(400).json({ error: "Parameters 'imageUrl1' and 'imageUrl2' (or 'urls' array) are required." });
+  }
+
+  try {
+    const res1 = await resolveImageToBuffer(img1);
+    const res2 = await resolveImageToBuffer(img2);
+
+    const meta1 = await sharp(res1.data).metadata();
+    const w1 = meta1.width || 0;
+    const h1 = meta1.height || 0;
+
+    if (w1 === 0 || h1 === 0) {
+      throw new Error("Invalid dimensions for the first image.");
+    }
+
+    // Always resize the second image to match the first's width (keeps aspect ratio)
+    const img2Buffer = await sharp(res2.data).resize({ width: w1 }).toBuffer();
+    const meta2Resized = await sharp(img2Buffer).metadata();
+    const h2Scaled = meta2Resized.height || 0;
+
+    const finalWidth = w1;
+    const finalHeight = h1 + h2Scaled;
+
+    const mergedBuffer = await sharp({
+      create: {
+        width: finalWidth,
+        height: finalHeight,
+        channels: 4,
+        background: { r: 255, g: 255, b: 255, alpha: 1 }
+      }
+    })
+    .composite([
+      { input: res1.data, top: 0, left: 0 },
+      { input: img2Buffer, top: h1, left: 0 }
+    ])
+    .png()
+    .toBuffer();
+
+    const uniqueId = `merged_${Date.now()}_merged`;
+    const newUrl = `/api/merge-images/cached/${uniqueId}`;
+    mergedCache.set(uniqueId, { data: mergedBuffer, contentType: "image/png" });
+    editHistory.set(newUrl, img1); // allow undoing the merge
+
+    return res.json({
+      success: true,
+      url: newUrl
+    });
+  } catch (err: any) {
+    console.error("[Merge API] Error merging images:", err);
+    return res.status(500).json({ error: `Image merging failed: ${err.message || err}` });
+  }
+});
 
 // Endpoint to restore the previous crop state of an edited image
 router.post("/undo-crop", (req, res) => {
@@ -254,8 +314,9 @@ router.post("/remove-speech-bubbles", async (req, res) => {
 
     await fs.promises.writeFile(tempIn, imgBuffer);
 
-    // 3. Construct python CLI command (Always use python3 as mandated by backend rules)
-    const pythonCommand = `python3 backend/services/cleaner.py --image_path "${tempIn}" --output_path "${tempOut}" --method "${activeMethod}" --sensitivity ${activeSensitivity} --dilation ${activeDilation} --inpaint_radius ${activeRadius} --detection_style "${activeStyle}"`;
+    // 3. Construct python CLI command (Use python on Windows, python3 on Unix to prevent Store hangs)
+    const pythonBin = process.platform === 'win32' ? 'python' : 'python3';
+    const pythonCommand = `${pythonBin} backend/services/cleaner.py --image_path "${tempIn}" --output_path "${tempOut}" --method "${activeMethod}" --sensitivity ${activeSensitivity} --dilation ${activeDilation} --inpaint_radius ${activeRadius} --detection_style "${activeStyle}"`;
     
     console.log(`[Bubble Cleaner API] Running command: ${pythonCommand}`);
 
@@ -292,10 +353,10 @@ router.post("/remove-speech-bubbles", async (req, res) => {
           console.warn("[Bubble Cleaner API Warning] Failed to clean up temp output file:", unlinkErr);
         }
 
-        // 5. Store in stitched Cache
-        const cacheId = `stitched_${Date.now()}_cleaned`;
-        const newUrl = `/api/stitch-images/cached/${cacheId}`;
-        stitchedCache.set(cacheId, { data: cleanedBuffer, contentType });
+        // 5. Store in merged Cache
+        const cacheId = `merged_${Date.now()}_cleaned`;
+        const newUrl = `/api/merge-images/cached/${cacheId}`;
+        mergedCache.set(cacheId, { data: cleanedBuffer, contentType });
         editHistory.set(newUrl, url);
 
         return res.json({
@@ -321,10 +382,10 @@ router.post("/remove-speech-bubbles", async (req, res) => {
 });
 
 // Cached endpoint to fetch compiled vertical panels safely with typical GET src attributes
-router.get("/stitch-images/cached/:id", (req, res) => {
-  const cached = stitchedCache.get(req.params.id);
+router.get(["/merge-images/cached/:id", "/stitch-images/cached/:id"], (req, res) => {
+  const cached = mergedCache.get(req.params.id);
   if (!cached) {
-    return res.status(404).send("Stitched visual resource is no longer in memory or has expired.");
+    return res.status(404).send("Merged visual resource is no longer in memory or has expired.");
   }
 
   res.setHeader("Content-Type", cached.contentType);

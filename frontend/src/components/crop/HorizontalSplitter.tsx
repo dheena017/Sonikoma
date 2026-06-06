@@ -47,7 +47,7 @@ export default function HorizontalSplitter({
             <Split className="h-3 w-3 text-indigo-400 rotate-90" />
           </div>
           <span className="text-[10px] uppercase font-mono font-bold text-neutral-400 tracking-widest">
-            Horizontal Splitter
+            Horizontal Cutter
           </span>
         </div>
         <label className="relative flex items-center gap-2 cursor-pointer select-none text-[10px] text-neutral-500 hover:text-neutral-300 transition-colors">
@@ -74,7 +74,7 @@ export default function HorizontalSplitter({
       </div>
 
       <p className="text-[10px] text-neutral-600 leading-relaxed">
-        Slice this panel horizontally into multiple separate images. Add cut
+        Cut this panel horizontally into multiple separate images. Add cut
         lines to split into N parts.{" "}
         <span className="text-purple-500 font-semibold">Tip:</span> Drag on canvas when guideline is on.
       </p>

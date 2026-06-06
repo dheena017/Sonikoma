@@ -131,9 +131,9 @@ export default function CutsRegistry({
           </div>
           <div>
             <span className="text-[10px] uppercase font-mono font-bold text-neutral-400 tracking-widest">
-              Target Cuts Registry
+              Target Crop Tools Registry
             </span>
-            <p className="text-[9px] text-neutral-600 font-mono mt-0.5">{slices.length} Cuts Defined</p>
+            <p className="text-[9px] text-neutral-600 font-mono mt-0.5">{slices.length} Crop Tools Defined</p>
           </div>
         </div>
         {slices.length > 0 && (
@@ -141,7 +141,7 @@ export default function CutsRegistry({
             type="button"
             onClick={handleClearAllSlices}
             className="flex items-center gap-1 text-[9px] bg-red-950/60 hover:bg-red-900/80 text-red-400 border border-red-800/40 hover:border-red-700/60 px-2 py-1 rounded-lg cursor-pointer transition-all"
-            title="Clear all defined cuts from list"
+            title="Clear all defined crop tools from list"
           >
             <Trash2 className="h-2.5 w-2.5" />
             <span>Clear All</span>
@@ -159,7 +159,7 @@ export default function CutsRegistry({
           style={{ boxShadow: !hasSelection ? undefined : "0 0 15px rgba(139,92,246,0.2)" }}
         >
           <Plus className="h-3.5 w-3.5" />
-          <span>Save Selection as Cut</span>
+          <span>Save Selection as Crop Tool</span>
         </button>
 
         <label className="flex items-center gap-2 cursor-pointer select-none text-[11px] text-neutral-500 hover:text-neutral-300 transition-colors">
@@ -182,7 +182,7 @@ export default function CutsRegistry({
           <div className="flex items-center gap-1.5">
             <Sliders className="h-3 w-3 text-purple-400" />
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-400">
-              {selectedSliceId ? "Fine-Tune Selected Cut" : "Fine-Tune Selection"}
+              {selectedSliceId ? "Fine-Tune Selected Crop Tool" : "Fine-Tune Selection"}
             </span>
           </div>
 
@@ -269,9 +269,9 @@ export default function CutsRegistry({
       {slices.length === 0 ? (
         <div className="border border-white/5 border-dashed rounded-2xl p-6 text-center">
           <Layers className="h-5 w-5 text-neutral-700 mx-auto mb-2" />
-          <p className="text-[11px] font-bold text-neutral-500">Cut list is empty</p>
+          <p className="text-[11px] font-bold text-neutral-500">Crop tools list is empty</p>
           <p className="text-[10px] text-neutral-600 leading-normal mt-1">
-            Draw on the image canvas and push to cuts list, or use Auto Panel
+            Draw on the image canvas and push to crop tools list, or use Auto Panel
             contour detection below to auto-slice.
           </p>
         </div>
@@ -309,7 +309,7 @@ export default function CutsRegistry({
                     onClick={(e) => handleCropSingleSlice(slice, e)}
                     disabled={isCroppingSlice === slice.id || isSavingEdit}
                     className="text-purple-500 hover:text-purple-300 disabled:opacity-50 disabled:cursor-wait p-1 rounded-lg hover:bg-purple-900/30 transition-all cursor-pointer"
-                    title="Execute this cut immediately"
+                    title="Execute this crop immediately"
                   >
                     {isCroppingSlice === slice.id ? (
                       <RefreshCw className="h-3 w-3 animate-spin" />
@@ -321,7 +321,7 @@ export default function CutsRegistry({
                     type="button"
                     onClick={(e) => handleDeleteSlice(slice.id, e)}
                     className="text-neutral-700 hover:text-red-400 p-1 rounded-lg hover:bg-red-950/40 transition-all cursor-pointer opacity-0 group-hover:opacity-100"
-                    title="Delete individual slice"
+                    title="Delete individual crop tool"
                   >
                     <Trash2 className="h-3 w-3" />
                   </button>

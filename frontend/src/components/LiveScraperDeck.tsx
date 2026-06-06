@@ -10,12 +10,12 @@ export default function LiveScraperDeck({
   selectedScraped,
   setSelectedScraped,
   setScrapedImages,
-  stitchingIndices,
+  mergingIndices,
   setConsoleLogs,
   panels,
   setPanels,
   currentPanelIndex,
-  handleStitchWithNext,
+  handleMergeWithNext,
   setEditingImageIdx,
   setEditCropTop,
   setEditCropBottom,
@@ -214,8 +214,8 @@ export default function LiveScraperDeck({
                   croppingImgUrl={croppingImgUrl}
                   bubbleCroppingImgUrl={bubbleCroppingImgUrl}
                   scrapedImages={scrapedImages}
-                  stitchingIndices={stitchingIndices}
-                  handleStitchWithNext={handleStitchWithNext}
+                  mergingIndices={mergingIndices}
+                  handleMergeWithNext={handleMergeWithNext}
                   setEditingImageIdx={setEditingImageIdx}
                   setEditCropTop={setEditCropTop}
                   setEditCropBottom={setEditCropBottom}
