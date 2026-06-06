@@ -40,6 +40,7 @@ export default function StoryboardTimeline({
   const handleDownloadZip = async () => {
     if (panels.length === 0) return;
     setIsZipping(true);
+    console.log('[StoryboardTimeline] Starting ZIP download for', panels.length, 'panels');
     try {
       const urls = panels.map(p => p.image_url);
       const res = await activeFetch("/api/download-zip", {
@@ -61,11 +62,12 @@ export default function StoryboardTimeline({
         if (addNotification) {
           addNotification("ZIP archive downloaded successfully!", "success");
         }
+        console.log('[StoryboardTimeline] ZIP archive download triggered successfully');
       } else {
         throw new Error(data.error || "Failed to package ZIP archive.");
       }
     } catch (err: any) {
-      console.error(err);
+      console.error('[StoryboardTimeline] ZIP download failed:', err);
       if (addNotification) {
         addNotification(err.message || "Failed to compile ZIP archive.", "error");
       }
@@ -76,18 +78,22 @@ export default function StoryboardTimeline({
   
   const handleModifySpeechText = (panelId: number, text: string) => {
     setPanels(prev => prev.map(p => p.id === panelId ? { ...p, speech_text: text } : p));
+    console.log('[StoryboardTimeline] Speech text updated for panel', panelId);
   };
 
   const handleModifyMotion = (panelId: number, motionVal: string) => {
     setPanels(prev => prev.map(p => p.id === panelId ? { ...p, motion_type: motionVal } : p));
+    console.log('[StoryboardTimeline] Camera motion changed to', motionVal, 'for panel', panelId);
   };
 
   const handleModifyDuration = (panelId: number, durVal: number) => {
     setPanels(prev => prev.map(p => p.id === panelId ? { ...p, duration: durVal } : p));
+    console.log('[StoryboardTimeline] Duration changed to', durVal, 's for panel', panelId);
   };
 
   const handleAnalyzePanel = async (panelId: number, imageUrl: string) => {
     setAnalyzingPanelId(panelId);
+    console.log('[StoryboardTimeline] Starting AI analysis for panel', panelId);
     try {
       const res = await activeFetch("/api/analyze-image", {
         method: "POST",
@@ -105,9 +111,16 @@ export default function StoryboardTimeline({
           motion_type: data.analysis.motion_type || p.motion_type,
           visual_description: data.analysis.visual_description || p.visual_description
         } : p));
+        if (addNotification) {
+          addNotification('AI analysis completed for Panel #' + panelId + '!', 'success');
+        }
+        console.log('[StoryboardTimeline] AI analysis completed successfully for panel', panelId);
       }
     } catch (err) {
-      console.error("Failed to analyze panel:", err);
+      console.error('[StoryboardTimeline] Panel analysis failed:', err);
+      if (addNotification) {
+        addNotification('AI analysis failed for Panel #' + panelId + '. Please try again.', 'error');
+      }
     } finally {
       setAnalyzingPanelId(null);
     }
@@ -115,6 +128,7 @@ export default function StoryboardTimeline({
 
   const handleCompileVideo = async () => {
     setIsCompiling(true);
+    console.log('[StoryboardTimeline] Starting video compilation with', panels.length, 'panels');
     try {
       const res = await activeFetch("/api/convert-images-to-video", {
         method: "POST",
@@ -134,11 +148,12 @@ export default function StoryboardTimeline({
         if (addNotification) {
           addNotification("Cinematic video converted successfully!", "success");
         }
+        console.log('[StoryboardTimeline] Video compiled successfully:', data.video_url);
       } else {
         throw new Error(data.message || "Failed to locate generated video output URL.");
       }
     } catch (err: any) {
-      console.error(err);
+      console.error('[StoryboardTimeline] Video compilation failed:', err);
       if (addNotification) {
         addNotification(err.message || "Video compilation failed. Please try again.", "error");
       }
