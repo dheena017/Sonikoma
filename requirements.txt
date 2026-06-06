@@ -1,0 +1,61 @@
+# =============================================================================
+# Webtoon-to-Video — Python Requirements
+# =============================================================================
+# Install with: pip install -r requirements.txt
+# All packages are used by files inside backend/services/ and backend/routes/
+# =============================================================================
+
+# ── Web Framework (FastAPI server + routing) ──────────────────────────────────
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+pydantic>=2.7.0
+
+# ── Image Processing (Core — OpenCV + Pillow + NumPy) ────────────────────────
+opencv-python>=4.9.0.80         # cv2 — panel detection, bubble removal, inpainting
+Pillow>=10.3.0                   # PIL — image load/save/filter fallback
+numpy>=1.26.0                    # np  — array operations for all CV tasks
+
+# ── Text-to-Speech (TTS Audio Generation) ────────────────────────────────────
+edge-tts>=6.1.9                  # Microsoft Edge TTS — voice synthesis (audio.py)
+
+# ── Audio Processing & Manipulation ──────────────────────────────────────────
+pydub>=0.25.1                    # Audio concat, speedup, silence padding (audio.py)
+# Note: pydub requires ffmpeg installed on system (see below)
+
+# ── Video Compilation ─────────────────────────────────────────────────────────
+moviepy>=1.0.3                   # MP4 compilation with pan/zoom + audio ducking (video.py)
+# Note: moviepy requires ffmpeg installed on system (see below)
+
+# ── OCR — Text Extraction from Comic Panels ───────────────────────────────────
+easyocr>=1.7.1                   # EasyOCR — text detection in panels (cleaner.py, optional)
+# Note: easyocr will download language model files (~200MB) on first use
+
+# ── HTTP Requests (Async scraping & API calls) ────────────────────────────────
+httpx>=0.27.0                    # Async HTTP client (scraper module)
+aiohttp>=3.9.5                   # Async HTTP session (alternative scraper support)
+requests>=2.32.0                 # Sync HTTP (fallback / utility)
+beautifulsoup4>=4.12.3           # HTML parsing for scraping panel image URLs
+lxml>=5.2.0                      # Fast XML/HTML parser (used with BeautifulSoup)
+
+# ── AI / ML — Google Gemini API (Python-side calls) ──────────────────────────
+google-generativeai>=0.7.0       # Gemini REST client (cleaner.py bubble detection)
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+python-dotenv>=1.0.1             # Load .env files (GEMINI_API_KEY etc.)
+python-multipart>=0.0.9          # Multipart form support for FastAPI file uploads
+aiofiles>=23.2.1                 # Async file I/O for FastAPI
+
+# =============================================================================
+# SYSTEM DEPENDENCIES (install separately — NOT via pip)
+# =============================================================================
+# ffmpeg  — Required by pydub and moviepy for audio/video encoding
+#           Windows: winget install ffmpeg
+#                 OR download from https://ffmpeg.org/download.html
+#           macOS:   brew install ffmpeg
+#           Linux:   sudo apt install ffmpeg
+#
+# =============================================================================
+# OPTIONAL — GPU acceleration for EasyOCR (much faster OCR, not required)
+# =============================================================================
+# torch>=2.3.0       # PyTorch — enables GPU mode for easyocr (large download ~2GB)
+# torchvision>=0.18.0
