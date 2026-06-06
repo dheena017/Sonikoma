@@ -196,6 +196,107 @@ router.post("/undo-crop", (req, res) => {
   });
 });
 
+// Endpoint to run speech bubble removal (OpenCV + Gemini)
+router.post("/remove-speech-bubbles", async (req, res) => {
+  const { url, method = "auto", sensitivity = 50.0, dilation = -1, inpaint_radius = 3, detection_style = "all" } = req.body;
+  if (!url) {
+    return res.status(400).json({ error: "Parameter 'url' is required." });
+  }
+
+  // Sanitize parameter options to prevent shell injections
+  const allowedMethods = ["auto", "inpaint", "inpaint_ns", "blur", "solid_white", "solid_black", "transparent", "ocr"];
+  const activeMethod = allowedMethods.includes(method) ? method : "auto";
+  
+  const allowedDetectionStyles = ["all", "white_only", "text_only"];
+  const activeStyle = allowedDetectionStyles.includes(detection_style) ? detection_style : "all";
+
+  const activeSensitivity = Math.max(0, Math.min(100, Number(sensitivity) || 50.0));
+  const activeDilation = Number(dilation) || -1;
+  const activeRadius = Math.max(1, Math.min(20, Number(inpaint_radius) || 3));
+
+  let tempIn = "";
+  let tempOut = "";
+
+  try {
+    // 1. Resolve image to buffer
+    const resolved = await resolveImageToBuffer(url);
+    const imgBuffer = resolved.data;
+    const contentType = resolved.contentType || "image/png";
+
+    // 2. Write buffer to temporary file
+    const uniqueId = `clean_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const tempDir = os.tmpdir();
+    tempIn = path.join(tempDir, `${uniqueId}_in.png`);
+    tempOut = path.join(tempDir, `${uniqueId}_out.png`);
+
+    await fs.promises.writeFile(tempIn, imgBuffer);
+
+    // 3. Construct python CLI command (Always use python3 as mandated by backend rules)
+    const pythonCommand = `python3 backend/services/cleaner.py --image_path "${tempIn}" --output_path "${tempOut}" --method "${activeMethod}" --sensitivity ${activeSensitivity} --dilation ${activeDilation} --inpaint_radius ${activeRadius} --detection_style "${activeStyle}"`;
+    
+    console.log(`[Bubble Cleaner API] Running command: ${pythonCommand}`);
+
+    exec(pythonCommand, async (error, stdout, stderr) => {
+      // Clean up the temporary input file immediately
+      try {
+        if (fs.existsSync(tempIn)) {
+          await fs.promises.unlink(tempIn);
+        }
+      } catch (unlinkErr) {
+        console.warn("[Bubble Cleaner API Warning] Failed to clean up temp input file:", unlinkErr);
+      }
+
+      if (error) {
+        console.error("[Bubble Cleaner API Error] Cleaner script execution failed:", error);
+        console.error("[Bubble Cleaner API Error] stderr:", stderr);
+        return res.status(500).json({ error: `Speech bubble cleaning failed: ${stderr || error.message}` });
+      }
+
+      console.log("[Bubble Cleaner API stdout]:", stdout);
+
+      try {
+        if (!fs.existsSync(tempOut)) {
+          throw new Error("Cleaner script did not output any file.");
+        }
+
+        // 4. Read cleaned image buffer
+        const cleanedBuffer = await fs.promises.readFile(tempOut);
+        
+        // Clean up temporary output file
+        try {
+          await fs.promises.unlink(tempOut);
+        } catch (unlinkErr) {
+          console.warn("[Bubble Cleaner API Warning] Failed to clean up temp output file:", unlinkErr);
+        }
+
+        // 5. Store in stitched Cache
+        const cacheId = `stitched_${Date.now()}_cleaned`;
+        const newUrl = `/api/stitch-images/cached/${cacheId}`;
+        stitchedCache.set(cacheId, { data: cleanedBuffer, contentType });
+        editHistory.set(newUrl, url);
+
+        return res.json({
+          success: true,
+          url: newUrl
+        });
+
+      } catch (fileErr: any) {
+        console.error("[Bubble Cleaner API Error] File operations failed:", fileErr);
+        return res.status(500).json({ error: `Failed to process cleaned output image: ${fileErr.message}` });
+      }
+    });
+
+  } catch (err: any) {
+    console.error("[Bubble Cleaner API Error] Route exception:", err);
+    // Clean up temp files if they still exist
+    try {
+      if (tempIn && fs.existsSync(tempIn)) await fs.promises.unlink(tempIn);
+      if (tempOut && fs.existsSync(tempOut)) await fs.promises.unlink(tempOut);
+    } catch (_) {}
+    return res.status(500).json({ error: `Speech bubble cleaning failed: ${err.message || err}` });
+  }
+});
+
 // Cached endpoint to fetch compiled vertical panels safely with typical GET src attributes
 router.get("/stitch-images/cached/:id", (req, res) => {
   const cached = stitchedCache.get(req.params.id);

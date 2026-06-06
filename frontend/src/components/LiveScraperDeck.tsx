@@ -13,7 +13,10 @@ import {
   Sparkles,
   Brain,
   Download,
-  X
+  X,
+  Settings2,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 import { GeneratedPanel } from "../types";
 
@@ -245,6 +248,100 @@ export default function LiveScraperDeck({
     }
   };
 
+  const [isCleaningBubbles, setIsCleaningBubbles] = React.useState<boolean>(false);
+  const [cleanProgress, setCleanProgress] = React.useState<{ current: number, total: number } | null>(null);
+
+  // ── Bubble Cleaner Settings ──────────────────────────────────────────────────
+  const [showBubbleSettings, setShowBubbleSettings] = React.useState<boolean>(false);
+  // Detection style controls WHICH regions are targeted
+  const [bubbleDetectionStyle, setBubbleDetectionStyle] = React.useState<"all" | "white_only" | "text_only">("all");
+  // Erase method controls HOW the target region is erased
+  const [bubbleEraseMethod, setBubbleEraseMethod] = React.useState<"auto" | "inpaint" | "blur" | "solid_white" | "solid_black">("auto");
+  // Sensitivity (0-100) – higher = more aggressive detection
+  const [bubbleSensitivity, setBubbleSensitivity] = React.useState<number>(50);
+  // ────────────────────────────────────────────────────────────────────────────
+
+  const handleCleanBubblesSelected = async () => {
+    if (selectedScraped.length === 0) return;
+    setIsCleaningBubbles(true);
+    setConsoleLogs(prev => [
+      `[Bubble Cleaner] Initiating AI Speech Bubble removal for ${selectedScraped.length} selected assets...`,
+      `[Bubble Cleaner] Settings → Detection: "${bubbleDetectionStyle}" | Method: "${bubbleEraseMethod}" | Sensitivity: ${bubbleSensitivity}`,
+      ...prev
+    ]);
+
+    try {
+      let updatedImages = [...scrapedImages];
+      let updatedSelected = [...selectedScraped];
+      setCleanProgress({ current: 0, total: selectedScraped.length });
+
+      for (let i = 0; i < selectedScraped.length; i++) {
+        const imgUrl = selectedScraped[i];
+        setCleanProgress({ current: i + 1, total: selectedScraped.length });
+        setCroppingImgUrl(imgUrl);
+        
+        const idx = updatedImages.indexOf(imgUrl);
+        if (idx === -1) continue;
+
+        const response = await activeFetch("/api/remove-speech-bubbles", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            url: imgUrl,
+            method: bubbleEraseMethod,
+            sensitivity: bubbleSensitivity,
+            dilation: -1,
+            inpaint_radius: 3,
+            detection_style: bubbleDetectionStyle
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Speech bubble removal failed with status ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success && data.url) {
+          const currentIdx = updatedImages.indexOf(imgUrl);
+          if (currentIdx !== -1) {
+            updatedImages[currentIdx] = data.url;
+          }
+          
+          const selIdx = updatedSelected.indexOf(imgUrl);
+          if (selIdx !== -1) {
+            updatedSelected[selIdx] = data.url;
+          }
+
+          setPanels(prevPanels => 
+            prevPanels.map(p => p.image_url === imgUrl ? { ...p, image_url: data.url } : p)
+          );
+          
+          setScrapedImages([...updatedImages]);
+          setSelectedScraped([...updatedSelected]);
+        }
+      }
+
+      setConsoleLogs(prev => [
+        `[Bubble Cleaner] Successfully completed AI Speech Bubble cleaning for all checked panels!`,
+        ...prev
+      ]);
+      addNotification("Speech bubble cleaning completed successfully.", "success");
+    } catch (err: any) {
+      console.error("[Bubble Cleaner] Batch process failed:", err);
+      setConsoleLogs(prev => [
+        `[Bubble Cleaner ERROR] Cleaning operation failed: ${err.message || err}`,
+        ...prev
+      ]);
+      addNotification(err.message || "Speech bubble cleaning failed.", "error");
+    } finally {
+      setIsCleaningBubbles(false);
+      setCleanProgress(null);
+      setCroppingImgUrl(null);
+    }
+  };
+
   return (
     <div id="scraped_strips_deck" className="bg-neutral-900/40 rounded-2xl border border-neutral-800/80 p-6 backdrop-blur-md space-y-4 shadow-sm">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-neutral-800/60 pb-3">
@@ -336,6 +433,140 @@ export default function LiveScraperDeck({
                   {isBatchCropping && batchProgress ? `Cropping (${batchProgress.current}/${batchProgress.total})` : "Auto-Crop"}
                 </span>
               </button>
+
+              {/* ── Clean Bubbles button + settings toggle ────────────────── */}
+              <div className="flex gap-1">
+                <button
+                  onClick={handleCleanBubblesSelected}
+                  disabled={isCleaningBubbles || selectedScraped.length === 0}
+                  className="flex-1 bg-purple-500/10 hover:bg-purple-500/20 border border-neutral-800/60 text-purple-300 px-3 py-2 rounded-lg flex items-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm cursor-pointer"
+                  title="AI Speech Bubble removal and narration blur"
+                >
+                  {isCleaningBubbles ? (
+                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Brain className="h-3.5 w-3.5" />
+                  )}
+                  <span className="text-[11px] uppercase tracking-wider font-semibold font-sans">
+                    {isCleaningBubbles && cleanProgress ? `Cleaning (${cleanProgress.current}/${cleanProgress.total})` : "Clean Bubbles"}
+                  </span>
+                </button>
+                {/* Settings gear – toggles the bubble config panel */}
+                <button
+                  onClick={() => setShowBubbleSettings(prev => !prev)}
+                  title="Bubble cleaner settings"
+                  className={`px-2.5 rounded-lg border transition-all cursor-pointer ${
+                    showBubbleSettings
+                      ? "bg-purple-600/30 border-purple-500/60 text-purple-300"
+                      : "bg-neutral-900/60 border-neutral-800/60 text-neutral-500 hover:text-purple-300 hover:border-purple-700/50"
+                  }`}
+                >
+                  {showBubbleSettings ? <ChevronUp className="h-3.5 w-3.5" /> : <Settings2 className="h-3.5 w-3.5" />}
+                </button>
+              </div>
+
+              {/* ── Bubble Cleaner Settings Panel ────────────────────────── */}
+              {showBubbleSettings && (
+                <div id="bubble_cleaner_settings_panel" className="bg-neutral-950/90 border border-purple-900/40 rounded-2xl p-4 space-y-4 shadow-2xl animate-fadeIn">
+                  <div className="flex items-center gap-2 border-b border-neutral-800 pb-2.5">
+                    <Brain className="h-3.5 w-3.5 text-purple-400" />
+                    <span className="text-[11px] font-bold text-purple-300 uppercase tracking-widest font-mono">Bubble Cleaner Settings</span>
+                  </div>
+
+                  {/* ── DETECTION STYLE ── */}
+                  <div className="space-y-2">
+                    <p className="text-[10px] text-neutral-400 font-mono uppercase tracking-wider font-semibold">What to detect</p>
+                    <div className="flex flex-col gap-1.5">
+                      {([
+                        { value: "all",        label: "All Bubble Types",     hint: "White bubbles + colored boxes + floating text (uses AI)" },
+                        { value: "white_only", label: "White Bubbles Only",   hint: "Standard speech / shout / thought bubbles with white fill" },
+                        { value: "text_only",  label: "Floating Text Only",   hint: "Narration boxes & borderless text on colored backgrounds" },
+                      ] as const).map(opt => (
+                        <button
+                          key={opt.value}
+                          onClick={() => setBubbleDetectionStyle(opt.value)}
+                          className={`flex flex-col items-start px-3 py-2 rounded-xl border text-left transition-all cursor-pointer ${
+                            bubbleDetectionStyle === opt.value
+                              ? "bg-purple-900/40 border-purple-500 text-white"
+                              : "bg-neutral-900/60 border-neutral-800 text-neutral-400 hover:border-neutral-700 hover:text-neutral-200"
+                          }`}
+                        >
+                          <span className="text-[11px] font-bold font-mono">{opt.label}</span>
+                          <span className="text-[9px] text-neutral-500 font-sans mt-0.5">{opt.hint}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* ── ERASE METHOD ── */}
+                  <div className="space-y-2">
+                    <p className="text-[10px] text-neutral-400 font-mono uppercase tracking-wider font-semibold">How to erase</p>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {([
+                        { value: "auto",        label: "Auto (AI)",       hint: "AI classifies each region then picks the best eraser" },
+                        { value: "inpaint",     label: "Inpaint TELEA",   hint: "Reconstructs background behind the bubble (best quality)" },
+                        { value: "blur",        label: "Gaussian Blur",   hint: "Softly blurs the bubble area – preserves background tones" },
+                        { value: "solid_white", label: "Fill White",      hint: "Paints the bubble region solid white" },
+                        { value: "solid_black", label: "Fill Black",      hint: "Paints the bubble region solid black" },
+                      ] as const).map(opt => (
+                        <button
+                          key={opt.value}
+                          onClick={() => setBubbleEraseMethod(opt.value)}
+                          title={opt.hint}
+                          className={`flex flex-col items-start px-2.5 py-2 rounded-xl border text-left transition-all cursor-pointer ${
+                            bubbleEraseMethod === opt.value
+                              ? "bg-indigo-900/40 border-indigo-500 text-white"
+                              : "bg-neutral-900/60 border-neutral-800 text-neutral-400 hover:border-neutral-700 hover:text-neutral-200"
+                          }`}
+                        >
+                          <span className="text-[11px] font-bold font-mono">{opt.label}</span>
+                          <span className="text-[9px] text-neutral-500 font-sans mt-0.5 leading-tight">{opt.hint}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* ── SENSITIVITY SLIDER ── */}
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider font-mono flex justify-between">
+                      <span>Detection Sensitivity</span>
+                      <span className="text-white font-bold">{bubbleSensitivity}%</span>
+                    </label>
+                    <input
+                      type="range"
+                      min="10"
+                      max="90"
+                      value={bubbleSensitivity}
+                      onChange={(e) => setBubbleSensitivity(Number(e.target.value))}
+                      className="w-full accent-purple-500 bg-neutral-800 rounded-lg h-1.5 px-0 cursor-pointer hover:accent-purple-400 transition-colors"
+                    />
+                    <div className="flex justify-between text-[9px] text-neutral-600 font-mono">
+                      <span>Conservative (miss less)</span>
+                      <span>Aggressive (catch more)</span>
+                    </div>
+                  </div>
+
+                  {/* ── Explanation legend ── */}
+                  <div className="border-t border-neutral-800 pt-3 space-y-1.5">
+                    <p className="text-[10px] font-bold text-neutral-400 font-mono uppercase tracking-wider">How it works</p>
+                    <div className="grid grid-cols-1 gap-1">
+                      {[
+                        { color: "bg-purple-500", label: "White Bubbles",     desc: "Detected by brightness threshold → inpainted" },
+                        { color: "bg-orange-400", label: "Narration Boxes",   desc: "Colored rectangles → Gaussian blur to kill text" },
+                        { color: "bg-sky-400",    label: "Floating Text",     desc: "Borderless text on art → soft blur mask applied" },
+                        { color: "bg-red-400",    label: "SFX (BOOM/CRASH)", desc: "Embedded art text → kept for visual style" },
+                      ].map(item => (
+                        <div key={item.label} className="flex items-start gap-2">
+                          <div className={`mt-0.5 h-2 w-2 shrink-0 rounded-full ${item.color}`} />
+                          <p className="text-[9px] text-neutral-400 font-sans">
+                            <span className="font-bold text-neutral-300">{item.label}: </span>{item.desc}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
 
 
 
