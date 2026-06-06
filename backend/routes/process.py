@@ -6,22 +6,37 @@ from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
-from app.services.audio import generate_panel_audio
-from app.services.video import compile_video
-from app.services.cleaner import clean_speech_bubbles
+try:
+    from backend.services.audio import generate_panel_audio
+    from backend.services.video import compile_video
+    from backend.services.cleaner import clean_speech_bubbles
+except ImportError:
+    try:
+        from app.services.audio import generate_panel_audio
+        from app.services.video import compile_video
+        from app.services.cleaner import clean_speech_bubbles
+    except ImportError:
+        # Fallback if both fail
+        pass
 
 # Pre-import safe safeguards in case sister modules are configured dynamically
 try:
-    from app.services.scraper import fetch_webtoon_panels
+    from backend.services.scraper import fetch_webtoon_panels
 except ImportError:
-    async def fetch_webtoon_panels(url: str, workspace_dir: str) -> List[Dict[str, Any]]:
-        return []
+    try:
+        from app.services.scraper import fetch_webtoon_panels
+    except ImportError:
+        async def fetch_webtoon_panels(url: str, workspace_dir: str) -> List[Dict[str, Any]]:
+            return []
 
 try:
-    from app.services.ocr import extract_dialogue_from_panel
+    from backend.services.ocr import extract_dialogue_from_panel
 except ImportError:
-    async def extract_dialogue_from_panel(panel_image_path: str) -> List[str]:
-         return []
+    try:
+        from app.services.ocr import extract_dialogue_from_panel
+    except ImportError:
+        async def extract_dialogue_from_panel(panel_image_path: str) -> List[str]:
+             return []
 
 logger = logging.getLogger("webtoon_engine.routes.process")
 
@@ -78,7 +93,7 @@ async def process_webtoon_to_video(request: ProcessRequest):
             image_path = panel.get("path")
             if image_path and os.path.exists(image_path):
                 try:
-                    clean_speech_bubbles(image_path, image_path, method="inpaint")
+                    clean_speech_bubbles(image_path, image_path, method="auto")
                     logger.info(f"[{project_id}] Successfully cleaned speech bubbles (inpaint) for: {image_path}")
                 except Exception as clean_err:
                     logger.warning(f"[{project_id}] Speech bubble cleansing skipped or failed for {image_path}: {clean_err}")

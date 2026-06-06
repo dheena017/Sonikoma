@@ -419,6 +419,7 @@ At the **end of every conversation**, append one row to the Session Changelog ta
 
 | Date | Summary | Files Affected |
 |---|---|---|
+| 2026-06-07 | Implemented sequential auto-decision speech bubble cleaner and specialized cleaning functions | `backend/services/cleaner.py`, `backend/routes/process.py`, `backend/services/test_cleaner.py`, `RULES.md` |
 | 2026-06-07 | Split server.ts into modular files; added self-healing validation fallback to scraperRoutes | `backend/server.ts`, `backend/config/*`, `backend/utils/*`, `backend/routes/*`, `RULES.md`, `README.md` |
 | 2026-06-07 | Created requirements.txt with all Python pip dependencies and ran pip install | `requirements.txt` |
 | 2026-06-07 | Created `.env` and fully rewrote `.env.example` with all variables documented | `.env`, `.env.example` |
