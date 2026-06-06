@@ -511,8 +511,7 @@ export default function LiveScraperDeck({
         </div>
       ) : (
         <div className="space-y-4">
-          {/* Select Toolbar */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-neutral-950/40 p-3 rounded-xl border border-neutral-800/60">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 bg-neutral-950/40 p-3 rounded-xl border border-neutral-800/60">
             <div className="space-y-0.5 shrink-0">
               <p className="text-xs text-neutral-400">
                 These live graphics are separated dynamically from the viewer URL.
@@ -524,8 +523,7 @@ export default function LiveScraperDeck({
               )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto mt-2 lg:mt-0">
-              {/* Group 1: Selection */}
+            <div className="flex flex-col gap-1.5 w-full sm:w-48 shrink-0">
               <button
                 onClick={() => {
                   if (selectedScraped.length === scrapedImages.length) {
@@ -537,7 +535,7 @@ export default function LiveScraperDeck({
                   }
                 }}
                 disabled={scrapedImages.length === 0}
-                className="shrink-0 bg-neutral-900/80 hover:bg-neutral-800 text-neutral-300 hover:text-white px-3 py-2 rounded-lg text-[11px] uppercase tracking-wider font-semibold font-sans border border-neutral-800/60 cursor-pointer flex items-center gap-1.5 transition-colors shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full bg-neutral-900/80 hover:bg-neutral-800 text-neutral-300 hover:text-white px-3 py-2 rounded-lg text-[11px] uppercase tracking-wider font-semibold font-sans border border-neutral-800/60 cursor-pointer flex items-center gap-1.5 transition-colors shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {selectedScraped.length === scrapedImages.length && scrapedImages.length > 0 ? (
                   <>
@@ -552,33 +550,27 @@ export default function LiveScraperDeck({
                 )}
               </button>
 
-              <div className="hidden sm:block shrink-0 h-5 w-px bg-neutral-800 mx-1"></div>
+              <button
+                onClick={handleAutoCropSelected}
+                disabled={isBatchCropping || selectedScraped.length === 0}
+                className="w-full bg-indigo-500/10 hover:bg-indigo-500/20 border border-neutral-800/60 text-indigo-300 px-3 py-2 rounded-lg flex items-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+                title="Auto-Crop with Standard CV"
+              >
+                {isBatchCropping ? (
+                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Scissors className="h-3.5 w-3.5" />
+                )}
+                <span className="text-[11px] uppercase tracking-wider font-semibold font-sans">
+                  {isBatchCropping && batchProgress ? `Cropping (${batchProgress.current}/${batchProgress.total})` : "Auto-Crop"}
+                </span>
+              </button>
 
-              {/* Group 2: Image Processing Tools */}
-              <div className="shrink-0 flex items-stretch bg-neutral-900/80 border border-neutral-800/60 rounded-lg overflow-hidden shadow-sm">
-                <button
-                  onClick={handleAutoCropSelected}
-                  disabled={isBatchCropping || selectedScraped.length === 0}
-                  className="bg-indigo-500/10 hover:bg-indigo-500/20 border-r border-neutral-800/60 text-indigo-300 px-3 py-2 flex items-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                  title="Auto-Crop with Standard CV"
-                >
-                  {isBatchCropping ? (
-                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                  ) : (
-                    <Scissors className="h-3.5 w-3.5" />
-                  )}
-                  <span className="text-[11px] uppercase tracking-wider font-semibold font-sans">{isBatchCropping && batchProgress ? `Cropping (${batchProgress.current}/${batchProgress.total})` : "Auto-Crop"}</span>
-                </button>
-              </div>
-
-              <div className="hidden sm:block shrink-0 h-5 w-px bg-neutral-800 mx-1"></div>
-
-              {/* Group 2.5: Batch Speech Bubble Eraser */}
-              <div className="shrink-0 flex items-stretch bg-neutral-900/80 border border-neutral-800/60 rounded-lg overflow-hidden shadow-sm">
+              <div className="flex items-stretch bg-neutral-900/80 border border-neutral-800/60 rounded-lg overflow-hidden shadow-sm">
                 <button
                   onClick={() => handleBatchRemoveSpeechBubbles('inpaint')}
                   disabled={isBatchErasing || isBatchCropping || selectedScraped.length === 0}
-                  className="bg-purple-500/10 hover:bg-purple-500/20 border-r border-neutral-800/60 text-purple-300 px-3 py-2 flex items-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer font-sans"
+                  className="flex-1 bg-purple-500/10 hover:bg-purple-500/20 border-r border-neutral-800/60 text-purple-300 px-3 py-2 flex items-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer font-sans"
                   title="Apply CV Inpaint Eraser to all checked images"
                   id="batch_bubble_inpaint"
                 >
@@ -590,14 +582,14 @@ export default function LiveScraperDeck({
                   <span className="text-[11px] uppercase tracking-wider font-semibold">
                     {isBatchErasing && batchEraseProgress?.method === 'inpaint'
                       ? `Inpainting (${batchEraseProgress.current}/${batchEraseProgress.total})`
-                      : "Batch Inpaint"}
+                      : "Inpaint"}
                   </span>
                 </button>
 
                 <button
                   onClick={() => handleBatchRemoveSpeechBubbles('blur')}
                   disabled={isBatchErasing || isBatchCropping || selectedScraped.length === 0}
-                  className="bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 px-3 py-2 flex items-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer font-sans"
+                  className="flex-1 bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 px-3 py-2 flex items-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer font-sans"
                   title="Apply Heavy Selective Blur to all checked images"
                   id="batch_bubble_blur"
                 >
@@ -609,33 +601,27 @@ export default function LiveScraperDeck({
                   <span className="text-[11px] uppercase tracking-wider font-semibold">
                     {isBatchErasing && batchEraseProgress?.method === 'blur'
                       ? `Blurring (${batchEraseProgress.current}/${batchEraseProgress.total})`
-                      : "Batch Blur"}
+                      : "Blur"}
                   </span>
                 </button>
               </div>
 
-              <div className="hidden sm:block shrink-0 h-5 w-px bg-neutral-800 mx-1"></div>
-
-              {/* Group 3: Utility / Downstream Actions */}
-              <div className="shrink-0 flex items-stretch bg-neutral-900/80 border border-neutral-800/60 rounded-lg overflow-hidden shadow-sm">
+              <div className="flex items-stretch bg-neutral-900/80 border border-neutral-800/60 rounded-lg overflow-hidden shadow-sm">
                 <button
                   onClick={async () => {
                     const isSelected = selectedScraped.length > 0;
                     const toDownload = isSelected ? selectedScraped : scrapedImages;
                     if (toDownload.length === 0) return;
                     setIsZipping(true);
-                    setDownloadReady(null); // Clear previous download
-
+                    setDownloadReady(null);
                     try {
                       const zip = new JSZip();
                       const folder = zip.folder("webtoon_frames");
-                      
                       if (!folder) {
                          addNotification("Failed to create zip folder", "error");
                          setIsZipping(false);
                          return;
                       }
-
                       for (let i = 0; i < toDownload.length; i++) {
                         try {
                           const url = toDownload[i];
@@ -647,19 +633,15 @@ export default function LiveScraperDeck({
                           console.error("Download failed for:", toDownload[i], err);
                         }
                       }
-                      
                       const base64Content = await zip.generateAsync({ type: "base64" });
                       const dataUrl = "data:application/zip;base64," + base64Content;
-                      
                       try {
                           const blobContent = await zip.generateAsync({ type: "blob" });
                           saveAs(blobContent, "webtoon_frames.zip");
                       } catch(e) {}
-                      
                       setDownloadReady({ url: dataUrl, filename: "webtoon_frames.zip" });
-                      
                       setConsoleLogs(prev => [`[GUI] Successfully generated zip for ${toDownload.length} images`, ...prev]);
-                      addNotification(`Finished zipping ${toDownload.length} image(s). (Click the 'Ready' button to save)`, "success");
+                      addNotification(`Finished zipping ${toDownload.length} image(s).`, "success");
                     } catch (err) {
                       console.error("Zip generation failed:", err);
                       addNotification("Failed to generate zip file", "error");
@@ -668,28 +650,26 @@ export default function LiveScraperDeck({
                     }
                   }}
                   disabled={scrapedImages.length === 0 || isZipping}
-                  className="bg-neutral-900/50 hover:bg-neutral-800 border-r border-neutral-800/60 text-neutral-300 hover:text-white px-3 py-2 flex items-center gap-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                  title={selectedScraped.length > 0 ? "Download Selected" : "Download All"}
+                  className="flex-1 bg-neutral-900/50 hover:bg-neutral-800 border-r border-neutral-800/60 text-neutral-300 hover:text-white px-3 py-2 flex items-center gap-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {isZipping ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
-                  <span className="text-[11px] uppercase tracking-wider font-semibold font-sans">{isZipping ? "DOWNLOADING..." : selectedScraped.length > 0 ? "Download Selected" : "Download All (ZIP)"}</span>
+                  <span className="text-[11px] uppercase tracking-wider font-semibold font-sans">
+                    {isZipping ? "Downloading..." : "Download"}
+                  </span>
                 </button>
 
                 {downloadReady && (
                   <a
                     href={downloadReady.url}
                     download={downloadReady.filename}
-                    onClick={() => {
-                        // Let the UI know they clicked it, then clear it after a short delay
-                        setTimeout(() => setDownloadReady(null), 3000);
-                    }}
+                    onClick={() => setTimeout(() => setDownloadReady(null), 3000)}
                     className="bg-emerald-600 hover:bg-emerald-500 border-r border-neutral-800/60 text-white px-3 py-2 flex items-center gap-2 transition-colors animate-pulse"
                     title="Click here to save the generated ZIP locally"
                     target="_blank"
                     rel="noreferrer"
                   >
                     <CheckSquare className="h-3.5 w-3.5" />
-                    <span className="text-[11px] uppercase tracking-wider font-bold font-sans">Ready! Click here to Save</span>
+                    <span className="text-[11px] uppercase tracking-wider font-bold font-sans">Ready!</span>
                   </a>
                 )}
 
@@ -697,29 +677,25 @@ export default function LiveScraperDeck({
                   onClick={() => {
                     if (selectedScraped.length === 0) return;
                     setScrapedImages(prev => prev.filter(img => !selectedScraped.includes(img)));
-                    setConsoleLogs(prev => [
-                      `[GUI] Removed ${selectedScraped.length} selected images from the deck`,
-                      ...prev
-                    ]);
+                    setConsoleLogs(prev => [`[GUI] Removed ${selectedScraped.length} images`, ...prev]);
                     setSelectedScraped([]);
                   }}
-                  className="bg-red-950/20 hover:bg-red-900/60 text-red-400 hover:text-red-300 px-3 py-2 flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="bg-red-950/20 hover:bg-red-900/60 text-red-400 hover:text-red-300 px-3 py-2 flex items-center justify-center gap-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   disabled={selectedScraped.length === 0}
                   title="Delete Selected"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
-                  <span className="sr-only">Delete</span>
+                  <span className="text-[11px] uppercase tracking-wider font-semibold font-sans">Delete</span>
                 </button>
               </div>
 
-              {/* Group 4: Insert (Primary Action) */}
               <button
                 onClick={() => {
                   if (selectedScraped.length === 0) return;
                   addPanelsWithAutoAnalysis(selectedScraped);
                   setSelectedScraped([]);
                 }}
-                className="shrink-0 lg:ml-auto bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white px-4 py-2 flex items-center justify-center gap-2 rounded-lg shadow-md transition-all cursor-pointer font-sans disabled:opacity-40 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-95"
+                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white px-4 py-2 flex items-center justify-center gap-2 rounded-lg shadow-md transition-all cursor-pointer font-sans disabled:opacity-40 disabled:cursor-not-allowed transform hover:scale-[1.01] active:scale-95"
                 disabled={selectedScraped.length === 0}
               >
                 <Plus className="h-4 w-4" />

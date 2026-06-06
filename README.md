@@ -44,18 +44,28 @@ webtoon-to-video-backend/
 │   └── tsconfig.json
 │
 ├── backend/                          ← Express server + Python services
-│   ├── server.ts                     ← All Node.js / Express API routes
+│   ├── server.ts                     ← Entry point only — imports, app setup
+│   ├── config/
+│   │   └── clients.ts                ← Shared AI clients (Gemini, HF)
 │   ├── database/
 │   │   ├── db.ts                     ← SQLite singleton + query helpers
 │   │   ├── schema.sql                ← Table definitions (auto-applied)
 │   │   └── webtoon_local.db          ← Auto-created SQLite file (git-ignored)
 │   ├── routes/
-│   │   └── process.py                ← FastAPI: /process, /detect-panels
-│   └── services/
-│       ├── audio.py                  ← TTS via edge-tts + pydub
-│       ├── cleaner.py                ← Speech bubble removal (OpenCV/Pillow)
-│       ├── ocr.py                    ← Panel processor + OCR
-│       └── video.py                  ← MP4 compiler via MoviePy
+│   │   ├── health.ts                 ← Liveliness probe route
+│   │   ├── projects.ts               ← Project history and panels CRUD
+│   │   ├── imageRoutes.ts            ← Proxy, crop edit, bubble cleaner, ZIPs
+│   │   ├── aiRoutes.ts               ← Smart crop, image analysis, video wrapper
+│   │   └── scraperRoutes.ts          ← Webtoon crawler and storyboard generation
+│   ├── services/
+│   │   ├── audio.py                  ← TTS via edge-tts + pydub
+│   │   ├── cleaner.py                ← Speech bubble removal (OpenCV/Pillow)
+│   │   ├── ocr.py                    ← Panel processor + OCR
+│   │   └── video.py                  ← MP4 compiler via MoviePy
+│   └── utils/
+│       ├── cache.ts                  ← Shared memory cache state
+│       ├── imageUtils.ts             ← Buffer resolution & auto-cropping
+│       └── urlUtils.ts               ← Region-stripping & URL parsing
 │
 ├── data/                             ← Temp outputs & text files
 ├── tests/                            ← Test scripts

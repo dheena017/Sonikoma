@@ -60,18 +60,28 @@ webtoon-to-video-backend/
 │   └── tsconfig.json                 ← TypeScript compiler settings
 │
 ├── backend/                          ← BACKEND — Express server + Python services
-│   ├── server.ts                     ← Express.js server (ALL Node.js API routes)
+│   ├── server.ts                     ← Express.js server (Entry point only)
+│   ├── config/
+│   │   └── clients.ts                ← Shared AI clients config
 │   ├── database/                     ← LOCAL DATABASE (SQLite)
 │   │   ├── db.ts                     ← DB singleton + typed query helpers
 │   │   ├── schema.sql                ← Table definitions (applied on first boot)
 │   │   └── webtoon_local.db          ← SQLite file (auto-created, NOT committed to git)
 │   ├── routes/
-│   │   └── process.py                ← FastAPI router: /process, /detect-panels
-│   └── services/
-│       ├── audio.py                  ← TTS generation using edge-tts
-│       ├── cleaner.py                ← Speech bubble removal (OpenCV/Pillow, CLI)
-│       ├── ocr.py                    ← OCR dialogue extraction
-│       └── video.py                  ← MP4 compilation using MoviePy
+│   │   ├── health.ts                 ← Health probe API router
+│   │   ├── projects.ts               ← Projects & panels CRUD API router
+│   │   ├── imageRoutes.ts            ← Image proxy, crop, cleaner & zip API router
+│   │   ├── aiRoutes.ts               ← Smart crop, analysis & video compile API router
+│   │   └── scraperRoutes.ts          ← Scraper & dynamic storyboard API router
+│   ├── services/
+│   │   ├── audio.py                  ← TTS generation using edge-tts
+│   │   ├── cleaner.py                ← Speech bubble removal (OpenCV/Pillow, CLI)
+│   │   ├── ocr.py                    ← OCR dialogue extraction
+│   │   └── video.py                  ← MP4 compilation using MoviePy
+│   └── utils/
+│       ├── cache.ts                  ← Shared memory cache state map
+│       ├── imageUtils.ts             ← Buffer resolver & auto-cropping helpers
+│       └── urlUtils.ts               ← Webtoon URL parsing & region helpers
 │
 ├── data/                             ← TEXT DATA — temp outputs, logs, text files
 │   └── tmp_crop.txt
@@ -409,7 +419,8 @@ At the **end of every conversation**, append one row to the Session Changelog ta
 
 | Date | Summary | Files Affected |
 |---|---|---|
-| 2026-06-07 | Created `requirements.txt` with all Python pip dependencies and ran pip install | `requirements.txt` |
+| 2026-06-07 | Split server.ts into modular files; added self-healing validation fallback to scraperRoutes | `backend/server.ts`, `backend/config/*`, `backend/utils/*`, `backend/routes/*`, `RULES.md`, `README.md` |
+| 2026-06-07 | Created requirements.txt with all Python pip dependencies and ran pip install | `requirements.txt` |
 | 2026-06-07 | Created `.env` and fully rewrote `.env.example` with all variables documented | `.env`, `.env.example` |
 | 2026-06-07 | Created local SQLite database (`backend/database/db.ts`, `schema.sql`) with full CRUD API | `backend/database/`, `backend/server.ts`, `.env`, `.gitignore` |
 | 2026-06-07 | Rewrote `README.md` with full setup guide, API reference, DB docs, and project structure | `README.md` |

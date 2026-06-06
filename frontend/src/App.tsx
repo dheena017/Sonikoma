@@ -277,6 +277,7 @@ export default function App() {
       });
 
       setIsScraping(true);
+      console.log('[Scraper] Starting image scrape for URL:', targetUrl);
 
       fetchWithInterceptor("/api/scrape-images", {
         method: "POST",
@@ -292,6 +293,7 @@ export default function App() {
         .then(data => {
           if (!isCurrent) return;
           if (data.success && data.images && data.images.length > 0) {
+            console.log('[Scraper] Successfully scraped', data.images.length, 'images');
             // Pre-apply referrer-bypass proxy so we never hit 403 hotlink errors in client browser
             const proxiedImages = data.images.map((img: string) => 
                img.startsWith('http') ? `/api/proxy-image?url=${encodeURIComponent(img)}` : img
@@ -323,6 +325,7 @@ export default function App() {
         .catch(err => {
           if (!isCurrent) return;
           console.warn("Background asset scraper failed:", err);
+          console.log('[Scraper] Scrape failed:', err.message);
           setScrapedImages([]);
           setPanels([]);
           
@@ -459,8 +462,10 @@ export default function App() {
       return;
     }
 
+    console.log('[Pipeline] Starting video generation pipeline...');
     setIsProcessing(true);
     setProgressStatus("Contacting pipeline orchestration...");
+    console.log('[Pipeline] Progress: Contacting pipeline orchestration...');
     setConsoleLogs([
       `[Control] Initiating dynamic production pipeline request...`,
       `[Control] Webtoon Destination target: ${targetUrl}`,
@@ -469,6 +474,7 @@ export default function App() {
 
     try {
       setProgressStatus("Scraping Webtoon strips & downloading frames...");
+      console.log('[Pipeline] Scraping phase initiated, target:', targetUrl);
       setConsoleLogs(prev => [...prev, `[Scraper] Spawned crawler tasks to fetch strip images...`]);
 
       const requestBody = {
@@ -488,6 +494,7 @@ export default function App() {
       });
 
       const responseData = await response.json();
+      console.log('[Pipeline] Server responded with', responseData.panels_processed, 'panels');
       
       setConsoleLogs(prev => [
         ...prev,
@@ -505,6 +512,7 @@ export default function App() {
       
     } catch (err: any) {
       console.error("Pipeline failure:", err);
+      console.log('[Pipeline] Error details:', (err as any).status || (err as any).code || 'unknown');
 
       if (!err.intercepted) {
         let errMessage = err.message || "An unexpected connection error occurred.";
@@ -518,12 +526,14 @@ export default function App() {
       }
     } finally {
       setIsProcessing(false);
+      console.log('[Pipeline] Video generation pipeline completed.');
     }
   };
 
   // Submit crops & auto-trims to the backend edit route
   const handleSaveEditedImage = async () => {
     if (editingImageIdx === null) return;
+    console.log('[ImageEditor] Starting crop/trim for frame', editingImageIdx);
     
     const originalUrl = scrapedImages[editingImageIdx];
     setIsSavingEdit(true);
@@ -570,6 +580,8 @@ export default function App() {
         `[Image Editor] Successfully cropped and trimmed Frame #${editingImageIdx + 1}!`,
         ...prev
       ]);
+      console.log('[ImageEditor] Successfully saved edits for frame', editingImageIdx);
+      addNotification('Frame #' + (editingImageIdx + 1) + ' cropped and trimmed successfully!', 'success');
       setEditingImageIdx(null); // Close the modal
     } catch (err: any) {
       console.error("[Image Editor] Failed to save edits:", err);
@@ -660,6 +672,7 @@ export default function App() {
   // Vertically stitch a panel image with its successor to prevent cutoff artifacts
   const handleStitchWithNext = async (idx: number) => {
     if (idx < 0 || idx >= scrapedImages.length - 1) return;
+    console.log('[Stitcher] Initiating merge of frames', idx + 1, 'and', idx + 2);
     
     setStitchingIndices(prev => [...prev, idx]);
     setConsoleLogs(prev => [
@@ -704,6 +717,8 @@ export default function App() {
         `[Stitcher] Successfully merged Frame #${idx + 1} and Frame #${idx + 2} vertically into a new seamless frame asset!`,
         ...prev
       ]);
+      console.log('[Stitcher] Merge completed successfully');
+      addNotification('Frames #' + (idx + 1) + ' and #' + (idx + 2) + ' stitched successfully!', 'success');
     } catch (err: any) {
       console.error("[Stitcher] Merging failed:", err);
       if (!err.intercepted) {
@@ -716,6 +731,7 @@ export default function App() {
 
   // Trigger webtool re-scrape / re-process trigger to recalculate tighter margins in CV/OCR engine
   const handleTriggerReprocess = async (panelId: number) => {
+    console.log('[Reprocess] Re-analyzing panel', panelId);
     const activePanel = panels.find(p => p.id === panelId);
     if (!activePanel) return;
 
@@ -752,6 +768,7 @@ export default function App() {
         `[OCR/CV Engine] Scene #${panelId} output canvas successfully re-parsed into tighter boundaries with margin padding ${activePadding}%!`,
         ...prev
       ]);
+      addNotification('Panel #' + panelId + ' reprocessed with tighter margins.', 'success');
     } catch (err) {
       console.error("Reprocessing failed:", err);
       addNotification(`Panel reprocessing failed. Please try again later.`, "error");
@@ -931,7 +948,7 @@ export default function App() {
           )}
 
           {/* REAL-TIME LOG MONITOR */}
-          {consoleLogs.length > 0 && (
+          {(
             <TerminalLogs consoleLogs={consoleLogs} setConsoleLogs={setConsoleLogs} />
           )}
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { X, AlertCircle, CheckCircle, Info, RefreshCw, Play, CircleAlert } from "lucide-react";
 
-export type NotificationType = "error" | "success" | "info";
+export type NotificationType = "error" | "success" | "info" | "warning";
 
 export interface Notification {
   id: number;
@@ -97,6 +97,10 @@ function IndividualNotification({ note, onRemove }: { note: Notification; onRemo
     title = "Operation Error";
     classes = "bg-rose-950/90 border-rose-800 text-rose-100";
     icon = <CircleAlert className="h-5 w-5 text-rose-400 shrink-0" />;
+  } else if (note.type === "warning") {
+    title = "Warning";
+    classes = "bg-amber-950/90 border-amber-800 text-amber-100";
+    icon = <AlertCircle className="h-5 w-5 text-amber-400 shrink-0" />;
   } else if (note.type === "success") {
     title = "Success";
     classes = "bg-emerald-950/90 border-emerald-800 text-emerald-100";
