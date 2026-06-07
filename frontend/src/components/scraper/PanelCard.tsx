@@ -265,14 +265,14 @@ export default function PanelCard({
           <button
             onClick={() => handleMergeWithNext(idx)}
             disabled={mergingIndices.includes(idx)}
-            className="w-full bg-indigo-950/40 hover:bg-indigo-900 border border-indigo-900/60 text-indigo-300 hover:text-indigo-100 text-[9px] py-1 rounded font-mono transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+            className="w-full bg-indigo-950/50 hover:bg-indigo-900 border border-indigo-900/60 text-indigo-100 hover:text-white text-[9px] sm:text-[10px] py-2 rounded-xl font-medium font-mono transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {mergingIndices.includes(idx) ? (
-              <RefreshCw className="h-2.5 w-2.5 animate-spin" />
+              <RefreshCw className="h-3 w-3 animate-spin" />
             ) : (
               <span className="text-[10px] font-bold">🔗</span>
             )}
-            <span>The Mearge</span>
+            <span>Merge</span>
           </button>
         )}
 

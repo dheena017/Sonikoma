@@ -70,8 +70,8 @@ export default function UrlInputPanel({
                 }}
                 className={`p-3.5 rounded-2xl border text-left flex flex-col justify-between gap-1.5 transition-all duration-300 cursor-pointer ${
                   selectedModel === modelItem.id
-                    ? "bg-purple-950/20 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.12)] text-white"
-                    : "bg-neutral-950/40 border-neutral-850/60 hover:border-neutral-750 text-neutral-400 hover:text-neutral-200"
+                    ? "bg-purple-950/10 border-transparent shadow-none text-white"
+                    : "bg-neutral-950/40 border-neutral-850/60 hover:border-neutral-700 text-neutral-300 hover:text-white"
                 }`}
               >
                 <div className="flex items-center justify-between gap-1.5 w-full">

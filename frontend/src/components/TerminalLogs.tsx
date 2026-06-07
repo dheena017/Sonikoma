@@ -109,34 +109,34 @@ export default function TerminalLogs({ consoleLogs, setConsoleLogs }: TerminalLo
 
   return (
     <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-3.5">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-neutral-800 pb-3">
+      <div className="flex flex-row flex-nowrap items-center justify-between gap-4 border-b border-neutral-800 pb-3 overflow-x-auto">
         {/* Header Title */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex min-w-0 items-center gap-2.5">
           <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/15">
             <Terminal className="h-4.5 w-4.5 text-purple-400" />
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-sm text-white">Real-Time Compilation Shell Logs</h3>
+              <h3 className="font-bold text-sm text-white">Terminal Logs</h3>
               {consoleLogs.length > 0 && (
                 <span className="text-[9px] px-1.5 py-0.5 font-mono font-bold bg-purple-950/60 text-purple-400 rounded border border-purple-800/40">
                   {consoleLogs.length} entries
                 </span>
               )}
             </div>
-            <p className="text-[10px] text-neutral-400 font-mono">Live background status of parser compiles &amp; AI operations</p>
+            <p className="text-[10px] text-neutral-400 font-mono">Live parser and AI status</p>
           </div>
         </div>
 
         {/* Global Toolbar */}
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-nowrap items-center gap-2 justify-end overflow-x-auto">
           {/* Auto-scroll toggle */}
           <button
             onClick={() => setAutoScroll(!autoScroll)}
-            className={`text-[10px] font-mono border px-2 py-1 rounded-lg cursor-pointer flex items-center gap-1 transition-colors ${
+            className={`h-9 min-w-[70px] text-[10px] font-mono rounded-xl border px-3 transition-colors flex items-center justify-center gap-2 ${
               autoScroll
                 ? "text-purple-400 border-purple-800/50 bg-purple-950/30 hover:bg-purple-950/50"
-                : "text-neutral-500 border-neutral-800/80 bg-neutral-950 hover:bg-neutral-900"
+                : "text-neutral-400 border-neutral-800/80 bg-neutral-950 hover:bg-neutral-900"
             }`}
             title={autoScroll ? "Auto-scroll enabled" : "Auto-scroll disabled"}
           >
@@ -148,12 +148,12 @@ export default function TerminalLogs({ consoleLogs, setConsoleLogs }: TerminalLo
           <button
             onClick={handleCopyAll}
             disabled={consoleLogs.length === 0}
-            className="text-[10px] text-neutral-400 hover:text-blue-400 font-mono border border-neutral-800/80 px-2.5 py-1 rounded-lg bg-neutral-950 hover:bg-neutral-900 cursor-pointer flex items-center gap-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="h-9 min-w-[78px] text-[10px] font-mono rounded-xl border border-neutral-800/80 px-3 text-neutral-300 hover:text-white bg-neutral-950 hover:bg-neutral-900 flex items-center justify-center gap-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {copied ? (
               <>
                 <Check className="h-3 w-3 text-emerald-400" />
-                <span className="text-emerald-400">Copied!</span>
+                <span className="text-emerald-400">Copied</span>
               </>
             ) : (
               <>
@@ -167,7 +167,7 @@ export default function TerminalLogs({ consoleLogs, setConsoleLogs }: TerminalLo
           <button
             onClick={handleDownloadLogs}
             disabled={consoleLogs.length === 0}
-            className="text-[10px] text-neutral-400 hover:text-emerald-400 font-mono border border-neutral-800/80 px-2.5 py-1 rounded-lg bg-neutral-950 hover:bg-neutral-900 cursor-pointer flex items-center gap-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="h-9 min-w-[78px] text-[10px] font-mono rounded-xl border border-neutral-800/80 px-3 text-neutral-300 hover:text-white bg-neutral-950 hover:bg-neutral-900 flex items-center justify-center gap-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             title="Download logs as text file"
           >
             <DownloadIcon className="h-3 w-3 text-emerald-500/70" />
@@ -177,7 +177,7 @@ export default function TerminalLogs({ consoleLogs, setConsoleLogs }: TerminalLo
           {/* Clear */}
           <button
             onClick={() => setConsoleLogs([`[GUI] ${getTimestamp()} — Active shell cleared at user prompt.`])}
-            className="text-[10px] text-neutral-400 hover:text-red-400 font-mono border border-neutral-800/80 px-2.5 py-1 rounded-lg bg-neutral-950 hover:bg-neutral-900 cursor-pointer flex items-center gap-1.5 transition-colors"
+            className="h-9 min-w-[70px] text-[10px] font-mono rounded-xl border border-neutral-800/80 px-3 text-red-400 hover:text-white bg-neutral-950 hover:bg-red-500/10 flex items-center justify-center gap-2 transition-colors"
           >
             <Trash2 className="h-3 w-3" />
             Clear
@@ -186,7 +186,7 @@ export default function TerminalLogs({ consoleLogs, setConsoleLogs }: TerminalLo
       </div>
 
       {/* Real-time search and filtering tabs */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-neutral-950/40 p-2 rounded-xl border border-neutral-850">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-neutral-950/40 p-2 rounded-xl border border-transparent shadow-inner shadow-black/10">
         {/* Filter Tabs */}
         <div className="flex items-center gap-1 overflow-x-auto">
           {([
@@ -204,7 +204,7 @@ export default function TerminalLogs({ consoleLogs, setConsoleLogs }: TerminalLo
                 className={`px-2.5 py-1 rounded-lg font-mono text-[9px] font-bold border transition-all cursor-pointer flex items-center gap-1.5 ${
                   isActive
                     ? "bg-purple-600 border-purple-500 text-white shadow-sm"
-                    : "bg-neutral-900 border-neutral-850 text-neutral-400 hover:text-neutral-200"
+                    : "bg-neutral-900 border-neutral-900/50 text-neutral-300 hover:text-neutral-100"
                 }`}
               >
                 <span>{tab.label}</span>
@@ -223,7 +223,7 @@ export default function TerminalLogs({ consoleLogs, setConsoleLogs }: TerminalLo
             placeholder="Search logs..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-neutral-900 border border-neutral-850 text-neutral-200 rounded-lg pl-7 pr-7 py-1 text-[10px] focus:border-purple-500 focus:outline-none placeholder-neutral-600 transition-colors"
+            className="w-full bg-neutral-900 border border-neutral-900/60 text-neutral-200 rounded-lg pl-7 pr-7 py-1 text-[10px] focus:border-purple-500 focus:outline-none placeholder-neutral-500 transition-colors"
           />
           <Search className="absolute left-2.5 h-3 w-3 text-neutral-600 pointer-events-none" />
           {searchQuery && (
@@ -240,7 +240,7 @@ export default function TerminalLogs({ consoleLogs, setConsoleLogs }: TerminalLo
       {/* Terminal Output display window */}
       <div
         ref={scrollRef}
-        className="bg-neutral-950 rounded-xl p-4 border border-neutral-850 h-56 overflow-y-auto font-mono text-[10px] space-y-1.5 scrollbar-thin shadow-inner"
+        className="bg-neutral-950 rounded-xl p-4 border border-transparent h-56 overflow-y-auto font-mono text-[10px] space-y-1.5 scrollbar-thin shadow-inner"
       >
         {filteredLogs.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-neutral-600 space-y-2">

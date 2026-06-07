@@ -1403,7 +1403,7 @@ export default function App() {
                         }}
                         className={`p-3.5 rounded-2xl border text-left flex flex-col justify-between gap-1.5 transition-all duration-300 cursor-pointer ${
                           selectedModel === modelItem.id
-                            ? "bg-purple-950/20 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.12)] text-white"
+                            ? "bg-purple-950/10 border-transparent text-white shadow-none"
                             : "bg-neutral-950/40 border-neutral-850/60 hover:border-neutral-750 text-neutral-400 hover:text-neutral-200"
                         }`}
                       >

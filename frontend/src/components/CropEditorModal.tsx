@@ -1327,71 +1327,74 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
   if (editingImageIdx === null) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4 md:p-6 animate-[fadeIn_0.2s_ease-out] overscroll-contain">
+    <div
+      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4 md:p-6 animate-[fadeIn_0.2s_ease-out] overflow-hidden overscroll-contain"
+      onWheel={(event) => event.stopPropagation()}
+      onTouchMove={(event) => event.stopPropagation()}
+    >
       <div
-        className="relative bg-neutral-950 border border-white/5 rounded-3xl overflow-hidden shadow-2xl flex flex-col w-full max-w-7xl h-[90vh] my-auto"
+        className="relative bg-neutral-950 border border-white/5 rounded-3xl overflow-hidden shadow-2xl flex flex-col w-full max-w-7xl h-auto max-h-[calc(100vh-4rem)] my-auto"
         style={{ boxShadow: "0 0 60px rgba(139,92,246,0.12), 0 30px 60px rgba(0,0,0,0.7)" }}
       >
         {/* Subtle top-edge glow line */}
         <div className="absolute top-0 left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-purple-500/60 to-transparent" />
 
         {/* Header */}
-        <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between bg-gradient-to-r from-neutral-950 via-neutral-950/95 to-purple-950/20">
-          <div className="flex items-center gap-3">
+        <div className="px-6 py-4 border-b border-white/5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-gradient-to-r from-neutral-950 via-neutral-950/95 to-purple-950/20">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-1">
             <div className="p-2 rounded-xl bg-purple-600/15 border border-purple-500/20">
               <Scissors className="h-4 w-4 text-purple-400" />
             </div>
-            <div>
-              <h3 className="font-bold text-sm text-white tracking-tight">
-                Advanced Drop & Drag Crop Tools Generator
+            <div className="min-w-0">
+              <h3 className="font-bold text-sm sm:text-base text-white tracking-tight leading-5">
+                Advanced Drag & Drop Crop Generator
               </h3>
-              <p className="text-[10px] text-neutral-500 font-mono mt-0.5">
-                Cutting and Trimming Frame #{editingImageIdx + 1} with custom
-                coordinates drag-and-drop
+              <p className="text-[10px] sm:text-[11px] text-neutral-400 font-mono mt-0.5 leading-4">
+                Crop and trim frame #{editingImageIdx + 1} with drag-and-drop controls
               </p>
             </div>
           </div>
           
           {/* Panel Navigation Group */}
-          <div className="flex items-center gap-1.5 bg-neutral-900/60 border border-white/5 rounded-2xl p-1 select-none">
+          <div className="w-full sm:w-auto flex items-center justify-between gap-2 bg-neutral-900/80 ring-1 ring-white/10 shadow-[0_10px_30px_rgba(15,23,42,0.35)] rounded-3xl p-1.5 select-none">
             <button
               onClick={handlePrevImage}
               disabled={editingImageIdx === 0}
-              className="p-1.5 rounded-xl text-neutral-400 hover:text-white hover:bg-neutral-800 disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-neutral-400 transition-all cursor-pointer flex items-center gap-1 text-[10px] font-bold font-mono"
+              className="inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-[11px] font-semibold font-mono text-neutral-300 bg-neutral-950/60 hover:text-white hover:bg-purple-600/10 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
               title="Previous Panel (ArrowLeft or [)"
             >
-              <ChevronLeft className="h-3.5 w-3.5" />
+              <ChevronLeft className="h-4 w-4" />
               <span className="hidden sm:inline">Prev</span>
             </button>
-            
-            <div className="px-2.5 py-1 text-[10px] font-mono text-purple-300 font-bold bg-black/40 rounded-lg border border-white/5">
+
+            <div className="min-w-[120px] px-3 py-2 text-[11px] font-semibold font-mono text-purple-200 bg-white/5 ring-1 ring-white/10 rounded-2xl backdrop-blur-sm text-center">
               Panel {editingImageIdx + 1} of {scrapedImages.length}
             </div>
 
             <button
               onClick={handleNextImage}
               disabled={editingImageIdx === scrapedImages.length - 1}
-              className="p-1.5 rounded-xl text-neutral-400 hover:text-white hover:bg-neutral-800 disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-neutral-400 transition-all cursor-pointer flex items-center gap-1 text-[10px] font-bold font-mono"
+              className="inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-[11px] font-semibold font-mono text-neutral-300 bg-neutral-950/60 hover:text-white hover:bg-purple-600/10 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
               title="Next Panel (ArrowRight or ])"
             >
               <span className="hidden sm:inline">Next</span>
-              <ChevronRight className="h-3.5 w-3.5" />
+              <ChevronRight className="h-4 w-4" />
             </button>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="w-full sm:w-auto flex flex-wrap items-center gap-2 justify-end">
              {/* Undo Button in header */}
             <button
               type="button"
               onClick={handleUndo}
               disabled={history.length === 0}
               title="Undo last action (Ctrl+Z)"
-              className="relative flex items-center gap-1.5 text-neutral-400 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed px-2.5 py-1.5 rounded-xl hover:bg-neutral-800/80 border border-transparent hover:border-neutral-700/60 transition-all cursor-pointer"
+              className="relative inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-[11px] font-semibold font-mono text-neutral-300 bg-neutral-950/60 hover:bg-neutral-800/85 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             >
-              <Undo2 className="h-3.5 w-3.5" />
-              <span className="text-[10px] font-semibold font-mono hidden sm:block">Undo</span>
+              <Undo2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Undo</span>
               {history.length > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-purple-600 text-white text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-lg">
+                <span className="absolute -top-2 -right-2 bg-purple-500 text-white text-[9px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-lg">
                   {history.length}
                 </span>
               )}
@@ -1402,12 +1405,12 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
               onClick={handleRedo}
               disabled={redoHistory.length === 0}
               title="Redo last action (Ctrl+Y)"
-              className="relative flex items-center gap-1.5 text-neutral-400 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed px-2.5 py-1.5 rounded-xl hover:bg-neutral-800/80 border border-transparent hover:border-neutral-700/60 transition-all cursor-pointer"
+              className="relative inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-[11px] font-semibold font-mono text-neutral-300 bg-neutral-950/60 hover:bg-neutral-800/85 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             >
-              <Redo2 className="h-3.5 w-3.5" />
-              <span className="text-[10px] font-semibold font-mono hidden sm:block">Redo</span>
+              <Redo2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Redo</span>
               {redoHistory.length > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-blue-650 text-white text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-lg">
+                <span className="absolute -top-2 -right-2 bg-sky-500 text-white text-[9px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-lg">
                   {redoHistory.length}
                 </span>
               )}
@@ -1416,15 +1419,16 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
               type="button"
               onClick={handleDeleteCurrentImage}
               title="Delete Panel from deck"
-              className="flex items-center gap-1.5 text-neutral-400 hover:text-red-400 px-2.5 py-1.5 rounded-xl hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-[11px] font-semibold font-mono text-red-200 bg-red-500/10 hover:bg-red-500/15 hover:text-red-100 border border-red-500/10 transition-all cursor-pointer"
             >
-              <Trash2 className="h-3.5 w-3.5 text-red-500/70 hover:text-red-400" />
-              <span className="text-[10px] font-semibold font-mono hidden sm:block">Delete</span>
+              <Trash2 className="h-4 w-4 text-red-400" />
+              <span className="hidden sm:inline">Delete</span>
             </button>
-            <div className="w-px h-5 bg-white/10" />
+            <div className="w-px h-6 bg-white/10" />
             <button
               onClick={() => setEditingImageIdx(null)}
-              className="text-neutral-400 hover:text-white p-1.5 rounded-xl hover:bg-neutral-800/80 border border-transparent hover:border-neutral-700/60 transition-all cursor-pointer"
+              className="inline-flex items-center justify-center rounded-2xl p-2 bg-neutral-950/60 hover:bg-neutral-800/90 text-neutral-300 hover:text-white transition-all"
+              title="Close crop editor"
             >
               <X className="h-4 w-4" />
             </button>
@@ -1432,9 +1436,9 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
         </div>
 
         {/* Main Content Pane */}
-        <div className="p-5 grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1 overflow-hidden select-none items-stretch">
+        <div className="p-5 grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1 min-h-0 overflow-hidden select-none items-stretch">
           {/* Left side: Visual Preview Area (Canvas) */}
-          <div className="lg:col-span-7 flex flex-col space-y-2 h-full overflow-hidden">
+          <div className="lg:col-span-7 flex flex-col space-y-2 h-full min-h-0 overflow-hidden">
             <div className="flex justify-between items-center bg-white/[0.02] backdrop-blur-sm p-2.5 rounded-xl border border-white/[0.06]">
               <div className="flex items-center gap-2">
                 <div className="p-1 rounded-lg bg-purple-500/10">
@@ -1504,13 +1508,13 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
           </div>
 
           {/* Right side: Tabbed controls sidebar */}
-          <div className="lg:col-span-5 flex flex-col space-y-3 h-full overflow-y-auto pr-1.5 scrollbar-thin overscroll-contain">
+          <div className="lg:col-span-5 flex flex-col space-y-3 h-full min-h-0 overflow-hidden pr-1.5 scrollbar-thin overscroll-contain">
             {/* Sidebar Navigation Tabs */}
-            <div className="flex gap-1 bg-black/40 backdrop-blur-sm p-1.5 rounded-2xl border border-white/5">
+            <div className="grid grid-cols-3 gap-2 bg-black/50 backdrop-blur-sm p-2 rounded-3xl border border-white/10 shadow-[inset_0_0_20px_rgba(0,0,0,0.35)] sm:flex sm:items-center sm:gap-1">
               {([
                 { key: "adjust", label: "Adjust", emoji: "✨" },
                 { key: "edit", label: "Edit", emoji: "✏️" },
-                { key: "eraser", label: "Eraser", emoji: "🧼" },
+                { key: "eraser", label: "Erase", emoji: "🧼" },
                 { key: "slice", label: "Cut", emoji: "✂️" },
                 { key: "cuts", label: `Cuts (${slices.length})`, emoji: "🎯" },
                 { key: "merge", label: "Merge", emoji: "🔗" },
@@ -1519,22 +1523,22 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
                   key={tab.key}
                   type="button"
                   onClick={() => setActiveTab(tab.key)}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl font-bold text-[10px] font-mono transition-all cursor-pointer ${
+                  className={`w-full min-w-0 flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-2xl text-[10px] font-bold font-mono transition-all cursor-pointer ${
                     activeTab === tab.key
                       ? "bg-purple-600 text-white shadow-lg shadow-purple-900/50"
-                      : "text-neutral-500 hover:text-neutral-300 hover:bg-white/5"
+                      : "text-neutral-400 hover:text-neutral-200 hover:bg-white/10"
                   }`}
                 >
-                  <span className="hidden sm:block">{tab.emoji}</span>
+                  <span className="hidden sm:inline">{tab.emoji}</span>
                   <span>{tab.label}</span>
                 </button>
               ))}
             </div>
 
             {/* Tab Contents */}
-            <div className="space-y-4">
+            <div className="flex-1 min-h-0 overflow-y-auto space-y-4 scrollbar-thin pr-1">
               {activeTab === "merge" && editingImageIdx !== null && (
-                <div className="animate-fadeIn">
+                <div className="animate-fadeIn rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
                   <MergePanel
                     editingImageIdx={editingImageIdx}
                     scrapedImages={scrapedImages}
@@ -1545,7 +1549,7 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
               )}
 
               {activeTab === "edit" && (
-                <div className="animate-fadeIn">
+                <div className="animate-fadeIn rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
                   <CropToolsPanel
                     editCropTop={editCropTop}
                     editCropBottom={editCropBottom}
@@ -1566,7 +1570,7 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
               )}
 
               {activeTab === "adjust" && (
-                <div className="space-y-4 animate-fadeIn">
+                <div className="space-y-4 animate-fadeIn rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
                   <EnhancementsPanel
                     activeStoryboardPanel={activeStoryboardPanel}
                     handleModifyBrightness={handleModifyBrightness}
@@ -1584,7 +1588,7 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
               )}
 
               {activeTab === "eraser" && (
-                <div className="space-y-4 animate-fadeIn">
+                <div className="space-y-4 animate-fadeIn rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
                   <CleanBubblesPanel
                     imgUrl={scrapedImages[editingImageIdx]}
                     editingImageIdx={editingImageIdx}
@@ -1633,7 +1637,7 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
               )}
 
               {activeTab === "slice" && (
-                <div className="space-y-4 animate-fadeIn">
+                <div className="space-y-4 animate-fadeIn rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
                   <HorizontalSplitter
                     splitPosition={splitPosition}
                     setSplitPosition={setSplitPosition}
@@ -1660,7 +1664,7 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
               )}
 
               {activeTab === "cuts" && (
-                <div className="space-y-4 animate-fadeIn">
+                <div className="space-y-4 animate-fadeIn rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
                   <CutsRegistry
                     slices={slices}
                     setSlices={setSlices}
@@ -1701,34 +1705,34 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
         </div>
 
         {/* Action Buttons Footer */}
-        <div className="px-5 py-4 bg-gradient-to-r from-neutral-950/95 via-neutral-950 to-purple-950/10 border-t border-white/5 flex items-center justify-between gap-3">
-          <div className="flex flex-col gap-0.5 hidden sm:flex">
-            <span className="text-[10px] text-neutral-500 font-mono italic max-w-[50%]">
+        <div className="px-5 py-4 bg-gradient-to-r from-neutral-950/95 via-neutral-950 to-purple-950/10 border-t border-white/5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-1 text-left sm:max-w-[45%]">
+            <span className="text-[10px] text-neutral-500 font-mono italic break-words">
               {slices.length > 0
                 ? `Multi-cut: ${slices.length} new scenes will be created on your deck`
-                : "Single-frame crop mode — drag canvas to set bounds"}
+                : "Single-frame crop mode — drag to set crop bounds"}
             </span>
             {history.length > 0 && (
               <span className="text-[9px] text-purple-500/80 font-mono">
                 {history.length} undo step{history.length !== 1 ? "s" : ""} available · Ctrl+Z
               </span>
             )}
-            <span className="text-[9px] text-neutral-600 font-mono mt-0.5">
+            <span className="text-[9px] text-neutral-600 font-mono mt-0.5 hidden sm:block">
               Hotkeys: [ Prev · ] Next · Esc Close · Enter Save · Ctrl+Z Undo
             </span>
           </div>
 
-          <div className="flex items-center gap-2 ml-auto">
+          <div className="flex flex-wrap items-center gap-2 justify-end ml-auto">
             {/* Undo Button in footer */}
             <button
               type="button"
               onClick={handleUndo}
               disabled={history.length === 0 || isSavingEdit}
               title="Undo last action (Ctrl+Z)"
-              className="flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white hover:border-purple-600/50 disabled:opacity-25 disabled:cursor-not-allowed px-3 py-2.5 rounded-xl text-xs font-semibold cursor-pointer transition-all"
+              className="inline-flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white hover:border-purple-600/50 disabled:opacity-25 disabled:cursor-not-allowed px-3 py-2 rounded-2xl text-xs font-semibold cursor-pointer transition-all"
             >
               <Undo2 className="h-3.5 w-3.5" />
-              <span className="hidden sm:block">Undo</span>
+              <span className="hidden sm:inline">Undo</span>
               {history.length > 0 && (
                 <span className="bg-purple-900/60 text-purple-300 text-[9px] font-bold px-1.5 rounded">
                   {history.length}
@@ -1739,7 +1743,7 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
               type="button"
               onClick={() => setEditingImageIdx(null)}
               disabled={isSavingEdit}
-              className="bg-neutral-900/80 border border-white/5 text-neutral-400 hover:text-white px-4 py-2.5 rounded-xl text-xs font-semibold cursor-pointer transition-colors hover:bg-neutral-800"
+              className="inline-flex items-center justify-center bg-neutral-900/80 border border-white/5 text-neutral-400 hover:text-white px-3.5 py-2 rounded-2xl text-xs font-semibold cursor-pointer transition-colors hover:bg-neutral-800"
             >
               Cancel
             </button>
@@ -1747,17 +1751,17 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
               type="button"
               onClick={handleDeleteCurrentImage}
               disabled={isSavingEdit}
-              className="bg-red-950/20 hover:bg-red-950/55 border border-red-900/30 hover:border-red-900/50 text-red-400 px-4 py-2.5 rounded-xl text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5"
+              className="inline-flex items-center gap-1.5 bg-red-950/20 hover:bg-red-950/55 border border-red-900/30 hover:border-red-900/50 text-red-400 px-3.5 py-2 rounded-2xl text-xs font-semibold cursor-pointer transition-all"
             >
               <Trash2 className="h-3.5 w-3.5 text-red-500/70" />
-              <span>Delete Panel</span>
+              <span>Delete</span>
             </button>
             {activeTab === "edit" && (
               <button
                 type="button"
                 onClick={handleExecuteSave}
                 disabled={isSavingEdit || isTransforming}
-                className="relative bg-cyan-600 hover:bg-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-2 shadow-lg shadow-cyan-900/40 active:scale-95"
+                className="relative inline-flex items-center justify-center bg-cyan-600 hover:bg-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed text-white px-5 py-2 rounded-2xl text-[11px] font-bold cursor-pointer transition-all gap-2 shadow-lg shadow-cyan-900/40 active:scale-95"
               >
                 {isSavingEdit || isTransforming ? (
                   <>
@@ -1779,7 +1783,7 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
                   onClick={() => {
                     addNotification("Style adjustments applied successfully!", "success");
                   }}
-                  className="bg-indigo-500/10 hover:bg-indigo-500/25 border border-indigo-500/25 text-indigo-300 hover:text-white px-5 py-2.5 rounded-xl text-xs font-semibold cursor-pointer transition-all active:scale-95 flex items-center gap-1.5"
+                  className="inline-flex items-center gap-1.5 bg-indigo-500/10 hover:bg-indigo-500/25 border border-indigo-500/25 text-indigo-300 hover:text-white px-4 py-2 rounded-2xl text-[11px] font-semibold cursor-pointer transition-all active:scale-95"
                 >
                   <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
                   <span>Apply Styles</span>
@@ -1788,7 +1792,7 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
                   type="button"
                   onClick={handleExecuteSave}
                   disabled={isSavingEdit}
-                  className="relative bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-2 shadow-lg shadow-purple-900/50"
+                  className="relative inline-flex items-center justify-center bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white px-5 py-2 rounded-2xl text-[11px] font-bold cursor-pointer transition-all gap-2 shadow-lg shadow-purple-900/50"
                   style={{ boxShadow: isSavingEdit ? undefined : "0 0 20px rgba(139,92,246,0.25), 0 4px 12px rgba(0,0,0,0.4)" }}
                 >
                   {isSavingEdit ? (
