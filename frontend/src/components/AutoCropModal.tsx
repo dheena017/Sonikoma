@@ -106,11 +106,12 @@ export default function AutoCropModal({
   isApplying,
 }: AutoCropModalProps) {
   return (
-    <div className="flex-1 w-full max-w-6xl mx-auto px-6 py-8 flex flex-col gap-0 animate-[fadeIn_0.18s_ease-out]">
-      {/* ── Card shell ── */}
-      <div className="bg-neutral-900 border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col">
-        {/* ── Header ── */}
-        <div className="px-6 py-5 border-b border-neutral-800 flex items-center justify-between bg-neutral-950/40">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-center justify-center p-4 overflow-y-auto">
+      <div className="relative w-full max-w-6xl min-h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] flex flex-col gap-0 animate-[fadeIn_0.18s_ease-out]">
+        {/* ── Card shell ── */}
+        <div className="bg-neutral-900 border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col h-full">
+          {/* ── Header ── */}
+          <div className="px-6 py-5 border-b border-neutral-800 flex items-center justify-between bg-neutral-950/40">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-indigo-950/60 border border-indigo-800/50 flex items-center justify-center shadow-[0_0_14px_rgba(99,102,241,0.15)]">
               <Scissors className="h-5 w-5 text-indigo-400" />
@@ -136,7 +137,7 @@ export default function AutoCropModal({
         </div>
 
         {/* ── Scrollable Body ── */}
-        <div className="p-6 overflow-y-auto grid grid-cols-1 lg:grid-cols-12 gap-8 max-h-[70vh]">
+        <div className="p-6 overflow-y-auto grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1">
 
           {/* ══ LEFT COLUMN ══ */}
           <div className="lg:col-span-7 space-y-7">
@@ -503,6 +504,7 @@ export default function AutoCropModal({
         </div>
       </div>
     </div>
+  </div>
   );
 }
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { 
   Sparkles, 
   Cpu, 
@@ -334,6 +334,7 @@ export default function App() {
 
   // Image editing/cropping states
   const [editingImageIdx, setEditingImageIdx] = useState<number | null>(null);
+  const [returnScrollY, setReturnScrollY] = useState<number>(0);
   const [editCropTop, setEditCropTop] = useState<number>(0);
   const [editCropBottom, setEditCropBottom] = useState<number>(0);
   const [editCropLeft, setEditCropLeft] = useState<number>(0);
@@ -341,6 +342,21 @@ export default function App() {
   const [editAutoTrim, setEditAutoTrim] = useState<boolean>(true);
   const [isSavingEdit, setIsSavingEdit] = useState<boolean>(false);
   const [imageEditStates, setImageEditStates] = useState<Record<string, any>>({});
+  const prevEditingImageIdxRef = useRef<number | null>(null);
+
+  const openEditingImageIdx = useCallback((idx: number | null) => {
+    if (idx !== null) {
+      setReturnScrollY(window.scrollY);
+    }
+    setEditingImageIdx(idx);
+  }, []);
+
+  useEffect(() => {
+    if (prevEditingImageIdxRef.current !== null && editingImageIdx === null) {
+      window.scrollTo({ top: returnScrollY, behavior: "auto" });
+    }
+    prevEditingImageIdxRef.current = editingImageIdx;
+  }, [editingImageIdx, returnScrollY]);
 
   // Restore editor states from cache when entering/switching the edit mode for a panel
   useEffect(() => {
@@ -1430,6 +1446,7 @@ export default function App() {
             currentPanelIndex={currentPanelIndex}
             handleMergeWithNext={handleStitchWithNext}
             setEditingImageIdx={setEditingImageIdx}
+            openEditingImageIdx={openEditingImageIdx}
             setEditCropTop={setEditCropTop}
             setEditCropBottom={setEditCropBottom}
             setEditCropLeft={setEditCropLeft}

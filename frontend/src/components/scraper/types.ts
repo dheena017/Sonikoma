@@ -16,6 +16,7 @@ export interface ScraperDeckProps {
   currentPanelIndex: number;
   handleMergeWithNext: (idx: number) => Promise<void>;
   setEditingImageIdx: (idx: number | null) => void;
+  openEditingImageIdx: (idx: number | null) => void;
   setEditCropTop: (val: number) => void;
   setEditCropBottom: (val: number) => void;
   setEditCropLeft: (val: number) => void;

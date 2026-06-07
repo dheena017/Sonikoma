@@ -6,6 +6,7 @@ interface PanelCardProps
   extends Pick<
     ScraperDeckProps,
     | "setEditingImageIdx"
+    | "openEditingImageIdx"
     | "setEditCropTop"
     | "setEditCropBottom"
     | "setEditCropLeft"
@@ -47,6 +48,7 @@ export default function PanelCard({
   setScrapedImages,
   setSelectedScraped,
   setConsoleLogs,
+  openEditingImageIdx,
   addPanelsWithAutoAnalysis,
 }: PanelCardProps) {
   const [isEditing, setIsEditing] = React.useState<boolean>(false);
@@ -277,7 +279,11 @@ export default function PanelCard({
         <div className="flex gap-1 justify-between items-center bg-transparent w-full">
           <button
             onClick={() => {
-              setEditingImageIdx(idx);
+              if (openEditingImageIdx) {
+                openEditingImageIdx(idx);
+              } else {
+                setEditingImageIdx(idx);
+              }
             }}
             title="Crop & Trim White Background"
             className="flex-1 flex items-center justify-center gap-1 bg-neutral-900 hover:bg-purple-950 hover:text-purple-400 text-neutral-400 py-1 rounded border border-neutral-800 hover:border-purple-900/60 transition-colors cursor-pointer text-[10px] font-mono"
