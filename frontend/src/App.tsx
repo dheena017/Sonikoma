@@ -45,7 +45,7 @@ export default function App() {
     type: NotificationType,
     options?: { errorCode?: number; retryDelay?: number; onRetry?: () => void }
   ) => {
-    const id = Date.now();
+    const id = Date.now() + Math.random();
     setNotifications(prev => [...prev, { id, message, type, ...options }]);
     
     // Only auto-dismiss if a countdown/retry action is NOT active
@@ -125,13 +125,22 @@ export default function App() {
               handled = true;
               return; // Pause execution, retry will resume and call executeFetch again
             } else if (response.status === 500) {
-              errMsg = "Pipeline Failure (500): The backend server failed to process the request. Please check server console logs or retry.";
+              let backendError = "";
+              if (contentType.includes("application/json")) {
+                const errorData = await response.clone().json().catch(() => ({}));
+                if (errorData.error) backendError = errorData.error;
+                else if (errorData.message) backendError = errorData.message;
+              }
+              errMsg = backendError 
+                ? `Pipeline Failure (500): ${backendError}`
+                : "Pipeline Failure (500): The backend server failed to process the request. Please check server console logs or retry.";
+              
               addNotification(errMsg, "error", { errorCode: 500 });
               setErrorPopup({
                 title: "Internal Engine Fault (500)",
-                message: "The backend server encountered an unexpected error while executing this request.",
+                message: backendError || "The backend server encountered an unexpected error while executing this request.",
                 type: "error",
-                technicalDetails: `HTTP 500 Internal Server Error\nRequested path: ${input}`,
+                technicalDetails: `HTTP 500 Internal Server Error\nRequested path: ${input}\nDetails: ${backendError || 'N/A'}`,
                 suggestion: "This usually points to a backend error, temporary memory constraints during image merging, or model processing issues. Make sure the scraped panel matches general dimensions and click Retry.",
                 onRetry: () => {
                   executeFetch();
@@ -230,6 +239,88 @@ export default function App() {
 
   const [consoleLogs, setConsoleLogs] = useState<string[]>([]);
 
+  // Synchronize backend server logs in real-time with automatic SSE-to-polling fallback
+  useEffect(() => {
+    let eventSource: EventSource | null = null;
+    let pollInterval: any = null;
+    let isPolling = false;
+    const lastLogIdRef = { current: 0 };
+
+    const startPolling = () => {
+      if (isPolling) return;
+      isPolling = true;
+
+      pollInterval = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/system-logs?since=${lastLogIdRef.current}`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          if (data.success && Array.isArray(data.logs)) {
+            const newLogs = data.logs.filter((log: any) => log.id > lastLogIdRef.current);
+            if (newLogs.length > 0) {
+              newLogs.forEach((log: any) => {
+                if (log.id > lastLogIdRef.current) {
+                  lastLogIdRef.current = log.id;
+                }
+              });
+              setConsoleLogs(prev => [
+                ...prev,
+                ...newLogs.map((log: any) => log.message)
+              ]);
+            }
+          }
+        } catch (err) {
+          // Silent catch to prevent console flooding during network restarts
+        }
+      }, 1500);
+    };
+
+    const stopPolling = () => {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+        pollInterval = null;
+      }
+      isPolling = false;
+    };
+
+    const connectSSE = () => {
+      try {
+        eventSource = new EventSource('/api/system-logs/stream');
+
+        eventSource.onmessage = (event) => {
+          try {
+            const entry = JSON.parse(event.data);
+            if (entry && entry.id > lastLogIdRef.current) {
+              lastLogIdRef.current = entry.id;
+              setConsoleLogs(prev => [...prev, entry.message]);
+            }
+          } catch (e) {
+            // silent catch on malformed stream messages
+          }
+        };
+
+        eventSource.onerror = () => {
+          if (eventSource) {
+            eventSource.close();
+            eventSource = null;
+          }
+          startPolling();
+        };
+      } catch (err) {
+        startPolling();
+      }
+    };
+
+    connectSSE();
+
+    return () => {
+      if (eventSource) {
+        eventSource.close();
+      }
+      stopPolling();
+    };
+  }, []);
+
   // Storyboard Preview player sub-states
   const [currentPanelIndex, setCurrentPanelIndex] = useState<number>(0);
   const [storyboardPlaying, setStoryboardPlaying] = useState<boolean>(false);
@@ -243,6 +334,29 @@ export default function App() {
   const [editCropRight, setEditCropRight] = useState<number>(0);
   const [editAutoTrim, setEditAutoTrim] = useState<boolean>(true);
   const [isSavingEdit, setIsSavingEdit] = useState<boolean>(false);
+  const [imageEditStates, setImageEditStates] = useState<Record<string, any>>({});
+
+  // Restore editor states from cache when entering/switching the edit mode for a panel
+  useEffect(() => {
+    if (editingImageIdx === null) return;
+    const imageUrl = scrapedImages[editingImageIdx];
+    if (!imageUrl) return;
+
+    const saved = imageEditStates[imageUrl];
+    if (saved) {
+      setEditCropTop(saved.cropTop ?? 0);
+      setEditCropBottom(saved.cropBottom ?? 0);
+      setEditCropLeft(saved.cropLeft ?? 0);
+      setEditCropRight(saved.cropRight ?? 0);
+      setEditAutoTrim(saved.autoTrim ?? true);
+    } else {
+      setEditCropTop(0);
+      setEditCropBottom(0);
+      setEditCropLeft(0);
+      setEditCropRight(0);
+      setEditAutoTrim(true);
+    }
+  }, [editingImageIdx, scrapedImages]);
 
   // Bubble cleaner states (lifted to App level so the modal is rendered at the same
   // level as CropEditorModal — replacing the main workspace, not overlaying it)
@@ -261,6 +375,10 @@ export default function App() {
   const [cropBackgroundMode, setCropBackgroundMode] = useState<string>("auto");
   const [autoSplitTallStrips, setAutoSplitTallStrips] = useState<boolean>(true);
   const [processingStrategy, setProcessingStrategy] = useState<string>("balanced");
+  const [aspectRatioLock, setAspectRatioLock] = useState<string>("free");
+  const [minPanelAreaPct, setMinPanelAreaPct] = useState<number>(2);
+  const [overlapMergeThreshold, setOverlapMergeThreshold] = useState<number>(20);
+  const [useLocalCV, setUseLocalCV] = useState<boolean>(false);
   const [isBatchCropping, setIsBatchCropping] = useState<boolean>(false);
   const [batchProgress, setBatchProgress] = useState<{ current: number; total: number } | null>(null);
   const [croppingImgUrl, setCroppingImgUrl] = useState<string | null>(null);
@@ -285,6 +403,7 @@ export default function App() {
 
       for (let i = 0; i < selectedScraped.length; i++) {
         const imgUrl = selectedScraped[i];
+        addNotification(`Cleaning speech bubbles on panel ${i + 1}/${selectedScraped.length}...`, 'info');
         setCleanProgress({ current: i + 1, total: selectedScraped.length });
         setBubbleCroppingImgUrl(imgUrl);
 
@@ -350,6 +469,7 @@ export default function App() {
 
       for (let i = 0; i < selectedScraped.length; i++) {
         const imgUrl = selectedScraped[i];
+        addNotification(`Auto-cropping panel ${i + 1}/${selectedScraped.length}...`, 'info');
         setBatchProgress({ current: i + 1, total: selectedScraped.length });
         setCroppingImgUrl(imgUrl);
         
@@ -370,7 +490,12 @@ export default function App() {
             autoTrim: true,
             sensitivity: cropSensitivity,
             padding: cropPaddingPx,
-            backgroundColorMode: cropBackgroundMode
+            backgroundColorMode: cropBackgroundMode,
+            processingStrategy,
+            aspectRatioLock: aspectRatioLock !== "free" ? aspectRatioLock : undefined,
+            minPanelAreaPct,
+            overlapMergeThreshold,
+            useLocalCV,
           })
         });
 
@@ -433,6 +558,10 @@ export default function App() {
     const timer = setTimeout(() => {
       const { genre, title, episode } = parseWebtoonUrl(targetUrl);
       
+      console.log('[Scraper] Starting image scrape for URL:', targetUrl);
+      console.log('[Scraper] Parsed metadata → Genre:', genre, '| Title:', title, '| Episode:', episode);
+      console.log('[Model] Active AI model engine:', selectedModel);
+      
       // Clear previous panels and images to start with a pristine slate
       setPanels([]);
       setScrapedImages([]);
@@ -445,6 +574,8 @@ export default function App() {
         const baseLogs = prev.filter(log => !log.startsWith("[Preloader]") && !log.startsWith("[Scraper]"));
         return [
           `[Scraper] Spawned live scraping task to separate strip images from: ${targetUrl}`,
+          `[Model] Using AI engine: ${selectedModel} for panel analysis`,
+          `[Scraper] Parsed URL → Genre: ${genre} | Title: ${title} | Episode: ${episode}`,
           ...baseLogs
         ];
       });
@@ -466,7 +597,10 @@ export default function App() {
         .then(data => {
           if (!isCurrent) return;
           if (data.success && data.images && data.images.length > 0) {
-            console.log('[Scraper] Successfully scraped', data.images.length, 'images');
+            console.log('[Scraper] Successfully scraped', data.images.length, 'images from target URL');
+            console.log('[Scraper] Total images reported by server:', data.total_images);
+            console.log('[API] Response status: success | Model used:', selectedModel);
+            
             // Pre-apply referrer-bypass proxy so we never hit 403 hotlink errors in client browser
             const proxiedImages = data.images.map((img: string) => 
                img.startsWith('http') ? `/api/proxy-image?url=${encodeURIComponent(img)}` : img
@@ -480,27 +614,40 @@ export default function App() {
             setPlaybackTime(0);
             setStoryboardPlaying(false);
             
+            addNotification(`Successfully extracted ${data.total_images} panel frames from the Webtoon page!`, 'success');
+            
             setConsoleLogs(prev => {
               const filtered = prev.filter(log => !log.startsWith("[Scraper]"));
               return [
                 `[Scraper] Success! Separated ${data.total_images} continuous panel strips from active page.`,
                 `[Scraper] Images loaded. Select and insert panels from the deck below.`,
+                `[API] Scrape response received — Model: ${selectedModel} | Images: ${data.total_images}`,
                 ...filtered
               ];
             });
           } else {
             const errMsg = data.message || "Connected but no native comic elements identified on page.";
+            console.warn('[Scraper] No panels found:', errMsg);
             setScrapedImages([]);
             setPanels([]);
             addNotification(`Failed to find comic panels: ${errMsg} Please check the URL and try again.`, "error");
+            setConsoleLogs(prev => [
+              `[Scraper] [WARNING] No comic panels detected on page. Server message: ${errMsg}`,
+              ...prev
+            ]);
           }
         })
         .catch(err => {
           if (!isCurrent) return;
-          console.warn("Background asset scraper failed:", err);
-          console.log('[Scraper] Scrape failed:', err.message);
+          console.error('[Scraper] Background asset scraper failed:', err);
+          console.log('[Scraper] Error type:', err.name, '| Message:', err.message);
           setScrapedImages([]);
           setPanels([]);
+          
+          setConsoleLogs(prev => [
+            `[Scraper] [ERROR] Scrape failed: ${err.message || 'Unknown error'}`,
+            ...prev
+          ]);
           
           if (!err.intercepted) {
             const errMsg = err.message || "Failed to retrieve comic panels from the specified URL.";
@@ -632,23 +779,36 @@ export default function App() {
   const handleGenerateVideo = async () => {
     if (!targetUrl.trim()) {
       addNotification("Please enter or select a valid Webtoon URL to initiate the process.", "error");
+      console.warn('[Pipeline] Generate video called without a URL');
       return;
     }
 
+    console.log('[Pipeline] ═══════════════════════════════════════════');
     console.log('[Pipeline] Starting video generation pipeline...');
+    console.log('[Pipeline] Target URL:', targetUrl);
+    console.log('[Pipeline] AI Model:', selectedModel);
+    console.log('[Pipeline] Frame Rate:', frameRate, 'fps');
+    console.log('[Pipeline] Voice Actor:', voiceActor);
+    console.log('[Pipeline] Music Theme:', musicTheme);
+    console.log('[Pipeline] Panels in storyboard:', panels.length);
+    console.log('[Pipeline] ═══════════════════════════════════════════');
+
     setIsProcessing(true);
     setProgressStatus("Contacting pipeline orchestration...");
-    console.log('[Pipeline] Progress: Contacting pipeline orchestration...');
+    addNotification('Pipeline initiated — generating video with ' + selectedModel + '...', 'info');
     setConsoleLogs([
       `[Control] Initiating dynamic production pipeline request...`,
       `[Control] Webtoon Destination target: ${targetUrl}`,
-      `[Control] Cinematic parameters applied -> FPS: ${frameRate} | Actor: ${voiceActor} | Audio: ${musicTheme} | Model: ${selectedModel}`
+      `[Control] Cinematic parameters applied -> FPS: ${frameRate} | Actor: ${voiceActor} | Audio: ${musicTheme}`,
+      `[Model] Active AI Engine: ${selectedModel}`,
+      `[Model] Sending request to AI model for OCR transcription & scene analysis...`,
+      `[Pipeline] Storyboard contains ${panels.length} panel(s) queued for compilation`
     ]);
 
     try {
       setProgressStatus("Scraping Webtoon strips & downloading frames...");
-      console.log('[Pipeline] Scraping phase initiated, target:', targetUrl);
       setConsoleLogs(prev => [...prev, `[Scraper] Spawned crawler tasks to fetch strip images...`]);
+      console.log('[Pipeline] Scraping phase initiated, target:', targetUrl);
 
       const requestBody = {
         url: targetUrl,
@@ -657,6 +817,8 @@ export default function App() {
         model: selectedModel
       };
 
+      console.log('[API] Sending POST /api/generate with', JSON.stringify({ url: targetUrl, model: selectedModel, panelCount: panels.length }));
+      
       // Real fetch endpoint integration targeting local app server
       const response = await fetchWithInterceptor("/api/generate", {
         method: "POST",
@@ -667,14 +829,19 @@ export default function App() {
       });
 
       const responseData = await response.json();
+      
       console.log('[Pipeline] Server responded with', responseData.panels_processed, 'panels');
+      console.log('[Pipeline] Generated video URL:', responseData.video_url);
+      console.log('[API] Full response keys:', Object.keys(responseData).join(', '));
       
       setConsoleLogs(prev => [
         ...prev,
         `[Scraper] Retrieved vertical strip elements successfully.`,
         `[Vision OCR] Isolated ${responseData.panels_processed} panels dynamically.`,
+        `[Model] AI engine ${selectedModel} completed OCR + scene analysis`,
         `[MoviePy] Compiling timeline with Pan/Zoom animations...`,
-        `[MoviePy] Encoded output video: ${responseData.video_url}`
+        `[MoviePy] Encoded output video: ${responseData.video_url}`,
+        `[Pipeline] [SUCCESS] Video generation pipeline completed successfully!`
       ]);
       
       // Update dynamic states
@@ -682,10 +849,17 @@ export default function App() {
       setVideoUrl(responseData.video_url);
       setProgressStatus("Slices mapped & MP4 master timeline generated!");
       setActivePreviewTab("video"); // Automatically default to the video view
+      addNotification('Video generated successfully! Check the preview player.', 'success');
       
     } catch (err: any) {
-      console.error("Pipeline failure:", err);
-      console.log('[Pipeline] Error details:', (err as any).status || (err as any).code || 'unknown');
+      console.error('[Pipeline] Pipeline failure:', err);
+      console.log('[Pipeline] Error details — Status:', err.status || 'N/A', '| Code:', err.code || 'N/A', '| Message:', err.message);
+
+      setConsoleLogs(prev => [
+        ...prev,
+        `[Pipeline] [ERROR] Video generation failed: ${err.message || 'Unknown error'}`,
+        `[Pipeline] Error code: ${err.status || err.code || 'unknown'} | Model: ${selectedModel}`
+      ]);
 
       if (!err.intercepted) {
         let errMessage = err.message || "An unexpected connection error occurred.";
@@ -706,16 +880,20 @@ export default function App() {
   // Submit crops & auto-trims to the backend edit route
   const handleSaveEditedImage = async () => {
     if (editingImageIdx === null) return;
-    console.log('[ImageEditor] Starting crop/trim for frame', editingImageIdx);
+    
+    console.log('[ImageEditor] Starting crop/trim for frame', editingImageIdx + 1);
+    console.log('[ImageEditor] Crop values — Top:', editCropTop, '| Bottom:', editCropBottom, '| Left:', editCropLeft, '| Right:', editCropRight, '| AutoTrim:', editAutoTrim);
     
     const originalUrl = scrapedImages[editingImageIdx];
     setIsSavingEdit(true);
     setConsoleLogs(prev => [
       `[Image Editor] Processing Crop & Auto-Trim operations on Frame #${editingImageIdx + 1}...`,
+      `[Image Editor] Crop values → Top: ${editCropTop}% | Bottom: ${editCropBottom}% | Left: ${editCropLeft}% | Right: ${editCropRight}% | AutoTrim: ${editAutoTrim}`,
       ...prev
     ]);
 
     try {
+      console.log('[API] POST /api/edit-image — Frame:', editingImageIdx + 1);
       const response = await fetchWithInterceptor("/api/edit-image", {
         method: "POST",
         headers: {
@@ -734,6 +912,10 @@ export default function App() {
       const data = await response.json();
       const croppedUrl = data.url;
 
+      console.log('[ImageEditor] Successfully saved edits for frame', editingImageIdx + 1, '→', croppedUrl);
+      console.log('  - Sent (Original):', originalUrl);
+      console.log('  - Revise (Cropped):', croppedUrl);
+
       // Update the scrapedImages array in place
       setScrapedImages(prev => {
         const copy = [...prev];
@@ -750,19 +932,25 @@ export default function App() {
       });
 
       setConsoleLogs(prev => [
-        `[Image Editor] Successfully cropped and trimmed Frame #${editingImageIdx + 1}!`,
+        `[Image Editor] [SUCCESS] Successfully cropped and trimmed Frame #${editingImageIdx + 1}!`,
+        `[Image Editor]   - Sent (Original): ${originalUrl.substring(0, 60)}...`,
+        `[Image Editor]   - Revise (Cropped): ${croppedUrl.substring(0, 60)}...`,
         ...prev
       ]);
-      console.log('[ImageEditor] Successfully saved edits for frame', editingImageIdx);
-      addNotification('Frame #' + (editingImageIdx + 1) + ' cropped and trimmed successfully!', 'success');
-      setEditingImageIdx(null); // Close the modal
+      addNotification(`Frame #${editingImageIdx + 1} cropped and trimmed successfully!`, 'success');
     } catch (err: any) {
-      console.error("[Image Editor] Failed to save edits:", err);
+      console.error('[ImageEditor] Failed to save edits:', err);
+      console.log('[ImageEditor] Error details:', err.message, '| Status:', err.status || 'N/A');
+      setConsoleLogs(prev => [
+        `[Image Editor] [ERROR] Failed to save edits for Frame #${editingImageIdx + 1}: ${err.message || 'Unknown error'}`,
+        ...prev
+      ]);
       if (!err.intercepted) {
         addNotification(`Failed to save edits for Frame #${editingImageIdx + 1}. Please try again later.`, "error");
       }
     } finally {
       setIsSavingEdit(false);
+      console.log('[ImageEditor] Edit operation completed for frame', editingImageIdx !== null ? editingImageIdx + 1 : 'N/A');
     }
   };
 
@@ -827,11 +1015,15 @@ export default function App() {
         return prev;
       });
 
+      console.log('[ImageEditor] Successfully saved multiple cuts for frame', editingImageIdx + 1);
+      console.log('  - Sent (Original):', originalUrl);
+      console.log('  - Revise (New Cuts):', croppedUrls);
       setConsoleLogs(prev => [
         `[Image Editor] Successfully generated ${cuts.length} cropped/trimmed frames from Frame #${editingImageIdx + 1}!`,
+        `[Image Editor]   - Sent (Original): ${originalUrl.substring(0, 60)}...`,
+        `[Image Editor]   - Revise (New Cuts): ${croppedUrls.map((u, i) => `Cut #${i+1}: ${u.substring(0, 40)}...`).join(', ')}`,
         ...prev
       ]);
-      setEditingImageIdx(null);
     } catch (err: any) {
       console.error("[Image Editor] Failed to save multiple cuts:", err);
       if (!err.intercepted) {
@@ -842,14 +1034,16 @@ export default function App() {
     }
   };
 
-  // Vertically merge a panel image with its successor to prevent cutoff artifacts
-  const handleMergeWithNext = async (idx: number) => {
+  // Vertically stitch a panel image with its successor to prevent cutoff artifacts
+  const handleStitchWithNext = async (idx: number) => {
     if (idx < 0 || idx >= scrapedImages.length - 1) return;
-    console.log('[Merger] Initiating merge of frames', idx + 1, 'and', idx + 2);
+    
+    console.log('[Stitcher] Initiating merge of frames', idx + 1, 'and', idx + 2);
     
     setMergingIndices(prev => [...prev, idx]);
     setConsoleLogs(prev => [
-      `[Merger] Merging Frame #${idx + 1} with Frame #${idx + 2} vertically...`,
+      `[Stitcher] Merging Frame #${idx + 1} with Frame #${idx + 2} vertically...`,
+      `[API] POST /api/stitch-images — Combining 2 image buffers server-side`,
       ...prev
     ]);
 
@@ -857,7 +1051,9 @@ export default function App() {
       const img1 = scrapedImages[idx];
       const img2 = scrapedImages[idx + 1];
       
-      const response = await fetchWithInterceptor("/api/merge-images", {
+      console.log('[API] POST /api/stitch-images with', { img1: img1.substring(0, 50) + '...', img2: img2.substring(0, 50) + '...' });
+      
+      const response = await fetchWithInterceptor("/api/stitch-images", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -866,13 +1062,17 @@ export default function App() {
       });
       
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || `Merge failed with status ${response.status}`);
-      const mergedUrl = data.url;
+      const stitchedUrl = data.url;
       
-      // Replace the two original frames on the deck with the single merged result
+      console.log('[Stitcher] Merge completed successfully → new URL:', stitchedUrl);
+      console.log('  - Sent (Img 1):', img1);
+      console.log('  - Sent (Img 2):', img2);
+      console.log('  - Revise (Stitched):', stitchedUrl);
+      
+      // Replace the two original frames on the deck with the single stitched result
       setScrapedImages(prev => {
         const copy = [...prev];
-        copy.splice(idx, 2, mergedUrl);
+        copy.splice(idx, 2, stitchedUrl);
         return copy;
       });
 
@@ -882,37 +1082,47 @@ export default function App() {
         const hasImg2 = prev.includes(img2);
         const filtered = prev.filter(img => img !== img1 && img !== img2);
         if (hasImg1 || hasImg2) {
-          return [...filtered, mergedUrl];
+          return [...filtered, stitchedUrl];
         }
         return filtered;
       });
 
       setConsoleLogs(prev => [
-        `[Merger] Successfully merged Frame #${idx + 1} and Frame #${idx + 2} vertically into a new seamless frame asset!`,
+        `[Stitcher] [SUCCESS] Successfully merged Frame #${idx + 1} and Frame #${idx + 2} vertically into a new seamless frame asset!`,
+        `[Stitcher]   - Sent Frame #${idx + 1}: ${img1.substring(0, 50)}...`,
+        `[Stitcher]   - Sent Frame #${idx + 2}: ${img2.substring(0, 50)}...`,
+        `[Stitcher]   - Revise (Stitched Frame): ${stitchedUrl.substring(0, 50)}...`,
         ...prev
       ]);
-      console.log('[Merger] Merge completed successfully');
-      addNotification('Frames #' + (idx + 1) + ' and #' + (idx + 2) + ' merged successfully!', 'success');
+      addNotification(`Frames #${idx + 1} and #${idx + 2} stitched successfully!`, 'success');
     } catch (err: any) {
-      console.error("[Merger] Merging failed:", err);
+      console.error('[Stitcher] Merging failed:', err);
+      console.log('[Stitcher] Error details:', err.message);
+      setConsoleLogs(prev => [
+        `[Stitcher] [ERROR] Merge failed for Frame #${idx + 1} + #${idx + 2}: ${err.message || 'Unknown error'}`,
+        ...prev
+      ]);
       if (!err.intercepted) {
-        addNotification(`Merging failed. Please try again or refresh the page.`, "error");
+        addNotification(`Stitching failed. Please try again or refresh the page.`, "error");
       }
     } finally {
       setMergingIndices(prev => prev.filter(i => i !== idx));
+      console.log('[Stitcher] Stitch operation completed for index', idx);
     }
   };
 
   // Trigger webtool re-scrape / re-process trigger to recalculate tighter margins in CV/OCR engine
   const handleTriggerReprocess = async (panelId: number) => {
-    console.log('[Reprocess] Re-analyzing panel', panelId);
     const activePanel = panels.find(p => p.id === panelId);
     if (!activePanel) return;
 
+    console.log('[Reprocess] Re-analyzing panel', panelId, '| Smart crop:', activePanel.smart_crop, '| Padding:', activePanel.crop_padding);
+    
     setReprocessingPanelId(panelId);
     const activePadding = activePanel.crop_padding !== undefined ? activePanel.crop_padding : 4;
     setConsoleLogs(prev => [
       `[OCR/CV Engine] Recalculating tighter cropping margins (padding: ${activePadding}%) & OCR vectors for Scene #${panelId}...`,
+      `[OCR/CV Engine] Smart crop: ${activePanel.smart_crop ? 'enabled' : 'disabled'} | Padding: ${activePadding}%`,
       ...prev
     ]);
 
@@ -931,24 +1141,139 @@ export default function App() {
           currentUrl = urlObj.pathname + urlObj.search;
         }
       } catch (e) {
-        console.warn("Failed to set refresh nonce:", e);
+        console.warn('[Reprocess] Failed to set refresh nonce:', e);
       }
 
       await new Promise(resolve => setTimeout(resolve, 900));
 
       setPanels(prev => prev.map(p => p.id === panelId ? { ...p, image_url: currentUrl } : p));
       
+      console.log('[Reprocess] Panel', panelId, 'reprocessed successfully with padding', activePadding + '%');
+      console.log('  - Sent (Original URL):', activePanel.image_url);
+      console.log('  - Revise (Reprocessed URL):', currentUrl);
+      
       setConsoleLogs(prev => [
-        `[OCR/CV Engine] Scene #${panelId} output canvas successfully re-parsed into tighter boundaries with margin padding ${activePadding}%!`,
+        `[OCR/CV Engine] [SUCCESS] Scene #${panelId} output canvas successfully re-parsed into tighter boundaries with margin padding ${activePadding}%!`,
+        `[OCR/CV Engine]   - Sent (Original URL): ${activePanel.image_url.substring(0, 60)}...`,
+        `[OCR/CV Engine]   - Revise (Reprocessed URL): ${currentUrl.substring(0, 60)}...`,
         ...prev
       ]);
-      addNotification('Panel #' + panelId + ' reprocessed with tighter margins.', 'success');
-    } catch (err) {
-      console.error("Reprocessing failed:", err);
+      addNotification(`Panel #${panelId} reprocessed with tighter margins (${activePadding}% padding).`, 'success');
+    } catch (err: any) {
+      console.error('[Reprocess] Reprocessing failed:', err);
+      setConsoleLogs(prev => [
+        `[OCR/CV Engine] [ERROR] Reprocessing failed for Scene #${panelId}: ${err.message || 'Unknown error'}`,
+        ...prev
+      ]);
       addNotification(`Panel reprocessing failed. Please try again later.`, "error");
     } finally {
       setReprocessingPanelId(null);
+      console.log('[Reprocess] Reprocess operation completed for panel', panelId);
     }
+  };
+
+  const runBackgroundAnalysis = async (panelId: number, imageUrl: string) => {
+    try {
+      const res = await fetchWithInterceptor("/api/analyze-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: imageUrl }),
+      });
+      if (!res.ok) throw new Error(`Analysis failed with status ${res.status}`);
+      const data = await res.json();
+      if (data.success && data.analysis) {
+        setPanels((prev) =>
+          prev.map((p) =>
+            p.id === panelId
+              ? {
+                  ...p,
+                  speech_text: data.analysis.speech_text || p.speech_text,
+                  sfx: data.analysis.sfx || p.sfx,
+                  duration: Number(data.analysis.duration) || p.duration,
+                  motion_type: data.analysis.motion_type || p.motion_type,
+                  visual_description:
+                    data.analysis.visual_description || p.visual_description,
+                  isAnalyzing: false,
+                }
+              : p
+          )
+        );
+        setConsoleLogs((prev) => [
+          `[AI Auto-Analysis] AI transcribed and fully mapped cinematic properties for Panel #${panelId}!`,
+          ...prev,
+        ]);
+        addNotification(`Panel #${panelId} analysis completed successfully!`, 'success');
+      } else {
+        throw new Error("Invalid response keys from AI Model Analysis");
+      }
+    } catch (err: any) {
+      console.error(`AI background analysis failed for Panel #${panelId}:`, err);
+      addNotification(`Panel #${panelId} AI analysis failed.`, 'error');
+      setPanels((prev) =>
+        prev.map((p) =>
+          p.id === panelId
+            ? {
+                ...p,
+                speech_text: `Separated scene segment frame #${panelId}.`,
+                sfx: "[Surge]",
+                isAnalyzing: false,
+              }
+            : p
+        )
+      );
+    }
+  };
+
+  const addPanelsWithAutoAnalysis = (imgUrls: string[], currentScrapedList?: string[], shouldScroll: boolean = true) => {
+    if (imgUrls.length === 0) return;
+
+    if (shouldScroll) {
+      setActivePreviewTab("storyboard");
+      setTimeout(() => {
+        document.getElementById("storyboard_timeline_section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+    }
+
+    let newIds: { id: number; url: string }[] = [];
+    const imageList = currentScrapedList || scrapedImages;
+
+    setPanels((prev) => {
+      const baseId =
+        prev.length > 0 ? Math.max(...prev.map((p) => p.id)) + 1 : 1;
+
+      const newPanelsToAdd = imgUrls.map((imgUrl, loopIdx) => {
+        const originalIdx = imageList.indexOf(imgUrl);
+        const cardNum = originalIdx !== -1 ? originalIdx + 1 : loopIdx + 1;
+        const assignedId = baseId + loopIdx;
+        newIds.push({ id: assignedId, url: imgUrl });
+
+        return {
+          id: assignedId,
+          image_url: imgUrl,
+          speech_text: `Loading dialogue... ✦`,
+          sfx: "[Deep Scan]",
+          duration: 4.5,
+          motion_type: "zoom_in",
+          isAnalyzing: true,
+        };
+      });
+
+      return [...prev, ...newPanelsToAdd];
+    });
+
+    setConsoleLogs((prev) => [
+      `[GUI] Added ${imgUrls.length} frames; spawning staggered AI OCR dialogue & camera motion detection...`,
+      ...prev,
+    ]);
+    addNotification(`Added ${imgUrls.length} panel(s) to storyboard. Spawning AI analysis...`, 'info');
+
+    setTimeout(() => {
+      newIds.forEach((item, index) => {
+        setTimeout(() => {
+          runBackgroundAnalysis(item.id, item.url);
+        }, index * 1000); // Stagger background API calls to respect rate limits
+      });
+    }, 50);
   };
 
   const totalCalculatedDuration = panels.reduce((sum, p) => sum + p.duration, 0);
@@ -978,6 +1303,14 @@ export default function App() {
           setAutoSplitTallStrips={setAutoSplitTallStrips}
           processingStrategy={processingStrategy}
           setProcessingStrategy={setProcessingStrategy}
+          aspectRatioLock={aspectRatioLock}
+          setAspectRatioLock={setAspectRatioLock}
+          minPanelAreaPct={minPanelAreaPct}
+          setMinPanelAreaPct={setMinPanelAreaPct}
+          overlapMergeThreshold={overlapMergeThreshold}
+          setOverlapMergeThreshold={setOverlapMergeThreshold}
+          useLocalCV={useLocalCV}
+          setUseLocalCV={setUseLocalCV}
           selectedCount={selectedScraped.length}
           isApplying={isBatchCropping}
         />
@@ -993,34 +1326,6 @@ export default function App() {
           setSensitivity={setBubbleSensitivity}
           selectedCount={selectedScraped.length}
           isApplying={isCleaningBubbles}
-        />
-      ) : editingImageIdx !== null ? (
-        <CropEditorModal
-          editingImageIdx={editingImageIdx}
-          setEditingImageIdx={setEditingImageIdx}
-          editCropTop={editCropTop}
-          setEditCropTop={setEditCropTop}
-          editCropBottom={editCropBottom}
-          setEditCropBottom={setEditCropBottom}
-          editCropLeft={editCropLeft}
-          setEditCropLeft={setEditCropLeft}
-          editCropRight={editCropRight}
-          setEditCropRight={setEditCropRight}
-          editAutoTrim={editAutoTrim}
-          setEditAutoTrim={setEditAutoTrim}
-          scrapedImages={scrapedImages}
-          setScrapedImages={setScrapedImages}
-          isSavingEdit={isSavingEdit}
-          handleSaveEditedImage={handleSaveEditedImage}
-          handleSaveMultipleCuts={handleSaveMultipleCuts}
-          setConsoleLogs={setConsoleLogs}
-          addNotification={addNotification}
-          selectedScraped={selectedScraped}
-          setSelectedScraped={setSelectedScraped}
-          panels={panels}
-          setPanels={setPanels}
-          fetchWithInterceptor={fetchWithInterceptor}
-          setErrorPopup={setErrorPopup}
         />
       ) : (
         <main id="main_workspace" className="flex-1 w-full max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
@@ -1117,7 +1422,7 @@ export default function App() {
             panels={panels}
             setPanels={setPanels}
             currentPanelIndex={currentPanelIndex}
-            handleMergeWithNext={handleMergeWithNext}
+            handleMergeWithNext={handleStitchWithNext}
             setEditingImageIdx={setEditingImageIdx}
             setEditCropTop={setEditCropTop}
             setEditCropBottom={setEditCropBottom}
@@ -1137,6 +1442,7 @@ export default function App() {
             isBatchCropping={isBatchCropping}
             batchProgress={batchProgress}
             croppingImgUrl={croppingImgUrl}
+            addPanelsWithAutoAnalysis={addPanelsWithAutoAnalysis}
           />
 
           {/* ACTIVE QUEUE / LIVE PIPELINE PROGRESS */}
@@ -1161,26 +1467,28 @@ export default function App() {
             </div>
           )}
 
-          {/* REAL-TIME LOG MONITOR */}
-          {(
-            <TerminalLogs consoleLogs={consoleLogs} setConsoleLogs={setConsoleLogs} />
-          )}
+          {/* REAL-TIME LOG MONITOR — Always visible */}
+          <TerminalLogs consoleLogs={consoleLogs} setConsoleLogs={setConsoleLogs} />
 
           {/* DYNAMIC STORYBOARD TIMELINE DECK */}
-          <StoryboardTimeline
-            panels={panels}
-            setPanels={setPanels}
-            currentPanelIndex={currentPanelIndex}
-            setCurrentPanelIndex={setCurrentPanelIndex}
-            activePreviewTab={activePreviewTab}
-            setActivePreviewTab={setActivePreviewTab}
-            setPlaybackTime={setPlaybackTime}
-            hasScrapedImages={scrapedImages.length > 0}
-            setVideoUrl={setVideoUrl}
-            addNotification={addNotification}
-            targetUrl={targetUrl}
-            fetchWithInterceptor={fetchWithInterceptor}
-          />
+          <div id="storyboard_timeline_section">
+            <StoryboardTimeline
+              panels={panels}
+              setPanels={setPanels}
+              currentPanelIndex={currentPanelIndex}
+              setCurrentPanelIndex={setCurrentPanelIndex}
+              activePreviewTab={activePreviewTab}
+              setActivePreviewTab={setActivePreviewTab}
+              setPlaybackTime={setPlaybackTime}
+              hasScrapedImages={scrapedImages.length > 0}
+              setVideoUrl={setVideoUrl}
+              addNotification={addNotification}
+              targetUrl={targetUrl}
+              fetchWithInterceptor={fetchWithInterceptor}
+              selectedModel={selectedModel}
+              setConsoleLogs={setConsoleLogs}
+            />
+          </div>
         </div>
 
         {/* RIGHT COLUMN: INTEGRATED CINEMA PLAYER */}
@@ -1315,6 +1623,39 @@ export default function App() {
           </div>
         </div>
         </main>
+      )}
+
+      {editingImageIdx !== null && (
+        <CropEditorModal
+          key={editingImageIdx}
+          editingImageIdx={editingImageIdx}
+          setEditingImageIdx={setEditingImageIdx}
+          editCropTop={editCropTop}
+          setEditCropTop={setEditCropTop}
+          editCropBottom={editCropBottom}
+          setEditCropBottom={setEditCropBottom}
+          editCropLeft={editCropLeft}
+          setEditCropLeft={setEditCropLeft}
+          editCropRight={editCropRight}
+          setEditCropRight={setEditCropRight}
+          editAutoTrim={editAutoTrim}
+          setEditAutoTrim={setEditAutoTrim}
+          scrapedImages={scrapedImages}
+          setScrapedImages={setScrapedImages}
+          isSavingEdit={isSavingEdit}
+          handleSaveEditedImage={handleSaveEditedImage}
+          handleSaveMultipleCuts={handleSaveMultipleCuts}
+          setConsoleLogs={setConsoleLogs}
+          addNotification={addNotification}
+          selectedScraped={selectedScraped}
+          setSelectedScraped={setSelectedScraped}
+          panels={panels}
+          setPanels={setPanels}
+          fetchWithInterceptor={fetchWithInterceptor}
+          setErrorPopup={setErrorPopup}
+          imageEditStates={imageEditStates}
+          setImageEditStates={setImageEditStates}
+        />
       )}
 
       {/* FOOTER */}

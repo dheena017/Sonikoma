@@ -1,5 +1,5 @@
 import React from "react";
-import { Scissors, X, RefreshCw, Sliders, Sparkles } from "lucide-react";
+import { Scissors, X, RefreshCw, Sparkles, Layers, Maximize2, Filter, Cpu } from "lucide-react";
 
 interface AutoCropModalProps {
   onClose: () => void;
@@ -19,6 +19,18 @@ interface AutoCropModalProps {
 
   processingStrategy: string;
   setProcessingStrategy: (v: string) => void;
+
+  aspectRatioLock: string;
+  setAspectRatioLock: (v: string) => void;
+
+  minPanelAreaPct: number;
+  setMinPanelAreaPct: (v: number) => void;
+
+  overlapMergeThreshold: number;
+  setOverlapMergeThreshold: (v: number) => void;
+
+  useLocalCV: boolean;
+  setUseLocalCV: (v: boolean) => void;
 
   selectedCount: number;
   isApplying: boolean;
@@ -45,19 +57,28 @@ const BG_MODE_OPTIONS = [
 const STRATEGY_OPTIONS = [
   {
     value: "balanced",
-    label: "Balanced Quality",
-    hint: "Optimized for speed and gutter precision. Standard for most comics.",
+    label: "Balanced",
+    hint: "Optimized for speed and precision. Standard for most comics.",
   },
   {
     value: "precise",
-    label: "High Precision",
-    hint: "Analyzes boundaries with finer steps. Best for complex layout borders.",
+    label: "Precise",
+    hint: "Finer analysis steps. Best for complex layout borders.",
   },
   {
     value: "fast",
-    label: "High Speed",
-    hint: "Fast scans using coarser sample lines. Best for simple vertical layouts.",
+    label: "Fast",
+    hint: "Coarser sample lines. Best for simple vertical layouts.",
   },
+];
+
+const ASPECT_RATIO_OPTIONS = [
+  { value: "free", label: "Free", sub: "No constraint" },
+  { value: "9:16", label: "9:16", sub: "Mobile / Webtoon" },
+  { value: "16:9", label: "16:9", sub: "Landscape HD" },
+  { value: "1:1", label: "1:1", sub: "Square" },
+  { value: "4:3", label: "4:3", sub: "Classic panel" },
+  { value: "3:4", label: "3:4", sub: "Portrait manga" },
 ];
 
 export default function AutoCropModal({
@@ -73,23 +94,31 @@ export default function AutoCropModal({
   setAutoSplitTallStrips,
   processingStrategy,
   setProcessingStrategy,
+  aspectRatioLock,
+  setAspectRatioLock,
+  minPanelAreaPct,
+  setMinPanelAreaPct,
+  overlapMergeThreshold,
+  setOverlapMergeThreshold,
+  useLocalCV,
+  setUseLocalCV,
   selectedCount,
   isApplying,
 }: AutoCropModalProps) {
   return (
-    <div className="flex-1 w-full max-w-5xl mx-auto px-6 py-10 flex flex-col gap-0 animate-[fadeIn_0.18s_ease-out]">
+    <div className="flex-1 w-full max-w-6xl mx-auto px-6 py-8 flex flex-col gap-0 animate-[fadeIn_0.18s_ease-out]">
       {/* ── Card shell ── */}
       <div className="bg-neutral-900 border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col">
         {/* ── Header ── */}
         <div className="px-6 py-5 border-b border-neutral-800 flex items-center justify-between bg-neutral-950/40">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-indigo-950/60 border border-indigo-800/50 flex items-center justify-center">
-              <Scissors className="h-4.5 w-4.5 text-indigo-400" />
+            <div className="h-10 w-10 rounded-xl bg-indigo-950/60 border border-indigo-800/50 flex items-center justify-center shadow-[0_0_14px_rgba(99,102,241,0.15)]">
+              <Scissors className="h-5 w-5 text-indigo-400" />
             </div>
             <div>
               <h3 className="font-bold text-sm text-white">Smart Auto-Crop Settings</h3>
               <p className="text-[10px] text-neutral-400 font-mono mt-0.5">
-                Configure smart CV border-detection parameters
+                Advanced CV border-detection & panel segmentation parameters
                 {selectedCount > 0 && (
                   <span className="ml-2 text-indigo-400 font-bold">
                     · {selectedCount} panel{selectedCount !== 1 ? "s" : ""} selected
@@ -107,12 +136,14 @@ export default function AutoCropModal({
         </div>
 
         {/* ── Scrollable Body ── */}
-        <div className="p-6 overflow-y-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* LEFT COLUMN: Gutter Color + Strategy */}
-          <div className="lg:col-span-7 space-y-8">
+        <div className="p-6 overflow-y-auto grid grid-cols-1 lg:grid-cols-12 gap-8 max-h-[70vh]">
+
+          {/* ══ LEFT COLUMN ══ */}
+          <div className="lg:col-span-7 space-y-7">
+
             {/* SECTION 1: BACKGROUND DETECTOR MODE */}
             <div className="space-y-3">
-              <SectionTitle>Background Gutter Mode</SectionTitle>
+              <SectionTitle icon={<Layers className="h-3 w-3" />}>Background Gutter Mode</SectionTitle>
               <div className="flex flex-col gap-2.5">
                 {BG_MODE_OPTIONS.map((opt) => (
                   <button
@@ -138,18 +169,10 @@ export default function AutoCropModal({
                       }`}
                     />
                     <div className="flex-1 min-w-0">
-                      <span
-                        className={`text-[12px] font-bold font-mono block mb-1 ${
-                          backgroundColorMode === opt.value
-                            ? "text-white"
-                            : "text-neutral-300"
-                        }`}
-                      >
+                      <span className={`text-[12px] font-bold font-mono block mb-1 ${backgroundColorMode === opt.value ? "text-white" : "text-neutral-300"}`}>
                         {opt.label}
                       </span>
-                      <p className="text-[10px] text-neutral-500 font-sans leading-relaxed">
-                        {opt.hint}
-                      </p>
+                      <p className="text-[10px] text-neutral-500 font-sans leading-relaxed">{opt.hint}</p>
                     </div>
                   </button>
                 ))}
@@ -158,8 +181,8 @@ export default function AutoCropModal({
 
             {/* SECTION 2: PROCESSING STRATEGY */}
             <div className="space-y-3">
-              <SectionTitle>Processing Strategy</SectionTitle>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <SectionTitle icon={<Cpu className="h-3 w-3" />}>Processing Strategy</SectionTitle>
+              <div className="grid grid-cols-3 gap-3">
                 {STRATEGY_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
@@ -170,38 +193,53 @@ export default function AutoCropModal({
                         : "bg-neutral-950/50 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-950"
                     }`}
                   >
-                    <span
-                      className={`text-[11px] font-bold font-mono ${
-                        processingStrategy === opt.value
-                          ? "text-white"
-                          : "text-neutral-300"
-                      }`}
-                    >
+                    <span className={`text-[11px] font-bold font-mono ${processingStrategy === opt.value ? "text-white" : "text-neutral-300"}`}>
                       {opt.label}
                     </span>
-                    <p className="text-[9px] text-neutral-500 font-sans leading-tight">
-                      {opt.hint}
-                    </p>
+                    <p className="text-[9px] text-neutral-500 font-sans leading-tight">{opt.hint}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* SECTION 3: ASPECT RATIO LOCK */}
+            <div className="space-y-3">
+              <SectionTitle icon={<Maximize2 className="h-3 w-3" />}>Aspect Ratio Lock</SectionTitle>
+              <p className="text-[10px] text-neutral-500 font-sans leading-relaxed -mt-1">
+                Constrain output panels to a fixed aspect ratio. Padding is added to maintain the ratio.
+              </p>
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                {ASPECT_RATIO_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setAspectRatioLock(opt.value)}
+                    className={`flex flex-col items-center gap-0.5 px-3 py-3 rounded-xl border text-center transition-all cursor-pointer ${
+                      aspectRatioLock === opt.value
+                        ? "bg-violet-900/30 border-violet-500 shadow-[0_0_12px_rgba(139,92,246,0.12)]"
+                        : "bg-neutral-950/50 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-950"
+                    }`}
+                  >
+                    <span className={`text-[12px] font-bold font-mono ${aspectRatioLock === opt.value ? "text-violet-300" : "text-neutral-300"}`}>
+                      {opt.label}
+                    </span>
+                    <span className="text-[8px] text-neutral-600 font-sans leading-tight">{opt.sub}</span>
                   </button>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* RIGHT COLUMN: Sensitivity + Padding + Strategy */}
+          {/* ══ RIGHT COLUMN ══ */}
           <div className="lg:col-span-5 space-y-6">
-            {/* SECTION 3: SENSITIVITY */}
+
+            {/* SECTION 4: SENSITIVITY */}
             <div className="space-y-3">
               <SectionTitle>Detection Sensitivity</SectionTitle>
               <div className="bg-neutral-950/60 border border-neutral-800 rounded-2xl p-5 space-y-4">
                 <div className="flex items-end justify-between">
                   <div>
-                    <p className="text-xs text-neutral-300 font-sans">
-                      Threshold tolerance
-                    </p>
-                    <p className="text-[10px] text-neutral-600 font-sans mt-0.5">
-                      Adjusts background boundary sensitivity.
-                    </p>
+                    <p className="text-xs text-neutral-300 font-sans">Threshold tolerance</p>
+                    <p className="text-[10px] text-neutral-600 font-sans mt-0.5">Adjusts background boundary sensitivity.</p>
                   </div>
                   <span className="text-2xl font-bold text-white font-mono tabular-nums">
                     {sensitivity}
@@ -209,10 +247,7 @@ export default function AutoCropModal({
                   </span>
                 </div>
                 <input
-                  type="range"
-                  min="5"
-                  max="90"
-                  value={sensitivity}
+                  type="range" min="5" max="90" value={sensitivity}
                   onChange={(e) => setSensitivity(Number(e.target.value))}
                   className="w-full accent-indigo-500 bg-neutral-800 rounded-full h-2 cursor-pointer"
                 />
@@ -223,18 +258,14 @@ export default function AutoCropModal({
               </div>
             </div>
 
-            {/* SECTION 4: MARGIN PADDING */}
+            {/* SECTION 5: MARGIN PADDING */}
             <div className="space-y-3">
               <SectionTitle>Margin Padding</SectionTitle>
               <div className="bg-neutral-950/60 border border-neutral-800 rounded-2xl p-5 space-y-4">
                 <div className="flex items-end justify-between">
                   <div>
-                    <p className="text-xs text-neutral-300 font-sans">
-                      Outer border padding
-                    </p>
-                    <p className="text-[10px] text-neutral-600 font-sans mt-0.5">
-                      Keeps whitespace border around panels.
-                    </p>
+                    <p className="text-xs text-neutral-300 font-sans">Outer border padding</p>
+                    <p className="text-[10px] text-neutral-600 font-sans mt-0.5">Keeps whitespace border around panels.</p>
                   </div>
                   <span className="text-2xl font-bold text-white font-mono tabular-nums">
                     {padding}
@@ -242,10 +273,7 @@ export default function AutoCropModal({
                   </span>
                 </div>
                 <input
-                  type="range"
-                  min="0"
-                  max="50"
-                  value={padding}
+                  type="range" min="0" max="50" value={padding}
                   onChange={(e) => setPadding(Number(e.target.value))}
                   className="w-full accent-indigo-500 bg-neutral-800 rounded-full h-2 cursor-pointer"
                 />
@@ -256,8 +284,61 @@ export default function AutoCropModal({
               </div>
             </div>
 
-            {/* SECTION 5: OPTIONS CHECKBOXES */}
-            <div className="bg-neutral-950/60 border border-neutral-800 rounded-2xl p-4 space-y-4">
+            {/* SECTION 6: MIN PANEL AREA (Noise Filter) */}
+            <div className="space-y-3">
+              <SectionTitle icon={<Filter className="h-3 w-3" />}>Noise Filter · Min Panel Area</SectionTitle>
+              <div className="bg-neutral-950/60 border border-neutral-800 rounded-2xl p-5 space-y-4">
+                <div className="flex items-end justify-between">
+                  <div>
+                    <p className="text-xs text-neutral-300 font-sans">Minimum detected area</p>
+                    <p className="text-[10px] text-neutral-600 font-sans mt-0.5">Panels smaller than this % of total area are discarded as noise.</p>
+                  </div>
+                  <span className="text-2xl font-bold text-white font-mono tabular-nums">
+                    {minPanelAreaPct}
+                    <span className="text-sm text-neutral-400 ml-0.5">%</span>
+                  </span>
+                </div>
+                <input
+                  type="range" min="0" max="20" step="0.5" value={minPanelAreaPct}
+                  onChange={(e) => setMinPanelAreaPct(Number(e.target.value))}
+                  className="w-full accent-emerald-500 bg-neutral-800 rounded-full h-2 cursor-pointer"
+                />
+                <div className="flex justify-between text-[9px] text-neutral-600 font-mono">
+                  <span>0% (Keep all)</span>
+                  <span>20% (Aggressive filter)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* SECTION 7: OVERLAP MERGE THRESHOLD */}
+            <div className="space-y-3">
+              <SectionTitle>Overlap Merge Threshold</SectionTitle>
+              <div className="bg-neutral-950/60 border border-neutral-800 rounded-2xl p-5 space-y-4">
+                <div className="flex items-end justify-between">
+                  <div>
+                    <p className="text-xs text-neutral-300 font-sans">Merge overlapping boxes</p>
+                    <p className="text-[10px] text-neutral-600 font-sans mt-0.5">Boxes overlapping by more than this % of the smaller box are merged together.</p>
+                  </div>
+                  <span className="text-2xl font-bold text-white font-mono tabular-nums">
+                    {overlapMergeThreshold}
+                    <span className="text-sm text-neutral-400 ml-0.5">%</span>
+                  </span>
+                </div>
+                <input
+                  type="range" min="0" max="80" step="5" value={overlapMergeThreshold}
+                  onChange={(e) => setOverlapMergeThreshold(Number(e.target.value))}
+                  className="w-full accent-amber-500 bg-neutral-800 rounded-full h-2 cursor-pointer"
+                />
+                <div className="flex justify-between text-[9px] text-neutral-600 font-mono">
+                  <span>0% (No merging)</span>
+                  <span>80% (Aggressive merge)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* SECTION 8: TOGGLES */}
+            <div className="bg-neutral-950/60 border border-neutral-800 rounded-2xl p-4 space-y-3">
+              {/* Auto-Split toggle */}
               <label className="relative flex items-center gap-3 bg-neutral-900/30 border border-neutral-800 rounded-xl px-4 py-3 cursor-pointer hover:bg-neutral-900 transition-all select-none">
                 <input
                   type="checkbox"
@@ -266,11 +347,38 @@ export default function AutoCropModal({
                   className="accent-indigo-500 h-4 w-4 rounded cursor-pointer"
                 />
                 <div className="flex flex-col">
-                  <span className="text-[12px] font-bold text-white">
-                    Auto-Split Strips
-                  </span>
+                  <span className="text-[12px] font-bold text-white">Auto-Split Strips</span>
                   <span className="text-[9px] text-neutral-500 mt-0.5 leading-normal">
                     Automatically slices long vertical webtoon strips into individual scenes.
+                  </span>
+                </div>
+              </label>
+
+              {/* Local CV Strategy toggle */}
+              <label className={`relative flex items-center gap-3 border rounded-xl px-4 py-3 cursor-pointer transition-all select-none ${
+                useLocalCV
+                  ? "bg-cyan-950/30 border-cyan-800/60 hover:bg-cyan-950/50"
+                  : "bg-neutral-900/30 border-neutral-800 hover:bg-neutral-900"
+              }`}>
+                <input
+                  type="checkbox"
+                  checked={useLocalCV}
+                  onChange={(e) => setUseLocalCV(e.target.checked)}
+                  className="accent-cyan-500 h-4 w-4 rounded cursor-pointer"
+                />
+                <div className="flex flex-col flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[12px] font-bold text-white">Use Local CV Engine</span>
+                    <span className={`text-[8px] font-bold font-mono px-1.5 py-0.5 rounded-md border ${
+                      useLocalCV
+                        ? "bg-cyan-950 text-cyan-400 border-cyan-800/60"
+                        : "bg-neutral-800 text-neutral-500 border-neutral-700"
+                    }`}>
+                      {useLocalCV ? "OPENCV" : "JS-ONLY"}
+                    </span>
+                  </div>
+                  <span className="text-[9px] text-neutral-500 mt-0.5 leading-normal">
+                    Uses server-side Python OpenCV for faster, more accurate panel detection. Requires Python + opencv-python installed.
                   </span>
                 </div>
               </label>
@@ -280,11 +388,23 @@ export default function AutoCropModal({
 
         {/* ── Footer ── */}
         <div className="px-6 py-4 border-t border-neutral-800 bg-neutral-950/40 flex items-center justify-between gap-3">
-          <p className="text-[10px] text-neutral-500 font-mono">
-            {selectedCount === 0
-              ? "⚠️  No panels selected — select panels first in the scraper deck"
-              : `Ready to auto-crop ${selectedCount} panel${selectedCount !== 1 ? "s" : ""}`}
-          </p>
+          <div className="flex items-center gap-3">
+            <p className="text-[10px] text-neutral-500 font-mono">
+              {selectedCount === 0
+                ? "⚠️  No panels selected — select panels first in the scraper deck"
+                : `Ready to auto-crop ${selectedCount} panel${selectedCount !== 1 ? "s" : ""}`}
+            </p>
+            {useLocalCV && (
+              <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-lg bg-cyan-950/80 text-cyan-400 border border-cyan-800/40">
+                LOCAL CV ACTIVE
+              </span>
+            )}
+            {aspectRatioLock !== "free" && (
+              <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-lg bg-violet-950/80 text-violet-400 border border-violet-800/40">
+                {aspectRatioLock} LOCKED
+              </span>
+            )}
+          </div>
           <div className="flex gap-2.5">
             <button
               onClick={onClose}
@@ -311,13 +431,16 @@ export default function AutoCropModal({
   );
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
+function SectionTitle({ children, icon }: { children: React.ReactNode; icon?: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2.5">
       <div className="h-px flex-1 bg-neutral-800" />
-      <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest font-mono whitespace-nowrap px-1">
-        {children}
-      </span>
+      <div className="flex items-center gap-1.5 text-neutral-400">
+        {icon && <span className="opacity-70">{icon}</span>}
+        <span className="text-[10px] font-bold uppercase tracking-widest font-mono whitespace-nowrap">
+          {children}
+        </span>
+      </div>
       <div className="h-px flex-1 bg-neutral-800" />
     </div>
   );

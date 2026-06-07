@@ -24,7 +24,7 @@ interface PanelCardProps
   isSelected: boolean;
   isBatchCropping: boolean;
   croppingImgUrl: string | null;
-  addPanelsWithAutoAnalysis: (urls: string[]) => void;
+  addPanelsWithAutoAnalysis: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
   key?: React.Key;
 }
 
@@ -278,11 +278,6 @@ export default function PanelCard({
           <button
             onClick={() => {
               setEditingImageIdx(idx);
-              setEditCropTop(0);
-              setEditCropBottom(0);
-              setEditCropLeft(0);
-              setEditCropRight(0);
-              setEditAutoTrim(true);
             }}
             title="Crop & Trim White Background"
             className="flex-1 flex items-center justify-center gap-1 bg-neutral-900 hover:bg-purple-950 hover:text-purple-400 text-neutral-400 py-1 rounded border border-neutral-800 hover:border-purple-900/60 transition-colors cursor-pointer text-[10px] font-mono"

@@ -140,6 +140,7 @@ All HTTP API endpoints live in `server.ts`. The server runs on **port 3000**.
 | `/api/proxy-image` | GET | Proxies external Webtoon images (bypasses CORS) |
 | `/api/stitch-images/cached/:id` | GET | Serves in-memory cached processed images |
 | `/api/edit-image` | POST | Crop and trim a single image using Sharp |
+| `/api/transform-image` | POST | Rotate or flip an image frame |
 | `/api/ai-detect-panels` | POST | AI-powered panel detection using Gemini |
 | `/api/analyze-image` | POST | Gemini vision analysis: captions, SFX, timing |
 | `/api/remove-speech-bubbles` | POST | Python OpenCV speech bubble removal |
@@ -147,6 +148,8 @@ All HTTP API endpoints live in `server.ts`. The server runs on **port 3000**.
 | `/api/download-zip` | POST | Packages selected images into a ZIP archive |
 | `/api/download-zip/get/:id` | GET | Downloads a pre-generated ZIP file |
 | `/api/convert-images-to-video` | POST | Compiles panels into video timeline metadata |
+| `/api/system-logs` | GET | JSON log lookup (polling fallback for console logs) |
+| `/api/system-logs/stream` | GET | SSE stream to push server console logs to UI console |
 
 ### Python API Routes (`app/routes/process.py`)
 
@@ -433,6 +436,8 @@ At the **end of every conversation**, append one row to the Session Changelog ta
 
 | Date | Summary | Files Affected |
 |---|---|---|
+| 2026-06-07 | Added Merge panel (vertical/horizontal stitching, gaps), prevented auto-close of Crop Editor, improved 500 error logging | `frontend/src/components/crop/MergePanel.tsx`, `frontend/src/components/CropEditorModal.tsx`, `frontend/src/App.tsx`, `backend/routes/imageRoutes.ts` |
+| 2026-06-07 | Added advanced manual horizontal split cutter features (precision inputs, equal parts division, presets, intervals, inline coordinate list editor, browser-based gutter gap detection, magnetic snapping, and templates), next/prev frame navigation buttons and shortcuts, edit panel delete buttons, and fixed /api/transform-image API bug | `frontend/src/components/crop/HorizontalSplitter.tsx`, `frontend/src/components/CropEditorModal.tsx`, `frontend/src/App.tsx`, `backend/routes/imageRoutes.ts`, `RULES.md`, `README.md` |
 | 2026-06-07 | Modularized LiveScraperDeck & CropEditorModal, added CleanBubblesPanel and AutoCropModal | `frontend/src/components/LiveScraperDeck.tsx`, `frontend/src/components/CropEditorModal.tsx`, `frontend/src/components/AutoCropModal.tsx`, `frontend/src/components/scraper/*`, `frontend/src/components/crop/*`, `frontend/src/App.tsx`, `RULES.md` |
 | 2026-06-07 | Implemented sequential auto-decision speech bubble cleaner and specialized cleaning functions | `backend/services/cleaner.py`, `backend/routes/process.py`, `backend/services/test_cleaner.py`, `RULES.md` |
 | 2026-06-07 | Split server.ts into modular files; added self-healing validation fallback to scraperRoutes | `backend/server.ts`, `backend/config/*`, `backend/utils/*`, `backend/routes/*`, `RULES.md`, `README.md` |

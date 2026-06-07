@@ -1,11 +1,4 @@
-/**
- * backend/server.ts
- * ─────────────────────────────────────────────────────────────────────────────
- * Main entry point of the backend application.
- * Mounts Vite middleware in development mode or serves the static production build.
- * ─────────────────────────────────────────────────────────────────────────────
- */
-
+import './utils/logInterceptor.js';
 import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
@@ -25,6 +18,19 @@ const app = express();
 const PORT = 3000;
 
 app.use(express.json());
+
+// API Request Logger Middleware
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    // Avoid logging system-logs polling/streaming to prevent infinite request-logging noise
+    if (!req.originalUrl.includes('/system-logs')) {
+      console.log(`[API] ${req.method} ${req.originalUrl} - ${res.statusCode} (${duration}ms)`);
+    }
+  });
+  next();
+});
 
 // Register API routes
 app.use('/api', healthRouter);

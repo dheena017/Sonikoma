@@ -127,7 +127,10 @@ router.post("/edit-image", async (req, res) => {
     padding, 
     backgroundColorMode,
     rotate = 0,
-    flipHorizontal = false
+    flipHorizontal = false,
+    aspectRatio = "free",
+    outputFormat = "jpeg",
+    cropQuality = 90
   } = req.body;
   if (!url) {
     return res.status(400).json({ error: "Parameter 'url' is required." });
@@ -180,8 +183,18 @@ router.post("/edit-image", async (req, res) => {
     }
 
     if (autoTrim) {
-      const trimmed = await cropAutoBorders(imgBuffer, true, padding, sensitivity, backgroundColorMode); 
+      const trimmed = await cropAutoBorders(
+        imgBuffer, 
+        true, 
+        padding, 
+        sensitivity, 
+        backgroundColorMode,
+        aspectRatio,
+        outputFormat,
+        cropQuality
+      ); 
       imgBuffer = trimmed.data;
+      contentType = trimmed.contentType;
     }
 
     const uniqueId = `merged_${Date.now()}_cropped`;
@@ -201,60 +214,93 @@ router.post("/edit-image", async (req, res) => {
 
 
 
-// Endpoint to merge/stitch two images vertically
+// Endpoint to merge/stitch multiple images
 router.post(["/merge-images", "/stitch-images"], async (req, res) => {
-  const { imageUrl1, imageUrl2, url1, url2, urls } = req.body;
-  const img1 = imageUrl1 || url1 || (Array.isArray(urls) && urls[0]);
-  const img2 = imageUrl2 || url2 || (Array.isArray(urls) && urls[1]);
+  const { imageUrl1, imageUrl2, url1, url2, urls, layout = "vertical", spacing = 0, spacingColor = "white" } = req.body;
 
-  if (!img1 || !img2) {
-    return res.status(400).json({ error: "Parameters 'imageUrl1' and 'imageUrl2' (or 'urls' array) are required." });
+  // Build the image URL list
+  let imageUrls: string[] = [];
+  if (Array.isArray(urls) && urls.length >= 2) {
+    imageUrls = urls;
+  } else {
+    const img1 = imageUrl1 || url1;
+    const img2 = imageUrl2 || url2;
+    if (img1 && img2) imageUrls = [img1, img2];
   }
 
+  if (imageUrls.length < 2) {
+    return res.status(400).json({ error: "At least 2 image URLs are required ('urls' array or 'imageUrl1'+'imageUrl2')." });
+  }
+
+  // Map color string to sharp RGBA
+  let bg = { r: 255, g: 255, b: 255, alpha: 1 };
+  if (spacingColor === "black") bg = { r: 0, g: 0, b: 0, alpha: 1 };
+  if (spacingColor === "transparent") bg = { r: 0, g: 0, b: 0, alpha: 0 };
+
+  const gap = Number(spacing) || 0;
+
   try {
-    const res1 = await resolveImageToBuffer(img1);
-    const res2 = await resolveImageToBuffer(img2);
+    const resolved = await Promise.all(imageUrls.map((u) => resolveImageToBuffer(u)));
+    const meta0 = await sharp(resolved[0].data).metadata();
 
-    const meta1 = await sharp(res1.data).metadata();
-    const w1 = meta1.width || 0;
-    const h1 = meta1.height || 0;
+    const resizedBuffers: Buffer[] = [];
+    let totalWidth = 0;
+    let totalHeight = 0;
+    const composites: sharp.OverlayOptions[] = [];
 
-    if (w1 === 0 || h1 === 0) {
-      throw new Error("Invalid dimensions for the first image.");
+    if (layout === "horizontal") {
+      const canonicalHeight = meta0.height || 800;
+      for (const r of resolved) {
+        const resized = await sharp(r.data).resize({ height: canonicalHeight }).png().toBuffer();
+        resizedBuffers.push(resized);
+      }
+      let offsetX = 0;
+      for (let i = 0; i < resizedBuffers.length; i++) {
+        const buf = resizedBuffers[i];
+        const meta = await sharp(buf).metadata();
+        composites.push({ input: buf, top: 0, left: offsetX });
+        offsetX += (meta.width || 0) + gap;
+        totalWidth += (meta.width || 0);
+      }
+      totalWidth += gap * (resizedBuffers.length - 1);
+      totalHeight = canonicalHeight;
+    } else {
+      // vertical (default)
+      const canonicalWidth = meta0.width || 800;
+      for (const r of resolved) {
+        const resized = await sharp(r.data).resize({ width: canonicalWidth }).png().toBuffer();
+        resizedBuffers.push(resized);
+      }
+      let offsetY = 0;
+      for (let i = 0; i < resizedBuffers.length; i++) {
+        const buf = resizedBuffers[i];
+        const meta = await sharp(buf).metadata();
+        composites.push({ input: buf, top: offsetY, left: 0 });
+        offsetY += (meta.height || 0) + gap;
+        totalHeight += (meta.height || 0);
+      }
+      totalHeight += gap * (resizedBuffers.length - 1);
+      totalWidth = canonicalWidth;
     }
-
-    // Always resize the second image to match the first's width (keeps aspect ratio)
-    const img2Buffer = await sharp(res2.data).resize({ width: w1 }).toBuffer();
-    const meta2Resized = await sharp(img2Buffer).metadata();
-    const h2Scaled = meta2Resized.height || 0;
-
-    const finalWidth = w1;
-    const finalHeight = h1 + h2Scaled;
 
     const mergedBuffer = await sharp({
       create: {
-        width: finalWidth,
-        height: finalHeight,
+        width: totalWidth,
+        height: totalHeight,
         channels: 4,
-        background: { r: 255, g: 255, b: 255, alpha: 1 }
-      }
+        background: bg,
+      },
     })
-    .composite([
-      { input: res1.data, top: 0, left: 0 },
-      { input: img2Buffer, top: h1, left: 0 }
-    ])
-    .png()
-    .toBuffer();
+      .composite(composites)
+      .png()
+      .toBuffer();
 
     const uniqueId = `merged_${Date.now()}_merged`;
     const newUrl = `/api/merge-images/cached/${uniqueId}`;
     mergedCache.set(uniqueId, { data: mergedBuffer, contentType: "image/png" });
-    editHistory.set(newUrl, img1); // allow undoing the merge
+    editHistory.set(newUrl, imageUrls[0]);
 
-    return res.json({
-      success: true,
-      url: newUrl
-    });
+    return res.json({ success: true, url: newUrl });
   } catch (err: any) {
     console.error("[Merge API] Error merging images:", err);
     return res.status(500).json({ error: `Image merging failed: ${err.message || err}` });
@@ -393,4 +439,50 @@ router.get(["/merge-images/cached/:id", "/stitch-images/cached/:id"], (req, res)
   return res.send(cached.data);
 });
 
+// ── Transform image: rotate & flip ──────────────────────────────────────────
+router.post("/transform-image", async (req, res) => {
+  try {
+    const { url, type, value } = req.body as { url: string; type: "rotate" | "flip"; value: string };
+    if (!url || !type || value === undefined) {
+      return res.status(400).json({ error: "Missing required fields: url, type, value" });
+    }
+
+    const resolved = await resolveImageToBuffer(url);
+    let pipeline = sharp(resolved.data);
+
+    if (type === "rotate") {
+      const degrees = parseInt(value, 10);
+      if (![90, -90, 180].includes(degrees)) {
+        return res.status(400).json({ error: "Invalid rotation angle. Use 90, -90, or 180." });
+      }
+      pipeline = pipeline.rotate(degrees);
+    } else if (type === "flip") {
+      if (value === "h") {
+        pipeline = pipeline.flop(); // horizontal flip
+      } else if (value === "v") {
+        pipeline = pipeline.flip(); // vertical flip
+      } else {
+        return res.status(400).json({ error: "Invalid flip axis. Use 'h' or 'v'." });
+      }
+    } else {
+      return res.status(400).json({ error: "Unknown transform type. Use 'rotate' or 'flip'." });
+    }
+
+    const outputBuffer = await pipeline.jpeg({ quality: 92 }).toBuffer();
+
+    const uniqueId = `transform_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
+    const proxyUrl = `/api/merge-images/cached/${uniqueId}`;
+
+    // Store in mergedCache for dynamic rendering and editHistory for undo mapping
+    mergedCache.set(uniqueId, { data: outputBuffer, contentType: "image/jpeg" });
+    editHistory.set(proxyUrl, url);
+
+    return res.json({ success: true, url: proxyUrl });
+  } catch (err: any) {
+    console.error("[transform-image] Error:", err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;
+

@@ -281,62 +281,16 @@ export async function scrapeImagesFromUrl(url: string): Promise<string[]> {
         lower.includes('author') ||
         lower.includes('social') ||
         lower.includes('shari') ||
-        lower.includes('footer')
+        lower.includes('mobile') ||
+        lower.includes('thumbnail') ||
+        lower.includes('footer') ||
+        (lower.includes('type=') && !lower.includes('type=q90'))
       );
     });
     
-    console.log(`[Helper Scraper] Extracted ${filteredImages.length} active frame candidates before dimension validation.`);
+    console.log(`[Helper Scraper] Extracted ${filteredImages.length} active frame candidates.`);
     
-    const validationPromises = filteredImages.map(async (imgUrl) => {
-      try {
-        const fetchResponse = await fetch(imgUrl, {
-          headers: {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "Referer": "https://www.webtoons.com/",
-            "Accept": "image/webp,image/apng,image/*,*/*"
-          }
-        });
-        if (!fetchResponse.ok) {
-          console.warn(`[Image Val] Failed to download image for dimensional check: ${imgUrl} (status ${fetchResponse.status})`);
-          return null;
-        }
-        
-        const arrayBuffer = await fetchResponse.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        
-        try {
-          const size = imageSize(buffer);
-          if (size && size.width !== undefined && size.height !== undefined) {
-            if (size.width >= 200 && size.height >= 200) {
-              return imgUrl;
-            } else {
-              console.log(`[Image Val] Discarded non-panel image (Dimension: ${size.width}x${size.height}): ${imgUrl}`);
-              return null;
-            }
-          }
-        } catch (parseErr: any) {
-          console.warn(`[Image Val] Could not parse format size headers for ${imgUrl}: ${parseErr.message}. Checking backup byte length.`);
-          if (buffer.length > 15 * 1024) {
-            return imgUrl;
-          }
-          return null;
-        }
-      } catch (err: any) {
-        console.error(`[Image Val] General error during validation for ${imgUrl}:`, err.message);
-        return null;
-      }
-      return null;
-    });
-
-    const validatedResults = await Promise.all(validationPromises);
-    let finalImages = validatedResults.filter((img): img is string => img !== null);
-    
-    console.log(`[Helper Scraper] Retained ${finalImages.length} images after validation threshold.`);
-
-    if (finalImages.length === 0 && filteredImages.length > 0) {
-      console.warn(`[Helper Scraper] All dimensional validation checks failed or timed out (potentially due to CDN rate limits). Falling back to all raw scraped image URLs.`);
-      finalImages = filteredImages;
-    }
+    const finalImages = filteredImages;
 
     if (finalImages.length === 0) {
       console.warn("[Scraper] Crawler found 0 eligible comic panel images.");
@@ -665,7 +619,7 @@ You MUST return the output STRICTLY as a JSON array inside the 'panels' field of
       try {
         console.log('Sending prompt to Gemini models to generate immersive custom script...');
         const aiResponse = await ai.models.generateContent({
-          model: "gemini-2.5-flash",
+          model: model || "gemini-2.5-flash",
           contents: [{ role: 'user', parts: [{ text: prompt }] }],
           config: {
             responseMimeType: "application/json",
@@ -719,7 +673,7 @@ You MUST return the output STRICTLY as a JSON array inside the 'panels' field of
           await new Promise(resolve => setTimeout(resolve, 5000));
           try {
             const aiResponse = await ai!.models.generateContent({
-               model: "gemini-2.5-flash",
+               model: model || "gemini-2.5-flash",
                contents: [{ role: 'user', parts: [{ text: prompt }] }],
                config: {
                  responseMimeType: "application/json",

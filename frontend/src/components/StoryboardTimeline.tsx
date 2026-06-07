@@ -16,6 +16,8 @@ interface StoryboardTimelineProps {
   addNotification?: (message: string, type: any) => void;
   targetUrl?: string;
   fetchWithInterceptor?: typeof fetch;
+  selectedModel?: string;
+  setConsoleLogs?: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 export default function StoryboardTimeline({
@@ -30,7 +32,9 @@ export default function StoryboardTimeline({
   setVideoUrl,
   addNotification,
   targetUrl,
-  fetchWithInterceptor
+  fetchWithInterceptor,
+  selectedModel,
+  setConsoleLogs
 }: StoryboardTimelineProps) {
   const activeFetch = fetchWithInterceptor || fetch;
   const [analyzingPanelId, setAnalyzingPanelId] = React.useState<number | null>(null);
@@ -43,6 +47,7 @@ export default function StoryboardTimeline({
     console.log('[StoryboardTimeline] Starting ZIP download for', panels.length, 'panels');
     try {
       const urls = panels.map(p => p.image_url);
+      console.log('[API] POST /api/download-zip with', urls.length, 'image URLs');
       const res = await activeFetch("/api/download-zip", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -59,10 +64,10 @@ export default function StoryboardTimeline({
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        console.log('[StoryboardTimeline] ZIP archive download triggered successfully');
         if (addNotification) {
           addNotification("ZIP archive downloaded successfully!", "success");
         }
-        console.log('[StoryboardTimeline] ZIP archive download triggered successfully');
       } else {
         throw new Error(data.error || "Failed to package ZIP archive.");
       }
@@ -73,32 +78,88 @@ export default function StoryboardTimeline({
       }
     } finally {
       setIsZipping(false);
+      console.log('[StoryboardTimeline] ZIP download operation completed');
     }
   };
   
   const handleModifySpeechText = (panelId: number, text: string) => {
+    const originalPanel = panels.find(p => p.id === panelId);
+    const originalText = originalPanel ? originalPanel.speech_text : "";
     setPanels(prev => prev.map(p => p.id === panelId ? { ...p, speech_text: text } : p));
-    console.log('[StoryboardTimeline] Speech text updated for panel', panelId);
+    console.log(`[StoryboardTimeline] [Text Edit] Panel #${panelId} dialogue revised:`);
+    console.log(`  - Sent (Original): "${originalText}"`);
+    console.log(`  - Revise (Revised): "${text}"`);
+    if (setConsoleLogs) {
+      setConsoleLogs(prev => [
+        `[Speech Bubbles] Dialogue revised on Panel #${panelId}`,
+        `[Speech Bubbles]   - Sent (Original): "${originalText}"`,
+        `[Speech Bubbles]   - Revise (Revised): "${text}"`,
+        ...prev
+      ]);
+    }
   };
 
   const handleModifyMotion = (panelId: number, motionVal: string) => {
+    const originalPanel = panels.find(p => p.id === panelId);
+    const originalMotion = originalPanel ? originalPanel.motion_type : "";
     setPanels(prev => prev.map(p => p.id === panelId ? { ...p, motion_type: motionVal } : p));
-    console.log('[StoryboardTimeline] Camera motion changed to', motionVal, 'for panel', panelId);
+    console.log(`[StoryboardTimeline] [Motion Edit] Panel #${panelId} camera motion changed:`);
+    console.log(`  - Sent (Original): "${originalMotion}"`);
+    console.log(`  - Revise (Revised): "${motionVal}"`);
+    if (setConsoleLogs) {
+      setConsoleLogs(prev => [
+        `[MoviePy] Camera motion revised on Panel #${panelId}`,
+        `[MoviePy]   - Sent (Original): "${originalMotion}"`,
+        `[MoviePy]   - Revise (Revised): "${motionVal}"`,
+        ...prev
+      ]);
+    }
   };
 
   const handleModifyDuration = (panelId: number, durVal: number) => {
+    const originalPanel = panels.find(p => p.id === panelId);
+    const originalDuration = originalPanel ? originalPanel.duration : 0;
     setPanels(prev => prev.map(p => p.id === panelId ? { ...p, duration: durVal } : p));
-    console.log('[StoryboardTimeline] Duration changed to', durVal, 's for panel', panelId);
+    console.log(`[StoryboardTimeline] [Duration Edit] Panel #${panelId} duration changed:`);
+    console.log(`  - Sent (Original): ${originalDuration}s`);
+    console.log(`  - Revise (Revised): ${durVal}s`);
+    if (setConsoleLogs) {
+      setConsoleLogs(prev => [
+        `[MoviePy] Playback duration revised on Panel #${panelId}`,
+        `[MoviePy]   - Sent (Original): ${originalDuration}s`,
+        `[MoviePy]   - Revise (Revised): ${durVal}s`,
+        ...prev
+      ]);
+    }
   };
 
   const handleAnalyzePanel = async (panelId: number, imageUrl: string) => {
     setAnalyzingPanelId(panelId);
+    const activeModel = selectedModel || "gemini-2.5-flash";
+    const originalPanel = panels.find(p => p.id === panelId);
+    const originalText = originalPanel ? originalPanel.speech_text : "";
+    const originalMotion = originalPanel ? originalPanel.motion_type : "";
+
     console.log('[StoryboardTimeline] Starting AI analysis for panel', panelId);
+    console.log(`  - Model used: ${activeModel}`);
+    console.log(`  - Sent Image: ${imageUrl.substring(0, 60)}...`);
+    console.log(`  - Sent Original Dialogue: "${originalText}"`);
+    console.log(`  - Sent Original Motion: "${originalMotion}"`);
+
+    if (setConsoleLogs) {
+      setConsoleLogs(prev => [
+        `[AI Auto-Analysis] Initiated image analysis on Panel #${panelId} using model: ${activeModel}`,
+        `[AI Auto-Analysis]   - Sent (Original Dialogue): "${originalText}"`,
+        ...prev
+      ]);
+    }
+
     try {
+      console.log('[API] POST /api/analyze-image for panel', panelId);
       const res = await activeFetch("/api/analyze-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: imageUrl })
+        body: JSON.stringify({ url: imageUrl, model: activeModel })
       });
       if (!res.ok) throw new Error("Image analysis failed");
       const data = await res.json();
@@ -111,18 +172,42 @@ export default function StoryboardTimeline({
           motion_type: data.analysis.motion_type || p.motion_type,
           visual_description: data.analysis.visual_description || p.visual_description
         } : p));
-        if (addNotification) {
-          addNotification('AI analysis completed for Panel #' + panelId + '!', 'success');
-        }
+        
         console.log('[StoryboardTimeline] AI analysis completed successfully for panel', panelId);
+        console.log('  - Revise (New Dialogue):', data.analysis.speech_text);
+        console.log('  - Revise (New Motion):', data.analysis.motion_type);
+        console.log('  - Revise (New Duration):', data.analysis.duration);
+        console.log('  - Revise (SFX):', data.analysis.sfx);
+        console.log('  - Revise (Visual Desc):', data.analysis.visual_description);
+
+        if (setConsoleLogs) {
+          setConsoleLogs(prev => [
+            `[AI Auto-Analysis] [SUCCESS] Panel #${panelId} analysis completed by ${activeModel}!`,
+            `[AI Auto-Analysis]   - Revise (Dialogue): "${data.analysis.speech_text}"`,
+            `[AI Auto-Analysis]   - Revise (Motion): "${data.analysis.motion_type}" | Duration: ${data.analysis.duration}s`,
+            `[AI Auto-Analysis]   - Revise (SFX): "${data.analysis.sfx}"`,
+            ...prev
+          ]);
+        }
+
+        if (addNotification) {
+          addNotification(`AI analysis completed for Panel #${panelId}!`, 'success');
+        }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('[StoryboardTimeline] Panel analysis failed:', err);
+      if (setConsoleLogs) {
+        setConsoleLogs(prev => [
+          `[AI Auto-Analysis] [ERROR] Analysis failed for Panel #${panelId}: ${err.message || 'Unknown error'}`,
+          ...prev
+        ]);
+      }
       if (addNotification) {
-        addNotification('AI analysis failed for Panel #' + panelId + '. Please try again.', 'error');
+        addNotification(`AI analysis failed for Panel #${panelId}. Please try again.`, 'error');
       }
     } finally {
       setAnalyzingPanelId(null);
+      console.log('[StoryboardTimeline] AI analysis operation completed for panel', panelId);
     }
   };
 
@@ -130,6 +215,7 @@ export default function StoryboardTimeline({
     setIsCompiling(true);
     console.log('[StoryboardTimeline] Starting video compilation with', panels.length, 'panels');
     try {
+      console.log('[API] POST /api/convert-images-to-video with', panels.length, 'panels');
       const res = await activeFetch("/api/convert-images-to-video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -145,10 +231,10 @@ export default function StoryboardTimeline({
           setVideoUrl(data.video_url);
         }
         setActivePreviewTab("video");
+        console.log('[StoryboardTimeline] Video compiled successfully:', data.video_url);
         if (addNotification) {
           addNotification("Cinematic video converted successfully!", "success");
         }
-        console.log('[StoryboardTimeline] Video compiled successfully:', data.video_url);
       } else {
         throw new Error(data.message || "Failed to locate generated video output URL.");
       }
@@ -159,6 +245,7 @@ export default function StoryboardTimeline({
       }
     } finally {
       setIsCompiling(false);
+      console.log('[StoryboardTimeline] Video compilation operation completed');
     }
   };
 
@@ -276,10 +363,10 @@ export default function StoryboardTimeline({
                   }}
                 />
 
-                {panel.isAnalyzing && (
+                {(panel.isAnalyzing || analyzingPanelId === panel.id) && (
                   <div className="absolute inset-0 bg-purple-950/40 backdrop-blur-[1px] flex flex-col items-center justify-center p-2 text-center animate-pulse z-10">
                     <Sparkles className="h-5 w-5 text-purple-400 animate-spin" style={{ animationDuration: '3s' }} />
-                    <span className="text-[9px] font-mono font-bold text-purple-300 mt-1 uppercase tracking-wider">AI Analysing...</span>
+                    <span className="text-[9px] font-mono font-bold text-purple-300 mt-1 uppercase tracking-wider">Loading...</span>
                     <div className="scanner-line" />
                   </div>
                 )}
@@ -299,19 +386,19 @@ export default function StoryboardTimeline({
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider block">Dialogue/Subtitle Text</label>
-                  {panel.isAnalyzing && (
+                  {(panel.isAnalyzing || analyzingPanelId === panel.id) && (
                     <span className="text-[9px] font-mono font-bold text-purple-400 animate-pulse flex items-center gap-0.5">
-                      <span>✦ AI writing...</span>
+                      <span>✦ Loading...</span>
                     </span>
                   )}
                 </div>
                 <textarea
                   rows={2}
-                  disabled={panel.isAnalyzing}
+                  disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
                   value={panel.speech_text}
                   onChange={(e) => handleModifySpeechText(panel.id, e.target.value)}
                   className={`w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all ${
-                    panel.isAnalyzing ? "opacity-60 cursor-not-allowed border-purple-900/40 text-purple-300" : ""
+                    (panel.isAnalyzing || analyzingPanelId === panel.id) ? "opacity-60 cursor-not-allowed border-purple-900/40 text-purple-300" : ""
                   }`}
                 />
               </div>

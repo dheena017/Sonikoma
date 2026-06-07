@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Scissors, X, RefreshCw, Crop, Layers, Move, Undo2 } from "lucide-react";
+import { Scissors, X, RefreshCw, Crop, Layers, Move, Undo2, Sparkles, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import { Slice, Slot } from "./crop/types";
 import { NotificationType } from "./NotificationStack";
 import { ErrorPopupDetail } from "./ErrorPopupModal";
@@ -10,6 +10,8 @@ import HorizontalSplitter from "./crop/HorizontalSplitter";
 import CutsRegistry from "./crop/CutsRegistry";
 import AutoSlicer from "./crop/AutoSlicer";
 import CropCanvas from "./crop/CropCanvas";
+import CropToolsPanel from "./crop/CropToolsPanel";
+import MergePanel from "./crop/MergePanel";
 
 interface CropEditorModalProps {
   editingImageIdx: number | null;
@@ -35,8 +37,10 @@ interface CropEditorModalProps {
   setSelectedScraped?: React.Dispatch<React.SetStateAction<string[]>>;
   panels?: any[];
   setPanels?: React.Dispatch<React.SetStateAction<any[]>>;
-  fetchWithInterceptor?: typeof fetch;
-  setErrorPopup?: (err: ErrorPopupDetail | null) => void;
+  fetchWithInterceptor?: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
+  setErrorPopup?: React.Dispatch<React.SetStateAction<ErrorPopupDetail | null>>;
+  imageEditStates?: Record<string, any>;
+  setImageEditStates?: React.Dispatch<React.SetStateAction<Record<string, any>>>;
 }
 
 export default function CropEditorModal({
@@ -62,13 +66,18 @@ export default function CropEditorModal({
   panels,
   setPanels,
   fetchWithInterceptor,
+  imageEditStates,
+  setImageEditStates,
+  selectedScraped,
+  setSelectedScraped,
+  setErrorPopup,
 }: CropEditorModalProps) {
   const activeFetch = fetchWithInterceptor || fetch;
   const containerRef = useRef<HTMLDivElement>(null);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(
     null
   );
-  const [dragType, setDragType] = useState<"draw" | "move" | "split" | null>(
+  const [dragType, setDragType] = useState<"draw" | "move" | "split" | "drag-split-line" | `resize-${'nw'|'ne'|'sw'|'se'|'n'|'s'|'w'|'e'}` | null>(
     null
   );
   const [dragStartPercent, setDragStartPercent] = useState<{
@@ -81,6 +90,10 @@ export default function CropEditorModal({
     left: number;
     right: number;
   } | null>(null);
+  const [draggingSplitLineIdx, setDraggingSplitLineIdx] = useState<number | null>(null);
+
+  const imageUrl = editingImageIdx !== null ? scrapedImages[editingImageIdx] : null;
+  const savedState = imageUrl && imageEditStates ? imageEditStates[imageUrl] : null;
 
   const [detectedBoxes, setDetectedBoxes] = useState<
     Array<{
@@ -92,24 +105,157 @@ export default function CropEditorModal({
       height: number;
       area: number;
     }>
-  >([]);
+  >(savedState?.detectedBoxes || []);
   const [isDetecting, setIsDetecting] = useState<boolean>(false);
   const [isAiDetecting, setIsAiDetecting] = useState<boolean>(false);
 
   // Sidebar Tab Configuration
-  const [activeTab, setActiveTab] = useState<"adjust" | "slice" | "cuts">("adjust");
+  const [activeTab, setActiveTab] = useState<"adjust" | "slice" | "cuts" | "tools" | "merge">(savedState?.activeTab || "adjust");
+
+  // Zoom & Transform
+  const [zoom, setZoom] = useState<number>(1);
+  const [isTransforming, setIsTransforming] = useState<boolean>(false);
+
+  // Merge
+  const [isMerging, setIsMerging] = useState<boolean>(false);
 
   // Multiple Cut List
-  const [slices, setSlices] = useState<Slice[]>([]);
-  const [selectedSliceId, setSelectedSliceId] = useState<string | null>(null);
+  const [slices, setSlices] = useState<Slice[]>(savedState?.slices || []);
+  const [selectedSliceId, setSelectedSliceId] = useState<string | null>(savedState?.selectedSliceId || null);
   const [autoPushOnDraw, setAutoPushOnDraw] = useState<boolean>(false);
 
   const [splitPosition, setSplitPosition] = useState<number>(50);
-  const [splitLines, setSplitLines] = useState<number[]>([]);
-  const [showSplitPosition, setShowSplitPosition] = useState<boolean>(false);
+  const [splitLines, setSplitLines] = useState<number[]>(savedState?.splitLines || []);
+  const [showSplitPosition, setShowSplitPosition] = useState<boolean>(savedState?.activeTab === "slice" || false);
+  const [magneticSnap, setMagneticSnap] = useState<boolean>(true);
+  const [detectedGutters, setDetectedGutters] = useState<number[]>([]);
 
   const [isCroppingSlice, setIsCroppingSlice] = useState<string | null>(null);
   const [slicesCroppedCount, setSlicesCroppedCount] = useState(0);
+
+  const handleTransform = async (type: "rotate" | "flip", value: string) => {
+    if (editingImageIdx === null) return;
+    const currentUrl = scrapedImages[editingImageIdx];
+    setIsTransforming(true);
+    try {
+      const response = await activeFetch("/api/transform-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: currentUrl, type, value }),
+      });
+      if (!response.ok) throw new Error("Transform failed: " + response.status);
+      const data = await response.json();
+      if (data.url && setScrapedImages) {
+        setScrapedImages((prev) => {
+          const copy = [...prev];
+          copy[editingImageIdx] = data.url;
+          return copy;
+        });
+        addNotification(
+          type === "rotate" ? `Rotated ${value}°` : `Flipped ${value === "h" ? "Horizontally" : "Vertically"}`,
+          "success"
+        );
+      }
+    } catch (err: any) {
+      addNotification(`Transform failed: ${err.message}`, "error");
+    } finally {
+      setIsTransforming(false);
+    }
+  };
+
+  const handleResetCropBounds = () => {
+    pushHistory();
+    setEditCropTop(0);
+    setEditCropBottom(0);
+    setEditCropLeft(0);
+    setEditCropRight(0);
+    addNotification("Crop bounds reset to full frame", "success");
+  };
+
+  const handleMergeWithNext = async (
+    count: number,
+    config: { direction: "next" | "prev"; layout: "vertical" | "horizontal"; spacing: number; spacingColor: string } = { direction: "next", layout: "vertical", spacing: 0, spacingColor: "white" }
+  ) => {
+    if (editingImageIdx === null) return;
+    
+    let urlsToMerge: string[] = [];
+    let spliceStart = editingImageIdx;
+    
+    if (config.direction === "next") {
+      urlsToMerge = scrapedImages.slice(editingImageIdx, editingImageIdx + count + 1);
+    } else {
+      spliceStart = Math.max(0, editingImageIdx - count);
+      urlsToMerge = scrapedImages.slice(spliceStart, editingImageIdx + 1);
+    }
+
+    if (urlsToMerge.length < 2) return;
+    setIsMerging(true);
+    try {
+      const response = await activeFetch("/api/stitch-images", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          urls: urlsToMerge,
+          layout: config.layout,
+          spacing: config.spacing,
+          spacingColor: config.spacingColor
+        }),
+      });
+      if (!response.ok) throw new Error("Merge failed: " + response.status);
+      const data = await response.json();
+      if (data.url && setScrapedImages) {
+        const stitchedUrl = data.url;
+        setScrapedImages((prev) => {
+          const copy = [...prev];
+          copy.splice(spliceStart, count + 1, stitchedUrl);
+          return copy;
+        });
+        addNotification(
+          `Merged ${count + 1} frames into 1 panel successfully!`,
+          "success"
+        );
+        // Do not close the modal; let the user continue editing the merged frame
+      }
+    } catch (err: any) {
+      addNotification(`Merge failed: ${err.message}`, "error");
+    } finally {
+      setIsMerging(false);
+    }
+  };
+
+  const handlePrevImage = () => {
+    if (editingImageIdx !== null && editingImageIdx > 0) {
+      setEditingImageIdx(editingImageIdx - 1);
+    }
+  };
+
+  const handleNextImage = () => {
+    if (editingImageIdx !== null && editingImageIdx < scrapedImages.length - 1) {
+      setEditingImageIdx(editingImageIdx + 1);
+    }
+  };
+
+  const handleDeleteCurrentImage = () => {
+    if (editingImageIdx === null || !setScrapedImages) return;
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete Panel #${editingImageIdx + 1} from your deck?`
+    );
+    if (!confirmDelete) return;
+
+    const imgUrl = scrapedImages[editingImageIdx];
+    setScrapedImages((prev) => prev.filter((_, i) => i !== editingImageIdx));
+    if (setSelectedScraped) {
+      setSelectedScraped((prev) => prev.filter((img) => img !== imgUrl));
+    }
+    if (setConsoleLogs) {
+      setConsoleLogs((prev) => [
+        `[GUI] Deleted extracted frame #${editingImageIdx + 1} from deck via Editor.`,
+        ...prev,
+      ]);
+    }
+    addNotification(`Panel #${editingImageIdx + 1} deleted from deck`, "info");
+    setEditingImageIdx(null); // Close editor
+  };
 
   // --- Undo History ---
   type HistorySnapshot = {
@@ -121,7 +267,7 @@ export default function CropEditorModal({
     splitLines: number[];
     selectedSliceId: string | null;
   };
-  const [history, setHistory] = useState<HistorySnapshot[]>([]);
+  const [history, setHistory] = useState<HistorySnapshot[]>(savedState?.history || []);
 
   const pushHistory = useCallback(() => {
     setHistory((prev) => [
@@ -180,17 +326,80 @@ export default function CropEditorModal({
     );
   };
 
-  // Clear states when transitioning editing frames
+  const handleModifyGrayscale = (panelId: number, val: boolean) => {
+    setPanels?.((prev) =>
+      prev.map((p) => (p.id === panelId ? { ...p, grayscale: val } : p))
+    );
+  };
+
+  const handleModifyDuration = (panelId: number, val: number) => {
+    setPanels?.((prev) =>
+      prev.map((p) => (p.id === panelId ? { ...p, duration: val } : p))
+    );
+  };
+
+  const handleModifyMotionType = (panelId: number, val: string) => {
+    setPanels?.((prev) =>
+      prev.map((p) => (p.id === panelId ? { ...p, motion_type: val } : p))
+    );
+  };
+
+  const handleModifySpeechText = (panelId: number, val: string) => {
+    setPanels?.((prev) =>
+      prev.map((p) => (p.id === panelId ? { ...p, speech_text: val } : p))
+    );
+  };
+
+  const handleModifySfx = (panelId: number, val: string) => {
+    setPanels?.((prev) =>
+      prev.map((p) => (p.id === panelId ? { ...p, sfx: val } : p))
+    );
+  };
+
+  const handleModifyCropPadding = (panelId: number, val: number) => {
+    setPanels?.((prev) =>
+      prev.map((p) => (p.id === panelId ? { ...p, crop_padding: val } : p))
+    );
+  };
+
+  // Sync state back to the parent cache whenever it changes
   useEffect(() => {
-    setDetectedBoxes([]);
-    setSlices([]);
-    setSelectedSliceId(null);
-    setSlicesCroppedCount(0);
-    setSplitPosition(50);
-    setSplitLines([]);
-    setShowSplitPosition(false);
-    setHistory([]);
-  }, [editingImageIdx]);
+    if (editingImageIdx === null || !setImageEditStates) return;
+    const currentUrl = scrapedImages[editingImageIdx];
+    if (!currentUrl) return;
+
+    setImageEditStates((prev) => ({
+      ...prev,
+      [currentUrl]: {
+        cropTop: editCropTop,
+        cropBottom: editCropBottom,
+        cropLeft: editCropLeft,
+        cropRight: editCropRight,
+        autoTrim: editAutoTrim,
+        slices,
+        selectedSliceId,
+        splitLines,
+        activeTab,
+        history,
+        detectedBoxes,
+      },
+    }));
+  }, [
+    editingImageIdx,
+    scrapedImages,
+    editCropTop,
+    editCropBottom,
+    editCropLeft,
+    editCropRight,
+    editAutoTrim,
+    slices,
+    selectedSliceId,
+    splitLines,
+    activeTab,
+    history,
+    detectedBoxes,
+    setImageEditStates,
+  ]);
 
   // Sync active coordinates state into the currently selected slice to support on-canvas fine-tuning
   useEffect(() => {
@@ -255,7 +464,7 @@ export default function CropEditorModal({
             `AI Smart Crop automatically isolated ${croppedUrls.length} panels!`,
             "success"
           );
-          setEditingImageIdx(null); // Close the modal
+          // Do not close the modal
           return;
         }
 
@@ -290,7 +499,7 @@ export default function CropEditorModal({
     }
   };
 
-  const handleDetectPanels = async () => {
+  const handleDetectPanels = async (settings?: { sensitivity?: number; backgroundMode?: string; aspectRatio?: string }) => {
     if (editingImageIdx === null) return;
     const currentUrl = scrapedImages[editingImageIdx];
     setIsDetecting(true);
@@ -298,7 +507,13 @@ export default function CropEditorModal({
       const response = await activeFetch("/api/detect-panels", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: currentUrl }),
+        body: JSON.stringify({ 
+          url: currentUrl,
+          sensitivity: settings?.sensitivity ?? 30,
+          backgroundColorMode: settings?.backgroundMode ?? "auto",
+          aspectRatio: settings?.aspectRatio ?? "free",
+          strategy: "local-cv"
+        }),
       });
       if (!response.ok) throw new Error("Failed to detect panels");
       const data = await response.json();
@@ -352,6 +567,40 @@ export default function CropEditorModal({
     return x >= left && x <= right && y >= top && y <= bottom;
   };
 
+  const onResizeStart = (handle: string, clientX: number, clientY: number) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+    const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
+    pushHistory();
+    setDragType(`resize-${handle}` as any);
+    setDragStartPercent({ x, y });
+    setOriginalCropBounds({
+      top: editCropTop,
+      bottom: editCropBottom,
+      left: editCropLeft,
+      right: editCropRight,
+    });
+  };
+
+  const handleSelectAndDragSlice = (slice: Slice, clientX: number, clientY: number) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+    const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
+    // Select and start moving this slice
+    handleSelectSlice(slice);
+    pushHistory();
+    setDragType("move");
+    setDragStartPercent({ x, y });
+    setOriginalCropBounds({
+      top: slice.cropTop,
+      bottom: slice.cropBottom,
+      left: slice.cropLeft,
+      right: slice.cropRight,
+    });
+  };
+
   const handleStart = (clientX: number, clientY: number) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
@@ -365,6 +614,14 @@ export default function CropEditorModal({
     );
 
     if (showSplitPosition) {
+      // Check if clicking near an existing split line for dragging
+      const nearLineIdx = splitLines.findIndex(lineY => Math.abs(lineY - y) < 2.5);
+      if (nearLineIdx !== -1) {
+        pushHistory();
+        setDragType("drag-split-line" as any);
+        setDraggingSplitLineIdx(nearLineIdx);
+        return;
+      }
       pushHistory();
       setDragType("split");
       setSplitPosition(parseFloat(Math.max(5, Math.min(95, y)).toFixed(1)));
@@ -401,8 +658,44 @@ export default function CropEditorModal({
       Math.min(100, ((clientY - rect.top) / rect.height) * 100)
     );
 
+    if (dragType === "drag-split-line" && draggingSplitLineIdx !== null) {
+      let targetY = y;
+      if (magneticSnap && detectedGutters.length > 0) {
+        let nearest = y;
+        let minDiff = 2.0;
+        for (const g of detectedGutters) {
+          const diff = Math.abs(g - y);
+          if (diff < minDiff) {
+            minDiff = diff;
+            nearest = g;
+          }
+        }
+        targetY = nearest;
+      }
+      const newY = parseFloat(Math.max(5, Math.min(95, targetY)).toFixed(1));
+      setSplitLines(prev => {
+        const updated = [...prev];
+        updated[draggingSplitLineIdx] = newY;
+        return [...updated].sort((a, b) => a - b);
+      });
+      return;
+    }
+
     if (showSplitPosition && dragType === "split") {
-      setSplitPosition(parseFloat(Math.max(5, Math.min(95, y)).toFixed(1)));
+      let targetY = y;
+      if (magneticSnap && detectedGutters.length > 0) {
+        let nearest = y;
+        let minDiff = 2.0;
+        for (const g of detectedGutters) {
+          const diff = Math.abs(g - y);
+          if (diff < minDiff) {
+            minDiff = diff;
+            nearest = g;
+          }
+        }
+        targetY = nearest;
+      }
+      setSplitPosition(parseFloat(Math.max(5, Math.min(95, targetY)).toFixed(1)));
       return;
     }
 
@@ -433,8 +726,8 @@ export default function CropEditorModal({
       let newTop = originalCropBounds.top + deltaY;
       let newBottom = originalCropBounds.bottom - deltaY;
 
-      const width = 105 - originalCropBounds.left - originalCropBounds.right;
-      const height = 105 - originalCropBounds.top - originalCropBounds.bottom;
+      const width = 100 - originalCropBounds.left - originalCropBounds.right;
+      const height = 100 - originalCropBounds.top - originalCropBounds.bottom;
 
       if (newLeft < 0) {
         newLeft = 0;
@@ -464,6 +757,31 @@ export default function CropEditorModal({
       setEditCropBottom(
         parseFloat(Math.max(0, Math.min(100, newBottom)).toFixed(1))
       );
+    } else if (dragType && dragType.startsWith("resize-") && dragStartPercent && originalCropBounds) {
+      const handle = dragType.replace("resize-", "");
+      // For resizing, we adjust only the relevant edge(s)
+      let newTop = originalCropBounds.top;
+      let newBottom = originalCropBounds.bottom;
+      let newLeft = originalCropBounds.left;
+      let newRight = originalCropBounds.right;
+
+      if (handle.includes("n")) {
+        newTop = parseFloat(Math.max(0, Math.min(y, 100 - originalCropBounds.bottom - 1.5)).toFixed(1));
+      }
+      if (handle.includes("s")) {
+        newBottom = parseFloat(Math.max(0, Math.min(100 - y, 100 - originalCropBounds.top - 1.5)).toFixed(1));
+      }
+      if (handle.includes("w")) {
+        newLeft = parseFloat(Math.max(0, Math.min(x, 100 - originalCropBounds.right - 1.5)).toFixed(1));
+      }
+      if (handle.includes("e")) {
+        newRight = parseFloat(Math.max(0, Math.min(100 - x, 100 - originalCropBounds.left - 1.5)).toFixed(1));
+      }
+
+      setEditCropTop(newTop);
+      setEditCropBottom(newBottom);
+      setEditCropLeft(newLeft);
+      setEditCropRight(newRight);
     }
   };
 
@@ -475,6 +793,9 @@ export default function CropEditorModal({
         );
         addNotification(`Added split line at Y: ${splitPosition}%`, "success");
       }
+    }
+    if (dragType === "drag-split-line") {
+      addNotification("Split line repositioned!", "success");
     }
     if (dragType === "draw" && autoPushOnDraw) {
       const width = 100 - editCropLeft - editCropRight;
@@ -503,6 +824,7 @@ export default function CropEditorModal({
     setDragType(null);
     setDragStartPercent(null);
     setOriginalCropBounds(null);
+    setDraggingSplitLineIdx(null);
   };
 
   const handlePushToSlices = () => {
@@ -678,14 +1000,14 @@ export default function CropEditorModal({
           cropBottom: 100 - splitPosition,
           cropLeft: 0,
           cropRight: 0,
-          autoTrim: editAutoTrim,
+          autoTrim: false,
         },
         {
           cropTop: splitPosition,
           cropBottom: 0,
           cropLeft: 0,
           cropRight: 0,
-          autoTrim: editAutoTrim,
+          autoTrim: false,
         },
       ];
       await handleSaveMultipleCuts(cuts);
@@ -700,7 +1022,7 @@ export default function CropEditorModal({
       cropBottom: 100 - sorted[0],
       cropLeft: 0,
       cropRight: 0,
-      autoTrim: editAutoTrim,
+      autoTrim: false,
     });
 
     for (let i = 0; i < sorted.length - 1; i++) {
@@ -709,7 +1031,7 @@ export default function CropEditorModal({
         cropBottom: 100 - sorted[i + 1],
         cropLeft: 0,
         cropRight: 0,
-        autoTrim: editAutoTrim,
+        autoTrim: false,
       });
     }
 
@@ -718,7 +1040,7 @@ export default function CropEditorModal({
       cropBottom: 0,
       cropLeft: 0,
       cropRight: 0,
-      autoTrim: editAutoTrim,
+      autoTrim: false,
     });
 
     await handleSaveMultipleCuts(cuts);
@@ -756,6 +1078,10 @@ export default function CropEditorModal({
       } else if ((e.ctrlKey || e.metaKey) && e.key === "z") {
         e.preventDefault();
         handleUndo();
+      } else if (e.key === "ArrowLeft" || e.key === "[") {
+        handlePrevImage();
+      } else if (e.key === "ArrowRight" || e.key === "]") {
+        handleNextImage();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -781,9 +1107,9 @@ export default function CropEditorModal({
   if (editingImageIdx === null) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-xl flex justify-center py-6 px-4 md:py-10 animate-[fadeIn_0.2s_ease-out]">
+    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4 md:p-6 animate-[fadeIn_0.2s_ease-out]">
       <div
-        className="relative bg-neutral-950 border border-white/5 rounded-3xl overflow-hidden shadow-2xl flex flex-col w-full max-w-7xl h-fit my-auto"
+        className="relative bg-neutral-950 border border-white/5 rounded-3xl overflow-hidden shadow-2xl flex flex-col w-full max-w-7xl h-[90vh] my-auto"
         style={{ boxShadow: "0 0 60px rgba(139,92,246,0.12), 0 30px 60px rgba(0,0,0,0.7)" }}
       >
         {/* Subtle top-edge glow line */}
@@ -805,6 +1131,34 @@ export default function CropEditorModal({
               </p>
             </div>
           </div>
+          
+          {/* Panel Navigation Group */}
+          <div className="flex items-center gap-1.5 bg-neutral-900/60 border border-white/5 rounded-2xl p-1 select-none">
+            <button
+              onClick={handlePrevImage}
+              disabled={editingImageIdx === 0}
+              className="p-1.5 rounded-xl text-neutral-400 hover:text-white hover:bg-neutral-800 disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-neutral-400 transition-all cursor-pointer flex items-center gap-1 text-[10px] font-bold font-mono"
+              title="Previous Panel (ArrowLeft or [)"
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Prev</span>
+            </button>
+            
+            <div className="px-2.5 py-1 text-[10px] font-mono text-purple-300 font-bold bg-black/40 rounded-lg border border-white/5">
+              Panel {editingImageIdx + 1} of {scrapedImages.length}
+            </div>
+
+            <button
+              onClick={handleNextImage}
+              disabled={editingImageIdx === scrapedImages.length - 1}
+              className="p-1.5 rounded-xl text-neutral-400 hover:text-white hover:bg-neutral-800 disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-neutral-400 transition-all cursor-pointer flex items-center gap-1 text-[10px] font-bold font-mono"
+              title="Next Panel (ArrowRight or ])"
+            >
+              <span className="hidden sm:inline">Next</span>
+              <ChevronRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
           <div className="flex items-center gap-2">
             {/* Undo Button in header */}
             <button
@@ -822,6 +1176,15 @@ export default function CropEditorModal({
                 </span>
               )}
             </button>
+            <button
+              type="button"
+              onClick={handleDeleteCurrentImage}
+              title="Delete Panel from deck"
+              className="flex items-center gap-1.5 text-neutral-400 hover:text-red-400 px-2.5 py-1.5 rounded-xl hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all cursor-pointer"
+            >
+              <Trash2 className="h-3.5 w-3.5 text-red-500/70 hover:text-red-400" />
+              <span className="text-[10px] font-semibold font-mono hidden sm:block">Delete</span>
+            </button>
             <div className="w-px h-5 bg-white/10" />
             <button
               onClick={() => setEditingImageIdx(null)}
@@ -833,9 +1196,9 @@ export default function CropEditorModal({
         </div>
 
         {/* Main Content Pane */}
-        <div className="p-5 grid grid-cols-1 lg:grid-cols-12 gap-5 overflow-y-auto select-none">
+        <div className="p-5 grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1 overflow-hidden select-none items-stretch">
           {/* Left side: Visual Preview Area (Canvas) */}
-          <div className="lg:col-span-7 flex flex-col space-y-2">
+          <div className="lg:col-span-7 flex flex-col space-y-2 h-full overflow-hidden">
             <div className="flex justify-between items-center bg-white/[0.02] backdrop-blur-sm p-2.5 rounded-xl border border-white/[0.06]">
               <div className="flex items-center gap-2">
                 <div className="p-1 rounded-lg bg-purple-500/10">
@@ -886,24 +1249,28 @@ export default function CropEditorModal({
               handleSelectSlice={handleSelectSlice}
               handleDeleteSlice={handleDeleteSlice}
               handleRemoveSplitLine={handleRemoveSplitLine}
-              dragType={dragType}
+              dragType={dragType as any}
+              onResizeStart={onResizeStart}
+              handleSelectAndDragSlice={handleSelectAndDragSlice}
+              zoom={zoom}
             />
 
             <span className="text-[10px] text-neutral-500 text-center italic font-sans block pt-1">
-              Drag on unpopulated image space to draw new panels. Grab and shift
-              any box selection to drag-and-drop it.
+              Draw to create panels · Drag to move · Drag corners/edges to resize · Drag split lines to reposition
             </span>
           </div>
 
           {/* Right side: Tabbed controls sidebar */}
-          <div className="lg:col-span-5 flex flex-col space-y-3">
+          <div className="lg:col-span-5 flex flex-col space-y-3 h-full overflow-y-auto pr-1.5 scrollbar-thin">
             {/* Sidebar Navigation Tabs */}
             <div className="flex gap-1 bg-black/40 backdrop-blur-sm p-1.5 rounded-2xl border border-white/5">
               {([
-                { key: "adjust", label: "Adjust & Clean", emoji: "✨" },
+                { key: "adjust", label: "Adjust", emoji: "✨" },
+                { key: "tools", label: "Tools", emoji: "🔧" },
                 { key: "slice", label: "Cut", emoji: "✂️" },
-                { key: "cuts", label: `Crop Tools (${slices.length})`, emoji: "🎯" },
-              ] as { key: "adjust" | "slice" | "cuts"; label: string; emoji: string }[]).map((tab) => (
+                { key: "cuts", label: `Cuts (${slices.length})`, emoji: "🎯" },
+                { key: "merge", label: "Merge", emoji: "🔗" },
+              ] as { key: "adjust" | "tools" | "slice" | "cuts" | "merge"; label: string; emoji: string }[]).map((tab) => (
                 <button
                   key={tab.key}
                   type="button"
@@ -922,6 +1289,38 @@ export default function CropEditorModal({
 
             {/* Tab Contents */}
             <div className="space-y-4">
+              {activeTab === "merge" && editingImageIdx !== null && (
+                <div className="animate-fadeIn">
+                  <MergePanel
+                    editingImageIdx={editingImageIdx}
+                    scrapedImages={scrapedImages}
+                    isMerging={isMerging}
+                    onMerge={handleMergeWithNext}
+                  />
+                </div>
+              )}
+
+              {activeTab === "tools" && (
+                <div className="animate-fadeIn">
+                  <CropToolsPanel
+                    editCropTop={editCropTop}
+                    editCropBottom={editCropBottom}
+                    editCropLeft={editCropLeft}
+                    editCropRight={editCropRight}
+                    setEditCropTop={(v) => { pushHistory(); setEditCropTop(v); }}
+                    setEditCropBottom={(v) => { pushHistory(); setEditCropBottom(v); }}
+                    setEditCropLeft={(v) => { pushHistory(); setEditCropLeft(v); }}
+                    setEditCropRight={(v) => { pushHistory(); setEditCropRight(v); }}
+                    zoom={zoom}
+                    setZoom={setZoom}
+                    isTransforming={isTransforming}
+                    onRotate={(deg) => handleTransform("rotate", String(deg))}
+                    onFlip={(axis) => handleTransform("flip", axis)}
+                    onReset={handleResetCropBounds}
+                  />
+                </div>
+              )}
+
               {activeTab === "adjust" && (
                 <div className="space-y-4 animate-fadeIn">
                   <EnhancementsPanel
@@ -930,6 +1329,12 @@ export default function CropEditorModal({
                     handleModifyContrast={handleModifyContrast}
                     handleModifySaturation={handleModifySaturation}
                     handleModifyFilterPreset={handleModifyFilterPreset}
+                    handleModifyGrayscale={handleModifyGrayscale}
+                    handleModifyDuration={handleModifyDuration}
+                    handleModifyMotionType={handleModifyMotionType}
+                    handleModifySpeechText={handleModifySpeechText}
+                    handleModifySfx={handleModifySfx}
+                    handleModifyCropPadding={handleModifyCropPadding}
                   />
                   <CleanBubblesPanel
                     imgUrl={scrapedImages[editingImageIdx]}
@@ -961,10 +1366,11 @@ export default function CropEditorModal({
                     handleRemoveSplitLine={handleRemoveSplitLine}
                     handleExecuteHorizontalSplit={handleExecuteHorizontalSplit}
                     isSavingEdit={isSavingEdit}
-                  />
-                  <AutoSlicer
-                    handleDetectPanels={handleDetectPanels}
-                    isDetecting={isDetecting}
+                    imageUrl={imageUrl}
+                    magneticSnap={magneticSnap}
+                    setMagneticSnap={setMagneticSnap}
+                    detectedGutters={detectedGutters}
+                    setDetectedGutters={setDetectedGutters}
                   />
                 </div>
               )}
@@ -995,6 +1401,10 @@ export default function CropEditorModal({
                     handleCropSingleSlice={handleCropSingleSlice}
                     isCroppingSlice={isCroppingSlice}
                     isSavingEdit={isSavingEdit}
+                  />
+                  <AutoSlicer
+                    handleDetectPanels={handleDetectPanels}
+                    isDetecting={isDetecting}
                   />
                 </div>
               )}
@@ -1044,28 +1454,110 @@ export default function CropEditorModal({
             </button>
             <button
               type="button"
-              onClick={handleExecuteSave}
+              onClick={handleDeleteCurrentImage}
               disabled={isSavingEdit}
-              className="relative bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-2 shadow-lg shadow-purple-900/50"
-              style={{ boxShadow: isSavingEdit ? undefined : "0 0 20px rgba(139,92,246,0.25), 0 4px 12px rgba(0,0,0,0.4)" }}
+              className="bg-red-950/20 hover:bg-red-950/55 border border-red-900/30 hover:border-red-900/50 text-red-400 px-4 py-2.5 rounded-xl text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5"
             >
-              {isSavingEdit ? (
-                <>
-                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                  <span>Processing Crop Tools...</span>
-                </>
-              ) : slices.length > 0 ? (
-                <>
-                  <Layers className="h-4 w-4 text-purple-200" />
-                  <span>Execute {slices.length} Crop Tools</span>
-                </>
-              ) : (
-                <>
-                  <Crop className="h-3.5 w-3.5" />
-                  <span>Execute Single Crop</span>
-                </>
-              )}
+              <Trash2 className="h-3.5 w-3.5 text-red-500/70" />
+              <span>Delete Panel</span>
             </button>
+            {activeTab === "tools" && (
+              <button
+                type="button"
+                onClick={handleExecuteSave}
+                disabled={isSavingEdit || isTransforming}
+                className="relative bg-cyan-600 hover:bg-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-2 shadow-lg shadow-cyan-900/40 active:scale-95"
+              >
+                {isSavingEdit || isTransforming ? (
+                  <>
+                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                    <span>Processing…</span>
+                  </>
+                ) : (
+                  <>
+                    <Crop className="h-3.5 w-3.5" />
+                    <span>Apply Crop</span>
+                  </>
+                )}
+              </button>
+            )}
+            {activeTab === "adjust" && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    addNotification("Style adjustments applied successfully!", "success");
+                  }}
+                  className="bg-indigo-500/10 hover:bg-indigo-500/25 border border-indigo-500/25 text-indigo-300 hover:text-white px-5 py-2.5 rounded-xl text-xs font-semibold cursor-pointer transition-all active:scale-95 flex items-center gap-1.5"
+                >
+                  <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
+                  <span>Apply Styles</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExecuteSave}
+                  disabled={isSavingEdit}
+                  className="relative bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-2 shadow-lg shadow-purple-900/50"
+                  style={{ boxShadow: isSavingEdit ? undefined : "0 0 20px rgba(139,92,246,0.25), 0 4px 12px rgba(0,0,0,0.4)" }}
+                >
+                  {isSavingEdit ? (
+                    <>
+                      <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                      <span>Processing Crop...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Crop className="h-3.5 w-3.5" />
+                      <span>Crop Image</span>
+                    </>
+                  )}
+                </button>
+              </>
+            )}
+
+            {activeTab === "slice" && (
+              <button
+                type="button"
+                onClick={handleExecuteHorizontalSplit}
+                disabled={isSavingEdit}
+                className="relative bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-2 shadow-lg shadow-purple-900/50"
+                style={{ boxShadow: isSavingEdit ? undefined : "0 0 20px rgba(139,92,246,0.25), 0 4px 12px rgba(0,0,0,0.4)" }}
+              >
+                {isSavingEdit ? (
+                  <>
+                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                    <span>Processing Split...</span>
+                  </>
+                ) : (
+                  <>
+                    <Scissors className="h-3.5 w-3.5 text-purple-200" />
+                    <span>Apply Split</span>
+                  </>
+                )}
+              </button>
+            )}
+
+            {activeTab === "cuts" && (
+              <button
+                type="button"
+                onClick={handleExecuteSave}
+                disabled={isSavingEdit}
+                className="relative bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-2 shadow-lg shadow-purple-900/50"
+                style={{ boxShadow: isSavingEdit ? undefined : "0 0 20px rgba(139,92,246,0.25), 0 4px 12px rgba(0,0,0,0.4)" }}
+              >
+                {isSavingEdit ? (
+                  <>
+                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                    <span>Processing Crops...</span>
+                  </>
+                ) : (
+                  <>
+                    <Layers className="h-4 w-4 text-purple-200" />
+                    <span>Execute {slices.length} Crops</span>
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>

@@ -31,7 +31,7 @@ interface ScraperControlsProps
     | "isBatchCropping"
     | "batchProgress"
   > {
-  addPanelsWithAutoAnalysis: (urls: string[]) => void;
+  addPanelsWithAutoAnalysis: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
 }
 
 export default function ScraperControls({

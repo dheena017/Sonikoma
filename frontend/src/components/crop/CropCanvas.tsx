@@ -21,7 +21,10 @@ interface CropCanvasProps {
   handleSelectSlice: (slice: Slice) => void;
   handleDeleteSlice: (id: string, e: React.MouseEvent) => void;
   handleRemoveSplitLine: (yVal: number) => void;
-  dragType: "draw" | "move" | "split" | null;
+  dragType: "draw" | "move" | "split" | "drag-split-line" | `resize-${string}` | null;
+  onResizeStart: (handle: string, clientX: number, clientY: number) => void;
+  handleSelectAndDragSlice: (slice: Slice, clientX: number, clientY: number) => void;
+  zoom?: number;
 }
 
 export default function CropCanvas({
@@ -44,6 +47,9 @@ export default function CropCanvas({
   handleDeleteSlice,
   handleRemoveSplitLine,
   dragType,
+  onResizeStart,
+  handleSelectAndDragSlice,
+  zoom = 1,
 }: CropCanvasProps) {
   const hasCropSelection =
     editCropTop !== 0 ||
@@ -66,16 +72,29 @@ export default function CropCanvas({
   );
 
   const getCursor = () => {
-    if (showSplitPosition) return "ns-resize";
+    if (showSplitPosition) {
+      if (hoverPct) {
+        const nearLine = splitLines.some(lineY => Math.abs(lineY - hoverPct.y) < 2.5);
+        if (nearLine) return "row-resize";
+      }
+      return "ns-resize";
+    }
     if (dragType === "move") return "grabbing";
     if (dragType === "draw") return "crosshair";
+    if (dragType && dragType.startsWith("resize-")) {
+      const handle = dragType.replace("resize-", "");
+      if (handle === "nw" || handle === "se") return "nwse-resize";
+      if (handle === "ne" || handle === "sw") return "nesw-resize";
+      if (handle === "n" || handle === "s") return "ns-resize";
+      if (handle === "w" || handle === "e") return "ew-resize";
+    }
     if (hoverPct && isPointInsideSelection(hoverPct.x, hoverPct.y)) return "grab";
     return "crosshair";
   };
 
   return (
     <div
-      className="relative border border-white/5 hover:border-purple-500/20 rounded-2xl bg-black overflow-hidden h-[480px] flex items-center justify-center select-none transition-colors"
+      className="relative border border-white/5 hover:border-purple-500/20 rounded-2xl bg-black overflow-y-auto flex-1 h-0 flex items-start justify-center select-none transition-colors"
       style={{ boxShadow: "inset 0 0 30px rgba(0,0,0,0.5)" }}
     >
       <div
@@ -101,14 +120,20 @@ export default function CropCanvas({
           }
         }}
         onTouchEnd={handleEnd}
-        className="relative inline-block max-h-full max-w-full"
-        style={{ cursor: getCursor(), userSelect: "none" }}
+        className="relative inline-block w-full max-w-full"
+        style={{
+          cursor: getCursor(),
+          userSelect: "none",
+          transform: zoom !== 1 ? `scale(${zoom})` : undefined,
+          transformOrigin: "top center",
+          transition: "transform 0.15s ease",
+        }}
       >
         {/* Raw image */}
         <img
           src={imgUrl}
           alt="Crop segment preview"
-          className="max-h-[470px] max-w-full pointer-events-none select-none block"
+          className="w-full max-w-full pointer-events-none select-none block"
           referrerPolicy="no-referrer"
           draggable={false}
         />
@@ -128,29 +153,34 @@ export default function CropCanvas({
             </div>
 
             {/* Saved split lines */}
-            {splitLines.map((y, idx) => (
-              <div
-                key={`split-line-${y}-${idx}`}
-                className="absolute left-0 right-0 z-40 pointer-events-none"
-                style={{ top: `${y}%` }}
-              >
-                <div className="absolute inset-x-0 border-t-2 border-dashed border-purple-500/70" />
-                <div className="absolute left-2 -top-5 bg-purple-950/95 text-purple-300 font-mono text-[9px] px-2 py-0.5 rounded-lg border border-purple-800/60 font-bold backdrop-blur shadow-lg flex items-center gap-1.5 pointer-events-auto select-none">
-                  <span>Cut #{idx + 1}: {y}%</span>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemoveSplitLine(y);
-                    }}
-                    className="text-purple-400 hover:text-red-400 font-bold font-sans text-[11px] cursor-pointer pl-0.5"
-                    title="Remove this split line"
-                  >
-                    &times;
-                  </button>
+            {splitLines.map((y, idx) => {
+              const isHovered = hoverPct ? Math.abs(hoverPct.y - y) < 2.5 : false;
+              return (
+                <div
+                  key={`split-line-${y}-${idx}`}
+                  className="absolute left-0 right-0 z-40 h-3 -translate-y-1.5 flex items-center cursor-row-resize pointer-events-auto"
+                  style={{ top: `${y}%` }}
+                >
+                  <div className={`w-full border-t-2 border-dashed transition-all ${
+                    isHovered ? "border-red-400 shadow-[0_0_8px_rgba(248,113,113,0.5)] scale-y-110" : "border-purple-500/70"
+                  }`} />
+                  <div className="absolute left-2 bg-purple-950/95 text-purple-300 font-mono text-[9px] px-2 py-0.5 rounded-lg border border-purple-800/60 font-bold backdrop-blur shadow-lg flex items-center gap-1.5 pointer-events-auto select-none">
+                    <span>Cut #{idx + 1}: {y}%</span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveSplitLine(y);
+                      }}
+                      className="text-purple-400 hover:text-red-400 font-bold font-sans text-[11px] cursor-pointer pl-0.5"
+                      title="Remove this split line"
+                    >
+                      &times;
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </>
         )}
 
@@ -186,7 +216,18 @@ export default function CropCanvas({
                 e.stopPropagation();
                 handleSelectSlice(slice);
               }}
-              className={`absolute border-2 pointer-events-auto cursor-pointer transition-all flex flex-col justify-between ${
+              onMouseDown={(e) => {
+                if (e.button !== 0) return;
+                e.stopPropagation();
+                handleSelectAndDragSlice(slice, e.clientX, e.clientY);
+              }}
+              onTouchStart={(e) => {
+                if (e.touches && e.touches[0]) {
+                  e.stopPropagation();
+                  handleSelectAndDragSlice(slice, e.touches[0].clientX, e.touches[0].clientY);
+                }
+              }}
+              className={`absolute border-2 pointer-events-auto cursor-grab active:cursor-grabbing transition-all flex flex-col justify-between ${
                 isSelected
                   ? "border-emerald-400 bg-emerald-500/10 z-30"
                   : "border-purple-500/40 bg-purple-500/5 hover:bg-purple-500/10 hover:border-purple-400/60 z-20"
@@ -239,11 +280,57 @@ export default function CropCanvas({
               boxShadow: "0 0 0 1px rgba(52,211,153,0.1), 0 0 20px rgba(52,211,153,0.06)",
             }}
           >
-            {/* Corner handles */}
-            <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-white -translate-x-[2px] -translate-y-[2px]" />
-            <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-white translate-x-[2px] -translate-y-[2px]" />
-            <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-white -translate-x-[2px] translate-y-[2px]" />
-            <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-white translate-x-[2px] translate-y-[2px]" />
+            {/* Corner handles (visible glowing handles) */}
+            <div 
+              onMouseDown={(e) => { e.stopPropagation(); onResizeStart("nw", e.clientX, e.clientY); }}
+              onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("nw", e.touches[0].clientX, e.touches[0].clientY); } }}
+              className="absolute top-0 left-0 w-3.5 h-3.5 bg-emerald-400 border border-neutral-900 rounded-full -translate-x-1/2 -translate-y-1/2 cursor-nwse-resize pointer-events-auto hover:scale-125 active:scale-95 transition-transform shadow-[0_0_8px_rgba(52,211,153,0.8)] z-50" 
+            />
+            <div 
+              onMouseDown={(e) => { e.stopPropagation(); onResizeStart("ne", e.clientX, e.clientY); }}
+              onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("ne", e.touches[0].clientX, e.touches[0].clientY); } }}
+              className="absolute top-0 right-0 w-3.5 h-3.5 bg-emerald-400 border border-neutral-900 rounded-full translate-x-1/2 -translate-y-1/2 cursor-nesw-resize pointer-events-auto hover:scale-125 active:scale-95 transition-transform shadow-[0_0_8px_rgba(52,211,153,0.8)] z-50" 
+            />
+            <div 
+              onMouseDown={(e) => { e.stopPropagation(); onResizeStart("sw", e.clientX, e.clientY); }}
+              onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("sw", e.touches[0].clientX, e.touches[0].clientY); } }}
+              className="absolute bottom-0 left-0 w-3.5 h-3.5 bg-emerald-400 border border-neutral-900 rounded-full -translate-x-1/2 translate-y-1/2 cursor-nesw-resize pointer-events-auto hover:scale-125 active:scale-95 transition-transform shadow-[0_0_8px_rgba(52,211,153,0.8)] z-50" 
+            />
+            <div 
+              onMouseDown={(e) => { e.stopPropagation(); onResizeStart("se", e.clientX, e.clientY); }}
+              onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("se", e.touches[0].clientX, e.touches[0].clientY); } }}
+              className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-400 border border-neutral-900 rounded-full translate-x-1/2 translate-y-1/2 cursor-nwse-resize pointer-events-auto hover:scale-125 active:scale-95 transition-transform shadow-[0_0_8px_rgba(52,211,153,0.8)] z-50" 
+            />
+
+            {/* Edge handles (invisible wide bars for easy grabbing) */}
+            <div 
+              onMouseDown={(e) => { e.stopPropagation(); onResizeStart("n", e.clientX, e.clientY); }}
+              onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("n", e.touches[0].clientX, e.touches[0].clientY); } }}
+              className="absolute -top-1.5 left-2 right-2 h-3 cursor-ns-resize pointer-events-auto group/edge z-40"
+            >
+              <div className="mx-auto w-12 h-1 bg-emerald-400/50 rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity mt-1 shadow-[0_0_4px_rgba(52,211,153,0.5)]" />
+            </div>
+            <div 
+              onMouseDown={(e) => { e.stopPropagation(); onResizeStart("s", e.clientX, e.clientY); }}
+              onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("s", e.touches[0].clientX, e.touches[0].clientY); } }}
+              className="absolute -bottom-1.5 left-2 right-2 h-3 cursor-ns-resize pointer-events-auto group/edge z-40"
+            >
+              <div className="mx-auto w-12 h-1 bg-emerald-400/50 rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity mt-1 shadow-[0_0_4px_rgba(52,211,153,0.5)]" />
+            </div>
+            <div 
+              onMouseDown={(e) => { e.stopPropagation(); onResizeStart("w", e.clientX, e.clientY); }}
+              onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("w", e.touches[0].clientX, e.touches[0].clientY); } }}
+              className="absolute top-2 bottom-2 -left-1.5 w-3 cursor-ew-resize pointer-events-auto group/edge flex items-center z-40"
+            >
+              <div className="my-auto h-12 w-1 bg-emerald-400/50 rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity ml-1 shadow-[0_0_4px_rgba(52,211,153,0.5)]" />
+            </div>
+            <div 
+              onMouseDown={(e) => { e.stopPropagation(); onResizeStart("e", e.clientX, e.clientY); }}
+              onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("e", e.touches[0].clientX, e.touches[0].clientY); } }}
+              className="absolute top-2 bottom-2 -right-1.5 w-3 cursor-ew-resize pointer-events-auto group/edge flex items-center z-40"
+            >
+              <div className="my-auto h-12 w-1 bg-emerald-400/50 rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity ml-1 shadow-[0_0_4px_rgba(52,211,153,0.5)]" />
+            </div>
 
             {/* Move helper */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/90 text-[9px] font-bold tracking-wide text-neutral-200 border border-white/10 px-2.5 py-1 rounded-xl shadow-xl backdrop-blur-sm flex items-center gap-1.5">

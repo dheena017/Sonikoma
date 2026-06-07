@@ -20,9 +20,10 @@
 - 🫧 **AI Bubble Removal** — Removes speech bubbles using Gemini vision + OpenCV inpainting
 - 🗣️ **TTS Voiceover** — Generates synced dialogue audio using Microsoft Edge TTS
 - 🎬 **Video Compiler** — Renders animated MP4 with pan/zoom effects via MoviePy
-- ✂️ **Crop Editor** — Manual and auto-crop panel editor with undo/redo
+- ✂️ **Crop Editor** — Advanced editor with manual/auto-crop, frame merging/stitching, style filters, and undo/redo
 - 🗄️ **Local Database** — SQLite stores all projects and panels (no cloud required)
 - 🤖 **Multi-AI** — Supports Gemini 2.5 Flash, Gemini 2.0 Pro, Llama 3, Mistral 7B
+- 📟 **Real-Time Shell Logs** — Direct SSE/polling compilation stream that displays backend actions, API hits, and Python execution console outputs inside the UI
 
 ---
 
@@ -168,6 +169,7 @@ The app opens at **http://localhost:3000** — backend API + frontend UI served 
 | `POST` | `/api/stitch-images` | Stitch multiple panel images vertically |
 | `POST` | `/api/smart-crop` | AI-powered smart panel cropping |
 | `POST` | `/api/crop-image` | Manual crop with pixel coordinates |
+| `POST` | `/api/transform-image` | Rotate or flip an image frame |
 | `POST` | `/api/remove-speech-bubbles` | Run Python speech bubble removal (OpenCV + Gemini) |
 
 ### AI Generation

@@ -83,7 +83,10 @@ export async function cropAutoBorders(
   tighter: boolean = false, 
   cropPadding?: number,
   sensitivity?: number,
-  backgroundColorMode: string = "auto"
+  backgroundColorMode: string = "auto",
+  aspectRatio: string = "free",
+  outputFormat: string = "jpeg",
+  cropQuality: number = 90
 ): Promise<{ data: Buffer; contentType: string }> {
   try {
     const minInstance = sharp(imageBuffer);
@@ -137,30 +140,72 @@ export async function cropAutoBorders(
       }
     }
     
-    // Step 2: Add custom padding around cropped bounds
+    // Step 2: Add custom padding and aspect ratio adjustment around cropped bounds
     let padding = tighter ? 4 : 20;
     if (typeof cropPadding === "number" && !isNaN(cropPadding)) {
       padding = cropPadding;
     }
     
-    let finalBuffer = trimmedBuffer;
-    if (padding > 0) {
-      // Default to white if "auto" was used so padding is consistent
-      let extendBg = bgHex || "#ffffff";
-      if (backgroundColorMode === "black") extendBg = "#000000";
-      
-      finalBuffer = await sharp(trimmedBuffer)
-        .extend({
-          top: padding,
-          bottom: padding,
-          left: padding,
-          right: padding,
-          background: extendBg
-        })
-        .toBuffer();
+    const trimmedMeta = await sharp(trimmedBuffer).metadata();
+    const tw = trimmedMeta.width || 0;
+    const th = trimmedMeta.height || 0;
+
+    let extendLeft = padding;
+    let extendRight = padding;
+    let extendTop = padding;
+    let extendBottom = padding;
+
+    if (aspectRatio && aspectRatio !== "free") {
+      let targetRatio = 1.0;
+      if (aspectRatio === "1:1") targetRatio = 1.0;
+      else if (aspectRatio === "16:9") targetRatio = 16.0 / 9.0;
+      else if (aspectRatio === "9:16") targetRatio = 9.0 / 16.0;
+      else if (aspectRatio === "4:3") targetRatio = 4.0 / 3.0;
+
+      const baseW = tw + padding * 2;
+      const baseH = th + padding * 2;
+      const currentRatio = baseW / baseH;
+
+      if (currentRatio < targetRatio) {
+        const desiredW = Math.round(baseH * targetRatio);
+        const extraW = desiredW - baseW;
+        extendLeft += Math.floor(extraW / 2);
+        extendRight += Math.ceil(extraW / 2);
+      } else if (currentRatio > targetRatio) {
+        const desiredH = Math.round(baseW / targetRatio);
+        const extraH = desiredH - baseH;
+        extendTop += Math.floor(extraH / 2);
+        extendBottom += Math.ceil(extraH / 2);
+      }
     }
     
-    return { data: finalBuffer, contentType: "image/jpeg" };
+    let finalBuffer = trimmedBuffer;
+    let extendBg = bgHex || "#ffffff";
+    if (backgroundColorMode === "black") extendBg = "#000000";
+    
+    finalBuffer = await sharp(trimmedBuffer)
+      .extend({
+        top: extendTop,
+        bottom: extendBottom,
+        left: extendLeft,
+        right: extendRight,
+        background: extendBg
+      })
+      .toBuffer();
+
+    // Step 3: Format and compression settings
+    let formattedInstance = sharp(finalBuffer);
+    let outputContentType = "image/jpeg";
+    if (outputFormat === "png") {
+      formattedInstance = formattedInstance.png();
+      outputContentType = "image/png";
+    } else {
+      formattedInstance = formattedInstance.jpeg({ quality: cropQuality });
+      outputContentType = "image/jpeg";
+    }
+    finalBuffer = await formattedInstance.toBuffer();
+    
+    return { data: finalBuffer, contentType: outputContentType };
   } catch (err: any) {
     console.error("[Auto Crop Error]", err);
     return { data: imageBuffer, contentType: "image/jpeg" };
