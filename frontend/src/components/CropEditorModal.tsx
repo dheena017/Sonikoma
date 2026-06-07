@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Scissors, X, RefreshCw, Crop, Layers, Move, Undo2, Sparkles, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
+import { Scissors, X, RefreshCw, Crop, Layers, Move, Undo2, Redo2, Sparkles, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import { Slice, Slot } from "./crop/types";
 import { NotificationType } from "./NotificationStack";
 import { ErrorPopupDetail } from "./ErrorPopupModal";
@@ -302,41 +302,6 @@ const handleCleanSingleBubble = async (
   }
 };
 
-// Updated CropCanvas component with Phase 4 props
-<CropCanvas
-  imgUrl={scrapedImages[editingImageIdx]}
-  containerRef={containerRef}
-  editCropTop={editCropTop}
-  editCropBottom={editCropBottom}
-  editCropLeft={editCropLeft}
-  editCropRight={editCropRight}
-  slices={slices}
-  selectedSliceId={selectedSliceId}
-  showSplitPosition={showSplitPosition}
-  splitPosition={splitPosition}
-  splitLines={splitLines}
-  handleStart={handleStart}
-  handleMove={handleMove}
-  handleEnd={handleEnd}
-  isPointInsideSelection={isPointInsideSelection}
-  handleSelectSlice={handleSelectSlice}
-  handleDeleteSlice={handleDeleteSlice}
-  handleRemoveSplitLine={handleRemoveSplitLine}
-  dragType={dragType as any}
-  onResizeStart={onResizeStart}
-  handleSelectAndDragSlice={handleSelectAndDragSlice}
-  zoom={zoom}
-  detectedBoxes={detectedBoxes}
-  // Phase 4 integration
-  editMode={editMode}
-  detectedBubbles={detectedBubbles}
-  selectedBubbleIdx={selectedBubbleIdx}
-  setSelectedBubbleIdx={setSelectedBubbleIdx}
-  brushSize={brushSize}
-  canvasMaskRef={canvasMaskRef}
-  onCleanSingleBubble={handleCleanSingleBubble}
-/>
-
   const handleDeleteCurrentImage = () => {
     if (editingImageIdx === null || !setScrapedImages) return;
     const confirmDelete = window.confirm(
@@ -359,7 +324,7 @@ const handleCleanSingleBubble = async (
     setEditingImageIdx(null); // Close editor
   };
 
-  // --- Undo History ---
+  // --- Undo/Redo History ---
   type HistorySnapshot = {
     cropTop: number;
     cropBottom: number;
@@ -370,6 +335,7 @@ const handleCleanSingleBubble = async (
     selectedSliceId: string | null;
   };
   const [history, setHistory] = useState<HistorySnapshot[]>(savedState?.history || []);
+  const [redoHistory, setRedoHistory] = useState<HistorySnapshot[]>([]);
 
   const pushHistory = useCallback(() => {
     setHistory((prev) => [
@@ -384,12 +350,28 @@ const handleCleanSingleBubble = async (
         selectedSliceId,
       },
     ]);
+    setRedoHistory([]); // Clear redo stack on new action
   }, [editCropTop, editCropBottom, editCropLeft, editCropRight, slices, splitLines, selectedSliceId]);
 
   const handleUndo = useCallback(() => {
     setHistory((prev) => {
       if (prev.length === 0) return prev;
       const snap = prev[prev.length - 1];
+
+      // Save current state to redo stack
+      setRedoHistory((prevRedo) => [
+        ...prevRedo,
+        {
+          cropTop: editCropTop,
+          cropBottom: editCropBottom,
+          cropLeft: editCropLeft,
+          cropRight: editCropRight,
+          slices,
+          splitLines,
+          selectedSliceId,
+        },
+      ]);
+
       setEditCropTop(snap.cropTop);
       setEditCropBottom(snap.cropBottom);
       setEditCropLeft(snap.cropLeft);
@@ -399,7 +381,37 @@ const handleCleanSingleBubble = async (
       setSelectedSliceId(snap.selectedSliceId);
       return prev.slice(0, -1);
     });
-  }, [setEditCropTop, setEditCropBottom, setEditCropLeft, setEditCropRight]);
+  }, [editCropTop, editCropBottom, editCropLeft, editCropRight, slices, splitLines, selectedSliceId, setEditCropTop, setEditCropBottom, setEditCropLeft, setEditCropRight]);
+
+  const handleRedo = useCallback(() => {
+    setRedoHistory((prevRedo) => {
+      if (prevRedo.length === 0) return prevRedo;
+      const snap = prevRedo[prevRedo.length - 1];
+
+      // Save current state to undo history
+      setHistory((prevUndo) => [
+        ...prevUndo,
+        {
+          cropTop: editCropTop,
+          cropBottom: editCropBottom,
+          cropLeft: editCropLeft,
+          cropRight: editCropRight,
+          slices,
+          splitLines,
+          selectedSliceId,
+        },
+      ]);
+
+      setEditCropTop(snap.cropTop);
+      setEditCropBottom(snap.cropBottom);
+      setEditCropLeft(snap.cropLeft);
+      setEditCropRight(snap.cropRight);
+      setSlices(snap.slices);
+      setSplitLines(snap.splitLines);
+      setSelectedSliceId(snap.selectedSliceId);
+      return prevRedo.slice(0, -1);
+    });
+  }, [editCropTop, editCropBottom, editCropLeft, editCropRight, slices, splitLines, selectedSliceId, setEditCropTop, setEditCropBottom, setEditCropLeft, setEditCropRight]);
 
   const activeStoryboardPanel = panels?.find(
     (p) => p.image_url === scrapedImages[editingImageIdx!]
@@ -1241,9 +1253,15 @@ const handleCleanSingleBubble = async (
         setEditingImageIdx(null);
       } else if (e.key === "Enter") {
         handleExecuteSave();
-      } else if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+      } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "z") {
+        e.preventDefault();
+        handleRedo();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
         e.preventDefault();
         handleUndo();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") {
+        e.preventDefault();
+        handleRedo();
       } else if (e.key === "ArrowLeft" || e.key === "[") {
         handlePrevImage();
       } else if (e.key === "ArrowRight" || e.key === "]") {
@@ -1252,7 +1270,7 @@ const handleCleanSingleBubble = async (
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [editingImageIdx, slices, editCropTop, editCropBottom, editCropLeft, editCropRight, handleUndo]);
+  }, [editingImageIdx, slices, editCropTop, editCropBottom, editCropLeft, editCropRight, handleUndo, handleRedo]);
 
   // Global mouse listeners while dragging — keeps the drag alive even when
   // the mouse moves outside the image element boundaries.
@@ -1326,7 +1344,7 @@ const handleCleanSingleBubble = async (
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Undo Button in header */}
+             {/* Undo Button in header */}
             <button
               type="button"
               onClick={handleUndo}
@@ -1339,6 +1357,22 @@ const handleCleanSingleBubble = async (
               {history.length > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 bg-purple-600 text-white text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-lg">
                   {history.length}
+                </span>
+              )}
+            </button>
+            {/* Redo Button in header */}
+            <button
+              type="button"
+              onClick={handleRedo}
+              disabled={redoHistory.length === 0}
+              title="Redo last action (Ctrl+Y)"
+              className="relative flex items-center gap-1.5 text-neutral-400 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed px-2.5 py-1.5 rounded-xl hover:bg-neutral-800/80 border border-transparent hover:border-neutral-700/60 transition-all cursor-pointer"
+            >
+              <Redo2 className="h-3.5 w-3.5" />
+              <span className="text-[10px] font-semibold font-mono hidden sm:block">Redo</span>
+              {redoHistory.length > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-blue-650 text-white text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-lg">
+                  {redoHistory.length}
                 </span>
               )}
             </button>
@@ -1750,3 +1784,15 @@ const handleCleanSingleBubble = async (
     </div>
   );
 }
+function setIsCleaning(arg0: boolean) {
+  throw new Error("Function not implemented.");
+}
+
+function updateImageUrl(url: any) {
+  throw new Error("Function not implemented.");
+}
+
+function setHistoryPointer(arg0: number) {
+  throw new Error("Function not implemented.");
+}
+

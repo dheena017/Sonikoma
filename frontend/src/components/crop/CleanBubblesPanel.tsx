@@ -19,6 +19,36 @@ interface CleanBubblesPanelProps {
   brushAction?: "paint" | "erase";
   setBrushAction?: (action: "paint" | "erase") => void;
   handleClearBrushMask?: () => void;
+
+  // Lifted Parameter Props
+  detectionStyle?: "all" | "white_only" | "text_only";
+  setDetectionStyle?: (style: "all" | "white_only" | "text_only") => void;
+  eraseMethod?: "auto" | "inpaint" | "inpaint_ns" | "blur" | "solid_white" | "solid_black" | "solid_color" | "transparent" | "ocr";
+  setEraseMethod?: (method: "auto" | "inpaint" | "inpaint_ns" | "blur" | "solid_white" | "solid_black" | "solid_color" | "transparent" | "ocr") => void;
+  sensitivity?: number;
+  setSensitivity?: (val: number) => void;
+  dilation?: number;
+  setDilation?: (val: number) => void;
+  inpaintRadius?: number;
+  setInpaintRadius?: (val: number) => void;
+  debugMode?: boolean;
+  setDebugMode?: (val: boolean) => void;
+  fillColor?: string;
+  setFillColor?: (val: string) => void;
+  ocrLang?: string;
+  setOcrLang?: (val: string) => void;
+  gpu?: boolean;
+  setGpu?: (val: boolean) => void;
+  morphKernelSize?: number;
+  setMorphKernelSize?: (val: number) => void;
+  morphShape?: string;
+  setMorphShape?: (val: string) => void;
+  useCustomColorTarget?: boolean;
+  setUseCustomColorTarget?: (val: boolean) => void;
+  customColorTarget?: string;
+  setCustomColorTarget?: (val: string) => void;
+  customColorTolerance?: number;
+  setCustomColorTolerance?: (val: number) => void;
 }
 
 const DETECTION_OPTIONS = [
@@ -97,28 +127,37 @@ export default function CleanBubblesPanel({
   brushAction = "paint",
   setBrushAction,
   handleClearBrushMask,
+
+  detectionStyle = "all",
+  setDetectionStyle,
+  eraseMethod = "auto",
+  setEraseMethod,
+  sensitivity = 50,
+  setSensitivity,
+  dilation = -1,
+  setDilation,
+  inpaintRadius = 3,
+  setInpaintRadius,
+  debugMode = false,
+  setDebugMode,
+  fillColor = "#ffffff",
+  setFillColor,
+  ocrLang = "en",
+  setOcrLang,
+  gpu = false,
+  setGpu,
+  morphKernelSize = 15,
+  setMorphKernelSize,
+  morphShape = "ellipse",
+  setMorphShape,
+  useCustomColorTarget = false,
+  setUseCustomColorTarget,
+  customColorTarget = "#ffffcc",
+  setCustomColorTarget,
+  customColorTolerance = 25,
+  setCustomColorTolerance,
 }: CleanBubblesPanelProps) {
   const activeFetch = fetchWithInterceptor || fetch;
-
-  // Parameters
-  const [detectionStyle, setDetectionStyle] = useState<"all" | "white_only" | "text_only">("all");
-  const [eraseMethod, setEraseMethod] = useState<
-    "auto" | "inpaint" | "inpaint_ns" | "blur" | "solid_white" | "solid_black" | "solid_color" | "transparent" | "ocr"
-  >("auto");
-  const [sensitivity, setSensitivity] = useState<number>(50);
-  const [dilation, setDilation] = useState<number>(-1);
-  const [inpaintRadius, setInpaintRadius] = useState<number>(3);
-  const [debugMode, setDebugMode] = useState<boolean>(false);
-
-  // New Advanced parameters states
-  const [fillColor, setFillColor] = useState<string>("#ffffff");
-  const [ocrLang, setOcrLang] = useState<string>("en");
-  const [gpu, setGpu] = useState<boolean>(false);
-  const [morphKernelSize, setMorphKernelSize] = useState<number>(15);
-  const [morphShape, setMorphShape] = useState<string>("ellipse");
-  const [useCustomColorTarget, setUseCustomColorTarget] = useState<boolean>(false);
-  const [customColorTarget, setCustomColorTarget] = useState<string>("#ffffcc");
-  const [customColorTolerance, setCustomColorTolerance] = useState<number>(25);
 
   // UI States
   const [isCleaning, setIsCleaning] = useState<boolean>(false);

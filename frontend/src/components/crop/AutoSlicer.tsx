@@ -19,6 +19,7 @@ interface AutoSlicerProps {
   isDetecting: boolean;
   onCommitCuts?: () => void;
   hasDetectedBoxes?: boolean;
+  detectedCount?: number;
   clearDetectedBoxes?: () => void;
 }
 
@@ -27,6 +28,7 @@ export default function AutoSlicer({
   isDetecting,
   onCommitCuts,
   hasDetectedBoxes = false,
+  detectedCount = 0,
   clearDetectedBoxes,
 }: AutoSlicerProps) {
   // Advanced parameters states
@@ -48,6 +50,21 @@ export default function AutoSlicer({
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [showOpenCvAdvanced, setShowOpenCvAdvanced] = useState<boolean>(false);
   const [showHelp, setShowHelp] = useState<boolean>(false);
+
+  const resetSettings = () => {
+    setStrategy("local-cv");
+    setModel("gemini-2.5-flash");
+    setSensitivity(30);
+    setBackgroundMode("auto");
+    setAspectRatio("free");
+    setMinHeightPx(60);
+    setMinAreaPct(0.15);
+    setMergeThreshold(20);
+    setCannyLow(20);
+    setCannyHigh(100);
+    setCloseKernelSize(15);
+    setDryRun(true);
+  };
 
   const handleScan = () => {
     handleDetectPanels({
@@ -77,14 +94,24 @@ export default function AutoSlicer({
             Contours-Detection Auto Cutter
           </span>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowHelp(!showHelp)}
-          className="p-1 rounded bg-neutral-900 border border-white/5 text-neutral-400 hover:text-white transition-colors cursor-pointer"
-          title="Show Scanner Help"
-        >
-          <HelpCircle className="h-3 w-3" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={resetSettings}
+            className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-neutral-950/70 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-neutral-300 hover:bg-white/5 transition"
+            title="Reset settings to defaults"
+          >
+            Reset
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowHelp(!showHelp)}
+            className="p-1 rounded bg-neutral-900 border border-white/5 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+            title="Show Scanner Help"
+          >
+            <HelpCircle className="h-3 w-3" />
+          </button>
+        </div>
       </div>
 
       {showHelp && (
@@ -166,6 +193,9 @@ export default function AutoSlicer({
           >
             Clear Preview
           </button>
+          <div className="col-span-2 text-[9px] text-neutral-400 font-mono">
+            Preview contains <span className="font-semibold text-white">{detectedCount}</span> detected panel{detectedCount === 1 ? "" : "s"}.
+          </div>
         </div>
       )}
 
