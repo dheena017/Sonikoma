@@ -216,7 +216,7 @@ router.post("/edit-image", async (req, res) => {
 
 // Endpoint to merge/stitch multiple images
 router.post(["/merge-images", "/stitch-images"], async (req, res) => {
-  const { imageUrl1, imageUrl2, url1, url2, urls, layout = "vertical", spacing = 0, spacingColor = "white" } = req.body;
+  const { imageUrl1, imageUrl2, url1, url2, urls, layout = "vertical", spacing = 0, spacingColor = "white", scaleToFit = true, alignMode = "center", padding = 0 } = req.body;
 
   // Build the image URL list
   let imageUrls: string[] = [];
@@ -238,49 +238,79 @@ router.post(["/merge-images", "/stitch-images"], async (req, res) => {
   if (spacingColor === "transparent") bg = { r: 0, g: 0, b: 0, alpha: 0 };
 
   const gap = Number(spacing) || 0;
+  const pad = Number(padding) || 0;
 
   try {
     const resolved = await Promise.all(imageUrls.map((u) => resolveImageToBuffer(u)));
     const meta0 = await sharp(resolved[0].data).metadata();
 
-    const resizedBuffers: Buffer[] = [];
+    const preparedBuffers: { buf: Buffer; width: number; height: number }[] = [];
+    
+    // First pass: resize if scaleToFit is true, otherwise keep original
+    if (layout === "horizontal") {
+      const canonicalHeight = meta0.height || 800;
+      for (const r of resolved) {
+        if (scaleToFit) {
+          const resized = await sharp(r.data).resize({ height: canonicalHeight }).png().toBuffer();
+          const meta = await sharp(resized).metadata();
+          preparedBuffers.push({ buf: resized, width: meta.width || 0, height: meta.height || 0 });
+        } else {
+          const meta = await sharp(r.data).metadata();
+          preparedBuffers.push({ buf: r.data, width: meta.width || 0, height: meta.height || 0 });
+        }
+      }
+    } else {
+      // vertical
+      const canonicalWidth = meta0.width || 800;
+      for (const r of resolved) {
+        if (scaleToFit) {
+          const resized = await sharp(r.data).resize({ width: canonicalWidth }).png().toBuffer();
+          const meta = await sharp(resized).metadata();
+          preparedBuffers.push({ buf: resized, width: meta.width || 0, height: meta.height || 0 });
+        } else {
+          const meta = await sharp(r.data).metadata();
+          preparedBuffers.push({ buf: r.data, width: meta.width || 0, height: meta.height || 0 });
+        }
+      }
+    }
+
     let totalWidth = 0;
     let totalHeight = 0;
     const composites: sharp.OverlayOptions[] = [];
 
     if (layout === "horizontal") {
-      const canonicalHeight = meta0.height || 800;
-      for (const r of resolved) {
-        const resized = await sharp(r.data).resize({ height: canonicalHeight }).png().toBuffer();
-        resizedBuffers.push(resized);
+      const maxH = Math.max(...preparedBuffers.map(p => p.height));
+      totalHeight = maxH + pad * 2;
+      
+      let offsetX = pad;
+      for (let i = 0; i < preparedBuffers.length; i++) {
+        const { buf, width, height } = preparedBuffers[i];
+        let offsetY = pad;
+        if (alignMode === "center") offsetY = pad + Math.floor((maxH - height) / 2);
+        else if (alignMode === "end") offsetY = pad + (maxH - height);
+        
+        composites.push({ input: buf, top: offsetY, left: offsetX });
+        offsetX += width + gap;
+        totalWidth += width;
       }
-      let offsetX = 0;
-      for (let i = 0; i < resizedBuffers.length; i++) {
-        const buf = resizedBuffers[i];
-        const meta = await sharp(buf).metadata();
-        composites.push({ input: buf, top: 0, left: offsetX });
-        offsetX += (meta.width || 0) + gap;
-        totalWidth += (meta.width || 0);
-      }
-      totalWidth += gap * (resizedBuffers.length - 1);
-      totalHeight = canonicalHeight;
+      totalWidth += gap * (preparedBuffers.length - 1) + pad * 2;
     } else {
-      // vertical (default)
-      const canonicalWidth = meta0.width || 800;
-      for (const r of resolved) {
-        const resized = await sharp(r.data).resize({ width: canonicalWidth }).png().toBuffer();
-        resizedBuffers.push(resized);
+      // vertical
+      const maxW = Math.max(...preparedBuffers.map(p => p.width));
+      totalWidth = maxW + pad * 2;
+      
+      let offsetY = pad;
+      for (let i = 0; i < preparedBuffers.length; i++) {
+        const { buf, width, height } = preparedBuffers[i];
+        let offsetX = pad;
+        if (alignMode === "center") offsetX = pad + Math.floor((maxW - width) / 2);
+        else if (alignMode === "end") offsetX = pad + (maxW - width);
+        
+        composites.push({ input: buf, top: offsetY, left: offsetX });
+        offsetY += height + gap;
+        totalHeight += height;
       }
-      let offsetY = 0;
-      for (let i = 0; i < resizedBuffers.length; i++) {
-        const buf = resizedBuffers[i];
-        const meta = await sharp(buf).metadata();
-        composites.push({ input: buf, top: offsetY, left: 0 });
-        offsetY += (meta.height || 0) + gap;
-        totalHeight += (meta.height || 0);
-      }
-      totalHeight += gap * (resizedBuffers.length - 1);
-      totalWidth = canonicalWidth;
+      totalHeight += gap * (preparedBuffers.length - 1) + pad * 2;
     }
 
     const mergedBuffer = await sharp({

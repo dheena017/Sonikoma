@@ -12,6 +12,9 @@ interface MergePanelProps {
       layout: "vertical" | "horizontal";
       spacing: number;
       spacingColor: string;
+      scaleToFit: boolean;
+      alignMode: "center" | "start" | "end";
+      padding: number;
     }
   ) => Promise<void>;
 }
@@ -27,6 +30,9 @@ export default function MergePanel({
   const [layout, setLayout] = useState<"vertical" | "horizontal">("vertical");
   const [spacing, setSpacing] = useState<number>(0);
   const [spacingColor, setSpacingColor] = useState<string>("white");
+  const [padding, setPadding] = useState<number>(0);
+  const [scaleToFit, setScaleToFit] = useState<boolean>(true);
+  const [alignMode, setAlignMode] = useState<"center" | "start" | "end">("center");
 
   const maxNext = scrapedImages.length - 1 - editingImageIdx;
   const maxPrev = editingImageIdx;
@@ -162,6 +168,51 @@ export default function MergePanel({
             </select>
           </div>
         </div>
+
+        {/* Scale & Align */}
+        <div className="grid grid-cols-2 gap-4 pt-1">
+          <div className="space-y-1.5">
+            <label className="text-[8px] font-mono font-bold text-neutral-500 uppercase">Scale Mode</label>
+            <select
+              value={scaleToFit ? "fit" : "original"}
+              onChange={(e) => setScaleToFit(e.target.value === "fit")}
+              className="w-full bg-black/40 border border-white/5 text-neutral-300 rounded-lg px-2 py-1 text-[9px] font-mono focus:outline-none"
+            >
+              <option value="fit">Scale to Fit</option>
+              <option value="original">Keep Original Size</option>
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[8px] font-mono font-bold text-neutral-500 uppercase">Alignment</label>
+            <select
+              value={alignMode}
+              onChange={(e) => setAlignMode(e.target.value as any)}
+              disabled={scaleToFit}
+              className="w-full bg-black/40 border border-white/5 text-neutral-300 rounded-lg px-2 py-1 text-[9px] font-mono focus:outline-none disabled:opacity-40"
+            >
+              <option value="center">Center</option>
+              <option value="start">{layout === "vertical" ? "Left" : "Top"}</option>
+              <option value="end">{layout === "vertical" ? "Right" : "Bottom"}</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Global Padding */}
+        <div className="space-y-1.5 pt-1">
+          <div className="flex justify-between">
+            <label className="text-[8px] font-mono font-bold text-neutral-500 uppercase">Global Padding</label>
+            <span className="text-[8px] font-mono text-teal-400">{padding}px</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            step="5"
+            value={padding}
+            onChange={(e) => setPadding(Number(e.target.value))}
+            className="w-full accent-teal-500 h-1.5 bg-neutral-800 rounded-full appearance-none cursor-pointer"
+          />
+        </div>
       </div>
 
       {!canMerge ? (
@@ -226,6 +277,16 @@ export default function MergePanel({
                   +{n}
                 </button>
               ))}
+              
+              {maxMergeable > 5 && mergeCount !== maxMergeable && (
+                <button
+                  type="button"
+                  onClick={() => setMergeCount(maxMergeable)}
+                  className="px-3 py-1 rounded-lg border text-[10px] font-bold font-mono transition-all cursor-pointer active:scale-95 bg-purple-600/20 border-purple-500/40 text-purple-300 hover:bg-purple-600/40 hover:border-purple-400"
+                >
+                  Merge All Remaining
+                </button>
+              )}
             </div>
           </div>
 
@@ -294,7 +355,7 @@ export default function MergePanel({
           {/* ── Merge button ── */}
           <button
             type="button"
-            onClick={() => onMerge(mergeCount, { direction, layout, spacing, spacingColor })}
+            onClick={() => onMerge(mergeCount, { direction, layout, spacing, spacingColor, scaleToFit, alignMode, padding })}
             disabled={isMerging || !canMerge}
             className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl bg-gradient-to-r from-teal-700 to-emerald-700 hover:from-teal-600 hover:to-emerald-600 text-white text-xs font-bold font-sans transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-lg shadow-teal-900/30"
             style={{ boxShadow: isMerging ? undefined : "0 0 20px rgba(20,184,166,0.2)" }}

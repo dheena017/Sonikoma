@@ -14,6 +14,7 @@ import CropToolsPanel from "./crop/CropToolsPanel";
 import MergePanel from "./crop/MergePanel";
 
 interface CropEditorModalProps {
+  key?: any;
   editingImageIdx: number | null;
   setEditingImageIdx: (idx: number | null) => void;
   editCropTop: number;
@@ -174,7 +175,7 @@ export default function CropEditorModal({
 
   const handleMergeWithNext = async (
     count: number,
-    config: { direction: "next" | "prev"; layout: "vertical" | "horizontal"; spacing: number; spacingColor: string } = { direction: "next", layout: "vertical", spacing: 0, spacingColor: "white" }
+    config: { direction: "next" | "prev"; layout: "vertical" | "horizontal"; spacing: number; spacingColor: string; scaleToFit: boolean; alignMode: "center" | "start" | "end"; padding: number; } = { direction: "next", layout: "vertical", spacing: 0, spacingColor: "white", scaleToFit: true, alignMode: "center", padding: 0 }
   ) => {
     if (editingImageIdx === null) return;
     
@@ -198,7 +199,10 @@ export default function CropEditorModal({
           urls: urlsToMerge,
           layout: config.layout,
           spacing: config.spacing,
-          spacingColor: config.spacingColor
+          spacingColor: config.spacingColor,
+          scaleToFit: config.scaleToFit,
+          alignMode: config.alignMode,
+          padding: config.padding
         }),
       });
       if (!response.ok) throw new Error("Merge failed: " + response.status);
