@@ -270,7 +270,7 @@ export default function PanelCard({
             ) : (
               <span className="text-[10px] font-bold">🔗</span>
             )}
-            <span>Merge with #{idx + 2}</span>
+            <span>The Mearge</span>
           </button>
         )}
 

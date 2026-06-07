@@ -177,7 +177,7 @@ export default function AutoSlicer({
       </div>
 
       {/* Dry Run Commit Row */}
-      {hasDetectedBoxes && !isDetecting && (
+      {hasDetectedBoxes && dryRun && !isDetecting && (
         <div className="grid grid-cols-2 gap-2 p-2 bg-neutral-900/60 border border-neutral-800 rounded-xl animate-fadeIn">
           <button
             type="button"
@@ -194,7 +194,7 @@ export default function AutoSlicer({
             Clear Preview
           </button>
           <div className="col-span-2 text-[9px] text-neutral-400 font-mono">
-            Preview contains <span className="font-semibold text-white">{detectedCount}</span> detected panel{detectedCount === 1 ? "" : "s"}.
+            Dry-run preview contains <span className="font-semibold text-white">{detectedCount}</span> detected panel{detectedCount === 1 ? "" : "s"}.
           </div>
         </div>
       )}
