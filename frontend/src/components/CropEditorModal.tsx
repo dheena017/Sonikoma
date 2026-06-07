@@ -116,6 +116,14 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
   const [customColorTolerance, setCustomColorTolerance] = useState<number>(25);
   const [isCleaning, setIsCleaning] = useState<boolean>(false);
 
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
+
   const handleClearBrushMask = () => {
     const canvas = canvasMaskRef.current;
     if (canvas) {
@@ -1837,16 +1845,5 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
       </div>
     </div>
   );
-}
-function setIsCleaning(arg0: boolean) {
-  throw new Error("Function not implemented.");
-}
-
-function updateImageUrl(url: any) {
-  throw new Error("Function not implemented.");
-}
-
-function setHistoryPointer(arg0: number) {
-  throw new Error("Function not implemented.");
 }
 
