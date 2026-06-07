@@ -99,6 +99,23 @@ const [brushSize, setBrushSize] = useState(20);
 const [brushAction, setBrushAction] = useState<"paint" | "erase">("paint");
 const canvasMaskRef = useRef<HTMLCanvasElement>(null);
 
+  // Lifted Clean Bubbles Parameters States
+  const [detectionStyle, setDetectionStyle] = useState<"all" | "white_only" | "text_only">("all");
+  const [eraseMethod, setEraseMethod] = useState<"auto" | "inpaint" | "inpaint_ns" | "blur" | "solid_white" | "solid_black" | "solid_color" | "transparent" | "ocr">("auto");
+  const [sensitivity, setSensitivity] = useState<number>(50);
+  const [dilation, setDilation] = useState<number>(-1);
+  const [inpaintRadius, setInpaintRadius] = useState<number>(3);
+  const [debugMode, setDebugMode] = useState<boolean>(false);
+  const [fillColor, setFillColor] = useState<string>("#ffffff");
+  const [ocrLang, setOcrLang] = useState<string>("en");
+  const [gpu, setGpu] = useState<boolean>(false);
+  const [morphKernelSize, setMorphKernelSize] = useState<number>(15);
+  const [morphShape, setMorphShape] = useState<string>("ellipse");
+  const [useCustomColorTarget, setUseCustomColorTarget] = useState<boolean>(false);
+  const [customColorTarget, setCustomColorTarget] = useState<string>("#ffffcc");
+  const [customColorTolerance, setCustomColorTolerance] = useState<number>(25);
+  const [isCleaning, setIsCleaning] = useState<boolean>(false);
+
   const handleClearBrushMask = () => {
     const canvas = canvasMaskRef.current;
     if (canvas) {
@@ -256,51 +273,59 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
   };
 
   // Handler for cleaning a single detected bubble
-const handleCleanSingleBubble = async (
-  ymin: number,
-  xmin: number,
-  ymax: number,
-  xmax: number,
-  text: string
-) => {
-  // Simple wrapper around the bulk clean endpoint for a single bubble
-  setIsCleaning(true);
-  try {
-    const response = await activeFetch("/api/remove-speech-bubble", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        url: imgUrl,
-        box: { ymin, xmin, ymax, xmax },
-        text,
-        method: eraseMethod,
-        sensitivity,
-        dilation,
-        inpaint_radius: inpaintRadius,
-        detection_style: detectionStyle,
-        debug_mode: debugMode,
-        fill_color: eraseMethod === "solid_color" ? fillColor : "",
-        gpu,
-      }),
-    });
-    if (!response.ok) throw new Error(`Single bubble clean failed: ${response.status}`);
-    const data = await response.json();
-    if (data.success && data.url) {
-      // Update image URL and history
-      updateImageUrl(data.url);
-      const newHistory = history.slice(0, historyPointer + 1);
-      newHistory.push(data.url);
-      setHistory(newHistory);
-      setHistoryPointer(newHistory.length - 1);
-      addNotification("Cleaned single bubble successfully", "success");
+  const handleCleanSingleBubble = async (
+    ymin: number,
+    xmin: number,
+    ymax: number,
+    xmax: number,
+    text: string
+  ) => {
+    if (editingImageIdx === null || !imageUrl) return;
+    setIsCleaning(true);
+    try {
+      const response = await activeFetch("/api/remove-speech-bubble", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: imageUrl,
+          box: { ymin, xmin, ymax, xmax },
+          text,
+          method: eraseMethod,
+          sensitivity,
+          dilation,
+          inpaint_radius: inpaintRadius,
+          detection_style: detectionStyle,
+          debug_mode: debugMode,
+          fill_color: eraseMethod === "solid_color" ? fillColor : "",
+          gpu,
+        }),
+      });
+      if (!response.ok) throw new Error(`Single bubble clean failed: ${response.status}`);
+      const data = await response.json();
+      if (data.success && data.url) {
+        if (setScrapedImages) {
+          setScrapedImages((prev) => {
+            const copy = [...prev];
+            copy[editingImageIdx] = data.url;
+            return copy;
+          });
+        }
+        if (setPanels) {
+          setPanels((prev) =>
+            prev.map((p) =>
+              p.image_url === imageUrl ? { ...p, image_url: data.url } : p
+            )
+          );
+        }
+        addNotification("Cleaned single bubble successfully", "success");
+      }
+    } catch (err: any) {
+      console.error(err);
+      addNotification(err.message || "Failed to clean bubble", "error");
+    } finally {
+      setIsCleaning(false);
     }
-  } catch (err: any) {
-    console.error(err);
-    addNotification(err.message || "Failed to clean bubble", "error");
-  } finally {
-    setIsCleaning(false);
-  }
-};
+  };
 
   const handleDeleteCurrentImage = () => {
     if (editingImageIdx === null || !setScrapedImages) return;
@@ -1558,6 +1583,34 @@ const handleCleanSingleBubble = async (
                     brushAction={brushAction}
                     setBrushAction={setBrushAction}
                     handleClearBrushMask={handleClearBrushMask}
+                    detectionStyle={detectionStyle}
+                    setDetectionStyle={setDetectionStyle}
+                    eraseMethod={eraseMethod}
+                    setEraseMethod={setEraseMethod}
+                    sensitivity={sensitivity}
+                    setSensitivity={setSensitivity}
+                    dilation={dilation}
+                    setDilation={setDilation}
+                    inpaintRadius={inpaintRadius}
+                    setInpaintRadius={setInpaintRadius}
+                    debugMode={debugMode}
+                    setDebugMode={setDebugMode}
+                    fillColor={fillColor}
+                    setFillColor={setFillColor}
+                    ocrLang={ocrLang}
+                    setOcrLang={setOcrLang}
+                    gpu={gpu}
+                    setGpu={setGpu}
+                    morphKernelSize={morphKernelSize}
+                    setMorphKernelSize={setMorphKernelSize}
+                    morphShape={morphShape}
+                    setMorphShape={setMorphShape}
+                    useCustomColorTarget={useCustomColorTarget}
+                    setUseCustomColorTarget={setUseCustomColorTarget}
+                    customColorTarget={customColorTarget}
+                    setCustomColorTarget={setCustomColorTarget}
+                    customColorTolerance={customColorTolerance}
+                    setCustomColorTolerance={setCustomColorTolerance}
                   />
                 </div>
               )}
@@ -1621,6 +1674,7 @@ const handleCleanSingleBubble = async (
                     isDetecting={isDetecting}
                     onCommitCuts={handleCommitDetectedBoxes}
                     hasDetectedBoxes={detectedBoxes && detectedBoxes.length > 0}
+                    detectedCount={detectedBoxes.length}
                     clearDetectedBoxes={handleClearDetectedBoxes}
                   />
                 </div>
