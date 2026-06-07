@@ -1506,7 +1506,7 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
             <div className="flex gap-1 bg-black/40 backdrop-blur-sm p-1.5 rounded-2xl border border-white/5">
               {([
                 { key: "adjust", label: "Adjust", emoji: "✨" },
-                { key: "tools", label: "Tools", emoji: "🔧" },
+                { key: "tools", label: "Edit", emoji: "✏️" },
                 { key: "slice", label: "Cut", emoji: "✂️" },
                 { key: "cuts", label: `Cuts (${slices.length})`, emoji: "🎯" },
                 { key: "merge", label: "Merge", emoji: "🔗" },
