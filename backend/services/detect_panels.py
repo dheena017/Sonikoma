@@ -109,7 +109,7 @@ def merge_overlapping_boxes(boxes, w_img, h_img, merge_threshold):
             
     return boxes
 
-def run_cv_detection(image_path, sensitivity, bg_mode, min_width_pct, min_height_px, merge_threshold, aspect_ratio_str):
+def run_cv_detection(image_path, sensitivity, bg_mode, min_width_pct, min_height_px, merge_threshold, aspect_ratio_str, canny_low=20, canny_high=100, close_kernel_size=15):
     try:
         import cv2
         has_cv = True
@@ -145,11 +145,11 @@ def run_cv_detection(image_path, sensitivity, bg_mode, min_width_pct, min_height
             _, thresh = cv2.threshold(gray, threshold_val, 255, cv2.THRESH_BINARY)
             
         # 3. Edges bitwise OR
-        edges = cv2.Canny(gray, 20, 100)
+        edges = cv2.Canny(gray, canny_low, canny_high)
         merged_mask = cv2.bitwise_or(thresh, edges)
         
         # 4. Morphological Close
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (15, 15))
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (close_kernel_size, close_kernel_size))
         closed = cv2.morphologyEx(merged_mask, cv2.MORPH_CLOSE, kernel)
         
         # 5. Locate contours
@@ -306,6 +306,9 @@ def main():
     parser.add_argument("--min_height_px", type=int, default=60, help="Minimum height in pixels")
     parser.add_argument("--merge_threshold", type=int, default=20, help="Vertical overlap merge threshold in pixels")
     parser.add_argument("--aspect_ratio", default="free", choices=["free", "1:1", "16:9", "9:16", "4:3"], help="Target aspect ratio")
+    parser.add_argument("--canny_low", type=int, default=20, help="Canny low threshold")
+    parser.add_argument("--canny_high", type=int, default=100, help="Canny high threshold")
+    parser.add_argument("--close_kernel_size", type=int, default=15, help="Morphological close kernel size")
     
     args = parser.parse_args()
     
@@ -321,7 +324,10 @@ def main():
             min_width_pct=args.min_width_pct,
             min_height_px=args.min_height_px,
             merge_threshold=args.merge_threshold,
-            aspect_ratio_str=args.aspect_ratio
+            aspect_ratio_str=args.aspect_ratio,
+            canny_low=args.canny_low,
+            canny_high=args.canny_high,
+            close_kernel_size=args.close_kernel_size
         )
         print(json.dumps({"success": True, "panels": panels, "message": f"Detected {len(panels)} panels."}))
     except Exception as e:

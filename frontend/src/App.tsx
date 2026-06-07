@@ -18,6 +18,8 @@ import {
 import { GeneratedPanel } from "./types";
 import { parseWebtoonUrl } from "./utils";
 import { AI_MODELS } from "./models";
+import { usePersistedState } from "./hooks/usePersistedState";
+import { createFetchWithInterceptor } from "./api/fetchWithInterceptor";
 
 // Child Components
 import Header from "./components/Header";
@@ -32,6 +34,10 @@ import TerminalLogs from "./components/TerminalLogs";
 import ModelStatusTable from "./components/ModelStatusTable";
 import NotificationStack, { Notification, NotificationType } from "./components/NotificationStack";
 import ErrorPopupModal, { ErrorPopupDetail } from "./components/ErrorPopupModal";
+import UrlInputPanel from "./components/UrlInputPanel";
+import PipelineStatusCard from "./components/PipelineStatusCard";
+import FinalVideoPlayer from "./components/FinalVideoPlayer";
+import OutputMetadataPanel from "./components/OutputMetadataPanel";
 
 export default function App() {
   // Input parameters

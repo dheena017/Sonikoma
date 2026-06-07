@@ -72,7 +72,11 @@ router.post(["/ai-detect-panels", "/detect-panels", "/ai-smart-crop"], async (re
     backgroundColorMode = "auto", 
     aspectRatio = "free", 
     minAreaPct = 0.15, 
-    mergeThreshold = 20 
+    mergeThreshold = 20,
+    cannyLow = 20,
+    cannyHigh = 100,
+    closeKernelSize = 15,
+    minHeightPx = 60
   } = req.body;
 
   if (!url) {
@@ -99,7 +103,7 @@ router.post(["/ai-detect-panels", "/detect-panels", "/ai-smart-crop"], async (re
       await fs.promises.writeFile(tempIn, imageBuffer);
 
       const pythonBin = process.platform === 'win32' ? 'python' : 'python3';
-      const pythonCommand = `"${pythonBin}" backend/services/detect_panels.py --image_path "${tempIn}" --sensitivity ${sensitivity} --background_mode "${backgroundColorMode}" --min_width_pct ${minAreaPct} --merge_threshold ${mergeThreshold} --aspect_ratio "${aspectRatio}"`;
+      const pythonCommand = `"${pythonBin}" backend/services/detect_panels.py --image_path "${tempIn}" --sensitivity ${sensitivity} --background_mode "${backgroundColorMode}" --min_width_pct ${minAreaPct} --merge_threshold ${mergeThreshold} --aspect_ratio "${aspectRatio}" --canny_low ${cannyLow} --canny_high ${cannyHigh} --close_kernel_size ${closeKernelSize} --min_height_px ${minHeightPx}`;
 
       console.log(`[Local CV Detector API] Running command: ${pythonCommand}`);
 

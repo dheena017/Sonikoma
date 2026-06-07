@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { Move, Trash2 } from "lucide-react";
 import { Slice } from "./types";
 
@@ -25,6 +25,21 @@ interface CropCanvasProps {
   onResizeStart: (handle: string, clientX: number, clientY: number) => void;
   handleSelectAndDragSlice: (slice: Slice, clientX: number, clientY: number) => void;
   zoom?: number;
+
+  // Phase 4 Props
+  editMode?: "crop" | "clean_auto" | "clean_manual" | "typeset" | "slices";
+  detectedBubbles?: Array<{ box: [number, number, number, number]; text: string; category?: string }>;
+  selectedBubbleIdx?: number | null;
+  setSelectedBubbleIdx?: (idx: number | null) => void;
+  brushSize?: number;
+  brushAction?: "paint" | "erase";
+  canvasMaskRef?: React.RefObject<HTMLCanvasElement | null>;
+  onCleanSingleBubble?: (ymin: number, xmin: number, ymax: number, xmax: number, text: string) => Promise<void>;
+  typesetText?: string;
+  typesetFont?: string;
+  typesetSize?: number;
+  typesetAlign?: "left" | "center" | "right";
+  typesetColor?: string;
 }
 
 export default function CropCanvas({
@@ -50,6 +65,21 @@ export default function CropCanvas({
   onResizeStart,
   handleSelectAndDragSlice,
   zoom = 1,
+
+  // Phase 4 Props
+  editMode = "crop",
+  detectedBubbles = [],
+  selectedBubbleIdx = null,
+  setSelectedBubbleIdx,
+  brushSize = 20,
+  brushAction = "paint",
+  canvasMaskRef,
+  onCleanSingleBubble,
+  typesetText = "",
+  typesetFont = "arial",
+  typesetSize = -1,
+  typesetAlign = "center",
+  typesetColor = "#000000",
 }: CropCanvasProps) {
   const hasCropSelection =
     editCropTop !== 0 ||
@@ -59,6 +89,7 @@ export default function CropCanvas({
 
   // Track mouse position for dynamic cursor
   const [hoverPct, setHoverPct] = useState<{ x: number; y: number } | null>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
 
   const getClientPct = useCallback(
     (clientX: number, clientY: number) => {
@@ -71,7 +102,112 @@ export default function CropCanvas({
     [containerRef]
   );
 
+  // Initialize and resize manual mask canvas
+  const initCanvas = (canvas: HTMLCanvasElement) => {
+    const rect = canvas.getBoundingClientRect();
+    if (canvas.width !== rect.width || canvas.height !== rect.height) {
+      // Create temporary canvas to preserve mask drawing
+      const tempCanvas = document.createElement("canvas");
+      tempCanvas.width = canvas.width;
+      tempCanvas.height = canvas.height;
+      const tempCtx = tempCanvas.getContext("2d");
+      if (tempCtx && canvas.width > 0 && canvas.height > 0) {
+        tempCtx.drawImage(canvas, 0, 0);
+      }
+
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+      
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        if (tempCtx && tempCanvas.width > 0 && tempCanvas.height > 0) {
+          ctx.drawImage(tempCanvas, 0, 0, rect.width, rect.height);
+        }
+      }
+    }
+
+    // Apply settings
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.lineWidth = brushSize;
+      if (brushAction === "erase") {
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.strokeStyle = "rgba(0, 0, 0, 1)";
+      } else {
+        ctx.globalCompositeOperation = "source-over";
+        ctx.strokeStyle = "rgba(239, 68, 68, 0.6)"; // Semi-transparent red brush
+      }
+    }
+  };
+
+  const getCanvasCoords = (e: React.MouseEvent | React.TouchEvent, canvas: HTMLCanvasElement) => {
+    const rect = canvas.getBoundingClientRect();
+    let clientX = 0;
+    let clientY = 0;
+    if ("touches" in e) {
+      if (e.touches.length === 0) return null;
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top
+    };
+  };
+
+  const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    const canvas = canvasMaskRef?.current;
+    if (!canvas) return;
+    initCanvas(canvas);
+    setIsDrawing(true);
+    
+    const coords = getCanvasCoords(e, canvas);
+    if (!coords) return;
+    
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.beginPath();
+      ctx.moveTo(coords.x, coords.y);
+      ctx.lineTo(coords.x, coords.y);
+      ctx.stroke();
+    }
+  };
+
+  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isDrawing) return;
+    const canvas = canvasMaskRef?.current;
+    if (!canvas) return;
+    const coords = getCanvasCoords(e, canvas);
+    if (!coords) return;
+    
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.lineTo(coords.x, coords.y);
+      ctx.stroke();
+    }
+  };
+
+  const handleCanvasMouseUp = () => {
+    setIsDrawing(false);
+  };
+
+  // Re-sync brush size & action whenever they change
+  useEffect(() => {
+    const canvas = canvasMaskRef?.current;
+    if (canvas) {
+      initCanvas(canvas);
+    }
+  }, [brushSize, brushAction, canvasMaskRef]);
+
   const getCursor = () => {
+    if (editMode === "clean_manual") return "crosshair";
     if (showSplitPosition) {
       if (hoverPct) {
         const nearLine = splitLines.some(lineY => Math.abs(lineY - hoverPct.y) < 2.5);
@@ -94,32 +230,34 @@ export default function CropCanvas({
 
   return (
     <div
-      className="relative border border-white/5 hover:border-purple-500/20 rounded-2xl bg-black overflow-y-auto flex-1 h-0 flex items-start justify-center select-none transition-colors"
+      className="relative border border-white/5 hover:border-purple-500/20 rounded-2xl bg-black overflow-auto flex-1 h-0 flex items-start justify-center select-none transition-colors"
       style={{ boxShadow: "inset 0 0 30px rgba(0,0,0,0.5)" }}
     >
       <div
         ref={containerRef}
         onMouseDown={(e) => {
+          if (editMode === "clean_manual") return;
           if (e.button !== 0) return;
           handleStart(e.clientX, e.clientY);
         }}
         onMouseMove={(e) => {
-          // Update hover position for cursor
+          if (editMode === "clean_manual") return;
           const pct = getClientPct(e.clientX, e.clientY);
           if (pct) setHoverPct(pct);
-          // NOTE: actual move tracking is done via global listeners in the parent
         }}
         onMouseLeave={() => {
           setHoverPct(null);
-          // Do NOT call handleEnd here — global window listeners handle mouseup
-          // so the drag continues even when the mouse leaves the image
         }}
         onTouchStart={(e) => {
+          if (editMode === "clean_manual") return;
           if (e.touches && e.touches[0]) {
             handleStart(e.touches[0].clientX, e.touches[0].clientY);
           }
         }}
-        onTouchEnd={handleEnd}
+        onTouchEnd={() => {
+          if (editMode === "clean_manual") return;
+          handleEnd();
+        }}
         className="relative inline-block w-full max-w-full"
         style={{
           cursor: getCursor(),
@@ -137,6 +275,91 @@ export default function CropCanvas({
           referrerPolicy="no-referrer"
           draggable={false}
         />
+
+        {/* Manual Brush Painting Layer */}
+        {editMode === "clean_manual" && (
+          <canvas
+            ref={canvasMaskRef}
+            className="absolute inset-0 z-40 cursor-crosshair pointer-events-auto w-full h-full"
+            style={{ touchAction: "none" }}
+            onMouseDown={handleCanvasMouseDown}
+            onMouseMove={handleCanvasMouseMove}
+            onMouseUp={handleCanvasMouseUp}
+            onMouseLeave={handleCanvasMouseUp}
+            onTouchStart={handleCanvasMouseDown}
+            onTouchMove={handleCanvasMouseMove}
+            onTouchEnd={handleCanvasMouseUp}
+          />
+        )}
+
+        {/* Interactive Speech Bubble Box Overlays */}
+        {(editMode === "clean_auto" || editMode === "typeset") && detectedBubbles.length > 0 && (
+          <div className="absolute inset-0 z-30 pointer-events-none">
+            {detectedBubbles.map((bubble, idx) => {
+              const [ymin, xmin, ymax, xmax] = bubble.box;
+              const top = ymin / 10;
+              const left = xmin / 10;
+              const width = (xmax - xmin) / 10;
+              const height = (ymax - ymin) / 10;
+              const isSelected = selectedBubbleIdx === idx;
+
+              return (
+                <div
+                  key={`bubble-box-${idx}`}
+                  className={`absolute border-2 pointer-events-auto cursor-pointer transition-all ${
+                    isSelected
+                      ? "border-amber-400 bg-amber-400/20 z-40 shadow-[0_0_10px_rgba(251,191,36,0.5)]"
+                      : "border-purple-400/40 bg-purple-500/5 hover:border-purple-300 hover:bg-purple-500/20"
+                  }`}
+                  style={{
+                    top: `${top}%`,
+                    left: `${left}%`,
+                    width: `${width}%`,
+                    height: `${height}%`,
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (setSelectedBubbleIdx) setSelectedBubbleIdx(idx);
+                    if (onCleanSingleBubble) {
+                      onCleanSingleBubble(ymin, xmin, ymax, xmax, bubble.text);
+                    }
+                  }}
+                  title={bubble.text ? `Bubble OCR: "${bubble.text}" (Click to Clean/Select)` : "Detected Bubble (Click to Clean/Select)"}
+                >
+                  <div className="absolute left-1 top-1 bg-black/85 text-[8px] text-purple-300 font-bold px-1 py-0.5 rounded border border-purple-500/20 max-w-[90%] overflow-hidden text-ellipsis whitespace-nowrap opacity-75 group-hover:opacity-100 transition-opacity">
+                    Bubble #{idx + 1}
+                  </div>
+                  {bubble.text && (
+                    <div className="absolute bottom-1 left-1 max-w-[95%] bg-black/90 text-[9px] text-neutral-200 px-1.5 py-0.5 rounded border border-white/5 opacity-0 hover:opacity-100 transition-opacity pointer-events-none overflow-hidden text-ellipsis whitespace-nowrap z-50">
+                      {bubble.text}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Live Typeset Text Preview Overlay */}
+        {editMode === "typeset" && selectedBubbleIdx !== null && detectedBubbles[selectedBubbleIdx] && (
+          <div
+            className="absolute z-40 pointer-events-none flex items-center justify-center p-2 text-center select-none"
+            style={{
+              top: `${detectedBubbles[selectedBubbleIdx].box[0] / 10}%`,
+              left: `${detectedBubbles[selectedBubbleIdx].box[1] / 10}%`,
+              width: `${(detectedBubbles[selectedBubbleIdx].box[3] - detectedBubbles[selectedBubbleIdx].box[1]) / 10}%`,
+              height: `${(detectedBubbles[selectedBubbleIdx].box[2] - detectedBubbles[selectedBubbleIdx].box[0]) / 10}%`,
+              color: typesetColor,
+              fontFamily: typesetFont === "comic" ? "Comic Sans MS, cursive" : typesetFont === "cour" ? "Courier New, monospace" : typesetFont === "times" ? "Times New Roman, serif" : "Arial, sans-serif",
+              fontSize: typesetSize && typesetSize > 0 ? `${typesetSize}px` : "14px",
+              textAlign: typesetAlign,
+              fontWeight: "bold",
+              textShadow: "0 0 3px white, 0 0 3px white, 0 0 3px white"
+            }}
+          >
+            {typesetText || "Preview Text"}
+          </div>
+        )}
 
         {/* Split guidelines */}
         {showSplitPosition && (
@@ -185,7 +408,7 @@ export default function CropCanvas({
         )}
 
         {/* CROP MASK SHADED AREAS */}
-        {hasCropSelection && (
+        {hasCropSelection && editMode === "crop" && (
           <>
             <div
               className="absolute top-0 left-0 right-0 bg-black/70 backdrop-blur-[1px] transition-all duration-75 pointer-events-none"
@@ -207,7 +430,7 @@ export default function CropCanvas({
         )}
 
         {/* SLICES VISUAL OVERLAYS */}
-        {slices.map((slice, index) => {
+        {editMode === "slices" && slices.map((slice, index) => {
           const isSelected = slice.id === selectedSliceId;
           return (
             <div
@@ -269,7 +492,7 @@ export default function CropCanvas({
         })}
 
         {/* ACTIVE CROP BOX BOUNDARY GUIDES */}
-        {hasCropSelection && (
+        {hasCropSelection && editMode === "crop" && (
           <div
             className="absolute border-2 border-dashed border-emerald-400/80 pointer-events-none transition-all duration-75"
             style={{

@@ -21,6 +21,8 @@ const PRESETS = [
   { id: "anime_vibrant", label: "Anime Vibrant", icon: "✦" },
   { id: "cinematic_drama", label: "Cinematic Dark", icon: "◈" },
   { id: "hdr_clear", label: "Clarity HDR", icon: "◉" },
+  { id: "vintage_warm", label: "Vintage Warm", icon: "☀️" },
+  { id: "neon_cyber", label: "Neon Cyberpunk", icon: "🌌" },
 ];
 
 interface SliderRowProps {

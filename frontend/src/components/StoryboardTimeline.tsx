@@ -1,7 +1,7 @@
 import React from "react";
 import { GeneratedPanel } from "../types";
 import { getPanelFilterStyle } from "../utils";
-import { Sparkles, RefreshCw, Download } from "lucide-react";
+import { Sparkles, RefreshCw, Download, Sliders } from "lucide-react";
 
 interface StoryboardTimelineProps {
   panels: GeneratedPanel[];
@@ -40,6 +40,10 @@ export default function StoryboardTimeline({
   const [analyzingPanelId, setAnalyzingPanelId] = React.useState<number | null>(null);
   const [isCompiling, setIsCompiling] = React.useState<boolean>(false);
   const [isZipping, setIsZipping] = React.useState<boolean>(false);
+  const [showBulkOps, setShowBulkOps] = React.useState<boolean>(false);
+  const [bulkDuration, setBulkDuration] = React.useState<number>(4.0);
+  const [bulkMotion, setBulkMotion] = React.useState<string>("zoom_in");
+  const [bulkPreset, setBulkPreset] = React.useState<string>("none");
 
   const handleDownloadZip = async () => {
     if (panels.length === 0) return;
@@ -130,6 +134,50 @@ export default function StoryboardTimeline({
         `[MoviePy]   - Revise (Revised): ${durVal}s`,
         ...prev
       ]);
+    }
+  };
+
+  const handleShiftPanel = (index: number, direction: "left" | "right") => {
+    if (direction === "left" && index > 0) {
+      setPanels(prev => {
+        const copy = [...prev];
+        const temp = copy[index];
+        copy[index] = copy[index - 1];
+        copy[index - 1] = temp;
+        return copy;
+      });
+      setCurrentPanelIndex(index - 1);
+    } else if (direction === "right" && index < panels.length - 1) {
+      setPanels(prev => {
+        const copy = [...prev];
+        const temp = copy[index];
+        copy[index] = copy[index + 1];
+        copy[index + 1] = temp;
+        return copy;
+      });
+      setCurrentPanelIndex(index + 1);
+    }
+  };
+
+  const handleBulkSetDuration = () => {
+    setPanels(prev => prev.map(p => ({ ...p, duration: bulkDuration })));
+    addNotification?.(`Applied ${bulkDuration}s duration to all panels!`, "success");
+  };
+
+  const handleBulkSetMotion = () => {
+    setPanels(prev => prev.map(p => ({ ...p, motion_type: bulkMotion })));
+    addNotification?.(`Applied '${bulkMotion}' motion to all panels!`, "success");
+  };
+
+  const handleBulkSetPreset = () => {
+    setPanels(prev => prev.map(p => ({ ...p, filter_preset: bulkPreset })));
+    addNotification?.(`Applied '${bulkPreset}' style filter to all panels!`, "success");
+  };
+
+  const handleClearTimeline = () => {
+    if (window.confirm("Are you sure you want to clear the entire storyboard timeline?")) {
+      setPanels([]);
+      addNotification?.("Storyboard cleared", "info");
     }
   };
 
@@ -290,6 +338,20 @@ export default function StoryboardTimeline({
         </div>
         
         <div className="flex items-center gap-2">
+          {/* Bulk Action Toggle */}
+          <button
+            type="button"
+            onClick={() => setShowBulkOps(!showBulkOps)}
+            className={`px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
+              showBulkOps
+                ? "bg-purple-900/40 border-purple-500/50 text-purple-300"
+                : "bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200"
+            }`}
+          >
+            <Sliders className="h-4 w-4 text-purple-400" />
+            <span>Bulk Actions</span>
+          </button>
+
           {/* ZIP Download Button */}
           <button
             type="button"
@@ -328,6 +390,96 @@ export default function StoryboardTimeline({
           </button>
         </div>
       </div>
+
+      {/* Bulk Operations Menu */}
+      {showBulkOps && (
+        <div className="bg-neutral-950/70 p-4 rounded-xl border border-purple-900/30 grid grid-cols-1 md:grid-cols-4 gap-4 animate-fadeIn">
+          {/* Duration */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-neutral-400 uppercase font-mono tracking-wider block">Bulk Set Timing</label>
+            <div className="flex gap-2">
+              <input
+                type="number"
+                min={1}
+                max={15}
+                step={0.5}
+                value={bulkDuration}
+                onChange={(e) => setBulkDuration(parseFloat(e.target.value) || 4.0)}
+                className="bg-neutral-900 border border-neutral-800 rounded px-2.5 py-1 text-[11px] text-white w-20 outline-none"
+              />
+              <button
+                type="button"
+                onClick={handleBulkSetDuration}
+                className="flex-1 bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold py-1 rounded transition-colors cursor-pointer"
+              >
+                Apply All
+              </button>
+            </div>
+          </div>
+
+          {/* Camera Motion */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-neutral-400 uppercase font-mono tracking-wider block">Bulk Set Cam Motion</label>
+            <div className="flex gap-2">
+              <select
+                value={bulkMotion}
+                onChange={(e) => setBulkMotion(e.target.value)}
+                className="flex-1 bg-neutral-900 border border-neutral-800 rounded px-2.5 py-1 text-[11px] text-white outline-none cursor-pointer"
+              >
+                <option value="zoom_in">Zoom In</option>
+                <option value="zoom_out">Zoom Out</option>
+                <option value="pan_right">Pan Right</option>
+                <option value="pan_left">Pan Left</option>
+                <option value="pan_down">Pan Down</option>
+              </select>
+              <button
+                type="button"
+                onClick={handleBulkSetMotion}
+                className="bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold px-3 py-1 rounded transition-colors cursor-pointer"
+              >
+                Apply All
+              </button>
+            </div>
+          </div>
+
+          {/* Color Grading Presets */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-neutral-400 uppercase font-mono tracking-wider block">Bulk Set Color Preset</label>
+            <div className="flex gap-2">
+              <select
+                value={bulkPreset}
+                onChange={(e) => setBulkPreset(e.target.value)}
+                className="flex-1 bg-neutral-900 border border-neutral-800 rounded px-2.5 py-1 text-[11px] text-white outline-none cursor-pointer"
+              >
+                <option value="none">Original</option>
+                <option value="anime_vibrant">Anime Vibrant</option>
+                <option value="cinematic_drama">Cinematic Dark</option>
+                <option value="hdr_clear">Clarity HDR</option>
+                <option value="vintage_warm">Vintage Warm</option>
+                <option value="neon_cyber">Neon Cyberpunk</option>
+              </select>
+              <button
+                type="button"
+                onClick={handleBulkSetPreset}
+                className="bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold px-3 py-1 rounded transition-colors cursor-pointer"
+              >
+                Apply All
+              </button>
+            </div>
+          </div>
+
+          {/* Reset / Actions */}
+          <div className="flex flex-col justify-end gap-2">
+            <button
+              type="button"
+              onClick={handleClearTimeline}
+              className="w-full bg-red-950/40 hover:bg-red-950/60 border border-red-900/40 text-red-400 text-[10px] font-bold py-1.5 rounded transition-colors cursor-pointer"
+            >
+              Clear Storyboard Timeline
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Storyboard grid */}
       <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin">
@@ -374,6 +526,34 @@ export default function StoryboardTimeline({
                 {/* Number tag */}
                 <div className="absolute top-2 left-2 h-5 w-5 rounded bg-black/80 backdrop-blur flex items-center justify-center font-mono text-[10px] text-purple-400 font-bold border border-purple-900/40">
                   #{panel.id}
+                </div>
+
+                {/* Reorder Buttons */}
+                <div className="absolute top-2 right-2 flex gap-1 z-20">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleShiftPanel(idx, "left");
+                    }}
+                    disabled={idx === 0}
+                    className="p-1 rounded bg-black/85 hover:bg-neutral-800 border border-white/10 text-neutral-300 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition-all cursor-pointer font-mono text-[8px] leading-none"
+                    title="Move Panel Left"
+                  >
+                    ◀
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleShiftPanel(idx, "right");
+                    }}
+                    disabled={idx === panels.length - 1}
+                    className="p-1 rounded bg-black/85 hover:bg-neutral-800 border border-white/10 text-neutral-300 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition-all cursor-pointer font-mono text-[8px] leading-none"
+                    title="Move Panel Right"
+                  >
+                    ▶
+                  </button>
                 </div>
 
                 {/* Motion overlay text */}

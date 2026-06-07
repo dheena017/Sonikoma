@@ -92,6 +92,22 @@ export default function CropEditorModal({
     right: number;
   } | null>(null);
   const [draggingSplitLineIdx, setDraggingSplitLineIdx] = useState<number | null>(null);
+const [editMode, setEditMode] = useState<"crop" | "clean_auto" | "clean_manual" | "typeset" | "slices">("crop");
+const [detectedBubbles, setDetectedBubbles] = useState<Array<{ box: [number, number, number, number]; text: string; category?: string }>>([]);
+const [selectedBubbleIdx, setSelectedBubbleIdx] = useState<number | null>(null);
+const [brushSize, setBrushSize] = useState(20);
+const [brushAction, setBrushAction] = useState<"paint" | "erase">("paint");
+const canvasMaskRef = useRef<HTMLCanvasElement>(null);
+
+  const handleClearBrushMask = () => {
+    const canvas = canvasMaskRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+  };
 
   const imageUrl = editingImageIdx !== null ? scrapedImages[editingImageIdx] : null;
   const savedState = imageUrl && imageEditStates ? imageEditStates[imageUrl] : null;
@@ -238,6 +254,88 @@ export default function CropEditorModal({
       setEditingImageIdx(editingImageIdx + 1);
     }
   };
+
+  // Handler for cleaning a single detected bubble
+const handleCleanSingleBubble = async (
+  ymin: number,
+  xmin: number,
+  ymax: number,
+  xmax: number,
+  text: string
+) => {
+  // Simple wrapper around the bulk clean endpoint for a single bubble
+  setIsCleaning(true);
+  try {
+    const response = await activeFetch("/api/remove-speech-bubble", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        url: imgUrl,
+        box: { ymin, xmin, ymax, xmax },
+        text,
+        method: eraseMethod,
+        sensitivity,
+        dilation,
+        inpaint_radius: inpaintRadius,
+        detection_style: detectionStyle,
+        debug_mode: debugMode,
+        fill_color: eraseMethod === "solid_color" ? fillColor : "",
+        gpu,
+      }),
+    });
+    if (!response.ok) throw new Error(`Single bubble clean failed: ${response.status}`);
+    const data = await response.json();
+    if (data.success && data.url) {
+      // Update image URL and history
+      updateImageUrl(data.url);
+      const newHistory = history.slice(0, historyPointer + 1);
+      newHistory.push(data.url);
+      setHistory(newHistory);
+      setHistoryPointer(newHistory.length - 1);
+      addNotification("Cleaned single bubble successfully", "success");
+    }
+  } catch (err: any) {
+    console.error(err);
+    addNotification(err.message || "Failed to clean bubble", "error");
+  } finally {
+    setIsCleaning(false);
+  }
+};
+
+// Updated CropCanvas component with Phase 4 props
+<CropCanvas
+  imgUrl={scrapedImages[editingImageIdx]}
+  containerRef={containerRef}
+  editCropTop={editCropTop}
+  editCropBottom={editCropBottom}
+  editCropLeft={editCropLeft}
+  editCropRight={editCropRight}
+  slices={slices}
+  selectedSliceId={selectedSliceId}
+  showSplitPosition={showSplitPosition}
+  splitPosition={splitPosition}
+  splitLines={splitLines}
+  handleStart={handleStart}
+  handleMove={handleMove}
+  handleEnd={handleEnd}
+  isPointInsideSelection={isPointInsideSelection}
+  handleSelectSlice={handleSelectSlice}
+  handleDeleteSlice={handleDeleteSlice}
+  handleRemoveSplitLine={handleRemoveSplitLine}
+  dragType={dragType as any}
+  onResizeStart={onResizeStart}
+  handleSelectAndDragSlice={handleSelectAndDragSlice}
+  zoom={zoom}
+  detectedBoxes={detectedBoxes}
+  // Phase 4 integration
+  editMode={editMode}
+  detectedBubbles={detectedBubbles}
+  selectedBubbleIdx={selectedBubbleIdx}
+  setSelectedBubbleIdx={setSelectedBubbleIdx}
+  brushSize={brushSize}
+  canvasMaskRef={canvasMaskRef}
+  onCleanSingleBubble={handleCleanSingleBubble}
+/>
 
   const handleDeleteCurrentImage = () => {
     if (editingImageIdx === null || !setScrapedImages) return;
@@ -503,7 +601,52 @@ export default function CropEditorModal({
     }
   };
 
-  const handleDetectPanels = async (settings?: { sensitivity?: number; backgroundMode?: string; aspectRatio?: string }) => {
+  const handleCommitDetectedBoxes = () => {
+    if (detectedBoxes.length === 0) {
+      addNotification("No detected boxes to apply.", "warning");
+      return;
+    }
+    const initialSlices = detectedBoxes.map((box: any, index: number) => ({
+      id: `detected-${index}-${Date.now()}`,
+      cropTop: box.cropTop,
+      cropBottom: box.cropBottom,
+      cropLeft: box.cropLeft,
+      cropRight: box.cropRight,
+      autoTrim: editAutoTrim,
+    }));
+    setSlices(initialSlices);
+
+    if (initialSlices.length > 0) {
+      const first = initialSlices[0];
+      setSelectedSliceId(first.id);
+      setEditCropLeft(first.cropLeft);
+      setEditCropRight(first.cropRight);
+      setEditCropTop(first.cropTop);
+      setEditCropBottom(first.cropBottom);
+    }
+    
+    addNotification(`Applied ${detectedBoxes.length} cuts to Target list!`, "success");
+  };
+
+  const handleClearDetectedBoxes = () => {
+    setDetectedBoxes([]);
+    addNotification("Preview cleared", "info");
+  };
+
+  const handleDetectPanels = async (settings?: { 
+    sensitivity?: number; 
+    backgroundMode?: string; 
+    aspectRatio?: string; 
+    strategy?: string;
+    model?: string;
+    minAreaPct?: number; 
+    mergeThreshold?: number;
+    cannyLow?: number;
+    cannyHigh?: number;
+    closeKernelSize?: number;
+    minHeightPx?: number;
+    dryRun?: boolean;
+  }) => {
     if (editingImageIdx === null) return;
     const currentUrl = scrapedImages[editingImageIdx];
     setIsDetecting(true);
@@ -516,14 +659,31 @@ export default function CropEditorModal({
           sensitivity: settings?.sensitivity ?? 30,
           backgroundColorMode: settings?.backgroundMode ?? "auto",
           aspectRatio: settings?.aspectRatio ?? "free",
-          strategy: "local-cv"
+          minAreaPct: settings?.minAreaPct ?? 0.15,
+          mergeThreshold: settings?.mergeThreshold ?? 20,
+          strategy: settings?.strategy ?? "local-cv",
+          model: settings?.model ?? "gemini-2.5-flash",
+          cannyLow: settings?.cannyLow ?? 20,
+          cannyHigh: settings?.cannyHigh ?? 100,
+          closeKernelSize: settings?.closeKernelSize ?? 15,
+          minHeightPx: settings?.minHeightPx ?? 60
         }),
       });
       if (!response.ok) throw new Error("Failed to detect panels");
       const data = await response.json();
       if (data.success && Array.isArray(data.panels)) {
         setDetectedBoxes(data.panels);
-        if (data.panels.length > 0) {
+        
+        if (settings?.dryRun) {
+          addNotification(
+            `Dry Run: Detected ${data.panels.length} panel outlines!`,
+            "success"
+          );
+        } else if (data.panels.length > 0) {
+          addNotification(
+            `Successfully sliced ${data.panels.length} panel cuts!`,
+            "success"
+          );
           const initialSlices = data.panels.map((box: any, index: number) => ({
             id: `detected-${index}-${Date.now()}`,
             cropTop: box.cropTop,
@@ -541,6 +701,8 @@ export default function CropEditorModal({
           setEditCropRight(first.cropRight);
           setEditCropTop(first.cropTop);
           setEditCropBottom(first.cropBottom);
+        } else {
+          addNotification("No panels detected.", "warning");
         }
       }
     } catch (err: any) {
@@ -1257,6 +1419,13 @@ export default function CropEditorModal({
               onResizeStart={onResizeStart}
               handleSelectAndDragSlice={handleSelectAndDragSlice}
               zoom={zoom}
+              editMode={editMode}
+              detectedBubbles={detectedBubbles}
+              selectedBubbleIdx={selectedBubbleIdx}
+              setSelectedBubbleIdx={setSelectedBubbleIdx}
+              brushSize={brushSize}
+              brushAction={brushAction}
+              canvasMaskRef={canvasMaskRef}
             />
 
             <span className="text-[10px] text-neutral-500 text-center italic font-sans block pt-1">
@@ -1348,6 +1517,13 @@ export default function CropEditorModal({
                     addNotification={addNotification}
                     fetchWithInterceptor={fetchWithInterceptor}
                     setConsoleLogs={setConsoleLogs}
+                    editMode={editMode}
+                    setEditMode={setEditMode}
+                    brushSize={brushSize}
+                    setBrushSize={setBrushSize}
+                    brushAction={brushAction}
+                    setBrushAction={setBrushAction}
+                    handleClearBrushMask={handleClearBrushMask}
                   />
                 </div>
               )}
@@ -1409,6 +1585,9 @@ export default function CropEditorModal({
                   <AutoSlicer
                     handleDetectPanels={handleDetectPanels}
                     isDetecting={isDetecting}
+                    onCommitCuts={handleCommitDetectedBoxes}
+                    hasDetectedBoxes={detectedBoxes && detectedBoxes.length > 0}
+                    clearDetectedBoxes={handleClearDetectedBoxes}
                   />
                 </div>
               )}
@@ -1429,6 +1608,9 @@ export default function CropEditorModal({
                 {history.length} undo step{history.length !== 1 ? "s" : ""} available · Ctrl+Z
               </span>
             )}
+            <span className="text-[9px] text-neutral-600 font-mono mt-0.5">
+              Hotkeys: [ Prev · ] Next · Esc Close · Enter Save · Ctrl+Z Undo
+            </span>
           </div>
 
           <div className="flex items-center gap-2 ml-auto">

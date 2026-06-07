@@ -49,6 +49,8 @@ export default function HorizontalSplitter({
   const [equalPartsCount, setEqualPartsCount] = useState<number>(3);
   const [intervalPercent, setIntervalPercent] = useState<number>(20);
   const [sliceHeightPx, setSliceHeightPx] = useState<number>(1000);
+  const [tolerance, setTolerance] = useState<number>(15);
+  const [minGutterHeight, setMinGutterHeight] = useState<number>(2);
 
   // Bulk shift state
   const [bulkShiftVal, setBulkShiftVal] = useState<number>(5);
@@ -103,7 +105,6 @@ export default function HorizontalSplitter({
         const bgB = imgData[2];
 
         const isGutterRow: boolean[] = [];
-        const tolerance = 15; // RGB color distance threshold
 
         for (let y = 0; y < scanHeight; y++) {
           let rowMatch = true;
@@ -141,7 +142,7 @@ export default function HorizontalSplitter({
             if (inGutter) {
               inGutter = false;
               const endRow = y - 1;
-              if (endRow - startRow >= 2) {
+              if (endRow - startRow >= minGutterHeight) {
                 const center = (startRow + endRow) / 2;
                 const pct = parseFloat(((center / scanHeight) * 100).toFixed(1));
                 if (pct >= 5 && pct <= 95) {
@@ -152,7 +153,7 @@ export default function HorizontalSplitter({
           }
         }
 
-        if (inGutter && (scanHeight - 1 - startRow >= 2)) {
+        if (inGutter && (scanHeight - 1 - startRow >= minGutterHeight)) {
           const center = (startRow + scanHeight - 1) / 2;
           const pct = parseFloat(((center / scanHeight) * 100).toFixed(1));
           if (pct >= 5 && pct <= 95) {
@@ -165,7 +166,7 @@ export default function HorizontalSplitter({
         console.warn("Gutter detection failed (Canvas CORS or loading issue):", err);
       }
     };
-  }, [imageUrl, setDetectedGutters]);
+  }, [imageUrl, setDetectedGutters, tolerance, minGutterHeight]);
 
   const sliderPct = ((splitPosition - 5) / 90) * 100;
 
@@ -373,6 +374,52 @@ export default function HorizontalSplitter({
           )}
         </div>
       )}
+
+      {/* Gutter Detection Tuning Controls */}
+      <div className="bg-neutral-900/60 border border-white/5 p-3 rounded-xl space-y-3">
+        <div className="text-[10px] font-bold text-neutral-400 uppercase font-mono tracking-widest flex items-center justify-between">
+          <span>Gutter Gap Tuning</span>
+          <span className="text-[8px] bg-neutral-800 text-neutral-400 px-1.5 py-0.5 rounded font-mono">
+            {detectedGutters.length} gaps found
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          {/* Tolerance */}
+          <div className="space-y-1">
+            <div className="flex justify-between items-center text-[9px] font-mono text-neutral-500">
+              <span>Color Tolerance</span>
+              <span className="text-purple-300 font-bold">{tolerance}</span>
+            </div>
+            <input
+              type="range"
+              min="2"
+              max="60"
+              value={tolerance}
+              onChange={(e) => setTolerance(Number(e.target.value))}
+              className="w-full accent-purple-500 bg-neutral-800 rounded-full h-1 cursor-pointer"
+              title="Sensitivity of background gutter color match"
+            />
+          </div>
+
+          {/* Min Gutter Height */}
+          <div className="space-y-1">
+            <div className="flex justify-between items-center text-[9px] font-mono text-neutral-500">
+              <span>Min Gap Height</span>
+              <span className="text-purple-300 font-bold">{minGutterHeight}px</span>
+            </div>
+            <input
+              type="range"
+              min="1"
+              max="20"
+              value={minGutterHeight}
+              onChange={(e) => setMinGutterHeight(Number(e.target.value))}
+              className="w-full accent-purple-500 bg-neutral-800 rounded-full h-1 cursor-pointer"
+              title="Minimum height of whitespace strip to consider a gutter"
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Smart Gutter Snap Actions */}
       {detectedGutters.length > 0 && (

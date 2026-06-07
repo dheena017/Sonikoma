@@ -141,6 +141,81 @@ export default function AutoCropModal({
           {/* ══ LEFT COLUMN ══ */}
           <div className="lg:col-span-7 space-y-7">
 
+            {/* SECTION 0: CROP CONFIGURATION PROFILES */}
+            <div className="space-y-3">
+              <SectionTitle icon={<Sparkles className="h-3 w-3" />}>Crop Profiles (Presets)</SectionTitle>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSensitivity(30);
+                    setPadding(10);
+                    setBackgroundColorMode("auto");
+                    setProcessingStrategy("balanced");
+                    setAspectRatioLock("free");
+                    setAutoSplitTallStrips(true);
+                    setMinPanelAreaPct(1.5);
+                    setOverlapMergeThreshold(30);
+                  }}
+                  className="bg-neutral-950/50 hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 px-3.5 py-2.5 rounded-2xl text-left transition-all cursor-pointer"
+                >
+                  <span className="text-[11px] font-bold text-white block">⚖️ Standard Balanced</span>
+                  <span className="text-[9px] text-neutral-500 font-sans block mt-0.5">30% sens · 10px pad · Auto BG</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSensitivity(25);
+                    setPadding(15);
+                    setBackgroundColorMode("auto");
+                    setProcessingStrategy("fast");
+                    setAspectRatioLock("free");
+                    setAutoSplitTallStrips(true);
+                    setMinPanelAreaPct(1.0);
+                    setOverlapMergeThreshold(45);
+                  }}
+                  className="bg-neutral-950/50 hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 px-3.5 py-2.5 rounded-2xl text-left transition-all cursor-pointer"
+                >
+                  <span className="text-[11px] font-bold text-white block">⚡ Webtoon Strip Slicer</span>
+                  <span className="text-[9px] text-neutral-500 font-sans block mt-0.5">25% sens · 15px pad · Fast split</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSensitivity(45);
+                    setPadding(5);
+                    setBackgroundColorMode("white");
+                    setProcessingStrategy("precise");
+                    setAspectRatioLock("free");
+                    setAutoSplitTallStrips(false);
+                    setMinPanelAreaPct(2.0);
+                    setOverlapMergeThreshold(20);
+                  }}
+                  className="bg-neutral-950/50 hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 px-3.5 py-2.5 rounded-2xl text-left transition-all cursor-pointer"
+                >
+                  <span className="text-[11px] font-bold text-white block">📖 Precise Manga</span>
+                  <span className="text-[9px] text-neutral-500 font-sans block mt-0.5">45% sens · 5px pad · White BG</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSensitivity(30);
+                    setPadding(12);
+                    setBackgroundColorMode("auto");
+                    setProcessingStrategy("balanced");
+                    setAspectRatioLock("1:1");
+                    setAutoSplitTallStrips(true);
+                    setMinPanelAreaPct(1.5);
+                    setOverlapMergeThreshold(35);
+                  }}
+                  className="bg-neutral-950/50 hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 px-3.5 py-2.5 rounded-2xl text-left transition-all cursor-pointer"
+                >
+                  <span className="text-[11px] font-bold text-white block">🏁 Mobile Square (1:1)</span>
+                  <span className="text-[9px] text-neutral-500 font-sans block mt-0.5">30% sens · 12px pad · Square lock</span>
+                </button>
+              </div>
+            </div>
+
             {/* SECTION 1: BACKGROUND DETECTOR MODE */}
             <div className="space-y-3">
               <SectionTitle icon={<Layers className="h-3 w-3" />}>Background Gutter Mode</SectionTitle>

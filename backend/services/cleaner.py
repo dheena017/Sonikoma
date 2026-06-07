@@ -26,77 +26,18 @@ except ImportError:
     ImageFilter = None
     has_pil = False
 
-
-def detect_bubble_regions_via_gemini(image_path: str) -> list:
-    """
-    Calls the Gemini REST API directly to detect speech bounding boxes
-    and text overlays. Extremely robust, style-agnostic, and AI-powered.
-    """
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        print("[Gemini Cleaner] No GEMINI_API_KEY environment variable found.")
-        return []
-
-    try:
-        with open(image_path, "rb") as f:
-            encoded_string = base64.b64encode(f.read()).decode('utf-8')
-        
-        prompt = (
-            "Identify all speech bubbles, dialogue boxes, text overlays, and floating text in this comic/webtoon panel image. "
-            "Return the 2D bounding boxes for each of these text regions. "
-            "For each bounding box, provide the normalized coordinates [ymin, xmin, ymax, xmax] as integers between 0 and 1000. "
-            "Format the output strictly as a JSON object with a key 'regions' containing a list of objects, "
-            "each object having 'box' (representing [ymin, xmin, ymax, xmax]) and 'text' (representing the text content inside, if readable). "
-            "Only return the JSON and nothing else."
-        )
-
-        payload = {
-            "contents": [
-                {
-                    "parts": [
-                        {"text": prompt},
-                        {
-                            "inlineData": {
-                                "mimeType": "image/png",
-                                "data": encoded_string
-                            }
-                        }
-                    ]
-                }
-            ],
-            "generationConfig": {
-                "responseMimeType": "application/json"
-            }
-        }
-
-        # We prefer gemini-2.5-flash as the fast, multimodal developer default
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
-        headers = {
-            "Content-Type": "application/json",
-            "User-Agent": "aistudio-build"
-        }
-        
-        req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
-        with urllib.request.urlopen(req, timeout=15) as response:
-            res_data = json.loads(response.read().decode("utf-8"))
-            
-        candidates = res_data.get("candidates", [])
-        if not candidates:
-            return []
-            
-        text = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "")
-        text = text.strip()
-        if text.startswith("```json"):
-            text = text[7:]
-        if text.endswith("```"):
-            text = text[:-3]
-        text = text.strip()
-        
-        data = json.loads(text)
-        return data.get("regions", [])
-    except Exception as e:
-        print(f"[Gemini Cleaner Warning] AI-assisted speech bubble detection failed: {e}")
-        return []
+try:
+    from backend.services.bubble_detector import (
+        detect_bubble_regions_via_gemini,
+        heuristic_classify,
+        classify_cropped_region
+    )
+except ImportError:
+    from bubble_detector import (
+        detect_bubble_regions_via_gemini,
+        heuristic_classify,
+        classify_cropped_region
+    )
 
 
 def clean_standard_bubble(image: np.ndarray, mask: np.ndarray, inpaint_radius: int = 3) -> np.ndarray:
@@ -138,128 +79,6 @@ def clean_sfx(image: np.ndarray, mask: np.ndarray) -> np.ndarray:
     Keeps/ignores sound effects to retain comic book feel.
     """
     return image
-
-
-def heuristic_classify(crop_img: np.ndarray) -> str:
-    """
-    Classifies a crop image based on color characteristics.
-    Returns: 'white_bubble', 'colored_box', or 'uncertain'.
-    """
-    if crop_img is None or crop_img.size == 0:
-        return "white_bubble"
-    
-    try:
-        # Convert to grayscale
-        gray = cv2.cvtColor(crop_img, cv2.COLOR_BGR2GRAY)
-        total_pixels = gray.size
-        if total_pixels == 0:
-            return "white_bubble"
-        
-        # Calculate percentage of very bright pixels (white background)
-        bright_pixels = np.sum(gray > 240)
-        bright_ratio = bright_pixels / total_pixels
-        
-        # Calculate mean brightness
-        mean_val = np.mean(gray)
-        
-        # If the background is predominantly white, classify as white_bubble
-        if bright_ratio > 0.65:
-            return "white_bubble"
-        
-        # If the crop has almost no white background and is generally darker, classify as colored_box
-        if bright_ratio < 0.05 and mean_val < 130:
-            return "colored_box"
-            
-        # Otherwise, background is intermediate or standard deviation is high -> uncertain
-        return "uncertain"
-    except Exception as e:
-        print(f"[Cleaner Heuristic Warning] Error in heuristic_classify: {e}")
-        return "uncertain"
-
-
-def classify_cropped_region(crop_img: np.ndarray) -> str:
-    """
-    Calls the Gemini Vision API to classify a cropped text region.
-    Returns: 'white_bubble', 'colored_box', or 'sfx'.
-    """
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        print("[Gemini Cleaner] No GEMINI_API_KEY found. Defaulting to 'white_bubble'.")
-        return "white_bubble"
-
-    try:
-        # Encode cropped image to base64
-        _, buffer = cv2.imencode('.png', crop_img)
-        encoded_string = base64.b64encode(buffer).decode('utf-8')
-        
-        prompt = (
-            "Analyze this cropped comic/webtoon panel text region image. "
-            "Classify it into one of these categories:\n"
-            "1. 'white_bubble': Any speech, thought, shout, or action bubble with a solid white or near-white background. "
-            "This includes standard ovals, fluffy clouds, rounded rectangles, starburst/spiky outlines, or angular concave shapes (such as tense or magic-shaking bubbles) containing dark text.\n"
-            "2. 'colored_box': A narration box, monologue box, or borderless/floating text on a colored, dark, gradient, or textured background.\n"
-            "3. 'sfx': Sound effects (massive stylized letters drawn directly into the art like BOOM, SWOOSH, CRASH, BAM).\n\n"
-            "Return a JSON object with a single key 'type' whose value is one of these three strings: 'white_bubble', 'colored_box', or 'sfx'. "
-            "Only return the JSON and nothing else."
-        )
-
-        payload = {
-            "contents": [
-                {
-                    "parts": [
-                        {"text": prompt},
-                        {
-                            "inlineData": {
-                                "mimeType": "image/png",
-                                "data": encoded_string
-                            }
-                        }
-                    ]
-                }
-            ],
-            "generationConfig": {
-                "responseMimeType": "application/json"
-            }
-        }
-
-        # We prefer gemini-2.5-flash as the fast, multimodal developer default
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
-        headers = {
-            "Content-Type": "application/json",
-            "User-Agent": "aistudio-build"
-        }
-        
-        req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
-        with urllib.request.urlopen(req, timeout=12) as response:
-            res_data = json.loads(response.read().decode("utf-8"))
-            
-        candidates = res_data.get("candidates", [])
-        if not candidates:
-            return "white_bubble"
-            
-        text = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "")
-        text = text.strip()
-        if text.startswith("```json"):
-            text = text[7:]
-        if text.endswith("```"):
-            text = text[:-3]
-        text = text.strip()
-        
-        data = json.loads(text)
-        category = data.get("type", "white_bubble").strip().lower()
-        
-        # Map different possible classification outputs to our 3 canonical options
-        if "white" in category or "bubble" in category:
-            return "white_bubble"
-        elif "color" in category or "box" in category or "text" in category or "borderless" in category:
-            return "colored_box"
-        elif "sfx" in category or "sound" in category:
-            return "sfx"
-            
-        return "white_bubble"
-    except Exception as e:
-        print(f"[Gemini Cleaner Warning] AI classification failed: {e}. Defaulting to 'white_bubble'.")
-        return "white_bubble"
 
 
 def auto_decide_and_clean(
@@ -341,7 +160,15 @@ def clean_speech_bubbles(
     dilation: int = -1,
     inpaint_radius: int = 3,
     detection_style: str = "all",
-    debug_path: Optional[str] = None
+    debug_path: Optional[str] = None,
+    ocr_lang: str = "en",
+    gpu: bool = False,
+    fill_color: str = "",
+    morph_kernel_size: int = 15,
+    morph_shape: str = "ellipse",
+    custom_color_target: str = "",
+    custom_color_tolerance: float = 25.0,
+    custom_mask_path: Optional[str] = None
 ) -> None:
     """
     Detects and removes speech bubbles from comic drawings and webtoon panels 
@@ -356,6 +183,14 @@ def clean_speech_bubbles(
         inpaint_radius (int): Pixel radius neighborhood for image inpainting.
         detection_style (str): Filter behavior: 'all', 'white_only', or 'text_only'.
         debug_path (str): Filepath to write classification debug visualization.
+        ocr_lang (str): EasyOCR language code.
+        gpu (bool): Enable GPU for EasyOCR.
+        fill_color (str): Hex fill color for solid_color strategy.
+        morph_kernel_size (int): Morphological kernel size.
+        morph_shape (str): Morphological kernel shape.
+        custom_color_target (str): Custom bubble background target hex color.
+        custom_color_tolerance (float): Tolerance for custom color matching.
+        custom_mask_path (str): Optional path to a binary mask image.
     """
     if not os.path.exists(image_path):
         raise FileNotFoundError(f"Input image not found: {image_path}")
@@ -393,6 +228,13 @@ def clean_speech_bubbles(
         # Initialize debug image if path is provided
         debug_img = original_image.copy() if debug_path else None
 
+        # Initialize Morph Shape constant
+        shape_const = cv2.MORPH_ELLIPSE
+        if morph_shape == "rect":
+            shape_const = cv2.MORPH_RECT
+        elif morph_shape == "cross":
+            shape_const = cv2.MORPH_CROSS
+
         # 2. Detect the Bubbles & Text Regions
         # Create a combined mask for all dialogue regions (used for non-auto modes)
         mask = np.zeros_like(gray)
@@ -401,8 +243,20 @@ def clean_speech_bubbles(
         # We compute dilation_factor early
         dilation_factor = dilation if dilation >= 0 else max(6, int(min(width, height) * 0.012))
 
+        # Check if custom mask file is provided to bypass autodetection
+        if custom_mask_path and os.path.exists(custom_mask_path):
+            print(f"[Cleaner] Loading manual drawing mask from: {custom_mask_path}")
+            custom_mask_loaded = cv2.imread(custom_mask_path, cv2.IMREAD_GRAYSCALE)
+            if custom_mask_loaded is not None:
+                if custom_mask_loaded.shape[:2] != (height, width):
+                    mask = cv2.resize(custom_mask_loaded, (width, height), interpolation=cv2.INTER_NEAREST)
+                else:
+                    mask = custom_mask_loaded
+                _, mask = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
+                bubble_detected = True
+
         # Try AI-assisted Gemini bubble locator first (unless restricted to white only)
-        if detection_style != "white_only":
+        if not bubble_detected and detection_style != "white_only":
             gemini_regions = detect_bubble_regions_via_gemini(image_path)
             if gemini_regions:
                 print(f"[Gemini Cleaner] AI detected {len(gemini_regions)} bubble/text regions.")
@@ -446,8 +300,14 @@ def clean_speech_bubbles(
             dark_thresh_val = max(60, min(160, 110 + int((sensitivity - 50) * 0.8)))
             min_bubble_area = max(300, min(2000, 1000 - int((sensitivity - 50) * 15)))
 
-            # Threshold to identify white, off-white, cream, and high-luminance speech bubbles
-            _, bright_mask = cv2.threshold(gray, bright_thresh_val, 255, cv2.THRESH_BINARY)
+            # Threshold to identify target speech bubbles (custom color vs standard white/bright thresholding)
+            if custom_color_target and len(custom_color_target.lstrip('#')) == 6:
+                hex_c = custom_color_target.lstrip('#')
+                target_bgr = np.array([int(hex_c[4:6], 16), int(hex_c[2:4], 16), int(hex_c[0:2], 16)], dtype=np.uint8)
+                color_dist = np.linalg.norm(original_image.astype(np.float32) - target_bgr.astype(np.float32), axis=2)
+                bright_mask = (color_dist <= custom_color_tolerance).astype(np.uint8) * 255
+            else:
+                _, bright_mask = cv2.threshold(gray, bright_thresh_val, 255, cv2.THRESH_BINARY)
             
             # Dark text mask to verify if these bright bubbles actually contain text strokes
             _, dark_text_mask = cv2.threshold(gray, dark_thresh_val, 255, cv2.THRESH_BINARY_INV)
@@ -509,7 +369,7 @@ def clean_speech_bubbles(
                 for lx, ly, lw, lh, l_contour in letter_candidates:
                     cv2.drawContours(text_seeds, [l_contour], -1, 255, -1)
 
-                text_dilate_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (20, 15))
+                text_dilate_kernel = cv2.getStructuringElement(shape_const, (morph_kernel_size, morph_kernel_size))
                 text_blocks = cv2.dilate(text_seeds, text_dilate_kernel, iterations=1)
                 text_contours, _ = cv2.findContours(text_blocks, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -545,7 +405,7 @@ def clean_speech_bubbles(
         # Dilate bubble boundaries for non-auto mode to guarantee speech bubble borders/outlines are 100% covered.
         if not is_auto and bubble_detected:
             if dilation_factor > 0:
-                kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (dilation_factor, dilation_factor))
+                kernel = cv2.getStructuringElement(shape_const, (dilation_factor, dilation_factor))
                 mask = cv2.dilate(mask, kernel, iterations=1)
 
         # 4. Apply the Cleaning Method
@@ -569,6 +429,15 @@ def clean_speech_bubbles(
             elif method_lower == "solid_black":
                 final_image = original_image.copy()
                 final_image[mask == 255] = [0, 0, 0]
+            elif method_lower == "solid_color":
+                final_image = original_image.copy()
+                color = [255, 255, 255]
+                if fill_color:
+                    hex_color = fill_color.lstrip('#')
+                    if len(hex_color) == 6:
+                        # OpenCV BGR
+                        color = [int(hex_color[4:6], 16), int(hex_color[2:4], 16), int(hex_color[0:2], 16)]
+                final_image[mask == 255] = color
             elif method_lower == "transparent":
                 if img_temp.shape[2] == 3:
                     h, w = img_temp.shape[:2]
@@ -579,7 +448,7 @@ def clean_speech_bubbles(
                 rgba_img[mask == 255, 3] = 0
                 final_image = rgba_img
             elif method_lower == "ocr" and has_easyocr:
-                reader = easyocr.Reader(['en'], gpu=False)
+                reader = easyocr.Reader([ocr_lang], gpu=gpu)
                 results = reader.readtext(image_path)
                 ocr_mask = np.zeros(original_image.shape[:2], dtype=np.uint8)
                 for (bbox, text, prob) in results:
@@ -634,6 +503,14 @@ if __name__ == "__main__":
     parser.add_argument("--inpaint_radius", type=int, default=3, help="Neighbor inpaint pixel radius")
     parser.add_argument("--detection_style", default="all", choices=["all", "white_only", "text_only"], help="Detection style")
     parser.add_argument("--debug_path", default=None, help="Path to write visual classification debug mask")
+    parser.add_argument("--ocr_lang", default="en", help="EasyOCR language code")
+    parser.add_argument("--gpu", action="store_true", help="Enable GPU EasyOCR")
+    parser.add_argument("--fill_color", default="", help="Hex fill color for solid_color strategy")
+    parser.add_argument("--morph_kernel_size", type=int, default=15, help="Morphological kernel size")
+    parser.add_argument("--morph_shape", default="ellipse", choices=["rect", "ellipse", "cross"], help="Morphological kernel shape")
+    parser.add_argument("--custom_color_target", default="", help="Custom bubble background target hex color")
+    parser.add_argument("--custom_color_tolerance", type=float, default=25.0, help="Tolerance for custom color matching")
+    parser.add_argument("--custom_mask_path", default=None, help="Path to custom manual mask image")
 
     args = parser.parse_args()
     try:
@@ -645,11 +522,18 @@ if __name__ == "__main__":
             dilation=args.dilation,
             inpaint_radius=args.inpaint_radius,
             detection_style=args.detection_style,
-            debug_path=args.debug_path
+            debug_path=args.debug_path,
+            ocr_lang=args.ocr_lang,
+            gpu=args.gpu,
+            fill_color=args.fill_color,
+            morph_kernel_size=args.morph_kernel_size,
+            morph_shape=args.morph_shape,
+            custom_color_target=args.custom_color_target,
+            custom_color_tolerance=args.custom_color_tolerance,
+            custom_mask_path=args.custom_mask_path
         )
         print("SUCCESS")
     except Exception as e:
         import sys
         print(f"ERROR: {str(e)}", file=sys.stderr)
-        sys.exit(1)
 

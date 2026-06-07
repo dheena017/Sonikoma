@@ -106,6 +106,7 @@ export default function LiveScraperDeck({
             setShowAutoCropModal={setShowAutoCropModal}
             isBatchCropping={isBatchCropping}
             batchProgress={batchProgress}
+            fetchWithInterceptor={fetchWithInterceptor}
           />
 
           {/* Grid list of extracted cards */}
