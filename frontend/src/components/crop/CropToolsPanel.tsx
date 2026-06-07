@@ -106,8 +106,33 @@ export default function CropToolsPanel({
   onReset,
 }: CropToolsPanelProps) {
   const [aspectLocked, setAspectLocked] = useState(false);
+  const [selectedPreset, setSelectedPreset] = useState<string>("Free");
+
+  // Keep selectedPreset in sync with current coordinates to resolve highlights
+  React.useEffect(() => {
+    const currentMatchingPreset = CROP_PRESETS.find(p => 
+      Math.abs(editCropTop - p.top) < 0.2 &&
+      Math.abs(editCropBottom - p.bottom) < 0.2 &&
+      Math.abs(editCropLeft - p.left) < 0.2 &&
+      Math.abs(editCropRight - p.right) < 0.2
+    );
+    if (!currentMatchingPreset) {
+      setSelectedPreset("");
+    } else {
+      const stillMatchesSelected = CROP_PRESETS.find(p => p.label === selectedPreset && 
+        Math.abs(editCropTop - p.top) < 0.2 &&
+        Math.abs(editCropBottom - p.bottom) < 0.2 &&
+        Math.abs(editCropLeft - p.left) < 0.2 &&
+        Math.abs(editCropRight - p.right) < 0.2
+      );
+      if (!stillMatchesSelected) {
+        setSelectedPreset(currentMatchingPreset.label);
+      }
+    }
+  }, [editCropTop, editCropBottom, editCropLeft, editCropRight, selectedPreset]);
 
   const handlePreset = (preset: (typeof CROP_PRESETS)[0]) => {
+    setSelectedPreset(preset.label);
     setEditCropTop(preset.top);
     setEditCropBottom(preset.bottom);
     setEditCropLeft(preset.left);
@@ -252,6 +277,7 @@ export default function CropToolsPanel({
         <div className="grid grid-cols-3 gap-1.5">
           {CROP_PRESETS.map((preset) => {
             const isActive =
+              selectedPreset === preset.label &&
               Math.abs(editCropTop - preset.top) < 0.2 &&
               Math.abs(editCropBottom - preset.bottom) < 0.2 &&
               Math.abs(editCropLeft - preset.left) < 0.2 &&
