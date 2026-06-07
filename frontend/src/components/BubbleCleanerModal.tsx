@@ -103,37 +103,38 @@ export default function BubbleCleanerModal({
   isApplying,
 }: BubbleCleanerModalProps) {
   return (
-    <div className="flex-1 w-full max-w-5xl mx-auto px-6 py-10 flex flex-col gap-0 animate-[fadeIn_0.18s_ease-out]">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-center justify-center p-4 overflow-y-auto">
+      <div className="relative w-full max-w-5xl min-h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] flex flex-col gap-0 animate-[fadeIn_0.18s_ease-out]">
 
-      {/* ── Card shell ── */}
-      <div className="bg-neutral-900 border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col">
+        {/* ── Card shell ── */}
+        <div className="bg-neutral-900 border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col h-full">
 
-        {/* ── Header ── */}
-        <div className="px-6 py-5 border-b border-neutral-800 flex items-center justify-between bg-neutral-950/40">
-          <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-purple-950/60 border border-purple-800/50 flex items-center justify-center">
-              <Brain className="h-4.5 w-4.5 text-purple-400" />
+          {/* ── Header ── */}
+          <div className="px-6 py-5 border-b border-neutral-800 flex items-center justify-between bg-neutral-950/40">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl bg-purple-950/60 border border-purple-800/50 flex items-center justify-center">
+                <Brain className="h-4.5 w-4.5 text-purple-400" />
+              </div>
+              <div>
+                <h3 className="font-bold text-sm text-white">Bubble Cleaner Settings</h3>
+                <p className="text-[10px] text-neutral-400 font-mono mt-0.5">
+                  Configure what gets detected and how it is erased
+                  {selectedCount > 0 && (
+                    <span className="ml-2 text-purple-400 font-bold">· {selectedCount} panel{selectedCount !== 1 ? "s" : ""} selected</span>
+                  )}
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-bold text-sm text-white">Bubble Cleaner Settings</h3>
-              <p className="text-[10px] text-neutral-400 font-mono mt-0.5">
-                Configure what gets detected and how it is erased
-                {selectedCount > 0 && (
-                  <span className="ml-2 text-purple-400 font-bold">· {selectedCount} panel{selectedCount !== 1 ? "s" : ""} selected</span>
-                )}
-              </p>
-            </div>
+            <button
+              onClick={onClose}
+              className="text-neutral-400 hover:text-white p-1.5 rounded-lg hover:bg-neutral-800 transition-colors cursor-pointer"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="text-neutral-400 hover:text-white p-1.5 rounded-lg hover:bg-neutral-800 transition-colors cursor-pointer"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
 
         {/* ── Scrollable Body ── */}
-        <div className="p-6 overflow-y-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="p-6 overflow-y-auto grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1">
 
           {/* LEFT COLUMN: Detection + Erase */}
           <div className="lg:col-span-7 space-y-8">
@@ -304,6 +305,7 @@ export default function BubbleCleanerModal({
 
       </div>
     </div>
+  </div>
   );
 }
 

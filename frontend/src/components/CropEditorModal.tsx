@@ -38,7 +38,7 @@ interface CropEditorModalProps {
   setSelectedScraped?: React.Dispatch<React.SetStateAction<string[]>>;
   panels?: any[];
   setPanels?: React.Dispatch<React.SetStateAction<any[]>>;
-  fetchWithInterceptor?: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
+  fetchWithInterceptor?: typeof fetch;
   setErrorPopup?: React.Dispatch<React.SetStateAction<ErrorPopupDetail | null>>;
   imageEditStates?: Record<string, any>;
   setImageEditStates?: React.Dispatch<React.SetStateAction<Record<string, any>>>;
@@ -117,10 +117,13 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
   const [isCleaning, setIsCleaning] = useState<boolean>(false);
 
   useEffect(() => {
-    const originalOverflow = document.body.style.overflow;
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
     document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = originalOverflow;
+      document.body.style.overflow = originalBodyOverflow;
+      document.documentElement.style.overflow = originalHtmlOverflow;
     };
   }, []);
 
@@ -152,7 +155,7 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
   const [isAiDetecting, setIsAiDetecting] = useState<boolean>(false);
 
   // Sidebar Tab Configuration
-  const [activeTab, setActiveTab] = useState<"adjust" | "slice" | "cuts" | "tools" | "merge">(savedState?.activeTab || "adjust");
+  const [activeTab, setActiveTab] = useState<"adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge">(savedState?.activeTab || "adjust");
 
   // Zoom & Transform
   const [zoom, setZoom] = useState<number>(1);
@@ -1324,7 +1327,7 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
   if (editingImageIdx === null) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4 md:p-6 animate-[fadeIn_0.2s_ease-out]">
+    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4 md:p-6 animate-[fadeIn_0.2s_ease-out] overscroll-contain">
       <div
         className="relative bg-neutral-950 border border-white/5 rounded-3xl overflow-hidden shadow-2xl flex flex-col w-full max-w-7xl h-[90vh] my-auto"
         style={{ boxShadow: "0 0 60px rgba(139,92,246,0.12), 0 30px 60px rgba(0,0,0,0.7)" }}
@@ -1501,16 +1504,17 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
           </div>
 
           {/* Right side: Tabbed controls sidebar */}
-          <div className="lg:col-span-5 flex flex-col space-y-3 h-full overflow-y-auto pr-1.5 scrollbar-thin">
+          <div className="lg:col-span-5 flex flex-col space-y-3 h-full overflow-y-auto pr-1.5 scrollbar-thin overscroll-contain">
             {/* Sidebar Navigation Tabs */}
             <div className="flex gap-1 bg-black/40 backdrop-blur-sm p-1.5 rounded-2xl border border-white/5">
               {([
                 { key: "adjust", label: "Adjust", emoji: "✨" },
-                { key: "tools", label: "Edit", emoji: "✏️" },
+                { key: "edit", label: "Edit", emoji: "✏️" },
+                { key: "eraser", label: "Eraser", emoji: "🧼" },
                 { key: "slice", label: "Cut", emoji: "✂️" },
                 { key: "cuts", label: `Cuts (${slices.length})`, emoji: "🎯" },
                 { key: "merge", label: "Merge", emoji: "🔗" },
-              ] as { key: "adjust" | "tools" | "slice" | "cuts" | "merge"; label: string; emoji: string }[]).map((tab) => (
+              ] as { key: "adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge"; label: string; emoji: string }[]).map((tab) => (
                 <button
                   key={tab.key}
                   type="button"
@@ -1540,7 +1544,7 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
                 </div>
               )}
 
-              {activeTab === "tools" && (
+              {activeTab === "edit" && (
                 <div className="animate-fadeIn">
                   <CropToolsPanel
                     editCropTop={editCropTop}
@@ -1576,6 +1580,11 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
                     handleModifySfx={handleModifySfx}
                     handleModifyCropPadding={handleModifyCropPadding}
                   />
+                </div>
+              )}
+
+              {activeTab === "eraser" && (
+                <div className="space-y-4 animate-fadeIn">
                   <CleanBubblesPanel
                     imgUrl={scrapedImages[editingImageIdx]}
                     editingImageIdx={editingImageIdx}
@@ -1743,7 +1752,7 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
               <Trash2 className="h-3.5 w-3.5 text-red-500/70" />
               <span>Delete Panel</span>
             </button>
-            {activeTab === "tools" && (
+            {activeTab === "edit" && (
               <button
                 type="button"
                 onClick={handleExecuteSave}
@@ -1758,7 +1767,7 @@ const canvasMaskRef = useRef<HTMLCanvasElement>(null);
                 ) : (
                   <>
                     <Crop className="h-3.5 w-3.5" />
-                    <span>Apply Crop</span>
+                    <span>Apply Edit</span>
                   </>
                 )}
               </button>

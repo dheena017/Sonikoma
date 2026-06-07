@@ -258,7 +258,7 @@ export default function CropCanvas({
           if (editMode === "clean_manual") return;
           handleEnd();
         }}
-        className="relative inline-block w-full max-w-full"
+        className="relative inline-block w-full max-w-full h-full"
         style={{
           cursor: getCursor(),
           userSelect: "none",
@@ -271,7 +271,7 @@ export default function CropCanvas({
         <img
           src={imgUrl}
           alt="Crop segment preview"
-          className="w-full max-w-full pointer-events-none select-none block"
+          className="w-full h-full object-contain pointer-events-none select-none block"
           referrerPolicy="no-referrer"
           draggable={false}
         />

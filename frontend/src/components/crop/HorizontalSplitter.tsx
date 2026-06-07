@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Split, ChevronUp, ChevronDown, Plus, X, Grid, Sliders, Hash, Trash2, ArrowUpDown, Save, FolderOpen, Image as ImageIcon, Magnet, ArrowUp, ArrowDown } from "lucide-react";
+import { detectHorizontalGutters } from "./gutterScanner";
 
 interface HorizontalSplitterProps {
   splitPosition: number;
@@ -80,92 +81,15 @@ export default function HorizontalSplitter({
 
   useEffect(() => {
     if (!imageUrl) return;
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.src = imageUrl;
-    img.onload = () => {
-      setNaturalHeight(img.naturalHeight);
-      setNaturalWidth(img.naturalWidth);
-
-      // Run smart horizontal gutter/gap detection
-      try {
-        const canvas = document.createElement("canvas");
-        const scanHeight = Math.min(1200, img.naturalHeight);
-        canvas.width = 40;
-        canvas.height = scanHeight;
-
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
-        ctx.drawImage(img, 0, 0, 40, scanHeight);
-        const imgData = ctx.getImageData(0, 0, 40, scanHeight).data;
-
-        // Sample background color from top-left pixel
-        const bgR = imgData[0];
-        const bgG = imgData[1];
-        const bgB = imgData[2];
-
-        const isGutterRow: boolean[] = [];
-
-        for (let y = 0; y < scanHeight; y++) {
-          let rowMatch = true;
-          for (let x = 0; x < 40; x++) {
-            const idx = (y * 40 + x) * 4;
-            const r = imgData[idx];
-            const g = imgData[idx + 1];
-            const b = imgData[idx + 2];
-
-            const dist = Math.sqrt(
-              (r - bgR) ** 2 +
-              (g - bgG) ** 2 +
-              (b - bgB) ** 2
-            );
-
-            if (dist > tolerance) {
-              rowMatch = false;
-              break;
-            }
-          }
-          isGutterRow.push(rowMatch);
-        }
-
-        const gutters: number[] = [];
-        let inGutter = false;
-        let startRow = 0;
-
-        for (let y = 0; y < scanHeight; y++) {
-          if (isGutterRow[y]) {
-            if (!inGutter) {
-              inGutter = true;
-              startRow = y;
-            }
-          } else {
-            if (inGutter) {
-              inGutter = false;
-              const endRow = y - 1;
-              if (endRow - startRow >= minGutterHeight) {
-                const center = (startRow + endRow) / 2;
-                const pct = parseFloat(((center / scanHeight) * 100).toFixed(1));
-                if (pct >= 5 && pct <= 95) {
-                  gutters.push(pct);
-                }
-              }
-            }
-          }
-        }
-
-        if (inGutter && (scanHeight - 1 - startRow >= minGutterHeight)) {
-          const center = (startRow + scanHeight - 1) / 2;
-          const pct = parseFloat(((center / scanHeight) * 100).toFixed(1));
-          if (pct >= 5 && pct <= 95) {
-            gutters.push(pct);
-          }
-        }
-
+    detectHorizontalGutters(imageUrl, tolerance, minGutterHeight)
+      .then(({ gutters, naturalWidth, naturalHeight }) => {
+        setNaturalWidth(naturalWidth);
+        setNaturalHeight(naturalHeight);
         setDetectedGutters(gutters);
-      } catch (err) {
-        console.warn("Gutter detection failed (Canvas CORS or loading issue):", err);
-      }
-    };
+      })
+      .catch((err) => {
+        console.warn("Gutter detection error:", err);
+      });
   }, [imageUrl, setDetectedGutters, tolerance, minGutterHeight]);
 
   const sliderPct = ((splitPosition - 5) / 90) * 100;

@@ -25,6 +25,7 @@ export default function LiveScraperDeck({
   addNotification,
   fetchWithInterceptor,
   setErrorPopup,
+  openEditingImageIdx,
   // Bubble Cleaner props from App.tsx
   showBubbleModal,
   setShowBubbleModal,
@@ -126,6 +127,7 @@ export default function LiveScraperDeck({
                   mergingIndices={mergingIndices}
                   handleMergeWithNext={handleMergeWithNext}
                   setEditingImageIdx={setEditingImageIdx}
+                  openEditingImageIdx={openEditingImageIdx}
                   setEditCropTop={setEditCropTop}
                   setEditCropBottom={setEditCropBottom}
                   setEditCropLeft={setEditCropLeft}
