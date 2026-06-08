@@ -1,5 +1,5 @@
 import React from "react";
-import PanelCard from "./PanelCard";
+import PanelCard from "./PanelCard.js";
 
 interface LiveScraperGridProps {
   scrapedImages: string[];

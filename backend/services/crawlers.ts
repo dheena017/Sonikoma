@@ -6,30 +6,81 @@ async function fetchWithTimeout(url: string, headers: Record<string, string>, ti
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    return await fetch(url, { headers, signal: controller.signal });
+    return await fetch(url, {
+      headers,
+      signal: controller.signal,
+      redirect: 'follow',
+      cache: 'no-store',
+    });
   } finally {
     clearTimeout(timeout);
   }
 }
 
-async function tryFetchUrl(url: string, headers: Record<string, string>, timeoutMs = 30000) {
-  try {
-    return await fetchWithTimeout(url, headers, timeoutMs);
-  } catch (error) {
-    console.warn(`${col.warn('[Scraper]')} Fetch error for ${col.dim(url)}:`, error);
-    return null;
+async function tryFetchUrl(url: string, headers: Record<string, string>, timeoutMs = 30000, retries = 2) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const response = await fetchWithTimeout(url, headers, timeoutMs);
+      return response;
+    } catch (error) {
+      console.warn(`${col.warn('[Scraper]')} Fetch error for ${col.dim(url)} (attempt ${attempt}/${retries}):`, error);
+      if (attempt < retries) {
+        console.log(`${col.info('[Scraper]')} Retrying fetch for ${col.dim(url)}...`);
+        await new Promise((resolve) => setTimeout(resolve, 600));
+      }
+    }
   }
+
+  return null;
+}
+
+function decodeEscapedJsString(value: string): string {
+  return value
+    .replace(/\\u([0-9A-Fa-f]{4})/g, (_match, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/\\n/g, '')
+    .replace(/\\r/g, '')
+    .replace(/\\t/g, '')
+    .replace(/\\'/g, "'")
+    .replace(/\\"/g, '"')
+    .replace(/\\\\/g, '\\');
+}
+
+function extractImagesFromNuxtPayload(html: string): string[] {
+  const pageImages: string[] = [];
+  const nuxtIndex = html.indexOf('window.__NUXT__=');
+  if (nuxtIndex === -1) {
+    return pageImages;
+  }
+
+  const endScriptIndex = html.indexOf('</script>', nuxtIndex);
+  const scriptBlock = endScriptIndex === -1 ? html.slice(nuxtIndex) : html.slice(nuxtIndex, endScriptIndex);
+  const pagesMatch = /pages:\s*\[([\s\S]*?)\]/.exec(scriptBlock);
+  if (!pagesMatch) {
+    return pageImages;
+  }
+
+  const pagesContent = pagesMatch[1];
+  const srcRegex = /src:\s*"((?:\\.|[^"\\])*)"/g;
+  let match;
+  while ((match = srcRegex.exec(pagesContent)) !== null) {
+    const decoded = decodeEscapedJsString(match[1]);
+    if (decoded.startsWith('http://') || decoded.startsWith('https://')) {
+      pageImages.push(decoded);
+    }
+  }
+
+  return pageImages;
 }
 
 /**
  * Helper function to safely crawl and isolate absolute webtoon panel images with unescaped references
  */
-export async function scrapeImagesFromUrl(url: string): Promise<string[]> {
+export async function scrapeImagesFromUrl(url: string, source?: string): Promise<string[]> {
   try {
     let fetchUrl = extractWebtoonUrl(url);
     const fetchHeaders = {
       "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-      "Referer": "https://www.webtoons.com/",
+      "Referer": source === 'webcomicsapp' ? "https://www.webcomicsapp.com/" : "https://www.webtoons.com/",
       "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
       "Accept-Language": "en-US,en;q=0.9",
       "Cache-Control": "no-cache",
@@ -261,7 +312,7 @@ export async function scrapeImagesFromUrl(url: string): Promise<string[]> {
                          candidateUrl.includes('creator') ||
                          candidateUrl.includes('author') ||
                          candidateUrl.includes('button');
-                         
+
       let isComicPanel = false;
       if (isPhinf && !isUnwanted) {
         if (isComicClass || isComicId) {
@@ -274,6 +325,12 @@ export async function scrapeImagesFromUrl(url: string): Promise<string[]> {
       if (isComicPanel) {
         imageSet.add(candidateUrl);
       }
+    }
+
+    const nuxtPageImages = extractImagesFromNuxtPayload(html);
+    if (nuxtPageImages.length > 0) {
+      console.log(`${col.info('[Scraper]')} Extracted ${col.success(String(nuxtPageImages.length))} image URLs from Nuxt payload.`);
+      nuxtPageImages.forEach((img) => imageSet.add(img));
     }
 
     if (imageSet.size === 0) {

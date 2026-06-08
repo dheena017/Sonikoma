@@ -52,10 +52,22 @@ export function parseWebtoonUrl(urlStr: string): ParsedWebtoonUrl {
     const cleanedUrl = stripRegionFromUrl(urlStr);
     const urlObj = new URL(cleanedUrl.startsWith("http") ? cleanedUrl : "https://" + cleanedUrl);
     const parts = urlObj.pathname.split('/').filter(Boolean);
+    const host = urlObj.hostname.toLowerCase();
 
     let genre   = "general";
     let title   = "Webtoon Comic";
     let episode = "Intro Chapter";
+
+    if (host.includes('webcomicsapp.com')) {
+      genre = "WebComicsApp";
+      if (parts.length >= 2 && parts[0] === 'view') {
+        title = parts[1].replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        episode = parts.length >= 3 ? parts.slice(2).join(' ').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : "Chapter";
+      } else if (parts.length >= 1) {
+        title = parts[parts.length - 1].replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      }
+      return { genre, title, episode };
+    }
 
     if (parts.length >= 2) {
       genre = parts[0] || "general";

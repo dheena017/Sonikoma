@@ -9,8 +9,8 @@ import {
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { LiveScraperDeckProps } from "./types";
-import PanelCard from "./PanelCard";
-import ScraperControls from "./ScraperControls";
+import PanelCard from "./PanelCard.js";
+import ScraperControls from "./ScraperControls.js";
 
 export default function LiveScraperDeck({
   scrapedImages,

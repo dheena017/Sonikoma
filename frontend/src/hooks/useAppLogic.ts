@@ -3,10 +3,12 @@ import { useAppState } from "./useAppState.js";
 import { usePlaybackEngine } from "./usePlaybackEngine.js";
 import { usePipelineActions } from "./usePipelineActions.js";
 import { parseWebtoonUrl } from "../utils.js";
+import { extractWebtoonUrl } from "../utils/url.js";
 
 export function useAppLogic() {
   const state = useAppState();
   const videoPlayerRef = useRef<HTMLVideoElement | null>(null);
+  const sourceMismatchNotified = useRef(false);
 
   const {
     currentPanelIndex,
@@ -131,9 +133,18 @@ export function useAppLogic() {
     };
   }, [state.setConsoleLogs]);
 
+  const SOURCE_DOMAINS: Record<string, string[]> = {
+    webtoons: ["webtoons.com", "webtoon.com"],
+    webcomicsapp: ["webcomicsapp.com"],
+    mangadex: ["mangadex.org", "mangadex.com"],
+    toomics: ["toomics.com"],
+    linewebtoon: ["webtoon.com"],
+  };
+
   // --- System Logs Engine ---
   useEffect(() => {
     let isCurrent = true;
+    const abortController = new AbortController();
 
     if (!state.targetUrl.trim()) {
       state.setScrapedImages([]);
@@ -142,8 +153,50 @@ export function useAppLogic() {
       return;
     }
 
+    const normalizedTargetUrl = extractWebtoonUrl(state.targetUrl);
+    const currentHost = (() => {
+      try {
+        const urlWithScheme = normalizedTargetUrl.startsWith("http") ? normalizedTargetUrl : `https://${normalizedTargetUrl}`;
+        return new URL(urlWithScheme).hostname.toLowerCase();
+      } catch {
+        return "";
+      }
+    })();
+
+    const allowedHosts = SOURCE_DOMAINS[state.selectedSource] || ["webtoons.com", "webtoon.com"];
+    const isSourceMismatch = Boolean(
+      normalizedTargetUrl &&
+      currentHost &&
+      !allowedHosts.some((allowedHost) =>
+        currentHost === allowedHost || currentHost.endsWith(`.${allowedHost}`)
+      )
+    );
+
+    if (isSourceMismatch) {
+      if (!sourceMismatchNotified.current) {
+        state.addNotification(
+          `Selected source ${state.selectedSource} does not match the current URL host (${currentHost}). Please choose the correct website or paste a matching URL.`,
+          'error'
+        );
+        sourceMismatchNotified.current = true;
+      }
+      state.setPanels([]);
+      state.setScrapedImages([]);
+      state.setSelectedScraped([]);
+      setCurrentPanelIndex(0);
+      setPlaybackTime(0);
+      setStoryboardPlaying(false);
+      state.setConsoleLogs(prev => [
+        `[Scraper] Aborting automatic scrape because selected source ${state.selectedSource} does not match the URL host ${currentHost}.`,
+        ...prev
+      ]);
+      return;
+    }
+
+    sourceMismatchNotified.current = false;
+
     const timer = setTimeout(() => {
-      const { genre, title, episode } = parseWebtoonUrl(state.targetUrl);
+      const { genre, title, episode } = parseWebtoonUrl(normalizedTargetUrl);
       
       state.setPanels([]);
       state.setScrapedImages([]);
@@ -155,7 +208,7 @@ export function useAppLogic() {
       state.setConsoleLogs(prev => {
         const baseLogs = prev.filter(log => !log.startsWith("[Preloader]") && !log.startsWith("[Scraper]"));
         return [
-          `[Scraper] Spawned live scraping task to separate strip images from: ${state.targetUrl}`,
+          `[Scraper] Spawned live scraping task to separate strip images from: ${normalizedTargetUrl}`,
           `[Model] Using AI engine: ${state.selectedModel} for panel analysis`,
           `[Scraper] Selected source website: ${state.selectedSource}`,
           `[Scraper] Parsed URL → Genre: ${genre} | Title: ${title} | Episode: ${episode}`,
@@ -167,7 +220,8 @@ export function useAppLogic() {
       state.fetchWithInterceptor("/api/scrape-images", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: state.targetUrl, model: state.selectedModel, source: state.selectedSource })
+        body: JSON.stringify({ url: normalizedTargetUrl, model: state.selectedModel, source: state.selectedSource }),
+        signal: abortController.signal,
       })
         .then(res => {
           if (!isCurrent) throw new Error("Stale request cleanup");
@@ -228,6 +282,7 @@ export function useAppLogic() {
     return () => {
       isCurrent = false;
       clearTimeout(timer);
+      abortController.abort();
     };
   }, [state.targetUrl, state.selectedModel, state.selectedSource, state.fetchWithInterceptor, state.addNotification, state.setPanels, state.setScrapedImages, state.setSelectedScraped, state.setConsoleLogs, setCurrentPanelIndex, setPlaybackTime, setStoryboardPlaying]);
 
