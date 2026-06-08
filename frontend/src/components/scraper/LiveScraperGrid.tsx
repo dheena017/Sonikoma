@@ -8,7 +8,7 @@ interface LiveScraperGridProps {
   croppingImgUrl: string | null;
   bubbleCroppingImgUrl: string | null;
   mergingIndices: number[];
-  handleMergeWithNext: (idx: number) => void;
+  handleMergeWithNext: (idx: number) => Promise<void>;
   setEditingImageIdx: (idx: number | null) => void;
   openEditingImageIdx?: (idx: number | null) => void;
   setEditCropTop: (v: number) => void;

@@ -1184,5 +1184,6 @@ export function useCropEditor({
     handleExecuteHorizontalSplit,
     handleExecuteSave,
     imageUrl,
+    handleClearBrushMask,
   };
 }
