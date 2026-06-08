@@ -20,6 +20,7 @@ interface LiveScraperGridProps {
   setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
   setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>>;
   addPanelsWithAutoAnalysis: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
+  addNotification: (message: string, type: "error" | "success" | "info" | "warning") => void;
 }
 
 export default function LiveScraperGrid({
@@ -41,6 +42,7 @@ export default function LiveScraperGrid({
   setSelectedScraped,
   setConsoleLogs,
   addPanelsWithAutoAnalysis,
+  addNotification,
 }: LiveScraperGridProps) {
   return (
     <div className="flex gap-4 overflow-x-auto pb-6 pt-1.5 scrollbar-thin">
@@ -69,6 +71,7 @@ export default function LiveScraperGrid({
             setSelectedScraped={setSelectedScraped}
             setConsoleLogs={setConsoleLogs}
             addPanelsWithAutoAnalysis={addPanelsWithAutoAnalysis}
+            addNotification={addNotification}
           />
         );
       })}
