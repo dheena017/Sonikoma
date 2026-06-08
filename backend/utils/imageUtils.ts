@@ -90,7 +90,7 @@ export async function resolveImageToBuffer(urlStr: string): Promise<ResolvedImag
 
   // 5. Relative paths → localhost
   if (workingUrl.startsWith('/')) {
-    workingUrl = `http://localhost:${process.env.PORT || 3000}${workingUrl}`;
+    workingUrl = `http://localhost:${process.env.PORT || 5173}${workingUrl}`;
   }
 
   // 6. Remote fetch with referrer-bypass headers
