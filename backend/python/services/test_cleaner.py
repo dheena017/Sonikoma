@@ -3,11 +3,11 @@ import sys
 import numpy as np
 import cv2
 
-# Add parent directory to sys.path so we can import backend.services.cleaner
+# Add parent directory to sys.path so we can import backend.python.services.cleaner
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 try:
-    from backend.services.cleaner import clean_speech_bubbles
+    from backend.python.services.cleaner import clean_speech_bubbles
 except ImportError:
     from services.cleaner import clean_speech_bubbles
 
@@ -99,7 +99,7 @@ def run_cleaner_test():
                 print("[Verification Details] WARNING: SFX region was modified.")
                 
             # Let's perform a direct heuristic check on the narration box crop to verify it classifies as colored_box
-            from backend.services.cleaner import heuristic_classify
+            from backend.python.services.cleaner import heuristic_classify
             narration_crop = in_img[50:130, 350:550]
             narration_class = heuristic_classify(narration_crop)
             print(f"[Verification Details] Direct heuristic classification of narration box crop: {narration_class}")
@@ -121,7 +121,7 @@ def run_enhanced_cleaner_tests():
     print("[Enhanced Test Run] Running enhanced cleaner feature tests...")
     print("="*50)
     
-    from backend.services.cleaner import (
+    from backend.python.services.cleaner import (
         clean_standard_bubble,
         clean_shout_bubble,
         clean_narration_box,

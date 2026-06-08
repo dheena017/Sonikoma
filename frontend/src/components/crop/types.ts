@@ -1,16 +1,1 @@
-export interface Slot {
-  cropTop: number;
-  cropBottom: number;
-  cropLeft: number;
-  cropRight: number;
-  autoTrim: boolean;
-}
-
-export interface Slice {
-  id: string;
-  cropTop: number;
-  cropBottom: number;
-  cropLeft: number;
-  cropRight: number;
-  autoTrim: boolean;
-}
+export * from "./shared/types";

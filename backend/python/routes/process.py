@@ -7,9 +7,9 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
 try:
-    from backend.services.audio import generate_panel_audio
-    from backend.services.video import compile_video
-    from backend.services.cleaner import clean_speech_bubbles
+    from backend.python.services.audio import generate_panel_audio
+    from backend.python.services.video import compile_video
+    from backend.python.services.cleaner import clean_speech_bubbles
 except ImportError:
     try:
         from app.services.audio import generate_panel_audio
@@ -21,7 +21,7 @@ except ImportError:
 
 # Pre-import safe safeguards in case sister modules are configured dynamically
 try:
-    from backend.services.scraper import fetch_webtoon_panels
+    from backend.python.services.scraper import fetch_webtoon_panels
 except ImportError:
     try:
         from app.services.scraper import fetch_webtoon_panels
@@ -30,7 +30,7 @@ except ImportError:
             return []
 
 try:
-    from backend.services.ocr import extract_dialogue_from_panel
+    from backend.python.services.ocr import extract_dialogue_from_panel
 except ImportError:
     try:
         from app.services.ocr import extract_dialogue_from_panel

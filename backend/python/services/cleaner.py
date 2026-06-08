@@ -28,11 +28,11 @@ except ImportError:
 
 # Import modular cleaners
 try:
-    from backend.services.standard import clean_standard_bubble
-    from backend.services.shout import clean_shout_bubble
-    from backend.services.narration import clean_narration_box
-    from backend.services.borderless import clean_borderless_text
-    from backend.services.sfx import clean_sfx
+    from backend.python.services.standard import clean_standard_bubble
+    from backend.python.services.shout import clean_shout_bubble
+    from backend.python.services.narration import clean_narration_box
+    from backend.python.services.borderless import clean_borderless_text
+    from backend.python.services.sfx import clean_sfx
 except ImportError:
     from standard import clean_standard_bubble
     from shout import clean_shout_bubble
@@ -41,7 +41,7 @@ except ImportError:
     from sfx import clean_sfx
 
 try:
-    from backend.services.bubble_detector import (
+    from backend.python.services.bubble_detector import (
         detect_bubble_regions_via_gemini,
         heuristic_classify,
         classify_cropped_region
