@@ -157,6 +157,7 @@ export function useAppLogic() {
         return [
           `[Scraper] Spawned live scraping task to separate strip images from: ${state.targetUrl}`,
           `[Model] Using AI engine: ${state.selectedModel} for panel analysis`,
+          `[Scraper] Selected source website: ${state.selectedSource}`,
           `[Scraper] Parsed URL → Genre: ${genre} | Title: ${title} | Episode: ${episode}`,
           ...baseLogs
         ];
@@ -166,7 +167,7 @@ export function useAppLogic() {
       state.fetchWithInterceptor("/api/scrape-images", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: state.targetUrl, model: state.selectedModel })
+        body: JSON.stringify({ url: state.targetUrl, model: state.selectedModel, source: state.selectedSource })
       })
         .then(res => {
           if (!isCurrent) throw new Error("Stale request cleanup");
@@ -228,7 +229,7 @@ export function useAppLogic() {
       isCurrent = false;
       clearTimeout(timer);
     };
-  }, [state.targetUrl, state.selectedModel, state.fetchWithInterceptor, state.addNotification, state.setPanels, state.setScrapedImages, state.setSelectedScraped, state.setConsoleLogs, setCurrentPanelIndex, setPlaybackTime, setStoryboardPlaying]);
+  }, [state.targetUrl, state.selectedModel, state.selectedSource, state.fetchWithInterceptor, state.addNotification, state.setPanels, state.setScrapedImages, state.setSelectedScraped, state.setConsoleLogs, setCurrentPanelIndex, setPlaybackTime, setStoryboardPlaying]);
 
   const totalCalculatedDuration = state.panels.reduce((sum, p) => sum + (p.duration || 0), 0);
 

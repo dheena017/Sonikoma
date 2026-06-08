@@ -10,6 +10,7 @@ interface UseVideoGenerationProps {
   fetchWithInterceptor: any;
   targetUrl: string;
   selectedModel: string;
+  selectedSource: string;
   frameRate: number;
   voiceActor: string;
   musicTheme: string;
@@ -28,6 +29,7 @@ export function useVideoGeneration({
   frameRate,
   voiceActor,
   musicTheme,
+  selectedSource,
   setVideoUrl,
   setActivePreviewTab,
 }: UseVideoGenerationProps) {
@@ -59,6 +61,7 @@ export function useVideoGeneration({
 
       const requestBody = {
         url: targetUrl,
+        source: selectedSource,
         episode_id: `wp_${Math.random().toString(36).substring(2, 8)}`,
         panels: panels,
         model: selectedModel
