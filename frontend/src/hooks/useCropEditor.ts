@@ -349,6 +349,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
         ...prev,
       ]);
     }
+    console.log(`[GUI] Deleted extracted frame #${editingImageIdx + 1} from deck`);
     addNotification(`Panel #${editingImageIdx + 1} deleted from deck`, "info");
     setEditingImageIdx(null);
   };

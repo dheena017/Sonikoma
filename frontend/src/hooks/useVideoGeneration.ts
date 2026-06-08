@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { GeneratedPanel } from "../types";
 import { NotificationType } from "../components/NotificationStack";
 

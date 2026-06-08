@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { Slice } from "../components/crop/types";
 
 interface UseCropEditorHistoryProps {

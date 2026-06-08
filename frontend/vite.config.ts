@@ -37,11 +37,24 @@ export default defineConfig(() => {
       proxy: {
         '/api': {
           target: 'http://127.0.0.1:5173',
-          changeOrigin: true
+          changeOrigin: true,
+          secure: false,
+          ws: false, // Ensure EventSource (SSE) isn't treated as a websocket
+          proxyTimeout: 0,
+          timeout: 0,
+          configure: (proxy, _options) => {
+            proxy.on('error', (err: any, req: any) => {
+              console.error('[Vite Proxy] /api proxy error:', err && err.message ? err.message : err);
+            });
+          }
         },
         '/media': {
           target: 'http://127.0.0.1:5173',
-          changeOrigin: true
+          changeOrigin: true,
+          secure: false,
+          ws: false,
+          proxyTimeout: 0,
+          timeout: 0,
         }
       }
     },

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { NotificationType } from "../components/NotificationStack";
 
 interface UseSingleImageEditsProps {
@@ -80,6 +80,7 @@ export function useSingleImageEdits({
         `[Image Editor]   - Revise (Cropped): ${croppedUrl.substring(0, 60)}...`,
         ...prev
       ]);
+      console.log(`[Image Editor] Cropped Frame #${editingImageIdx + 1}:`, { original: originalUrl, cropped: croppedUrl });
       addNotification(`Frame #${editingImageIdx + 1} cropped and trimmed successfully!`, 'success');
     } catch (err: any) {
       setConsoleLogs(prev => [
@@ -150,6 +151,7 @@ export function useSingleImageEdits({
         `[Image Editor] Successfully generated ${cuts.length} cropped/trimmed frames from Frame #${editingImageIdx + 1}!`,
         ...prev
       ]);
+      console.log(`[Image Editor] Generated ${cuts.length} cuts from Frame #${editingImageIdx + 1}:`, croppedUrls);
     } catch (err: any) {
       if (!err.intercepted) {
         addNotification(`Batch crop failed. Please check the edits and try again.`, "error");
@@ -201,6 +203,7 @@ export function useSingleImageEdits({
         `[Stitcher] [SUCCESS] Successfully merged Frame #${idx + 1} and Frame #${idx + 2} vertically into a new seamless frame asset!`,
         ...prev
       ]);
+      console.log(`[Stitcher] Merged frames ${idx + 1} & ${idx + 2} -> ${stitchedUrl}`);
       addNotification(`Frames #${idx + 1} and #${idx + 2} stitched successfully!`, 'success');
     } catch (err: any) {
       setConsoleLogs(prev => [

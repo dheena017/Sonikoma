@@ -1,3 +1,4 @@
+import React from "react";
 import { GeneratedPanel } from "../types.js";
 import { useBulkOperations } from "./useBulkOperations.js";
 import { useSceneModifier } from "./useSceneModifier.js";
