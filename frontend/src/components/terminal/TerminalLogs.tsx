@@ -17,6 +17,8 @@ export default function TerminalLogs({ consoleLogs, setConsoleLogs }: TerminalLo
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [copied, setCopied] = useState(false);
   const [autoScroll, setAutoScroll] = useState(true);
+  const [paused, setPaused] = useState(false);
+  const [lastVisibleCount, setLastVisibleCount] = useState<number>(consoleLogs.length);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<"all" | "errors" | "warnings" | "ai" | "success">("all");
 
@@ -25,11 +27,23 @@ export default function TerminalLogs({ consoleLogs, setConsoleLogs }: TerminalLo
     if (autoScroll && scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
+    // when not paused, keep visible count in sync
+    if (!paused) {
+      setLastVisibleCount(consoleLogs.length);
+    }
   }, [consoleLogs, autoScroll, searchQuery, activeFilter]);
 
   const handleCopyAll = () => {
     const allLogs = consoleLogs.join("\n");
     navigator.clipboard.writeText(allLogs).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  const handleCopyVisible = () => {
+    const visible = (paused ? consoleLogs.slice(0, lastVisibleCount) : consoleLogs).join("\n");
+    navigator.clipboard.writeText(visible).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
@@ -74,6 +88,9 @@ export default function TerminalLogs({ consoleLogs, setConsoleLogs }: TerminalLo
     return true;
   });
 
+  // When paused, only show up to `lastVisibleCount` logs to avoid UI jumping
+  const displayedLogs = paused ? filteredLogs.slice(0, Math.max(0, Math.min(lastVisibleCount, filteredLogs.length))) : filteredLogs;
+
   // Calculate statistics counts
   const errorCount = consoleLogs.filter(log => log.includes("[ERROR]") || log.includes("ERROR]") || log.includes("[FATAL]")).length;
   const warningCount = consoleLogs.filter(log => log.includes("[WARNING]") || log.includes("[WARN]")).length;
@@ -86,8 +103,11 @@ export default function TerminalLogs({ consoleLogs, setConsoleLogs }: TerminalLo
         consoleLogs={consoleLogs}
         autoScroll={autoScroll}
         setAutoScroll={setAutoScroll}
+        paused={paused}
+        setPaused={setPaused}
         copied={copied}
         handleCopyAll={handleCopyAll}
+        handleCopyVisible={handleCopyVisible}
         handleDownloadLogs={handleDownloadLogs}
         handleClear={handleClear}
       />
@@ -106,7 +126,7 @@ export default function TerminalLogs({ consoleLogs, setConsoleLogs }: TerminalLo
 
       <TerminalLogsOutput
         scrollRef={scrollRef}
-        filteredLogs={filteredLogs}
+        filteredLogs={displayedLogs}
         searchQuery={searchQuery}
         activeFilter={activeFilter}
       />

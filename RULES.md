@@ -457,15 +457,30 @@ The project uses **SQLite** via `better-sqlite3`.
 
 | Command | Description |
 |---|---|
-| `npm run dev` | Start backend/server.ts via tsx + Vite HMR frontend |
-| `npm run build` | Build frontend with Vite + bundle backend with esbuild |
-| `npm run start` | Start the production bundle from `dist/server.cjs` |
-| `npm run lint` | Run TypeScript type checking on `frontend/tsconfig.json` |
-| `npm run clean` | Remove build artifacts from `dist/` |
+| `npm run start` | Start backend + Vite frontend (development)
+| `npm run dev` | Alias for `npm run start` (recommended shorthand)
+| `npm run backend` | Start backend dev server only
+| `npm run frontend` | Start frontend dev server only
+| `npm run build` | Build frontend and bundle backend to `dist/` (production)
+| `npm run build:frontend` | Build only the frontend with Vite
+| `npm run build:backend` | Bundle only the backend with esbuild to `dist/server.cjs`
+| `npm run preview` | Preview frontend build (Vite preview)
+| `npm run start:prod` | Run the production bundle from `dist/server.cjs`
+| `npm run clean` | Remove `dist/` (cross-platform using `rimraf`)
+| `npm run lint` | TypeScript checks for the frontend (`frontend/tsconfig.json`)
+| `npm run typecheck` | Run `tsc --noEmit` for workspace-wide type checking
+| `npm run format` | Format code using Prettier
+| `npm run test` | Placeholder test command (update when adding tests)
+| `npm run install:python` | Install Python deps: `pip install -r requirements.txt`
+| `npm run docker:build` | Build local Docker image
+| `npm run docker:run` | Run the built Docker image (example helper)
 
-**Rules:**
-- Always use `npm run dev` for local development — never run `server.ts` directly.
-- The dev server runs on **http://localhost:5173** by default (configurable via `PORT`).
+**Rules & best practices:**
+- Use `npm run start` for local development (starts both backend and frontend).
+- Use `npm run build` then `npm run start:prod` to run the production bundle.
+- Run `npm run format` and `npm run typecheck` before committing changes.
+- Do not run `server.ts` directly in production; always use the bundled `dist/server.cjs`.
+- Keep `package.json` scripts up-to-date and document any additions in this file.
 
 ---
 

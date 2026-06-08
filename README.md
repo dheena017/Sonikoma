@@ -219,7 +219,7 @@ HUGGINGFACE_API_KEY="hf_..."
 ### 4️⃣ Start the App
 
 ```bash
-npm run dev
+npm run start
 ```
 
 The frontend app opens at **http://localhost:3000** while the backend API listens on **http://localhost:5173**.
@@ -314,11 +314,28 @@ It is **auto-created on first startup** — no setup needed.
 
 | Command | Description |
 |---|---|
-| `npm run dev` | Start backend (5173) + Vite frontend (3000) |
-| `npm run build` | Build frontend + bundle backend to `dist/` |
-| `npm run start` | Run production build from `dist/server.cjs` |
+| `npm run start` | Start backend (5173) + Vite frontend (3000) (development) |
+| `npm run dev` | Alias for `npm run start` |
+| `npm run backend` | Start backend dev server only |
+| `npm run frontend` | Start frontend dev server only |
+| `npm run build` | Build frontend and bundle backend to `dist/` (production) |
+| `npm run build:frontend` | Build only the frontend package |
+| `npm run build:backend` | Bundle only the backend to `dist/server.cjs` |
+| `npm run preview` | Preview the frontend build (Vite preview) |
+| `npm run start:prod` | Run production build from `dist/server.cjs` |
+| `npm run clean` | Remove `dist/` (cross-platform; uses `rimraf`) |
 | `npm run lint` | TypeScript type check (`frontend/tsconfig.json`) |
-| `npm run clean` | Delete the `dist/` folder |
+| `npm run typecheck` | Run `tsc --noEmit` across the workspace |
+| `npm run format` | Format code with Prettier |
+| `npm run test` | Placeholder test command |
+| `npm run install:python` | Install Python dependencies from `requirements.txt` |
+| `npm run docker:build` | Build a local Docker image |
+| `npm run docker:run` | Run the Docker image (exposes port 3000) |
+
+Developer notes:
+- Use `npm run start` for local development (starts both backend and frontend).
+- Use `npm run build` and then `npm run start:prod` to run the production bundle.
+- Run `npm run format` and `npm run typecheck` before committing changes.
 
 ---
 
