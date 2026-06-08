@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { TerminalLogsHeader } from "./terminal/TerminalLogsHeader.js";
-import { TerminalLogsFilter } from "./terminal/TerminalLogsFilter.js";
-import { TerminalLogsOutput } from "./terminal/TerminalLogsOutput.js";
+import { TerminalLogsHeader } from "./TerminalLogsHeader.js";
+import { TerminalLogsFilter } from "./TerminalLogsFilter.js";
+import { TerminalLogsOutput } from "./TerminalLogsOutput.js";
 
 interface TerminalLogsProps {
   consoleLogs: string[];

@@ -33,6 +33,10 @@ function formatTimestamp(): string {
   return now.toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
+function stripAnsi(str: string): string {
+  return str.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');
+}
+
 function formatArgs(args: any[]): string {
   return args.map(arg => {
     if (typeof arg === 'string') {
@@ -49,7 +53,7 @@ function pushLog(prefix: string, args: any[]) {
   isIntercepting = true;
 
   try {
-    const rawMsg = formatArgs(args);
+    const rawMsg = stripAnsi(formatArgs(args));
     const timestamp = formatTimestamp();
     
     // Format the message with appropriate category tag if not present

@@ -1,4 +1,5 @@
 import { parseWebtoonUrl } from '../utils/urlUtils.js';
+import { col } from '../utils/colors.js';
 
 /**
  * Helper function to safely crawl and isolate absolute webtoon panel images with unescaped references
@@ -16,14 +17,15 @@ export async function scrapeImagesFromUrl(url: string): Promise<string[]> {
       "Cookie": "needZoneZone=true; locale=en; cc=US; ageGatePass=true; adult=true"
     };
 
-    console.log(`[Scraper] Requesting: ${fetchUrl}`);
+    console.log(`${col.info('[Scraper]')} Requesting: ${col.dim(fetchUrl)}`);
     let response = await fetch(fetchUrl, { headers: fetchHeaders });
     
-    console.log(`[Scraper] Initial fetch status: ${response.status} (${response.statusText})`);
+    const statusCol = response.status === 200 ? col.success : col.warn;
+    console.log(`${col.info('[Scraper]')} Initial fetch status: ${statusCol(`${response.status} (${response.statusText})`)}`);
     
     if (!response.ok) {
       const errText = await response.text().then(t => t.substring(0, 400)).catch(() => "");
-      console.warn(`[Scraper] Initial fetch failed. Status: ${response.status}. Body preview: ${errText}`);
+      console.warn(`${col.warn('[Scraper]')} Initial fetch failed. Status: ${col.error(String(response.status))}. Body preview: ${col.dim(errText)}`);
       
       try {
         const urlObj = new URL(url);
@@ -32,21 +34,21 @@ export async function scrapeImagesFromUrl(url: string): Promise<string[]> {
         if (pathParts.length > 0 && !rxRegion.test(pathParts[0])) {
           urlObj.pathname = '/en/' + pathParts.join('/');
           fetchUrl = urlObj.toString();
-          console.log(`[Scraper] Fallback: Re-trying fallback regional URL: ${fetchUrl}`);
+          console.log(`${col.info('[Scraper]')} Fallback: Re-trying fallback regional URL: ${col.dim(fetchUrl)}`);
           response = await fetch(fetchUrl, { headers: fetchHeaders });
-          console.log(`[Scraper] Fallback fetch status: ${response.status}`);
+          console.log(`${col.info('[Scraper]')} Fallback fetch status: ${response.status === 200 ? col.success(String(response.status)) : col.warn(String(response.status))}`);
           if (!response.ok) {
             const fallbackErrText = await response.text().then(t => t.substring(0, 400)).catch(() => "");
-            console.warn(`[Scraper] Fallback fetch also failed. Body preview: ${fallbackErrText}`);
+            console.warn(`${col.warn('[Scraper]')} Fallback fetch also failed. Body preview: ${col.dim(fallbackErrText)}`);
           }
         }
       } catch (err) {
-        console.warn(`[Scraper] Regional completion fallback attempt failed in helper:`, err);
+        console.warn(`${col.warn('[Scraper]')} Regional completion fallback attempt failed in helper:`, err);
       }
     }
     
     if (!response.ok) {
-      console.error(`[Scraper] All fetch attempts returned not ok (Status ${response.status})`);
+      console.error(`${col.error('[Scraper]')} All fetch attempts returned not ok (Status ${col.error(String(response.status))})`);
       throw new Error(`Scraper failed to fetch the page (HTTP ${response.status} ${response.statusText}). Webtoon servers might be preventing access or the page URL is invalid/private.`);
     }
     
@@ -68,7 +70,7 @@ export async function scrapeImagesFromUrl(url: string): Promise<string[]> {
       startIdx = containerMatch.index;
       const startTag = containerMatch[0];
       const tagType = containerMatch[1];
-      console.log(`[Scraper] Isolated comic reader container tag "${startTag}" at position ${startIdx}`);
+      console.log(`${col.info('[Scraper]')} Isolated comic reader container tag ${col.brightGreen(startTag)} at position ${col.brightYellow(String(startIdx))}`);
 
       const afterStart = html.substring(startIdx + startTag.length);
       let balance = 1;
@@ -92,10 +94,10 @@ export async function scrapeImagesFromUrl(url: string): Promise<string[]> {
 
       if (endIdxInAfter !== -1) {
         const absoluteEndIdx = startIdx + startTag.length + endIdxInAfter;
-        console.log(`[Scraper] Perfectly balanced ${tagType}.viewer_lst container found. Slicing from ${startIdx} to ${absoluteEndIdx}`);
+        console.log(`${col.info('[Scraper]')} Perfectly balanced ${col.brightGreen(tagType + '.viewer_lst')} container found. Slicing from ${col.brightYellow(String(startIdx))} to ${col.brightYellow(String(absoluteEndIdx))}`);
         searchBlock = html.substring(startIdx, absoluteEndIdx);
       } else {
-        console.log(`[Scraper] Could not find balanced closing ${tagType} tag. Slicing 300,000 characters from start container.`);
+        console.log(`${col.info('[Scraper]')} ${col.warn('Could not find balanced closing')} ${col.brightGreen(tagType)} tag. Slicing 300,000 characters from start container.`);
         searchBlock = html.substring(startIdx, startIdx + 300000);
       }
     } else {
@@ -105,7 +107,7 @@ export async function scrapeImagesFromUrl(url: string): Promise<string[]> {
         const bodyIdx = html.indexOf("<body");
         if (potentialIdx !== -1 && (bodyIdx === -1 || potentialIdx > bodyIdx)) {
           startIdx = potentialIdx;
-          console.log(`[Scraper] Fallback isolated comic container using key "${key}" at position ${startIdx}`);
+          console.log(`${col.info('[Scraper]')} Fallback isolated comic container using key ${col.brightGreen(key)} at position ${col.brightYellow(String(startIdx))}`);
           break;
         }
       }
@@ -118,7 +120,7 @@ export async function scrapeImagesFromUrl(url: string): Promise<string[]> {
         
         if (endMatch) {
           endIdx = startIdx + endMatch.index;
-          console.log(`[Scraper] Confirmed bounding container end tag "${endMatch[0]}" at position ${endIdx}`);
+          console.log(`${col.info('[Scraper]')} Confirmed bounding container end tag ${col.brightGreen(endMatch[0])} at position ${col.brightYellow(String(endIdx))}`);
         } else {
           const endKeys = [
             'class="rt_area"', 
@@ -140,14 +142,14 @@ export async function scrapeImagesFromUrl(url: string): Promise<string[]> {
         }
         
         if (endIdx !== -1) {
-          console.log(`[Scraper] Confirmed bounding container. Slicing HTML viewer section from index ${startIdx} to ${endIdx}`);
+          console.log(`${col.info('[Scraper]')} Confirmed bounding container. Slicing HTML viewer section from index ${col.brightYellow(String(startIdx))} to ${col.brightYellow(String(endIdx))}`);
           searchBlock = html.substring(startIdx, endIdx);
         } else {
-          console.log(`[Scraper] Bounding container end not found. Slicing 300,000 characters from start container.`);
+          console.log(`${col.info('[Scraper]')} ${col.warn('Bounding container end not found')}. Slicing 300,000 characters from start container.`);
           searchBlock = html.substring(startIdx, startIdx + 300000);
         }
       } else {
-        console.log(`[Scraper] Comic reader container not found in HTML. Scanning full page as fallback.`);
+        console.log(`${col.info('[Scraper]')} ${col.warn('Comic reader container not found in HTML')}. Scanning full page as fallback.`);
       }
     }
 
@@ -209,7 +211,7 @@ export async function scrapeImagesFromUrl(url: string): Promise<string[]> {
     }
 
     if (imageSet.size === 0) {
-      console.log(`[Scraper] Structural parser returned 0 images. Falling back to regex scanners.`);
+      console.log(`${col.info('[Scraper]')} Structural parser returned 0 images. Falling back to regex scanners.`);
       const fallbackRegexes = [
         /https?:\/\/webtoon-phinf\.pstatic\.net\/[^"'\s>]+/gi,
         /https?:\/\/[^"'\s>]*?phinf\.net\/[^"'\s>]+/gi
@@ -276,18 +278,18 @@ export async function scrapeImagesFromUrl(url: string): Promise<string[]> {
       );
     });
     
-    console.log(`[Helper Scraper] Extracted ${filteredImages.length} active frame candidates.`);
+    console.log(`${col.label('[Helper Scraper]')} Extracted ${col.success(String(filteredImages.length))} active frame candidates.`);
     
     const finalImages = filteredImages;
 
     if (finalImages.length === 0) {
-      console.warn("[Scraper] Crawler found 0 eligible comic panel images.");
+      console.warn(`${col.warn('[Scraper]')} ${col.error('Crawler found 0 eligible comic panel images.')}`);
       throw new Error("No eligible comic panel images were found. The Webtoon page might be structured differently or access is restricted.");
     }
 
     return finalImages.map(img => `/api/proxy-image?url=${encodeURIComponent(img)}`);
   } catch (error) {
-    console.error(`[Helper Scraper Error] Failed to extract page assets:`, error);
+    console.error(`${col.error('[Helper Scraper Error]')} Failed to extract page assets:`, error);
     throw error;
   }
 }

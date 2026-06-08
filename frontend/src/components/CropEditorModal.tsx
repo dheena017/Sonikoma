@@ -8,68 +8,44 @@ import CropEditorFooter from "./crop/CropEditorFooter";
 import CropEditorCanvasContainer from "./crop/CropEditorCanvasContainer";
 import CropEditorSidebar from "./crop/CropEditorSidebar";
 
-import { useCropEditor } from "../hooks/useCropEditor";
+import { useCropEditor } from "../hooks/useCropEditor.js";
+import { useAppLogic } from "../hooks/useAppLogic.js";
 
 interface CropEditorModalProps {
-  key?: any;
-  editingImageIdx: number | null;
-  setEditingImageIdx: (idx: number | null) => void;
-  editCropTop: number;
-  setEditCropTop: (val: number) => void;
-  editCropBottom: number;
-  setEditCropBottom: (val: number) => void;
-  editCropLeft: number;
-  setEditCropLeft: (val: number) => void;
-  editCropRight: number;
-  setEditCropRight: (val: number) => void;
-  editAutoTrim: boolean;
-  setEditAutoTrim: (val: boolean) => void;
-  scrapedImages: string[];
-  setScrapedImages?: React.Dispatch<React.SetStateAction<string[]>>;
-  isSavingEdit: boolean;
-  handleSaveEditedImage: () => Promise<void>;
-  handleSaveMultipleCuts: (cuts: Slot[]) => Promise<void>;
-  setConsoleLogs?: React.Dispatch<React.SetStateAction<string[]>>;
-  addNotification: (message: string, type: NotificationType) => void;
-  selectedScraped?: string[];
-  setSelectedScraped?: React.Dispatch<React.SetStateAction<string[]>>;
-  panels?: any[];
-  setPanels?: React.Dispatch<React.SetStateAction<any[]>>;
-  fetchWithInterceptor?: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
-  setErrorPopup?: React.Dispatch<React.SetStateAction<ErrorPopupDetail | null>>;
-  imageEditStates?: Record<string, any>;
-  setImageEditStates?: React.Dispatch<React.SetStateAction<Record<string, any>>>;
+  appLogic: ReturnType<typeof useAppLogic>;
 }
 
-export default function CropEditorModal({
-  editingImageIdx,
-  setEditingImageIdx,
-  editCropTop,
-  setEditCropTop,
-  editCropBottom,
-  setEditCropBottom,
-  editCropLeft,
-  setEditCropLeft,
-  editCropRight,
-  setEditCropRight,
-  editAutoTrim,
-  setEditAutoTrim,
-  scrapedImages,
-  setScrapedImages,
-  isSavingEdit,
-  handleSaveEditedImage,
-  handleSaveMultipleCuts,
-  setConsoleLogs,
-  addNotification,
-  panels,
-  setPanels,
-  fetchWithInterceptor,
-  imageEditStates,
-  setImageEditStates,
-  selectedScraped,
-  setSelectedScraped,
-  setErrorPopup,
-}: CropEditorModalProps) {
+export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
+  const {
+    editingImageIdx,
+    setEditingImageIdx,
+    editCropTop,
+    setEditCropTop,
+    editCropBottom,
+    setEditCropBottom,
+    editCropLeft,
+    setEditCropLeft,
+    editCropRight,
+    setEditCropRight,
+    editAutoTrim,
+    setEditAutoTrim,
+    scrapedImages,
+    setScrapedImages,
+    isSavingEdit,
+    handleSaveEditedImage,
+    handleSaveMultipleCuts,
+    setConsoleLogs,
+    addNotification,
+    panels,
+    setPanels,
+    fetchWithInterceptor,
+    imageEditStates,
+    setImageEditStates,
+    selectedScraped,
+    setSelectedScraped,
+    setErrorPopup,
+  } = appLogic;
+
   useEffect(() => {
     const originalBodyOverflow = document.body.style.overflow;
     const originalHtmlOverflow = document.documentElement.style.overflow;
@@ -186,29 +162,7 @@ export default function CropEditorModal({
     imageUrl,
     handleClearBrushMask,
   } = useCropEditor({
-    editingImageIdx,
-    setEditingImageIdx,
-    editCropTop,
-    setEditCropTop,
-    editCropBottom,
-    setEditCropBottom,
-    editCropLeft,
-    setEditCropLeft,
-    editCropRight,
-    setEditCropRight,
-    editAutoTrim,
-    setEditAutoTrim,
-    scrapedImages,
-    setScrapedImages,
-    handleSaveEditedImage,
-    handleSaveMultipleCuts,
-    setConsoleLogs,
-    addNotification,
-    panels,
-    setPanels,
-    fetchWithInterceptor,
-    imageEditStates,
-    setImageEditStates,
+    appLogic,
   });
 
   const activeStoryboardPanel = panels?.find(

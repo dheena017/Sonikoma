@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch backend/server.ts",
+    "dev": "concurrently --names \"SERVER,VITE\" --prefix-colors \"cyan,magenta\" \"npm run server\" \"npm run frontend\"",
     "server": "cross-env STANDALONE_SERVER=true tsx watch backend/server.ts",
     "frontend": "vite --config frontend/vite.config.ts",
     "dev:all": "concurrently --names \"SERVER,VITE\" --prefix-colors \"cyan,magenta\" \"npm run server\" \"npm run frontend\"",

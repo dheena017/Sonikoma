@@ -1,7 +1,7 @@
 import React from "react";
-import { GeneratedPanel } from "../types.js";
-import { VideoMonitorTabs } from "./video/VideoMonitorTabs.js";
-import { VideoMonitorActive } from "./video/VideoMonitorActive.js";
+import { GeneratedPanel } from "../../types.js";
+import { VideoMonitorTabs } from "./VideoMonitorTabs.js";
+import { VideoMonitorActive } from "./VideoMonitorActive.js";
 
 interface VideoMonitorProps {
   activePreviewTab: "video" | "storyboard";

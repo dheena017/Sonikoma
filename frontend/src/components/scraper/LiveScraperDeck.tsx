@@ -8,9 +8,9 @@ import {
 } from "lucide-react";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
-import { LiveScraperDeckProps } from "./scraper/types";
-import PanelCard from "./scraper/PanelCard";
-import ScraperControls from "./scraper/ScraperControls";
+import { LiveScraperDeckProps } from "./types";
+import PanelCard from "./PanelCard";
+import ScraperControls from "./ScraperControls";
 
 export default function LiveScraperDeck({
   scrapedImages,

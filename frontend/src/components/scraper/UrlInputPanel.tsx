@@ -1,7 +1,7 @@
 import React from "react";
 import { Sparkles } from "lucide-react";
-import { AI_MODELS } from "../models";
-import { NotificationType } from "./NotificationStack";
+import { AI_MODELS } from "../../models";
+import { NotificationType } from "../NotificationStack";
 
 interface UrlInputPanelProps {
   targetUrl: string;

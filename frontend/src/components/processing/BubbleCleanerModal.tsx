@@ -1,7 +1,7 @@
 import React from "react";
 import { Brain, X, RefreshCw } from "lucide-react";
-import BubbleCleanerLeftColumn from "./scraper/BubbleCleanerLeftColumn";
-import BubbleCleanerRightColumn from "./scraper/BubbleCleanerRightColumn";
+import BubbleCleanerLeftColumn from "../scraper/BubbleCleanerLeftColumn";
+import BubbleCleanerRightColumn from "../scraper/BubbleCleanerRightColumn";
 
 interface BubbleCleanerModalProps {
   onClose: () => void;

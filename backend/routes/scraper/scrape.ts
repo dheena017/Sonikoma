@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { parseWebtoonUrl } from '../../utils/urlUtils.js';
 import { scrapeImagesFromUrl } from '../../services/scraperService.js';
+import { col } from '../../utils/colors.js';
 
 const router = Router();
 
@@ -13,7 +14,7 @@ router.post("/scrape-images", async (req, res) => {
   
   try {
     const parsed = parseWebtoonUrl(url);
-    console.log(`[Scraper] Parsing page resource via helper: ${url}`);
+    console.log(`${col.info('[Scraper]')} Parsing page resource via helper: ${col.brightCyan(url)}`);
     const proxiedUrls = await scrapeImagesFromUrl(url);
     
     return res.json({
@@ -28,7 +29,7 @@ router.post("/scrape-images", async (req, res) => {
     });
     
   } catch (error: any) {
-    console.error("[Scraper Error] Failed to extract page assets:", error);
+    console.error(`${col.error('[Scraper Error]')} Failed to extract page assets:`, error);
     return res.status(500).json({ 
       success: false, 
       message: error.message || "Failed to parse page images.",

@@ -1,6 +1,6 @@
 import React from "react";
 import { Play, Pause, RotateCcw, VolumeX, Volume2 } from "lucide-react";
-import { GeneratedPanel } from "../types";
+import { GeneratedPanel } from "../../types";
 
 interface VolumeAndProgressPanelProps {
   panels: GeneratedPanel[];

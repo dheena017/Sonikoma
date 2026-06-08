@@ -1,11 +1,11 @@
 import React from "react";
-import { GeneratedPanel } from "../types";
-import { useStoryboardOperations } from "../hooks/useStoryboardOperations";
+import { GeneratedPanel } from "../../types";
+import { useStoryboardOperations } from "../../hooks/useStoryboardOperations";
 
-import TimelineEmptyState from "./timeline/TimelineEmptyState";
-import TimelineHeader from "./timeline/TimelineHeader";
-import TimelineBulkOps from "./timeline/TimelineBulkOps";
-import TimelineCard from "./timeline/TimelineCard";
+import TimelineEmptyState from "./TimelineEmptyState";
+import TimelineHeader from "./TimelineHeader";
+import TimelineBulkOps from "./TimelineBulkOps";
+import TimelineCard from "./TimelineCard";
 
 interface StoryboardTimelineProps {
   panels: GeneratedPanel[];

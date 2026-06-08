@@ -1,7 +1,7 @@
 import React from "react";
 import { Scissors, X, RefreshCw, Sparkles } from "lucide-react";
-import AutoCropLeftColumn from "./scraper/AutoCropLeftColumn";
-import AutoCropRightColumn from "./scraper/AutoCropRightColumn";
+import AutoCropLeftColumn from "../scraper/AutoCropLeftColumn";
+import AutoCropRightColumn from "../scraper/AutoCropRightColumn";
 
 interface AutoCropModalProps {
   onClose: () => void;
