@@ -8,7 +8,6 @@ interface PanelCardProps
   extends Pick<
     ScraperDeckProps,
     | "setEditingImageIdx"
-    | "openEditingImageIdx"
     | "setEditCropTop"
     | "setEditCropBottom"
     | "setEditCropLeft"
@@ -27,7 +26,9 @@ interface PanelCardProps
   isSelected: boolean;
   isBatchCropping: boolean;
   croppingImgUrl: string | null;
+  openEditingImageIdx?: (idx: number | null) => void;
   addPanelsWithAutoAnalysis: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
+  addNotification: (message: string, type: "error" | "success" | "info" | "warning") => void;
   key?: React.Key;
 }
 
@@ -52,6 +53,7 @@ export default function PanelCard({
   setConsoleLogs,
   openEditingImageIdx,
   addPanelsWithAutoAnalysis,
+  addNotification,
 }: PanelCardProps) {
   const [isEditing, setIsEditing] = React.useState<boolean>(false);
   const isProcessing =
@@ -59,7 +61,7 @@ export default function PanelCard({
 
   const handleRotateClockwise = async () => {
     setIsEditing(true);
-    setConsoleLogs?.((prev) => [
+    setConsoleLogs?.((prev: any) => [
       `[Image Editor] Rotating Panel #${idx + 1} 90° clockwise...`,
       ...prev,
     ]);
@@ -75,16 +77,16 @@ export default function PanelCard({
       });
       if (!response.ok) throw new Error(`Rotate failed with status ${response.status}`);
       const data = await response.json();
-      
-      setScrapedImages?.((prev) => prev.map((img, i) => (i === idx ? data.url : img)));
-      setSelectedScraped?.((prev) => prev.map((img) => (img === imgUrl ? data.url : img)));
-      setConsoleLogs?.((prev) => [
+
+      setScrapedImages?.((prev: any[]) => prev.map((img: any, i: number) => (i === idx ? data.url : img)));
+      setSelectedScraped?.((prev: any[]) => prev.map((img: string) => (img === imgUrl ? data.url : img)));
+      setConsoleLogs?.((prev: any) => [
         `[Image Editor] Successfully rotated Panel #${idx + 1}!`,
         ...prev,
       ]);
     } catch (err: any) {
       console.error(err);
-      setConsoleLogs?.((prev) => [`[Image Editor Error] Rotation failed: ${err.message}`, ...prev]);
+      setConsoleLogs?.((prev: any) => [`[Image Editor Error] Rotation failed: ${err.message}`, ...prev]);
     } finally {
       setIsEditing(false);
     }
@@ -92,7 +94,7 @@ export default function PanelCard({
 
   const handleFlipHorizontal = async () => {
     setIsEditing(true);
-    setConsoleLogs?.((prev) => [
+    setConsoleLogs?.((prev: any) => [
       `[Image Editor] Flipping Panel #${idx + 1} horizontally...`,
       ...prev,
     ]);
@@ -109,15 +111,15 @@ export default function PanelCard({
       if (!response.ok) throw new Error(`Flip failed with status ${response.status}`);
       const data = await response.json();
 
-      setScrapedImages?.((prev) => prev.map((img, i) => (i === idx ? data.url : img)));
-      setSelectedScraped?.((prev) => prev.map((img) => (img === imgUrl ? data.url : img)));
-      setConsoleLogs?.((prev) => [
+      setScrapedImages?.((prev: any[]) => prev.map((img: any, i: number) => (i === idx ? data.url : img)));
+      setSelectedScraped?.((prev: any[]) => prev.map((img: string) => (img === imgUrl ? data.url : img)));
+      setConsoleLogs?.((prev: any) => [
         `[Image Editor] Successfully flipped Panel #${idx + 1} horizontally!`,
         ...prev,
       ]);
     } catch (err: any) {
       console.error(err);
-      setConsoleLogs?.((prev) => [`[Image Editor Error] Flipping failed: ${err.message}`, ...prev]);
+      setConsoleLogs?.((prev: any) => [`[Image Editor Error] Flipping failed: ${err.message}`, ...prev]);
     } finally {
       setIsEditing(false);
     }
@@ -125,7 +127,7 @@ export default function PanelCard({
 
   const handleUndo = async () => {
     setIsEditing(true);
-    setConsoleLogs?.((prev) => [
+    setConsoleLogs?.((prev: any) => [
       `[Image Editor] Restoring previous state for Panel #${idx + 1}...`,
       ...prev,
     ]);
@@ -139,9 +141,9 @@ export default function PanelCard({
       const data = await response.json();
 
       if (data.success && data.previous_url) {
-        setScrapedImages?.((prev) => prev.map((img, i) => (i === idx ? data.previous_url : img)));
-        setSelectedScraped?.((prev) => prev.map((img) => (img === imgUrl ? data.previous_url : img)));
-        setConsoleLogs?.((prev) => [
+        setScrapedImages?.((prev: any[]) => prev.map((img: any, i: number) => (i === idx ? data.previous_url : img)));
+        setSelectedScraped?.((prev: any[]) => prev.map((img: string) => (img === imgUrl ? data.previous_url : img)));
+        setConsoleLogs?.((prev: any) => [
           `[Image Editor] Successfully restored previous state for Panel #${idx + 1}!`,
           ...prev,
         ]);
@@ -150,7 +152,7 @@ export default function PanelCard({
       }
     } catch (err: any) {
       console.error(err);
-      setConsoleLogs?.((prev) => [`[Image Editor Error] Undo failed: ${err.message}`, ...prev]);
+      setConsoleLogs?.((prev: any) => [`[Image Editor Error] Undo failed: ${err.message}`, ...prev]);
     } finally {
       setIsEditing(false);
     }
@@ -160,20 +162,21 @@ export default function PanelCard({
     <div
       onClick={() => {
         if (setSelectedScraped) {
-          setSelectedScraped((prev) => {
+          setSelectedScraped((prev: any[]) => {
             if (isSelected) {
-              return prev.filter((img) => img !== imgUrl);
+              return prev.filter((img: string) => img !== imgUrl);
             } else {
               return [...prev, imgUrl];
             }
           });
         }
       }}
-      className={`group relative w-[132px] sm:w-[150px] shrink-0 rounded-2xl border p-2 space-y-2 transition-all text-center cursor-pointer select-none ${
+      className={[
+        "group relative w-[140px] sm:w-[156px] shrink-0 rounded-2xl border p-2 space-y-2 transition-all duration-200 text-center cursor-pointer select-none",
         isSelected
-          ? "border-purple-500 bg-purple-950/20 shadow-lg shadow-purple-900/40"
-          : "border-neutral-800/80 bg-neutral-950 hover:border-purple-500/60"
-      }`}
+          ? "border-purple-500/80 bg-purple-950/25 shadow-[0_0_18px_2px_rgba(168,85,247,0.22)] ring-1 ring-purple-500/30 scale-[1.02]"
+          : "border-neutral-800/70 bg-neutral-950 hover:border-purple-500/50 hover:shadow-[0_0_12px_1px_rgba(168,85,247,0.10)] hover:scale-[1.01]",
+      ].join(" ")}
     >
       <PanelCardThumbnail
         imgUrl={imgUrl}
@@ -204,6 +207,7 @@ export default function PanelCard({
         setScrapedImages={setScrapedImages}
         setSelectedScraped={setSelectedScraped}
         setConsoleLogs={setConsoleLogs}
+        addNotification={addNotification}
       />
     </div>
   );

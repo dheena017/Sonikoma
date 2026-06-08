@@ -96,12 +96,15 @@ export default function LiveScraperDeck({
       `[GUI] Removed ${selectedScraped.length} images`,
       ...prev,
     ]);
+    console.log(`[GUI] Deleted ${selectedScraped.length} selected image(s) from the deck.`);
+    addNotification(`Deleted ${selectedScraped.length} selected image(s) from the deck.`, "success");
     setSelectedScraped([]);
   };
 
   const handleAddToCanvas = () => {
     if (selectedScraped.length === 0) return;
     addPanelsWithAutoAnalysis(selectedScraped);
+    console.log(`[GUI] Adding ${selectedScraped.length} selected image(s) to storyboard.`);
     setSelectedScraped([]);
   };
 
@@ -213,6 +216,7 @@ export default function LiveScraperDeck({
                   setSelectedScraped={setSelectedScraped}
                   setConsoleLogs={setConsoleLogs}
                   addPanelsWithAutoAnalysis={addPanelsWithAutoAnalysis}
+                  addNotification={addNotification}
                 />
               );
             })}
