@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Brain, RefreshCw, Sliders, HelpCircle, Eye } from "lucide-react";
-import { NotificationType } from "../NotificationStack";
+import { NotificationType } from "../../NotificationStack";
 import { PRESETS } from "../auto/bubblePresets";
 import CleanBubblesPresets from "./CleanBubblesPresets";
 import CleanBubblesModes from "./CleanBubblesModes";

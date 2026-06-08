@@ -7,7 +7,6 @@
     "dev": "concurrently --names \"SERVER,VITE\" --prefix-colors \"cyan,magenta\" \"npm run server\" \"npm run frontend\"",
     "server": "cross-env STANDALONE_SERVER=true tsx watch backend/server.ts",
     "frontend": "vite --config frontend/vite.config.ts",
-    "dev:all": "concurrently --names \"SERVER,VITE\" --prefix-colors \"cyan,magenta\" \"npm run server\" \"npm run frontend\"",
     "build": "vite build --config frontend/vite.config.ts && esbuild backend/server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
     "start": "node dist/server.cjs",
     "clean": "rm -rf dist",
