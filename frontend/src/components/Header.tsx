@@ -31,10 +31,10 @@ export default function Header({ isProcessing, panels, totalCalculatedDuration }
         </div>
 
         <div className="flex items-center gap-6">
-          <div className="bg-neutral-900 px-3 py-1.5 rounded-lg border border-neutral-800 flex items-center gap-2 font-mono">
+          <div className={`px-3 py-1.5 rounded-lg border flex items-center gap-2 font-mono border-neutral-800 bg-neutral-900`}>
             <span className={`h-2 w-2 rounded-full ${isProcessing ? 'bg-purple-500 animate-ping' : 'bg-emerald-500'}`} />
             <span className="text-[11px] text-neutral-300">
-              {isProcessing ? "PROCESSING..." : "ENGINE ONLINE"}
+              {isProcessing ? "PROCESSING..." : "READY"}
             </span>
           </div>
           {panels.length > 0 && (
