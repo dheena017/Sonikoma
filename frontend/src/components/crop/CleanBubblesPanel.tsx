@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Brain, RefreshCw, ChevronDown, Sliders, ChevronRight, Undo2, Redo2, RotateCcw, HelpCircle, Eye, Sparkles, Layers, Cpu } from "lucide-react";
+import { Brain, RefreshCw, Sliders, HelpCircle, Eye } from "lucide-react";
 import { NotificationType } from "../NotificationStack";
-import { DETECTION_OPTIONS, ERASE_OPTIONS, PRESETS } from "./bubblePresets";
+import { PRESETS } from "./bubblePresets";
+import CleanBubblesPresets from "./CleanBubblesPresets";
+import CleanBubblesModes from "./CleanBubblesModes";
+import CleanBubblesAdvanced from "./CleanBubblesAdvanced";
+import CleanBubblesManual from "./CleanBubblesManual";
+import CleanBubblesHistory from "./CleanBubblesHistory";
 
 interface CleanBubblesPanelProps {
   imgUrl: string;
@@ -52,7 +57,6 @@ interface CleanBubblesPanelProps {
   setCustomColorTolerance?: (val: number) => void;
 }
 
-
 export default function CleanBubblesPanel({
   imgUrl,
   editingImageIdx,
@@ -70,33 +74,33 @@ export default function CleanBubblesPanel({
   handleClearBrushMask,
 
   detectionStyle = "all",
-  setDetectionStyle,
+  setDetectionStyle = () => {},
   eraseMethod = "auto",
-  setEraseMethod,
+  setEraseMethod = () => {},
   sensitivity = 50,
-  setSensitivity,
+  setSensitivity = () => {},
   dilation = -1,
-  setDilation,
+  setDilation = () => {},
   inpaintRadius = 3,
-  setInpaintRadius,
+  setInpaintRadius = () => {},
   debugMode = false,
-  setDebugMode,
+  setDebugMode = () => {},
   fillColor = "#ffffff",
-  setFillColor,
+  setFillColor = () => {},
   ocrLang = "en",
-  setOcrLang,
+  setOcrLang = () => {},
   gpu = false,
-  setGpu,
+  setGpu = () => {},
   morphKernelSize = 15,
-  setMorphKernelSize,
+  setMorphKernelSize = () => {},
   morphShape = "ellipse",
-  setMorphShape,
+  setMorphShape = () => {},
   useCustomColorTarget = false,
-  setUseCustomColorTarget,
+  setUseCustomColorTarget = () => {},
   customColorTarget = "#ffffcc",
-  setCustomColorTarget,
+  setCustomColorTarget = () => {},
   customColorTolerance = 25,
-  setCustomColorTolerance,
+  setCustomColorTolerance = () => {},
 }: CleanBubblesPanelProps) {
   const activeFetch = fetchWithInterceptor || fetch;
 
@@ -326,452 +330,66 @@ export default function CleanBubblesPanel({
       )}
 
       {/* Preset profiles selection carousel/grid */}
-      <div className="space-y-1.5">
-        <label className="text-[9px] font-bold text-neutral-400 uppercase font-mono block tracking-wider">
-          Presets ({PRESETS.length})
-        </label>
-        <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-neutral-800">
-          {PRESETS.map((p) => {
-            const isSelected = activePreset === p.name;
-            return (
-              <button
-                key={p.name}
-                type="button"
-                onClick={() => handleApplyPreset(p)}
-                className={`flex-shrink-0 px-2.5 py-1.5 rounded-lg border text-[10px] font-bold font-mono transition-all cursor-pointer flex items-center gap-1.5 ${
-                  isSelected
-                    ? "bg-purple-600 border-purple-500 text-white shadow-md shadow-purple-900/30"
-                    : "bg-neutral-900 hover:bg-neutral-800 border-neutral-800 hover:border-neutral-700 text-neutral-400 hover:text-neutral-200"
-                }`}
-                title={p.description}
-              >
-                <span>{p.icon}</span>
-                <span>{p.name}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <CleanBubblesPresets activePreset={activePreset} handleApplyPreset={handleApplyPreset} />
 
       {showSettings && (
         <div className="space-y-3.5 animate-fadeIn">
           {/* Engine Parameters Grid */}
-          <div className="grid grid-cols-2 gap-2">
-            {/* Detection Style Selector */}
-            <div className="space-y-1.5">
-              <label className="text-[9px] font-bold text-neutral-400 uppercase font-mono block tracking-wider">
-                Detection Mode
-              </label>
-              <div className="relative">
-                <select
-                  value={detectionStyle}
-                  onChange={(e) => {
-                    setDetectionStyle(e.target.value as any);
-                    setActivePreset("Custom");
-                  }}
-                  className="w-full bg-neutral-900 border border-neutral-800 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] font-mono focus:border-purple-600 focus:outline-none cursor-pointer appearance-none transition-colors hover:border-neutral-700"
-                >
-                  {DETECTION_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-500 pointer-events-none" />
-              </div>
-            </div>
+          <CleanBubblesModes
+            detectionStyle={detectionStyle}
+            setDetectionStyle={setDetectionStyle}
+            eraseMethod={eraseMethod}
+            setEraseMethod={setEraseMethod}
+            setActivePreset={setActivePreset}
+            fillColor={fillColor}
+            setFillColor={setFillColor}
+            sensitivity={sensitivity}
+            setSensitivity={setSensitivity}
+            sensitivityPct={sensitivityPct}
+          />
 
-            {/* Erase Method Selector */}
-            <div className="space-y-1.5">
-              <label className="text-[9px] font-bold text-neutral-400 uppercase font-mono block tracking-wider">
-                Erase Strategy
-              </label>
-              <div className="relative">
-                <select
-                  value={eraseMethod}
-                  onChange={(e) => {
-                    setEraseMethod(e.target.value as any);
-                    setActivePreset("Custom");
-                  }}
-                  className="w-full bg-neutral-900 border border-neutral-800 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] font-mono focus:border-purple-600 focus:outline-none cursor-pointer appearance-none transition-colors hover:border-neutral-700"
-                >
-                  {ERASE_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-500 pointer-events-none" />
-              </div>
-            </div>
-          </div>
-
-          {/* Custom Solid Color Fill picker */}
-          {eraseMethod === "solid_color" && (
-            <div className="flex items-center justify-between p-2.5 bg-neutral-900/60 border border-neutral-850 rounded-xl animate-fadeIn">
-              <span className="text-[9px] font-bold text-neutral-400 uppercase font-mono tracking-wider">Fill Color</span>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={fillColor}
-                  onChange={(e) => setFillColor(e.target.value)}
-                  className="w-16 bg-neutral-950 border border-neutral-800 text-[10px] font-mono text-center rounded py-0.5"
-                />
-                <input
-                  type="color"
-                  value={fillColor}
-                  onChange={(e) => setFillColor(e.target.value)}
-                  className="w-5 h-5 bg-transparent border-0 cursor-pointer"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Sensitivity slider */}
-          <div className="space-y-1.5">
-            <div className="flex justify-between items-center">
-              <span className="text-[9px] font-bold text-neutral-400 uppercase font-mono tracking-wider">
-                Detection Sensitivity
-              </span>
-              <span className="text-[10px] font-mono font-bold text-purple-400">
-                {sensitivity}%
-              </span>
-            </div>
-            <div className="relative h-1.5 rounded-full bg-neutral-900 border border-white/5 overflow-hidden">
-              <div
-                className="absolute inset-y-0 left-0 rounded-full transition-all duration-100"
-                style={{
-                  width: `${sensitivityPct}%`,
-                  background: "linear-gradient(to right, #7c3aed, #c084fc)",
-                }}
-              />
-              <input
-                type="range"
-                min="10"
-                max="90"
-                value={sensitivity}
-                onChange={(e) => {
-                  setSensitivity(Number(e.target.value));
-                  setActivePreset("Custom");
-                }}
-                className="absolute inset-0 w-full opacity-0 cursor-pointer h-full"
-              />
-            </div>
-          </div>
-
-          {/* Collapsible Custom Color Filter Range */}
-          <div className="border-t border-white/5 pt-2">
-            <button
-              type="button"
-              onClick={() => setShowColorFilter(!showColorFilter)}
-              className="flex items-center gap-1.5 text-[9px] font-bold text-neutral-500 hover:text-neutral-400 uppercase font-mono tracking-widest transition-colors cursor-pointer"
-            >
-              <ChevronRight className={`h-3 w-3 transition-transform duration-200 ${showColorFilter ? "rotate-90 text-purple-400" : ""}`} />
-              <span>Chroma-Filter Bubble Color</span>
-            </button>
-
-            {showColorFilter && (
-              <div className="space-y-3 pt-2.5 animate-fadeIn">
-                <div className="flex items-center justify-between p-2 rounded-xl bg-neutral-900/40 border border-neutral-800">
-                  <span className="text-[8px] font-mono text-neutral-400 uppercase">Enable Color Chroma-Filter</span>
-                  <label className="relative inline-flex items-center cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={useCustomColorTarget}
-                      onChange={(e) => setUseCustomColorTarget(e.target.checked)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-7 h-4 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-neutral-500 after:border-neutral-400 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-purple-650 peer-checked:after:bg-white border border-neutral-700"></div>
-                  </label>
-                </div>
-
-                {useCustomColorTarget && (
-                  <>
-                    <div className="flex items-center justify-between p-2 rounded-xl bg-neutral-900/40 border border-neutral-800 animate-fadeIn">
-                      <span className="text-[8px] font-mono text-neutral-400 uppercase">Target Bubble Color</span>
-                      <div className="flex items-center gap-1.5">
-                        <input
-                          type="text"
-                          value={customColorTarget}
-                          onChange={(e) => setCustomColorTarget(e.target.value)}
-                          className="w-16 bg-neutral-950 border border-neutral-850 text-[10px] font-mono text-center rounded py-0.5"
-                        />
-                        <input
-                          type="color"
-                          value={customColorTarget}
-                          onChange={(e) => setCustomColorTarget(e.target.value)}
-                          className="w-5 h-5 bg-transparent border-0 cursor-pointer"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-1 animate-fadeIn">
-                      <div className="flex justify-between text-[8px] font-mono">
-                        <span className="text-neutral-500">Color Distance Tolerance</span>
-                        <span className="text-purple-400 font-bold">{customColorTolerance}</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="5"
-                        max="100"
-                        value={customColorTolerance}
-                        onChange={(e) => setCustomColorTolerance(Number(e.target.value))}
-                        className="w-full h-1 bg-neutral-900 rounded appearance-none cursor-pointer accent-purple-500"
-                      />
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* OCR Config Options */}
-          {eraseMethod === "ocr" && (
-            <div className="border-t border-white/5 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowOcrConfig(!showOcrConfig)}
-                className="flex items-center gap-1.5 text-[9px] font-bold text-neutral-500 hover:text-neutral-400 uppercase font-mono tracking-widest transition-colors cursor-pointer"
-              >
-                <ChevronRight className={`h-3 w-3 transition-transform duration-200 ${showOcrConfig ? "rotate-90 text-cyan-400" : ""}`} />
-                <span>EasyOCR Engine Settings</span>
-              </button>
-
-              {showOcrConfig && (
-                <div className="space-y-3 pt-2.5 animate-fadeIn">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-1">
-                      <span className="text-[8px] font-mono text-neutral-500 uppercase">OCR Language</span>
-                      <select
-                        value={ocrLang}
-                        onChange={(e) => setOcrLang(e.target.value)}
-                        className="w-full bg-neutral-905 border border-neutral-800 text-[10px] text-neutral-300 rounded p-1 font-mono"
-                      >
-                        <option value="en">English (en)</option>
-                        <option value="ko">Korean (ko)</option>
-                        <option value="ja">Japanese (ja)</option>
-                        <option value="ch_sim">Chinese Sim (ch_sim)</option>
-                        <option value="fr">French (fr)</option>
-                        <option value="es">Spanish (es)</option>
-                      </select>
-                    </div>
-
-                    <div className="flex flex-col justify-end pb-1.5 pl-2">
-                      <span className="text-[8px] font-mono text-neutral-500 uppercase mb-1">GPU Acceleration</span>
-                      <label className="relative inline-flex items-center cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={gpu}
-                          onChange={(e) => setGpu(e.target.checked)}
-                          className="sr-only peer"
-                        />
-                        <div className="w-7 h-4 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-neutral-500 after:border-neutral-400 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-cyan-600 peer-checked:after:bg-white border border-neutral-700"></div>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Advanced toggle */}
-          <div className="border-t border-white/5 pt-2">
-            <button
-              type="button"
-              onClick={() => setShowAdvanced(!showAdvanced)}
-              className="flex items-center gap-1.5 text-[9px] font-bold text-neutral-500 hover:text-neutral-400 uppercase font-mono tracking-widest transition-colors cursor-pointer"
-            >
-              <ChevronRight
-                className={`h-3 w-3 transition-transform duration-200 ${
-                  showAdvanced ? "rotate-90 text-purple-400" : ""
-                }`}
-              />
-              <span>Dilation & Morph Tuning</span>
-            </button>
-
-            {showAdvanced && (
-              <div className="space-y-3.5 pt-2.5 animate-fadeIn">
-                {/* Morph shape selector */}
-                <div className="space-y-1">
-                  <span className="text-[8px] font-mono text-neutral-500 uppercase">Dilation Kernel Shape</span>
-                  <select
-                    value={morphShape}
-                    onChange={(e) => setMorphShape(e.target.value)}
-                    className="w-full bg-neutral-900 border border-neutral-800 text-[10px] text-neutral-300 rounded p-1 font-mono"
-                  >
-                    <option value="ellipse">Elliptical (Smooth)</option>
-                    <option value="rect">Rectangular (Angular)</option>
-                    <option value="cross">Cross-shaped (Spiky)</option>
-                  </select>
-                </div>
-
-                {/* Dilation Slider */}
-                <div className="space-y-1.5">
-                  <div className="flex justify-between items-center">
-                    <span
-                      className="text-[9px] font-bold text-neutral-400 uppercase font-mono tracking-wider"
-                      title="Custom padding margin pixel count. Auto dynamically calculates based on image size."
-                    >
-                      Mask Expansion Dilation
-                    </span>
-                    <span className="text-[10px] font-mono font-bold text-purple-400">
-                      {dilation === -1 ? "Auto (Adaptive)" : `${dilation}px`}
-                    </span>
-                  </div>
-                  <div className="relative h-1.5 rounded-full bg-neutral-900 border border-white/5 overflow-hidden">
-                    <div
-                      className="absolute inset-y-0 left-0 rounded-full transition-all duration-100"
-                      style={{
-                        width: `${dilationPct}%`,
-                        background: "linear-gradient(to right, #7c3aed, #c084fc)",
-                      }}
-                    />
-                    <input
-                      type="range"
-                      min="-1"
-                      max="20"
-                      value={dilation}
-                      onChange={(e) => {
-                        setDilation(Number(e.target.value));
-                        setActivePreset("Custom");
-                      }}
-                      className="absolute inset-0 w-full opacity-0 cursor-pointer h-full"
-                    />
-                  </div>
-                </div>
-
-                {/* Text stroke Morph Kernel Size */}
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[8px] font-mono">
-                    <span className="text-neutral-500">Text Stroke Closing Kernel</span>
-                    <span className="text-purple-400 font-bold">{morphKernelSize}px</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="3"
-                    max="51"
-                    step="2" // Odd numbers preferred for morphological structuring kernels
-                    value={morphKernelSize}
-                    onChange={(e) => setMorphKernelSize(Number(e.target.value))}
-                    className="w-full h-1 bg-neutral-900 rounded appearance-none cursor-pointer accent-purple-500"
-                  />
-                </div>
-
-                {/* Inpaint Radius Slider */}
-                <div className="space-y-1.5">
-                  <div className="flex justify-between items-center">
-                    <span
-                      className="text-[9px] font-bold text-neutral-400 uppercase font-mono tracking-wider"
-                      title="Pixel radius neighborhood for image inpainting."
-                    >
-                      Inpainting Neighborhood Radius
-                    </span>
-                    <span className="text-[10px] font-mono font-bold text-purple-400">
-                      {inpaintRadius}px
-                    </span>
-                  </div>
-                  <div className="relative h-1.5 rounded-full bg-neutral-900 border border-white/5 overflow-hidden">
-                    <div
-                      className="absolute inset-y-0 left-0 rounded-full transition-all duration-100"
-                      style={{
-                        width: `${inpaintRadiusPct}%`,
-                        background: "linear-gradient(to right, #7c3aed, #c084fc)",
-                      }}
-                    />
-                    <input
-                      type="range"
-                      min="1"
-                      max="20"
-                      value={inpaintRadius}
-                      onChange={(e) => {
-                        setInpaintRadius(Number(e.target.value));
-                        setActivePreset("Custom");
-                      }}
-                      className="absolute inset-0 w-full opacity-0 cursor-pointer h-full"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Collapsible Custom Color Filter Range & Morph Tuning */}
+          <CleanBubblesAdvanced
+            showColorFilter={showColorFilter}
+            setShowColorFilter={setShowColorFilter}
+            useCustomColorTarget={useCustomColorTarget}
+            setUseCustomColorTarget={setUseCustomColorTarget}
+            customColorTarget={customColorTarget}
+            setCustomColorTarget={setCustomColorTarget}
+            customColorTolerance={customColorTolerance}
+            setCustomColorTolerance={setCustomColorTolerance}
+            eraseMethod={eraseMethod}
+            showOcrConfig={showOcrConfig}
+            setShowOcrConfig={setShowOcrConfig}
+            ocrLang={ocrLang}
+            setOcrLang={setOcrLang}
+            gpu={gpu}
+            setGpu={setGpu}
+            showAdvanced={showAdvanced}
+            setShowAdvanced={setShowAdvanced}
+            morphShape={morphShape}
+            setMorphShape={setMorphShape}
+            dilation={dilation}
+            setDilation={setDilation}
+            dilationPct={dilationPct}
+            morphKernelSize={morphKernelSize}
+            setMorphKernelSize={setMorphKernelSize}
+            inpaintRadius={inpaintRadius}
+            setInpaintRadius={setInpaintRadius}
+            inpaintRadiusPct={inpaintRadiusPct}
+            setActivePreset={setActivePreset}
+          />
 
           {/* Manual Spot-Healing Brush Controls */}
-          <div className="border-t border-white/5 pt-2 mt-1">
-            <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-900/60 border border-neutral-850">
-              <span className="text-[10px] font-bold text-neutral-300 font-mono flex items-center gap-1.5">
-                <Cpu className="h-3.5 w-3.5 text-purple-400" />
-                <span>Manual Spot-Healing Brush</span>
-              </span>
-              <label className="relative inline-flex items-center cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={editMode === "clean_manual"}
-                  onChange={(e) => {
-                    if (setEditMode) {
-                      setEditMode(e.target.checked ? "clean_manual" : "crop");
-                    }
-                  }}
-                  className="sr-only peer"
-                />
-                <div className="w-7 h-4 bg-neutral-850 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-neutral-500 after:border-neutral-450 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-purple-650 peer-checked:after:bg-white border border-neutral-700"></div>
-              </label>
-            </div>
-
-            {editMode === "clean_manual" && (
-              <div className="space-y-3 pt-2.5 pl-2.5 border-l-2 border-purple-500/30 animate-fadeIn mt-2">
-                {/* Paint / Erase selection */}
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setBrushAction && setBrushAction("paint")}
-                    className={`flex-1 py-1 rounded-lg border text-[9px] font-mono font-bold transition-all cursor-pointer ${
-                      brushAction === "paint"
-                        ? "bg-purple-600/20 border-purple-500/50 text-white"
-                        : "bg-black/20 border-white/5 text-neutral-500 hover:text-neutral-300"
-                    }`}
-                  >
-                    Paint Mask (Red)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setBrushAction && setBrushAction("erase")}
-                    className={`flex-1 py-1 rounded-lg border text-[9px] font-mono font-bold transition-all cursor-pointer ${
-                      brushAction === "erase"
-                        ? "bg-purple-600/10 border-purple-500/30 text-purple-305"
-                        : "bg-black/20 border-white/5 text-neutral-500 hover:text-neutral-300"
-                    }`}
-                  >
-                    Erase Mask
-                  </button>
-                </div>
-
-                {/* Brush Size Slider */}
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[8px] font-mono">
-                    <span className="text-neutral-500">Brush Size</span>
-                    <span className="text-purple-400 font-bold">{brushSize}px</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="5"
-                    max="80"
-                    value={brushSize}
-                    onChange={(e) => setBrushSize && setBrushSize(Number(e.target.value))}
-                    className="w-full h-1 bg-neutral-900 rounded appearance-none cursor-pointer accent-purple-500"
-                  />
-                </div>
-
-                {/* Clear Mask Button */}
-                <button
-                  type="button"
-                  onClick={handleClearBrushMask}
-                  className="w-full py-1 bg-red-950/10 hover:bg-red-950/20 border border-red-900/20 text-red-400 rounded-lg text-[9px] font-mono font-bold transition-all"
-                >
-                  Clear Drawing Mask
-                </button>
-              </div>
-            )}
-          </div>
+          <CleanBubblesManual
+            editMode={editMode}
+            setEditMode={setEditMode}
+            brushAction={brushAction}
+            setBrushAction={setBrushAction}
+            brushSize={brushSize}
+            setBrushSize={setBrushSize}
+            handleClearBrushMask={handleClearBrushMask}
+          />
 
           {/* Interactive Bounding Boxes / Debug Mode Toggle */}
           <div className="flex items-center justify-between bg-neutral-900/60 border border-neutral-850 p-2.5 rounded-xl">
@@ -798,40 +416,15 @@ export default function CleanBubblesPanel({
       )}
 
       {/* History Actions & Control Bar */}
-      <div className="flex items-center gap-2 border-t border-white/5 pt-3">
-        <button
-          type="button"
-          onClick={handleUndoClean}
-          disabled={historyPointer <= 0}
-          className="flex-1 py-1.5 bg-neutral-900 hover:bg-neutral-800 disabled:opacity-20 disabled:cursor-not-allowed border border-neutral-800 rounded-xl text-neutral-300 flex items-center justify-center gap-1 cursor-pointer transition-all active:scale-95 text-[10px] font-mono font-bold"
-          title="Undo clean action"
-        >
-          <Undo2 className="h-3 w-3 text-purple-400" />
-          <span>Undo</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={handleRedoClean}
-          disabled={historyPointer >= history.length - 1}
-          className="flex-1 py-1.5 bg-neutral-900 hover:bg-neutral-800 disabled:opacity-20 disabled:cursor-not-allowed border border-neutral-800 rounded-xl text-neutral-300 flex items-center justify-center gap-1 cursor-pointer transition-all active:scale-95 text-[10px] font-mono font-bold"
-          title="Redo clean action"
-        >
-          <Redo2 className="h-3 w-3 text-purple-400" />
-          <span>Redo</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={handleResetToOriginal}
-          disabled={imgUrl === originalUrl}
-          className="py-1.5 px-3 bg-neutral-900 hover:bg-red-950/20 border border-neutral-800 hover:border-red-900/30 text-neutral-400 hover:text-red-400 rounded-xl flex items-center justify-center gap-1 cursor-pointer transition-all active:scale-95 text-[10px] font-mono font-bold"
-          title="Reset completely to uncleaned panel state"
-        >
-          <RotateCcw className="h-3 w-3 text-red-500/70" />
-          <span>Original</span>
-        </button>
-      </div>
+      <CleanBubblesHistory
+        handleUndoClean={handleUndoClean}
+        historyPointer={historyPointer}
+        handleRedoClean={handleRedoClean}
+        historyLength={history.length}
+        handleResetToOriginal={handleResetToOriginal}
+        imgUrl={imgUrl}
+        originalUrl={originalUrl}
+      />
 
       {/* Action execution button */}
       <div className="flex items-center h-9 w-full">
@@ -865,7 +458,7 @@ export default function CleanBubblesPanel({
           className={`h-full px-2.5 border rounded-r-xl transition-all cursor-pointer active:scale-95 flex items-center justify-center ${
             showSettings
               ? "bg-purple-950/50 text-purple-200 border-purple-800/50"
-              : "bg-neutral-900 text-neutral-400 border-neutral-850 hover:bg-neutral-850"
+              : "bg-neutral-900 text-neutral-400 border-neutral-850 hover:bg-neutral-855"
           }`}
         >
           <Sliders className="h-3.5 w-3.5" />
