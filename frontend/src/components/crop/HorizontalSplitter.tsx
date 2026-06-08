@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Split, ChevronUp, ChevronDown, Plus, X, Grid, Sliders, Hash, Trash2, ArrowUpDown, Save, FolderOpen, Image as ImageIcon, Magnet, ArrowUp, ArrowDown } from "lucide-react";
+import { Split, ChevronUp, ChevronDown, Plus, X, Grid, Hash, Trash2, ArrowUpDown, Image as ImageIcon, ArrowUp, ArrowDown } from "lucide-react";
 import { detectHorizontalGutters } from "./gutterScanner";
+import HorizontalSplitterPresets from "./HorizontalSplitterPresets";
+import HorizontalSplitterControls from "./HorizontalSplitterControls";
+import HorizontalSplitterPreview from "./HorizontalSplitterPreview";
 
 interface HorizontalSplitterProps {
   splitPosition: number;
@@ -185,7 +188,6 @@ export default function HorizontalSplitter({
         const newY = parseFloat((y + shift).toFixed(1));
         return Math.max(5, Math.min(95, newY));
       });
-      // De-duplicate and sort
       return Array.from(new Set(shifted)).sort((a: number, b: number) => a - b);
     });
   };
@@ -345,164 +347,18 @@ export default function HorizontalSplitter({
         </div>
       </div>
 
-      {/* Smart Gutter Snap Actions */}
-      {detectedGutters.length > 0 && (
-        <div className="bg-gradient-to-r from-yellow-500/10 to-purple-500/10 border border-yellow-500/20 p-2.5 rounded-xl space-y-2">
-          <div className="flex justify-between items-center text-[10px]">
-            <span className="text-yellow-400 font-bold font-mono flex items-center gap-1.5">
-              <Magnet className="h-3.5 w-3.5 text-yellow-400 animate-pulse" />
-              <span>Gutter Gaps Detected!</span>
-            </span>
-            <label className="flex items-center gap-1.5 cursor-pointer text-[9px] text-neutral-400 select-none">
-              <span>Magnet Snap</span>
-              <input
-                type="checkbox"
-                checked={magneticSnap}
-                onChange={(e) => setMagneticSnap(e.target.checked)}
-                className="rounded border-white/10 bg-neutral-900 text-purple-600 focus:ring-0 w-3 h-3"
-              />
-            </label>
-          </div>
-          <button
-            type="button"
-            onClick={handleAutoPlaceCuts}
-            className="w-full bg-yellow-500/20 hover:bg-yellow-500/35 border border-yellow-500/30 hover:border-yellow-500/50 text-yellow-300 text-[10px] font-bold py-1 rounded-lg cursor-pointer transition-all flex items-center justify-center gap-1"
-          >
-            <Plus className="h-3 w-3" />
-            <span>Auto-Place Cuts at Gaps ({detectedGutters.length})</span>
-          </button>
-        </div>
-      )}
-
-      {/* Slider & Precise Position Control */}
-      <div className="space-y-3 bg-black/30 p-3 rounded-xl border border-white/5">
-        <div className="flex justify-between items-center text-[10px] font-mono">
-          <span className="text-neutral-400 flex items-center gap-1">
-            <Sliders className="h-3 w-3 text-purple-400" />
-            <span>Active draft line</span>
-          </span>
-          <div className="flex items-center gap-1 bg-black/40 border border-white/10 rounded-lg px-2 py-0.5">
-            <input
-              type="number"
-              min="5"
-              max="95"
-              step="0.1"
-              value={splitPosition}
-              onChange={(e) => {
-                let val = parseFloat(e.target.value);
-                if (isNaN(val)) return;
-                val = Math.max(5, Math.min(95, val));
-                handleSetSplitPosition(val);
-                setShowSplitPosition(true);
-              }}
-              className="bg-transparent text-purple-400 font-bold font-mono text-[10px] w-12 focus:outline-none text-center"
-            />
-            <span className="text-[9px] text-neutral-500 font-mono">%</span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {/* Nudge Up buttons */}
-          <div className="flex gap-0.5">
-            <button
-              type="button"
-              onClick={() => {
-                const target = Math.max(5, parseFloat((splitPosition - 5).toFixed(1)));
-                handleSetSplitPosition(target);
-                setShowSplitPosition(true);
-              }}
-              className="px-1.5 py-1 text-neutral-500 hover:text-white bg-black/40 hover:bg-neutral-800 rounded-l-lg border border-white/5 cursor-pointer text-[9px] font-bold font-mono transition-all"
-              title="Fast Nudge Up (-5%)"
-            >
-              -5%
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                const target = Math.max(5, parseFloat((splitPosition - 1).toFixed(1)));
-                handleSetSplitPosition(target);
-                setShowSplitPosition(true);
-              }}
-              className="p-1.5 text-neutral-500 hover:text-white bg-black/40 hover:bg-neutral-800 rounded-r-lg border border-white/5 cursor-pointer transition-all"
-              title="Nudge Up (-1%)"
-            >
-              <ChevronUp className="h-3 w-3" />
-            </button>
-          </div>
-
-          {/* Custom slider with gutter tick marks */}
-          <div className="relative flex-1 h-2 rounded-full bg-neutral-800/80 flex items-center">
-            {/* Visual Gutter ticks */}
-            {detectedGutters.map((g, idx) => (
-              <div
-                key={idx}
-                className="absolute top-0 bottom-0 w-0.5 bg-yellow-400/40 z-10 pointer-events-none"
-                style={{ left: `${g}%` }}
-                title={`Detected Gutter Gap at ${g}%`}
-              />
-            ))}
-            
-            <div
-              className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 opacity-60"
-              style={{
-                width: `${sliderPct}%`,
-              }}
-            />
-            
-            <input
-              type="range"
-              min="5"
-              max="95"
-              step="0.5"
-              value={splitPosition}
-              onChange={(e) => {
-                handleSetSplitPosition(parseFloat(Number(e.target.value).toFixed(1)));
-                setShowSplitPosition(true);
-              }}
-              className="absolute inset-0 w-full opacity-0 cursor-pointer h-full z-20"
-            />
-          </div>
-
-          {/* Nudge Down buttons */}
-          <div className="flex gap-0.5">
-            <button
-              type="button"
-              onClick={() => {
-                const target = Math.min(95, parseFloat((splitPosition + 1).toFixed(1)));
-                handleSetSplitPosition(target);
-                setShowSplitPosition(true);
-              }}
-              className="p-1.5 text-neutral-500 hover:text-white bg-black/40 hover:bg-neutral-800 rounded-l-lg border border-white/5 cursor-pointer transition-all"
-              title="Nudge Down (+1%)"
-            >
-              <ChevronDown className="h-3 w-3" />
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                const target = Math.min(95, parseFloat((splitPosition + 5).toFixed(1)));
-                handleSetSplitPosition(target);
-                setShowSplitPosition(true);
-              }}
-              className="px-1.5 py-1 text-neutral-500 hover:text-white bg-black/40 hover:bg-neutral-800 rounded-r-lg border border-white/5 cursor-pointer text-[9px] font-bold font-mono transition-all"
-              title="Fast Nudge Down (+5%)"
-            >
-              +5%
-            </button>
-          </div>
-        </div>
-
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={handleAddSplitLine}
-            className="flex-1 bg-indigo-600/15 hover:bg-indigo-600/30 border border-indigo-500/25 hover:border-indigo-500/50 text-indigo-400 text-[11px] font-bold py-1.5 rounded-xl cursor-pointer transition-all flex items-center justify-center gap-1.5"
-          >
-            <Plus className="h-3 w-3" />
-            <span>Add Split Line</span>
-          </button>
-        </div>
-      </div>
+      {/* Smart Gutter Snap Actions / Nudge guideline controls */}
+      <HorizontalSplitterControls
+        splitPosition={splitPosition}
+        handleSetSplitPosition={handleSetSplitPosition}
+        setShowSplitPosition={setShowSplitPosition}
+        detectedGutters={detectedGutters}
+        magneticSnap={magneticSnap}
+        setMagneticSnap={setMagneticSnap}
+        handleAutoPlaceCuts={handleAutoPlaceCuts}
+        handleAddSplitLine={handleAddSplitLine}
+        sliderPct={sliderPct}
+      />
 
       {/* Generator Tools */}
       <div className="space-y-3 bg-black/30 p-3 rounded-xl border border-white/5">
@@ -669,54 +525,16 @@ export default function HorizontalSplitter({
       )}
 
       {/* Templates Manager */}
-      <div className="space-y-2 bg-black/30 p-3 rounded-xl border border-white/5">
-        <div className="text-[10px] uppercase font-mono font-bold text-neutral-400 flex items-center gap-1.5">
-          <FolderOpen className="h-3 w-3 text-emerald-400" />
-          <span>Layout Templates</span>
-        </div>
-
-        <div className="flex gap-2 items-center">
-          <select
-            value={selectedTemplate}
-            onChange={(e) => handleLoadTemplate(e.target.value)}
-            className="flex-1 text-[10px] font-bold font-mono bg-neutral-900 border border-white/10 rounded-lg py-1 px-2 text-white focus:outline-none cursor-pointer"
-          >
-            <option value="">Select template...</option>
-            {Object.keys(savedTemplates).map((name) => (
-              <option key={name} value={name}>{name}</option>
-            ))}
-          </select>
-          {selectedTemplate && (
-            <button
-              type="button"
-              onClick={() => handleDeleteTemplate(selectedTemplate)}
-              className="p-1.5 text-neutral-500 hover:text-red-400 bg-neutral-900 border border-white/10 rounded-lg transition-colors cursor-pointer"
-              title="Delete this template"
-            >
-              <Trash2 className="h-3 w-3" />
-            </button>
-          )}
-        </div>
-
-        <div className="flex gap-2 pt-1 border-t border-white/5">
-          <input
-            type="text"
-            placeholder="Save current layout as..."
-            value={newTemplateName}
-            onChange={(e) => setNewTemplateName(e.target.value)}
-            className="flex-1 text-[10px] bg-neutral-900 border border-white/10 rounded-lg py-1 px-2 text-white focus:outline-none placeholder-neutral-600"
-          />
-          <button
-            type="button"
-            onClick={handleSaveTemplate}
-            disabled={!newTemplateName.trim() || splitLines.length === 0}
-            className="bg-emerald-600/10 hover:bg-emerald-600/20 disabled:opacity-20 disabled:hover:bg-transparent border border-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-1 rounded-lg cursor-pointer transition-all flex items-center gap-1"
-          >
-            <Save className="h-3 w-3" />
-            <span>Save</span>
-          </button>
-        </div>
-      </div>
+      <HorizontalSplitterPresets
+        savedTemplates={savedTemplates}
+        selectedTemplate={selectedTemplate}
+        handleLoadTemplate={handleLoadTemplate}
+        handleDeleteTemplate={handleDeleteTemplate}
+        newTemplateName={newTemplateName}
+        setNewTemplateName={setNewTemplateName}
+        handleSaveTemplate={handleSaveTemplate}
+        splitLines={splitLines}
+      />
 
       {/* Defined split lines list */}
       {splitLines.length > 0 && (
@@ -799,31 +617,7 @@ export default function HorizontalSplitter({
       )}
 
       {/* Resulting Segments Height Breakdown */}
-      {resultingSegments.length > 1 && (
-        <div className="bg-black/30 rounded-xl p-2.5 border border-white/5 space-y-1.5">
-          <div className="text-[9px] uppercase font-mono text-neutral-600 pb-1 border-b border-white/5 flex items-center gap-1">
-            <Split className="h-3 w-3 text-purple-400" />
-            <span>Output Segments Preview ({resultingSegments.length})</span>
-          </div>
-
-          <div className="max-h-32 overflow-y-auto space-y-1.5 pr-0.5 scrollbar-thin">
-            {resultingSegments.map((seg) => (
-              <div
-                key={seg.index}
-                className="flex justify-between items-center text-[9px] text-neutral-400 font-mono bg-white/[0.01] hover:bg-white/[0.04] border border-white/[0.03] rounded-lg px-2.5 py-1"
-              >
-                <span className="text-neutral-500 font-bold">Part {seg.index}</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-purple-300 font-semibold">{seg.heightPct}%</span>
-                  {seg.heightPx !== null && (
-                    <span className="text-neutral-600 font-normal">({seg.heightPx}px)</span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      <HorizontalSplitterPreview resultingSegments={resultingSegments} />
 
       {/* Main split execution button */}
       <button
