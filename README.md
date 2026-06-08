@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎬 Webtoon to Video
+# 🎬 Anivox — Webtoon to Video
 
 **Transform webtoon & manhwa comics into cinematic MP4 videos with AI-powered speech bubble removal, TTS voiceovers, and pan/zoom animations.**
 
@@ -17,13 +17,16 @@
 ## ✨ Features
 
 - 🖼️ **Panel Scraper** — Fetches webtoon/manhwa panels from any Webtoon series URL
-- 🫧 **AI Bubble Removal** — Removes speech bubbles using Gemini vision + OpenCV inpainting
+- 🫧 **AI Bubble Removal** — Removes speech bubbles using Gemini vision + OpenCV inpainting with advanced mode, manual brush, presets & history
 - 🗣️ **TTS Voiceover** — Generates synced dialogue audio using Microsoft Edge TTS
 - 🎬 **Video Compiler** — Renders animated MP4 with pan/zoom effects via MoviePy
-- ✂️ **Crop Editor** — Advanced editor with manual/auto-crop, frame merging/stitching, style filters, and undo/redo
+- ✂️ **Crop Editor** — Advanced fully-modular editor: manual/auto-crop, horizontal splitter, frame merging/stitching, style filters, enhancements, undo/redo
+- 🔀 **Merge Panel** — Vertical/horizontal multi-panel stitching with configurable gap, alignment, and direction
 - 🗄️ **Local Database** — SQLite stores all projects and panels (no cloud required)
 - 🤖 **Multi-AI** — Supports Gemini 2.5 Flash, Gemini 2.0 Pro, Llama 3, Mistral 7B
-- 📟 **Real-Time Shell Logs** — Direct SSE/polling compilation stream that displays backend actions, API hits, and Python execution console outputs inside the UI
+- 📟 **Real-Time Shell Logs** — ANSI-colored SSE/polling log stream piped from the backend terminal directly into the UI
+- 📊 **Live Metrics** — `/api/metrics` endpoint reports uptime, memory, request stats, rate limits, and cache state
+- 🛡️ **Security Middleware** — Rate limiting, request timeouts, CSP headers, request IDs, and CORS baked into the server
 
 ---
 
@@ -34,12 +37,60 @@ webtoon-to-video-backend/
 │
 ├── frontend/                         ← React + TypeScript UI (Vite)
 │   ├── src/
+│   │   ├── api/
+│   │   │   └── fetchWithInterceptor.ts   ← Global fetch wrapper with error handling
 │   │   ├── components/               ← All UI components (.tsx)
-│   │   │   ├── crop/                 ← Modular crop components (canvas, registry, splitters)
-│   │   │   ├── scraper/              ← Modular scraper deck card & toolbar components
-│   │   │   ├── AutoCropModal.tsx     ← Workspace Auto-Crop modal
-│   │   │   ├── CropEditorModal.tsx   ← Workspace single/multi cut editor
-│   │   │   └── BubbleCleanerModal.tsx← Workspace Speech bubble cleaner modal
+│   │   │   ├── crop/                 ← Fully modular Crop Editor sub-components
+│   │   │   │   ├── auto/             ← AutoSlicer (Canny + settings)
+│   │   │   │   ├── canvas/           ← CropCanvas, brush/bubble/split layers
+│   │   │   │   ├── clean/            ← CleanBubblesPanel + Advanced/Manual/Presets/History/Modes
+│   │   │   │   ├── cuts/             ← CutsRegistry + fine-tune, list, selector
+│   │   │   │   ├── editor/           ← CropEditorCanvasContainer, Header, Footer, Sidebar, ToolsPanel
+│   │   │   │   ├── enhancements/     ← Enhancements: Audio, Cinematic, Colors, Presets
+│   │   │   │   ├── horizontal/       ← HorizontalSplitter + Controls, Presets, Preview
+│   │   │   │   ├── merge/            ← MergePanel + List, Options
+│   │   │   │   ├── shared/           ← RangeSlider, SectionTitle, shared types
+│   │   │   │   ├── utils/            ← gutterScanner.ts (browser-based gutter detection)
+│   │   │   │   ├── index.ts          ← Barrel exports for all crop sub-components
+│   │   │   │   └── types.ts          ← Crop-scoped TypeScript types
+│   │   │   ├── pipeline/
+│   │   │   │   └── PipelineStatusCard.tsx
+│   │   │   ├── processing/           ← AutoCropModal, BubbleCleanerModal
+│   │   │   ├── scraper/              ← LiveScraperDeck, Grid, Header, PanelCard, Controls, etc.
+│   │   │   │   ├── AutoCropLeftColumn.tsx / AutoCropRightColumn.tsx / AutoCropSettingsPanel.tsx
+│   │   │   │   ├── BubbleCleanerLeftColumn.tsx / BubbleCleanerRightColumn.tsx
+│   │   │   │   ├── LiveScraperDeck.tsx / LiveScraperGrid.tsx / LiveScraperHeader.tsx
+│   │   │   │   ├── PanelCard.tsx / PanelCardActions.tsx / PanelCardControls.tsx / PanelCardThumbnail.tsx
+│   │   │   │   ├── ScraperActionButtons.tsx / ScraperControls.tsx / ScraperSelectionToolbar.tsx / UrlInputPanel.tsx
+│   │   │   │   ├── autoCropConfig.ts / bubbleCleanerConfig.ts / types.ts
+│   │   │   ├── status/
+│   │   │   │   └── ModelStatusTable.tsx
+│   │   │   ├── terminal/             ← TerminalLogs + Filter, Header, Output
+│   │   │   ├── timeline/             ← StoryboardTimeline + BulkOps, Card, EmptyState, Header
+│   │   │   ├── video/                ← VideoMonitor, VideoMonitorActive, Tabs, FinalVideoPlayer, VolumePanel
+│   │   │   ├── AppWorkspace.tsx      ← Main workspace layout component
+│   │   │   ├── AdvancedSettings.tsx
+│   │   │   ├── CropEditorModal.tsx   ← Crop editor modal shell
+│   │   │   ├── ErrorPopupModal.tsx
+│   │   │   ├── Header.tsx
+│   │   │   ├── NotificationStack.tsx
+│   │   │   └── OutputMetadataPanel.tsx
+│   │   ├── hooks/                    ← All custom React hooks (logic extracted from App.tsx)
+│   │   │   ├── useAppLogic.ts / useAppState.ts
+│   │   │   ├── useAutoAnalysis.ts
+│   │   │   ├── useBatchImageActions.ts / useBulkOperations.ts
+│   │   │   ├── useCompileActions.ts
+│   │   │   ├── useCropEditor.ts / useCropEditorDrag.ts / useCropEditorHistory.ts
+│   │   │   ├── useCropEditorPipelines.ts / useCropEditorState.ts
+│   │   │   ├── useLiveScraperActions.ts
+│   │   │   ├── usePersistedState.ts
+│   │   │   ├── usePipelineActions.ts / usePlaybackEngine.ts
+│   │   │   ├── useSceneModifier.ts / useSingleImageEdits.ts
+│   │   │   ├── useStoryboardOperations.ts
+│   │   │   └── useVideoGeneration.ts
+│   │   ├── utils/
+│   │   │   ├── filter.ts             ← Filter/style utility helpers
+│   │   │   └── url.ts                ← Frontend URL helpers
 │   │   ├── App.tsx                   ← Root page component
 │   │   ├── types.ts                  ← Shared TypeScript types
 │   │   ├── models.ts                 ← AI model registry
@@ -50,7 +101,7 @@ webtoon-to-video-backend/
 │   └── tsconfig.json
 │
 ├── backend/                          ← Express server + Python services
-│   ├── server.ts                     ← Entry point only — imports, app setup
+│   ├── server.ts                     ← Main entry: middleware stack, route mounting, ANSI logging
 │   ├── config/
 │   │   └── clients.ts                ← Shared AI clients (Gemini, HF)
 │   ├── database/
@@ -60,17 +111,49 @@ webtoon-to-video-backend/
 │   ├── routes/
 │   │   ├── health.ts                 ← Liveliness probe route
 │   │   ├── projects.ts               ← Project history and panels CRUD
-│   │   ├── imageRoutes.ts            ← Proxy, crop edit, bubble cleaner, ZIPs
-│   │   ├── aiRoutes.ts               ← Smart crop, image analysis, video wrapper
-│   │   └── scraperRoutes.ts          ← Webtoon crawler and storyboard generation
-│   ├── services/
-│   │   ├── audio.py                  ← TTS via edge-tts + pydub
-│   │   ├── cleaner.py                ← Speech bubble removal (OpenCV/Pillow)
-│   │   ├── ocr.py                    ← Panel processor + OCR
-│   │   └── video.py                  ← MP4 compiler via MoviePy
+│   │   ├── imageRoutes.ts            ← Image router entry (mounts image/ sub-routes)
+│   │   ├── aiRoutes.ts               ← AI router entry (mounts ai/ sub-routes)
+│   │   ├── scraperRoutes.ts          ← Scraper router entry (mounts scraper/ sub-routes)
+│   │   ├── ai/
+│   │   │   ├── analyze.ts            ← Gemini image analysis, speech text, panel detection
+│   │   │   ├── crop.ts               ← AI smart crop
+│   │   │   └── video.ts              ← Video compile wrapper
+│   │   ├── image/
+│   │   │   ├── proxy.ts              ← Referrer-bypass image proxy
+│   │   │   ├── edit.ts               ← Crop, rotate, flip
+│   │   │   ├── merge.ts              ← Multi-panel stitching
+│   │   │   ├── cleanup.ts            ← Speech bubble removal (OpenCV/Gemini)
+│   │   │   └── zip.ts                ← ZIP archive generation
+│   │   └── scraper/
+│   │       ├── scrape.ts             ← Webtoon crawler
+│   │       ├── generate.ts           ← Storyboard AI generation
+│   │       └── process.ts            ← Panel detection pipeline
+│   ├── services/                     ← Node.js service helpers
+│   │   ├── crawlers.ts               ← Webtoon HTTP crawlers
+│   │   ├── scraperService.ts         ← Scraper orchestration
+│   │   └── storyboardAI.ts           ← AI storyboard narrative engine
+│   ├── python/                       ← Python services package
+│   │   ├── routes/
+│   │   │   └── process.py            ← FastAPI panel detection route
+│   │   └── services/
+│   │       ├── audio.py              ← TTS via edge-tts + pydub
+│   │       ├── borderless.py         ← Borderless panel detection helper
+│   │       ├── bubble_detector.py    ← Bubble detection core logic
+│   │       ├── cleaner.py            ← Speech bubble removal (OpenCV/Pillow)
+│   │       ├── detect_panels.py      ← Panel boundary detection
+│   │       ├── narration.py          ← Narration text utilities
+│   │       ├── ocr.py                ← Panel processor + OCR
+│   │       ├── sfx.py                ← Sound effects helper
+│   │       ├── shout.py              ← Shouting text detection
+│   │       ├── standard.py           ← Standard speech bubble helper
+│   │       ├── video.py              ← MP4 compiler via MoviePy
+│   │       └── test_cleaner.py       ← Cleaner unit tests
 │   └── utils/
-│       ├── cache.ts                  ← Shared memory cache state
+│       ├── cache.ts                  ← Shared memory cache + TTL eviction
+│       ├── colors.ts                 ← ANSI color helper utilities
+│       ├── cvUtils.py                ← OpenCV helper functions (Python)
 │       ├── imageUtils.ts             ← Buffer resolution & auto-cropping
+│       ├── logInterceptor.ts         ← console.* → SSE color-broadcast interceptor
 │       └── urlUtils.ts               ← Region-stripping & URL parsing
 │
 ├── data/                             ← Temp outputs & text files
@@ -139,7 +222,7 @@ HUGGINGFACE_API_KEY="hf_..."
 npm run dev
 ```
 
-The app opens at **http://localhost:3000** — backend API + frontend UI served together.
+The frontend app opens at **http://localhost:3000** while the backend API listens on **http://localhost:5173**.
 
 ---
 
@@ -150,6 +233,7 @@ The app opens at **http://localhost:3000** — backend API + frontend UI served 
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/api/health` | Health check — returns DB status and stats |
+| `GET` | `/api/metrics` | Live server metrics: memory, requests, cache, rate limits |
 
 ### Project History (SQLite)
 
@@ -166,34 +250,42 @@ The app opens at **http://localhost:3000** — backend API + frontend UI served 
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/api/proxy-image?url=` | Proxy-fetch a webtoon image (bypasses CORS) |
-| `POST` | `/api/stitch-images` | Stitch multiple panel images vertically |
-| `POST` | `/api/smart-crop` | AI-powered smart panel cropping |
-| `POST` | `/api/crop-image` | Manual crop with pixel coordinates |
-| `POST` | `/api/transform-image` | Rotate or flip an image frame |
+| `POST` | `/api/edit-image` | Crop, rotate, or flip an image frame |
+| `POST` | `/api/merge-images` | Stitch multiple panel images (vertical/horizontal) |
 | `POST` | `/api/remove-speech-bubbles` | Run Python speech bubble removal (OpenCV + Gemini) |
+| `POST` | `/api/download-zip` | Package selected images into a ZIP archive |
+| `GET` | `/api/download-zip/get/:id` | Download a pre-generated ZIP file |
 
 ### AI Generation
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/api/generate-image` | Generate panel image via Gemini |
-| `POST` | `/api/ai-detect-panels` | Detect panel regions using Gemini vision |
 | `POST` | `/api/analyze-image` | Full panel analysis — captions, SFX, motion |
 | `POST` | `/api/generate-speech-text` | Generate dialogue/subtitle from image |
+| `POST` | `/api/ai-detect-panels` | Detect panel regions using Gemini vision |
+| `POST` | `/api/ai-smart-crop` | AI bounding-box auto-crop |
 
 ### Video & Audio
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/api/generate-video` | Compile final MP4 from storyboard panels |
+| `POST` | `/api/convert-images-to-video` | Compile final MP4 from storyboard panels |
 | `POST` | `/api/generate-tts` | Generate TTS audio for a panel |
 
 ### Scraper
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/api/scrape` | Scrape panel images from a Webtoon URL |
+| `POST` | `/api/scrape-images` | Scrape panel images from a Webtoon URL |
+| `POST` | `/api/generate` | Generate AI storyboard narrative from panels |
 | `POST` | `/api/detect-panels` | Detect and crop panels from a single image |
+
+### Logs & Monitoring
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/system-logs` | JSON log lookup (polling fallback) |
+| `GET` | `/api/system-logs/stream` | SSE stream — pushes ANSI-colored server logs to UI |
 
 ---
 
@@ -222,7 +314,7 @@ It is **auto-created on first startup** — no setup needed.
 
 | Command | Description |
 |---|---|
-| `npm run dev` | Start backend + Vite frontend (port 3000) |
+| `npm run dev` | Start backend (5173) + Vite frontend (3000) |
 | `npm run build` | Build frontend + bundle backend to `dist/` |
 | `npm run start` | Run production build from `dist/server.cjs` |
 | `npm run lint` | TypeScript type check (`frontend/tsconfig.json`) |
@@ -246,9 +338,12 @@ It is **auto-created on first startup** — no setup needed.
 | File | Library | Purpose |
 |---|---|---|
 | `cleaner.py` | OpenCV, Pillow, EasyOCR | Speech bubble detection + removal |
+| `bubble_detector.py` | OpenCV, NumPy | Bubble detection core logic |
 | `audio.py` | edge-tts, pydub | TTS voice synthesis |
 | `ocr.py` | OpenCV, Pillow, NumPy | Panel OCR + cropping processor |
 | `video.py` | MoviePy, NumPy | MP4 animation + audio compilation |
+| `detect_panels.py` | OpenCV | Panel boundary detection |
+| `cvUtils.py` | OpenCV | Shared OpenCV utility functions |
 
 ---
 
@@ -259,7 +354,12 @@ It is **auto-created on first startup** — no setup needed.
 | `GEMINI_API_KEY` | ✅ Yes | Google AI Studio API key |
 | `HUGGINGFACE_API_KEY` | Optional | HuggingFace token for open models |
 | `NODE_ENV` | Optional | `development` or `production` |
-| `PORT` | Optional | Server port (default: `3000`) |
+| `PORT` | Optional | Server port (default: `5173`) |
+| `SLOW_REQ_MS` | Optional | Slow request threshold in ms (default: `3000`) |
+| `RATE_LIMIT_RPM` | Optional | Max requests/min per IP (default: `120`) |
+| `REQ_TIMEOUT_MS` | Optional | Request timeout in ms (default: `30000`) |
+| `MAINTENANCE_MODE` | Optional | Set `true` to serve 503 to all requests |
+| `STANDALONE_SERVER` | Optional | Set `true` to skip Vite and run API-only |
 | `DATABASE_URL` | Optional | SQLite path (auto-set) |
 
 ---

@@ -131,7 +131,7 @@ export function useAppLogic() {
     };
   }, [state.setConsoleLogs]);
 
-  // Load preview images and panels on targetUrl changes
+  // --- System Logs Engine ---
   useEffect(() => {
     let isCurrent = true;
 

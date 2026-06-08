@@ -9,7 +9,7 @@
 
 ## 🏗️ Project Overview
 
-**Name:** Webtoon-to-Video  
+**Name:** Anivox — Webtoon-to-Video  
 **Purpose:** A full-stack web application that scrapes Webtoon comic panels, processes them using
 AI (Google Gemini, HuggingFace), applies image editing (crop, speech-bubble removal via OpenCV),
 and compiles the results into a cinematic MP4 video.
@@ -22,9 +22,9 @@ and compiles the results into a cinematic MP4 video.
 | Backend Server | Node.js + Express + TypeScript (`tsx` for dev) |
 | Image Processing | Python 3 + OpenCV + Sharp (Node) + Pillow |
 | AI / ML | Google Gemini API (`@google/genai`) + HuggingFace Inference |
-| Audio / TTS | `edge-tts` Python library |
+| Audio / TTS | `edge-tts` Python library + pydub |
 | Video Compilation | MoviePy (Python) |
-| Database (optional) | PostgreSQL / Supabase |
+| Database | SQLite (via `better-sqlite3`) |
 | Build Tool | Vite (frontend) + esbuild (backend bundle) |
 
 ---
@@ -36,32 +36,74 @@ webtoon-to-video-backend/
 │
 ├── frontend/                         ← FRONTEND — React/TypeScript UI
 │   ├── src/
+│   │   ├── api/
+│   │   │   └── fetchWithInterceptor.ts   ← Global fetch wrapper + error interceptor
 │   │   ├── components/               ← All reusable React UI components (.tsx)
-│   │   │   ├── crop/                 ← Modular crop components (canvas, registry, splitters)
-│   │   │   │   ├── AutoSlicer.tsx
-│   │   │   │   ├── CleanBubblesPanel.tsx
-│   │   │   │   ├── CropCanvas.tsx
-│   │   │   │   ├── CutsRegistry.tsx
-│   │   │   │   ├── EnhancementsPanel.tsx
-│   │   │   │   ├── HorizontalSplitter.tsx
-│   │   │   │   └── types.ts
-│   │   │   ├── scraper/              ← Modular scraper deck card & toolbar components
-│   │   │   │   ├── PanelCard.tsx
-│   │   │   │   ├── ScraperControls.tsx
-│   │   │   │   └── types.ts
+│   │   │   ├── crop/                 ← Fully modular Crop Editor sub-components
+│   │   │   │   ├── auto/             ← AutoSlicer.tsx, AutoSlicerCanny.tsx, AutoSlicerSettings.tsx, bubblePresets.ts
+│   │   │   │   ├── canvas/           ← CropCanvas.tsx, CanvasBrushLayer.tsx, CanvasBubbleBoxes.tsx, CanvasCropSelection.tsx, CanvasSplitLines.tsx
+│   │   │   │   ├── clean/            ← CleanBubblesPanel.tsx, CleanBubblesAdvanced.tsx, CleanBubblesManual.tsx, CleanBubblesPresets.tsx, CleanBubblesHistory.tsx, CleanBubblesModes.tsx
+│   │   │   │   ├── cuts/             ← CutsRegistry.tsx, CutsRegistryFineTune.tsx, CutsRegistryHeader.tsx, CutsRegistryList.tsx, CutsRegistrySelector.tsx
+│   │   │   │   ├── editor/           ← CropEditorCanvasContainer.tsx, CropEditorHeader.tsx, CropEditorFooter.tsx, CropEditorSidebar.tsx, CropToolsPanel.tsx
+│   │   │   │   ├── enhancements/     ← EnhancementsPanel.tsx, EnhancementsAudio.tsx, EnhancementsCinematic.tsx, EnhancementsColors.tsx, EnhancementsPresets.tsx
+│   │   │   │   ├── horizontal/       ← HorizontalSplitter.tsx, HorizontalSplitterControls.tsx, HorizontalSplitterPresets.tsx, HorizontalSplitterPreview.tsx
+│   │   │   │   ├── merge/            ← MergePanel.tsx, MergePanelList.tsx, MergePanelOptions.tsx
+│   │   │   │   ├── shared/           ← RangeSlider.tsx, SectionTitle.tsx, types.ts
+│   │   │   │   ├── utils/            ← gutterScanner.ts
+│   │   │   │   ├── index.ts          ← Barrel exports for all crop sub-components
+│   │   │   │   └── types.ts          ← Crop-scoped TypeScript types
+│   │   │   ├── pipeline/
+│   │   │   │   └── PipelineStatusCard.tsx
+│   │   │   ├── processing/
+│   │   │   │   ├── AutoCropModal.tsx
+│   │   │   │   └── BubbleCleanerModal.tsx
+│   │   │   ├── scraper/
+│   │   │   │   ├── AutoCropLeftColumn.tsx / AutoCropRightColumn.tsx / AutoCropSettingsPanel.tsx
+│   │   │   │   ├── BubbleCleanerLeftColumn.tsx / BubbleCleanerRightColumn.tsx
+│   │   │   │   ├── LiveScraperDeck.tsx / LiveScraperGrid.tsx / LiveScraperHeader.tsx
+│   │   │   │   ├── PanelCard.tsx / PanelCardActions.tsx / PanelCardControls.tsx / PanelCardThumbnail.tsx
+│   │   │   │   ├── ScraperActionButtons.tsx / ScraperControls.tsx / ScraperSelectionToolbar.tsx / UrlInputPanel.tsx
+│   │   │   │   └── autoCropConfig.ts / bubbleCleanerConfig.ts / types.ts
+│   │   │   ├── status/
+│   │   │   │   └── ModelStatusTable.tsx
+│   │   │   ├── terminal/
+│   │   │   │   ├── TerminalLogs.tsx
+│   │   │   │   ├── TerminalLogsFilter.tsx
+│   │   │   │   ├── TerminalLogsHeader.tsx
+│   │   │   │   └── TerminalLogsOutput.tsx
+│   │   │   ├── timeline/
+│   │   │   │   ├── StoryboardTimeline.tsx
+│   │   │   │   ├── TimelineBulkOps.tsx
+│   │   │   │   ├── TimelineCard.tsx
+│   │   │   │   ├── TimelineEmptyState.tsx
+│   │   │   │   └── TimelineHeader.tsx
+│   │   │   ├── video/
+│   │   │   │   ├── VideoMonitor.tsx / VideoMonitorActive.tsx / VideoMonitorTabs.tsx
+│   │   │   │   ├── FinalVideoPlayer.tsx
+│   │   │   │   └── VolumeAndProgressPanel.tsx
+│   │   │   ├── AppWorkspace.tsx      ← Main workspace layout
 │   │   │   ├── AdvancedSettings.tsx
-│   │   │   ├── AutoCropModal.tsx
-│   │   │   ├── BubbleCleanerModal.tsx
-│   │   │   ├── CropEditorModal.tsx
+│   │   │   ├── CropEditorModal.tsx   ← Modal shell for the crop editor
 │   │   │   ├── ErrorPopupModal.tsx
 │   │   │   ├── Header.tsx
-│   │   │   ├── LiveScraperDeck.tsx
-│   │   │   ├── ModelStatusTable.tsx
 │   │   │   ├── NotificationStack.tsx
-│   │   │   ├── StoryboardTimeline.tsx
-│   │   │   ├── TerminalLogs.tsx
-│   │   │   ├── VideoMonitor.tsx
-│   │   │   └── VolumeAndProgressPanel.tsx
+│   │   │   └── OutputMetadataPanel.tsx
+│   │   ├── hooks/                    ← All custom React hooks
+│   │   │   ├── useAppLogic.ts / useAppState.ts
+│   │   │   ├── useAutoAnalysis.ts
+│   │   │   ├── useBatchImageActions.ts / useBulkOperations.ts
+│   │   │   ├── useCompileActions.ts
+│   │   │   ├── useCropEditor.ts / useCropEditorDrag.ts / useCropEditorHistory.ts
+│   │   │   ├── useCropEditorPipelines.ts / useCropEditorState.ts
+│   │   │   ├── useLiveScraperActions.ts
+│   │   │   ├── usePersistedState.ts
+│   │   │   ├── usePipelineActions.ts / usePlaybackEngine.ts
+│   │   │   ├── useSceneModifier.ts / useSingleImageEdits.ts
+│   │   │   ├── useStoryboardOperations.ts
+│   │   │   └── useVideoGeneration.ts
+│   │   ├── utils/
+│   │   │   ├── filter.ts             ← Filter/style helpers
+│   │   │   └── url.ts                ← Frontend URL helpers
 │   │   ├── App.tsx                   ← Root React component (main page logic)
 │   │   ├── audio.ts                  ← Frontend audio utilities (Web Audio API)
 │   │   ├── index.css                 ← Global CSS styles + Tailwind base
@@ -70,13 +112,13 @@ webtoon-to-video-backend/
 │   │   ├── types.ts                  ← Shared TypeScript interfaces (GeneratedPanel, etc.)
 │   │   └── utils.ts                  ← Shared helper utilities (pure functions only)
 │   ├── index.html                    ← HTML entry point for Vite
-│   ├── vite.config.ts                ← Vite config (build + dev proxy → port 3000)
+│   ├── vite.config.ts                ← Vite config (build + dev proxy → port 5173)
 │   └── tsconfig.json                 ← TypeScript compiler settings
 │
 ├── backend/                          ← BACKEND — Express server + Python services
-│   ├── server.ts                     ← Express.js server (Entry point only)
+│   ├── server.ts                     ← Main entry: middleware, ANSI logging, route mounting
 │   ├── config/
-│   │   └── clients.ts                ← Shared AI clients config
+│   │   └── clients.ts                ← Shared AI clients config (Gemini, HuggingFace)
 │   ├── database/                     ← LOCAL DATABASE (SQLite)
 │   │   ├── db.ts                     ← DB singleton + typed query helpers
 │   │   ├── schema.sql                ← Table definitions (applied on first boot)
@@ -84,31 +126,59 @@ webtoon-to-video-backend/
 │   ├── routes/
 │   │   ├── health.ts                 ← Health probe API router
 │   │   ├── projects.ts               ← Projects & panels CRUD API router
-│   │   ├── imageRoutes.ts            ← Image proxy, crop, cleaner & zip API router
-│   │   ├── aiRoutes.ts               ← Smart crop, analysis & video compile API router
-│   │   └── scraperRoutes.ts          ← Scraper & dynamic storyboard API router
-│   ├── services/
-│   │   ├── audio.py                  ← TTS generation using edge-tts
-│   │   ├── cleaner.py                ← Speech bubble removal (OpenCV/Pillow, CLI)
-│   │   ├── ocr.py                    ← OCR dialogue extraction
-│   │   └── video.py                  ← MP4 compilation using MoviePy
+│   │   ├── imageRoutes.ts            ← Image router entry (mounts image/ sub-routes)
+│   │   ├── aiRoutes.ts               ← AI router entry (mounts ai/ sub-routes)
+│   │   ├── scraperRoutes.ts          ← Scraper router entry (mounts scraper/ sub-routes)
+│   │   ├── ai/
+│   │   │   ├── analyze.ts            ← Gemini image analysis, speech text, panel detect
+│   │   │   ├── crop.ts               ← AI smart crop
+│   │   │   └── video.ts              ← Video compile wrapper
+│   │   ├── image/
+│   │   │   ├── proxy.ts              ← Referrer-bypass image proxy
+│   │   │   ├── edit.ts               ← Crop, rotate, flip pipeline
+│   │   │   ├── merge.ts              ← Multi-panel canvas stitching
+│   │   │   ├── cleanup.ts            ← Speech bubble removal (OpenCV/Gemini)
+│   │   │   └── zip.ts                ← ZIP archive generation
+│   │   └── scraper/
+│   │       ├── scrape.ts             ← Webtoon crawler
+│   │       ├── generate.ts           ← AI storyboard generation
+│   │       └── process.ts            ← Panel detection pipeline
+│   ├── services/                     ← Node.js service helpers
+│   │   ├── crawlers.ts               ← Webtoon HTTP crawlers
+│   │   ├── scraperService.ts         ← Scraper orchestration
+│   │   └── storyboardAI.ts           ← AI storyboard narrative engine
+│   ├── python/                       ← Python services package
+│   │   ├── routes/
+│   │   │   └── process.py            ← FastAPI panel detection route
+│   │   └── services/
+│   │       ├── audio.py              ← TTS generation using edge-tts
+│   │       ├── borderless.py         ← Borderless panel detection helper
+│   │       ├── bubble_detector.py    ← Bubble detection core logic
+│   │       ├── cleaner.py            ← Speech bubble removal (OpenCV/Pillow, CLI)
+│   │       ├── detect_panels.py      ← Panel boundary detection
+│   │       ├── narration.py          ← Narration text utilities
+│   │       ├── ocr.py                ← OCR dialogue extraction
+│   │       ├── sfx.py                ← Sound effects helper
+│   │       ├── shout.py              ← Shouting text detection
+│   │       ├── standard.py           ← Standard speech bubble helper
+│   │       ├── video.py              ← MP4 compilation using MoviePy
+│   │       └── test_cleaner.py       ← Cleaner unit tests
 │   └── utils/
-│       ├── cache.ts                  ← Shared memory cache state map
+│       ├── cache.ts                  ← Shared memory cache state + TTL eviction
+│       ├── colors.ts                 ← ANSI color helper utilities (shared)
+│       ├── cvUtils.py                ← OpenCV shared helper functions (Python)
 │       ├── imageUtils.ts             ← Buffer resolver & auto-cropping helpers
+│       ├── logInterceptor.ts         ← Intercepts console.* → SSE color broadcast
 │       └── urlUtils.ts               ← Webtoon URL parsing & region helpers
 │
 ├── data/                             ← TEXT DATA — temp outputs, logs, text files
-│   └── tmp_crop.txt
-│
 ├── tests/                            ← TEST FILES
-│   └── test_jszip.ts
-│
 ├── .env.example                      ← Template for environment variables
 ├── .gitignore
-├── metadata.json                     ← Project metadata for AI Studio deployment
+├── metadata.json                     ← Project metadata
 ├── package.json                      ← Node.js dependencies + npm scripts
 ├── package-lock.json                 ← Locked dependency versions (DO NOT edit)
-├── requirements.txt                  ← Python pip dependencies (pip install -r requirements.txt)
+├── requirements.txt                  ← Python pip dependencies
 ├── RULES.md                          ← THIS FILE — AI rules and guidelines
 └── README.md                         ← User-facing setup instructions
 ```
@@ -118,42 +188,52 @@ webtoon-to-video-backend/
 | ❌ Wrong | ✅ Correct |
 |---|---|
 | React components in root or `backend/` | All `.tsx` components go in `frontend/src/components/` |
-| Python scripts in `frontend/` | All Python goes in `backend/services/` or `backend/routes/` |
-| API routes in `frontend/` files | All API routes go in `backend/server.ts` (Node) or `backend/routes/` (Python) |
+| Python scripts in `frontend/` | All Python goes in `backend/python/services/` |
+| API routes in `frontend/` files | All API routes go in `backend/routes/` sub-folders |
 | Type definitions scattered everywhere | All shared types go in `frontend/src/types.ts` |
 | One-off test scripts in root | Put tests in `tests/` folder |
 | Temp/data files in root | Put them in the `data/` folder |
-| Business logic in React components | Keep logic in `utils.ts`, `audio.ts`, or dedicated hooks |
+| Business logic in React components | Keep logic in hooks (`frontend/src/hooks/`) |
+| Large monolithic component files | Split into modular sub-components in sub-folders |
+| Large route files | Split into `backend/routes/ai/`, `image/`, `scraper/` sub-files |
 | Configs at root (vite/tsconfig) | Frontend configs live in `frontend/` |
 
 ---
 
 ## 🔌 API Architecture
 
-### Node.js Express API (primary, `server.ts`)
+### Node.js Express API (`server.ts`)
 
-All HTTP API endpoints live in `server.ts`. The server runs on **port 3000**.
+All HTTP API endpoints are mounted via sub-routers. The server runs on **port 5173** by default.
 
 | Endpoint | Method | Description |
 |---|---|---|
 | `/api/health` | GET | Liveness probe / health check |
-| `/api/proxy-image` | GET | Proxies external Webtoon images (bypasses CORS) |
-| `/api/stitch-images/cached/:id` | GET | Serves in-memory cached processed images |
-| `/api/edit-image` | POST | Crop and trim a single image using Sharp |
-| `/api/transform-image` | POST | Rotate or flip an image frame |
-| `/api/ai-detect-panels` | POST | AI-powered panel detection using Gemini |
-| `/api/analyze-image` | POST | Gemini vision analysis: captions, SFX, timing |
+| `/api/metrics` | GET | Live server + cache stats (memory, requests, rate limits) |
+| `/api/system-logs` | GET | JSON log polling fallback |
+| `/api/system-logs/stream` | GET | SSE stream — pushes ANSI-colored logs to UI |
+| `/api/proxy-image` | GET | Proxies external Webtoon images (bypasses CORS + Referer) |
+| `/api/edit-image` | POST | Crop, rotate, flip a single image using Sharp |
+| `/api/merge-images` | POST | Stitch multiple panels vertically or horizontally |
 | `/api/remove-speech-bubbles` | POST | Python OpenCV speech bubble removal |
-| `/api/undo-crop` | POST | Restores previous image state from edit history |
 | `/api/download-zip` | POST | Packages selected images into a ZIP archive |
 | `/api/download-zip/get/:id` | GET | Downloads a pre-generated ZIP file |
-| `/api/convert-images-to-video` | POST | Compiles panels into video timeline metadata |
-| `/api/system-logs` | GET | JSON log lookup (polling fallback for console logs) |
-| `/api/system-logs/stream` | GET | SSE stream to push server console logs to UI console |
+| `/api/analyze-image` | POST | Gemini vision analysis: captions, SFX, timing |
+| `/api/generate-speech-text` | POST | Generate dialogue/subtitle text from a panel image |
+| `/api/ai-detect-panels` | POST | AI-powered panel detection using Gemini |
+| `/api/ai-smart-crop` | POST | AI bounding-box auto-crop |
+| `/api/convert-images-to-video` | POST | Compiles panels into a cinematic MP4 |
+| `/api/generate-tts` | POST | Generate TTS audio for a panel |
+| `/api/scrape-images` | POST | Scrape panel images from a Webtoon URL |
+| `/api/generate` | POST | AI storyboard narrative generation |
+| `/api/detect-panels` | POST | OpenCV contour-based panel detection |
+| `/api/projects` | GET/POST | List or create projects |
+| `/api/projects/:id` | GET/DELETE | Get or delete a project |
+| `/api/projects/:id/panels` | POST | Save panels for a project |
 
-### Python API Routes (`app/routes/process.py`)
+### Python Routes (`backend/python/routes/process.py`)
 
-These are FastAPI routes that handle heavy CPU/ML workloads:
+FastAPI routes for heavy CPU/ML workloads:
 
 | Endpoint | Method | Description |
 |---|---|---|
@@ -162,7 +242,7 @@ These are FastAPI routes that handle heavy CPU/ML workloads:
 
 ---
 
-## 🛠️ Backend Rules (server.ts / Node.js Express)
+## 🛠️ Backend Rules (Node.js Express)
 
 ### 1. Gemini API Usage
 - **Always** use `callGeminiWithRetry()` when calling `ai.models.generateContent()`. Never call the Gemini API directly without retry logic.
@@ -187,10 +267,11 @@ const response = await ai.models.generateContent({...});
 - Keys follow the pattern: `stitched_<timestamp>_<descriptor>` (e.g., `stitched_1712345678_cropped`).
 - **Always** register new URLs in `editHistory` so undo operations work correctly.
 - The cache is in-memory only — it does not survive server restarts.
+- Cache stats are exposed via `getAllCacheStats()` and the `/api/metrics` endpoint.
 
 ### 4. Calling Python Scripts
 - Call Python scripts via `exec()` with sanitized, allow-listed parameters only.
-- The Python script path is: `backend/services/cleaner.py`
+- Python scripts live in `backend/python/services/`
 - Always use `python3` (not `python`) when executing scripts.
 - Always write temp files to `os.tmpdir()` (never to the project directory).
 - Clean up temp files (`unlink`) after processing, even if an error occurs.
@@ -208,13 +289,25 @@ const activeMethod = allowedMethods.includes(method) ? method : "inpaint";
 - Log errors with `console.error("[RoutePrefix] Error:", err)`.
 - Never expose raw stack traces in API responses.
 
-### 6. New API Endpoints
-When adding a new endpoint to `server.ts`:
+### 6. Console Logging (ANSI Colors)
+- All `console.log/warn/error` calls in the backend are intercepted by `logInterceptor.ts` and broadcast via SSE to the UI terminal.
+- Use the shared `colors.ts` helpers for consistent ANSI formatting.
+- Prefix all log messages with a colored bracket tag, e.g. `[Scraper]`, `[Helper Scraper]`, `[API]`.
+- Use `col.success()`, `col.warn()`, `col.error()`, `col.info()`, `col.label()` from the color palette.
+
+### 7. New API Endpoints
+When adding a new endpoint:
 1. Add a comment header explaining the endpoint's purpose.
 2. Validate all required body parameters at the top of the handler.
 3. Use `resolveImageToBuffer()` for any image URL input.
 4. Wrap the logic in `try/catch`.
-5. Document the new endpoint in the API table in this `RULES.md`.
+5. Add the route to the correct sub-router in `backend/routes/ai/`, `image/`, or `scraper/`.
+6. Document the new endpoint in the API table in this `RULES.md`.
+
+### 8. Route Modularization
+- Never put all routes in a single file.
+- Routes must be split by domain: `ai/`, `image/`, `scraper/` sub-folders under `backend/routes/`.
+- Each sub-folder has its own router file; the root `aiRoutes.ts`, `imageRoutes.ts`, and `scraperRoutes.ts` are entry points only.
 
 ---
 
@@ -224,17 +317,25 @@ When adding a new endpoint to `server.ts`:
 - **All** React components go in `frontend/src/components/` as `.tsx` files.
 - **All** shared TypeScript types go in `frontend/src/types.ts`.
 - **All** AI model definitions go in `frontend/src/models.ts`.
-- **All** pure utility functions go in `frontend/src/utils.ts`.
+- **All** pure utility functions go in `frontend/src/utils.ts` or `frontend/src/utils/`.
+- **All** custom React hooks go in `frontend/src/hooks/`.
 - Audio/TTS browser utilities go in `frontend/src/audio.ts`.
+- The global fetch wrapper lives at `frontend/src/api/fetchWithInterceptor.ts`.
 
 ### 2. Component Rules
 - Use **functional components** only. No class components.
 - Use `React.FC` or typed props interfaces for all components.
 - Keep components **focused** — one responsibility per component.
-- Do NOT put API fetch logic directly inside JSX. Use callbacks or helper functions.
+- Large components (>300 lines) MUST be split into modular sub-components in a sub-folder.
+- Do NOT put API fetch logic directly inside JSX. Use hooks or callbacks.
 - Prefix all console logs with a component tag: `console.log("[ComponentName]", ...)`.
 
-### 3. TypeScript Types
+### 3. Hook Rules
+- All stateful logic and side effects should live in custom hooks in `frontend/src/hooks/`.
+- Never put large blocks of business logic directly in `App.tsx` or `AppWorkspace.tsx`.
+- Name hooks with the `use` prefix. Each hook should have a single, clear responsibility.
+
+### 4. TypeScript Types
 - Define all panel data shapes using the `GeneratedPanel` interface in `src/types.ts`.
 - Do NOT use `any` type unless absolutely necessary with a comment explaining why.
 - Use strict typing for all API response objects.
@@ -254,13 +355,14 @@ interface GeneratedPanel {
 const panel: any = await fetchPanel();
 ```
 
-### 4. API Calls from Frontend
+### 5. API Calls from Frontend
 - All API calls go to `/api/...` paths (proxied through Vite to the Express server).
 - Always handle loading states and show errors to the user via the `NotificationStack` component.
 - Use `try/catch` around all `fetch()` calls.
-- Never hardcode `localhost:3000` in frontend code.
+- Use `fetchWithInterceptor` from `frontend/src/api/fetchWithInterceptor.ts` for all API calls.
+- Never hardcode `localhost:3000` or any port in frontend code.
 
-### 5. Styling
+### 6. Styling
 - Use **Tailwind CSS** utility classes for all styling.
 - No inline `style={{}}` objects unless for truly dynamic values (e.g., calculated widths/positions).
 - Global CSS goes in `src/index.css`.
@@ -268,16 +370,19 @@ const panel: any = await fetchPanel();
 
 ---
 
-## 🐍 Python Backend Rules (app/services/)
+## 🐍 Python Backend Rules (`backend/python/`)
 
 ### 1. Service Responsibilities
 
 | File | Responsibility |
 |---|---|
-| `backend/services/audio.py` | Text-to-speech generation using `edge-tts`. Outputs `.mp3` files. |
-| `backend/services/cleaner.py` | Speech bubble detection and removal using OpenCV / Pillow. Called via CLI args. |
-| `backend/services/ocr.py` | OCR to extract text/dialogue from comic panel images. |
-| `backend/services/video.py` | MoviePy-based MP4 video compilation from panel images + audio. |
+| `backend/python/services/audio.py` | Text-to-speech generation using `edge-tts`. Outputs `.mp3` files. |
+| `backend/python/services/cleaner.py` | Speech bubble detection and removal using OpenCV / Pillow. Called via CLI args. |
+| `backend/python/services/bubble_detector.py` | Core bubble detection logic (used by cleaner.py). |
+| `backend/python/services/ocr.py` | OCR to extract text/dialogue from comic panel images. |
+| `backend/python/services/video.py` | MoviePy-based MP4 video compilation from panel images + audio. |
+| `backend/python/services/detect_panels.py` | Panel boundary detection using OpenCV. |
+| `backend/utils/cvUtils.py` | Shared OpenCV utility functions used across Python services. |
 
 ### 2. CLI Interface for `cleaner.py`
 The cleaner script is called from Node.js via shell `exec()`. It must always:
@@ -310,10 +415,16 @@ All environment variables are defined in `.env` (copy from `.env.example`). Neve
 |---|---|---|
 | `GEMINI_API_KEY` | ✅ Yes | Google Gemini API key for AI features |
 | `HUGGINGFACE_API_KEY` | ⚡ Optional | HuggingFace API key for open-source models |
-| `APP_URL` | ⚡ Optional | Public URL of the deployed app |
-| `DATABASE_URL` | ⚡ Optional | PostgreSQL connection string |
-| `SUPABASE_URL` | ⚡ Optional | Supabase project URL |
-| `SUPABASE_KEY` | ⚡ Optional | Supabase anon/service key |
+| `PORT` | ⚡ Optional | Server port (default: `5173`) |
+| `NODE_ENV` | ⚡ Optional | `development` or `production` |
+| `SLOW_REQ_MS` | ⚡ Optional | Slow request threshold ms (default: `3000`) |
+| `RATE_LIMIT_RPM` | ⚡ Optional | Max requests/min per IP (default: `120`) |
+| `REQ_TIMEOUT_MS` | ⚡ Optional | Request timeout ms (default: `30000`) |
+| `API_VERSION` | ⚡ Optional | API version string shown in headers |
+| `MAINTENANCE_MODE` | ⚡ Optional | Set `true` to serve 503 to all requests |
+| `STANDALONE_SERVER` | ⚡ Optional | Set `true` to skip Vite and run API-only |
+| `DISABLE_HMR` | ⚡ Optional | Set `true` to disable Vite HMR in dev |
+| `DATABASE_URL` | ⚡ Optional | SQLite path (auto-set) |
 
 **Rules:**
 - Always check `process.env.GEMINI_API_KEY` before initializing the AI client.
@@ -325,12 +436,20 @@ All environment variables are defined in `.env` (copy from `.env.example`). Neve
 
 ## 🗃️ Database
 
-The project has a **planned** (optional) PostgreSQL/Supabase database.
+The project uses **SQLite** via `better-sqlite3`.
 
-- Connection string: `DATABASE_URL` in `.env`
-- The `/api/health` endpoint currently returns `"database": "disconnected"` — update this if DB is connected.
+- DB file: `backend/database/webtoon_local.db` (auto-created, git-ignored)
+- Schema: `backend/database/schema.sql` (applied on first boot)
+- Query helpers: `backend/database/db.ts`
+- The `/api/health` endpoint returns DB connection status and table stats.
 - If adding DB functionality: use parameterized queries only. Never use string concatenation for SQL.
-- No ORM is currently used. If adding one, use **Prisma** (TypeScript) or **SQLAlchemy** (Python).
+
+| Table | Description |
+|---|---|
+| `projects` | All processed webtoon projects |
+| `panels` | Every panel's image, text, filters, and settings |
+| `scrape_sessions` | Cached scrape results per URL |
+| `edit_history` | Undo/redo history (persists across restarts) |
 
 ---
 
@@ -346,8 +465,7 @@ The project has a **planned** (optional) PostgreSQL/Supabase database.
 
 **Rules:**
 - Always use `npm run dev` for local development — never run `server.ts` directly.
-- The dev server runs on **http://localhost:3000**.
-- The Vite dev proxy forwards `/api/*` and `/media/*` to `http://127.0.0.1:8000` (for future Python FastAPI server integration).
+- The dev server runs on **http://localhost:5173** by default (configurable via `PORT`).
 
 ---
 
@@ -372,22 +490,44 @@ const result = await callGeminiWithRetry(() =>
 
 ### 3. Python Shell Call Pattern
 ```typescript
-const pythonCommand = `python3 app/services/cleaner.py --image_path "${tempIn}" --output_path "${tempOut}" --method "${method}"`;
+const pythonCommand = `python3 backend/python/services/cleaner.py --image_path "${tempIn}" --output_path "${tempOut}" --method "${method}"`;
 exec(pythonCommand, (error, stdout, stderr) => {
   if (error) { /* handle failure, return structured error */ }
   else { /* read tempOut, cache result, return URL */ }
 });
 ```
 
-### 4. Genre-Based Background Video Selection
+### 4. ANSI Console Logging Pattern
 ```typescript
-const DYNAMIC_BACKGROUND_VIDEOS = {
-  action: "...", romance: "...", fantasy: "...", cyberpunk: "...", general: "..."
-};
-// Always select from this map based on parsed Webtoon URL genre.
+// Use the color palette from backend/utils/colors.ts
+import { col, c } from '../utils/colors.js';
+console.log(`${col.info('[Scraper]')} Fetching ${col.value(url)}`);
+console.warn(`${col.warn('[Helper Scraper]')} Retrying after ${col.value('2s')}...`);
+console.error(`${col.error('[API]')} Request failed: ${col.error(err.message)}`);
 ```
 
-### 5. Webtoon URL Parsing
+### 5. Modular Route Pattern
+```typescript
+// Root entry file (e.g., imageRoutes.ts) — mount sub-routers
+import editRouter   from './image/edit.js';
+import mergeRouter  from './image/merge.js';
+const router = express.Router();
+router.use(editRouter);
+router.use(mergeRouter);
+export default router;
+```
+
+### 6. Custom Hook Pattern (Frontend)
+```typescript
+// Extract logic from components into hooks/
+// hooks/useSingleImageEdits.ts
+export function useSingleImageEdits(panel: GeneratedPanel, onUpdate: (p: GeneratedPanel) => void) {
+  // All crop/edit state and handlers live here
+  return { handleCrop, handleFlip, handleRotate, ... };
+}
+```
+
+### 7. Webtoon URL Parsing
 - Always use `stripRegionFromUrl()` before parsing to remove locale prefixes (en, fr, ko, etc.).
 - Use `parseWebtoonUrl()` to extract `{ genre, title, episode }` from any Webtoon URL.
 
@@ -436,6 +576,9 @@ At the **end of every conversation**, append one row to the Session Changelog ta
 
 | Date | Summary | Files Affected |
 |---|---|---|
+| 2026-06-08 | Fully rewrote README.md and RULES.md to reflect current modular structure, new routes, hooks, utils, and server features | `README.md`, `RULES.md` |
+| 2026-06-08 | Added ANSI color system to server.ts and all backend log prefixes via logInterceptor.ts and colors.ts | `backend/server.ts`, `backend/utils/logInterceptor.ts`, `backend/utils/colors.ts`, `backend/routes/scraper/*`, `backend/routes/image/*`, `backend/routes/ai/*` |
+| 2026-06-08 | Refactored large files: split App.tsx logic into 19 hooks, CropEditorModal into 10+ sub-components, TerminalLogs/Timeline/VideoMonitor/Scraper into modular sub-folders | `frontend/src/hooks/*`, `frontend/src/components/crop/*`, `frontend/src/components/terminal/*`, `frontend/src/components/timeline/*`, `frontend/src/components/video/*`, `frontend/src/components/scraper/*` |
 | 2026-06-07 | Added Merge panel (vertical/horizontal stitching, gaps), prevented auto-close of Crop Editor, improved 500 error logging | `frontend/src/components/crop/MergePanel.tsx`, `frontend/src/components/CropEditorModal.tsx`, `frontend/src/App.tsx`, `backend/routes/imageRoutes.ts` |
 | 2026-06-07 | Added advanced manual horizontal split cutter features (precision inputs, equal parts division, presets, intervals, inline coordinate list editor, browser-based gutter gap detection, magnetic snapping, and templates), next/prev frame navigation buttons and shortcuts, edit panel delete buttons, and fixed /api/transform-image API bug | `frontend/src/components/crop/HorizontalSplitter.tsx`, `frontend/src/components/CropEditorModal.tsx`, `frontend/src/App.tsx`, `backend/routes/imageRoutes.ts`, `RULES.md`, `README.md` |
 | 2026-06-07 | Modularized LiveScraperDeck & CropEditorModal, added CleanBubblesPanel and AutoCropModal | `frontend/src/components/LiveScraperDeck.tsx`, `frontend/src/components/CropEditorModal.tsx`, `frontend/src/components/AutoCropModal.tsx`, `frontend/src/components/scraper/*`, `frontend/src/components/crop/*`, `frontend/src/App.tsx`, `RULES.md` |
@@ -459,10 +602,13 @@ At the **end of every conversation**, append one row to the Session Changelog ta
 4. **Never use** `python` (without the `3`) in shell commands — use `python3`.
 5. **Never add** new npm packages without updating this file's tech stack table.
 6. **Never place** React components outside of `frontend/src/components/`.
-7. **Never place** Python files outside of `backend/services/` or `backend/routes/`.
+7. **Never place** Python service files outside of `backend/python/services/`.
 8. **Never expose** stack traces or raw error objects in API JSON responses.
 9. **Never hardcode** localhost, IP addresses, or port numbers in frontend code.
 10. **Never use** `any` TypeScript type without a comment explaining why.
+11. **Never put** all routes in one giant file — split by domain into `ai/`, `image/`, `scraper/` sub-folders.
+12. **Never put** hook logic directly in `App.tsx` — extract into `frontend/src/hooks/`.
+13. **Never put** Python scripts directly in `backend/services/` — use `backend/python/services/`.
 
 ---
 
@@ -475,6 +621,8 @@ At the **end of every conversation**, append one row to the Session Changelog ta
 - [ ] Is the `.env.example` updated if new environment variables were added?
 - [ ] Is this `RULES.md` updated if new files, folders, or API endpoints were added?
 - [ ] Are all API routes documented in the API table above?
+- [ ] Are all new console log calls using ANSI color helpers from `colors.ts`?
+- [ ] Are new components split into modular sub-components if over ~300 lines?
 
 ---
 

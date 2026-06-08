@@ -127,7 +127,7 @@ export default function App() {
       <Header 
         isProcessing={isProcessing} 
         panels={panels} 
-        totalCalculatedDuration={totalCalculatedDuration} 
+        totalCalculatedDuration={totalCalculatedDuration}
       />
 
       {/* WORKSPACE AREA — AutoCropModal / BubbleCleanerModal / CropEditorModal / Main Grid */}
