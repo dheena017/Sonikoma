@@ -50,6 +50,7 @@ interface CropEditorSidebarProps {
   brushSize: number;
   setBrushSize: any;
   brushAction: any;
+  setBrushAction: any;
   handleClearBrushMask: any;
   detectionStyle: any;
   setDetectionStyle: any;
@@ -105,7 +106,7 @@ interface CropEditorSidebarProps {
   handleSelectSlice: any;
   handleDeleteSlice: any;
   handleCropSingleSlice: any;
-  isCroppingSlice: boolean;
+  isCroppingSlice: string | null;
   handleDetectPanels: any;
   isDetecting: boolean;
   handleCommitDetectedBoxes: any;
@@ -156,6 +157,7 @@ export default function CropEditorSidebar({
   brushSize,
   setBrushSize,
   brushAction,
+  setBrushAction,
   handleClearBrushMask,
   detectionStyle,
   setDetectionStyle,

@@ -6,7 +6,7 @@ interface PanelCardControlsProps {
   idx: number;
   scrapedImages: string[];
   mergingIndices: number[];
-  handleMergeWithNext: (index: number) => void;
+  handleMergeWithNext: (index: number) => Promise<void>;
   addPanelsWithAutoAnalysis: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
 }
 

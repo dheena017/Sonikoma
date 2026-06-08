@@ -383,6 +383,7 @@ export default function CropEditorModal({
             brushSize={brushSize}
             setBrushSize={setBrushSize}
             brushAction={brushAction}
+            setBrushAction={setBrushAction}
             handleClearBrushMask={handleClearBrushMask}
             detectionStyle={detectionStyle}
             setDetectionStyle={setDetectionStyle}
