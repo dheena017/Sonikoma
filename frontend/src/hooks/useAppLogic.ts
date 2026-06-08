@@ -1,102 +1,308 @@
-import { useState, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { GeneratedPanel } from "../types";
+import { AI_MODELS } from "../models";
+import { createFetchWithInterceptor } from "../api/fetchWithInterceptor";
+import {
+  setEngineVolume,
+  startAmbientBackgroundMusic,
+  stopAmbientBackgroundMusic,
+  playComicSoundEffect,
+} from "../audio";
 import { parseWebtoonUrl } from "../utils";
+import { Notification, NotificationType } from "../components/NotificationStack";
+import { ErrorPopupDetail } from "../components/ErrorPopupModal";
 
-interface UseVideoPipelineProps {
-  targetUrl: string;
-  setTargetUrl: (v: string) => void;
-  selectedModel: string;
-  frameRate: number;
-  voiceActor: string;
-  musicTheme: string;
-  panels: GeneratedPanel[];
-  setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
-  addNotification: (message: string, type: any, options?: any) => void;
-  fetchWithInterceptor: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
-  setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>>;
-  setCurrentPanelIndex: (idx: number) => void;
-  setPlaybackTime: (time: number) => void;
-  setStoryboardPlaying: (playing: boolean) => void;
-  setActivePreviewTab: (tab: "video" | "storyboard") => void;
-  bubbleDetectionStyle: string;
-  bubbleEraseMethod: string;
-  bubbleSensitivity: number;
-  selectedScraped: string[];
-  setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
-  scrapedImages: string[];
-  setScrapedImages: React.Dispatch<React.SetStateAction<string[]>>;
-  setIsCleaningBubbles: (v: boolean) => void;
-  setCleanProgress: (p: any) => void;
-  setBubbleCroppingImgUrl: (v: string | null) => void;
-  cropSensitivity: number;
-  cropPaddingPx: number;
-  cropBackgroundMode: string;
-  processingStrategy: string;
-  aspectRatioLock: string;
-  minPanelAreaPct: number;
-  overlapMergeThreshold: number;
-  useLocalCV: boolean;
-  setIsBatchCropping: (v: boolean) => void;
-  setBatchProgress: (p: any) => void;
-  setCroppingImgUrl: (v: string | null) => void;
-  imageEditStates: Record<string, any>;
-  setEditCropTop: (v: number) => void;
-  setEditCropBottom: (v: number) => void;
-  setEditCropLeft: (v: number) => void;
-  setEditCropRight: (v: number) => void;
-  setEditAutoTrim: (v: boolean) => void;
-}
+export function useAppLogic() {
+  const [panels, setPanels] = useState<GeneratedPanel[]>([]);
+  const [consoleLogs, setConsoleLogs] = useState<string[]>([]);
+  
+  // Scraped images states from live URL separation
+  const [scrapedImages, setScrapedImages] = useState<string[]>([]);
+  const [selectedScraped, setSelectedScraped] = useState<string[]>([]);
 
-export function useVideoPipeline({
-  targetUrl,
-  setTargetUrl,
-  selectedModel,
-  frameRate,
-  voiceActor,
-  musicTheme,
-  panels,
-  setPanels,
-  addNotification,
-  fetchWithInterceptor,
-  setConsoleLogs,
-  setCurrentPanelIndex,
-  setPlaybackTime,
-  setStoryboardPlaying,
-  setActivePreviewTab,
-  bubbleDetectionStyle,
-  bubbleEraseMethod,
-  bubbleSensitivity,
-  selectedScraped,
-  setSelectedScraped,
-  scrapedImages,
-  setScrapedImages,
-  setIsCleaningBubbles,
-  setCleanProgress,
-  setBubbleCroppingImgUrl,
-  cropSensitivity,
-  cropPaddingPx,
-  cropBackgroundMode,
-  processingStrategy,
-  aspectRatioLock,
-  minPanelAreaPct,
-  overlapMergeThreshold,
-  useLocalCV,
-  setIsBatchCropping,
-  setBatchProgress,
-  setCroppingImgUrl,
-  imageEditStates,
-  setEditCropTop,
-  setEditCropBottom,
-  setEditCropLeft,
-  setEditCropRight,
-  setEditAutoTrim,
-}: UseVideoPipelineProps) {
+  // Tab View for Preview ("video" for MP4 player, "storyboard" for step-by-step)
+  const [activePreviewTab, setActivePreviewTab] = useState<"video" | "storyboard">("video");
+
+  // Image editing/cropping states
+  const [editingImageIdx, setEditingImageIdx] = useState<number | null>(null);
+  const [editCropTop, setEditCropTop] = useState<number>(0);
+  const [editCropBottom, setEditCropBottom] = useState<number>(0);
+  const [editCropLeft, setEditCropLeft] = useState<number>(0);
+  const [editCropRight, setEditCropRight] = useState<number>(0);
+  const [editAutoTrim, setEditAutoTrim] = useState<boolean>(true);
+  const [imageEditStates, setImageEditStates] = useState<Record<string, any>>({});
+
+  // Bubble cleaner states
+  const [showBubbleModal, setShowBubbleModal] = useState<boolean>(false);
+  const [bubbleDetectionStyle, setBubbleDetectionStyle] = useState<"all" | "white_only" | "text_only">("all");
+  const [bubbleEraseMethod, setBubbleEraseMethod] = useState<"auto" | "inpaint" | "blur" | "solid_white" | "solid_black">("auto");
+  const [bubbleSensitivity, setBubbleSensitivity] = useState<number>(50);
+  const [isCleaningBubbles, setIsCleaningBubbles] = useState<boolean>(false);
+  const [cleanProgress, setCleanProgress] = useState<{ current: number; total: number } | null>(null);
+  const [bubbleCroppingImgUrl, setBubbleCroppingImgUrl] = useState<string | null>(null);
+
+  // Auto crop states
+  const [showAutoCropModal, setShowAutoCropModal] = useState<boolean>(false);
+  const [cropSensitivity, setCropSensitivity] = useState<number>(30);
+  const [cropPaddingPx, setCropPaddingPx] = useState<number>(10);
+  const [cropBackgroundMode, setCropBackgroundMode] = useState<string>("auto");
+  const [autoSplitTallStrips, setAutoSplitTallStrips] = useState<boolean>(true);
+  const [processingStrategy, setProcessingStrategy] = useState<string>("balanced");
+  const [aspectRatioLock, setAspectRatioLock] = useState<string>("free");
+  const [minPanelAreaPct, setMinPanelAreaPct] = useState<number>(2);
+  const [overlapMergeThreshold, setOverlapMergeThreshold] = useState<number>(20);
+  const [useLocalCV, setUseLocalCV] = useState<boolean>(false);
+  const [isBatchCropping, setIsBatchCropping] = useState<boolean>(false);
+  const [batchProgress, setBatchProgress] = useState<{ current: number; total: number } | null>(null);
+  const [croppingImgUrl, setCroppingImgUrl] = useState<string | null>(null);
+
+  const videoPlayerRef = useRef<HTMLVideoElement | null>(null);
+
+  // --- Notifications State ---
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [errorPopup, setErrorPopup] = useState<ErrorPopupDetail | null>(null);
+
+  const addNotification = useCallback((
+    message: string,
+    type: NotificationType,
+    options?: { errorCode?: number; retryDelay?: number; onRetry?: () => void }
+  ) => {
+    const id = Date.now() + Math.random();
+    setNotifications((prev) => [...prev, { id, message, type, ...options }]);
+
+    // Only auto-dismiss if a countdown/retry action is NOT active
+    if (!options?.onRetry) {
+      setTimeout(() => {
+        setNotifications((prev) => prev.filter((n) => n.id !== id));
+      }, 5000);
+    }
+  }, []);
+
+  const removeNotification = useCallback((id: number) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  }, []);
+
+  const fetchWithInterceptor = useCallback(
+    createFetchWithInterceptor({ addNotification, setErrorPopup }),
+    [addNotification, setErrorPopup]
+  );
+
+  // --- Settings State ---
+  const [targetUrl, setTargetUrl] = useState<string>(() => localStorage.getItem('ai_comic_url') || "");
+  const [voiceActor, setVoiceActor] = useState<string>(() => localStorage.getItem('ai_comic_voice') || "Standard Comic Narrator (Male)");
+  const [musicTheme, setMusicTheme] = useState<string>(() => localStorage.getItem('ai_comic_music') || "Orchestral Battle Theme");
+  const [aspectRatio, setAspectRatio] = useState<"9:16" | "16:9">(() => (localStorage.getItem('ai_comic_aspectRatio') as "9:16" | "16:9") || "9:16");
+  const [selectedModel, setSelectedModel] = useState<string>(() => localStorage.getItem('ai_comic_model') || AI_MODELS[0].id);
+  const [frameRate, setFrameRate] = useState<number>(() => parseInt(localStorage.getItem('ai_comic_fps') || '24'));
+  const [volume, setVolume] = useState<number>(() => parseInt(localStorage.getItem('ai_comic_volume') || '80'));
+  const [isMuted, setIsMuted] = useState<boolean>(() => localStorage.getItem('ai_comic_muted') === 'true');
+
+  useEffect(() => {
+    localStorage.setItem('ai_comic_url', targetUrl);
+    localStorage.setItem('ai_comic_voice', voiceActor);
+    localStorage.setItem('ai_comic_music', musicTheme);
+    localStorage.setItem('ai_comic_aspectRatio', aspectRatio);
+    localStorage.setItem('ai_comic_model', selectedModel);
+    localStorage.setItem('ai_comic_fps', frameRate.toString());
+    localStorage.setItem('ai_comic_volume', volume.toString());
+    localStorage.setItem('ai_comic_muted', isMuted.toString());
+  }, [targetUrl, voiceActor, musicTheme, aspectRatio, selectedModel, frameRate, volume, isMuted]);
+
+  // --- Playback States ---
+  const [currentPanelIndex, setCurrentPanelIndex] = useState<number>(0);
+  const [playbackTime, setPlaybackTime] = useState<number>(0);
+  const [storyboardPlaying, setStoryboardPlaying] = useState<boolean>(false);
+  const playTimerRef = useRef<any>(null);
+
+  // --- System Logs Engine ---
+  useEffect(() => {
+    let eventSource: EventSource | null = null;
+    let pollInterval: any = null;
+    let isPolling = false;
+    const lastLogIdRef = { current: 0 };
+
+    const startPolling = () => {
+      if (isPolling) return;
+      isPolling = true;
+
+      pollInterval = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/system-logs?since=${lastLogIdRef.current}`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          if (data.success && Array.isArray(data.logs)) {
+            const newLogs = data.logs.filter((log: any) => log.id > lastLogIdRef.current);
+            if (newLogs.length > 0) {
+              newLogs.forEach((log: any) => {
+                if (log.id > lastLogIdRef.current) {
+                  lastLogIdRef.current = log.id;
+                }
+              });
+              setConsoleLogs(prev => [
+                ...prev,
+                ...newLogs.map((log: any) => log.message)
+              ]);
+            }
+          }
+        } catch (err) {
+          // Silent catch to prevent console flooding during network restarts
+        }
+      }, 1500);
+    };
+
+    const stopPolling = () => {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+        pollInterval = null;
+      }
+      isPolling = false;
+    };
+
+    const connectSSE = () => {
+      try {
+        eventSource = new EventSource('/api/system-logs/stream');
+
+        eventSource.onmessage = (event) => {
+          try {
+            const entry = JSON.parse(event.data);
+            if (entry && entry.id > lastLogIdRef.current) {
+              lastLogIdRef.current = entry.id;
+              setConsoleLogs(prev => [...prev, entry.message]);
+            }
+          } catch (e) {
+            // silent catch on malformed stream messages
+          }
+        };
+
+        eventSource.onerror = () => {
+          if (eventSource) {
+            eventSource.close();
+            eventSource = null;
+          }
+          startPolling();
+        };
+      } catch (err) {
+        startPolling();
+      }
+    };
+
+    connectSSE();
+
+    return () => {
+      if (eventSource) {
+        eventSource.close();
+      }
+      stopPolling();
+    };
+  }, []);
+
+  const speakDialogue = useCallback((text: string) => {
+    if (!window.speechSynthesis || isMuted) return;
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voices = window.speechSynthesis.getVoices();
+    
+    let selectedVoice = null;
+    if (voiceActor.toLowerCase().includes("sultry") || voiceActor.toLowerCase().includes("female")) {
+      selectedVoice = voices.find(v => v.name.toLowerCase().includes("female") || v.name.toLowerCase().includes("zira") || v.name.toLowerCase().includes("samantha"));
+    } else {
+      selectedVoice = voices.find(v => v.name.toLowerCase().includes("male") || v.name.toLowerCase().includes("david") || v.name.toLowerCase().includes("premium"));
+    }
+    
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+    }
+    utterance.volume = volume / 100;
+    utterance.rate = 0.95;
+    
+    window.speechSynthesis.speak(utterance);
+  }, [isMuted, voiceActor, volume]);
+
+  const playStoryboardAudio = useCallback((panelIdx: number) => {
+    const activePanel = panels[panelIdx];
+    if (!activePanel) return;
+
+    speakDialogue(activePanel.speech_text);
+
+    if (activePanel.sfx && !isMuted) {
+      playComicSoundEffect(activePanel.sfx);
+    }
+  }, [panels, speakDialogue, isMuted]);
+
+  useEffect(() => {
+    setEngineVolume(volume, isMuted);
+  }, [volume, isMuted]);
+
+  useEffect(() => {
+    if (storyboardPlaying) {
+      startAmbientBackgroundMusic(musicTheme, volume, isMuted);
+    } else {
+      stopAmbientBackgroundMusic();
+    }
+    return () => {
+      stopAmbientBackgroundMusic();
+    };
+  }, [storyboardPlaying, musicTheme, volume, isMuted]);
+
+  useEffect(() => {
+    if (storyboardPlaying && panels.length > 0) {
+      const activePanel = panels[currentPanelIndex];
+      const stepMs = 100;
+
+      playTimerRef.current = setTimeout(() => {
+        setPlaybackTime(prev => {
+          const nextTime = parseFloat((prev + 0.1).toFixed(1));
+          if (nextTime >= activePanel.duration) {
+            if (currentPanelIndex < panels.length - 1) {
+              const nextIdx = currentPanelIndex + 1;
+              setCurrentPanelIndex(nextIdx);
+              playStoryboardAudio(nextIdx);
+              return 0;
+            } else {
+              setStoryboardPlaying(false);
+              return 0;
+            }
+          }
+          return nextTime;
+        });
+      }, stepMs);
+    } else {
+      if (playTimerRef.current) clearTimeout(playTimerRef.current);
+    }
+
+    return () => {
+      if (playTimerRef.current) clearTimeout(playTimerRef.current);
+    };
+  }, [storyboardPlaying, currentPanelIndex, panels, playStoryboardAudio]);
+
+  const toggleStoryboardPlayback = () => {
+    if (panels.length === 0) return;
+    if (storyboardPlaying) {
+      setStoryboardPlaying(false);
+      if (window.speechSynthesis) window.speechSynthesis.pause();
+    } else {
+      setStoryboardPlaying(true);
+      playStoryboardAudio(currentPanelIndex);
+    }
+  };
+
+  const resetStoryboardPlayback = () => {
+    setStoryboardPlaying(false);
+    setCurrentPanelIndex(0);
+    setPlaybackTime(0);
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    stopAmbientBackgroundMusic();
+  };
+
+  // --- Video Pipeline & Action Handlers ---
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [progressStatus, setProgressStatus] = useState<string>("");
   const [isScraping, setIsScraping] = useState<boolean>(false);
   const [mergingIndices, setMergingIndices] = useState<number[]>([]);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [reprocessingPanelId, setReprocessingPanelId] = useState<number | null>(null);
+  const [isSavingEdit, setIsSavingEdit] = useState<boolean>(false);
 
   // Load preview images and panels on targetUrl changes
   useEffect(() => {
@@ -199,7 +405,7 @@ export function useVideoPipeline({
       isCurrent = false;
       clearTimeout(timer);
     };
-  }, [targetUrl, selectedModel]);
+  }, [targetUrl, selectedModel, fetchWithInterceptor, addNotification]);
 
   const handleGenerateVideo = async () => {
     if (!targetUrl.trim()) {
@@ -273,15 +479,7 @@ export function useVideoPipeline({
     }
   };
 
-  const handleSaveEditedImage = async (
-    editingImageIdx: number | null,
-    editCropTop: number,
-    editCropBottom: number,
-    editCropLeft: number,
-    editCropRight: number,
-    editAutoTrim: boolean,
-    setIsSavingEdit: (v: boolean) => void
-  ) => {
+  const handleSaveEditedImage = async () => {
     if (editingImageIdx === null) return;
     
     const originalUrl = scrapedImages[editingImageIdx];
@@ -342,11 +540,7 @@ export function useVideoPipeline({
     }
   };
 
-  const handleSaveMultipleCuts = async (
-    editingImageIdx: number | null,
-    cuts: Array<{ cropTop: number; cropBottom: number; cropLeft: number; cropRight: number; autoTrim: boolean }>,
-    setIsSavingEdit: (v: boolean) => void
-  ) => {
+  const handleSaveMultipleCuts = async (cuts: Array<{ cropTop: number; cropBottom: number; cropLeft: number; cropRight: number; autoTrim: boolean }>) => {
     if (editingImageIdx === null || cuts.length === 0) return;
     
     const originalUrl = scrapedImages[editingImageIdx];
@@ -512,7 +706,7 @@ export function useVideoPipeline({
     }
   };
 
-  const runBackgroundAnalysis = async (panelId: number, imageUrl: string) => {
+  const runBackgroundAnalysis = useCallback(async (panelId: number, imageUrl: string) => {
     try {
       const res = await fetchWithInterceptor("/api/analyze-image", {
         method: "POST",
@@ -561,9 +755,9 @@ export function useVideoPipeline({
         )
       );
     }
-  };
+  }, [fetchWithInterceptor, addNotification]);
 
-  const addPanelsWithAutoAnalysis = (imgUrls: string[], currentScrapedList?: string[], shouldScroll: boolean = true) => {
+  const addPanelsWithAutoAnalysis = useCallback((imgUrls: string[], currentScrapedList?: string[], shouldScroll: boolean = true) => {
     if (imgUrls.length === 0) return;
 
     if (shouldScroll) {
@@ -611,7 +805,7 @@ export function useVideoPipeline({
         }, index * 1000);
       });
     }, 50);
-  };
+  }, [scrapedImages, runBackgroundAnalysis, addNotification]);
 
   const handleCleanBubblesSelected = async () => {
     if (selectedScraped.length === 0) return;
@@ -761,7 +955,97 @@ export function useVideoPipeline({
     }
   }, [editingImageIdx, scrapedImages, imageEditStates]);
 
+  const totalCalculatedDuration = panels.reduce((sum, p) => sum + p.duration, 0);
+
   return {
+    panels,
+    setPanels,
+    consoleLogs,
+    setConsoleLogs,
+    scrapedImages,
+    setScrapedImages,
+    selectedScraped,
+    setSelectedScraped,
+    activePreviewTab,
+    setActivePreviewTab,
+    editingImageIdx,
+    setEditingImageIdx,
+    editCropTop,
+    setEditCropTop,
+    editCropBottom,
+    setEditCropBottom,
+    editCropLeft,
+    setEditCropLeft,
+    editCropRight,
+    setEditCropRight,
+    editAutoTrim,
+    setEditAutoTrim,
+    imageEditStates,
+    setImageEditStates,
+    showBubbleModal,
+    setShowBubbleModal,
+    bubbleDetectionStyle,
+    setBubbleDetectionStyle,
+    bubbleEraseMethod,
+    setBubbleEraseMethod,
+    bubbleSensitivity,
+    setBubbleSensitivity,
+    isCleaningBubbles,
+    cleanProgress,
+    bubbleCroppingImgUrl,
+    showAutoCropModal,
+    setShowAutoCropModal,
+    cropSensitivity,
+    setCropSensitivity,
+    cropPaddingPx,
+    setCropPaddingPx,
+    cropBackgroundMode,
+    setCropBackgroundMode,
+    autoSplitTallStrips,
+    setAutoSplitTallStrips,
+    processingStrategy,
+    setProcessingStrategy,
+    aspectRatioLock,
+    setAspectRatioLock,
+    minPanelAreaPct,
+    setMinPanelAreaPct,
+    overlapMergeThreshold,
+    setOverlapMergeThreshold,
+    useLocalCV,
+    setUseLocalCV,
+    isBatchCropping,
+    batchProgress,
+    croppingImgUrl,
+    videoPlayerRef,
+    notifications,
+    errorPopup,
+    setErrorPopup,
+    addNotification,
+    removeNotification,
+    fetchWithInterceptor,
+    targetUrl,
+    setTargetUrl,
+    voiceActor,
+    setVoiceActor,
+    musicTheme,
+    setMusicTheme,
+    aspectRatio,
+    setAspectRatio,
+    selectedModel,
+    setSelectedModel,
+    frameRate,
+    setFrameRate,
+    volume,
+    setVolume,
+    isMuted,
+    setIsMuted,
+    currentPanelIndex,
+    setCurrentPanelIndex,
+    playbackTime,
+    setPlaybackTime,
+    storyboardPlaying,
+    toggleStoryboardPlayback,
+    resetStoryboardPlayback,
     isProcessing,
     progressStatus,
     isScraping,
@@ -769,14 +1053,15 @@ export function useVideoPipeline({
     videoUrl,
     setVideoUrl,
     reprocessingPanelId,
+    isSavingEdit,
     handleGenerateVideo,
     handleSaveEditedImage,
     handleSaveMultipleCuts,
     handleStitchWithNext,
     handleTriggerReprocess,
-    runBackgroundAnalysis,
     addPanelsWithAutoAnalysis,
     handleCleanBubblesSelected,
     handleAutoCropSelected,
+    totalCalculatedDuration,
   };
 }

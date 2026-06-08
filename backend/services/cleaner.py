@@ -42,43 +42,271 @@ except ImportError:
 
 def clean_standard_bubble(image: np.ndarray, mask: np.ndarray, inpaint_radius: int = 3) -> np.ndarray:
     """
-    Removes standard speech/thought bubbles by inpainting.
+    Removes standard speech/thought bubbles by reconstructing the background.
+    Fits a 2D linear gradient or solid color to boundary pixels for a smooth result,
+    falling back to cv2.inpaint if the boundary is textured.
     """
+    if not has_opencv or image is None or image.size == 0 or mask is None or mask.size == 0:
+        return image
+        
+    h, w = image.shape[:2]
+    
+    # 1. Create a detached outer boundary ring to sample background art,
+    # bypassing any speech bubble black borders/outlines
+    inner_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    outer_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (13, 13))
+    dilated_inner = cv2.dilate(mask, inner_kernel, iterations=1)
+    dilated_outer = cv2.dilate(mask, outer_kernel, iterations=1)
+    outer_ring = cv2.subtract(dilated_outer, dilated_inner)
+    
+    # Check if we have enough boundary pixels
+    ring_pixels = np.where(outer_ring == 255)
+    if len(ring_pixels[0]) < 10:
+        return cv2.inpaint(image, mask, inpaint_radius, cv2.INPAINT_TELEA)
+        
+    # Get coordinates and color values of the boundary ring
+    coords_y, coords_x = ring_pixels[0], ring_pixels[1]
+    colors = image[coords_y, coords_x].astype(np.float32)
+    
+    # Downsample if we have too many boundary pixels to keep least-squares super fast
+    if len(coords_y) > 1000:
+        indices = np.random.choice(len(coords_y), 1000, replace=False)
+        coords_y = coords_y[indices]
+        coords_x = coords_x[indices]
+        colors = colors[indices]
+        
+    # Fit a 2D linear regression model for each channel: Value = a*y + b*x + c
+    # Formulate A matrix: [Y, X, 1]
+    A = np.column_stack([coords_y, coords_x, np.ones_like(coords_y)])
+    
+    try:
+        # Solve least squares: A * W = colors
+        W, residuals, rank, s = np.linalg.lstsq(A, colors, rcond=None)
+        
+        # Calculate mean squared error of the fit
+        fitted = A @ W
+        mse = np.mean((colors - fitted) ** 2)
+        
+        # If the fit is good (MSE is low), we reconstruct the background using the fit
+        if mse < 65.0:  # Threshold for clean gradient or solid color
+            # Get all coordinates inside the mask
+            mask_y, mask_x = np.where(mask == 255)
+            if len(mask_y) > 0:
+                A_mask = np.column_stack([mask_y, mask_x, np.ones_like(mask_y)])
+                predicted = A_mask @ W
+                predicted = np.clip(predicted, 0, 255).astype(np.uint8)
+                
+                cleaned_image = image.copy()
+                cleaned_image[mask_y, mask_x] = predicted
+                
+                # Perform a thin boundary blend to remove any hard transition seam
+                # Create a 3px boundary blend mask
+                blend_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+                blend_mask = cv2.subtract(cv2.dilate(mask, blend_kernel), cv2.erode(mask, blend_kernel))
+                return cv2.inpaint(cleaned_image, blend_mask, 2, cv2.INPAINT_TELEA)
+    except Exception as e:
+        print(f"[Cleaner standard_bubble warning] Gradient fit failed: {e}")
+        
+    # Fallback to standard inpainting
     return cv2.inpaint(image, mask, inpaint_radius, cv2.INPAINT_TELEA)
 
 
 def clean_shout_bubble(image: np.ndarray, mask: np.ndarray, inpaint_radius: int = 3) -> np.ndarray:
     """
-    Removes shout and action bubbles by inpainting.
+    Removes shout and action bubbles by inpainting and preserving edge contrast
+    with bilateral filtering.
     """
-    return cv2.inpaint(image, mask, inpaint_radius, cv2.INPAINT_TELEA)
+    if not has_opencv or image is None or image.size == 0 or mask is None or mask.size == 0:
+        return image
+        
+    # 1. Inpaint using Navier-Stokes (better boundary structure preservation)
+    inpainted = cv2.inpaint(image, mask, inpaint_radius, cv2.INPAINT_NS)
+    
+    # 2. Apply bilateral filter to the inpainted region to smooth out inpainting smudges
+    # while preserving strong edge details of the illustration
+    smoothed = cv2.bilateralFilter(inpainted, d=9, sigmaColor=75, sigmaSpace=75)
+    
+    # 3. Blend only the mask region
+    return np.where(mask[:, :, np.newaxis] == 255, smoothed, inpainted)
 
 
 def clean_narration_box(image: np.ndarray, mask: np.ndarray) -> np.ndarray:
     """
-    Blurs narration/monologue boxes to preserve background color but kill text.
+    Removes text inside narration boxes by segmenting high-contrast text strokes
+    and inpainting only the strokes, leaving borders and box background intact.
     """
-    h, w = image.shape[:2]
-    blur_factor = max(25, int(min(w, h) * 0.12) | 1)
-    blurred = cv2.GaussianBlur(image, (blur_factor, blur_factor), 0)
-    return np.where(mask[:, :, np.newaxis] == 255, blurred, image)
+    if not has_opencv or image is None or image.size == 0 or mask is None or mask.size == 0:
+        return image
+        
+    h_img, w_img = image.shape[:2]
+    
+    # 1. Get bounding box to crop the ROI
+    x, y, w, h = cv2.boundingRect(mask)
+    y1, y2 = max(0, y), min(h_img, y + h)
+    x1, x2 = max(0, x), min(w_img, x + w)
+    
+    if (y2 - y1) <= 0 or (x2 - x1) <= 0:
+        return image
+        
+    roi_img = image[y1:y2, x1:x2]
+    roi_mask = mask[y1:y2, x1:x2]
+    
+    # Erode the mask dynamically to exclude the outer borders of the narration box
+    # This prevents the boundary/borders from being classified as text strokes
+    erode_size = max(9, int(min(w, h) * 0.06) | 1)
+    border_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (erode_size, erode_size))
+    interior_mask = cv2.erode(roi_mask, border_kernel, borderType=cv2.BORDER_CONSTANT, borderValue=0)
+    
+    if np.count_nonzero(interior_mask) == 0:
+        # If the box is too thin to erode, use the original mask
+        interior_mask = roi_mask
+        
+    # 2. Get median color of the box interior
+    box_pixels = roi_img[interior_mask == 255]
+    if len(box_pixels) == 0:
+        return image
+        
+    median_color = np.median(box_pixels, axis=0)
+    
+    # 3. Compute L2 color distance from median color
+    diff = np.linalg.norm(roi_img.astype(np.float32) - median_color, axis=2)
+    
+    # Convert to uint8 for thresholding
+    diff_uint8 = np.clip(diff, 0, 255).astype(np.uint8)
+    
+    # Verify if there is actually high contrast text inside the interior
+    max_diff = np.max(diff_uint8[interior_mask == 255])
+    if max_diff < 20:
+        # No high contrast text strokes found, keep narration box as is
+        return image
+        
+    # 4. Use Otsu's thresholding to find text stroke candidates
+    # We apply Otsu's on the entire ROI and mask it with the interior_mask
+    _, stroke_mask = cv2.threshold(diff_uint8, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    stroke_mask = cv2.bitwise_and(stroke_mask, interior_mask)
+    
+    # 5. Dilate stroke mask slightly to fully cover stroke antialiasing edges
+    dilate_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+    stroke_mask_dilated = cv2.dilate(stroke_mask, dilate_kernel, iterations=1)
+    
+    # 6. Apply inpainting ONLY to the text strokes globally
+    global_stroke_mask = np.zeros((h_img, w_img), dtype=np.uint8)
+    global_stroke_mask[y1:y2, x1:x2] = stroke_mask_dilated
+    
+    # Return inpainted image (inpainting strokes inside the box blends them with box background)
+    return cv2.inpaint(image, global_stroke_mask, 3, cv2.INPAINT_TELEA)
 
 
 def clean_borderless_text(image: np.ndarray, mask: np.ndarray) -> np.ndarray:
     """
-    Blurs floating/borderless text to protect underlying art features.
+    Removes floating/borderless text by extracting high-frequency text strokes
+    using morphological Top-Hat/Bottom-Hat transforms, and inpainting only those strokes.
     """
-    h, w = image.shape[:2]
-    blur_factor = max(15, int(min(w, h) * 0.08) | 1)
-    blurred = cv2.GaussianBlur(image, (blur_factor, blur_factor), 0)
-    return np.where(mask[:, :, np.newaxis] == 255, blurred, image)
+    if not has_opencv or image is None or image.size == 0 or mask is None or mask.size == 0:
+        return image
+        
+    h_img, w_img = image.shape[:2]
+    
+    x, y, w, h = cv2.boundingRect(mask)
+    y1, y2 = max(0, y), min(h_img, y + h)
+    x1, x2 = max(0, x), min(w_img, x + w)
+    
+    if (y2 - y1) <= 0 or (x2 - x1) <= 0:
+        return image
+        
+    roi_img = image[y1:y2, x1:x2]
+    roi_mask = mask[y1:y2, x1:x2]
+    
+    # Convert ROI to grayscale
+    roi_gray = cv2.cvtColor(roi_img, cv2.COLOR_BGR2GRAY)
+    
+    # Use Top-Hat and Bottom-Hat transforms to highlight local light and dark features (strokes)
+    morph_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9))
+    top_hat = cv2.morphologyEx(roi_gray, cv2.MORPH_TOPHAT, morph_kernel)
+    bottom_hat = cv2.morphologyEx(roi_gray, cv2.MORPH_BLACKHAT, morph_kernel)
+    
+    # Combine the features to handle both white/light text and black/dark text
+    text_features = cv2.max(top_hat, bottom_hat)
+    
+    # Only run thresholding if we have pixels in the mask
+    mask_pixels = text_features[roi_mask == 255]
+    if len(mask_pixels) == 0:
+        return image
+        
+    max_val = np.max(mask_pixels)
+    if max_val < 30:
+        # No significant text features detected
+        return image
+        
+    # Threshold based on max contrast to dynamically segment strokes
+    thresh_val = max(15, int(max_val * 0.35))
+    _, stroke_mask = cv2.threshold(text_features, thresh_val, 255, cv2.THRESH_BINARY)
+    stroke_mask = cv2.bitwise_and(stroke_mask, roi_mask)
+    
+    # Dilate stroke mask to cover anti-aliased borders and text outlines
+    dilate_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+    stroke_mask_dilated = cv2.dilate(stroke_mask, dilate_kernel, iterations=1)
+    
+    # Create global stroke mask
+    global_stroke_mask = np.zeros((h_img, w_img), dtype=np.uint8)
+    global_stroke_mask[y1:y2, x1:x2] = stroke_mask_dilated
+    
+    # Inpaint only the text strokes over the original image
+    return cv2.inpaint(image, global_stroke_mask, 3, cv2.INPAINT_TELEA)
 
 
-def clean_sfx(image: np.ndarray, mask: np.ndarray) -> np.ndarray:
+def clean_sfx(image: np.ndarray, mask: np.ndarray, clean_enabled: bool = False) -> np.ndarray:
     """
-    Keeps/ignores sound effects to retain comic book feel.
+    Keeps sound effects by default to retain comic book feel. If clean_enabled is True,
+    it removes the sound effect by performing a content-aware style inpaint.
     """
-    return image
+    if not clean_enabled:
+        return image
+        
+    if not has_opencv or image is None or image.size == 0 or mask is None or mask.size == 0:
+        return image
+        
+    # SFX characters are typically very large and thick.
+    # We extract their stroke outlines using a larger morphological kernel and inpaint them.
+    h_img, w_img = image.shape[:2]
+    x, y, w, h = cv2.boundingRect(mask)
+    y1, y2 = max(0, y), min(h_img, y + h)
+    x1, x2 = max(0, x), min(w_img, x + w)
+    
+    if (y2 - y1) <= 0 or (x2 - x1) <= 0:
+        return image
+        
+    roi_img = image[y1:y2, x1:x2]
+    roi_mask = mask[y1:y2, x1:x2]
+    roi_gray = cv2.cvtColor(roi_img, cv2.COLOR_BGR2GRAY)
+    
+    # Large kernel for thick SFX characters (15x15)
+    morph_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
+    top_hat = cv2.morphologyEx(roi_gray, cv2.MORPH_TOPHAT, morph_kernel)
+    bottom_hat = cv2.morphologyEx(roi_gray, cv2.MORPH_BLACKHAT, morph_kernel)
+    text_features = cv2.max(top_hat, bottom_hat)
+    
+    mask_pixels = text_features[roi_mask == 255]
+    if len(mask_pixels) == 0:
+        return image
+        
+    max_val = np.max(mask_pixels)
+    if max_val < 20:
+        return image
+        
+    thresh_val = max(10, int(max_val * 0.25))
+    _, stroke_mask = cv2.threshold(text_features, thresh_val, 255, cv2.THRESH_BINARY)
+    stroke_mask = cv2.bitwise_and(stroke_mask, roi_mask)
+    
+    # Dilation to fully cover the thick SFX letters and outlines
+    dilate_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    stroke_mask_dilated = cv2.dilate(stroke_mask, dilate_kernel, iterations=1)
+    
+    global_stroke_mask = np.zeros((h_img, w_img), dtype=np.uint8)
+    global_stroke_mask[y1:y2, x1:x2] = stroke_mask_dilated
+    
+    # Inpaint SFX text strokes
+    return cv2.inpaint(image, global_stroke_mask, 5, cv2.INPAINT_TELEA)
 
 
 def auto_decide_and_clean(
@@ -86,11 +314,14 @@ def auto_decide_and_clean(
     contour: np.ndarray,
     dilation: int = 0,
     inpaint_radius: int = 3,
-    debug_img: Optional[np.ndarray] = None
+    debug_img: Optional[np.ndarray] = None,
+    clean_sfx_allowed: bool = False
 ) -> np.ndarray:
     """
     Extracts the crop of the contour, classifies it (heuristic first, then Gemini),
     and dispatches to the corresponding specialized cleaning function.
+    Uses geometric properties (solidity and rectangularity) of the contour
+    to refine routing between standard/shout bubbles and narration/borderless text.
     """
     if original_image is None or original_image.size == 0 or contour is None or len(contour) == 0:
         return original_image
@@ -128,6 +359,17 @@ def auto_decide_and_clean(
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (dilation, dilation))
         mask = cv2.dilate(mask, kernel, iterations=1)
         
+    # Compute geometric metrics of the contour
+    area = cv2.contourArea(contour)
+    bbox_area = w * h
+    rectangularity = area / bbox_area if bbox_area > 0 else 0
+    
+    hull = cv2.convexHull(contour)
+    hull_area = cv2.contourArea(hull)
+    solidity = area / hull_area if hull_area > 0 else 0
+    
+    print(f"[Cleaner] Geometry: Area={area:.1f}, Solidity={solidity:.3f}, Rectangularity={rectangularity:.3f}")
+
     # Update debug image if provided
     if debug_img is not None:
         color = (0, 255, 0)  # Green for white_bubble
@@ -141,13 +383,29 @@ def auto_decide_and_clean(
         cv2.rectangle(debug_img, (x, y), (x + w, y + h), color, 2)
         cv2.putText(debug_img, label, (x, max(15, y - 5)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1, cv2.LINE_AA)
 
-    # 3. DISPATCH TO SPECIALIZED CLEANING FUNCTION
+    # 3. DISPATCH TO SPECIALIZED CLEANING FUNCTION WITH GEOMETRIC REFINEMENT
     if category == "white_bubble":
-        return clean_standard_bubble(original_image, mask, inpaint_radius)
+        # Standard speech/thought bubble vs spiky shout bubble
+        if solidity > 0.82:
+            print(f"[Cleaner] Dispatching to clean_standard_bubble (solidity={solidity:.3f} > 0.82)")
+            return clean_standard_bubble(original_image, mask, inpaint_radius)
+        else:
+            print(f"[Cleaner] Dispatching to clean_shout_bubble (solidity={solidity:.3f} <= 0.82)")
+            return clean_shout_bubble(original_image, mask, inpaint_radius)
+            
     elif category == "colored_box":
-        return clean_narration_box(original_image, mask)
+        # Narration/monologue box vs borderless/floating text
+        if rectangularity > 0.78:
+            print(f"[Cleaner] Dispatching to clean_narration_box (rectangularity={rectangularity:.3f} > 0.78)")
+            return clean_narration_box(original_image, mask)
+        else:
+            print(f"[Cleaner] Dispatching to clean_borderless_text (rectangularity={rectangularity:.3f} <= 0.78)")
+            return clean_borderless_text(original_image, mask)
+            
     elif category == "sfx":
-        return clean_sfx(original_image, mask)
+        print(f"[Cleaner] Dispatching to clean_sfx (sfx_clean_allowed={clean_sfx_allowed})")
+        return clean_sfx(original_image, mask, clean_enabled=clean_sfx_allowed)
+        
     else:
         return clean_standard_bubble(original_image, mask, inpaint_radius)
 
@@ -168,7 +426,8 @@ def clean_speech_bubbles(
     morph_shape: str = "ellipse",
     custom_color_target: str = "",
     custom_color_tolerance: float = 25.0,
-    custom_mask_path: Optional[str] = None
+    custom_mask_path: Optional[str] = None,
+    clean_sfx: bool = False
 ) -> None:
     """
     Detects and removes speech bubbles from comic drawings and webtoon panels 
@@ -191,6 +450,7 @@ def clean_speech_bubbles(
         custom_color_target (str): Custom bubble background target hex color.
         custom_color_tolerance (float): Tolerance for custom color matching.
         custom_mask_path (str): Optional path to a binary mask image.
+        clean_sfx (bool): Enable cleaning of sound effect regions (instead of keeping them).
     """
     if not os.path.exists(image_path):
         raise FileNotFoundError(f"Input image not found: {image_path}")
@@ -287,7 +547,7 @@ def clean_speech_bubbles(
                         
                         if is_auto:
                             contour = np.array([[[x1_pad, y1_pad]], [[x2_pad, y1_pad]], [[x2_pad, y2_pad]], [[x1_pad, y2_pad]]], dtype=np.int32)
-                            original_image = auto_decide_and_clean(original_image, contour, dilation=0, inpaint_radius=inpaint_radius, debug_img=debug_img)
+                            original_image = auto_decide_and_clean(original_image, contour, dilation=0, inpaint_radius=inpaint_radius, debug_img=debug_img, clean_sfx_allowed=clean_sfx)
                             auto_processed = True
                         else:
                             cv2.rectangle(mask, (x1_pad, y1_pad), (x2_pad, y2_pad), 255, -1)
@@ -350,14 +610,14 @@ def clean_speech_bubbles(
                     
                     if detection_style == "white_only" or len(letter_candidates) == 0:
                         if is_auto:
-                            original_image = auto_decide_and_clean(original_image, contour, dilation=dilation_factor, inpaint_radius=inpaint_radius, debug_img=debug_img)
+                            original_image = auto_decide_and_clean(original_image, contour, dilation=dilation_factor, inpaint_radius=inpaint_radius, debug_img=debug_img, clean_sfx_allowed=clean_sfx)
                             auto_processed = True
                         else:
                             cv2.drawContours(mask, [contour], -1, 255, -1)
                             bubble_detected = True
                     elif contained_letters_count >= required_letters:
                         if is_auto:
-                            original_image = auto_decide_and_clean(original_image, contour, dilation=dilation_factor, inpaint_radius=inpaint_radius, debug_img=debug_img)
+                            original_image = auto_decide_and_clean(original_image, contour, dilation=dilation_factor, inpaint_radius=inpaint_radius, debug_img=debug_img, clean_sfx_allowed=clean_sfx)
                             auto_processed = True
                         else:
                             cv2.drawContours(mask, [contour], -1, 255, -1)
@@ -396,7 +656,7 @@ def clean_speech_bubbles(
                             
                             if is_auto:
                                 contour = np.array([[[x1, y1]], [[x2, y1]], [[x2, y2]], [[x1, y2]]], dtype=np.int32)
-                                original_image = auto_decide_and_clean(original_image, contour, dilation=0, inpaint_radius=inpaint_radius, debug_img=debug_img)
+                                original_image = auto_decide_and_clean(original_image, contour, dilation=0, inpaint_radius=inpaint_radius, debug_img=debug_img, clean_sfx_allowed=clean_sfx)
                                 auto_processed = True
                             else:
                                 cv2.rectangle(mask, (x1, y1), (x2, y2), 255, -1)
@@ -511,6 +771,7 @@ if __name__ == "__main__":
     parser.add_argument("--custom_color_target", default="", help="Custom bubble background target hex color")
     parser.add_argument("--custom_color_tolerance", type=float, default=25.0, help="Tolerance for custom color matching")
     parser.add_argument("--custom_mask_path", default=None, help="Path to custom manual mask image")
+    parser.add_argument("--clean_sfx", action="store_true", help="Enable cleaning of SFX regions")
 
     args = parser.parse_args()
     try:
@@ -530,7 +791,8 @@ if __name__ == "__main__":
             morph_shape=args.morph_shape,
             custom_color_target=args.custom_color_target,
             custom_color_tolerance=args.custom_color_tolerance,
-            custom_mask_path=args.custom_mask_path
+            custom_mask_path=args.custom_mask_path,
+            clean_sfx=args.clean_sfx
         )
         print("SUCCESS")
     except Exception as e:

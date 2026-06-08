@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { Layers, RefreshCw, ArrowDown, ArrowUp, ChevronUp, ChevronDown, Link2, Image as ImageIcon, Settings2, Columns, Rows } from "lucide-react";
+import { Layers, RefreshCw, ChevronUp, ChevronDown, Link2, Image as ImageIcon } from "lucide-react";
+import MergePanelOptions from "./MergePanelOptions";
+import MergePanelList from "./MergePanelList";
 
 interface MergePanelProps {
   editingImageIdx: number;
@@ -77,143 +79,23 @@ export default function MergePanel({
       </div>
 
       {/* ── Configuration Options ── */}
-      <div className="space-y-3 bg-black/20 border border-white/5 p-3 rounded-xl">
-        <div className="flex items-center gap-2">
-          <Settings2 className="h-3 w-3 text-neutral-500" />
-          <span className="text-[9px] font-bold text-neutral-500 uppercase font-mono tracking-widest block">
-            Stitch Options
-          </span>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2">
-          {/* Direction toggle */}
-          <div className="space-y-1.5">
-            <label className="text-[8px] font-mono font-bold text-neutral-500 uppercase">Direction</label>
-            <div className="flex gap-1 bg-black/40 p-1 rounded-lg border border-white/5">
-              <button
-                type="button"
-                onClick={() => handleDirectionChange("prev")}
-                className={`flex-1 flex items-center justify-center gap-1 py-1 rounded text-[9px] font-mono font-bold transition-all ${
-                  direction === "prev" ? "bg-teal-600 text-white" : "text-neutral-500 hover:text-neutral-300"
-                }`}
-              >
-                <ArrowUp className="h-2.5 w-2.5" /> Prev
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDirectionChange("next")}
-                className={`flex-1 flex items-center justify-center gap-1 py-1 rounded text-[9px] font-mono font-bold transition-all ${
-                  direction === "next" ? "bg-teal-600 text-white" : "text-neutral-500 hover:text-neutral-300"
-                }`}
-              >
-                Next <ArrowDown className="h-2.5 w-2.5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Layout toggle */}
-          <div className="space-y-1.5">
-            <label className="text-[8px] font-mono font-bold text-neutral-500 uppercase">Layout</label>
-            <div className="flex gap-1 bg-black/40 p-1 rounded-lg border border-white/5">
-              <button
-                type="button"
-                onClick={() => setLayout("vertical")}
-                className={`flex-1 flex items-center justify-center gap-1 py-1 rounded text-[9px] font-mono font-bold transition-all ${
-                  layout === "vertical" ? "bg-indigo-600 text-white" : "text-neutral-500 hover:text-neutral-300"
-                }`}
-              >
-                <Rows className="h-2.5 w-2.5" /> Vert
-              </button>
-              <button
-                type="button"
-                onClick={() => setLayout("horizontal")}
-                className={`flex-1 flex items-center justify-center gap-1 py-1 rounded text-[9px] font-mono font-bold transition-all ${
-                  layout === "horizontal" ? "bg-indigo-600 text-white" : "text-neutral-500 hover:text-neutral-300"
-                }`}
-              >
-                <Columns className="h-2.5 w-2.5" /> Horz
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Spacing & Color */}
-        <div className="grid grid-cols-2 gap-4 pt-1">
-          <div className="space-y-1.5">
-            <div className="flex justify-between">
-              <label className="text-[8px] font-mono font-bold text-neutral-500 uppercase">Gap Spacing</label>
-              <span className="text-[8px] font-mono text-teal-400">{spacing}px</span>
-            </div>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              step="5"
-              value={spacing}
-              onChange={(e) => setSpacing(Number(e.target.value))}
-              className="w-full accent-teal-500 h-1.5 bg-neutral-800 rounded-full appearance-none cursor-pointer"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-[8px] font-mono font-bold text-neutral-500 uppercase">Gap Color</label>
-            <select
-              value={spacingColor}
-              onChange={(e) => setSpacingColor(e.target.value)}
-              disabled={spacing === 0}
-              className="w-full bg-black/40 border border-white/5 text-neutral-300 rounded-lg px-2 py-1 text-[9px] font-mono focus:outline-none disabled:opacity-40"
-            >
-              <option value="white">White</option>
-              <option value="black">Black</option>
-              <option value="transparent">Transparent</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Scale & Align */}
-        <div className="grid grid-cols-2 gap-4 pt-1">
-          <div className="space-y-1.5">
-            <label className="text-[8px] font-mono font-bold text-neutral-500 uppercase">Scale Mode</label>
-            <select
-              value={scaleToFit ? "fit" : "original"}
-              onChange={(e) => setScaleToFit(e.target.value === "fit")}
-              className="w-full bg-black/40 border border-white/5 text-neutral-300 rounded-lg px-2 py-1 text-[9px] font-mono focus:outline-none"
-            >
-              <option value="fit">Scale to Fit</option>
-              <option value="original">Keep Original Size</option>
-            </select>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-[8px] font-mono font-bold text-neutral-500 uppercase">Alignment</label>
-            <select
-              value={alignMode}
-              onChange={(e) => setAlignMode(e.target.value as any)}
-              disabled={scaleToFit}
-              className="w-full bg-black/40 border border-white/5 text-neutral-300 rounded-lg px-2 py-1 text-[9px] font-mono focus:outline-none disabled:opacity-40"
-            >
-              <option value="center">Center</option>
-              <option value="start">{layout === "vertical" ? "Left" : "Top"}</option>
-              <option value="end">{layout === "vertical" ? "Right" : "Bottom"}</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Global Padding */}
-        <div className="space-y-1.5 pt-1">
-          <div className="flex justify-between">
-            <label className="text-[8px] font-mono font-bold text-neutral-500 uppercase">Global Padding</label>
-            <span className="text-[8px] font-mono text-teal-400">{padding}px</span>
-          </div>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            step="5"
-            value={padding}
-            onChange={(e) => setPadding(Number(e.target.value))}
-            className="w-full accent-teal-500 h-1.5 bg-neutral-800 rounded-full appearance-none cursor-pointer"
-          />
-        </div>
-      </div>
+      <MergePanelOptions
+        direction={direction}
+        setDirection={setDirection}
+        layout={layout}
+        setLayout={setLayout}
+        spacing={spacing}
+        setSpacing={setSpacing}
+        spacingColor={spacingColor}
+        setSpacingColor={setSpacingColor}
+        padding={padding}
+        setPadding={setPadding}
+        scaleToFit={scaleToFit}
+        setScaleToFit={setScaleToFit}
+        alignMode={alignMode}
+        setAlignMode={setAlignMode}
+        handleDirectionChange={handleDirectionChange}
+      />
 
       {!canMerge ? (
         <div className="bg-neutral-900/60 border border-neutral-800 rounded-xl p-4 text-center space-y-2">
@@ -291,53 +173,12 @@ export default function MergePanel({
           </div>
 
           {/* ── Preview list of frames to merge ── */}
-          <div className="space-y-1.5">
-            <span className="text-[9px] font-bold text-neutral-600 uppercase font-mono tracking-widest block">
-              Frames to be merged ({previewIndices.length} total)
-            </span>
-            <div className={`space-y-1 max-h-48 overflow-y-auto pr-1 scrollbar-thin flex ${layout === "horizontal" ? "flex-row gap-2 overflow-x-auto overflow-y-hidden" : "flex-col"}`}>
-              {previewIndices.map((imgIdx, i) => {
-                const imgUrl = scrapedImages[imgIdx];
-                const isCurrent = imgIdx === editingImageIdx;
-                const isLast = i === previewIndices.length - 1;
-                return (
-                  <React.Fragment key={imgIdx}>
-                    <div
-                      className={`flex items-center gap-2.5 px-3 py-2 rounded-xl border flex-shrink-0 ${
-                        isCurrent
-                          ? "bg-teal-950/30 border-teal-800/40"
-                          : "bg-black/20 border-white/5"
-                      }`}
-                    >
-                      <div className="w-8 h-8 rounded-lg overflow-hidden border border-white/10 flex-shrink-0 bg-neutral-900">
-                        <img
-                          src={imgUrl}
-                          alt={`Frame ${imgIdx + 1}`}
-                          className="w-full h-full object-cover"
-                          referrerPolicy="no-referrer"
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <span className={`text-[10px] font-bold font-mono ${isCurrent ? "text-teal-300" : "text-neutral-400"}`}>
-                          Frame #{imgIdx + 1}
-                        </span>
-                        {isCurrent && (
-                          <span className="ml-2 text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-teal-950 text-teal-400 border border-teal-800/50">
-                            CURRENT
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    {!isLast && layout === "vertical" && (
-                      <div className="flex justify-center">
-                        <ArrowDown className="h-3 w-3 text-teal-700/60" />
-                      </div>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </div>
-          </div>
+          <MergePanelList
+            previewIndices={previewIndices}
+            editingImageIdx={editingImageIdx}
+            scrapedImages={scrapedImages}
+            layout={layout}
+          />
 
           {/* ── Result summary ── */}
           <div className="flex items-center gap-2.5 bg-teal-950/20 border border-teal-800/30 rounded-xl px-3 py-2.5">
@@ -377,4 +218,3 @@ export default function MergePanel({
     </div>
   );
 }
-

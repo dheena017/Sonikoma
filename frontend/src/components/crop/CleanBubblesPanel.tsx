@@ -123,7 +123,7 @@ export default function CleanBubblesPanel({
   }, [imgUrl]);
 
   // Apply a selected preset
-  const handleApplyPreset = (p: typeof PRESETS[0]) => {
+  const handleApplyPreset = (p: typeof PRESETS[number]) => {
     setActivePreset(p.name);
     setDetectionStyle(p.detectionStyle as any);
     setEraseMethod(p.eraseMethod as any);
