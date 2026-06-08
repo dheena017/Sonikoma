@@ -226,16 +226,17 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4 md:p-6 animate-[fadeIn_0.2s_ease-out] overflow-hidden overscroll-contain"
+      className="fixed inset-0 z-50 bg-[radial-gradient(circle_at_top,rgba(139,92,246,0.18),transparent_42%),linear-gradient(180deg,rgba(3,3,8,0.84),rgba(3,3,8,0.94))] backdrop-blur-xl flex items-center justify-center p-3 sm:p-4 md:p-6 animate-[fadeIn_0.2s_ease-out] overflow-hidden overscroll-contain"
       onWheel={(event) => event.stopPropagation()}
       onTouchMove={(event) => event.stopPropagation()}
     >
       <div
-        className="relative bg-neutral-950 border border-white/5 rounded-3xl overflow-hidden shadow-2xl flex flex-col w-full max-w-7xl h-auto max-h-[calc(100vh-4rem)] my-auto"
-        style={{ boxShadow: "0 0 60px rgba(139,92,246,0.12), 0 30px 60px rgba(0,0,0,0.7)" }}
+        className="relative bg-neutral-950/95 border border-white/5 rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden shadow-2xl flex flex-col w-full max-w-7xl h-[min(100dvh-1.5rem,980px)] sm:h-auto max-h-[calc(100vh-4rem)] my-auto"
+        style={{ boxShadow: "0 0 0 1px rgba(255,255,255,0.02), 0 0 70px rgba(139,92,246,0.14), 0 30px 60px rgba(0,0,0,0.78)" }}
       >
         {/* Subtle top-edge glow line */}
-        <div className="absolute top-0 left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-purple-500/60 to-transparent" />
+        <div className="absolute top-0 left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-purple-500/70 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-purple-500/10 to-transparent pointer-events-none" />
 
         <CropEditorHeader
           editingImageIdx={editingImageIdx}
@@ -251,7 +252,7 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
         />
 
         {/* Main Content Pane */}
-        <div className="p-5 grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1 min-h-0 overflow-hidden select-none items-stretch">
+        <div className="p-4 sm:p-5 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 flex-1 min-h-0 overflow-hidden select-none items-stretch">
           <CropEditorCanvasContainer
             handleAiCrop={handleAiCrop}
             isAiDetecting={isAiDetecting}
@@ -314,7 +315,9 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
             zoom={zoom}
             setZoom={setZoom}
             isTransforming={isTransforming}
-            handleTransform={handleTransform}
+            handleTransform={(action, param) =>
+              handleTransform(action as "rotate" | "flip", param)
+            }
             handleResetCropBounds={handleResetCropBounds}
             activeStoryboardPanel={activeStoryboardPanel}
             handleModifyBrightness={handleModifyBrightness}

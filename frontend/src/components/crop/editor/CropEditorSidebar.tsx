@@ -221,9 +221,9 @@ export default function CropEditorSidebar({
   handleClearDetectedBoxes,
 }: CropEditorSidebarProps) {
   return (
-    <div className="lg:col-span-5 flex flex-col space-y-3 h-full min-h-0 overflow-hidden pr-1.5 scrollbar-thin overscroll-contain">
+    <div className="lg:col-span-5 flex flex-col space-y-3 h-full min-h-0 overflow-hidden pr-0 sm:pr-1.5 scrollbar-thin overscroll-contain">
       {/* Sidebar Navigation Tabs */}
-      <div className="grid grid-cols-3 gap-2 bg-black/50 backdrop-blur-sm p-2 rounded-3xl border border-white/10 shadow-[inset_0_0_20px_rgba(0,0,0,0.35)] sm:flex sm:items-center sm:gap-1">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-black/50 backdrop-blur-sm p-2 rounded-3xl border border-white/10 shadow-[inset_0_0_20px_rgba(0,0,0,0.35)] md:flex md:items-center md:gap-1">
         {([
           { key: "adjust", label: "Adjust", emoji: "✨" },
           { key: "edit", label: "Edit", emoji: "✏️" },
@@ -249,7 +249,7 @@ export default function CropEditorSidebar({
       </div>
 
       {/* Tab Contents */}
-      <div className="flex-1 min-h-0 overflow-y-auto space-y-4 scrollbar-thin pr-1">
+      <div className="flex-1 min-h-0 overflow-y-auto space-y-4 scrollbar-thin pr-0 sm:pr-1">
         {activeTab === "merge" && (
           <div className="animate-fadeIn rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
             <MergePanel

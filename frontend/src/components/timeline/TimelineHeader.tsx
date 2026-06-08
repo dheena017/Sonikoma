@@ -21,18 +21,18 @@ export default function TimelineHeader({
   handleCompileVideo,
 }: TimelineHeaderProps) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-neutral-800 pb-4">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-neutral-800 pb-4">
       <div>
         <h3 className="font-bold text-base text-white">Dynamic Storyboard & OCR Transcription</h3>
-        <p className="text-xs text-neutral-400">Review live isolated panel frames. Adjust speech transcripts locally below.</p>
+        <p className="hidden sm:block text-xs text-neutral-400">Review live isolated panel frames. Adjust speech transcripts locally below.</p>
       </div>
       
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         {/* Bulk Action Toggle */}
         <button
           type="button"
           onClick={() => setShowBulkOps(!showBulkOps)}
-          className={`px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
+          className={`px-3 sm:px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
             showBulkOps
               ? "bg-purple-900/40 border-purple-500/50 text-purple-300"
               : "bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200"
@@ -47,7 +47,7 @@ export default function TimelineHeader({
           type="button"
           disabled={isZipping || panelsLength === 0}
           onClick={handleDownloadZip}
-          className={`px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
+          className={`px-3 sm:px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
             isZipping
               ? "bg-neutral-800 border-neutral-700 text-neutral-500 cursor-not-allowed"
               : "bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-200 shadow-sm hover:border-neutral-700"
@@ -65,7 +65,7 @@ export default function TimelineHeader({
           type="button"
           disabled={isCompiling || panelsLength === 0}
           onClick={handleCompileVideo}
-          className={`px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
+          className={`px-3 sm:px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
             isCompiling
               ? "bg-purple-900/40 border-purple-500/50 text-purple-200 cursor-not-allowed"
               : "bg-purple-600 border-purple-500 hover:bg-purple-500 text-white shadow-md hover:shadow-purple-500/20"

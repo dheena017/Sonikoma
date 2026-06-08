@@ -7,7 +7,6 @@ import StoryboardTimeline from "./timeline/StoryboardTimeline.tsx";
 import VideoMonitor from "./video/VideoMonitor.tsx";
 import FinalVideoPlayer from "./video/FinalVideoPlayer.tsx";
 import VolumeAndProgressPanel from "./video/VolumeAndProgressPanel.tsx";
-import ModelStatusTable from "./status/ModelStatusTable.js";
 import OutputMetadataPanel from "./OutputMetadataPanel.js";
 
 interface AppWorkspaceProps {
@@ -132,10 +131,10 @@ export function AppWorkspace({
   voiceActor,
 }: AppWorkspaceProps) {
   return (
-    <main id="main_workspace" className="flex-1 w-full max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+    <main id="main_workspace" className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-10 items-start">
       
       {/* LEFT COLUMN: SOURCE INTEGRATION */}
-      <div id="controls_column" className="lg:col-span-7 flex flex-col gap-8">
+      <div id="controls_column" className="order-1 lg:order-1 lg:col-span-7 flex flex-col gap-6 md:gap-8">
         
         {/* CONVERSION INPUT CARD */}
         <UrlInputPanel
@@ -192,29 +191,31 @@ export function AppWorkspace({
         {/* REAL-TIME LOG MONITOR — Always visible */}
         <TerminalLogs consoleLogs={consoleLogs} setConsoleLogs={setConsoleLogs} />
 
-        {/* DYNAMIC STORYBOARD TIMELINE DECK */}
-        <div id="storyboard_timeline_section">
-          <StoryboardTimeline
-            panels={panels}
-            setPanels={setPanels}
-            currentPanelIndex={currentPanelIndex}
-            setCurrentPanelIndex={setCurrentPanelIndex}
-            activePreviewTab={activePreviewTab}
-            setActivePreviewTab={setActivePreviewTab}
-            setPlaybackTime={setPlaybackTime}
-            hasScrapedImages={scrapedImages.length > 0}
-            setVideoUrl={setVideoUrl}
-            addNotification={addNotification}
-            targetUrl={targetUrl}
-            fetchWithInterceptor={fetchWithInterceptor}
-            selectedModel={selectedModel}
-            setConsoleLogs={setConsoleLogs}
-          />
-        </div>
+        {/* DYNAMIC STORYBOARD TIMELINE DECK (hidden when empty to save vertical space on mobile) */}
+        {panels.length > 0 && (
+          <div id="storyboard_timeline_section">
+            <StoryboardTimeline
+              panels={panels}
+              setPanels={setPanels}
+              currentPanelIndex={currentPanelIndex}
+              setCurrentPanelIndex={setCurrentPanelIndex}
+              activePreviewTab={activePreviewTab}
+              setActivePreviewTab={setActivePreviewTab}
+              setPlaybackTime={setPlaybackTime}
+              hasScrapedImages={scrapedImages.length > 0}
+              setVideoUrl={setVideoUrl}
+              addNotification={addNotification}
+              targetUrl={targetUrl}
+              fetchWithInterceptor={fetchWithInterceptor}
+              selectedModel={selectedModel}
+              setConsoleLogs={setConsoleLogs}
+            />
+          </div>
+        )}
       </div>
 
       {/* RIGHT COLUMN: INTEGRATED CINEMA PLAYER */}
-      <div id="cinema_column" className="lg:col-span-5 flex flex-col gap-6 sticky top-24">
+      <div id="cinema_column" className="order-2 lg:order-2 lg:col-span-5 flex flex-col gap-6 lg:sticky lg:top-24">
         <VideoMonitor
           activePreviewTab={activePreviewTab}
           setActivePreviewTab={setActivePreviewTab}
@@ -248,28 +249,7 @@ export function AppWorkspace({
           />
         )}
 
-        <ModelStatusTable 
-          selectedModel={
-            selectedModel === 'gemini-3.5-flash' ? 'Gemini 3.5 Flash' :
-            selectedModel === 'gemini-2.5-flash' ? 'Gemini 2.5 Flash' :
-            selectedModel === 'gemini-1.5-pro' ? 'Gemini 1.5 Pro' :
-            selectedModel === 'llama-3-70b' ? 'Llama 3 (via Groq)' :
-            selectedModel === 'huggingface-mistral-7b' ? 'Mistral 7B (via HuggingFace)' :
-            selectedModel
-          }
-          onSelect={(modelName) => {
-            if (modelName === "Gemini 2.5 Flash") {
-              setSelectedModel("gemini-2.5-flash");
-              addNotification(`Model configured to Gemini 2.5 Flash`, 'info');
-            } else if (modelName === "Gemini 3.5 Flash") {
-              setSelectedModel("gemini-3.5-flash");
-              addNotification(`Model configured to Gemini 3.5 Flash`, 'info');
-            } else if (modelName.includes("Pro")) {
-              setSelectedModel("gemini-1.5-pro");
-              addNotification(`Model configured to Gemini 1.5 Pro (Note: Pro Model)`, 'info');
-            }
-          }}
-        />
+        {/* AI Model Capabilities panel intentionally removed */}
 
         {/* METADATA RENDER MATRIX */}
         <OutputMetadataPanel

@@ -25,7 +25,7 @@ export function PanelCardThumbnail({
   handleUndo,
 }: PanelCardThumbnailProps) {
   return (
-    <div className="relative h-28 rounded-lg overflow-hidden bg-neutral-900 flex items-center justify-center">
+    <div className="relative h-24 sm:h-28 rounded-lg overflow-hidden bg-neutral-900 flex items-center justify-center">
       <img
         src={imgUrl}
         alt=""

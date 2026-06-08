@@ -118,7 +118,7 @@ export default function App() {
     handleCleanBubblesSelected,
     handleAutoCropSelected,
     totalCalculatedDuration,
-  } = useAppLogic();
+  } = appLogic;
 
   return (
     <div id="app_root" className="min-h-screen bg-[#070709] text-neutral-100 flex flex-col justify-between selection:bg-purple-600 selection:text-white">

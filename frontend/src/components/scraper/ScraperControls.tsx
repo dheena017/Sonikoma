@@ -42,6 +42,7 @@ export default function ScraperControls({
   fetchWithInterceptor,
 }: ScraperControlsProps) {
   const [isBatchMerging, setIsBatchMerging] = useState<boolean>(false);
+ 
 
   const handleSelectAllToggle = () => {
     if (selectedScraped.length === scrapedImages.length) {
@@ -131,8 +132,8 @@ export default function ScraperControls({
     }
   };
 
-  return (
-    <div className="flex flex-col gap-4 bg-neutral-950/50 p-5 rounded-2xl border border-transparent shadow-inner">
+  const controlsContent = (
+    <>
       <ScraperSelectionToolbar
         scrapedImages={scrapedImages}
         selectedScraped={selectedScraped}
@@ -155,6 +156,22 @@ export default function ScraperControls({
         handleBatchMergeSelected={handleBatchMergeSelected}
         isBatchMerging={isBatchMerging}
       />
+    </>
+  );
+
+  return (
+    <div className="flex flex-col gap-4 bg-neutral-950/50 p-4 sm:p-5 rounded-2xl border border-transparent shadow-inner">
+      <div className="lg:hidden">
+        <details className="rounded-2xl border border-neutral-800/70 bg-neutral-950/70 p-3">
+          <summary className="cursor-pointer list-none flex items-center justify-between gap-2 text-xs font-bold text-neutral-200 font-mono uppercase tracking-wider select-none">
+            <span>Bulk tools</span>
+            <span className="text-[10px] text-neutral-500 normal-case tracking-normal">Tap to expand</span>
+          </summary>
+          <div className="mt-4 space-y-4">{controlsContent}</div>
+        </details>
+      </div>
+
+      <div className="hidden lg:block">{controlsContent}</div>
     </div>
   );
 }

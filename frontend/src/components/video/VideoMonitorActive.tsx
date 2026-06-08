@@ -27,14 +27,14 @@ export function VideoMonitorActive({
   const activeStoryboardPanel = panels[currentPanelIndex] || null;
 
   return (
-    <div id="video_monitor_outer_wrapper" className="relative bg-neutral-950/40 border border-neutral-800/80 rounded-3xl overflow-hidden shadow-inner flex items-center justify-center p-4 min-h-[440px]">
+    <div id="video_monitor_outer_wrapper" className="relative bg-neutral-950/40 border border-neutral-800/80 rounded-3xl overflow-hidden shadow-inner flex items-center justify-center p-3 sm:p-4 min-h-[320px] sm:min-h-[440px]">
       {/* Ambient Background Glow */}
       <div className="absolute h-56 w-56 rounded-full bg-purple-600/10 blur-3xl" />
 
       {/* IF NO VIDEO GENERATED YET -> SHOW ILLUSTRATIVE EMPTY STATE */}
       {!videoUrl && panels.length === 0 && (
-        <div className="flex flex-col items-center justify-center text-center p-8 space-y-4">
-          <div className="h-14 w-14 rounded-2xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-500">
+        <div className="flex flex-col items-center justify-center text-center p-6 sm:p-8 space-y-4">
+          <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-500">
             <Film className="h-6 w-6" />
           </div>
           <div className="space-y-1">
@@ -114,10 +114,10 @@ export function VideoMonitorActive({
           {/* Subtitles Overlay */}
           <div className="absolute bottom-4 left-3 right-3 z-10 text-center">
             {activeStoryboardPanel.sfx && (
-              <span className="inline-block transform -rotate-2 bg-yellow-500 text-black font-extrabold text-[10px] px-2 py-0.5 rounded shadow-lg font-mono tracking-widest uppercase mb-1">
-                {activeStoryboardPanel.sfx}
-              </span>
-            )}
+                <span className="hidden sm:inline-block transform -rotate-2 bg-yellow-500 text-black font-extrabold text-[10px] px-2 py-0.5 rounded shadow-lg font-mono tracking-widest uppercase mb-1">
+                  {activeStoryboardPanel.sfx}
+                </span>
+              )}
             <p className="text-white font-bold text-xs leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,1)] bg-black/60 p-2.5 rounded-lg border border-white/5 backdrop-blur-xs text-center font-sans">
               {activeStoryboardPanel.speech_text}
             </p>

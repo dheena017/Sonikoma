@@ -169,7 +169,7 @@ export default function PanelCard({
           });
         }
       }}
-      className={`group relative w-[150px] shrink-0 rounded-2xl border p-2.5 space-y-2.5 transition-all text-center cursor-pointer select-none ${
+      className={`group relative w-[132px] sm:w-[150px] shrink-0 rounded-2xl border p-2 space-y-2 transition-all text-center cursor-pointer select-none ${
         isSelected
           ? "border-purple-500 bg-purple-950/20 shadow-lg shadow-purple-900/40"
           : "border-neutral-800/80 bg-neutral-950 hover:border-purple-500/60"

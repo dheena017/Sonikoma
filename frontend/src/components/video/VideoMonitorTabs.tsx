@@ -17,8 +17,8 @@ export function VideoMonitorTabs({
   aspectRatio,
 }: VideoMonitorTabsProps) {
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex gap-2">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
+      <div className="flex flex-wrap gap-2">
         <button
           onClick={() => setActivePreviewTab("video")}
           disabled={!videoUrl}
@@ -47,7 +47,7 @@ export function VideoMonitorTabs({
         </button>
       </div>
 
-      <span className="text-[10px] font-mono bg-neutral-950 border border-neutral-800 px-2 py-0.5 rounded text-neutral-400">
+      <span className="self-start sm:self-auto text-[10px] font-mono bg-neutral-950 border border-neutral-800 px-2 py-0.5 rounded text-neutral-400">
         {aspectRatio === "9:16" ? "Portrait (1080x1920)" : "Landscape (1920x1080)"}
       </span>
     </div>

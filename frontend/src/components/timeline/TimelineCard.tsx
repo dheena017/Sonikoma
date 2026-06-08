@@ -40,7 +40,7 @@ export default function TimelineCard({
 
   return (
     <div
-      className={`w-[260px] shrink-0 rounded-xl border p-3.5 space-y-3 transition-all ${
+      className={`w-[220px] sm:w-[260px] shrink-0 rounded-xl border p-3 space-y-2.5 transition-all ${
         isCurrent 
           ? "bg-neutral-800/80 border-purple-500 shadow-lg" 
           : "bg-neutral-950 border-neutral-800"
@@ -53,7 +53,7 @@ export default function TimelineCard({
           setActivePreviewTab("storyboard");
           setPlaybackTime(0);
         }}
-        className="relative h-32 rounded-lg overflow-hidden cursor-pointer select-none bg-neutral-950 border border-neutral-800 flex items-center justify-center group"
+        className="relative h-28 sm:h-32 rounded-lg overflow-hidden cursor-pointer select-none bg-neutral-950 border border-neutral-800 flex items-center justify-center group"
       >
         <img 
           src={panel.image_url} 
@@ -135,8 +135,8 @@ export default function TimelineCard({
         />
       </div>
 
-      {/* Playback specifications */}
-      <div className="grid grid-cols-2 gap-2 pt-1.5 border-t border-neutral-900/80">
+      {/* Playback specifications (hidden on small screens to save vertical space) */}
+      <div className="hidden sm:grid grid-cols-2 gap-2 pt-1.5 border-t border-neutral-900/80">
         <div>
           <span className="text-[9px] font-mono text-neutral-500 uppercase block">Cam Motion</span>
           <select
@@ -173,7 +173,7 @@ export default function TimelineCard({
           type="button"
           disabled={analyzingPanelId === panel.id}
           onClick={() => handleAnalyzePanel(panel.id, panel.image_url)}
-          className={`w-full py-1.5 rounded-lg border text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all ${
+          className={`w-full py-1.5 rounded-lg border text-[10px] font-mono font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
             analyzingPanelId === panel.id
               ? "bg-purple-900/40 border-purple-500/50 text-purple-200"
               : "bg-purple-950/40 border-purple-800/40 hover:bg-purple-900/60 text-purple-300 hover:border-purple-600"
@@ -184,12 +184,12 @@ export default function TimelineCard({
           ) : (
             <Sparkles className="h-3 w-3 text-purple-400 animate-pulse" />
           )}
-          <span>{analyzingPanelId === panel.id ? "Analyzing Panel..." : "AI Image Analyse"}</span>
+          <span className="hidden sm:inline">{analyzingPanelId === panel.id ? "Analyzing Panel..." : "AI Image Analyse"}</span>
         </button>
       </div>
 
       <div className="flex items-center justify-between text-[9px] text-neutral-500 pt-1 font-mono">
-        <span>SFX: {panel.sfx || "None"}</span>
+        <span className="hidden sm:inline">SFX: {panel.sfx || "None"}</span>
         <span>{idx + 1} / {panelsLength}</span>
       </div>
     </div>

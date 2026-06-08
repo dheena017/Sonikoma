@@ -81,7 +81,7 @@ export default function StoryboardTimeline({
   }
 
   return (
-    <div id="panels_timeline_section" className="bg-neutral-900/60 rounded-2xl border border-neutral-800 p-6 space-y-4">
+    <div id="panels_timeline_section" className="bg-neutral-900/60 rounded-2xl border border-neutral-800 p-4 sm:p-6 space-y-4">
       <TimelineHeader
         showBulkOps={showBulkOps}
         setShowBulkOps={setShowBulkOps}
@@ -109,7 +109,7 @@ export default function StoryboardTimeline({
       )}
 
       {/* Storyboard grid */}
-      <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin">
+      <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-4 scrollbar-thin">
         {panels.map((panel, idx) => (
           <TimelineCard
             key={panel.id}
