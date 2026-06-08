@@ -1,6 +1,10 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
-import { Move, Trash2 } from "lucide-react";
+import React, { useState, useCallback, useEffect } from "react";
+import { Trash2 } from "lucide-react";
 import { Slice } from "./types";
+import CanvasBrushLayer from "./CanvasBrushLayer";
+import CanvasBubbleBoxes from "./CanvasBubbleBoxes";
+import CanvasSplitLines from "./CanvasSplitLines";
+import CanvasCropSelection from "./CanvasCropSelection";
 
 interface CropCanvasProps {
   imgUrl: string;
@@ -40,6 +44,13 @@ interface CropCanvasProps {
   typesetSize?: number;
   typesetAlign?: "left" | "center" | "right";
   typesetColor?: string;
+  setSplitPosition: React.Dispatch<React.SetStateAction<number>>;
+  setShowSplitPosition: (v: boolean) => void;
+  setEditCropTop: (val: number) => void;
+  setEditCropBottom: (val: number) => void;
+  setEditCropLeft: (val: number) => void;
+  setEditCropRight: (val: number) => void;
+  setSelectedSliceId: (id: string | null) => void;
 }
 
 export default function CropCanvas({
@@ -55,7 +66,6 @@ export default function CropCanvas({
   splitPosition,
   splitLines,
   handleStart,
-  handleMove,
   handleEnd,
   isPointInsideSelection,
   handleSelectSlice,
@@ -80,13 +90,14 @@ export default function CropCanvas({
   typesetSize = -1,
   typesetAlign = "center",
   typesetColor = "#000000",
+  setSplitPosition,
+  setShowSplitPosition,
+  setEditCropTop,
+  setEditCropBottom,
+  setEditCropLeft,
+  setEditCropRight,
+  setSelectedSliceId,
 }: CropCanvasProps) {
-  const hasCropSelection =
-    editCropTop !== 0 ||
-    editCropBottom !== 0 ||
-    editCropLeft !== 0 ||
-    editCropRight !== 0;
-
   // Track mouse position for dynamic cursor
   const [hoverPct, setHoverPct] = useState<{ x: number; y: number } | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -278,66 +289,22 @@ export default function CropCanvas({
 
         {/* Manual Brush Painting Layer */}
         {editMode === "clean_manual" && (
-          <canvas
-            ref={canvasMaskRef}
-            className="absolute inset-0 z-40 cursor-crosshair pointer-events-auto w-full h-full"
-            style={{ touchAction: "none" }}
-            onMouseDown={handleCanvasMouseDown}
-            onMouseMove={handleCanvasMouseMove}
-            onMouseUp={handleCanvasMouseUp}
-            onMouseLeave={handleCanvasMouseUp}
-            onTouchStart={handleCanvasMouseDown}
-            onTouchMove={handleCanvasMouseMove}
-            onTouchEnd={handleCanvasMouseUp}
+          <CanvasBrushLayer
+            canvasMaskRef={canvasMaskRef}
+            handleCanvasMouseDown={handleCanvasMouseDown}
+            handleCanvasMouseMove={handleCanvasMouseMove}
+            handleCanvasMouseUp={handleCanvasMouseUp}
           />
         )}
 
         {/* Interactive Speech Bubble Box Overlays */}
-        {(editMode === "clean_auto" || editMode === "typeset") && detectedBubbles.length > 0 && (
-          <div className="absolute inset-0 z-30 pointer-events-none">
-            {detectedBubbles.map((bubble, idx) => {
-              const [ymin, xmin, ymax, xmax] = bubble.box;
-              const top = ymin / 10;
-              const left = xmin / 10;
-              const width = (xmax - xmin) / 10;
-              const height = (ymax - ymin) / 10;
-              const isSelected = selectedBubbleIdx === idx;
-
-              return (
-                <div
-                  key={`bubble-box-${idx}`}
-                  className={`absolute border-2 pointer-events-auto cursor-pointer transition-all ${
-                    isSelected
-                      ? "border-amber-400 bg-amber-400/20 z-40 shadow-[0_0_10px_rgba(251,191,36,0.5)]"
-                      : "border-purple-400/40 bg-purple-500/5 hover:border-purple-300 hover:bg-purple-500/20"
-                  }`}
-                  style={{
-                    top: `${top}%`,
-                    left: `${left}%`,
-                    width: `${width}%`,
-                    height: `${height}%`,
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (setSelectedBubbleIdx) setSelectedBubbleIdx(idx);
-                    if (onCleanSingleBubble) {
-                      onCleanSingleBubble(ymin, xmin, ymax, xmax, bubble.text);
-                    }
-                  }}
-                  title={bubble.text ? `Bubble OCR: "${bubble.text}" (Click to Clean/Select)` : "Detected Bubble (Click to Clean/Select)"}
-                >
-                  <div className="absolute left-1 top-1 bg-black/85 text-[8px] text-purple-300 font-bold px-1 py-0.5 rounded border border-purple-500/20 max-w-[90%] overflow-hidden text-ellipsis whitespace-nowrap opacity-75 group-hover:opacity-100 transition-opacity">
-                    Bubble #{idx + 1}
-                  </div>
-                  {bubble.text && (
-                    <div className="absolute bottom-1 left-1 max-w-[95%] bg-black/90 text-[9px] text-neutral-200 px-1.5 py-0.5 rounded border border-white/5 opacity-0 hover:opacity-100 transition-opacity pointer-events-none overflow-hidden text-ellipsis whitespace-nowrap z-50">
-                      {bubble.text}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+        {(editMode === "clean_auto" || editMode === "typeset") && (
+          <CanvasBubbleBoxes
+            detectedBubbles={detectedBubbles}
+            selectedBubbleIdx={selectedBubbleIdx}
+            setSelectedBubbleIdx={setSelectedBubbleIdx}
+            onCleanSingleBubble={onCleanSingleBubble}
+          />
         )}
 
         {/* Live Typeset Text Preview Overlay */}
@@ -363,70 +330,25 @@ export default function CropCanvas({
 
         {/* Split guidelines */}
         {showSplitPosition && (
-          <>
-            {/* Active sliding guideline */}
-            <div
-              className="absolute left-0 right-0 z-40 pointer-events-none"
-              style={{ top: `${splitPosition}%` }}
-            >
-              <div className="absolute inset-x-0 border-t-2 border-dashed border-red-400/80" />
-              <div className="absolute right-2 -top-5 bg-red-950/95 text-red-300 font-mono text-[9px] px-2 py-0.5 rounded-lg border border-red-800/60 font-bold backdrop-blur shadow-lg">
-                Split: {splitPosition}% (draft)
-              </div>
-            </div>
-
-            {/* Saved split lines */}
-            {splitLines.map((y, idx) => {
-              const isHovered = hoverPct ? Math.abs(hoverPct.y - y) < 2.5 : false;
-              return (
-                <div
-                  key={`split-line-${y}-${idx}`}
-                  className="absolute left-0 right-0 z-40 h-3 -translate-y-1.5 flex items-center cursor-row-resize pointer-events-auto"
-                  style={{ top: `${y}%` }}
-                >
-                  <div className={`w-full border-t-2 border-dashed transition-all ${
-                    isHovered ? "border-red-400 shadow-[0_0_8px_rgba(248,113,113,0.5)] scale-y-110" : "border-purple-500/70"
-                  }`} />
-                  <div className="absolute left-2 bg-purple-950/95 text-purple-300 font-mono text-[9px] px-2 py-0.5 rounded-lg border border-purple-800/60 font-bold backdrop-blur shadow-lg flex items-center gap-1.5 pointer-events-auto select-none">
-                    <span>Cut #{idx + 1}: {y}%</span>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveSplitLine(y);
-                      }}
-                      className="text-purple-400 hover:text-red-400 font-bold font-sans text-[11px] cursor-pointer pl-0.5"
-                      title="Remove this split line"
-                    >
-                      &times;
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </>
+          <CanvasSplitLines
+            splitPosition={splitPosition}
+            splitLines={splitLines}
+            hoverPct={hoverPct}
+            handleRemoveSplitLine={handleRemoveSplitLine}
+            setSplitPosition={setSplitPosition}
+            setShowSplitPosition={setShowSplitPosition}
+          />
         )}
 
-        {/* CROP MASK SHADED AREAS */}
-        {hasCropSelection && editMode === "crop" && (
-          <>
-            <div
-              className="absolute top-0 left-0 right-0 bg-black/70 backdrop-blur-[1px] transition-all duration-75 pointer-events-none"
-              style={{ height: `${editCropTop}%`, borderBottom: "1px solid rgba(139,92,246,0.35)" }}
-            />
-            <div
-              className="absolute bottom-0 left-0 right-0 bg-black/70 backdrop-blur-[1px] transition-all duration-75 pointer-events-none"
-              style={{ height: `${editCropBottom}%`, borderTop: "1px solid rgba(139,92,246,0.35)" }}
-            />
-            <div
-              className="absolute top-0 bottom-0 left-0 bg-black/70 backdrop-blur-[1px] transition-all duration-75 pointer-events-none"
-              style={{ width: `${editCropLeft}%`, borderRight: "1px solid rgba(139,92,246,0.35)" }}
-            />
-            <div
-              className="absolute top-0 bottom-0 right-0 bg-black/70 backdrop-blur-[1px] transition-all duration-75 pointer-events-none"
-              style={{ width: `${editCropRight}%`, borderLeft: "1px solid rgba(139,92,246,0.35)" }}
-            />
-          </>
+        {/* CROP MASK SHADED AREAS & SELECTION BOUNDS */}
+        {editMode === "crop" && (
+          <CanvasCropSelection
+            editCropTop={editCropTop}
+            editCropBottom={editCropBottom}
+            editCropLeft={editCropLeft}
+            editCropRight={editCropRight}
+            onResizeStart={onResizeStart}
+          />
         )}
 
         {/* SLICES VISUAL OVERLAYS */}
@@ -490,85 +412,6 @@ export default function CropCanvas({
             </div>
           );
         })}
-
-        {/* ACTIVE CROP BOX BOUNDARY GUIDES */}
-        {hasCropSelection && editMode === "crop" && (
-          <div
-            className="absolute border-2 border-dashed border-emerald-400/80 pointer-events-none transition-all duration-75"
-            style={{
-              top: `${editCropTop}%`,
-              bottom: `${editCropBottom}%`,
-              left: `${editCropLeft}%`,
-              right: `${editCropRight}%`,
-              boxShadow: "0 0 0 1px rgba(52,211,153,0.1), 0 0 20px rgba(52,211,153,0.06)",
-            }}
-          >
-            {/* Corner handles (visible glowing handles) */}
-            <div 
-              onMouseDown={(e) => { e.stopPropagation(); onResizeStart("nw", e.clientX, e.clientY); }}
-              onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("nw", e.touches[0].clientX, e.touches[0].clientY); } }}
-              className="absolute top-0 left-0 w-3.5 h-3.5 bg-emerald-400 border border-neutral-900 rounded-full -translate-x-1/2 -translate-y-1/2 cursor-nwse-resize pointer-events-auto hover:scale-125 active:scale-95 transition-transform shadow-[0_0_8px_rgba(52,211,153,0.8)] z-50" 
-            />
-            <div 
-              onMouseDown={(e) => { e.stopPropagation(); onResizeStart("ne", e.clientX, e.clientY); }}
-              onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("ne", e.touches[0].clientX, e.touches[0].clientY); } }}
-              className="absolute top-0 right-0 w-3.5 h-3.5 bg-emerald-400 border border-neutral-900 rounded-full translate-x-1/2 -translate-y-1/2 cursor-nesw-resize pointer-events-auto hover:scale-125 active:scale-95 transition-transform shadow-[0_0_8px_rgba(52,211,153,0.8)] z-50" 
-            />
-            <div 
-              onMouseDown={(e) => { e.stopPropagation(); onResizeStart("sw", e.clientX, e.clientY); }}
-              onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("sw", e.touches[0].clientX, e.touches[0].clientY); } }}
-              className="absolute bottom-0 left-0 w-3.5 h-3.5 bg-emerald-400 border border-neutral-900 rounded-full -translate-x-1/2 translate-y-1/2 cursor-nesw-resize pointer-events-auto hover:scale-125 active:scale-95 transition-transform shadow-[0_0_8px_rgba(52,211,153,0.8)] z-50" 
-            />
-            <div 
-              onMouseDown={(e) => { e.stopPropagation(); onResizeStart("se", e.clientX, e.clientY); }}
-              onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("se", e.touches[0].clientX, e.touches[0].clientY); } }}
-              className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-400 border border-neutral-900 rounded-full translate-x-1/2 translate-y-1/2 cursor-nwse-resize pointer-events-auto hover:scale-125 active:scale-95 transition-transform shadow-[0_0_8px_rgba(52,211,153,0.8)] z-50" 
-            />
-
-            {/* Edge handles (invisible wide bars for easy grabbing) */}
-            <div 
-              onMouseDown={(e) => { e.stopPropagation(); onResizeStart("n", e.clientX, e.clientY); }}
-              onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("n", e.touches[0].clientX, e.touches[0].clientY); } }}
-              className="absolute -top-1.5 left-2 right-2 h-3 cursor-ns-resize pointer-events-auto group/edge z-40"
-            >
-              <div className="mx-auto w-12 h-1 bg-emerald-400/50 rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity mt-1 shadow-[0_0_4px_rgba(52,211,153,0.5)]" />
-            </div>
-            <div 
-              onMouseDown={(e) => { e.stopPropagation(); onResizeStart("s", e.clientX, e.clientY); }}
-              onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("s", e.touches[0].clientX, e.touches[0].clientY); } }}
-              className="absolute -bottom-1.5 left-2 right-2 h-3 cursor-ns-resize pointer-events-auto group/edge z-40"
-            >
-              <div className="mx-auto w-12 h-1 bg-emerald-400/50 rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity mt-1 shadow-[0_0_4px_rgba(52,211,153,0.5)]" />
-            </div>
-            <div 
-              onMouseDown={(e) => { e.stopPropagation(); onResizeStart("w", e.clientX, e.clientY); }}
-              onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("w", e.touches[0].clientX, e.touches[0].clientY); } }}
-              className="absolute top-2 bottom-2 -left-1.5 w-3 cursor-ew-resize pointer-events-auto group/edge flex items-center z-40"
-            >
-              <div className="my-auto h-12 w-1 bg-emerald-400/50 rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity ml-1 shadow-[0_0_4px_rgba(52,211,153,0.5)]" />
-            </div>
-            <div 
-              onMouseDown={(e) => { e.stopPropagation(); onResizeStart("e", e.clientX, e.clientY); }}
-              onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("e", e.touches[0].clientX, e.touches[0].clientY); } }}
-              className="absolute top-2 bottom-2 -right-1.5 w-3 cursor-ew-resize pointer-events-auto group/edge flex items-center z-40"
-            >
-              <div className="my-auto h-12 w-1 bg-emerald-400/50 rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity ml-1 shadow-[0_0_4px_rgba(52,211,153,0.5)]" />
-            </div>
-
-            {/* Move helper */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/90 text-[9px] font-bold tracking-wide text-neutral-200 border border-white/10 px-2.5 py-1 rounded-xl shadow-xl backdrop-blur-sm flex items-center gap-1.5">
-              <Move className="h-3 w-3 text-purple-400" />
-              <span>Drag to Move</span>
-            </div>
-
-            {/* Specs badge */}
-            <div className="absolute top-1.5 left-1.5 bg-black/90 text-[9px] font-mono font-bold text-emerald-400 border border-emerald-800/40 px-1.5 py-0.5 rounded-lg shadow-lg backdrop-blur-sm">
-              {parseFloat((100 - editCropLeft - editCropRight).toFixed(1))}%
-              &times;{" "}
-              {parseFloat((100 - editCropTop - editCropBottom).toFixed(1))}%
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
