@@ -122,7 +122,7 @@ import scraperRouter  from './routes/scraperRoutes.js';
 // CONSTANTS
 // ─────────────────────────────────────────────────────────────────────────────
 const app              = express();
-const PORT             = parseInt(process.env.PORT             || '3000',  10);
+const PORT             = parseInt(process.env.PORT             || '5173',  10);
 const SLOW_REQ_MS      = parseInt(process.env.SLOW_REQ_MS      || '3000',  10);
 const RATE_LIMIT_RPM   = parseInt(process.env.RATE_LIMIT_RPM   || '120',   10);
 const REQ_TIMEOUT_MS   = parseInt(process.env.REQ_TIMEOUT_MS   || '30000', 10);
