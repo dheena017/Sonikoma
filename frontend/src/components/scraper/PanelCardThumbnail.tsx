@@ -44,6 +44,8 @@ export function PanelCardThumbnail({
         className={`w-full h-full object-contain transition-all duration-300 ${
           isProcessing ? "opacity-20 scale-95 blur-[3px]" : "group-hover:scale-105"
         }`}
+        loading="lazy"
+        decoding="async"
         referrerPolicy="no-referrer"
         draggable={false}
       />

@@ -4,9 +4,27 @@ import { AI_MODELS } from "../../models";
 import { NotificationType } from "../NotificationStack";
 import { extractWebtoonUrl } from "../../utils/url";
 
+const SOURCE_OPTIONS = [
+  { id: "webtoons", name: "Webtoons" },
+  { id: "webcomicsapp", name: "WebComics App" },
+  { id: "mangadex", name: "MangaDex" },
+  { id: "toomics", name: "Toomics" },
+  { id: "linewebtoon", name: "Line Webtoon" },
+];
+
+const SOURCE_EXAMPLES: Record<string, string> = {
+  webtoons: "webtoons.com/...",
+  webcomicsapp: "webcomicsapp.com/...",
+  mangadex: "mangadex.org/...",
+  toomics: "toomics.com/...",
+  linewebtoon: "webtoon.com/...",
+};
+
 interface UrlInputPanelProps {
   targetUrl: string;
   setTargetUrl: (url: string) => void;
+  selectedSource: string;
+  setSelectedSource: (source: string) => void;
   selectedModel: string;
   setSelectedModel: (model: string) => void;
   isProcessing: boolean;
@@ -32,12 +50,17 @@ export default function UrlInputPanel({
       setTargetUrl(normalized);
       if (normalized !== url) {
         addNotification(
-          'Detected duplicate Webtoon URLs in the paste buffer. Using the first valid URL.',
+          'Detected duplicate URLs in the paste buffer. Using the first valid URL.',
           'info'
         );
       }
     }
   };
+
+  const selectedSourceName = SOURCE_OPTIONS.find((source) => source.id === selectedSource)?.name || "Webtoons";
+  const targetExample = SOURCE_EXAMPLES[selectedSource] || "webtoons.com/...";
+  const placeholderText = `Paste ${selectedSourceName} viewer URL (e.g. ${targetExample})`;
+
   const modelGrid = (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
       {AI_MODELS.map((modelItem) => (
@@ -89,22 +112,46 @@ export default function UrlInputPanel({
 
       {/* URL Inputs + Model Selection */}
       <div className="space-y-5">
-        <div className="relative group">
-          <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 opacity-20 blur group-focus-within:opacity-40 transition-opacity duration-300" />
-          <input 
-            id="target_url_input"
-            type="url" 
-            value={targetUrl}
-            onChange={(e) => setTargetUrl(e.target.value.trim())}
-            onPaste={handlePaste}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !isProcessing && targetUrl.trim()) {
-                handleGenerateVideo();
-              }
-            }}
-            placeholder="Paste Webtoon episode viewer URL (e.g. webtoons.com/...)"
-            className="relative w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-neutral-200 outline-none placeholder:text-neutral-600 focus:border-purple-500 transition-colors"
-          />
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-purple-500 animate-ping" />
+              Choose source website
+            </label>
+            <div className="relative">
+              <select
+                id="source_select"
+                value={selectedSource}
+                onChange={(e) => setSelectedSource(e.target.value)}
+                className="relative w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-neutral-200 outline-none appearance-none focus:border-purple-500 transition-colors"
+              >
+                {SOURCE_OPTIONS.map((option) => (
+                  <option key={option.id} value={option.id} className="bg-neutral-950 text-neutral-100">
+                    {option.name}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-neutral-500 select-none">▾</div>
+            </div>
+          </div>
+
+          <div className="relative group">
+            <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 opacity-20 blur group-focus-within:opacity-40 transition-opacity duration-300" />
+            <input 
+              id="target_url_input"
+              type="url" 
+              value={targetUrl}
+              onChange={(e) => setTargetUrl(e.target.value.trim())}
+              onPaste={handlePaste}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !isProcessing && targetUrl.trim()) {
+                  handleGenerateVideo();
+                }
+              }}
+              placeholder={placeholderText}
+              className="relative w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-neutral-200 outline-none placeholder:text-neutral-600 focus:border-purple-500 transition-colors"
+            />
+          </div>
         </div>
         {duplicateWarning && (
           <p className="text-[11px] text-amber-300 font-mono">

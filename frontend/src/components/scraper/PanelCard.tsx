@@ -32,7 +32,7 @@ interface PanelCardProps
   key?: React.Key;
 }
 
-export default function PanelCard({
+function PanelCard({
   imgUrl,
   idx,
   isSelected,
@@ -212,3 +212,5 @@ export default function PanelCard({
     </div>
   );
 }
+
+export default React.memo(PanelCard);

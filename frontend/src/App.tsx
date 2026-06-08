@@ -88,6 +88,8 @@ export default function App() {
     setAspectRatio,
     selectedModel,
     setSelectedModel,
+    selectedSource,
+    setSelectedSource,
     frameRate,
     setFrameRate,
     volume,
@@ -203,6 +205,8 @@ export default function App() {
           fetchWithInterceptor={fetchWithInterceptor}
           targetUrl={targetUrl}
           setTargetUrl={setTargetUrl}
+          selectedSource={selectedSource}
+          setSelectedSource={setSelectedSource}
           selectedModel={selectedModel}
           setSelectedModel={setSelectedModel}
           isProcessing={isProcessing}

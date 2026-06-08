@@ -42,6 +42,8 @@ interface AppWorkspaceProps {
   fetchWithInterceptor: any;
   targetUrl: string;
   setTargetUrl: (v: string) => void;
+  selectedSource: string;
+  setSelectedSource: (v: string) => void;
   selectedModel: string;
   setSelectedModel: (v: string) => void;
   isProcessing: boolean;
@@ -103,6 +105,8 @@ export function AppWorkspace({
   fetchWithInterceptor,
   targetUrl,
   setTargetUrl,
+  selectedSource,
+  setSelectedSource,
   selectedModel,
   setSelectedModel,
   isProcessing,
@@ -140,6 +144,8 @@ export function AppWorkspace({
         <UrlInputPanel
           targetUrl={targetUrl}
           setTargetUrl={setTargetUrl}
+          selectedSource={selectedSource}
+          setSelectedSource={setSelectedSource}
           selectedModel={selectedModel}
           setSelectedModel={setSelectedModel}
           isProcessing={isProcessing}

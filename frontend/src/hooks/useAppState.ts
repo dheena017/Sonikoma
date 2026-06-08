@@ -55,6 +55,7 @@ export function useAppState() {
   const [musicTheme, setMusicTheme] = useState<string>(() => localStorage.getItem('ai_comic_music') || "Orchestral Battle Theme");
   const [aspectRatio, setAspectRatio] = useState<"9:16" | "16:9">(() => (localStorage.getItem('ai_comic_aspectRatio') as "9:16" | "16:9") || "9:16");
   const [selectedModel, setSelectedModel] = useState<string>(() => localStorage.getItem('ai_comic_model') || AI_MODELS[0].id);
+  const [selectedSource, setSelectedSource] = useState<string>(() => localStorage.getItem('ai_comic_source') || "webtoons");
   const [frameRate, setFrameRate] = useState<number>(() => parseInt(localStorage.getItem('ai_comic_fps') || '24'));
   const [volume, setVolume] = useState<number>(() => parseInt(localStorage.getItem('ai_comic_volume') || '80'));
   const [isMuted, setIsMuted] = useState<boolean>(() => localStorage.getItem('ai_comic_muted') === 'true');
@@ -93,10 +94,11 @@ export function useAppState() {
     localStorage.setItem('ai_comic_music', musicTheme);
     localStorage.setItem('ai_comic_aspectRatio', aspectRatio);
     localStorage.setItem('ai_comic_model', selectedModel);
+    localStorage.setItem('ai_comic_source', selectedSource);
     localStorage.setItem('ai_comic_fps', frameRate.toString());
     localStorage.setItem('ai_comic_volume', volume.toString());
     localStorage.setItem('ai_comic_muted', isMuted.toString());
-  }, [targetUrl, voiceActor, musicTheme, aspectRatio, selectedModel, frameRate, volume, isMuted]);
+  }, [targetUrl, voiceActor, musicTheme, aspectRatio, selectedModel, selectedSource, frameRate, volume, isMuted]);
 
   return {
     panels,
@@ -179,6 +181,8 @@ export function useAppState() {
     setAspectRatio,
     selectedModel,
     setSelectedModel,
+    selectedSource,
+    setSelectedSource,
     frameRate,
     setFrameRate,
     volume,
