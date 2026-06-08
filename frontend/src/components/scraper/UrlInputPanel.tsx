@@ -20,6 +20,14 @@ const SOURCE_EXAMPLES: Record<string, string> = {
   linewebtoon: "webtoon.com/...",
 };
 
+const SOURCE_DOMAINS: Record<string, string[]> = {
+  webtoons: ["webtoons.com", "webtoon.com"],
+  webcomicsapp: ["webcomicsapp.com"],
+  mangadex: ["mangadex.org", "mangadex.com"],
+  toomics: ["toomics.com"],
+  linewebtoon: ["webtoon.com"],
+};
+
 interface UrlInputPanelProps {
   targetUrl: string;
   setTargetUrl: (url: string) => void;
@@ -32,15 +40,21 @@ interface UrlInputPanelProps {
   addNotification: (message: string, type: NotificationType) => void;
 }
 
-export default function UrlInputPanel({
-  targetUrl,
-  setTargetUrl,
-  selectedModel,
-  setSelectedModel,
-  isProcessing,
-  handleGenerateVideo,
-  addNotification,
-}: UrlInputPanelProps) {
+export default function UrlInputPanel(props: UrlInputPanelProps) {
+  const {
+    targetUrl,
+    setTargetUrl,
+    selectedSource,
+    setSelectedSource,
+    selectedModel,
+    setSelectedModel,
+    isProcessing,
+    handleGenerateVideo,
+    addNotification,
+  } = props;
+
+  const source = selectedSource || 'webtoons';
+
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     const pasted = e.clipboardData?.getData('text') || '';
     const url = pasted.trim();
@@ -57,9 +71,27 @@ export default function UrlInputPanel({
     }
   };
 
-  const selectedSourceName = SOURCE_OPTIONS.find((source) => source.id === selectedSource)?.name || "Webtoons";
-  const targetExample = SOURCE_EXAMPLES[selectedSource] || "webtoons.com/...";
+  const selectedSourceName = SOURCE_OPTIONS.find((option) => option.id === source)?.name || "Webtoons";
+  const targetExample = SOURCE_EXAMPLES[source] || "webtoons.com/...";
   const placeholderText = `Paste ${selectedSourceName} viewer URL (e.g. ${targetExample})`;
+
+  const currentHost = (() => {
+    try {
+      const normalized = extractWebtoonUrl(targetUrl);
+      const urlWithScheme = normalized.startsWith('http') ? normalized : `https://${normalized}`;
+      return new URL(urlWithScheme).hostname.toLowerCase();
+    } catch {
+      return "";
+    }
+  })();
+
+  const isSourceMismatch = Boolean(
+    targetUrl.trim() &&
+    currentHost &&
+    !SOURCE_DOMAINS[source]?.some((allowedHost) =>
+      currentHost === allowedHost || currentHost.endsWith(`.${allowedHost}`)
+    )
+  );
 
   const modelGrid = (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -94,8 +126,6 @@ export default function UrlInputPanel({
       ))}
     </div>
   );
-
-  const duplicateWarning = targetUrl.trim().length > 0 && extractWebtoonUrl(targetUrl) !== targetUrl.trim();
 
   return (
     <div id="dynamic_input_box" className="bg-neutral-900/40 rounded-3xl border border-neutral-800/80 p-5 sm:p-6 lg:p-8 backdrop-blur-md shadow-sm space-y-5 sm:space-y-6">
@@ -141,23 +171,31 @@ export default function UrlInputPanel({
               id="target_url_input"
               type="url" 
               value={targetUrl}
-              onChange={(e) => setTargetUrl(e.target.value.trim())}
+              onChange={(e) => setTargetUrl(e.target.value)}
               onPaste={handlePaste}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !isProcessing && targetUrl.trim()) {
+                  if (isSourceMismatch) {
+                    addNotification(
+                      `Selected source ${selectedSourceName} does not match the current URL host (${currentHost}). Please choose the correct website or paste a matching URL.`,
+                      'error'
+                    );
+                    return;
+                  }
                   handleGenerateVideo();
                 }
               }}
               placeholder={placeholderText}
               className="relative w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-neutral-200 outline-none placeholder:text-neutral-600 focus:border-purple-500 transition-colors"
             />
+            {isSourceMismatch && (
+              <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-[11px] text-amber-100 font-mono leading-5 mt-3">
+                <strong className="block text-amber-200 mb-1">Source mismatch detected</strong>
+                Selected source <strong>{selectedSourceName}</strong> does not match the URL host <strong>{currentHost || 'unknown'}</strong>. Please choose the correct website or paste a matching URL.
+              </div>
+            )}
           </div>
         </div>
-        {duplicateWarning && (
-          <p className="text-[11px] text-amber-300 font-mono">
-            Duplicate or concatenated Webtoon links were detected in the input. The first valid URL is being used.
-          </p>
-        )}
 
         <div className="space-y-3 pt-1">
           <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">

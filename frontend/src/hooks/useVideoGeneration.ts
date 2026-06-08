@@ -43,6 +43,54 @@ export function useVideoGeneration({
       return;
     }
 
+    const sourceDisplayNames: Record<string, string> = {
+      webtoons: "Webtoons",
+      webcomicsapp: "WebComics App",
+      mangadex: "MangaDex",
+      toomics: "Toomics",
+      linewebtoon: "Line Webtoon",
+    };
+
+    const selectedSourceName = sourceDisplayNames[selectedSource] || selectedSource;
+    const normalizeTarget = (() => {
+      try {
+        return targetUrl.trim().startsWith('http') ? targetUrl.trim() : `https://${targetUrl.trim()}`;
+      } catch {
+        return targetUrl.trim();
+      }
+    })();
+
+    const currentHost = (() => {
+      try {
+        return new URL(normalizeTarget).hostname.toLowerCase();
+      } catch {
+        return '';
+      }
+    })();
+
+    const allowedHosts: Record<string, string[]> = {
+      webtoons: ["webtoons.com", "webtoon.com"],
+      webcomicsapp: ["webcomicsapp.com"],
+      mangadex: ["mangadex.org", "mangadex.com"],
+      toomics: ["toomics.com"],
+      linewebtoon: ["webtoon.com"],
+    };
+
+    const isSourceMismatch = Boolean(
+      currentHost &&
+      !allowedHosts[selectedSource]?.some((allowedHost) =>
+        currentHost === allowedHost || currentHost.endsWith(`.${allowedHost}`)
+      )
+    );
+
+    if (isSourceMismatch) {
+      addNotification(
+        `Selected source ${selectedSourceName} does not match the URL host (${currentHost}). Please choose the correct website or paste a matching URL.`,
+        "error"
+      );
+      return;
+    }
+
     setIsProcessing(true);
     setProgressStatus("Contacting pipeline orchestration...");
     addNotification('Pipeline initiated — generating video with ' + selectedModel + '...', 'info');

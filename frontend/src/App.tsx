@@ -7,7 +7,6 @@ import CropEditorModal from "./components/CropEditorModal.js";
 import BubbleCleanerModal from "./components/processing/BubbleCleanerModal.js";
 import AutoCropModal from "./components/processing/AutoCropModal.js";
 import NotificationStack from "./components/NotificationStack.js";
-import ErrorPopupModal from "./components/ErrorPopupModal.js";
 import { AppWorkspace } from "./components/AppWorkspace.js";
 
 export default function App() {
@@ -248,7 +247,6 @@ export default function App() {
       </footer>
 
       <NotificationStack notifications={notifications} removeNotification={removeNotification} />
-      <ErrorPopupModal error={errorPopup} onClose={() => setErrorPopup(null)} />
     </div>
   );
 }

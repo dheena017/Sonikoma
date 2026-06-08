@@ -1,12 +1,12 @@
 import React from "react";
-import UrlInputPanel from "./scraper/UrlInputPanel.tsx";
-import LiveScraperDeck from "./scraper/LiveScraperDeck.tsx";
-import PipelineStatusCard from "./pipeline/PipelineStatusCard.tsx";
-import TerminalLogs from "./terminal/TerminalLogs.tsx";
-import StoryboardTimeline from "./timeline/StoryboardTimeline.tsx";
-import VideoMonitor from "./video/VideoMonitor.tsx";
-import FinalVideoPlayer from "./video/FinalVideoPlayer.tsx";
-import VolumeAndProgressPanel from "./video/VolumeAndProgressPanel.tsx";
+import UrlInputPanel from "./scraper/UrlInputPanel.js";
+import LiveScraperDeck from "./scraper/LiveScraperDeck.js";
+import PipelineStatusCard from "./pipeline/PipelineStatusCard.js";
+import TerminalLogs from "./terminal/TerminalLogs.js";
+import StoryboardTimeline from "./timeline/StoryboardTimeline.js";
+import VideoMonitor from "./video/VideoMonitor.js";
+import FinalVideoPlayer from "./video/FinalVideoPlayer.js";
+import VolumeAndProgressPanel from "./video/VolumeAndProgressPanel.js";
 import OutputMetadataPanel from "./OutputMetadataPanel.js";
 
 interface AppWorkspaceProps {

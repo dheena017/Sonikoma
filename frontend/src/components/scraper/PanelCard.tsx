@@ -213,4 +213,5 @@ function PanelCard({
   );
 }
 
-export default React.memo(PanelCard);
+const MemoizedPanelCard = React.memo(PanelCard);
+export default MemoizedPanelCard;
