@@ -5,10 +5,18 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
+/** Extracts the first valid URL when a pasted string contains duplicate or concatenated Webtoon links. */
+export function extractWebtoonUrl(urlStr: string): string {
+  if (!urlStr) return "";
+  const trimmed = urlStr.trim();
+  const duplicateAware = trimmed.match(/https?:\/\/(?:[^\s"']*?)(?=https?:\/\/|$)/i);
+  return duplicateAware ? duplicateAware[0] : trimmed;
+}
+
 /** Strips language/region prefix (e.g. /en/, /fr/, /zh-hans/) from a Webtoon URL */
 export function stripRegionFromUrl(urlStr: string): string {
   if (!urlStr) return "";
-  let workingUrl = urlStr.trim();
+  let workingUrl = extractWebtoonUrl(urlStr);
   if (workingUrl && !/^https?:\/\//i.test(workingUrl)) {
     workingUrl = "https://" + workingUrl;
   }

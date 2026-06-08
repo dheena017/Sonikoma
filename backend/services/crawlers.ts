@@ -1,12 +1,32 @@
-import { parseWebtoonUrl } from '../utils/urlUtils.js';
+import { extractWebtoonUrl } from '../utils/urlUtils.js';
 import { col } from '../utils/colors.js';
+
+async function fetchWithTimeout(url: string, headers: Record<string, string>, timeoutMs = 30000) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, { headers, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function tryFetchUrl(url: string, headers: Record<string, string>, timeoutMs = 30000) {
+  try {
+    return await fetchWithTimeout(url, headers, timeoutMs);
+  } catch (error) {
+    console.warn(`${col.warn('[Scraper]')} Fetch error for ${col.dim(url)}:`, error);
+    return null;
+  }
+}
 
 /**
  * Helper function to safely crawl and isolate absolute webtoon panel images with unescaped references
  */
 export async function scrapeImagesFromUrl(url: string): Promise<string[]> {
   try {
-    let fetchUrl = url;
+    let fetchUrl = extractWebtoonUrl(url);
     const fetchHeaders = {
       "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
       "Referer": "https://www.webtoons.com/",
@@ -18,14 +38,22 @@ export async function scrapeImagesFromUrl(url: string): Promise<string[]> {
     };
 
     console.log(`${col.info('[Scraper]')} Requesting: ${col.dim(fetchUrl)}`);
-    let response = await fetch(fetchUrl, { headers: fetchHeaders });
+    let response = await tryFetchUrl(fetchUrl, fetchHeaders, 45000);
     
-    const statusCol = response.status === 200 ? col.success : col.warn;
-    console.log(`${col.info('[Scraper]')} Initial fetch status: ${statusCol(`${response.status} (${response.statusText})`)}`);
-    
-    if (!response.ok) {
-      const errText = await response.text().then(t => t.substring(0, 400)).catch(() => "");
-      console.warn(`${col.warn('[Scraper]')} Initial fetch failed. Status: ${col.error(String(response.status))}. Body preview: ${col.dim(errText)}`);
+    if (response) {
+      const statusCol = response.status === 200 ? col.success : col.warn;
+      console.log(`${col.info('[Scraper]')} Initial fetch status: ${statusCol(`${response.status} (${response.statusText})`)}`);
+    } else {
+      console.warn(`${col.warn('[Scraper]')} Initial fetch failed before receiving a response.`);
+    }
+
+    if (!response || !response.ok) {
+      if (response) {
+        const errText = await response.text().then(t => t.substring(0, 400)).catch(() => "");
+        console.warn(`${col.warn('[Scraper]')} Initial fetch failed. Status: ${col.error(String(response.status))}. Body preview: ${col.dim(errText)}`);
+      } else {
+        console.warn(`${col.warn('[Scraper]')} Initial fetch failed without a response object.`);
+      }
       
       try {
         const urlObj = new URL(url);
@@ -35,11 +63,15 @@ export async function scrapeImagesFromUrl(url: string): Promise<string[]> {
           urlObj.pathname = '/en/' + pathParts.join('/');
           fetchUrl = urlObj.toString();
           console.log(`${col.info('[Scraper]')} Fallback: Re-trying fallback regional URL: ${col.dim(fetchUrl)}`);
-          response = await fetch(fetchUrl, { headers: fetchHeaders });
-          console.log(`${col.info('[Scraper]')} Fallback fetch status: ${response.status === 200 ? col.success(String(response.status)) : col.warn(String(response.status))}`);
-          if (!response.ok) {
-            const fallbackErrText = await response.text().then(t => t.substring(0, 400)).catch(() => "");
-            console.warn(`${col.warn('[Scraper]')} Fallback fetch also failed. Body preview: ${col.dim(fallbackErrText)}`);
+          response = await tryFetchUrl(fetchUrl, fetchHeaders, 45000);
+          if (response) {
+            console.log(`${col.info('[Scraper]')} Fallback fetch status: ${response.status === 200 ? col.success(String(response.status)) : col.warn(String(response.status))}`);
+            if (!response.ok) {
+              const fallbackErrText = await response.text().then(t => t.substring(0, 400)).catch(() => "");
+              console.warn(`${col.warn('[Scraper]')} Fallback fetch also failed. Body preview: ${col.dim(fallbackErrText)}`);
+            }
+          } else {
+            console.warn(`${col.warn('[Scraper]')} Fallback fetch failed before receiving a response.`);
           }
         }
       } catch (err) {
@@ -47,8 +79,9 @@ export async function scrapeImagesFromUrl(url: string): Promise<string[]> {
       }
     }
     
-    if (!response.ok) {
-      console.error(`${col.error('[Scraper]')} All fetch attempts returned not ok (Status ${col.error(String(response.status))})`);
+    if (!response || !response.ok) {
+      const statusMessage = response ? `Status ${response.status}` : 'No response';
+      console.error(`${col.error('[Scraper]')} All fetch attempts failed (${statusMessage}).`);
 
       // Attempt Playwright headless browser fallback when direct fetch fails
       try {
@@ -62,7 +95,7 @@ export async function scrapeImagesFromUrl(url: string): Promise<string[]> {
           },
         });
 
-        await page.goto(fetchUrl, { waitUntil: 'networkidle', timeout: 30000 });
+        await page.goto(fetchUrl, { waitUntil: 'networkidle', timeout: 45000 });
         const pwHtml = await page.content();
         await browser.close();
 
@@ -79,9 +112,10 @@ export async function scrapeImagesFromUrl(url: string): Promise<string[]> {
       }
     }
     
-    if (!response.ok) {
-      console.error(`${col.error('[Scraper]')} Final response was not OK (Status ${response.status}). Cannot read text.`);
-      throw new Error(`Failed to retrieve page content. Server returned status code ${response.status}`);
+    if (!response || !response.ok) {
+      const statusDetails = response ? `Status ${response.status}` : 'No response';
+      console.error(`${col.error('[Scraper]')} Final response was not OK (${statusDetails}). Cannot read text.`);
+      throw new Error(`Failed to retrieve page content. ${statusDetails}`);
     }
     
     const html = await response.text();

@@ -2,6 +2,7 @@ import React from "react";
 import { Sparkles } from "lucide-react";
 import { AI_MODELS } from "../../models";
 import { NotificationType } from "../NotificationStack";
+import { extractWebtoonUrl } from "../../utils/url";
 
 interface UrlInputPanelProps {
   targetUrl: string;
@@ -26,8 +27,15 @@ export default function UrlInputPanel({
     const pasted = e.clipboardData?.getData('text') || '';
     const url = pasted.trim();
     if (url) {
-      console.log('Pasted URL:', url);
-      setTargetUrl(url);
+      const normalized = extractWebtoonUrl(url);
+      console.log('Pasted URL:', url, 'Normalized URL:', normalized);
+      setTargetUrl(normalized);
+      if (normalized !== url) {
+        addNotification(
+          'Detected duplicate Webtoon URLs in the paste buffer. Using the first valid URL.',
+          'info'
+        );
+      }
     }
   };
   const modelGrid = (
@@ -64,6 +72,8 @@ export default function UrlInputPanel({
     </div>
   );
 
+  const duplicateWarning = targetUrl.trim().length > 0 && extractWebtoonUrl(targetUrl) !== targetUrl.trim();
+
   return (
     <div id="dynamic_input_box" className="bg-neutral-900/40 rounded-3xl border border-neutral-800/80 p-5 sm:p-6 lg:p-8 backdrop-blur-md shadow-sm space-y-5 sm:space-y-6">
       <div className="space-y-1">
@@ -96,6 +106,11 @@ export default function UrlInputPanel({
             className="relative w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-neutral-200 outline-none placeholder:text-neutral-600 focus:border-purple-500 transition-colors"
           />
         </div>
+        {duplicateWarning && (
+          <p className="text-[11px] text-amber-300 font-mono">
+            Duplicate or concatenated Webtoon links were detected in the input. The first valid URL is being used.
+          </p>
+        )}
 
         <div className="space-y-3 pt-1">
           <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">

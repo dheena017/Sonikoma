@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { parseWebtoonUrl } from '../../utils/urlUtils.js';
+import { extractWebtoonUrl, parseWebtoonUrl } from '../../utils/urlUtils.js';
 import { scrapeImagesFromUrl } from '../../services/scraperService.js';
 import { col } from '../../utils/colors.js';
 
@@ -13,9 +13,10 @@ router.post("/scrape-images", async (req, res) => {
   }
   
   try {
-    const parsed = parseWebtoonUrl(url);
-    console.log(`${col.info('[Scraper]')} Parsing page resource via helper: ${col.brightCyan(url)}`);
-    const proxiedUrls = await scrapeImagesFromUrl(url);
+    const normalizedUrl = extractWebtoonUrl(url);
+    const parsed = parseWebtoonUrl(normalizedUrl);
+    console.log(`${col.info('[Scraper]')} Parsing page resource via helper: ${col.brightCyan(normalizedUrl)}`);
+    const proxiedUrls = await scrapeImagesFromUrl(normalizedUrl);
     
     return res.json({
       success: true,
