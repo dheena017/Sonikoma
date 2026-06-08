@@ -49,7 +49,39 @@ export async function scrapeImagesFromUrl(url: string): Promise<string[]> {
     
     if (!response.ok) {
       console.error(`${col.error('[Scraper]')} All fetch attempts returned not ok (Status ${col.error(String(response.status))})`);
-      throw new Error(`Scraper failed to fetch the page (HTTP ${response.status} ${response.statusText}). Webtoon servers might be preventing access or the page URL is invalid/private.`);
+
+      // Attempt Playwright headless browser fallback when direct fetch fails
+      try {
+        console.log(`${col.info('[Scraper]')} Attempting Playwright headless-browser fallback to render page.`);
+        const { chromium } = await import('playwright');
+        const browser = await chromium.launch({ headless: true });
+        const page = await browser.newPage({
+          userAgent: fetchHeaders['User-Agent'],
+          extraHTTPHeaders: {
+            Referer: fetchHeaders['Referer'],
+          },
+        });
+
+        await page.goto(fetchUrl, { waitUntil: 'networkidle', timeout: 30000 });
+        const pwHtml = await page.content();
+        await browser.close();
+
+        // Use the rendered HTML from Playwright going forward
+        response = {
+          ok: true,
+          status: 200,
+          statusText: 'OK',
+          text: async () => pwHtml,
+        } as any;
+        console.log(`${col.info('[Scraper]')} Playwright fallback succeeded.`);
+      } catch (pwErr) {
+        console.warn(`${col.warn('[Scraper]')} Playwright fallback failed:`, pwErr);
+      }
+    }
+    
+    if (!response.ok) {
+      console.error(`${col.error('[Scraper]')} Final response was not OK (Status ${response.status}). Cannot read text.`);
+      throw new Error(`Failed to retrieve page content. Server returned status code ${response.status}`);
     }
     
     const html = await response.text();

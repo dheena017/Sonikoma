@@ -195,6 +195,8 @@ export function useAppLogic() {
                 ...filtered
               ];
             });
+              // Developer console visibility
+              console.log(`[Scraper] Loaded ${data.total_images} images from ${state.targetUrl}`);
           } else {
             const errMsg = data.message || "Connected but no native comic elements identified on page.";
             state.setScrapedImages([]);

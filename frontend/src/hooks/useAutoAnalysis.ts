@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { GeneratedPanel } from "../types";
 import { NotificationType } from "../components/NotificationStack";
 
@@ -109,6 +109,9 @@ export function useAutoAnalysis({
       ...prev,
     ]);
     addNotification(`Added ${imgUrls.length} panel(s) to storyboard. Spawning AI analysis...`, 'info');
+
+    // Developer console visibility
+    console.log(`[GUI] Added ${imgUrls.length} frame(s) to storyboard`, newIds);
 
     newIds.forEach((item) => {
       runBackgroundAnalysis(item.id, item.url);

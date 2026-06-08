@@ -1,3 +1,4 @@
+import React from "react";
 import { Slice } from "../components/crop/types";
 
 interface UseCropEditorDragProps {

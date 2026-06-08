@@ -234,7 +234,6 @@ export default function App() {
 
       {editingImageIdx !== null && (
         <CropEditorModal
-          key={editingImageIdx}
           appLogic={appLogic}
         />
       )}

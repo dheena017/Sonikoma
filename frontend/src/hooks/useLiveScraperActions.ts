@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 
@@ -69,6 +69,7 @@ export function useLiveScraperActions({
       `[GUI] Removed ${selectedScraped.length} images`,
       ...prev,
     ]);
+    console.log(`[GUI] Removed ${selectedScraped.length} image(s) from scraped deck`);
     setSelectedScraped([]);
   };
 
