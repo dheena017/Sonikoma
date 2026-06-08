@@ -1,10 +1,16 @@
-import React from "react";
-import { RefreshCw } from "lucide-react";
+import React, { useState } from "react";
+import {
+  Image as ImageIcon,
+  RefreshCw,
+  Trash2,
+  Download,
+  Plus,
+} from "lucide-react";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 import { LiveScraperDeckProps } from "./scraper/types";
+import PanelCard from "./scraper/PanelCard";
 import ScraperControls from "./scraper/ScraperControls";
-import LiveScraperHeader from "./scraper/LiveScraperHeader";
-import LiveScraperGrid from "./scraper/LiveScraperGrid";
-import { useLiveScraperActions } from "../hooks/useLiveScraperActions";
 
 export default function LiveScraperDeck({
   scrapedImages,
@@ -42,21 +48,62 @@ export default function LiveScraperDeck({
   croppingImgUrl,
   addPanelsWithAutoAnalysis,
 }: LiveScraperDeckProps) {
-  
-  const {
-    isZipping,
-    handleDownloadZip,
-    handleDeleteSelected,
-    handleAddToCanvas,
-  } = useLiveScraperActions({
-    scrapedImages,
-    selectedScraped,
-    setSelectedScraped,
-    setScrapedImages,
-    setConsoleLogs,
-    addPanelsWithAutoAnalysis,
-    fetchWithInterceptor,
-  });
+  const [isZipping, setIsZipping] = useState(false);
+  const activeFetch = fetchWithInterceptor || fetch;
+
+  const handleDownloadZip = async () => {
+    const toDownload = selectedScraped.length > 0 ? selectedScraped : scrapedImages;
+    if (toDownload.length === 0) return;
+
+    setIsZipping(true);
+    try {
+      const zip = new JSZip();
+      const folder = zip.folder("webtoon_frames");
+      if (!folder) {
+        setIsZipping(false);
+        return;
+      }
+
+      for (let i = 0; i < toDownload.length; i++) {
+        try {
+          const url = toDownload[i];
+          const res = await activeFetch(url);
+          const blob = await res.blob();
+          const filename = `webtoon_frame_${String(i + 1).padStart(3, "0")}.png`;
+          folder.file(filename, blob);
+        } catch (err) {
+          console.error("Download failed for:", toDownload[i], err);
+        }
+      }
+
+      const blobContent = await zip.generateAsync({ type: "blob" });
+      saveAs(blobContent, "webtoon_frames.zip");
+      setConsoleLogs((prev) => [
+        `[GUI] Successfully generated zip for ${toDownload.length} images`,
+        ...prev,
+      ]);
+    } catch (err) {
+      console.error("Zip generation failed:", err);
+    } finally {
+      setIsZipping(false);
+    }
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedScraped.length === 0) return;
+    setScrapedImages((prev) => prev.filter((img) => !selectedScraped.includes(img)));
+    setConsoleLogs((prev) => [
+      `[GUI] Removed ${selectedScraped.length} images`,
+      ...prev,
+    ]);
+    setSelectedScraped([]);
+  };
+
+  const handleAddToCanvas = () => {
+    if (selectedScraped.length === 0) return;
+    addPanelsWithAutoAnalysis(selectedScraped);
+    setSelectedScraped([]);
+  };
 
   if (!isScraping && scrapedImages.length === 0) return null;
 
@@ -65,14 +112,56 @@ export default function LiveScraperDeck({
       id="scraped_strips_deck"
       className="bg-neutral-900/40 rounded-2xl border border-neutral-800/80 p-6 backdrop-blur-md space-y-4 shadow-sm"
     >
-      <LiveScraperHeader
-        imagesCount={scrapedImages.length}
-        selectedCount={selectedScraped.length}
-        isZipping={isZipping}
-        handleDownloadZip={handleDownloadZip}
-        handleDeleteSelected={handleDeleteSelected}
-        handleAddToCanvas={handleAddToCanvas}
-      />
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-neutral-800/60 pb-3">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center h-11 w-11 rounded-xl bg-purple-500/10 border border-purple-500/15 text-purple-400">
+            <ImageIcon className="h-5 w-5" />
+          </div>
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-3">
+              <h3 className="font-bold text-sm text-white">Live Asset Extraction</h3>
+              {scrapedImages.length > 0 && (
+                <span className="text-[10px] px-3 py-1 rounded-full bg-purple-950/60 text-purple-300 border border-purple-800/50 shadow-inner font-mono uppercase tracking-wider">
+                  {scrapedImages.length} Frames
+                </span>
+              )}
+            </div>
+            <p className="text-[10px] text-neutral-400 font-mono">
+              Separated panels from the live Webtoon viewer.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-nowrap items-center gap-2 overflow-x-auto">
+          <button
+            type="button"
+            onClick={handleDownloadZip}
+            disabled={scrapedImages.length === 0 || isZipping}
+            className="text-[10px] font-mono border border-neutral-800/70 bg-neutral-950/60 hover:bg-neutral-900 text-neutral-300 hover:text-white rounded-lg px-3.5 py-1.5 flex items-center gap-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Download className="h-3.5 w-3.5" />
+            <span>{isZipping ? "Downloading..." : "Download"}</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleDeleteSelected}
+            disabled={selectedScraped.length === 0}
+            className="text-[10px] font-mono border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-lg px-3.5 py-1.5 flex items-center gap-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            <span>Delete</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleAddToCanvas}
+            disabled={selectedScraped.length === 0}
+            className="text-[10px] font-mono rounded-lg px-3.5 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border border-purple-500/30 flex items-center gap-1.5 shadow-lg shadow-purple-900/20 hover:shadow-purple-900/35 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            <span>Add to Canvas</span>
+          </button>
+        </div>
+      </div>
 
       {isScraping ? (
         <div className="flex flex-col items-center justify-center py-8 space-y-3">
@@ -103,26 +192,36 @@ export default function LiveScraperDeck({
           />
 
           {/* Grid list of extracted cards */}
-          <LiveScraperGrid
-            scrapedImages={scrapedImages}
-            selectedScraped={selectedScraped}
-            isBatchCropping={isBatchCropping}
-            croppingImgUrl={croppingImgUrl}
-            bubbleCroppingImgUrl={bubbleCroppingImgUrl}
-            mergingIndices={mergingIndices}
-            handleMergeWithNext={handleMergeWithNext}
-            setEditingImageIdx={setEditingImageIdx}
-            openEditingImageIdx={openEditingImageIdx}
-            setEditCropTop={setEditCropTop}
-            setEditCropBottom={setEditCropBottom}
-            setEditCropLeft={setEditCropLeft}
-            setEditCropRight={setEditCropRight}
-            setEditAutoTrim={setEditAutoTrim}
-            setScrapedImages={setScrapedImages}
-            setSelectedScraped={setSelectedScraped}
-            setConsoleLogs={setConsoleLogs}
-            addPanelsWithAutoAnalysis={addPanelsWithAutoAnalysis}
-          />
+          <div className="flex gap-4 overflow-x-auto pb-6 pt-1.5 scrollbar-thin">
+            {scrapedImages.map((imgUrl, idx) => {
+              const isSelected = selectedScraped.includes(imgUrl);
+              return (
+                <PanelCard
+                  key={`${imgUrl}-${idx}`}
+                  imgUrl={imgUrl}
+                  idx={idx}
+                  isSelected={isSelected}
+                  isBatchCropping={isBatchCropping}
+                  croppingImgUrl={croppingImgUrl}
+                  bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+                  scrapedImages={scrapedImages}
+                  mergingIndices={mergingIndices}
+                  handleMergeWithNext={handleMergeWithNext}
+                  setEditingImageIdx={setEditingImageIdx}
+                  openEditingImageIdx={openEditingImageIdx}
+                  setEditCropTop={setEditCropTop}
+                  setEditCropBottom={setEditCropBottom}
+                  setEditCropLeft={setEditCropLeft}
+                  setEditCropRight={setEditCropRight}
+                  setEditAutoTrim={setEditAutoTrim}
+                  setScrapedImages={setScrapedImages}
+                  setSelectedScraped={setSelectedScraped}
+                  setConsoleLogs={setConsoleLogs}
+                  addPanelsWithAutoAnalysis={addPanelsWithAutoAnalysis}
+                />
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
