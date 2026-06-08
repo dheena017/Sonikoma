@@ -22,6 +22,14 @@ export default function UrlInputPanel({
   handleGenerateVideo,
   addNotification,
 }: UrlInputPanelProps) {
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const pasted = e.clipboardData?.getData('text') || '';
+    const url = pasted.trim();
+    if (url) {
+      console.log('Pasted URL:', url);
+      setTargetUrl(url);
+    }
+  };
   const modelGrid = (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
       {AI_MODELS.map((modelItem) => (
@@ -78,6 +86,7 @@ export default function UrlInputPanel({
             type="url" 
             value={targetUrl}
             onChange={(e) => setTargetUrl(e.target.value.trim())}
+            onPaste={handlePaste}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !isProcessing && targetUrl.trim()) {
                 handleGenerateVideo();
