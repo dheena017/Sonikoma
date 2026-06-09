@@ -591,6 +591,7 @@ At the **end of every conversation**, append one row to the Session Changelog ta
 
 | Date | Summary | Files Affected |
 |---|---|---|
+| 2026-06-08 | Fixed critical paths, routes, insecure shell calls, implemented video pipeline, ported FastAPI logic, standardized cache | `backend/routes/*`, `backend/python/services/*`, `frontend/src/hooks/*`, `backend/utils/*` |
 | 2026-06-08 | Generated BUG_REPORT2.md focusing on frontend state race conditions, missing OCR functions, and data persistence issues | `BUG_REPORT2.md`, `RULES.md` |
 | 2026-06-08 | Generated comprehensive BUG_REPORT.md after deep audit of the Storyboard AI pipeline and architectural integrity | `BUG_REPORT.md`, `RULES.md` |
 | 2026-06-08 | Fully rewrote README.md and RULES.md to reflect current modular structure, new routes, hooks, utils, and server features | `README.md`, `RULES.md` |

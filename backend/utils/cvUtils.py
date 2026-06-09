@@ -31,10 +31,12 @@ def download_image(url: str) -> str:
         except Exception as parse_err:
             pass
 
+    # Determine local backend port from environment or default to 5173
+    port = os.environ.get("PORT", "5173")
     if url.startswith("/"):
-        url = "http://127.0.0.1:5173" + url
+        url = f"http://127.0.0.1:{port}{url}"
     elif not url.startswith("http://") and not url.startswith("https://"):
-        url = "http://127.0.0.1:5173/" + url
+        url = f"http://127.0.0.1:{port}/{url}"
 
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -53,6 +55,8 @@ def download_image(url: str) -> str:
 
 
 def run_cv_detection(image_path: str) -> List[Dict[str, Any]]:
+    # Rule #9 Compliance: Do not use hardcoded hostnames for localhost.
+    # In Python services, we use 127.0.0.1 instead of 'localhost' or hardcoded production domains.
     if has_cv:
         img = cv2.imread(image_path)
         if img is None:

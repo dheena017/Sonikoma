@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import sharp from 'sharp';
 import { resolveImageToBuffer } from '../../utils/imageUtils.js';
-import { mergedCache, editHistory } from '../../utils/cache.js';
+import { stitchedCache, editHistory } from '../../utils/cache.js';
 
 const router = Router();
 
@@ -118,11 +118,11 @@ router.post(["/merge-images", "/stitch-images"], async (req, res) => {
 
     const uniqueId = `merged_${Date.now()}_merged`;
     const newUrl = `/api/merge-images/cached/${uniqueId}`;
-    mergedCache.set(uniqueId, { data: mergedBuffer, contentType: "image/png" });
+    stitchedCache.set(uniqueId, { data: mergedBuffer, contentType: "image/png" });
     editHistory.set(newUrl, imageUrls[0]);
 
     return res.json({ success: true, url: newUrl });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("[Merge API] Error merging images:", err);
     return res.status(500).json({ error: `Image merging failed: ${err.message || err}` });
   }
@@ -130,7 +130,7 @@ router.post(["/merge-images", "/stitch-images"], async (req, res) => {
 
 // Cached endpoint to fetch compiled vertical panels safely with typical GET src attributes
 router.get(["/merge-images/cached/:id", "/stitch-images/cached/:id"], (req, res) => {
-  const cached = mergedCache.get(req.params.id);
+  const cached = stitchedCache.get(req.params.id);
   if (!cached) {
     return res.status(404).send("Merged visual resource is no longer in memory or has expired.");
   }

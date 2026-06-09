@@ -134,3 +134,33 @@ async def generate_panel_audio(
 def uuid_hex() -> str:
     import uuid
     return uuid.uuid4().hex[:8]
+
+if __name__ == "__main__":
+    import argparse
+    import json
+    import asyncio
+
+    parser = argparse.ArgumentParser(description="Anivox TTS Audio Engine CLI")
+    parser.add_argument("--dialogue_list", required=True, help="JSON list of dialogue strings")
+    parser.add_argument("--target_duration", type=float, required=True, help="Target duration in seconds")
+    parser.add_argument("--output_path", required=True, help="Path to save output MP3")
+    parser.add_argument("--voice", default="en-US-GuyNeural", help="Edge-TTS voice code")
+
+    args = parser.parse_args()
+
+    async def main():
+        try:
+            dialogue = json.loads(args.dialogue_list)
+            await generate_panel_audio(
+                dialogue_list=dialogue,
+                target_duration=args.target_duration,
+                output_path=args.output_path,
+                voice=args.voice
+            )
+            print("SUCCESS")
+        except Exception as e:
+            import sys
+            print(f"ERROR: {str(e)}", file=sys.stderr)
+            sys.exit(1)
+
+    asyncio.run(main())

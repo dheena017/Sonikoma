@@ -29,7 +29,7 @@ const PROXY_CACHE_TTL_MS = 30 * 60 * 1000;  // 30 minutes
 const PROXY_MAX_RETRIES  = 3;
 const PROXY_RETRY_BASE   = 400; // ms
 
-// ─── In-memory proxy cache (separate from mergedCache) ──────────────────────
+// ─── In-memory proxy cache (separate from stitchedCache) ──────────────────────
 interface ProxyCacheEntry {
   data:        Buffer;
   contentType: string;
@@ -90,7 +90,7 @@ async function fetchWithRetry(
   retries = PROXY_MAX_RETRIES,
   baseDelay = PROXY_RETRY_BASE
 ): Promise<globalThis.Response> {
-  let lastErr: any;
+  let lastErr: unknown;
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
       const resp = await fetch(url, { headers });
@@ -105,7 +105,7 @@ async function fetchWithRetry(
         continue;
       }
       return resp;
-    } catch (e: any) {
+    } catch (e: unknown) {
       lastErr = e;
       if (attempt < retries - 1) {
         const delay = baseDelay * Math.pow(2, attempt);
@@ -269,7 +269,7 @@ router.get('/proxy-image', async (req: Request, res: Response) => {
     res.setHeader('X-Proxy-Size-KB',  (buffer.length / 1024).toFixed(1));
     return res.send(buffer);
 
-  } catch (e: any) {
+  } catch (e: unknown) {
     const ms = Date.now() - start;
     console.error(
       `${label('[Proxy]')} ${err('ERROR')} ${route(fetchUrl.slice(0, 60))} ` +

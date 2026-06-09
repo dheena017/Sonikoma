@@ -45,7 +45,7 @@ router.post("/download-zip", async (req, res) => {
       success: true,
       downloadUrl: `/api/download-zip/get/${zipId}`
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("[Zip Generation Error]", err);
     return res.status(500).json({ error: `ZIP packaging failed: ${err.message || err}` });
   }

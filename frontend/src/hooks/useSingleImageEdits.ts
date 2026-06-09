@@ -84,10 +84,10 @@ export function useSingleImageEdits({
       addNotification(`Frame #${editingImageIdx + 1} cropped and trimmed successfully!`, 'success');
     } catch (err: any) {
       setConsoleLogs(prev => [
-        `[Image Editor] [ERROR] Failed to save edits for Frame #${editingImageIdx + 1}: ${err.message || 'Unknown error'}`,
+        `[Image Editor] [ERROR] Failed to save edits for Frame #${editingImageIdx + 1}: ${ (err as any).message || 'Unknown error'}`,
         ...prev
       ]);
-      if (!err.intercepted) {
+      if (! (err as any).intercepted) {
         addNotification(`Failed to save edits for Frame #${editingImageIdx + 1}. Please try again later.`, "error");
       }
     } finally {
@@ -153,7 +153,7 @@ export function useSingleImageEdits({
       ]);
       console.log(`[Image Editor] Generated ${cuts.length} cuts from Frame #${editingImageIdx + 1}:`, croppedUrls);
     } catch (err: any) {
-      if (!err.intercepted) {
+      if (! (err as any).intercepted) {
         addNotification(`Batch crop failed. Please check the edits and try again.`, "error");
       }
     } finally {
@@ -207,10 +207,10 @@ export function useSingleImageEdits({
       addNotification(`Frames #${idx + 1} and #${idx + 2} stitched successfully!`, 'success');
     } catch (err: any) {
       setConsoleLogs(prev => [
-        `[Stitcher] [ERROR] Merge failed for Frame #${idx + 1} + #${idx + 2}: ${err.message || 'Unknown error'}`,
+        `[Stitcher] [ERROR] Merge failed for Frame #${idx + 1} + #${idx + 2}: ${ (err as any).message || 'Unknown error'}`,
         ...prev
       ]);
-      if (!err.intercepted) {
+      if (! (err as any).intercepted) {
         addNotification(`Stitching failed. Please try again or refresh the page.`, "error");
       }
     } finally {

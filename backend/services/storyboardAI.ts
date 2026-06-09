@@ -1,9 +1,19 @@
 import { ai, hf, Type } from '../config/clients.js';
 
+interface StoryboardPanel {
+  id: number;
+  image_url: string;
+  original_image_url: string;
+  speech_text: string;
+  sfx: string;
+  duration: number;
+  motion_type: string;
+}
+
 /**
  * Helper function to generate rich story dialogs/captions dynamically without hardcoding
  */
-export async function generateDynamicPanels(title: string, genre: string, episode: string, imgUrls: string[], model: string): Promise<any[]> {
+export async function generateDynamicPanels(title: string, genre: string, episode: string, imgUrls: string[], model: string): Promise<StoryboardPanel[]> {
   const activeSlicesCount = Math.min(imgUrls.length, 8);
   const prompt = `You are a cinematic comic book editor and storyteller.
 Given this Comic Webtoon information:
@@ -30,9 +40,14 @@ Output strictly valid JSON with top-level key "panels".`;
       });
 
       const responseText = response.choices[0].message.content || "";
-      const parsedAI = JSON.parse(responseText.replace(/```json/g, '').replace(/```/g, '').trim());
+      // Robust JSON cleaning
+      const cleanJson = responseText
+        .replace(/^\s*```(?:json)?/i, '')
+        .replace(/```\s*$/i, '')
+        .trim();
+      const parsedAI = JSON.parse(cleanJson);
       if (parsedAI && Array.isArray(parsedAI.panels)) {
-          return parsedAI.panels.slice(0, activeSlicesCount).map((p: any, idx: number) => ({
+          return parsedAI.panels.slice(0, activeSlicesCount).map((p: { speech_text?: string; sfx?: string; motion_type?: string }, idx: number) => ({
               id: idx + 1,
               image_url: imgUrls[idx],
               original_image_url: imgUrls[idx],
@@ -42,7 +57,7 @@ Output strictly valid JSON with top-level key "panels".`;
               motion_type: p.motion_type || "zoom_in"
           }));
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       if (e.message && e.message.includes("sufficient permissions")) {
           console.log('[HuggingFace] Inference Provider permission denied. Falling back silently to Gemini.');
       } else {
@@ -84,7 +99,7 @@ Output strictly valid JSON with top-level key "panels".`;
         const parsedAI = JSON.parse(responseText);
         if (parsedAI && Array.isArray(parsedAI.panels) && parsedAI.panels.length > 0) {
           console.log(`[Gemini] Storyboard narration generated successfully for ${activeSlicesCount} slices.`);
-          return parsedAI.panels.slice(0, activeSlicesCount).map((p: any, idx: number) => ({
+          return parsedAI.panels.slice(0, activeSlicesCount).map((p: { speech_text?: string; sfx?: string; motion_type?: string }, idx: number) => ({
             id: idx + 1,
             image_url: imgUrls[idx],
             original_image_url: imgUrls[idx],
@@ -95,7 +110,7 @@ Output strictly valid JSON with top-level key "panels".`;
           }));
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (err.status === 429) {
         console.warn("[Gemini Script] Quota limit reached, waiting to retry once...");
         await new Promise(resolve => setTimeout(resolve, 5000));
@@ -130,7 +145,7 @@ Output strictly valid JSON with top-level key "panels".`;
           if (responseText) {
             const parsedAI = JSON.parse(responseText);
             if (parsedAI && Array.isArray(parsedAI.panels) && parsedAI.panels.length > 0) {
-              return parsedAI.panels.slice(0, activeSlicesCount).map((p: any, idx: number) => ({
+              return parsedAI.panels.slice(0, activeSlicesCount).map((p: { speech_text?: string; sfx?: string; motion_type?: string }, idx: number) => ({
                 id: idx + 1,
                 image_url: imgUrls[idx],
                 original_image_url: imgUrls[idx],
@@ -141,7 +156,7 @@ Output strictly valid JSON with top-level key "panels".`;
               }));
             }
           }
-        } catch (retryErr: any) {
+        } catch (retryErr: unknown) {
           console.warn("[Gemini Script] Retry also failed. Falling back.", retryErr.message);
         }
       } else {

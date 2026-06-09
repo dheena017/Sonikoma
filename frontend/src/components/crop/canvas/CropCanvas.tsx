@@ -303,6 +303,7 @@ export default function CropCanvas({
           editCropLeft={editCropLeft}
           editCropRight={editCropRight}
           onResizeStart={onResizeStart}
+          dragType={dragType}
         />
 
         {/* Slices Overlay */}

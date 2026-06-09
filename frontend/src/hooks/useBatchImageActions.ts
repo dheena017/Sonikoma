@@ -69,38 +69,42 @@ export function useBatchImageActions({
     let completedCount = 0;
     const errors: string[] = [];
 
-    for (const url of selectedScraped) {
-      setBubbleCroppingImgUrl(url);
-      try {
-        const response = await fetchWithInterceptor("/api/remove-speech-bubble", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            url: url,
-            method: bubbleEraseMethod,
-            sensitivity: bubbleSensitivity,
-            detection_style: bubbleDetectionStyle,
-          }),
-        });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
-        
-        if (data.success && data.url) {
-          setScrapedImages((prev) => prev.map((img) => (img === url ? data.url : img)));
-          setSelectedScraped((prev) => prev.map((img) => (img === url ? data.url : img)));
-          setPanels((prev) => prev.map((p) => (p.image_url === url ? { ...p, image_url: data.url } : p)));
-        }
-      } catch (err: any) {
-        errors.push(`Image: ${url.substring(0, 40)}... - Error: ${err.message}`);
-      } finally {
-        completedCount++;
-        setCleanProgress({ current: completedCount, total: selectedScraped.length });
-      }
-    }
+    try {
+      for (const url of selectedScraped) {
+        setBubbleCroppingImgUrl(url);
+        try {
+          const response = await fetchWithInterceptor("/api/remove-speech-bubbles", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              url: url,
+              method: bubbleEraseMethod,
+              sensitivity: bubbleSensitivity,
+              detection_style: bubbleDetectionStyle,
+            }),
+          });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const data = await response.json();
 
-    setIsCleaningBubbles(false);
-    setCleanProgress(null);
-    setBubbleCroppingImgUrl(null);
+          if (data.success && data.url) {
+            setScrapedImages((prev) => prev.map((img) => (img === url ? data.url : img)));
+            setSelectedScraped((prev) => prev.map((img) => (img === url ? data.url : img)));
+            setPanels((prev) => prev.map((p) => (p.image_url === url ? { ...p, image_url: data.url } : p)));
+          }
+        } catch (err: any) {
+          errors.push(`Image: ${url.substring(0, 40)}... - Error: ${err.message}`);
+        } finally {
+          completedCount++;
+          setCleanProgress({ current: completedCount, total: selectedScraped.length });
+        }
+      }
+    } catch (outerErr: any) {
+      errors.push(`Critical error in batch bubble cleaning: ${outerErr.message}`);
+    } finally {
+      setIsCleaningBubbles(false);
+      setCleanProgress(null);
+      setBubbleCroppingImgUrl(null);
+    }
 
     if (errors.length > 0) {
       addNotification(`Batch cleaning speech bubbles completed with ${errors.length} errors.`, "warning");
@@ -131,71 +135,79 @@ export function useBatchImageActions({
     const errors: string[] = [];
     const newSlicedUrlsMap: Record<string, string[]> = {};
 
-    for (const url of selectedScraped) {
-      setCroppingImgUrl(url);
-      try {
-        const response = await fetchWithInterceptor("/api/detect-panels", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            url: url,
-            sensitivity: cropSensitivity,
-            backgroundColorMode: cropBackgroundMode,
-            aspectRatio: aspectRatioLock,
-            minAreaPct: minPanelAreaPct,
-            mergeThreshold: overlapMergeThreshold,
-            strategy: useLocalCV ? "local-cv" : "balanced",
-            model: selectedModel,
-            closeKernelSize: 15,
-            minHeightPx: 50,
-          }),
-        });
+    try {
+      for (const url of selectedScraped) {
+        setCroppingImgUrl(url);
+        try {
+          const response = await fetchWithInterceptor("/api/detect-panels", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              url: url,
+              sensitivity: cropSensitivity,
+              backgroundColorMode: cropBackgroundMode,
+              aspectRatio: aspectRatioLock,
+              minAreaPct: minPanelAreaPct,
+              mergeThreshold: overlapMergeThreshold,
+              strategy: useLocalCV ? "local-cv" : "balanced",
+              model: selectedModel,
+              closeKernelSize: 15,
+              minHeightPx: 50,
+            }),
+          });
 
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const data = await response.json();
 
-        if (data.success && Array.isArray(data.panels) && data.panels.length > 0) {
-          const croppedUrls: string[] = [];
-          for (let i = 0; i < data.panels.length; i++) {
-            const box = data.panels[i];
+          if (data.success && Array.isArray(data.panels) && data.panels.length > 0) {
+            const croppedUrls: string[] = [];
+            for (let i = 0; i < data.panels.length; i++) {
+              const box = data.panels[i];
 
-            // The /api/detect-panels backend already crops each panel and
-            // returns a ready-to-use croppedUrl. Use it directly to avoid a
-            // redundant second edit-image round-trip that was silently
-            // re-cropping the wrong region.
-            if (box.croppedUrl) {
-              croppedUrls.push(box.croppedUrl);
-            } else {
-              // Fallback for any backend variant that doesn't embed croppedUrl
-              const cropResponse = await fetchWithInterceptor("/api/edit-image", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  url: url,
-                  cropTop: box.cropTop,
-                  cropBottom: box.cropBottom,
-                  cropLeft: box.cropLeft,
-                  cropRight: box.cropRight,
-                  autoTrim: true,
-                  padding: cropPaddingPx,
-                }),
-              });
-              if (!cropResponse.ok) throw new Error(`Edit-image HTTP ${cropResponse.status}`);
-              const cropData = await cropResponse.json();
-              croppedUrls.push(cropData.url);
+              // The /api/detect-panels backend already crops each panel and
+              // returns a ready-to-use croppedUrl. Use it directly to avoid a
+              // redundant second edit-image round-trip that was silently
+              // re-cropping the wrong region.
+              if (box.croppedUrl) {
+                croppedUrls.push(box.croppedUrl);
+              } else {
+                // Fallback for any backend variant that doesn't embed croppedUrl
+                const cropResponse = await fetchWithInterceptor("/api/edit-image", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    url: url,
+                    cropTop: box.cropTop,
+                    cropBottom: box.cropBottom,
+                    cropLeft: box.cropLeft,
+                    cropRight: box.cropRight,
+                    autoTrim: true,
+                    padding: cropPaddingPx,
+                  }),
+                });
+                if (!cropResponse.ok) throw new Error(`Edit-image HTTP ${cropResponse.status}`);
+                const cropData = await cropResponse.json();
+                croppedUrls.push(cropData.url);
+              }
             }
+            newSlicedUrlsMap[url] = croppedUrls;
+          } else {
+            newSlicedUrlsMap[url] = [url];
           }
-          newSlicedUrlsMap[url] = croppedUrls;
-        } else {
+        } catch (err: any) {
+          errors.push(`Image: ${url.substring(0, 40)}... - Error: ${err.message}`);
           newSlicedUrlsMap[url] = [url];
+        } finally {
+          completedCount++;
+          setBatchProgress({ current: completedCount, total: selectedScraped.length });
         }
-      } catch (err: any) {
-        errors.push(`Image: ${url.substring(0, 40)}... - Error: ${err.message}`);
-        newSlicedUrlsMap[url] = [url];
-      } finally {
-        completedCount++;
-        setBatchProgress({ current: completedCount, total: selectedScraped.length });
       }
+    } catch (outerErr: any) {
+      errors.push(`Critical error in batch auto-crop: ${outerErr.message}`);
+    } finally {
+      setIsBatchCropping(false);
+      setBatchProgress(null);
+      setCroppingImgUrl(null);
     }
 
     setScrapedImages((prev) => {
@@ -209,10 +221,6 @@ export function useBatchImageActions({
       });
       return copy;
     });
-
-    setIsBatchCropping(false);
-    setBatchProgress(null);
-    setCroppingImgUrl(null);
 
     if (errors.length > 0) {
       addNotification(`Batch auto crop completed with ${errors.length} errors.`, "warning");

@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import sharp from 'sharp';
-import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { ai, Type, callGeminiWithRetry } from '../../config/clients.js';
 import { resolveImageToBuffer } from '../../utils/imageUtils.js';
-import { mergedCache, editHistory } from '../../utils/cache.js';
+import { stitchedCache, editHistory } from '../../utils/cache.js';
+import { runPythonScript } from '../../utils/pythonHelper.js';
 
 const router = Router();
 
@@ -94,29 +94,35 @@ router.post(["/ai-detect-panels", "/detect-panels", "/ai-smart-crop"], async (re
       const tempIn = path.join(tempDir, `${uniqueId}_in.png`);
       await fs.promises.writeFile(tempIn, imageBuffer);
 
-      const pythonBin = process.platform === 'win32' ? 'python' : 'python3';
-      const pythonCommand = `"${pythonBin}" backend/services/detect_panels.py --image_path "${tempIn}" --sensitivity ${sensitivity} --background_mode "${backgroundColorMode}" --min_width_pct ${minAreaPct} --merge_threshold ${mergeThreshold} --aspect_ratio "${aspectRatio}" --canny_low ${cannyLow} --canny_high ${cannyHigh} --close_kernel_size ${closeKernelSize} --min_height_px ${minHeightPx}`;
+      const pythonScript = 'backend/python/services/detect_panels.py';
+      const args = [
+        '--image_path', tempIn,
+        '--sensitivity', sensitivity.toString(),
+        '--background_mode', backgroundColorMode,
+        '--min_width_pct', minAreaPct.toString(),
+        '--merge_threshold', mergeThreshold.toString(),
+        '--aspect_ratio', aspectRatio,
+        '--canny_low', cannyLow.toString(),
+        '--canny_high', cannyHigh.toString(),
+        '--close_kernel_size', closeKernelSize.toString(),
+        '--min_height_px', minHeightPx.toString()
+      ];
 
-      console.log(`[Local CV Detector API] Running command: ${pythonCommand}`);
+      console.log(`[Local CV Detector API] Spawning ${pythonScript} with args: ${args.join(' ')}`);
 
       try {
-        const stdout = await new Promise<string>((resolve, reject) => {
-          exec(pythonCommand, (error, stdout, stderr) => {
-            if (error) {
-              console.error("[Local CV Detector Error] Script failed:", error, stderr);
-              reject(new Error(stderr || error.message));
-            } else {
-              resolve(stdout);
-            }
-          });
-        });
+        const { code, stdout, stderr } = await runPythonScript(pythonScript, args);
+        if (code !== 0) {
+          console.error("[Local CV Detector Error] Script failed:", code, stderr);
+          throw new Error(stderr);
+        }
 
         const data = JSON.parse(stdout.trim());
         if (!data.success) {
           throw new Error(data.error || "Local CV detection script reported failure.");
         }
         coordPanels = data.panels || [];
-      } catch (cvErr: any) {
+      } catch (cvErr: unknown) {
         console.error("[Local CV Detector Error] Parse or execution error:", cvErr);
         throw cvErr;
       } finally {
@@ -171,7 +177,7 @@ router.post(["/ai-detect-panels", "/detect-panels", "/ai-smart-crop"], async (re
           },
         }), 4, 1500);
         aiResultText = response.text || "[]";
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("[AI Smart Crop API] All retries failed or fatal error encountered. Returning empty.", err);
         // 👇 FIX: Return empty array so the UI knows detection failed
         aiResultText = "[]";
@@ -227,7 +233,7 @@ router.post(["/ai-detect-panels", "/detect-panels", "/ai-smart-crop"], async (re
 
       const uniqueId = `merged_${Date.now()}_smartcrop_${i}`;
       const cachedUrl = `/api/merge-images/cached/${uniqueId}`;
-      mergedCache.set(uniqueId, { data: croppedBuffer, contentType });
+      stitchedCache.set(uniqueId, { data: croppedBuffer, contentType });
       editHistory.set(cachedUrl, url);
 
       croppedPanels.push({
@@ -243,7 +249,7 @@ router.post(["/ai-detect-panels", "/detect-panels", "/ai-smart-crop"], async (re
       success: true,
       panels: croppedPanels
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("[AI Smart Crop API] Error:", err.message || err);
     return res.status(500).json({ error: `AI Smart Crop failed: ${err.message || err}` });
   }

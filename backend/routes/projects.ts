@@ -24,7 +24,7 @@ router.get("/", (req, res) => {
   try {
     const projects = getAllProjects();
     res.json({ success: true, projects });
-  } catch (err: any) {
+  } catch (err: unknown) {
     res.status(500).json({ error: `Failed to fetch projects: ${err.message}` });
   }
 });
@@ -36,7 +36,7 @@ router.get("/:projectId", (req, res) => {
     if (!project) return res.status(404).json({ error: "Project not found." });
     const panels = getPanels(req.params.projectId);
     res.json({ success: true, project, panels });
-  } catch (err: any) {
+  } catch (err: unknown) {
     res.status(500).json({ error: `Failed to fetch project: ${err.message}` });
   }
 });
@@ -54,12 +54,12 @@ router.post("/", (req, res) => {
       title:        title || "Untitled Webtoon",
       genre:        genre || "general",
       episode:      episode || "",
-      status:       "completed",
+      status:       "pending",
       panels_count: panels_count || 0,
       video_url:    video_url || null
     });
     res.json({ success: true, project_id });
-  } catch (err: any) {
+  } catch (err: unknown) {
     res.status(500).json({ error: `Failed to save project: ${err.message}` });
   }
 });
@@ -71,18 +71,22 @@ router.post("/:projectId/panels", (req, res) => {
     return res.status(400).json({ error: "Field 'panels' must be an array." });
   }
   try {
-    const saveMany = db.transaction((panelList: any[]) => {
+    const saveMany = db.transaction((panelList: unknown[]) => {
       panelList.forEach((p, i) => {
+        // Enforce length validation for AI-generated text (Rule violation check)
+        const speechText = (p.speech_text || "").substring(0, 1000);
+        const visualDescription = (p.visual_description || "").substring(0, 2000);
+
         insertPanel({
           project_id:         req.params.projectId,
           panel_index:        i,
           image_url:          p.image_url || "",
           original_url:       p.original_image_url || null,
-          speech_text:        p.speech_text || "",
+          speech_text:        speechText,
           sfx:                p.sfx || "",
           duration:           p.duration || 4.5,
           motion_type:        p.motion_type || "zoom_in",
-          visual_description: p.visual_description || null,
+          visual_description: visualDescription || null,
           brightness:         p.brightness ?? null,
           contrast:           p.contrast ?? null,
           saturation:         p.saturation ?? null,
@@ -99,7 +103,7 @@ router.post("/:projectId/panels", (req, res) => {
     saveMany(panels);
     updateProject(req.params.projectId, { panels_count: panels.length });
     res.json({ success: true, saved: panels.length });
-  } catch (err: any) {
+  } catch (err: unknown) {
     res.status(500).json({ error: `Failed to save panels: ${err.message}` });
   }
 });
@@ -109,7 +113,7 @@ router.delete("/:projectId", (req, res) => {
   try {
     deleteProject(req.params.projectId);
     res.json({ success: true });
-  } catch (err: any) {
+  } catch (err: unknown) {
     res.status(500).json({ error: `Failed to delete project: ${err.message}` });
   }
 });

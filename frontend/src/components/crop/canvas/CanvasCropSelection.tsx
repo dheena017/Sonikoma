@@ -8,6 +8,7 @@ interface CanvasCropSelectionProps {
   editCropLeft: number;
   editCropRight: number;
   onResizeStart: (handle: string, clientX: number, clientY: number) => void;
+  dragType?: string | null;
 }
 
 export default function CanvasCropSelection({
@@ -17,6 +18,7 @@ export default function CanvasCropSelection({
   editCropLeft,
   editCropRight,
   onResizeStart,
+  dragType,
 }: CanvasCropSelectionProps) {
   if (!isVisible) return null;
 
@@ -26,7 +28,9 @@ export default function CanvasCropSelection({
     editCropLeft !== 0 ||
     editCropRight !== 0;
 
-  if (!hasCropSelection) return null;
+  const shouldRender = hasCropSelection || dragType === "draw";
+
+  if (!shouldRender) return null;
 
   return (
     <>

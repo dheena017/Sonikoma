@@ -36,7 +36,7 @@ router.post("/scrape-images", async (req, res) => {
       }
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`${col.error('[Scraper Error]')} Failed to extract page assets:`, error);
     return res.status(500).json({
       success: false,

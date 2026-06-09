@@ -105,9 +105,9 @@ export class CacheStore<T> {
 
 // ─── Shared application caches ───────────────────────────────────────────────
 
-/** Merged/stitched image cache — entries expire after 30 minutes */
-export const mergedCache = new CacheStore<{ data: Buffer; contentType: string }>(
-  'mergedImages', 30 * 60 * 1000, 100
+/** Merged/stitched image cache — entries expire after 4 hours (increased from 30m to prevent 404s in long sessions) */
+export const stitchedCache = new CacheStore<{ data: Buffer; contentType: string }>(
+  'stitchedCache', 4 * 60 * 60 * 1000, 200
 );
 
 /** Per-panel base64 edit history — entries expire after 1 hour */
@@ -124,7 +124,7 @@ export const zipCache = new CacheStore<Buffer>(
 
 export function getAllCacheStats() {
   return {
-    mergedImages: mergedCache.stats(),
+    stitchedCache: stitchedCache.stats(),
     editHistory:  editHistory.stats(),
     zipFiles:     zipCache.stats(),
   };
@@ -132,7 +132,7 @@ export function getAllCacheStats() {
 
 /** Run expired-entry purge across all caches. */
 export function purgeAllExpired(): void {
-  const m = mergedCache.purgeExpired();
+  const m = stitchedCache.purgeExpired();
   const e = editHistory.purgeExpired();
   const z = zipCache.purgeExpired();
   if (m + e + z > 0) {

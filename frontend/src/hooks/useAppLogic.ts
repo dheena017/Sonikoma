@@ -116,16 +116,20 @@ export function useAppLogic() {
             eventSource.close();
             eventSource = null;
           }
-          startPolling();
+          if (isCurrent) {
+            startPolling();
+          }
         };
       } catch (err) {
         startPolling();
       }
     };
 
+    let isCurrent = true;
     connectSSE();
 
     return () => {
+      isCurrent = false;
       if (eventSource) {
         eventSource.close();
       }

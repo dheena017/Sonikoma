@@ -169,3 +169,39 @@ async def compile_video(
     except Exception as compile_err:
         logger.critical(f"Cinematic compilation failed: {str(compile_err)}", exc_info=True)
         raise compile_err
+
+if __name__ == "__main__":
+    import argparse
+    import json
+    import asyncio
+
+    parser = argparse.ArgumentParser(description="Anivox Video Compiler CLI")
+    parser.add_argument("--panel_data_path", required=True, help="Path to JSON file containing panel data")
+    parser.add_argument("--output_path", required=True, help="Path to write the final MP4")
+    parser.add_argument("--bgm_path", help="Path to optional background music")
+    parser.add_argument("--target_width", type=int, default=1920)
+    parser.add_argument("--target_height", type=int, default=1080)
+    parser.add_argument("--fps", type=int, default=24)
+
+    args = parser.parse_args()
+
+    async def main():
+        try:
+            with open(args.panel_data_path, 'r') as f:
+                panel_data = json.load(f)
+
+            await compile_video(
+                panel_data=panel_data,
+                output_path=args.output_path,
+                bgm_path=args.bgm_path,
+                target_width=args.target_width,
+                target_height=args.target_height,
+                fps=args.fps
+            )
+            print("SUCCESS")
+        except Exception as e:
+            import sys
+            print(f"ERROR: {str(e)}", file=sys.stderr)
+            sys.exit(1)
+
+    asyncio.run(main())
