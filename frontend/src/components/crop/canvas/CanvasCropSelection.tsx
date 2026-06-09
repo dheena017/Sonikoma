@@ -62,7 +62,7 @@ export default function CanvasCropSelection({
           left: `${editCropLeft}%`,
           right: `${editCropRight}%`,
           boxShadow: `0 0 0 1.5px rgba(0,0,0,0.7), inset 0 0 0 1.5px rgba(0,0,0,0.7), 0 0 30px ${glowColor}`,
-          zIndex: 40
+          zIndex: 50
         }}
       >
         {/* Corner handles - Keep premium transitions for hover effects */}
