@@ -21,7 +21,7 @@ export default function CanvasSplitLines({
 }: CanvasSplitLinesProps) {
   return (
     <div
-      className="absolute inset-0 z-40 pointer-events-none transition-opacity duration-200"
+      className="absolute inset-0 z-40 pointer-events-none"
       style={{
         display: isVisible ? "block" : "none",
       }}
@@ -31,8 +31,8 @@ export default function CanvasSplitLines({
         className="absolute left-0 right-0 z-40 pointer-events-none"
         style={{ top: `${splitPosition}%` }}
       >
-        <div className="absolute inset-x-0 border-t-2 border-dashed border-red-400/80" />
-        <div className="absolute right-2 -top-5 bg-red-950/95 text-red-300 font-mono text-[9px] px-2 py-0.5 rounded-lg border border-red-800/60 font-bold backdrop-blur shadow-lg">
+        <div className="absolute inset-x-0 border-t-2 border-dashed border-purple-400/80" />
+        <div className="absolute right-2 -top-5 bg-purple-950/95 text-purple-300 font-mono text-[9px] px-2 py-0.5 rounded-lg border border-purple-800/60 font-bold backdrop-blur shadow-lg">
           Split: {splitPosition}% (draft)
         </div>
       </div>
@@ -47,9 +47,9 @@ export default function CanvasSplitLines({
             style={{ top: `${y}%` }}
           >
             <div
-              className={`w-full border-t-2 border-dashed transition-all ${
+              className={`w-full border-t-2 border-dashed ${
                 isHovered
-                  ? "border-red-400 shadow-[0_0_8px_rgba(248,113,113,0.5)] scale-y-110"
+                  ? "border-purple-400 shadow-[0_0_8px_rgba(167,139,250,0.5)]"
                   : "border-purple-500/70"
               }`}
             />

@@ -315,12 +315,12 @@ export default function CropCanvas({
               onClick={(e) => { e.stopPropagation(); handleSelectSlice(slice); }}
               onMouseDown={(e) => { if (e.button === 0) { e.stopPropagation(); handleSelectAndDragSlice(slice, e.clientX, e.clientY); }}}
               className={`absolute border-2 pointer-events-auto cursor-grab active:cursor-grabbing transition-colors flex flex-col justify-between ${
-                isSelected ? "border-emerald-400 bg-emerald-500/10 z-30" : "border-purple-500/40 bg-purple-500/5 hover:bg-purple-500/10 z-20"
+                isSelected ? "border-purple-400 bg-purple-500/10 z-30 shadow-[0_0_15px_rgba(139,92,246,0.2)]" : "border-purple-500/40 bg-purple-500/5 hover:bg-purple-500/10 z-20"
               }`}
               style={{ top: `${slice.cropTop}%`, bottom: `${slice.cropBottom}%`, left: `${slice.cropLeft}%`, right: `${slice.cropRight}%` }}
             >
               <div className="p-1">
-                <span className={`inline-block font-mono text-[8px] font-bold px-1.5 py-0.5 rounded-lg ${isSelected ? "bg-emerald-950 text-emerald-300" : "bg-purple-950/90 text-purple-300"}`}>
+                <span className={`inline-block font-mono text-[8px] font-bold px-1.5 py-0.5 rounded-lg ${isSelected ? "bg-purple-950 text-purple-300 border border-purple-500/30" : "bg-purple-950/90 text-purple-300"}`}>
                   Cut #{index + 1}
                 </span>
               </div>
