@@ -37,6 +37,7 @@ interface UseCropEditorDragProps {
   selectedSliceId: string | null;
   autoPushOnDraw: boolean;
   editAutoTrim: boolean;
+  activeTab: string;
   
   pushHistory: () => void;
   handleSelectSlice: (slice: Slice) => void;
@@ -79,6 +80,7 @@ export function useCropEditorDrag({
   selectedSliceId,
   autoPushOnDraw,
   editAutoTrim,
+  activeTab,
 
   pushHistory,
   handleSelectSlice,
@@ -136,7 +138,7 @@ export function useCropEditorDrag({
     const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
     const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
 
-    if (showSplitPosition) {
+    if (activeTab === 'slice') {
       const nearLineIdx = splitLines.findIndex(lineY => Math.abs(lineY - y) < 2.5);
       if (nearLineIdx !== -1) {
         setDragType("drag-split-line" as any);
@@ -150,24 +152,26 @@ export function useCropEditorDrag({
       return;
     }
 
-    if (isPointInsideSelection(x, y)) {
-      setDragType("move");
-      setDragStartPercent({ x, y });
-      setOriginalCropBounds({
-        top: editCropTop,
-        bottom: editCropBottom,
-        left: editCropLeft,
-        right: editCropRight,
-      });
-    } else {
-      setDragType("draw");
-      setDragStart({ x, y });
-      setSelectedSliceId(null);
+    if (activeTab === 'crop') {
+      if (isPointInsideSelection(x, y)) {
+        setDragType("move");
+        setDragStartPercent({ x, y });
+        setOriginalCropBounds({
+          top: editCropTop,
+          bottom: editCropBottom,
+          left: editCropLeft,
+          right: editCropRight,
+        });
+      } else {
+        setDragType("draw");
+        setDragStart({ x, y });
+        setSelectedSliceId(null);
+      }
     }
   };
 
   const handleMove = (x: number, y: number) => {
-    if (dragType === "drag-split-line" && draggingSplitLineIdx !== null) {
+    if (activeTab === 'slice' && dragType === "drag-split-line" && draggingSplitLineIdx !== null) {
       let targetY = y;
       if (magneticSnap && detectedGutters.length > 0) {
         let nearest = y;
@@ -190,7 +194,7 @@ export function useCropEditorDrag({
       return;
     }
 
-    if (showSplitPosition && dragType === "split") {
+    if (activeTab === 'slice' && dragType === "split") {
       let targetY = y;
       if (magneticSnap && detectedGutters.length > 0) {
         let nearest = y;
@@ -208,7 +212,7 @@ export function useCropEditorDrag({
       return;
     }
 
-    if (dragType === "draw" && dragStart) {
+    if (activeTab === 'crop' && dragType === "draw" && dragStart) {
       const left = Math.min(dragStart.x, x);
       const right = 100 - Math.max(dragStart.x, x);
       const top = Math.min(dragStart.y, y);
@@ -221,7 +225,7 @@ export function useCropEditorDrag({
       return;
     }
 
-    if (dragType === "move" && dragStartPercent && originalCropBounds) {
+    if (activeTab === 'crop' && dragType === "move" && dragStartPercent && originalCropBounds) {
       const dx = x - dragStartPercent.x;
       const dy = y - dragStartPercent.y;
 
@@ -271,7 +275,7 @@ export function useCropEditorDrag({
       return;
     }
 
-    if (dragType?.startsWith("resize-") && dragStartPercent && originalCropBounds) {
+    if (activeTab === 'crop' && dragType?.startsWith("resize-") && dragStartPercent && originalCropBounds) {
       const handle = dragType.replace("resize-", "");
       const dx = x - dragStartPercent.x;
       const dy = y - dragStartPercent.y;
