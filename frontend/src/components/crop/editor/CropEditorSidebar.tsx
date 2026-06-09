@@ -437,8 +437,12 @@ function CropEditorSidebar({
               type="button"
               onClick={handleExecuteSave}
               disabled={isSavingEdit}
-              className="w-full relative bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center justify-center gap-2 shadow-lg shadow-purple-900/50"
-              style={{ boxShadow: isSavingEdit ? undefined : "0 0 20px rgba(139,92,246,0.25), 0 4px 12px rgba(0,0,0,0.4)" }}
+              className={`w-full relative px-6 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center justify-center gap-2 shadow-lg ${
+                selectedSliceId
+                  ? "bg-emerald-600 hover:bg-emerald-500 shadow-emerald-900/50"
+                  : "bg-purple-600 hover:bg-purple-500 shadow-purple-900/50"
+              } disabled:opacity-40 disabled:cursor-not-allowed text-white`}
+              style={{ boxShadow: isSavingEdit ? undefined : `0 0 20px ${selectedSliceId ? 'rgba(16,185,129,0.25)' : 'rgba(139,92,246,0.25)'}, 0 4px 12px rgba(0,0,0,0.4)` }}
             >
               {isSavingEdit ? (
                 <>
@@ -447,8 +451,17 @@ function CropEditorSidebar({
                 </>
               ) : (
                 <>
-                  <Layers className="h-4 w-4 text-purple-200" />
-                  <span>Execute {slices.length} Crops</span>
+                  {selectedSliceId ? (
+                    <>
+                      <Layers className="h-4 w-4 text-emerald-200" />
+                      <span>Execute Selected Crop</span>
+                    </>
+                  ) : (
+                    <>
+                      <Layers className="h-4 w-4 text-purple-200" />
+                      <span>{slices.length > 0 ? `Execute ${slices.length} Crops` : "Execute Crop"}</span>
+                    </>
+                  )}
                 </>
               )}
             </button>
