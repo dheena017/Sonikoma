@@ -23,7 +23,7 @@ export function PanelCardActions({
   setConsoleLogs,
   addNotification,
 }: PanelCardActionsProps) {
-  const [confirmDelete, setConfirmDelete] = React.useState(false);
+  // immediate delete on click; no confirm state needed
 
   const handleEditClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
@@ -33,12 +33,7 @@ export function PanelCardActions({
 
   const handleDeleteClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
-    if (!confirmDelete) {
-      setConfirmDelete(true);
-      // Auto-reset confirm state after 2.5 s
-      setTimeout(() => setConfirmDelete(false), 2500);
-      return;
-    }
+    // Delete immediately on single click
     setScrapedImages((prev) => prev.filter((_, i) => i !== idx));
     setSelectedScraped((prev) => prev.filter((img) => img !== imgUrl));
     setConsoleLogs((prev) => [
@@ -65,20 +60,15 @@ export function PanelCardActions({
         <span>Edit</span>
       </button>
 
-      {/* Delete button – single-click → confirm, second click → delete */}
+      {/* Delete button – single-click deletes immediately */}
       <button
         type="button"
         onClick={handleDeleteClick}
-        title={confirmDelete ? "Click again to confirm delete" : "Remove panel from deck"}
-        className={[
-          "flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg border transition-all duration-150 cursor-pointer text-[9px] font-mono font-medium tracking-wide",
-          confirmDelete
-            ? "bg-red-900/60 border-red-700/70 text-red-300 animate-pulse"
-            : "bg-neutral-900 hover:bg-red-950/50 hover:text-red-400 text-neutral-500 border-neutral-800 hover:border-red-900/50",
-        ].join(" ")}
+        title="Remove panel from deck"
+        className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg border transition-all duration-150 cursor-pointer text-[9px] font-mono font-medium tracking-wide bg-neutral-900 hover:bg-red-950/50 hover:text-red-400 text-neutral-500 border-neutral-800 hover:border-red-900/50"
       >
         <Trash2 className="h-3 w-3 shrink-0" />
-        <span>{confirmDelete ? "Confirm?" : "Delete"}</span>
+        <span>Delete</span>
       </button>
     </div>
   );

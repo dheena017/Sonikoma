@@ -29,6 +29,7 @@ interface CropCanvasProps {
   onResizeStart: (handle: string, clientX: number, clientY: number) => void;
   handleSelectAndDragSlice: (slice: Slice, clientX: number, clientY: number) => void;
   zoom?: number;
+  activeTab: "adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge";
 
   // Phase 4 Props
   editMode?: "crop" | "clean_auto" | "clean_manual" | "typeset" | "slices";
@@ -66,6 +67,7 @@ export default function CropCanvas({
   splitPosition,
   splitLines,
   handleStart,
+  handleMove,
   handleEnd,
   isPointInsideSelection,
   handleSelectSlice,
@@ -75,6 +77,7 @@ export default function CropCanvas({
   onResizeStart,
   handleSelectAndDragSlice,
   zoom = 1,
+  activeTab,
 
   // Phase 4 Props
   editMode = "crop",
@@ -101,6 +104,35 @@ export default function CropCanvas({
   // Track mouse position for dynamic cursor
   const [hoverPct, setHoverPct] = useState<{ x: number; y: number } | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
+
+  const getTabBaseCursor = () => {
+    if (activeTab === "slice") return "crosshair";
+    if (activeTab === "cuts") return "nwse-resize";
+    return "default";
+  };
+
+  const getCursor = () => {
+    if (editMode === "clean_manual") return "crosshair";
+    if (showSplitPosition) {
+      if (hoverPct) {
+        const nearLine = splitLines.some(lineY => Math.abs(lineY - hoverPct.y) < 2.5);
+        if (nearLine) return "row-resize";
+      }
+      return "ns-resize";
+    }
+    if (dragType === "move") return "grabbing";
+    if (dragType === "draw") return "crosshair";
+    if (dragType && dragType.startsWith("resize-")) {
+      const handle = dragType.replace("resize-", "");
+      if (handle === "nw" || handle === "se") return "nwse-resize";
+      if (handle === "ne" || handle === "sw") return "nesw-resize";
+      if (handle === "n" || handle === "s") return "ns-resize";
+      if (handle === "w" || handle === "e") return "ew-resize";
+    }
+    if (hoverPct && isPointInsideSelection(hoverPct.x, hoverPct.y)) return "grab";
+    // Use tab-based cursor as the default fallback
+    return getTabBaseCursor();
+  };
 
   const getClientPct = useCallback(
     (clientX: number, clientY: number) => {
@@ -217,28 +249,6 @@ export default function CropCanvas({
     }
   }, [brushSize, brushAction, canvasMaskRef]);
 
-  const getCursor = () => {
-    if (editMode === "clean_manual") return "crosshair";
-    if (showSplitPosition) {
-      if (hoverPct) {
-        const nearLine = splitLines.some(lineY => Math.abs(lineY - hoverPct.y) < 2.5);
-        if (nearLine) return "row-resize";
-      }
-      return "ns-resize";
-    }
-    if (dragType === "move") return "grabbing";
-    if (dragType === "draw") return "crosshair";
-    if (dragType && dragType.startsWith("resize-")) {
-      const handle = dragType.replace("resize-", "");
-      if (handle === "nw" || handle === "se") return "nwse-resize";
-      if (handle === "ne" || handle === "sw") return "nesw-resize";
-      if (handle === "n" || handle === "s") return "ns-resize";
-      if (handle === "w" || handle === "e") return "ew-resize";
-    }
-    if (hoverPct && isPointInsideSelection(hoverPct.x, hoverPct.y)) return "grab";
-    return "crosshair";
-  };
-
   return (
     <div
       className="relative border border-white/5 hover:border-purple-500/20 rounded-2xl bg-black overflow-auto flex-1 h-0 flex items-start justify-center select-none transition-colors"
@@ -255,14 +265,35 @@ export default function CropCanvas({
           if (editMode === "clean_manual") return;
           const pct = getClientPct(e.clientX, e.clientY);
           if (pct) setHoverPct(pct);
+          if (dragType) {
+            handleMove(e.clientX, e.clientY);
+          }
+        }}
+        onMouseUp={() => {
+          if (editMode === "clean_manual") return;
+          handleEnd();
         }}
         onMouseLeave={() => {
           setHoverPct(null);
+          if (dragType) {
+            handleEnd();
+          }
         }}
         onTouchStart={(e) => {
           if (editMode === "clean_manual") return;
           if (e.touches && e.touches[0]) {
             handleStart(e.touches[0].clientX, e.touches[0].clientY);
+          }
+        }}
+        onTouchMove={(e) => {
+          if (editMode === "clean_manual") return;
+          if (e.touches && e.touches[0]) {
+            const touch = e.touches[0];
+            const pct = getClientPct(touch.clientX, touch.clientY);
+            if (pct) setHoverPct(pct);
+            if (dragType) {
+              handleMove(touch.clientX, touch.clientY);
+            }
           }
         }}
         onTouchEnd={() => {
@@ -273,6 +304,7 @@ export default function CropCanvas({
         style={{
           cursor: getCursor(),
           userSelect: "none",
+          touchAction: "none",
           transform: zoom !== 1 ? `scale(${zoom})` : undefined,
           transformOrigin: "top center",
           transition: "transform 0.15s ease",

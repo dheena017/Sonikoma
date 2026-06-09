@@ -1,4 +1,5 @@
 import React from "react";
+import { RefreshCw, Layers } from "lucide-react";
 import MergePanel from "../merge/MergePanel";
 import CropToolsPanel from "./CropToolsPanel";
 import EnhancementsPanel from "../enhancements/EnhancementsPanel";
@@ -112,6 +113,7 @@ interface CropEditorSidebarProps {
   handleCommitDetectedBoxes: any;
   detectedBoxes: any[];
   handleClearDetectedBoxes: any;
+  handleExecuteSave: any;
 }
 
 export default function CropEditorSidebar({
@@ -219,7 +221,25 @@ export default function CropEditorSidebar({
   handleCommitDetectedBoxes,
   detectedBoxes,
   handleClearDetectedBoxes,
+  handleExecuteSave,
 }: CropEditorSidebarProps) {
+  const handleTabClick = (tab: "adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge") => {
+    setActiveTab(tab);
+
+    if (tab !== "eraser") {
+      setEditMode("crop");
+    }
+
+    if (tab === "slice") {
+      setShowSplitPosition(true);
+      setEditCropTop(0);
+      setEditCropBottom(0);
+      setEditCropLeft(0);
+      setEditCropRight(0);
+      setSelectedSliceId(null);
+    }
+  };
+
   return (
     <div className="lg:col-span-5 flex flex-col space-y-3 h-full min-h-0 overflow-hidden pr-0 sm:pr-1.5 scrollbar-thin overscroll-contain">
       {/* Sidebar Navigation Tabs */}
@@ -229,13 +249,13 @@ export default function CropEditorSidebar({
           { key: "edit", label: "Edit", emoji: "✏️" },
           { key: "eraser", label: "Erase", emoji: "🧼" },
           { key: "slice", label: "Cut", emoji: "✂️" },
-          { key: "cuts", label: `Cuts (${slices.length})`, emoji: "🎯" },
+          { key: "cuts", label: `Crop (${slices.length})`, emoji: "🎯" },
           { key: "merge", label: "Merge", emoji: "🔗" },
         ] as { key: "adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge"; label: string; emoji: string }[]).map((tab) => (
           <button
             key={tab.key}
             type="button"
-            onClick={() => setActiveTab(tab.key)}
+            onClick={() => handleTabClick(tab.key)}
             className={`w-full min-w-0 flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-2xl text-[10px] font-bold font-mono transition-all cursor-pointer ${
               activeTab === tab.key
                 ? "bg-purple-600 text-white shadow-lg shadow-purple-900/50"
@@ -278,6 +298,7 @@ export default function CropEditorSidebar({
               onRotate={(deg) => handleTransform("rotate", String(deg))}
               onFlip={(axis) => handleTransform("flip", axis)}
               onReset={handleResetCropBounds}
+              handleNudge={handleNudge}
             />
           </div>
         )}
@@ -411,6 +432,25 @@ export default function CropEditorSidebar({
               detectedCount={detectedBoxes.length}
               clearDetectedBoxes={handleClearDetectedBoxes}
             />
+            <button
+              type="button"
+              onClick={handleExecuteSave}
+              disabled={isSavingEdit}
+              className="w-full relative bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center justify-center gap-2 shadow-lg shadow-purple-900/50"
+              style={{ boxShadow: isSavingEdit ? undefined : "0 0 20px rgba(139,92,246,0.25), 0 4px 12px rgba(0,0,0,0.4)" }}
+            >
+              {isSavingEdit ? (
+                <>
+                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                  <span>Processing Crops...</span>
+                </>
+              ) : (
+                <>
+                  <Layers className="h-4 w-4 text-purple-200" />
+                  <span>Execute {slices.length} Crops</span>
+                </>
+              )}
+            </button>
           </div>
         )}
       </div>
