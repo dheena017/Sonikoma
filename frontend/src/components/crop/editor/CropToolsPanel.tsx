@@ -28,7 +28,9 @@ interface CropToolsPanelProps {
   onRotate: (degrees: 90 | -90 | 180) => void;
   onFlip: (axis: "h" | "v") => void;
   onReset: () => void;
+  handleNudge: (direction: "top" | "bottom" | "left" | "right", amount: number) => void;
 }
+
 
 const CROP_PRESETS = [
   { label: "Free", icon: "⬜", top: 0, bottom: 0, left: 0, right: 0 },
@@ -104,7 +106,9 @@ export default function CropToolsPanel({
   onRotate,
   onFlip,
   onReset,
+  handleNudge,
 }: CropToolsPanelProps) {
+
   const [aspectLocked, setAspectLocked] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState<string>("Free");
 
@@ -352,6 +356,65 @@ export default function CropToolsPanel({
         </div>
       </div>
 
+      {/* ── Move Crop (Nudge) ── */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <div className="p-1 rounded-lg bg-emerald-500/10 border border-emerald-500/15">
+            {/* using Crop icon already imported */}
+            <Crop className="h-3 w-3 text-emerald-400" />
+          </div>
+          <span className="text-[10px] uppercase font-mono font-bold text-neutral-400 tracking-widest">
+            Move Crop
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => handleNudge("top", 1)}
+            className="flex-1 p-2 rounded-lg bg-black/30 border border-white/6 hover:bg-emerald-500/10 hover:border-emerald-500/30 text-neutral-500 hover:text-emerald-300 transition-all cursor-pointer active:scale-95"
+            title="Nudge up (+1%)"
+            disabled={isTransforming}
+          >
+            ↑
+          </button>
+          <button
+            type="button"
+            onClick={() => handleNudge("bottom", 1)}
+            className="flex-1 p-2 rounded-lg bg-black/30 border border-white/6 hover:bg-emerald-500/10 hover:border-emerald-500/30 text-neutral-500 hover:text-emerald-300 transition-all cursor-pointer active:scale-95"
+            title="Nudge down (+1%)"
+            disabled={isTransforming}
+          >
+            ↓
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => handleNudge("left", 1)}
+            className="flex-1 p-2 rounded-lg bg-black/30 border border-white/6 hover:bg-emerald-500/10 hover:border-emerald-500/30 text-neutral-500 hover:text-emerald-300 transition-all cursor-pointer active:scale-95"
+            title="Nudge left (+1%)"
+            disabled={isTransforming}
+          >
+            ←
+          </button>
+          <div className="flex-1 bg-black/20 border border-white/5 rounded-lg px-2 py-2 text-center">
+            <span className="text-[9px] font-mono text-neutral-500">Step: </span>
+            <span className="text-[10px] font-mono font-bold text-emerald-400">1%</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => handleNudge("right", 1)}
+            className="flex-1 p-2 rounded-lg bg-black/30 border border-white/6 hover:bg-emerald-500/10 hover:border-emerald-500/30 text-neutral-500 hover:text-emerald-300 transition-all cursor-pointer active:scale-95"
+            title="Nudge right (+1%)"
+            disabled={isTransforming}
+          >
+            →
+          </button>
+        </div>
+      </div>
+
       {/* ── Reset All ── */}
       <button
         type="button"
@@ -364,3 +427,4 @@ export default function CropToolsPanel({
     </div>
   );
 }
+

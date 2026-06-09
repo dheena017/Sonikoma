@@ -11,6 +11,7 @@ import zipRouter from './image/zip.js';
 import editRouter from './image/edit.js';
 import mergeRouter from './image/merge.js';
 import cleanupRouter from './image/cleanup.js';
+import splitRouter from './image/split.js';
 
 const router = Router();
 
@@ -19,5 +20,7 @@ router.use(zipRouter);
 router.use(editRouter);
 router.use(mergeRouter);
 router.use(cleanupRouter);
+router.use(splitRouter);
 
 export default router;
+
