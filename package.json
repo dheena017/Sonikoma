@@ -44,6 +44,7 @@
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
     "sharp": "^0.34.5",
+    "uuid": "^14.0.0",
     "vite": "^6.2.3"
   },
   "devDependencies": {
@@ -51,6 +52,7 @@
     "@types/node": "^22.14.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
+    "@types/uuid": "^10.0.0",
     "autoprefixer": "^10.4.21",
     "concurrently": "^10.0.3",
     "cross-env": "^10.1.0",

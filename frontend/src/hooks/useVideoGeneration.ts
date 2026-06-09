@@ -142,12 +142,12 @@ export function useVideoGeneration({
     } catch (err: any) {
       setConsoleLogs(prev => [
         ...prev,
-        `[Pipeline] [ERROR] Video generation failed: ${err.message || 'Unknown error'}`,
-        `[Pipeline] Error code: ${err.status || err.code || 'unknown'} | Model: ${selectedModel}`
+        `[Pipeline] [ERROR] Video generation failed: ${ (err as any).message || 'Unknown error'}`,
+        `[Pipeline] Error code: ${ (err as any).status ||  (err as any).code || 'unknown'} | Model: ${selectedModel}`
       ]);
 
-      if (!err.intercepted) {
-        let errMessage = err.message || "An unexpected connection error occurred.";
+      if (! (err as any).intercepted) {
+        let errMessage =  (err as any).message || "An unexpected connection error occurred.";
         if (errMessage.includes("429") || errMessage.includes("quota")) {
           errMessage = "You've exceeded your daily/request quota for the Gemini API. Please wait a short while for the quota to reset, or check your billing plan in Google AI Studio to increase your limits.";
         }
@@ -194,7 +194,7 @@ export function useVideoGeneration({
       addNotification(`Panel #${panelId} reprocessed with tighter margins (${activePadding}% padding).`, 'success');
     } catch (err: any) {
       setConsoleLogs(prev => [
-        `[OCR/CV Engine] [ERROR] Reprocessing failed for Scene #${panelId}: ${err.message || 'Unknown error'}`,
+        `[OCR/CV Engine] [ERROR] Reprocessing failed for Scene #${panelId}: ${ (err as any).message || 'Unknown error'}`,
         ...prev
       ]);
       addNotification(`Panel reprocessing failed. Please try again later.`, "error");

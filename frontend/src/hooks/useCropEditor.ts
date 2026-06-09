@@ -421,7 +421,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
         addNotification("No detected boxes to apply.", "warning");
         return;
       }
-      const initialSlices = state.detectedBoxes.map((box: any, index: number) => ({
+      const initialSlices = state.detectedBoxes.map((box: unknown, index: number) => ({
         id: `detected-${index}-${Date.now()}`,
         cropTop: box.cropTop,
         cropBottom: box.cropBottom,

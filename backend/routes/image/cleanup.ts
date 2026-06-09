@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { resolveImageToBuffer } from '../../utils/imageUtils.js';
-import { mergedCache, editHistory } from '../../utils/cache.js';
+import { stitchedCache, editHistory } from '../../utils/cache.js';
+import { runPythonScript } from '../../utils/pythonHelper.js';
 
 const router = Router();
 
@@ -83,51 +83,62 @@ router.post("/remove-speech-bubbles", async (req, res) => {
       }
     }
 
-    // 3. Construct python CLI command (Use python on Windows, python3 on Unix to prevent Store hangs)
-    const pythonBin = process.platform === 'win32' ? 'python' : 'python3';
-    let pythonCommand = `"${pythonBin}" backend/services/cleaner.py --image_path "${tempIn}" --output_path "${tempOut}" --method "${activeMethod}" --sensitivity ${activeSensitivity} --dilation ${activeDilation} --inpaint_radius ${activeRadius} --detection_style "${activeStyle}" --ocr_lang "${sanitizedOcrLang}" --morph_kernel_size ${activeMorphKernel} --morph_shape "${activeMorphShape}" --custom_color_tolerance ${activeTolerance}`;
+    // 3. Construct python CLI arguments
+    const pythonScript = 'backend/python/services/cleaner.py';
     
-    if (gpu) {
-      pythonCommand += " --gpu";
-    }
+    const args = [
+      '--image_path', tempIn,
+      '--output_path', tempOut,
+      '--method', activeMethod,
+      '--sensitivity', activeSensitivity.toString(),
+      '--dilation', activeDilation.toString(),
+      '--inpaint_radius', activeRadius.toString(),
+      '--detection_style', activeStyle,
+      '--ocr_lang', sanitizedOcrLang,
+      '--morph_kernel_size', activeMorphKernel.toString(),
+      '--morph_shape', activeMorphShape,
+      '--custom_color_tolerance', activeTolerance.toString()
+    ];
+
+    if (gpu) args.push('--gpu');
     if (sanitizedFillColor) {
-      pythonCommand += ` --fill_color "${sanitizedFillColor}"`;
+      args.push('--fill_color', sanitizedFillColor);
     }
     if (sanitizedCustomColorTarget) {
-      pythonCommand += ` --custom_color_target "${sanitizedCustomColorTarget}"`;
+      args.push('--custom_color_target', sanitizedCustomColorTarget);
     }
     if (tempMask) {
-      pythonCommand += ` --custom_mask_path "${tempMask}"`;
+      args.push('--custom_mask_path', tempMask);
     }
-    
     if (debug_mode) {
-      pythonCommand += ` --debug_path "${tempOut}"`;
+      args.push('--debug_path', tempOut);
     }
 
-    console.log(`[Bubble Cleaner API] Running command: ${pythonCommand}`);
+    console.log(`[Bubble Cleaner API] Spawning ${pythonScript} with args: ${args.join(' ')}`);
 
-    exec(pythonCommand, async (error, stdout, stderr) => {
-      // Clean up the temporary input and mask files immediately
-      try {
-        if (fs.existsSync(tempIn)) {
-          await fs.promises.unlink(tempIn);
-        }
-        if (tempMask && fs.existsSync(tempMask)) {
-          await fs.promises.unlink(tempMask);
-        }
-      } catch (unlinkErr) {
-        console.warn("[Bubble Cleaner API Warning] Failed to clean up temp input files:", unlinkErr);
+    const { code, stdout, stderr } = await runPythonScript(pythonScript, args);
+
+    // Clean up the temporary input and mask files immediately
+    try {
+      if (fs.existsSync(tempIn)) {
+        await fs.promises.unlink(tempIn);
       }
-
-      if (error) {
-        console.error("[Bubble Cleaner API Error] Cleaner script execution failed:", error);
-        console.error("[Bubble Cleaner API Error] stderr:", stderr);
-        return res.status(500).json({ error: `Speech bubble cleaning failed: ${stderr || error.message}` });
+      if (tempMask && fs.existsSync(tempMask)) {
+        await fs.promises.unlink(tempMask);
       }
+    } catch (unlinkErr) {
+      console.warn("[Bubble Cleaner API Warning] Failed to clean up temp input files:", unlinkErr);
+    }
 
-      console.log("[Bubble Cleaner API stdout]:", stdout);
+    if (code !== 0) {
+      console.error(`[Bubble Cleaner API Error] Cleaner script exited with code ${code}`);
+      console.error("[Bubble Cleaner API Error] stderr:", stderr);
+      return res.status(500).json({ error: `Speech bubble cleaning failed: ${stderr}` });
+    }
 
-      try {
+    console.log("[Bubble Cleaner API stdout]:", stdout);
+
+    try {
         if (!fs.existsSync(tempOut)) {
           throw new Error("Cleaner script did not output any file.");
         }
@@ -142,10 +153,10 @@ router.post("/remove-speech-bubbles", async (req, res) => {
           console.warn("[Bubble Cleaner API Warning] Failed to clean up temp output file:", unlinkErr);
         }
 
-        // 5. Store in merged Cache
+        // 5. Store in stitched Cache
         const cacheId = `merged_${Date.now()}_cleaned`;
         const newUrl = `/api/merge-images/cached/${cacheId}`;
-        mergedCache.set(cacheId, { data: cleanedBuffer, contentType });
+        stitchedCache.set(cacheId, { data: cleanedBuffer, contentType });
         editHistory.set(newUrl, url);
 
         return res.json({
@@ -157,7 +168,6 @@ router.post("/remove-speech-bubbles", async (req, res) => {
         console.error("[Bubble Cleaner API Error] File operations failed:", fileErr);
         return res.status(500).json({ error: `Failed to process cleaned output image: ${fileErr.message}` });
       }
-    });
 
   } catch (err: any) {
     console.error("[Bubble Cleaner API Error] Route exception:", err);

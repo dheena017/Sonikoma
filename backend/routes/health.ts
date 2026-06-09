@@ -33,7 +33,7 @@ router.get("/system-logs", (req, res) => {
     const since = parseInt(req.query.since as string || '0', 10);
     const logs = getLogs(since);
     res.json({ success: true, logs });
-  } catch (err: any) {
+  } catch (err: unknown) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -55,7 +55,7 @@ router.get("/system-logs/stream", (req, res) => {
   }
 
   // Listener to stream logs as they occur
-  const listener = (entry: any) => {
+  const listener = (entry: unknown) => {
     res.write(`data: ${JSON.stringify(entry)}\n\n`);
   };
 

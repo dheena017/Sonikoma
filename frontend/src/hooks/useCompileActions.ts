@@ -6,7 +6,7 @@ interface UseCompileActionsProps {
   setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
   setActivePreviewTab: (tab: "video" | "storyboard") => void;
   setVideoUrl?: React.Dispatch<React.SetStateAction<string>>;
-  addNotification?: (message: string, type: any) => void;
+  addNotification?: (message: string, type: unknown) => void;
   targetUrl?: string;
   fetchWithInterceptor?: typeof fetch;
   selectedModel?: string;

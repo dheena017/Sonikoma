@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { DYNAMIC_BACKGROUND_VIDEOS } from '../../config/clients.js';
 import { parseWebtoonUrl } from '../../utils/urlUtils.js';
 import { scrapeImagesFromUrl, generateDynamicPanels } from '../../services/scraperService.js';
+import { generateProjectId } from '../../utils/idUtils.js';
 
 const router = Router();
 
@@ -15,7 +16,7 @@ router.post("/generate", async (req, res) => {
     }
 
     const parsed = parseWebtoonUrl(url);
-    const projectId = episode_id || `project_${Math.random().toString(36).substring(2, 8)}`;
+    const projectId = episode_id || generateProjectId();
     
     console.log(`Processing storyboard request for url: "${url}". Parsed Title: "${parsed.title}", Genre: "${parsed.genre}"`);
 
@@ -38,7 +39,7 @@ router.post("/generate", async (req, res) => {
 
     if (clientPanels && Array.isArray(clientPanels) && clientPanels.length > 0) {
       console.log(`Utilizing client-provided storyboard modifications directly. Resolving placeholders.`);
-      const resolvedClientPanels = clientPanels.map((p: any, idx: number) => {
+      const resolvedClientPanels = clientPanels.map((p: unknown, idx: number) => {
         let resolvedImg = p.image_url;
         if (!resolvedImg || resolvedImg.startsWith("data:image/svg") || resolvedImg.includes("Awaiting Source")) {
           if (scrapedUrls && scrapedUrls.length > 0) {
@@ -72,6 +73,7 @@ router.post("/generate", async (req, res) => {
 
     if (responsePanels.length === 0) {
       console.log("Compiling storyboard with fully programmatic metadata extraction...");
+      const numPanels = Math.min(scrapedUrls.length, 5);
       const placeholders = [
         { speech_text: `The saga of ${parsed.title} begins! Welcome to this breathtaking adventure.`, sfx: "[Echoing Footsteps]", motion: "zoom_in" },
         { speech_text: `Each path unfurls dangerous secrets hidden within the ${parsed.genre} realm.`, sfx: "[Mystical Whispers]", motion: "pan_right" },
@@ -80,10 +82,11 @@ router.post("/generate", async (req, res) => {
         { speech_text: `Thus the chapter rests. Stay tuned for the ultimate epic resolution!`, sfx: "[Flute Melancholy]", motion: "zoom_in" }
       ];
 
-      responsePanels = placeholders.map((p, idx) => {
+      responsePanels = Array.from({ length: numPanels }).map((_, idx) => {
+        const p = placeholders[idx % placeholders.length];
         let imgUrl = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'><rect width='100%' height='100%' fill='%230f0f11'/><text x='50%25' y='50%25' fill='%233f3f46' font-family='sans-serif' font-weight='bold' font-size='20' text-anchor='middle' dominant-baseline='middle'>Scene Frame Awaiting Source</text></svg>`;
         if (scrapedUrls && scrapedUrls.length > 0) {
-          imgUrl = scrapedUrls[idx % scrapedUrls.length];
+          imgUrl = scrapedUrls[idx];
         }
         return {
           id: idx + 1,
@@ -104,7 +107,7 @@ router.post("/generate", async (req, res) => {
       message: `Webtoon ${parsed.title} animation compilation created dynamically.`,
       panels: responsePanels
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("[API Generate Error]", err.message || err);
     res.status(500).json({ error: err.message || "An unexpected error occurred during generation." });
   }

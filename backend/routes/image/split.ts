@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import sharp from 'sharp';
 import { resolveImageToBuffer, cropAutoBorders } from '../../utils/imageUtils.js';
-import { mergedCache } from '../../utils/cache.js';
+import { stitchedCache } from '../../utils/cache.js';
 
 const router = Router();
 
@@ -88,7 +88,7 @@ router.post('/execute-splits', async (req, res) => {
       const cacheId = `split_${Date.now()}_${Math.floor(Math.random() * 100000)}_${i}`;
       const newUrl = `/api/merge-images/cached/${cacheId}`;
 
-      mergedCache.set(cacheId, {
+      stitchedCache.set(cacheId, {
         data: segBuffer,
         contentType: 'image/jpeg',
       });
@@ -101,7 +101,7 @@ router.post('/execute-splits', async (req, res) => {
     }
 
     return res.json({ success: true, urls });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[execute-splits] failed:', err);
     return res.status(500).json({ success: false, error: err.message || 'execute-splits failed' });
   }

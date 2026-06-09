@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import sharp from 'sharp';
 import { resolveImageToBuffer, cropAutoBorders } from '../../utils/imageUtils.js';
-import { mergedCache, editHistory } from '../../utils/cache.js';
+import { stitchedCache, editHistory } from '../../utils/cache.js';
 
 const router = Router();
 
@@ -90,14 +90,14 @@ router.post("/edit-image", async (req, res) => {
 
     const uniqueId = `merged_${Date.now()}_cropped`;
     const newUrl = `/api/merge-images/cached/${uniqueId}`;
-    mergedCache.set(uniqueId, { data: imgBuffer, contentType });
+    stitchedCache.set(uniqueId, { data: imgBuffer, contentType });
     editHistory.set(newUrl, url);
 
     return res.json({
       success: true,
       url: newUrl
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("[Edit API] Error editing image frame:", err);
     return res.status(500).json({ error: `Image frame editing failed: ${err.message || err}` });
   }
@@ -155,12 +155,12 @@ router.post("/transform-image", async (req, res) => {
     const uniqueId = `transform_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
     const proxyUrl = `/api/merge-images/cached/${uniqueId}`;
 
-    // Store in mergedCache for dynamic rendering and editHistory for undo mapping
-    mergedCache.set(uniqueId, { data: outputBuffer, contentType: "image/jpeg" });
+    // Store in stitchedCache for dynamic rendering and editHistory for undo mapping
+    stitchedCache.set(uniqueId, { data: outputBuffer, contentType: "image/jpeg" });
     editHistory.set(proxyUrl, url);
 
     return res.json({ success: true, url: proxyUrl });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("[transform-image] Error:", err);
     return res.status(500).json({ error: err.message });
   }

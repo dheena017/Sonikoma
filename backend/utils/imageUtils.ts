@@ -8,7 +8,7 @@
 
 import sharp, { Sharp } from 'sharp';
 import crypto from 'crypto';
-import { mergedCache } from './cache.js';
+import { stitchedCache } from './cache.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -54,7 +54,7 @@ export async function resolveImageToBuffer(urlStr: string): Promise<ResolvedImag
   ) {
     const matched = workingUrl.match(/\/(?:merge|stitch)-images\/cached\/([^\\/\s?&]+)/);
     if (matched?.[1]) {
-      const cached = mergedCache.get(matched[1]);
+      const cached = stitchedCache.get(matched[1]);
       if (cached) return { data: cached.data, contentType: cached.contentType || 'image/png' };
     }
   }
@@ -234,7 +234,7 @@ export async function cropAutoBorders(
 
     let trimmed = imageBuffer;
     try {
-      const opts: any = { threshold };
+      const opts: unknown = { threshold };
       if (bgHex) opts.background = bgHex;
       const { data, info } = await sharp(imageBuffer).trim(opts).toBuffer({ resolveWithObject: true });
       if (info.width >= 15 && info.height >= 15) trimmed = data;
@@ -286,7 +286,7 @@ export async function cropAutoBorders(
 
     return { data: finalBuf, contentType: isPng ? 'image/png' : 'image/jpeg' };
 
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error('[ImageUtils] cropAutoBorders failed:', e.message);
     return { data: imageBuffer, contentType: 'image/jpeg' };
   }
@@ -390,7 +390,7 @@ export async function applyFilters(
   if (options.blur && options.blur > 0) img = img.blur(options.blur);
   if (options.sharpen)                  img = img.sharpen();
 
-  const mod: any = {};
+  const mod: unknown = {};
   if (typeof options.brightness === 'number') {
     // sharp modulate brightness is 0–2 (1 = no change), we accept -100 to +100 delta
     mod.brightness = 1 + options.brightness / 100;

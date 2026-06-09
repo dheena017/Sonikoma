@@ -37,7 +37,7 @@ function stripAnsi(str: string): string {
   return str.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');
 }
 
-function formatArgs(args: any[]): string {
+function formatArgs(args: unknown[]): string {
   return args.map(arg => {
     if (typeof arg === 'string') {
       return arg;
@@ -47,7 +47,7 @@ function formatArgs(args: any[]): string {
   }).join(' ');
 }
 
-function pushLog(prefix: string, args: any[]) {
+function pushLog(prefix: string, args: unknown[]) {
   // Reentrancy guard to prevent infinite loops if formatting or listener logs
   if (isIntercepting) return;
   isIntercepting = true;
@@ -102,17 +102,17 @@ function pushLog(prefix: string, args: any[]) {
 }
 
 // Override console methods globally
-console.log = (...args: any[]) => {
+console.log = (...args: unknown[]) => {
   originalLog.apply(console, args);
   pushLog('[INFO]', args);
 };
 
-console.warn = (...args: any[]) => {
+console.warn = (...args: unknown[]) => {
   originalWarn.apply(console, args);
   pushLog('[WARNING]', args);
 };
 
-console.error = (...args: any[]) => {
+console.error = (...args: unknown[]) => {
   originalError.apply(console, args);
   pushLog('[ERROR]', args);
 };

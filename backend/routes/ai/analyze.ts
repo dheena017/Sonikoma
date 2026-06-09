@@ -108,7 +108,7 @@ router.post('/analyze-image', async (req: Request, res: Response) => {
   try {
     const resolved = await resolveImageToBuffer(url);
     imageBuffer    = resolved.data;
-  } catch (fetchErr: any) {
+  } catch (fetchErr: unknown) {
     console.warn(
       `${label('[Analyze]')} ${warn('Image fetch failed')} — ${fetchErr.message} — using fallback analysis`
     );
@@ -159,7 +159,7 @@ router.post('/analyze-image', async (req: Request, res: Response) => {
 
     responseText = response.text || '{}';
 
-  } catch (aiErr: any) {
+  } catch (aiErr: unknown) {
     const ms = Date.now() - start;
     console.error(
       `${label('[Analyze]')} ${err('AI failed after retries')} ` +
@@ -172,7 +172,7 @@ router.post('/analyze-image', async (req: Request, res: Response) => {
   let analysis;
   try {
     analysis = validateAnalysis(JSON.parse(responseText.trim()));
-  } catch (parseErr: any) {
+  } catch (parseErr: unknown) {
     console.warn(`${label('[Analyze]')} ${warn('Response parse failed')} — ${parseErr.message}`);
     analysis = DEFAULT_ANALYSIS;
   }
@@ -273,7 +273,7 @@ router.post('/analyze-batch', async (req: Request, res: Response) => {
       );
 
       results.push({ url, analysis });
-    } catch (e: any) {
+    } catch (e: unknown) {
       completed++;
       console.warn(
         `${label('[Batch]')} ${warn(`[${completed}/${urls.length}]`)} ` +

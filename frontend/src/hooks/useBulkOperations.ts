@@ -3,7 +3,7 @@ import { GeneratedPanel } from "../types";
 
 interface UseBulkOperationsProps {
   setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
-  addNotification?: (message: string, type: any) => void;
+  addNotification?: (message: string, type: unknown) => void;
 }
 
 export function useBulkOperations({

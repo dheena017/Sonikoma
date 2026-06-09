@@ -156,9 +156,10 @@ def run_cv_detection(image_path, sensitivity, bg_mode, min_width_pct, min_height
         contours, _ = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         
         raw_boxes = []
-        for contour in contours:
-            x_box, y_box, w_box, h_box = cv2.boundingRect(contour)
-            raw_boxes.append({"x": x_box, "y": y_box, "w": w_box, "h": h_box})
+        if contours:
+            for contour in contours:
+                x_box, y_box, w_box, h_box = cv2.boundingRect(contour)
+                raw_boxes.append({"x": x_box, "y": y_box, "w": w_box, "h": h_box})
             
     else:
         # PIL/NumPy Fallback
