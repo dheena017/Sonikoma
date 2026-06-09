@@ -9,7 +9,7 @@ import CutsRegistry from "../cuts/CutsRegistry";
 import AutoSlicer from "../auto/AutoSlicer";
 
 interface CropEditorSidebarProps {
-  activeTab: "adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge";
+  activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge";
   setActiveTab: (tab: any) => void;
   slices: any[];
   setSlices: any;
@@ -223,7 +223,7 @@ function CropEditorSidebar({
   handleClearDetectedBoxes,
   handleExecuteSave,
 }: CropEditorSidebarProps) {
-  const handleTabClick = useCallback((tab: "adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge") => {
+  const handleTabClick = useCallback((tab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge") => {
     setActiveTab(tab);
 
     // Set the correct editMode based on which tab was clicked
@@ -235,7 +235,7 @@ function CropEditorSidebar({
       setEditCropLeft(0);
       setEditCropRight(0);
       setSelectedSliceId(null);
-    } else if (tab === "cuts") {
+    } else if (tab === "crop") {
       setEditMode("slices");
     } else if (tab === "eraser") {
       setEditMode("clean_manual");
@@ -253,9 +253,9 @@ function CropEditorSidebar({
           { key: "edit", label: "Edit", emoji: "✏️" },
           { key: "eraser", label: "Erase", emoji: "🧼" },
           { key: "slice", label: "Cut", emoji: "✂️" },
-          { key: "cuts", label: `Crop (${slices.length})`, emoji: "🎯" },
+          { key: "crop", label: `Crop (${slices.length})`, emoji: "🎯" },
           { key: "merge", label: "Merge", emoji: "🔗" },
-        ] as { key: "adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge"; label: string; emoji: string }[]).map((tab) => (
+        ] as { key: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge"; label: string; emoji: string }[]).map((tab) => (
           <button
             key={tab.key}
             type="button"
@@ -401,7 +401,7 @@ function CropEditorSidebar({
           </div>
         )}
 
-        {activeTab === "cuts" && (
+        {activeTab === "crop" && (
           <div className="space-y-4 rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
             <CutsRegistry
               slices={slices}
