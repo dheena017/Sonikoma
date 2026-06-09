@@ -343,9 +343,17 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
   };
 
   const handleExecuteSave = async () => {
-    if (state.slices.length > 0) {
+    if (state.selectedSliceId) {
+      // If a specific slice is selected, only execute that one
+      const selectedSlice = state.slices.find(s => s.id === state.selectedSliceId);
+      if (selectedSlice) {
+        await handleSaveEditedImageCallback();
+      }
+    } else if (state.slices.length > 0) {
+      // If no slice selected but multiple exist, execute all
       await handleSaveMultipleCutsCallback(state.slices);
     } else {
+      // Default single frame crop
       await handleSaveEditedImageCallback();
     }
     setEditingImageIdx(null);
