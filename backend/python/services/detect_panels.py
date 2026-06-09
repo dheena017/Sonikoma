@@ -280,21 +280,6 @@ def run_cv_detection(image_path, sensitivity, bg_mode, min_width_pct, min_height
             "area": int(w_box * h_box)
         })
         
-    # Fallback to equidistant panels if empty
-    if not final_panels:
-        for i in range(3):
-            top_pct = i * 33.3
-            bot_pct = 100.0 - (i + 1) * 33.3
-            final_panels.append({
-                "cropTop": round(top_pct, 2),
-                "cropBottom": round(bot_pct, 2),
-                "cropLeft": 0.0,
-                "cropRight": 0.0,
-                "width": w,
-                "height": int(h / 3),
-                "area": int((w * h) / 3)
-            })
-            
     return sorted(final_panels, key=lambda b: b["cropTop"])
 
 def main():
