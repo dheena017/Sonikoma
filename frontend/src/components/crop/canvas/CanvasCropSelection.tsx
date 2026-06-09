@@ -8,6 +8,7 @@ interface CanvasCropSelectionProps {
   editCropRight: number;
   onResizeStart: (handle: string, clientX: number, clientY: number) => void;
   targetAspectRatio?: number;
+  isDragging?: boolean;
 }
 
 export default function CanvasCropSelection({
@@ -17,9 +18,17 @@ export default function CanvasCropSelection({
   editCropRight,
   onResizeStart,
   targetAspectRatio = 0,
+  isDragging = false,
 }: CanvasCropSelectionProps) {
 
-  // 👇 REMOVED the early return so the lines stay mounted during drags
+  // Only show if there is an active selection OR we are currently dragging to create one
+  const hasCropSelection =
+    editCropTop !== 0 ||
+    editCropBottom !== 0 ||
+    editCropLeft !== 0 ||
+    editCropRight !== 0;
+
+  if (!hasCropSelection && !isDragging) return null;
 
   // Aspect Ratio Validation
   const currentWidth = 100 - editCropLeft - editCropRight;

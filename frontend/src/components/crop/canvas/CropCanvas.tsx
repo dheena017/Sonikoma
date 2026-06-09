@@ -328,6 +328,7 @@ export default function CropCanvas({
             editCropRight={editCropRight}
             onResizeStart={onResizeStart}
             targetAspectRatio={aspectRatio}
+            isDragging={dragType !== null}
           />
         )}
 
