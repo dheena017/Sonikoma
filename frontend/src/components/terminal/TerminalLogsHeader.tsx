@@ -1,5 +1,14 @@
 import React from "react";
-import { Terminal, Trash2, Copy, Check, ChevronDown, Download as DownloadIcon, Pause, Play } from "lucide-react";
+import {
+  Terminal,
+  Trash2,
+  Copy,
+  Check,
+  ChevronDown,
+  Download as DownloadIcon,
+  Pause,
+  Play,
+} from "lucide-react";
 
 interface TerminalLogsHeaderProps {
   consoleLogs: string[];
@@ -43,7 +52,9 @@ export function TerminalLogsHeader({
               </span>
             )}
           </div>
-          <p className="text-[11px] text-neutral-400 font-mono">Live parser and AI status</p>
+          <p className="text-[11px] text-neutral-400 font-mono">
+            Live parser and AI status
+          </p>
         </div>
       </div>
 
@@ -58,7 +69,11 @@ export function TerminalLogsHeader({
           }`}
           title={autoScroll ? "Auto-scroll enabled" : "Auto-scroll disabled"}
         >
-          <ChevronDown className={`h-3 w-3 transition-transform ${autoScroll ? "rotate-0" : "-rotate-90"}`} />
+          <ChevronDown
+            className={`h-3 w-3 transition-transform ${
+              autoScroll ? "rotate-0" : "-rotate-90"
+            }`}
+          />
           Auto
         </button>
 
@@ -69,9 +84,15 @@ export function TerminalLogsHeader({
               ? "text-amber-300 border-amber-500/40 bg-amber-950/45 hover:bg-amber-950/65"
               : "text-neutral-300 border-neutral-800/60 bg-neutral-950/80 hover:bg-neutral-900"
           }`}
-          title={paused ? "Paused — buffering incoming logs" : "Resume live logs"}
+          title={
+            paused ? "Paused — buffering incoming logs" : "Resume live logs"
+          }
         >
-          {paused ? <Play className="h-3 w-3 text-amber-300" /> : <Pause className="h-3 w-3" />}
+          {paused ? (
+            <Play className="h-3 w-3 text-amber-300" />
+          ) : (
+            <Pause className="h-3 w-3" />
+          )}
           {paused ? "Resume" : "Pause"}
         </button>
 

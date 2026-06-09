@@ -33,9 +33,13 @@ export default function HorizontalSplitterPreview({
           >
             <span className="text-neutral-500 font-bold">Part {seg.index}</span>
             <div className="flex items-center gap-2">
-              <span className="text-purple-300 font-semibold">{seg.heightPct}%</span>
+              <span className="text-purple-300 font-semibold">
+                {seg.heightPct}%
+              </span>
               {seg.heightPx !== null && (
-                <span className="text-neutral-600 font-normal">({seg.heightPx}px)</span>
+                <span className="text-neutral-600 font-normal">
+                  ({seg.heightPx}px)
+                </span>
               )}
             </div>
           </div>

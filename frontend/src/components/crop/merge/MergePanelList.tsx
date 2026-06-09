@@ -19,7 +19,13 @@ export default function MergePanelList({
       <span className="text-[9px] font-bold text-neutral-600 uppercase font-mono tracking-widest block">
         Frames to be merged ({previewIndices.length} total)
       </span>
-      <div className={`space-y-1 max-h-48 overflow-y-auto pr-1 scrollbar-thin flex ${layout === "horizontal" ? "flex-row gap-2 overflow-x-auto overflow-y-hidden" : "flex-col"}`}>
+      <div
+        className={`space-y-1 max-h-48 overflow-y-auto pr-1 scrollbar-thin flex ${
+          layout === "horizontal"
+            ? "flex-row gap-2 overflow-x-auto overflow-y-hidden"
+            : "flex-col"
+        }`}
+      >
         {previewIndices.map((imgIdx, i) => {
           const imgUrl = scrapedImages[imgIdx];
           const isCurrent = imgIdx === editingImageIdx;
@@ -42,7 +48,11 @@ export default function MergePanelList({
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className={`text-[10px] font-bold font-mono ${isCurrent ? "text-teal-300" : "text-neutral-400"}`}>
+                  <span
+                    className={`text-[10px] font-bold font-mono ${
+                      isCurrent ? "text-teal-300" : "text-neutral-400"
+                    }`}
+                  >
                     Frame #{imgIdx + 1}
                   </span>
                   {isCurrent && (

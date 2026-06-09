@@ -57,13 +57,17 @@ export default function MergePanelOptions({
       <div className="grid grid-cols-2 gap-2">
         {/* Direction toggle */}
         <div className="space-y-1.5">
-          <label className="text-[8px] font-mono font-bold text-neutral-500 uppercase">Direction</label>
+          <label className="text-[8px] font-mono font-bold text-neutral-500 uppercase">
+            Direction
+          </label>
           <div className="flex gap-1 bg-black/40 p-1 rounded-lg border border-white/5">
             <button
               type="button"
               onClick={() => handleDirectionChange("prev")}
               className={`flex-1 flex items-center justify-center gap-1 py-1 rounded text-[9px] font-mono font-bold transition-all ${
-                direction === "prev" ? "bg-teal-600 text-white" : "text-neutral-500 hover:text-neutral-300"
+                direction === "prev"
+                  ? "bg-teal-600 text-white"
+                  : "text-neutral-500 hover:text-neutral-300"
               }`}
             >
               <ArrowUp className="h-2.5 w-2.5" /> Prev
@@ -72,7 +76,9 @@ export default function MergePanelOptions({
               type="button"
               onClick={() => handleDirectionChange("next")}
               className={`flex-1 flex items-center justify-center gap-1 py-1 rounded text-[9px] font-mono font-bold transition-all ${
-                direction === "next" ? "bg-teal-600 text-white" : "text-neutral-500 hover:text-neutral-300"
+                direction === "next"
+                  ? "bg-teal-600 text-white"
+                  : "text-neutral-500 hover:text-neutral-300"
               }`}
             >
               Next <ArrowDown className="h-2.5 w-2.5" />
@@ -82,13 +88,17 @@ export default function MergePanelOptions({
 
         {/* Layout toggle */}
         <div className="space-y-1.5">
-          <label className="text-[8px] font-mono font-bold text-neutral-500 uppercase">Layout</label>
+          <label className="text-[8px] font-mono font-bold text-neutral-500 uppercase">
+            Layout
+          </label>
           <div className="flex gap-1 bg-black/40 p-1 rounded-lg border border-white/5">
             <button
               type="button"
               onClick={() => setLayout("vertical")}
               className={`flex-1 flex items-center justify-center gap-1 py-1 rounded text-[9px] font-mono font-bold transition-all ${
-                layout === "vertical" ? "bg-indigo-600 text-white" : "text-neutral-500 hover:text-neutral-300"
+                layout === "vertical"
+                  ? "bg-indigo-600 text-white"
+                  : "text-neutral-500 hover:text-neutral-300"
               }`}
             >
               <Rows className="h-2.5 w-2.5" /> Vert
@@ -97,7 +107,9 @@ export default function MergePanelOptions({
               type="button"
               onClick={() => setLayout("horizontal")}
               className={`flex-1 flex items-center justify-center gap-1 py-1 rounded text-[9px] font-mono font-bold transition-all ${
-                layout === "horizontal" ? "bg-indigo-600 text-white" : "text-neutral-500 hover:text-neutral-300"
+                layout === "horizontal"
+                  ? "bg-indigo-600 text-white"
+                  : "text-neutral-500 hover:text-neutral-300"
               }`}
             >
               <Columns className="h-2.5 w-2.5" /> Horz
@@ -110,8 +122,12 @@ export default function MergePanelOptions({
       <div className="grid grid-cols-2 gap-4 pt-1">
         <div className="space-y-1.5">
           <div className="flex justify-between">
-            <label className="text-[8px] font-mono font-bold text-neutral-500 uppercase">Gap Spacing</label>
-            <span className="text-[8px] font-mono text-teal-400">{spacing}px</span>
+            <label className="text-[8px] font-mono font-bold text-neutral-500 uppercase">
+              Gap Spacing
+            </label>
+            <span className="text-[8px] font-mono text-teal-400">
+              {spacing}px
+            </span>
           </div>
           <input
             type="range"
@@ -124,7 +140,9 @@ export default function MergePanelOptions({
           />
         </div>
         <div className="space-y-1.5">
-          <label className="text-[8px] font-mono font-bold text-neutral-500 uppercase">Gap Color</label>
+          <label className="text-[8px] font-mono font-bold text-neutral-500 uppercase">
+            Gap Color
+          </label>
           <select
             value={spacingColor}
             onChange={(e) => setSpacingColor(e.target.value)}
@@ -141,7 +159,9 @@ export default function MergePanelOptions({
       {/* Scale & Align */}
       <div className="grid grid-cols-2 gap-4 pt-1">
         <div className="space-y-1.5">
-          <label className="text-[8px] font-mono font-bold text-neutral-500 uppercase">Scale Mode</label>
+          <label className="text-[8px] font-mono font-bold text-neutral-500 uppercase">
+            Scale Mode
+          </label>
           <select
             value={scaleToFit ? "fit" : "original"}
             onChange={(e) => setScaleToFit(e.target.value === "fit")}
@@ -152,7 +172,9 @@ export default function MergePanelOptions({
           </select>
         </div>
         <div className="space-y-1.5">
-          <label className="text-[8px] font-mono font-bold text-neutral-500 uppercase">Alignment</label>
+          <label className="text-[8px] font-mono font-bold text-neutral-500 uppercase">
+            Alignment
+          </label>
           <select
             value={alignMode}
             onChange={(e) => setAlignMode(e.target.value as any)}
@@ -160,8 +182,12 @@ export default function MergePanelOptions({
             className="w-full bg-black/40 border border-white/5 text-neutral-300 rounded-lg px-2 py-1 text-[9px] font-mono focus:outline-none disabled:opacity-40"
           >
             <option value="center">Center</option>
-            <option value="start">{layout === "vertical" ? "Left" : "Top"}</option>
-            <option value="end">{layout === "vertical" ? "Right" : "Bottom"}</option>
+            <option value="start">
+              {layout === "vertical" ? "Left" : "Top"}
+            </option>
+            <option value="end">
+              {layout === "vertical" ? "Right" : "Bottom"}
+            </option>
           </select>
         </div>
       </div>
@@ -169,8 +195,12 @@ export default function MergePanelOptions({
       {/* Global Padding */}
       <div className="space-y-1.5 pt-1">
         <div className="flex justify-between">
-          <label className="text-[8px] font-mono font-bold text-neutral-500 uppercase">Global Padding</label>
-          <span className="text-[8px] font-mono text-teal-400">{padding}px</span>
+          <label className="text-[8px] font-mono font-bold text-neutral-500 uppercase">
+            Global Padding
+          </label>
+          <span className="text-[8px] font-mono text-teal-400">
+            {padding}px
+          </span>
         </div>
         <input
           type="range"

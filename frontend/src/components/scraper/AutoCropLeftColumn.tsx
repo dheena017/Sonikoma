@@ -1,7 +1,11 @@
 import React from "react";
 import SectionTitle from "../crop/SectionTitle";
 import { Sparkles, Layers, Cpu, Maximize2 } from "lucide-react";
-import { BG_MODE_OPTIONS, STRATEGY_OPTIONS, ASPECT_RATIO_OPTIONS } from "./autoCropConfig";
+import {
+  BG_MODE_OPTIONS,
+  STRATEGY_OPTIONS,
+  ASPECT_RATIO_OPTIONS,
+} from "./autoCropConfig";
 
 interface AutoCropLeftColumnProps {
   sensitivity: number;
@@ -39,7 +43,9 @@ export default function AutoCropLeftColumn({
     <div className="lg:col-span-7 space-y-7">
       {/* SECTION 0: CROP CONFIGURATION PROFILES */}
       <div className="space-y-3">
-        <SectionTitle icon={<Sparkles className="h-3 w-3" />}>Crop Profiles (Presets)</SectionTitle>
+        <SectionTitle icon={<Sparkles className="h-3 w-3" />}>
+          Crop Profiles (Presets)
+        </SectionTitle>
         <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
@@ -55,8 +61,12 @@ export default function AutoCropLeftColumn({
             }}
             className="bg-neutral-950/50 hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 px-3.5 py-2.5 rounded-2xl text-left transition-all cursor-pointer"
           >
-            <span className="text-[11px] font-bold text-white block">⚖️ Standard Balanced</span>
-            <span className="text-[9px] text-neutral-500 font-sans block mt-0.5">30% sens · 10px pad · Auto BG</span>
+            <span className="text-[11px] font-bold text-white block">
+              ⚖️ Standard Balanced
+            </span>
+            <span className="text-[9px] text-neutral-500 font-sans block mt-0.5">
+              30% sens · 10px pad · Auto BG
+            </span>
           </button>
           <button
             type="button"
@@ -72,8 +82,12 @@ export default function AutoCropLeftColumn({
             }}
             className="bg-neutral-950/50 hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 px-3.5 py-2.5 rounded-2xl text-left transition-all cursor-pointer"
           >
-            <span className="text-[11px] font-bold text-white block">⚡ Webtoon Strip Slicer</span>
-            <span className="text-[9px] text-neutral-500 font-sans block mt-0.5">25% sens · 15px pad · Fast split</span>
+            <span className="text-[11px] font-bold text-white block">
+              ⚡ Webtoon Strip Slicer
+            </span>
+            <span className="text-[9px] text-neutral-500 font-sans block mt-0.5">
+              25% sens · 15px pad · Fast split
+            </span>
           </button>
           <button
             type="button"
@@ -89,8 +103,12 @@ export default function AutoCropLeftColumn({
             }}
             className="bg-neutral-950/50 hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 px-3.5 py-2.5 rounded-2xl text-left transition-all cursor-pointer"
           >
-            <span className="text-[11px] font-bold text-white block">📖 Precise Manga</span>
-            <span className="text-[9px] text-neutral-500 font-sans block mt-0.5">45% sens · 5px pad · White BG</span>
+            <span className="text-[11px] font-bold text-white block">
+              📖 Precise Manga
+            </span>
+            <span className="text-[9px] text-neutral-500 font-sans block mt-0.5">
+              45% sens · 5px pad · White BG
+            </span>
           </button>
           <button
             type="button"
@@ -106,15 +124,21 @@ export default function AutoCropLeftColumn({
             }}
             className="bg-neutral-950/50 hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 px-3.5 py-2.5 rounded-2xl text-left transition-all cursor-pointer"
           >
-            <span className="text-[11px] font-bold text-white block">🏁 Mobile Square (1:1)</span>
-            <span className="text-[9px] text-neutral-500 font-sans block mt-0.5">30% sens · 12px pad · Square lock</span>
+            <span className="text-[11px] font-bold text-white block">
+              🏁 Mobile Square (1:1)
+            </span>
+            <span className="text-[9px] text-neutral-500 font-sans block mt-0.5">
+              30% sens · 12px pad · Square lock
+            </span>
           </button>
         </div>
       </div>
 
       {/* SECTION 1: BACKGROUND DETECTOR MODE */}
       <div className="space-y-3">
-        <SectionTitle icon={<Layers className="h-3 w-3" />}>Background Gutter Mode</SectionTitle>
+        <SectionTitle icon={<Layers className="h-3 w-3" />}>
+          Background Gutter Mode
+        </SectionTitle>
         <div className="flex flex-col gap-2.5">
           {BG_MODE_OPTIONS.map((opt) => (
             <button
@@ -140,10 +164,18 @@ export default function AutoCropLeftColumn({
                 }`}
               />
               <div className="flex-1 min-w-0">
-                <span className={`text-[12px] font-bold font-mono block mb-1 ${backgroundColorMode === opt.value ? "text-white" : "text-neutral-300"}`}>
+                <span
+                  className={`text-[12px] font-bold font-mono block mb-1 ${
+                    backgroundColorMode === opt.value
+                      ? "text-white"
+                      : "text-neutral-300"
+                  }`}
+                >
                   {opt.label}
                 </span>
-                <p className="text-[10px] text-neutral-500 font-sans leading-relaxed">{opt.hint}</p>
+                <p className="text-[10px] text-neutral-500 font-sans leading-relaxed">
+                  {opt.hint}
+                </p>
               </div>
             </button>
           ))}
@@ -152,7 +184,9 @@ export default function AutoCropLeftColumn({
 
       {/* SECTION 2: PROCESSING STRATEGY */}
       <div className="space-y-3">
-        <SectionTitle icon={<Cpu className="h-3 w-3" />}>Processing Strategy</SectionTitle>
+        <SectionTitle icon={<Cpu className="h-3 w-3" />}>
+          Processing Strategy
+        </SectionTitle>
         <div className="grid grid-cols-3 gap-3">
           {STRATEGY_OPTIONS.map((opt) => (
             <button
@@ -164,10 +198,18 @@ export default function AutoCropLeftColumn({
                   : "bg-neutral-950/50 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-950"
               }`}
             >
-              <span className={`text-[11px] font-bold font-mono ${processingStrategy === opt.value ? "text-white" : "text-neutral-300"}`}>
+              <span
+                className={`text-[11px] font-bold font-mono ${
+                  processingStrategy === opt.value
+                    ? "text-white"
+                    : "text-neutral-300"
+                }`}
+              >
                 {opt.label}
               </span>
-              <p className="text-[9px] text-neutral-500 font-sans leading-tight">{opt.hint}</p>
+              <p className="text-[9px] text-neutral-500 font-sans leading-tight">
+                {opt.hint}
+              </p>
             </button>
           ))}
         </div>
@@ -175,9 +217,12 @@ export default function AutoCropLeftColumn({
 
       {/* SECTION 3: ASPECT RATIO LOCK */}
       <div className="space-y-3">
-        <SectionTitle icon={<Maximize2 className="h-3 w-3" />}>Aspect Ratio Lock</SectionTitle>
+        <SectionTitle icon={<Maximize2 className="h-3 w-3" />}>
+          Aspect Ratio Lock
+        </SectionTitle>
         <p className="text-[10px] text-neutral-500 font-sans leading-relaxed -mt-1">
-          Constrain output panels to a fixed aspect ratio. Padding is added to maintain the ratio.
+          Constrain output panels to a fixed aspect ratio. Padding is added to
+          maintain the ratio.
         </p>
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
           {ASPECT_RATIO_OPTIONS.map((opt) => (
@@ -190,10 +235,18 @@ export default function AutoCropLeftColumn({
                   : "bg-neutral-950/50 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-950"
               }`}
             >
-              <span className={`text-[12px] font-bold font-mono ${aspectRatioLock === opt.value ? "text-violet-300" : "text-neutral-300"}`}>
+              <span
+                className={`text-[12px] font-bold font-mono ${
+                  aspectRatioLock === opt.value
+                    ? "text-violet-300"
+                    : "text-neutral-300"
+                }`}
+              >
                 {opt.label}
               </span>
-              <span className="text-[8px] text-neutral-600 font-sans leading-tight">{opt.sub}</span>
+              <span className="text-[8px] text-neutral-600 font-sans leading-tight">
+                {opt.sub}
+              </span>
             </button>
           ))}
         </div>

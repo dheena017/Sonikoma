@@ -41,7 +41,10 @@ export function PanelCardActions({
       ...prev,
     ]);
     console.log(`[GUI] Deleted extracted frame #${idx + 1} from deck.`);
-    addNotification(`Deleted extracted frame #${idx + 1} from deck.`, "success");
+    addNotification(
+      `Deleted extracted frame #${idx + 1} from deck.`,
+      "success"
+    );
   };
 
   return (

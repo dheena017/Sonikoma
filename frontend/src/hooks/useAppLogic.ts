@@ -64,20 +64,24 @@ export function useAppLogic() {
 
       pollInterval = setInterval(async () => {
         try {
-          const res = await fetch(`/api/system-logs?since=${lastLogIdRef.current}`);
+          const res = await fetch(
+            `/api/system-logs?since=${lastLogIdRef.current}`
+          );
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
           if (data.success && Array.isArray(data.logs)) {
-            const newLogs = data.logs.filter((log: any) => log.id > lastLogIdRef.current);
+            const newLogs = data.logs.filter(
+              (log: any) => log.id > lastLogIdRef.current
+            );
             if (newLogs.length > 0) {
               newLogs.forEach((log: any) => {
                 if (log.id > lastLogIdRef.current) {
                   lastLogIdRef.current = log.id;
                 }
               });
-              state.setConsoleLogs(prev => [
+              state.setConsoleLogs((prev) => [
                 ...prev,
-                ...newLogs.map((log: any) => log.message)
+                ...newLogs.map((log: any) => log.message),
               ]);
             }
           }
@@ -97,14 +101,14 @@ export function useAppLogic() {
 
     const connectSSE = () => {
       try {
-        eventSource = new EventSource('/api/system-logs/stream');
+        eventSource = new EventSource("/api/system-logs/stream");
 
         eventSource.onmessage = (event) => {
           try {
             const entry = JSON.parse(event.data);
             if (entry && entry.id > lastLogIdRef.current) {
               lastLogIdRef.current = entry.id;
-              state.setConsoleLogs(prev => [...prev, entry.message]);
+              state.setConsoleLogs((prev) => [...prev, entry.message]);
             }
           } catch (e) {
             // silent catch
@@ -160,27 +164,34 @@ export function useAppLogic() {
     const normalizedTargetUrl = extractWebtoonUrl(state.targetUrl);
     const currentHost = (() => {
       try {
-        const urlWithScheme = normalizedTargetUrl.startsWith("http") ? normalizedTargetUrl : `https://${normalizedTargetUrl}`;
+        const urlWithScheme = normalizedTargetUrl.startsWith("http")
+          ? normalizedTargetUrl
+          : `https://${normalizedTargetUrl}`;
         return new URL(urlWithScheme).hostname.toLowerCase();
       } catch {
         return "";
       }
     })();
 
-    const allowedHosts = SOURCE_DOMAINS[state.selectedSource] || ["webtoons.com", "webtoon.com"];
+    const allowedHosts = SOURCE_DOMAINS[state.selectedSource] || [
+      "webtoons.com",
+      "webtoon.com",
+    ];
     const isSourceMismatch = Boolean(
       normalizedTargetUrl &&
-      currentHost &&
-      !allowedHosts.some((allowedHost) =>
-        currentHost === allowedHost || currentHost.endsWith(`.${allowedHost}`)
-      )
+        currentHost &&
+        !allowedHosts.some(
+          (allowedHost) =>
+            currentHost === allowedHost ||
+            currentHost.endsWith(`.${allowedHost}`)
+        )
     );
 
     if (isSourceMismatch) {
       if (!sourceMismatchNotified.current) {
         state.addNotification(
           `Selected source ${state.selectedSource} does not match the current URL host (${currentHost}). Please choose the correct website or paste a matching URL.`,
-          'error'
+          "error"
         );
         sourceMismatchNotified.current = true;
       }
@@ -190,9 +201,9 @@ export function useAppLogic() {
       setCurrentPanelIndex(0);
       setPlaybackTime(0);
       setStoryboardPlaying(false);
-      state.setConsoleLogs(prev => [
+      state.setConsoleLogs((prev) => [
         `[Scraper] Aborting automatic scrape because selected source ${state.selectedSource} does not match the URL host ${currentHost}.`,
-        ...prev
+        ...prev,
       ]);
       return;
     }
@@ -201,84 +212,113 @@ export function useAppLogic() {
 
     const timer = setTimeout(() => {
       const { genre, title, episode } = parseWebtoonUrl(normalizedTargetUrl);
-      
+
       state.setPanels([]);
       state.setScrapedImages([]);
       state.setSelectedScraped([]);
       setCurrentPanelIndex(0);
       setPlaybackTime(0);
       setStoryboardPlaying(false);
-      
-      state.setConsoleLogs(prev => {
-        const baseLogs = prev.filter(log => !log.startsWith("[Preloader]") && !log.startsWith("[Scraper]"));
+
+      state.setConsoleLogs((prev) => {
+        const baseLogs = prev.filter(
+          (log) =>
+            !log.startsWith("[Preloader]") && !log.startsWith("[Scraper]")
+        );
         return [
           `[Scraper] Spawned live scraping task to separate strip images from: ${normalizedTargetUrl}`,
           `[Model] Using AI engine: ${state.selectedModel} for panel analysis`,
           `[Scraper] Selected source website: ${state.selectedSource}`,
           `[Scraper] Parsed URL → Genre: ${genre} | Title: ${title} | Episode: ${episode}`,
-          ...baseLogs
+          ...baseLogs,
         ];
       });
 
       // We trigger the scrape directly here since it touches states in useAppState
-      state.fetchWithInterceptor("/api/scrape-images", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: normalizedTargetUrl, model: state.selectedModel, source: state.selectedSource }),
-        signal: abortController.signal,
-      })
-        .then(res => {
+      state
+        .fetchWithInterceptor("/api/scrape-images", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            url: normalizedTargetUrl,
+            model: state.selectedModel,
+            source: state.selectedSource,
+          }),
+          signal: abortController.signal,
+        })
+        .then((res) => {
           if (!isCurrent) throw new Error("Stale request cleanup");
           return res.json();
         })
-        .then(data => {
+        .then((data) => {
           if (!isCurrent) return;
           if (data.success && data.images && data.images.length > 0) {
-            const proxiedImages = data.images.map((img: string) => 
-               img.startsWith('http') ? `/api/proxy-image?url=${encodeURIComponent(img)}` : img
+            const proxiedImages = data.images.map((img: string) =>
+              img.startsWith("http")
+                ? `/api/proxy-image?url=${encodeURIComponent(img)}`
+                : img
             );
             state.setScrapedImages(proxiedImages);
             state.setPanels([]);
             setCurrentPanelIndex(0);
             setPlaybackTime(0);
             setStoryboardPlaying(false);
-            
-            state.addNotification(`Successfully extracted ${data.total_images} panel frames from the Webtoon page!`, 'success');
-            
-            state.setConsoleLogs(prev => {
-              const filtered = prev.filter(log => !log.startsWith("[Scraper]"));
+
+            state.addNotification(
+              `Successfully extracted ${data.total_images} panel frames from the Webtoon page!`,
+              "success"
+            );
+
+            state.setConsoleLogs((prev) => {
+              const filtered = prev.filter(
+                (log) => !log.startsWith("[Scraper]")
+              );
               return [
                 `[Scraper] Success! Separated ${data.total_images} continuous panel strips from active page.`,
                 `[Scraper] Images loaded. Select and insert panels from the deck below.`,
                 `[API] Scrape response received — Model: ${state.selectedModel} | Images: ${data.total_images}`,
-                ...filtered
+                ...filtered,
               ];
             });
-              // Developer console visibility
-              console.log(`[Scraper] Loaded ${data.total_images} images from ${state.targetUrl}`);
+            // Developer console visibility
+            console.log(
+              `[Scraper] Loaded ${data.total_images} images from ${state.targetUrl}`
+            );
           } else {
-            const errMsg = data.message || "Connected but no native comic elements identified on page.";
+            const errMsg =
+              data.message ||
+              "Connected but no native comic elements identified on page.";
             state.setScrapedImages([]);
             state.setPanels([]);
-            state.addNotification(`Failed to find comic panels: ${errMsg} Please check the URL and try again.`, "error");
-            state.setConsoleLogs(prev => [
+            state.addNotification(
+              `Failed to find comic panels: ${errMsg} Please check the URL and try again.`,
+              "error"
+            );
+            state.setConsoleLogs((prev) => [
               `[Scraper] [WARNING] No comic panels detected on page. Server message: ${errMsg}`,
-              ...prev
+              ...prev,
             ]);
           }
         })
-        .catch(err => {
+        .catch((err) => {
           if (!isCurrent) return;
           state.setScrapedImages([]);
           state.setPanels([]);
-          state.setConsoleLogs(prev => [
-            `[Scraper] [ERROR] Scrape failed: ${err.message || 'Unknown error'}`,
-            ...prev
+          state.setConsoleLogs((prev) => [
+            `[Scraper] [ERROR] Scrape failed: ${
+              err.message || "Unknown error"
+            }`,
+            ...prev,
           ]);
-          
+
           if (!err.intercepted) {
-            const errMsg = err.message || "Failed to retrieve comic panels from the specified URL.";
-            state.addNotification(`Service unable to access target site. Check the URL or refresh the page. (${errMsg})`, "error");
+            const errMsg =
+              err.message ||
+              "Failed to retrieve comic panels from the specified URL.";
+            state.addNotification(
+              `Service unable to access target site. Check the URL or refresh the page. (${errMsg})`,
+              "error"
+            );
           }
         });
     }, 750);
@@ -288,9 +328,25 @@ export function useAppLogic() {
       clearTimeout(timer);
       abortController.abort();
     };
-  }, [state.targetUrl, state.selectedModel, state.selectedSource, state.fetchWithInterceptor, state.addNotification, state.setPanels, state.setScrapedImages, state.setSelectedScraped, state.setConsoleLogs, setCurrentPanelIndex, setPlaybackTime, setStoryboardPlaying]);
+  }, [
+    state.targetUrl,
+    state.selectedModel,
+    state.selectedSource,
+    state.fetchWithInterceptor,
+    state.addNotification,
+    state.setPanels,
+    state.setScrapedImages,
+    state.setSelectedScraped,
+    state.setConsoleLogs,
+    setCurrentPanelIndex,
+    setPlaybackTime,
+    setStoryboardPlaying,
+  ]);
 
-  const totalCalculatedDuration = state.panels.reduce((sum, p) => sum + (p.duration || 0), 0);
+  const totalCalculatedDuration = state.panels.reduce(
+    (sum, p) => sum + (p.duration || 0),
+    0
+  );
 
   return {
     ...state,

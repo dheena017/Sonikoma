@@ -223,36 +223,54 @@ function CropEditorSidebar({
   handleClearDetectedBoxes,
   handleExecuteSave,
 }: CropEditorSidebarProps) {
-  const handleTabClick = useCallback((tab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge") => {
-    setActiveTab(tab);
+  const handleTabClick = useCallback(
+    (tab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge") => {
+      setActiveTab(tab);
 
-    // Set the correct editMode based on which tab was clicked
-    if (tab === "slice") {
-      setEditMode("crop");
-      setShowSplitPosition(true);
-      // We don't reset crop bounds here to allow switching between slice and crop tabs
-    } else if (tab === "crop") {
-      setEditMode("crop");
-      setShowSplitPosition(false);
-    } else if (tab === "eraser") {
-      setEditMode("clean_manual");
-    } else {
-      setEditMode("crop"); // For adjust, edit, merge
-    }
-  }, [setActiveTab, setEditMode, setShowSplitPosition, setEditCropTop, setEditCropBottom, setEditCropLeft, setEditCropRight, setSelectedSliceId]);
+      // Set the correct editMode based on which tab was clicked
+      if (tab === "slice") {
+        setEditMode("crop");
+        setShowSplitPosition(true);
+        // We don't reset crop bounds here to allow switching between slice and crop tabs
+      } else if (tab === "crop") {
+        setEditMode("crop");
+        setShowSplitPosition(false);
+      } else if (tab === "eraser") {
+        setEditMode("clean_manual");
+      } else {
+        setEditMode("crop"); // For adjust, edit, merge
+      }
+    },
+    [
+      setActiveTab,
+      setEditMode,
+      setShowSplitPosition,
+      setEditCropTop,
+      setEditCropBottom,
+      setEditCropLeft,
+      setEditCropRight,
+      setSelectedSliceId,
+    ]
+  );
 
   return (
     <div className="lg:col-span-5 flex flex-col space-y-3 h-full min-h-0 overflow-hidden pr-0 sm:pr-1.5 scrollbar-thin overscroll-contain">
       {/* Sidebar Navigation Tabs */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-black/50 backdrop-blur-sm p-2 rounded-3xl border border-white/10 shadow-[inset_0_0_20px_rgba(0,0,0,0.35)] md:flex md:items-center md:gap-1">
-        {([
-          { key: "adjust", label: "Adjust", emoji: "✨" },
-          { key: "edit", label: "Edit", emoji: "✏️" },
-          { key: "eraser", label: "Erase", emoji: "🧼" },
-          { key: "slice", label: "Cut", emoji: "✂️" },
-          { key: "crop", label: `Crop (${slices.length})`, emoji: "🎯" },
-          { key: "merge", label: "Merge", emoji: "🔗" },
-        ] as { key: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge"; label: string; emoji: string }[]).map((tab) => (
+        {(
+          [
+            { key: "adjust", label: "Adjust", emoji: "✨" },
+            { key: "edit", label: "Edit", emoji: "✏️" },
+            { key: "eraser", label: "Erase", emoji: "🧼" },
+            { key: "slice", label: "Cut", emoji: "✂️" },
+            { key: "crop", label: `Crop (${slices.length})`, emoji: "🎯" },
+            { key: "merge", label: "Merge", emoji: "🔗" },
+          ] as {
+            key: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge";
+            label: string;
+            emoji: string;
+          }[]
+        ).map((tab) => (
           <button
             key={tab.key}
             type="button"
@@ -442,7 +460,15 @@ function CropEditorSidebar({
                   ? "bg-emerald-600 hover:bg-emerald-500 shadow-emerald-900/50"
                   : "bg-purple-600 hover:bg-purple-500 shadow-purple-900/50"
               } disabled:opacity-40 disabled:cursor-not-allowed text-white`}
-              style={{ boxShadow: isSavingEdit ? undefined : `0 0 20px ${selectedSliceId ? 'rgba(16,185,129,0.25)' : 'rgba(139,92,246,0.25)'}, 0 4px 12px rgba(0,0,0,0.4)` }}
+              style={{
+                boxShadow: isSavingEdit
+                  ? undefined
+                  : `0 0 20px ${
+                      selectedSliceId
+                        ? "rgba(16,185,129,0.25)"
+                        : "rgba(139,92,246,0.25)"
+                    }, 0 4px 12px rgba(0,0,0,0.4)`,
+              }}
             >
               {isSavingEdit ? (
                 <>
@@ -459,7 +485,11 @@ function CropEditorSidebar({
                   ) : (
                     <>
                       <Layers className="h-4 w-4 text-purple-200" />
-                      <span>{slices.length > 0 ? `Execute ${slices.length} Crops` : "Execute Crop"}</span>
+                      <span>
+                        {slices.length > 0
+                          ? `Execute ${slices.length} Crops`
+                          : "Execute Crop"}
+                      </span>
                     </>
                   )}
                 </>

@@ -52,7 +52,8 @@ export default function LiveScraperDeck({
   const activeFetch = fetchWithInterceptor || fetch;
 
   const handleDownloadZip = async () => {
-    const toDownload = selectedScraped.length > 0 ? selectedScraped : scrapedImages;
+    const toDownload =
+      selectedScraped.length > 0 ? selectedScraped : scrapedImages;
     if (toDownload.length === 0) return;
 
     setIsZipping(true);
@@ -69,7 +70,10 @@ export default function LiveScraperDeck({
           const url = toDownload[i];
           const res = await activeFetch(url);
           const blob = await res.blob();
-          const filename = `webtoon_frame_${String(i + 1).padStart(3, "0")}.png`;
+          const filename = `webtoon_frame_${String(i + 1).padStart(
+            3,
+            "0"
+          )}.png`;
           folder.file(filename, blob);
         } catch (err) {
           console.error("Download failed for:", toDownload[i], err);
@@ -91,20 +95,29 @@ export default function LiveScraperDeck({
 
   const handleDeleteSelected = () => {
     if (selectedScraped.length === 0) return;
-    setScrapedImages((prev) => prev.filter((img) => !selectedScraped.includes(img)));
+    setScrapedImages((prev) =>
+      prev.filter((img) => !selectedScraped.includes(img))
+    );
     setConsoleLogs((prev) => [
       `[GUI] Removed ${selectedScraped.length} images`,
       ...prev,
     ]);
-    console.log(`[GUI] Deleted ${selectedScraped.length} selected image(s) from the deck.`);
-    addNotification(`Deleted ${selectedScraped.length} selected image(s) from the deck.`, "success");
+    console.log(
+      `[GUI] Deleted ${selectedScraped.length} selected image(s) from the deck.`
+    );
+    addNotification(
+      `Deleted ${selectedScraped.length} selected image(s) from the deck.`,
+      "success"
+    );
     setSelectedScraped([]);
   };
 
   const handleAddToCanvas = () => {
     if (selectedScraped.length === 0) return;
     addPanelsWithAutoAnalysis(selectedScraped);
-    console.log(`[GUI] Adding ${selectedScraped.length} selected image(s) to storyboard.`);
+    console.log(
+      `[GUI] Adding ${selectedScraped.length} selected image(s) to storyboard.`
+    );
     setSelectedScraped([]);
   };
 
@@ -121,7 +134,9 @@ export default function LiveScraperDeck({
             <ImageIcon className="h-5 w-5" />
           </div>
           <div className="ml-2 flex items-center gap-2 min-w-0">
-            <h3 className="font-bold text-sm text-white truncate">Live Asset Extraction</h3>
+            <h3 className="font-bold text-sm text-white truncate">
+              Live Asset Extraction
+            </h3>
             {scrapedImages.length > 0 && (
               <span className="text-[10px] px-3 py-1 rounded-full bg-purple-950/60 text-purple-300 border border-purple-800/50 shadow-inner font-mono uppercase tracking-wider">
                 {scrapedImages.length} Frames

@@ -1,7 +1,7 @@
-import { Router } from 'express';
-import { extractWebtoonUrl, parseWebtoonUrl } from '../../utils/urlUtils.js';
-import { scrapeImagesFromUrl } from '../../services/scraperService.js';
-import { col } from '../../utils/colors.js';
+import { Router } from "express";
+import { extractWebtoonUrl, parseWebtoonUrl } from "../../utils/urlUtils.js";
+import { scrapeImagesFromUrl } from "../../services/scraperService.js";
+import { col } from "../../utils/colors.js";
 
 const router = Router();
 
@@ -16,7 +16,11 @@ router.post("/scrape-images", async (req, res) => {
     const normalizedUrl = extractWebtoonUrl(url);
     const parsed = parseWebtoonUrl(normalizedUrl);
     console.log(
-      `${col.info('[Scraper]')} Scrape request received - source: ${col.brightCyan(source || 'unknown')}, url: ${col.brightCyan(normalizedUrl)}`
+      `${col.info(
+        "[Scraper]"
+      )} Scrape request received - source: ${col.brightCyan(
+        source || "unknown"
+      )}, url: ${col.brightCyan(normalizedUrl)}`
     );
 
     const proxiedUrls = await scrapeImagesFromUrl(normalizedUrl, source);
@@ -33,18 +37,20 @@ router.post("/scrape-images", async (req, res) => {
       debug: {
         normalized_url: normalizedUrl,
         source: source || null,
-      }
+      },
     });
-
   } catch (error: unknown) {
-    console.error(`${col.error('[Scraper Error]')} Failed to extract page assets:`, error);
+    console.error(
+      `${col.error("[Scraper Error]")} Failed to extract page assets:`,
+      error
+    );
     return res.status(500).json({
       success: false,
       message: error.message || "Failed to parse page images.",
       error: error.message || null,
       source: source || null,
       request_url: url,
-      images: []
+      images: [],
     });
   }
 });

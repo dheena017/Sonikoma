@@ -5,7 +5,7 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-import { Router } from 'express';
+import { Router } from "express";
 import {
   db,
   insertProject,
@@ -14,8 +14,8 @@ import {
   updateProject,
   deleteProject,
   getPanels,
-  insertPanel
-} from '../database/db.js';
+  insertPanel,
+} from "../database/db.js";
 
 const router = Router();
 
@@ -43,20 +43,23 @@ router.get("/:projectId", (req, res) => {
 
 // POST — save a new project to the local database
 router.post("/", (req, res) => {
-  const { project_id, url, title, genre, episode, panels_count, video_url } = req.body;
+  const { project_id, url, title, genre, episode, panels_count, video_url } =
+    req.body;
   if (!project_id || !url) {
-    return res.status(400).json({ error: "Fields 'project_id' and 'url' are required." });
+    return res
+      .status(400)
+      .json({ error: "Fields 'project_id' and 'url' are required." });
   }
   try {
     insertProject({
       project_id,
       url,
-      title:        title || "Untitled Webtoon",
-      genre:        genre || "general",
-      episode:      episode || "",
-      status:       "pending",
+      title: title || "Untitled Webtoon",
+      genre: genre || "general",
+      episode: episode || "",
+      status: "pending",
       panels_count: panels_count || 0,
-      video_url:    video_url || null
+      video_url: video_url || null,
     });
     res.json({ success: true, project_id });
   } catch (err: unknown) {
@@ -75,28 +78,31 @@ router.post("/:projectId/panels", (req, res) => {
       panelList.forEach((p, i) => {
         // Enforce length validation for AI-generated text (Rule violation check)
         const speechText = (p.speech_text || "").substring(0, 1000);
-        const visualDescription = (p.visual_description || "").substring(0, 2000);
+        const visualDescription = (p.visual_description || "").substring(
+          0,
+          2000
+        );
 
         insertPanel({
-          project_id:         req.params.projectId,
-          panel_index:        i,
-          image_url:          p.image_url || "",
-          original_url:       p.original_image_url || null,
-          speech_text:        speechText,
-          sfx:                p.sfx || "",
-          duration:           p.duration || 4.5,
-          motion_type:        p.motion_type || "zoom_in",
+          project_id: req.params.projectId,
+          panel_index: i,
+          image_url: p.image_url || "",
+          original_url: p.original_image_url || null,
+          speech_text: speechText,
+          sfx: p.sfx || "",
+          duration: p.duration || 4.5,
+          motion_type: p.motion_type || "zoom_in",
           visual_description: visualDescription || null,
-          brightness:         p.brightness ?? null,
-          contrast:           p.contrast ?? null,
-          saturation:         p.saturation ?? null,
-          grayscale:          p.grayscale ? 1 : 0,
-          filter_preset:      p.filter_preset || null,
-          bubble_method:      p.bubble_method || null,
+          brightness: p.brightness ?? null,
+          contrast: p.contrast ?? null,
+          saturation: p.saturation ?? null,
+          grayscale: p.grayscale ? 1 : 0,
+          filter_preset: p.filter_preset || null,
+          bubble_method: p.bubble_method || null,
           bubble_sensitivity: p.bubble_sensitivity ?? null,
-          bubble_dilation:    p.bubble_dilation ?? null,
-          inpaint_radius:     p.inpaint_radius ?? null,
-          detection_style:    p.detection_style || null
+          bubble_dilation: p.bubble_dilation ?? null,
+          inpaint_radius: p.inpaint_radius ?? null,
+          detection_style: p.detection_style || null,
         });
       });
     });

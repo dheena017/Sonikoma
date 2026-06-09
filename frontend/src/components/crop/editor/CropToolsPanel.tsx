@@ -28,9 +28,11 @@ interface CropToolsPanelProps {
   onRotate: (degrees: 90 | -90 | 180) => void;
   onFlip: (axis: "h" | "v") => void;
   onReset: () => void;
-  handleNudge: (direction: "top" | "bottom" | "left" | "right", amount: number) => void;
+  handleNudge: (
+    direction: "top" | "bottom" | "left" | "right",
+    amount: number
+  ) => void;
 }
-
 
 const CROP_PRESETS = [
   { label: "Free", icon: "⬜", top: 0, bottom: 0, left: 0, right: 0 },
@@ -67,7 +69,9 @@ function NumericCropInput({
 
   return (
     <div className="flex flex-col gap-1">
-      <span className={`text-[8px] font-bold uppercase tracking-widest font-mono ${textColor}`}>
+      <span
+        className={`text-[8px] font-bold uppercase tracking-widest font-mono ${textColor}`}
+      >
         {label}
       </span>
       <div className="relative">
@@ -78,7 +82,10 @@ function NumericCropInput({
           step="0.5"
           value={value}
           onChange={(e) => {
-            const v = Math.max(0, Math.min(90, parseFloat(e.target.value) || 0));
+            const v = Math.max(
+              0,
+              Math.min(90, parseFloat(e.target.value) || 0)
+            );
             onChange(parseFloat(v.toFixed(1)));
           }}
           className={`w-full bg-black/40 border ${borderColor} text-neutral-200 rounded-xl px-2.5 py-1.5 text-[11px] font-mono font-bold focus:outline-none transition-colors text-center`}
@@ -108,32 +115,40 @@ export default function CropToolsPanel({
   onReset,
   handleNudge,
 }: CropToolsPanelProps) {
-
   const [aspectLocked, setAspectLocked] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState<string>("Free");
 
   // Keep selectedPreset in sync with current coordinates to resolve highlights
   React.useEffect(() => {
-    const currentMatchingPreset = CROP_PRESETS.find(p => 
-      Math.abs(editCropTop - p.top) < 0.2 &&
-      Math.abs(editCropBottom - p.bottom) < 0.2 &&
-      Math.abs(editCropLeft - p.left) < 0.2 &&
-      Math.abs(editCropRight - p.right) < 0.2
-    );
-    if (!currentMatchingPreset) {
-      setSelectedPreset("");
-    } else {
-      const stillMatchesSelected = CROP_PRESETS.find(p => p.label === selectedPreset && 
+    const currentMatchingPreset = CROP_PRESETS.find(
+      (p) =>
         Math.abs(editCropTop - p.top) < 0.2 &&
         Math.abs(editCropBottom - p.bottom) < 0.2 &&
         Math.abs(editCropLeft - p.left) < 0.2 &&
         Math.abs(editCropRight - p.right) < 0.2
+    );
+    if (!currentMatchingPreset) {
+      setSelectedPreset("");
+    } else {
+      const stillMatchesSelected = CROP_PRESETS.find(
+        (p) =>
+          p.label === selectedPreset &&
+          Math.abs(editCropTop - p.top) < 0.2 &&
+          Math.abs(editCropBottom - p.bottom) < 0.2 &&
+          Math.abs(editCropLeft - p.left) < 0.2 &&
+          Math.abs(editCropRight - p.right) < 0.2
       );
       if (!stillMatchesSelected) {
         setSelectedPreset(currentMatchingPreset.label);
       }
     }
-  }, [editCropTop, editCropBottom, editCropLeft, editCropRight, selectedPreset]);
+  }, [
+    editCropTop,
+    editCropBottom,
+    editCropLeft,
+    editCropRight,
+    selectedPreset,
+  ]);
 
   const handlePreset = (preset: (typeof CROP_PRESETS)[0]) => {
     setSelectedPreset(preset.label);
@@ -144,7 +159,9 @@ export default function CropToolsPanel({
   };
 
   const cropWidth = parseFloat((100 - editCropLeft - editCropRight).toFixed(1));
-  const cropHeight = parseFloat((100 - editCropTop - editCropBottom).toFixed(1));
+  const cropHeight = parseFloat(
+    (100 - editCropTop - editCropBottom).toFixed(1)
+  );
 
   return (
     <div className="space-y-4 bg-white/[0.01] p-4 rounded-2xl border border-white/[0.05]">
@@ -158,7 +175,9 @@ export default function CropToolsPanel({
             Rotate &amp; Flip
           </span>
           {isTransforming && (
-            <span className="ml-auto text-[8px] font-mono text-cyan-400 animate-pulse">Applying…</span>
+            <span className="ml-auto text-[8px] font-mono text-cyan-400 animate-pulse">
+              Applying…
+            </span>
           )}
         </div>
 
@@ -240,10 +259,28 @@ export default function CropToolsPanel({
       {/* ── Numeric Crop Inputs ── */}
       <div className="space-y-2.5">
         <div className="grid grid-cols-2 gap-2">
-          <NumericCropInput label="Top %" value={editCropTop} onChange={setEditCropTop} />
-          <NumericCropInput label="Bottom %" value={editCropBottom} onChange={setEditCropBottom} />
-          <NumericCropInput label="Left %" value={editCropLeft} onChange={setEditCropLeft} color="emerald" />
-          <NumericCropInput label="Right %" value={editCropRight} onChange={setEditCropRight} color="emerald" />
+          <NumericCropInput
+            label="Top %"
+            value={editCropTop}
+            onChange={setEditCropTop}
+          />
+          <NumericCropInput
+            label="Bottom %"
+            value={editCropBottom}
+            onChange={setEditCropBottom}
+          />
+          <NumericCropInput
+            label="Left %"
+            value={editCropLeft}
+            onChange={setEditCropLeft}
+            color="emerald"
+          />
+          <NumericCropInput
+            label="Right %"
+            value={editCropRight}
+            onChange={setEditCropRight}
+            color="emerald"
+          />
         </div>
 
         {/* Live size readout */}
@@ -259,7 +296,11 @@ export default function CropToolsPanel({
                   : "bg-neutral-800/50 border-neutral-700/50 text-neutral-500 hover:text-neutral-300"
               }`}
             >
-              {aspectLocked ? <Lock className="h-2.5 w-2.5" /> : <Unlock className="h-2.5 w-2.5" />}
+              {aspectLocked ? (
+                <Lock className="h-2.5 w-2.5" />
+              ) : (
+                <Unlock className="h-2.5 w-2.5" />
+              )}
             </button>
             <span className="text-[9px] text-neutral-500 font-mono">
               {aspectLocked ? "Ratio locked" : "Free ratio"}
@@ -298,7 +339,9 @@ export default function CropToolsPanel({
                 }`}
               >
                 <span className="text-base leading-none">{preset.icon}</span>
-                <span className="text-[8px] font-mono font-bold">{preset.label}</span>
+                <span className="text-[8px] font-mono font-bold">
+                  {preset.label}
+                </span>
               </button>
             );
           })}
@@ -311,12 +354,16 @@ export default function CropToolsPanel({
           <span className="text-[9px] uppercase font-mono font-bold text-neutral-600 tracking-widest">
             Canvas Zoom
           </span>
-          <span className="text-[10px] font-mono font-bold text-amber-400">{Math.round(zoom * 100)}%</span>
+          <span className="text-[10px] font-mono font-bold text-amber-400">
+            {Math.round(zoom * 100)}%
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setZoom(Math.max(0.5, parseFloat((zoom - 0.25).toFixed(2))))}
+            onClick={() =>
+              setZoom(Math.max(0.5, parseFloat((zoom - 0.25).toFixed(2))))
+            }
             className="p-1.5 rounded-lg bg-black/30 border border-white/6 hover:bg-amber-500/10 hover:border-amber-500/30 text-neutral-500 hover:text-amber-300 transition-all cursor-pointer active:scale-90"
           >
             <ZoomOut className="h-3.5 w-3.5" />
@@ -341,7 +388,9 @@ export default function CropToolsPanel({
           </div>
           <button
             type="button"
-            onClick={() => setZoom(Math.min(2.5, parseFloat((zoom + 0.25).toFixed(2))))}
+            onClick={() =>
+              setZoom(Math.min(2.5, parseFloat((zoom + 0.25).toFixed(2))))
+            }
             className="p-1.5 rounded-lg bg-black/30 border border-white/6 hover:bg-amber-500/10 hover:border-amber-500/30 text-neutral-500 hover:text-amber-300 transition-all cursor-pointer active:scale-90"
           >
             <ZoomIn className="h-3.5 w-3.5" />
@@ -400,8 +449,12 @@ export default function CropToolsPanel({
             ←
           </button>
           <div className="flex-1 bg-black/20 border border-white/5 rounded-lg px-2 py-2 text-center">
-            <span className="text-[9px] font-mono text-neutral-500">Step: </span>
-            <span className="text-[10px] font-mono font-bold text-emerald-400">1%</span>
+            <span className="text-[9px] font-mono text-neutral-500">
+              Step:{" "}
+            </span>
+            <span className="text-[10px] font-mono font-bold text-emerald-400">
+              1%
+            </span>
           </div>
           <button
             type="button"
@@ -427,4 +480,3 @@ export default function CropToolsPanel({
     </div>
   );
 }
-

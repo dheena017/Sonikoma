@@ -35,7 +35,10 @@ export function EnhancementsCinematic({
           <select
             value={activeStoryboardPanel?.motion_type || "static"}
             disabled={!activeStoryboardPanel}
-            onChange={(e) => activeStoryboardPanel && handleModifyMotionType(activeStoryboardPanel.id, e.target.value)}
+            onChange={(e) =>
+              activeStoryboardPanel &&
+              handleModifyMotionType(activeStoryboardPanel.id, e.target.value)
+            }
             className="w-full bg-black/40 border border-white/8 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] font-mono focus:border-purple-500/50 focus:outline-none cursor-pointer appearance-none transition-colors hover:border-white/15 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <option value="static">Static (No Motion)</option>
@@ -45,7 +48,9 @@ export function EnhancementsCinematic({
             <option value="pan_left">Pan Left</option>
             <option value="pan_down">Pan Down</option>
           </select>
-          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] pointer-events-none text-neutral-500">▼</span>
+          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] pointer-events-none text-neutral-500">
+            ▼
+          </span>
         </div>
       </div>
 

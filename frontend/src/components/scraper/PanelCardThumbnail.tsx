@@ -1,5 +1,12 @@
 import React from "react";
-import { RefreshCw, Check, RotateCw, FlipHorizontal, Undo2, Loader2 } from "lucide-react";
+import {
+  RefreshCw,
+  Check,
+  RotateCw,
+  FlipHorizontal,
+  Undo2,
+  Loader2,
+} from "lucide-react";
 
 interface PanelCardThumbnailProps {
   imgUrl: string;
@@ -42,7 +49,9 @@ export function PanelCardThumbnail({
         src={imgUrl}
         alt={`Panel #${idx + 1}`}
         className={`w-full h-full object-contain transition-all duration-300 ${
-          isProcessing ? "opacity-20 scale-95 blur-[3px]" : "group-hover:scale-105"
+          isProcessing
+            ? "opacity-20 scale-95 blur-[3px]"
+            : "group-hover:scale-105"
         }`}
         loading="lazy"
         decoding="async"
@@ -63,7 +72,9 @@ export function PanelCardThumbnail({
           <span className="text-[9px] font-mono font-bold tracking-widest text-purple-300 uppercase">
             {label}
           </span>
-          <span className="text-[8px] text-neutral-500 mt-0.5 font-sans">Please wait…</span>
+          <span className="text-[8px] text-neutral-500 mt-0.5 font-sans">
+            Please wait…
+          </span>
         </div>
       )}
 

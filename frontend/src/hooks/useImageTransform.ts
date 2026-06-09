@@ -57,7 +57,6 @@ export function useImageTransform({
   fillColor,
   gpu,
 }: UseImageTransformProps) {
-
   const handleTransform = async (type: "rotate" | "flip", value: string) => {
     if (editingImageIdx === null) return;
     const currentUrl = scrapedImages[editingImageIdx];
@@ -77,7 +76,9 @@ export function useImageTransform({
           return copy;
         });
         addNotification(
-          type === "rotate" ? `Rotated ${value}°` : `Flipped ${value === "h" ? "Horizontally" : "Vertically"}`,
+          type === "rotate"
+            ? `Rotated ${value}°`
+            : `Flipped ${value === "h" ? "Horizontally" : "Vertically"}`,
           "success"
         );
       }
@@ -90,7 +91,23 @@ export function useImageTransform({
 
   const handleMergeWithNext = async (
     count: number,
-    config: { direction: "next" | "prev"; layout: "vertical" | "horizontal"; spacing: number; spacingColor: string; scaleToFit: boolean; alignMode: "center" | "start" | "end"; padding: number; } = { direction: "next", layout: "vertical", spacing: 0, spacingColor: "white", scaleToFit: true, alignMode: "center", padding: 0 }
+    config: {
+      direction: "next" | "prev";
+      layout: "vertical" | "horizontal";
+      spacing: number;
+      spacingColor: string;
+      scaleToFit: boolean;
+      alignMode: "center" | "start" | "end";
+      padding: number;
+    } = {
+      direction: "next",
+      layout: "vertical",
+      spacing: 0,
+      spacingColor: "white",
+      scaleToFit: true,
+      alignMode: "center",
+      padding: 0,
+    }
   ) => {
     if (editingImageIdx === null) return;
 
@@ -98,7 +115,10 @@ export function useImageTransform({
     let spliceStart = editingImageIdx;
 
     if (config.direction === "next") {
-      urlsToMerge = scrapedImages.slice(editingImageIdx, editingImageIdx + count + 1);
+      urlsToMerge = scrapedImages.slice(
+        editingImageIdx,
+        editingImageIdx + count + 1
+      );
     } else {
       spliceStart = Math.max(0, editingImageIdx - count);
       urlsToMerge = scrapedImages.slice(spliceStart, editingImageIdx + 1);
@@ -117,7 +137,7 @@ export function useImageTransform({
           spacingColor: config.spacingColor,
           scaleToFit: config.scaleToFit,
           alignMode: config.alignMode,
-          padding: config.padding
+          padding: config.padding,
         }),
       });
       if (!response.ok) throw new Error("Merge failed: " + response.status);
@@ -168,7 +188,8 @@ export function useImageTransform({
           gpu,
         }),
       });
-      if (!response.ok) throw new Error(`Single bubble clean failed: ${response.status}`);
+      if (!response.ok)
+        throw new Error(`Single bubble clean failed: ${response.status}`);
       const data = await response.json();
       if (data.success && data.url) {
         if (setScrapedImages) {

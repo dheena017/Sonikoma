@@ -36,18 +36,19 @@ export default function TimelineCard({
   handleModifyDuration,
   handleAnalyzePanel,
 }: TimelineCardProps) {
-  const isCurrent = idx === currentPanelIndex && activePreviewTab === "storyboard";
+  const isCurrent =
+    idx === currentPanelIndex && activePreviewTab === "storyboard";
 
   return (
     <div
       className={`w-[220px] sm:w-[260px] shrink-0 rounded-xl border p-3 space-y-2.5 transition-all ${
-        isCurrent 
-          ? "bg-neutral-800/80 border-purple-500 shadow-lg" 
+        isCurrent
+          ? "bg-neutral-800/80 border-purple-500 shadow-lg"
           : "bg-neutral-950 border-neutral-800"
       }`}
     >
       {/* Image Thumbnail */}
-      <div 
+      <div
         onClick={() => {
           setCurrentPanelIndex(idx);
           setActivePreviewTab("storyboard");
@@ -55,9 +56,9 @@ export default function TimelineCard({
         }}
         className="relative h-28 sm:h-32 rounded-lg overflow-hidden cursor-pointer select-none bg-neutral-950 border border-neutral-800 flex items-center justify-center group"
       >
-        <img 
-          src={panel.image_url} 
-          alt={`Panel ${panel.id}`} 
+        <img
+          src={panel.image_url}
+          alt={`Panel ${panel.id}`}
           className="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-300"
           referrerPolicy="no-referrer"
           style={{ filter: getPanelFilterStyle(panel) }}
@@ -69,12 +70,17 @@ export default function TimelineCard({
 
         {(panel.isAnalyzing || analyzingPanelId === panel.id) && (
           <div className="absolute inset-0 bg-purple-950/40 backdrop-blur-[1px] flex flex-col items-center justify-center p-2 text-center animate-pulse z-10">
-            <Sparkles className="h-5 w-5 text-purple-400 animate-spin" style={{ animationDuration: '3s' }} />
-            <span className="text-[9px] font-mono font-bold text-purple-300 mt-1 uppercase tracking-wider">Loading...</span>
+            <Sparkles
+              className="h-5 w-5 text-purple-400 animate-spin"
+              style={{ animationDuration: "3s" }}
+            />
+            <span className="text-[9px] font-mono font-bold text-purple-300 mt-1 uppercase tracking-wider">
+              Loading...
+            </span>
             <div className="scanner-line" />
           </div>
         )}
-        
+
         {/* Number tag */}
         <div className="absolute top-2 left-2 h-5 w-5 rounded bg-black/80 backdrop-blur flex items-center justify-center font-mono text-[10px] text-purple-400 font-bold border border-purple-900/40">
           #{panel.id}
@@ -117,7 +123,9 @@ export default function TimelineCard({
       {/* Text OCR Editable Input */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <label className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider block">Dialogue/Subtitle Text</label>
+          <label className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider block">
+            Dialogue/Subtitle Text
+          </label>
           {(panel.isAnalyzing || analyzingPanelId === panel.id) && (
             <span className="text-[9px] font-mono font-bold text-purple-400 animate-pulse flex items-center gap-0.5">
               <span>✦ Loading...</span>
@@ -130,7 +138,9 @@ export default function TimelineCard({
           value={panel.speech_text}
           onChange={(e) => handleModifySpeechText(panel.id, e.target.value)}
           className={`w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all ${
-            (panel.isAnalyzing || analyzingPanelId === panel.id) ? "opacity-60 cursor-not-allowed border-purple-900/40 text-purple-300" : ""
+            panel.isAnalyzing || analyzingPanelId === panel.id
+              ? "opacity-60 cursor-not-allowed border-purple-900/40 text-purple-300"
+              : ""
           }`}
         />
       </div>
@@ -138,7 +148,9 @@ export default function TimelineCard({
       {/* Playback specifications (hidden on small screens to save vertical space) */}
       <div className="hidden sm:grid grid-cols-2 gap-2 pt-1.5 border-t border-neutral-900/80">
         <div>
-          <span className="text-[9px] font-mono text-neutral-500 uppercase block">Cam Motion</span>
+          <span className="text-[9px] font-mono text-neutral-500 uppercase block">
+            Cam Motion
+          </span>
           <select
             value={panel.motion_type}
             onChange={(e) => handleModifyMotion(panel.id, e.target.value)}
@@ -153,7 +165,9 @@ export default function TimelineCard({
         </div>
 
         <div>
-          <span className="text-[9px] font-mono text-neutral-500 uppercase block">Timing (sec)</span>
+          <span className="text-[9px] font-mono text-neutral-500 uppercase block">
+            Timing (sec)
+          </span>
           <div className="flex items-center gap-1">
             <input
               type="number"
@@ -161,7 +175,12 @@ export default function TimelineCard({
               max={15}
               step={0.5}
               value={panel.duration}
-              onChange={(e) => handleModifyDuration(panel.id, parseFloat(e.target.value) || 4.0)}
+              onChange={(e) =>
+                handleModifyDuration(
+                  panel.id,
+                  parseFloat(e.target.value) || 4.0
+                )
+              }
               className="bg-neutral-900 text-[11px] text-neutral-300 rounded border border-neutral-800 p-1 w-full outline-none"
             />
           </div>
@@ -184,13 +203,19 @@ export default function TimelineCard({
           ) : (
             <Sparkles className="h-3 w-3 text-purple-400 animate-pulse" />
           )}
-          <span className="hidden sm:inline">{analyzingPanelId === panel.id ? "Analyzing Panel..." : "AI Image Analyse"}</span>
+          <span className="hidden sm:inline">
+            {analyzingPanelId === panel.id
+              ? "Analyzing Panel..."
+              : "AI Image Analyse"}
+          </span>
         </button>
       </div>
 
       <div className="flex items-center justify-between text-[9px] text-neutral-500 pt-1 font-mono">
         <span className="hidden sm:inline">SFX: {panel.sfx || "None"}</span>
-        <span>{idx + 1} / {panelsLength}</span>
+        <span>
+          {idx + 1} / {panelsLength}
+        </span>
       </div>
     </div>
   );

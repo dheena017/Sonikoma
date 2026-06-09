@@ -51,7 +51,9 @@ export default function AutoSlicerCanny({
       <div className="space-y-1">
         <div className="flex justify-between text-[8px] font-mono">
           <span className="text-neutral-500">Min Panel Width Ratio</span>
-          <span className="text-emerald-400 font-bold">{Math.round(minAreaPct * 100)}%</span>
+          <span className="text-emerald-400 font-bold">
+            {Math.round(minAreaPct * 100)}%
+          </span>
         </div>
         <input
           type="range"
@@ -84,7 +86,9 @@ export default function AutoSlicerCanny({
       <div className="space-y-1">
         <div className="flex justify-between text-[8px] font-mono">
           <span className="text-neutral-500">Morph Close Size</span>
-          <span className="text-emerald-400 font-bold">{closeKernelSize}px</span>
+          <span className="text-emerald-400 font-bold">
+            {closeKernelSize}px
+          </span>
         </div>
         <input
           type="range"

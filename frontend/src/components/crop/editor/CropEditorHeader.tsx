@@ -59,7 +59,8 @@ export default function CropEditorHeader({
                 Advanced Drag & Drop Crop Generator
               </h3>
               <p className="max-w-2xl text-[10px] sm:text-[11px] text-neutral-400 font-mono leading-4">
-                Crop, trim, split, and clean the current frame without leaving the editor.
+                Crop, trim, split, and clean the current frame without leaving
+                the editor.
               </p>
             </div>
           </div>

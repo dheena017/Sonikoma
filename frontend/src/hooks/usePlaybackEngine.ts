@@ -27,39 +27,58 @@ export function usePlaybackEngine({
   const [storyboardPlaying, setStoryboardPlaying] = useState<boolean>(false);
   const playTimerRef = useRef<any>(null);
 
-  const speakDialogue = useCallback((text: string) => {
-    if (!window.speechSynthesis || isMuted) return;
-    window.speechSynthesis.cancel();
+  const speakDialogue = useCallback(
+    (text: string) => {
+      if (!window.speechSynthesis || isMuted) return;
+      window.speechSynthesis.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    const voices = window.speechSynthesis.getVoices();
-    
-    let selectedVoice = null;
-    if (voiceActor.toLowerCase().includes("sultry") || voiceActor.toLowerCase().includes("female")) {
-      selectedVoice = voices.find(v => v.name.toLowerCase().includes("female") || v.name.toLowerCase().includes("zira") || v.name.toLowerCase().includes("samantha"));
-    } else {
-      selectedVoice = voices.find(v => v.name.toLowerCase().includes("male") || v.name.toLowerCase().includes("david") || v.name.toLowerCase().includes("premium"));
-    }
-    
-    if (selectedVoice) {
-      utterance.voice = selectedVoice;
-    }
-    utterance.volume = volume / 100;
-    utterance.rate = 0.95;
-    
-    window.speechSynthesis.speak(utterance);
-  }, [isMuted, voiceActor, volume]);
+      const utterance = new SpeechSynthesisUtterance(text);
+      const voices = window.speechSynthesis.getVoices();
 
-  const playStoryboardAudio = useCallback((panelIdx: number) => {
-    const activePanel = panels[panelIdx];
-    if (!activePanel) return;
+      let selectedVoice = null;
+      if (
+        voiceActor.toLowerCase().includes("sultry") ||
+        voiceActor.toLowerCase().includes("female")
+      ) {
+        selectedVoice = voices.find(
+          (v) =>
+            v.name.toLowerCase().includes("female") ||
+            v.name.toLowerCase().includes("zira") ||
+            v.name.toLowerCase().includes("samantha")
+        );
+      } else {
+        selectedVoice = voices.find(
+          (v) =>
+            v.name.toLowerCase().includes("male") ||
+            v.name.toLowerCase().includes("david") ||
+            v.name.toLowerCase().includes("premium")
+        );
+      }
 
-    speakDialogue(activePanel.speech_text);
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
+      utterance.volume = volume / 100;
+      utterance.rate = 0.95;
 
-    if (activePanel.sfx && !isMuted) {
-      playComicSoundEffect(activePanel.sfx);
-    }
-  }, [panels, speakDialogue, isMuted]);
+      window.speechSynthesis.speak(utterance);
+    },
+    [isMuted, voiceActor, volume]
+  );
+
+  const playStoryboardAudio = useCallback(
+    (panelIdx: number) => {
+      const activePanel = panels[panelIdx];
+      if (!activePanel) return;
+
+      speakDialogue(activePanel.speech_text);
+
+      if (activePanel.sfx && !isMuted) {
+        playComicSoundEffect(activePanel.sfx);
+      }
+    },
+    [panels, speakDialogue, isMuted]
+  );
 
   useEffect(() => {
     setEngineVolume(volume, isMuted);
@@ -82,7 +101,7 @@ export function usePlaybackEngine({
       const stepMs = 100;
 
       playTimerRef.current = setTimeout(() => {
-        setPlaybackTime(prev => {
+        setPlaybackTime((prev) => {
           const nextTime = parseFloat((prev + 0.1).toFixed(1));
           if (nextTime >= activePanel.duration) {
             if (currentPanelIndex < panels.length - 1) {

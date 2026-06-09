@@ -14,16 +14,18 @@ export { Type };
 // ── Gemini ────────────────────────────────────────────────────────────────────
 let ai: GoogleGenAI | null = null;
 if (!process.env.GEMINI_API_KEY) {
-  console.error('CRITICAL: GEMINI_API_KEY is missing from environment variables!');
+  console.error(
+    "CRITICAL: GEMINI_API_KEY is missing from environment variables!"
+  );
 } else {
   try {
     ai = new GoogleGenAI({
       apiKey: process.env.GEMINI_API_KEY,
-      httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
+      httpOptions: { headers: { "User-Agent": "aistudio-build" } },
     });
-    console.log('Gemini GenAI client successfully initialized server-side.');
+    console.log("Gemini GenAI client successfully initialized server-side.");
   } catch (err) {
-    console.error('Failed to initialize Gemini Client:', err);
+    console.error("Failed to initialize Gemini Client:", err);
   }
 }
 export { ai };
@@ -57,9 +59,13 @@ export async function callGeminiWithRetry<T>(
           initialDelayMs * Math.pow(2.2, attempt - 1) + Math.random() * 1500
         );
         console.warn(
-          `[Gemini] Error ${err.status || 'unknown'} (attempt ${attempt}/${maxAttempts}). Retrying in ${delay}ms... ${err.message || ''}`
+          `[Gemini] Error ${
+            err.status || "unknown"
+          } (attempt ${attempt}/${maxAttempts}). Retrying in ${delay}ms... ${
+            err.message || ""
+          }`
         );
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       } else {
         throw err;
       }
@@ -71,17 +77,22 @@ export async function callGeminiWithRetry<T>(
 let hf: HfInference | null = null;
 if (process.env.HUGGINGFACE_API_KEY) {
   hf = new HfInference(process.env.HUGGINGFACE_API_KEY);
-  console.log('HuggingFace Inference client successfully initialized.');
+  console.log("HuggingFace Inference client successfully initialized.");
 } else {
-  console.log('No HUGGINGFACE_API_KEY detected.');
+  console.log("No HUGGINGFACE_API_KEY detected.");
 }
 export { hf };
 
 // ── Background video URLs by genre ────────────────────────────────────────────
 export const DYNAMIC_BACKGROUND_VIDEOS: Record<string, string> = {
-  action:    'https://assets.mixkit.co/videos/preview/mixkit-fire-sparkles-and-embers-on-black-background-43026-large.mp4',
-  romance:   'https://assets.mixkit.co/videos/preview/mixkit-rain-drops-on-a-window-looking-out-to-city-lights-4122-large.mp4',
-  fantasy:   'https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-background-with-shining-stars-and-clouds-43187-large.mp4',
-  cyberpunk: 'https://assets.mixkit.co/videos/preview/mixkit-futuristic-subway-station-with-neon-lights-41710-large.mp4',
-  general:   'https://assets.mixkit.co/videos/preview/mixkit-retro-futuristic-grid-background-42999-large.mp4'
+  action:
+    "https://assets.mixkit.co/videos/preview/mixkit-fire-sparkles-and-embers-on-black-background-43026-large.mp4",
+  romance:
+    "https://assets.mixkit.co/videos/preview/mixkit-rain-drops-on-a-window-looking-out-to-city-lights-4122-large.mp4",
+  fantasy:
+    "https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-background-with-shining-stars-and-clouds-43187-large.mp4",
+  cyberpunk:
+    "https://assets.mixkit.co/videos/preview/mixkit-futuristic-subway-station-with-neon-lights-41710-large.mp4",
+  general:
+    "https://assets.mixkit.co/videos/preview/mixkit-retro-futuristic-grid-background-42999-large.mp4",
 };

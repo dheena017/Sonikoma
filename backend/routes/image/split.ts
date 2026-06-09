@@ -1,7 +1,10 @@
-import { Router } from 'express';
-import sharp from 'sharp';
-import { resolveImageToBuffer, cropAutoBorders } from '../../utils/imageUtils.js';
-import { stitchedCache } from '../../utils/cache.js';
+import { Router } from "express";
+import sharp from "sharp";
+import {
+  resolveImageToBuffer,
+  cropAutoBorders,
+} from "../../utils/imageUtils.js";
+import { stitchedCache } from "../../utils/cache.js";
 
 const router = Router();
 
@@ -14,11 +17,23 @@ const router = Router();
  * splitLines are Y positions in percent (0-100) representing boundaries between panels.
  * The final output will contain cropped images for each segment.
  */
-router.post('/execute-splits', async (req, res) => {
-  const { url, splitLines } = req.body as { url?: string; splitLines?: number[] };
+router.post("/execute-splits", async (req, res) => {
+  const { url, splitLines } = req.body as {
+    url?: string;
+    splitLines?: number[];
+  };
 
-  if (!url) return res.status(400).json({ success: false, error: "Parameter 'url' is required." });
-  if (!Array.isArray(splitLines)) return res.status(400).json({ success: false, error: "Parameter 'splitLines' must be an array." });
+  if (!url)
+    return res
+      .status(400)
+      .json({ success: false, error: "Parameter 'url' is required." });
+  if (!Array.isArray(splitLines))
+    return res
+      .status(400)
+      .json({
+        success: false,
+        error: "Parameter 'splitLines' must be an array.",
+      });
 
   try {
     const resolved = await resolveImageToBuffer(url);
@@ -29,7 +44,9 @@ router.post('/execute-splits', async (req, res) => {
     const h = meta.height || 0;
 
     if (w <= 0 || h <= 0) {
-      return res.status(400).json({ success: false, error: 'Unable to read image dimensions.' });
+      return res
+        .status(400)
+        .json({ success: false, error: "Unable to read image dimensions." });
     }
 
     // Normalize & sanitize split lines
@@ -40,7 +57,9 @@ router.post('/execute-splits', async (req, res) => {
 
     // Always include edges.
     // Create segments between consecutive boundaries.
-    const boundaries = Array.from(new Set([0, ...ys, 100])).sort((a, b) => a - b);
+    const boundaries = Array.from(new Set([0, ...ys, 100])).sort(
+      (a, b) => a - b
+    );
 
     const minSegmentHeightPx = 20; // avoid producing near-empty crops
 
@@ -75,9 +94,9 @@ router.post('/execute-splits', async (req, res) => {
           true,
           0,
           30,
-          'auto',
-          'free',
-          'jpeg',
+          "auto",
+          "free",
+          "jpeg",
           90
         );
         segBuffer = trimmed.data;
@@ -85,27 +104,36 @@ router.post('/execute-splits', async (req, res) => {
         // ignore trimming failures; still return extracted segment
       }
 
-      const cacheId = `split_${Date.now()}_${Math.floor(Math.random() * 100000)}_${i}`;
+      const cacheId = `split_${Date.now()}_${Math.floor(
+        Math.random() * 100000
+      )}_${i}`;
       const newUrl = `/api/merge-images/cached/${cacheId}`;
 
       stitchedCache.set(cacheId, {
         data: segBuffer,
-        contentType: 'image/jpeg',
+        contentType: "image/jpeg",
       });
 
       urls.push(newUrl);
     }
 
     if (urls.length === 0) {
-      return res.status(200).json({ success: true, urls: [], message: 'No valid split segments produced.' });
+      return res
+        .status(200)
+        .json({
+          success: true,
+          urls: [],
+          message: "No valid split segments produced.",
+        });
     }
 
     return res.json({ success: true, urls });
   } catch (err: unknown) {
-    console.error('[execute-splits] failed:', err);
-    return res.status(500).json({ success: false, error: err.message || 'execute-splits failed' });
+    console.error("[execute-splits] failed:", err);
+    return res
+      .status(500)
+      .json({ success: false, error: err.message || "execute-splits failed" });
   }
 });
 
 export default router;
-

@@ -46,7 +46,9 @@ export function useCropEditorHistory({
   setSelectedSliceId,
   savedState,
 }: UseCropEditorHistoryProps) {
-  const [history, setHistory] = useState<HistorySnapshot[]>(savedState?.history || []);
+  const [history, setHistory] = useState<HistorySnapshot[]>(
+    savedState?.history || []
+  );
   const [redoHistory, setRedoHistory] = useState<HistorySnapshot[]>([]);
 
   const pushHistory = useCallback(() => {
@@ -63,7 +65,15 @@ export function useCropEditorHistory({
       },
     ]);
     setRedoHistory([]);
-  }, [editCropTop, editCropBottom, editCropLeft, editCropRight, slices, splitLines, selectedSliceId]);
+  }, [
+    editCropTop,
+    editCropBottom,
+    editCropLeft,
+    editCropRight,
+    slices,
+    splitLines,
+    selectedSliceId,
+  ]);
 
   const handleUndo = useCallback(() => {
     setHistory((prev) => {
@@ -92,7 +102,22 @@ export function useCropEditorHistory({
       setSelectedSliceId(snap.selectedSliceId);
       return prev.slice(0, -1);
     });
-  }, [editCropTop, editCropBottom, editCropLeft, editCropRight, slices, splitLines, selectedSliceId, setEditCropTop, setEditCropBottom, setEditCropLeft, setEditCropRight, setSlices, setSplitLines, setSelectedSliceId]);
+  }, [
+    editCropTop,
+    editCropBottom,
+    editCropLeft,
+    editCropRight,
+    slices,
+    splitLines,
+    selectedSliceId,
+    setEditCropTop,
+    setEditCropBottom,
+    setEditCropLeft,
+    setEditCropRight,
+    setSlices,
+    setSplitLines,
+    setSelectedSliceId,
+  ]);
 
   const handleRedo = useCallback(() => {
     setRedoHistory((prevRedo) => {
@@ -121,7 +146,22 @@ export function useCropEditorHistory({
       setSelectedSliceId(snap.selectedSliceId);
       return prevRedo.slice(0, -1);
     });
-  }, [editCropTop, editCropBottom, editCropLeft, editCropRight, slices, splitLines, selectedSliceId, setEditCropTop, setEditCropBottom, setEditCropLeft, setEditCropRight, setSlices, setSplitLines, setSelectedSliceId]);
+  }, [
+    editCropTop,
+    editCropBottom,
+    editCropLeft,
+    editCropRight,
+    slices,
+    splitLines,
+    selectedSliceId,
+    setEditCropTop,
+    setEditCropBottom,
+    setEditCropLeft,
+    setEditCropRight,
+    setSlices,
+    setSplitLines,
+    setSelectedSliceId,
+  ]);
 
   return {
     history,

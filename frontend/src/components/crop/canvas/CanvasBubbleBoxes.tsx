@@ -1,10 +1,20 @@
 import React from "react";
 
 interface CanvasBubbleBoxesProps {
-  detectedBubbles: Array<{ box: [number, number, number, number]; text: string; category?: string }>;
+  detectedBubbles: Array<{
+    box: [number, number, number, number];
+    text: string;
+    category?: string;
+  }>;
   selectedBubbleIdx: number | null;
   setSelectedBubbleIdx?: (idx: number | null) => void;
-  onCleanSingleBubble?: (ymin: number, xmin: number, ymax: number, xmax: number, text: string) => Promise<void>;
+  onCleanSingleBubble?: (
+    ymin: number,
+    xmin: number,
+    ymax: number,
+    xmax: number,
+    text: string
+  ) => Promise<void>;
 }
 
 export default function CanvasBubbleBoxes({
@@ -46,7 +56,11 @@ export default function CanvasBubbleBoxes({
                 onCleanSingleBubble(ymin, xmin, ymax, xmax, bubble.text);
               }
             }}
-            title={bubble.text ? `Bubble OCR: "${bubble.text}" (Click to Clean/Select)` : "Detected Bubble (Click to Clean/Select)"}
+            title={
+              bubble.text
+                ? `Bubble OCR: "${bubble.text}" (Click to Clean/Select)`
+                : "Detected Bubble (Click to Clean/Select)"
+            }
           >
             <div className="absolute left-1 top-1 bg-black/85 text-[8px] text-purple-300 font-bold px-1 py-0.5 rounded border border-purple-500/20 max-w-[90%] overflow-hidden text-ellipsis whitespace-nowrap opacity-75 group-hover:opacity-100 transition-opacity">
               Bubble #{idx + 1}

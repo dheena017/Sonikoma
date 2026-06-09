@@ -6,14 +6,17 @@ interface FinalVideoPlayerProps {
   aspectRatio: "9:16" | "16:9";
 }
 
-export default function FinalVideoPlayer({ videoUrl, aspectRatio }: FinalVideoPlayerProps) {
+export default function FinalVideoPlayer({
+  videoUrl,
+  aspectRatio,
+}: FinalVideoPlayerProps) {
   return (
     <div className="space-y-3 bg-neutral-900 border border-neutral-700/50 rounded-xl p-4">
       <div className="flex items-center gap-2">
-         <Film className="h-4 w-4 text-purple-400" />
-         <span className="text-[10px] uppercase font-mono font-bold text-neutral-300 tracking-wider">
-           Final Compiled Preview
-         </span>
+        <Film className="h-4 w-4 text-purple-400" />
+        <span className="text-[10px] uppercase font-mono font-bold text-neutral-300 tracking-wider">
+          Final Compiled Preview
+        </span>
       </div>
       <div className="flex gap-2">
         <button className="flex-1 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold py-2 rounded-lg cursor-pointer transition-all flex items-center justify-center gap-2 shadow">

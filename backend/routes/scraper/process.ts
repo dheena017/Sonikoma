@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router } from "express";
 
 const router = Router();
 
@@ -6,7 +6,9 @@ const router = Router();
 router.post("/process-url", async (req, res) => {
   const { url } = req.body;
   if (!url) {
-    return res.status(400).json({ status: "error", message: "Parameter 'url' is required." });
+    return res
+      .status(400)
+      .json({ status: "error", message: "Parameter 'url' is required." });
   }
   return res.json({
     status: "success",
@@ -14,8 +16,8 @@ router.post("/process-url", async (req, res) => {
     payload: {
       url: url,
       title: "Processed Episode",
-      panels_found: 5
-    }
+      panels_found: 5,
+    },
   });
 });
 

@@ -24,7 +24,7 @@ export default function VideoMonitor({
   videoPlayerRef,
   currentPanelIndex,
   playbackTime,
-  reprocessingPanelId
+  reprocessingPanelId,
 }: VideoMonitorProps) {
   return (
     <div className="space-y-4">

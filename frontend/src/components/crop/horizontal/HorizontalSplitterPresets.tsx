@@ -37,7 +37,9 @@ export default function HorizontalSplitterPresets({
         >
           <option value="">Select template...</option>
           {Object.keys(savedTemplates).map((name) => (
-            <option key={name} value={name}>{name}</option>
+            <option key={name} value={name}>
+              {name}
+            </option>
           ))}
         </select>
         {selectedTemplate && (
