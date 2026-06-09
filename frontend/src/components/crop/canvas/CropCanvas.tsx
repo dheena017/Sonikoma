@@ -106,59 +106,6 @@ export default function CropCanvas({
   const [isDrawing, setIsDrawing] = useState(false);
   const isManualBrushActive = editMode === "clean_manual" && activeTab === "eraser";
 
-  // Derive cursor reactively from all relevant state/props so it never lags
-  // behind editMode changes or quick mouse-leave/enter cycles.
-  const computedCursor = useMemo(() => {
-    // 👇 STRICT OVERRIDE AT THE TOP: If not in an active editing mode, force default cursor
-    if (editMode !== "crop" && editMode !== "slices" && editMode !== "clean_manual") {
-      return "default"; // Instantly override any lingering dragType state
-    }
-
-    // Brush mode: always crosshair regardless of hover state
-    if (isManualBrushActive) return "crosshair";
-
-    // Active drag overrides everything else
-    if (dragType === "move") return "grabbing";
-    if (dragType === "drag-split-line") return "row-resize";
-    if (dragType === "draw") return "crosshair";
-    if (dragType === "split") return "ns-resize";
-    if (dragType && dragType.startsWith("resize-")) {
-      const handle = dragType.replace("resize-", "");
-      if (handle === "nw" || handle === "se") return "nwse-resize";
-      if (handle === "ne" || handle === "sw") return "nesw-resize";
-      if (handle === "n"  || handle === "s")  return "ns-resize";
-      if (handle === "w"  || handle === "e")  return "ew-resize";
-    }
-
-    // Split-line mode
-    if (showSplitPosition) {
-      if (hoverPct) {
-        const nearLine = splitLines.some(lineY => Math.abs(lineY - hoverPct.y) < 2.5);
-        if (nearLine) return "row-resize";
-      }
-      return "ns-resize";
-    }
-
-    // Hover over an existing selection
-    if (hoverPct && isPointInsideSelection(hoverPct.x, hoverPct.y)) return "grab";
-
-    // Edit mode-based fallback
-    if (editMode === "clean_manual") return "crosshair";
-    if (editMode === "crop" || editMode === "slices") return "crosshair";
-    
-    // For all other modes (adjust, edit, typeset, etc.), use default cursor
-    return "default";
-  }, [
-    isManualBrushActive,
-    dragType,
-    showSplitPosition,
-    splitLines,
-    hoverPct,
-    isPointInsideSelection,
-    activeTab,
-    editMode,
-  ]);
-
   const getClientPct = useCallback(
     (clientX: number, clientY: number) => {
       if (!containerRef.current) return null;
@@ -309,7 +256,6 @@ export default function CropCanvas({
         }}
         className="relative inline-block w-full max-w-full h-full"
         style={{
-          cursor: computedCursor,
           userSelect: "none",
           touchAction: "none",
           transform: zoom !== 1 ? `scale(${zoom})` : undefined,

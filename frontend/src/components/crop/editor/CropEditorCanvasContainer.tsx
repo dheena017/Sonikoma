@@ -107,7 +107,6 @@ export default function CropEditorCanvasContainer({
     <div 
       className="lg:col-span-7 flex flex-col space-y-2 h-full min-h-0 overflow-hidden"
       style={{ 
-        cursor: (activeTab === "slice" || activeTab === "cuts") ? "crosshair" : "default",
         pointerEvents: "auto"
       }}
     >

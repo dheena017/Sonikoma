@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { RefreshCw, Layers } from "lucide-react";
 import MergePanel from "../merge/MergePanel";
 import CropToolsPanel from "./CropToolsPanel";
@@ -116,7 +116,7 @@ interface CropEditorSidebarProps {
   handleExecuteSave: any;
 }
 
-export default function CropEditorSidebar({
+function CropEditorSidebar({
   activeTab,
   setActiveTab,
   slices,
@@ -223,22 +223,26 @@ export default function CropEditorSidebar({
   handleClearDetectedBoxes,
   handleExecuteSave,
 }: CropEditorSidebarProps) {
-  const handleTabClick = (tab: "adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge") => {
+  const handleTabClick = useCallback((tab: "adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge") => {
     setActiveTab(tab);
 
-    if (tab !== "eraser") {
-      setEditMode("crop");
-    }
-
+    // Set the correct editMode based on which tab was clicked
     if (tab === "slice") {
+      setEditMode("crop");
       setShowSplitPosition(true);
       setEditCropTop(0);
       setEditCropBottom(0);
       setEditCropLeft(0);
       setEditCropRight(0);
       setSelectedSliceId(null);
+    } else if (tab === "cuts") {
+      setEditMode("slices");
+    } else if (tab === "eraser") {
+      setEditMode("clean_manual");
+    } else {
+      setEditMode("crop"); // For adjust, edit, merge
     }
-  };
+  }, [setActiveTab, setEditMode, setShowSplitPosition, setEditCropTop, setEditCropBottom, setEditCropLeft, setEditCropRight, setSelectedSliceId]);
 
   return (
     <div className="lg:col-span-5 flex flex-col space-y-3 h-full min-h-0 overflow-hidden pr-0 sm:pr-1.5 scrollbar-thin overscroll-contain">
@@ -256,7 +260,7 @@ export default function CropEditorSidebar({
             key={tab.key}
             type="button"
             onClick={() => handleTabClick(tab.key)}
-            className={`w-full min-w-0 flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-2xl text-[10px] font-bold font-mono transition-all cursor-pointer ${
+            className={`w-full min-w-0 flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-2xl text-[10px] font-bold font-mono transition-colors duration-150 cursor-pointer ${
               activeTab === tab.key
                 ? "bg-purple-600 text-white shadow-lg shadow-purple-900/50"
                 : "text-neutral-400 hover:text-neutral-200 hover:bg-white/10"
@@ -271,7 +275,7 @@ export default function CropEditorSidebar({
       {/* Tab Contents */}
       <div className="flex-1 min-h-0 overflow-y-auto space-y-4 scrollbar-thin pr-0 sm:pr-1">
         {activeTab === "merge" && (
-          <div className="animate-fadeIn rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
+          <div className="rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
             <MergePanel
               editingImageIdx={editingImageIdx}
               scrapedImages={scrapedImages}
@@ -282,7 +286,7 @@ export default function CropEditorSidebar({
         )}
 
         {activeTab === "edit" && (
-          <div className="animate-fadeIn rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
+          <div className="rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
             <CropToolsPanel
               editCropTop={editCropTop}
               editCropBottom={editCropBottom}
@@ -304,7 +308,7 @@ export default function CropEditorSidebar({
         )}
 
         {activeTab === "adjust" && (
-          <div className="space-y-4 animate-fadeIn rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
+          <div className="space-y-4 rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
             <EnhancementsPanel
               activeStoryboardPanel={activeStoryboardPanel}
               handleModifyBrightness={handleModifyBrightness}
@@ -322,7 +326,7 @@ export default function CropEditorSidebar({
         )}
 
         {activeTab === "eraser" && (
-          <div className="space-y-4 animate-fadeIn rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
+          <div className="space-y-4 rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
             <CleanBubblesPanel
               imgUrl={scrapedImages[editingImageIdx]}
               editingImageIdx={editingImageIdx}
@@ -371,7 +375,7 @@ export default function CropEditorSidebar({
         )}
 
         {activeTab === "slice" && (
-          <div className="space-y-4 animate-fadeIn rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
+          <div className="space-y-4 rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
             <HorizontalSplitter
               splitPosition={splitPosition}
               setSplitPosition={setSplitPosition}
@@ -398,7 +402,7 @@ export default function CropEditorSidebar({
         )}
 
         {activeTab === "cuts" && (
-          <div className="space-y-4 animate-fadeIn rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
+          <div className="space-y-4 rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
             <CutsRegistry
               slices={slices}
               setSlices={setSlices}
@@ -457,3 +461,5 @@ export default function CropEditorSidebar({
     </div>
   );
 }
+
+export default React.memo(CropEditorSidebar);
