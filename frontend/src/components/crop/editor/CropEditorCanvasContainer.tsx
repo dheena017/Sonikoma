@@ -91,17 +91,17 @@ export default function CropEditorCanvasContainer({
 }: CropEditorCanvasContainerProps) {
   // Safe handlers that only allow crop drawing when in the correct tabs
   const safeHandleStart = (clientX: number, clientY: number) => {
-    if (activeTab !== "slice" && activeTab !== "cuts") return;
+    if (!['edit', 'slice', 'cuts'].includes(activeTab)) return;
     handleStart(clientX, clientY);
   };
 
   const safeHandleMove = (x: number, y: number) => {
-    if (activeTab !== "slice" && activeTab !== "cuts") return;
+    if (!['edit', 'slice', 'cuts'].includes(activeTab)) return;
     handleMove(x, y);
   };
 
   const safeHandleEnd = () => {
-    if (activeTab !== "slice" && activeTab !== "cuts") return;
+    if (!['edit', 'slice', 'cuts'].includes(activeTab)) return;
     handleEnd();
   };
 
