@@ -1,11 +1,11 @@
-import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react";
-import path from "path";
-import { defineConfig, loadEnv } from "vite";
+import tailwindcss from '@tailwindcss/vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+import { defineConfig, loadEnv } from 'vite';
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, path.resolve(__dirname, ".."));
-  const backendPort = env.PORT || "5173";
+  const env = loadEnv(mode, path.resolve(__dirname, '..'));
+  const backendPort = env.PORT || '5173';
   const backendTarget = `http://127.0.0.1:${backendPort}`;
 
   return {
@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "src"),
+        '@': path.resolve(__dirname, 'src'),
       },
     },
     build: {
@@ -21,25 +21,25 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks(id) {
-            if (id.includes("node_modules")) {
-              if (id.includes("react") || id.includes("scheduler")) {
-                return "vendor-react-core";
+            if (id.includes('node_modules')) {
+              if (id.includes('react') || id.includes('scheduler')) {
+                return 'vendor-react-core';
               }
-              if (id.includes("lucide") || id.includes("icons")) {
-                return "vendor-icons";
+              if (id.includes('lucide') || id.includes('icons')) {
+                return 'vendor-icons';
               }
-              return "vendor-libs";
+              return 'vendor-libs';
             }
-          },
-        },
-      },
+          }
+        }
+      }
     },
     server: {
       port: 3000,
-      hmr: process.env.DISABLE_HMR !== "true",
-      watch: process.env.DISABLE_HMR === "true" ? null : {},
+      hmr: process.env.DISABLE_HMR !== 'true',
+      watch: process.env.DISABLE_HMR === 'true' ? null : {},
       proxy: {
-        "/api": {
+        '/api': {
           target: backendTarget,
           changeOrigin: true,
           secure: false,
@@ -47,23 +47,20 @@ export default defineConfig(({ mode }) => {
           proxyTimeout: 0,
           timeout: 0,
           configure: (proxy, _options) => {
-            proxy.on("error", (err: any, req: any) => {
-              console.error(
-                "[Vite Proxy] /api proxy error:",
-                err && err.message ? err.message : err
-              );
+            proxy.on('error', (err: any, req: any) => {
+              console.error('[Vite Proxy] /api proxy error:', err && err.message ? err.message : err);
             });
-          },
+          }
         },
-        "/media": {
+        '/media': {
           target: backendTarget,
           changeOrigin: true,
           secure: false,
           ws: false,
           proxyTimeout: 0,
           timeout: 0,
-        },
-      },
+        }
+      }
     },
   };
 });

@@ -63,15 +63,12 @@ export default function AutoCropModal({
                 <Scissors className="h-5 w-5 text-indigo-400" />
               </div>
               <div>
-                <h3 className="font-bold text-sm text-white">
-                  Smart Auto-Crop Settings
-                </h3>
+                <h3 className="font-bold text-sm text-white">Smart Auto-Crop Settings</h3>
                 <p className="text-[10px] text-neutral-400 font-mono mt-0.5">
                   Advanced CV border-detection & panel segmentation parameters
                   {selectedCount > 0 && (
                     <span className="ml-2 text-indigo-400 font-bold">
-                      · {selectedCount} panel{selectedCount !== 1 ? "s" : ""}{" "}
-                      selected
+                      · {selectedCount} panel{selectedCount !== 1 ? "s" : ""} selected
                     </span>
                   )}
                 </p>
@@ -127,9 +124,7 @@ export default function AutoCropModal({
               <p className="text-[10px] text-neutral-505 font-mono">
                 {selectedCount === 0
                   ? "⚠️  No panels selected — select panels first in the scraper deck"
-                  : `Ready to auto-crop ${selectedCount} panel${
-                      selectedCount !== 1 ? "s" : ""
-                    }`}
+                  : `Ready to auto-crop ${selectedCount} panel${selectedCount !== 1 ? "s" : ""}`}
               </p>
               {useLocalCV && (
                 <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-lg bg-cyan-950/80 text-cyan-400 border border-cyan-800/40">

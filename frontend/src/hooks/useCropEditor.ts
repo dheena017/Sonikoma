@@ -42,11 +42,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasMaskRef = useRef<HTMLCanvasElement>(null);
 
-  const state = useCropEditorState({
-    scrapedImages,
-    editingImageIdx,
-    imageEditStates,
-  });
+  const state = useCropEditorState({ scrapedImages, editingImageIdx, imageEditStates });
 
   const {
     history,
@@ -221,12 +217,9 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
     handleClearBrushMask();
   }, []);
 
-  const handleSaveMultipleCutsCallback = useCallback(
-    (cuts: Slot[]) => {
-      return handleSaveMultipleCuts(cuts);
-    },
-    [handleSaveMultipleCuts]
-  );
+  const handleSaveMultipleCutsCallback = useCallback((cuts: Slot[]) => {
+    return handleSaveMultipleCuts(cuts);
+  }, [handleSaveMultipleCuts]);
 
   const handleSaveEditedImageCallback = useCallback(() => {
     return handleSaveEditedImage();
@@ -247,16 +240,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
         },
       }));
     }
-  }, [
-    state.imageUrl,
-    history,
-    state.slices,
-    state.selectedSliceId,
-    state.splitLines,
-    state.activeTab,
-    state.detectedBoxes,
-    setImageEditStates,
-  ]);
+  }, [state.imageUrl, history, state.slices, state.selectedSliceId, state.splitLines, state.activeTab, state.detectedBoxes, setImageEditStates]);
 
   const handlePushToSlices = () => {
     pushHistory();
@@ -302,8 +286,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
   };
 
   const handleNextImage = () => {
-    if (editingImageIdx === null || editingImageIdx >= scrapedImages.length - 1)
-      return;
+    if (editingImageIdx === null || editingImageIdx >= scrapedImages.length - 1) return;
     setEditingImageIdx(editingImageIdx + 1);
   };
 
@@ -320,15 +303,13 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
 
   const handleAddSplitLine = () => {
     pushHistory();
-    state.setSplitLines((prev) =>
-      [...prev, state.splitPosition].sort((a, b) => a - b)
-    );
+    state.setSplitLines(prev => [...prev, state.splitPosition].sort((a, b) => a - b));
     addNotification("Split line added", "success");
   };
 
   const handleRemoveSplitLine = (lineY: number) => {
     pushHistory();
-    state.setSplitLines((prev) => prev.filter((y) => y !== lineY));
+    state.setSplitLines(prev => prev.filter(y => y !== lineY));
     addNotification("Split line removed", "info");
   };
 
@@ -351,10 +332,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
           copy.splice(editingImageIdx, 1, ...data.urls);
           return copy;
         });
-        addNotification(
-          `Successfully split panel into ${data.urls.length} images!`,
-          "success"
-        );
+        addNotification(`Successfully split panel into ${data.urls.length} images!`, "success");
         setEditingImageIdx(null);
       }
     } catch (err: any) {
@@ -367,9 +345,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
   const handleExecuteSave = async () => {
     if (state.selectedSliceId) {
       // If a specific slice is selected, only execute that one
-      const selectedSlice = state.slices.find(
-        (s) => s.id === state.selectedSliceId
-      );
+      const selectedSlice = state.slices.find(s => s.id === state.selectedSliceId);
       if (selectedSlice) {
         await handleSaveEditedImageCallback();
       }
@@ -386,16 +362,14 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
   const handleDeleteCurrentImage = () => {
     if (editingImageIdx === null || !setScrapedImages) return;
     const confirmDelete = window.confirm(
-      `Are you sure you want to delete Panel #${
-        editingImageIdx + 1
-      } from your deck?`
+      `Are you sure you want to delete Panel #${editingImageIdx + 1} from your deck?`
     );
     if (!confirmDelete) return;
 
     const currentIdx = editingImageIdx;
     setScrapedImages((prev) => {
       const filtered = prev.filter((_, i) => i !== currentIdx);
-
+      
       // Only close editor if no images left
       if (filtered.length === 0) {
         setEditingImageIdx(null);
@@ -414,9 +388,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
 
     if (setConsoleLogs) {
       setConsoleLogs((prev) => [
-        `[GUI] Deleted extracted frame #${
-          currentIdx + 1
-        } from deck via Editor.`,
+        `[GUI] Deleted extracted frame #${currentIdx + 1} from deck via Editor.`,
         ...prev,
       ]);
     }
@@ -449,16 +421,14 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
         addNotification("No detected boxes to apply.", "warning");
         return;
       }
-      const initialSlices = state.detectedBoxes.map(
-        (box: unknown, index: number) => ({
-          id: `detected-${index}-${Date.now()}`,
-          cropTop: box.cropTop,
-          cropBottom: box.cropBottom,
-          cropLeft: box.cropLeft,
-          cropRight: box.cropRight,
-          autoTrim: editAutoTrim,
-        })
-      );
+      const initialSlices = state.detectedBoxes.map((box: unknown, index: number) => ({
+        id: `detected-${index}-${Date.now()}`,
+        cropTop: box.cropTop,
+        cropBottom: box.cropBottom,
+        cropLeft: box.cropLeft,
+        cropRight: box.cropRight,
+        autoTrim: editAutoTrim,
+      }));
       state.setSlices(initialSlices);
 
       if (initialSlices.length > 0) {
@@ -469,11 +439,8 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
         setEditCropTop(first.cropTop);
         setEditCropBottom(first.cropBottom);
       }
-
-      addNotification(
-        `Applied ${state.detectedBoxes.length} cuts to Target list!`,
-        "success"
-      );
+      
+      addNotification(`Applied ${state.detectedBoxes.length} cuts to Target list!`, "success");
     },
     handleClearDetectedBoxes: () => {
       state.setDetectedBoxes([]);

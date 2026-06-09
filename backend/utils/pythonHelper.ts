@@ -6,14 +6,14 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-import { spawn } from "child_process";
-import os from "os";
+import { spawn } from 'child_process';
+import os from 'os';
 
 /**
  * Returns the correct python binary name based on the current platform.
  */
 export function getPythonBin(): string {
-  return process.platform === "win32" ? "python" : "python3";
+  return process.platform === 'win32' ? 'python' : 'python3';
 }
 
 /**
@@ -31,10 +31,7 @@ export interface PythonExecResult {
  * @param args Array of arguments to pass to the script.
  * @returns Promise<PythonExecResult>
  */
-export async function runPythonScript(
-  scriptPath: string,
-  args: string[]
-): Promise<PythonExecResult> {
+export async function runPythonScript(scriptPath: string, args: string[]): Promise<PythonExecResult> {
   const pythonBin = getPythonBin();
   const fullArgs = [scriptPath, ...args];
 
@@ -43,18 +40,14 @@ export async function runPythonScript(
     let stdout = "";
     let stderr = "";
 
-    child.stdout.on("data", (data) => {
-      stdout += data.toString();
-    });
-    child.stderr.on("data", (data) => {
-      stderr += data.toString();
-    });
+    child.stdout.on('data', (data) => { stdout += data.toString(); });
+    child.stderr.on('data', (data) => { stderr += data.toString(); });
 
-    child.on("close", (code) => {
+    child.on('close', (code) => {
       resolve({ code, stdout, stderr });
     });
 
-    child.on("error", (err) => {
+    child.on('error', (err) => {
       reject(err);
     });
   });

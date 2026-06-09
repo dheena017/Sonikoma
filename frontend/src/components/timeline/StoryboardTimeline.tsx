@@ -38,7 +38,7 @@ export default function StoryboardTimeline({
   targetUrl,
   fetchWithInterceptor,
   selectedModel,
-  setConsoleLogs,
+  setConsoleLogs
 }: StoryboardTimelineProps) {
   const {
     analyzingPanelId,
@@ -81,10 +81,7 @@ export default function StoryboardTimeline({
   }
 
   return (
-    <div
-      id="panels_timeline_section"
-      className="bg-neutral-900/60 rounded-2xl border border-neutral-800 p-4 sm:p-6 space-y-4"
-    >
+    <div id="panels_timeline_section" className="bg-neutral-900/60 rounded-2xl border border-neutral-800 p-4 sm:p-6 space-y-4">
       <TimelineHeader
         showBulkOps={showBulkOps}
         setShowBulkOps={setShowBulkOps}

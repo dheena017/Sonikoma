@@ -39,6 +39,7 @@ export function usePanelDetection({
   setConsoleLogs,
   editAutoTrim,
 }: UsePanelDetectionProps) {
+
   const handleAiCrop = async () => {
     if (editingImageIdx === null) return;
     const currentUrl = scrapedImages[editingImageIdx];
@@ -51,11 +52,7 @@ export function usePanelDetection({
       });
       if (!response.ok) throw new Error("AI analysis failed");
       const data = await response.json();
-      if (
-        data.success &&
-        Array.isArray(data.panels) &&
-        data.panels.length > 0
-      ) {
+      if (data.success && Array.isArray(data.panels) && data.panels.length > 0) {
         const hasCroppedUrls = data.panels.every((p: unknown) => p.croppedUrl);
         if (hasCroppedUrls && setScrapedImages) {
           const croppedUrls = data.panels.map((p: unknown) => p.croppedUrl);
@@ -152,7 +149,7 @@ export function usePanelDetection({
           cannyLow: settings?.cannyLow ?? 20,
           cannyHigh: settings?.cannyHigh ?? 100,
           closeKernelSize: settings?.closeKernelSize ?? 15,
-          minHeightPx: settings?.minHeightPx ?? 60,
+          minHeightPx: settings?.minHeightPx ?? 60
         }),
       });
       if (!response.ok) throw new Error("Failed to detect panels");
@@ -170,16 +167,14 @@ export function usePanelDetection({
             `Successfully sliced ${data.panels.length} panel cuts!`,
             "success"
           );
-          const initialSlices = data.panels.map(
-            (box: unknown, index: number) => ({
-              id: `detected-${index}-${Date.now()}`,
-              cropTop: box.cropTop,
-              cropBottom: box.cropBottom,
-              cropLeft: box.cropLeft,
-              cropRight: box.cropRight,
-              autoTrim: editAutoTrim,
-            })
-          );
+          const initialSlices = data.panels.map((box: unknown, index: number) => ({
+            id: `detected-${index}-${Date.now()}`,
+            cropTop: box.cropTop,
+            cropBottom: box.cropBottom,
+            cropLeft: box.cropLeft,
+            cropRight: box.cropRight,
+            autoTrim: editAutoTrim,
+          }));
           setSlices(initialSlices);
 
           const first = initialSlices[0];

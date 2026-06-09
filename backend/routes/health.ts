@@ -5,13 +5,9 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-import { Router } from "express";
-import { getDbStats } from "../database/db.js";
-import {
-  getLogs,
-  addLogListener,
-  removeLogListener,
-} from "../utils/logInterceptor.js";
+import { Router } from 'express';
+import { getDbStats } from '../database/db.js';
+import { getLogs, addLogListener, removeLogListener } from '../utils/logInterceptor.js';
 
 const router = Router();
 
@@ -24,21 +20,17 @@ router.get("/health", (req, res) => {
       service: "Webtoon-to-Video API",
       database: "connected",
       db_type: "SQLite (local)",
-      db_stats: stats,
+      db_stats: stats
     });
   } catch (err) {
-    res.json({
-      status: "ok",
-      service: "Webtoon-to-Video API",
-      database: "error",
-    });
+    res.json({ status: "ok", service: "Webtoon-to-Video API", database: "error" });
   }
 });
 
 // JSON polling endpoint for server console logs
 router.get("/system-logs", (req, res) => {
   try {
-    const since = parseInt((req.query.since as string) || "0", 10);
+    const since = parseInt(req.query.since as string || '0', 10);
     const logs = getLogs(since);
     res.json({ success: true, logs });
   } catch (err: unknown) {
@@ -49,11 +41,11 @@ router.get("/system-logs", (req, res) => {
 // Server-Sent Events (SSE) stream endpoint for live server console logs
 router.get("/system-logs/stream", (req, res) => {
   // Set headers for SSE
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache");
-  res.setHeader("Connection", "keep-alive");
-  res.setHeader("X-Accel-Buffering", "no"); // Disable buffering in proxy servers like Nginx
-
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no'); // Disable buffering in proxy servers like Nginx
+  
   res.flushHeaders();
 
   // Send current log history to align client state immediately
@@ -71,11 +63,11 @@ router.get("/system-logs/stream", (req, res) => {
 
   // Send a periodic keep-alive comment to keep connection alive
   const pingInterval = setInterval(() => {
-    res.write(": ping\n\n");
+    res.write(': ping\n\n');
   }, 15000);
 
   // Clean up on disconnect
-  req.on("close", () => {
+  req.on('close', () => {
     clearInterval(pingInterval);
     removeLogListener(listener);
     res.end();
@@ -83,3 +75,4 @@ router.get("/system-logs/stream", (req, res) => {
 });
 
 export default router;
+

@@ -3,7 +3,7 @@ import { PRESETS } from "../auto/bubblePresets";
 
 interface CleanBubblesPresetsProps {
   activePreset: string;
-  handleApplyPreset: (p: (typeof PRESETS)[number]) => void;
+  handleApplyPreset: (p: typeof PRESETS[number]) => void;
 }
 
 export default function CleanBubblesPresets({

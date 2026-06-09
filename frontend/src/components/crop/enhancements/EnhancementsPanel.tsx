@@ -38,9 +38,7 @@ export default function EnhancementsPanel({
         <div className="bg-purple-950/20 border border-purple-800/30 rounded-xl p-3 text-[10px] text-purple-300 font-sans leading-relaxed flex items-start gap-2 shadow-inner">
           <span className="text-xs leading-none">💡</span>
           <p>
-            <strong>Note:</strong> Insert this frame panel into the storyboard
-            to customize cinematic options like camera pans, text subtitles,
-            sound effects, and color grading.
+            <strong>Note:</strong> Insert this frame panel into the storyboard to customize cinematic options like camera pans, text subtitles, sound effects, and color grading.
           </p>
         </div>
       )}

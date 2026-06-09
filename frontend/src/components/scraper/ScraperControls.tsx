@@ -21,11 +21,7 @@ interface ScraperControlsProps
     | "batchProgress"
     | "fetchWithInterceptor"
   > {
-  addPanelsWithAutoAnalysis: (
-    urls: string[],
-    currentScrapedList?: string[],
-    shouldScroll?: boolean
-  ) => void;
+  addPanelsWithAutoAnalysis: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
 }
 
 export default function ScraperControls({
@@ -46,6 +42,7 @@ export default function ScraperControls({
   fetchWithInterceptor,
 }: ScraperControlsProps) {
   const [isBatchMerging, setIsBatchMerging] = useState<boolean>(false);
+ 
 
   const handleSelectAllToggle = () => {
     if (selectedScraped.length === scrapedImages.length) {
@@ -61,9 +58,7 @@ export default function ScraperControls({
   };
 
   const handleInvertSelection = () => {
-    setSelectedScraped((prev) =>
-      scrapedImages.filter((img) => !prev.includes(img))
-    );
+    setSelectedScraped((prev) => scrapedImages.filter((img) => !prev.includes(img)));
     setConsoleLogs((prev) => ["[GUI] Inverted selection set", ...prev]);
   };
 
@@ -79,10 +74,7 @@ export default function ScraperControls({
 
   const handleReverseDeckOrder = () => {
     setScrapedImages((prev) => [...prev].reverse());
-    setConsoleLogs((prev) => [
-      "[GUI] Reversed extracted frame sequence order in deck",
-      ...prev,
-    ]);
+    setConsoleLogs((prev) => ["[GUI] Reversed extracted frame sequence order in deck", ...prev]);
     addNotification("Reversed sequence order of the scraped deck!", "info");
   };
 
@@ -117,17 +109,11 @@ export default function ScraperControls({
       const data = await response.json();
       if (data.url) {
         // Find the index of the first selected image to insert the merged panel at that spot
-        const firstSelectedIdx = scrapedImages.findIndex((img) =>
-          selectedScraped.includes(img)
-        );
+        const firstSelectedIdx = scrapedImages.findIndex((img) => selectedScraped.includes(img));
 
         setScrapedImages((prev) => {
           const filtered = prev.filter((img) => !selectedScraped.includes(img));
-          filtered.splice(
-            firstSelectedIdx === -1 ? 0 : firstSelectedIdx,
-            0,
-            data.url
-          );
+          filtered.splice(firstSelectedIdx === -1 ? 0 : firstSelectedIdx, 0, data.url);
           return filtered;
         });
 
@@ -136,10 +122,7 @@ export default function ScraperControls({
           `[Stitch Generator] ✓ Stitching completed successfully! Stored URL: ${data.url}`,
           ...prev,
         ]);
-        addNotification(
-          "Stitched selected panels into one frame successfully!",
-          "success"
-        );
+        addNotification("Stitched selected panels into one frame successfully!", "success");
       }
     } catch (err: any) {
       console.error("Batch stitch failed:", err);
@@ -182,9 +165,7 @@ export default function ScraperControls({
         <details className="rounded-2xl border border-neutral-800/70 bg-neutral-950/70 p-3">
           <summary className="cursor-pointer list-none flex items-center justify-between gap-2 text-xs font-bold text-neutral-200 font-mono uppercase tracking-wider select-none">
             <span>Bulk tools</span>
-            <span className="text-[10px] text-neutral-500 normal-case tracking-normal">
-              Tap to expand
-            </span>
+            <span className="text-[10px] text-neutral-500 normal-case tracking-normal">Tap to expand</span>
           </summary>
           <div className="mt-4 space-y-4">{controlsContent}</div>
         </details>

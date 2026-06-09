@@ -37,8 +37,7 @@ export default function CropEditorFooter({
         </span>
         {historyLength > 0 && (
           <span className="text-[9px] text-purple-500/80 font-mono">
-            {historyLength} undo step{historyLength !== 1 ? "s" : ""} available
-            · Ctrl+Z
+            {historyLength} undo step{historyLength !== 1 ? "s" : ""} available · Ctrl+Z
           </span>
         )}
         <span className="text-[9px] text-neutral-600 font-mono mt-0.5 hidden sm:block">
@@ -87,11 +86,7 @@ export default function CropEditorFooter({
             onClick={handleExecuteHorizontalSplit}
             disabled={isSavingEdit}
             className="relative bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-2 shadow-lg shadow-purple-900/50"
-            style={{
-              boxShadow: isSavingEdit
-                ? undefined
-                : "0 0 20px rgba(139,92,246,0.25), 0 4px 12px rgba(0,0,0,0.4)",
-            }}
+            style={{ boxShadow: isSavingEdit ? undefined : "0 0 20px rgba(139,92,246,0.25), 0 4px 12px rgba(0,0,0,0.4)" }}
           >
             {isSavingEdit ? (
               <>
@@ -106,6 +101,7 @@ export default function CropEditorFooter({
             )}
           </button>
         )}
+
       </div>
     </div>
   );

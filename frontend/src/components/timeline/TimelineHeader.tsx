@@ -23,15 +23,10 @@ export default function TimelineHeader({
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-neutral-800 pb-4">
       <div>
-        <h3 className="font-bold text-base text-white">
-          Dynamic Storyboard & OCR Transcription
-        </h3>
-        <p className="hidden sm:block text-xs text-neutral-400">
-          Review live isolated panel frames. Adjust speech transcripts locally
-          below.
-        </p>
+        <h3 className="font-bold text-base text-white">Dynamic Storyboard & OCR Transcription</h3>
+        <p className="hidden sm:block text-xs text-neutral-400">Review live isolated panel frames. Adjust speech transcripts locally below.</p>
       </div>
-
+      
       <div className="flex flex-wrap items-center gap-2">
         {/* Bulk Action Toggle */}
         <button
@@ -81,9 +76,7 @@ export default function TimelineHeader({
           ) : (
             <Sparkles className="h-4 w-4 text-white animate-pulse" />
           )}
-          <span>
-            {isCompiling ? "Compiling Video..." : "Convert Storyboard to Video"}
-          </span>
+          <span>{isCompiling ? "Compiling Video..." : "Convert Storyboard to Video"}</span>
         </button>
       </div>
     </div>

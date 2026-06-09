@@ -25,11 +25,7 @@ export interface ScraperDeckProps {
   addNotification: (message: string, type: NotificationType) => void;
   fetchWithInterceptor?: typeof fetch;
   setErrorPopup?: (err: ErrorPopupDetail | null) => void;
-  addPanelsWithAutoAnalysis: (
-    urls: string[],
-    currentScrapedList?: string[],
-    shouldScroll?: boolean
-  ) => void;
+  addPanelsWithAutoAnalysis: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
   // Bubble Cleaner (managed at App level)
   showBubbleModal: boolean;
   setShowBubbleModal: (v: boolean) => void;
@@ -45,3 +41,4 @@ export interface ScraperDeckProps {
 }
 
 export type LiveScraperDeckProps = ScraperDeckProps;
+

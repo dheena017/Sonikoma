@@ -9,9 +9,7 @@ interface BubbleCleanerModalProps {
   detectionStyle: "all" | "white_only" | "text_only";
   setDetectionStyle: (v: "all" | "white_only" | "text_only") => void;
   eraseMethod: "auto" | "inpaint" | "blur" | "solid_white" | "solid_black";
-  setEraseMethod: (
-    v: "auto" | "inpaint" | "blur" | "solid_white" | "solid_black"
-  ) => void;
+  setEraseMethod: (v: "auto" | "inpaint" | "blur" | "solid_white" | "solid_black") => void;
   sensitivity: number;
   setSensitivity: (v: number) => void;
   selectedCount: number;
@@ -41,16 +39,11 @@ export default function BubbleCleanerModal({
                 <Brain className="h-4.5 w-4.5 text-purple-400" />
               </div>
               <div>
-                <h3 className="font-bold text-sm text-white">
-                  Bubble Cleaner Settings
-                </h3>
+                <h3 className="font-bold text-sm text-white">Bubble Cleaner Settings</h3>
                 <p className="text-[10px] text-neutral-400 font-mono mt-0.5">
                   Configure what gets detected and how it is erased
                   {selectedCount > 0 && (
-                    <span className="ml-2 text-purple-400 font-bold">
-                      · {selectedCount} panel{selectedCount !== 1 ? "s" : ""}{" "}
-                      selected
-                    </span>
+                    <span className="ml-2 text-purple-400 font-bold">· {selectedCount} panel{selectedCount !== 1 ? "s" : ""} selected</span>
                   )}
                 </p>
               </div>
@@ -84,9 +77,7 @@ export default function BubbleCleanerModal({
             <p className="text-[10px] text-neutral-500 font-mono">
               {selectedCount === 0
                 ? "⚠️  No panels selected — select panels first in the scraper deck"
-                : `Ready to clean ${selectedCount} panel${
-                    selectedCount !== 1 ? "s" : ""
-                  }`}
+                : `Ready to clean ${selectedCount} panel${selectedCount !== 1 ? "s" : ""}`}
             </p>
             <div className="flex gap-2.5">
               <button
@@ -100,11 +91,7 @@ export default function BubbleCleanerModal({
                 disabled={isApplying || selectedCount === 0}
                 className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold font-sans transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-purple-900/30 flex items-center gap-2 active:scale-95"
               >
-                {isApplying ? (
-                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Brain className="h-3.5 w-3.5" />
-                )}
+                {isApplying ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Brain className="h-3.5 w-3.5" />}
                 {isApplying ? "Cleaning…" : "Apply & Clean"}
               </button>
             </div>

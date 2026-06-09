@@ -1,4 +1,4 @@
-import { ai, hf, Type } from "../config/clients.js";
+import { ai, hf, Type } from '../config/clients.js';
 
 interface StoryboardPanel {
   id: number;
@@ -13,13 +13,7 @@ interface StoryboardPanel {
 /**
  * Helper function to generate rich story dialogs/captions dynamically without hardcoding
  */
-export async function generateDynamicPanels(
-  title: string,
-  genre: string,
-  episode: string,
-  imgUrls: string[],
-  model: string
-): Promise<StoryboardPanel[]> {
+export async function generateDynamicPanels(title: string, genre: string, episode: string, imgUrls: string[], model: string): Promise<StoryboardPanel[]> {
   const activeSlicesCount = Math.min(imgUrls.length, 8);
   const prompt = `You are a cinematic comic book editor and storyteller.
 Given this Comic Webtoon information:
@@ -35,14 +29,12 @@ For each of the ${activeSlicesCount} panels, provide:
 
 Output strictly valid JSON with top-level key "panels".`;
 
-  if (model.startsWith("huggingface") && hf) {
+  if (model.startsWith('huggingface') && hf) {
     try {
-      console.log(
-        `[HuggingFace] Creating storyboard using Mistral 7B for "${title}"`
-      );
+      console.log(`[HuggingFace] Creating storyboard using Mistral 7B for "${title}"`);
       const response = await hf.chatCompletion({
-        model: "mistralai/Mistral-7B-Instruct-v0.3",
-        messages: [{ role: "user", content: prompt }],
+        model: 'mistralai/Mistral-7B-Instruct-v0.3',
+        messages: [{ role: 'user', content: prompt }],
         temperature: 0.7,
         max_tokens: 1000,
       });
@@ -50,35 +42,26 @@ Output strictly valid JSON with top-level key "panels".`;
       const responseText = response.choices[0].message.content || "";
       // Robust JSON cleaning
       const cleanJson = responseText
-        .replace(/^\s*```(?:json)?/i, "")
-        .replace(/```\s*$/i, "")
+        .replace(/^\s*```(?:json)?/i, '')
+        .replace(/```\s*$/i, '')
         .trim();
       const parsedAI = JSON.parse(cleanJson);
       if (parsedAI && Array.isArray(parsedAI.panels)) {
-        return parsedAI.panels
-          .slice(0, activeSlicesCount)
-          .map(
-            (
-              p: { speech_text?: string; sfx?: string; motion_type?: string },
-              idx: number
-            ) => ({
+          return parsedAI.panels.slice(0, activeSlicesCount).map((p: { speech_text?: string; sfx?: string; motion_type?: string }, idx: number) => ({
               id: idx + 1,
               image_url: imgUrls[idx],
               original_image_url: imgUrls[idx],
               speech_text: p.speech_text || `Scene ${idx + 1}`,
               sfx: p.sfx || "[Action]",
               duration: 5.0,
-              motion_type: p.motion_type || "zoom_in",
-            })
-          );
+              motion_type: p.motion_type || "zoom_in"
+          }));
       }
     } catch (e: unknown) {
       if (e.message && e.message.includes("sufficient permissions")) {
-        console.log(
-          "[HuggingFace] Inference Provider permission denied. Falling back silently to Gemini."
-        );
+          console.log('[HuggingFace] Inference Provider permission denied. Falling back silently to Gemini.');
       } else {
-        console.warn("HuggingFace failed, falling back...", e);
+        console.warn('HuggingFace failed, falling back...', e);
       }
     }
   }
@@ -100,52 +83,37 @@ Output strictly valid JSON with top-level key "panels".`;
                   properties: {
                     speech_text: { type: Type.STRING },
                     sfx: { type: Type.STRING },
-                    motion_type: { type: Type.STRING },
+                    motion_type: { type: Type.STRING }
                   },
-                  required: ["speech_text", "sfx", "motion_type"],
-                },
-              },
+                  required: ["speech_text", "sfx", "motion_type"]
+                }
+              }
             },
-            required: ["panels"],
-          },
-        },
+            required: ["panels"]
+          }
+        }
       });
 
       const responseText = aiResponse.text?.trim() || "";
       if (responseText) {
         const parsedAI = JSON.parse(responseText);
-        if (
-          parsedAI &&
-          Array.isArray(parsedAI.panels) &&
-          parsedAI.panels.length > 0
-        ) {
-          console.log(
-            `[Gemini] Storyboard narration generated successfully for ${activeSlicesCount} slices.`
-          );
-          return parsedAI.panels
-            .slice(0, activeSlicesCount)
-            .map(
-              (
-                p: { speech_text?: string; sfx?: string; motion_type?: string },
-                idx: number
-              ) => ({
-                id: idx + 1,
-                image_url: imgUrls[idx],
-                original_image_url: imgUrls[idx],
-                speech_text: p.speech_text || `Scene ${idx + 1} of ${title}`,
-                sfx: p.sfx || "[Action Sounds]",
-                duration: 4.5,
-                motion_type: p.motion_type || "zoom_in",
-              })
-            );
+        if (parsedAI && Array.isArray(parsedAI.panels) && parsedAI.panels.length > 0) {
+          console.log(`[Gemini] Storyboard narration generated successfully for ${activeSlicesCount} slices.`);
+          return parsedAI.panels.slice(0, activeSlicesCount).map((p: { speech_text?: string; sfx?: string; motion_type?: string }, idx: number) => ({
+            id: idx + 1,
+            image_url: imgUrls[idx],
+            original_image_url: imgUrls[idx],
+            speech_text: p.speech_text || `Scene ${idx + 1} of ${title}`,
+            sfx: p.sfx || "[Action Sounds]",
+            duration: 4.5,
+            motion_type: p.motion_type || "zoom_in"
+          }));
         }
       }
     } catch (err: unknown) {
       if (err.status === 429) {
-        console.warn(
-          "[Gemini Script] Quota limit reached, waiting to retry once..."
-        );
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        console.warn("[Gemini Script] Quota limit reached, waiting to retry once...");
+        await new Promise(resolve => setTimeout(resolve, 5000));
         try {
           const aiResponse = await ai.models.generateContent({
             model: model || "gemini-2.5-flash",
@@ -162,59 +130,37 @@ Output strictly valid JSON with top-level key "panels".`;
                       properties: {
                         speech_text: { type: Type.STRING },
                         sfx: { type: Type.STRING },
-                        motion_type: { type: Type.STRING },
+                        motion_type: { type: Type.STRING }
                       },
-                      required: ["speech_text", "sfx", "motion_type"],
-                    },
-                  },
+                      required: ["speech_text", "sfx", "motion_type"]
+                    }
+                  }
                 },
-                required: ["panels"],
-              },
-            },
+                required: ["panels"]
+              }
+            }
           });
 
           const responseText = aiResponse.text?.trim() || "";
           if (responseText) {
             const parsedAI = JSON.parse(responseText);
-            if (
-              parsedAI &&
-              Array.isArray(parsedAI.panels) &&
-              parsedAI.panels.length > 0
-            ) {
-              return parsedAI.panels
-                .slice(0, activeSlicesCount)
-                .map(
-                  (
-                    p: {
-                      speech_text?: string;
-                      sfx?: string;
-                      motion_type?: string;
-                    },
-                    idx: number
-                  ) => ({
-                    id: idx + 1,
-                    image_url: imgUrls[idx],
-                    original_image_url: imgUrls[idx],
-                    speech_text:
-                      p.speech_text || `Scene ${idx + 1} of ${title}`,
-                    sfx: p.sfx || "[Action Sounds]",
-                    duration: 4.5,
-                    motion_type: p.motion_type || "zoom_in",
-                  })
-                );
+            if (parsedAI && Array.isArray(parsedAI.panels) && parsedAI.panels.length > 0) {
+              return parsedAI.panels.slice(0, activeSlicesCount).map((p: { speech_text?: string; sfx?: string; motion_type?: string }, idx: number) => ({
+                id: idx + 1,
+                image_url: imgUrls[idx],
+                original_image_url: imgUrls[idx],
+                speech_text: p.speech_text || `Scene ${idx + 1} of ${title}`,
+                sfx: p.sfx || "[Action Sounds]",
+                duration: 4.5,
+                motion_type: p.motion_type || "zoom_in"
+              }));
             }
           }
         } catch (retryErr: unknown) {
-          console.warn(
-            "[Gemini Script] Retry also failed. Falling back.",
-            retryErr.message
-          );
+          console.warn("[Gemini Script] Retry also failed. Falling back.", retryErr.message);
         }
       } else {
-        console.warn(
-          "[Gemini Script] Storyboard generation failed, falling back.",
-          err.message
-        );
+        console.warn("[Gemini Script] Storyboard generation failed, falling back.", err.message);
       }
     }
   }
@@ -239,26 +185,14 @@ Output strictly valid JSON with top-level key "panels".`;
         `A mysterious shadows crawls quietly, casting an unexpected veil of magic over the path.`,
         `Crucial keys and ancient memories are laid bare, revealing a hidden side of ${title}.`,
         `An absolute burst of brilliant energy sweeps the frame! Destiny is set in motion.`,
-        `Silence fills the space as allies stand tall together, ready to confront the ultimate mystery.`,
+        `Silence fills the space as allies stand tall together, ready to confront the ultimate mystery.`
       ];
       text = dynamicTexts[(i - 1) % dynamicTexts.length];
-
-      const sfxs = [
-        "[Soft Whoosh]",
-        "[Drums Rumble]",
-        "[Sparkling Shimmer]",
-        "[Energy Flare]",
-        "[Low Resonance]",
-      ];
+      
+      const sfxs = ["[Soft Whoosh]", "[Drums Rumble]", "[Sparkling Shimmer]", "[Energy Flare]", "[Low Resonance]"];
       sfx = sfxs[(i - 1) % sfxs.length];
-
-      const motions = [
-        "pan_right",
-        "pan_left",
-        "pan_up",
-        "zoom_out",
-        "pan_down",
-      ];
+      
+      const motions = ["pan_right", "pan_left", "pan_up", "zoom_out", "pan_down"];
       motion = motions[(i - 1) % motions.length];
     }
 
@@ -269,7 +203,7 @@ Output strictly valid JSON with top-level key "panels".`;
       speech_text: text,
       sfx: sfx,
       duration: 4.5,
-      motion_type: motion,
+      motion_type: motion
     });
   }
   return panelsList;

@@ -53,35 +53,32 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
     addNotification,
   } = props;
 
-  const source = selectedSource || "webtoons";
+  const source = selectedSource || 'webtoons';
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    const pasted = e.clipboardData?.getData("text") || "";
+    const pasted = e.clipboardData?.getData('text') || '';
     const url = pasted.trim();
     if (url) {
       const normalized = extractWebtoonUrl(url);
-      console.log("Pasted URL:", url, "Normalized URL:", normalized);
+      console.log('Pasted URL:', url, 'Normalized URL:', normalized);
       setTargetUrl(normalized);
       if (normalized !== url) {
         addNotification(
-          "Detected duplicate URLs in the paste buffer. Using the first valid URL.",
-          "info"
+          'Detected duplicate URLs in the paste buffer. Using the first valid URL.',
+          'info'
         );
       }
     }
   };
 
-  const selectedSourceName =
-    SOURCE_OPTIONS.find((option) => option.id === source)?.name || "Webtoons";
+  const selectedSourceName = SOURCE_OPTIONS.find((option) => option.id === source)?.name || "Webtoons";
   const targetExample = SOURCE_EXAMPLES[source] || "webtoons.com/...";
   const placeholderText = `Paste ${selectedSourceName} viewer URL (e.g. ${targetExample})`;
 
   const currentHost = (() => {
     try {
       const normalized = extractWebtoonUrl(targetUrl);
-      const urlWithScheme = normalized.startsWith("http")
-        ? normalized
-        : `https://${normalized}`;
+      const urlWithScheme = normalized.startsWith('http') ? normalized : `https://${normalized}`;
       return new URL(urlWithScheme).hostname.toLowerCase();
     } catch {
       return "";
@@ -90,11 +87,10 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
 
   const isSourceMismatch = Boolean(
     targetUrl.trim() &&
-      currentHost &&
-      !SOURCE_DOMAINS[source]?.some(
-        (allowedHost) =>
-          currentHost === allowedHost || currentHost.endsWith(`.${allowedHost}`)
-      )
+    currentHost &&
+    !SOURCE_DOMAINS[source]?.some((allowedHost) =>
+      currentHost === allowedHost || currentHost.endsWith(`.${allowedHost}`)
+    )
   );
 
   const modelGrid = (
@@ -105,7 +101,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
           type="button"
           onClick={() => {
             setSelectedModel(modelItem.id);
-            addNotification(`Model configured to ${modelItem.name}`, "info");
+            addNotification(`Model configured to ${modelItem.name}`, 'info');
           }}
           className={`p-3.5 rounded-2xl border text-left flex flex-col justify-between gap-1.5 transition-all duration-300 cursor-pointer ${
             selectedModel === modelItem.id
@@ -114,48 +110,33 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
           }`}
         >
           <div className="flex items-center justify-between gap-1.5 w-full">
-            <span className="text-xs font-semibold whitespace-nowrap truncate">
-              {modelItem.name}
-            </span>
-            <span
-              className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold uppercase tracking-wider ${
-                modelItem.type === "free"
-                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                  : modelItem.type === "open-source"
-                  ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-                  : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-              }`}
-            >
+            <span className="text-xs font-semibold whitespace-nowrap truncate">{modelItem.name}</span>
+            <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold uppercase tracking-wider ${
+              modelItem.type === 'free' 
+                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" 
+                : modelItem.type === 'open-source'
+                ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+            }`}>
               {modelItem.type}
             </span>
           </div>
-          <span className="text-[10px] text-neutral-500 truncate w-full italic font-sans">
-            Powered by {modelItem.provider}
-          </span>
+          <span className="text-[10px] text-neutral-500 truncate w-full italic font-sans">Powered by {modelItem.provider}</span>
         </button>
       ))}
     </div>
   );
 
   return (
-    <div
-      id="dynamic_input_box"
-      className="bg-neutral-900/40 rounded-3xl border border-neutral-800/80 p-5 sm:p-6 lg:p-8 backdrop-blur-md shadow-sm space-y-5 sm:space-y-6"
-    >
+    <div id="dynamic_input_box" className="bg-neutral-900/40 rounded-3xl border border-neutral-800/80 p-5 sm:p-6 lg:p-8 backdrop-blur-md shadow-sm space-y-5 sm:space-y-6">
       <div className="space-y-1">
         <div className="flex items-center gap-2 text-purple-400">
           <Sparkles className="h-4 w-4" />
-          <span className="text-xs font-semibold tracking-wider uppercase font-mono">
-            Dynamic Webtoon Scraper
-          </span>
+          <span className="text-xs font-semibold tracking-wider uppercase font-mono">Dynamic Webtoon Scraper</span>
         </div>
-        <h2 className="text-lg font-bold text-white tracking-tight">
-          Generate Video from Live Incident URL
-        </h2>
+        <h2 className="text-lg font-bold text-white tracking-tight">Generate Video from Live Incident URL</h2>
         <p className="hidden sm:block text-xs text-neutral-400 font-sans">
-          Enter an official Webtoon viewer URL page. The backend engine will
-          scrape the live media assets, isolate panels, run OCR transcriptions,
-          and compile the cinematic rendering dynamically.
+          Enter an official Webtoon viewer URL page. The backend engine will scrape the live media assets, isolate panels, run OCR transcriptions, and compile the cinematic rendering dynamically.
         </p>
       </div>
 
@@ -175,35 +156,29 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                 className="relative w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-neutral-200 outline-none appearance-none focus:border-purple-500 transition-colors"
               >
                 {SOURCE_OPTIONS.map((option) => (
-                  <option
-                    key={option.id}
-                    value={option.id}
-                    className="bg-neutral-950 text-neutral-100"
-                  >
+                  <option key={option.id} value={option.id} className="bg-neutral-950 text-neutral-100">
                     {option.name}
                   </option>
                 ))}
               </select>
-              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-neutral-500 select-none">
-                ▾
-              </div>
+              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-neutral-500 select-none">▾</div>
             </div>
           </div>
 
           <div className="relative group">
             <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 opacity-20 blur group-focus-within:opacity-40 transition-opacity duration-300" />
-            <input
+            <input 
               id="target_url_input"
-              type="url"
+              type="url" 
               value={targetUrl}
               onChange={(e) => setTargetUrl(e.target.value)}
               onPaste={handlePaste}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !isProcessing && targetUrl.trim()) {
+                if (e.key === 'Enter' && !isProcessing && targetUrl.trim()) {
                   if (isSourceMismatch) {
                     addNotification(
                       `Selected source ${selectedSourceName} does not match the current URL host (${currentHost}). Please choose the correct website or paste a matching URL.`,
-                      "error"
+                      'error'
                     );
                     return;
                   }
@@ -215,12 +190,8 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
             />
             {isSourceMismatch && (
               <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-[11px] text-amber-100 font-mono leading-5 mt-3">
-                <strong className="block text-amber-200 mb-1">
-                  Source mismatch detected
-                </strong>
-                Selected source <strong>{selectedSourceName}</strong> does not
-                match the URL host <strong>{currentHost || "unknown"}</strong>.
-                Please choose the correct website or paste a matching URL.
+                <strong className="block text-amber-200 mb-1">Source mismatch detected</strong>
+                Selected source <strong>{selectedSourceName}</strong> does not match the URL host <strong>{currentHost || 'unknown'}</strong>. Please choose the correct website or paste a matching URL.
               </div>
             )}
           </div>
@@ -235,9 +206,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
             <details className="rounded-2xl border border-neutral-800/80 bg-neutral-950/30 p-3">
               <summary className="cursor-pointer list-none flex items-center justify-between gap-2 text-xs font-bold text-neutral-200 font-mono uppercase tracking-wider select-none">
                 <span>Choose model</span>
-                <span className="text-[10px] text-neutral-500 normal-case tracking-normal">
-                  Tap to expand
-                </span>
+                <span className="text-[10px] text-neutral-500 normal-case tracking-normal">Tap to expand</span>
               </summary>
               <div className="mt-3">{modelGrid}</div>
             </details>
@@ -245,10 +214,9 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
 
           <div className="hidden lg:block">{modelGrid}</div>
 
-          {selectedModel.includes("pro") && (
+          {selectedModel.includes('pro') && (
             <p className="text-[10.5px] text-amber-500/90 font-mono flex items-center gap-1.5 animate-pulse">
-              <span>⚠️</span> Note: Pro models may require billing/credits.
-              Flash models (Free) are highly recommended.
+              <span>⚠️</span> Note: Pro models may require billing/credits. Flash models (Free) are highly recommended.
             </p>
           )}
         </div>

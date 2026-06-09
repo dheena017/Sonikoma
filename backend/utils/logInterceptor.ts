@@ -6,7 +6,7 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-import { inspect } from "util";
+import { inspect } from 'util';
 
 export interface LogEntry {
   id: number;
@@ -30,31 +30,21 @@ let isIntercepting = false;
 
 function formatTimestamp(): string {
   const now = new Date();
-  return now.toLocaleTimeString("en-US", {
-    hour12: false,
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
+  return now.toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
 function stripAnsi(str: string): string {
-  return str.replace(
-    /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
-    ""
-  );
+  return str.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');
 }
 
 function formatArgs(args: unknown[]): string {
-  return args
-    .map((arg) => {
-      if (typeof arg === "string") {
-        return arg;
-      }
-      // Deep formatting of objects / errors / arrays without colors
-      return inspect(arg, { depth: 4, colors: false, breakLength: 100 });
-    })
-    .join(" ");
+  return args.map(arg => {
+    if (typeof arg === 'string') {
+      return arg;
+    }
+    // Deep formatting of objects / errors / arrays without colors
+    return inspect(arg, { depth: 4, colors: false, breakLength: 100 });
+  }).join(' ');
 }
 
 function pushLog(prefix: string, args: unknown[]) {
@@ -65,21 +55,21 @@ function pushLog(prefix: string, args: unknown[]) {
   try {
     const rawMsg = stripAnsi(formatArgs(args));
     const timestamp = formatTimestamp();
-
+    
     // Format the message with appropriate category tag if not present
     let formattedMsg = rawMsg;
-    if (prefix === "[WARNING]") {
-      if (!rawMsg.includes("[WARNING]") && !rawMsg.includes("[WARN]")) {
+    if (prefix === '[WARNING]') {
+      if (!rawMsg.includes('[WARNING]') && !rawMsg.includes('[WARN]')) {
         formattedMsg = `[WARNING] ${rawMsg}`;
       }
-    } else if (prefix === "[ERROR]") {
-      if (!rawMsg.includes("[ERROR]") && !rawMsg.includes("[FATAL]")) {
+    } else if (prefix === '[ERROR]') {
+      if (!rawMsg.includes('[ERROR]') && !rawMsg.includes('[FATAL]')) {
         formattedMsg = `[ERROR] ${rawMsg}`;
       }
     } else {
       // General info logs.
       // If it doesn't have a category bracket prefix, default to [Backend]
-      if (!rawMsg.startsWith("[")) {
+      if (!rawMsg.startsWith('[')) {
         formattedMsg = `[Backend] ${rawMsg}`;
       }
     }
@@ -88,7 +78,7 @@ function pushLog(prefix: string, args: unknown[]) {
     const entry: LogEntry = {
       id: logSeq,
       timestamp,
-      message: formattedMsg,
+      message: formattedMsg
     };
 
     logBuffer.push(entry);
@@ -97,7 +87,7 @@ function pushLog(prefix: string, args: unknown[]) {
     }
 
     // Notify all active SSE streams
-    listeners.forEach((listener) => {
+    listeners.forEach(listener => {
       try {
         listener(entry);
       } catch (err) {
@@ -105,7 +95,7 @@ function pushLog(prefix: string, args: unknown[]) {
       }
     });
   } catch (err) {
-    originalError("[Logger Interceptor Error] Failed to process log:", err);
+    originalError('[Logger Interceptor Error] Failed to process log:', err);
   } finally {
     isIntercepting = false;
   }
@@ -114,22 +104,22 @@ function pushLog(prefix: string, args: unknown[]) {
 // Override console methods globally
 console.log = (...args: unknown[]) => {
   originalLog.apply(console, args);
-  pushLog("[INFO]", args);
+  pushLog('[INFO]', args);
 };
 
 console.warn = (...args: unknown[]) => {
   originalWarn.apply(console, args);
-  pushLog("[WARNING]", args);
+  pushLog('[WARNING]', args);
 };
 
 console.error = (...args: unknown[]) => {
   originalError.apply(console, args);
-  pushLog("[ERROR]", args);
+  pushLog('[ERROR]', args);
 };
 
 // Export APIs to be consumed by routes
 export function getLogs(since = 0): LogEntry[] {
-  return logBuffer.filter((entry) => entry.id > since);
+  return logBuffer.filter(entry => entry.id > since);
 }
 
 export function addLogListener(listener: LogListener) {

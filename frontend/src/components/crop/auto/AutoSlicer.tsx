@@ -1,19 +1,12 @@
 import React, { useState } from "react";
-import {
-  Sparkles,
-  RefreshCw,
-  Scissors,
-  Sliders,
-  Eye,
-  HelpCircle,
-} from "lucide-react";
+import { Sparkles, RefreshCw, Scissors, Sliders, Eye, HelpCircle } from "lucide-react";
 import AutoSlicerSettings from "./AutoSlicerSettings";
 import AutoSlicerCanny from "./AutoSlicerCanny";
 
 interface AutoSlicerProps {
-  handleDetectPanels: (settings?: {
-    sensitivity?: number;
-    backgroundMode?: string;
+  handleDetectPanels: (settings?: { 
+    sensitivity?: number; 
+    backgroundMode?: string; 
     aspectRatio?: string;
     strategy?: string;
     model?: string;
@@ -46,7 +39,7 @@ export default function AutoSlicer({
   const [sensitivity, setSensitivity] = useState<number>(30);
   const [backgroundMode, setBackgroundMode] = useState<string>("auto");
   const [aspectRatio, setAspectRatio] = useState<string>("free");
-
+  
   // OpenCV advanced parameters
   const [minHeightPx, setMinHeightPx] = useState<number>(60);
   const [minAreaPct, setMinAreaPct] = useState<number>(0.15);
@@ -142,19 +135,9 @@ export default function AutoSlicer({
 
       {showHelp && (
         <div className="p-3 bg-neutral-900/80 rounded-xl border border-neutral-800 text-[9px] text-neutral-400 space-y-1.5 font-mono animate-fadeIn">
-          <p>
-            <strong>OpenCV Contours Detector:</strong> Standard edge-based
-            segmentation that identifies panels separated by high-luminance
-            spacing gutters.
-          </p>
-          <p>
-            <strong>Gemini AI Smart Scanner:</strong> Vision-based LLM
-            segmentation that extracts panel boundaries based on page context.
-          </p>
-          <p>
-            <strong>Dry Run:</strong> Highlights contours visually without
-            saving them immediately, so you can tweak thresholds safely.
-          </p>
+          <p><strong>OpenCV Contours Detector:</strong> Standard edge-based segmentation that identifies panels separated by high-luminance spacing gutters.</p>
+          <p><strong>Gemini AI Smart Scanner:</strong> Vision-based LLM segmentation that extracts panel boundaries based on page context.</p>
+          <p><strong>Dry Run:</strong> Highlights contours visually without saving them immediately, so you can tweak thresholds safely.</p>
         </div>
       )}
 
@@ -196,21 +179,15 @@ export default function AutoSlicer({
           ) : (
             <Scissors className="h-3.5 w-3.5" />
           )}
-          <span>
-            {isDetecting
-              ? "Scanning..."
-              : dryRun
-              ? "Dry Run Preview"
-              : "Slice Panel Cuts"}
-          </span>
+          <span>{isDetecting ? "Scanning..." : dryRun ? "Dry Run Preview" : "Slice Panel Cuts"}</span>
         </button>
         <button
           type="button"
           onClick={() => setShowSettings(!showSettings)}
           title="Toggle Auto-crop Settings"
           className={`h-full px-2.5 border rounded-r-xl transition-all cursor-pointer active:scale-95 flex items-center justify-center ${
-            showSettings
-              ? "bg-indigo-500/20 text-indigo-200 border-indigo-500/40"
+            showSettings 
+              ? "bg-indigo-500/20 text-indigo-200 border-indigo-500/40" 
               : "bg-indigo-500/10 text-indigo-300 border-indigo-500/20 hover:bg-indigo-500/20"
           }`}
         >
@@ -236,9 +213,7 @@ export default function AutoSlicer({
             Clear Preview
           </button>
           <div className="col-span-2 text-[9px] text-neutral-400 font-mono">
-            Dry-run preview contains{" "}
-            <span className="font-semibold text-white">{detectedCount}</span>{" "}
-            detected panel{detectedCount === 1 ? "" : "s"}.
+            Dry-run preview contains <span className="font-semibold text-white">{detectedCount}</span> detected panel{detectedCount === 1 ? "" : "s"}.
           </div>
         </div>
       )}

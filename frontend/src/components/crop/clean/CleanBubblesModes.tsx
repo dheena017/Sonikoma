@@ -5,28 +5,8 @@ import { DETECTION_OPTIONS, ERASE_OPTIONS } from "../auto/bubblePresets";
 interface CleanBubblesModesProps {
   detectionStyle: "all" | "white_only" | "text_only";
   setDetectionStyle: (style: "all" | "white_only" | "text_only") => void;
-  eraseMethod:
-    | "auto"
-    | "inpaint"
-    | "inpaint_ns"
-    | "blur"
-    | "solid_white"
-    | "solid_black"
-    | "solid_color"
-    | "transparent"
-    | "ocr";
-  setEraseMethod: (
-    method:
-      | "auto"
-      | "inpaint"
-      | "inpaint_ns"
-      | "blur"
-      | "solid_white"
-      | "solid_black"
-      | "solid_color"
-      | "transparent"
-      | "ocr"
-  ) => void;
+  eraseMethod: "auto" | "inpaint" | "inpaint_ns" | "blur" | "solid_white" | "solid_black" | "solid_color" | "transparent" | "ocr";
+  setEraseMethod: (method: "auto" | "inpaint" | "inpaint_ns" | "blur" | "solid_white" | "solid_black" | "solid_color" | "transparent" | "ocr") => void;
   setActivePreset: (preset: string) => void;
   fillColor: string;
   setFillColor: (color: string) => void;
@@ -102,9 +82,7 @@ export default function CleanBubblesModes({
       {/* Custom Solid Color Fill picker */}
       {eraseMethod === "solid_color" && (
         <div className="flex items-center justify-between p-2.5 bg-neutral-900/60 border border-neutral-850 rounded-xl animate-fadeIn">
-          <span className="text-[9px] font-bold text-neutral-400 uppercase font-mono tracking-wider">
-            Fill Color
-          </span>
+          <span className="text-[9px] font-bold text-neutral-400 uppercase font-mono tracking-wider">Fill Color</span>
           <div className="flex items-center gap-2">
             <input
               type="text"

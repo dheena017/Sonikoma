@@ -27,15 +27,8 @@ interface PanelCardProps
   isBatchCropping: boolean;
   croppingImgUrl: string | null;
   openEditingImageIdx?: (idx: number | null) => void;
-  addPanelsWithAutoAnalysis: (
-    urls: string[],
-    currentScrapedList?: string[],
-    shouldScroll?: boolean
-  ) => void;
-  addNotification: (
-    message: string,
-    type: "error" | "success" | "info" | "warning"
-  ) => void;
+  addPanelsWithAutoAnalysis: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
+  addNotification: (message: string, type: "error" | "success" | "info" | "warning") => void;
   key?: React.Key;
 }
 
@@ -82,26 +75,18 @@ function PanelCard({
           autoTrim: false,
         }),
       });
-      if (!response.ok)
-        throw new Error(`Rotate failed with status ${response.status}`);
+      if (!response.ok) throw new Error(`Rotate failed with status ${response.status}`);
       const data = await response.json();
 
-      setScrapedImages?.((prev: any[]) =>
-        prev.map((img: any, i: number) => (i === idx ? data.url : img))
-      );
-      setSelectedScraped?.((prev: any[]) =>
-        prev.map((img: string) => (img === imgUrl ? data.url : img))
-      );
+      setScrapedImages?.((prev: any[]) => prev.map((img: any, i: number) => (i === idx ? data.url : img)));
+      setSelectedScraped?.((prev: any[]) => prev.map((img: string) => (img === imgUrl ? data.url : img)));
       setConsoleLogs?.((prev: any) => [
         `[Image Editor] Successfully rotated Panel #${idx + 1}!`,
         ...prev,
       ]);
     } catch (err: any) {
       console.error(err);
-      setConsoleLogs?.((prev: any) => [
-        `[Image Editor Error] Rotation failed: ${err.message}`,
-        ...prev,
-      ]);
+      setConsoleLogs?.((prev: any) => [`[Image Editor Error] Rotation failed: ${err.message}`, ...prev]);
     } finally {
       setIsEditing(false);
     }
@@ -123,26 +108,18 @@ function PanelCard({
           autoTrim: false,
         }),
       });
-      if (!response.ok)
-        throw new Error(`Flip failed with status ${response.status}`);
+      if (!response.ok) throw new Error(`Flip failed with status ${response.status}`);
       const data = await response.json();
 
-      setScrapedImages?.((prev: any[]) =>
-        prev.map((img: any, i: number) => (i === idx ? data.url : img))
-      );
-      setSelectedScraped?.((prev: any[]) =>
-        prev.map((img: string) => (img === imgUrl ? data.url : img))
-      );
+      setScrapedImages?.((prev: any[]) => prev.map((img: any, i: number) => (i === idx ? data.url : img)));
+      setSelectedScraped?.((prev: any[]) => prev.map((img: string) => (img === imgUrl ? data.url : img)));
       setConsoleLogs?.((prev: any) => [
         `[Image Editor] Successfully flipped Panel #${idx + 1} horizontally!`,
         ...prev,
       ]);
     } catch (err: any) {
       console.error(err);
-      setConsoleLogs?.((prev: any) => [
-        `[Image Editor Error] Flipping failed: ${err.message}`,
-        ...prev,
-      ]);
+      setConsoleLogs?.((prev: any) => [`[Image Editor Error] Flipping failed: ${err.message}`, ...prev]);
     } finally {
       setIsEditing(false);
     }
@@ -160,23 +137,14 @@ function PanelCard({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: imgUrl }),
       });
-      if (!response.ok)
-        throw new Error(`Undo failed with status ${response.status}`);
+      if (!response.ok) throw new Error(`Undo failed with status ${response.status}`);
       const data = await response.json();
 
       if (data.success && data.previous_url) {
-        setScrapedImages?.((prev: any[]) =>
-          prev.map((img: any, i: number) =>
-            i === idx ? data.previous_url : img
-          )
-        );
-        setSelectedScraped?.((prev: any[]) =>
-          prev.map((img: string) => (img === imgUrl ? data.previous_url : img))
-        );
+        setScrapedImages?.((prev: any[]) => prev.map((img: any, i: number) => (i === idx ? data.previous_url : img)));
+        setSelectedScraped?.((prev: any[]) => prev.map((img: string) => (img === imgUrl ? data.previous_url : img)));
         setConsoleLogs?.((prev: any) => [
-          `[Image Editor] Successfully restored previous state for Panel #${
-            idx + 1
-          }!`,
+          `[Image Editor] Successfully restored previous state for Panel #${idx + 1}!`,
           ...prev,
         ]);
       } else {
@@ -184,10 +152,7 @@ function PanelCard({
       }
     } catch (err: any) {
       console.error(err);
-      setConsoleLogs?.((prev: any) => [
-        `[Image Editor Error] Undo failed: ${err.message}`,
-        ...prev,
-      ]);
+      setConsoleLogs?.((prev: any) => [`[Image Editor Error] Undo failed: ${err.message}`, ...prev]);
     } finally {
       setIsEditing(false);
     }

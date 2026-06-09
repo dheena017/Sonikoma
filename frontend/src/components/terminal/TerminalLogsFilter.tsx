@@ -4,9 +4,7 @@ import { Search, X } from "lucide-react";
 interface TerminalLogsFilterProps {
   consoleLogs: string[];
   activeFilter: "all" | "errors" | "warnings" | "ai" | "success";
-  setActiveFilter: (
-    val: "all" | "errors" | "warnings" | "ai" | "success"
-  ) => void;
+  setActiveFilter: (val: "all" | "errors" | "warnings" | "ai" | "success") => void;
   searchQuery: string;
   setSearchQuery: (val: string) => void;
   errorCount: number;
@@ -30,35 +28,13 @@ export function TerminalLogsFilter({
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-neutral-950/40 p-2 rounded-xl border border-transparent shadow-inner shadow-black/10">
       {/* Filter Tabs */}
       <div className="flex items-center gap-1 overflow-x-auto">
-        {(
-          [
-            { id: "all", label: "All", count: consoleLogs.length },
-            {
-              id: "errors",
-              label: "Errors",
-              count: errorCount,
-              color: "text-red-400 bg-red-950/20 border-red-900/30",
-            },
-            {
-              id: "warnings",
-              label: "Warnings",
-              count: warningCount,
-              color: "text-amber-400 bg-amber-950/20 border-amber-900/30",
-            },
-            {
-              id: "ai",
-              label: "AI & Gemini",
-              count: aiCount,
-              color: "text-purple-400 bg-purple-950/20 border-purple-900/30",
-            },
-            {
-              id: "success",
-              label: "Success",
-              count: successCount,
-              color: "text-emerald-400 bg-emerald-950/20 border-emerald-900/30",
-            },
-          ] as const
-        ).map((tab) => {
+        {([
+          { id: "all", label: "All", count: consoleLogs.length },
+          { id: "errors", label: "Errors", count: errorCount, color: "text-red-400 bg-red-950/20 border-red-900/30" },
+          { id: "warnings", label: "Warnings", count: warningCount, color: "text-amber-400 bg-amber-950/20 border-amber-900/30" },
+          { id: "ai", label: "AI & Gemini", count: aiCount, color: "text-purple-400 bg-purple-950/20 border-purple-900/30" },
+          { id: "success", label: "Success", count: successCount, color: "text-emerald-400 bg-emerald-950/20 border-emerald-900/30" },
+        ] as const).map((tab) => {
           const isActive = activeFilter === tab.id;
           return (
             <button
@@ -71,13 +47,7 @@ export function TerminalLogsFilter({
               }`}
             >
               <span>{tab.label}</span>
-              <span
-                className={`px-1 rounded font-bold ${
-                  isActive
-                    ? "bg-purple-700 text-white"
-                    : "bg-neutral-950 text-neutral-500"
-                }`}
-              >
+              <span className={`px-1 rounded font-bold ${isActive ? "bg-purple-700 text-white" : "bg-neutral-950 text-neutral-500"}`}>
                 {tab.count}
               </span>
             </button>
