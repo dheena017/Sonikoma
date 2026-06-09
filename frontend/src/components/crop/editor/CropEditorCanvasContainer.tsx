@@ -95,9 +95,9 @@ export default function CropEditorCanvasContainer({
     handleStart(clientX, clientY);
   };
 
-  const safeHandleMove = (clientX: number, clientY: number) => {
+  const safeHandleMove = (x: number, y: number) => {
     if (activeTab !== "slice" && activeTab !== "cuts") return;
-    handleMove(clientX, clientY);
+    handleMove(x, y);
   };
 
   const safeHandleEnd = () => {

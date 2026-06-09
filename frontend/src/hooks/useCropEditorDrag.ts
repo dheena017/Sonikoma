@@ -166,12 +166,7 @@ export function useCropEditorDrag({
     }
   };
 
-  const handleMove = (clientX: number, clientY: number) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
-    const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
-
+  const handleMove = (x: number, y: number) => {
     if (dragType === "drag-split-line" && draggingSplitLineIdx !== null) {
       let targetY = y;
       if (magneticSnap && detectedGutters.length > 0) {

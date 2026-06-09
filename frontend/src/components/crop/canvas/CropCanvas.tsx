@@ -235,14 +235,16 @@ export default function CropCanvas({
         onMouseMove={(e) => {
           if (isManualBrushActive) return;
 
+          const pct = getClientPct(e.clientX, e.clientY);
+          if (!pct) return;
+
           // Skip hover state updates while dragging to reduce re-renders
           if (dragType !== null) {
-            if (dragType) handleMove(e.clientX, e.clientY);
+            if (dragType) handleMove(pct.x, pct.y);
             return;
           }
 
-          const pct = getClientPct(e.clientX, e.clientY);
-          if (pct) setHoverPct(pct);
+          setHoverPct(pct);
         }}
         onMouseUp={() => {
           if (isManualBrushActive) return;
@@ -263,8 +265,13 @@ export default function CropCanvas({
           if (e.touches && e.touches[0]) {
             const touch = e.touches[0];
             const pct = getClientPct(touch.clientX, touch.clientY);
-            if (pct) setHoverPct(pct);
-            if (dragType) handleMove(touch.clientX, touch.clientY);
+            if (!pct) return;
+
+            if (dragType) {
+              handleMove(pct.x, pct.y);
+            } else {
+              setHoverPct(pct);
+            }
           }
         }}
         onTouchEnd={() => {
