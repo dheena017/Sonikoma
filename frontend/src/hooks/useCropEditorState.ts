@@ -59,10 +59,10 @@ export function useCropEditorState({
 
   // Sidebar Tab Configuration
   const savedActiveTab = savedState?.activeTab;
-  const [activeTab, setActiveTab] = useState<"adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge">(
+  const [activeTab, setActiveTab] = useState<"adjust" | "edit" | "eraser" | "slice" | "crop" | "merge">(
     savedActiveTab === "adjust" ||
     savedActiveTab === "slice" ||
-    savedActiveTab === "cuts" ||
+    savedActiveTab === "crop" ||
     savedActiveTab === "edit" ||
     savedActiveTab === "merge" ||
     savedActiveTab === "eraser"

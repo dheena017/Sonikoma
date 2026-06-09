@@ -190,7 +190,14 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
         autoTrim: editAutoTrim,
       };
       state.setSlices((prev) => [...prev, newSlice]);
-      state.setSelectedSliceId(newSlice.id);
+
+      // Reset active selection after saving
+      setEditCropTop(0);
+      setEditCropBottom(0);
+      setEditCropLeft(0);
+      setEditCropRight(0);
+      state.setSelectedSliceId(null);
+
       addNotification("Saved crop tool", "success");
     },
   });
@@ -245,7 +252,14 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
       autoTrim: editAutoTrim,
     };
     state.setSlices((prev) => [...prev, newSlice]);
-    state.setSelectedSliceId(newSlice.id);
+
+    // Reset active selection after saving
+    setEditCropTop(0);
+    setEditCropBottom(0);
+    setEditCropLeft(0);
+    setEditCropRight(0);
+    state.setSelectedSliceId(null);
+
     addNotification("Saved crop tool", "success");
   };
 

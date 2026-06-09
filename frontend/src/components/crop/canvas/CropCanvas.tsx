@@ -29,7 +29,7 @@ interface CropCanvasProps {
   onResizeStart: (handle: string, clientX: number, clientY: number) => void;
   handleSelectAndDragSlice: (slice: Slice, clientX: number, clientY: number) => void;
   zoom?: number;
-  activeTab: "adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge";
+  activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge";
 
   // Phase 4 Props
   editMode?: "crop" | "clean_auto" | "clean_manual" | "typeset" | "slices";
@@ -52,6 +52,7 @@ interface CropCanvasProps {
   setEditCropLeft: (val: number) => void;
   setEditCropRight: (val: number) => void;
   setSelectedSliceId: (id: string | null) => void;
+  aspectRatio?: number;
 }
 
 export default function CropCanvas({
@@ -100,6 +101,7 @@ export default function CropCanvas({
   setEditCropLeft,
   setEditCropRight,
   setSelectedSliceId,
+  aspectRatio = 0,
 }: CropCanvasProps) {
   // Track mouse position for dynamic cursor
   const [hoverPct, setHoverPct] = useState<{ x: number; y: number } | null>(null);
@@ -116,7 +118,7 @@ export default function CropCanvas({
     },
     [containerRef]
   );
-  
+
   // Initialize and resize manual mask canvas
   const initCanvas = (canvas: HTMLCanvasElement) => {
     const rect = canvas.getBoundingClientRect();
@@ -203,6 +205,21 @@ export default function CropCanvas({
     if (isManualBrushActive && canvas) initCanvas(canvas);
   }, [brushSize, brushAction, canvasMaskRef, isManualBrushActive]);
 
+  // Hardened Global Event Listeners for Drag Robustness
+  useEffect(() => {
+    const handleGlobalUp = () => {
+      if (dragType) handleEnd();
+    };
+
+    window.addEventListener("mouseup", handleGlobalUp);
+    window.addEventListener("touchend", handleGlobalUp);
+
+    return () => {
+      window.removeEventListener("mouseup", handleGlobalUp);
+      window.removeEventListener("touchend", handleGlobalUp);
+    };
+  }, [dragType, handleEnd]);
+
   return (
     <div
       className="relative border border-white/5 hover:border-purple-500/20 rounded-2xl bg-black overflow-auto flex-1 h-0 flex items-start justify-center select-none transition-colors"
@@ -217,15 +234,17 @@ export default function CropCanvas({
         }}
         onMouseMove={(e) => {
           if (isManualBrushActive) return;
-          
+
+          const pct = getClientPct(e.clientX, e.clientY);
+          if (!pct) return;
+
           // Skip hover state updates while dragging to reduce re-renders
           if (dragType !== null) {
-            if (dragType) handleMove(e.clientX, e.clientY);
+            if (dragType) handleMove(pct.x, pct.y);
             return;
           }
-          
-          const pct = getClientPct(e.clientX, e.clientY);
-          if (pct) setHoverPct(pct);
+
+          setHoverPct(pct);
         }}
         onMouseUp={() => {
           if (isManualBrushActive) return;
@@ -246,8 +265,13 @@ export default function CropCanvas({
           if (e.touches && e.touches[0]) {
             const touch = e.touches[0];
             const pct = getClientPct(touch.clientX, touch.clientY);
-            if (pct) setHoverPct(pct);
-            if (dragType) handleMove(touch.clientX, touch.clientY);
+            if (!pct) return;
+
+            if (dragType) {
+              handleMove(pct.x, pct.y);
+            } else {
+              setHoverPct(pct);
+            }
           }
         }}
         onTouchEnd={() => {
@@ -286,7 +310,7 @@ export default function CropCanvas({
         )}
 
         {/* Persistent UI Components (Visibility controlled by CSS inside components) */}
-        <CanvasSplitLines 
+        <CanvasSplitLines
           isVisible={showSplitPosition && activeTab === "slice"}
           splitPosition={splitPosition}
           splitLines={splitLines}
@@ -296,14 +320,17 @@ export default function CropCanvas({
           setShowSplitPosition={setShowSplitPosition}
         />
 
-        <CanvasCropSelection 
-          isVisible={activeTab === 'slice'} // Shows when on Crop tab
-          editCropTop={editCropTop}
-          editCropBottom={editCropBottom}
-          editCropLeft={editCropLeft}
-          editCropRight={editCropRight}
-          onResizeStart={onResizeStart}
-        />
+        {activeTab === 'crop' && (
+          <CanvasCropSelection
+            editCropTop={editCropTop}
+            editCropBottom={editCropBottom}
+            editCropLeft={editCropLeft}
+            editCropRight={editCropRight}
+            onResizeStart={onResizeStart}
+            targetAspectRatio={aspectRatio}
+            isDragging={dragType !== null}
+          />
+        )}
 
         {/* Slices Overlay */}
         {(editMode === "slices" || editMode === "crop") && slices.map((slice, index) => {
@@ -314,12 +341,12 @@ export default function CropCanvas({
               onClick={(e) => { e.stopPropagation(); handleSelectSlice(slice); }}
               onMouseDown={(e) => { if (e.button === 0) { e.stopPropagation(); handleSelectAndDragSlice(slice, e.clientX, e.clientY); }}}
               className={`absolute border-2 pointer-events-auto cursor-grab active:cursor-grabbing transition-colors flex flex-col justify-between ${
-                isSelected ? "border-emerald-400 bg-emerald-500/10 z-30" : "border-purple-500/40 bg-purple-500/5 hover:bg-purple-500/10 z-20"
+                isSelected ? "border-purple-400 bg-purple-500/10 z-30 shadow-[0_0_15px_rgba(139,92,246,0.2)]" : "border-purple-500/40 bg-purple-500/5 hover:bg-purple-500/10 z-20"
               }`}
               style={{ top: `${slice.cropTop}%`, bottom: `${slice.cropBottom}%`, left: `${slice.cropLeft}%`, right: `${slice.cropRight}%` }}
             >
               <div className="p-1">
-                <span className={`inline-block font-mono text-[8px] font-bold px-1.5 py-0.5 rounded-lg ${isSelected ? "bg-emerald-950 text-emerald-300" : "bg-purple-950/90 text-purple-300"}`}>
+                <span className={`inline-block font-mono text-[8px] font-bold px-1.5 py-0.5 rounded-lg ${isSelected ? "bg-purple-950 text-purple-300 border border-purple-500/30" : "bg-purple-950/90 text-purple-300"}`}>
                   Cut #{index + 1}
                 </span>
               </div>

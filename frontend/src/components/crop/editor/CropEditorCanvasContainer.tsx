@@ -42,7 +42,8 @@ interface CropEditorCanvasContainerProps {
   setEditCropLeft: (val: number) => void;
   setEditCropRight: (val: number) => void;
   setSelectedSliceId: (id: string | null) => void;
-  activeTab: "adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge";
+  activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge";
+  aspectRatio?: any;
 }
 
 export default function CropEditorCanvasContainer({
@@ -86,27 +87,28 @@ export default function CropEditorCanvasContainer({
   setEditCropRight,
   setSelectedSliceId,
   activeTab,
+  aspectRatio,
 }: CropEditorCanvasContainerProps) {
   // Safe handlers that only allow crop drawing when in the correct tabs
   const safeHandleStart = (clientX: number, clientY: number) => {
-    if (activeTab !== "slice" && activeTab !== "cuts") return;
+    if (!['slice', 'crop'].includes(activeTab)) return;
     handleStart(clientX, clientY);
   };
 
-  const safeHandleMove = (clientX: number, clientY: number) => {
-    if (activeTab !== "slice" && activeTab !== "cuts") return;
-    handleMove(clientX, clientY);
+  const safeHandleMove = (x: number, y: number) => {
+    if (!['slice', 'crop'].includes(activeTab)) return;
+    handleMove(x, y);
   };
 
   const safeHandleEnd = () => {
-    if (activeTab !== "slice" && activeTab !== "cuts") return;
+    if (!['slice', 'crop'].includes(activeTab)) return;
     handleEnd();
   };
 
   return (
-    <div 
+    <div
       className="lg:col-span-7 flex flex-col space-y-2 h-full min-h-0 overflow-hidden"
-      style={{ 
+      style={{
         pointerEvents: "auto"
       }}
     >
@@ -179,6 +181,7 @@ export default function CropEditorCanvasContainer({
         setEditCropRight={setEditCropRight}
         setSelectedSliceId={setSelectedSliceId}
         activeTab={activeTab}
+        aspectRatio={aspectRatio === "9:16" ? 9/16 : aspectRatio === "16:9" ? 16/9 : 0}
       />
 
       <span className="text-[10px] text-neutral-500 text-center italic font-sans block pt-1">
