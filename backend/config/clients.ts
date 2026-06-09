@@ -13,7 +13,9 @@ export { Type };
 
 // ── Gemini ────────────────────────────────────────────────────────────────────
 let ai: GoogleGenAI | null = null;
-if (process.env.GEMINI_API_KEY) {
+if (!process.env.GEMINI_API_KEY) {
+  console.error('CRITICAL: GEMINI_API_KEY is missing from environment variables!');
+} else {
   try {
     ai = new GoogleGenAI({
       apiKey: process.env.GEMINI_API_KEY,

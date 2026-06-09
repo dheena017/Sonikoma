@@ -172,12 +172,9 @@ router.post(["/ai-detect-panels", "/detect-panels", "/ai-smart-crop"], async (re
         }), 4, 1500);
         aiResultText = response.text || "[]";
       } catch (err: any) {
-        console.error("[AI Smart Crop API] All retries failed or fatal error encountered. Falling back to heuristic slices.", err);
-        aiResultText = JSON.stringify([
-          { cropTop: 0, cropBottom: 66, cropLeft: 0, cropRight: 0 },
-          { cropTop: 33, cropBottom: 33, cropLeft: 0, cropRight: 0 },
-          { cropTop: 66, cropBottom: 0, cropLeft: 0, cropRight: 0 },
-        ]);
+        console.error("[AI Smart Crop API] All retries failed or fatal error encountered. Returning empty.", err);
+        // 👇 FIX: Return empty array so the UI knows detection failed
+        aiResultText = "[]";
       }
 
       coordPanels = JSON.parse(aiResultText.trim());

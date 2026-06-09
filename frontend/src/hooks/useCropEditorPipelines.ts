@@ -41,6 +41,7 @@ interface UseCropEditorPipelinesProps {
   setIsDetecting: (val: boolean) => void;
   setDetectedBoxes: React.Dispatch<React.SetStateAction<any[]>>;
   setIsAiDetecting: (val: boolean) => void;
+  setEditMode: (mode: "crop" | "clean_auto" | "clean_manual" | "typeset" | "slices") => void;
   setSlices: React.Dispatch<React.SetStateAction<Slice[]>>;
   setSelectedSliceId: (id: string | null) => void;
 
@@ -86,6 +87,7 @@ export function useCropEditorPipelines({
   setIsDetecting,
   setDetectedBoxes,
   setIsAiDetecting,
+  setEditMode,
   setSlices,
   setSelectedSliceId,
 
@@ -340,6 +342,17 @@ export function useCropEditorPipelines({
         setEditCropRight(firstNew.cropRight);
         setEditCropTop(firstNew.cropTop);
         setEditCropBottom(firstNew.cropBottom);
+
+        addNotification(
+          `AI Smart Crop successfully isolated ${newSlices.length} panels!`,
+          "success"
+        );
+      } else {
+        addNotification(
+          "AI could not detect any panels. Please draw your crops manually.",
+          "warning"
+        );
+        setEditMode("crop");
       }
     } catch (err: any) {
       console.error("AI crop detection failed:", err);
@@ -420,7 +433,11 @@ export function useCropEditorPipelines({
           setEditCropTop(first.cropTop);
           setEditCropBottom(first.cropBottom);
         } else {
-          addNotification("No panels detected.", "warning");
+          addNotification(
+            "No panels detected. Please draw your crops manually.",
+            "warning"
+          );
+          setEditMode("crop");
         }
       }
     } catch (err: any) {

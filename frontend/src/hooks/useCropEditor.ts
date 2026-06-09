@@ -117,6 +117,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
     setIsDetecting: state.setIsDetecting,
     setDetectedBoxes: state.setDetectedBoxes,
     setIsAiDetecting: state.setIsAiDetecting,
+    setEditMode: state.setEditMode,
     setSlices: state.setSlices,
     setSelectedSliceId: state.setSelectedSliceId,
 
