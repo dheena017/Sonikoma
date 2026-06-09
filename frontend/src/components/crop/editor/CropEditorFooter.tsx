@@ -9,7 +9,7 @@ interface CropEditorFooterProps {
   isSavingEdit: boolean;
   setEditingImageIdx: (idx: number | null) => void;
   handleDeleteCurrentImage: () => void;
-  activeTab: "adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge";
+  activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge";
   isTransforming: boolean;
   addNotification: (msg: string, type: any) => void;
   handleExecuteHorizontalSplit: () => void;

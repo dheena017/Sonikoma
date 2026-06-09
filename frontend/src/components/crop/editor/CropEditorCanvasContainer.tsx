@@ -42,7 +42,7 @@ interface CropEditorCanvasContainerProps {
   setEditCropLeft: (val: number) => void;
   setEditCropRight: (val: number) => void;
   setSelectedSliceId: (id: string | null) => void;
-  activeTab: "adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge";
+  activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge";
   aspectRatio?: any;
 }
 
@@ -91,17 +91,17 @@ export default function CropEditorCanvasContainer({
 }: CropEditorCanvasContainerProps) {
   // Safe handlers that only allow crop drawing when in the correct tabs
   const safeHandleStart = (clientX: number, clientY: number) => {
-    if (!['slice', 'cuts'].includes(activeTab)) return;
+    if (!['slice', 'crop'].includes(activeTab)) return;
     handleStart(clientX, clientY);
   };
 
   const safeHandleMove = (x: number, y: number) => {
-    if (!['slice', 'cuts'].includes(activeTab)) return;
+    if (!['slice', 'crop'].includes(activeTab)) return;
     handleMove(x, y);
   };
 
   const safeHandleEnd = () => {
-    if (!['slice', 'cuts'].includes(activeTab)) return;
+    if (!['slice', 'crop'].includes(activeTab)) return;
     handleEnd();
   };
 

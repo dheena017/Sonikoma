@@ -29,7 +29,7 @@ interface CropCanvasProps {
   onResizeStart: (handle: string, clientX: number, clientY: number) => void;
   handleSelectAndDragSlice: (slice: Slice, clientX: number, clientY: number) => void;
   zoom?: number;
-  activeTab: "adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge";
+  activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge";
 
   // Phase 4 Props
   editMode?: "crop" | "clean_auto" | "clean_manual" | "typeset" | "slices";
@@ -320,7 +320,7 @@ export default function CropCanvas({
           setShowSplitPosition={setShowSplitPosition}
         />
 
-        {activeTab === 'cuts' && (
+        {activeTab === 'crop' && (
           <CanvasCropSelection
             editCropTop={editCropTop}
             editCropBottom={editCropBottom}
