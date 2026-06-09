@@ -47,7 +47,7 @@ export default function CanvasCropSelection({
           bottom: `${editCropBottom}%`,
           left: `${editCropLeft}%`,
           right: `${editCropRight}%`,
-          boxShadow: "0 0 0 1px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(0,0,0,0.5)",
+          boxShadow: "0 0 0 1px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(0,0,0,0.5), 0 0 20px rgba(139,92,246,0.15)",
           zIndex: 40
         }}
       >
@@ -55,22 +55,22 @@ export default function CanvasCropSelection({
         <div 
           onMouseDown={(e) => { e.stopPropagation(); onResizeStart("nw", e.clientX, e.clientY); }}
           onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("nw", e.touches[0].clientX, e.touches[0].clientY); } }}
-          className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-purple-500 rounded-full cursor-nwse-resize pointer-events-auto z-50"
+          className="absolute -top-1.5 -left-1.5 w-3.5 h-3.5 bg-white border-2 border-purple-500 rounded-full cursor-nwse-resize pointer-events-auto z-50 hover:scale-125 active:scale-95 transition-transform shadow-[0_0_10px_rgba(139,92,246,0.5)]"
         />
         <div 
           onMouseDown={(e) => { e.stopPropagation(); onResizeStart("ne", e.clientX, e.clientY); }}
           onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("ne", e.touches[0].clientX, e.touches[0].clientY); } }}
-          className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-purple-500 rounded-full cursor-nesw-resize pointer-events-auto z-50"
+          className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-white border-2 border-purple-500 rounded-full cursor-nesw-resize pointer-events-auto z-50 hover:scale-125 active:scale-95 transition-transform shadow-[0_0_10px_rgba(139,92,246,0.5)]"
         />
         <div 
           onMouseDown={(e) => { e.stopPropagation(); onResizeStart("sw", e.clientX, e.clientY); }}
           onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("sw", e.touches[0].clientX, e.touches[0].clientY); } }}
-          className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-purple-500 rounded-full cursor-nesw-resize pointer-events-auto z-50"
+          className="absolute -bottom-1.5 -left-1.5 w-3.5 h-3.5 bg-white border-2 border-purple-500 rounded-full cursor-nesw-resize pointer-events-auto z-50 hover:scale-125 active:scale-95 transition-transform shadow-[0_0_10px_rgba(139,92,246,0.5)]"
         />
         <div 
           onMouseDown={(e) => { e.stopPropagation(); onResizeStart("se", e.clientX, e.clientY); }}
           onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("se", e.touches[0].clientX, e.touches[0].clientY); } }}
-          className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-purple-500 rounded-full cursor-nwse-resize pointer-events-auto z-50"
+          className="absolute -bottom-1.5 -right-1.5 w-3.5 h-3.5 bg-white border-2 border-purple-500 rounded-full cursor-nwse-resize pointer-events-auto z-50 hover:scale-125 active:scale-95 transition-transform shadow-[0_0_10px_rgba(139,92,246,0.5)]"
         />
 
         {/* Edge handles */}
@@ -79,33 +79,33 @@ export default function CanvasCropSelection({
           onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("n", e.touches[0].clientX, e.touches[0].clientY); } }}
           className="absolute -top-1.5 left-2 right-2 h-3 cursor-ns-resize pointer-events-auto group/edge z-40"
         >
-          <div className="mx-auto w-12 h-1 bg-purple-500/50 rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity mt-1 shadow-[0_0_4px_rgba(139,92,246,0.5)]" />
+          <div className="mx-auto w-12 h-1 bg-purple-500/50 rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity mt-1 shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
         </div>
         <div 
           onMouseDown={(e) => { e.stopPropagation(); onResizeStart("s", e.clientX, e.clientY); }}
           onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("s", e.touches[0].clientX, e.touches[0].clientY); } }}
           className="absolute -bottom-1.5 left-2 right-2 h-3 cursor-ns-resize pointer-events-auto group/edge z-40"
         >
-          <div className="mx-auto w-12 h-1 bg-purple-500/50 rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity mt-1 shadow-[0_0_4px_rgba(139,92,246,0.5)]" />
+          <div className="mx-auto w-12 h-1 bg-purple-500/50 rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity mt-1 shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
         </div>
         <div 
           onMouseDown={(e) => { e.stopPropagation(); onResizeStart("w", e.clientX, e.clientY); }}
           onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("w", e.touches[0].clientX, e.touches[0].clientY); } }}
           className="absolute top-2 bottom-2 -left-1.5 w-3 cursor-ew-resize pointer-events-auto group/edge flex items-center z-40"
         >
-          <div className="my-auto h-12 w-1 bg-purple-500/50 rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity ml-1 shadow-[0_0_4px_rgba(139,92,246,0.5)]" />
+          <div className="my-auto h-12 w-1 bg-purple-500/50 rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity ml-1 shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
         </div>
         <div 
           onMouseDown={(e) => { e.stopPropagation(); onResizeStart("e", e.clientX, e.clientY); }}
           onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("e", e.touches[0].clientX, e.touches[0].clientY); } }}
           className="absolute top-2 bottom-2 -right-1.5 w-3 cursor-ew-resize pointer-events-auto group/edge flex items-center z-40"
         >
-          <div className="my-auto h-12 w-1 bg-purple-500/50 rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity ml-1 shadow-[0_0_4px_rgba(139,92,246,0.5)]" />
+          <div className="my-auto h-12 w-1 bg-purple-500/50 rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity ml-1 shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
         </div>
 
         {/* Move helper */}
         <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-          <Move className="h-6 w-6 text-white/50 drop-shadow-md" />
+          <Move className="h-6 w-6 text-white drop-shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
         </div>
 
         {/* Specs badge */}
