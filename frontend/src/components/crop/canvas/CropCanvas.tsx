@@ -278,7 +278,7 @@ export default function CropCanvas({
           if (isManualBrushActive) return;
           handleEnd();
         }}
-        className="relative inline-block w-full max-w-full h-full"
+        className={`relative inline-block w-full max-w-full h-full ${activeTab === 'crop' ? 'cursor-crosshair' : ''}`}
         style={{
           userSelect: "none",
           touchAction: "none",

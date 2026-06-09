@@ -230,13 +230,10 @@ function CropEditorSidebar({
     if (tab === "slice") {
       setEditMode("crop");
       setShowSplitPosition(true);
-      setEditCropTop(0);
-      setEditCropBottom(0);
-      setEditCropLeft(0);
-      setEditCropRight(0);
-      setSelectedSliceId(null);
+      // We don't reset crop bounds here to allow switching between slice and crop tabs
     } else if (tab === "crop") {
-      setEditMode("slices");
+      setEditMode("crop");
+      setShowSplitPosition(false);
     } else if (tab === "eraser") {
       setEditMode("clean_manual");
     } else {

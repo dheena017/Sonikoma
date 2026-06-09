@@ -176,6 +176,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
     selectedSliceId: state.selectedSliceId,
     autoPushOnDraw: state.autoPushOnDraw,
     editAutoTrim,
+    activeTab: state.activeTab,
 
     pushHistory,
     handleSelectSlice,
