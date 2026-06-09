@@ -591,6 +591,7 @@ At the **end of every conversation**, append one row to the Session Changelog ta
 
 | Date | Summary | Files Affected |
 |---|---|---|
+| 2026-06-08 | Generated comprehensive BUG_REPORT.md after deep audit of the Storyboard AI pipeline and architectural integrity | `BUG_REPORT.md`, `RULES.md` |
 | 2026-06-08 | Fully rewrote README.md and RULES.md to reflect current modular structure, new routes, hooks, utils, and server features | `README.md`, `RULES.md` |
 | 2026-06-08 | Added ANSI color system to server.ts and all backend log prefixes via logInterceptor.ts and colors.ts | `backend/server.ts`, `backend/utils/logInterceptor.ts`, `backend/utils/colors.ts`, `backend/routes/scraper/*`, `backend/routes/image/*`, `backend/routes/ai/*` |
 | 2026-06-08 | Refactored large files: split App.tsx logic into 19 hooks, CropEditorModal into 10+ sub-components, TerminalLogs/Timeline/VideoMonitor/Scraper into modular sub-folders | `frontend/src/hooks/*`, `frontend/src/components/crop/*`, `frontend/src/components/terminal/*`, `frontend/src/components/timeline/*`, `frontend/src/components/video/*`, `frontend/src/components/scraper/*` |
