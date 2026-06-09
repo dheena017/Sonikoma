@@ -32,9 +32,9 @@ def download_image(url: str) -> str:
             pass
 
     if url.startswith("/"):
-        url = "http://127.0.0.1:3000" + url
+        url = "http://127.0.0.1:5173" + url
     elif not url.startswith("http://") and not url.startswith("https://"):
-        url = "http://127.0.0.1:3000/" + url
+        url = "http://127.0.0.1:5173/" + url
 
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -114,19 +114,6 @@ def run_cv_detection(image_path: str) -> List[Dict[str, Any]]:
                 "area": int(w_box * h_box)
             })
             
-        if not boxes:
-            # Fallback split
-            for i in range(3):
-                boxes.append({
-                    "cropTop": round(i * 33.3, 2),
-                    "cropBottom": round(100 - (i + 1) * 33.3, 2),
-                    "cropLeft": 0.0,
-                    "cropRight": 0.0,
-                    "width": w,
-                    "height": int(h / 3),
-                    "area": int((w * h) / 3)
-                })
-                
         # Sort boxes from Top to Bottom
         boxes = sorted(boxes, key=lambda b: b["cropTop"])
         return boxes
@@ -225,19 +212,6 @@ def run_cv_detection(image_path: str) -> List[Dict[str, Any]]:
                 "area": (end_x - start_x) * (end_y - start_y)
             })
             
-        if not boxes:
-            # Fallback equidistant splitting if no features could be resolved
-            for i in range(3):
-                boxes.append({
-                    "cropTop": round(i * 33.3, 2),
-                    "cropBottom": round(100 - (i + 1) * 33.3, 2),
-                    "cropLeft": 0.0,
-                    "cropRight": 0.0,
-                    "width": w,
-                    "height": int(h / 3),
-                    "area": int((w * h) / 3)
-                })
-                
         boxes = sorted(boxes, key=lambda b: b["cropTop"])
         return boxes
     else:
