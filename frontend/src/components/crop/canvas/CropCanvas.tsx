@@ -137,9 +137,11 @@ export default function CropCanvas({
     // Hover over an existing selection
     if (hoverPct && isPointInsideSelection(hoverPct.x, hoverPct.y)) return "grab";
 
-    // Tab-based fallback — evaluated inline so it is always in sync with activeTab
-    if (activeTab === "slice") return "crosshair";
-    if (activeTab === "cuts")  return "nwse-resize";
+    // Edit mode-based fallback
+    if (editMode === "clean_manual") return "crosshair";
+    if (editMode === "crop" || editMode === "slices") return "crosshair";
+    
+    // For all other modes (adjust, edit, typeset, etc.), use default cursor
     return "default";
   }, [
     isManualBrushActive,
