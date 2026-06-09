@@ -49,10 +49,7 @@ export class CacheStore<T> {
   /** Retrieve an item, returning undefined if missing or expired. */
   get(key: string): T | undefined {
     const entry = this.store.get(key);
-    if (!entry) {
-      this.misses++;
-      return undefined;
-    }
+    if (!entry) { this.misses++; return undefined; }
     if (entry.expiresAt !== null && Date.now() > entry.expiresAt) {
       this.store.delete(key);
       this.evictions++;
@@ -75,9 +72,7 @@ export class CacheStore<T> {
     this.store.clear();
   }
 
-  get size(): number {
-    return this.store.size;
-  }
+  get size(): number { return this.store.size; }
 
   /** Evict all entries past their TTL. */
   purgeExpired(): number {
@@ -101,10 +96,9 @@ export class CacheStore<T> {
       hits: this.hits,
       misses: this.misses,
       evictions: this.evictions,
-      hitRate:
-        this.hits + this.misses > 0
-          ? ((this.hits / (this.hits + this.misses)) * 100).toFixed(1) + "%"
-          : "N/A",
+      hitRate: this.hits + this.misses > 0
+        ? ((this.hits / (this.hits + this.misses)) * 100).toFixed(1) + '%'
+        : 'N/A',
     };
   }
 }
@@ -112,28 +106,27 @@ export class CacheStore<T> {
 // ─── Shared application caches ───────────────────────────────────────────────
 
 /** Merged/stitched image cache — entries expire after 4 hours (increased from 30m to prevent 404s in long sessions) */
-export const stitchedCache = new CacheStore<{
-  data: Buffer;
-  contentType: string;
-}>("stitchedCache", 4 * 60 * 60 * 1000, 200);
+export const stitchedCache = new CacheStore<{ data: Buffer; contentType: string }>(
+  'stitchedCache', 4 * 60 * 60 * 1000, 200
+);
 
 /** Per-panel base64 edit history — entries expire after 1 hour */
 export const editHistory = new CacheStore<string>(
-  "editHistory",
-  60 * 60 * 1000,
-  500
+  'editHistory', 60 * 60 * 1000, 500
 );
 
 /** Generated ZIP file cache — entries expire after 20 minutes */
-export const zipCache = new CacheStore<Buffer>("zipFiles", 20 * 60 * 1000, 50);
+export const zipCache = new CacheStore<Buffer>(
+  'zipFiles', 20 * 60 * 1000, 50
+);
 
 // ─── Global stats snapshot ───────────────────────────────────────────────────
 
 export function getAllCacheStats() {
   return {
     stitchedCache: stitchedCache.stats(),
-    editHistory: editHistory.stats(),
-    zipFiles: zipCache.stats(),
+    editHistory:  editHistory.stats(),
+    zipFiles:     zipCache.stats(),
   };
 }
 
@@ -143,10 +136,6 @@ export function purgeAllExpired(): void {
   const e = editHistory.purgeExpired();
   const z = zipCache.purgeExpired();
   if (m + e + z > 0) {
-    console.log(
-      `[Cache] ♻️  Purged ${
-        m + e + z
-      } expired entries (merged:${m} edits:${e} zips:${z})`
-    );
+    console.log(`[Cache] ♻️  Purged ${m + e + z} expired entries (merged:${m} edits:${e} zips:${z})`);
   }
 }

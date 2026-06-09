@@ -29,6 +29,7 @@ export function useStoryboardOperations({
   selectedModel,
   setConsoleLogs,
 }: UseStoryboardOperationsProps) {
+  
   const {
     showBulkOps,
     setShowBulkOps,
@@ -48,12 +49,7 @@ export function useStoryboardOperations({
     handleModifyMotion,
     handleModifyDuration,
     handleShiftPanel,
-  } = useSceneModifier({
-    panels,
-    setPanels,
-    setCurrentPanelIndex,
-    setConsoleLogs,
-  });
+  } = useSceneModifier({ panels, setPanels, setCurrentPanelIndex, setConsoleLogs });
 
   const {
     analyzingPanelId,
@@ -75,11 +71,7 @@ export function useStoryboardOperations({
   });
 
   const handleClearTimeline = () => {
-    if (
-      window.confirm(
-        "Are you sure you want to clear the entire storyboard timeline?"
-      )
-    ) {
+    if (window.confirm("Are you sure you want to clear the entire storyboard timeline?")) {
       setPanels([]);
       addNotification?.("Storyboard cleared", "info");
     }

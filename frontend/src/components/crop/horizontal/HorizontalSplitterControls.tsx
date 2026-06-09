@@ -88,10 +88,7 @@ export default function HorizontalSplitterControls({
             <button
               type="button"
               onClick={() => {
-                const target = Math.max(
-                  5,
-                  parseFloat((splitPosition - 5).toFixed(1))
-                );
+                const target = Math.max(5, parseFloat((splitPosition - 5).toFixed(1)));
                 handleSetSplitPosition(target);
                 setShowSplitPosition(true);
               }}
@@ -103,10 +100,7 @@ export default function HorizontalSplitterControls({
             <button
               type="button"
               onClick={() => {
-                const target = Math.max(
-                  5,
-                  parseFloat((splitPosition - 1).toFixed(1))
-                );
+                const target = Math.max(5, parseFloat((splitPosition - 1).toFixed(1)));
                 handleSetSplitPosition(target);
                 setShowSplitPosition(true);
               }}
@@ -128,14 +122,14 @@ export default function HorizontalSplitterControls({
                 title={`Detected Gutter Gap at ${g}%`}
               />
             ))}
-
+            
             <div
               className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 opacity-60"
               style={{
                 width: `${sliderPct}%`,
               }}
             />
-
+            
             <input
               type="range"
               min="5"
@@ -143,9 +137,7 @@ export default function HorizontalSplitterControls({
               step="0.5"
               value={splitPosition}
               onChange={(e) => {
-                handleSetSplitPosition(
-                  parseFloat(Number(e.target.value).toFixed(1))
-                );
+                handleSetSplitPosition(parseFloat(Number(e.target.value).toFixed(1)));
                 setShowSplitPosition(true);
               }}
               className="absolute inset-0 w-full opacity-0 cursor-pointer h-full z-20"
@@ -157,10 +149,7 @@ export default function HorizontalSplitterControls({
             <button
               type="button"
               onClick={() => {
-                const target = Math.min(
-                  95,
-                  parseFloat((splitPosition + 1).toFixed(1))
-                );
+                const target = Math.min(95, parseFloat((splitPosition + 1).toFixed(1)));
                 handleSetSplitPosition(target);
                 setShowSplitPosition(true);
               }}
@@ -172,10 +161,7 @@ export default function HorizontalSplitterControls({
             <button
               type="button"
               onClick={() => {
-                const target = Math.min(
-                  95,
-                  parseFloat((splitPosition + 5).toFixed(1))
-                );
+                const target = Math.min(95, parseFloat((splitPosition + 5).toFixed(1)));
                 handleSetSplitPosition(target);
                 setShowSplitPosition(true);
               }}

@@ -87,24 +87,8 @@ export const ERASE_OPTIONS: EraseOption[] = [
 ];
 
 export const LEGEND: LegendItem[] = [
-  {
-    color: "bg-purple-500",
-    label: "Standard / Shout Bubbles",
-    desc: "White/off-white fill → OpenCV threshold → inpainted cleanly",
-  },
-  {
-    color: "bg-orange-400",
-    label: "Narration Boxes",
-    desc: "Colored rectangles (dark/blue bg) → Gaussian blur kills text",
-  },
-  {
-    color: "bg-sky-400",
-    label: "Floating Borderless Text",
-    desc: "Text drawn over art background → soft blur mask applied",
-  },
-  {
-    color: "bg-red-400",
-    label: "SFX (BOOM / CRASH / POW)",
-    desc: "Embedded art-style text → kept as-is for visual feel",
-  },
+  { color: "bg-purple-500",  label: "Standard / Shout Bubbles",  desc: "White/off-white fill → OpenCV threshold → inpainted cleanly" },
+  { color: "bg-orange-400",  label: "Narration Boxes",            desc: "Colored rectangles (dark/blue bg) → Gaussian blur kills text" },
+  { color: "bg-sky-400",     label: "Floating Borderless Text",   desc: "Text drawn over art background → soft blur mask applied" },
+  { color: "bg-red-400",     label: "SFX (BOOM / CRASH / POW)",   desc: "Embedded art-style text → kept as-is for visual feel" },
 ];

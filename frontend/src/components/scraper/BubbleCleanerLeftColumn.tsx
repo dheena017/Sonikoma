@@ -5,9 +5,7 @@ interface BubbleCleanerLeftColumnProps {
   detectionStyle: "all" | "white_only" | "text_only";
   setDetectionStyle: (v: "all" | "white_only" | "text_only") => void;
   eraseMethod: "auto" | "inpaint" | "blur" | "solid_white" | "solid_black";
-  setEraseMethod: (
-    v: "auto" | "inpaint" | "blur" | "solid_white" | "solid_black"
-  ) => void;
+  setEraseMethod: (v: "auto" | "inpaint" | "blur" | "solid_white" | "solid_black") => void;
 }
 
 import { DETECTION_OPTIONS, ERASE_OPTIONS } from "./bubbleCleanerConfig";
@@ -24,7 +22,7 @@ export default function BubbleCleanerLeftColumn({
       <div className="space-y-3">
         <SectionTitle>What to Detect</SectionTitle>
         <div className="flex flex-col gap-2.5">
-          {DETECTION_OPTIONS.map((opt) => (
+          {DETECTION_OPTIONS.map(opt => (
             <button
               key={opt.value}
               onClick={() => setDetectionStyle(opt.value)}
@@ -34,33 +32,21 @@ export default function BubbleCleanerLeftColumn({
                   : "bg-neutral-950/50 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-950"
               }`}
             >
-              <div
-                className={`mt-1.5 h-3 w-3 shrink-0 rounded-full ${opt.dot} ${
-                  detectionStyle === opt.value
-                    ? "ring-2 ring-offset-2 ring-offset-neutral-900 ring-purple-500"
-                    : ""
-                }`}
-              />
+              <div className={`mt-1.5 h-3 w-3 shrink-0 rounded-full ${opt.dot} ${
+                detectionStyle === opt.value
+                  ? "ring-2 ring-offset-2 ring-offset-neutral-900 ring-purple-500"
+                  : ""
+              }`} />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2.5 mb-1.5">
-                  <span
-                    className={`text-[12px] font-bold font-mono ${
-                      detectionStyle === opt.value
-                        ? "text-white"
-                        : "text-neutral-300"
-                    }`}
-                  >
+                  <span className={`text-[12px] font-bold font-mono ${detectionStyle === opt.value ? "text-white" : "text-neutral-300"}`}>
                     {opt.label}
                   </span>
-                  <span
-                    className={`text-[9px] px-1.5 py-0.5 rounded border font-mono font-bold uppercase tracking-wider ${opt.badgeColor}`}
-                  >
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded border font-mono font-bold uppercase tracking-wider ${opt.badgeColor}`}>
                     {opt.badge}
                   </span>
                 </div>
-                <p className="text-[10px] text-neutral-500 font-sans leading-relaxed">
-                  {opt.hint}
-                </p>
+                <p className="text-[10px] text-neutral-500 font-sans leading-relaxed">{opt.hint}</p>
               </div>
             </button>
           ))}
@@ -71,7 +57,7 @@ export default function BubbleCleanerLeftColumn({
       <div className="space-y-3">
         <SectionTitle>How to Erase</SectionTitle>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {ERASE_OPTIONS.map((opt) => (
+          {ERASE_OPTIONS.map(opt => (
             <button
               key={opt.value}
               onClick={() => setEraseMethod(opt.value)}
@@ -83,13 +69,7 @@ export default function BubbleCleanerLeftColumn({
             >
               <div className="flex items-center gap-2">
                 <span className="text-lg leading-none">{opt.icon}</span>
-                <span
-                  className={`text-[11px] font-bold font-mono ${
-                    eraseMethod === opt.value
-                      ? "text-white"
-                      : "text-neutral-300"
-                  }`}
-                >
+                <span className={`text-[11px] font-bold font-mono ${eraseMethod === opt.value ? "text-white" : "text-neutral-300"}`}>
                   {opt.label}
                 </span>
                 {opt.badge && (
@@ -98,9 +78,7 @@ export default function BubbleCleanerLeftColumn({
                   </span>
                 )}
               </div>
-              <p className="text-[10px] text-neutral-500 font-sans leading-relaxed">
-                {opt.hint}
-              </p>
+              <p className="text-[10px] text-neutral-500 font-sans leading-relaxed">{opt.hint}</p>
             </button>
           ))}
         </div>

@@ -1,18 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Split,
-  ChevronUp,
-  ChevronDown,
-  Plus,
-  X,
-  Grid,
-  Hash,
-  Trash2,
-  ArrowUpDown,
-  Image as ImageIcon,
-  ArrowUp,
-  ArrowDown,
-} from "lucide-react";
+import { Split, ChevronUp, ChevronDown, Plus, X, Grid, Hash, Trash2, ArrowUpDown, Image as ImageIcon, ArrowUp, ArrowDown } from "lucide-react";
 import { detectHorizontalGutters } from "../utils/gutterScanner";
 import HorizontalSplitterPresets from "./HorizontalSplitterPresets";
 import HorizontalSplitterControls from "./HorizontalSplitterControls";
@@ -78,17 +65,13 @@ export default function HorizontalSplitter({
   const [naturalWidth, setNaturalWidth] = useState<number | null>(null);
 
   // Layout Templates State
-  const [savedTemplates, setSavedTemplates] = useState<
-    Record<string, number[]>
-  >(() => {
+  const [savedTemplates, setSavedTemplates] = useState<Record<string, number[]>>(() => {
     try {
       const item = localStorage.getItem("splitter_templates");
-      return item
-        ? JSON.parse(item)
-        : {
-            "Preset: 3 Equal Parts": [33.3, 66.7],
-            "Preset: 4 Equal Parts": [25, 50, 75],
-          };
+      return item ? JSON.parse(item) : {
+        "Preset: 3 Equal Parts": [33.3, 66.7],
+        "Preset: 4 Equal Parts": [25, 50, 75],
+      };
     } catch {
       return {
         "Preset: 3 Equal Parts": [33.3, 66.7],
@@ -163,11 +146,7 @@ export default function HorizontalSplitter({
   const handleApplyPixelSlice = () => {
     if (!naturalHeight || sliceHeightPx <= 0) return;
     const newLines: number[] = [];
-    for (
-      let currentY = sliceHeightPx;
-      currentY < naturalHeight;
-      currentY += sliceHeightPx
-    ) {
+    for (let currentY = sliceHeightPx; currentY < naturalHeight; currentY += sliceHeightPx) {
       const pct = parseFloat(((currentY / naturalHeight) * 100).toFixed(1));
       if (pct >= 5 && pct <= 95) {
         newLines.push(pct);
@@ -247,19 +226,15 @@ export default function HorizontalSplitter({
     const sorted = [...splitLines].sort((a, b) => a - b);
     const segments = [];
     let prevPct = 0;
-
+    
     for (let i = 0; i <= sorted.length; i++) {
       const currentPct = i < sorted.length ? sorted[i] : 100;
       const heightPct = currentPct - prevPct;
-
-      const startPx = naturalHeight
-        ? Math.round((prevPct / 100) * naturalHeight)
-        : 0;
-      const endPx = naturalHeight
-        ? Math.round((currentPct / 100) * naturalHeight)
-        : 0;
+      
+      const startPx = naturalHeight ? Math.round((prevPct / 100) * naturalHeight) : 0;
+      const endPx = naturalHeight ? Math.round((currentPct / 100) * naturalHeight) : 0;
       const heightPx = naturalHeight ? endPx - startPx : null;
-
+      
       segments.push({
         index: i + 1,
         startPct: prevPct,
@@ -288,18 +263,8 @@ export default function HorizontalSplitter({
         </div>
         <label className="relative flex items-center gap-2 cursor-pointer select-none text-[10px] text-neutral-500 hover:text-neutral-300 transition-colors">
           <span>Guideline</span>
-          <div
-            className={`relative w-8 h-4 rounded-full border transition-all ${
-              showSplitPosition
-                ? "bg-purple-600 border-purple-500"
-                : "bg-neutral-800 border-neutral-700"
-            }`}
-          >
-            <div
-              className={`absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-all ${
-                showSplitPosition ? "left-4.5" : "left-0.5"
-              }`}
-            />
+          <div className={`relative w-8 h-4 rounded-full border transition-all ${showSplitPosition ? "bg-purple-600 border-purple-500" : "bg-neutral-800 border-neutral-700"}`}>
+            <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-all ${showSplitPosition ? "left-4.5" : "left-0.5"}`} />
             <input
               type="checkbox"
               checked={showSplitPosition}
@@ -325,8 +290,7 @@ export default function HorizontalSplitter({
           <div className="flex items-center gap-2">
             <ImageIcon className="h-3.5 w-3.5 text-purple-400" />
             <div className="text-[10px] font-mono text-purple-300">
-              Image size: <span className="font-bold">{naturalWidth}px</span>{" "}
-              &times; <span className="font-bold">{naturalHeight}px</span>
+              Image size: <span className="font-bold">{naturalWidth}px</span> &times; <span className="font-bold">{naturalHeight}px</span>
             </div>
           </div>
           {detectedGutters.length > 0 && (
@@ -368,9 +332,7 @@ export default function HorizontalSplitter({
           <div className="space-y-1">
             <div className="flex justify-between items-center text-[9px] font-mono text-neutral-500">
               <span>Min Gap Height</span>
-              <span className="text-purple-300 font-bold">
-                {minGutterHeight}px
-              </span>
+              <span className="text-purple-300 font-bold">{minGutterHeight}px</span>
             </div>
             <input
               type="range"
@@ -409,9 +371,7 @@ export default function HorizontalSplitter({
         <div className="space-y-1.5">
           <div className="flex justify-between items-center text-[9px] font-mono text-neutral-500">
             <span>Divide into Equal Parts</span>
-            <span className="text-indigo-300 font-bold">
-              {equalPartsCount} parts
-            </span>
+            <span className="text-indigo-300 font-bold">{equalPartsCount} parts</span>
           </div>
           <div className="flex gap-2 items-center">
             <input
@@ -419,11 +379,7 @@ export default function HorizontalSplitter({
               min="2"
               max="15"
               value={equalPartsCount}
-              onChange={(e) =>
-                setEqualPartsCount(
-                  Math.max(2, Math.min(15, parseInt(e.target.value) || 2))
-                )
-              }
+              onChange={(e) => setEqualPartsCount(Math.max(2, Math.min(15, parseInt(e.target.value) || 2)))}
               className="w-12 text-center text-[10px] font-bold font-mono bg-neutral-900 border border-white/10 rounded-lg py-1 text-white focus:outline-none"
             />
             <button
@@ -438,9 +394,7 @@ export default function HorizontalSplitter({
 
         {/* Quick Presets row */}
         <div className="flex items-center gap-1.5">
-          <span className="text-[9px] font-mono text-neutral-600">
-            Presets:
-          </span>
+          <span className="text-[9px] font-mono text-neutral-600">Presets:</span>
           <button
             type="button"
             onClick={() => handleGenerateEqualSplits(2)}
@@ -469,9 +423,7 @@ export default function HorizontalSplitter({
           <div className="space-y-1.5 pt-1.5 border-t border-white/5">
             <div className="flex justify-between items-center text-[9px] font-mono text-neutral-500">
               <span>Slice every X pixels</span>
-              <span className="text-purple-300 font-bold">
-                {sliceHeightPx} px
-              </span>
+              <span className="text-purple-300 font-bold">{sliceHeightPx} px</span>
             </div>
             <div className="flex gap-2 items-center">
               <input
@@ -480,14 +432,7 @@ export default function HorizontalSplitter({
                 max={naturalHeight}
                 step="50"
                 value={sliceHeightPx}
-                onChange={(e) =>
-                  setSliceHeightPx(
-                    Math.max(
-                      100,
-                      Math.min(naturalHeight, parseInt(e.target.value) || 500)
-                    )
-                  )
-                }
+                onChange={(e) => setSliceHeightPx(Math.max(100, Math.min(naturalHeight, parseInt(e.target.value) || 500)))}
                 className="flex-1 text-[10px] font-bold font-mono bg-neutral-900 border border-white/10 rounded-lg py-1 px-2 text-white focus:outline-none"
               />
               <button
@@ -505,9 +450,7 @@ export default function HorizontalSplitter({
         <div className="space-y-1.5 pt-1.5 border-t border-white/5">
           <div className="flex justify-between items-center text-[9px] font-mono text-neutral-500">
             <span>Repeating Interval Cuts</span>
-            <span className="text-indigo-300 font-bold">
-              Every {intervalPercent}%
-            </span>
+            <span className="text-indigo-300 font-bold">Every {intervalPercent}%</span>
           </div>
           <div className="flex gap-2 items-center">
             <select
@@ -539,17 +482,13 @@ export default function HorizontalSplitter({
         <div className="space-y-2 bg-black/30 p-3 rounded-xl border border-white/5">
           <div className="text-[10px] uppercase font-mono font-bold text-neutral-400 flex items-center justify-between">
             <span>Bulk Shift Guidelines</span>
-            <span className="text-neutral-500 text-[9px] font-mono">
-              Shift All
-            </span>
+            <span className="text-neutral-500 text-[9px] font-mono">Shift All</span>
           </div>
           <div className="flex gap-2 items-center">
             <input
               type="number"
               value={bulkShiftVal}
-              onChange={(e) =>
-                setBulkShiftVal(Math.max(0.1, parseFloat(e.target.value) || 1))
-              }
+              onChange={(e) => setBulkShiftVal(Math.max(0.1, parseFloat(e.target.value) || 1))}
               className="w-12 text-center text-[10px] font-bold font-mono bg-neutral-900 border border-white/10 rounded-lg py-1 text-white focus:outline-none"
             />
             <select
@@ -560,7 +499,7 @@ export default function HorizontalSplitter({
               <option value="pct">%</option>
               {naturalHeight && <option value="px">px</option>}
             </select>
-
+            
             <div className="flex flex-1 gap-1">
               <button
                 type="button"
@@ -686,9 +625,7 @@ export default function HorizontalSplitter({
         onClick={handleExecuteHorizontalSplit}
         disabled={isSavingEdit}
         className="w-full bg-purple-600 hover:bg-purple-500 disabled:opacity-35 disabled:cursor-not-allowed text-white text-xs font-bold py-2 rounded-xl cursor-pointer transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-purple-900/30"
-        style={{
-          boxShadow: isSavingEdit ? undefined : "0 0 15px rgba(139,92,246,0.2)",
-        }}
+        style={{ boxShadow: isSavingEdit ? undefined : "0 0 15px rgba(139,92,246,0.2)" }}
       >
         <Split className="h-3.5 w-3.5 rotate-90" />
         <span>

@@ -66,7 +66,10 @@ export function usePipelineActions({
     setVideoUrl,
   } = state;
 
-  const { runBackgroundAnalysis, addPanelsWithAutoAnalysis } = useAutoAnalysis({
+  const {
+    runBackgroundAnalysis,
+    addPanelsWithAutoAnalysis,
+  } = useAutoAnalysis({
     scrapedImages,
     setPanels,
     setConsoleLogs,

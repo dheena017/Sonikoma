@@ -30,9 +30,7 @@ export default function RangeSlider({
       <div className="flex items-end justify-between">
         <div>
           <p className="text-xs text-neutral-300 font-sans">{label}</p>
-          <p className="text-[10px] text-neutral-600 font-sans mt-0.5">
-            {description}
-          </p>
+          <p className="text-[10px] text-neutral-600 font-sans mt-0.5">{description}</p>
         </div>
         <span className="text-2xl font-bold text-white font-mono tabular-nums">
           {value}

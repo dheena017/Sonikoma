@@ -50,19 +50,11 @@ export function useBatchImageActions({
   cropPaddingPx,
 }: UseBatchImageActionsProps) {
   const [isCleaningBubbles, setIsCleaningBubbles] = useState<boolean>(false);
-  const [cleanProgress, setCleanProgress] = useState<{
-    current: number;
-    total: number;
-  } | null>(null);
-  const [bubbleCroppingImgUrl, setBubbleCroppingImgUrl] = useState<
-    string | null
-  >(null);
+  const [cleanProgress, setCleanProgress] = useState<{ current: number; total: number } | null>(null);
+  const [bubbleCroppingImgUrl, setBubbleCroppingImgUrl] = useState<string | null>(null);
 
   const [isBatchCropping, setIsBatchCropping] = useState<boolean>(false);
-  const [batchProgress, setBatchProgress] = useState<{
-    current: number;
-    total: number;
-  } | null>(null);
+  const [batchProgress, setBatchProgress] = useState<{ current: number; total: number } | null>(null);
   const [croppingImgUrl, setCroppingImgUrl] = useState<string | null>(null);
 
   const handleCleanBubblesSelected = async () => {
@@ -81,51 +73,33 @@ export function useBatchImageActions({
       for (const url of selectedScraped) {
         setBubbleCroppingImgUrl(url);
         try {
-          const response = await fetchWithInterceptor(
-            "/api/remove-speech-bubbles",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                url: url,
-                method: bubbleEraseMethod,
-                sensitivity: bubbleSensitivity,
-                detection_style: bubbleDetectionStyle,
-              }),
-            }
-          );
+          const response = await fetchWithInterceptor("/api/remove-speech-bubbles", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              url: url,
+              method: bubbleEraseMethod,
+              sensitivity: bubbleSensitivity,
+              detection_style: bubbleDetectionStyle,
+            }),
+          });
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           const data = await response.json();
 
           if (data.success && data.url) {
-            setScrapedImages((prev) =>
-              prev.map((img) => (img === url ? data.url : img))
-            );
-            setSelectedScraped((prev) =>
-              prev.map((img) => (img === url ? data.url : img))
-            );
-            setPanels((prev) =>
-              prev.map((p) =>
-                p.image_url === url ? { ...p, image_url: data.url } : p
-              )
-            );
+            setScrapedImages((prev) => prev.map((img) => (img === url ? data.url : img)));
+            setSelectedScraped((prev) => prev.map((img) => (img === url ? data.url : img)));
+            setPanels((prev) => prev.map((p) => (p.image_url === url ? { ...p, image_url: data.url } : p)));
           }
         } catch (err: any) {
-          errors.push(
-            `Image: ${url.substring(0, 40)}... - Error: ${err.message}`
-          );
+          errors.push(`Image: ${url.substring(0, 40)}... - Error: ${err.message}`);
         } finally {
           completedCount++;
-          setCleanProgress({
-            current: completedCount,
-            total: selectedScraped.length,
-          });
+          setCleanProgress({ current: completedCount, total: selectedScraped.length });
         }
       }
     } catch (outerErr: any) {
-      errors.push(
-        `Critical error in batch bubble cleaning: ${outerErr.message}`
-      );
+      errors.push(`Critical error in batch bubble cleaning: ${outerErr.message}`);
     } finally {
       setIsCleaningBubbles(false);
       setCleanProgress(null);
@@ -133,21 +107,13 @@ export function useBatchImageActions({
     }
 
     if (errors.length > 0) {
-      addNotification(
-        `Batch cleaning speech bubbles completed with ${errors.length} errors.`,
-        "warning"
-      );
+      addNotification(`Batch cleaning speech bubbles completed with ${errors.length} errors.`, "warning");
       setConsoleLogs((prev) => [
-        `[Speech Bubbles] Batch cleaning finished with errors:\n${errors.join(
-          "\n"
-        )}`,
+        `[Speech Bubbles] Batch cleaning finished with errors:\n${errors.join("\n")}`,
         ...prev,
       ]);
     } else {
-      addNotification(
-        `Successfully cleaned speech bubbles for ${selectedScraped.length} images!`,
-        "success"
-      );
+      addNotification(`Successfully cleaned speech bubbles for ${selectedScraped.length} images!`, "success");
       setConsoleLogs((prev) => [
         `[Speech Bubbles] ✓ Batch clean speech bubbles job completed successfully!`,
         ...prev,
@@ -193,11 +159,7 @@ export function useBatchImageActions({
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           const data = await response.json();
 
-          if (
-            data.success &&
-            Array.isArray(data.panels) &&
-            data.panels.length > 0
-          ) {
+          if (data.success && Array.isArray(data.panels) && data.panels.length > 0) {
             const croppedUrls: string[] = [];
             for (let i = 0; i < data.panels.length; i++) {
               const box = data.panels[i];
@@ -210,24 +172,20 @@ export function useBatchImageActions({
                 croppedUrls.push(box.croppedUrl);
               } else {
                 // Fallback for any backend variant that doesn't embed croppedUrl
-                const cropResponse = await fetchWithInterceptor(
-                  "/api/edit-image",
-                  {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      url: url,
-                      cropTop: box.cropTop,
-                      cropBottom: box.cropBottom,
-                      cropLeft: box.cropLeft,
-                      cropRight: box.cropRight,
-                      autoTrim: true,
-                      padding: cropPaddingPx,
-                    }),
-                  }
-                );
-                if (!cropResponse.ok)
-                  throw new Error(`Edit-image HTTP ${cropResponse.status}`);
+                const cropResponse = await fetchWithInterceptor("/api/edit-image", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    url: url,
+                    cropTop: box.cropTop,
+                    cropBottom: box.cropBottom,
+                    cropLeft: box.cropLeft,
+                    cropRight: box.cropRight,
+                    autoTrim: true,
+                    padding: cropPaddingPx,
+                  }),
+                });
+                if (!cropResponse.ok) throw new Error(`Edit-image HTTP ${cropResponse.status}`);
                 const cropData = await cropResponse.json();
                 croppedUrls.push(cropData.url);
               }
@@ -237,16 +195,11 @@ export function useBatchImageActions({
             newSlicedUrlsMap[url] = [url];
           }
         } catch (err: any) {
-          errors.push(
-            `Image: ${url.substring(0, 40)}... - Error: ${err.message}`
-          );
+          errors.push(`Image: ${url.substring(0, 40)}... - Error: ${err.message}`);
           newSlicedUrlsMap[url] = [url];
         } finally {
           completedCount++;
-          setBatchProgress({
-            current: completedCount,
-            total: selectedScraped.length,
-          });
+          setBatchProgress({ current: completedCount, total: selectedScraped.length });
         }
       }
     } catch (outerErr: any) {
@@ -270,14 +223,9 @@ export function useBatchImageActions({
     });
 
     if (errors.length > 0) {
-      addNotification(
-        `Batch auto crop completed with ${errors.length} errors.`,
-        "warning"
-      );
+      addNotification(`Batch auto crop completed with ${errors.length} errors.`, "warning");
       setConsoleLogs((prev) => [
-        `[Auto Cropper] Batch auto crop finished with errors:\n${errors.join(
-          "\n"
-        )}`,
+        `[Auto Cropper] Batch auto crop finished with errors:\n${errors.join("\n")}`,
         ...prev,
       ]);
     } else {

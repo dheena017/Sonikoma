@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  Sliders,
-  ChevronDown,
-  ChevronUp,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { Sliders, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface NudgeControlProps {
   label: string;
@@ -30,9 +24,7 @@ function NudgeControl({
 }: NudgeControlProps) {
   return (
     <div className="flex flex-col space-y-1.5 bg-black/30 border border-white/5 p-2 rounded-xl">
-      <span className="text-neutral-600 text-[9px] font-sans font-semibold uppercase tracking-widest">
-        {label}
-      </span>
+      <span className="text-neutral-600 text-[9px] font-sans font-semibold uppercase tracking-widest">{label}</span>
       <div className="flex items-center justify-between">
         <button
           type="button"
@@ -42,9 +34,7 @@ function NudgeControl({
         >
           {decrementIcon}
         </button>
-        <span className="text-neutral-200 font-bold font-mono text-xs">
-          {value}%
-        </span>
+        <span className="text-neutral-200 font-bold font-mono text-xs">{value}%</span>
         <button
           type="button"
           onClick={onIncrement}
@@ -91,9 +81,7 @@ export function CutsRegistryFineTune({
       <div className="flex items-center gap-1.5">
         <Sliders className="h-3 w-3 text-purple-400" />
         <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-400">
-          {selectedSliceId
-            ? "Fine-Tune Selected Crop Tool"
-            : "Fine-Tune Selection"}
+          {selectedSliceId ? "Fine-Tune Selected Crop Tool" : "Fine-Tune Selection"}
         </span>
       </div>
 
@@ -145,11 +133,7 @@ export function CutsRegistryFineTune({
       <div className="space-y-2 pt-1">
         {[
           { label: "Top Edge", value: editCropTop, setter: setEditCropTop },
-          {
-            label: "Bottom Edge",
-            value: editCropBottom,
-            setter: setEditCropBottom,
-          },
+          { label: "Bottom Edge", value: editCropBottom, setter: setEditCropBottom },
         ].map(({ label, value, setter }) => (
           <div key={label}>
             <div className="flex justify-between items-center text-[9px] font-mono text-neutral-600 mb-1">
@@ -170,9 +154,7 @@ export function CutsRegistryFineTune({
                 max="80"
                 step="0.5"
                 value={value}
-                onChange={(e) =>
-                  setter(parseFloat(Number(e.target.value).toFixed(1)))
-                }
+                onChange={(e) => setter(parseFloat(Number(e.target.value).toFixed(1)))}
                 className="absolute inset-0 w-full opacity-0 cursor-pointer h-full"
               />
             </div>

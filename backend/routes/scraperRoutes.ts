@@ -5,10 +5,10 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-import { Router } from "express";
-import scrapeRouter from "./scraper/scrape.js";
-import generateRouter from "./scraper/generate.js";
-import processRouter from "./scraper/process.js";
+import { Router } from 'express';
+import scrapeRouter from './scraper/scrape.js';
+import generateRouter from './scraper/generate.js';
+import processRouter from './scraper/process.js';
 
 const router = Router();
 

@@ -10,7 +10,7 @@ interface CleanBubblesAdvancedProps {
   setCustomColorTarget: (val: string) => void;
   customColorTolerance: number;
   setCustomColorTolerance: (val: number) => void;
-
+  
   eraseMethod: string;
   showOcrConfig: boolean;
   setShowOcrConfig: (val: boolean) => void;
@@ -43,7 +43,7 @@ export default function CleanBubblesAdvanced({
   setCustomColorTarget,
   customColorTolerance,
   setCustomColorTolerance,
-
+  
   eraseMethod,
   showOcrConfig,
   setShowOcrConfig,
@@ -75,20 +75,14 @@ export default function CleanBubblesAdvanced({
           onClick={() => setShowColorFilter(!showColorFilter)}
           className="flex items-center gap-1.5 text-[9px] font-bold text-neutral-500 hover:text-neutral-400 uppercase font-mono tracking-widest transition-colors cursor-pointer"
         >
-          <ChevronRight
-            className={`h-3 w-3 transition-transform duration-200 ${
-              showColorFilter ? "rotate-90 text-purple-400" : ""
-            }`}
-          />
+          <ChevronRight className={`h-3 w-3 transition-transform duration-200 ${showColorFilter ? "rotate-90 text-purple-400" : ""}`} />
           <span>Chroma-Filter Bubble Color</span>
         </button>
 
         {showColorFilter && (
           <div className="space-y-3 pt-2.5 animate-fadeIn">
             <div className="flex items-center justify-between p-2 rounded-xl bg-neutral-900/40 border border-neutral-800">
-              <span className="text-[8px] font-mono text-neutral-400 uppercase">
-                Enable Color Chroma-Filter
-              </span>
+              <span className="text-[8px] font-mono text-neutral-400 uppercase">Enable Color Chroma-Filter</span>
               <label className="relative inline-flex items-center cursor-pointer select-none">
                 <input
                   type="checkbox"
@@ -103,9 +97,7 @@ export default function CleanBubblesAdvanced({
             {useCustomColorTarget && (
               <>
                 <div className="flex items-center justify-between p-2 rounded-xl bg-neutral-900/40 border border-neutral-800 animate-fadeIn">
-                  <span className="text-[8px] font-mono text-neutral-400 uppercase">
-                    Target Bubble Color
-                  </span>
+                  <span className="text-[8px] font-mono text-neutral-400 uppercase">Target Bubble Color</span>
                   <div className="flex items-center gap-1.5">
                     <input
                       type="text"
@@ -124,21 +116,15 @@ export default function CleanBubblesAdvanced({
 
                 <div className="space-y-1 animate-fadeIn">
                   <div className="flex justify-between text-[8px] font-mono">
-                    <span className="text-neutral-500">
-                      Color Distance Tolerance
-                    </span>
-                    <span className="text-purple-400 font-bold">
-                      {customColorTolerance}
-                    </span>
+                    <span className="text-neutral-500">Color Distance Tolerance</span>
+                    <span className="text-purple-400 font-bold">{customColorTolerance}</span>
                   </div>
                   <input
                     type="range"
                     min="5"
                     max="100"
                     value={customColorTolerance}
-                    onChange={(e) =>
-                      setCustomColorTolerance(Number(e.target.value))
-                    }
+                    onChange={(e) => setCustomColorTolerance(Number(e.target.value))}
                     className="w-full h-1 bg-neutral-900 rounded appearance-none cursor-pointer accent-purple-500"
                   />
                 </div>
@@ -156,11 +142,7 @@ export default function CleanBubblesAdvanced({
             onClick={() => setShowOcrConfig(!showOcrConfig)}
             className="flex items-center gap-1.5 text-[9px] font-bold text-neutral-500 hover:text-neutral-400 uppercase font-mono tracking-widest transition-colors cursor-pointer"
           >
-            <ChevronRight
-              className={`h-3 w-3 transition-transform duration-200 ${
-                showOcrConfig ? "rotate-90 text-cyan-400" : ""
-              }`}
-            />
+            <ChevronRight className={`h-3 w-3 transition-transform duration-200 ${showOcrConfig ? "rotate-90 text-cyan-400" : ""}`} />
             <span>EasyOCR Engine Settings</span>
           </button>
 
@@ -168,9 +150,7 @@ export default function CleanBubblesAdvanced({
             <div className="space-y-3 pt-2.5 animate-fadeIn">
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
-                  <span className="text-[8px] font-mono text-neutral-500 uppercase">
-                    OCR Language
-                  </span>
+                  <span className="text-[8px] font-mono text-neutral-500 uppercase">OCR Language</span>
                   <select
                     value={ocrLang}
                     onChange={(e) => setOcrLang(e.target.value)}
@@ -186,9 +166,7 @@ export default function CleanBubblesAdvanced({
                 </div>
 
                 <div className="flex flex-col justify-end pb-1.5 pl-2">
-                  <span className="text-[8px] font-mono text-neutral-500 uppercase mb-1">
-                    GPU Acceleration
-                  </span>
+                  <span className="text-[8px] font-mono text-neutral-500 uppercase mb-1">GPU Acceleration</span>
                   <label className="relative inline-flex items-center cursor-pointer select-none">
                     <input
                       type="checkbox"
@@ -224,9 +202,7 @@ export default function CleanBubblesAdvanced({
           <div className="space-y-3.5 pt-2.5 animate-fadeIn">
             {/* Morph shape selector */}
             <div className="space-y-1">
-              <span className="text-[8px] font-mono text-neutral-500 uppercase">
-                Dilation Kernel Shape
-              </span>
+              <span className="text-[8px] font-mono text-neutral-500 uppercase">Dilation Kernel Shape</span>
               <select
                 value={morphShape}
                 onChange={(e) => setMorphShape(e.target.value)}
@@ -276,12 +252,8 @@ export default function CleanBubblesAdvanced({
             {/* Text stroke Morph Kernel Size */}
             <div className="space-y-1">
               <div className="flex justify-between text-[8px] font-mono">
-                <span className="text-neutral-500">
-                  Text Stroke Closing Kernel
-                </span>
-                <span className="text-purple-400 font-bold">
-                  {morphKernelSize}px
-                </span>
+                <span className="text-neutral-500">Text Stroke Closing Kernel</span>
+                <span className="text-purple-400 font-bold">{morphKernelSize}px</span>
               </div>
               <input
                 type="range"

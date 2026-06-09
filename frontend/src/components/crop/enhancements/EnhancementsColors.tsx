@@ -11,38 +11,17 @@ interface SliderRowProps {
   disabled?: boolean;
 }
 
-export function SliderRow({
-  label,
-  value,
-  min,
-  max,
-  step = 1,
-  unit = "%",
-  onChange,
-  disabled,
-}: SliderRowProps) {
+export function SliderRow({ label, value, min, max, step = 1, unit = "%", onChange, disabled }: SliderRowProps) {
   const pct = ((value - min) / (max - min)) * 100;
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-semibold text-neutral-400">
-          {label}
-        </span>
+        <span className="text-[10px] font-semibold text-neutral-400">{label}</span>
         <span
           className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md"
-          style={{
-            color: disabled
-              ? "#6b7280"
-              : value === (min + max) / 2 || value === 100
-              ? "#a78bfa"
-              : value > (min + max) / 2
-              ? "#34d399"
-              : "#f87171",
-            background: "rgba(255,255,255,0.05)",
-          }}
+          style={{ color: disabled ? "#6b7280" : value === (min + max) / 2 || value === 100 ? "#a78bfa" : value > (min + max) / 2 ? "#34d399" : "#f87171", background: "rgba(255,255,255,0.05)" }}
         >
-          {value}
-          {unit}
+          {value}{unit}
         </span>
       </div>
       <div className="relative h-1.5 rounded-full bg-neutral-800/80 overflow-hidden">
@@ -50,9 +29,7 @@ export function SliderRow({
           className="absolute inset-y-0 left-0 rounded-full transition-all duration-100"
           style={{
             width: `${pct}%`,
-            background: disabled
-              ? "#4b5563"
-              : "linear-gradient(to right, #7c3aed, #a78bfa)",
+            background: disabled ? "#4b5563" : "linear-gradient(to right, #7c3aed, #a78bfa)",
           }}
         />
         <input

@@ -8,11 +8,7 @@ interface UseLiveScraperActionsProps {
   setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
   setScrapedImages: React.Dispatch<React.SetStateAction<string[]>>;
   setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>>;
-  addPanelsWithAutoAnalysis: (
-    urls: string[],
-    currentScrapedList?: string[],
-    shouldScroll?: boolean
-  ) => void;
+  addPanelsWithAutoAnalysis: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
   fetchWithInterceptor?: typeof fetch;
 }
 
@@ -29,8 +25,7 @@ export function useLiveScraperActions({
   const activeFetch = fetchWithInterceptor || fetch;
 
   const handleDownloadZip = async () => {
-    const toDownload =
-      selectedScraped.length > 0 ? selectedScraped : scrapedImages;
+    const toDownload = selectedScraped.length > 0 ? selectedScraped : scrapedImages;
     if (toDownload.length === 0) return;
 
     setIsZipping(true);
@@ -47,10 +42,7 @@ export function useLiveScraperActions({
           const url = toDownload[i];
           const res = await activeFetch(url);
           const blob = await res.blob();
-          const filename = `webtoon_frame_${String(i + 1).padStart(
-            3,
-            "0"
-          )}.png`;
+          const filename = `webtoon_frame_${String(i + 1).padStart(3, "0")}.png`;
           folder.file(filename, blob);
         } catch (err) {
           console.error("Download failed for:", toDownload[i], err);
@@ -72,16 +64,12 @@ export function useLiveScraperActions({
 
   const handleDeleteSelected = () => {
     if (selectedScraped.length === 0) return;
-    setScrapedImages((prev) =>
-      prev.filter((img) => !selectedScraped.includes(img))
-    );
+    setScrapedImages((prev) => prev.filter((img) => !selectedScraped.includes(img)));
     setConsoleLogs((prev) => [
       `[GUI] Removed ${selectedScraped.length} images`,
       ...prev,
     ]);
-    console.log(
-      `[GUI] Removed ${selectedScraped.length} image(s) from scraped deck`
-    );
+    console.log(`[GUI] Removed ${selectedScraped.length} image(s) from scraped deck`);
     setSelectedScraped([]);
   };
 

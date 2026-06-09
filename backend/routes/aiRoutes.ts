@@ -5,10 +5,10 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-import { Router } from "express";
-import cropRouter from "./ai/crop.js";
-import analyzeRouter from "./ai/analyze.js";
-import videoRouter from "./ai/video.js";
+import { Router } from 'express';
+import cropRouter from './ai/crop.js';
+import analyzeRouter from './ai/analyze.js';
+import videoRouter from './ai/video.js';
 
 const router = Router();
 

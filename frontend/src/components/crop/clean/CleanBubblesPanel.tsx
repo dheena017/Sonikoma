@@ -19,9 +19,7 @@ interface CleanBubblesPanelProps {
 
   // Manual Brush Props
   editMode?: "crop" | "clean_auto" | "clean_manual" | "typeset" | "slices";
-  setEditMode?: (
-    mode: "crop" | "clean_auto" | "clean_manual" | "typeset" | "slices"
-  ) => void;
+  setEditMode?: (mode: "crop" | "clean_auto" | "clean_manual" | "typeset" | "slices") => void;
   brushSize?: number;
   setBrushSize?: (size: number) => void;
   brushAction?: "paint" | "erase";
@@ -31,28 +29,8 @@ interface CleanBubblesPanelProps {
   // Lifted Parameter Props
   detectionStyle?: "all" | "white_only" | "text_only";
   setDetectionStyle?: (style: "all" | "white_only" | "text_only") => void;
-  eraseMethod?:
-    | "auto"
-    | "inpaint"
-    | "inpaint_ns"
-    | "blur"
-    | "solid_white"
-    | "solid_black"
-    | "solid_color"
-    | "transparent"
-    | "ocr";
-  setEraseMethod?: (
-    method:
-      | "auto"
-      | "inpaint"
-      | "inpaint_ns"
-      | "blur"
-      | "solid_white"
-      | "solid_black"
-      | "solid_color"
-      | "transparent"
-      | "ocr"
-  ) => void;
+  eraseMethod?: "auto" | "inpaint" | "inpaint_ns" | "blur" | "solid_white" | "solid_black" | "solid_color" | "transparent" | "ocr";
+  setEraseMethod?: (method: "auto" | "inpaint" | "inpaint_ns" | "blur" | "solid_white" | "solid_black" | "solid_color" | "transparent" | "ocr") => void;
   sensitivity?: number;
   setSensitivity?: (val: number) => void;
   dilation?: number;
@@ -149,7 +127,7 @@ export default function CleanBubblesPanel({
   }, [imgUrl]);
 
   // Apply a selected preset
-  const handleApplyPreset = (p: (typeof PRESETS)[number]) => {
+  const handleApplyPreset = (p: typeof PRESETS[number]) => {
     setActivePreset(p.name);
     setDetectionStyle(p.detectionStyle as any);
     setEraseMethod(p.eraseMethod as any);
@@ -163,9 +141,7 @@ export default function CleanBubblesPanel({
     setIsCleaning(true);
     if (setConsoleLogs) {
       setConsoleLogs((prev) => [
-        `[Crop Editor] Cleaning speech bubbles on Frame #${
-          editingImageIdx + 1
-        } (${activePreset})...`,
+        `[Crop Editor] Cleaning speech bubbles on Frame #${editingImageIdx + 1} (${activePreset})...`,
         ...prev,
       ]);
     }
@@ -228,18 +204,13 @@ export default function CleanBubblesPanel({
           ]);
         }
         addNotification(
-          debugMode
-            ? "Debug overlay generated! Bounding boxes highlighted."
-            : "Successfully cleaned bubbles!",
+          debugMode ? "Debug overlay generated! Bounding boxes highlighted." : "Successfully cleaned bubbles!",
           "success"
         );
       }
     } catch (err: any) {
       console.error("[Crop Editor Bubble Cleaner] Failed:", err);
-      addNotification(
-        err.message || "Failed to clean speech bubbles.",
-        "error"
-      );
+      addNotification(err.message || "Failed to clean speech bubbles.", "error");
     } finally {
       setIsCleaning(false);
     }
@@ -289,7 +260,9 @@ export default function CleanBubblesPanel({
     }
     if (setPanels) {
       setPanels((prev) =>
-        prev.map((p) => (p.image_url === imgUrl ? { ...p, image_url: url } : p))
+        prev.map((p) =>
+          p.image_url === imgUrl ? { ...p, image_url: url } : p
+        )
       );
     }
   };
@@ -334,10 +307,7 @@ export default function CleanBubblesPanel({
           <div className="font-bold text-neutral-200 uppercase tracking-widest text-[9px] mb-1">
             Visual Guide
           </div>
-          <p>
-            This tool replaces comic text with inpainted artwork using AI image
-            context boundaries.
-          </p>
+          <p>This tool replaces comic text with inpainted artwork using AI image context boundaries.</p>
           <div className="grid grid-cols-2 gap-2 text-[9px]">
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded bg-green-500 inline-block" />
@@ -360,10 +330,7 @@ export default function CleanBubblesPanel({
       )}
 
       {/* Preset profiles selection carousel/grid */}
-      <CleanBubblesPresets
-        activePreset={activePreset}
-        handleApplyPreset={handleApplyPreset}
-      />
+      <CleanBubblesPresets activePreset={activePreset} handleApplyPreset={handleApplyPreset} />
 
       {showSettings && (
         <div className="space-y-3.5 animate-fadeIn">

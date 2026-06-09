@@ -187,7 +187,9 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
   };
   const handleModifyFilterPreset = (panelId: number, preset: string) => {
     setPanels?.((prev) =>
-      prev.map((p) => (p.id === panelId ? { ...p, filter_preset: preset } : p))
+      prev.map((p) =>
+        p.id === panelId ? { ...p, filter_preset: preset } : p
+      )
     );
   };
   const handleModifyGrayscale = (panelId: number, val: boolean) => {
@@ -231,10 +233,7 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
     >
       <div
         className="relative bg-neutral-950/95 border border-white/5 rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden shadow-2xl flex flex-col w-full max-w-7xl h-[min(100dvh-1.5rem,980px)] sm:h-auto max-h-[calc(100vh-4rem)] my-auto"
-        style={{
-          boxShadow:
-            "0 0 0 1px rgba(255,255,255,0.02), 0 0 70px rgba(139,92,246,0.14), 0 30px 60px rgba(0,0,0,0.78)",
-        }}
+        style={{ boxShadow: "0 0 0 1px rgba(255,255,255,0.02), 0 0 70px rgba(139,92,246,0.14), 0 30px 60px rgba(0,0,0,0.78)" }}
       >
         {/* Subtle top-edge glow line */}
         <div className="absolute top-0 left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-purple-500/70 to-transparent" />

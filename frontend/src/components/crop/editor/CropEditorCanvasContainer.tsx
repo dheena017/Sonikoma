@@ -26,11 +26,7 @@ interface CropEditorCanvasContainerProps {
   handleRemoveSplitLine: (yVal: number) => void;
   dragType: any;
   onResizeStart: (handle: string, clientX: number, clientY: number) => void;
-  handleSelectAndDragSlice: (
-    slice: any,
-    clientX: number,
-    clientY: number
-  ) => void;
+  handleSelectAndDragSlice: (slice: any, clientX: number, clientY: number) => void;
   zoom: number;
   editMode: any;
   detectedBubbles: any[];
@@ -95,17 +91,17 @@ export default function CropEditorCanvasContainer({
 }: CropEditorCanvasContainerProps) {
   // Safe handlers that only allow crop drawing when in the correct tabs
   const safeHandleStart = (clientX: number, clientY: number) => {
-    if (!["slice", "crop"].includes(activeTab)) return;
+    if (!['slice', 'crop'].includes(activeTab)) return;
     handleStart(clientX, clientY);
   };
 
   const safeHandleMove = (x: number, y: number) => {
-    if (!["slice", "crop"].includes(activeTab)) return;
+    if (!['slice', 'crop'].includes(activeTab)) return;
     handleMove(x, y);
   };
 
   const safeHandleEnd = () => {
-    if (!["slice", "crop"].includes(activeTab)) return;
+    if (!['slice', 'crop'].includes(activeTab)) return;
     handleEnd();
   };
 
@@ -113,7 +109,7 @@ export default function CropEditorCanvasContainer({
     <div
       className="lg:col-span-7 flex flex-col space-y-2 h-full min-h-0 overflow-hidden"
       style={{
-        pointerEvents: "auto",
+        pointerEvents: "auto"
       }}
     >
       <div className="flex justify-between items-center bg-white/[0.02] backdrop-blur-sm p-2.5 rounded-xl border border-white/[0.06]">
@@ -185,14 +181,11 @@ export default function CropEditorCanvasContainer({
         setEditCropRight={setEditCropRight}
         setSelectedSliceId={setSelectedSliceId}
         activeTab={activeTab}
-        aspectRatio={
-          aspectRatio === "9:16" ? 9 / 16 : aspectRatio === "16:9" ? 16 / 9 : 0
-        }
+        aspectRatio={aspectRatio === "9:16" ? 9/16 : aspectRatio === "16:9" ? 16/9 : 0}
       />
 
       <span className="text-[10px] text-neutral-500 text-center italic font-sans block pt-1">
-        Draw to create panels · Drag to move · Drag corners/edges to resize ·
-        Drag split lines to reposition
+        Draw to create panels · Drag to move · Drag corners/edges to resize · Drag split lines to reposition
       </span>
     </div>
   );

@@ -36,8 +36,7 @@ export function EnhancementsPresets({
 
       <div className="grid grid-cols-2 gap-2">
         {PRESETS.map((preset) => {
-          const isActive =
-            activePreset === preset.id && !!activeStoryboardPanel;
+          const isActive = activePreset === preset.id && !!activeStoryboardPanel;
           return (
             <button
               key={preset.id}
@@ -58,7 +57,9 @@ export function EnhancementsPresets({
               )}
               <span className="text-base mr-1">{preset.icon}</span>
               {preset.label}
-              {isActive && <span className="ml-1 text-purple-400">✓</span>}
+              {isActive && (
+                <span className="ml-1 text-purple-400">✓</span>
+              )}
             </button>
           );
         })}
@@ -66,35 +67,15 @@ export function EnhancementsPresets({
 
       {/* Grayscale Manga Mode */}
       <div className="flex items-center justify-between p-2.5 rounded-xl bg-black/20 border border-white/5 mt-1">
-        <span className="text-[10px] font-semibold text-neutral-400">
-          Manga Grayscale Style
-        </span>
+        <span className="text-[10px] font-semibold text-neutral-400">Manga Grayscale Style</span>
         <label className="relative flex items-center cursor-pointer select-none">
-          <div
-            className={`relative w-8 h-4 rounded-full border transition-all ${
-              activeStoryboardPanel?.grayscale && !!activeStoryboardPanel
-                ? "bg-purple-600 border-purple-500"
-                : "bg-neutral-800 border-neutral-700"
-            }`}
-          >
-            <div
-              className={`absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-all ${
-                activeStoryboardPanel?.grayscale && !!activeStoryboardPanel
-                  ? "left-4.5"
-                  : "left-0.5"
-              }`}
-            />
+          <div className={`relative w-8 h-4 rounded-full border transition-all ${activeStoryboardPanel?.grayscale && !!activeStoryboardPanel ? "bg-purple-600 border-purple-500" : "bg-neutral-800 border-neutral-700"}`}>
+            <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-all ${activeStoryboardPanel?.grayscale && !!activeStoryboardPanel ? "left-4.5" : "left-0.5"}`} />
             <input
               type="checkbox"
               checked={activeStoryboardPanel?.grayscale || false}
               disabled={!activeStoryboardPanel}
-              onChange={(e) =>
-                activeStoryboardPanel &&
-                handleModifyGrayscale(
-                  activeStoryboardPanel.id,
-                  e.target.checked
-                )
-              }
+              onChange={(e) => activeStoryboardPanel && handleModifyGrayscale(activeStoryboardPanel.id, e.target.checked)}
               className="absolute inset-0 opacity-0 cursor-pointer w-full h-full disabled:cursor-not-allowed"
             />
           </div>

@@ -1,7 +1,7 @@
-import { Router } from "express";
-import JSZip from "jszip";
-import { resolveImageToBuffer } from "../../utils/imageUtils.js";
-import { zipCache } from "../../utils/cache.js";
+import { Router } from 'express';
+import JSZip from 'jszip';
+import { resolveImageToBuffer } from '../../utils/imageUtils.js';
+import { zipCache } from '../../utils/cache.js';
 
 const router = Router();
 
@@ -9,11 +9,7 @@ const router = Router();
 router.post("/download-zip", async (req, res) => {
   const { urls } = req.body;
   if (!urls || !Array.isArray(urls) || urls.length === 0) {
-    return res
-      .status(400)
-      .json({
-        error: "Parameter 'urls' must be a non-empty array of image URLs.",
-      });
+    return res.status(400).json({ error: "Parameter 'urls' must be a non-empty array of image URLs." });
   }
 
   try {
@@ -30,19 +26,14 @@ router.post("/download-zip", async (req, res) => {
         else if (ct.includes("webp")) ext = "webp";
         else if (ct.includes("gif")) ext = "gif";
 
-        zip.file(
-          `panel_${String(i + 1).padStart(3, "0")}.${ext}`,
-          resolved.data
-        );
+        zip.file(`panel_${String(i + 1).padStart(3, "0")}.${ext}`, resolved.data);
       } catch (err) {
         console.warn(`[ZIP API Warning] Failed to resolve URL: ${url}`, err);
       }
     }
 
     const zipBuffer = await zip.generateAsync({ type: "nodebuffer" });
-    const zipId = `zip_${Date.now()}_${Math.random()
-      .toString(36)
-      .substring(2, 9)}`;
+    const zipId = `zip_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
     zipCache.set(zipId, zipBuffer);
 
     // Automatically purge the zip cache item after 10 minutes to save memory
@@ -52,13 +43,11 @@ router.post("/download-zip", async (req, res) => {
 
     return res.json({
       success: true,
-      downloadUrl: `/api/download-zip/get/${zipId}`,
+      downloadUrl: `/api/download-zip/get/${zipId}`
     });
   } catch (err: unknown) {
     console.error("[Zip Generation Error]", err);
-    return res
-      .status(500)
-      .json({ error: `ZIP packaging failed: ${err.message || err}` });
+    return res.status(500).json({ error: `ZIP packaging failed: ${err.message || err}` });
   }
 });
 
@@ -67,17 +56,10 @@ router.get("/download-zip/get/:id", (req, res) => {
   const zipId = req.params.id;
   const buffer = zipCache.get(zipId);
   if (!buffer) {
-    return res
-      .status(404)
-      .send(
-        "The requested ZIP archive has expired or was not found. Please try packaging again."
-      );
+    return res.status(404).send("The requested ZIP archive has expired or was not found. Please try packaging again.");
   }
   res.setHeader("Content-Type", "application/zip");
-  res.setHeader(
-    "Content-Disposition",
-    "attachment; filename=comic_panels_archive.zip"
-  );
+  res.setHeader("Content-Disposition", "attachment; filename=comic_panels_archive.zip");
   res.send(buffer);
 });
 

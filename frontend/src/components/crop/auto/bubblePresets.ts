@@ -1,63 +1,19 @@
 export const DETECTION_OPTIONS = [
-  {
-    value: "all",
-    label: "All Bubbles",
-    description: "Detect speech & thought boxes",
-  },
-  {
-    value: "white_only",
-    label: "White Only",
-    description: "Only light-colored shapes",
-  },
-  {
-    value: "text_only",
-    label: "Text Only",
-    description: "Filter on text outlines directly",
-  },
+  { value: "all", label: "All Bubbles", description: "Detect speech & thought boxes" },
+  { value: "white_only", label: "White Only", description: "Only light-colored shapes" },
+  { value: "text_only", label: "Text Only", description: "Filter on text outlines directly" },
 ] as const;
 
 export const ERASE_OPTIONS = [
-  {
-    value: "auto",
-    label: "Auto (AI)",
-    description: "Smart AI classifier inpainting",
-  },
-  {
-    value: "inpaint",
-    label: "Inpaint (Telea)",
-    description: "Telea fast border blend",
-  },
-  {
-    value: "inpaint_ns",
-    label: "Inpaint (NS)",
-    description: "Navier-Stokes micro-inpaint",
-  },
+  { value: "auto", label: "Auto (AI)", description: "Smart AI classifier inpainting" },
+  { value: "inpaint", label: "Inpaint (Telea)", description: "Telea fast border blend" },
+  { value: "inpaint_ns", label: "Inpaint (NS)", description: "Navier-Stokes micro-inpaint" },
   { value: "blur", label: "Blur Text", description: "Gaussian blur masking" },
-  {
-    value: "solid_white",
-    label: "Fill White",
-    description: "White fill over shapes",
-  },
-  {
-    value: "solid_black",
-    label: "Fill Black",
-    description: "Black fill over shapes",
-  },
-  {
-    value: "solid_color",
-    label: "Fill Custom Color",
-    description: "Fill custom color over shapes",
-  },
-  {
-    value: "transparent",
-    label: "Transparent",
-    description: "Cutout transparency hole",
-  },
-  {
-    value: "ocr",
-    label: "OCR Erase",
-    description: "EasyOCR direct text removal",
-  },
+  { value: "solid_white", label: "Fill White", description: "White fill over shapes" },
+  { value: "solid_black", label: "Fill Black", description: "Black fill over shapes" },
+  { value: "solid_color", label: "Fill Custom Color", description: "Fill custom color over shapes" },
+  { value: "transparent", label: "Transparent", description: "Cutout transparency hole" },
+  { value: "ocr", label: "OCR Erase", description: "EasyOCR direct text removal" },
 ] as const;
 
 export const PRESETS = [
