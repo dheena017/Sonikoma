@@ -64,7 +64,7 @@ export default function CanvasCropSelection({
 
       {/* SELECTION BOUNDARY GUIDES - Set transition-none */}
       <div
-        className={`absolute border-[2.5px] border-dashed pointer-events-none group transition-none bg-purple-500/5 ${themeColorClass}`}
+        className={`absolute border-[2.5px] border-dashed pointer-events-none group transition-none bg-purple-500/[0.12] ${themeColorClass}`}
         style={{
           top: `${editCropTop}%`,
           bottom: `${editCropBottom}%`,
