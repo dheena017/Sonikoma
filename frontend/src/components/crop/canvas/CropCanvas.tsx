@@ -278,7 +278,7 @@ export default function CropCanvas({
           if (isManualBrushActive) return;
           handleEnd();
         }}
-        className={`relative inline-block w-full max-w-full h-full ${activeTab === 'crop' ? 'cursor-crosshair' : ''}`}
+        className={`relative inline-block ${activeTab === 'crop' ? 'cursor-crosshair' : ''}`}
         style={{
           userSelect: "none",
           touchAction: "none",
@@ -287,7 +287,7 @@ export default function CropCanvas({
           transition: "transform 0.15s ease",
         }}
       >
-        <img src={imgUrl} alt="Preview" className="w-full h-full object-contain pointer-events-none select-none block" draggable={false} />
+        <img src={imgUrl} alt="Preview" className="max-w-full h-auto pointer-events-none select-none block" draggable={false} />
 
         {/* Brush Layer */}
         {isManualBrushActive && (
