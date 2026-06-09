@@ -87,15 +87,27 @@ export default function CropEditorCanvasContainer({
   setSelectedSliceId,
   activeTab,
 }: CropEditorCanvasContainerProps) {
+  // Safe handlers that only allow crop drawing when in the correct tabs
+  const safeHandleStart = (clientX: number, clientY: number) => {
+    if (activeTab !== "slice" && activeTab !== "cuts") return;
+    handleStart(clientX, clientY);
+  };
+
+  const safeHandleMove = (clientX: number, clientY: number) => {
+    if (activeTab !== "slice" && activeTab !== "cuts") return;
+    handleMove(clientX, clientY);
+  };
+
+  const safeHandleEnd = () => {
+    if (activeTab !== "slice" && activeTab !== "cuts") return;
+    handleEnd();
+  };
+
   return (
     <div 
-      className={`lg:col-span-7 flex flex-col space-y-2 h-full min-h-0 overflow-hidden ${
-        activeTab === "slice" ? "cursor-crosshair" : 
-        activeTab === "cuts" ? "cursor-nwse-resize" : 
-        "cursor-default"
-      }`}
+      className="lg:col-span-7 flex flex-col space-y-2 h-full min-h-0 overflow-hidden"
       style={{ 
-        cursor: activeTab === "slice" ? "crosshair" : activeTab === "cuts" ? "nwse-resize" : "default",
+        cursor: (activeTab === "slice" || activeTab === "cuts") ? "crosshair" : "default",
         pointerEvents: "auto"
       }}
     >
@@ -142,9 +154,9 @@ export default function CropEditorCanvasContainer({
         showSplitPosition={showSplitPosition}
         splitPosition={splitPosition}
         splitLines={splitLines}
-        handleStart={handleStart}
-        handleMove={handleMove}
-        handleEnd={handleEnd}
+        handleStart={safeHandleStart}
+        handleMove={safeHandleMove}
+        handleEnd={safeHandleEnd}
         isPointInsideSelection={isPointInsideSelection}
         handleSelectSlice={handleSelectSlice}
         handleDeleteSlice={handleDeleteSlice}

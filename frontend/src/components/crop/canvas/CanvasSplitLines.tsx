@@ -1,6 +1,7 @@
 import React from "react";
 
 interface CanvasSplitLinesProps {
+  isVisible?: boolean;
   splitPosition: number;
   splitLines: number[];
   hoverPct: { x: number; y: number } | null;
@@ -10,6 +11,7 @@ interface CanvasSplitLinesProps {
 }
 
 export default function CanvasSplitLines({
+  isVisible = true,
   splitPosition,
   splitLines,
   hoverPct,
@@ -18,7 +20,12 @@ export default function CanvasSplitLines({
   setShowSplitPosition,
 }: CanvasSplitLinesProps) {
   return (
-    <>
+    <div
+      className="absolute inset-0 z-40 pointer-events-none transition-opacity duration-200"
+      style={{
+        display: isVisible ? "block" : "none",
+      }}
+    >
       {/* Active sliding guideline */}
       <div
         className="absolute left-0 right-0 z-40 pointer-events-none"
@@ -39,11 +46,17 @@ export default function CanvasSplitLines({
             className="absolute left-0 right-0 z-40 h-3 -translate-y-1.5 flex items-center cursor-row-resize pointer-events-auto"
             style={{ top: `${y}%` }}
           >
-            <div className={`w-full border-t-2 border-dashed transition-all ${
-              isHovered ? "border-red-400 shadow-[0_0_8px_rgba(248,113,113,0.5)] scale-y-110" : "border-purple-500/70"
-            }`} />
+            <div
+              className={`w-full border-t-2 border-dashed transition-all ${
+                isHovered
+                  ? "border-red-400 shadow-[0_0_8px_rgba(248,113,113,0.5)] scale-y-110"
+                  : "border-purple-500/70"
+              }`}
+            />
             <div className="absolute left-2 bg-purple-950/95 text-purple-300 font-mono text-[9px] px-2 py-0.5 rounded-lg border border-purple-800/60 font-bold backdrop-blur shadow-lg flex items-center gap-1.5 pointer-events-auto select-none">
-              <span>Cut #{idx + 1}: {y}%</span>
+              <span>
+                Cut #{idx + 1}: {y}%
+              </span>
               <button
                 type="button"
                 onClick={(e) => {
@@ -59,6 +72,6 @@ export default function CanvasSplitLines({
           </div>
         );
       })}
-    </>
+    </div>
   );
 }

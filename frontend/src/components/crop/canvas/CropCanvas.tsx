@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { Trash2 } from "lucide-react";
 import { Slice } from "../shared/types";
 import CanvasBrushLayer from "./CanvasBrushLayer";
@@ -104,15 +104,28 @@ export default function CropCanvas({
   // Track mouse position for dynamic cursor
   const [hoverPct, setHoverPct] = useState<{ x: number; y: number } | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
+  const isManualBrushActive = editMode === "clean_manual" && activeTab === "eraser";
 
-  const getTabBaseCursor = () => {
-    if (activeTab === "slice") return "crosshair";
-    if (activeTab === "cuts") return "nwse-resize";
-    return "default";
-  };
+  // Derive cursor reactively from all relevant state/props so it never lags
+  // behind editMode changes or quick mouse-leave/enter cycles.
+  const computedCursor = useMemo(() => {
+    // Brush mode: always crosshair regardless of hover state
+    if (isManualBrushActive) return "crosshair";
 
-  const getCursor = () => {
-    if (editMode === "clean_manual") return "crosshair";
+    // Active drag overrides everything else
+    if (dragType === "move") return "grabbing";
+    if (dragType === "drag-split-line") return "row-resize";
+    if (dragType === "draw") return "crosshair";
+    if (dragType === "split") return "ns-resize";
+    if (dragType && dragType.startsWith("resize-")) {
+      const handle = dragType.replace("resize-", "");
+      if (handle === "nw" || handle === "se") return "nwse-resize";
+      if (handle === "ne" || handle === "sw") return "nesw-resize";
+      if (handle === "n"  || handle === "s")  return "ns-resize";
+      if (handle === "w"  || handle === "e")  return "ew-resize";
+    }
+
+    // Split-line mode
     if (showSplitPosition) {
       if (hoverPct) {
         const nearLine = splitLines.some(lineY => Math.abs(lineY - hoverPct.y) < 2.5);
@@ -120,19 +133,24 @@ export default function CropCanvas({
       }
       return "ns-resize";
     }
-    if (dragType === "move") return "grabbing";
-    if (dragType === "draw") return "crosshair";
-    if (dragType && dragType.startsWith("resize-")) {
-      const handle = dragType.replace("resize-", "");
-      if (handle === "nw" || handle === "se") return "nwse-resize";
-      if (handle === "ne" || handle === "sw") return "nesw-resize";
-      if (handle === "n" || handle === "s") return "ns-resize";
-      if (handle === "w" || handle === "e") return "ew-resize";
-    }
+
+    // Hover over an existing selection
     if (hoverPct && isPointInsideSelection(hoverPct.x, hoverPct.y)) return "grab";
-    // Use tab-based cursor as the default fallback
-    return getTabBaseCursor();
-  };
+
+    // Tab-based fallback — evaluated inline so it is always in sync with activeTab
+    if (activeTab === "slice") return "crosshair";
+    if (activeTab === "cuts")  return "nwse-resize";
+    return "default";
+  }, [
+    isManualBrushActive,
+    dragType,
+    showSplitPosition,
+    splitLines,
+    hoverPct,
+    isPointInsideSelection,
+    activeTab,
+    editMode,
+  ]);
 
   const getClientPct = useCallback(
     (clientX: number, clientY: number) => {
@@ -144,12 +162,11 @@ export default function CropCanvas({
     },
     [containerRef]
   );
-
+  
   // Initialize and resize manual mask canvas
   const initCanvas = (canvas: HTMLCanvasElement) => {
     const rect = canvas.getBoundingClientRect();
     if (canvas.width !== rect.width || canvas.height !== rect.height) {
-      // Create temporary canvas to preserve mask drawing
       const tempCanvas = document.createElement("canvas");
       tempCanvas.width = canvas.width;
       tempCanvas.height = canvas.height;
@@ -157,21 +174,14 @@ export default function CropCanvas({
       if (tempCtx && canvas.width > 0 && canvas.height > 0) {
         tempCtx.drawImage(canvas, 0, 0);
       }
-
       canvas.width = rect.width;
       canvas.height = rect.height;
-      
       const ctx = canvas.getContext("2d");
-      if (ctx) {
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
-        if (tempCtx && tempCanvas.width > 0 && tempCanvas.height > 0) {
+      if (ctx && tempCtx && tempCanvas.width > 0 && tempCanvas.height > 0) {
           ctx.drawImage(tempCanvas, 0, 0, rect.width, rect.height);
-        }
       }
     }
 
-    // Apply settings
     const ctx = canvas.getContext("2d");
     if (ctx) {
       ctx.lineCap = "round";
@@ -182,7 +192,7 @@ export default function CropCanvas({
         ctx.strokeStyle = "rgba(0, 0, 0, 1)";
       } else {
         ctx.globalCompositeOperation = "source-over";
-        ctx.strokeStyle = "rgba(239, 68, 68, 0.6)"; // Semi-transparent red brush
+        ctx.strokeStyle = "rgba(239, 68, 68, 0.6)";
       }
     }
   };
@@ -199,10 +209,8 @@ export default function CropCanvas({
       clientX = e.clientX;
       clientY = e.clientY;
     }
-    return {
-      x: clientX - rect.left,
-      y: clientY - rect.top
-    };
+    // Account for CSS transform scale to ensure accurate coordinates
+    return { x: (clientX - rect.left) / zoom, y: (clientY - rect.top) / zoom };
   };
 
   const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
@@ -210,10 +218,8 @@ export default function CropCanvas({
     if (!canvas) return;
     initCanvas(canvas);
     setIsDrawing(true);
-    
     const coords = getCanvasCoords(e, canvas);
     if (!coords) return;
-    
     const ctx = canvas.getContext("2d");
     if (ctx) {
       ctx.beginPath();
@@ -229,7 +235,6 @@ export default function CropCanvas({
     if (!canvas) return;
     const coords = getCanvasCoords(e, canvas);
     if (!coords) return;
-    
     const ctx = canvas.getContext("2d");
     if (ctx) {
       ctx.lineTo(coords.x, coords.y);
@@ -237,17 +242,12 @@ export default function CropCanvas({
     }
   };
 
-  const handleCanvasMouseUp = () => {
-    setIsDrawing(false);
-  };
+  const handleCanvasMouseUp = () => setIsDrawing(false);
 
-  // Re-sync brush size & action whenever they change
   useEffect(() => {
     const canvas = canvasMaskRef?.current;
-    if (canvas) {
-      initCanvas(canvas);
-    }
-  }, [brushSize, brushAction, canvasMaskRef]);
+    if (isManualBrushActive && canvas) initCanvas(canvas);
+  }, [brushSize, brushAction, canvasMaskRef, isManualBrushActive]);
 
   return (
     <div
@@ -257,52 +257,46 @@ export default function CropCanvas({
       <div
         ref={containerRef}
         onMouseDown={(e) => {
-          if (editMode === "clean_manual") return;
+          if (isManualBrushActive) return;
           if (e.button !== 0) return;
           handleStart(e.clientX, e.clientY);
         }}
         onMouseMove={(e) => {
-          if (editMode === "clean_manual") return;
+          if (isManualBrushActive) return;
           const pct = getClientPct(e.clientX, e.clientY);
           if (pct) setHoverPct(pct);
-          if (dragType) {
-            handleMove(e.clientX, e.clientY);
-          }
+          if (dragType) handleMove(e.clientX, e.clientY);
         }}
         onMouseUp={() => {
-          if (editMode === "clean_manual") return;
+          if (isManualBrushActive) return;
           handleEnd();
         }}
         onMouseLeave={() => {
           setHoverPct(null);
-          if (dragType) {
-            handleEnd();
-          }
+          if (dragType) handleEnd();
         }}
         onTouchStart={(e) => {
-          if (editMode === "clean_manual") return;
+          if (isManualBrushActive) return;
           if (e.touches && e.touches[0]) {
             handleStart(e.touches[0].clientX, e.touches[0].clientY);
           }
         }}
         onTouchMove={(e) => {
-          if (editMode === "clean_manual") return;
+          if (isManualBrushActive) return;
           if (e.touches && e.touches[0]) {
             const touch = e.touches[0];
             const pct = getClientPct(touch.clientX, touch.clientY);
             if (pct) setHoverPct(pct);
-            if (dragType) {
-              handleMove(touch.clientX, touch.clientY);
-            }
+            if (dragType) handleMove(touch.clientX, touch.clientY);
           }
         }}
         onTouchEnd={() => {
-          if (editMode === "clean_manual") return;
+          if (isManualBrushActive) return;
           handleEnd();
         }}
         className="relative inline-block w-full max-w-full h-full"
         style={{
-          cursor: getCursor(),
+          cursor: computedCursor,
           userSelect: "none",
           touchAction: "none",
           transform: zoom !== 1 ? `scale(${zoom})` : undefined,
@@ -310,17 +304,10 @@ export default function CropCanvas({
           transition: "transform 0.15s ease",
         }}
       >
-        {/* Raw image */}
-        <img
-          src={imgUrl}
-          alt="Crop segment preview"
-          className="w-full h-full object-contain pointer-events-none select-none block"
-          referrerPolicy="no-referrer"
-          draggable={false}
-        />
+        <img src={imgUrl} alt="Preview" className="w-full h-full object-contain pointer-events-none select-none block" draggable={false} />
 
-        {/* Manual Brush Painting Layer */}
-        {editMode === "clean_manual" && (
+        {/* Brush Layer */}
+        {isManualBrushActive && (
           <CanvasBrushLayer
             canvasMaskRef={canvasMaskRef}
             handleCanvasMouseDown={handleCanvasMouseDown}
@@ -329,7 +316,7 @@ export default function CropCanvas({
           />
         )}
 
-        {/* Interactive Speech Bubble Box Overlays */}
+        {/* Bubble Layers */}
         {(editMode === "clean_auto" || editMode === "typeset") && (
           <CanvasBubbleBoxes
             detectedBubbles={detectedBubbles}
@@ -339,107 +326,46 @@ export default function CropCanvas({
           />
         )}
 
-        {/* Live Typeset Text Preview Overlay */}
-        {editMode === "typeset" && selectedBubbleIdx !== null && detectedBubbles[selectedBubbleIdx] && (
-          <div
-            className="absolute z-40 pointer-events-none flex items-center justify-center p-2 text-center select-none"
-            style={{
-              top: `${detectedBubbles[selectedBubbleIdx].box[0] / 10}%`,
-              left: `${detectedBubbles[selectedBubbleIdx].box[1] / 10}%`,
-              width: `${(detectedBubbles[selectedBubbleIdx].box[3] - detectedBubbles[selectedBubbleIdx].box[1]) / 10}%`,
-              height: `${(detectedBubbles[selectedBubbleIdx].box[2] - detectedBubbles[selectedBubbleIdx].box[0]) / 10}%`,
-              color: typesetColor,
-              fontFamily: typesetFont === "comic" ? "Comic Sans MS, cursive" : typesetFont === "cour" ? "Courier New, monospace" : typesetFont === "times" ? "Times New Roman, serif" : "Arial, sans-serif",
-              fontSize: typesetSize && typesetSize > 0 ? `${typesetSize}px` : "14px",
-              textAlign: typesetAlign,
-              fontWeight: "bold",
-              textShadow: "0 0 3px white, 0 0 3px white, 0 0 3px white"
-            }}
-          >
-            {typesetText || "Preview Text"}
-          </div>
-        )}
+        {/* Persistent UI Components (Visibility controlled by CSS inside components) */}
+        <CanvasSplitLines 
+          isVisible={showSplitPosition && activeTab === "slice"}
+          splitPosition={splitPosition}
+          splitLines={splitLines}
+          hoverPct={hoverPct}
+          handleRemoveSplitLine={handleRemoveSplitLine}
+          setSplitPosition={setSplitPosition}
+          setShowSplitPosition={setShowSplitPosition}
+        />
 
-        {/* Split guidelines */}
-        {showSplitPosition && (
-          <CanvasSplitLines
-            splitPosition={splitPosition}
-            splitLines={splitLines}
-            hoverPct={hoverPct}
-            handleRemoveSplitLine={handleRemoveSplitLine}
-            setSplitPosition={setSplitPosition}
-            setShowSplitPosition={setShowSplitPosition}
-          />
-        )}
+        <CanvasCropSelection 
+          isVisible={editMode === 'crop'} // Shows when on crop mode
+          editCropTop={editCropTop}
+          editCropBottom={editCropBottom}
+          editCropLeft={editCropLeft}
+          editCropRight={editCropRight}
+          onResizeStart={onResizeStart}
+        />
 
-        {/* CROP MASK SHADED AREAS & SELECTION BOUNDS */}
-        {editMode === "crop" && (
-          <CanvasCropSelection
-            editCropTop={editCropTop}
-            editCropBottom={editCropBottom}
-            editCropLeft={editCropLeft}
-            editCropRight={editCropRight}
-            onResizeStart={onResizeStart}
-          />
-        )}
-
-        {/* SLICES VISUAL OVERLAYS */}
+        {/* Slices Overlay */}
         {editMode === "slices" && slices.map((slice, index) => {
           const isSelected = slice.id === selectedSliceId;
           return (
             <div
               key={slice.id}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleSelectSlice(slice);
-              }}
-              onMouseDown={(e) => {
-                if (e.button !== 0) return;
-                e.stopPropagation();
-                handleSelectAndDragSlice(slice, e.clientX, e.clientY);
-              }}
-              onTouchStart={(e) => {
-                if (e.touches && e.touches[0]) {
-                  e.stopPropagation();
-                  handleSelectAndDragSlice(slice, e.touches[0].clientX, e.touches[0].clientY);
-                }
-              }}
+              onClick={(e) => { e.stopPropagation(); handleSelectSlice(slice); }}
+              onMouseDown={(e) => { if (e.button === 0) { e.stopPropagation(); handleSelectAndDragSlice(slice, e.clientX, e.clientY); }}}
               className={`absolute border-2 pointer-events-auto cursor-grab active:cursor-grabbing transition-all flex flex-col justify-between ${
-                isSelected
-                  ? "border-emerald-400 bg-emerald-500/10 z-30"
-                  : "border-purple-500/40 bg-purple-500/5 hover:bg-purple-500/10 hover:border-purple-400/60 z-20"
+                isSelected ? "border-emerald-400 bg-emerald-500/10 z-30" : "border-purple-500/40 bg-purple-500/5 hover:bg-purple-500/10 z-20"
               }`}
-              style={{
-                top: `${slice.cropTop}%`,
-                bottom: `${slice.cropBottom}%`,
-                left: `${slice.cropLeft}%`,
-                right: `${slice.cropRight}%`,
-                boxShadow: isSelected
-                  ? "0 0 0 1px rgba(52,211,153,0.2), inset 0 0 20px rgba(52,211,153,0.05)"
-                  : undefined,
-              }}
+              style={{ top: `${slice.cropTop}%`, bottom: `${slice.cropBottom}%`, left: `${slice.cropLeft}%`, right: `${slice.cropRight}%` }}
             >
               <div className="p-1">
-                <span
-                  className={`inline-block font-mono text-[8px] font-bold px-1.5 py-0.5 rounded-lg shadow ${
-                    isSelected
-                      ? "bg-emerald-950 text-emerald-300 border border-emerald-800/60"
-                      : "bg-purple-950/90 text-purple-300 border border-purple-800/60"
-                  }`}
-                >
-                  Cut #{index + 1} {isSelected ? "★" : ""}
+                <span className={`inline-block font-mono text-[8px] font-bold px-1.5 py-0.5 rounded-lg ${isSelected ? "bg-emerald-950 text-emerald-300" : "bg-purple-950/90 text-purple-300"}`}>
+                  Cut #{index + 1}
                 </span>
               </div>
-
               <div className="flex justify-end p-1">
-                <button
-                  type="button"
-                  onClick={(e) => handleDeleteSlice(slice.id, e)}
-                  className="bg-red-950/90 hover:bg-red-900 border border-red-800/60 text-red-300 p-0.5 rounded-lg cursor-pointer transition-colors"
-                  title="Delete this cut"
-                >
-                  <Trash2 className="h-2.5 w-2.5" />
-                </button>
+                <button onClick={(e) => handleDeleteSlice(slice.id, e)} className="bg-red-950/90 text-red-300 p-0.5 rounded-lg"><Trash2 className="h-2.5 w-2.5" /></button>
               </div>
             </div>
           );

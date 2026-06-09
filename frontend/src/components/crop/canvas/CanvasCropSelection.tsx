@@ -2,6 +2,7 @@ import React from "react";
 import { Move } from "lucide-react";
 
 interface CanvasCropSelectionProps {
+  isVisible: boolean;
   editCropTop: number;
   editCropBottom: number;
   editCropLeft: number;
@@ -10,12 +11,15 @@ interface CanvasCropSelectionProps {
 }
 
 export default function CanvasCropSelection({
+  isVisible,
   editCropTop,
   editCropBottom,
   editCropLeft,
   editCropRight,
   onResizeStart,
 }: CanvasCropSelectionProps) {
+  if (!isVisible) return null;
+
   const hasCropSelection =
     editCropTop !== 0 ||
     editCropBottom !== 0 ||
