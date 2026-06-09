@@ -296,14 +296,15 @@ export default function CropCanvas({
           setShowSplitPosition={setShowSplitPosition}
         />
 
-        <CanvasCropSelection 
-          isVisible={activeTab === 'slice'} // Shows when on Crop tab
-          editCropTop={editCropTop}
-          editCropBottom={editCropBottom}
-          editCropLeft={editCropLeft}
-          editCropRight={editCropRight}
-          onResizeStart={onResizeStart}
-        />
+        {activeTab === 'slice' && (
+          <CanvasCropSelection
+            editCropTop={editCropTop}
+            editCropBottom={editCropBottom}
+            editCropLeft={editCropLeft}
+            editCropRight={editCropRight}
+            onResizeStart={onResizeStart}
+          />
+        )}
 
         {/* Slices Overlay */}
         {(editMode === "slices" || editMode === "crop") && slices.map((slice, index) => {
