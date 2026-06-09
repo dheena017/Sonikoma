@@ -21,27 +21,27 @@ export default function CanvasCropSelection({
 
   return (
     <>
-      {/* SHADED AREAS - Removed transition-all to fix lag and rendering bugs */}
+      {/* SHADED AREAS - Set transition-none to fix lag and rendering bugs */}
       <div
-        className="absolute top-0 left-0 right-0 bg-black/70 backdrop-blur-[1px] pointer-events-none"
+        className="absolute top-0 left-0 right-0 bg-black/70 backdrop-blur-[1px] pointer-events-none transition-none"
         style={{ height: `${editCropTop}%`, borderBottom: "1px solid rgba(139,92,246,0.35)" }}
       />
       <div
-        className="absolute bottom-0 left-0 right-0 bg-black/70 backdrop-blur-[1px] pointer-events-none"
+        className="absolute bottom-0 left-0 right-0 bg-black/70 backdrop-blur-[1px] pointer-events-none transition-none"
         style={{ height: `${editCropBottom}%`, borderTop: "1px solid rgba(139,92,246,0.35)" }}
       />
       <div
-        className="absolute top-0 bottom-0 left-0 bg-black/70 backdrop-blur-[1px] pointer-events-none"
+        className="absolute top-0 bottom-0 left-0 bg-black/70 backdrop-blur-[1px] pointer-events-none transition-none"
         style={{ width: `${editCropLeft}%`, borderRight: "1px solid rgba(139,92,246,0.35)" }}
       />
       <div
-        className="absolute top-0 bottom-0 right-0 bg-black/70 backdrop-blur-[1px] pointer-events-none"
+        className="absolute top-0 bottom-0 right-0 bg-black/70 backdrop-blur-[1px] pointer-events-none transition-none"
         style={{ width: `${editCropRight}%`, borderLeft: "1px solid rgba(139,92,246,0.35)" }}
       />
 
-      {/* SELECTION BOUNDARY GUIDES - Removed transition-all */}
+      {/* SELECTION BOUNDARY GUIDES - Set transition-none */}
       <div
-        className="absolute border-2 border-dashed border-purple-500/80 pointer-events-none group"
+        className="absolute border-2 border-dashed border-purple-500/80 pointer-events-none group transition-none"
         style={{
           top: `${editCropTop}%`,
           bottom: `${editCropBottom}%`,
@@ -51,7 +51,7 @@ export default function CanvasCropSelection({
           zIndex: 40
         }}
       >
-        {/* Corner handles */}
+        {/* Corner handles - Keep premium transitions for hover effects */}
         <div 
           onMouseDown={(e) => { e.stopPropagation(); onResizeStart("nw", e.clientX, e.clientY); }}
           onTouchStart={(e) => { if (e.touches && e.touches[0]) { e.stopPropagation(); onResizeStart("nw", e.touches[0].clientX, e.touches[0].clientY); } }}
