@@ -42,6 +42,7 @@ interface CropEditorCanvasContainerProps {
   setEditCropLeft: (val: number) => void;
   setEditCropRight: (val: number) => void;
   setSelectedSliceId: (id: string | null) => void;
+  activeTab: "adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge";
 }
 
 export default function CropEditorCanvasContainer({
@@ -84,9 +85,15 @@ export default function CropEditorCanvasContainer({
   setEditCropLeft,
   setEditCropRight,
   setSelectedSliceId,
+  activeTab,
 }: CropEditorCanvasContainerProps) {
   return (
-    <div className="lg:col-span-7 flex flex-col space-y-2 h-full min-h-0 overflow-hidden">
+    <div 
+      className="lg:col-span-7 flex flex-col space-y-2 h-full min-h-0 overflow-hidden" 
+      style={{ 
+        cursor: activeTab === "slice" ? "crosshair" : activeTab === "cuts" ? "grab" : "auto"
+      }}
+    >
       <div className="flex justify-between items-center bg-white/[0.02] backdrop-blur-sm p-2.5 rounded-xl border border-white/[0.06]">
         <div className="flex items-center gap-2">
           <div className="p-1 rounded-lg bg-purple-500/10">
