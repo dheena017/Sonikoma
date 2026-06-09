@@ -109,6 +109,11 @@ export default function CropCanvas({
   // Derive cursor reactively from all relevant state/props so it never lags
   // behind editMode changes or quick mouse-leave/enter cycles.
   const computedCursor = useMemo(() => {
+    // 👇 STRICT OVERRIDE AT THE TOP: If not in an active editing mode, force default cursor
+    if (editMode !== "crop" && editMode !== "slices" && editMode !== "clean_manual") {
+      return "default"; // Instantly override any lingering dragType state
+    }
+
     // Brush mode: always crosshair regardless of hover state
     if (isManualBrushActive) return "crosshair";
 
@@ -265,9 +270,15 @@ export default function CropCanvas({
         }}
         onMouseMove={(e) => {
           if (isManualBrushActive) return;
+          
+          // Skip hover state updates while dragging to reduce re-renders
+          if (dragType !== null) {
+            if (dragType) handleMove(e.clientX, e.clientY);
+            return;
+          }
+          
           const pct = getClientPct(e.clientX, e.clientY);
           if (pct) setHoverPct(pct);
-          if (dragType) handleMove(e.clientX, e.clientY);
         }}
         onMouseUp={() => {
           if (isManualBrushActive) return;
@@ -340,7 +351,7 @@ export default function CropCanvas({
         />
 
         <CanvasCropSelection 
-          isVisible={editMode === 'crop'} // Shows when on crop mode
+          isVisible={activeTab === 'slice'} // Shows when on Crop tab
           editCropTop={editCropTop}
           editCropBottom={editCropBottom}
           editCropLeft={editCropLeft}
@@ -349,14 +360,14 @@ export default function CropCanvas({
         />
 
         {/* Slices Overlay */}
-        {editMode === "slices" && slices.map((slice, index) => {
+        {(editMode === "slices" || editMode === "crop") && slices.map((slice, index) => {
           const isSelected = slice.id === selectedSliceId;
           return (
             <div
               key={slice.id}
               onClick={(e) => { e.stopPropagation(); handleSelectSlice(slice); }}
               onMouseDown={(e) => { if (e.button === 0) { e.stopPropagation(); handleSelectAndDragSlice(slice, e.clientX, e.clientY); }}}
-              className={`absolute border-2 pointer-events-auto cursor-grab active:cursor-grabbing transition-all flex flex-col justify-between ${
+              className={`absolute border-2 pointer-events-auto cursor-grab active:cursor-grabbing transition-colors flex flex-col justify-between ${
                 isSelected ? "border-emerald-400 bg-emerald-500/10 z-30" : "border-purple-500/40 bg-purple-500/5 hover:bg-purple-500/10 z-20"
               }`}
               style={{ top: `${slice.cropTop}%`, bottom: `${slice.cropBottom}%`, left: `${slice.cropLeft}%`, right: `${slice.cropRight}%` }}
