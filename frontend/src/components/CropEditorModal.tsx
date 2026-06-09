@@ -44,6 +44,7 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
     selectedScraped,
     setSelectedScraped,
     setErrorPopup,
+    aspectRatio,
   } = appLogic;
 
   useEffect(() => {
@@ -294,6 +295,7 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
             setEditCropRight={setEditCropRight}
             setSelectedSliceId={setSelectedSliceId}
             activeTab={activeTab}
+            aspectRatio={aspectRatio}
           />
 
           <CropEditorSidebar

@@ -7,6 +7,7 @@ interface CanvasCropSelectionProps {
   editCropLeft: number;
   editCropRight: number;
   onResizeStart: (handle: string, clientX: number, clientY: number) => void;
+  targetAspectRatio?: number;
 }
 
 export default function CanvasCropSelection({
@@ -15,9 +16,22 @@ export default function CanvasCropSelection({
   editCropLeft,
   editCropRight,
   onResizeStart,
+  targetAspectRatio = 0,
 }: CanvasCropSelectionProps) {
 
   // 👇 REMOVED the early return so the lines stay mounted during drags
+
+  // Aspect Ratio Validation
+  const currentWidth = 100 - editCropLeft - editCropRight;
+  const currentHeight = 100 - editCropTop - editCropBottom;
+  const currentRatio = currentWidth / currentHeight;
+
+  const isOutOfTolerance = targetAspectRatio > 0 &&
+    Math.abs(currentRatio - targetAspectRatio) / targetAspectRatio > 0.05;
+
+  const themeColorClass = isOutOfTolerance ? "border-orange-500" : "border-purple-400";
+  const badgeColorClass = isOutOfTolerance ? "text-orange-400 border-orange-800/40" : "text-purple-400 border-purple-800/40";
+  const glowColor = isOutOfTolerance ? "rgba(249,115,22,0.3)" : "rgba(139,92,246,0.25)";
 
   return (
     <>
@@ -41,13 +55,13 @@ export default function CanvasCropSelection({
 
       {/* SELECTION BOUNDARY GUIDES - Set transition-none */}
       <div
-        className="absolute border-[2.5px] border-dashed border-purple-400 pointer-events-none group transition-none"
+        className={`absolute border-[2.5px] border-dashed pointer-events-none group transition-none ${themeColorClass}`}
         style={{
           top: `${editCropTop}%`,
           bottom: `${editCropBottom}%`,
           left: `${editCropLeft}%`,
           right: `${editCropRight}%`,
-          boxShadow: "0 0 0 1.5px rgba(0,0,0,0.7), inset 0 0 0 1.5px rgba(0,0,0,0.7), 0 0 30px rgba(139,92,246,0.25)",
+          boxShadow: `0 0 0 1.5px rgba(0,0,0,0.7), inset 0 0 0 1.5px rgba(0,0,0,0.7), 0 0 30px ${glowColor}`,
           zIndex: 40
         }}
       >
@@ -109,7 +123,7 @@ export default function CanvasCropSelection({
         </div>
 
         {/* Specs badge */}
-        <div className="absolute top-1.5 left-1.5 bg-black/90 text-[9px] font-mono font-bold text-purple-400 border border-purple-800/40 px-1.5 py-0.5 rounded-lg shadow-lg backdrop-blur-sm">
+        <div className={`absolute top-1.5 left-1.5 bg-black/90 text-[9px] font-mono font-bold border px-1.5 py-0.5 rounded-lg shadow-lg backdrop-blur-sm ${badgeColorClass}`}>
           {parseFloat((100 - editCropLeft - editCropRight).toFixed(1))}%
           &times;{" "}
           {parseFloat((100 - editCropTop - editCropBottom).toFixed(1))}%

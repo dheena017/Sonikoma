@@ -52,6 +52,7 @@ interface CropCanvasProps {
   setEditCropLeft: (val: number) => void;
   setEditCropRight: (val: number) => void;
   setSelectedSliceId: (id: string | null) => void;
+  aspectRatio?: number;
 }
 
 export default function CropCanvas({
@@ -100,6 +101,7 @@ export default function CropCanvas({
   setEditCropLeft,
   setEditCropRight,
   setSelectedSliceId,
+  aspectRatio = 0,
 }: CropCanvasProps) {
   // Track mouse position for dynamic cursor
   const [hoverPct, setHoverPct] = useState<{ x: number; y: number } | null>(null);
@@ -116,7 +118,7 @@ export default function CropCanvas({
     },
     [containerRef]
   );
-  
+
   // Initialize and resize manual mask canvas
   const initCanvas = (canvas: HTMLCanvasElement) => {
     const rect = canvas.getBoundingClientRect();
@@ -203,6 +205,21 @@ export default function CropCanvas({
     if (isManualBrushActive && canvas) initCanvas(canvas);
   }, [brushSize, brushAction, canvasMaskRef, isManualBrushActive]);
 
+  // Hardened Global Event Listeners for Drag Robustness
+  useEffect(() => {
+    const handleGlobalUp = () => {
+      if (dragType) handleEnd();
+    };
+
+    window.addEventListener("mouseup", handleGlobalUp);
+    window.addEventListener("touchend", handleGlobalUp);
+
+    return () => {
+      window.removeEventListener("mouseup", handleGlobalUp);
+      window.removeEventListener("touchend", handleGlobalUp);
+    };
+  }, [dragType, handleEnd]);
+
   return (
     <div
       className="relative border border-white/5 hover:border-purple-500/20 rounded-2xl bg-black overflow-auto flex-1 h-0 flex items-start justify-center select-none transition-colors"
@@ -217,13 +234,13 @@ export default function CropCanvas({
         }}
         onMouseMove={(e) => {
           if (isManualBrushActive) return;
-          
+
           // Skip hover state updates while dragging to reduce re-renders
           if (dragType !== null) {
             if (dragType) handleMove(e.clientX, e.clientY);
             return;
           }
-          
+
           const pct = getClientPct(e.clientX, e.clientY);
           if (pct) setHoverPct(pct);
         }}
@@ -286,7 +303,7 @@ export default function CropCanvas({
         )}
 
         {/* Persistent UI Components (Visibility controlled by CSS inside components) */}
-        <CanvasSplitLines 
+        <CanvasSplitLines
           isVisible={showSplitPosition && activeTab === "slice"}
           splitPosition={splitPosition}
           splitLines={splitLines}
@@ -303,6 +320,7 @@ export default function CropCanvas({
             editCropLeft={editCropLeft}
             editCropRight={editCropRight}
             onResizeStart={onResizeStart}
+            targetAspectRatio={aspectRatio}
           />
         )}
 

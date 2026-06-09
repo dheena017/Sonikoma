@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Slice } from "../components/crop/types";
 
 interface UseCropEditorDragProps {
@@ -84,6 +84,7 @@ export function useCropEditorDrag({
   handleSelectSlice,
   handlePushToSlices,
 }: UseCropEditorDragProps) {
+  const [initialSplitLines, setInitialSplitLines] = useState<number[]>([]);
 
   const isPointInsideSelection = (x: number, y: number) => {
     if (editCropTop === 0 && editCropBottom === 0 && editCropLeft === 0 && editCropRight === 0) {
@@ -101,7 +102,7 @@ export function useCropEditorDrag({
     const rect = containerRef.current.getBoundingClientRect();
     const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
     const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
-    pushHistory();
+
     setDragType(`resize-${handle}` as any);
     setDragStartPercent({ x, y });
     setOriginalCropBounds({
@@ -118,7 +119,7 @@ export function useCropEditorDrag({
     const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
     const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
     handleSelectSlice(slice);
-    pushHistory();
+
     setDragType("move");
     setDragStartPercent({ x, y });
     setOriginalCropBounds({
@@ -138,9 +139,9 @@ export function useCropEditorDrag({
     if (showSplitPosition) {
       const nearLineIdx = splitLines.findIndex(lineY => Math.abs(lineY - y) < 2.5);
       if (nearLineIdx !== -1) {
-        pushHistory();
         setDragType("drag-split-line" as any);
         setDraggingSplitLineIdx(nearLineIdx);
+        setInitialSplitLines([...splitLines]);
         return;
       }
       pushHistory();
@@ -150,7 +151,6 @@ export function useCropEditorDrag({
     }
 
     if (isPointInsideSelection(x, y)) {
-      pushHistory();
       setDragType("move");
       setDragStartPercent({ x, y });
       setOriginalCropBounds({
@@ -160,7 +160,6 @@ export function useCropEditorDrag({
         right: editCropRight,
       });
     } else {
-      pushHistory();
       setDragType("draw");
       setDragStart({ x, y });
       setSelectedSliceId(null);
@@ -316,6 +315,22 @@ export function useCropEditorDrag({
   };
 
   const handleEnd = () => {
+    // Only push history if state has actually changed
+    const cropChanged = originalCropBounds && (
+      editCropTop !== originalCropBounds.top ||
+      editCropBottom !== originalCropBounds.bottom ||
+      editCropLeft !== originalCropBounds.left ||
+      editCropRight !== originalCropBounds.right
+    );
+
+    const isDrawChange = dragType === "draw" && (editCropTop !== 0 || editCropBottom !== 0 || editCropLeft !== 0 || editCropRight !== 0);
+
+    const splitLinesChanged = dragType === "drag-split-line" && JSON.stringify(splitLines) !== JSON.stringify(initialSplitLines);
+
+    if (cropChanged || isDrawChange || splitLinesChanged) {
+      pushHistory();
+    }
+
     if (dragType === "draw" && autoPushOnDraw) {
       handlePushToSlices();
     }
@@ -324,6 +339,7 @@ export function useCropEditorDrag({
     setDragStartPercent(null);
     setOriginalCropBounds(null);
     setDraggingSplitLineIdx(null);
+    setInitialSplitLines([]);
   };
 
   const handleNudge = (direction: "top" | "bottom" | "left" | "right", amount: number) => {
