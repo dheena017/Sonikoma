@@ -1,5 +1,5 @@
 import React from "react";
-import { Undo2, Trash2, RefreshCw, Crop, Sparkles, Scissors, Layers } from "lucide-react";
+import { Undo2, Trash2, RefreshCw, Scissors } from "lucide-react";
 import { Slice } from "../shared/types";
 
 interface CropEditorFooterProps {
@@ -10,7 +10,6 @@ interface CropEditorFooterProps {
   setEditingImageIdx: (idx: number | null) => void;
   handleDeleteCurrentImage: () => void;
   activeTab: "adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge";
-  handleExecuteSave: () => void;
   isTransforming: boolean;
   addNotification: (msg: string, type: any) => void;
   handleExecuteHorizontalSplit: () => void;
@@ -24,7 +23,6 @@ export default function CropEditorFooter({
   setEditingImageIdx,
   handleDeleteCurrentImage,
   activeTab,
-  handleExecuteSave,
   isTransforming,
   addNotification,
   handleExecuteHorizontalSplit,
@@ -82,61 +80,6 @@ export default function CropEditorFooter({
           <span>Delete</span>
         </button>
 
-        {activeTab === "edit" && (
-          <button
-            type="button"
-            onClick={handleExecuteSave}
-            disabled={isSavingEdit || isTransforming}
-            className="relative inline-flex items-center justify-center bg-cyan-600 hover:bg-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed text-white px-5 py-2 rounded-2xl text-[11px] font-bold cursor-pointer transition-all gap-2 shadow-lg shadow-cyan-900/40 active:scale-95"
-          >
-            {isSavingEdit || isTransforming ? (
-              <>
-                <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                <span>Processing…</span>
-              </>
-            ) : (
-              <>
-                <Crop className="h-3.5 w-3.5" />
-                <span>Apply Edit</span>
-              </>
-            )}
-          </button>
-        )}
-
-        {activeTab === "adjust" && (
-          <>
-            <button
-              type="button"
-              onClick={() => {
-                addNotification("Style adjustments applied successfully!", "success");
-              }}
-              className="inline-flex items-center gap-1.5 bg-indigo-500/10 hover:bg-indigo-500/25 border border-indigo-500/25 text-indigo-300 hover:text-white px-4 py-2 rounded-2xl text-[11px] font-semibold cursor-pointer transition-all active:scale-95"
-            >
-              <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
-              <span>Apply Styles</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleExecuteSave}
-              disabled={isSavingEdit}
-              className="relative inline-flex items-center justify-center bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white px-5 py-2 rounded-2xl text-[11px] font-bold cursor-pointer transition-all gap-2 shadow-lg shadow-purple-900/50"
-              style={{ boxShadow: isSavingEdit ? undefined : "0 0 20px rgba(139,92,246,0.25), 0 4px 12px rgba(0,0,0,0.4)" }}
-            >
-              {isSavingEdit ? (
-                <>
-                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                  <span>Processing Crop...</span>
-                </>
-              ) : (
-                <>
-                  <Crop className="h-3.5 w-3.5" />
-                  <span>Crop Image</span>
-                </>
-              )}
-            </button>
-          </>
-        )}
-
         {activeTab === "slice" && (
           <button
             type="button"
@@ -159,27 +102,6 @@ export default function CropEditorFooter({
           </button>
         )}
 
-        {activeTab === "cuts" && (
-          <button
-            type="button"
-            onClick={handleExecuteSave}
-            disabled={isSavingEdit}
-            className="relative bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-2 shadow-lg shadow-purple-900/50"
-            style={{ boxShadow: isSavingEdit ? undefined : "0 0 20px rgba(139,92,246,0.25), 0 4px 12px rgba(0,0,0,0.4)" }}
-          >
-            {isSavingEdit ? (
-              <>
-                <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                <span>Processing Crops...</span>
-              </>
-            ) : (
-              <>
-                <Layers className="h-4 w-4 text-purple-200" />
-                <span>Execute {slices.length} Crops</span>
-              </>
-            )}
-          </button>
-        )}
       </div>
     </div>
   );

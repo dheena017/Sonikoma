@@ -158,22 +158,32 @@ export function useBatchImageActions({
           const croppedUrls: string[] = [];
           for (let i = 0; i < data.panels.length; i++) {
             const box = data.panels[i];
-            const cropResponse = await fetchWithInterceptor("/api/edit-image", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                url: url,
-                cropTop: box.cropTop,
-                cropBottom: box.cropBottom,
-                cropLeft: box.cropLeft,
-                cropRight: box.cropRight,
-                autoTrim: true,
-                padding: cropPaddingPx,
-              }),
-            });
-            if (!cropResponse.ok) throw new Error(`Edit-image HTTP ${cropResponse.status}`);
-            const cropData = await cropResponse.json();
-            croppedUrls.push(cropData.url);
+
+            // The /api/detect-panels backend already crops each panel and
+            // returns a ready-to-use croppedUrl. Use it directly to avoid a
+            // redundant second edit-image round-trip that was silently
+            // re-cropping the wrong region.
+            if (box.croppedUrl) {
+              croppedUrls.push(box.croppedUrl);
+            } else {
+              // Fallback for any backend variant that doesn't embed croppedUrl
+              const cropResponse = await fetchWithInterceptor("/api/edit-image", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  url: url,
+                  cropTop: box.cropTop,
+                  cropBottom: box.cropBottom,
+                  cropLeft: box.cropLeft,
+                  cropRight: box.cropRight,
+                  autoTrim: true,
+                  padding: cropPaddingPx,
+                }),
+              });
+              if (!cropResponse.ok) throw new Error(`Edit-image HTTP ${cropResponse.status}`);
+              const cropData = await cropResponse.json();
+              croppedUrls.push(cropData.url);
+            }
           }
           newSlicedUrlsMap[url] = croppedUrls;
         } else {

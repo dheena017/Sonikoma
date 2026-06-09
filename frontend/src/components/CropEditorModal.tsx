@@ -293,6 +293,7 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
             setEditCropLeft={setEditCropLeft}
             setEditCropRight={setEditCropRight}
             setSelectedSliceId={setSelectedSliceId}
+            activeTab={activeTab}
           />
 
           <CropEditorSidebar
@@ -402,6 +403,7 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
             handleCommitDetectedBoxes={handleCommitDetectedBoxes}
             detectedBoxes={detectedBoxes}
             handleClearDetectedBoxes={handleClearDetectedBoxes}
+            handleExecuteSave={handleExecuteSave}
           />
         </div>
 
@@ -413,7 +415,6 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
           setEditingImageIdx={setEditingImageIdx}
           handleDeleteCurrentImage={handleDeleteCurrentImage}
           activeTab={activeTab}
-          handleExecuteSave={handleExecuteSave}
           isTransforming={isTransforming}
           addNotification={addNotification}
           handleExecuteHorizontalSplit={handleExecuteHorizontalSplit}

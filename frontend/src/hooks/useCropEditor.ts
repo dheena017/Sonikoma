@@ -38,7 +38,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
     setImageEditStates,
   } = appLogic;
 
-  const activeFetch = fetchWithInterceptor || fetch;
+  const activeFetch = (fetchWithInterceptor || fetch) as typeof fetch;
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasMaskRef = useRef<HTMLCanvasElement>(null);
 
@@ -342,16 +342,34 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
     );
     if (!confirmDelete) return;
 
-    setScrapedImages((prev) => prev.filter((_, i) => i !== editingImageIdx));
+    const currentIdx = editingImageIdx;
+    setScrapedImages((prev) => {
+      const filtered = prev.filter((_, i) => i !== currentIdx);
+      
+      // Only close editor if no images left
+      if (filtered.length === 0) {
+        setEditingImageIdx(null);
+        return filtered;
+      }
+
+      // Auto-navigate to next image, or previous if it was the last one
+      if (currentIdx >= filtered.length) {
+        setEditingImageIdx(currentIdx - 1);
+      } else {
+        setEditingImageIdx(currentIdx);
+      }
+
+      return filtered;
+    });
+
     if (setConsoleLogs) {
       setConsoleLogs((prev) => [
-        `[GUI] Deleted extracted frame #${editingImageIdx + 1} from deck via Editor.`,
+        `[GUI] Deleted extracted frame #${currentIdx + 1} from deck via Editor.`,
         ...prev,
       ]);
     }
-    console.log(`[GUI] Deleted extracted frame #${editingImageIdx + 1} from deck`);
-    addNotification(`Panel #${editingImageIdx + 1} deleted from deck`, "info");
-    setEditingImageIdx(null);
+    console.log(`[GUI] Deleted extracted frame #${currentIdx + 1} from deck`);
+    addNotification(`Panel #${currentIdx + 1} deleted from deck`, "info");
   };
 
   return {
