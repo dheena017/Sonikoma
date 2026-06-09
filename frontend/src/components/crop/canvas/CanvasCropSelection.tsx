@@ -41,13 +41,13 @@ export default function CanvasCropSelection({
 
       {/* SELECTION BOUNDARY GUIDES - Set transition-none */}
       <div
-        className="absolute border-2 border-dashed border-purple-500/80 pointer-events-none group transition-none"
+        className="absolute border-[2.5px] border-dashed border-purple-400 pointer-events-none group transition-none"
         style={{
           top: `${editCropTop}%`,
           bottom: `${editCropBottom}%`,
           left: `${editCropLeft}%`,
           right: `${editCropRight}%`,
-          boxShadow: "0 0 0 1px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(0,0,0,0.5), 0 0 20px rgba(139,92,246,0.15)",
+          boxShadow: "0 0 0 1.5px rgba(0,0,0,0.7), inset 0 0 0 1.5px rgba(0,0,0,0.7), 0 0 30px rgba(139,92,246,0.25)",
           zIndex: 40
         }}
       >

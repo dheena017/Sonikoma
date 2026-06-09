@@ -296,7 +296,7 @@ export default function CropCanvas({
           setShowSplitPosition={setShowSplitPosition}
         />
 
-        {editMode === 'crop' && (
+        {(activeTab === 'slice' || (activeTab === 'cuts' && (selectedSliceId || dragType === 'draw'))) && (
           <CanvasCropSelection
             editCropTop={editCropTop}
             editCropBottom={editCropBottom}
