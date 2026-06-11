@@ -73,6 +73,7 @@ export function useAutoCropPresets(props: AutoCropSharedProps) {
       ...currentConfig,
       name: name.trim() || `Custom ${slot.toUpperCase()}`,
     };
+    console.log(`[Auto Cropper] Saving preset to slot ${slot}:`, config);
     const updated = { ...customPresets, [slot]: config };
     setCustomPresets(updated);
     localStorage.setItem("crop_custom_presets", JSON.stringify(updated));
@@ -84,6 +85,7 @@ export function useAutoCropPresets(props: AutoCropSharedProps) {
   const loadPresetSlot = useCallback((slot: string) => {
     const t = customPresets[slot];
     if (!t) return;
+    console.log(`[Auto Cropper] Loading preset from slot ${slot}:`, t);
     applyState(t);
     setActiveSlot(slot);
     props.addNotification?.(`Loaded preset config: "${t.name}"`, "info");

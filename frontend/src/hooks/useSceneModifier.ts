@@ -6,6 +6,7 @@ interface UseSceneModifierProps {
   setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
   setCurrentPanelIndex: (idx: number) => void;
   setConsoleLogs?: React.Dispatch<React.SetStateAction<string[]>>;
+  addNotification?: (message: string, type: any) => void;
 }
 
 export function useSceneModifier({
@@ -13,6 +14,7 @@ export function useSceneModifier({
   setPanels,
   setCurrentPanelIndex,
   setConsoleLogs,
+  addNotification,
 }: UseSceneModifierProps) {
   const handleModifySpeechText = (panelId: number, text: string) => {
     const originalPanel = panels.find(p => p.id === panelId);
@@ -29,6 +31,7 @@ export function useSceneModifier({
         ...prev
       ]);
     }
+    addNotification?.(`Panel #${panelId} dialogue updated.`, "info");
   };
 
   const handleModifyMotion = (panelId: number, motionVal: string) => {
@@ -46,6 +49,7 @@ export function useSceneModifier({
         ...prev
       ]);
     }
+    addNotification?.(`Panel #${panelId} motion updated to ${motionVal}.`, "info");
   };
 
   const handleModifyDuration = (panelId: number, durVal: number) => {
@@ -63,6 +67,7 @@ export function useSceneModifier({
         ...prev
       ]);
     }
+    addNotification?.(`Panel #${panelId} duration set to ${durVal}s.`, "info");
   };
 
   const handleShiftPanel = (index: number, direction: "left" | "right") => {

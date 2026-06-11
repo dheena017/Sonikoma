@@ -10,7 +10,7 @@ try:
 except ImportError:
     has_easyocr = False
 
-logger = logging.getLogger("webtoon_engine.ocr")
+logger = logging.getLogger("anivox.services.ocr")
 
 # Global reader instance to avoid reloading models on every call
 _reader = None
@@ -71,9 +71,9 @@ async def extract_full_ocr_data(panel_image_path: str, langs: List[str] = ['en']
                     "box_pct": box_pct
                 })
 
-        logger.info(f"OCR: Extracted {len(structured_results)} structured segments from {panel_image_path}")
+        logger.info(f"[OCR] Extracted {len(structured_results)} structured segments from {panel_image_path}")
         return structured_results
 
     except Exception as e:
-        logger.error(f"OCR: Error in extract_full_ocr_data from {panel_image_path}: {str(e)}")
+        logger.error(f"[OCR] Error in extract_full_ocr_data from {panel_image_path}: {str(e)}")
         return []

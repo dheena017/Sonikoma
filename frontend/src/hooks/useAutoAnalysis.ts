@@ -24,6 +24,7 @@ export function useAutoAnalysis({
   setActivePreviewTab,
 }: UseAutoAnalysisProps) {
   const runBackgroundAnalysis = useCallback(async (panelId: number, imageUrl: string) => {
+    console.log(`[AI Auto-Analysis] Starting analysis for panel #${panelId}`);
     try {
       const res = await fetchWithInterceptor("/api/analyze-image", {
         method: "POST",
@@ -32,6 +33,7 @@ export function useAutoAnalysis({
       });
       if (!res.ok) throw new Error(`Analysis failed with status ${res.status}`);
       const data = await res.json();
+      console.log(`[AI Auto-Analysis] Response for panel #${panelId}:`, data);
       if (data.success && data.analysis) {
         setPanels((prev) =>
           prev.map((p) =>
@@ -58,6 +60,7 @@ export function useAutoAnalysis({
         throw new Error(data.error || "Invalid response keys from AI Model Analysis");
       }
     } catch (err: any) {
+      console.error(`[AI Auto-Analysis] Analysis failed for panel #${panelId}:`, err);
       addNotification(`Panel #${panelId} AI analysis failed: ${err.message || err}`, 'error');
       setPanels((prev) =>
         prev.map((p) =>

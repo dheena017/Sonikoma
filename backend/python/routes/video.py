@@ -68,6 +68,7 @@ async def compile_video_route(body: VideoCompileRequest):
     Combines panel images + TTS audio tracks into a cinematic MP4 video.
     Applies Ken-Burns pan/zoom, audio ducking for BGM, and AAC/H.264 encoding.
     """
+    logger.info(f"[Video] Computational compile request received with {len(body.panels)} panels")
     project_id  = uuid.uuid4().hex[:8]
     output_path = os.path.join(tempfile.gettempdir(), "anivox_renders", f"render_{project_id}.mp4")
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -140,6 +141,7 @@ async def convert_images_to_video(body: ConvertVideoRequest):
     TTS voiceovers using edge-tts/pydub, and compiles a cinematic MP4 using MoviePy.
     Caches output video in memory and returns a cached video endpoint.
     """
+    logger.info(f"[Video] High-level conversion request for {len(body.panels)} panels")
     project_id = generate_project_id()
     temp_dir = os.path.join(tempfile.gettempdir(), "webtoon_workspace", project_id)
     os.makedirs(temp_dir, exist_ok=True)
@@ -203,6 +205,7 @@ async def convert_images_to_video(body: ConvertVideoRequest):
 
         # Store in stitchedCache
         stitched_cache.set(video_cache_id, {"data": video_bytes, "content_type": "video/mp4"})
+        logger.info(f"[Video] Successfully compiled and cached video with ID: {video_cache_id}")
 
         return {
             "success": True,

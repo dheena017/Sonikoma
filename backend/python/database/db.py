@@ -21,10 +21,13 @@ def get_db_connection() -> sqlite3.Connection:
     conn.execute('PRAGMA foreign_keys = ON')
     return conn
 
+import logging
+logger = logging.getLogger("anivox.database")
+
 def init_db() -> None:
     if os.path.exists(DB_PATH):
         return
-    print(f"[DB] Opening local SQLite database at: {DB_PATH}")
+    logger.info(f"[Database] Opening local SQLite database at: {DB_PATH}")
     os.makedirs(DB_DIR, exist_ok=True)
     conn = get_db_connection()
     try:
@@ -32,14 +35,14 @@ def init_db() -> None:
             with open(SCHEMA_PATH, 'r', encoding='utf-8') as f:
                 schema = f.read()
             conn.executescript(schema)
-            print("[DB] Schema applied successfully.")
+            logger.info("[Database] Schema applied successfully.")
         else:
-            print("[DB] Warning: schema.sql not found — skipping schema apply.")
+            logger.warning("[Database] schema.sql not found — skipping schema apply.")
     except Exception as e:
-        print(f"[DB] Error applying schema: {e}")
+        logger.error(f"[Database] Error applying schema: {e}")
     finally:
         conn.close()
-    print("[DB] SQLite database ready [OK]")
+    logger.info("[Database] SQLite database ready [OK]")
 
 # Initialize SQLite database immediately upon import
 init_db()

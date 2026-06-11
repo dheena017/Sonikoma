@@ -40,6 +40,7 @@ export function useBubbleCleanerPresets(props: BubbleCleanerSharedProps) {
       ...currentConfig,
       name: name.trim() || `Custom Slot ${slot.slice(-1)}`,
     };
+    console.log(`[Speech Bubbles] Saving preset to slot ${slot}:`, config);
     const updated = { ...customPresets, [slot]: config };
     setCustomPresets(updated);
     localStorage.setItem("bubble_custom_presets", JSON.stringify(updated));
@@ -51,6 +52,7 @@ export function useBubbleCleanerPresets(props: BubbleCleanerSharedProps) {
   const loadPresetSlot = useCallback((slot: string) => {
     const t = customPresets[slot];
     if (!t) return;
+    console.log(`[Speech Bubbles] Loading preset from slot ${slot}:`, t);
     applyState(t);
     setActiveSlot(slot);
     props.addNotification?.(`Loaded preset: "${t.name}"`, "info");

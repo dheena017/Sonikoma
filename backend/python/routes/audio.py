@@ -68,7 +68,7 @@ async def generate_audio(body: AudioGenerateRequest):
 
     try:
         logger.info(
-            f"Generating audio: {len(body.dialogue_list)} segments, "
+            f"[Narration/TTS] Generating audio: {len(body.dialogue_list)} segments, "
             f"target={body.target_duration}s, voice={body.voice}"
         )
 
@@ -87,6 +87,7 @@ async def generate_audio(body: AudioGenerateRequest):
                 audio_bytes = f.read()
             audio_b64 = base64.b64encode(audio_bytes).decode("utf-8")
             file_size_kb = round(len(audio_bytes) / 1024, 1)
+            logger.info(f"[Narration/TTS] Audio generated successfully ({file_size_kb}KB)")
 
             return JSONResponse(content={
                 "success": True,

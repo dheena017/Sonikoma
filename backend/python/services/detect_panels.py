@@ -3,7 +3,10 @@ import sys
 import json
 import argparse
 import numpy as np
+import logging
 from PIL import Image
+
+logger = logging.getLogger("anivox.services.detect_panels")
 
 def adjust_to_aspect_ratio(x, y, w_box, h_box, w_img, h_img, aspect_ratio_str):
     if not aspect_ratio_str or aspect_ratio_str == "free":
@@ -110,6 +113,7 @@ def merge_overlapping_boxes(boxes, w_img, h_img, merge_threshold):
     return boxes
 
 def run_cv_detection(image_path, sensitivity, bg_mode, min_width_pct, min_height_px, merge_threshold, aspect_ratio_str, canny_low=20, canny_high=100, close_kernel_size=15):
+    logger.info(f"[Panel Detection] Starting local CV detection on {image_path}")
     try:
         import cv2
         has_cv = True
@@ -261,6 +265,7 @@ def run_cv_detection(image_path, sensitivity, bg_mode, min_width_pct, min_height
     
     # Adjust to aspect ratio & format response
     final_panels = []
+    logger.info(f"[Panel Detection] Found {len(merged_boxes)} panels after merging and filtering.")
     for box in merged_boxes:
         x, y, w_box, h_box = adjust_to_aspect_ratio(
             box["x"], box["y"], box["w"], box["h"], w, h, aspect_ratio_str

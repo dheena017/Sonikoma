@@ -54,7 +54,9 @@ async def extract_text_upload(
         image_path = tmp.name
 
     try:
+        logger.info(f"[OCR] Extracting dialogue from uploaded file: {file.filename}")
         dialogue = await extract_dialogue_from_panel(image_path, langs=lang_list)
+        logger.info(f"[OCR] Extraction successful. Text length: {len(dialogue)}")
         return {"success": True, "text": dialogue}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
@@ -77,7 +79,9 @@ async def extract_text_full(
         image_path = tmp.name
 
     try:
+        logger.info(f"[OCR] Extracting full OCR data from uploaded file: {file.filename}")
         results = await extract_full_ocr_data(image_path, langs=lang_list)
+        logger.info(f"[OCR] Full extraction successful. Segments found: {len(results)}")
         return {"success": True, "results": results}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))

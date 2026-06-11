@@ -10,6 +10,7 @@ interface UseLiveScraperActionsProps {
   setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>>;
   addPanelsWithAutoAnalysis: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
   fetchWithInterceptor?: typeof fetch;
+  addNotification?: (message: string, type: any) => void;
 }
 
 export function useLiveScraperActions({
@@ -20,14 +21,20 @@ export function useLiveScraperActions({
   setConsoleLogs,
   addPanelsWithAutoAnalysis,
   fetchWithInterceptor,
+  addNotification,
 }: UseLiveScraperActionsProps) {
   const [isZipping, setIsZipping] = useState(false);
   const activeFetch = fetchWithInterceptor || fetch;
 
   const handleDownloadZip = async () => {
     const toDownload = selectedScraped.length > 0 ? selectedScraped : scrapedImages;
-    if (toDownload.length === 0) return;
+    if (toDownload.length === 0) {
+      addNotification?.("No images to download.", "warning");
+      return;
+    }
 
+    console.log(`[GUI] Starting ZIP download for ${toDownload.length} images`);
+    addNotification?.(`Generating ZIP for ${toDownload.length} images...`, "info");
     setIsZipping(true);
     try {
       const zip = new JSZip();
@@ -55,26 +62,36 @@ export function useLiveScraperActions({
         `[GUI] Successfully generated zip for ${toDownload.length} images`,
         ...prev,
       ]);
-    } catch (err) {
+      addNotification?.("ZIP archive downloaded successfully!", "success");
+    } catch (err: any) {
       console.error("Zip generation failed:", err);
+      addNotification?.(`Failed to generate ZIP: ${err.message || err}`, "error");
     } finally {
       setIsZipping(false);
     }
   };
 
   const handleDeleteSelected = () => {
-    if (selectedScraped.length === 0) return;
+    if (selectedScraped.length === 0) {
+      addNotification?.("No images selected to delete.", "warning");
+      return;
+    }
     setScrapedImages((prev) => prev.filter((img) => !selectedScraped.includes(img)));
     setConsoleLogs((prev) => [
       `[GUI] Removed ${selectedScraped.length} images`,
       ...prev,
     ]);
     console.log(`[GUI] Removed ${selectedScraped.length} image(s) from scraped deck`);
+    addNotification?.(`Removed ${selectedScraped.length} images from deck.`, "info");
     setSelectedScraped([]);
   };
 
   const handleAddToCanvas = () => {
-    if (selectedScraped.length === 0) return;
+    if (selectedScraped.length === 0) {
+      addNotification?.("No images selected to add to storyboard.", "warning");
+      return;
+    }
+    console.log(`[GUI] Adding ${selectedScraped.length} image(s) to storyboard`);
     addPanelsWithAutoAnalysis(selectedScraped);
     setSelectedScraped([]);
   };

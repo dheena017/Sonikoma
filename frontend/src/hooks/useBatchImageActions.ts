@@ -71,7 +71,11 @@ export function useBatchImageActions({
   const [croppingImgUrl, setCroppingImgUrl] = useState<string | null>(null);
 
   const handleCleanBubblesSelected = async () => {
-    if (selectedScraped.length === 0) return;
+    if (selectedScraped.length === 0) {
+      addNotification("No images selected for bubble cleaning.", "warning");
+      return;
+    }
+    console.log(`[Speech Bubbles] Starting batch clean on ${selectedScraped.length} images`, selectedScraped);
     setIsCleaningBubbles(true);
     setCleanProgress({ current: 0, total: selectedScraped.length });
     setConsoleLogs((prev) => [
@@ -110,6 +114,7 @@ export function useBatchImageActions({
             throw new Error(errMsg);
           }
         } catch (err: any) {
+          console.error(`[Speech Bubbles] Error cleaning image ${url}:`, err);
           errors.push(`Image: ${url.substring(0, 40)}... - Error: ${err.message}`);
         } finally {
           completedCount++;
@@ -141,7 +146,11 @@ export function useBatchImageActions({
   };
 
   const handleAutoCropSelected = async () => {
-    if (selectedScraped.length === 0) return;
+    if (selectedScraped.length === 0) {
+      addNotification("No images selected for auto cropping.", "warning");
+      return;
+    }
+    console.log(`[Auto Cropper] Starting batch auto-crop on ${selectedScraped.length} images`, selectedScraped);
     setIsBatchCropping(true);
     setBatchProgress({ current: 0, total: selectedScraped.length });
     setConsoleLogs((prev) => [
@@ -240,6 +249,7 @@ export function useBatchImageActions({
             throw new Error(errMsg);
           }
         } catch (err: any) {
+          console.error(`[Auto Cropper] Error cropping image ${url}:`, err);
           errors.push(`Image: ${url.substring(0, 40)}... - Error: ${err.message}`);
           newSlicedUrlsMap[url] = [url];
         } finally {

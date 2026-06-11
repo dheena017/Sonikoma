@@ -1,8 +1,11 @@
 import os
 import sys
 import argparse
+import logging
 import numpy as np
 from PIL import Image, ImageFilter
+
+logger = logging.getLogger("anivox.services.cleaner")
 
 try:
     import cv2
@@ -29,6 +32,8 @@ def remove_speech_bubbles(
     """
     if not os.path.exists(image_path):
         raise FileNotFoundError(f"Image not found at path: {image_path}")
+
+    logger.info(f"[Speech Bubbles] Processing image: {image_path} | method: {method}")
 
     if not has_cv:
         # Simple PIL-based fallback
@@ -99,6 +104,7 @@ def remove_speech_bubbles(
             bubble_detected = True
 
     if bubble_detected:
+        logger.info(f"[Speech Bubbles] Detected bubbles. Applying removal using {method}...")
         # Dynamic dilation fitting boundary size
         d = dilation if dilation >= 0 else max(4, int(np.sqrt(np.count_nonzero(mask)) * 0.06))
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (d, d))
@@ -120,6 +126,7 @@ def remove_speech_bubbles(
         
         cv2.imwrite(output_path, out)
     else:
+        logger.info("[Speech Bubbles] No bubbles detected.")
         cv2.imwrite(output_path, image)
 
     return bubble_detected
