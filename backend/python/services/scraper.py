@@ -425,6 +425,7 @@ async def try_fetch_url_resilient(
                         return resp.text
                     elif resp.status_code in (403, 429):
                         logger.warning(f"[Scraper] Blocked status {resp.status_code} in client {client_type}")
+                        return None
             elif client_type == "aiohttp":
                 async with aiohttp.ClientSession(headers=headers) as session:
                     async with session.get(url, timeout=30.0, allow_redirects=True) as resp:
@@ -434,6 +435,7 @@ async def try_fetch_url_resilient(
                             return text
                         elif resp.status in (403, 429):
                             logger.warning(f"[Scraper] Blocked status {resp.status} in client {client_type}")
+                            return None
             elif client_type == "requests":
                 def sync_req():
                     return requests.get(url, headers=headers, timeout=30.0, allow_redirects=True)
@@ -444,6 +446,7 @@ async def try_fetch_url_resilient(
                     return resp.text
                 elif resp.status_code in (403, 429):
                     logger.warning(f"[Scraper] Blocked status {resp.status_code} in client {client_type}")
+                    return None
         except Exception as e:
             logger.warning(f"[Scraper] Attempt {attempt} via {client_type} failed: {e}")
             
@@ -462,6 +465,7 @@ async def try_fetch_with_playwright(
 ) -> Optional[str]:
     """Playwright rendering fallback with lazy-load scrolling, clicker hooks, and HTML5 Canvas extraction."""
     try:
+        # pyrefly: ignore [missing-import]
         from playwright.async_api import async_playwright
     except ImportError:
         logger.warning("[Scraper] Playwright not found. Browser rendering fallback bypassed.")
@@ -487,7 +491,7 @@ async def try_fetch_with_playwright(
                 
             page = await context.new_page()
             await page.set_viewport_size({"width": 1280, "height": 1080})
-            await page.goto(url, wait_until="load", timeout=45000)
+            await page.goto(url, wait_until="domcontentloaded", timeout=45000)
             
             # Interactive click expansions
             if interactive:
@@ -513,7 +517,7 @@ async def try_fetch_with_playwright(
             await page.evaluate("""async () => {
                 await new Promise((resolve) => {
                     let totalHeight = 0;
-                    const distance = 350;
+                    const distance = 3000;
                     const timer = setInterval(() => {
                         const scrollHeight = document.body.scrollHeight;
                         window.scrollBy(0, distance);
@@ -522,7 +526,7 @@ async def try_fetch_with_playwright(
                             clearInterval(timer);
                             resolve();
                         }
-                    }, 80);
+                    }, 15);
                 });
             }""")
             
@@ -545,7 +549,7 @@ async def try_fetch_with_playwright(
                 });
             }""")
             
-            await page.wait_for_timeout(1000)
+            await page.wait_for_timeout(200)
             html = await page.content()
             await browser.close()
             logger.info(f"[Scraper] Playwright render succeeded in {int(time.time() - start_t)}s")
@@ -770,9 +774,6 @@ async def scrape_images_from_url(
         if 'type=' in lower and 'type=q90' not in lower:
             continue
         filtered_images.append(img)
-        
-    # Natural alphanumeric sort
-    filtered_images.sort(key=natural_sort_key)
     
     if limit:
         filtered_images = filtered_images[:limit]

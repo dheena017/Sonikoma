@@ -124,15 +124,17 @@ class ColoredFormatter(logging.Formatter):
 console_handler = logging.StreamHandler(sys.stdout)
 console_handler.setFormatter(ColoredFormatter())
 
-# Clear existing handlers
+# Preserve UIStreamLogHandler (attached by log_interceptor at import time).
+# Remove only non-UI handlers so the SSE/polling log feed stays alive.
+from utils.log_interceptor import UIStreamLogHandler as _UIStreamLogHandler
 root_logger = logging.getLogger()
 for handler in root_logger.handlers[:]:
-    root_logger.removeHandler(handler)
+    if not isinstance(handler, _UIStreamLogHandler):
+        root_logger.removeHandler(handler)
 
-logging.basicConfig(
-    level=logging.INFO,
-    handlers=[console_handler]
-)
+# Add the colored console handler and ensure INFO level on root
+root_logger.addHandler(console_handler)
+root_logger.setLevel(logging.INFO)
 logger = logging.getLogger("anivox.api")
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -163,15 +165,49 @@ async def lifespan(app: FastAPI):
         logging.getLogger(logger_name).addFilter(EndpointFilter())
     logging.getLogger().addFilter(EndpointFilter())
 
-    # Format all backend terminal log handlers with ColoredFormatter for beautiful development console output
+    # Re-apply ColoredFormatter to all non-UI handlers for beautiful console output.
+    # UIStreamLogHandler keeps its own plain formatter so log entries reach the frontend cleanly.
+    from utils.log_interceptor import UIStreamLogHandler as _UIStreamLogHandler
     for name in list(logging.root.manager.loggerDict.keys()):
         l = logging.getLogger(name)
         for h in l.handlers:
-            h.setFormatter(ColoredFormatter())
+            if not isinstance(h, _UIStreamLogHandler):
+                h.setFormatter(ColoredFormatter())
     for h in logging.getLogger().handlers:
-        h.setFormatter(ColoredFormatter())
+        if not isinstance(h, _UIStreamLogHandler):
+            h.setFormatter(ColoredFormatter())
 
     _print_startup_banner()
+
+    # Emit structured startup logs so the frontend terminal shows them on connect.
+    # (banner uses print() which bypasses the handler; these go through the buffer)
+    logger.info(f"[Backend] Anivox Compute Engine v{API_VERSION} started on port {BACKEND_PORT}")
+    logger.info(f"[Backend] Python {sys.version.split(' ')[0]} | {platform.system()} {platform.machine()}")
+    logger.info(f"[Backend] Swagger docs available at http://localhost:{BACKEND_PORT}/api/docs")
+
+    # Capability probe results
+    caps = {
+        "OpenCV (cv2)": "cv2",
+        "MoviePy": "moviepy",
+        "EasyOCR": "easyocr",
+        "Edge TTS": "edge_tts",
+        "Google GenAI": "google.genai",
+    }
+    for label, mod in caps.items():
+        try:
+            __import__(mod)
+            logger.info(f"[Backend] ✔ {label} loaded successfully")
+        except ImportError:
+            logger.warning(f"[WARNING] {label} not available — some features may be disabled")
+
+    # API key status
+    if os.getenv("GEMINI_API_KEY"):
+        logger.info("[Backend] ✔ GEMINI_API_KEY detected — AI features enabled")
+    else:
+        logger.warning("[WARNING] GEMINI_API_KEY not set — AI panel analysis disabled")
+
+    logger.info("[Backend] Server ready — waiting for requests")
+
     yield
     uptime = round(time.time() - SERVER_START, 1)
     logger.info(f"FastAPI engine shutting down after {uptime}s uptime.")

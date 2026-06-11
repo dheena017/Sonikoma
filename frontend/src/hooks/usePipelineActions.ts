@@ -64,6 +64,7 @@ export function usePipelineActions({
     setCroppingImgUrl,
     setActivePreviewTab,
     setVideoUrl,
+    isScraping,
   } = state;
 
   const {
@@ -150,9 +151,6 @@ export function usePipelineActions({
     editCropRight,
     editAutoTrim,
   });
-
-  // State indicators
-  const isScraping = false; // Set to false since scraping is handled in the root hook's useEffect scraper task
 
   return {
     isProcessing,

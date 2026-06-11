@@ -160,6 +160,7 @@ export function useAppLogic() {
       state.setScrapedImages([]);
       state.setSelectedScraped([]);
       state.setPanels([]);
+      state.setIsScraping(false);
       return;
     }
 
@@ -196,6 +197,7 @@ export function useAppLogic() {
       setCurrentPanelIndex(0);
       setPlaybackTime(0);
       setStoryboardPlaying(false);
+      state.setIsScraping(false);
       state.setConsoleLogs(prev => [
         `[Scraper] Aborting automatic scrape because selected source ${state.selectedSource} does not match the URL host ${currentHost}.`,
         ...prev
@@ -204,6 +206,7 @@ export function useAppLogic() {
     }
 
     sourceMismatchNotified.current = false;
+    state.setIsScraping(true);
 
     const timer = setTimeout(() => {
       const { genre, title, episode } = parseWebtoonUrl(normalizedTargetUrl);
@@ -230,7 +233,7 @@ export function useAppLogic() {
       state.fetchWithInterceptor("/api/scrape-images", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: normalizedTargetUrl, model: state.selectedModel, source: state.selectedSource }),
+        body: JSON.stringify({ url: normalizedTargetUrl, model: state.selectedModel, source: state.selectedSource, bypass_cache: false }),
         signal: abortController.signal,
       })
         .then(res => {
@@ -239,15 +242,31 @@ export function useAppLogic() {
         })
         .then(data => {
           if (!isCurrent) return;
+          state.setIsScraping(false);
           if (data.success && data.images && data.images.length > 0) {
             const proxiedImages = data.images.map((img: string) => 
                img.startsWith('http') ? `/api/proxy-image?url=${encodeURIComponent(img)}` : img
             );
-            state.setScrapedImages(proxiedImages);
+
+            state.setScrapedImages([]);
             state.setPanels([]);
             setCurrentPanelIndex(0);
             setPlaybackTime(0);
             setStoryboardPlaying(false);
+            
+            // Progressive image loading one by one
+            let currentLoaded: string[] = [];
+            let currentImageIdx = 0;
+            const addNextImage = () => {
+              if (!isCurrent) return;
+              if (currentImageIdx < proxiedImages.length) {
+                currentLoaded.push(proxiedImages[currentImageIdx]);
+                state.setScrapedImages([...currentLoaded]);
+                currentImageIdx++;
+                setTimeout(addNextImage, 50); // Add next image after 50ms delay
+              }
+            };
+            addNextImage();
             
             state.addNotification(`Successfully extracted ${data.total_images} panel frames from the Webtoon page!`, 'success');
             
@@ -275,6 +294,7 @@ export function useAppLogic() {
         })
         .catch(err => {
           if (!isCurrent) return;
+          state.setIsScraping(false);
           state.setScrapedImages([]);
           state.setPanels([]);
           state.setConsoleLogs(prev => [
@@ -294,7 +314,7 @@ export function useAppLogic() {
       clearTimeout(timer);
       abortController.abort();
     };
-  }, [state.targetUrl, state.selectedModel, state.selectedSource, state.fetchWithInterceptor, state.addNotification, state.setPanels, state.setScrapedImages, state.setSelectedScraped, state.setConsoleLogs, setCurrentPanelIndex, setPlaybackTime, setStoryboardPlaying]);
+  }, [state.targetUrl, state.selectedModel, state.selectedSource, state.fetchWithInterceptor, state.addNotification, state.setPanels, state.setScrapedImages, state.setSelectedScraped, state.setConsoleLogs, setCurrentPanelIndex, setPlaybackTime, setStoryboardPlaying, state.setIsScraping]);
 
   const totalCalculatedDuration = state.panels.reduce((sum, p) => sum + (p.duration || 0), 0);
 

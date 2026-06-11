@@ -61,6 +61,7 @@ export function useAppState() {
   const [isMuted, setIsMuted] = useState<boolean>(() => localStorage.getItem('ai_comic_muted') === 'true');
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [isSavingEdit, setIsSavingEdit] = useState<boolean>(false);
+  const [isScraping, setIsScraping] = useState<boolean>(false);
 
   // ── Callbacks & effects AFTER all useState declarations ──────────────────
 
@@ -193,5 +194,7 @@ export function useAppState() {
     setVideoUrl,
     isSavingEdit,
     setIsSavingEdit,
+    isScraping,
+    setIsScraping,
   };
 }
