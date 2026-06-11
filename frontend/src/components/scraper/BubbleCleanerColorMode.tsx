@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { Pipette, SlidersHorizontal } from "lucide-react";
 
 interface Props {
@@ -48,8 +48,15 @@ export function BubbleCleanerColorMode({ maskColor, setMaskColor, firstImageUrl,
           {targetColorOption === "custom" && (
             <div className="flex items-center gap-3 pt-1.5 border-t border-neutral-900 animate-fadeIn">
               <span className="text-[8px] font-mono text-neutral-500">Pick Target Hex:</span>
-              <input type="color" value={customColorHex} onChange={(e) => setCustomColorHex(e.target.value)} className="h-6 w-10 bg-transparent border-0 cursor-pointer rounded-md focus:outline-none" />
-              <span className="text-[8px] font-mono font-bold text-white uppercase">{customColorHex}</span>
+              <div className="flex items-center gap-2">
+                 <input type="color" value={customColorHex} onChange={(e) => setCustomColorHex(e.target.value)} className="h-6 w-10 bg-transparent border-0 cursor-pointer rounded-md focus:outline-none" />
+                 <span className="text-[8px] font-mono font-bold text-white uppercase">{customColorHex}</span>
+              </div>
+              <div className="ml-auto w-12 h-4 rounded border border-neutral-700 relative overflow-hidden" title="Range Visualizer">
+                 <div className="absolute inset-0" style={{ backgroundColor: customColorHex }} />
+                 <div className="absolute inset-0 bg-white/30" style={{ width: `${tolerance}%` }} />
+                 <div className="absolute inset-0 bg-black/30 right-0 left-auto" style={{ width: `${tolerance}%` }} />
+              </div>
             </div>
           )}
         </div>
