@@ -90,6 +90,9 @@ export function useBatchImageActions({
             setScrapedImages((prev) => prev.map((img) => (img === url ? data.url : img)));
             setSelectedScraped((prev) => prev.map((img) => (img === url ? data.url : img)));
             setPanels((prev) => prev.map((p) => (p.image_url === url ? { ...p, image_url: data.url } : p)));
+          } else {
+            const errMsg = data.message || "Failed to clean speech bubbles on this image.";
+            throw new Error(errMsg);
           }
         } catch (err: any) {
           errors.push(`Image: ${url.substring(0, 40)}... - Error: ${err.message}`);
@@ -107,7 +110,7 @@ export function useBatchImageActions({
     }
 
     if (errors.length > 0) {
-      addNotification(`Batch cleaning speech bubbles completed with ${errors.length} errors.`, "warning");
+      addNotification(`Batch cleaning speech bubbles completed with ${errors.length} errors.`, "error");
       setConsoleLogs((prev) => [
         `[Speech Bubbles] Batch cleaning finished with errors:\n${errors.join("\n")}`,
         ...prev,
@@ -192,7 +195,8 @@ export function useBatchImageActions({
             }
             newSlicedUrlsMap[url] = croppedUrls;
           } else {
-            newSlicedUrlsMap[url] = [url];
+            const errMsg = data.message || "No panels detected or backend service unavailable.";
+            throw new Error(errMsg);
           }
         } catch (err: any) {
           errors.push(`Image: ${url.substring(0, 40)}... - Error: ${err.message}`);
@@ -223,7 +227,7 @@ export function useBatchImageActions({
     });
 
     if (errors.length > 0) {
-      addNotification(`Batch auto crop completed with ${errors.length} errors.`, "warning");
+      addNotification(`Batch auto crop completed with ${errors.length} errors.`, "error");
       setConsoleLogs((prev) => [
         `[Auto Cropper] Batch auto crop finished with errors:\n${errors.join("\n")}`,
         ...prev,

@@ -1,5 +1,5 @@
 import { useRef, useEffect, useCallback } from "react";
-import { Slice, Slot } from "../components/crop/types.js";
+import { Slice, Slot, DetectedPanel } from "../components/crop/types.js";
 import { NotificationType } from "../components/NotificationStack.js";
 import { useCropEditorState } from "./useCropEditorState.js";
 import { useCropEditorHistory } from "./useCropEditorHistory.js";
@@ -421,7 +421,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
         addNotification("No detected boxes to apply.", "warning");
         return;
       }
-      const initialSlices = state.detectedBoxes.map((box: unknown, index: number) => ({
+      const initialSlices = state.detectedBoxes.map((box: DetectedPanel, index: number) => ({
         id: `detected-${index}-${Date.now()}`,
         cropTop: box.cropTop,
         cropBottom: box.cropBottom,

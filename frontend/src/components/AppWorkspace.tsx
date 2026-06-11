@@ -36,6 +36,8 @@ interface AppWorkspaceProps {
   isBatchCropping: boolean;
   batchProgress: any;
   croppingImgUrl: string | null;
+  handleAutoCropSelected: () => void;
+  handleCleanBubblesSelected: () => void;
   videoPlayerRef: React.RefObject<HTMLVideoElement | null>;
   addNotification: any;
   setErrorPopup: any;
@@ -99,6 +101,8 @@ export function AppWorkspace({
   isBatchCropping,
   batchProgress,
   croppingImgUrl,
+  handleAutoCropSelected,
+  handleCleanBubblesSelected,
   videoPlayerRef,
   addNotification,
   setErrorPopup,
@@ -186,6 +190,8 @@ export function AppWorkspace({
           isBatchCropping={isBatchCropping}
           batchProgress={batchProgress}
           croppingImgUrl={croppingImgUrl}
+          handleAutoCropSelected={handleAutoCropSelected}
+          handleCleanBubblesSelected={handleCleanBubblesSelected}
           addPanelsWithAutoAnalysis={addPanelsWithAutoAnalysis}
         />
 

@@ -14,3 +14,14 @@ export interface Slice {
   cropRight: number;
   autoTrim: boolean;
 }
+
+export interface DetectedPanel {
+  cropTop: number;
+  cropBottom: number;
+  cropLeft: number;
+  cropRight: number;
+  croppedUrl?: string;
+  width?: number;
+  height?: number;
+  area?: number;
+}

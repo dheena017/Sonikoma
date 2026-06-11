@@ -1,8 +1,7 @@
 # =============================================================================
-# Webtoon-to-Video — Python Requirements
+# Webtoon-to-Video — Python Requirements (Computational Engine)
 # =============================================================================
-# Install with: pip install -r requirements.txt
-# All packages are used by files inside backend/services/ and backend/routes/
+# Install with: pip3 install -r requirements.txt
 # =============================================================================
 
 # ── Web Framework (FastAPI server + routing) ──────────────────────────────────
@@ -38,9 +37,10 @@ beautifulsoup4>=4.12.3           # HTML parsing for scraping panel image URLs
 lxml>=5.2.0                      # Fast XML/HTML parser (used with BeautifulSoup)
 
 # ── AI / ML — Google Gemini API (Python-side calls) ──────────────────────────
-google-generativeai>=0.7.0       # Gemini REST client (cleaner.py bubble detection)
+google-genai>=2.8.0              # Gemini REST client (cleaner.py bubble detection)
 
 # ── Utilities ─────────────────────────────────────────────────────────────────
+pydantic>=2.7.0                  # Data validation for incoming CLI/JSON payloads
 python-dotenv>=1.0.1             # Load .env files (GEMINI_API_KEY etc.)
 python-multipart>=0.0.9          # Multipart form support for FastAPI file uploads
 aiofiles>=23.2.1                 # Async file I/O for FastAPI

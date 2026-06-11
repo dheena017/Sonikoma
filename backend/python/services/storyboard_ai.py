@@ -1,0 +1,177 @@
+"""
+backend/python/services/storyboard_ai.py
+─────────────────────────────────────────────────────────────────────────────
+Storyboard narrative generation computational service using Gemini or HuggingFace.
+─────────────────────────────────────────────────────────────────────────────
+"""
+
+import json
+import logging
+import asyncio
+from typing import List, Dict, Any, Optional
+import pydantic
+
+from config.clients import ai_initialized, hf_client, call_gemini_with_retry, genai_client
+
+logger = logging.getLogger("anivox.services.storyboard_ai")
+
+class StoryboardPanelModel(pydantic.BaseModel):
+    speech_text: str
+    sfx: str
+    motion_type: str
+
+class StoryboardModel(pydantic.BaseModel):
+    panels: List[StoryboardPanelModel]
+
+
+def get_programmatic_panels(title: str, genre: str, episode: str, img_urls: List[str], count: int) -> List[Dict[str, Any]]:
+    """Programmatic fallback generator when AI calls fail."""
+    panels_list = []
+    for i in range(count):
+        text = ""
+        sfx = ""
+        motion = "zoom_in"
+
+        if i == 0:
+            text = f"Welcome to the legendary path of {title}! The grand chronicle of the {episode} of this {genre} saga starts here."
+            sfx = "[Chime Echo]"
+            motion = "zoom_in"
+        elif i == count - 1:
+            text = f"And thus is the peak climax of {episode} of {title} completed! What epic struggles lie ahead?"
+            sfx = "[Impact Strike]"
+            motion = "zoom_out"
+        else:
+            dynamic_texts = [
+                f"Tensions escalate rapidly across the {genre} zone, forcing characters to adapt immediately.",
+                "A mysterious shadows crawls quietly, casting an unexpected veil of magic over the path.",
+                f"Crucial keys and ancient memories are laid bare, revealing a hidden side of {title}.",
+                "An absolute burst of brilliant energy sweeps the frame! Destiny is set in motion.",
+                "Silence fills the space as allies stand tall together, ready to confront the ultimate mystery."
+            ]
+            text = dynamic_texts[(i - 1) % len(dynamic_texts)]
+            
+            sfxs = ["[Soft Whoosh]", "[Drums Rumble]", "[Sparkling Shimmer]", "[Energy Flare]", "[Low Resonance]"]
+            sfx = sfxs[(i - 1) % len(sfxs)]
+            
+            motions = ["pan_right", "pan_left", "pan_up", "zoom_out", "pan_down"]
+            motion = motions[(i - 1) % len(motions)]
+
+        panels_list.append({
+            "id": i + 1,
+            "image_url": img_urls[i],
+            "original_image_url": img_urls[i],
+            "speech_text": text,
+            "sfx": sfx,
+            "duration": 4.5,
+            "motion_type": motion
+        })
+    return panels_list
+
+
+async def generate_dynamic_panels(
+    title: str,
+    genre: str,
+    episode: str,
+    img_urls: List[str],
+    model: str
+) -> List[Dict[str, Any]]:
+    """
+    Generates narration script and storyboard camera moves via Gemini or HuggingFace.
+    """
+    active_slices_count = min(len(img_urls), 8)
+    if active_slices_count == 0:
+        return []
+
+    prompt = f"""You are a cinematic comic book editor and storyteller.
+Given this Comic Webtoon information:
+Title: "{title}"
+Genre: "{genre}"
+Episode: "{episode}"
+
+Please generate exactly {active_slices_count} distinct chronological narration or panel speech lines.
+For each of the {active_slices_count} panels, provide:
+1. "speech_text": An engaging, atmospheric description (under 20 words).
+2. "sfx": A punchy comic-style sound effect in brackets.
+3. "motion_type": One of 'zoom_in', 'zoom_out', 'pan_left', 'pan_right', 'pan_up', 'pan_down'.
+
+Output strictly valid JSON with top-level key "panels"."""
+
+    # 1. HuggingFace Fallback check
+    if model.startswith('huggingface') and hf_client:
+        try:
+            logger.info(f"[HuggingFace] Creating storyboard using Mistral 7B for \"{title}\"")
+            # Run blocking chat_completion in executor
+            loop = asyncio.get_event_loop()
+            response = await loop.run_in_executor(
+                None,
+                lambda: hf_client.chat_completion(
+                    model='mistralai/Mistral-7B-Instruct-v0.3',
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0.7,
+                    max_tokens=1000
+                )
+            )
+            response_text = response.choices[0].message.content or ""
+            # Strip code blocks
+            clean_json = response_text.replace("```json", "").replace("```", "").strip()
+            parsed = json.loads(clean_json)
+            if parsed and isinstance(parsed.get('panels'), list):
+                result = []
+                for idx, p in enumerate(parsed['panels'][:active_slices_count]):
+                    result.append({
+                        "id": idx + 1,
+                        "image_url": img_urls[idx],
+                        "original_image_url": img_urls[idx],
+                        "speech_text": p.get("speech_text") or f"Scene {idx + 1}",
+                        "sfx": p.get("sfx") or "[Action]",
+                        "duration": 5.0,
+                        "motion_type": p.get("motion_type") or "zoom_in"
+                    })
+                return result
+        except Exception as e:
+            logger.warning(f"HuggingFace storyboard generation failed: {e}. Falling back to Gemini.")
+
+    # 2. Gemini generation
+    if ai_initialized:
+        from google.genai import types
+        try:
+            target_model_name = model if model and not model.startswith('huggingface') else "gemini-2.5-flash"
+            logger.info(f"[Gemini] Storyboard narrative generation using: {target_model_name}")
+
+            config = types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=StoryboardModel
+            )
+
+            # Invoke Gemini through the retry wrapper
+            response = await call_gemini_with_retry(
+                lambda: genai_client.models.generate_content(
+                    model=target_model_name,
+                    contents=prompt,
+                    config=config
+                )
+            )
+
+            response_text = response.text or ""
+            if response_text.strip():
+                parsed = json.loads(response_text)
+                if parsed and isinstance(parsed.get('panels'), list) and len(parsed['panels']) > 0:
+                    result = []
+                    for idx, p in enumerate(parsed['panels'][:active_slices_count]):
+                        result.append({
+                            "id": idx + 1,
+                            "image_url": img_urls[idx],
+                            "original_image_url": img_urls[idx],
+                            "speech_text": p.get("speech_text") or f"Scene {idx + 1} of {title}",
+                            "sfx": p.get("sfx") or "[Action Sounds]",
+                            "duration": 4.5,
+                            "motion_type": p.get("motion_type") or "zoom_in"
+                        })
+                    logger.info(f"[Gemini] Storyboard narration generated successfully for {len(result)} slices.")
+                    return result
+        except Exception as e:
+            logger.warning(f"[Gemini] Storyboard generation failed: {e}")
+
+    # 3. Final programmatic fallback
+    logger.info("[Scraper Service] Falling back to programmatic storyboard generation.")
+    return get_programmatic_panels(title, genre, episode, img_urls, active_slices_count)

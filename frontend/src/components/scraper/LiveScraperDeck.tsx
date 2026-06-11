@@ -46,6 +46,8 @@ export default function LiveScraperDeck({
   isBatchCropping,
   batchProgress,
   croppingImgUrl,
+  handleAutoCropSelected,
+  handleCleanBubblesSelected,
   addPanelsWithAutoAnalysis,
 }: LiveScraperDeckProps) {
   const [isZipping, setIsZipping] = useState(false);
@@ -186,6 +188,8 @@ export default function LiveScraperDeck({
             setShowAutoCropModal={setShowAutoCropModal}
             isBatchCropping={isBatchCropping}
             batchProgress={batchProgress}
+            handleAutoCropSelected={handleAutoCropSelected}
+            handleCleanBubblesSelected={handleCleanBubblesSelected}
             fetchWithInterceptor={fetchWithInterceptor}
           />
 

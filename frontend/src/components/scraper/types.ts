@@ -38,6 +38,8 @@ export interface ScraperDeckProps {
   isBatchCropping: boolean;
   batchProgress: { current: number; total: number } | null;
   croppingImgUrl: string | null;
+  handleAutoCropSelected: () => void;
+  handleCleanBubblesSelected: () => void;
 }
 
 export type LiveScraperDeckProps = ScraperDeckProps;

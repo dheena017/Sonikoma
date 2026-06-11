@@ -16,9 +16,11 @@ interface ScraperActionButtonsProps {
   setShowAutoCropModal: (val: boolean) => void;
   isBatchCropping: boolean;
   batchProgress: { current: number; total: number } | null;
+  handleAutoCropSelected: () => void;
   setShowBubbleModal: (val: boolean) => void;
   isCleaningBubbles: boolean;
   cleanProgress: { current: number; total: number } | null;
+  handleCleanBubblesSelected: () => void;
   handleBatchMergeSelected: () => void;
   isBatchMerging: boolean;
 }
@@ -30,9 +32,11 @@ export function ScraperActionButtons({
   setShowAutoCropModal,
   isBatchCropping,
   batchProgress,
+  handleAutoCropSelected,
   setShowBubbleModal,
   isCleaningBubbles,
   cleanProgress,
+  handleCleanBubblesSelected,
   handleBatchMergeSelected,
   isBatchMerging,
 }: ScraperActionButtonsProps) {
@@ -62,10 +66,10 @@ export function ScraperActionButtons({
         {/* Auto-Crop Segmented Button Group */}
         <div className="flex items-center h-9 animate-[fadeIn_0.2s_ease-out]">
           <button
-            onClick={() => setShowAutoCropModal(true)}
+            onClick={handleAutoCropSelected}
             disabled={isBatchCropping || selectedScraped.length === 0}
             className="h-full px-3.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-300 hover:text-indigo-200 rounded-l-xl border-r-0 flex items-center gap-1.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm text-[11px] uppercase tracking-wider font-bold cursor-pointer active:scale-95"
-            title="Open Auto-Crop Settings"
+            title="Auto-crop selected panels"
           >
             {isBatchCropping ? (
               <RefreshCw className="h-3.5 w-3.5 animate-spin" />
@@ -90,10 +94,10 @@ export function ScraperActionButtons({
         {/* Clean Bubbles Button Group */}
         <div className="flex items-center h-9">
           <button
-            onClick={() => setShowBubbleModal(true)}
+            onClick={handleCleanBubblesSelected}
             disabled={isCleaningBubbles || selectedScraped.length === 0}
             className="h-full px-3.5 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300 hover:text-purple-200 rounded-l-xl border-r-0 flex items-center gap-1.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm cursor-pointer active:scale-95 text-[11px] uppercase tracking-wider font-bold"
-            title="Open Bubble Cleaner Settings"
+            title="Clean speech bubbles on selected panels"
           >
             {isCleaningBubbles ? (
               <RefreshCw className="h-3.5 w-3.5 animate-spin" />

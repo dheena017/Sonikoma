@@ -43,6 +43,12 @@ export function useAppLogic() {
     addPanelsWithAutoAnalysis,
     handleCleanBubblesSelected,
     handleAutoCropSelected,
+    isCleaningBubbles,
+    cleanProgress,
+    bubbleCroppingImgUrl,
+    isBatchCropping,
+    batchProgress,
+    croppingImgUrl,
   } = usePipelineActions({
     state,
     setCurrentPanelIndex,
@@ -319,5 +325,11 @@ export function useAppLogic() {
     handleCleanBubblesSelected,
     handleAutoCropSelected,
     totalCalculatedDuration,
+    isCleaningBubbles,
+    cleanProgress,
+    bubbleCroppingImgUrl,
+    isBatchCropping,
+    batchProgress,
+    croppingImgUrl,
   };
 }
