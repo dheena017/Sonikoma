@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import { Download, LayoutPanelTop } from "lucide-react";
+import { LayoutPanelTop, Paintbrush, Eraser } from "lucide-react";
 import { useSandboxLogic } from "../../hooks/useSandboxLogic";
 
 interface Props {
@@ -13,8 +13,9 @@ export function BubbleCleanerSandbox({ eraseMethod, addNotification, firstImageU
   const {
     brushColor, setBrushColor,
     brushSize, setBrushSize,
+    brushMode, setBrushMode,
     undo, redo, canUndo, canRedo,
-    startDrawing, draw, stopDrawing, clearCanvas, simulateInpaint
+    startDrawing, draw, stopDrawing, clearCanvas, simulateInpaint, setOriginalData
   } = useSandboxLogic(canvasRef, addNotification);
 
   const drawCartoonTemplate = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
@@ -45,6 +46,7 @@ export function BubbleCleanerSandbox({ eraseMethod, addNotification, firstImageU
       const x = (canvas.width / 2) - (img.width / 2) * scale;
       const y = (canvas.height / 2) - (img.height / 2) * scale;
       ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+      setOriginalData(ctx.getImageData(0, 0, canvas.width, canvas.height));
       addNotification?.("Active panel loaded into sandbox!", "info");
     };
     img.src = firstImageUrl;
@@ -54,9 +56,12 @@ export function BubbleCleanerSandbox({ eraseMethod, addNotification, firstImageU
     const canvas = canvasRef.current;
     if (canvas) {
       const ctx = canvas.getContext("2d");
-      if (ctx) drawCartoonTemplate(ctx, canvas);
+      if (ctx) {
+         drawCartoonTemplate(ctx, canvas);
+         setOriginalData(ctx.getImageData(0, 0, canvas.width, canvas.height));
+      }
     }
-  }, []);
+  }, [setOriginalData]);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const rect = canvasRef.current!.getBoundingClientRect();
@@ -93,15 +98,18 @@ export function BubbleCleanerSandbox({ eraseMethod, addNotification, firstImageU
           onMouseUp={stopDrawing} onMouseLeave={stopDrawing}
           className="bg-neutral-900 cursor-crosshair block" />
       </div>
-      <div className="w-full space-y-2">
-        <div className="flex items-center justify-between text-[8px] font-mono">
-          <span className="text-neutral-500">Brush Color & Size ({brushSize}px):</span>
-          <div className="flex items-center gap-3">
-             <input type="range" min="2" max="30" value={brushSize} onChange={(e) => setBrushSize(Number(e.target.value))} className="w-16 h-1 bg-neutral-800 accent-purple-500" />
+      <div className="w-full space-y-3">
+        <div className="flex items-center justify-between">
+           <div className="flex bg-neutral-900 rounded-lg p-0.5 border border-neutral-800">
+              <button onClick={() => setBrushMode("paint")} className={`p-1 rounded ${brushMode === 'paint' ? 'bg-purple-600 text-white' : 'text-neutral-500'}`} title="Paint Mode"><Paintbrush className="h-3 w-3" /></button>
+              <button onClick={() => setBrushMode("restore")} className={`p-1 rounded ${brushMode === 'restore' ? 'bg-indigo-600 text-white' : 'text-neutral-500'}`} title="Restore Original"><Eraser className="h-3 w-3" /></button>
+           </div>
+           <div className="flex items-center gap-3">
+             <input type="range" min="2" max="30" value={brushSize} onChange={(e) => setBrushSize(Number(e.target.value))} className="w-20 h-1 bg-neutral-800 accent-purple-500" />
             <div className="flex gap-1.5">
               {[["#ffffff", "bg-white"], ["#000000", "bg-black"], ["#818cf8", "bg-[#818cf8]"]].map(([color, bg]) => (
-                <button key={color} onClick={() => setBrushColor(color)}
-                  className={`w-4 h-4 rounded-full border ${bg} ${brushColor === color ? "border-purple-500 ring-1 ring-purple-500" : "border-neutral-700"}`} />
+                <button key={color} onClick={() => { setBrushColor(color); setBrushMode("paint"); }}
+                  className={`w-4 h-4 rounded-full border ${bg} ${brushColor === color && brushMode === 'paint' ? "border-purple-500 ring-1 ring-purple-500" : "border-neutral-700"}`} />
               ))}
             </div>
           </div>

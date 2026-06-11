@@ -6,6 +6,7 @@ interface SandboxState {
   isDrawing: boolean;
   canUndo: boolean;
   canRedo: boolean;
+  brushMode: "paint" | "restore";
 }
 
 export function useSandboxLogic(canvasRef: React.RefObject<HTMLCanvasElement | null>, addNotification?: (msg: string, type: any) => void) {
@@ -15,10 +16,12 @@ export function useSandboxLogic(canvasRef: React.RefObject<HTMLCanvasElement | n
     isDrawing: false,
     canUndo: false,
     canRedo: false,
+    brushMode: "paint"
   });
 
   const historyRef = useRef<ImageData[]>([]);
   const redoStackRef = useRef<ImageData[]>([]);
+  const originalDataRef = useRef<ImageData | null>(null);
 
   const saveToHistory = useCallback(() => {
     const canvas = canvasRef.current;
@@ -84,13 +87,30 @@ export function useSandboxLogic(canvasRef: React.RefObject<HTMLCanvasElement | n
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    ctx.strokeStyle = state.brushColor;
-    ctx.lineWidth = state.brushSize;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    ctx.lineTo(x, y);
-    ctx.stroke();
-  }, [canvasRef, state.isDrawing, state.brushColor, state.brushSize]);
+    if (state.brushMode === "restore" && originalDataRef.current) {
+        // Complex restore logic: sample from original data and put back
+        const brushR = state.brushSize / 2;
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+        const tCtx = tempCanvas.getContext('2d')!;
+        tCtx.putImageData(originalDataRef.current, 0, 0);
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(x, y, brushR, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.drawImage(tempCanvas, 0, 0);
+        ctx.restore();
+    } else {
+        ctx.strokeStyle = state.brushColor;
+        ctx.lineWidth = state.brushSize;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.lineTo(x, y);
+        ctx.stroke();
+    }
+  }, [canvasRef, state.isDrawing, state.brushColor, state.brushSize, state.brushMode]);
 
   const stopDrawing = useCallback(() => {
     setState(prev => ({ ...prev, isDrawing: false }));
@@ -104,8 +124,13 @@ export function useSandboxLogic(canvasRef: React.RefObject<HTMLCanvasElement | n
 
     saveToHistory();
     templateDrawer(ctx, canvas);
+    originalDataRef.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
     addNotification?.("Sandbox reset to template.", "info");
   }, [canvasRef, saveToHistory, addNotification]);
+
+  const setOriginalData = useCallback((data: ImageData) => {
+     originalDataRef.current = data;
+  }, []);
 
   const simulateInpaint = useCallback((eraseMethod: string) => {
     const canvas = canvasRef.current;
@@ -118,22 +143,15 @@ export function useSandboxLogic(canvasRef: React.RefObject<HTMLCanvasElement | n
     const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const d = imgData.data;
 
-    // Simple color-based replacement to simulate cleaning
     for (let i = 0; i < d.length; i += 4) {
       const r = d[i], g = d[i+1], b = d[i+2];
-
-      // If it's "drawn" text (white-ish)
       if (r > 230 && g > 230 && b > 230) {
         if (eraseMethod === "solid_black") { d[i]=0; d[i+1]=0; d[i+2]=0; }
-        else if (eraseMethod === "blur")   { d[i]=40; d[i+1]=35; d[i+2]=90; } // Simulated blur color
+        else if (eraseMethod === "blur")   { d[i]=40; d[i+1]=35; d[i+2]=90; }
         else if (eraseMethod === "solid_white") { d[i]=255; d[i+1]=255; d[i+2]=255; }
-        else { d[i]=30; d[i+1]=27; d[i+2]=75; } // Simulated inpaint/auto
+        else { d[i]=30; d[i+1]=27; d[i+2]=75; }
       }
-
-      // If it's black-ish text
-      if (r < 25 && g < 25 && b < 25) {
-         d[i]=30; d[i+1]=27; d[i+2]=75;
-      }
+      if (r < 25 && g < 25 && b < 25) { d[i]=30; d[i+1]=27; d[i+2]=75; }
     }
 
     ctx.putImageData(imgData, 0, 0);
@@ -144,12 +162,14 @@ export function useSandboxLogic(canvasRef: React.RefObject<HTMLCanvasElement | n
     ...state,
     setBrushColor: (color: string) => setState(prev => ({ ...prev, brushColor: color })),
     setBrushSize: (size: number) => setState(prev => ({ ...prev, brushSize: size })),
+    setBrushMode: (mode: "paint" | "restore") => setState(prev => ({ ...prev, brushMode: mode })),
     undo,
     redo,
     startDrawing,
     draw,
     stopDrawing,
     clearCanvas,
-    simulateInpaint
+    simulateInpaint,
+    setOriginalData
   };
 }

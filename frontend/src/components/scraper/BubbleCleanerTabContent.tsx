@@ -9,6 +9,7 @@ import { BubbleCleanerGeneralTab } from "./BubbleCleanerGeneralTab";
 import { BubbleCleanerAdvancedTab } from "./BubbleCleanerAdvancedTab";
 import { BubbleCleanerHelpTab } from "./BubbleCleanerHelpTab";
 import { GlobalScraperConfigTool } from "./GlobalScraperConfigTool";
+import { ScraperLogStream } from "./ScraperLogStream";
 
 export type DetectionStyle = "all" | "white_only" | "text_only";
 export type EraseMethod = "auto" | "inpaint" | "blur" | "solid_white" | "solid_black";
@@ -67,6 +68,7 @@ export default function BubbleCleanerTabContent(props: BubbleCleanerTabContentPr
       )}
 
       <GlobalScraperConfigTool addNotification={props.addNotification} />
+      <ScraperLogStream />
     </div>
   );
 }

@@ -1,17 +1,18 @@
 import React, { useState, useRef } from "react";
-import { Pipette } from "lucide-react";
+import { Pipette, SlidersHorizontal } from "lucide-react";
 
 interface Props {
   maskColor: string;
   setMaskColor: (v: string) => void;
   firstImageUrl: string | null;
+  tolerance: number;
+  setTolerance: (v: number) => void;
 }
 
-export function BubbleCleanerColorMode({ maskColor, setMaskColor, firstImageUrl }: Props) {
+export function BubbleCleanerColorMode({ maskColor, setMaskColor, firstImageUrl, tolerance, setTolerance }: Props) {
   const [targetColorOption, setTargetColorOption] = useState("auto");
   const [customColorHex, setCustomColorHex] = useState("#ffffff");
   const [isPicking, setIsPicking] = useState(false);
-  const hiddenCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const quickPalettes = [
     { name: "Pure White", hex: "#ffffff" },
@@ -24,29 +25,6 @@ export function BubbleCleanerColorMode({ maskColor, setMaskColor, firstImageUrl 
   const handlePipetteClick = () => {
      if (!firstImageUrl) return;
      setIsPicking(!isPicking);
-  };
-
-  const pickColorFromImage = (e: React.MouseEvent) => {
-     if (!isPicking || !firstImageUrl) return;
-
-     const img = new Image();
-     img.crossOrigin = "anonymous";
-     img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d")!;
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-
-        // This is a simplified picking logic since we don't have the real image rendered here to click on
-        // In a real app we'd need the click coordinates on the image.
-        // For now, let's sample the center to demonstrate the function.
-        const pixel = ctx.getImageData(img.width/2, img.height/2, 1, 1).data;
-        const hex = "#" + ((1 << 24) + (pixel[0] << 16) + (pixel[1] << 8) + pixel[2]).toString(16).slice(1);
-        setCustomColorHex(hex);
-        setIsPicking(false);
-     };
-     img.src = firstImageUrl;
   };
 
   return (
@@ -91,20 +69,34 @@ export function BubbleCleanerColorMode({ maskColor, setMaskColor, firstImageUrl 
         </div>
       </div>
 
-      {targetColorOption === "custom" && (
-        <div className="p-4 bg-neutral-950/40 border border-neutral-800 rounded-2xl space-y-3 animate-fadeIn">
-           <span className="text-neutral-500 uppercase tracking-wider font-bold text-[8px] font-mono block">Quick Palette Library</span>
-           <div className="flex flex-wrap gap-2">
-              {quickPalettes.map(p => (
-                 <button key={p.hex} onClick={() => setCustomColorHex(p.hex)}
-                   className={`flex items-center gap-2 px-2.5 py-1.5 rounded-xl border border-neutral-800 bg-neutral-900/50 hover:bg-neutral-800 transition-all ${customColorHex === p.hex ? 'border-purple-500/50 bg-purple-500/10' : ''}`}>
-                    <div className="w-3 h-3 rounded-full border border-neutral-700" style={{ backgroundColor: p.hex }} />
-                    <span className="text-[9px] font-mono text-neutral-300">{p.name}</span>
-                 </button>
-              ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+         {targetColorOption === "custom" && (
+           <div className="p-4 bg-neutral-950/40 border border-neutral-800 rounded-2xl space-y-3 animate-fadeIn">
+              <span className="text-neutral-500 uppercase tracking-wider font-bold text-[8px] font-mono block">Quick Palette Library</span>
+              <div className="flex flex-wrap gap-2">
+                 {quickPalettes.map(p => (
+                    <button key={p.hex} onClick={() => setCustomColorHex(p.hex)}
+                      className={`flex items-center gap-2 px-2.5 py-1.5 rounded-xl border border-neutral-800 bg-neutral-900/50 hover:bg-neutral-800 transition-all ${customColorHex === p.hex ? 'border-purple-500/50 bg-purple-500/10' : ''}`}>
+                       <div className="w-3 h-3 rounded-full border border-neutral-700" style={{ backgroundColor: p.hex }} />
+                       <span className="text-[9px] font-mono text-neutral-300">{p.name}</span>
+                    </button>
+                 ))}
+              </div>
            </div>
-        </div>
-      )}
+         )}
+
+         <div className="p-4 bg-neutral-950/40 border border-neutral-800 rounded-2xl space-y-3">
+            <div className="flex items-center justify-between">
+               <div className="flex items-center gap-2 text-[9px] font-mono font-bold text-neutral-500 uppercase tracking-wider">
+                  <SlidersHorizontal className="h-3 w-3" />
+                  <span>Color Tolerance Tuning</span>
+               </div>
+               <span className="text-purple-400 font-mono font-bold text-[10px]">{tolerance}%</span>
+            </div>
+            <input type="range" min="1" max="50" value={tolerance} onChange={(e) => setTolerance(Number(e.target.value))} className="w-full h-1 bg-neutral-900 rounded-lg appearance-none cursor-pointer accent-purple-500" />
+            <p className="text-[7.5px] text-neutral-600 leading-normal">Determines the allowed variance from the target color. Higher values expand the mask into nearby shades.</p>
+         </div>
+      </div>
     </div>
   );
 }

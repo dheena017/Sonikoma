@@ -8,6 +8,7 @@ import { AutoCropJsonDebugger } from "./AutoCropJsonDebugger"; // Reusing this o
 export function BubbleCleanerAdvancedTab(props: BubbleCleanerSharedProps) {
   const [sfxProtection, setSfxProtection] = useState(true);
   const [maskColor, setMaskColor] = useState("rgba(168, 85, 247, 0.45)");
+  const [tolerance, setTolerance] = useState(15);
 
   const firstImageUrl = props.selectedScraped.length > 0 ? props.selectedScraped[0] : props.scrapedImages.length > 0 ? props.scrapedImages[0] : null;
 
@@ -18,6 +19,7 @@ export function BubbleCleanerAdvancedTab(props: BubbleCleanerSharedProps) {
     dilation: props.bubbleDilation,
     inpaint_radius: props.bubbleInpaintRadius,
     sfx_protection: sfxProtection,
+    color_tolerance: tolerance,
   };
 
   return (
@@ -41,6 +43,8 @@ export function BubbleCleanerAdvancedTab(props: BubbleCleanerSharedProps) {
         maskColor={maskColor}
         setMaskColor={setMaskColor}
         firstImageUrl={firstImageUrl}
+        tolerance={tolerance}
+        setTolerance={setTolerance}
       />
 
       <BubbleCleanerMaskControls

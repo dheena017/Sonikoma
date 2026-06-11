@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Info, LayoutGrid, AlertCircle, Eye, RefreshCw } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Info, LayoutGrid, AlertCircle, Eye, RefreshCw, Ruler, Trash2 } from "lucide-react";
 
 interface Props {
   firstImageUrl: string | null;
@@ -21,6 +21,8 @@ export function AutoCropVisualGuide({
   const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(null);
   const [detectedPanels, setDetectedPanels] = useState<any[]>([]);
   const [isDetecting, setIsDetecting] = useState(false);
+  const [manualSplits, setManualSplits] = useState<number[]>([]);
+  const previewContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!firstImageUrl) { setImageSize(null); setDetectedPanels([]); return; }
@@ -33,7 +35,6 @@ export function AutoCropVisualGuide({
     if (!firstImageUrl) return;
     setIsDetecting(true);
     try {
-      // 1. Fetch the image and convert to base64
       const resp = await fetch(firstImageUrl);
       const blob = await resp.blob();
       const reader = new FileReader();
@@ -43,7 +44,6 @@ export function AutoCropVisualGuide({
         reader.readAsDataURL(blob);
       });
 
-      // 2. Call the backend detect-b64 endpoint
       const detectResp = await fetch("/api/py/panels/detect-b64", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -70,6 +70,18 @@ export function AutoCropVisualGuide({
     } finally {
       setIsDetecting(false);
     }
+  };
+
+  const handlePreviewClick = (e: React.MouseEvent) => {
+     if (!previewContainerRef.current) return;
+     const rect = previewContainerRef.current.getBoundingClientRect();
+     const yPct = ((e.clientY - rect.top) / rect.height) * 100;
+     setManualSplits(prev => [...prev, yPct]);
+  };
+
+  const clearSplits = (e: React.MouseEvent) => {
+     e.stopPropagation();
+     setManualSplits([]);
   };
 
   const getRecommendation = () => {
@@ -117,18 +129,38 @@ export function AutoCropVisualGuide({
       </div>
 
       <div className="flex flex-col items-center justify-center p-4 bg-neutral-950/30 border border-neutral-800 rounded-2xl min-h-[180px]">
-        <span className="text-[9px] font-bold text-neutral-500 uppercase tracking-widest font-mono mb-2.5">Visual Preview Guide</span>
-        <div className="relative border border-neutral-700/60 rounded-lg overflow-hidden transition-all duration-300 w-full max-w-[150px] aspect-[3/4] bg-cover bg-center"
+        <div className="w-full flex items-center justify-between mb-2.5">
+           <span className="text-[9px] font-bold text-neutral-500 uppercase tracking-widest font-mono">Interactive Visual Guide</span>
+           {manualSplits.length > 0 && (
+              <button onClick={clearSplits} className="flex items-center gap-1 text-[7px] text-red-400 font-bold uppercase hover:text-red-300">
+                 <Trash2 className="h-2.5 w-2.5" /> Clear Rulers
+              </button>
+           )}
+        </div>
+
+        <div
+          ref={previewContainerRef}
+          onClick={handlePreviewClick}
+          className="relative border border-neutral-700/60 rounded-lg overflow-hidden transition-all duration-300 w-full max-w-[150px] aspect-[3/4] bg-cover bg-center cursor-crosshair group"
           style={{ backgroundColor: cropBackgroundMode === "white" ? "#ffffff" : cropBackgroundMode === "black" ? "#0a0a0a" : "#171717", backgroundImage: firstImageUrl ? `url(${firstImageUrl})` : "none" }}>
 
-          {/* Real Detected Panels */}
+          {/* Manual Split Rulers */}
+          {manualSplits.map((y, i) => (
+             <div key={i} className="absolute w-full h-[2px] bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.6)] z-30" style={{ top: `${y}%` }}>
+                <div className="absolute right-0 -top-3 flex items-center gap-1 bg-indigo-600 text-white text-[5px] px-1 rounded-sm font-bold shadow-lg">
+                   <Ruler className="h-2 w-2" /> SPLIT_{i+1}
+                </div>
+             </div>
+          ))}
+
+          {/* Real Detected Panels - Mapping from backend camelCase keys */}
           {detectedPanels.map((p, i) => (
             <div key={i} className="absolute border border-emerald-400 bg-emerald-400/10 z-20 shadow-[0_0_4px_rgba(52,211,153,0.3)]"
               style={{
-                top: `${p.top_pct * 100}%`,
-                left: `${p.left_pct * 100}%`,
-                width: `${(1 - p.left_pct - p.right_pct) * 100}%`,
-                height: `${(1 - p.top_pct - p.bottom_pct) * 100}%`
+                top: `${p.cropTop}%`,
+                left: `${p.cropLeft}%`,
+                width: `${100 - p.cropLeft - p.cropRight}%`,
+                height: `${100 - p.cropTop - p.cropBottom}%`
               }}>
               <span className="absolute top-0 left-0 bg-emerald-500 text-black text-[5px] px-0.5 font-bold">{i+1}</span>
             </div>
@@ -154,9 +186,9 @@ export function AutoCropVisualGuide({
         </div>
         <div className="flex flex-col items-center mt-2 space-y-1">
           <span className="text-[8px] text-neutral-600 font-mono text-center">
-            {detectedPanels.length > 0 ? `Showing ${detectedPanels.length} detected panels.` : "Dashed guide box represents theoretical lock."}
+            {manualSplits.length > 0 ? `Active rulers: ${manualSplits.length}. Tap to add more.` : "Tap on preview to place manual split rulers."}
           </span>
-          {autoSplit && <span className="text-[7px] text-indigo-400 font-bold uppercase tracking-tighter">Auto-Split seams active</span>}
+          {autoSplit && <span className="text-[7px] text-indigo-400 font-bold uppercase tracking-tighter">Auto-Split algorithm active</span>}
         </div>
       </div>
     </div>
