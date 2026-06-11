@@ -22,6 +22,7 @@ interface AutoCropLayoutTabProps
     | "cropCannyLow"
     | "cropCannyHigh"
     | "cropCloseKernelSize"
+    | "addNotification"
   > {}
 
 export function AutoCropLayoutTab({
@@ -39,6 +40,7 @@ export function AutoCropLayoutTab({
   cropCannyLow,
   cropCannyHigh,
   cropCloseKernelSize,
+  addNotification,
 }: AutoCropLayoutTabProps) {
   const firstImageUrl =
     selectedScraped.length > 0 ? selectedScraped[0] : scrapedImages.length > 0 ? scrapedImages[0] : null;
@@ -57,11 +59,13 @@ export function AutoCropLayoutTab({
             cropBackgroundMode={cropBackgroundMode}
             setCropBackgroundMode={setCropBackgroundMode}
             firstImageUrl={firstImageUrl}
+            addNotification={addNotification}
           />
 
           <AutoCropMarginPadding
             cropPaddingPx={cropPaddingPx}
             setCropPaddingPx={setCropPaddingPx}
+            firstImageUrl={firstImageUrl}
           />
         </div>
 

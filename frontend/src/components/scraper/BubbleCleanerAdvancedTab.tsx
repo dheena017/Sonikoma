@@ -9,6 +9,8 @@ export function BubbleCleanerAdvancedTab(props: BubbleCleanerSharedProps) {
   const [sfxProtection, setSfxProtection] = useState(true);
   const [maskColor, setMaskColor] = useState("rgba(168, 85, 247, 0.45)");
 
+  const firstImageUrl = props.selectedScraped.length > 0 ? props.selectedScraped[0] : props.scrapedImages.length > 0 ? props.scrapedImages[0] : null;
+
   const jsonPayload = {
     method: props.eraseMethod,
     sensitivity: props.sensitivity,
@@ -38,6 +40,7 @@ export function BubbleCleanerAdvancedTab(props: BubbleCleanerSharedProps) {
       <BubbleCleanerColorMode
         maskColor={maskColor}
         setMaskColor={setMaskColor}
+        firstImageUrl={firstImageUrl}
       />
 
       <BubbleCleanerMaskControls

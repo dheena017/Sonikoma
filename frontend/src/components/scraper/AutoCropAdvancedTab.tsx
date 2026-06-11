@@ -3,6 +3,7 @@ import { AutoCropSharedProps } from "./tabTypes";
 import { AutoCropParameterSlider } from "./AutoCropParameterSlider";
 import { AutoCropCannyControls } from "./AutoCropCannyControls";
 import { AutoCropJsonDebugger } from "./AutoCropJsonDebugger";
+import { AutoCropComplexityAnalysis } from "./AutoCropComplexityAnalysis";
 
 interface AutoCropAdvancedTabProps
   extends Pick<
@@ -27,6 +28,8 @@ interface AutoCropAdvancedTabProps
     | "setCropCannyHigh"
     | "cropCloseKernelSize"
     | "setCropCloseKernelSize"
+    | "scrapedImages"
+    | "selectedScraped"
   > {}
 
 export function AutoCropAdvancedTab({
@@ -48,7 +51,11 @@ export function AutoCropAdvancedTab({
   setCropCannyHigh,
   cropCloseKernelSize,
   setCropCloseKernelSize,
+  scrapedImages,
+  selectedScraped,
 }: AutoCropAdvancedTabProps) {
+
+  const firstImageUrl = selectedScraped.length > 0 ? selectedScraped[0] : scrapedImages.length > 0 ? scrapedImages[0] : null;
 
   const jsonPayload = {
     sensitivity: cropSensitivity,
@@ -66,6 +73,8 @@ export function AutoCropAdvancedTab({
 
   return (
     <div className="space-y-5 animate-[fadeIn_0.2s_ease-out]">
+      <AutoCropComplexityAnalysis firstImageUrl={firstImageUrl} />
+
       <div className="grid grid-cols-2 gap-4">
         <AutoCropParameterSlider
           label="Edge Sensitivity"

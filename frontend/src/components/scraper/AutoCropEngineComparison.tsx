@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Sparkles, Brain, ArrowRight, Eye, RefreshCw } from "lucide-react";
+import { Sparkles, Brain, ArrowRight, Eye, RefreshCw, FileText, Loader2, Clock, Hash } from "lucide-react";
 
 export function AutoCropEngineComparison({
   firstImageUrl, sensitivity, bgMode, overlapMerge, aspectRatio,
@@ -17,10 +17,15 @@ export function AutoCropEngineComparison({
   const [activeEngine, setActiveEngine] = useState<"opencv" | "gemini">("opencv");
   const [opencvPanels, setOpencvPanels] = useState<any[]>([]);
   const [isDetecting, setIsDetecting] = useState(false);
+  const [ocrActive, setOcrActive] = useState(false);
+  const [ocrResults, setOcrResults] = useState<any[]>([]);
+  const [isScanningOcr, setIsScanningOcr] = useState(false);
+  const [perfMetrics, setPerfMetrics] = useState<{ duration: number; count: number } | null>(null);
 
   const runPreview = async () => {
     if (!firstImageUrl) return;
     setIsDetecting(true);
+    const start = performance.now();
     try {
       const resp = await fetch(firstImageUrl);
       const blob = await resp.blob();
@@ -50,12 +55,48 @@ export function AutoCropEngineComparison({
       const data = await detectResp.json();
       if (data.success) {
         setOpencvPanels(data.panels);
+        setPerfMetrics({
+           duration: Math.round(performance.now() - start),
+           count: data.panels.length
+        });
       }
     } catch (err) {
       console.error("Preview failed:", err);
     } finally {
       setIsDetecting(false);
     }
+  };
+
+  const runOcrAnalysis = async () => {
+     if (!firstImageUrl) return;
+     if (ocrActive && ocrResults.length > 0) { setOcrActive(false); return; }
+
+     setIsScanningOcr(true);
+     try {
+        const resp = await fetch(firstImageUrl);
+        const blob = await resp.blob();
+        const reader = new FileReader();
+        const b64 = await new Promise<string>((resolve) => {
+          reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
+          reader.readAsDataURL(blob);
+        });
+
+        const ocrResp = await fetch("/api/py/ocr/extract-full-b64", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image_base64: b64, langs: ["en"] })
+        });
+
+        const data = await ocrResp.json();
+        if (data.success) {
+           setOcrResults(data.results);
+           setOcrActive(true);
+        }
+     } catch (err) {
+        console.error("OCR analysis failed:", err);
+     } finally {
+        setIsScanningOcr(false);
+     }
   };
 
   return (
@@ -66,6 +107,26 @@ export function AutoCropEngineComparison({
           <span>Engine Strategy Comparison</span>
         </div>
         <div className="flex items-center gap-3">
+           {perfMetrics && (
+              <div className="flex items-center gap-2 px-2 py-1 rounded bg-neutral-900 border border-neutral-800 text-[7px] font-mono">
+                 <div className="flex items-center gap-1 text-emerald-400">
+                    <Clock className="h-2 w-2" />
+                    <span>{perfMetrics.duration}ms</span>
+                 </div>
+                 <div className="flex items-center gap-1 text-indigo-400">
+                    <Hash className="h-2 w-2" />
+                    <span>{perfMetrics.count}</span>
+                 </div>
+              </div>
+           )}
+           <button
+             onClick={runOcrAnalysis}
+             disabled={isScanningOcr || !firstImageUrl}
+             className={`p-1.5 rounded-lg border transition-all ${ocrActive ? 'bg-amber-500/20 border-amber-500 text-amber-400' : 'bg-neutral-900 border-neutral-800 text-neutral-500 hover:text-white'}`}
+             title="Scan for Speech/Text Regions"
+           >
+              {isScanningOcr ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileText className="h-3.5 w-3.5" />}
+           </button>
            <button
              onClick={runPreview}
              disabled={isDetecting || !firstImageUrl || activeEngine === 'gemini'}
@@ -105,15 +166,36 @@ export function AutoCropEngineComparison({
                     ))
                   ) : (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 opacity-40">
-                       <span className="text-[8px] font-mono text-cyan-300">CLICK EYE TO RUN OPENCV SCAN</span>
+                       <span className="text-[8px] font-mono text-cyan-300 uppercase tracking-widest">RUN SCAN TO SEE Gutter EDGES</span>
                     </div>
                   )}
                </>
             ) : (
                <div className="absolute inset-0 border-2 border-indigo-500/40 bg-indigo-500/5 rounded flex items-center justify-center">
                   <div className="w-3/4 h-3/4 border border-indigo-400 bg-indigo-400/10 rounded flex items-center justify-center p-4 text-center">
-                     <span className="text-[9px] font-mono font-bold text-indigo-300 animate-pulse uppercase">Gemini Vision detects semantic boundaries using visual comprehension. (Simulation only - requires AI token)</span>
+                     <span className="text-[9px] font-mono font-bold text-indigo-300 animate-pulse uppercase tracking-widest">GEMINI_SEMANTIC_ENGINE</span>
                   </div>
+               </div>
+            )}
+
+            {/* Real OCR Overlay */}
+            {ocrActive && ocrResults.length > 0 && (
+               <div className="absolute inset-0 pointer-events-none">
+                  {ocrResults.map((res, i) => {
+                     const p = res.box_pct;
+                     const left = Math.min(...p.map((pt: any) => pt[0])) * 100;
+                     const top = Math.min(...p.map((pt: any) => pt[1])) * 100;
+                     const right = Math.max(...p.map((pt: any) => pt[0])) * 100;
+                     const bottom = Math.max(...p.map((pt: any) => pt[1])) * 100;
+
+                     return (
+                        <div key={i} className="absolute border border-amber-500/60 bg-amber-500/20 rounded shadow-[0_0_5px_rgba(245,158,11,0.4)]"
+                           style={{ top: `${top}%`, left: `${left}%`, width: `${right-left}%`, height: `${bottom-top}%` }}>
+                           <span className="absolute -top-3 left-0 text-[5px] font-mono text-amber-200 bg-black/60 px-0.5 truncate max-w-[80px]">{res.text}</span>
+                        </div>
+                     );
+                  })}
+                  <span className="absolute bottom-2 left-2 text-[6px] text-amber-500 font-mono bg-black/80 px-1 rounded uppercase tracking-widest animate-pulse">LIVE_OCR_PROXIMITY_BOUNDS</span>
                </div>
             )}
          </div>

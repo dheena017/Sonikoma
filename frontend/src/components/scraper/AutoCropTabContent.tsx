@@ -65,6 +65,7 @@ export default function AutoCropTabContent(props: AutoCropTabContentProps) {
           cropCannyLow={props.cropCannyLow}
           cropCannyHigh={props.cropCannyHigh}
           cropCloseKernelSize={props.cropCloseKernelSize}
+          addNotification={props.addNotification}
         />
       )}
       {activeTab === "advanced" && (
@@ -89,6 +90,8 @@ export default function AutoCropTabContent(props: AutoCropTabContentProps) {
           setCropCannyHigh={props.setCropCannyHigh}
           cropCloseKernelSize={props.cropCloseKernelSize}
           setCropCloseKernelSize={props.setCropCloseKernelSize}
+          scrapedImages={props.scrapedImages}
+          selectedScraped={props.selectedScraped}
         />
       )}
       {activeTab === "help" && <AutoCropHelpTab />}

@@ -1,5 +1,5 @@
-import React from "react";
-import { Layers, Wand2 } from "lucide-react";
+import React, { useState } from "react";
+import { Layers, Wand2, Loader2 } from "lucide-react";
 import SectionTitle from "../crop/SectionTitle";
 import { BG_MODE_OPTIONS } from "./autoCropConfig";
 
@@ -7,34 +7,60 @@ interface Props {
   cropBackgroundMode: string;
   setCropBackgroundMode: (v: string) => void;
   firstImageUrl: string | null;
+  addNotification?: (msg: string, type: any) => void;
 }
 
-export function AutoCropGutterModeToggle({ cropBackgroundMode, setCropBackgroundMode, firstImageUrl }: Props) {
+export function AutoCropGutterModeToggle({ cropBackgroundMode, setCropBackgroundMode, firstImageUrl, addNotification }: Props) {
+  const [isDetecting, setIsDetecting] = useState(false);
+
   const detectGutterColor = async () => {
     if (!firstImageUrl) return;
+    setIsDetecting(true);
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
-      if (!ctx) return;
+      if (!ctx) { setIsDetecting(false); return; }
       canvas.width = img.width;
       canvas.height = img.height;
       ctx.drawImage(img, 0, 0);
 
-      // Sample 4 corners
-      const corners = [
-        ctx.getImageData(0, 0, 1, 1).data,
-        ctx.getImageData(img.width - 1, 0, 1, 1).data,
-        ctx.getImageData(0, img.height - 1, 1, 1).data,
-        ctx.getImageData(img.width - 1, img.height - 1, 1, 1).data
-      ];
+      const samples: number[] = [];
+      const step = 0.1; // 10 samples per edge
 
-      const avgBrightness = corners.reduce((acc, c) => acc + (c[0] + c[1] + c[2]) / 3, 0) / 4;
+      // Sample Edges
+      for (let i = 0; i <= 1; i += step) {
+        // Top edge
+        const t = ctx.getImageData(Math.floor(img.width * i), 5, 1, 1).data;
+        samples.push((t[0] + t[1] + t[2]) / 3);
 
-      if (avgBrightness > 200) setCropBackgroundMode("white");
-      else if (avgBrightness < 50) setCropBackgroundMode("black");
-      else setCropBackgroundMode("auto");
+        // Bottom edge
+        const b = ctx.getImageData(Math.floor(img.width * i), img.height - 5, 1, 1).data;
+        samples.push((b[0] + b[1] + b[2]) / 3);
+
+        // Left edge
+        const l = ctx.getImageData(5, Math.floor(img.height * i), 1, 1).data;
+        samples.push((l[0] + l[1] + l[2]) / 3);
+
+        // Right edge
+        const r = ctx.getImageData(img.width - 5, Math.floor(img.height * i), 1, 1).data;
+        samples.push((r[0] + r[1] + r[2]) / 3);
+      }
+
+      const avgBrightness = samples.reduce((acc, s) => acc + s, 0) / samples.length;
+
+      let detected: "white" | "black" | "auto" = "auto";
+      if (avgBrightness > 215) detected = "white";
+      else if (avgBrightness < 40) detected = "black";
+
+      setCropBackgroundMode(detected);
+      addNotification?.(`Smart Gutter Detection: Set to ${detected.toUpperCase()} (Avg brightness: ${Math.round(avgBrightness)})`, "info");
+      setIsDetecting(false);
+    };
+    img.onerror = () => {
+      setIsDetecting(false);
+      addNotification?.("Failed to sample image for gutter detection.", "error");
     };
     img.src = firstImageUrl;
   };
@@ -45,11 +71,11 @@ export function AutoCropGutterModeToggle({ cropBackgroundMode, setCropBackground
          <SectionTitle icon={<Layers className="h-3 w-3" />}>Background Gutter Mode</SectionTitle>
          <button
            onClick={detectGutterColor}
-           disabled={!firstImageUrl}
-           className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-[8px] font-bold uppercase hover:bg-indigo-500/20 transition-all disabled:opacity-20"
+           disabled={!firstImageUrl || isDetecting}
+           className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-[9px] font-bold uppercase hover:bg-indigo-500/20 transition-all disabled:opacity-20"
          >
-            <Wand2 className="h-2.5 w-2.5" />
-            Smart Detect
+            {isDetecting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Wand2 className="h-3 w-3" />}
+            Edge-Sample Detect
          </button>
       </div>
       <div className="grid grid-cols-3 gap-2">

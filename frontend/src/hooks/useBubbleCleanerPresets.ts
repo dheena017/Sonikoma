@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { CustomBubblePreset, BubbleCleanerSharedProps } from "../components/scraper/tabTypes";
+import { useConfigHistory } from "./useConfigHistory";
 
 export function useBubbleCleanerPresets(props: BubbleCleanerSharedProps) {
   const [customPresets, setCustomPresets] = useState<Record<string, CustomBubblePreset>>(() => {
@@ -16,44 +17,50 @@ export function useBubbleCleanerPresets(props: BubbleCleanerSharedProps) {
 
   const [activeSlot, setActiveSlot] = useState<string | null>(null);
 
+  const currentConfig = {
+    detectionStyle: props.detectionStyle,
+    eraseMethod: props.eraseMethod,
+    sensitivity: props.sensitivity,
+    bubbleDilation: props.bubbleDilation,
+    bubbleInpaintRadius: props.bubbleInpaintRadius
+  };
+
+  const { history, pushToHistory } = useConfigHistory<any>("bubble_config", currentConfig);
+
+  const applyState = useCallback((s: any) => {
+    if (s.detectionStyle !== undefined) props.setDetectionStyle(s.detectionStyle);
+    if (s.eraseMethod !== undefined) props.setEraseMethod(s.eraseMethod);
+    if (s.sensitivity !== undefined) props.setSensitivity(s.sensitivity);
+    if (s.bubbleDilation !== undefined) props.setBubbleDilation(s.bubbleDilation);
+    if (s.bubbleInpaintRadius !== undefined) props.setBubbleInpaintRadius(s.bubbleInpaintRadius);
+  }, [props]);
+
   const savePresetSlot = useCallback((slot: string, name: string) => {
-    const updated = {
-      ...customPresets,
-      [slot]: {
-        name: name.trim() || `Custom Slot ${slot.slice(-1)}`,
-        detectionStyle: props.detectionStyle,
-        eraseMethod: props.eraseMethod,
-        sensitivity: props.sensitivity,
-        bubbleDilation: props.bubbleDilation,
-        bubbleInpaintRadius: props.bubbleInpaintRadius
-      }
+    const config = {
+      ...currentConfig,
+      name: name.trim() || `Custom Slot ${slot.slice(-1)}`,
     };
+    const updated = { ...customPresets, [slot]: config };
     setCustomPresets(updated);
     localStorage.setItem("bubble_custom_presets", JSON.stringify(updated));
     setActiveSlot(slot);
-    props.addNotification?.(`Saved custom preset: "${updated[slot].name}"`, "success");
-  }, [customPresets, props]);
+    pushToHistory(config);
+    props.addNotification?.(`Saved custom preset: "${config.name}"`, "success");
+  }, [customPresets, currentConfig, props.addNotification, pushToHistory]);
 
   const loadPresetSlot = useCallback((slot: string) => {
     const t = customPresets[slot];
     if (!t) return;
-    props.setDetectionStyle(t.detectionStyle);
-    props.setEraseMethod(t.eraseMethod);
-    props.setSensitivity(t.sensitivity);
-    props.setBubbleDilation(t.bubbleDilation);
-    props.setBubbleInpaintRadius(t.bubbleInpaintRadius);
+    applyState(t);
     setActiveSlot(slot);
     props.addNotification?.(`Loaded preset: "${t.name}"`, "info");
-  }, [customPresets, props]);
+  }, [customPresets, applyState, props.addNotification]);
 
   const applyQuickPreset = useCallback((preset: Partial<CustomBubblePreset> & { id: string }) => {
-    if (preset.detectionStyle !== undefined) props.setDetectionStyle(preset.detectionStyle);
-    if (preset.eraseMethod !== undefined) props.setEraseMethod(preset.eraseMethod);
-    if (preset.sensitivity !== undefined) props.setSensitivity(preset.sensitivity);
-    if (preset.bubbleDilation !== undefined) props.setBubbleDilation(preset.bubbleDilation);
-    if (preset.bubbleInpaintRadius !== undefined) props.setBubbleInpaintRadius(preset.bubbleInpaintRadius);
+    applyState(preset);
     setActiveSlot(preset.id);
-  }, [props]);
+    pushToHistory(preset);
+  }, [applyState, pushToHistory]);
 
   const exportPresets = useCallback(() => {
     try {
@@ -68,7 +75,7 @@ export function useBubbleCleanerPresets(props: BubbleCleanerSharedProps) {
     } catch (err: any) {
       props.addNotification?.("Failed to export presets: " + err.message, "error");
     }
-  }, [customPresets, props]);
+  }, [customPresets, props.addNotification]);
 
   const importPresets = useCallback((jsonString: string) => {
     try {
@@ -85,7 +92,7 @@ export function useBubbleCleanerPresets(props: BubbleCleanerSharedProps) {
       props.addNotification?.("Failed to parse file: " + err.message, "error");
       return false;
     }
-  }, [props]);
+  }, [props.addNotification]);
 
   return {
     customPresets,
@@ -95,6 +102,8 @@ export function useBubbleCleanerPresets(props: BubbleCleanerSharedProps) {
     loadPresetSlot,
     applyQuickPreset,
     exportPresets,
-    importPresets
+    importPresets,
+    history,
+    applyState
   };
 }
