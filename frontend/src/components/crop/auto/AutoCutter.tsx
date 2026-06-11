@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Sparkles, RefreshCw, Scissors, Sliders, Eye, HelpCircle } from "lucide-react";
-import AutoSlicerSettings from "./AutoSlicerSettings";
-import AutoSlicerCanny from "./AutoSlicerCanny";
+import AutoCutterSettings from "./AutoCutterSettings";
+import AutoCutterCanny from "./AutoCutterCanny";
 
-interface AutoSlicerProps {
+interface AutoCutterProps {
   handleDetectPanels: (settings?: { 
     sensitivity?: number; 
     backgroundMode?: string; 
@@ -25,14 +25,14 @@ interface AutoSlicerProps {
   clearDetectedBoxes?: () => void;
 }
 
-export default function AutoSlicer({
+export default function AutoCutter({
   handleDetectPanels,
   isDetecting,
   onCommitCuts,
   hasDetectedBoxes = false,
   detectedCount = 0,
   clearDetectedBoxes,
-}: AutoSlicerProps) {
+}: AutoCutterProps) {
   // Advanced parameters states
   const [strategy, setStrategy] = useState<"local-cv" | "ai">("local-cv");
   const [model, setModel] = useState<string>("gemini-2.5-flash");
@@ -86,7 +86,7 @@ export default function AutoSlicer({
   };
 
   const renderOpenCvAdvanced = () => (
-    <AutoSlicerCanny
+    <AutoCutterCanny
       minHeightPx={minHeightPx}
       setMinHeightPx={setMinHeightPx}
       minAreaPct={minAreaPct}
@@ -179,7 +179,7 @@ export default function AutoSlicer({
           ) : (
             <Scissors className="h-3.5 w-3.5" />
           )}
-          <span>{isDetecting ? "Scanning..." : dryRun ? "Dry Run Preview" : "Slice Panel Cuts"}</span>
+          <span>{isDetecting ? "Scanning..." : dryRun ? "Dry Run Preview" : "Cut Panel Cuts"}</span>
         </button>
         <button
           type="button"
@@ -219,7 +219,7 @@ export default function AutoSlicer({
       )}
 
       {showSettings && (
-        <AutoSlicerSettings
+        <AutoCutterSettings
           backgroundMode={backgroundMode}
           setBackgroundMode={setBackgroundMode}
           aspectRatio={aspectRatio}

@@ -135,7 +135,7 @@ export function useVideoGeneration({
       
       setPanels(responseData.panels || []);
       setVideoUrl(responseData.video_url);
-      setProgressStatus("Slices mapped & MP4 master timeline generated!");
+      setProgressStatus("Cuts mapped & MP4 master timeline generated!");
       setActivePreviewTab("video");
       addNotification('Video generated successfully! Check the preview player.', 'success');
       

@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { Trash2 } from "lucide-react";
-import { Slice } from "../shared/types";
+import { Cut } from "../shared/types";
 import CanvasBrushLayer from "./CanvasBrushLayer";
 import CanvasBubbleBoxes from "./CanvasBubbleBoxes";
 import CanvasSplitLines from "./CanvasSplitLines";
@@ -13,8 +13,8 @@ interface CropCanvasProps {
   editCropBottom: number;
   editCropLeft: number;
   editCropRight: number;
-  slices: Slice[];
-  selectedSliceId: string | null;
+  cuts: Cut[];
+  selectedCutId: string | null;
   showSplitPosition: boolean;
   splitPosition: number;
   splitLines: number[];
@@ -22,17 +22,17 @@ interface CropCanvasProps {
   handleMove: (clientX: number, clientY: number) => void;
   handleEnd: () => void;
   isPointInsideSelection: (x: number, y: number) => boolean;
-  handleSelectSlice: (slice: Slice) => void;
-  handleDeleteSlice: (id: string, e: React.MouseEvent) => void;
+  handleSelectCut: (cut: Cut) => void;
+  handleDeleteCut: (id: string, e: React.MouseEvent) => void;
   handleRemoveSplitLine: (yVal: number) => void;
   dragType: "draw" | "move" | "split" | "drag-split-line" | `resize-${string}` | null;
   onResizeStart: (handle: string, clientX: number, clientY: number) => void;
-  handleSelectAndDragSlice: (slice: Slice, clientX: number, clientY: number) => void;
+  handleSelectAndDragCut: (cut: Cut, clientX: number, clientY: number) => void;
   zoom?: number;
-  activeTab: "adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge";
+  activeTab: "adjust" | "edit" | "eraser" | "split" | "crop" | "merge";
 
   // Phase 4 Props
-  editMode?: "crop" | "clean_auto" | "clean_manual" | "typeset" | "slices";
+  editMode?: "crop" | "clean_auto" | "clean_manual" | "typeset" | "crop";
   detectedBubbles?: Array<{ box: [number, number, number, number]; text: string; category?: string }>;
   selectedBubbleIdx?: number | null;
   setSelectedBubbleIdx?: (idx: number | null) => void;
@@ -51,7 +51,7 @@ interface CropCanvasProps {
   setEditCropBottom: (val: number) => void;
   setEditCropLeft: (val: number) => void;
   setEditCropRight: (val: number) => void;
-  setSelectedSliceId: (id: string | null) => void;
+  setSelectedCutId: (id: string | null) => void;
 }
 
 export default function CropCanvas({
@@ -61,8 +61,8 @@ export default function CropCanvas({
   editCropBottom,
   editCropLeft,
   editCropRight,
-  slices,
-  selectedSliceId,
+  cuts,
+  selectedCutId,
   showSplitPosition,
   splitPosition,
   splitLines,
@@ -70,12 +70,12 @@ export default function CropCanvas({
   handleMove,
   handleEnd,
   isPointInsideSelection,
-  handleSelectSlice,
-  handleDeleteSlice,
+  handleSelectCut,
+  handleDeleteCut,
   handleRemoveSplitLine,
   dragType,
   onResizeStart,
-  handleSelectAndDragSlice,
+  handleSelectAndDragCut,
   zoom = 1,
   activeTab,
 
@@ -99,7 +99,7 @@ export default function CropCanvas({
   setEditCropBottom,
   setEditCropLeft,
   setEditCropRight,
-  setSelectedSliceId,
+  setSelectedCutId,
 }: CropCanvasProps) {
   // Track mouse position for dynamic cursor
   const [hoverPct, setHoverPct] = useState<{ x: number; y: number } | null>(null);
@@ -116,7 +116,7 @@ export default function CropCanvas({
     },
     [containerRef]
   );
-  
+
   // Initialize and resize manual mask canvas
   const initCanvas = (canvas: HTMLCanvasElement) => {
     const rect = canvas.getBoundingClientRect();
@@ -217,13 +217,13 @@ export default function CropCanvas({
         }}
         onMouseMove={(e) => {
           if (isManualBrushActive) return;
-          
+
           // Skip hover state updates while dragging to reduce re-renders
           if (dragType !== null) {
             if (dragType) handleMove(e.clientX, e.clientY);
             return;
           }
-          
+
           const pct = getClientPct(e.clientX, e.clientY);
           if (pct) setHoverPct(pct);
         }}
@@ -286,8 +286,8 @@ export default function CropCanvas({
         )}
 
         {/* Persistent UI Components (Visibility controlled by CSS inside components) */}
-        <CanvasSplitLines 
-          isVisible={showSplitPosition && activeTab === "slice"}
+        <CanvasSplitLines
+          isVisible={showSplitPosition && activeTab === "split"}
           splitPosition={splitPosition}
           splitLines={splitLines}
           hoverPct={hoverPct}
@@ -296,8 +296,8 @@ export default function CropCanvas({
           setShowSplitPosition={setShowSplitPosition}
         />
 
-        <CanvasCropSelection 
-          isVisible={activeTab === 'slice'} // Shows when on Crop tab
+        <CanvasCropSelection
+          isVisible={activeTab === 'split'} // Shows when on Crop tab
           editCropTop={editCropTop}
           editCropBottom={editCropBottom}
           editCropLeft={editCropLeft}
@@ -305,18 +305,18 @@ export default function CropCanvas({
           onResizeStart={onResizeStart}
         />
 
-        {/* Slices Overlay */}
-        {(editMode === "slices" || editMode === "crop") && slices.map((slice, index) => {
-          const isSelected = slice.id === selectedSliceId;
+        {/* Cuts Overlay */}
+        {(editMode === "crop" || editMode === "crop") && cuts.map((cut, index) => {
+          const isSelected = cut.id === selectedCutId;
           return (
             <div
-              key={slice.id}
-              onClick={(e) => { e.stopPropagation(); handleSelectSlice(slice); }}
-              onMouseDown={(e) => { if (e.button === 0) { e.stopPropagation(); handleSelectAndDragSlice(slice, e.clientX, e.clientY); }}}
+              key={cut.id}
+              onClick={(e) => { e.stopPropagation(); handleSelectCut(cut); }}
+              onMouseDown={(e) => { if (e.button === 0) { e.stopPropagation(); handleSelectAndDragCut(cut, e.clientX, e.clientY); }}}
               className={`absolute border-2 pointer-events-auto cursor-grab active:cursor-grabbing transition-colors flex flex-col justify-between ${
                 isSelected ? "border-emerald-400 bg-emerald-500/10 z-30" : "border-purple-500/40 bg-purple-500/5 hover:bg-purple-500/10 z-20"
               }`}
-              style={{ top: `${slice.cropTop}%`, bottom: `${slice.cropBottom}%`, left: `${slice.cropLeft}%`, right: `${slice.cropRight}%` }}
+              style={{ top: `${cut.cropTop}%`, bottom: `${cut.cropBottom}%`, left: `${cut.cropLeft}%`, right: `${cut.cropRight}%` }}
             >
               <div className="p-1">
                 <span className={`inline-block font-mono text-[8px] font-bold px-1.5 py-0.5 rounded-lg ${isSelected ? "bg-emerald-950 text-emerald-300" : "bg-purple-950/90 text-purple-300"}`}>
@@ -324,7 +324,7 @@ export default function CropCanvas({
                 </span>
               </div>
               <div className="flex justify-end p-1">
-                <button onClick={(e) => handleDeleteSlice(slice.id, e)} className="bg-red-950/90 text-red-300 p-0.5 rounded-lg"><Trash2 className="h-2.5 w-2.5" /></button>
+                <button onClick={(e) => handleDeleteCut(cut.id, e)} className="bg-red-950/90 text-red-300 p-0.5 rounded-lg"><Trash2 className="h-2.5 w-2.5" /></button>
               </div>
             </div>
           );

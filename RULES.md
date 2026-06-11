@@ -40,7 +40,7 @@ webtoon-to-video-backend/
 │   │   │   └── fetchWithInterceptor.ts   ← Global fetch wrapper + error interceptor
 │   │   ├── components/               ← All reusable React UI components (.tsx)
 │   │   │   ├── crop/                 ← Fully modular Crop Editor sub-components
-│   │   │   │   ├── auto/             ← AutoSlicer.tsx, AutoSlicerCanny.tsx, AutoSlicerSettings.tsx, bubblePresets.ts
+│   │   │   │   ├── auto/             ← AutoCutter.tsx, AutoCutterCanny.tsx, AutoCutterSettings.tsx, bubblePresets.ts
 │   │   │   │   ├── canvas/           ← CropCanvas.tsx, CanvasBrushLayer.tsx, CanvasBubbleBoxes.tsx, CanvasCropSelection.tsx, CanvasSplitLines.tsx
 │   │   │   │   ├── clean/            ← CleanBubblesPanel.tsx, CleanBubblesAdvanced.tsx, CleanBubblesManual.tsx, CleanBubblesPresets.tsx, CleanBubblesHistory.tsx, CleanBubblesModes.tsx
 │   │   │   │   ├── cuts/             ← CutsRegistry.tsx, CutsRegistryFineTune.tsx, CutsRegistryHeader.tsx, CutsRegistryList.tsx, CutsRegistrySelector.tsx

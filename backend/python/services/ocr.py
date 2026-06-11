@@ -247,9 +247,9 @@ class PanelProcessor:
             self._update_internal_dimensions()
             return self._image
 
-    def slice_all_panels(self, panels_config: List[Dict[str, Any]], output_dir: str) -> None:
+    def cut_all_panels(self, panels_config: List[Dict[str, Any]], output_dir: str) -> None:
         """
-        Processes webtoon slice configurations by resolving boundaries, correcting seams, 
+        Processes webtoon cut configurations by resolving boundaries, correcting seams,
         cleaning side columns, and outputting to file.
         """
         if not os.path.exists(output_dir):
@@ -288,17 +288,17 @@ class PanelProcessor:
             if start_y >= end_y:
                 continue
 
-            sliced_crop = self._image[start_y:end_y, :]
-            clean_panel = self.trim_x_margins(sliced_crop)
+            cut_crop = self._image[start_y:end_y, :]
+            clean_panel = self.trim_x_margins(cut_crop)
 
             out_filename = os.path.join(output_dir, f"panel_{idx:03d}.png")
             cv2.imwrite(out_filename, clean_panel)
 
 
-def slice_panels(image_path: str, panels_config: List[Dict[str, Any]], output_dir: str) -> None:
-    """Wrapper supporting the legacy slice_panels signature by delegating to PanelProcessor."""
+def cut_panels(image_path: str, panels_config: List[Dict[str, Any]], output_dir: str) -> None:
+    """Wrapper supporting the legacy cut_panels signature by delegating to PanelProcessor."""
     processor = PanelProcessor(image_path)
-    processor.slice_all_panels(panels_config, output_dir)
+    processor.cut_all_panels(panels_config, output_dir)
 
 
 def remove_speech_bubbles(image_path: str, output_path: str, method: str = 'inpaint') -> None:

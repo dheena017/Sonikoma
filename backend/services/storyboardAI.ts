@@ -4,15 +4,15 @@ import { ai, hf, Type } from '../config/clients.js';
  * Helper function to generate rich story dialogs/captions dynamically without hardcoding
  */
 export async function generateDynamicPanels(title: string, genre: string, episode: string, imgUrls: string[], model: string): Promise<any[]> {
-  const activeSlicesCount = Math.min(imgUrls.length, 8);
+  const activeCutsCount = Math.min(imgUrls.length, 8);
   const prompt = `You are a cinematic comic book editor and storyteller.
 Given this Comic Webtoon information:
 Title: "${title}"
 Genre: "${genre}"
 Episode: "${episode}"
 
-Please generate exactly ${activeSlicesCount} distinct chronological narration or panel speech lines.
-For each of the ${activeSlicesCount} panels, provide:
+Please generate exactly ${activeCutsCount} distinct chronological narration or panel speech lines.
+For each of the ${activeCutsCount} panels, provide:
 1. "speech_text": An engaging, atmospheric description (under 20 words).
 2. "sfx": A punchy comic-style sound effect in brackets.
 3. "motion_type": One of 'zoom_in', 'zoom_out', 'pan_left', 'pan_right', 'pan_up', 'pan_down'.
@@ -32,7 +32,7 @@ Output strictly valid JSON with top-level key "panels".`;
       const responseText = response.choices[0].message.content || "";
       const parsedAI = JSON.parse(responseText.replace(/```json/g, '').replace(/```/g, '').trim());
       if (parsedAI && Array.isArray(parsedAI.panels)) {
-          return parsedAI.panels.slice(0, activeSlicesCount).map((p: any, idx: number) => ({
+          return parsedAI.panels.slice(0, activeCutsCount).map((p: any, idx: number) => ({
               id: idx + 1,
               image_url: imgUrls[idx],
               original_image_url: imgUrls[idx],
@@ -83,8 +83,8 @@ Output strictly valid JSON with top-level key "panels".`;
       if (responseText) {
         const parsedAI = JSON.parse(responseText);
         if (parsedAI && Array.isArray(parsedAI.panels) && parsedAI.panels.length > 0) {
-          console.log(`[Gemini] Storyboard narration generated successfully for ${activeSlicesCount} slices.`);
-          return parsedAI.panels.slice(0, activeSlicesCount).map((p: any, idx: number) => ({
+          console.log(`[Gemini] Storyboard narration generated successfully for ${activeCutsCount} cuts.`);
+          return parsedAI.panels.slice(0, activeCutsCount).map((p: any, idx: number) => ({
             id: idx + 1,
             image_url: imgUrls[idx],
             original_image_url: imgUrls[idx],
@@ -130,7 +130,7 @@ Output strictly valid JSON with top-level key "panels".`;
           if (responseText) {
             const parsedAI = JSON.parse(responseText);
             if (parsedAI && Array.isArray(parsedAI.panels) && parsedAI.panels.length > 0) {
-              return parsedAI.panels.slice(0, activeSlicesCount).map((p: any, idx: number) => ({
+              return parsedAI.panels.slice(0, activeCutsCount).map((p: any, idx: number) => ({
                 id: idx + 1,
                 image_url: imgUrls[idx],
                 original_image_url: imgUrls[idx],
@@ -151,7 +151,7 @@ Output strictly valid JSON with top-level key "panels".`;
   }
 
   const panelsList = [];
-  for (let i = 0; i < activeSlicesCount; i++) {
+  for (let i = 0; i < activeCutsCount; i++) {
     let text = "";
     let sfx = "";
     let motion = "zoom_in";
@@ -160,7 +160,7 @@ Output strictly valid JSON with top-level key "panels".`;
       text = `Welcome to the legendary path of ${title}! The grand chronicle of the ${episode} of this ${genre} saga starts here.`;
       sfx = "[Chime Echo]";
       motion = "zoom_in";
-    } else if (i === activeSlicesCount - 1) {
+    } else if (i === activeCutsCount - 1) {
       text = `And thus is the peak climax of ${episode} of ${title} completed! What epic struggles lie ahead?`;
       sfx = "[Impact Strike]";
       motion = "zoom_out";

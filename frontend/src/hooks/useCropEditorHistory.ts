@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { Slice } from "../components/crop/types";
+import { Cut } from "../components/crop/types";
 
 interface UseCropEditorHistoryProps {
   editCropTop: number;
@@ -10,12 +10,12 @@ interface UseCropEditorHistoryProps {
   setEditCropLeft: (val: number) => void;
   editCropRight: number;
   setEditCropRight: (val: number) => void;
-  slices: Slice[];
-  setSlices: React.Dispatch<React.SetStateAction<Slice[]>>;
+  cuts: Cut[];
+  setCuts: React.Dispatch<React.SetStateAction<Cut[]>>;
   splitLines: number[];
   setSplitLines: React.Dispatch<React.SetStateAction<number[]>>;
-  selectedSliceId: string | null;
-  setSelectedSliceId: (id: string | null) => void;
+  selectedCutId: string | null;
+  setSelectedCutId: (id: string | null) => void;
   savedState: any;
 }
 
@@ -24,9 +24,9 @@ export type HistorySnapshot = {
   cropBottom: number;
   cropLeft: number;
   cropRight: number;
-  slices: Slice[];
+  cuts: Cut[];
   splitLines: number[];
-  selectedSliceId: string | null;
+  selectedCutId: string | null;
 };
 
 export function useCropEditorHistory({
@@ -38,12 +38,12 @@ export function useCropEditorHistory({
   setEditCropLeft,
   editCropRight,
   setEditCropRight,
-  slices,
-  setSlices,
+  cuts,
+  setCuts,
   splitLines,
   setSplitLines,
-  selectedSliceId,
-  setSelectedSliceId,
+  selectedCutId,
+  setSelectedCutId,
   savedState,
 }: UseCropEditorHistoryProps) {
   const [history, setHistory] = useState<HistorySnapshot[]>(savedState?.history || []);
@@ -57,13 +57,13 @@ export function useCropEditorHistory({
         cropBottom: editCropBottom,
         cropLeft: editCropLeft,
         cropRight: editCropRight,
-        slices,
+        cuts,
         splitLines,
-        selectedSliceId,
+        selectedCutId,
       },
     ]);
     setRedoHistory([]);
-  }, [editCropTop, editCropBottom, editCropLeft, editCropRight, slices, splitLines, selectedSliceId]);
+  }, [editCropTop, editCropBottom, editCropLeft, editCropRight, cuts, splitLines, selectedCutId]);
 
   const handleUndo = useCallback(() => {
     setHistory((prev) => {
@@ -77,9 +77,9 @@ export function useCropEditorHistory({
           cropBottom: editCropBottom,
           cropLeft: editCropLeft,
           cropRight: editCropRight,
-          slices,
+          cuts,
           splitLines,
-          selectedSliceId,
+          selectedCutId,
         },
       ]);
 
@@ -87,12 +87,12 @@ export function useCropEditorHistory({
       setEditCropBottom(snap.cropBottom);
       setEditCropLeft(snap.cropLeft);
       setEditCropRight(snap.cropRight);
-      setSlices(snap.slices);
+      setCuts(snap.cuts);
       setSplitLines(snap.splitLines);
-      setSelectedSliceId(snap.selectedSliceId);
+      setSelectedCutId(snap.selectedCutId);
       return prev.slice(0, -1);
     });
-  }, [editCropTop, editCropBottom, editCropLeft, editCropRight, slices, splitLines, selectedSliceId, setEditCropTop, setEditCropBottom, setEditCropLeft, setEditCropRight, setSlices, setSplitLines, setSelectedSliceId]);
+  }, [editCropTop, editCropBottom, editCropLeft, editCropRight, cuts, splitLines, selectedCutId, setEditCropTop, setEditCropBottom, setEditCropLeft, setEditCropRight, setCuts, setSplitLines, setSelectedCutId]);
 
   const handleRedo = useCallback(() => {
     setRedoHistory((prevRedo) => {
@@ -106,9 +106,9 @@ export function useCropEditorHistory({
           cropBottom: editCropBottom,
           cropLeft: editCropLeft,
           cropRight: editCropRight,
-          slices,
+          cuts,
           splitLines,
-          selectedSliceId,
+          selectedCutId,
         },
       ]);
 
@@ -116,12 +116,12 @@ export function useCropEditorHistory({
       setEditCropBottom(snap.cropBottom);
       setEditCropLeft(snap.cropLeft);
       setEditCropRight(snap.cropRight);
-      setSlices(snap.slices);
+      setCuts(snap.cuts);
       setSplitLines(snap.splitLines);
-      setSelectedSliceId(snap.selectedSliceId);
+      setSelectedCutId(snap.selectedCutId);
       return prevRedo.slice(0, -1);
     });
-  }, [editCropTop, editCropBottom, editCropLeft, editCropRight, slices, splitLines, selectedSliceId, setEditCropTop, setEditCropBottom, setEditCropLeft, setEditCropRight, setSlices, setSplitLines, setSelectedSliceId]);
+  }, [editCropTop, editCropBottom, editCropLeft, editCropRight, cuts, splitLines, selectedCutId, setEditCropTop, setEditCropBottom, setEditCropLeft, setEditCropRight, setCuts, setSplitLines, setSelectedCutId]);
 
   return {
     history,

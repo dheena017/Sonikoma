@@ -1,7 +1,7 @@
 // Shared export entrypoint for crop-related components and types.
-export { default as AutoSlicer } from "./auto/AutoSlicer";
-export { default as AutoSlicerCanny } from "./auto/AutoSlicerCanny";
-export { default as AutoSlicerSettings } from "./auto/AutoSlicerSettings";
+export { default as AutoCutter } from "./auto/AutoCutter";
+export { default as AutoCutterCanny } from "./auto/AutoCutterCanny";
+export { default as AutoCutterSettings } from "./auto/AutoCutterSettings";
 export { default as CropCanvas } from "./canvas/CropCanvas";
 export { default as CanvasBrushLayer } from "./canvas/CanvasBrushLayer";
 export { default as CanvasBubbleBoxes } from "./canvas/CanvasBubbleBoxes";

@@ -6,7 +6,7 @@ export interface Slot {
   autoTrim: boolean;
 }
 
-export interface Slice {
+export interface Cut {
   id: string;
   cropTop: number;
   cropBottom: number;

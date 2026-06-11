@@ -3,14 +3,14 @@ import { Plus } from "lucide-react";
 
 interface CutsRegistrySelectorProps {
   hasSelection: boolean;
-  handlePushToSlices: () => void;
+  handlePushToCuts: () => void;
   autoPushOnDraw: boolean;
   setAutoPushOnDraw: (v: boolean) => void;
 }
 
 export function CutsRegistrySelector({
   hasSelection,
-  handlePushToSlices,
+  handlePushToCuts,
   autoPushOnDraw,
   setAutoPushOnDraw,
 }: CutsRegistrySelectorProps) {
@@ -18,7 +18,7 @@ export function CutsRegistrySelector({
     <div className="bg-black/30 border border-white/5 p-3 rounded-xl space-y-3">
       <button
         type="button"
-        onClick={handlePushToSlices}
+        onClick={handlePushToCuts}
         disabled={!hasSelection}
         className="w-full bg-purple-600/80 hover:bg-purple-500 disabled:opacity-30 disabled:cursor-not-allowed text-white text-xs font-bold py-2 rounded-xl cursor-pointer transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-purple-900/30"
         style={{ boxShadow: !hasSelection ? undefined : "0 0 15px rgba(139,92,246,0.2)" }}

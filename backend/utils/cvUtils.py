@@ -177,8 +177,8 @@ def run_cv_detection(image_path: str) -> List[Dict[str, Any]]:
                 
         boxes = []
         for start_y, end_y in panels:
-            panel_slice = gray_arr[start_y:end_y, :]
-            col_means = np.mean(panel_slice, axis=0)
+            panel_cut = gray_arr[start_y:end_y, :]
+            col_means = np.mean(panel_cut, axis=0)
             
             # Trim horizontal white space columns to focus crop tightly onto the panel
             if is_white_bg:

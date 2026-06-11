@@ -6,13 +6,13 @@ import EnhancementsPanel from "../enhancements/EnhancementsPanel";
 import CleanBubblesPanel from "../clean/CleanBubblesPanel";
 import HorizontalSplitter from "../horizontal/HorizontalSplitter";
 import CutsRegistry from "../cuts/CutsRegistry";
-import AutoSlicer from "../auto/AutoSlicer";
+import AutoCutter from "../auto/AutoCutter";
 
 interface CropEditorSidebarProps {
-  activeTab: "adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge";
+  activeTab: "adjust" | "edit" | "eraser" | "split" | "crop" | "merge";
   setActiveTab: (tab: any) => void;
-  slices: any[];
-  setSlices: any;
+  cuts: any[];
+  setCuts: any;
   editingImageIdx: number;
   scrapedImages: string[];
   isMerging: boolean;
@@ -87,7 +87,7 @@ interface CropEditorSidebarProps {
   setSplitLines: any;
   showSplitPosition: boolean;
   setShowSplitPosition: any;
-  setSelectedSliceId: any;
+  setSelectedCutId: any;
   handleAddSplitLine: any;
   handleRemoveSplitLine: any;
   handleExecuteHorizontalSplit: any;
@@ -97,17 +97,17 @@ interface CropEditorSidebarProps {
   setMagneticSnap: any;
   detectedGutters: number[];
   setDetectedGutters: any;
-  selectedSliceId: string | null;
+  selectedCutId: string | null;
   editAutoTrim: boolean;
-  handlePushToSlices: any;
+  handlePushToCuts: any;
   autoPushOnDraw: boolean;
   setAutoPushOnDraw: any;
-  handleClearAllSlices: any;
+  handleClearAllCuts: any;
   handleNudge: any;
-  handleSelectSlice: any;
-  handleDeleteSlice: any;
-  handleCropSingleSlice: any;
-  isCroppingSlice: string | null;
+  handleSelectCut: any;
+  handleDeleteCut: any;
+  handleCropSingleCut: any;
+  isCroppingCut: string | null;
   handleDetectPanels: any;
   isDetecting: boolean;
   handleCommitDetectedBoxes: any;
@@ -119,8 +119,8 @@ interface CropEditorSidebarProps {
 function CropEditorSidebar({
   activeTab,
   setActiveTab,
-  slices,
-  setSlices,
+  cuts,
+  setCuts,
   editingImageIdx,
   scrapedImages,
   isMerging,
@@ -195,7 +195,7 @@ function CropEditorSidebar({
   setSplitLines,
   showSplitPosition,
   setShowSplitPosition,
-  setSelectedSliceId,
+  setSelectedCutId,
   handleAddSplitLine,
   handleRemoveSplitLine,
   handleExecuteHorizontalSplit,
@@ -205,17 +205,17 @@ function CropEditorSidebar({
   setMagneticSnap,
   detectedGutters,
   setDetectedGutters,
-  selectedSliceId,
+  selectedCutId,
   editAutoTrim,
-  handlePushToSlices,
+  handlePushToCuts,
   autoPushOnDraw,
   setAutoPushOnDraw,
-  handleClearAllSlices,
+  handleClearAllCuts,
   handleNudge,
-  handleSelectSlice,
-  handleDeleteSlice,
-  handleCropSingleSlice,
-  isCroppingSlice,
+  handleSelectCut,
+  handleDeleteCut,
+  handleCropSingleCut,
+  isCroppingCut,
   handleDetectPanels,
   isDetecting,
   handleCommitDetectedBoxes,
@@ -223,26 +223,26 @@ function CropEditorSidebar({
   handleClearDetectedBoxes,
   handleExecuteSave,
 }: CropEditorSidebarProps) {
-  const handleTabClick = useCallback((tab: "adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge") => {
+  const handleTabClick = useCallback((tab: "adjust" | "edit" | "eraser" | "split" | "crop" | "merge") => {
     setActiveTab(tab);
 
     // Set the correct editMode based on which tab was clicked
-    if (tab === "slice") {
+    if (tab === "split") {
       setEditMode("crop");
       setShowSplitPosition(true);
       setEditCropTop(0);
       setEditCropBottom(0);
       setEditCropLeft(0);
       setEditCropRight(0);
-      setSelectedSliceId(null);
-    } else if (tab === "cuts") {
-      setEditMode("slices");
+      setSelectedCutId(null);
+    } else if (tab === "crop") {
+      setEditMode("crop");
     } else if (tab === "eraser") {
       setEditMode("clean_manual");
     } else {
       setEditMode("crop"); // For adjust, edit, merge
     }
-  }, [setActiveTab, setEditMode, setShowSplitPosition, setEditCropTop, setEditCropBottom, setEditCropLeft, setEditCropRight, setSelectedSliceId]);
+  }, [setActiveTab, setEditMode, setShowSplitPosition, setEditCropTop, setEditCropBottom, setEditCropLeft, setEditCropRight, setSelectedCutId]);
 
   return (
     <div className="lg:col-span-5 flex flex-col space-y-3 h-full min-h-0 overflow-hidden pr-0 sm:pr-1.5 scrollbar-thin overscroll-contain">
@@ -252,10 +252,10 @@ function CropEditorSidebar({
           { key: "adjust", label: "Adjust", emoji: "✨" },
           { key: "edit", label: "Edit", emoji: "✏️" },
           { key: "eraser", label: "Erase", emoji: "🧼" },
-          { key: "slice", label: "Cut", emoji: "✂️" },
-          { key: "cuts", label: `Crop (${slices.length})`, emoji: "🎯" },
+          { key: "split", label: "Cut", emoji: "✂️" },
+          { key: "crop", label: `Crop (${cuts.length})`, emoji: "🎯" },
           { key: "merge", label: "Merge", emoji: "🔗" },
-        ] as { key: "adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge"; label: string; emoji: string }[]).map((tab) => (
+        ] as { key: "adjust" | "edit" | "eraser" | "split" | "crop" | "merge"; label: string; emoji: string }[]).map((tab) => (
           <button
             key={tab.key}
             type="button"
@@ -374,7 +374,7 @@ function CropEditorSidebar({
           </div>
         )}
 
-        {activeTab === "slice" && (
+        {activeTab === "split" && (
           <div className="space-y-4 rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
             <HorizontalSplitter
               splitPosition={splitPosition}
@@ -387,7 +387,7 @@ function CropEditorSidebar({
               setEditCropBottom={setEditCropBottom}
               setEditCropLeft={setEditCropLeft}
               setEditCropRight={setEditCropRight}
-              setSelectedSliceId={setSelectedSliceId}
+              setSelectedCutId={setSelectedCutId}
               handleAddSplitLine={handleAddSplitLine}
               handleRemoveSplitLine={handleRemoveSplitLine}
               handleExecuteHorizontalSplit={handleExecuteHorizontalSplit}
@@ -401,13 +401,13 @@ function CropEditorSidebar({
           </div>
         )}
 
-        {activeTab === "cuts" && (
+        {activeTab === "crop" && (
           <div className="space-y-4 rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
             <CutsRegistry
-              slices={slices}
-              setSlices={setSlices}
-              selectedSliceId={selectedSliceId}
-              setSelectedSliceId={setSelectedSliceId}
+              cuts={cuts}
+              setCuts={setCuts}
+              selectedCutId={selectedCutId}
+              setSelectedCutId={setSelectedCutId}
               editCropTop={editCropTop}
               setEditCropTop={setEditCropTop}
               editCropBottom={editCropBottom}
@@ -417,18 +417,18 @@ function CropEditorSidebar({
               editCropRight={editCropRight}
               setEditCropRight={setEditCropRight}
               editAutoTrim={editAutoTrim}
-              handlePushToSlices={handlePushToSlices}
+              handlePushToCuts={handlePushToCuts}
               autoPushOnDraw={autoPushOnDraw}
               setAutoPushOnDraw={setAutoPushOnDraw}
-              handleClearAllSlices={handleClearAllSlices}
+              handleClearAllCuts={handleClearAllCuts}
               handleNudge={handleNudge}
-              handleSelectSlice={handleSelectSlice}
-              handleDeleteSlice={handleDeleteSlice}
-              handleCropSingleSlice={handleCropSingleSlice}
-              isCroppingSlice={isCroppingSlice}
+              handleSelectCut={handleSelectCut}
+              handleDeleteCut={handleDeleteCut}
+              handleCropSingleCut={handleCropSingleCut}
+              isCroppingCut={isCroppingCut}
               isSavingEdit={isSavingEdit}
             />
-            <AutoSlicer
+            <AutoCutter
               handleDetectPanels={handleDetectPanels}
               isDetecting={isDetecting}
               onCommitCuts={handleCommitDetectedBoxes}
@@ -451,7 +451,7 @@ function CropEditorSidebar({
               ) : (
                 <>
                   <Layers className="h-4 w-4 text-purple-200" />
-                  <span>Execute {slices.length} Crops</span>
+                  <span>Execute {cuts.length} Crops</span>
                 </>
               )}
             </button>

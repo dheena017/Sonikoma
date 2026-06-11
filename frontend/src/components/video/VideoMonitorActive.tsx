@@ -93,7 +93,7 @@ export function VideoMonitorActive({
             <div className="absolute inset-0 bg-black/85 backdrop-blur-sm flex flex-col items-center justify-center space-y-3 z-30">
               <RefreshCw className="h-8 w-8 text-purple-400 animate-spin" />
               <p className="text-xs font-mono text-purple-300 font-semibold tracking-wider">Recalculating CV Margins...</p>
-              <p className="text-[10px] text-neutral-500 font-mono">Re-slicing boundaries live</p>
+              <p className="text-[10px] text-neutral-500 font-mono">Re-cutting boundaries live</p>
             </div>
           )}
 

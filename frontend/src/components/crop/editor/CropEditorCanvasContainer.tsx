@@ -12,8 +12,8 @@ interface CropEditorCanvasContainerProps {
   editCropBottom: number;
   editCropLeft: number;
   editCropRight: number;
-  slices: any[];
-  selectedSliceId: string | null;
+  cuts: any[];
+  selectedCutId: string | null;
   showSplitPosition: boolean;
   splitPosition: number;
   splitLines: number[];
@@ -21,12 +21,12 @@ interface CropEditorCanvasContainerProps {
   handleMove: (clientX: number, clientY: number) => void;
   handleEnd: () => void;
   isPointInsideSelection: (x: number, y: number) => boolean;
-  handleSelectSlice: (slice: any) => void;
-  handleDeleteSlice: (id: string, e: React.MouseEvent) => void;
+  handleSelectCut: (cut: any) => void;
+  handleDeleteCut: (id: string, e: React.MouseEvent) => void;
   handleRemoveSplitLine: (yVal: number) => void;
   dragType: any;
   onResizeStart: (handle: string, clientX: number, clientY: number) => void;
-  handleSelectAndDragSlice: (slice: any, clientX: number, clientY: number) => void;
+  handleSelectAndDragCut: (cut: any, clientX: number, clientY: number) => void;
   zoom: number;
   editMode: any;
   detectedBubbles: any[];
@@ -41,8 +41,8 @@ interface CropEditorCanvasContainerProps {
   setEditCropBottom: (val: number) => void;
   setEditCropLeft: (val: number) => void;
   setEditCropRight: (val: number) => void;
-  setSelectedSliceId: (id: string | null) => void;
-  activeTab: "adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge";
+  setSelectedCutId: (id: string | null) => void;
+  activeTab: "adjust" | "edit" | "eraser" | "split" | "crop" | "merge";
 }
 
 export default function CropEditorCanvasContainer({
@@ -55,8 +55,8 @@ export default function CropEditorCanvasContainer({
   editCropBottom,
   editCropLeft,
   editCropRight,
-  slices,
-  selectedSliceId,
+  cuts,
+  selectedCutId,
   showSplitPosition,
   splitPosition,
   splitLines,
@@ -64,12 +64,12 @@ export default function CropEditorCanvasContainer({
   handleMove,
   handleEnd,
   isPointInsideSelection,
-  handleSelectSlice,
-  handleDeleteSlice,
+  handleSelectCut,
+  handleDeleteCut,
   handleRemoveSplitLine,
   dragType,
   onResizeStart,
-  handleSelectAndDragSlice,
+  handleSelectAndDragCut,
   zoom,
   editMode,
   detectedBubbles,
@@ -84,29 +84,29 @@ export default function CropEditorCanvasContainer({
   setEditCropBottom,
   setEditCropLeft,
   setEditCropRight,
-  setSelectedSliceId,
+  setSelectedCutId,
   activeTab,
 }: CropEditorCanvasContainerProps) {
   // Safe handlers that only allow crop drawing when in the correct tabs
   const safeHandleStart = (clientX: number, clientY: number) => {
-    if (activeTab !== "slice" && activeTab !== "cuts") return;
+    if (activeTab !== "split" && activeTab !== "crop") return;
     handleStart(clientX, clientY);
   };
 
   const safeHandleMove = (clientX: number, clientY: number) => {
-    if (activeTab !== "slice" && activeTab !== "cuts") return;
+    if (activeTab !== "split" && activeTab !== "crop") return;
     handleMove(clientX, clientY);
   };
 
   const safeHandleEnd = () => {
-    if (activeTab !== "slice" && activeTab !== "cuts") return;
+    if (activeTab !== "split" && activeTab !== "crop") return;
     handleEnd();
   };
 
   return (
-    <div 
+    <div
       className="lg:col-span-7 flex flex-col space-y-2 h-full min-h-0 overflow-hidden"
-      style={{ 
+      style={{
         pointerEvents: "auto"
       }}
     >
@@ -148,8 +148,8 @@ export default function CropEditorCanvasContainer({
         editCropBottom={editCropBottom}
         editCropLeft={editCropLeft}
         editCropRight={editCropRight}
-        slices={slices}
-        selectedSliceId={selectedSliceId}
+        cuts={cuts}
+        selectedCutId={selectedCutId}
         showSplitPosition={showSplitPosition}
         splitPosition={splitPosition}
         splitLines={splitLines}
@@ -157,12 +157,12 @@ export default function CropEditorCanvasContainer({
         handleMove={safeHandleMove}
         handleEnd={safeHandleEnd}
         isPointInsideSelection={isPointInsideSelection}
-        handleSelectSlice={handleSelectSlice}
-        handleDeleteSlice={handleDeleteSlice}
+        handleSelectCut={handleSelectCut}
+        handleDeleteCut={handleDeleteCut}
         handleRemoveSplitLine={handleRemoveSplitLine}
         dragType={dragType}
         onResizeStart={onResizeStart}
-        handleSelectAndDragSlice={handleSelectAndDragSlice}
+        handleSelectAndDragCut={handleSelectAndDragCut}
         zoom={zoom}
         editMode={editMode}
         detectedBubbles={detectedBubbles}
@@ -177,7 +177,7 @@ export default function CropEditorCanvasContainer({
         setEditCropBottom={setEditCropBottom}
         setEditCropLeft={setEditCropLeft}
         setEditCropRight={setEditCropRight}
-        setSelectedSliceId={setSelectedSliceId}
+        setSelectedCutId={setSelectedCutId}
         activeTab={activeTab}
       />
 

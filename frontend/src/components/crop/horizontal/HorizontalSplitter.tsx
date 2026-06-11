@@ -16,7 +16,7 @@ interface HorizontalSplitterProps {
   setEditCropBottom: (val: number) => void;
   setEditCropLeft: (val: number) => void;
   setEditCropRight: (val: number) => void;
-  setSelectedSliceId: (id: string | null) => void;
+  setSelectedCutId: (id: string | null) => void;
   handleAddSplitLine: () => void;
   handleRemoveSplitLine: (yVal: number) => void;
   handleExecuteHorizontalSplit: () => Promise<void>;
@@ -39,7 +39,7 @@ export default function HorizontalSplitter({
   setEditCropBottom,
   setEditCropLeft,
   setEditCropRight,
-  setSelectedSliceId,
+  setSelectedCutId,
   handleAddSplitLine,
   handleRemoveSplitLine,
   handleExecuteHorizontalSplit,
@@ -52,7 +52,7 @@ export default function HorizontalSplitter({
 }: HorizontalSplitterProps) {
   const [equalPartsCount, setEqualPartsCount] = useState<number>(3);
   const [intervalPercent, setIntervalPercent] = useState<number>(20);
-  const [sliceHeightPx, setSliceHeightPx] = useState<number>(1000);
+  const [cutHeightPx, setCutHeightPx] = useState<number>(1000);
   const [tolerance, setTolerance] = useState<number>(15);
   const [minGutterHeight, setMinGutterHeight] = useState<number>(2);
 
@@ -143,10 +143,10 @@ export default function HorizontalSplitter({
     setShowSplitPosition(true);
   };
 
-  const handleApplyPixelSlice = () => {
-    if (!naturalHeight || sliceHeightPx <= 0) return;
+  const handleApplyPixelCut = () => {
+    if (!naturalHeight || cutHeightPx <= 0) return;
     const newLines: number[] = [];
-    for (let currentY = sliceHeightPx; currentY < naturalHeight; currentY += sliceHeightPx) {
+    for (let currentY = cutHeightPx; currentY < naturalHeight; currentY += cutHeightPx) {
       const pct = parseFloat(((currentY / naturalHeight) * 100).toFixed(1));
       if (pct >= 5 && pct <= 95) {
         newLines.push(pct);
@@ -226,15 +226,15 @@ export default function HorizontalSplitter({
     const sorted = [...splitLines].sort((a, b) => a - b);
     const segments = [];
     let prevPct = 0;
-    
+
     for (let i = 0; i <= sorted.length; i++) {
       const currentPct = i < sorted.length ? sorted[i] : 100;
       const heightPct = currentPct - prevPct;
-      
+
       const startPx = naturalHeight ? Math.round((prevPct / 100) * naturalHeight) : 0;
       const endPx = naturalHeight ? Math.round((currentPct / 100) * naturalHeight) : 0;
       const heightPx = naturalHeight ? endPx - startPx : null;
-      
+
       segments.push({
         index: i + 1,
         startPct: prevPct,
@@ -275,7 +275,7 @@ export default function HorizontalSplitter({
                   setEditCropBottom(0);
                   setEditCropLeft(0);
                   setEditCropRight(0);
-                  setSelectedSliceId(null);
+                  setSelectedCutId(null);
                 }
               }}
               className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
@@ -418,12 +418,12 @@ export default function HorizontalSplitter({
           </button>
         </div>
 
-        {/* Pixel height slicing (Webtoon special) */}
+        {/* Pixel height cutting (Webtoon special) */}
         {naturalHeight && (
           <div className="space-y-1.5 pt-1.5 border-t border-white/5">
             <div className="flex justify-between items-center text-[9px] font-mono text-neutral-500">
-              <span>Slice every X pixels</span>
-              <span className="text-purple-300 font-bold">{sliceHeightPx} px</span>
+              <span>Cut every X pixels</span>
+              <span className="text-purple-300 font-bold">{cutHeightPx} px</span>
             </div>
             <div className="flex gap-2 items-center">
               <input
@@ -431,16 +431,16 @@ export default function HorizontalSplitter({
                 min="100"
                 max={naturalHeight}
                 step="50"
-                value={sliceHeightPx}
-                onChange={(e) => setSliceHeightPx(Math.max(100, Math.min(naturalHeight, parseInt(e.target.value) || 500)))}
+                value={cutHeightPx}
+                onChange={(e) => setCutHeightPx(Math.max(100, Math.min(naturalHeight, parseInt(e.target.value) || 500)))}
                 className="flex-1 text-[10px] font-bold font-mono bg-neutral-900 border border-white/10 rounded-lg py-1 px-2 text-white focus:outline-none"
               />
               <button
                 type="button"
-                onClick={handleApplyPixelSlice}
+                onClick={handleApplyPixelCut}
                 className="bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 text-[10px] font-bold py-1 px-4 rounded-lg cursor-pointer transition-all"
               >
-                Apply Pixel Slice
+                Apply Pixel Cut
               </button>
             </div>
           </div>
@@ -499,7 +499,7 @@ export default function HorizontalSplitter({
               <option value="pct">%</option>
               {naturalHeight && <option value="px">px</option>}
             </select>
-            
+
             <div className="flex flex-1 gap-1">
               <button
                 type="button"

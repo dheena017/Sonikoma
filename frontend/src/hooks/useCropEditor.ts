@@ -1,5 +1,5 @@
 import { useRef, useEffect, useCallback } from "react";
-import { Slice, Slot } from "../components/crop/types.js";
+import { Cut, Slot } from "../components/crop/types.js";
 import { NotificationType } from "../components/NotificationStack.js";
 import { useCropEditorState } from "./useCropEditorState.js";
 import { useCropEditorHistory } from "./useCropEditorHistory.js";
@@ -61,12 +61,12 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
     setEditCropLeft,
     editCropRight,
     setEditCropRight,
-    slices: state.slices,
-    setSlices: state.setSlices,
+    cuts: state.cuts,
+    setCuts: state.setCuts,
     splitLines: state.splitLines,
     setSplitLines: state.setSplitLines,
-    selectedSliceId: state.selectedSliceId,
-    setSelectedSliceId: state.setSelectedSliceId,
+    selectedCutId: state.selectedCutId,
+    setSelectedCutId: state.setSelectedCutId,
     savedState: state.savedState,
   });
 
@@ -74,8 +74,8 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
     handleTransform,
     handleMergeWithNext,
     handleCleanSingleBubble,
-    handleDeleteSlice,
-    handleCropSingleSlice,
+    handleDeleteCut,
+    handleCropSingleCut,
     handleAiCrop,
     handleDetectPanels,
   } = useCropEditorPipelines({
@@ -111,31 +111,31 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
     setIsTransforming: state.setIsTransforming,
     setIsMerging: state.setIsMerging,
     setIsCleaning: state.setIsCleaning,
-    setIsCroppingSlice: state.setIsCroppingSlice,
-    setSlicesCroppedCount: state.setSlicesCroppedCount,
-    slicesCroppedCount: state.slicesCroppedCount,
+    setIsCroppingCut: state.setIsCroppingCut,
+    setCutsCroppedCount: state.setCutsCroppedCount,
+    cutsCroppedCount: state.cutsCroppedCount,
     setIsDetecting: state.setIsDetecting,
     setDetectedBoxes: state.setDetectedBoxes,
     setIsAiDetecting: state.setIsAiDetecting,
     setEditMode: state.setEditMode,
-    setSlices: state.setSlices,
-    setSelectedSliceId: state.setSelectedSliceId,
+    setCuts: state.setCuts,
+    setSelectedCutId: state.setSelectedCutId,
 
     pushHistory,
   });
 
-  const handleSelectSlice = (slice: Slice) => {
-    state.setSelectedSliceId(slice.id);
-    setEditCropTop(slice.cropTop);
-    setEditCropBottom(slice.cropBottom);
-    setEditCropLeft(slice.cropLeft);
-    setEditCropRight(slice.cropRight);
+  const handleSelectCut = (cut: Cut) => {
+    state.setSelectedCutId(cut.id);
+    setEditCropTop(cut.cropTop);
+    setEditCropBottom(cut.cropBottom);
+    setEditCropLeft(cut.cropLeft);
+    setEditCropRight(cut.cropRight);
   };
 
   const {
     isPointInsideSelection,
     onResizeStart,
-    handleSelectAndDragSlice,
+    handleSelectAndDragCut,
     handleStart,
     handleMove,
     handleEnd,
@@ -170,27 +170,27 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
     magneticSnap: state.magneticSnap,
     detectedGutters: state.detectedGutters,
 
-    slices: state.slices,
-    setSlices: state.setSlices,
-    setSelectedSliceId: state.setSelectedSliceId,
-    selectedSliceId: state.selectedSliceId,
+    cuts: state.cuts,
+    setCuts: state.setCuts,
+    setSelectedCutId: state.setSelectedCutId,
+    selectedCutId: state.selectedCutId,
     autoPushOnDraw: state.autoPushOnDraw,
     editAutoTrim,
 
     pushHistory,
-    handleSelectSlice,
-    handlePushToSlices: () => {
+    handleSelectCut,
+    handlePushToCuts: () => {
       pushHistory();
-      const newSlice: Slice = {
-        id: `slice-${Date.now()}`,
+      const newCut: Cut = {
+        id: `cut-${Date.now()}`,
         cropTop: editCropTop,
         cropBottom: editCropBottom,
         cropLeft: editCropLeft,
         cropRight: editCropRight,
         autoTrim: editAutoTrim,
       };
-      state.setSlices((prev) => [...prev, newSlice]);
-      state.setSelectedSliceId(newSlice.id);
+      state.setCuts((prev) => [...prev, newCut]);
+      state.setSelectedCutId(newCut.id);
       addNotification("Saved crop tool", "success");
     },
   });
@@ -224,35 +224,35 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
         ...prev,
         [state.imageUrl!]: {
           history,
-          slices: state.slices,
-          selectedSliceId: state.selectedSliceId,
+          cuts: state.cuts,
+          selectedCutId: state.selectedCutId,
           splitLines: state.splitLines,
           activeTab: state.activeTab,
           detectedBoxes: state.detectedBoxes,
         },
       }));
     }
-  }, [state.imageUrl, history, state.slices, state.selectedSliceId, state.splitLines, state.activeTab, state.detectedBoxes, setImageEditStates]);
+  }, [state.imageUrl, history, state.cuts, state.selectedCutId, state.splitLines, state.activeTab, state.detectedBoxes, setImageEditStates]);
 
-  const handlePushToSlices = () => {
+  const handlePushToCuts = () => {
     pushHistory();
-    const newSlice: Slice = {
-      id: `slice-${Date.now()}`,
+    const newCut: Cut = {
+      id: `cut-${Date.now()}`,
       cropTop: editCropTop,
       cropBottom: editCropBottom,
       cropLeft: editCropLeft,
       cropRight: editCropRight,
       autoTrim: editAutoTrim,
     };
-    state.setSlices((prev) => [...prev, newSlice]);
-    state.setSelectedSliceId(newSlice.id);
+    state.setCuts((prev) => [...prev, newCut]);
+    state.setSelectedCutId(newCut.id);
     addNotification("Saved crop tool", "success");
   };
 
-  const handleClearAllSlices = () => {
+  const handleClearAllCuts = () => {
     pushHistory();
-    state.setSlices([]);
-    state.setSelectedSliceId(null);
+    state.setCuts([]);
+    state.setSelectedCutId(null);
     addNotification("Cleared all crop tools", "info");
   };
 
@@ -328,8 +328,8 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
   };
 
   const handleExecuteSave = async () => {
-    if (state.slices.length > 0) {
-      await handleSaveMultipleCutsCallback(state.slices);
+    if (state.cuts.length > 0) {
+      await handleSaveMultipleCutsCallback(state.cuts);
     } else {
       await handleSaveEditedImageCallback();
     }
@@ -389,16 +389,16 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
     handleNextImage,
     handleCleanSingleBubble,
     handleDeleteCurrentImage,
-    handleSelectSlice,
-    handleDeleteSlice,
-    handleCropSingleSlice,
+    handleSelectCut,
+    handleDeleteCut,
+    handleCropSingleCut,
     handleAiCrop,
     handleCommitDetectedBoxes: () => {
       if (state.detectedBoxes.length === 0) {
         addNotification("No detected boxes to apply.", "warning");
         return;
       }
-      const initialSlices = state.detectedBoxes.map((box: any, index: number) => ({
+      const initialCuts = state.detectedBoxes.map((box: any, index: number) => ({
         id: `detected-${index}-${Date.now()}`,
         cropTop: box.cropTop,
         cropBottom: box.cropBottom,
@@ -406,11 +406,11 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
         cropRight: box.cropRight,
         autoTrim: editAutoTrim,
       }));
-      state.setSlices(initialSlices);
+      state.setCuts(initialCuts);
 
-      if (initialSlices.length > 0) {
-        const first = initialSlices[0];
-        state.setSelectedSliceId(first.id);
+      if (initialCuts.length > 0) {
+        const first = initialCuts[0];
+        state.setSelectedCutId(first.id);
         setEditCropLeft(first.cropLeft);
         setEditCropRight(first.cropRight);
         setEditCropTop(first.cropTop);
@@ -426,13 +426,13 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
     handleDetectPanels,
     isPointInsideSelection,
     onResizeStart,
-    handleSelectAndDragSlice,
+    handleSelectAndDragCut,
     handleStart,
     handleMove,
     handleEnd,
-    handlePushToSlices,
+    handlePushToCuts,
     handleApplyEqualSplits,
-    handleClearAllSlices,
+    handleClearAllCuts,
     handleNudge,
     handleAddSplitLine,
     handleRemoveSplitLine,

@@ -149,7 +149,7 @@ export default function AutoCropRightColumn({
           <div className="flex flex-col">
             <span className="text-[12px] font-bold text-white">Auto-Split Strips</span>
             <span className="text-[9px] text-neutral-500 mt-0.5 leading-normal">
-              Automatically slices long vertical webtoon strips into individual scenes.
+              Automatically cuts long vertical webtoon strips into individual scenes.
             </span>
           </div>
         </label>

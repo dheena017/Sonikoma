@@ -72,7 +72,7 @@ export default function AutoCropLeftColumn({
             }}
             className="bg-neutral-950/50 hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 px-3.5 py-2.5 rounded-2xl text-left transition-all cursor-pointer"
           >
-            <span className="text-[11px] font-bold text-white block">⚡ Webtoon Strip Slicer</span>
+            <span className="text-[11px] font-bold text-white block">⚡ Webtoon Strip Cutter</span>
             <span className="text-[9px] text-neutral-500 font-sans block mt-0.5">25% sens · 15px pad · Fast split</span>
           </button>
           <button

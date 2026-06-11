@@ -49,7 +49,7 @@ function NudgeControl({
 }
 
 interface CutsRegistryFineTuneProps {
-  selectedSliceId: string | null;
+  selectedCutId: string | null;
   editCropTop: number;
   setEditCropTop: (val: number) => void;
   editCropBottom: number;
@@ -65,7 +65,7 @@ interface CutsRegistryFineTuneProps {
 }
 
 export function CutsRegistryFineTune({
-  selectedSliceId,
+  selectedCutId,
   editCropTop,
   setEditCropTop,
   editCropBottom,
@@ -81,7 +81,7 @@ export function CutsRegistryFineTune({
       <div className="flex items-center gap-1.5">
         <Sliders className="h-3 w-3 text-purple-400" />
         <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-400">
-          {selectedSliceId ? "Fine-Tune Selected Crop Tool" : "Fine-Tune Selection"}
+          {selectedCutId ? "Fine-Tune Selected Crop Tool" : "Fine-Tune Selection"}
         </span>
       </div>
 

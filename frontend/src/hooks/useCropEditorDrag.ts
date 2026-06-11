@@ -1,5 +1,5 @@
 import React from "react";
-import { Slice } from "../components/crop/types";
+import { Cut } from "../components/crop/types";
 
 interface UseCropEditorDragProps {
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -31,16 +31,16 @@ interface UseCropEditorDragProps {
   magneticSnap: boolean;
   detectedGutters: number[];
   
-  slices: Slice[];
-  setSlices: React.Dispatch<React.SetStateAction<Slice[]>>;
-  setSelectedSliceId: (id: string | null) => void;
-  selectedSliceId: string | null;
+  cuts: Cut[];
+  setCuts: React.Dispatch<React.SetStateAction<Cut[]>>;
+  setSelectedCutId: (id: string | null) => void;
+  selectedCutId: string | null;
   autoPushOnDraw: boolean;
   editAutoTrim: boolean;
   
   pushHistory: () => void;
-  handleSelectSlice: (slice: Slice) => void;
-  handlePushToSlices: () => void;
+  handleSelectCut: (cut: Cut) => void;
+  handlePushToCuts: () => void;
 }
 
 export function useCropEditorDrag({
@@ -73,16 +73,16 @@ export function useCropEditorDrag({
   magneticSnap,
   detectedGutters,
 
-  slices,
-  setSlices,
-  setSelectedSliceId,
-  selectedSliceId,
+  cuts,
+  setCuts,
+  setSelectedCutId,
+  selectedCutId,
   autoPushOnDraw,
   editAutoTrim,
 
   pushHistory,
-  handleSelectSlice,
-  handlePushToSlices,
+  handleSelectCut,
+  handlePushToCuts,
 }: UseCropEditorDragProps) {
 
   const isPointInsideSelection = (x: number, y: number) => {
@@ -112,20 +112,20 @@ export function useCropEditorDrag({
     });
   };
 
-  const handleSelectAndDragSlice = (slice: Slice, clientX: number, clientY: number) => {
+  const handleSelectAndDragCut = (cut: Cut, clientX: number, clientY: number) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
     const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
-    handleSelectSlice(slice);
+    handleSelectCut(cut);
     pushHistory();
     setDragType("move");
     setDragStartPercent({ x, y });
     setOriginalCropBounds({
-      top: slice.cropTop,
-      bottom: slice.cropBottom,
-      left: slice.cropLeft,
-      right: slice.cropRight,
+      top: cut.cropTop,
+      bottom: cut.cropBottom,
+      left: cut.cropLeft,
+      right: cut.cropRight,
     });
   };
 
@@ -163,7 +163,7 @@ export function useCropEditorDrag({
       pushHistory();
       setDragType("draw");
       setDragStart({ x, y });
-      setSelectedSliceId(null);
+      setSelectedCutId(null);
     }
   };
 
@@ -259,10 +259,10 @@ export function useCropEditorDrag({
       setEditCropTop(newTop);
       setEditCropBottom(newBottom);
 
-      if (selectedSliceId) {
-        setSlices((prev) =>
+      if (selectedCutId) {
+        setCuts((prev) =>
           prev.map((s) =>
-            s.id === selectedSliceId
+            s.id === selectedCutId
               ? {
                   ...s,
                   cropLeft: newLeft,
@@ -297,10 +297,10 @@ export function useCropEditorDrag({
       setEditCropTop(newTop);
       setEditCropBottom(newBottom);
 
-      if (selectedSliceId) {
-        setSlices((prev) =>
+      if (selectedCutId) {
+        setCuts((prev) =>
           prev.map((s) =>
-            s.id === selectedSliceId
+            s.id === selectedCutId
               ? {
                   ...s,
                   cropLeft: newLeft,
@@ -317,7 +317,7 @@ export function useCropEditorDrag({
 
   const handleEnd = () => {
     if (dragType === "draw" && autoPushOnDraw) {
-      handlePushToSlices();
+      handlePushToCuts();
     }
     setDragStart(null);
     setDragType(null);
@@ -343,10 +343,10 @@ export function useCropEditorDrag({
     setEditCropLeft(updatedLeft);
     setEditCropRight(updatedRight);
 
-    if (selectedSliceId) {
-      setSlices((prev) =>
+    if (selectedCutId) {
+      setCuts((prev) =>
         prev.map((s) =>
-          s.id === selectedSliceId
+          s.id === selectedCutId
             ? {
                 ...s,
                 cropTop: updatedTop,
@@ -363,7 +363,7 @@ export function useCropEditorDrag({
   return {
     isPointInsideSelection,
     onResizeStart,
-    handleSelectAndDragSlice,
+    handleSelectAndDragCut,
     handleStart,
     handleMove,
     handleEnd,

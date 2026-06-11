@@ -99,7 +99,7 @@ export default function AutoCropSettingsPanel({
               Auto-Split Strips
             </span>
             <span className="text-[10px] text-neutral-400">
-              Automatically slice long strips into panels.
+              Automatically cut long strips into panels.
             </span>
           </div>
         </label>

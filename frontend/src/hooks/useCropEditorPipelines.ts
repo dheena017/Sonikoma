@@ -1,5 +1,5 @@
 import React from "react";
-import { Slice } from "../components/crop/types";
+import { Cut } from "../components/crop/types";
 import { NotificationType } from "../components/NotificationStack";
 
 interface UseCropEditorPipelinesProps {
@@ -35,15 +35,15 @@ interface UseCropEditorPipelinesProps {
   setIsTransforming: (val: boolean) => void;
   setIsMerging: (val: boolean) => void;
   setIsCleaning: (val: boolean) => void;
-  setIsCroppingSlice: (id: string | null) => void;
-  setSlicesCroppedCount: React.Dispatch<React.SetStateAction<number>>;
-  slicesCroppedCount: number;
+  setIsCroppingCut: (id: string | null) => void;
+  setCutsCroppedCount: React.Dispatch<React.SetStateAction<number>>;
+  cutsCroppedCount: number;
   setIsDetecting: (val: boolean) => void;
   setDetectedBoxes: React.Dispatch<React.SetStateAction<any[]>>;
   setIsAiDetecting: (val: boolean) => void;
-  setEditMode: (mode: "crop" | "clean_auto" | "clean_manual" | "typeset" | "slices") => void;
-  setSlices: React.Dispatch<React.SetStateAction<Slice[]>>;
-  setSelectedSliceId: (id: string | null) => void;
+  setEditMode: (mode: "crop" | "clean_auto" | "clean_manual" | "typeset" | "crop") => void;
+  setCuts: React.Dispatch<React.SetStateAction<Cut[]>>;
+  setSelectedCutId: (id: string | null) => void;
 
   pushHistory: () => void;
 }
@@ -81,15 +81,15 @@ export function useCropEditorPipelines({
   setIsTransforming,
   setIsMerging,
   setIsCleaning,
-  setIsCroppingSlice,
-  setSlicesCroppedCount,
-  slicesCroppedCount,
+  setIsCroppingCut,
+  setCutsCroppedCount,
+  cutsCroppedCount,
   setIsDetecting,
   setDetectedBoxes,
   setIsAiDetecting,
   setEditMode,
-  setSlices,
-  setSelectedSliceId,
+  setCuts,
+  setSelectedCutId,
 
   pushHistory,
 }: UseCropEditorPipelinesProps) {
@@ -231,30 +231,30 @@ export function useCropEditorPipelines({
     }
   };
 
-  const handleDeleteSlice = (id: string, e: React.MouseEvent) => {
+  const handleDeleteCut = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     pushHistory();
-    setSlices((prev) => prev.filter((s) => s.id !== id));
-    setSelectedSliceId(null);
+    setCuts((prev) => prev.filter((s) => s.id !== id));
+    setSelectedCutId(null);
   };
 
-  const handleCropSingleSlice = async (slice: Slice, e: React.MouseEvent) => {
+  const handleCropSingleCut = async (cut: Cut, e: React.MouseEvent) => {
     e.stopPropagation();
     if (editingImageIdx === null || !setScrapedImages) return;
     const originalUrl = scrapedImages[editingImageIdx];
 
-    setIsCroppingSlice(slice.id);
+    setIsCroppingCut(cut.id);
     try {
       const response = await activeFetch("/api/edit-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           url: originalUrl,
-          cropTop: slice.cropTop,
-          cropBottom: slice.cropBottom,
-          cropLeft: slice.cropLeft,
-          cropRight: slice.cropRight,
-          autoTrim: slice.autoTrim,
+          cropTop: cut.cropTop,
+          cropBottom: cut.cropBottom,
+          cropLeft: cut.cropLeft,
+          cropRight: cut.cropRight,
+          autoTrim: cut.autoTrim,
         }),
       });
 
@@ -266,11 +266,11 @@ export function useCropEditorPipelines({
 
       setScrapedImages((prev) => {
         const copy = [...prev];
-        copy.splice(editingImageIdx + 1 + slicesCroppedCount, 0, data.url);
+        copy.splice(editingImageIdx + 1 + cutsCroppedCount, 0, data.url);
         return copy;
       });
 
-      setSlicesCroppedCount((prev) => prev + 1);
+      setCutsCroppedCount((prev) => prev + 1);
 
       if (setConsoleLogs) {
         setConsoleLogs((prev) => [
@@ -279,12 +279,12 @@ export function useCropEditorPipelines({
         ]);
       }
 
-      handleDeleteSlice(slice.id, e);
+      handleDeleteCut(cut.id, e);
       addNotification("Extracted Cut!", "success");
     } catch (err: any) {
       addNotification(`Failed to crop: ${err.message}`, "error");
     } finally {
-      setIsCroppingSlice(null);
+      setIsCroppingCut(null);
     }
   };
 
@@ -325,7 +325,7 @@ export function useCropEditorPipelines({
           return;
         }
 
-        const newSlices = data.panels.map((box: any, index: number) => ({
+        const newCuts = data.panels.map((box: any, index: number) => ({
           id: `ai-${index}-${Date.now()}`,
           cropTop: box.cropTop,
           cropBottom: box.cropBottom,
@@ -334,17 +334,17 @@ export function useCropEditorPipelines({
           autoTrim: editAutoTrim,
         }));
 
-        setSlices((prev) => [...prev, ...newSlices]);
+        setCuts((prev) => [...prev, ...newCuts]);
 
-        const firstNew = newSlices[0];
-        setSelectedSliceId(firstNew.id);
+        const firstNew = newCuts[0];
+        setSelectedCutId(firstNew.id);
         setEditCropLeft(firstNew.cropLeft);
         setEditCropRight(firstNew.cropRight);
         setEditCropTop(firstNew.cropTop);
         setEditCropBottom(firstNew.cropBottom);
 
         addNotification(
-          `AI Smart Crop successfully isolated ${newSlices.length} panels!`,
+          `AI Smart Crop successfully isolated ${newCuts.length} panels!`,
           "success"
         );
       } else {
@@ -413,10 +413,10 @@ export function useCropEditorPipelines({
           );
         } else if (data.panels.length > 0) {
           addNotification(
-            `Successfully sliced ${data.panels.length} panel cuts!`,
+            `Successfully cut ${data.panels.length} panel cuts!`,
             "success"
           );
-          const initialSlices = data.panels.map((box: any, index: number) => ({
+          const initialCuts = data.panels.map((box: any, index: number) => ({
             id: `detected-${index}-${Date.now()}`,
             cropTop: box.cropTop,
             cropBottom: box.cropBottom,
@@ -424,10 +424,10 @@ export function useCropEditorPipelines({
             cropRight: box.cropRight,
             autoTrim: editAutoTrim,
           }));
-          setSlices(initialSlices);
+          setCuts(initialCuts);
 
-          const first = initialSlices[0];
-          setSelectedSliceId(first.id);
+          const first = initialCuts[0];
+          setSelectedCutId(first.id);
           setEditCropLeft(first.cropLeft);
           setEditCropRight(first.cropRight);
           setEditCropTop(first.cropTop);
@@ -456,8 +456,8 @@ export function useCropEditorPipelines({
     handleTransform,
     handleMergeWithNext,
     handleCleanSingleBubble,
-    handleDeleteSlice,
-    handleCropSingleSlice,
+    handleDeleteCut,
+    handleCropSingleCut,
     handleAiCrop,
     handleDetectPanels,
   };

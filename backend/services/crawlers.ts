@@ -211,10 +211,10 @@ export async function scrapeImagesFromUrl(url: string, source?: string): Promise
 
       if (endIdxInAfter !== -1) {
         const absoluteEndIdx = startIdx + startTag.length + endIdxInAfter;
-        console.log(`${col.info('[Scraper]')} Perfectly balanced ${col.brightGreen(tagType + '.viewer_lst')} container found. Slicing from ${col.brightYellow(String(startIdx))} to ${col.brightYellow(String(absoluteEndIdx))}`);
+        console.log(`${col.info('[Scraper]')} Perfectly balanced ${col.brightGreen(tagType + '.viewer_lst')} container found. Cutting from ${col.brightYellow(String(startIdx))} to ${col.brightYellow(String(absoluteEndIdx))}`);
         searchBlock = html.substring(startIdx, absoluteEndIdx);
       } else {
-        console.log(`${col.info('[Scraper]')} ${col.warn('Could not find balanced closing')} ${col.brightGreen(tagType)} tag. Slicing 300,000 characters from start container.`);
+        console.log(`${col.info('[Scraper]')} ${col.warn('Could not find balanced closing')} ${col.brightGreen(tagType)} tag. Cutting 300,000 characters from start container.`);
         searchBlock = html.substring(startIdx, startIdx + 300000);
       }
     } else {
@@ -259,10 +259,10 @@ export async function scrapeImagesFromUrl(url: string, source?: string): Promise
         }
         
         if (endIdx !== -1) {
-          console.log(`${col.info('[Scraper]')} Confirmed bounding container. Slicing HTML viewer section from index ${col.brightYellow(String(startIdx))} to ${col.brightYellow(String(endIdx))}`);
+          console.log(`${col.info('[Scraper]')} Confirmed bounding container. Cutting HTML viewer section from index ${col.brightYellow(String(startIdx))} to ${col.brightYellow(String(endIdx))}`);
           searchBlock = html.substring(startIdx, endIdx);
         } else {
-          console.log(`${col.info('[Scraper]')} ${col.warn('Bounding container end not found')}. Slicing 300,000 characters from start container.`);
+          console.log(`${col.info('[Scraper]')} ${col.warn('Bounding container end not found')}. Cutting 300,000 characters from start container.`);
           searchBlock = html.substring(startIdx, startIdx + 300000);
         }
       } else {

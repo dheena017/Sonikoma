@@ -1,15 +1,15 @@
 import React from "react";
-import { Slice } from "../shared/types.js";
+import { Cut } from "../shared/types.js";
 import { CutsRegistryHeader } from "./CutsRegistryHeader.js";
 import { CutsRegistrySelector } from "./CutsRegistrySelector.js";
 import { CutsRegistryFineTune } from "./CutsRegistryFineTune.js";
 import { CutsRegistryList } from "./CutsRegistryList.js";
 
 interface CutsRegistryProps {
-  slices: Slice[];
-  setSlices: React.Dispatch<React.SetStateAction<Slice[]>>;
-  selectedSliceId: string | null;
-  setSelectedSliceId: (id: string | null) => void;
+  cuts: Cut[];
+  setCuts: React.Dispatch<React.SetStateAction<Cut[]>>;
+  selectedCutId: string | null;
+  setSelectedCutId: (id: string | null) => void;
   editCropTop: number;
   setEditCropTop: (val: number) => void;
   editCropBottom: number;
@@ -19,26 +19,26 @@ interface CutsRegistryProps {
   editCropRight: number;
   setEditCropRight: (val: number) => void;
   editAutoTrim: boolean;
-  handlePushToSlices: () => void;
+  handlePushToCuts: () => void;
   autoPushOnDraw: boolean;
   setAutoPushOnDraw: (v: boolean) => void;
-  handleClearAllSlices: () => void;
+  handleClearAllCuts: () => void;
   handleNudge: (
     direction: "top" | "bottom" | "left" | "right",
     amount: number
   ) => void;
-  handleSelectSlice: (slice: Slice) => void;
-  handleDeleteSlice: (id: string, e: React.MouseEvent) => void;
-  handleCropSingleSlice: (slice: Slice, e: React.MouseEvent) => Promise<void>;
-  isCroppingSlice: string | null;
+  handleSelectCut: (cut: Cut) => void;
+  handleDeleteCut: (id: string, e: React.MouseEvent) => void;
+  handleCropSingleCut: (cut: Cut, e: React.MouseEvent) => Promise<void>;
+  isCroppingCut: string | null;
   isSavingEdit: boolean;
 }
 
 export default function CutsRegistry({
-  slices,
-  setSlices,
-  selectedSliceId,
-  setSelectedSliceId,
+  cuts,
+  setCuts,
+  selectedCutId,
+  setSelectedCutId,
   editCropTop,
   setEditCropTop,
   editCropBottom,
@@ -48,15 +48,15 @@ export default function CutsRegistry({
   editCropRight,
   setEditCropRight,
   editAutoTrim,
-  handlePushToSlices,
+  handlePushToCuts,
   autoPushOnDraw,
   setAutoPushOnDraw,
-  handleClearAllSlices,
+  handleClearAllCuts,
   handleNudge,
-  handleSelectSlice,
-  handleDeleteSlice,
-  handleCropSingleSlice,
-  isCroppingSlice,
+  handleSelectCut,
+  handleDeleteCut,
+  handleCropSingleCut,
+  isCroppingCut,
   isSavingEdit,
 }: CutsRegistryProps) {
   const hasSelection =
@@ -68,20 +68,20 @@ export default function CutsRegistry({
   return (
     <div className="space-y-3 bg-white/[0.02] p-4 rounded-2xl border border-white/[0.06]">
       <CutsRegistryHeader
-        slices={slices}
-        handleClearAllSlices={handleClearAllSlices}
+        cuts={cuts}
+        handleClearAllCuts={handleClearAllCuts}
       />
 
       <CutsRegistrySelector
         hasSelection={hasSelection}
-        handlePushToSlices={handlePushToSlices}
+        handlePushToCuts={handlePushToCuts}
         autoPushOnDraw={autoPushOnDraw}
         setAutoPushOnDraw={setAutoPushOnDraw}
       />
 
       {hasSelection && (
         <CutsRegistryFineTune
-          selectedSliceId={selectedSliceId}
+          selectedCutId={selectedCutId}
           editCropTop={editCropTop}
           setEditCropTop={setEditCropTop}
           editCropBottom={editCropBottom}
@@ -95,12 +95,12 @@ export default function CutsRegistry({
       )}
 
       <CutsRegistryList
-        slices={slices}
-        selectedSliceId={selectedSliceId}
-        handleSelectSlice={handleSelectSlice}
-        handleCropSingleSlice={handleCropSingleSlice}
-        handleDeleteSlice={handleDeleteSlice}
-        isCroppingSlice={isCroppingSlice}
+        cuts={cuts}
+        selectedCutId={selectedCutId}
+        handleSelectCut={handleSelectCut}
+        handleCropSingleCut={handleCropSingleCut}
+        handleDeleteCut={handleDeleteCut}
+        isCroppingCut={isCroppingCut}
         isSavingEdit={isSavingEdit}
       />
     </div>

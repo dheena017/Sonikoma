@@ -1,22 +1,22 @@
 import React from "react";
 import { Undo2, Trash2, RefreshCw, Scissors } from "lucide-react";
-import { Slice } from "../shared/types";
+import { Cut } from "../shared/types";
 
 interface CropEditorFooterProps {
-  slices: Slice[];
+  cuts: Cut[];
   historyLength: number;
   handleUndo: () => void;
   isSavingEdit: boolean;
   setEditingImageIdx: (idx: number | null) => void;
   handleDeleteCurrentImage: () => void;
-  activeTab: "adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge";
+  activeTab: "adjust" | "edit" | "eraser" | "split" | "crop" | "merge";
   isTransforming: boolean;
   addNotification: (msg: string, type: any) => void;
   handleExecuteHorizontalSplit: () => void;
 }
 
 export default function CropEditorFooter({
-  slices,
+  cuts,
   historyLength,
   handleUndo,
   isSavingEdit,
@@ -31,8 +31,8 @@ export default function CropEditorFooter({
     <div className="px-5 py-4 bg-gradient-to-r from-neutral-950/95 via-neutral-950 to-purple-950/10 border-t border-white/5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex flex-col gap-1 text-left sm:max-w-[45%]">
         <span className="text-[10px] text-neutral-500 font-mono italic break-words">
-          {slices.length > 0
-            ? `Multi-cut: ${slices.length} new scenes will be created on your deck`
+          {cuts.length > 0
+            ? `Multi-cut: ${cuts.length} new scenes will be created on your deck`
             : "Single-frame crop mode — drag to set crop bounds"}
         </span>
         {historyLength > 0 && (
@@ -80,7 +80,7 @@ export default function CropEditorFooter({
           <span>Delete</span>
         </button>
 
-        {activeTab === "slice" && (
+        {activeTab === "split" && (
           <button
             type="button"
             onClick={handleExecuteHorizontalSplit}

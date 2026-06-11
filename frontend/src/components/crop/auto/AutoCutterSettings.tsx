@@ -1,7 +1,7 @@
 import React from "react";
 import { ChevronDown } from "lucide-react";
 
-interface AutoSlicerSettingsProps {
+interface AutoCutterSettingsProps {
   backgroundMode: string;
   setBackgroundMode: (val: string) => void;
   aspectRatio: string;
@@ -18,7 +18,7 @@ interface AutoSlicerSettingsProps {
   setDryRun: (val: boolean) => void;
 }
 
-export default function AutoSlicerSettings({
+export default function AutoCutterSettings({
   backgroundMode,
   setBackgroundMode,
   aspectRatio,
@@ -33,7 +33,7 @@ export default function AutoSlicerSettings({
   renderOpenCvAdvanced,
   dryRun,
   setDryRun,
-}: AutoSlicerSettingsProps) {
+}: AutoCutterSettingsProps) {
   return (
     <div className="pt-3.5 border-t border-white/5 space-y-3.5 animate-fadeIn">
       {/* General config */}

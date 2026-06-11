@@ -45,7 +45,7 @@ interface CropEditorModalProps {
   addNotification: (message: string, type: NotificationType) => void;
 }
 
-interface Slice {
+interface Cut {
   id: string;
   cropTop: number;
   cropBottom: number;
@@ -94,20 +94,20 @@ export default function CropEditorModal({
   const [isAiDetecting, setIsAiDetecting] = React.useState<boolean>(false);
 
   // Multiple Cut List
-  const [slices, setSlices] = React.useState<Slice[]>([]);
-  const [selectedSliceId, setSelectedSliceId] = React.useState<string | null>(null);
+  const [cuts, setCuts] = React.useState<Cut[]>([]);
+  const [selectedCutId, setSelectedCutId] = React.useState<string | null>(null);
 
   // Clear states when transitioning editing frames
   React.useEffect(() => {
     setDetectedBoxes([]);
-    setSlices([]);
-    setSelectedSliceId(null);
+    setCuts([]);
+    setSelectedCutId(null);
   }, [editingImageIdx]);
 
-  // Sync active coordinates state into the currently selected slice to support on-canvas fine-tuning
+  // Sync active coordinates state into the currently selected cut to support on-canvas fine-tuning
   React.useEffect(() => {
-    if (selectedSliceId) {
-      setSlices(prev => prev.map(s => s.id === selectedSliceId ? {
+    if (selectedCutId) {
+      setCuts(prev => prev.map(s => s.id === selectedCutId ? {
         ...s,
         cropTop: editCropTop,
         cropBottom: editCropBottom,
@@ -115,7 +115,7 @@ export default function CropEditorModal({
         cropRight: editCropRight
       } : s));
     }
-  }, [editCropTop, editCropBottom, editCropLeft, editCropRight, selectedSliceId]);
+  }, [editCropTop, editCropBottom, editCropLeft, editCropRight, selectedCutId]);
 
   const handleAiCrop = async () => {
     if (editingImageIdx === null) return;
@@ -130,8 +130,8 @@ export default function CropEditorModal({
       if (!response.ok) throw new Error("AI analysis failed");
       const data = await response.json();
       if (data.success && Array.isArray(data.panels) && data.panels.length > 0) {
-        // Populate all panels into the slices list instead of just the first one
-        const newSlices = data.panels.map((box: any, index: number) => ({
+        // Populate all panels into the cuts list instead of just the first one
+        const newCuts = data.panels.map((box: any, index: number) => ({
           id: `ai-${index}-${Date.now()}`,
           cropTop: box.cropTop,
           cropBottom: box.cropBottom,
@@ -140,11 +140,11 @@ export default function CropEditorModal({
           autoTrim: editAutoTrim
         }));
         
-        setSlices(prev => [...prev, ...newSlices]);
+        setCuts(prev => [...prev, ...newCuts]);
         
-        // Select the first of the newly added slices
-        const firstNew = newSlices[0];
-        setSelectedSliceId(firstNew.id);
+        // Select the first of the newly added cuts
+        const firstNew = newCuts[0];
+        setSelectedCutId(firstNew.id);
         setEditCropLeft(firstNew.cropLeft);
         setEditCropRight(firstNew.cropRight);
         setEditCropTop(firstNew.cropTop);
@@ -173,7 +173,7 @@ export default function CropEditorModal({
       if (data.success && Array.isArray(data.panels)) {
         setDetectedBoxes(data.panels);
         if (data.panels.length > 0) {
-          const initialSlices = data.panels.map((box: any, index: number) => ({
+          const initialCuts = data.panels.map((box: any, index: number) => ({
             id: `detected-${index}-${Date.now()}`,
             cropTop: box.cropTop,
             cropBottom: box.cropBottom,
@@ -181,11 +181,11 @@ export default function CropEditorModal({
             cropRight: box.cropRight,
             autoTrim: editAutoTrim
           }));
-          setSlices(initialSlices);
+          setCuts(initialCuts);
 
           // Default select the first panel
-          const first = initialSlices[0];
-          setSelectedSliceId(first.id);
+          const first = initialCuts[0];
+          setSelectedCutId(first.id);
           setEditCropLeft(first.cropLeft);
           setEditCropRight(first.cropRight);
           setEditCropTop(first.cropTop);
@@ -292,39 +292,39 @@ export default function CropEditorModal({
     setOriginalCropBounds(null);
   };
 
-  // Save selection onto the slices generator deck
-  const handlePushToSlices = () => {
-    const newSlice: Slice = {
-      id: `slice-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+  // Save selection onto the cuts generator deck
+  const handlePushToCuts = () => {
+    const newCut: Cut = {
+      id: `cut-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       cropTop: editCropTop,
       cropBottom: editCropBottom,
       cropLeft: editCropLeft,
       cropRight: editCropRight,
       autoTrim: editAutoTrim
     };
-    setSlices(prev => [...prev, newSlice]);
-    setSelectedSliceId(newSlice.id);
+    setCuts(prev => [...prev, newCut]);
+    setSelectedCutId(newCut.id);
   };
 
-  const handleSelectSlice = (slice: Slice) => {
-    setSelectedSliceId(slice.id);
-    setEditCropTop(slice.cropTop);
-    setEditCropBottom(slice.cropBottom);
-    setEditCropLeft(slice.cropLeft);
-    setEditCropRight(slice.cropRight);
+  const handleSelectCut = (cut: Cut) => {
+    setSelectedCutId(cut.id);
+    setEditCropTop(cut.cropTop);
+    setEditCropBottom(cut.cropBottom);
+    setEditCropLeft(cut.cropLeft);
+    setEditCropRight(cut.cropRight);
   };
 
-  const handleDeleteSlice = (id: string, e: React.MouseEvent) => {
+  const handleDeleteCut = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setSlices(prev => prev.filter(s => s.id !== id));
-    if (selectedSliceId === id) {
-      setSelectedSliceId(null);
+    setCuts(prev => prev.filter(s => s.id !== id));
+    if (selectedCutId === id) {
+      setSelectedCutId(null);
     }
   };
 
   const handleExecuteSave = () => {
-    if (slices.length > 0) {
-      const cuts = slices.map(s => ({
+    if (cuts.length > 0) {
+      const cuts = cuts.map(s => ({
         cropTop: s.cropTop,
         cropBottom: s.cropBottom,
         cropLeft: s.cropLeft,
@@ -351,7 +351,7 @@ export default function CropEditorModal({
               <div>
                 <h3 className="font-bold text-sm text-white">Advanced Drop & Drag Multiple-Cut Generator</h3>
                 <p className="text-[10px] text-neutral-400 font-mono">
-                  Slicing and Trimming Frame #{editingImageIdx + 1} with custom coordinates drag-and-drop
+                  Cutting and Trimming Frame #{editingImageIdx + 1} with custom coordinates drag-and-drop
                 </p>
               </div>
             </div>
@@ -448,15 +448,15 @@ export default function CropEditorModal({
                   </>
                 )}
 
-                {/* SLICES VISUAL OVERLAYS */}
-                {slices.map((slice, index) => {
-                  const isSelected = slice.id === selectedSliceId;
+                {/* CUTS VISUAL OVERLAYS */}
+                {cuts.map((cut, index) => {
+                  const isSelected = cut.id === selectedCutId;
                   return (
                     <div
-                      key={slice.id}
+                      key={cut.id}
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleSelectSlice(slice);
+                        handleSelectCut(cut);
                       }}
                       className={`absolute border-2 pointer-events-auto cursor-pointer transition-all flex flex-col justify-between ${
                         isSelected
@@ -464,10 +464,10 @@ export default function CropEditorModal({
                           : "border-purple-500/50 bg-purple-500/5 hover:bg-purple-500/10 hover:border-purple-400 z-20"
                       }`}
                       style={{
-                        top: `${slice.cropTop}%`,
-                        bottom: `${slice.cropBottom}%`,
-                        left: `${slice.cropLeft}%`,
-                        right: `${slice.cropRight}%`
+                        top: `${cut.cropTop}%`,
+                        bottom: `${cut.cropBottom}%`,
+                        left: `${cut.cropLeft}%`,
+                        right: `${cut.cropRight}%`
                       }}
                     >
                       <div className="p-1">
@@ -483,7 +483,7 @@ export default function CropEditorModal({
                       <div className="flex justify-end p-1">
                         <button
                           type="button"
-                          onClick={(e) => handleDeleteSlice(slice.id, e)}
+                          onClick={(e) => handleDeleteCut(cut.id, e)}
                           className="bg-red-950/90 hover:bg-red-900 border border-red-800 text-red-300 p-0.5 rounded cursor-pointer transition-colors"
                           title="Delete this cut"
                         >
@@ -530,7 +530,7 @@ export default function CropEditorModal({
               </span>
             </div>
 
-            {/* Right side: Multi-slice list and telemetry controls */}
+            {/* Right side: Multi-cut list and telemetry controls */}
             <div className="lg:col-span-5 flex flex-col space-y-4">
               
               {/* SECTION: BATCH MULTIPLE CUT GENERATOR */}
@@ -540,14 +540,14 @@ export default function CropEditorModal({
                     Target Cuts Registry
                   </span>
                   <span className="text-[9px] bg-purple-900/30 text-purple-300 font-bold px-2 py-0.5 rounded border border-purple-800/50">
-                    {slices.length} Cuts Defined
+                    {cuts.length} Cuts Defined
                   </span>
                 </div>
 
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    onClick={handlePushToSlices}
+                    onClick={handlePushToCuts}
                     disabled={editCropTop === 0 && editCropBottom === 0 && editCropLeft === 0 && editCropRight === 0}
                     className="flex-1 bg-purple-600 hover:bg-purple-500 disabled:opacity-35 disabled:cursor-not-allowed text-white text-xs font-bold py-2.5 rounded-xl cursor-pointer transition-all flex items-center justify-center gap-2 shadow"
                   >
@@ -556,22 +556,22 @@ export default function CropEditorModal({
                   </button>
                 </div>
 
-                {slices.length === 0 ? (
+                {cuts.length === 0 ? (
                   <div className="border border-neutral-850 border-dashed rounded-xl p-6 text-center text-neutral-500">
                     <Layers className="h-5 w-5 text-neutral-600 mx-auto mb-1.5" />
                     <p className="text-[11px] font-bold text-neutral-400">Cut list is empty</p>
                     <p className="text-[10px] text-neutral-500 leading-normal mt-0.5">
-                      Draw on the image canvas and push to cuts list, or use Auto Panel contour detection below to auto-slice.
+                      Draw on the image canvas and push to cuts list, or use Auto Panel contour detection below to auto-cut.
                     </p>
                   </div>
                 ) : (
                   <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                    {slices.map((slice, index) => {
-                      const isSelected = slice.id === selectedSliceId;
+                    {cuts.map((cut, index) => {
+                      const isSelected = cut.id === selectedCutId;
                       return (
                         <div
-                          key={slice.id}
-                          onClick={() => handleSelectSlice(slice)}
+                          key={cut.id}
+                          onClick={() => handleSelectCut(cut)}
                           className={`p-2 rounded-xl text-[11px] font-mono border cursor-pointer transition-all flex items-center justify-between ${
                             isSelected
                               ? "bg-emerald-950/40 border-emerald-500/80 text-emerald-300"
@@ -581,19 +581,19 @@ export default function CropEditorModal({
                           <div className="flex items-center gap-2">
                             <span className="font-bold text-neutral-300">Cut #{index + 1}</span>
                             <span className="text-[9px] opacity-75">
-                              ({parseFloat((100 - slice.cropLeft - slice.cropRight).toFixed(1))}% w)
+                              ({parseFloat((100 - cut.cropLeft - cut.cropRight).toFixed(1))}% w)
                             </span>
                           </div>
                           
                           <div className="flex items-center gap-3">
                             <span className="text-[10px] text-neutral-500 font-mono">
-                              H:{Math.round(slice.cropTop)}-{Math.round(100 - slice.cropBottom)}%
+                              H:{Math.round(cut.cropTop)}-{Math.round(100 - cut.cropBottom)}%
                             </span>
                             <button
                               type="button"
-                              onClick={(e) => handleDeleteSlice(slice.id, e)}
+                              onClick={(e) => handleDeleteCut(cut.id, e)}
                               className="text-neutral-500 hover:text-red-400 p-1 rounded hover:bg-neutral-900 transition-colors cursor-pointer"
-                              title="Delete individual slice"
+                              title="Delete individual cut"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
                             </button>
@@ -610,11 +610,11 @@ export default function CropEditorModal({
                 <div className="flex items-center gap-1.5">
                   <Sparkles className="h-3.5 w-3.5 text-purple-400" />
                   <span className="text-[10px] uppercase font-mono font-bold text-neutral-400 tracking-wider">
-                    Contours-Detection Auto Slicer
+                    Contours-Detection Auto Cutter
                   </span>
                 </div>
                 <p className="text-[10px] text-neutral-500 leading-normal">
-                  Contour scans look for white gutters to identify individual panel slices. When completed, detected panels are instantly loaded into the Targets list for fine-tuning.
+                  Contour scans look for white gutters to identify individual panel cuts. When completed, detected panels are instantly loaded into the Targets list for fine-tuning.
                 </p>
                 <button
                   type="button"
@@ -627,7 +627,7 @@ export default function CropEditorModal({
                   ) : (
                     <Sparkles className="h-3.5 w-3.5 text-purple-400" />
                   )}
-                  <span>{isDetecting ? "Executing Scan..." : "Detect & Populate Slices List"}</span>
+                  <span>{isDetecting ? "Executing Scan..." : "Detect & Populate Cuts List"}</span>
                 </button>
               </div>
 
@@ -640,8 +640,8 @@ export default function CropEditorModal({
           {/* Action Buttons Footer */}
           <div className="px-6 py-4 bg-neutral-950/60 border-t border-neutral-800 flex items-center justify-between gap-3">
             <span className="text-[10px] text-neutral-400 font-mono italic max-w-[50%] hidden sm:block">
-              {slices.length > 0 
-                ? `Executing multi-cut split operations will create ${slices.length} new scenes on your deck` 
+              {cuts.length > 0
+                ? `Executing multi-cut split operations will create ${cuts.length} new scenes on your deck`
                 : "You are editing a single crop selection"}
             </span>
 
@@ -665,10 +665,10 @@ export default function CropEditorModal({
                     <RefreshCw className="h-3.5 w-3.5 animate-spin" />
                     <span>Processing Cuts...</span>
                   </>
-                ) : slices.length > 0 ? (
+                ) : cuts.length > 0 ? (
                   <>
                     <Layers className="h-4 w-4 animate-pulse text-purple-200" />
-                    <span>Execute Multiple Cuts ({slices.length})</span>
+                    <span>Execute Multiple Cuts ({cuts.length})</span>
                   </>
                 ) : (
                   <>

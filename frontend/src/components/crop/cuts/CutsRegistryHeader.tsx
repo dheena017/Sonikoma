@@ -1,15 +1,15 @@
 import React from "react";
 import { LayoutGrid, Trash2 } from "lucide-react";
-import { Slice } from "../shared/types";
+import { Cut } from "../shared/types";
 
 interface CutsRegistryHeaderProps {
-  slices: Slice[];
-  handleClearAllSlices: () => void;
+  cuts: Cut[];
+  handleClearAllCuts: () => void;
 }
 
 export function CutsRegistryHeader({
-  slices,
-  handleClearAllSlices,
+  cuts,
+  handleClearAllCuts,
 }: CutsRegistryHeaderProps) {
   return (
     <div className="flex items-center justify-between">
@@ -21,13 +21,13 @@ export function CutsRegistryHeader({
           <span className="text-[10px] uppercase font-mono font-bold text-neutral-400 tracking-widest">
             Target Crop Tools Registry
           </span>
-          <p className="text-[9px] text-neutral-600 font-mono mt-0.5">{slices.length} Crop Tools Defined</p>
+          <p className="text-[9px] text-neutral-600 font-mono mt-0.5">{cuts.length} Crop Tools Defined</p>
         </div>
       </div>
-      {slices.length > 0 && (
+      {cuts.length > 0 && (
         <button
           type="button"
-          onClick={handleClearAllSlices}
+          onClick={handleClearAllCuts}
           className="flex items-center gap-1 text-[9px] bg-red-950/60 hover:bg-red-900/80 text-red-400 border border-red-800/40 hover:border-red-700/60 px-2 py-1 rounded-lg cursor-pointer transition-all"
           title="Clear all defined crop tools from list"
         >

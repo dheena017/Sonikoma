@@ -108,10 +108,10 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
     setZoom,
     isTransforming,
     isMerging,
-    slices,
-    setSlices,
-    selectedSliceId,
-    setSelectedSliceId,
+    cuts,
+    setCuts,
+    selectedCutId,
+    setSelectedCutId,
     autoPushOnDraw,
     setAutoPushOnDraw,
     splitPosition,
@@ -124,8 +124,8 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
     setMagneticSnap,
     detectedGutters,
     setDetectedGutters,
-    isCroppingSlice,
-    slicesCroppedCount,
+    isCroppingCut,
+    cutsCroppedCount,
     history,
     redoHistory,
     pushHistory,
@@ -138,22 +138,22 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
     handleNextImage,
     handleCleanSingleBubble,
     handleDeleteCurrentImage,
-    handleSelectSlice,
-    handleDeleteSlice,
-    handleCropSingleSlice,
+    handleSelectCut,
+    handleDeleteCut,
+    handleCropSingleCut,
     handleAiCrop,
     handleCommitDetectedBoxes,
     handleClearDetectedBoxes,
     handleDetectPanels,
     isPointInsideSelection,
     onResizeStart,
-    handleSelectAndDragSlice,
+    handleSelectAndDragCut,
     handleStart,
     handleMove,
     handleEnd,
-    handlePushToSlices,
+    handlePushToCuts,
     handleApplyEqualSplits,
-    handleClearAllSlices,
+    handleClearAllCuts,
     handleNudge,
     handleAddSplitLine,
     handleRemoveSplitLine,
@@ -263,8 +263,8 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
             editCropBottom={editCropBottom}
             editCropLeft={editCropLeft}
             editCropRight={editCropRight}
-            slices={slices}
-            selectedSliceId={selectedSliceId}
+            cuts={cuts}
+            selectedCutId={selectedCutId}
             showSplitPosition={showSplitPosition}
             splitPosition={splitPosition}
             splitLines={splitLines}
@@ -272,12 +272,12 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
             handleMove={handleMove}
             handleEnd={handleEnd}
             isPointInsideSelection={isPointInsideSelection}
-            handleSelectSlice={handleSelectSlice}
-            handleDeleteSlice={handleDeleteSlice}
+            handleSelectCut={handleSelectCut}
+            handleDeleteCut={handleDeleteCut}
             handleRemoveSplitLine={handleRemoveSplitLine}
             dragType={dragType}
             onResizeStart={onResizeStart}
-            handleSelectAndDragSlice={handleSelectAndDragSlice}
+            handleSelectAndDragCut={handleSelectAndDragCut}
             zoom={zoom}
             editMode={editMode}
             detectedBubbles={detectedBubbles}
@@ -292,15 +292,15 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
             setEditCropBottom={setEditCropBottom}
             setEditCropLeft={setEditCropLeft}
             setEditCropRight={setEditCropRight}
-            setSelectedSliceId={setSelectedSliceId}
+            setSelectedCutId={setSelectedCutId}
             activeTab={activeTab}
           />
 
           <CropEditorSidebar
             activeTab={activeTab}
             setActiveTab={setActiveTab}
-            slices={slices}
-            setSlices={setSlices}
+            cuts={cuts}
+            setCuts={setCuts}
             editingImageIdx={editingImageIdx}
             scrapedImages={scrapedImages}
             isMerging={isMerging}
@@ -377,7 +377,7 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
             setSplitLines={setSplitLines}
             showSplitPosition={showSplitPosition}
             setShowSplitPosition={setShowSplitPosition}
-            setSelectedSliceId={setSelectedSliceId}
+            setSelectedCutId={setSelectedCutId}
             handleAddSplitLine={handleAddSplitLine}
             handleRemoveSplitLine={handleRemoveSplitLine}
             handleExecuteHorizontalSplit={handleExecuteHorizontalSplit}
@@ -387,17 +387,17 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
             setMagneticSnap={setMagneticSnap}
             detectedGutters={detectedGutters}
             setDetectedGutters={setDetectedGutters}
-            selectedSliceId={selectedSliceId}
+            selectedCutId={selectedCutId}
             editAutoTrim={editAutoTrim}
-            handlePushToSlices={handlePushToSlices}
+            handlePushToCuts={handlePushToCuts}
             autoPushOnDraw={autoPushOnDraw}
             setAutoPushOnDraw={setAutoPushOnDraw}
-            handleClearAllSlices={handleClearAllSlices}
+            handleClearAllCuts={handleClearAllCuts}
             handleNudge={handleNudge}
-            handleSelectSlice={handleSelectSlice}
-            handleDeleteSlice={handleDeleteSlice}
-            handleCropSingleSlice={handleCropSingleSlice}
-            isCroppingSlice={isCroppingSlice}
+            handleSelectCut={handleSelectCut}
+            handleDeleteCut={handleDeleteCut}
+            handleCropSingleCut={handleCropSingleCut}
+            isCroppingCut={isCroppingCut}
             handleDetectPanels={handleDetectPanels}
             isDetecting={isDetecting}
             handleCommitDetectedBoxes={handleCommitDetectedBoxes}
@@ -408,7 +408,7 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
         </div>
 
         <CropEditorFooter
-          slices={slices}
+          cuts={cuts}
           historyLength={history.length}
           handleUndo={handleUndo}
           isSavingEdit={isSavingEdit}

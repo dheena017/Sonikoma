@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Slice } from "../components/crop/types";
+import { Cut } from "../components/crop/types";
 
 interface UseCropEditorStateProps {
   scrapedImages: string[];
@@ -17,7 +17,7 @@ export function useCropEditorState({
   const [dragStartPercent, setDragStartPercent] = useState<{ x: number; y: number } | null>(null);
   const [originalCropBounds, setOriginalCropBounds] = useState<{ top: number; bottom: number; left: number; right: number } | null>(null);
   const [draggingSplitLineIdx, setDraggingSplitLineIdx] = useState<number | null>(null);
-  const [editMode, setEditMode] = useState<"crop" | "clean_auto" | "clean_manual" | "typeset" | "slices">("crop");
+  const [editMode, setEditMode] = useState<"crop" | "clean_auto" | "clean_manual" | "typeset" | "crop">("crop");
   const [detectedBubbles, setDetectedBubbles] = useState<Array<{ box: [number, number, number, number]; text: string; category?: string }>>([]);
   const [selectedBubbleIdx, setSelectedBubbleIdx] = useState<number | null>(null);
   const [brushSize, setBrushSize] = useState(20);
@@ -59,10 +59,10 @@ export function useCropEditorState({
 
   // Sidebar Tab Configuration
   const savedActiveTab = savedState?.activeTab;
-  const [activeTab, setActiveTab] = useState<"adjust" | "edit" | "eraser" | "slice" | "cuts" | "merge">(
+  const [activeTab, setActiveTab] = useState<"adjust" | "edit" | "eraser" | "split" | "crop" | "merge">(
     savedActiveTab === "adjust" ||
-    savedActiveTab === "slice" ||
-    savedActiveTab === "cuts" ||
+    savedActiveTab === "split" ||
+    savedActiveTab === "crop" ||
     savedActiveTab === "edit" ||
     savedActiveTab === "merge" ||
     savedActiveTab === "eraser"
@@ -80,18 +80,18 @@ export function useCropEditorState({
   const [isMerging, setIsMerging] = useState<boolean>(false);
 
   // Multiple Cut List
-  const [slices, setSlices] = useState<Slice[]>(savedState?.slices || []);
-  const [selectedSliceId, setSelectedSliceId] = useState<string | null>(savedState?.selectedSliceId || null);
+  const [cuts, setCuts] = useState<Cut[]>(savedState?.cuts || []);
+  const [selectedCutId, setSelectedCutId] = useState<string | null>(savedState?.selectedCutId || null);
   const [autoPushOnDraw, setAutoPushOnDraw] = useState<boolean>(false);
 
   const [splitPosition, setSplitPosition] = useState<number>(50);
   const [splitLines, setSplitLines] = useState<number[]>(savedState?.splitLines || []);
-  const [showSplitPosition, setShowSplitPosition] = useState<boolean>(savedState?.activeTab === "slice" || false);
+  const [showSplitPosition, setShowSplitPosition] = useState<boolean>(savedState?.activeTab === "split" || false);
   const [magneticSnap, setMagneticSnap] = useState<boolean>(true);
   const [detectedGutters, setDetectedGutters] = useState<number[]>([]);
 
-  const [isCroppingSlice, setIsCroppingSlice] = useState<string | null>(null);
-  const [slicesCroppedCount, setSlicesCroppedCount] = useState(0);
+  const [isCroppingCut, setIsCroppingCut] = useState<string | null>(null);
+  const [cutsCroppedCount, setCutsCroppedCount] = useState(0);
 
   return {
     dragStart, setDragStart,
@@ -128,15 +128,15 @@ export function useCropEditorState({
     zoom, setZoom,
     isTransforming, setIsTransforming,
     isMerging, setIsMerging,
-    slices, setSlices,
-    selectedSliceId, setSelectedSliceId,
+    cuts, setCuts,
+    selectedCutId, setSelectedCutId,
     autoPushOnDraw, setAutoPushOnDraw,
     splitPosition, setSplitPosition,
     splitLines, setSplitLines,
     showSplitPosition, setShowSplitPosition,
     magneticSnap, setMagneticSnap,
     detectedGutters, setDetectedGutters,
-    isCroppingSlice, setIsCroppingSlice,
-    slicesCroppedCount, setSlicesCroppedCount,
+    isCroppingCut, setIsCroppingCut,
+    cutsCroppedCount, setCutsCroppedCount,
   };
 }

@@ -225,8 +225,8 @@ def run_cv_detection(image_path, sensitivity, bg_mode, min_width_pct, min_height
                 
         raw_boxes = []
         for start_y, end_y in panels:
-            panel_slice = gray_arr[start_y:end_y, :]
-            col_means = np.mean(panel_slice, axis=0)
+            panel_cut = gray_arr[start_y:end_y, :]
+            col_means = np.mean(panel_cut, axis=0)
             
             if is_white_bg:
                 is_content_col = col_means < (thresh_limit + 2)

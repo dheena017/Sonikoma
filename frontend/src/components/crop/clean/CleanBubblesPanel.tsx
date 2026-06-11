@@ -18,8 +18,8 @@ interface CleanBubblesPanelProps {
   setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>> | undefined;
 
   // Manual Brush Props
-  editMode?: "crop" | "clean_auto" | "clean_manual" | "typeset" | "slices";
-  setEditMode?: (mode: "crop" | "clean_auto" | "clean_manual" | "typeset" | "slices") => void;
+  editMode?: "crop" | "clean_auto" | "clean_manual" | "typeset" | "cuts";
+  setEditMode?: (mode: "crop" | "clean_auto" | "clean_manual" | "typeset" | "cuts") => void;
   brushSize?: number;
   setBrushSize?: (size: number) => void;
   brushAction?: "paint" | "erase";

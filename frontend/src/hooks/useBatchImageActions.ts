@@ -129,7 +129,7 @@ export function useBatchImageActions({
 
     let completedCount = 0;
     const errors: string[] = [];
-    const newSlicedUrlsMap: Record<string, string[]> = {};
+    const newCutUrlsMap: Record<string, string[]> = {};
 
     for (const url of selectedScraped) {
       setCroppingImgUrl(url);
@@ -185,13 +185,13 @@ export function useBatchImageActions({
               croppedUrls.push(cropData.url);
             }
           }
-          newSlicedUrlsMap[url] = croppedUrls;
+          newCutUrlsMap[url] = croppedUrls;
         } else {
-          newSlicedUrlsMap[url] = [url];
+          newCutUrlsMap[url] = [url];
         }
       } catch (err: any) {
         errors.push(`Image: ${url.substring(0, 40)}... - Error: ${err.message}`);
-        newSlicedUrlsMap[url] = [url];
+        newCutUrlsMap[url] = [url];
       } finally {
         completedCount++;
         setBatchProgress({ current: completedCount, total: selectedScraped.length });
@@ -201,8 +201,8 @@ export function useBatchImageActions({
     setScrapedImages((prev) => {
       const copy: string[] = [];
       prev.forEach((img) => {
-        if (newSlicedUrlsMap[img]) {
-          copy.push(...newSlicedUrlsMap[img]);
+        if (newCutUrlsMap[img]) {
+          copy.push(...newCutUrlsMap[img]);
         } else {
           copy.push(img);
         }
@@ -221,7 +221,7 @@ export function useBatchImageActions({
         ...prev,
       ]);
     } else {
-      addNotification(`Successfully sliced & auto-cropped panels!`, "success");
+      addNotification(`Successfully cut & auto-cropped panels!`, "success");
       setConsoleLogs((prev) => [
         `[Auto Cropper] ✓ Batch auto crop job completed successfully!`,
         ...prev,

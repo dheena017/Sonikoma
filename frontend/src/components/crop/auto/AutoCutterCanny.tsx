@@ -1,6 +1,6 @@
 import React from "react";
 
-interface AutoSlicerCannyProps {
+interface AutoCutterCannyProps {
   minHeightPx: number;
   setMinHeightPx: (val: number) => void;
   minAreaPct: number;
@@ -15,7 +15,7 @@ interface AutoSlicerCannyProps {
   setCannyHigh: (val: number) => void;
 }
 
-export default function AutoSlicerCanny({
+export default function AutoCutterCanny({
   minHeightPx,
   setMinHeightPx,
   minAreaPct,
@@ -28,7 +28,7 @@ export default function AutoSlicerCanny({
   setCannyLow,
   cannyHigh,
   setCannyHigh,
-}: AutoSlicerCannyProps) {
+}: AutoCutterCannyProps) {
   return (
     <div className="space-y-3.5 pt-2.5 animate-fadeIn">
       {/* Min Height Slider */}

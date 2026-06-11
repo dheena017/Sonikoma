@@ -3,7 +3,7 @@ import { Cpu } from "lucide-react";
 
 interface CleanBubblesManualProps {
   editMode: string;
-  setEditMode?: (mode: "crop" | "clean_auto" | "clean_manual" | "typeset" | "slices") => void;
+  setEditMode?: (mode: "crop" | "clean_auto" | "clean_manual" | "typeset" | "cuts") => void;
   brushAction: "paint" | "erase";
   setBrushAction?: (action: "paint" | "erase") => void;
   brushSize: number;
