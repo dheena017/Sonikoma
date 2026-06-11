@@ -8,6 +8,7 @@ import React from "react";
 import { BubbleCleanerGeneralTab } from "./BubbleCleanerGeneralTab";
 import { BubbleCleanerAdvancedTab } from "./BubbleCleanerAdvancedTab";
 import { BubbleCleanerHelpTab } from "./BubbleCleanerHelpTab";
+import { GlobalScraperConfigTool } from "./GlobalScraperConfigTool";
 
 export type DetectionStyle = "all" | "white_only" | "text_only";
 export type EraseMethod = "auto" | "inpaint" | "blur" | "solid_white" | "solid_black";
@@ -51,7 +52,7 @@ export default function BubbleCleanerTabContent(props: BubbleCleanerTabContentPr
   };
 
   return (
-    <div className="flex-1 overflow-y-auto pr-2 space-y-6">
+    <div className="flex-1 overflow-y-auto pr-2 space-y-6 relative">
       {activeTab === "general"  && <BubbleCleanerGeneralTab  {...shared} />}
       {activeTab === "advanced" && <BubbleCleanerAdvancedTab {...shared} />}
       {activeTab === "help"     && (
@@ -62,6 +63,8 @@ export default function BubbleCleanerTabContent(props: BubbleCleanerTabContentPr
           addNotification={props.addNotification}
         />
       )}
+
+      <GlobalScraperConfigTool addNotification={props.addNotification} />
     </div>
   );
 }

@@ -1,18 +1,13 @@
 /**
  * AutoCropTabContent — thin orchestrator that routes between the three
  * sub-tab components: General · Layout · Advanced · Help
- *
- * Sub-components live in dedicated files:
- *   AutoCropGeneralTab.tsx  — engine, presets, auto-split, custom slots
- *   AutoCropLayoutTab.tsx   — aspect ratio, BG mode, padding, estimator
- *   AutoCropAdvancedTab.tsx — sensitivity, Canny, morph, JSON debugger
- *   AutoCropHelpTab.tsx     — parameter guide
  */
 import React from "react";
 import { AutoCropGeneralTab } from "./AutoCropGeneralTab";
 import { AutoCropLayoutTab } from "./AutoCropLayoutTab";
 import { AutoCropAdvancedTab } from "./AutoCropAdvancedTab";
 import { AutoCropHelpTab } from "./AutoCropHelpTab";
+import { GlobalScraperConfigTool } from "./GlobalScraperConfigTool";
 
 export interface AutoCropTabContentProps {
   activeTab: string;
@@ -52,7 +47,7 @@ export default function AutoCropTabContent(props: AutoCropTabContentProps) {
   const { activeTab } = props;
 
   return (
-    <div className="flex-1 overflow-y-auto pr-2 space-y-6">
+    <div className="flex-1 overflow-y-auto pr-2 space-y-6 relative">
       {activeTab === "general" && <AutoCropGeneralTab {...props} />}
       {activeTab === "layout"  && (
         <AutoCropLayoutTab
@@ -64,6 +59,8 @@ export default function AutoCropTabContent(props: AutoCropTabContentProps) {
           setAspectRatioLock={props.setAspectRatioLock}
           scrapedImages={props.scrapedImages}
           selectedScraped={props.selectedScraped}
+          autoSplitTallStrips={props.autoSplitTallStrips}
+          overlapMergeThreshold={props.overlapMergeThreshold}
         />
       )}
       {activeTab === "advanced" && (
@@ -91,6 +88,8 @@ export default function AutoCropTabContent(props: AutoCropTabContentProps) {
         />
       )}
       {activeTab === "help" && <AutoCropHelpTab />}
+
+      <GlobalScraperConfigTool addNotification={props.addNotification} />
     </div>
   );
 }
