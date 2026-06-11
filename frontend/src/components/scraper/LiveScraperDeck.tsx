@@ -163,15 +163,25 @@ export default function LiveScraperDeck({
         </div>
       </div>
 
-      {isScraping ? (
+      {isScraping && scrapedImages.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-8 space-y-3">
           <RefreshCw className="h-6 w-6 text-purple-500 animate-spin" />
           <p className="text-xs text-neutral-400 font-mono">
-            Analyzing Webtoon viewer page, extraction in progress...
+            Launching browser to scrape webtoon panels... this may take up to 60 seconds.
           </p>
         </div>
       ) : (
         <div className="space-y-4">
+          {/* Live scraping progress banner — shows while images are arriving */}
+          {isScraping && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-purple-950/30 border border-purple-800/40">
+              <RefreshCw className="h-3.5 w-3.5 text-purple-400 animate-spin flex-shrink-0" />
+              <p className="text-[11px] text-purple-300 font-mono">
+                Extracting panels... {scrapedImages.length > 0 ? `${scrapedImages.length} loaded so far` : "launching browser renderer"}
+              </p>
+            </div>
+          )}
+
           {/* Scraper Controls Toolbar */}
           <ScraperControls
             scrapedImages={scrapedImages}

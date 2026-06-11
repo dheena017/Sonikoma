@@ -22,6 +22,8 @@ def get_db_connection() -> sqlite3.Connection:
     return conn
 
 def init_db() -> None:
+    if os.path.exists(DB_PATH):
+        return
     print(f"[DB] Opening local SQLite database at: {DB_PATH}")
     os.makedirs(DB_DIR, exist_ok=True)
     conn = get_db_connection()

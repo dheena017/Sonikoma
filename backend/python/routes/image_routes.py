@@ -455,7 +455,6 @@ async def bubble_cleaning(body: RemoveBubblesRequest):
             tmp_in_path = tmp_in.name
             
         tmp_out_path = tmp_in_path.replace(".png", "_out.png")
-        import tempfile  # Re-import just to be safe
         
         try:
             # 3. Call services/cleaner remove_speech_bubbles directly (no subprocess!)

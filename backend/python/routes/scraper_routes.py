@@ -24,6 +24,7 @@ router = APIRouter()
 class ScrapeImagesRequest(BaseModel):
     url: str
     source: Optional[str] = None
+    bypass_cache: Optional[bool] = True
 
 class GenerateStoryboardRequest(BaseModel):
     url: str
@@ -31,6 +32,7 @@ class GenerateStoryboardRequest(BaseModel):
     panels: Optional[List[Dict[str, Any]]] = None
     custom_background_video: Optional[str] = None
     model: Optional[str] = "gemini-2.5-flash"
+    bypass_cache: Optional[bool] = True
 
 class ProcessUrlRequest(BaseModel):
     url: str
@@ -46,7 +48,7 @@ async def scrape_images(body: ScrapeImagesRequest):
         
         logger.info(f"[Scraper] Scrape request received - source: {body.source or 'unknown'}, url: {normalized_url}")
         
-        proxied_urls = await scrape_images_from_url(normalized_url, body.source)
+        proxied_urls = await scrape_images_from_url(normalized_url, body.source, bypass_cache=body.bypass_cache)
 
         return {
             "success": True,
@@ -97,7 +99,7 @@ async def generate_storyboard(body: GenerateStoryboardRequest):
         elif any(x in genre_lower for x in ['cyber', 'sci', 'thriller', 'tech']):
             video_url = DYNAMIC_BACKGROUND_VIDEOS["cyberpunk"]
 
-        scraped_urls = await scrape_images_from_url(body.url)
+        scraped_urls = await scrape_images_from_url(body.url, bypass_cache=body.bypass_cache)
 
         # Re-use client panels if provided
         if body.panels and len(body.panels) > 0:
