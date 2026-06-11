@@ -36,8 +36,13 @@ export function AutoCropEngineSelector({ useLocalCV, setUseLocalCV, cropModel, s
         <div className="space-y-2.5 p-4 bg-neutral-950/50 border border-neutral-800 rounded-2xl animate-fadeIn">
           <label className="text-[9px] font-bold text-neutral-500 uppercase font-mono block tracking-wider">Gemini Vision Model</label>
           <div className="relative">
-            <select value={cropModel} onChange={(e) => setCropModel(e.target.value)}
+            <select value={cropModel} onChange={(e) => {
+              setCropModel(e.target.value);
+              console.log(`[AutoCropEngineSelector] Crop model changed to: ${e.target.value}`);
+            }}
               className="w-full bg-neutral-900 border border-neutral-800 text-neutral-300 rounded-xl px-3.5 py-2 text-[10px] font-mono focus:border-indigo-500/50 focus:outline-none cursor-pointer appearance-none transition-colors hover:border-neutral-700">
+              <option value="gemini-3.5-flash">Gemini 3.5 Flash (Fast, Visual Layout)</option>
+              <option value="gemini-3.5-pro">Gemini 3.5 Pro (Deep Visual Comprehension)</option>
               <option value="gemini-2.5-flash">Gemini 2.5 Flash (Fast, Visual Layout)</option>
               <option value="gemini-2.5-pro">Gemini 2.5 Pro (Deep Visual Comprehension)</option>
             </select>

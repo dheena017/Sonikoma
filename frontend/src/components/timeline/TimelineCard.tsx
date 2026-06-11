@@ -17,6 +17,8 @@ interface TimelineCardProps {
   handleModifySpeechText: (id: number, val: string) => void;
   handleModifyMotion: (id: number, val: string) => void;
   handleModifyDuration: (id: number, val: number) => void;
+  handleModifySFX: (id: number, val: string) => void;
+  handleModifyVisualDescription: (id: number, val: string) => void;
   handleAnalyzePanel: (id: number, url: string) => void;
 }
 
@@ -34,6 +36,8 @@ export default function TimelineCard({
   handleModifySpeechText,
   handleModifyMotion,
   handleModifyDuration,
+  handleModifySFX,
+  handleModifyVisualDescription,
   handleAnalyzePanel,
 }: TimelineCardProps) {
   const isCurrent = idx === currentPanelIndex && activePreviewTab === "storyboard";
@@ -114,7 +118,7 @@ export default function TimelineCard({
         </div>
       </div>
 
-      {/* Text OCR Editable Input */}
+      {/* Dialogue/Subtitle Text OCR Editable Input */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <label className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider block">Dialogue/Subtitle Text</label>
@@ -131,6 +135,36 @@ export default function TimelineCard({
           onChange={(e) => handleModifySpeechText(panel.id, e.target.value)}
           className={`w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all ${
             (panel.isAnalyzing || analyzingPanelId === panel.id) ? "opacity-60 cursor-not-allowed border-purple-900/40 text-purple-300" : ""
+          }`}
+        />
+      </div>
+
+      {/* Sound Effect (SFX) Editable Input */}
+      <div className="space-y-1.5">
+        <label className="text-[9px] font-mono text-neutral-500 uppercase tracking-wider block">Sound Effect (SFX)</label>
+        <input
+          type="text"
+          disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
+          value={panel.sfx || ""}
+          onChange={(e) => handleModifySFX(panel.id, e.target.value)}
+          placeholder="e.g. [Shatter], [Whoosh]"
+          className={`w-full bg-neutral-900 border border-neutral-800 text-[10px] rounded-lg px-2.5 py-1.5 text-neutral-100 outline-none focus:border-purple-500 font-mono transition-all ${
+            (panel.isAnalyzing || analyzingPanelId === panel.id) ? "opacity-60 cursor-not-allowed text-purple-300 border-purple-900/40" : ""
+          }`}
+        />
+      </div>
+
+      {/* Visual Scene Description Editable Input */}
+      <div className="space-y-1.5">
+        <label className="text-[9px] font-mono text-neutral-500 uppercase tracking-wider block">Visual Scene Description</label>
+        <textarea
+          rows={2}
+          disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
+          value={panel.visual_description || ""}
+          onChange={(e) => handleModifyVisualDescription(panel.id, e.target.value)}
+          placeholder="Describe actions, visual cues, scene details..."
+          className={`w-full bg-neutral-900 border border-neutral-800 text-[10px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all resize-none ${
+            (panel.isAnalyzing || analyzingPanelId === panel.id) ? "opacity-60 cursor-not-allowed text-purple-300 border-purple-900/40" : ""
           }`}
         />
       </div>
@@ -188,8 +222,7 @@ export default function TimelineCard({
         </button>
       </div>
 
-      <div className="flex items-center justify-between text-[9px] text-neutral-500 pt-1 font-mono">
-        <span className="hidden sm:inline">SFX: {panel.sfx || "None"}</span>
+      <div className="flex items-center justify-end text-[9px] text-neutral-500 pt-1 font-mono">
         <span>{idx + 1} / {panelsLength}</span>
       </div>
     </div>

@@ -93,37 +93,27 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
     )
   );
 
-  const modelGrid = (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-      {AI_MODELS.map((modelItem) => (
-        <button
-          key={modelItem.id}
-          type="button"
-          onClick={() => {
-            setSelectedModel(modelItem.id);
-            addNotification(`Model configured to ${modelItem.name}`, 'info');
-          }}
-          className={`p-3.5 rounded-2xl border text-left flex flex-col justify-between gap-1.5 transition-all duration-300 cursor-pointer ${
-            selectedModel === modelItem.id
-              ? "bg-purple-950/10 border-transparent shadow-none text-white"
-              : "bg-neutral-950/40 border-neutral-800/60 hover:border-neutral-700 text-neutral-300 hover:text-white"
-          }`}
-        >
-          <div className="flex items-center justify-between gap-1.5 w-full">
-            <span className="text-xs font-semibold whitespace-nowrap truncate">{modelItem.name}</span>
-            <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold uppercase tracking-wider ${
-              modelItem.type === 'free' 
-                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" 
-                : modelItem.type === 'open-source'
-                ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-                : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-            }`}>
-              {modelItem.type}
-            </span>
-          </div>
-          <span className="text-[10px] text-neutral-500 truncate w-full italic font-sans">Powered by {modelItem.provider}</span>
-        </button>
-      ))}
+  const modelDropdown = (
+    <div className="relative">
+      <select
+        id="model_select"
+        value={selectedModel}
+        onChange={(e) => {
+          setSelectedModel(e.target.value);
+          const selectedName = AI_MODELS.find(m => m.id === e.target.value)?.name || e.target.value;
+          console.log(`[UrlInputPanel] Model changed to: ${e.target.value} (${selectedName})`);
+          addNotification(`Model configured to ${selectedName}`, 'info');
+        }}
+        className="relative w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-neutral-200 outline-none appearance-none focus:border-purple-500 transition-colors cursor-pointer"
+      >
+        <option value="" disabled>Select AI Model Engine...</option>
+        {AI_MODELS.map((modelItem) => (
+          <option key={modelItem.id} value={modelItem.id} className="bg-neutral-950 text-neutral-100">
+            {modelItem.name} ({modelItem.provider} - {modelItem.type})
+          </option>
+        ))}
+      </select>
+      <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-neutral-500 select-none">▾</div>
     </div>
   );
 
@@ -202,17 +192,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
             <span className="h-1.5 w-1.5 rounded-full bg-purple-500 animate-ping"></span>
             Active AI Model Engine (Free Models Recommended)
           </label>
-          <div className="lg:hidden">
-            <details className="rounded-2xl border border-neutral-800/80 bg-neutral-950/30 p-3">
-              <summary className="cursor-pointer list-none flex items-center justify-between gap-2 text-xs font-bold text-neutral-200 font-mono uppercase tracking-wider select-none">
-                <span>Choose model</span>
-                <span className="text-[10px] text-neutral-500 normal-case tracking-normal">Tap to expand</span>
-              </summary>
-              <div className="mt-3">{modelGrid}</div>
-            </details>
-          </div>
-
-          <div className="hidden lg:block">{modelGrid}</div>
+          {modelDropdown}
 
           {selectedModel.includes('pro') && (
             <p className="text-[10.5px] text-amber-500/90 font-mono flex items-center gap-1.5 animate-pulse">

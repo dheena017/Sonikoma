@@ -49,6 +49,8 @@ export function useStoryboardOperations({
     handleModifyMotion,
     handleModifyDuration,
     handleShiftPanel,
+    handleModifySFX,
+    handleModifyVisualDescription,
   } = useSceneModifier({ panels, setPanels, setCurrentPanelIndex, setConsoleLogs });
 
   const {
@@ -94,6 +96,8 @@ export function useStoryboardOperations({
     handleModifyMotion,
     handleModifyDuration,
     handleShiftPanel,
+    handleModifySFX,
+    handleModifyVisualDescription,
     handleBulkSetDuration,
     handleBulkSetMotion,
     handleBulkSetPreset,

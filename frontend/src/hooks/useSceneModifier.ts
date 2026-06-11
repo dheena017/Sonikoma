@@ -65,6 +65,40 @@ export function useSceneModifier({
     }
   };
 
+  const handleModifySFX = (panelId: number, sfxVal: string) => {
+    const originalPanel = panels.find(p => p.id === panelId);
+    const originalSFX = originalPanel ? originalPanel.sfx : "";
+    setPanels(prev => prev.map(p => p.id === panelId ? { ...p, sfx: sfxVal } : p));
+    console.log(`[StoryboardTimeline] [SFX Edit] Panel #${panelId} SFX revised:`);
+    console.log(`  - Sent (Original): "${originalSFX}"`);
+    console.log(`  - Revise (Revised): "${sfxVal}"`);
+    if (setConsoleLogs) {
+      setConsoleLogs(prev => [
+        `[SFX] Sound effect revised on Panel #${panelId}`,
+        `[SFX]   - Sent (Original): "${originalSFX}"`,
+        `[SFX]   - Revise (Revised): "${sfxVal}"`,
+        ...prev
+      ]);
+    }
+  };
+
+  const handleModifyVisualDescription = (panelId: number, descVal: string) => {
+    const originalPanel = panels.find(p => p.id === panelId);
+    const originalDesc = originalPanel ? originalPanel.visual_description : "";
+    setPanels(prev => prev.map(p => p.id === panelId ? { ...p, visual_description: descVal } : p));
+    console.log(`[StoryboardTimeline] [Visual Edit] Panel #${panelId} visual description revised:`);
+    console.log(`  - Sent (Original): "${originalDesc}"`);
+    console.log(`  - Revise (Revised): "${descVal}"`);
+    if (setConsoleLogs) {
+      setConsoleLogs(prev => [
+        `[Visual] Description revised on Panel #${panelId}`,
+        `[Visual]   - Sent (Original): "${originalDesc}"`,
+        `[Visual]   - Revise (Revised): "${descVal}"`,
+        ...prev
+      ]);
+    }
+  };
+
   const handleShiftPanel = (index: number, direction: "left" | "right") => {
     if (direction === "left" && index > 0) {
       setPanels(prev => {
@@ -92,5 +126,7 @@ export function useSceneModifier({
     handleModifyMotion,
     handleModifyDuration,
     handleShiftPanel,
+    handleModifySFX,
+    handleModifyVisualDescription,
   };
 }

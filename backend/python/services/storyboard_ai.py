@@ -124,7 +124,11 @@ async def generate_dynamic_panels(
         try:
             target_model_name = model if model and model.lower().startswith('gemini') else "gemini-2.5-flash"
             if target_model_name and "gemini-3.5" in target_model_name.lower():
-                target_model_name = "gemini-2.5-flash"
+                if "pro" in target_model_name.lower():
+                    target_model_name = "gemini-2.5-pro"
+                else:
+                    target_model_name = "gemini-2.5-flash"
+                logger.info(f"[storyboard_ai] Translated gemini-3.5 model selection in storyboard generation to: {target_model_name}")
                 
             logger.info(f"[Gemini] Storyboard narrative generation using: {target_model_name}")
 
