@@ -193,7 +193,7 @@ export default function BubbleCleanerModal({
                 ) : (
                   <Brain className="h-3.5 w-3.5" />
                 )}
-                {isApplying ? "Cleaning…" : "Apply & Clean"}
+                {isApplying ? "Cleaning…" : "Apply"}
               </button>
             </div>
           </div>
