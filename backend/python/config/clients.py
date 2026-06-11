@@ -55,13 +55,14 @@ except ImportError:
 
 async def call_gemini_with_retry(
     fn: Callable[[], Any],
-    max_attempts: int = 5,
+    max_attempts: int = 1,
     initial_delay_sec: float = 2.0
 ) -> Any:
     """
     Resilient Gemini wrapper with exponential back-off + jitter.
     Handles 429 (quota) and 503 (high demand) automatically.
     """
+    logger.info(f"[call_gemini_with_retry] Executing Gemini client function call. max_attempts={max_attempts}")
     attempt = 0
     import inspect
     import asyncio

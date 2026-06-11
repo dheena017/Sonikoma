@@ -299,7 +299,11 @@ async def analyze_image(body: AnalyzeImageRequest):
     if not target_model.lower().startswith("gemini"):
         target_model = MODEL_FALLBACKS[0]
     elif "gemini-3.5" in target_model.lower():
-        target_model = "gemini-2.5-flash"
+        if "pro" in target_model.lower():
+            target_model = "gemini-2.5-pro"
+        else:
+            target_model = "gemini-2.5-flash"
+        logger.info(f"[analyze_image] Translated gemini-3.5 model selection to: {target_model}")
     
     try:
         tone_hint = ""
@@ -345,7 +349,11 @@ async def analyze_batch(body: AnalyzeBatchRequest):
     if not target_model.lower().startswith("gemini"):
         target_model = MODEL_FALLBACKS[0]
     elif "gemini-3.5" in target_model.lower():
-        target_model = "gemini-2.5-flash"
+        if "pro" in target_model.lower():
+            target_model = "gemini-2.5-pro"
+        else:
+            target_model = "gemini-2.5-flash"
+        logger.info(f"[analyze_batch] Translated gemini-3.5 model selection to: {target_model}")
 
     semaphore = asyncio.Semaphore(4)
     results = []
@@ -410,7 +418,11 @@ async def ai_smart_crop(body: SmartCropRequest):
             if ai_initialized:
                 target_model = body.model or "gemini-2.5-flash"
                 if "gemini-3.5" in target_model.lower():
-                    target_model = "gemini-2.5-flash"
+                    if "pro" in target_model.lower():
+                        target_model = "gemini-2.5-pro"
+                    else:
+                        target_model = "gemini-2.5-flash"
+                    logger.info(f"[ai_smart_crop] Translated gemini-3.5 model selection to: {target_model}")
                 logger.info(f"[AI Smart Crop API] Using Gemini model: {target_model}")
                 
                 try:

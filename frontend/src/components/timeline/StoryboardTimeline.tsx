@@ -57,6 +57,8 @@ export default function StoryboardTimeline({
     handleModifyMotion,
     handleModifyDuration,
     handleShiftPanel,
+    handleModifySFX,
+    handleModifyVisualDescription,
     handleBulkSetDuration,
     handleBulkSetMotion,
     handleBulkSetPreset,
@@ -126,6 +128,8 @@ export default function StoryboardTimeline({
             handleModifySpeechText={handleModifySpeechText}
             handleModifyMotion={handleModifyMotion}
             handleModifyDuration={handleModifyDuration}
+            handleModifySFX={handleModifySFX}
+            handleModifyVisualDescription={handleModifyVisualDescription}
             handleAnalyzePanel={handleAnalyzePanel}
           />
         ))}

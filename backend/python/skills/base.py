@@ -279,7 +279,11 @@ class BaseAISkill:
         
         # Translate gemini-3.5 fallbacks if passed from frontend
         if "gemini-3.5" in target_model.lower():
-            target_model = "gemini-2.5-flash"
+            if "pro" in target_model.lower():
+                target_model = "gemini-2.5-pro"
+            else:
+                target_model = "gemini-2.5-flash"
+            logger.info(f"[base.py] Translated gemini-3.5 model selection in '{self.name}' to: {target_model}")
             
         prompt = self.build_prompt(**kwargs)
         
@@ -327,10 +331,10 @@ class BaseAISkill:
             
         except Exception as e:
             elapsed_ms = int((time.monotonic() - start_time) * 1000)
-            logger.error(f"Skill '{self.name}' execution failed: {e}. Utilizing fallback coordination.")
+            logger.error(f"Skill '{self.name}' execution failed: {e}. Raising exception to propagate error.", exc_info=True)
             
             fallback = FallbackCoordinator.get_programmatic_fallback(self.name, **kwargs)
             self.logger.log_execution(self.name, elapsed_ms, False, kwargs, fallback)
             
-            import json
-            return json.dumps(fallback)
+            # Raise the exception so endpoints can detect failure and return success: False with the error message
+            raise e
