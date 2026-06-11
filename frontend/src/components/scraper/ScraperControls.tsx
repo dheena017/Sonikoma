@@ -20,6 +20,8 @@ interface ScraperControlsProps
     | "isBatchCropping"
     | "batchProgress"
     | "fetchWithInterceptor"
+    | "handleAutoCropSelected"
+    | "handleCleanBubblesSelected"
   > {
   addPanelsWithAutoAnalysis: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
 }
@@ -38,6 +40,8 @@ export default function ScraperControls({
   setShowAutoCropModal,
   isBatchCropping,
   batchProgress,
+  handleAutoCropSelected,
+  handleCleanBubblesSelected,
   addPanelsWithAutoAnalysis,
   fetchWithInterceptor,
 }: ScraperControlsProps) {
@@ -150,9 +154,11 @@ export default function ScraperControls({
         setShowAutoCropModal={setShowAutoCropModal}
         isBatchCropping={isBatchCropping}
         batchProgress={batchProgress}
+        handleAutoCropSelected={handleAutoCropSelected}
         setShowBubbleModal={setShowBubbleModal}
         isCleaningBubbles={isCleaningBubbles}
         cleanProgress={cleanProgress}
+        handleCleanBubblesSelected={handleCleanBubblesSelected}
         handleBatchMergeSelected={handleBatchMergeSelected}
         isBatchMerging={isBatchMerging}
       />

@@ -198,6 +198,8 @@ export default function App() {
           isBatchCropping={isBatchCropping}
           batchProgress={batchProgress}
           croppingImgUrl={croppingImgUrl}
+          handleAutoCropSelected={handleAutoCropSelected}
+          handleCleanBubblesSelected={handleCleanBubblesSelected}
           videoPlayerRef={videoPlayerRef}
           addNotification={addNotification}
           setErrorPopup={setErrorPopup}

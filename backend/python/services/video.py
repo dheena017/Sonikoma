@@ -3,23 +3,78 @@ import logging
 import numpy as np
 from typing import List, Dict, Any
 
+# MoviePy imports supporting both v1.x and v2.x
 try:
-    from moviepy.editor import (
+    # MoviePy v2.x direct imports
+    from moviepy import (
         ImageClip,
         AudioFileClip,
         CompositeVideoClip,
         CompositeAudioClip,
-        concatenate_videoclips,
-        afx
+        concatenate_videoclips
     )
+    import moviepy.audio.fx as afx
+    import moviepy.video.fx as vfx
 except ImportError:
-    # Fallback to direct imports if moviepy.editor is unavailable
-    from moviepy.video.VideoClip import ImageClip
-    from moviepy.audio.io.AudioFileClip import AudioFileClip
-    from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
-    from moviepy.audio.AudioClip import CompositeAudioClip
-    from moviepy.video.compositing.concatenate import concatenate_videoclips
-    import moviepy.audio.fx.all as afx
+    try:
+        # MoviePy v1.x editor imports
+        from moviepy.editor import (
+            ImageClip,
+            AudioFileClip,
+            CompositeVideoClip,
+            CompositeAudioClip,
+            concatenate_videoclips,
+            afx
+        )
+        vfx = None
+    except ImportError:
+        # Fallback to moviepy v1.x internal imports
+        from moviepy.video.VideoClip import ImageClip
+        from moviepy.audio.io.AudioFileClip import AudioFileClip
+        from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
+        from moviepy.audio.AudioClip import CompositeAudioClip
+        from moviepy.video.compositing.concatenate import concatenate_videoclips
+        import moviepy.audio.fx.all as afx
+        vfx = None
+
+# Compatibility helper wrappers for moviepy v1.x vs v2.x
+def set_clip_duration(clip, duration):
+    if hasattr(clip, "with_duration"):
+        return clip.with_duration(duration)
+    return clip.set_duration(duration)
+
+def resize_clip(clip, size_or_factor):
+    if hasattr(clip, "with_effects") and vfx is not None:
+        return clip.with_effects([vfx.Resize(size_or_factor)])
+    return clip.resize(size_or_factor)
+
+def set_clip_position(clip, position):
+    if hasattr(clip, "with_position"):
+        return clip.with_position(position)
+    return clip.set_position(position)
+
+def set_clip_audio(clip, audio):
+    if hasattr(clip, "with_audio"):
+        return clip.with_audio(audio)
+    return clip.set_audio(audio)
+
+def apply_volume_ducking(bgm_clip, ducking_volume_func):
+    if hasattr(bgm_clip, "volumex"):
+        return bgm_clip.volumex(ducking_volume_func)
+    
+    # For moviepy v2.x, write a custom frame function wrapper
+    original_frame_function = bgm_clip.frame_function
+    def new_frame_function(t):
+        frames = original_frame_function(t)
+        factors = ducking_volume_func(t)
+        if isinstance(factors, np.ndarray):
+            if len(frames.shape) > 1:
+                return frames * factors[:, np.newaxis]
+            return frames * factors
+        return frames * factors
+        
+    return bgm_clip.with_updated_frame_function(new_frame_function)
+
 
 logger = logging.getLogger("webtoon_engine.video")
 
@@ -70,7 +125,7 @@ async def compile_video(
                     logger.error(f"Failed to integrate audio track at {audio_path}: {audio_err}")
             
             # Apply duration to the base image clip
-            img_clip = img_clip.set_duration(duration)
+            img_clip = set_clip_duration(img_clip, duration)
             
             # 3. Apply continuous sub-pixel camera pan/zoom transformation
             # Calculate optimal scale to fit screen dimensions without black bars
@@ -80,23 +135,26 @@ async def compile_video(
             else:
                 scale_to_fit = target_width / w
                 
-            img_clip = img_clip.resize(scale_to_fit)
+            img_clip = resize_clip(img_clip, scale_to_fit)
             
             # Define zoom function over time
             def zoom_func(t):
                 return 1.0 + (zoom_factor * (t / duration))
                 
-            animated_clip = img_clip.resize(zoom_func)
+            animated_clip = resize_clip(img_clip, zoom_func)
             
             # Center the animating clip within the target viewport (crops overflow gracefully)
-            viewport_clip = CompositeVideoClip(
-                [animated_clip.set_position(('center', 'center'))], 
-                size=(target_width, target_height)
-            ).set_duration(duration)
+            viewport_clip = set_clip_duration(
+                CompositeVideoClip(
+                    [set_clip_position(animated_clip, ('center', 'center'))], 
+                    size=(target_width, target_height)
+                ),
+                duration
+            )
             
             # Attach the dialogue track to this specific temporal block
             if panel_audio:
-                viewport_clip = viewport_clip.set_audio(panel_audio)
+                viewport_clip = set_clip_audio(viewport_clip, panel_audio)
                 
             video_clips.append(viewport_clip)
             current_time += duration
@@ -120,7 +178,10 @@ async def compile_video(
             try:
                 bgm_clip = AudioFileClip(bgm_path)
                 # Loop BGM across the entire video runtime
-                bgm_clip = afx.audio_loop(bgm_clip, duration=total_duration)
+                if hasattr(afx, "audio_loop"):
+                    bgm_clip = afx.audio_loop(bgm_clip, duration=total_duration)
+                else:
+                    bgm_clip = bgm_clip.with_effects([afx.AudioLoop(duration=total_duration)])
                 
                 # Function to dynamically lower BGM volume during dialogues
                 def ducking_volume_func(t):
@@ -133,7 +194,7 @@ async def compile_video(
                         
                     return vols[0] if is_scalar else vols
                     
-                bgm_clip = bgm_clip.volumex(ducking_volume_func)
+                bgm_clip = apply_volume_ducking(bgm_clip, ducking_volume_func)
                 final_audio_tracks.append(bgm_clip)
                 logger.info(f"Background music track loaded and layered with ducking: {bgm_path}")
             except Exception as e:
@@ -142,7 +203,7 @@ async def compile_video(
         # Combine all audio tracks into one master mix
         if final_audio_tracks:
             composite_audio = CompositeAudioClip(final_audio_tracks)
-            final_video_clip = final_video_clip.set_audio(composite_audio)
+            final_video_clip = set_clip_audio(final_video_clip, composite_audio)
 
         # 6. Stitch frames and write output
         os.makedirs(os.path.dirname(output_path), exist_ok=True)

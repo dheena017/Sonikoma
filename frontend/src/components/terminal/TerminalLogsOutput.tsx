@@ -9,10 +9,24 @@ interface TerminalLogsOutputProps {
 }
 
 function getLogColor(log: string): string {
+  // Priority 1: Errors & Fatal errors
   if (log.includes("[ERROR]") || log.includes("ERROR]") || log.includes("[Error]") || log.includes("Error]")) return "text-red-400 font-semibold";
   if (log.includes("[FATAL]")) return "text-red-500 font-bold";
-  if (log.includes("[SUCCESS]") || log.includes("completed cleanly") || log.includes("Successfully")) return "text-emerald-400 font-medium";
+  if (log.includes(" 500 ") || log.includes("-> 500")) return "text-red-400 font-semibold";
+  
+  // Priority 2: Warnings
   if (log.includes("[WARNING]") || log.includes("[WARN]") || log.includes("[Warning]") || log.includes("Warning]")) return "text-amber-400 font-semibold";
+  if (log.includes(" 404 ") || log.includes("-> 404")) return "text-amber-400 font-semibold";
+
+  // Priority 3: Success requests and messages
+  if (log.includes("[SUCCESS]") || log.includes("completed cleanly") || log.includes("Successfully")) return "text-emerald-400 font-medium";
+  if (log.includes(" 200 ") || log.includes(" 200 OK") || log.includes("-> 200")) return "text-emerald-400 font-medium";
+
+  // Specific components
+  if (log.includes("[Proxy]") || log.includes("[Proxy-image]") || log.includes("proxy-image") || log.includes("anivox.routes.proxy")) return "text-sky-300 font-medium";
+  if (log.includes("[API]") || log.includes("[Network]") || log.includes("[HTTP]") || log.includes("anivox.api")) return "text-sky-400";
+  if (log.includes("httpx") || log.includes("HTTP Request:")) return "text-purple-400 font-light";
+
   if (log.includes("[AI Auto-Analysis]") || log.includes("[AI Model]") || log.includes("[Gemini]")) return "text-purple-300 font-medium";
   if (log.includes("[AI Smart Crop]")) return "text-violet-400 font-medium";
   if (log.includes("[OCR/CV Engine]") || log.includes("[Vision OCR]") || log.includes("[CV")) return "text-purple-300";
@@ -26,7 +40,6 @@ function getLogColor(log: string): string {
   if (log.includes("[Stitcher]") || log.includes("Combined") || log.includes("[Stitch]")) return "text-indigo-300";
   if (log.includes("[Auto Cropper]") || log.includes("[Crop]")) return "text-green-400";
   if (log.includes("[Speech Bubbles]")) return "text-pink-400";
-  if (log.includes("[API]") || log.includes("[Network]") || log.includes("[HTTP]")) return "text-sky-400";
   if (log.includes("[GUI]")) return "text-neutral-300";
   if (log.includes("[Preloader]")) return "text-neutral-500";
   if (log.includes("[Model]")) return "text-violet-300";
@@ -36,8 +49,14 @@ function getLogColor(log: string): string {
 
 function getLogBorderColor(log: string): string {
   if (log.includes("[ERROR]") || log.includes("ERROR]") || log.includes("[Error]") || log.includes("Error]") || log.includes("[FATAL]")) return "border-red-500/60";
+  if (log.includes(" 500 ") || log.includes("-> 500")) return "border-red-500/60";
   if (log.includes("[SUCCESS]") || log.includes("Successfully")) return "border-emerald-500/60";
+  if (log.includes(" 200 ") || log.includes(" 200 OK") || log.includes("-> 200")) return "border-emerald-500/60";
   if (log.includes("[WARNING]") || log.includes("[WARN]") || log.includes("[Warning]") || log.includes("Warning]")) return "border-amber-500/60";
+  if (log.includes(" 404 ") || log.includes("-> 404")) return "border-amber-500/60";
+  if (log.includes("[Proxy]") || log.includes("[Proxy-image]") || log.includes("proxy-image") || log.includes("anivox.routes.proxy")) return "border-sky-500/40";
+  if (log.includes("[API]") || log.includes("[Network]") || log.includes("[HTTP]") || log.includes("anivox.api")) return "border-sky-500/40";
+  if (log.includes("httpx") || log.includes("HTTP Request:")) return "border-purple-500/40";
   if (log.includes("[AI") || log.includes("[Gemini]")) return "border-purple-500/50";
   if (log.includes("[Helper Scraper]")) return "border-cyan-400/40";
   if (log.includes("[Scraper]")) return "border-cyan-500/40";

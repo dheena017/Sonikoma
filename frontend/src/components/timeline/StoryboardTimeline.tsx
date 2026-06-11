@@ -112,6 +112,7 @@ export default function StoryboardTimeline({
       <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-4 scrollbar-thin">
         {panels.map((panel, idx) => (
           <TimelineCard
+            key={panel.id}
             panel={panel}
             idx={idx}
             currentPanelIndex={currentPanelIndex}

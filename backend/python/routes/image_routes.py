@@ -1,0 +1,492 @@
+"""
+backend/python/routes/image_routes.py
+─────────────────────────────────────────────────────────────────────────────
+Unified router for all image manipulation operations: editing, stitching,
+transforming, splitting, bubble-cleaning, and ZIP packaging.
+─────────────────────────────────────────────────────────────────────────────
+"""
+
+import time
+import logging
+import io
+import os
+import tempfile
+import zipfile
+from typing import List, Optional, Literal, Dict, Any
+from fastapi import APIRouter, HTTPException, Response, Query, Body, Path
+from pydantic import BaseModel, Field
+from PIL import Image
+
+import utils.image_utils as img_utils
+from utils.cache import stitched_cache, edit_history, zip_cache
+from services.cleaner import remove_speech_bubbles
+
+logger = logging.getLogger("anivox.routes.image_routes")
+router = APIRouter()
+
+# ─── Schemas ──────────────────────────────────────────────────────────────────
+
+class EditImageRequest(BaseModel):
+    url: str
+    cropTop: Optional[float] = 0.0
+    cropBottom: Optional[float] = 0.0
+    cropLeft: Optional[float] = 0.0
+    cropRight: Optional[float] = 0.0
+    autoTrim: Optional[bool] = True
+    sensitivity: Optional[float] = None
+    padding: Optional[int] = None
+    backgroundColorMode: Optional[str] = "auto"
+    rotate: Optional[float] = 0.0
+    flipHorizontal: Optional[bool] = False
+    aspectRatio: Optional[str] = "free"
+    outputFormat: Optional[str] = "jpeg"
+    cropQuality: Optional[int] = 90
+
+class UndoCropRequest(BaseModel):
+    url: str
+
+class TransformImageRequest(BaseModel):
+    url: str
+    type: Literal["rotate", "flip"]
+    value: str
+
+class StitchImagesRequest(BaseModel):
+    url1: Optional[str] = None
+    url2: Optional[str] = None
+    imageUrl1: Optional[str] = None
+    imageUrl2: Optional[str] = None
+    urls: Optional[List[str]] = None
+    layout: Optional[Literal["vertical", "horizontal"]] = "vertical"
+    spacing: Optional[int] = 0
+    spacingColor: Optional[str] = "white"
+    scaleToFit: Optional[bool] = True
+    alignMode: Optional[Literal["center", "start", "end"]] = "center"
+    padding: Optional[int] = 0
+
+class SplitImagesRequest(BaseModel):
+    url: str
+    splitLines: List[float]
+
+class DownloadZipRequest(BaseModel):
+    urls: List[str]
+
+class RemoveBubblesRequest(BaseModel):
+    url: str
+    method: Optional[str] = "auto"
+    sensitivity: Optional[float] = 50.0
+    dilation: Optional[int] = -1
+    inpaint_radius: Optional[int] = 3
+    detection_style: Optional[str] = "all"
+
+
+# ─── Image Editing & Transform Routes ──────────────────────────────────────────
+
+@router.post("/edit-image", summary="Crop, rotate, and auto-trim an image panel")
+async def edit_image(body: EditImageRequest):
+    try:
+        resolved = await img_utils.resolve_image_to_buffer(body.url)
+        img_buffer = resolved["data"]
+        content_type = resolved["contentType"]
+
+        # Apply rotation if requested
+        rotate_angle = body.rotate
+        if rotate_angle and rotate_angle != 0:
+            img = Image.open(io.BytesIO(img_buffer))
+            img = img.rotate(rotate_angle, expand=True)
+            out = io.BytesIO()
+            img.save(out, format=img.format or 'JPEG')
+            img_buffer = out.getvalue()
+
+        # Apply horizontal flip
+        if body.flipHorizontal:
+            img = Image.open(io.BytesIO(img_buffer))
+            img = img.transpose(Image.FLIP_LEFT_RIGHT)
+            out = io.BytesIO()
+            img.save(out, format=img.format or 'JPEG')
+            img_buffer = out.getvalue()
+
+        # Crop percent-based boxes
+        if body.cropTop > 0 or body.cropBottom > 0 or body.cropLeft > 0 or body.cropRight > 0:
+            img = Image.open(io.BytesIO(img_buffer))
+            w, h = img.size
+            
+            top_px = int(round((body.cropTop / 100) * h))
+            bot_px = int(round((body.cropBottom / 100) * h))
+            left_px = int(round((body.cropLeft / 100) * w))
+            right_px = int(round((body.cropRight / 100) * w))
+
+            crop_w = w - left_px - right_px
+            crop_h = h - top_px - bot_px
+            if crop_w > 10 and crop_h > 10:
+                img_cropped = img.crop((left_px, top_px, left_px + crop_w, top_px + crop_h))
+                out = io.BytesIO()
+                img_cropped.save(out, format=img.format or 'JPEG')
+                img_buffer = out.getvalue()
+
+        # Auto trim borders
+        if body.autoTrim:
+            trimmed = img_utils.crop_auto_borders(
+                img_buffer,
+                tighter=True,
+                crop_padding=body.padding,
+                sensitivity=body.sensitivity,
+                background_color_mode=body.backgroundColorMode,
+                aspect_ratio=body.aspectRatio,
+                output_format=body.outputFormat,
+                crop_quality=body.cropQuality
+            )
+            img_buffer = trimmed["data"]
+            content_type = trimmed["content_type"]
+
+        # Cache in memory
+        unique_id = f"merged_{int(time.time() * 1000)}_cropped"
+        new_url = f"/api/merge-images/cached/{unique_id}"
+        
+        stitched_cache.set(unique_id, {"data": img_buffer, "content_type": content_type})
+        edit_history.set(new_url, body.url)
+
+        return {"success": True, "url": new_url}
+    except Exception as e:
+        logger.error(f"[Edit API] Error editing image frame: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Image frame editing failed: {e}")
+
+
+@router.post("/undo-crop", summary="Restore previous crop state of an edited image")
+async def undo_crop(body: UndoCropRequest):
+    prev = edit_history.get(body.url)
+    if not prev:
+        raise HTTPException(status_code=404, detail="No previous crop state found in session history.")
+    return {"success": True, "previous_url": prev}
+
+
+@router.post("/transform-image", summary="Rotate or flip image frame")
+async def transform_image(body: TransformImageRequest):
+    try:
+        resolved = await img_utils.resolve_image_to_buffer(body.url)
+        img = Image.open(io.BytesIO(resolved["data"]))
+
+        if body.type == "rotate":
+            degrees = int(body.value)
+            if degrees not in (90, -90, 180):
+                raise HTTPException(status_code=400, detail="Invalid rotation angle. Use 90, -90, or 180.")
+            img = img.rotate(degrees, expand=True)
+        elif body.type == "flip":
+            if body.value == "h":
+                img = img.transpose(Image.FLIP_LEFT_RIGHT)
+            elif body.value == "v":
+                img = img.transpose(Image.FLIP_TOP_BOTTOM)
+            else:
+                raise HTTPException(status_code=400, detail="Invalid flip axis. Use 'h' or 'v'.")
+
+        out = io.BytesIO()
+        img.save(out, format="JPEG", quality=92)
+        out_bytes = out.getvalue()
+
+        unique_id = f"transform_{int(time.time() * 1000)}"
+        proxy_url = f"/api/merge-images/cached/{unique_id}"
+
+        stitched_cache.set(unique_id, {"data": out_bytes, "content_type": "image/jpeg"})
+        edit_history.set(proxy_url, body.url)
+
+        return {"success": True, "url": proxy_url}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[Transform API] Error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ─── Image Merging & Stacking Routes ───────────────────────────────────────────
+
+@router.post("/merge-images", summary="Stitch multiple panels vertically/horizontally")
+@router.post("/stitch-images")
+async def merge_images(body: StitchImagesRequest):
+    try:
+        # Build URLs
+        urls = body.urls
+        if not urls:
+            img1 = body.imageUrl1 or body.url1
+            img2 = body.imageUrl2 or body.url2
+            if img1 and img2:
+                urls = [img1, img2]
+                
+        if not urls or len(urls) < 2:
+            raise HTTPException(status_code=400, detail="At least 2 image URLs are required.")
+
+        # Resolve image buffers
+        resolved = [await img_utils.resolve_image_to_buffer(u) for u in urls]
+        imgs = [Image.open(io.BytesIO(r["data"])) for r in resolved]
+
+        bg_color = (255, 255, 255)
+        if body.spacingColor == "black":
+            bg_color = (0, 0, 0)
+        elif body.spacingColor == "transparent":
+            bg_color = (0, 0, 0, 0)
+
+        gap = body.spacing
+        pad = body.padding
+
+        # First pass resizing
+        prepared_images = []
+        if body.layout == "horizontal":
+            canonical_h = imgs[0].size[1]
+            for img in imgs:
+                if body.scaleToFit:
+                    # scale height
+                    w, h = img.size
+                    new_w = int(round(w * (canonical_h / h)))
+                    img_res = img.resize((new_w, canonical_h), Image.Resampling.LANCZOS)
+                    prepared_images.append(img_res)
+                else:
+                    prepared_images.append(img)
+        else:
+            # vertical
+            canonical_w = imgs[0].size[0]
+            for img in imgs:
+                if body.scaleToFit:
+                    # scale width
+                    w, h = img.size
+                    new_h = int(round(h * (canonical_w / w)))
+                    img_res = img.resize((canonical_w, new_h), Image.Resampling.LANCZOS)
+                    prepared_images.append(img_res)
+                else:
+                    prepared_images.append(img)
+
+        # Calculate coordinates
+        widths = [img.size[0] for img in prepared_images]
+        heights = [img.size[1] for img in prepared_images]
+
+        total_w = 0
+        total_h = 0
+
+        if body.layout == "horizontal":
+            max_h = max(heights)
+            total_h = max_h + pad * 2
+            total_w = sum(widths) + gap * (len(prepared_images) - 1) + pad * 2
+            
+            canvas = Image.new("RGBA" if body.spacingColor == "transparent" else "RGB", (total_w, total_h), bg_color)
+            offset_x = pad
+            for img in prepared_images:
+                w, h = img.size
+                offset_y = pad
+                if body.alignMode == "center":
+                    offset_y = pad + (max_h - h) // 2
+                elif body.alignMode == "end":
+                    offset_y = pad + (max_h - h)
+                canvas.paste(img, (offset_x, offset_y))
+                offset_x += w + gap
+        else:
+            # vertical
+            max_w = max(widths)
+            total_w = max_w + pad * 2
+            total_h = sum(heights) + gap * (len(prepared_images) - 1) + pad * 2
+            
+            canvas = Image.new("RGBA" if body.spacingColor == "transparent" else "RGB", (total_w, total_h), bg_color)
+            offset_y = pad
+            for img in prepared_images:
+                w, h = img.size
+                offset_x = pad
+                if body.alignMode == "center":
+                    offset_x = pad + (max_w - w) // 2
+                elif body.alignMode == "end":
+                    offset_x = pad + (max_w - w)
+                canvas.paste(img, (offset_x, offset_y))
+                offset_y += h + gap
+
+        out = io.BytesIO()
+        canvas.save(out, format="PNG")
+        merged_bytes = out.getvalue()
+
+        unique_id = f"merged_{int(time.time() * 1000)}_merged"
+        new_url = f"/api/merge-images/cached/{unique_id}"
+
+        stitched_cache.set(unique_id, {"data": merged_bytes, "content_type": "image/png"})
+        edit_history.set(new_url, urls[0])
+
+        return {"success": True, "url": new_url}
+    except Exception as e:
+        logger.error(f"[Merge API] Error stitching images: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Image merging failed: {e}")
+
+
+@router.get("/merge-images/cached/{cache_id}", summary="Retrieve stitched cached panel image")
+@router.get("/stitch-images/cached/{cache_id}")
+async def get_cached_stitch(cache_id: str = Path(...)):
+    cached = stitched_cache.get(cache_id)
+    if not cached:
+        raise HTTPException(status_code=404, detail="Stitched resource expired or not found.")
+    return Response(
+        content=cached["data"],
+        media_type=cached["content_type"],
+        headers={"Cache-Control": "public, max-age=86400"} # Cache 1 day
+    )
+
+
+# ─── Image Splitting Route ─────────────────────────────────────────────────────
+
+@router.post("/execute-splits", summary="Split strip image into separate panels")
+async def execute_splits(body: SplitImagesRequest):
+    try:
+        resolved = await img_utils.resolve_image_to_buffer(body.url)
+        img = Image.open(io.BytesIO(resolved["data"]))
+        w, h = img.size
+
+        if w <= 0 or h <= 0:
+            raise HTTPException(status_code=400, detail="Unable to read image dimensions.")
+
+        ys = [max(0.0, min(100.0, float(n))) for n in body.splitLines]
+        # Include edges, sort, and remove duplicates
+        boundaries = sorted(list(set([0.0] + ys + [100.0])))
+
+        min_segment_height_px = 20
+        urls = []
+
+        for i in range(len(boundaries) - 1):
+            top_pct = boundaries[i]
+            bot_pct = boundaries[i + 1]
+
+            seg_top_px = int(round((top_pct / 100.0) * h))
+            seg_bot_px = int(round((bot_pct / 100.0) * h))
+            seg_h_px = seg_bot_px - seg_top_px
+
+            if seg_h_px < min_segment_height_px:
+                continue
+
+            seg_img = img.crop((0, seg_top_px, w, seg_top_px + seg_h_px))
+            out = io.BytesIO()
+            seg_img.save(out, format="JPEG", quality=90)
+            seg_bytes = out.getvalue()
+
+            # Trim margins conservatively
+            try:
+                trimmed = img_utils.crop_auto_borders(
+                    seg_bytes,
+                    tighter=True,
+                    crop_padding=0,
+                    sensitivity=30.0,
+                    background_color_mode='auto',
+                    aspect_ratio='free',
+                    output_format='jpeg',
+                    crop_quality=90
+                )
+                seg_bytes = trimmed["data"]
+            except Exception:
+                pass
+
+            cache_id = f"split_{int(time.time() * 1000)}_{i}"
+            new_url = f"/api/merge-images/cached/{cache_id}"
+
+            stitched_cache.set(cache_id, {"data": seg_bytes, "content_type": "image/jpeg"})
+            urls.append(new_url)
+
+        return {"success": True, "urls": urls}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[Split API] failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ─── ZIP Packager Routes ────────────────────────────────────────────────────────
+
+@router.post("/download-zip", summary="Create ZIP archive containing storyboard panels")
+async def download_zip(body: DownloadZipRequest):
+    try:
+        # Generate ZIP in-memory
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            for idx, url in enumerate(body.urls):
+                try:
+                    resolved = await img_utils.resolve_image_to_buffer(url)
+                    ext = "jpg"
+                    ct = resolved["content_type"]
+                    if "png" in ct:
+                        ext = "png"
+                    elif "webp" in ct:
+                        ext = "webp"
+                    elif "gif" in ct:
+                        ext = "gif"
+                        
+                    filename = f"panel_{idx + 1:03d}.{ext}"
+                    zip_file.writestr(filename, resolved["data"])
+                except Exception as ex:
+                    logger.warning(f"[ZIP API] Failed to resolve URL: {url} | {ex}")
+
+        # Retrieve bytes
+        zip_bytes = zip_buffer.getvalue()
+        zip_id = f"zip_{int(time.time() * 1000)}"
+        zip_cache.set(zip_id, zip_bytes)
+
+        return {"success": True, "downloadUrl": f"/api/download-zip/get/{zip_id}"}
+    except Exception as e:
+        logger.error(f"[ZIP API Error] Generation failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"ZIP packaging failed: {e}")
+
+
+@router.get("/download-zip/get/{zip_id}", summary="Download packaged ZIP archive")
+async def get_download_zip(zip_id: str = Path(...)):
+    buffer = zip_cache.get(zip_id)
+    if not buffer:
+        raise HTTPException(
+            status_code=404, 
+            detail="The requested ZIP archive has expired or was not found. Please package again."
+        )
+    return Response(
+        content=buffer,
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": "attachment; filename=comic_panels_archive.zip"
+        }
+    )
+
+
+# ─── Speech Bubble Removal Route (migrated from Express image/cleanup.ts) ──────
+
+@router.post("/remove-speech-bubbles", summary="Inpaint speech bubbles out of a panel image")
+async def bubble_cleaning(body: RemoveBubblesRequest):
+    try:
+        # 1. Resolve image
+        resolved = await img_utils.resolve_image_to_buffer(body.url)
+        content_type = resolved["contentType"]
+        
+        # 2. Write to temp file
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_in:
+            tmp_in.write(resolved["data"])
+            tmp_in_path = tmp_in.name
+            
+        tmp_out_path = tmp_in_path.replace(".png", "_out.png")
+        import tempfile  # Re-import just to be safe
+        
+        try:
+            # 3. Call services/cleaner remove_speech_bubbles directly (no subprocess!)
+            detected = remove_speech_bubbles(
+                image_path=tmp_in_path,
+                output_path=tmp_out_path,
+                method=body.method,
+                sensitivity=body.sensitivity,
+                dilation=body.dilation,
+                inpaint_radius=body.inpaint_radius,
+                detection_style=body.detection_style
+            )
+            
+            with open(tmp_out_path, "rb") as f:
+                cleaned_bytes = f.read()
+                
+            cache_id = f"merged_{int(time.time() * 1000)}_cleaned"
+            new_url = f"/api/merge-images/cached/{cache_id}"
+            
+            stitched_cache.set(cache_id, {"data": cleaned_bytes, "content_type": content_type})
+            edit_history.set(new_url, body.url)
+            
+            return {"success": True, "url": new_url}
+        finally:
+            # Cleanup temp files
+            for p in (tmp_in_path, tmp_out_path):
+                try:
+                    if os.path.exists(p):
+                        os.remove(p)
+                except OSError:
+                    pass
+    except Exception as e:
+        logger.error(f"[Bubble Cleaner API Error] failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Speech bubble cleaning failed: {e}")

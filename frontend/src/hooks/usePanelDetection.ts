@@ -1,5 +1,5 @@
 import React from "react";
-import { Slice } from "../components/crop/types";
+import { Slice, DetectedPanel } from "../components/crop/types";
 import { NotificationType } from "../components/NotificationStack";
 
 interface UsePanelDetectionProps {
@@ -53,9 +53,9 @@ export function usePanelDetection({
       if (!response.ok) throw new Error("AI analysis failed");
       const data = await response.json();
       if (data.success && Array.isArray(data.panels) && data.panels.length > 0) {
-        const hasCroppedUrls = data.panels.every((p: unknown) => p.croppedUrl);
+        const hasCroppedUrls = data.panels.every((p: DetectedPanel) => p.croppedUrl);
         if (hasCroppedUrls && setScrapedImages) {
-          const croppedUrls = data.panels.map((p: unknown) => p.croppedUrl);
+          const croppedUrls = data.panels.map((p: DetectedPanel) => p.croppedUrl);
 
           if (setConsoleLogs) {
             setConsoleLogs((prev) => [
@@ -77,7 +77,7 @@ export function usePanelDetection({
           return;
         }
 
-        const newSlices = data.panels.map((box: unknown, index: number) => ({
+        const newSlices = data.panels.map((box: DetectedPanel, index: number) => ({
           id: `ai-${index}-${Date.now()}`,
           cropTop: box.cropTop,
           cropBottom: box.cropBottom,
@@ -167,7 +167,7 @@ export function usePanelDetection({
             `Successfully sliced ${data.panels.length} panel cuts!`,
             "success"
           );
-          const initialSlices = data.panels.map((box: unknown, index: number) => ({
+          const initialSlices = data.panels.map((box: DetectedPanel, index: number) => ({
             id: `detected-${index}-${Date.now()}`,
             cropTop: box.cropTop,
             cropBottom: box.cropBottom,
