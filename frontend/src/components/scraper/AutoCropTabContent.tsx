@@ -61,6 +61,10 @@ export default function AutoCropTabContent(props: AutoCropTabContentProps) {
           selectedScraped={props.selectedScraped}
           autoSplitTallStrips={props.autoSplitTallStrips}
           overlapMergeThreshold={props.overlapMergeThreshold}
+          cropSensitivity={props.cropSensitivity}
+          cropCannyLow={props.cropCannyLow}
+          cropCannyHigh={props.cropCannyHigh}
+          cropCloseKernelSize={props.cropCloseKernelSize}
         />
       )}
       {activeTab === "advanced" && (

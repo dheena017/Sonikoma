@@ -10,13 +10,18 @@ interface Props {
   bubbleDilation: number;
   bubbleInpaintRadius: number;
   addNotification?: (msg: string, type: any) => void;
+  scrapedImages: string[];
+  selectedScraped: string[];
 }
 
 export function BubbleCleanerHelpTab({
   eraseMethod, bubbleDilation, bubbleInpaintRadius, addNotification,
+  scrapedImages, selectedScraped
 }: Props) {
   const dilR = Math.max(22, 20 + (bubbleDilation === -1 ? 4 : bubbleDilation) * 1.2);
   const inpR = Math.max(24, dilR + bubbleInpaintRadius * 1.5);
+
+  const firstImageUrl = selectedScraped.length > 0 ? selectedScraped[0] : scrapedImages.length > 0 ? scrapedImages[0] : null;
 
   return (
     <div className="space-y-6">
@@ -85,6 +90,7 @@ export function BubbleCleanerHelpTab({
           <BubbleCleanerSandbox
             eraseMethod={eraseMethod}
             addNotification={addNotification}
+            firstImageUrl={firstImageUrl}
           />
         </div>
       </div>

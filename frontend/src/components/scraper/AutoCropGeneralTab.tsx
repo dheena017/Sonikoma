@@ -22,6 +22,7 @@ export function AutoCropGeneralTab(props: AutoCropSharedProps) {
       <AutoCropPresetGrid
         activeSlot={activeSlot}
         applyPreset={applyBuiltInPreset}
+        firstImageUrl={firstImageUrl}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -47,7 +48,16 @@ export function AutoCropGeneralTab(props: AutoCropSharedProps) {
           </label>
         </div>
 
-        <AutoCropEngineComparison firstImageUrl={firstImageUrl} />
+        <AutoCropEngineComparison
+          firstImageUrl={firstImageUrl}
+          sensitivity={props.cropSensitivity}
+          bgMode={props.cropBackgroundMode}
+          overlapMerge={props.overlapMergeThreshold}
+          aspectRatio={props.aspectRatioLock}
+          cannyLow={props.cropCannyLow}
+          cannyHigh={props.cropCannyHigh}
+          closeKernel={props.cropCloseKernelSize}
+        />
       </div>
 
       <AutoCropCustomProfileManager
