@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Download, Share2, Clipboard, Upload, FileJson, RefreshCw } from "lucide-react";
+import { Download, Share2, Clipboard, Upload, RefreshCw } from "lucide-react";
 
 export function GlobalScraperConfigTool({ addNotification }: { addNotification?: (msg: string, type: any) => void }) {
   const [showTools, setShowTools] = useState(false);
@@ -86,7 +86,7 @@ export function GlobalScraperConfigTool({ addNotification }: { addNotification?:
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-[100]">
+    <div className="fixed bottom-6 right-6 z-[120]">
       <div className={`absolute bottom-full right-0 mb-4 flex flex-col gap-2 transition-all duration-300 ${showTools ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
          <button onClick={exportGlobalConfig} className="flex items-center gap-2 px-4 py-2 bg-neutral-900 border border-neutral-800 rounded-xl text-white text-[10px] font-bold hover:bg-neutral-800 shadow-2xl">
             <Download className="h-3.5 w-3.5 text-indigo-400" />

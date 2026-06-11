@@ -8,6 +8,8 @@ import BubbleCleanerModal from "./components/processing/BubbleCleanerModal.js";
 import AutoCropModal from "./components/processing/AutoCropModal.js";
 import NotificationStack from "./components/NotificationStack.js";
 import { AppWorkspace } from "./components/AppWorkspace.js";
+import { GlobalScraperConfigTool } from "./components/scraper/GlobalScraperConfigTool.js";
+import { ScraperLogStream } from "./components/scraper/ScraperLogStream.js";
 
 export default function App() {
   const appLogic = useAppLogic();
@@ -140,7 +142,7 @@ export default function App() {
   } = appLogic;
 
   return (
-    <div id="app_root" className="min-h-screen bg-[#070709] text-neutral-100 flex flex-col justify-between selection:bg-purple-600 selection:text-white">
+    <div id="app_root" className="min-h-screen bg-[#070709] text-neutral-100 flex flex-col justify-between selection:bg-purple-600 selection:text-white relative">
       
       {/* BRANDING HEADER */}
       <Header 
@@ -153,7 +155,11 @@ export default function App() {
       {showAutoCropModal ? (
         <AutoCropModal
           onClose={() => setShowAutoCropModal(false)}
-          onApply={() => { setShowAutoCropModal(false); handleAutoCropSelected(); }}
+          onApply={() => {
+             console.log("App: Triggering handleAutoCropSelected");
+             handleAutoCropSelected();
+             setShowAutoCropModal(false);
+          }}
           sensitivity={cropSensitivity}
           setSensitivity={setCropSensitivity}
           padding={cropPaddingPx}
@@ -192,7 +198,11 @@ export default function App() {
       ) : showBubbleModal ? (
         <BubbleCleanerModal
           onClose={() => setShowBubbleModal(false)}
-          onApply={() => { setShowBubbleModal(false); handleCleanBubblesSelected(); }}
+          onApply={() => {
+             console.log("App: Triggering handleCleanBubblesSelected");
+             handleCleanBubblesSelected();
+             setShowBubbleModal(false);
+          }}
           detectionStyle={bubbleDetectionStyle}
           setDetectionStyle={setBubbleDetectionStyle}
           eraseMethod={bubbleEraseMethod}
@@ -282,6 +292,13 @@ export default function App() {
         <CropEditorModal
           appLogic={appLogic}
         />
+      )}
+
+      {!showAutoCropModal && !showBubbleModal && (
+        <>
+          <GlobalScraperConfigTool addNotification={addNotification} />
+          <ScraperLogStream />
+        </>
       )}
 
       {/* FOOTER */}
