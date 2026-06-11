@@ -137,20 +137,29 @@ export function createFetchWithInterceptor({ addNotification, setErrorPopup }: F
             reject(error);
             return;
           }
-          if (error instanceof TypeError && error.message === "Failed to fetch") {
-            const netErrMessage = "Network Connection Error: Server is currently unreachable. Make sure the development server is active.";
+          const isNetError = error instanceof TypeError && (
+            error.message === "Failed to fetch" ||
+            error.message === "fetch failed" ||
+            error.message.includes("NetworkError") ||
+            error.message.includes("unreachable")
+          );
+          if (isNetError) {
+            const netErrMessage = "The backend server is not running. Please make sure the backend server is started.";
             addNotification(netErrMessage, "error");
             setErrorPopup({
-              title: "Network Unreachable",
+              title: "Backend Server Offline",
               message: netErrMessage,
               type: "error",
-              technicalDetails: `Network TypeError: Failed to fetch\nTarget URL: ${input}`,
-              suggestion: "Please check your network signal or wait a brief moment for the sandboxed backend node to finish warming up and compiling, then retry the request.",
+              technicalDetails: `Network TypeError: ${error.message}\nTarget URL: ${input}`,
+              suggestion: "Please start the backend server or verify it is running on the correct port, then retry the request.",
               onRetry: () => {
                 executeFetch();
               }
             });
-            (error as any).intercepted = true;
+            const customNetErr = new Error(netErrMessage);
+            (customNetErr as any).intercepted = true;
+            reject(customNetErr);
+            return;
           }
           reject(error);
         }

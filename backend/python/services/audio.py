@@ -54,60 +54,65 @@ async def generate_panel_audio(
             communicate = edge_tts.Communicate(text, voice or "en-US-GuyNeural")
             await communicate.save(temp_file_path)
 
-        # Phase 2: Loading & Concatenating files using defensive format normalizer
-        combined_audio = AudioSegment.empty()
-        for idx, file_path in enumerate(temp_files):
-            if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
-                continue
+        import asyncio
 
-            segment = AudioSegment.from_file(file_path, format="mp3")
-            # Normalize tracks sample rate & active channels to avoid standard concat glitches
-            normalized_seg = segment.set_frame_rate(44100).set_channels(2)
-            
-            # If combining multiple segments, introduce a short natural 100ms pause, except for last
-            combined_audio += normalized_seg
-            if idx < len(temp_files) - 1:
-                combined_audio += AudioSegment.silent(duration=100)
+        def process_audio_sync():
+            # Phase 2: Loading & Concatenating files using defensive format normalizer
+            combined_audio = AudioSegment.empty()
+            for idx, file_path in enumerate(temp_files):
+                if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
+                    continue
 
-        current_duration_ms = len(combined_audio)
-        logger.info(f"Concat summary: initial raw voice length = {current_duration_ms}ms, target = {target_duration_ms}ms")
+                segment = AudioSegment.from_file(file_path, format="mp3")
+                # Normalize tracks sample rate & active channels to avoid standard concat glitches
+                normalized_seg = segment.set_frame_rate(44100).set_channels(2)
+                
+                # If combining multiple segments, introduce a short natural 100ms pause, except for last
+                combined_audio += normalized_seg
+                if idx < len(temp_files) - 1:
+                    combined_audio += AudioSegment.silent(duration=100)
 
-        # Phase 3: Alignment to target_duration
-        if current_duration_ms == 0:
-            logger.warning("Combined audio yielded zero duration. Exporting silence.")
-            final_audio = AudioSegment.silent(duration=target_duration_ms)
-        elif current_duration_ms > target_duration_ms:
-            # Seamless speedup without pitch shifting using pydub.effects
-            playback_speed = float(current_duration_ms) / float(target_duration_ms)
-            logger.info(f"Action: Audio is longer than target. Compressing seamlessly with speedup factor: {playback_speed:.2f}x")
-            
-            # Pydub speedup effect typically expects playback_speed > 1.0
-            if playback_speed > 1.0:
-                try:
-                    # speedup is pitch-preserved
-                    final_audio = speedup(combined_audio, playback_speed=playback_speed)
-                except Exception as stretch_err:
-                    logger.error(f"Pydub speedup failed, falling back to direct curtailing: {str(stretch_err)}")
+            current_duration_ms = len(combined_audio)
+            logger.info(f"Concat summary: initial raw voice length = {current_duration_ms}ms, target = {target_duration_ms}ms")
+
+            # Phase 3: Alignment to target_duration
+            if current_duration_ms == 0:
+                logger.warning("Combined audio yielded zero duration. Exporting silence.")
+                final_audio = AudioSegment.silent(duration=target_duration_ms)
+            elif current_duration_ms > target_duration_ms:
+                # Seamless speedup without pitch shifting using pydub.effects
+                playback_speed = float(current_duration_ms) / float(target_duration_ms)
+                logger.info(f"Action: Audio is longer than target. Compressing seamlessly with speedup factor: {playback_speed:.2f}x")
+                
+                # Pydub speedup effect typically expects playback_speed > 1.0
+                if playback_speed > 1.0:
+                    try:
+                        # speedup is pitch-preserved
+                        final_audio = speedup(combined_audio, playback_speed=playback_speed)
+                    except Exception as stretch_err:
+                        logger.error(f"Pydub speedup failed, falling back to direct curtailing: {str(stretch_err)}")
+                        final_audio = combined_audio
+                else:
                     final_audio = combined_audio
+
+                # Final precise microsecond crop
+                final_audio = final_audio[:target_duration_ms]
             else:
-                final_audio = combined_audio
+                # Padding with tailing organic silence
+                silence_needed_ms = target_duration_ms - current_duration_ms
+                logger.info(f"Action: Audio is shorter than target. Appending {silence_needed_ms}ms of silence.")
+                silence_padding = AudioSegment.silent(duration=silence_needed_ms)
+                final_audio = combined_audio + silence_padding
 
-            # Final precise microsecond crop
+            # Ensure absolute precision matching target_duration to avoid downstream video sync creep
             final_audio = final_audio[:target_duration_ms]
-        else:
-            # Padding with tailing organic silence
-            silence_needed_ms = target_duration_ms - current_duration_ms
-            logger.info(f"Action: Audio is shorter than target. Appending {silence_needed_ms}ms of silence.")
-            silence_padding = AudioSegment.silent(duration=silence_needed_ms)
-            final_audio = combined_audio + silence_padding
 
-        # Ensure absolute precision matching target_duration to avoid downstream video sync creep
-        final_audio = final_audio[:target_duration_ms]
+            # Phase 4: Export finished compilation stream
+            os.makedirs(os.path.dirname(output_path), exist_ok=True)
+            final_audio.export(output_path, format="mp3")
+            logger.info(f"Audio compilation saved successfully at: {output_path} with final length {len(final_audio)}ms")
 
-        # Phase 4: Export finished compilation stream
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        final_audio.export(output_path, format="mp3")
-        logger.info(f"Audio compilation saved successfully at: {output_path} with final length {len(final_audio)}ms")
+        await asyncio.to_thread(process_audio_sync)
 
     except Exception as general_err:
         logger.error(f"Audio Engine pipeline failure: {str(general_err)}", exc_info=True)

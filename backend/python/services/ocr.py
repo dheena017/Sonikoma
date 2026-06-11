@@ -52,8 +52,9 @@ async def extract_full_ocr_data(panel_image_path: str, langs: List[str] = ['en']
         img = Image.open(panel_image_path)
         width, height = img.size
 
+        import asyncio
         # EasyOCR readtext
-        raw_results = reader.readtext(panel_image_path)
+        raw_results = await asyncio.to_thread(reader.readtext, panel_image_path)
         
         # Results format: [([[x, y], [x, y], [x, y], [x, y]], text, confidence), ...]
         structured_results = []

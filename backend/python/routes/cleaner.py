@@ -16,6 +16,7 @@ import sys
 import base64
 import tempfile
 import logging
+import asyncio
 from typing import Optional, Literal
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
@@ -106,7 +107,8 @@ async def remove_bubbles_upload(
             f"Cleaning: {file.filename} | method={method} "
             f"sensitivity={sensitivity} dilation={dilation}"
         )
-        bubbles_detected = _run_cleaner(
+        bubbles_detected = await asyncio.to_thread(
+            _run_cleaner,
             input_path, output_path, method, sensitivity, dilation,
             inpaint_radius, detection_style,
         )
@@ -153,7 +155,8 @@ async def remove_bubbles_base64(body: CleanerBase64Request):
             f"Cleaning base64 image | method={body.method} "
             f"sensitivity={body.sensitivity}"
         )
-        bubbles_detected = _run_cleaner(
+        bubbles_detected = await asyncio.to_thread(
+            _run_cleaner,
             input_path, output_path, body.method, body.sensitivity,
             body.dilation, body.inpaint_radius, body.detection_style,
         )

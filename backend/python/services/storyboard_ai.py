@@ -1,7 +1,7 @@
 """
 backend/python/services/storyboard_ai.py
 ─────────────────────────────────────────────────────────────────────────────
-Storyboard narrative generation computational service using Gemini or HuggingFace.
+Storyboard narrative generation service using AI Markdown Skills.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -12,17 +12,10 @@ from typing import List, Dict, Any, Optional
 import pydantic
 
 from config.clients import ai_initialized, hf_client, call_gemini_with_retry, genai_client
+from skills.registry import registry
+from skills.base import StoryboardModel
 
 logger = logging.getLogger("anivox.services.storyboard_ai")
-
-class StoryboardPanelModel(pydantic.BaseModel):
-    speech_text: str
-    sfx: str
-    motion_type: str
-
-class StoryboardModel(pydantic.BaseModel):
-    panels: List[StoryboardPanelModel]
-
 
 def get_programmatic_panels(title: str, genre: str, episode: str, img_urls: List[str], count: int) -> List[Dict[str, Any]]:
     """Programmatic fallback generator when AI calls fail."""
@@ -76,31 +69,27 @@ async def generate_dynamic_panels(
     model: str
 ) -> List[Dict[str, Any]]:
     """
-    Generates narration script and storyboard camera moves via Gemini or HuggingFace.
+    Generates narration script and storyboard camera moves via AI Markdown Skills.
     """
     active_slices_count = min(len(img_urls), 8)
     if active_slices_count == 0:
         return []
 
-    prompt = f"""You are a cinematic comic book editor and storyteller.
-Given this Comic Webtoon information:
-Title: "{title}"
-Genre: "{genre}"
-Episode: "{episode}"
-
-Please generate exactly {active_slices_count} distinct chronological narration or panel speech lines.
-For each of the {active_slices_count} panels, provide:
-1. "speech_text": An engaging, atmospheric description (under 20 words).
-2. "sfx": A punchy comic-style sound effect in brackets.
-3. "motion_type": One of 'zoom_in', 'zoom_out', 'pan_left', 'pan_right', 'pan_up', 'pan_down'.
-
-Output strictly valid JSON with top-level key "panels"."""
+    # Construct the prompt arguments
+    prompt_args = {
+        "title": title,
+        "genre": genre,
+        "episode": episode,
+        "active_slices_count": active_slices_count
+    }
 
     # 1. HuggingFace Fallback check
     if model.startswith('huggingface') and hf_client:
         try:
             logger.info(f"[HuggingFace] Creating storyboard using Mistral 7B for \"{title}\"")
-            # Run blocking chat_completion in executor
+            skill = registry.get("storyboard_narrative")
+            prompt = skill.build_prompt(**prompt_args)
+            
             loop = asyncio.get_event_loop()
             response = await loop.run_in_executor(
                 None,
@@ -112,7 +101,6 @@ Output strictly valid JSON with top-level key "panels"."""
                 )
             )
             response_text = response.choices[0].message.content or ""
-            # Strip code blocks
             clean_json = response_text.replace("```json", "").replace("```", "").strip()
             parsed = json.loads(clean_json)
             if parsed and isinstance(parsed.get('panels'), list):
@@ -131,28 +119,18 @@ Output strictly valid JSON with top-level key "panels"."""
         except Exception as e:
             logger.warning(f"HuggingFace storyboard generation failed: {e}. Falling back to Gemini.")
 
-    # 2. Gemini generation
+    # 2. Gemini generation using storyboard_narrative skill
     if ai_initialized:
-        from google.genai import types
         try:
-            target_model_name = model if model and not model.startswith('huggingface') else "gemini-2.5-flash"
+            target_model_name = model if model and model.lower().startswith('gemini') else "gemini-2.5-flash"
+            if target_model_name and "gemini-3.5" in target_model_name.lower():
+                target_model_name = "gemini-2.5-flash"
+                
             logger.info(f"[Gemini] Storyboard narrative generation using: {target_model_name}")
 
-            config = types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=StoryboardModel
-            )
+            skill = registry.get("storyboard_narrative")
+            response_text = await skill.execute(model=target_model_name, **prompt_args)
 
-            # Invoke Gemini through the retry wrapper
-            response = await call_gemini_with_retry(
-                lambda: genai_client.models.generate_content(
-                    model=target_model_name,
-                    contents=prompt,
-                    config=config
-                )
-            )
-
-            response_text = response.text or ""
             if response_text.strip():
                 parsed = json.loads(response_text)
                 if parsed and isinstance(parsed.get('panels'), list) and len(parsed['panels']) > 0:
