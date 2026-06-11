@@ -91,6 +91,7 @@ export function useVideoGeneration({
       return;
     }
 
+    console.log(`[Control] Starting video generation pipeline with model: ${selectedModel}`);
     setIsProcessing(true);
     setProgressStatus("Contacting pipeline orchestration...");
     addNotification('Pipeline initiated — generating video with ' + selectedModel + '...', 'info');
@@ -115,6 +116,7 @@ export function useVideoGeneration({
         model: selectedModel
       };
 
+      console.log(`[API] POST /api/generate`, requestBody);
       const response = await fetchWithInterceptor("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -122,6 +124,7 @@ export function useVideoGeneration({
       });
 
       const responseData = await response.json();
+      console.log(`[API] /api/generate response:`, responseData);
       
       setConsoleLogs(prev => [
         ...prev,
@@ -183,6 +186,7 @@ export function useVideoGeneration({
         currentUrl = urlObj.pathname + urlObj.search;
       }
 
+      console.log(`[OCR/CV Engine] Reprocessing panel #${panelId}...`);
       await new Promise(resolve => setTimeout(resolve, 900));
 
       setPanels(prev => prev.map(p => p.id === panelId ? { ...p, image_url: currentUrl } : p));

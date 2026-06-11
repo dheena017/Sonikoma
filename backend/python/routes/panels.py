@@ -105,8 +105,9 @@ async def detect_panels_upload(
     )
 
     try:
-        logger.info(f"Detecting panels in: {file.filename}")
+        logger.info(f"[Panel Detection] Processing uploaded file: {file.filename}")
         panels = _detect(image_path, params)
+        logger.info(f"[Panel Detection] Successfully detected {len(panels)} panels.")
         return JSONResponse(content={
             "success": True,
             "panels": panels,
@@ -145,8 +146,9 @@ async def detect_panels_base64(body: DetectPanelsBase64Request):
     params = body.model_dump(exclude={"image_base64"})
 
     try:
-        logger.info("Detecting panels in base64 image")
+        logger.info("[Panel Detection] Processing base64 image")
         panels = _detect(image_path, params)
+        logger.info(f"[Panel Detection] Successfully detected {len(panels)} panels.")
         return JSONResponse(content={
             "success": True,
             "panels": panels,

@@ -589,6 +589,7 @@ At the **end of every conversation**, append one row to the Session Changelog ta
 
 > Auto-updated by AI at the end of each conversation. Newest entries at the top.
 
+| 2026-06-12 | Enhanced logging and notifications across frontend hooks and backend routes/services for better DX and UX | `frontend/src/hooks/*`, `backend/python/routes/*`, `backend/python/services/*`, `backend/python/utils/*` |
 | 2026-06-11 | Filtered system-logs polling spam; added regex-based status/method coloring for Python terminal and custom Vite request logger middleware for dev server terminal | `backend/python/main.py`, `frontend/vite.config.ts`, `frontend/src/components/terminal/TerminalLogsOutput.tsx` |
 | 2026-06-08 | Fixed critical paths, routes, insecure shell calls, implemented video pipeline, ported FastAPI logic, standardized cache | `backend/routes/*`, `backend/python/services/*`, `frontend/src/hooks/*`, `backend/utils/*` |
 | 2026-06-08 | Generated BUG_REPORT2.md focusing on frontend state race conditions, missing OCR functions, and data persistence issues | `BUG_REPORT2.md`, `RULES.md` |

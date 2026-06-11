@@ -104,7 +104,7 @@ async def remove_bubbles_upload(
 
     try:
         logger.info(
-            f"Cleaning: {file.filename} | method={method} "
+            f"[Speech Bubbles] Received file upload: {file.filename} | method={method} "
             f"sensitivity={sensitivity} dilation={dilation}"
         )
         bubbles_detected = await asyncio.to_thread(
@@ -113,6 +113,7 @@ async def remove_bubbles_upload(
             inpaint_radius, detection_style,
         )
         encoded = _encode_output(output_path)
+        logger.info(f"[Speech Bubbles] Cleaning complete. Bubbles detected: {bubbles_detected}")
         return JSONResponse(content={
             "success": True,
             "bubbles_detected": bubbles_detected,
@@ -152,7 +153,7 @@ async def remove_bubbles_base64(body: CleanerBase64Request):
 
     try:
         logger.info(
-            f"Cleaning base64 image | method={body.method} "
+            f"[Speech Bubbles] Received base64 image request | method={body.method} "
             f"sensitivity={body.sensitivity}"
         )
         bubbles_detected = await asyncio.to_thread(
@@ -161,6 +162,7 @@ async def remove_bubbles_base64(body: CleanerBase64Request):
             body.dilation, body.inpaint_radius, body.detection_style,
         )
         encoded = _encode_output(output_path)
+        logger.info(f"[Speech Bubbles] Base64 cleaning complete. Bubbles detected: {bubbles_detected}")
         return JSONResponse(content={
             "success": True,
             "bubbles_detected": bubbles_detected,

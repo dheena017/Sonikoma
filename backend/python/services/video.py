@@ -76,7 +76,7 @@ def apply_volume_ducking(bgm_clip, ducking_volume_func):
     return bgm_clip.with_updated_frame_function(new_frame_function)
 
 
-logger = logging.getLogger("webtoon_engine.video")
+logger = logging.getLogger("anivox.services.video")
 
 async def compile_video(
     panel_data: List[Dict[str, Any]], 
@@ -96,7 +96,7 @@ async def compile_video(
     import asyncio
     
     def sync_compile():
-        logger.info(f"Compiling cinematic timeline with {len(panel_data)} scenes.")
+        logger.info(f"[Video] Compiling cinematic timeline with {len(panel_data)} scenes.")
         
         dialogue_intervals = []
         current_time = 0.0
@@ -166,7 +166,7 @@ async def compile_video(
                 raise ValueError("Zero valid frames compiled. All target images or audio were corrupted or missing.")
 
             # 4. Composite the timeline
-            logger.info("Concatenating individual video clips into final narrative track...")
+            logger.info("[Video] Concatenating individual video clips into final narrative track...")
             final_video_clip = concatenate_videoclips(video_clips, method="compose")
             total_duration = final_video_clip.duration
             
@@ -211,7 +211,7 @@ async def compile_video(
             # 6. Stitch frames and write output
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
             
-            logger.info(f"Rendering master MP4 payload to: {output_path}")
+            logger.info(f"[Video] Rendering master MP4 payload to: {output_path}")
             final_video_clip.write_videofile(
                 output_path,
                 fps=fps,
@@ -227,11 +227,11 @@ async def compile_video(
             for c in video_clips:
                 c.close()
 
-            logger.info(f"Master cinematic rendering finished successfully: {output_path}")
+            logger.info(f"[Video] Master cinematic rendering finished successfully: {output_path}")
             return output_path
 
         except Exception as compile_err:
-            logger.critical(f"Cinematic compilation failed: {str(compile_err)}", exc_info=True)
+            logger.critical(f"[Video] Cinematic compilation failed: {str(compile_err)}", exc_info=True)
             raise compile_err
 
     return await asyncio.to_thread(sync_compile)

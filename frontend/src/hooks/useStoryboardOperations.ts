@@ -49,7 +49,7 @@ export function useStoryboardOperations({
     handleModifyMotion,
     handleModifyDuration,
     handleShiftPanel,
-  } = useSceneModifier({ panels, setPanels, setCurrentPanelIndex, setConsoleLogs });
+  } = useSceneModifier({ panels, setPanels, setCurrentPanelIndex, setConsoleLogs, addNotification });
 
   const {
     analyzingPanelId,

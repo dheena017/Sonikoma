@@ -84,6 +84,7 @@ class RemoveBubblesRequest(BaseModel):
 
 @router.post("/edit-image", summary="Crop, rotate, and auto-trim an image panel")
 async def edit_image(body: EditImageRequest):
+    logger.info(f"[Image Edit] Request received for URL: {body.url[:60]}...")
     try:
         resolved = await img_utils.resolve_image_to_buffer(body.url)
         img_buffer = resolved["data"]
@@ -151,6 +152,7 @@ async def edit_image(body: EditImageRequest):
         stitched_cache.set(unique_id, {"data": img_buffer, "content_type": content_type})
         edit_history.set(new_url, body.url)
 
+        logger.info(f"[Image Edit] Successfully edited image. Cached as: {new_url}")
         return {"success": True, "url": new_url}
     except Exception as e:
         logger.error(f"[Edit API] Error editing image frame: {e}", exc_info=True)
@@ -167,6 +169,7 @@ async def undo_crop(body: UndoCropRequest):
 
 @router.post("/transform-image", summary="Rotate or flip image frame")
 async def transform_image(body: TransformImageRequest):
+    logger.info(f"[Transform] Request: {body.type} {body.value} for {body.url[:60]}...")
     try:
         resolved = await img_utils.resolve_image_to_buffer(body.url)
         img = Image.open(io.BytesIO(resolved["data"]))
@@ -194,6 +197,7 @@ async def transform_image(body: TransformImageRequest):
         stitched_cache.set(unique_id, {"data": out_bytes, "content_type": "image/jpeg"})
         edit_history.set(proxy_url, body.url)
 
+        logger.info(f"[Transform] Successfully transformed image. Cached as: {proxy_url}")
         return {"success": True, "url": proxy_url}
     except HTTPException:
         raise
@@ -207,6 +211,7 @@ async def transform_image(body: TransformImageRequest):
 @router.post("/merge-images", summary="Stitch multiple panels vertically/horizontally")
 @router.post("/stitch-images")
 async def merge_images(body: StitchImagesRequest):
+    logger.info(f"[Merge] Request received for {len(body.urls) if body.urls else 2} images.")
     try:
         # Build URLs
         urls = body.urls
@@ -312,6 +317,7 @@ async def merge_images(body: StitchImagesRequest):
         stitched_cache.set(unique_id, {"data": merged_bytes, "content_type": "image/png"})
         edit_history.set(new_url, urls[0])
 
+        logger.info(f"[Merge] Successfully stitched images. Cached as: {new_url}")
         return {"success": True, "url": new_url}
     except Exception as e:
         logger.error(f"[Merge API] Error stitching images: {e}", exc_info=True)
@@ -335,6 +341,7 @@ async def get_cached_stitch(cache_id: str = Path(...)):
 
 @router.post("/execute-splits", summary="Split strip image into separate panels")
 async def execute_splits(body: SplitImagesRequest):
+    logger.info(f"[Split] Request received for URL: {body.url[:60]}... with {len(body.splitLines)} split lines.")
     try:
         resolved = await img_utils.resolve_image_to_buffer(body.url)
         img = Image.open(io.BytesIO(resolved["data"]))
@@ -392,6 +399,7 @@ async def execute_splits(body: SplitImagesRequest):
             return res_urls
 
         urls = await asyncio.to_thread(split_sync)
+        logger.info(f"[Split] Successfully split image into {len(urls)} segments.")
         return {"success": True, "urls": urls}
     except HTTPException:
         raise
@@ -404,6 +412,7 @@ async def execute_splits(body: SplitImagesRequest):
 
 @router.post("/download-zip", summary="Create ZIP archive containing storyboard panels")
 async def download_zip(body: DownloadZipRequest):
+    logger.info(f"[ZIP API] Request received for {len(body.urls)} image URLs.")
     try:
         # Resolve all buffers asynchronously first
         resolved_buffers = []
@@ -436,6 +445,7 @@ async def download_zip(body: DownloadZipRequest):
         zip_id = f"zip_{int(time.time() * 1000)}"
         zip_cache.set(zip_id, zip_bytes)
 
+        logger.info(f"[ZIP API] Successfully generated ZIP archive with ID: {zip_id}")
         return {"success": True, "downloadUrl": f"/api/download-zip/get/{zip_id}"}
     except Exception as e:
         logger.error(f"[ZIP API Error] Generation failed: {e}", exc_info=True)
@@ -463,6 +473,7 @@ async def get_download_zip(zip_id: str = Path(...)):
 
 @router.post("/remove-speech-bubbles", summary="Inpaint speech bubbles out of a panel image")
 async def bubble_cleaning(body: RemoveBubblesRequest):
+    logger.info(f"[Bubble Cleaner] Request received for URL: {body.url[:60]}...")
     try:
         # 1. Resolve image
         resolved = await img_utils.resolve_image_to_buffer(body.url)
@@ -497,6 +508,7 @@ async def bubble_cleaning(body: RemoveBubblesRequest):
             stitched_cache.set(cache_id, {"data": cleaned_bytes, "content_type": content_type})
             edit_history.set(new_url, body.url)
             
+            logger.info(f"[Bubble Cleaner] Successfully cleaned bubbles. Cached as: {new_url}")
             return {"success": True, "url": new_url}
         finally:
             # Cleanup temp files
