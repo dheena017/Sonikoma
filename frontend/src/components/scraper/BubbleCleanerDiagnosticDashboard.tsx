@@ -1,10 +1,16 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { Info, Activity, RefreshCw } from "lucide-react";
+import React, { useState, useCallback, useEffect } from "react";
+import { Info, Activity, RefreshCw, Clock } from "lucide-react";
 import { useBackendHealth } from "../../hooks/useBackendHealth";
 
 export function BubbleCleanerDiagnosticDashboard({ addNotification }: { addNotification?: (msg: string, type: any) => void }) {
   const { status, latency, version, checkHealth } = useBackendHealth();
   const [isSyncing, setIsSyncing] = useState(false);
+  const [uptime, setUptime] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => setUptime(prev => prev + 1), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleManualCheck = useCallback(async () => {
     setIsSyncing(true);
@@ -19,9 +25,15 @@ export function BubbleCleanerDiagnosticDashboard({ addNotification }: { addNotif
           <Activity className={`h-4.5 w-4.5 ${isSyncing ? 'animate-pulse' : ''}`} />
           <span>BACKEND CONNECTIVITY & PERFORMANCE DIAGNOSTICS</span>
         </div>
-        <button onClick={handleManualCheck} className="p-1.5 rounded-lg hover:bg-white/5 transition-colors">
-          <RefreshCw className={`h-3 w-3 text-neutral-500 ${isSyncing ? 'animate-spin' : ''}`} />
-        </button>
+        <div className="flex items-center gap-3">
+           <div className="flex items-center gap-1.5 text-[8px] font-mono text-neutral-500">
+              <Clock className="h-3 w-3" />
+              <span>SESS: {Math.floor(uptime/60)}m {uptime%60}s</span>
+           </div>
+           <button onClick={handleManualCheck} className="p-1.5 rounded-lg hover:bg-white/5 transition-colors">
+             <RefreshCw className={`h-3 w-3 text-neutral-500 ${isSyncing ? 'animate-spin' : ''}`} />
+           </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-3">

@@ -8,6 +8,7 @@ import { BubbleCleanerCustomSlots } from "./BubbleCleanerCustomSlots";
 import { BubbleCleanerSplitSlider } from "./BubbleCleanerSplitSlider";
 import { BubbleCleanerPixelScanner } from "./BubbleCleanerPixelScanner";
 import { BubbleCleanerPerfEstimator } from "./BubbleCleanerPerfEstimator";
+import { ConfigHistoryDropdown } from "./ConfigHistoryDropdown";
 
 export function BubbleCleanerGeneralTab(props: BubbleCleanerSharedProps) {
   const {
@@ -17,7 +18,9 @@ export function BubbleCleanerGeneralTab(props: BubbleCleanerSharedProps) {
     loadPresetSlot,
     applyQuickPreset,
     exportPresets,
-    importPresets
+    importPresets,
+    history,
+    applyState
   } = useBubbleCleanerPresets(props);
 
   const firstImageUrl = props.selectedScraped.length > 0 ? props.selectedScraped[0] : props.scrapedImages.length > 0 ? props.scrapedImages[0] : null;
@@ -56,6 +59,8 @@ export function BubbleCleanerGeneralTab(props: BubbleCleanerSharedProps) {
           firstImageUrl={firstImageUrl}
           eraseMethod={props.eraseMethod}
         />
+
+        <ConfigHistoryDropdown history={history} onApply={applyState} />
 
         <BubbleCleanerPixelScanner
           firstImageUrl={firstImageUrl}

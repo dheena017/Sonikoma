@@ -5,6 +5,7 @@ import { AutoCropPresetGrid } from "./AutoCropPresetGrid";
 import { AutoCropEngineSelector } from "./AutoCropEngineSelector";
 import { AutoCropCustomProfileManager } from "./AutoCropCustomProfileManager";
 import { AutoCropEngineComparison } from "./AutoCropEngineComparison";
+import { ConfigHistoryDropdown } from "./ConfigHistoryDropdown";
 
 export function AutoCropGeneralTab(props: AutoCropSharedProps) {
   const {
@@ -12,7 +13,9 @@ export function AutoCropGeneralTab(props: AutoCropSharedProps) {
     activeSlot,
     savePresetSlot,
     loadPresetSlot,
-    applyBuiltInPreset
+    applyBuiltInPreset,
+    history,
+    applyState
   } = useAutoCropPresets(props);
 
   const firstImageUrl = props.selectedScraped.length > 0 ? props.selectedScraped[0] : props.scrapedImages.length > 0 ? props.scrapedImages[0] : null;
@@ -46,6 +49,8 @@ export function AutoCropGeneralTab(props: AutoCropSharedProps) {
               <span className="text-[9px] text-neutral-500 mt-0.5 leading-normal">Automatically detects vertical seams to split tall webtoon strip pages into standalone scenes.</span>
             </div>
           </label>
+
+          <ConfigHistoryDropdown history={history} onApply={applyState} />
         </div>
 
         <AutoCropEngineComparison
