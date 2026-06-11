@@ -61,6 +61,8 @@ export default function BubbleCleanerTabContent(props: BubbleCleanerTabContentPr
           bubbleDilation={props.bubbleDilation}
           bubbleInpaintRadius={props.bubbleInpaintRadius}
           addNotification={props.addNotification}
+          scrapedImages={props.scrapedImages}
+          selectedScraped={props.selectedScraped}
         />
       )}
 

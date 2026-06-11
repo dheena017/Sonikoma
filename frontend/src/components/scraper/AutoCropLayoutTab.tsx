@@ -18,6 +18,10 @@ interface AutoCropLayoutTabProps
     | "selectedScraped"
     | "autoSplitTallStrips"
     | "overlapMergeThreshold"
+    | "cropSensitivity"
+    | "cropCannyLow"
+    | "cropCannyHigh"
+    | "cropCloseKernelSize"
   > {}
 
 export function AutoCropLayoutTab({
@@ -31,6 +35,10 @@ export function AutoCropLayoutTab({
   selectedScraped,
   autoSplitTallStrips,
   overlapMergeThreshold,
+  cropSensitivity,
+  cropCannyLow,
+  cropCannyHigh,
+  cropCloseKernelSize,
 }: AutoCropLayoutTabProps) {
   const firstImageUrl =
     selectedScraped.length > 0 ? selectedScraped[0] : scrapedImages.length > 0 ? scrapedImages[0] : null;
@@ -48,6 +56,7 @@ export function AutoCropLayoutTab({
           <AutoCropGutterModeToggle
             cropBackgroundMode={cropBackgroundMode}
             setCropBackgroundMode={setCropBackgroundMode}
+            firstImageUrl={firstImageUrl}
           />
 
           <AutoCropMarginPadding
@@ -64,6 +73,10 @@ export function AutoCropLayoutTab({
           cropBackgroundMode={cropBackgroundMode}
           autoSplit={autoSplitTallStrips}
           overlapMerge={overlapMergeThreshold}
+          sensitivity={cropSensitivity}
+          cannyLow={cropCannyLow}
+          cannyHigh={cropCannyHigh}
+          closeKernel={cropCloseKernelSize}
         />
       </div>
     </div>

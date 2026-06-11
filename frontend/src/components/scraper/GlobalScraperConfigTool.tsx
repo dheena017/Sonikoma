@@ -30,11 +30,18 @@ export function GlobalScraperConfigTool({ addNotification }: { addNotification?:
   };
 
   const copyToClipboard = () => {
-    const crop = localStorage.getItem("crop_custom_presets");
-    const bubble = localStorage.getItem("bubble_custom_presets");
-    const config = JSON.stringify({ crop, bubble }, null, 2);
-    navigator.clipboard.writeText(config);
-    addNotification?.("Configuration copied to clipboard!", "info");
+    try {
+      const cropRaw = localStorage.getItem("crop_custom_presets");
+      const bubbleRaw = localStorage.getItem("bubble_custom_presets");
+      const config = {
+        crop: cropRaw ? JSON.parse(cropRaw) : null,
+        bubble: bubbleRaw ? JSON.parse(bubbleRaw) : null,
+      };
+      navigator.clipboard.writeText(JSON.stringify(config, null, 2));
+      addNotification?.("Configuration copied to clipboard!", "info");
+    } catch (err) {
+      addNotification?.("Failed to copy configuration", "error");
+    }
   };
 
   return (

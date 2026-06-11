@@ -1,17 +1,57 @@
 import React from "react";
-import { Layers } from "lucide-react";
+import { Layers, Wand2 } from "lucide-react";
 import SectionTitle from "../crop/SectionTitle";
 import { BG_MODE_OPTIONS } from "./autoCropConfig";
 
 interface Props {
   cropBackgroundMode: string;
   setCropBackgroundMode: (v: string) => void;
+  firstImageUrl: string | null;
 }
 
-export function AutoCropGutterModeToggle({ cropBackgroundMode, setCropBackgroundMode }: Props) {
+export function AutoCropGutterModeToggle({ cropBackgroundMode, setCropBackgroundMode, firstImageUrl }: Props) {
+  const detectGutterColor = async () => {
+    if (!firstImageUrl) return;
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+
+      // Sample 4 corners
+      const corners = [
+        ctx.getImageData(0, 0, 1, 1).data,
+        ctx.getImageData(img.width - 1, 0, 1, 1).data,
+        ctx.getImageData(0, img.height - 1, 1, 1).data,
+        ctx.getImageData(img.width - 1, img.height - 1, 1, 1).data
+      ];
+
+      const avgBrightness = corners.reduce((acc, c) => acc + (c[0] + c[1] + c[2]) / 3, 0) / 4;
+
+      if (avgBrightness > 200) setCropBackgroundMode("white");
+      else if (avgBrightness < 50) setCropBackgroundMode("black");
+      else setCropBackgroundMode("auto");
+    };
+    img.src = firstImageUrl;
+  };
+
   return (
     <div className="space-y-3">
-      <SectionTitle icon={<Layers className="h-3 w-3" />}>Background Gutter Mode</SectionTitle>
+      <div className="flex items-center justify-between">
+         <SectionTitle icon={<Layers className="h-3 w-3" />}>Background Gutter Mode</SectionTitle>
+         <button
+           onClick={detectGutterColor}
+           disabled={!firstImageUrl}
+           className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-[8px] font-bold uppercase hover:bg-indigo-500/20 transition-all disabled:opacity-20"
+         >
+            <Wand2 className="h-2.5 w-2.5" />
+            Smart Detect
+         </button>
+      </div>
       <div className="grid grid-cols-3 gap-2">
         {BG_MODE_OPTIONS.map((opt) => (
           <button key={opt.value} onClick={() => setCropBackgroundMode(opt.value)}

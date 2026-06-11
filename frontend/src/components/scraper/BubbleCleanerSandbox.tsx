@@ -1,12 +1,14 @@
 import React, { useRef, useEffect } from "react";
+import { Download, LayoutPanelTop } from "lucide-react";
 import { useSandboxLogic } from "../../hooks/useSandboxLogic";
 
 interface Props {
   eraseMethod: string;
   addNotification?: (msg: string, type: any) => void;
+  firstImageUrl?: string | null;
 }
 
-export function BubbleCleanerSandbox({ eraseMethod, addNotification }: Props) {
+export function BubbleCleanerSandbox({ eraseMethod, addNotification, firstImageUrl }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const {
     brushColor, setBrushColor,
@@ -27,6 +29,25 @@ export function BubbleCleanerSandbox({ eraseMethod, addNotification }: Props) {
     ctx.beginPath(); ctx.moveTo(120, 80); ctx.lineTo(135, 75); ctx.lineTo(125, 95); ctx.closePath(); ctx.fill(); ctx.stroke();
     ctx.fillStyle = "#000000"; ctx.font = "bold 10px monospace";
     ctx.fillText("HELLO WORLD!", 95, 63);
+  };
+
+  const loadActivePanel = () => {
+    if (!firstImageUrl || !canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+      const x = (canvas.width / 2) - (img.width / 2) * scale;
+      const y = (canvas.height / 2) - (img.height / 2) * scale;
+      ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+      addNotification?.("Active panel loaded into sandbox!", "info");
+    };
+    img.src = firstImageUrl;
   };
 
   useEffect(() => {
@@ -50,7 +71,17 @@ export function BubbleCleanerSandbox({ eraseMethod, addNotification }: Props) {
   return (
     <div className="bg-neutral-950/40 border border-neutral-800 rounded-3xl p-5 space-y-4 flex flex-col items-center">
       <div className="w-full flex items-center justify-between text-[9px] font-mono">
-        <span className="text-neutral-500 font-bold uppercase">doodle sandBox</span>
+        <div className="flex items-center gap-2">
+           <span className="text-neutral-500 font-bold uppercase">doodle sandBox</span>
+           <button
+             onClick={loadActivePanel}
+             disabled={!firstImageUrl}
+             className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-purple-500/10 border border-purple-500/30 text-purple-400 text-[7px] hover:bg-purple-500/20 disabled:opacity-20"
+           >
+              <LayoutPanelTop className="h-2.5 w-2.5" />
+              LOAD PANEL
+           </button>
+        </div>
         <div className="flex gap-2">
            <button onClick={undo} disabled={!canUndo} className="px-2 py-0.5 rounded border border-neutral-800 bg-neutral-900 text-neutral-400 disabled:opacity-30">Undo</button>
            <button onClick={redo} disabled={!canRedo} className="px-2 py-0.5 rounded border border-neutral-800 bg-neutral-900 text-neutral-400 disabled:opacity-30">Redo</button>

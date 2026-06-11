@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Eye, RefreshCw, EyeOff, BarChart2 } from "lucide-react";
 
 interface Props {
@@ -12,31 +12,84 @@ export function BubbleCleanerPixelScanner({ firstImageUrl, sensitivity, detectio
   const [scanResult, setScanResult] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [showHistogram, setShowHistogram] = useState(true);
+  const [histogramData, setHistogramData] = useState<{ h: number; isTarget: boolean }[]>([]);
   const maskColor = "rgba(168, 85, 247, 0.45)";
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  useEffect(() => { setScanResult(null); }, [firstImageUrl, sensitivity, detectionStyle]);
+  useEffect(() => {
+    if (!firstImageUrl) {
+      setHistogramData([]);
+      return;
+    }
+
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      // Draw a smaller version for performance
+      const w = 100;
+      const h = (img.height / img.width) * w;
+      canvas.width = w;
+      canvas.height = h;
+      ctx.drawImage(img, 0, 0, w, h);
+
+      const imageData = ctx.getImageData(0, 0, w, h);
+      const data = imageData.data;
+      const brightnessCount = new Array(256).fill(0);
+
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i], g = data[i + 1], b = data[i + 2];
+        const brightness = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+        brightnessCount[brightness]++;
+      }
+
+      // Group into 24 bins for the UI
+      const bins = 24;
+      const binSize = Math.ceil(256 / bins);
+      const groupedData = [];
+      const maxCount = Math.max(...brightnessCount);
+
+      for (let i = 0; i < bins; i++) {
+        let sum = 0;
+        for (let j = 0; j < binSize; j++) {
+          const idx = i * binSize + j;
+          if (idx < 256) sum += brightnessCount[idx];
+        }
+
+        // Threshold mapping (sensitivity 10-90 mapped to 0-255)
+        // High sensitivity means lower threshold for what we consider "white"
+        const threshold = 255 - (sensitivity * 2);
+        const isTarget = (i * binSize) > threshold;
+
+        groupedData.push({
+          h: (sum / (maxCount * binSize)) * 100,
+          isTarget
+        });
+      }
+      setHistogramData(groupedData);
+    };
+    img.src = firstImageUrl;
+  }, [firstImageUrl, sensitivity]);
 
   const triggerBubbleScan = () => {
     setIsScanning(true);
+    // Real-ish scan simulation: we use the histogram to "guess"
     setTimeout(() => {
       setIsScanning(false);
-      const base = firstImageUrl ? 3 : 2;
-      const delta = sensitivity > 60 ? 2 : sensitivity < 30 ? -1 : 0;
-      const count = Math.max(0, base + delta);
+      const targetWeight = histogramData.reduce((acc, bin) => bin.isTarget ? acc + bin.h : acc, 0);
+      const count = Math.round(targetWeight / 15); // Random heuristic
       setScanResult(`Analysis complete: Isolated ${count} suspected speech bubble${count !== 1 ? "s" : ""} on active frame.`);
       addNotification?.(`Located ${count} speech bubble mask${count !== 1 ? "s" : ""} on first panel!`, "info");
     }, 1100);
   };
 
-  // Simulated Histogram Data
-  const histogramBars = Array.from({ length: 24 }, (_, i) => {
-    const h = Math.abs(Math.sin((i + sensitivity/10) * 0.5)) * 100;
-    const isTarget = i > (sensitivity / 4) && i < (sensitivity / 4 + 5);
-    return { h, isTarget };
-  });
-
   return (
     <div className="bg-neutral-950/40 border border-neutral-800 rounded-3xl p-5 space-y-4">
+      <canvas ref={canvasRef} className="hidden" />
       <div className="flex items-center justify-between text-[9px] font-mono">
         <div className="flex items-center gap-2">
            <BarChart2 className="h-3.5 w-3.5 text-emerald-400" />
@@ -63,12 +116,12 @@ export function BubbleCleanerPixelScanner({ firstImageUrl, sensitivity, detectio
            <div className="absolute inset-0 bg-purple-500/10 mix-blend-overlay animate-pulse" />
         </div>
 
-        {showHistogram && (
+        {showHistogram && histogramData.length > 0 && (
            <div className="absolute bottom-4 left-4 right-4 h-16 flex items-end gap-0.5 bg-black/40 backdrop-blur-sm p-2 rounded-lg border border-white/5">
-              {histogramBars.map((bar, i) => (
-                 <div key={i} className={`flex-1 rounded-t-sm transition-all duration-500 ${bar.isTarget ? 'bg-emerald-400/80 shadow-[0_0_8px_rgba(52,211,153,0.3)]' : 'bg-neutral-700/40'}`} style={{ height: `${bar.h}%` }} />
+              {histogramData.map((bar, i) => (
+                 <div key={i} className={`flex-1 rounded-t-sm transition-all duration-500 ${bar.isTarget ? 'bg-emerald-400/80 shadow-[0_0_8px_rgba(52,211,153,0.3)]' : 'bg-neutral-700/40'}`} style={{ height: `${Math.max(2, bar.h)}%` }} />
               ))}
-              <span className="absolute -top-3 left-2 text-[6px] font-mono text-neutral-500 uppercase tracking-tighter">Color Distribution (Thresh: {sensitivity})</span>
+              <span className="absolute -top-3 left-2 text-[6px] font-mono text-neutral-500 uppercase tracking-tighter">Real Color Distribution (Thresh: {sensitivity})</span>
            </div>
         )}
 

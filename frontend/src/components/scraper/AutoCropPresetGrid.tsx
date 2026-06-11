@@ -1,13 +1,14 @@
 import React from "react";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Wand2 } from "lucide-react";
 import SectionTitle from "../crop/SectionTitle";
 
 interface Props {
   activeSlot: string | null;
   applyPreset: (preset: any) => void;
+  firstImageUrl: string | null;
 }
 
-export function AutoCropPresetGrid({ activeSlot, applyPreset }: Props) {
+export function AutoCropPresetGrid({ activeSlot, applyPreset, firstImageUrl }: Props) {
   const border = (slot: string) =>
     activeSlot === slot
       ? "border-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.12)]"
@@ -20,9 +21,31 @@ export function AutoCropPresetGrid({ activeSlot, applyPreset }: Props) {
     { id: "square",   label: "🏁 Mobile Square (1:1)", sub: "30% sens · 12px pad · Square lock", config: { cropSensitivity: 30, cropPaddingPx: 12, cropBackgroundMode: "auto", aspectRatioLock: "1:1", autoSplitTallStrips: true, minPanelAreaPct: 1.5, overlapMergeThreshold: 35 } },
   ];
 
+  const autoOptimize = async () => {
+    if (!firstImageUrl) return;
+    const img = new Image();
+    img.onload = () => {
+      const ratio = img.height / img.width;
+      if (ratio > 2.5) applyPreset({ ...presets.find(p => p.id === 'webtoon')?.config, id: 'webtoon' });
+      else if (ratio < 0.8) applyPreset({ ...presets.find(p => p.id === 'square')?.config, id: 'square' });
+      else applyPreset({ ...presets.find(p => p.id === 'standard')?.config, id: 'standard' });
+    };
+    img.src = firstImageUrl;
+  };
+
   return (
     <div className="space-y-3">
-      <SectionTitle icon={<Sparkles className="h-3 w-3" />}>Crop Profile Presets</SectionTitle>
+      <div className="flex items-center justify-between">
+         <SectionTitle icon={<Sparkles className="h-3 w-3" />}>Crop Profile Presets</SectionTitle>
+         <button
+           onClick={autoOptimize}
+           disabled={!firstImageUrl}
+           className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[8px] font-bold uppercase hover:bg-emerald-500/20 transition-all disabled:opacity-20"
+         >
+            <Wand2 className="h-2.5 w-2.5" />
+            Auto-Optimize
+         </button>
+      </div>
       <div className="grid grid-cols-2 gap-3">
         {presets.map((p) => (
           <button key={p.id} type="button" onClick={() => applyPreset({ ...p.config, id: p.id })}
