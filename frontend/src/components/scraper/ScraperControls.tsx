@@ -19,11 +19,11 @@ interface ScraperControlsProps
     | "setShowAutoCropModal"
     | "isBatchCropping"
     | "batchProgress"
-    | "fetchWithInterceptor"
     | "handleAutoCropSelected"
     | "handleCleanBubblesSelected"
   > {
   addPanelsWithAutoAnalysis: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
+  fetchWithInterceptor?: any;
   /** Called when a filter action resets selection — so parent can clear lastSelectedIndex anchor */
   onLastSelectedReset?: () => void;
 }
@@ -44,8 +44,6 @@ export default function ScraperControls({
   batchProgress,
   handleAutoCropSelected,
   handleCleanBubblesSelected,
-  addPanelsWithAutoAnalysis,
-  fetchWithInterceptor,
   onLastSelectedReset,
 }: ScraperControlsProps) {
   // ── Quick Selection Filters ──────────────────────────────────────────────
@@ -132,6 +130,7 @@ export default function ScraperControls({
         handleSelectLastN={handleSelectLastN}
         handleSelectRange={handleSelectRange}
         handleClearAll={handleClearAll}
+        setSelectedScraped={setSelectedScraped}
       />
 
       <ScraperActionButtons

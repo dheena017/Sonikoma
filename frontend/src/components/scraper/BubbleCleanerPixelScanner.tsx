@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Eye, RefreshCw, EyeOff, BarChart2 } from "lucide-react";
+import { Eye, RefreshCw, EyeOff, BarChart2, Wand2 } from "lucide-react";
 
 interface Props {
   firstImageUrl: string | null;
   sensitivity: number;
+  setSensitivity: (v: number) => void;
   detectionStyle: string;
   addNotification?: (msg: string, type: any) => void;
 }
 
-export function BubbleCleanerPixelScanner({ firstImageUrl, sensitivity, detectionStyle, addNotification }: Props) {
+export function BubbleCleanerPixelScanner({ firstImageUrl, sensitivity, setSensitivity, detectionStyle, addNotification }: Props) {
   const [scanResult, setScanResult] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [showHistogram, setShowHistogram] = useState(true);
@@ -16,7 +17,6 @@ export function BubbleCleanerPixelScanner({ firstImageUrl, sensitivity, detectio
   const [maskPreviewUrl, setMaskColorPreviewUrl] = useState<string | null>(null);
   const maskColor = "rgba(168, 85, 247, 0.45)";
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const previewCanvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     if (!firstImageUrl) {
@@ -43,14 +43,13 @@ export function BubbleCleanerPixelScanner({ firstImageUrl, sensitivity, detectio
       const data = imageData.data;
       const brightnessCount = new Array(256).fill(0);
 
-      // Create preview mask
+      const threshold = 255 - (sensitivity * 2);
+
       const previewCanvas = document.createElement('canvas');
       previewCanvas.width = w;
       previewCanvas.height = h;
       const pCtx = previewCanvas.getContext('2d')!;
       const pData = pCtx.createImageData(w, h);
-
-      const threshold = 255 - (sensitivity * 2);
 
       for (let i = 0; i < data.length; i += 4) {
         const r = data[i], g = data[i + 1], b = data[i + 2];
@@ -86,6 +85,24 @@ export function BubbleCleanerPixelScanner({ firstImageUrl, sensitivity, detectio
     img.src = firstImageUrl;
   }, [firstImageUrl, sensitivity]);
 
+  const autoSetSensitivity = () => {
+     if (histogramData.length === 0) return;
+     // Find the largest peak in the bright regions
+     let maxH = 0;
+     let peakIdx = 20;
+     for (let i = 15; i < histogramData.length; i++) {
+        if (histogramData[i].h > maxH) {
+           maxH = histogramData[i].h;
+           peakIdx = i;
+        }
+     }
+     // Map peak index (0-23) back to sensitivity (10-90)
+     const suggested = Math.round(((23 - peakIdx) / 23) * 100);
+     const clamped = Math.max(10, Math.min(90, suggested + 5));
+     setSensitivity(clamped);
+     addNotification?.(`Auto-tuned sensitivity to ${clamped}% based on image histogram.`, "success");
+  };
+
   const triggerBubbleScan = () => {
     setIsScanning(true);
     setTimeout(() => {
@@ -105,7 +122,12 @@ export function BubbleCleanerPixelScanner({ firstImageUrl, sensitivity, detectio
            <BarChart2 className="h-3.5 w-3.5 text-emerald-400" />
            <span className="text-neutral-500 font-bold uppercase">Live Mask Scanner</span>
         </div>
-        <button onClick={() => setShowHistogram(!showHistogram)} className="text-neutral-600 hover:text-white transition-colors">{showHistogram ? "Hide Details" : "Show Details"}</button>
+        <div className="flex items-center gap-2">
+           <button onClick={autoSetSensitivity} className="flex items-center gap-1 text-indigo-400 hover:text-indigo-300 transition-colors uppercase font-bold">
+              <Wand2 className="h-2.5 w-2.5" /> Auto-Set
+           </button>
+           <button onClick={() => setShowHistogram(!showHistogram)} className="text-neutral-600 hover:text-white transition-colors">{showHistogram ? "Hide Details" : "Show Details"}</button>
+        </div>
       </div>
 
       <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden border border-neutral-800 bg-neutral-950 flex flex-col items-center justify-center">
@@ -118,7 +140,6 @@ export function BubbleCleanerPixelScanner({ firstImageUrl, sensitivity, detectio
           </div>
         )}
 
-        {/* Real-time Mask Overlay */}
         {maskPreviewUrl && (
            <div className="absolute inset-0 bg-contain bg-center bg-no-repeat transition-opacity duration-300"
              style={{ backgroundImage: `url(${maskPreviewUrl})`, mixBlendMode: 'screen' }} />

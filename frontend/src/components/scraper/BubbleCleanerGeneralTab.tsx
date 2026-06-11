@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useBubbleCleanerPresets } from "../../hooks/useBubbleCleanerPresets";
 import { BubbleCleanerSharedProps } from "./tabTypes";
 import { BubbleCleanerQuickPresets } from "./BubbleCleanerQuickPresets";
@@ -23,7 +23,7 @@ export function BubbleCleanerGeneralTab(props: BubbleCleanerSharedProps) {
     applyState
   } = useBubbleCleanerPresets(props);
 
-  const [showComparison, setShowComparison] = useState(false);
+  const [showComparison, setShowComparison] = React.useState(false);
   const firstImageUrl = props.selectedScraped.length > 0 ? props.selectedScraped[0] : props.scrapedImages.length > 0 ? props.scrapedImages[0] : null;
 
   return (
@@ -86,6 +86,7 @@ export function BubbleCleanerGeneralTab(props: BubbleCleanerSharedProps) {
         <BubbleCleanerPixelScanner
           firstImageUrl={firstImageUrl}
           sensitivity={props.sensitivity}
+          setSensitivity={props.setSensitivity}
           detectionStyle={props.detectionStyle}
           addNotification={props.addNotification}
         />
