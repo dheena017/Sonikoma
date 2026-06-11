@@ -3,6 +3,8 @@ import { GeneratedPanel } from "../types";
 import { NotificationType } from "../components/NotificationStack";
 
 interface UseAutoAnalysisProps {
+  panels: GeneratedPanel[];
+  selectedModel?: string;
   scrapedImages: string[];
   setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
   setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>>;
@@ -12,6 +14,8 @@ interface UseAutoAnalysisProps {
 }
 
 export function useAutoAnalysis({
+  panels,
+  selectedModel,
   scrapedImages,
   setPanels,
   setConsoleLogs,
@@ -24,7 +28,7 @@ export function useAutoAnalysis({
       const res = await fetchWithInterceptor("/api/analyze-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: imageUrl }),
+        body: JSON.stringify({ url: imageUrl, model: selectedModel }),
       });
       if (!res.ok) throw new Error(`Analysis failed with status ${res.status}`);
       const data = await res.json();
@@ -51,10 +55,10 @@ export function useAutoAnalysis({
         ]);
         addNotification(`Panel #${panelId} analysis completed successfully!`, 'success');
       } else {
-        throw new Error("Invalid response keys from AI Model Analysis");
+        throw new Error(data.error || "Invalid response keys from AI Model Analysis");
       }
     } catch (err: any) {
-      addNotification(`Panel #${panelId} AI analysis failed.`, 'error');
+      addNotification(`Panel #${panelId} AI analysis failed: ${err.message || err}`, 'error');
       setPanels((prev) =>
         prev.map((p) =>
           p.id === panelId
@@ -68,7 +72,7 @@ export function useAutoAnalysis({
         )
       );
     }
-  }, [fetchWithInterceptor, addNotification, setPanels, setConsoleLogs]);
+  }, [fetchWithInterceptor, addNotification, setPanels, setConsoleLogs, selectedModel]);
 
   const addPanelsWithAutoAnalysis = useCallback((imgUrls: string[], currentScrapedList?: string[], shouldScroll: boolean = true) => {
     if (imgUrls.length === 0) return;
@@ -80,29 +84,21 @@ export function useAutoAnalysis({
       }, 100);
     }
 
-    let newIds: { id: number; url: string }[] = [];
-    const imageList = currentScrapedList || scrapedImages;
+    const baseId = panels.length > 0 ? Math.max(...panels.map((p) => p.id)) + 1 : 1;
 
-    setPanels((prev) => {
-      const baseId = prev.length > 0 ? Math.max(...prev.map((p) => p.id)) + 1 : 1;
-
-      const newPanelsToAdd = imgUrls.map((imgUrl, loopIdx) => {
-        const assignedId = baseId + loopIdx;
-        newIds.push({ id: assignedId, url: imgUrl });
-
-        return {
-          id: assignedId,
-          image_url: imgUrl,
-          speech_text: `Loading dialogue... ✦`,
-          sfx: "[Deep Scan]",
-          duration: 4.5,
-          motion_type: "zoom_in",
-          isAnalyzing: true,
-        };
-      });
-
-      return [...prev, ...newPanelsToAdd];
+    const newPanelsToAdd = imgUrls.map((imgUrl, loopIdx) => {
+      return {
+        id: baseId + loopIdx,
+        image_url: imgUrl,
+        speech_text: `Loading dialogue... ✦`,
+        sfx: "[Deep Scan]",
+        duration: 4.5,
+        motion_type: "zoom_in",
+        isAnalyzing: true,
+      };
     });
+
+    setPanels((prev) => [...prev, ...newPanelsToAdd]);
 
     setConsoleLogs((prev) => [
       `[GUI] Added ${imgUrls.length} frames; spawning staggered AI OCR dialogue & camera motion detection...`,
@@ -111,12 +107,12 @@ export function useAutoAnalysis({
     addNotification(`Added ${imgUrls.length} panel(s) to storyboard. Spawning AI analysis...`, 'info');
 
     // Developer console visibility
-    console.log(`[GUI] Added ${imgUrls.length} frame(s) to storyboard`, newIds);
+    console.log(`[GUI] Added ${imgUrls.length} frame(s) to storyboard`, newPanelsToAdd);
 
-    newIds.forEach((item) => {
-      runBackgroundAnalysis(item.id, item.url);
+    newPanelsToAdd.forEach((item) => {
+      runBackgroundAnalysis(item.id, item.image_url);
     });
-  }, [scrapedImages, runBackgroundAnalysis, addNotification, setActivePreviewTab, setPanels, setConsoleLogs]);
+  }, [panels, runBackgroundAnalysis, addNotification, setActivePreviewTab, setPanels, setConsoleLogs]);
 
   return {
     runBackgroundAnalysis,

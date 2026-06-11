@@ -12,6 +12,7 @@ import io
 import os
 import tempfile
 import zipfile
+import asyncio
 from typing import List, Optional, Literal, Dict, Any
 from fastapi import APIRouter, HTTPException, Response, Query, Body, Path
 from pydantic import BaseModel, Field
@@ -88,55 +89,60 @@ async def edit_image(body: EditImageRequest):
         img_buffer = resolved["data"]
         content_type = resolved["contentType"]
 
-        # Apply rotation if requested
-        rotate_angle = body.rotate
-        if rotate_angle and rotate_angle != 0:
-            img = Image.open(io.BytesIO(img_buffer))
-            img = img.rotate(rotate_angle, expand=True)
-            out = io.BytesIO()
-            img.save(out, format=img.format or 'JPEG')
-            img_buffer = out.getvalue()
-
-        # Apply horizontal flip
-        if body.flipHorizontal:
-            img = Image.open(io.BytesIO(img_buffer))
-            img = img.transpose(Image.FLIP_LEFT_RIGHT)
-            out = io.BytesIO()
-            img.save(out, format=img.format or 'JPEG')
-            img_buffer = out.getvalue()
-
-        # Crop percent-based boxes
-        if body.cropTop > 0 or body.cropBottom > 0 or body.cropLeft > 0 or body.cropRight > 0:
-            img = Image.open(io.BytesIO(img_buffer))
-            w, h = img.size
-            
-            top_px = int(round((body.cropTop / 100) * h))
-            bot_px = int(round((body.cropBottom / 100) * h))
-            left_px = int(round((body.cropLeft / 100) * w))
-            right_px = int(round((body.cropRight / 100) * w))
-
-            crop_w = w - left_px - right_px
-            crop_h = h - top_px - bot_px
-            if crop_w > 10 and crop_h > 10:
-                img_cropped = img.crop((left_px, top_px, left_px + crop_w, top_px + crop_h))
+        def edit_sync():
+            nonlocal img_buffer, content_type
+            # Apply rotation if requested
+            rotate_angle = body.rotate
+            if rotate_angle and rotate_angle != 0:
+                img = Image.open(io.BytesIO(img_buffer))
+                img = img.rotate(rotate_angle, expand=True)
                 out = io.BytesIO()
-                img_cropped.save(out, format=img.format or 'JPEG')
+                img.save(out, format=img.format or 'JPEG')
                 img_buffer = out.getvalue()
 
-        # Auto trim borders
-        if body.autoTrim:
-            trimmed = img_utils.crop_auto_borders(
-                img_buffer,
-                tighter=True,
-                crop_padding=body.padding,
-                sensitivity=body.sensitivity,
-                background_color_mode=body.backgroundColorMode,
-                aspect_ratio=body.aspectRatio,
-                output_format=body.outputFormat,
-                crop_quality=body.cropQuality
-            )
-            img_buffer = trimmed["data"]
-            content_type = trimmed["content_type"]
+            # Apply horizontal flip
+            if body.flipHorizontal:
+                img = Image.open(io.BytesIO(img_buffer))
+                img = img.transpose(Image.FLIP_LEFT_RIGHT)
+                out = io.BytesIO()
+                img.save(out, format=img.format or 'JPEG')
+                img_buffer = out.getvalue()
+
+            # Crop percent-based boxes
+            if body.cropTop > 0 or body.cropBottom > 0 or body.cropLeft > 0 or body.cropRight > 0:
+                img = Image.open(io.BytesIO(img_buffer))
+                w, h = img.size
+                
+                top_px = int(round((body.cropTop / 100) * h))
+                bot_px = int(round((body.cropBottom / 100) * h))
+                left_px = int(round((body.cropLeft / 100) * w))
+                right_px = int(round((body.cropRight / 100) * w))
+
+                crop_w = w - left_px - right_px
+                crop_h = h - top_px - bot_px
+                if crop_w > 10 and crop_h > 10:
+                    img_cropped = img.crop((left_px, top_px, left_px + crop_w, top_px + crop_h))
+                    out = io.BytesIO()
+                    img_cropped.save(out, format=img.format or 'JPEG')
+                    img_buffer = out.getvalue()
+
+            # Auto trim borders
+            if body.autoTrim:
+                trimmed = img_utils.crop_auto_borders(
+                    img_buffer,
+                    tighter=True,
+                    crop_padding=body.padding,
+                    sensitivity=body.sensitivity,
+                    background_color_mode=body.backgroundColorMode,
+                    aspect_ratio=body.aspectRatio,
+                    output_format=body.outputFormat,
+                    crop_quality=body.cropQuality
+                )
+                img_buffer = trimmed["data"]
+                content_type = trimmed["content_type"]
+            return img_buffer, content_type
+
+        img_buffer, content_type = await asyncio.to_thread(edit_sync)
 
         # Cache in memory
         unique_id = f"merged_{int(time.time() * 1000)}_cropped"
@@ -215,87 +221,90 @@ async def merge_images(body: StitchImagesRequest):
 
         # Resolve image buffers
         resolved = [await img_utils.resolve_image_to_buffer(u) for u in urls]
-        imgs = [Image.open(io.BytesIO(r["data"])) for r in resolved]
+        def merge_sync():
+            imgs = [Image.open(io.BytesIO(r["data"])) for r in resolved]
 
-        bg_color = (255, 255, 255)
-        if body.spacingColor == "black":
-            bg_color = (0, 0, 0)
-        elif body.spacingColor == "transparent":
-            bg_color = (0, 0, 0, 0)
+            bg_color = (255, 255, 255)
+            if body.spacingColor == "black":
+                bg_color = (0, 0, 0)
+            elif body.spacingColor == "transparent":
+                bg_color = (0, 0, 0, 0)
 
-        gap = body.spacing
-        pad = body.padding
+            gap = body.spacing
+            pad = body.padding
 
-        # First pass resizing
-        prepared_images = []
-        if body.layout == "horizontal":
-            canonical_h = imgs[0].size[1]
-            for img in imgs:
-                if body.scaleToFit:
-                    # scale height
-                    w, h = img.size
-                    new_w = int(round(w * (canonical_h / h)))
-                    img_res = img.resize((new_w, canonical_h), Image.Resampling.LANCZOS)
-                    prepared_images.append(img_res)
-                else:
-                    prepared_images.append(img)
-        else:
-            # vertical
-            canonical_w = imgs[0].size[0]
-            for img in imgs:
-                if body.scaleToFit:
-                    # scale width
-                    w, h = img.size
-                    new_h = int(round(h * (canonical_w / w)))
-                    img_res = img.resize((canonical_w, new_h), Image.Resampling.LANCZOS)
-                    prepared_images.append(img_res)
-                else:
-                    prepared_images.append(img)
+            # First pass resizing
+            prepared_images = []
+            if body.layout == "horizontal":
+                canonical_h = imgs[0].size[1]
+                for img in imgs:
+                    if body.scaleToFit:
+                        # scale height
+                        w, h = img.size
+                        new_w = int(round(w * (canonical_h / h)))
+                        img_res = img.resize((new_w, canonical_h), Image.Resampling.LANCZOS)
+                        prepared_images.append(img_res)
+                    else:
+                        prepared_images.append(img)
+            else:
+                # vertical
+                canonical_w = imgs[0].size[0]
+                for img in imgs:
+                    if body.scaleToFit:
+                        # scale width
+                        w, h = img.size
+                        new_h = int(round(h * (canonical_w / w)))
+                        img_res = img.resize((canonical_w, new_h), Image.Resampling.LANCZOS)
+                        prepared_images.append(img_res)
+                    else:
+                        prepared_images.append(img)
 
-        # Calculate coordinates
-        widths = [img.size[0] for img in prepared_images]
-        heights = [img.size[1] for img in prepared_images]
+            # Calculate coordinates
+            widths = [img.size[0] for img in prepared_images]
+            heights = [img.size[1] for img in prepared_images]
 
-        total_w = 0
-        total_h = 0
+            total_w = 0
+            total_h = 0
 
-        if body.layout == "horizontal":
-            max_h = max(heights)
-            total_h = max_h + pad * 2
-            total_w = sum(widths) + gap * (len(prepared_images) - 1) + pad * 2
-            
-            canvas = Image.new("RGBA" if body.spacingColor == "transparent" else "RGB", (total_w, total_h), bg_color)
-            offset_x = pad
-            for img in prepared_images:
-                w, h = img.size
-                offset_y = pad
-                if body.alignMode == "center":
-                    offset_y = pad + (max_h - h) // 2
-                elif body.alignMode == "end":
-                    offset_y = pad + (max_h - h)
-                canvas.paste(img, (offset_x, offset_y))
-                offset_x += w + gap
-        else:
-            # vertical
-            max_w = max(widths)
-            total_w = max_w + pad * 2
-            total_h = sum(heights) + gap * (len(prepared_images) - 1) + pad * 2
-            
-            canvas = Image.new("RGBA" if body.spacingColor == "transparent" else "RGB", (total_w, total_h), bg_color)
-            offset_y = pad
-            for img in prepared_images:
-                w, h = img.size
+            if body.layout == "horizontal":
+                max_h = max(heights)
+                total_h = max_h + pad * 2
+                total_w = sum(widths) + gap * (len(prepared_images) - 1) + pad * 2
+                
+                canvas = Image.new("RGBA" if body.spacingColor == "transparent" else "RGB", (total_w, total_h), bg_color)
                 offset_x = pad
-                if body.alignMode == "center":
-                    offset_x = pad + (max_w - w) // 2
-                elif body.alignMode == "end":
-                    offset_x = pad + (max_w - w)
-                canvas.paste(img, (offset_x, offset_y))
-                offset_y += h + gap
+                for img in prepared_images:
+                    w, h = img.size
+                    offset_y = pad
+                    if body.alignMode == "center":
+                        offset_y = pad + (max_h - h) // 2
+                    elif body.alignMode == "end":
+                        offset_y = pad + (max_h - h)
+                    canvas.paste(img, (offset_x, offset_y))
+                    offset_x += w + gap
+            else:
+                # vertical
+                max_w = max(widths)
+                total_w = max_w + pad * 2
+                total_h = sum(heights) + gap * (len(prepared_images) - 1) + pad * 2
+                
+                canvas = Image.new("RGBA" if body.spacingColor == "transparent" else "RGB", (total_w, total_h), bg_color)
+                offset_y = pad
+                for img in prepared_images:
+                    w, h = img.size
+                    offset_x = pad
+                    if body.alignMode == "center":
+                        offset_x = pad + (max_w - w) // 2
+                    elif body.alignMode == "end":
+                        offset_x = pad + (max_w - w)
+                    canvas.paste(img, (offset_x, offset_y))
+                    offset_y += h + gap
 
-        out = io.BytesIO()
-        canvas.save(out, format="PNG")
-        merged_bytes = out.getvalue()
+            out = io.BytesIO()
+            canvas.save(out, format="PNG")
+            return out.getvalue()
+
+        merged_bytes = await asyncio.to_thread(merge_sync)
 
         unique_id = f"merged_{int(time.time() * 1000)}_merged"
         new_url = f"/api/merge-images/cached/{unique_id}"
@@ -341,44 +350,48 @@ async def execute_splits(body: SplitImagesRequest):
         min_segment_height_px = 20
         urls = []
 
-        for i in range(len(boundaries) - 1):
-            top_pct = boundaries[i]
-            bot_pct = boundaries[i + 1]
+        def split_sync():
+            res_urls = []
+            for i in range(len(boundaries) - 1):
+                top_pct = boundaries[i]
+                bot_pct = boundaries[i + 1]
 
-            seg_top_px = int(round((top_pct / 100.0) * h))
-            seg_bot_px = int(round((bot_pct / 100.0) * h))
-            seg_h_px = seg_bot_px - seg_top_px
+                seg_top_px = int(round((top_pct / 100.0) * h))
+                seg_bot_px = int(round((bot_pct / 100.0) * h))
+                seg_h_px = seg_bot_px - seg_top_px
 
-            if seg_h_px < min_segment_height_px:
-                continue
+                if seg_h_px < min_segment_height_px:
+                    continue
 
-            seg_img = img.crop((0, seg_top_px, w, seg_top_px + seg_h_px))
-            out = io.BytesIO()
-            seg_img.save(out, format="JPEG", quality=90)
-            seg_bytes = out.getvalue()
+                seg_img = img.crop((0, seg_top_px, w, seg_top_px + seg_h_px))
+                out = io.BytesIO()
+                seg_img.save(out, format="JPEG", quality=90)
+                seg_bytes = out.getvalue()
 
-            # Trim margins conservatively
-            try:
-                trimmed = img_utils.crop_auto_borders(
-                    seg_bytes,
-                    tighter=True,
-                    crop_padding=0,
-                    sensitivity=30.0,
-                    background_color_mode='auto',
-                    aspect_ratio='free',
-                    output_format='jpeg',
-                    crop_quality=90
-                )
-                seg_bytes = trimmed["data"]
-            except Exception:
-                pass
+                # Trim margins conservatively
+                try:
+                    trimmed = img_utils.crop_auto_borders(
+                        seg_bytes,
+                        tighter=True,
+                        crop_padding=0,
+                        sensitivity=30.0,
+                        background_color_mode='auto',
+                        aspect_ratio='free',
+                        output_format='jpeg',
+                        crop_quality=90
+                    )
+                    seg_bytes = trimmed["data"]
+                except Exception:
+                    pass
 
-            cache_id = f"split_{int(time.time() * 1000)}_{i}"
-            new_url = f"/api/merge-images/cached/{cache_id}"
+                cache_id = f"split_{int(time.time() * 1000)}_{i}"
+                new_url = f"/api/merge-images/cached/{cache_id}"
 
-            stitched_cache.set(cache_id, {"data": seg_bytes, "content_type": "image/jpeg"})
-            urls.append(new_url)
+                stitched_cache.set(cache_id, {"data": seg_bytes, "content_type": "image/jpeg"})
+                res_urls.append(new_url)
+            return res_urls
 
+        urls = await asyncio.to_thread(split_sync)
         return {"success": True, "urls": urls}
     except HTTPException:
         raise
@@ -392,14 +405,22 @@ async def execute_splits(body: SplitImagesRequest):
 @router.post("/download-zip", summary="Create ZIP archive containing storyboard panels")
 async def download_zip(body: DownloadZipRequest):
     try:
-        # Generate ZIP in-memory
-        zip_buffer = io.BytesIO()
-        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
-            for idx, url in enumerate(body.urls):
-                try:
-                    resolved = await img_utils.resolve_image_to_buffer(url)
+        # Resolve all buffers asynchronously first
+        resolved_buffers = []
+        for url in body.urls:
+            try:
+                resolved = await img_utils.resolve_image_to_buffer(url)
+                resolved_buffers.append(resolved)
+            except Exception as ex:
+                logger.warning(f"[ZIP API] Failed to resolve URL: {url} | {ex}")
+
+        # Package ZIP in-memory on a background thread
+        def generate_zip_sync():
+            zip_buffer = io.BytesIO()
+            with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+                for idx, resolved in enumerate(resolved_buffers):
                     ext = "jpg"
-                    ct = resolved["content_type"]
+                    ct = resolved.get("content_type") or resolved.get("contentType") or ""
                     if "png" in ct:
                         ext = "png"
                     elif "webp" in ct:
@@ -409,11 +430,9 @@ async def download_zip(body: DownloadZipRequest):
                         
                     filename = f"panel_{idx + 1:03d}.{ext}"
                     zip_file.writestr(filename, resolved["data"])
-                except Exception as ex:
-                    logger.warning(f"[ZIP API] Failed to resolve URL: {url} | {ex}")
+            return zip_buffer.getvalue()
 
-        # Retrieve bytes
-        zip_bytes = zip_buffer.getvalue()
+        zip_bytes = await asyncio.to_thread(generate_zip_sync)
         zip_id = f"zip_{int(time.time() * 1000)}"
         zip_cache.set(zip_id, zip_bytes)
 
@@ -458,7 +477,8 @@ async def bubble_cleaning(body: RemoveBubblesRequest):
         
         try:
             # 3. Call services/cleaner remove_speech_bubbles directly (no subprocess!)
-            detected = remove_speech_bubbles(
+            detected = await asyncio.to_thread(
+                remove_speech_bubbles,
                 image_path=tmp_in_path,
                 output_path=tmp_out_path,
                 method=body.method,

@@ -79,6 +79,8 @@ export function usePipelineActions({
     runBackgroundAnalysis,
     addPanelsWithAutoAnalysis,
   } = useAutoAnalysis({
+    panels,
+    selectedModel,
     scrapedImages,
     setPanels,
     setConsoleLogs,

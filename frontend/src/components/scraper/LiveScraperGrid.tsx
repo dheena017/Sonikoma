@@ -21,6 +21,7 @@ interface LiveScraperGridProps {
   setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>>;
   addPanelsWithAutoAnalysis: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
   addNotification: (message: string, type: "error" | "success" | "info" | "warning") => void;
+  onCardClick?: (idx: number, imgUrl: string, shiftKey: boolean) => void;
 }
 
 export default function LiveScraperGrid({
@@ -43,6 +44,7 @@ export default function LiveScraperGrid({
   setConsoleLogs,
   addPanelsWithAutoAnalysis,
   addNotification,
+  onCardClick,
 }: LiveScraperGridProps) {
   return (
     <div className="flex gap-4 overflow-x-auto pb-6 pt-1.5 scrollbar-thin">
@@ -72,6 +74,7 @@ export default function LiveScraperGrid({
             setConsoleLogs={setConsoleLogs}
             addPanelsWithAutoAnalysis={addPanelsWithAutoAnalysis}
             addNotification={addNotification}
+            onCardClick={onCardClick || (() => {})}
           />
         );
       })}

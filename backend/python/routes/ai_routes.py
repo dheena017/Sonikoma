@@ -1,7 +1,7 @@
 """
 backend/python/routes/ai_routes.py
 ─────────────────────────────────────────────────────────────────────────────
-AI Image Analysis and Smart Cropping routes.
+AI Image Analysis and Smart Cropping routes refactored to use AI Markdown Skills.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -23,6 +23,10 @@ from utils.cache import stitched_cache, edit_history
 from config.clients import ai_initialized, call_gemini_with_retry, genai_client
 from services.detect_panels import run_cv_detection
 
+# AI Skills registry and models imports
+from skills.registry import registry
+from skills.base import GeminiAnalysisModel, CropBox, CropList
+
 logger = logging.getLogger("anivox.routes.ai_routes")
 router = APIRouter()
 
@@ -37,14 +41,7 @@ DEFAULT_ANALYSIS = {
     "visual_description":  "A cropped illustration frame ready for cinematic playback.",
 }
 
-# ─── Pydantic Schemas for Structured Output ────────────────────────────────────
-
-class GeminiAnalysisModel(BaseModel):
-    speech_text: str
-    sfx: str
-    duration: float
-    motion_type: str
-    visual_description: str
+# ─── Pydantic Schemas for Requests ───────────────────────────────────────────
 
 class AnalyzeImageRequest(BaseModel):
     url: str
@@ -67,6 +64,144 @@ class SmartCropRequest(BaseModel):
     cannyHigh: Optional[int] = 100
     closeKernelSize: Optional[int] = 15
     minHeightPx: Optional[int] = 60
+
+# ─── Dynamic Endpoints Requests ──────────────────────────────────────────────
+
+class DramatizeRequest(BaseModel):
+    raw_ocr_text: List[str]
+    genre: str
+    scene_context: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class SFXAudioRequest(BaseModel):
+    visual_description: str
+    sfx_tag: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class ThumbnailRequest(BaseModel):
+    title: str
+    genre: str
+    plot_point: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class TranslationRequest(BaseModel):
+    text: str
+    target_lang: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class SEORequest(BaseModel):
+    title: str
+    genre: str
+    storyboard_summary: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class VoiceCastingRequest(BaseModel):
+    character_name: str
+    dialogue_sample: str
+    visual_description: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class ThumbnailLayoutRequest(BaseModel):
+    thumbnail_concept: str
+    main_character: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class SeriesIntroHookRequest(BaseModel):
+    title: str
+    premise_summary: str
+    genre: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class CharacterBioRequest(BaseModel):
+    dialogue: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class NarrativePacingRequest(BaseModel):
+    visual_description: str
+    speech_text: str
+    sfx: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class CommentReplyRequest(BaseModel):
+    user_comment: str
+    video_title: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class BGMVibeRequest(BaseModel):
+    narrative_mood: str
+    action_scale: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class ShortsScriptRequest(BaseModel):
+    storyboard_summary: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class CliffhangerRequest(BaseModel):
+    story_outline: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class TitleABRequest(BaseModel):
+    title: str
+    key_climax_event: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class SFXOverlayRequest(BaseModel):
+    visual_description: str
+    speech_text: str
+    sfx: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class CameraShakeRequest(BaseModel):
+    visual_description: str
+    sfx: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class SceneCompositionRequest(BaseModel):
+    visual_description: str
+    speech_text: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class SubtitleStylerRequest(BaseModel):
+    visual_description: str
+    speech_text: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class YouTubeChapterRequest(BaseModel):
+    compiled_script: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class MidrollPlacementRequest(BaseModel):
+    compiled_script: str
+    max_ads: Optional[int] = 3
+    model: Optional[str] = "gemini-2.5-flash"
+
+class ShortsHookRequest(BaseModel):
+    title: str
+    key_event: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class CharacterEmotionRequest(BaseModel):
+    visual_description: str
+    speech_text: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class TransitionSpeedRequest(BaseModel):
+    visual_description: str
+    speech_text: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class ThumbnailVisualRequest(BaseModel):
+    thumbnail_concept: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class OutroCTARequest(BaseModel):
+    title: str
+    ending_cliffhanger: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class CopyrightScrubRequest(BaseModel):
+    text: str
+    model: Optional[str] = "gemini-2.5-flash"
 
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -94,23 +229,6 @@ def validate_analysis(raw: Dict[str, Any]) -> Dict[str, Any]:
         "motion_type": motion if motion in VALID_MOTIONS else DEFAULT_ANALYSIS["motion_type"],
         "visual_description": vis.strip()[:400] if isinstance(vis, str) and vis.strip() else DEFAULT_ANALYSIS["visual_description"],
     }
-
-
-def build_analysis_prompt(brightness: Optional[int] = None) -> str:
-    tone_hint = ""
-    if brightness is not None:
-        if brightness < 80:
-            tone_hint = " The panel appears dark or moody — favour dramatic or tense SFX."
-        elif brightness > 200:
-            tone_hint = " The panel appears bright and vibrant — favour action or triumphant SFX."
-            
-    return f"""Analyze this comic/manhwa illustration panel in detail and generate cinematic metadata.{tone_hint}
-Return a JSON object with these exact properties:
-- speech_text: A caption, subtitle, or character dialogue (max 25 words, impactful and dramatic).
-- sfx: An on-screen bracket-style sound effect (e.g., "[Whoosh]", "[Slash]", "[Crash]", "[Gasp]", "[Boom]").
-- duration: Suggested scene duration in seconds (between 2.0 and 8.0). Action scenes = shorter; dialogue scenes = longer.
-- motion_type: Camera motion. Must be one of: "zoom_in", "zoom_out", "pan_left", "pan_right", "pan_up", "pan_down".
-- visual_description: A single sentence describing what is happening in the panel."""
 
 
 def adjust_to_aspect_ratio(
@@ -167,7 +285,7 @@ async def analyze_image(body: AnalyzeImageRequest):
         img_buffer = resolved["data"]
     except Exception as e:
         logger.warning(f"[Analyze] Image fetch failed: {e}. Using default fallback.")
-        return {"success": True, "analysis": DEFAULT_ANALYSIS, "source": "fallback:fetch_error"}
+        return {"success": False, "error": f"Image fetch failed: {e}", "analysis": DEFAULT_ANALYSIS, "source": "fallback:fetch_error"}
 
     # 2. Get brightness hint
     brightness = None
@@ -176,39 +294,27 @@ async def analyze_image(body: AnalyzeImageRequest):
     except Exception:
         pass
 
-    # 3. Invoke Gemini
+    # 3. Model mapping
     target_model = body.model or MODEL_FALLBACKS[0]
+    if not target_model.lower().startswith("gemini"):
+        target_model = MODEL_FALLBACKS[0]
+    elif "gemini-3.5" in target_model.lower():
+        target_model = "gemini-2.5-flash"
     
-    if not ai_initialized:
-        logger.warning("[Analyze] Gemini client not initialized. Returning fallback.")
-        return {"success": True, "analysis": DEFAULT_ANALYSIS, "source": "fallback:no_client"}
-
-    from google.genai import types
     try:
-        prompt = build_analysis_prompt(brightness)
-        
-        config = types.GenerateContentConfig(
-            response_mime_type="application/json",
-            response_schema=GeminiAnalysisModel
-        )
+        tone_hint = ""
+        if brightness is not None:
+            if brightness < 80:
+                tone_hint = " The panel appears dark or moody — favour dramatic or tense SFX."
+            elif brightness > 200:
+                tone_hint = " The panel appears bright and vibrant — favour action or triumphant SFX."
 
-        response = await call_gemini_with_retry(
-            lambda: genai_client.models.generate_content(
-                model=target_model,
-                contents=[
-                    types.Part.from_bytes(data=img_buffer, mime_type="image/jpeg"),
-                    prompt
-                ],
-                config=config
-            )
-        )
+        # Execute using panel_analysis skill
+        skill = registry.get("panel_analysis")
+        raw_text = await skill.execute(model=target_model, image_bytes=img_buffer, tone_hint=tone_hint)
         
-        # Parse Response
-        raw_text = response.text or "{}"
         analysis = validate_analysis(json.loads(raw_text))
-
         elapsed = int((time.time() - start_time) * 1000)
-        logger.info(f"[Analyze] ✓ model={target_model} motion={analysis['motion_type']} dur={analysis['duration']}s brightness={brightness} ({elapsed}ms)")
         
         return {
             "success": True,
@@ -220,8 +326,8 @@ async def analyze_image(body: AnalyzeImageRequest):
 
     except Exception as e:
         elapsed = int((time.time() - start_time) * 1000)
-        logger.error(f"[Analyze] AI generate failed after retries: {e} ({elapsed}ms). Using fallback.")
-        return {"success": True, "analysis": DEFAULT_ANALYSIS, "source": "fallback:ai_error"}
+        logger.error(f"[Analyze] AI generate failed: {e} ({elapsed}ms). Using fallback.")
+        return {"success": False, "error": f"AI generation failed: {e}", "analysis": DEFAULT_ANALYSIS, "source": "fallback:ai_error"}
 
 
 @router.post("/analyze-batch", summary="Batch analysis of multiple storyboard panels (max 20)")
@@ -235,61 +341,48 @@ async def analyze_batch(body: AnalyzeBatchRequest):
 
     logger.info(f"[Batch Analyze] Starting {len(body.urls)} panels. Concurrency=4")
     
+    target_model = body.model or MODEL_FALLBACKS[0]
+    if not target_model.lower().startswith("gemini"):
+        target_model = MODEL_FALLBACKS[0]
+    elif "gemini-3.5" in target_model.lower():
+        target_model = "gemini-2.5-flash"
+
     semaphore = asyncio.Semaphore(4)
     results = []
     
     async def process_one(url: str, index: int):
         async with semaphore:
             try:
-                # Resolve image
                 resolved = await img_utils.resolve_image_to_buffer(url)
                 img_buffer = resolved["data"]
                 
-                # Brightness
                 brightness = None
                 try:
                     brightness = img_utils.compute_brightness(img_buffer)
                 except Exception:
                     pass
                 
-                if ai_initialized:
-                    from google.genai import types
-                    prompt = build_analysis_prompt(brightness)
-                    
-                    config = types.GenerateContentConfig(
-                        response_mime_type="application/json",
-                        response_schema=GeminiAnalysisModel
-                    )
-                    
-                    response = await call_gemini_with_retry(
-                        lambda: genai_client.models.generate_content(
-                            model=body.model or MODEL_FALLBACKS[0],
-                            contents=[
-                                types.Part.from_bytes(data=img_buffer, mime_type="image/jpeg"),
-                                prompt
-                            ],
-                            config=config
-                        )
-                    )
-                    raw_text = response.text or "{}"
-                    analysis = validate_analysis(json.loads(raw_text))
-                else:
-                    analysis = DEFAULT_ANALYSIS
-                    
-                logger.info(f"[Batch] [{index + 1}/{len(body.urls)}] ✓ {url[:50]} motion={analysis['motion_type']}")
+                tone_hint = ""
+                if brightness is not None:
+                    if brightness < 80:
+                        tone_hint = " The panel appears dark or moody — favour dramatic or tense SFX."
+                    elif brightness > 200:
+                        tone_hint = " The panel appears bright and vibrant — favour action or triumphant SFX."
+
+                skill = registry.get("panel_analysis")
+                raw_text = await skill.execute(model=target_model, image_bytes=img_buffer, tone_hint=tone_hint)
+                analysis = validate_analysis(json.loads(raw_text))
+                
                 results.append({"url": url, "analysis": analysis})
                 
             except Exception as e:
-                logger.warning(f"[Batch] [{index + 1}/{len(body.urls)}] ⚠ Failed {url[:50]}: {e}")
+                logger.warning(f"[Batch] Failed {url[:50]}: {e}")
                 results.append({"url": url, "analysis": DEFAULT_ANALYSIS, "error": str(e)})
 
-    # Dispatch tasks
     tasks = [process_one(url, idx) for idx, url in enumerate(body.urls)]
     await asyncio.gather(*tasks)
     
     elapsed = int((time.time() - start_time) * 1000)
-    logger.info(f"[Batch Analyze] Complete {len(results)} panels ({elapsed}ms total)")
-    
     return {
         "success": True,
         "total": len(results),
@@ -315,65 +408,26 @@ async def ai_smart_crop(body: SmartCropRequest):
         # Strategy 1: Try Gemini AI crop box model first if not local-cv
         if body.strategy != "local-cv" and body.model != "local-cv":
             if ai_initialized:
-                from google.genai import types
                 target_model = body.model or "gemini-2.5-flash"
+                if "gemini-3.5" in target_model.lower():
+                    target_model = "gemini-2.5-flash"
                 logger.info(f"[AI Smart Crop API] Using Gemini model: {target_model}")
                 
-                # Define structure crop schema
-                class CropBox(BaseModel):
-                    cropTop: float = Field(description="Top coordinate of the panel bounding box (percentage from 0 to 100, where 0 is the top edge and 100 is the bottom edge)")
-                    cropBottom: float = Field(description="Bottom coordinate of the panel bounding box (percentage from 0 to 100, where 0 is the top edge and 100 is the bottom edge)")
-                    cropLeft: float = Field(description="Left coordinate of the panel bounding box (percentage from 0 to 100, where 0 is the left edge and 100 is the right edge)")
-                    cropRight: float = Field(description="Right coordinate of the panel bounding box (percentage from 0 to 100, where 0 is the left edge and 100 is the right edge)")
-                    
-                class CropList(BaseModel):
-                    panels: List[CropBox]
-
-                prompt = (
-                    "Analyze this comic/webtoon image. Identify the main scene/illustration panels. "
-                    "For each panel, detect its bounding box boundaries as coordinates (0 to 100) relative to the image edges:\n"
-                    "- cropTop: top boundary of the panel (0 is top edge, 100 is bottom)\n"
-                    "- cropBottom: bottom boundary of the panel (0 is top edge, 100 is bottom)\n"
-                    "- cropLeft: left boundary of the panel (0 is left edge, 100 is right)\n"
-                    "- cropRight: right boundary of the panel (0 is left edge, 100 is right)\n"
-                    "Make sure these are absolute coordinates from the top/left of the image, NOT margins. "
-                    "Return a JSON object containing a 'panels' array."
-                )
-                
                 try:
-                    config = types.GenerateContentConfig(
-                        response_mime_type="application/json",
-                        response_schema=CropList
-                    )
-                    
-                    response = await call_gemini_with_retry(
-                        lambda: genai_client.models.generate_content(
-                            model=target_model,
-                            contents=[
-                                types.Part.from_bytes(data=image_buffer, mime_type="image/jpeg"),
-                                prompt
-                            ],
-                            config=config
-                        )
-                    )
-                    
-                    raw_text = response.text or "{}"
+                    skill = registry.get("smart_crop")
+                    raw_text = await skill.execute(model=target_model, image_bytes=image_buffer)
                     data = json.loads(raw_text)
                     raw_panels = data.get("panels", [])
-                    logger.info(f"[AI Smart Crop] Gemini isolated {len(raw_panels)} panels.")
                     
-                    # Convert absolute coordinates to margins (expected by backend and frontend)
                     margins_panels = []
                     for box in raw_panels:
-                        y1 = max(0.0, min(100.0, float(box.get("cropTop", 0) if isinstance(box, dict) else getattr(box, "cropTop", 0))))
-                        y2 = max(0.0, min(100.0, float(box.get("cropBottom", 0) if isinstance(box, dict) else getattr(box, "cropBottom", 0))))
-                        x1 = max(0.0, min(100.0, float(box.get("cropLeft", 0) if isinstance(box, dict) else getattr(box, "cropLeft", 0))))
-                        x2 = max(0.0, min(100.0, float(box.get("cropRight", 0) if isinstance(box, dict) else getattr(box, "cropRight", 0))))
+                        y1 = max(0.0, min(100.0, float(box.get("cropTop", 0))))
+                        y2 = max(0.0, min(100.0, float(box.get("cropBottom", 0))))
+                        x1 = max(0.0, min(100.0, float(box.get("cropLeft", 0))))
+                        x2 = max(0.0, min(100.0, float(box.get("cropRight", 0))))
                         
-                        if y1 > y2:
-                            y1, y2 = y2, y1
-                        if x1 > x2:
-                            x1, x2 = x2, x1
+                        if y1 > y2: y1, y2 = y2, y1
+                        if x1 > x2: x1, x2 = x2, x1
                             
                         margins_panels.append({
                             "cropTop": y1,
@@ -387,7 +441,6 @@ async def ai_smart_crop(body: SmartCropRequest):
                     ai_failed = True
                     ai_error_msg = str(e)
             else:
-                logger.warning("[AI Smart Crop API] Gemini not initialized. Falling back to local CV.")
                 ai_failed = True
                 ai_error_msg = "Gemini client not initialized"
 
@@ -396,20 +449,17 @@ async def ai_smart_crop(body: SmartCropRequest):
 
         # Strategy 2: Local CV panel detection (Pillow/OpenCV)
         if body.strategy == "local-cv" or body.model == "local-cv":
-            # Write to temp file for detection
-            import tempfile, os
             with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_in:
                 tmp_in.write(image_buffer)
                 temp_in_path = tmp_in.name
                 
             try:
-                # Robust scaling: If frontend sent percentage (e.g. 2.0%) instead of ratio (0.02), scale it down
                 min_area_pct = body.minAreaPct if body.minAreaPct is not None else 0.15
                 if min_area_pct > 1.0:
                     min_area_pct = min_area_pct / 100.0
 
-                # Call detect_panels run_cv_detection directly! (No subprocess needed!)
-                coord_panels = run_cv_detection(
+                coord_panels = await asyncio.to_thread(
+                    run_cv_detection,
                     image_path=temp_in_path,
                     sensitivity=body.sensitivity,
                     bg_mode=body.backgroundColorMode,
@@ -425,7 +475,6 @@ async def ai_smart_crop(body: SmartCropRequest):
                 if os.path.exists(temp_in_path):
                     os.remove(temp_in_path)
 
-        # Crop each panel out
         img = Image.open(io.BytesIO(image_buffer))
         w, h = img.size
 
@@ -455,7 +504,6 @@ async def ai_smart_crop(body: SmartCropRequest):
                 p_right = ((w - (left_px + crop_w)) / w) * 100.0
                 p_bottom = ((h - (top_px + crop_h)) / h) * 100.0
 
-            # Perform Crop
             if crop_w > 10 and crop_h > 10:
                 cropped_img = img.crop((left_px, top_px, left_px + crop_w, top_px + crop_h))
                 out = io.BytesIO()
@@ -487,3 +535,124 @@ async def ai_smart_crop(body: SmartCropRequest):
     except Exception as e:
         logger.error(f"[AI Smart Crop API] Error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"AI Smart Crop failed: {e}")
+
+
+# ─── New Dynamic AI Skills Endpoints ──────────────────────────────────────────
+
+async def run_md_skill(skill_name: str, model: str, **kwargs) -> Dict[str, Any]:
+    try:
+        skill = registry.get(skill_name)
+        raw_text = await skill.execute(model=model, **kwargs)
+        return {"success": True, "result": json.loads(raw_text)}
+    except Exception as e:
+        logger.error(f"Endpoint skill execution failed for '{skill_name}': {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/skills/dramatize")
+async def dramatize_script(body: DramatizeRequest):
+    return await run_md_skill("script_dramatization", body.model, raw_ocr_text=body.raw_ocr_text, genre=body.genre, scene_context=body.scene_context)
+
+@router.post("/skills/sfx-audio")
+async def get_sfx_audio(body: SFXAudioRequest):
+    return await run_md_skill("sfx_audio_prompt", body.model, visual_description=body.visual_description, sfx_tag=body.sfx_tag)
+
+@router.post("/skills/thumbnail")
+async def get_thumbnail_concept(body: ThumbnailRequest):
+    return await run_md_skill("thumbnail_concept", body.model, title=body.title, genre=body.genre, plot_point=body.plot_point)
+
+@router.post("/skills/translate")
+async def translate_script(body: TranslationRequest):
+    return await run_md_skill("translation", body.model, text=body.text, target_lang=body.target_lang)
+
+@router.post("/skills/seo")
+async def get_seo_metadata(body: SEORequest):
+    return await run_md_skill("video_seo_metadata", body.model, title=body.title, genre=body.genre, storyboard_summary=body.storyboard_summary)
+
+@router.post("/skills/voice-cast")
+async def get_voice_cast(body: VoiceCastingRequest):
+    return await run_md_skill("voice_casting", body.model, character_name=body.character_name, dialogue_sample=body.dialogue_sample, visual_description=body.visual_description)
+
+@router.post("/skills/thumbnail-layout")
+async def get_thumbnail_layout(body: ThumbnailLayoutRequest):
+    return await run_md_skill("thumbnail_layout", body.model, thumbnail_concept=body.thumbnail_concept, main_character=body.main_character)
+
+@router.post("/skills/intro-hook")
+async def get_intro_hook(body: SeriesIntroHookRequest):
+    return await run_md_skill("series_intro_hook", body.model, title=body.title, premise_summary=body.premise_summary, genre=body.genre)
+
+@router.post("/skills/character-bio")
+async def get_character_bio(body: CharacterBioRequest):
+    return await run_md_skill("character_bio_profiler", body.model, dialogue=body.dialogue)
+
+@router.post("/skills/pacing")
+async def get_pacing(body: NarrativePacingRequest):
+    return await run_md_skill("narrative_pace_controller", body.model, visual_description=body.visual_description, speech_text=body.speech_text, sfx=body.sfx)
+
+@router.post("/skills/comment-reply")
+async def get_comment_reply(body: CommentReplyRequest):
+    return await run_md_skill("youtube_comment_coach", body.model, user_comment=body.user_comment, video_title=body.video_title)
+
+@router.post("/skills/bgm-vibe")
+async def get_bgm_vibe(body: BGMVibeRequest):
+    return await run_md_skill("bgm_vibe_selector", body.model, narrative_mood=body.narrative_mood, action_scale=body.action_scale)
+
+@router.post("/skills/shorts-script")
+async def get_shorts_script(body: ShortsScriptRequest):
+    return await run_md_skill("shorts_script_adapter", body.model, storyboard_summary=body.storyboard_summary)
+
+@router.post("/skills/cliffhanger")
+async def get_cliffhanger(body: CliffhangerRequest):
+    return await run_md_skill("cliffhanger_generator", body.model, story_outline=body.story_outline)
+
+@router.post("/skills/title-ab")
+async def get_title_ab(body: TitleABRequest):
+    return await run_md_skill("title_ab_tester", body.model, title=body.title, key_climax_event=body.key_climax_event)
+
+@router.post("/skills/sfx-mix")
+async def get_sfx_mix(body: SFXOverlayRequest):
+    return await run_md_skill("sfx_overlay_scheduler", body.model, visual_description=body.visual_description, speech_text=body.speech_text, sfx=body.sfx)
+
+@router.post("/skills/camera-shake")
+async def get_camera_shake(body: CameraShakeRequest):
+    return await run_md_skill("camera_shake_dynamics", body.model, visual_description=body.visual_description, sfx=body.sfx)
+
+@router.post("/skills/scene-composition")
+async def get_scene_composition(body: SceneCompositionRequest):
+    return await run_md_skill("scene_composition_desc", body.model, visual_description=body.visual_description, speech_text=body.speech_text)
+
+@router.post("/skills/subtitle-styler")
+async def get_subtitle_styler(body: SubtitleStylerRequest):
+    return await run_md_skill("subtitle_styler", body.model, visual_description=body.visual_description, speech_text=body.speech_text)
+
+@router.post("/skills/chapters")
+async def get_chapters(body: YouTubeChapterRequest):
+    return await run_md_skill("youtube_chapter_gen", body.model, compiled_script=body.compiled_script)
+
+@router.post("/skills/midrolls")
+async def get_midrolls(body: MidrollPlacementRequest):
+    return await run_md_skill("midroll_placement_ref", body.model, compiled_script=body.compiled_script, max_ads=body.max_ads)
+
+@router.post("/skills/shorts-hook")
+async def get_shorts_hook(body: ShortsHookRequest):
+    return await run_md_skill("shorts_retention_hook", body.model, title=body.title, key_event=body.key_event)
+
+@router.post("/skills/emotion")
+async def get_emotion(body: CharacterEmotionRequest):
+    return await run_md_skill("character_emotion_class", body.model, visual_description=body.visual_description, speech_text=body.speech_text)
+
+@router.post("/skills/transition-speed")
+async def get_transition_speed(body: TransitionSpeedRequest):
+    return await run_md_skill("transition_speed_tuner", body.model, visual_description=body.visual_description, speech_text=body.speech_text)
+
+@router.post("/skills/thumbnail-visual")
+async def get_thumbnail_visual(body: ThumbnailVisualRequest):
+    return await run_md_skill("thumbnail_visual_comp", body.model, thumbnail_concept=body.thumbnail_concept)
+
+@router.post("/skills/outro-cta")
+async def get_outro_cta(body: OutroCTARequest):
+    return await run_md_skill("outro_cta_generator", body.model, title=body.title, ending_cliffhanger=body.ending_cliffhanger)
+
+@router.post("/skills/copyright-scrub")
+async def get_copyright_scrub(body: CopyrightScrubRequest):
+    return await run_md_skill("copyright_scrubber", body.model, text=body.text)

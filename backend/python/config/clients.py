@@ -63,14 +63,15 @@ async def call_gemini_with_retry(
     Handles 429 (quota) and 503 (high demand) automatically.
     """
     attempt = 0
+    import inspect
+    import asyncio
     while True:
         try:
             # Check if fn is coroutine, but we run blocking or thread-pool generate_content typically
-            import inspect
             if inspect.iscoroutinefunction(fn):
                 return await fn()
             else:
-                return fn()
+                return await asyncio.to_thread(fn)
         except Exception as err:
             attempt += 1
             err_msg = str(err).lower()
@@ -106,7 +107,7 @@ async def call_gemini_with_retry(
                     f"[Gemini] Error (attempt {attempt}/{max_attempts}). "
                     f"Retrying in {delay:.2f}s... {err}"
                 )
-                time.sleep(delay)
+                await asyncio.sleep(delay)
             else:
                 raise err
 

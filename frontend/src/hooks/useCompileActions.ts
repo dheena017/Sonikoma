@@ -125,6 +125,8 @@ export function useCompileActions({
         if (addNotification) {
           addNotification(`AI analysis completed for Panel #${panelId}!`, 'success');
         }
+      } else {
+        throw new Error(data.error || "AI Model Analysis returned unsuccessful status");
       }
     } catch (err: any) {
       console.error('[StoryboardTimeline] Panel analysis failed:', err);
@@ -135,7 +137,7 @@ export function useCompileActions({
         ]);
       }
       if (addNotification) {
-        addNotification(`AI analysis failed for Panel #${panelId}. Please try again.`, 'error');
+        addNotification(`AI analysis failed for Panel #${panelId}: ${err.message || 'Please try again.'}`, 'error');
       }
     } finally {
       setAnalyzingPanelId(null);
