@@ -126,7 +126,7 @@ async def scrape_images_from_url(url: str, source: Optional[str] = None) -> List
     if not html:
         raise RuntimeError("Failed to retrieve page content from all scraping avenues.")
 
-    image_set = set()
+    image_dict = {}
 
     # Isolate viewer container blocks for precise search (prevents ads/comments from polluting results)
     search_block = html
@@ -234,15 +234,15 @@ async def scrape_images_from_url(url: str, source: Optional[str] = None) -> List
                 is_comic_panel = True
                 
         if is_comic_panel:
-            image_set.add(candidate)
+            image_dict[candidate] = True
 
     # Nuxt extraction
     nuxt_images = extract_images_from_nuxt_payload(html)
     for img in nuxt_images:
-        image_set.add(img)
+        image_dict[img] = True
 
     # Regex scanner fallbacks if empty
-    if not image_set:
+    if not image_dict:
         fallback_regexes = [
             re.compile(r'https?://webtoon-phinf\.pstatic\.net/[^"\'\s>]+', re.IGNORECASE),
             re.compile(r'https?://[^"\'\s>]*?phinf\.net/[^"\'\s>]+', re.IGNORECASE)
@@ -255,9 +255,9 @@ async def scrape_images_from_url(url: str, source: Optional[str] = None) -> List
                     'profile', 'comment', 'creator', 'author', 'button'
                 ])
                 if not is_unwanted:
-                    image_set.add(img)
+                    image_dict[img] = True
 
-    raw_images = list(image_set)
+    raw_images = list(image_dict.keys())
     # Filters
     unwanted_patterns = [
         'logo', 'bg_', 'icon', 'button', 'loading', 'pixel', 'progress', 'arrow', 'favicon',
