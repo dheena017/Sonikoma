@@ -589,9 +589,7 @@ At the **end of every conversation**, append one row to the Session Changelog ta
 
 > Auto-updated by AI at the end of each conversation. Newest entries at the top.
 
-| Date | Summary | Files Affected |
-|---|---|---|
-| 2026-06-11 | Filtered system-logs polling spam; added clear log color styling for HTTP, proxy, and httpx requests | `backend/python/main.py`, `frontend/vite.config.ts`, `frontend/src/components/terminal/TerminalLogsOutput.tsx` |
+| 2026-06-11 | Filtered system-logs polling spam; added regex-based status/method coloring for Python terminal and custom Vite request logger middleware for dev server terminal | `backend/python/main.py`, `frontend/vite.config.ts`, `frontend/src/components/terminal/TerminalLogsOutput.tsx` |
 | 2026-06-08 | Fixed critical paths, routes, insecure shell calls, implemented video pipeline, ported FastAPI logic, standardized cache | `backend/routes/*`, `backend/python/services/*`, `frontend/src/hooks/*`, `backend/utils/*` |
 | 2026-06-08 | Generated BUG_REPORT2.md focusing on frontend state race conditions, missing OCR functions, and data persistence issues | `BUG_REPORT2.md`, `RULES.md` |
 | 2026-06-08 | Generated comprehensive BUG_REPORT.md after deep audit of the Storyboard AI pipeline and architectural integrity | `BUG_REPORT.md`, `RULES.md` |

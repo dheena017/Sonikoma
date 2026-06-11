@@ -89,17 +89,35 @@ class ColoredFormatter(logging.Formatter):
             
         formatted = re.sub(r'\[([^\]]+)\]', color_bracket, formatted)
         
-        # Color HTTP methods in quotes or standalone
-        formatted = formatted.replace('"GET ', '"\x1b[38;5;120mGET\x1b[0m ')
-        formatted = formatted.replace('"POST ', '"\x1b[38;5;220mPOST\x1b[0m ')
-        formatted = formatted.replace('"PUT ', '"\x1b[38;5;75mPUT\x1b[0m ')
-        formatted = formatted.replace('"DELETE ', '"\x1b[38;5;196mDELETE\x1b[0m ')
+        # Color HTTP methods
+        formatted = re.sub(r'\b(GET|POST|PUT|DELETE)\b', lambda m: {
+            "GET": "\x1b[38;5;120mGET\x1b[0m",
+            "POST": "\x1b[38;5;220mPOST\x1b[0m",
+            "PUT": "\x1b[38;5;75mPUT\x1b[0m",
+            "DELETE": "\x1b[38;5;196mDELETE\x1b[0m"
+        }[m.group(1)], formatted)
         
-        # Color HTTP status codes
-        formatted = formatted.replace(' 200 ', ' \x1b[38;5;120m200\x1b[0m ')
-        formatted = formatted.replace(' 200 OK', ' \x1b[38;5;120m200 OK\x1b[0m ')
-        formatted = formatted.replace(' 500 ', ' \x1b[38;5;196m500\x1b[0m ')
-        formatted = formatted.replace(' 404 ', ' \x1b[38;5;220m404\x1b[0m ')
+        # Color HTTP status codes (2xx/3xx/4xx/5xx)
+        def color_status(match):
+            prefix = match.group(1)
+            code = match.group(2)
+            suffix = match.group(3) or ""
+            if code.startswith("2"):
+                color = "\x1b[38;5;120m" # Green
+            elif code.startswith("3"):
+                color = "\x1b[38;5;86m"  # Cyan
+            elif code.startswith("4"):
+                color = "\x1b[38;5;220m" # Yellow
+            else:
+                color = "\x1b[38;5;196m" # Red
+            return f"{prefix}{color}{code}\x1b[0m{suffix}"
+
+        # Matches "HTTP/1.1" 200" or similar
+        formatted = re.sub(r'(HTTP/[0-9.]+"\s+)(\d{3})(\b)', color_status, formatted)
+        # Matches "-> 200" or similar
+        formatted = re.sub(r'(->\s+)(\d{3})(\b)', color_status, formatted)
+        # Matches standalone status codes at the end of the line preceded by space
+        formatted = re.sub(r'(\s+)(\d{3})($)', color_status, formatted)
         
         return formatted
 

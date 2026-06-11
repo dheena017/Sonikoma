@@ -38,6 +38,40 @@ export default defineConfig(({ mode }) => {
       port: parseInt(env.FRONTEND_PORT || '3000', 10),
       hmr: process.env.DISABLE_HMR !== 'true',
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
+      configureServer: (server) => {
+        server.middlewares.use((req, res, next) => {
+          const startTime = Date.now();
+          res.on('finish', () => {
+            const url = req.url || '';
+            // Skip noisy polling logs
+            if (url.includes('system-logs')) return;
+
+            const duration = Date.now() - startTime;
+            let statusColor = '\x1b[32m'; // Green for 2xx
+            if (res.statusCode >= 500) statusColor = '\x1b[31m'; // Red for 5xx
+            else if (res.statusCode >= 400) statusColor = '\x1b[33m'; // Yellow for 4xx
+            else if (res.statusCode >= 300) statusColor = '\x1b[36m'; // Cyan for 3xx
+
+            const methodColors: Record<string, string> = {
+              GET: '\x1b[32m',    // Green
+              POST: '\x1b[33m',   // Yellow
+              PUT: '\x1b[34m',    // Blue
+              DELETE: '\x1b[31m', // Red
+            };
+            const methodColor = methodColors[req.method || ''] || '\x1b[37m';
+
+            console.log(
+              `\x1b[90m${new Date().toLocaleTimeString()}\x1b[0m ` +
+              `\x1b[35m[Vite]\x1b[0m ` +
+              `${methodColor}${req.method || 'GET'}\x1b[0m ` +
+              `\x1b[36m${url}\x1b[0m ` +
+              `${statusColor}${res.statusCode}\x1b[0m ` +
+              `\x1b[90m(${duration}ms)\x1b[0m`
+            );
+          });
+          next();
+        });
+      },
       proxy: {
         '/api': {
           target: backendTarget,
