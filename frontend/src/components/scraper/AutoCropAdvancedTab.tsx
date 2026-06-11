@@ -30,6 +30,7 @@ interface AutoCropAdvancedTabProps
     | "setCropCloseKernelSize"
     | "scrapedImages"
     | "selectedScraped"
+    | "addNotification"
   > {}
 
 export function AutoCropAdvancedTab({
@@ -53,6 +54,7 @@ export function AutoCropAdvancedTab({
   setCropCloseKernelSize,
   scrapedImages,
   selectedScraped,
+  addNotification,
 }: AutoCropAdvancedTabProps) {
 
   const firstImageUrl = selectedScraped.length > 0 ? selectedScraped[0] : scrapedImages.length > 0 ? scrapedImages[0] : null;
@@ -73,7 +75,12 @@ export function AutoCropAdvancedTab({
 
   return (
     <div className="space-y-5 animate-[fadeIn_0.2s_ease-out]">
-      <AutoCropComplexityAnalysis firstImageUrl={firstImageUrl} />
+      <AutoCropComplexityAnalysis
+        firstImageUrl={firstImageUrl}
+        setCannyLow={setCropCannyLow}
+        setCannyHigh={setCropCannyHigh}
+        addNotification={addNotification}
+      />
 
       <div className="grid grid-cols-2 gap-4">
         <AutoCropParameterSlider
