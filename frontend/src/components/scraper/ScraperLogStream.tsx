@@ -28,7 +28,7 @@ export function ScraperLogStream() {
   }, [logs]);
 
   return (
-    <div className={`fixed bottom-24 right-6 z-[90] w-80 transition-all duration-500 flex flex-col ${isMinimized ? 'h-10' : 'h-64'}`}>
+    <div className={`fixed bottom-24 right-6 z-[110] w-80 transition-all duration-500 flex flex-col ${isMinimized ? 'h-10 opacity-60 hover:opacity-100' : 'h-64'}`}>
        <div
          onClick={() => setIsMinimized(!isMinimized)}
          className={`flex items-center justify-between px-4 py-2 bg-neutral-900 border border-neutral-800 rounded-t-xl cursor-pointer hover:bg-neutral-800 transition-colors ${isMinimized ? 'rounded-xl shadow-lg' : ''}`}
@@ -71,7 +71,6 @@ export function ScraperLogStream() {
   );
 }
 
-// Simple wrapper for EventSource if needed for consistency
 class Event_Source {
     es: EventSource;
     constructor(url: string) { this.es = new EventSource(url); }
