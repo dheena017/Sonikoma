@@ -11,10 +11,11 @@ interface UseBatchImageActionsProps {
   addNotification: (message: string, type: NotificationType) => void;
   fetchWithInterceptor: any;
 
-  // bubble configs
   bubbleEraseMethod: string;
   bubbleSensitivity: number;
   bubbleDetectionStyle: string;
+  bubbleDilation: number;
+  bubbleInpaintRadius: number;
 
   // crop configs
   cropSensitivity: number;
@@ -25,6 +26,11 @@ interface UseBatchImageActionsProps {
   useLocalCV: boolean;
   selectedModel: string;
   cropPaddingPx: number;
+  cropModel: string;
+  cropMinHeightPx: number;
+  cropCannyLow: number;
+  cropCannyHigh: number;
+  cropCloseKernelSize: number;
 }
 
 export function useBatchImageActions({
@@ -39,6 +45,8 @@ export function useBatchImageActions({
   bubbleEraseMethod,
   bubbleSensitivity,
   bubbleDetectionStyle,
+  bubbleDilation,
+  bubbleInpaintRadius,
 
   cropSensitivity,
   cropBackgroundMode,
@@ -48,6 +56,11 @@ export function useBatchImageActions({
   useLocalCV,
   selectedModel,
   cropPaddingPx,
+  cropModel,
+  cropMinHeightPx,
+  cropCannyLow,
+  cropCannyHigh,
+  cropCloseKernelSize,
 }: UseBatchImageActionsProps) {
   const [isCleaningBubbles, setIsCleaningBubbles] = useState<boolean>(false);
   const [cleanProgress, setCleanProgress] = useState<{ current: number; total: number } | null>(null);
@@ -81,6 +94,8 @@ export function useBatchImageActions({
               method: bubbleEraseMethod,
               sensitivity: bubbleSensitivity,
               detection_style: bubbleDetectionStyle,
+              dilation: bubbleDilation,
+              inpaint_radius: bubbleInpaintRadius,
             }),
           });
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -150,50 +165,76 @@ export function useBatchImageActions({
               sensitivity: cropSensitivity,
               backgroundColorMode: cropBackgroundMode,
               aspectRatio: aspectRatioLock,
-              minAreaPct: minPanelAreaPct,
+              minAreaPct: minPanelAreaPct / 100.0,
               mergeThreshold: overlapMergeThreshold,
               strategy: useLocalCV ? "local-cv" : "balanced",
-              model: selectedModel,
-              closeKernelSize: 15,
-              minHeightPx: 50,
+              model: cropModel,
+              cannyLow: cropCannyLow,
+              cannyHigh: cropCannyHigh,
+              closeKernelSize: cropCloseKernelSize,
+              minHeightPx: cropMinHeightPx,
             }),
           });
 
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          const data = await response.json();
-
-          if (data.success && Array.isArray(data.panels) && data.panels.length > 0) {
-            const croppedUrls: string[] = [];
-            for (let i = 0; i < data.panels.length; i++) {
-              const box = data.panels[i];
-
-              // The /api/detect-panels backend already crops each panel and
-              // returns a ready-to-use croppedUrl. Use it directly to avoid a
-              // redundant second edit-image round-trip that was silently
-              // re-cropping the wrong region.
-              if (box.croppedUrl) {
-                croppedUrls.push(box.croppedUrl);
-              } else {
-                // Fallback for any backend variant that doesn't embed croppedUrl
-                const cropResponse = await fetchWithInterceptor("/api/edit-image", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    url: url,
-                    cropTop: box.cropTop,
-                    cropBottom: box.cropBottom,
-                    cropLeft: box.cropLeft,
-                    cropRight: box.cropRight,
-                    autoTrim: true,
-                    padding: cropPaddingPx,
-                  }),
-                });
-                if (!cropResponse.ok) throw new Error(`Edit-image HTTP ${cropResponse.status}`);
-                const cropData = await cropResponse.json();
-                croppedUrls.push(cropData.url);
+          if (!response.ok) {
+            let errMsg = `HTTP ${response.status}`;
+            try {
+              const errorData = await response.json();
+              if (errorData?.detail) {
+                errMsg = errorData.detail;
               }
+            } catch (_) {}
+            throw new Error(errMsg);
+          }
+          const data = await response.json();
+          if (data.fallback) {
+            setConsoleLogs((prev) => [
+              `[Auto Cropper Fallback] AI detection failed on ${url.substring(0, 40)}..., fell back to local CV: ${data.message}`,
+              ...prev,
+            ]);
+          }
+
+          if (data.success && Array.isArray(data.panels)) {
+            if (data.panels.length > 0) {
+              const croppedUrls: string[] = [];
+              for (let i = 0; i < data.panels.length; i++) {
+                const box = data.panels[i];
+
+                // The /api/detect-panels backend already crops each panel and
+                // returns a ready-to-use croppedUrl. Use it directly to avoid a
+                // redundant second edit-image round-trip that was silently
+                // re-cropping the wrong region.
+                if (box.croppedUrl) {
+                  croppedUrls.push(box.croppedUrl);
+                } else {
+                  // Fallback for any backend variant that doesn't embed croppedUrl
+                  const cropResponse = await fetchWithInterceptor("/api/edit-image", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      url: url,
+                      cropTop: box.cropTop,
+                      cropBottom: box.cropBottom,
+                      cropLeft: box.cropLeft,
+                      cropRight: box.cropRight,
+                      autoTrim: true,
+                      padding: cropPaddingPx,
+                    }),
+                  });
+                  if (!cropResponse.ok) throw new Error(`Edit-image HTTP ${cropResponse.status}`);
+                  const cropData = await cropResponse.json();
+                  croppedUrls.push(cropData.url);
+                }
+              }
+              newSlicedUrlsMap[url] = croppedUrls;
+            } else {
+              // No panels detected - keep the original image as-is
+              newSlicedUrlsMap[url] = [url];
+              setConsoleLogs((prev) => [
+                `[Auto Cropper Warning] No panels detected for ${url.substring(0, 40)}... - keeping original image as a single panel.`,
+                ...prev,
+              ]);
             }
-            newSlicedUrlsMap[url] = croppedUrls;
           } else {
             const errMsg = data.message || "No panels detected or backend service unavailable.";
             throw new Error(errMsg);

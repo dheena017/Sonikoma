@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { ScraperDeckProps } from "./types.js";
 import { ScraperSelectionToolbar } from "./ScraperSelectionToolbar.js";
 import { ScraperActionButtons } from "./ScraperActionButtons.js";
@@ -24,6 +24,8 @@ interface ScraperControlsProps
     | "handleCleanBubblesSelected"
   > {
   addPanelsWithAutoAnalysis: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
+  /** Called when a filter action resets selection — so parent can clear lastSelectedIndex anchor */
+  onLastSelectedReset?: () => void;
 }
 
 export default function ScraperControls({
@@ -44,97 +46,78 @@ export default function ScraperControls({
   handleCleanBubblesSelected,
   addPanelsWithAutoAnalysis,
   fetchWithInterceptor,
+  onLastSelectedReset,
 }: ScraperControlsProps) {
-  const [isBatchMerging, setIsBatchMerging] = useState<boolean>(false);
- 
+  // ── Quick Selection Filters ──────────────────────────────────────────────
 
   const handleSelectAllToggle = () => {
     if (selectedScraped.length === scrapedImages.length) {
       setSelectedScraped([]);
+      onLastSelectedReset?.();
       setConsoleLogs((prev) => ["[GUI] Cleared selections", ...prev]);
     } else {
       setSelectedScraped([...scrapedImages]);
-      setConsoleLogs((prev) => [
-        "[GUI] Selected all extracted frames",
-        ...prev,
-      ]);
+      setConsoleLogs((prev) => ["[GUI] Selected all extracted frames", ...prev]);
     }
   };
 
   const handleInvertSelection = () => {
     setSelectedScraped((prev) => scrapedImages.filter((img) => !prev.includes(img)));
+    onLastSelectedReset?.();
     setConsoleLogs((prev) => ["[GUI] Inverted selection set", ...prev]);
   };
 
   const handleSelectOdd = () => {
     setSelectedScraped(scrapedImages.filter((_, idx) => idx % 2 === 0));
+    onLastSelectedReset?.();
     setConsoleLogs((prev) => ["[GUI] Selected odd-numbered frames", ...prev]);
   };
 
   const handleSelectEven = () => {
     setSelectedScraped(scrapedImages.filter((_, idx) => idx % 2 !== 0));
+    onLastSelectedReset?.();
     setConsoleLogs((prev) => ["[GUI] Selected even-numbered frames", ...prev]);
   };
 
   const handleReverseDeckOrder = () => {
     setScrapedImages((prev) => [...prev].reverse());
+    onLastSelectedReset?.();
     setConsoleLogs((prev) => ["[GUI] Reversed extracted frame sequence order in deck", ...prev]);
     addNotification("Reversed sequence order of the scraped deck!", "info");
   };
 
-  const handleBatchMergeSelected = async () => {
-    if (selectedScraped.length < 2) {
-      addNotification("Select at least 2 panels to stitch together", "info");
-      return;
-    }
-    setIsBatchMerging(true);
-    setConsoleLogs((prev) => [
-      `[Stitch Generator] Merging ${selectedScraped.length} selected images vertically...`,
-      ...prev,
-    ]);
+  // ── Advanced Count & Range Filters ───────────────────────────────────────
 
-    try {
-      const activeFetch = fetchWithInterceptor || fetch;
-      const response = await activeFetch("/api/stitch-images", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          urls: selectedScraped,
-          layout: "vertical",
-          spacing: 0,
-          spacingColor: "white",
-          scaleToFit: true,
-          alignMode: "center",
-          padding: 0,
-        }),
-      });
-
-      if (!response.ok) throw new Error("Stitch failed: " + response.status);
-      const data = await response.json();
-      if (data.url) {
-        // Find the index of the first selected image to insert the merged panel at that spot
-        const firstSelectedIdx = scrapedImages.findIndex((img) => selectedScraped.includes(img));
-
-        setScrapedImages((prev) => {
-          const filtered = prev.filter((img) => !selectedScraped.includes(img));
-          filtered.splice(firstSelectedIdx === -1 ? 0 : firstSelectedIdx, 0, data.url);
-          return filtered;
-        });
-
-        setSelectedScraped([]);
-        setConsoleLogs((prev) => [
-          `[Stitch Generator] ✓ Stitching completed successfully! Stored URL: ${data.url}`,
-          ...prev,
-        ]);
-        addNotification("Stitched selected panels into one frame successfully!", "success");
-      }
-    } catch (err: any) {
-      console.error("Batch stitch failed:", err);
-      addNotification(`Merge failed: ${err.message}`, "error");
-    } finally {
-      setIsBatchMerging(false);
-    }
+  const handleSelectFirstN = (n: number) => {
+    const clamped = Math.min(Math.max(1, n), scrapedImages.length);
+    setSelectedScraped(scrapedImages.slice(0, clamped));
+    onLastSelectedReset?.();
+    setConsoleLogs((prev) => [`[GUI] Selected first ${clamped} frames`, ...prev]);
   };
+
+  const handleSelectLastN = (n: number) => {
+    const clamped = Math.min(Math.max(1, n), scrapedImages.length);
+    setSelectedScraped(scrapedImages.slice(-clamped));
+    onLastSelectedReset?.();
+    setConsoleLogs((prev) => [`[GUI] Selected last ${clamped} frames`, ...prev]);
+  };
+
+  /** a and b are 1-indexed inclusive panel numbers */
+  const handleSelectRange = (a: number, b: number) => {
+    const lo = Math.max(0, Math.min(a, b) - 1);       // convert to 0-indexed
+    const hi = Math.min(scrapedImages.length, Math.max(a, b)); // exclusive end
+    setSelectedScraped(scrapedImages.slice(lo, hi));
+    onLastSelectedReset?.();
+    setConsoleLogs((prev) => [`[GUI] Selected panels ${a} to ${b}`, ...prev]);
+  };
+
+  const handleClearAll = () => {
+    setSelectedScraped([]);
+    onLastSelectedReset?.();
+    setConsoleLogs((prev) => ["[GUI] Cleared all selections", ...prev]);
+  };
+
+  // ─────────────────────────────────────────────────────────────────────────
 
   const controlsContent = (
     <>
@@ -145,6 +128,10 @@ export default function ScraperControls({
         handleSelectOdd={handleSelectOdd}
         handleSelectEven={handleSelectEven}
         handleReverseDeckOrder={handleReverseDeckOrder}
+        handleSelectFirstN={handleSelectFirstN}
+        handleSelectLastN={handleSelectLastN}
+        handleSelectRange={handleSelectRange}
+        handleClearAll={handleClearAll}
       />
 
       <ScraperActionButtons
@@ -159,8 +146,10 @@ export default function ScraperControls({
         isCleaningBubbles={isCleaningBubbles}
         cleanProgress={cleanProgress}
         handleCleanBubblesSelected={handleCleanBubblesSelected}
-        handleBatchMergeSelected={handleBatchMergeSelected}
-        isBatchMerging={isBatchMerging}
+        handleBatchMergeSelected={() => {
+          /* noop — stitch is now in FloatingSelectionBar */
+        }}
+        isBatchMerging={false}
       />
     </>
   );

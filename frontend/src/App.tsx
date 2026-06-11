@@ -44,6 +44,12 @@ export default function App() {
     setBubbleEraseMethod,
     bubbleSensitivity,
     setBubbleSensitivity,
+    bubbleDilation,
+    setBubbleDilation,
+    bubbleInpaintRadius,
+    setBubbleInpaintRadius,
+    activeBubbleTab,
+    setActiveBubbleTab,
     isCleaningBubbles,
     cleanProgress,
     bubbleCroppingImgUrl,
@@ -70,6 +76,18 @@ export default function App() {
     isBatchCropping,
     batchProgress,
     croppingImgUrl,
+    cropModel,
+    setCropModel,
+    cropMinHeightPx,
+    setCropMinHeightPx,
+    cropCannyLow,
+    setCropCannyLow,
+    cropCannyHigh,
+    setCropCannyHigh,
+    cropCloseKernelSize,
+    setCropCloseKernelSize,
+    activeAutoCropTab,
+    setActiveAutoCropTab,
     videoPlayerRef,
     notifications,
     errorPopup,
@@ -144,8 +162,6 @@ export default function App() {
           setBackgroundColorMode={setCropBackgroundMode}
           autoSplitTallStrips={autoSplitTallStrips}
           setAutoSplitTallStrips={setAutoSplitTallStrips}
-          processingStrategy={processingStrategy}
-          setProcessingStrategy={setProcessingStrategy}
           aspectRatioLock={aspectRatioLock}
           setAspectRatioLock={setAspectRatioLock}
           minPanelAreaPct={minPanelAreaPct}
@@ -154,8 +170,24 @@ export default function App() {
           setOverlapMergeThreshold={setOverlapMergeThreshold}
           useLocalCV={useLocalCV}
           setUseLocalCV={setUseLocalCV}
+          cropModel={cropModel}
+          setCropModel={setCropModel}
+          cropMinHeightPx={cropMinHeightPx}
+          setCropMinHeightPx={setCropMinHeightPx}
+          cropCannyLow={cropCannyLow}
+          setCropCannyLow={setCropCannyLow}
+          cropCannyHigh={cropCannyHigh}
+          setCropCannyHigh={setCropCannyHigh}
+          cropCloseKernelSize={cropCloseKernelSize}
+          setCropCloseKernelSize={setCropCloseKernelSize}
+          activeTab={activeAutoCropTab}
+          setActiveTab={setActiveAutoCropTab}
           selectedCount={selectedScraped.length}
           isApplying={isBatchCropping}
+          scrapedImages={scrapedImages}
+          selectedScraped={selectedScraped}
+          setConsoleLogs={setConsoleLogs}
+          addNotification={addNotification}
         />
       ) : showBubbleModal ? (
         <BubbleCleanerModal
@@ -167,8 +199,17 @@ export default function App() {
           setEraseMethod={setBubbleEraseMethod}
           sensitivity={bubbleSensitivity}
           setSensitivity={setBubbleSensitivity}
+          bubbleDilation={bubbleDilation}
+          setBubbleDilation={setBubbleDilation}
+          bubbleInpaintRadius={bubbleInpaintRadius}
+          setBubbleInpaintRadius={setBubbleInpaintRadius}
+          activeTab={activeBubbleTab}
+          setActiveTab={setActiveBubbleTab}
           selectedCount={selectedScraped.length}
           isApplying={isCleaningBubbles}
+          scrapedImages={scrapedImages}
+          selectedScraped={selectedScraped}
+          addNotification={addNotification}
         />
       ) : (
         <AppWorkspace
@@ -244,7 +285,7 @@ export default function App() {
       )}
 
       {/* FOOTER */}
-      <footer id="footer_pane" className="border-t border-neutral-850 bg-neutral-950/20 py-6 text-center text-xs text-neutral-500">
+      <footer id="footer_pane" className="border-t border-neutral-800 bg-neutral-950/20 py-6 text-center text-xs text-neutral-500">
         <p className="font-mono">Webtoon-to-Video compilation dashboard &bull; Real-time Scraper Integration</p>
       </footer>
 

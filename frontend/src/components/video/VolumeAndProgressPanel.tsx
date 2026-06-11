@@ -39,7 +39,7 @@ export default function VolumeAndProgressPanel({
           )}
         </div>
         
-        <div className="relative h-2 bg-neutral-950 rounded-full overflow-hidden border border-neutral-850">
+        <div className="relative h-2 bg-neutral-950 rounded-full overflow-hidden border border-neutral-800">
           {activeStoryboardPanel && (
             <div 
               className="bg-purple-500 h-full transition-all duration-100 ease-linear"

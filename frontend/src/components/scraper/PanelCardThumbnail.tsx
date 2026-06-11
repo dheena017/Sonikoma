@@ -67,21 +67,48 @@ export function PanelCardThumbnail({
         </div>
       )}
 
-      {/* Index badge */}
-      <div className="absolute top-1.5 left-1.5 bg-black/80 backdrop-blur-sm px-1.5 py-0.5 rounded-md text-[8px] font-mono font-bold text-purple-400 border border-purple-900/30 leading-none">
+      {/* Index badge — purple when selected, dark when not */}
+      <div
+        className={[
+          "absolute top-1.5 left-1.5 backdrop-blur-sm px-1.5 py-0.5 rounded-md text-[8px] font-mono font-bold leading-none transition-all duration-200",
+          isSelected
+            ? "bg-purple-600/90 border border-purple-400/60 text-white shadow-[0_0_8px_rgba(168,85,247,0.5)]"
+            : "bg-black/80 border border-purple-900/30 text-purple-400",
+        ].join(" ")}
+      >
         #{idx + 1}
       </div>
 
-      {/* Selection check badge */}
-      <div
-        className={`absolute top-1.5 right-1.5 rounded-full p-0.5 border transition-all duration-200 ${
-          isSelected
-            ? "bg-purple-600 border-purple-400 shadow-[0_0_8px_2px_rgba(168,85,247,0.45)] scale-110"
-            : "bg-black/60 border-neutral-700 opacity-0 group-hover:opacity-100"
-        }`}
-      >
-        <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />
+      {/* Selection check badge with animated ping ring */}
+      <div className="absolute top-1.5 right-1.5">
+        {/* Animated pulse ring — only when selected */}
+        {isSelected && (
+          <div className="absolute inset-0 rounded-full bg-purple-500/35 animate-ping" />
+        )}
+        {/* Ghost dashed ring on hover (unselected) */}
+        <div
+          className={[
+            "relative rounded-full p-0.5 border transition-all duration-200",
+            isSelected
+              ? "bg-purple-600 border-purple-400 shadow-[0_0_10px_3px_rgba(168,85,247,0.5)] scale-110"
+              : "bg-black/60 border-dashed border-neutral-600 opacity-0 group-hover:opacity-60",
+          ].join(" ")}
+        >
+          <Check
+            className={`h-2.5 w-2.5 ${isSelected ? "text-white" : "text-neutral-400"}`}
+            strokeWidth={3}
+          />
+        </div>
       </div>
+
+      {/* Shift-select hint on hover when not selected */}
+      {!isSelected && (
+        <div className="absolute inset-x-0 bottom-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none">
+          <div className="bg-black/70 backdrop-blur-sm text-[7px] text-neutral-400 font-mono text-center py-0.5">
+            Click · Shift+Click range
+          </div>
+        </div>
+      )}
 
       {/* Quick-action toolbar (hover) */}
       {!isProcessing && (

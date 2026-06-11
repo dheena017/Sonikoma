@@ -108,6 +108,19 @@ export default function CropCanvas({
   const [isDrawing, setIsDrawing] = useState(false);
   const isManualBrushActive = editMode === "clean_manual" && activeTab === "eraser";
 
+  const [naturalAspect, setNaturalAspect] = useState<number | null>(null);
+
+  useEffect(() => {
+    setNaturalAspect(null);
+  }, [imgUrl]);
+
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { naturalWidth, naturalHeight } = e.currentTarget;
+    if (naturalWidth && naturalHeight) {
+      setNaturalAspect(naturalWidth / naturalHeight);
+    }
+  };
+
   const getClientPct = useCallback(
     (clientX: number, clientY: number) => {
       if (!containerRef.current) return null;
@@ -222,7 +235,7 @@ export default function CropCanvas({
 
   return (
     <div
-      className="relative border border-white/5 hover:border-purple-500/20 rounded-2xl bg-black overflow-auto flex-1 h-0 flex items-start justify-center select-none transition-colors"
+      className="relative border border-white/5 hover:border-purple-500/20 rounded-2xl bg-black overflow-hidden flex-1 h-0 flex items-center justify-center select-none transition-colors"
       style={{ boxShadow: "inset 0 0 30px rgba(0,0,0,0.5)" }}
     >
       <div
@@ -278,16 +291,26 @@ export default function CropCanvas({
           if (isManualBrushActive) return;
           handleEnd();
         }}
-        className={`relative inline-block ${activeTab === 'crop' ? 'cursor-crosshair' : ''}`}
+        className={`relative inline-flex flex-col ${activeTab === 'crop' ? 'cursor-crosshair' : ''}`}
         style={{
           userSelect: "none",
           touchAction: "none",
           transform: zoom !== 1 ? `scale(${zoom})` : undefined,
           transformOrigin: "top center",
           transition: "transform 0.15s ease",
+          maxHeight: "100%",
+          maxWidth: "100%",
+          aspectRatio: naturalAspect || undefined,
         }}
       >
-        <img src={imgUrl} alt="Preview" className="max-w-full h-auto pointer-events-none select-none block" draggable={false} />
+        <img
+          src={imgUrl}
+          alt="Preview"
+          onLoad={handleImageLoad}
+          className="pointer-events-none select-none block w-full h-full"
+          style={{ width: "100%", height: "100%" }}
+          draggable={false}
+        />
 
         {/* Brush Layer */}
         {isManualBrushActive && (

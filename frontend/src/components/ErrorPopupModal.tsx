@@ -148,7 +148,7 @@ export default function ErrorPopupModal({ error, onClose }: ErrorPopupModalProps
           <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-2">
             <button
               onClick={onClose}
-              className="w-full sm:w-auto px-5 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border border-neutral-850"
+              className="w-full sm:w-auto px-5 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border border-neutral-800"
             >
               Cancel & Dismiss
             </button>

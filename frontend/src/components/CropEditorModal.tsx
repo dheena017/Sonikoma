@@ -232,7 +232,7 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
       onTouchMove={(event) => event.stopPropagation()}
     >
       <div
-        className="relative bg-neutral-950/95 border border-white/5 rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden shadow-2xl flex flex-col w-full max-w-7xl h-[min(100dvh-1.5rem,980px)] sm:h-auto max-h-[calc(100vh-4rem)] my-auto"
+        className="relative bg-neutral-950/95 border border-white/5 rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden shadow-2xl flex flex-col w-full max-w-7xl h-[min(100dvh-1.5rem,980px)] max-h-[calc(100vh-4rem)] my-auto"
         style={{ boxShadow: "0 0 0 1px rgba(255,255,255,0.02), 0 0 70px rgba(139,92,246,0.14), 0 30px 60px rgba(0,0,0,0.78)" }}
       >
         {/* Subtle top-edge glow line */}

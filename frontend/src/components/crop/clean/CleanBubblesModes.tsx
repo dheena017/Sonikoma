@@ -81,7 +81,7 @@ export default function CleanBubblesModes({
 
       {/* Custom Solid Color Fill picker */}
       {eraseMethod === "solid_color" && (
-        <div className="flex items-center justify-between p-2.5 bg-neutral-900/60 border border-neutral-850 rounded-xl animate-fadeIn">
+        <div className="flex items-center justify-between p-2.5 bg-neutral-900/60 border border-neutral-800 rounded-xl animate-fadeIn">
           <span className="text-[9px] font-bold text-neutral-400 uppercase font-mono tracking-wider">Fill Color</span>
           <div className="flex items-center gap-2">
             <input

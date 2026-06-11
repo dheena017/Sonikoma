@@ -50,9 +50,32 @@ export function usePanelDetection({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: currentUrl }),
       });
-      if (!response.ok) throw new Error("AI analysis failed");
+      if (!response.ok) {
+        let errMsg = "AI analysis failed";
+        try {
+          const errorData = await response.json();
+          if (errorData?.detail) {
+            errMsg = errorData.detail;
+          }
+        } catch (_) {}
+        throw new Error(errMsg);
+      }
       const data = await response.json();
       if (data.success && Array.isArray(data.panels) && data.panels.length > 0) {
+        // If the backend fell back to local CV, warn the user
+        if (data.fallback) {
+          addNotification(
+            data.message || "AI panel detection failed, fell back to local CV.",
+            "warning"
+          );
+          if (setConsoleLogs) {
+            setConsoleLogs((prev) => [
+              `[AI Smart Crop Fallback] ${data.message || "Fell back to local CV detection."}`,
+              ...prev,
+            ]);
+          }
+        }
+
         const hasCroppedUrls = data.panels.every((p: DetectedPanel) => p.croppedUrl);
         if (hasCroppedUrls && setScrapedImages) {
           const croppedUrls = data.panels.map((p: DetectedPanel) => p.croppedUrl);
@@ -100,10 +123,17 @@ export function usePanelDetection({
           "success"
         );
       } else {
-        addNotification(
-          "AI could not detect any panels. Please draw your crops manually.",
-          "warning"
-        );
+        if (data.fallback) {
+          addNotification(
+            data.message || "AI failed to detect panels, and fallback found no panels.",
+            "warning"
+          );
+        } else {
+          addNotification(
+            "AI could not detect any panels. Please draw your crops manually.",
+            "warning"
+          );
+        }
       }
     } catch (err: any) {
       console.error("AI crop detection failed:", err);
@@ -144,7 +174,7 @@ export function usePanelDetection({
           aspectRatio: settings?.aspectRatio ?? "free",
           minAreaPct: settings?.minAreaPct ?? 0.15,
           mergeThreshold: settings?.mergeThreshold ?? 20,
-          strategy: settings?.strategy ?? "local-cv",
+          strategy: settings?.strategy ?? "ai",
           model: settings?.model ?? "gemini-2.5-flash",
           cannyLow: settings?.cannyLow ?? 20,
           cannyHigh: settings?.cannyHigh ?? 100,
@@ -152,9 +182,31 @@ export function usePanelDetection({
           minHeightPx: settings?.minHeightPx ?? 60
         }),
       });
-      if (!response.ok) throw new Error("Failed to detect panels");
+      if (!response.ok) {
+        let errMsg = "Failed to detect panels";
+        try {
+          const errorData = await response.json();
+          if (errorData?.detail) {
+            errMsg = errorData.detail;
+          }
+        } catch (_) {}
+        throw new Error(errMsg);
+      }
       const data = await response.json();
       if (data.success && Array.isArray(data.panels)) {
+        if (data.fallback) {
+          addNotification(
+            data.message || "AI panel detection failed, fell back to local CV.",
+            "warning"
+          );
+          if (setConsoleLogs) {
+            setConsoleLogs((prev) => [
+              `[Panel Detection Fallback] ${data.message || "Fell back to local CV detection."}`,
+              ...prev,
+            ]);
+          }
+        }
+
         setDetectedBoxes(data.panels);
 
         if (settings?.dryRun) {

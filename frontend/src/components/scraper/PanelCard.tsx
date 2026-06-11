@@ -29,6 +29,8 @@ interface PanelCardProps
   openEditingImageIdx?: (idx: number | null) => void;
   addPanelsWithAutoAnalysis: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
   addNotification: (message: string, type: "error" | "success" | "info" | "warning") => void;
+  /** Called when the card is clicked. Parent handles selection + shift-range logic. */
+  onCardClick: (idx: number, imgUrl: string, shiftKey: boolean) => void;
   key?: React.Key;
 }
 
@@ -54,6 +56,7 @@ function PanelCard({
   openEditingImageIdx,
   addPanelsWithAutoAnalysis,
   addNotification,
+  onCardClick,
 }: PanelCardProps) {
   const [isEditing, setIsEditing] = React.useState<boolean>(false);
   const isProcessing =
@@ -160,17 +163,7 @@ function PanelCard({
 
   return (
     <div
-      onClick={() => {
-        if (setSelectedScraped) {
-          setSelectedScraped((prev: any[]) => {
-            if (isSelected) {
-              return prev.filter((img: string) => img !== imgUrl);
-            } else {
-              return [...prev, imgUrl];
-            }
-          });
-        }
-      }}
+      onClick={(e) => onCardClick(idx, imgUrl, e.shiftKey)}
       className={[
         "group relative w-[140px] sm:w-[156px] shrink-0 rounded-2xl border p-2 space-y-2 transition-all duration-200 text-center cursor-pointer select-none",
         isSelected

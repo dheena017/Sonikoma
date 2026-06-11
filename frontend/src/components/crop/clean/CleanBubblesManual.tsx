@@ -22,7 +22,7 @@ export default function CleanBubblesManual({
 }: CleanBubblesManualProps) {
   return (
     <div className="border-t border-white/5 pt-2 mt-1">
-      <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-900/60 border border-neutral-850">
+      <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-900/60 border border-neutral-800">
         <span className="text-[10px] font-bold text-neutral-300 font-mono flex items-center gap-1.5">
           <Cpu className="h-3.5 w-3.5 text-purple-400" />
           <span>Manual Spot-Healing Brush</span>
@@ -38,7 +38,7 @@ export default function CleanBubblesManual({
             }}
             className="sr-only peer"
           />
-          <div className="w-7 h-4 bg-neutral-850 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-neutral-500 after:border-neutral-450 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-purple-650 peer-checked:after:bg-white border border-neutral-700"></div>
+          <div className="w-7 h-4 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-neutral-500 after:border-neutral-450 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-purple-650 peer-checked:after:bg-white border border-neutral-700"></div>
         </label>
       </div>
 

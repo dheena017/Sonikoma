@@ -21,7 +21,7 @@ export default function PipelineStatusCard({ progressStatus }: PipelineStatusCar
       </div>
 
       {/* Progress animation track */}
-      <div className="w-full bg-neutral-950 h-2 rounded-full overflow-hidden border border-neutral-850">
+      <div className="w-full bg-neutral-950 h-2 rounded-full overflow-hidden border border-neutral-800">
         <div className="bg-gradient-to-r from-purple-500 via-indigo-500 to-purple-600 h-full w-2/3 rounded-full animate-infinite-scroll" />
       </div>
     </div>

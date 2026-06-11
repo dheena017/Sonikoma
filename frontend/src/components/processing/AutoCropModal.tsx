@@ -1,7 +1,6 @@
 import React from "react";
-import { Scissors, X, RefreshCw, Sparkles } from "lucide-react";
-import AutoCropLeftColumn from "../scraper/AutoCropLeftColumn";
-import AutoCropRightColumn from "../scraper/AutoCropRightColumn";
+import { Scissors, X, RefreshCw, Sparkles, RotateCcw, Cpu, Maximize2, Sliders, HelpCircle } from "lucide-react";
+import AutoCropTabContent from "../scraper/AutoCropTabContent";
 
 interface AutoCropModalProps {
   onClose: () => void;
@@ -14,8 +13,6 @@ interface AutoCropModalProps {
   setBackgroundColorMode: (v: string) => void;
   autoSplitTallStrips: boolean;
   setAutoSplitTallStrips: (v: boolean) => void;
-  processingStrategy: string;
-  setProcessingStrategy: (v: string) => void;
   aspectRatioLock: string;
   setAspectRatioLock: (v: string) => void;
   minPanelAreaPct: number;
@@ -24,8 +21,27 @@ interface AutoCropModalProps {
   setOverlapMergeThreshold: (v: number) => void;
   useLocalCV: boolean;
   setUseLocalCV: (v: boolean) => void;
+  
+  // Advanced States
+  cropModel: string;
+  setCropModel: (v: string) => void;
+  cropMinHeightPx: number;
+  setCropMinHeightPx: (v: number) => void;
+  cropCannyLow: number;
+  setCropCannyLow: (v: number) => void;
+  cropCannyHigh: number;
+  setCropCannyHigh: (v: number) => void;
+  cropCloseKernelSize: number;
+  setCropCloseKernelSize: (v: number) => void;
+  activeTab: string;
+  setActiveTab: (v: string) => void;
+  
   selectedCount: number;
   isApplying: boolean;
+  scrapedImages: string[];
+  selectedScraped: string[];
+  setConsoleLogs?: React.Dispatch<React.SetStateAction<string[]>>;
+  addNotification?: (msg: string, type: any) => void;
 }
 
 export default function AutoCropModal({
@@ -39,8 +55,6 @@ export default function AutoCropModal({
   setBackgroundColorMode,
   autoSplitTallStrips,
   setAutoSplitTallStrips,
-  processingStrategy,
-  setProcessingStrategy,
   aspectRatioLock,
   setAspectRatioLock,
   minPanelAreaPct,
@@ -49,9 +63,55 @@ export default function AutoCropModal({
   setOverlapMergeThreshold,
   useLocalCV,
   setUseLocalCV,
+  
+  cropModel,
+  setCropModel,
+  cropMinHeightPx,
+  setCropMinHeightPx,
+  cropCannyLow,
+  setCropCannyLow,
+  cropCannyHigh,
+  setCropCannyHigh,
+  cropCloseKernelSize,
+  setCropCloseKernelSize,
+  activeTab,
+  setActiveTab,
+  
   selectedCount,
   isApplying,
+  scrapedImages,
+  selectedScraped,
+  setConsoleLogs,
+  addNotification
 }: AutoCropModalProps) {
+
+  const handleResetAll = () => {
+    setSensitivity(30);
+    setPadding(10);
+    setBackgroundColorMode("auto");
+    setAutoSplitTallStrips(true);
+    setAspectRatioLock("free");
+    setMinPanelAreaPct(2);
+    setOverlapMergeThreshold(20);
+    setUseLocalCV(true);
+    setCropModel("gemini-2.5-flash");
+    setCropMinHeightPx(60);
+    setCropCannyLow(20);
+    setCropCannyHigh(100);
+    setCropCloseKernelSize(15);
+    setActiveTab("general");
+    if (addNotification) {
+      addNotification("Restored all crop parameters to defaults.", "info");
+    }
+  };
+
+  const tabs = [
+    { id: "general", label: "General", icon: <Cpu className="h-3.5 w-3.5" /> },
+    { id: "layout", label: "Layout & Guides", icon: <Maximize2 className="h-3.5 w-3.5" /> },
+    { id: "advanced", label: "Advanced CV", icon: <Sliders className="h-3.5 w-3.5" /> },
+    { id: "help", label: "Help Guide", icon: <HelpCircle className="h-3.5 w-3.5" /> }
+  ];
+
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-center justify-center p-4 overflow-y-auto">
       <div className="relative w-full max-w-6xl min-h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] flex flex-col gap-0 animate-[fadeIn_0.18s_ease-out]">
@@ -74,61 +134,113 @@ export default function AutoCropModal({
                 </p>
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="text-neutral-400 hover:text-white p-1.5 rounded-lg hover:bg-neutral-800 transition-colors cursor-pointer"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleResetAll}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-800 bg-neutral-900/60 hover:bg-neutral-800 text-neutral-400 hover:text-white transition-all text-[10px] font-bold font-mono active:scale-95 cursor-pointer"
+              >
+                <RotateCcw className="h-3.5 w-3.5 text-neutral-500" />
+                Reset Defaults
+              </button>
+              <button
+                onClick={onClose}
+                className="text-neutral-400 hover:text-white p-1.5 rounded-lg hover:bg-neutral-800 transition-colors cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Tab Selection Row */}
+          <div className="flex border-b border-neutral-800 bg-neutral-950/20 px-6">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`relative flex items-center gap-2 px-5 py-3 text-xs font-bold font-mono transition-all border-b-2 cursor-pointer select-none ${
+                  activeTab === tab.id
+                    ? "text-indigo-400 border-indigo-500 bg-indigo-500/5"
+                    : "text-neutral-500 border-transparent hover:text-neutral-300 hover:bg-neutral-800/30"
+                }`}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+              </button>
+            ))}
           </div>
 
           {/* Scrollable Body */}
-          <div className="p-6 overflow-y-auto grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1">
-            <AutoCropLeftColumn
-              sensitivity={sensitivity}
-              setSensitivity={setSensitivity}
-              padding={padding}
-              setPadding={setPadding}
-              backgroundColorMode={backgroundColorMode}
-              setBackgroundColorMode={setBackgroundColorMode}
+          <div className="p-6 overflow-y-auto flex flex-col flex-1 min-h-0 bg-neutral-900/50">
+            <AutoCropTabContent
+              activeTab={activeTab}
+              useLocalCV={useLocalCV}
+              setUseLocalCV={setUseLocalCV}
+              cropModel={cropModel}
+              setCropModel={setCropModel}
               autoSplitTallStrips={autoSplitTallStrips}
               setAutoSplitTallStrips={setAutoSplitTallStrips}
-              processingStrategy={processingStrategy}
-              setProcessingStrategy={setProcessingStrategy}
+              cropSensitivity={sensitivity}
+              setCropSensitivity={setSensitivity}
+              cropPaddingPx={padding}
+              setCropPaddingPx={setPadding}
+              cropBackgroundMode={backgroundColorMode}
+              setCropBackgroundMode={setBackgroundColorMode}
               aspectRatioLock={aspectRatioLock}
               setAspectRatioLock={setAspectRatioLock}
               minPanelAreaPct={minPanelAreaPct}
               setMinPanelAreaPct={setMinPanelAreaPct}
               overlapMergeThreshold={overlapMergeThreshold}
               setOverlapMergeThreshold={setOverlapMergeThreshold}
+              cropMinHeightPx={cropMinHeightPx}
+              setCropMinHeightPx={setCropMinHeightPx}
+              cropCannyLow={cropCannyLow}
+              setCropCannyLow={setCropCannyLow}
+              cropCannyHigh={cropCannyHigh}
+              setCropCannyHigh={setCropCannyHigh}
+              cropCloseKernelSize={cropCloseKernelSize}
+              setCropCloseKernelSize={setCropCloseKernelSize}
+              scrapedImages={scrapedImages}
+              selectedScraped={selectedScraped}
+              setConsoleLogs={setConsoleLogs}
+              addNotification={addNotification}
             />
-            <AutoCropRightColumn
-              sensitivity={sensitivity}
-              setSensitivity={setSensitivity}
-              padding={padding}
-              setPadding={setPadding}
-              minPanelAreaPct={minPanelAreaPct}
-              setMinPanelAreaPct={setMinPanelAreaPct}
-              overlapMergeThreshold={overlapMergeThreshold}
-              setOverlapMergeThreshold={setOverlapMergeThreshold}
-              autoSplitTallStrips={autoSplitTallStrips}
-              setAutoSplitTallStrips={setAutoSplitTallStrips}
-              useLocalCV={useLocalCV}
-              setUseLocalCV={setUseLocalCV}
-            />
+          </div>
+
+          {/* Live Config Summary Bar */}
+          <div className="px-6 py-2.5 bg-neutral-950/20 border-t border-neutral-800 flex items-center gap-4 text-[9px] font-mono text-neutral-500 tracking-wider">
+            <span className="font-bold text-neutral-400 uppercase">Active Profile:</span>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <span>Engine: <strong className="text-neutral-350">{useLocalCV ? "OPENCV ONLY" : `GEMINI AI (${cropModel})`}</strong></span>
+              <span>•</span>
+              <span>Gutter: <strong className="text-neutral-350">{backgroundColorMode.toUpperCase()}</strong></span>
+              <span>•</span>
+              <span>Padding: <strong className="text-neutral-350">{padding}px</strong></span>
+              <span>•</span>
+              <span>Lock: <strong className="text-neutral-350">{aspectRatioLock}</strong></span>
+              <span>•</span>
+              <span>Sensitivity: <strong className="text-neutral-350">{sensitivity}%</strong></span>
+              <span>•</span>
+              <span>Canny: <strong className="text-neutral-350">{cropCannyLow}/{cropCannyHigh}</strong></span>
+            </div>
           </div>
 
           {/* Footer */}
           <div className="px-6 py-4 border-t border-neutral-800 bg-neutral-950/40 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <p className="text-[10px] text-neutral-505 font-mono">
+              <p className="text-[10px] text-neutral-500 font-mono">
                 {selectedCount === 0
                   ? "⚠️  No panels selected — select panels first in the scraper deck"
                   : `Ready to auto-crop ${selectedCount} panel${selectedCount !== 1 ? "s" : ""}`}
               </p>
-              {useLocalCV && (
+              {useLocalCV ? (
                 <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-lg bg-cyan-950/80 text-cyan-400 border border-cyan-800/40">
                   LOCAL CV ACTIVE
+                </span>
+              ) : (
+                <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-lg bg-indigo-950/85 text-indigo-400 border border-indigo-800/40">
+                  GEMINI AI ACTIVE
                 </span>
               )}
               {aspectRatioLock !== "free" && (
@@ -144,6 +256,7 @@ export default function AutoCropModal({
               >
                 Cancel
               </button>
+
               <button
                 onClick={onApply}
                 disabled={isApplying || selectedCount === 0}
@@ -154,7 +267,7 @@ export default function AutoCropModal({
                 ) : (
                   <Sparkles className="h-3.5 w-3.5" />
                 )}
-                {isApplying ? "Auto-Cropping…" : "Apply & Crop"}
+                {isApplying ? "Applying…" : "Apply"}
               </button>
             </div>
           </div>

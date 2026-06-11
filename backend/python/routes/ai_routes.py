@@ -309,8 +309,92 @@ async def ai_smart_crop(body: SmartCropRequest):
         content_type = resolved["contentType"]
 
         coord_panels = []
+        ai_failed = False
+        ai_error_msg = ""
 
-        # Strategy 1: Local CV panel detection (Pillow/OpenCV)
+        # Strategy 1: Try Gemini AI crop box model first if not local-cv
+        if body.strategy != "local-cv" and body.model != "local-cv":
+            if ai_initialized:
+                from google.genai import types
+                target_model = body.model or "gemini-2.5-flash"
+                logger.info(f"[AI Smart Crop API] Using Gemini model: {target_model}")
+                
+                # Define structure crop schema
+                class CropBox(BaseModel):
+                    cropTop: float = Field(description="Top coordinate of the panel bounding box (percentage from 0 to 100, where 0 is the top edge and 100 is the bottom edge)")
+                    cropBottom: float = Field(description="Bottom coordinate of the panel bounding box (percentage from 0 to 100, where 0 is the top edge and 100 is the bottom edge)")
+                    cropLeft: float = Field(description="Left coordinate of the panel bounding box (percentage from 0 to 100, where 0 is the left edge and 100 is the right edge)")
+                    cropRight: float = Field(description="Right coordinate of the panel bounding box (percentage from 0 to 100, where 0 is the left edge and 100 is the right edge)")
+                    
+                class CropList(BaseModel):
+                    panels: List[CropBox]
+
+                prompt = (
+                    "Analyze this comic/webtoon image. Identify the main scene/illustration panels. "
+                    "For each panel, detect its bounding box boundaries as coordinates (0 to 100) relative to the image edges:\n"
+                    "- cropTop: top boundary of the panel (0 is top edge, 100 is bottom)\n"
+                    "- cropBottom: bottom boundary of the panel (0 is top edge, 100 is bottom)\n"
+                    "- cropLeft: left boundary of the panel (0 is left edge, 100 is right)\n"
+                    "- cropRight: right boundary of the panel (0 is left edge, 100 is right)\n"
+                    "Make sure these are absolute coordinates from the top/left of the image, NOT margins. "
+                    "Return a JSON object containing a 'panels' array."
+                )
+                
+                try:
+                    config = types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema=CropList
+                    )
+                    
+                    response = await call_gemini_with_retry(
+                        lambda: genai_client.models.generate_content(
+                            model=target_model,
+                            contents=[
+                                types.Part.from_bytes(data=image_buffer, mime_type="image/jpeg"),
+                                prompt
+                            ],
+                            config=config
+                        )
+                    )
+                    
+                    raw_text = response.text or "{}"
+                    data = json.loads(raw_text)
+                    raw_panels = data.get("panels", [])
+                    logger.info(f"[AI Smart Crop] Gemini isolated {len(raw_panels)} panels.")
+                    
+                    # Convert absolute coordinates to margins (expected by backend and frontend)
+                    margins_panels = []
+                    for box in raw_panels:
+                        y1 = max(0.0, min(100.0, float(box.get("cropTop", 0) if isinstance(box, dict) else getattr(box, "cropTop", 0))))
+                        y2 = max(0.0, min(100.0, float(box.get("cropBottom", 0) if isinstance(box, dict) else getattr(box, "cropBottom", 0))))
+                        x1 = max(0.0, min(100.0, float(box.get("cropLeft", 0) if isinstance(box, dict) else getattr(box, "cropLeft", 0))))
+                        x2 = max(0.0, min(100.0, float(box.get("cropRight", 0) if isinstance(box, dict) else getattr(box, "cropRight", 0))))
+                        
+                        if y1 > y2:
+                            y1, y2 = y2, y1
+                        if x1 > x2:
+                            x1, x2 = x2, x1
+                            
+                        margins_panels.append({
+                            "cropTop": y1,
+                            "cropBottom": 100.0 - y2,
+                            "cropLeft": x1,
+                            "cropRight": 100.0 - x2
+                        })
+                    coord_panels = margins_panels
+                except Exception as e:
+                    logger.warning(f"[AI Smart Crop API] Gemini failed: {e}. Falling back to local CV.")
+                    ai_failed = True
+                    ai_error_msg = str(e)
+            else:
+                logger.warning("[AI Smart Crop API] Gemini not initialized. Falling back to local CV.")
+                ai_failed = True
+                ai_error_msg = "Gemini client not initialized"
+
+        if body.strategy != "local-cv" and body.model != "local-cv" and ai_failed:
+            raise HTTPException(status_code=500, detail=f"AI smart crop failed: {ai_error_msg}")
+
+        # Strategy 2: Local CV panel detection (Pillow/OpenCV)
         if body.strategy == "local-cv" or body.model == "local-cv":
             # Write to temp file for detection
             import tempfile, os
@@ -319,12 +403,17 @@ async def ai_smart_crop(body: SmartCropRequest):
                 temp_in_path = tmp_in.name
                 
             try:
+                # Robust scaling: If frontend sent percentage (e.g. 2.0%) instead of ratio (0.02), scale it down
+                min_area_pct = body.minAreaPct if body.minAreaPct is not None else 0.15
+                if min_area_pct > 1.0:
+                    min_area_pct = min_area_pct / 100.0
+
                 # Call detect_panels run_cv_detection directly! (No subprocess needed!)
                 coord_panels = run_cv_detection(
                     image_path=temp_in_path,
                     sensitivity=body.sensitivity,
                     bg_mode=body.backgroundColorMode,
-                    min_width_pct=body.minAreaPct,
+                    min_width_pct=min_area_pct,
                     min_height_px=body.minHeightPx,
                     merge_threshold=body.mergeThreshold,
                     aspect_ratio_str=body.aspectRatio,
@@ -335,47 +424,6 @@ async def ai_smart_crop(body: SmartCropRequest):
             finally:
                 if os.path.exists(temp_in_path):
                     os.remove(temp_in_path)
-        else:
-            # Strategy 2: Gemini AI crop box model
-            if ai_initialized:
-                from google.genai import types
-                target_model = body.model or "gemini-2.5-flash"
-                logger.info(f"[AI Smart Crop API] Using Gemini model: {target_model}")
-                
-                # Define structure crop schema
-                class CropBox(BaseModel):
-                    cropTop: float
-                    cropBottom: float
-                    cropLeft: float
-                    cropRight: float
-                    
-                class CropList(BaseModel):
-                    panels: List[CropBox]
-
-                prompt = "Analyze this comic image page. Identify the main illustrations/panels that contain scenes. Detect the outer borders and give me the precise percentage coordinates (0 to 100) for cropping each panel out properly, removing any extra whitespace or gutters. Return a JSON object containing a 'panels' array."
-                
-                config = types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    response_schema=CropList
-                )
-                
-                response = await call_gemini_with_retry(
-                    lambda: genai_client.models.generate_content(
-                        model=target_model,
-                        contents=[
-                            types.Part.from_bytes(data=image_buffer, mime_type="image/jpeg"),
-                            prompt
-                        ],
-                        config=config
-                    )
-                )
-                
-                raw_text = response.text or "{}"
-                data = json.loads(raw_text)
-                coord_panels = data.get("panels", [])
-                logger.info(f"[AI Smart Crop] Gemini isolated {len(coord_panels)} panels.")
-            else:
-                coord_panels = []
 
         # Crop each panel out
         img = Image.open(io.BytesIO(image_buffer))
@@ -430,7 +478,12 @@ async def ai_smart_crop(body: SmartCropRequest):
                 "croppedUrl": cached_url
             })
 
-        return {"success": True, "panels": cropped_panels}
+        return {
+            "success": True,
+            "panels": cropped_panels,
+            "fallback": ai_failed,
+            "message": f"AI smart crop failed: {ai_error_msg}. Fell back to local CV." if ai_failed else ""
+        }
     except Exception as e:
         logger.error(f"[AI Smart Crop API] Error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"AI Smart Crop failed: {e}")

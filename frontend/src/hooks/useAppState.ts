@@ -26,6 +26,9 @@ export function useAppState() {
   const [bubbleDetectionStyle, setBubbleDetectionStyle] = useState<"all" | "white_only" | "text_only">("all");
   const [bubbleEraseMethod, setBubbleEraseMethod] = useState<"auto" | "inpaint" | "blur" | "solid_white" | "solid_black">("auto");
   const [bubbleSensitivity, setBubbleSensitivity] = useState<number>(50);
+  const [bubbleDilation, setBubbleDilation] = useState<number>(-1);
+  const [bubbleInpaintRadius, setBubbleInpaintRadius] = useState<number>(3);
+  const [activeBubbleTab, setActiveBubbleTab] = useState<string>("general");
   const [isCleaningBubbles, setIsCleaningBubbles] = useState<boolean>(false);
   const [cleanProgress, setCleanProgress] = useState<{ current: number; total: number } | null>(null);
   const [bubbleCroppingImgUrl, setBubbleCroppingImgUrl] = useState<string | null>(null);
@@ -40,10 +43,16 @@ export function useAppState() {
   const [aspectRatioLock, setAspectRatioLock] = useState<string>("free");
   const [minPanelAreaPct, setMinPanelAreaPct] = useState<number>(2);
   const [overlapMergeThreshold, setOverlapMergeThreshold] = useState<number>(20);
-  const [useLocalCV, setUseLocalCV] = useState<boolean>(false);
+  const [useLocalCV, setUseLocalCV] = useState<boolean>(true);
   const [isBatchCropping, setIsBatchCropping] = useState<boolean>(false);
   const [batchProgress, setBatchProgress] = useState<{ current: number; total: number } | null>(null);
   const [croppingImgUrl, setCroppingImgUrl] = useState<string | null>(null);
+  const [cropModel, setCropModel] = useState<string>("gemini-2.5-flash");
+  const [cropMinHeightPx, setCropMinHeightPx] = useState<number>(60);
+  const [cropCannyLow, setCropCannyLow] = useState<number>(20);
+  const [cropCannyHigh, setCropCannyHigh] = useState<number>(100);
+  const [cropCloseKernelSize, setCropCloseKernelSize] = useState<number>(15);
+  const [activeAutoCropTab, setActiveAutoCropTab] = useState<string>("general");
 
   // Notifications
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -134,6 +143,12 @@ export function useAppState() {
     setBubbleEraseMethod,
     bubbleSensitivity,
     setBubbleSensitivity,
+    bubbleDilation,
+    setBubbleDilation,
+    bubbleInpaintRadius,
+    setBubbleInpaintRadius,
+    activeBubbleTab,
+    setActiveBubbleTab,
     isCleaningBubbles,
     setIsCleaningBubbles,
     cleanProgress,
@@ -166,6 +181,18 @@ export function useAppState() {
     setBatchProgress,
     croppingImgUrl,
     setCroppingImgUrl,
+    cropModel,
+    setCropModel,
+    cropMinHeightPx,
+    setCropMinHeightPx,
+    cropCannyLow,
+    setCropCannyLow,
+    cropCannyHigh,
+    setCropCannyHigh,
+    cropCloseKernelSize,
+    setCropCloseKernelSize,
+    activeAutoCropTab,
+    setActiveAutoCropTab,
     notifications,
     errorPopup,
     setErrorPopup,

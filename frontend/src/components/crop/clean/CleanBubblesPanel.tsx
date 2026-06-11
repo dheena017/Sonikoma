@@ -392,7 +392,7 @@ export default function CleanBubblesPanel({
           />
 
           {/* Interactive Bounding Boxes / Debug Mode Toggle */}
-          <div className="flex items-center justify-between bg-neutral-900/60 border border-neutral-850 p-2.5 rounded-xl">
+          <div className="flex items-center justify-between bg-neutral-900/60 border border-neutral-800 p-2.5 rounded-xl">
             <div className="flex flex-col">
               <span className="text-[10px] font-bold text-neutral-300 font-mono flex items-center gap-1.5">
                 <Eye className="h-3.5 w-3.5 text-cyan-400" />
@@ -458,7 +458,7 @@ export default function CleanBubblesPanel({
           className={`h-full px-2.5 border rounded-r-xl transition-all cursor-pointer active:scale-95 flex items-center justify-center ${
             showSettings
               ? "bg-purple-950/50 text-purple-200 border-purple-800/50"
-              : "bg-neutral-900 text-neutral-400 border-neutral-850 hover:bg-neutral-855"
+              : "bg-neutral-900 text-neutral-400 border-neutral-800 hover:bg-neutral-855"
           }`}
         >
           <Sliders className="h-3.5 w-3.5" />
