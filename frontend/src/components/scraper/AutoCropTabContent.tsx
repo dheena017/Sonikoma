@@ -7,8 +7,6 @@ import { AutoCropGeneralTab } from "./AutoCropGeneralTab";
 import { AutoCropLayoutTab } from "./AutoCropLayoutTab";
 import { AutoCropAdvancedTab } from "./AutoCropAdvancedTab";
 import { AutoCropHelpTab } from "./AutoCropHelpTab";
-import { GlobalScraperConfigTool } from "./GlobalScraperConfigTool";
-import { ScraperLogStream } from "./ScraperLogStream";
 
 export interface AutoCropTabContentProps {
   activeTab: string;
@@ -96,9 +94,6 @@ export default function AutoCropTabContent(props: AutoCropTabContentProps) {
         />
       )}
       {activeTab === "help" && <AutoCropHelpTab />}
-
-      <GlobalScraperConfigTool addNotification={props.addNotification} />
-      <ScraperLogStream />
     </div>
   );
 }

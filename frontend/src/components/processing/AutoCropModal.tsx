@@ -258,6 +258,7 @@ export default function AutoCropModal({
               </button>
 
               <button
+                type="button"
                 onClick={onApply}
                 disabled={isApplying || selectedCount === 0}
                 className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-bold font-sans transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-indigo-900/30 flex items-center gap-2 active:scale-95"
