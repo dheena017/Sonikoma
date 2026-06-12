@@ -140,7 +140,7 @@ def insert_panels(project_id: str, panels: List[Dict[str, Any]]) -> None:
                     p.get('original_image_url') or p.get('original_url', None),
                     speech_text,
                     p.get('sfx') or "",
-                    p.get('duration') or 4.5,
+                    p.get('duration') if p.get('duration') is not None else 4.5,
                     p.get('motion_type') or "zoom_in",
                     visual_description or None,
                     p.get('brightness'),

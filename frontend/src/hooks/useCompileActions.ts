@@ -26,6 +26,7 @@ export function useCompileActions({
 }: UseCompileActionsProps) {
   const activeFetch = fetchWithInterceptor || fetch;
   const [analyzingPanelId, setAnalyzingPanelId] = useState<number | null>(null);
+  const [isAnalyzingAll, setIsAnalyzingAll] = useState<boolean>(false);
   const [isCompiling, setIsCompiling] = useState<boolean>(false);
   const [isZipping, setIsZipping] = useState<boolean>(false);
 
@@ -101,12 +102,16 @@ export function useCompileActions({
       if (!res.ok) throw new Error("Image analysis failed");
       const data = await res.json();
       if (data.success && data.analysis) {
+        const aiDuration = Number(data.analysis.duration);
+        const aiMotion = String(data.analysis.motion_type || "").trim();
         setPanels(prev => prev.map(p => p.id === panelId ? {
           ...p,
           speech_text: data.analysis.speech_text || p.speech_text,
           sfx: data.analysis.sfx || p.sfx,
-          duration: Number(data.analysis.duration) || p.duration,
-          motion_type: data.analysis.motion_type || p.motion_type,
+          // Always use AI duration if it's a valid positive number
+          duration: aiDuration > 0 ? aiDuration : p.duration,
+          // Always use AI motion if it returned a valid value
+          motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
           visual_description: data.analysis.visual_description || p.visual_description
         } : p));
 
@@ -115,9 +120,9 @@ export function useCompileActions({
         if (setConsoleLogs) {
           setConsoleLogs(prev => [
             `[AI Auto-Analysis] [SUCCESS] Panel #${panelId} analysis completed by ${activeModel}!`,
-            `[AI Auto-Analysis]   - Revise (Dialogue): "${data.analysis.speech_text}"`,
-            `[AI Auto-Analysis]   - Revise (Motion): "${data.analysis.motion_type}" | Duration: ${data.analysis.duration}s`,
-            `[AI Auto-Analysis]   - Revise (SFX): "${data.analysis.sfx}"`,
+            `[AI Auto-Analysis]   - AI Set Dialogue: "${data.analysis.speech_text}"`,
+            `[AI Auto-Analysis]   - AI Set Motion: "${aiMotion}" | AI Set Duration: ${aiDuration}s`,
+            `[AI Auto-Analysis]   - AI Set SFX: "${data.analysis.sfx}"`,
             ...prev
           ]);
         }
@@ -181,12 +186,81 @@ export function useCompileActions({
     }
   };
 
+  const handleAnalyzeSelectedPanels = async (selectedIds: number[]) => {
+    if (selectedIds.length === 0) return;
+    setIsAnalyzingAll(true);
+    if (addNotification) {
+      addNotification(`Starting AI analysis for ${selectedIds.length} selected panel(s)...`, "info");
+    }
+    console.log('[useCompileActions] Analyzing selected panels:', selectedIds);
+    try {
+      for (let i = 0; i < selectedIds.length; i++) {
+        const panel = panels.find(p => p.id === selectedIds[i]);
+        if (!panel) continue;
+        console.log(`[useCompileActions] Analyzing selected panel ${i + 1}/${selectedIds.length} (ID: ${panel.id})`);
+        try {
+          await handleAnalyzePanel(panel.id, panel.image_url);
+        } catch (err) {
+          console.error(`[useCompileActions] Failed to analyze selected panel ID ${panel.id}:`, err);
+        }
+        await new Promise((resolve) => setTimeout(resolve, 300));
+      }
+      if (addNotification) {
+        addNotification(`AI analysis completed for ${selectedIds.length} selected panel(s)!`, "success");
+      }
+    } catch (err: any) {
+      console.error("[useCompileActions] Selected panel analysis failed:", err);
+      if (addNotification) {
+        addNotification("AI analysis of selected panels encountered an error.", "error");
+      }
+    } finally {
+      setIsAnalyzingAll(false);
+    }
+  };
+
+  const handleAnalyzeAllPanels = async () => {
+    if (panels.length === 0) return;
+    setIsAnalyzingAll(true);
+    if (addNotification) {
+      addNotification("Starting sequential AI analysis for all panels...", "info");
+    }
+    console.log('[useCompileActions] Initiating sequential AI analysis for all panels:', panels.length);
+    try {
+      // Loop sequentially to prevent API rate limiting (429/503 errors)
+      for (let i = 0; i < panels.length; i++) {
+        const panel = panels[i];
+        console.log(`[useCompileActions] Analyzing panel ${i + 1}/${panels.length} (ID: ${panel.id})`);
+        try {
+          await handleAnalyzePanel(panel.id, panel.image_url);
+        } catch (panelErr) {
+          console.error(`[useCompileActions] Failed to analyze panel ID ${panel.id}:`, panelErr);
+          // Continue to next panel in case one fails
+        }
+        // Small delay between calls to be safe with rate limits
+        await new Promise((resolve) => setTimeout(resolve, 300));
+      }
+      if (addNotification) {
+        addNotification("AI analysis completed for all panels!", "success");
+      }
+    } catch (err: any) {
+      console.error("[useCompileActions] Sequential analysis failed:", err);
+      if (addNotification) {
+        addNotification("AI Storyboard analysis encountered an error.", "error");
+      }
+    } finally {
+      setIsAnalyzingAll(false);
+    }
+  };
+
   return {
     analyzingPanelId,
+    isAnalyzingAll,
     isCompiling,
     isZipping,
     handleDownloadZip,
     handleAnalyzePanel,
+    handleAnalyzeAllPanels,
+    handleAnalyzeSelectedPanels,
     handleCompileVideo,
   };
 }

@@ -77,7 +77,7 @@ export function usePipelineActions({
 
   const {
     runBackgroundAnalysis,
-    addPanelsWithAutoAnalysis,
+    addPanelsToStoryboard,
   } = useAutoAnalysis({
     panels,
     selectedModel,
@@ -167,6 +167,7 @@ export function usePipelineActions({
     editCropLeft,
     editCropRight,
     editAutoTrim,
+    addPanelsToStoryboard,
   });
 
   return {
@@ -181,7 +182,7 @@ export function usePipelineActions({
     handleSaveMultipleCuts,
     handleStitchWithNext,
     handleTriggerReprocess,
-    addPanelsWithAutoAnalysis,
+    addPanelsToStoryboard,
     handleCleanBubblesSelected,
     handleAutoCropSelected,
     isCleaningBubbles,

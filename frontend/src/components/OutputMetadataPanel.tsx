@@ -15,7 +15,7 @@ export default function OutputMetadataPanel({
   return (
     <div id="video_metadata_panel" className="bg-neutral-900/40 rounded-2xl border border-neutral-800/80 p-5 space-y-3.5">
       <h4 className="font-bold text-xs text-neutral-400 uppercase tracking-widest font-mono">Output Specifications</h4>
-      
+
       <div className="grid grid-cols-2 gap-y-3 gap-x-6 text-xs text-neutral-300">
         <div className="flex items-center justify-between border-b border-neutral-800/50 pb-2">
           <span className="text-neutral-500 font-sans">Codec</span>

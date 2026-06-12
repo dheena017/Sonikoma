@@ -9,6 +9,8 @@ interface TimelineHeaderProps {
   handleDownloadZip: () => void;
   isCompiling: boolean;
   handleCompileVideo: () => void;
+  isAnalyzingAll: boolean;
+  handleAnalyzeAllPanels: () => void;
 }
 
 export default function TimelineHeader({
@@ -19,14 +21,16 @@ export default function TimelineHeader({
   handleDownloadZip,
   isCompiling,
   handleCompileVideo,
+  isAnalyzingAll,
+  handleAnalyzeAllPanels,
 }: TimelineHeaderProps) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-neutral-800 pb-4">
       <div>
-        <h3 className="font-bold text-base text-white">Dynamic Storyboard & OCR Transcription</h3>
+        <h3 className="font-bold text-base text-white">Dynamic Storyboard &amp; OCR Transcription</h3>
         <p className="hidden sm:block text-xs text-neutral-400">Review live isolated panel frames. Adjust speech transcripts locally below.</p>
       </div>
-      
+
       <div className="flex flex-wrap items-center gap-2">
         {/* Bulk Action Toggle */}
         <button
@@ -67,15 +71,37 @@ export default function TimelineHeader({
           <span>{isZipping ? "Zipping..." : "Download Panels ZIP"}</span>
         </button>
 
+        {/* AI Storyboard Analysis Button */}
         <button
           type="button"
-          disabled={isCompiling || panelsLength === 0}
+          disabled={isAnalyzingAll || panelsLength === 0}
+          onClick={() => {
+            console.log("[TimelineHeader] Storyboard AI analysis triggered");
+            handleAnalyzeAllPanels();
+          }}
+          className={`px-3 sm:px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
+            isAnalyzingAll
+              ? "bg-neutral-800 border-neutral-700 text-neutral-500 cursor-wait"
+              : "bg-purple-950/40 border-purple-800/40 hover:bg-purple-900/60 text-purple-300 hover:border-purple-600 shadow-sm"
+          }`}
+        >
+          {isAnalyzingAll ? (
+            <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
+          ) : (
+            <Sparkles className="h-4 w-4 text-purple-400 animate-pulse" />
+          )}
+          <span>{isAnalyzingAll ? "Analyzing Storyboard..." : "AI Analyze Storyboard"}</span>
+        </button>
+
+        <button
+          type="button"
+          disabled={isCompiling || panelsLength === 0 || isAnalyzingAll}
           onClick={() => {
             console.log("[TimelineHeader] Compile video triggered");
             handleCompileVideo();
           }}
           className={`px-3 sm:px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
-            isCompiling
+            isCompiling || isAnalyzingAll
               ? "bg-purple-900/40 border-purple-500/50 text-purple-200 cursor-not-allowed"
               : "bg-purple-600 border-purple-500 hover:bg-purple-500 text-white shadow-md hover:shadow-purple-500/20"
           }`}

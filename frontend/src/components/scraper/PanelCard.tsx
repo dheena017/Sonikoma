@@ -27,7 +27,7 @@ interface PanelCardProps
   isBatchCropping: boolean;
   croppingImgUrl: string | null;
   openEditingImageIdx?: (idx: number | null) => void;
-  addPanelsWithAutoAnalysis: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
+  addPanelsToStoryboard: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
   addNotification: (message: string, type: "error" | "success" | "info" | "warning") => void;
   /** Called when the card is clicked. Parent handles selection + shift-range logic. */
   onCardClick: (idx: number, imgUrl: string, shiftKey: boolean) => void;
@@ -54,7 +54,7 @@ function PanelCard({
   setSelectedScraped,
   setConsoleLogs,
   openEditingImageIdx,
-  addPanelsWithAutoAnalysis,
+  addPanelsToStoryboard,
   addNotification,
   onCardClick,
 }: PanelCardProps) {
@@ -197,7 +197,7 @@ function PanelCard({
         scrapedImages={scrapedImages}
         mergingIndices={mergingIndices}
         handleMergeWithNext={handleMergeWithNext}
-        addPanelsWithAutoAnalysis={addPanelsWithAutoAnalysis}
+        addPanelsToStoryboard={addPanelsToStoryboard}
       />
 
       <PanelCardActions

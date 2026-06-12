@@ -33,11 +33,12 @@ export function EnhancementsCinematic({
         </label>
         <div className="relative">
           <select
-            value={activeStoryboardPanel?.motion_type || "static"}
+            value={activeStoryboardPanel?.motion_type ?? ""}
             disabled={!activeStoryboardPanel}
             onChange={(e) => activeStoryboardPanel && handleModifyMotionType(activeStoryboardPanel.id, e.target.value)}
             className="w-full bg-black/40 border border-white/8 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] font-mono focus:border-purple-500/50 focus:outline-none cursor-pointer appearance-none transition-colors hover:border-white/15 disabled:opacity-40 disabled:cursor-not-allowed"
           >
+            <option value="">AI Will Decide</option>
             <option value="static">Static (No Motion)</option>
             <option value="zoom_in">Zoom In Animation</option>
             <option value="zoom_out">Zoom Out Animation</option>
@@ -52,11 +53,11 @@ export function EnhancementsCinematic({
       {/* Playback Duration */}
       <SliderRow
         label="Scene Timing (Duration)"
-        value={activeStoryboardPanel?.duration ?? 4.5}
-        min={1}
+        value={activeStoryboardPanel?.duration ?? 0}
+        min={0}
         max={10}
         step={0.5}
-        unit="s"
+        unit={activeStoryboardPanel?.duration === 0 ? " (AI Decides)" : "s"}
         disabled={!activeStoryboardPanel}
         onChange={(val) =>
           activeStoryboardPanel &&

@@ -7,7 +7,7 @@ interface PanelCardControlsProps {
   scrapedImages: string[];
   mergingIndices: number[];
   handleMergeWithNext: (index: number) => Promise<void>;
-  addPanelsWithAutoAnalysis: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
+  addPanelsToStoryboard: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
 }
 
 export function PanelCardControls({
@@ -16,7 +16,7 @@ export function PanelCardControls({
   scrapedImages,
   mergingIndices,
   handleMergeWithNext,
-  addPanelsWithAutoAnalysis,
+  addPanelsToStoryboard,
 }: PanelCardControlsProps) {
   const isMerging = mergingIndices.includes(idx);
   const isLast = idx >= scrapedImages.length - 1;
@@ -27,7 +27,7 @@ export function PanelCardControls({
       <button
         onClick={() => {
           console.log(`[PanelCardControls] Adding image #${idx + 1} to storyboard`);
-          addPanelsWithAutoAnalysis([imgUrl]);
+          addPanelsToStoryboard([imgUrl]);
         }}
         className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-purple-700 to-violet-600 hover:from-purple-600 hover:to-violet-500 active:from-purple-800 active:to-violet-700 text-white text-[9px] py-1.5 rounded-lg font-mono font-semibold tracking-wide transition-all duration-150 shadow-sm hover:shadow-[0_0_10px_rgba(168,85,247,0.35)] cursor-pointer border border-purple-500/20"
       >

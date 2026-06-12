@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { GeneratedPanel } from "../../types";
 import { useStoryboardOperations } from "../../hooks/useStoryboardOperations";
 
@@ -6,6 +6,7 @@ import TimelineEmptyState from "./TimelineEmptyState";
 import TimelineHeader from "./TimelineHeader";
 import TimelineBulkOps from "./TimelineBulkOps";
 import TimelineCard from "./TimelineCard";
+import TimelineSelectionBar from "./TimelineSelectionBar";
 
 interface StoryboardTimelineProps {
   panels: GeneratedPanel[];
@@ -40,6 +41,28 @@ export default function StoryboardTimeline({
   selectedModel,
   setConsoleLogs
 }: StoryboardTimelineProps) {
+
+  // ── Panel selection state ────────────────────────────────────────────────
+  const [selectedPanelIds, setSelectedPanelIds] = useState<Set<number>>(new Set());
+
+  const togglePanelSelection = (id: number) => {
+    setSelectedPanelIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const selectAllPanels = () => {
+    setSelectedPanelIds(new Set(panels.map(p => p.id)));
+  };
+
+  const clearSelection = () => {
+    setSelectedPanelIds(new Set());
+  };
+  // ────────────────────────────────────────────────────────────────────────
+
   const {
     analyzingPanelId,
     isCompiling,
@@ -64,6 +87,9 @@ export default function StoryboardTimeline({
     handleBulkSetPreset,
     handleClearTimeline,
     handleAnalyzePanel,
+    handleAnalyzeAllPanels,
+    handleAnalyzeSelectedPanels,
+    isAnalyzingAll,
     handleCompileVideo,
   } = useStoryboardOperations({
     panels,
@@ -82,8 +108,15 @@ export default function StoryboardTimeline({
     return <TimelineEmptyState hasScrapedImages={hasScrapedImages} />;
   }
 
+  const selectedCount = selectedPanelIds.size;
+
   return (
-    <div id="panels_timeline_section" className="bg-neutral-900/60 rounded-2xl border border-neutral-800 p-4 sm:p-6 space-y-4">
+    <div
+      id="panels_timeline_section"
+      className={`bg-neutral-900/60 rounded-2xl border border-neutral-800 p-4 sm:p-6 space-y-4 transition-all ${
+        selectedCount > 0 ? "pb-24" : ""
+      }`}
+    >
       <TimelineHeader
         showBulkOps={showBulkOps}
         setShowBulkOps={setShowBulkOps}
@@ -92,6 +125,8 @@ export default function StoryboardTimeline({
         handleDownloadZip={handleDownloadZip}
         isCompiling={isCompiling}
         handleCompileVideo={handleCompileVideo}
+        isAnalyzingAll={isAnalyzingAll}
+        handleAnalyzeAllPanels={handleAnalyzeAllPanels}
       />
 
       {/* Bulk Operations Menu */}
@@ -111,7 +146,10 @@ export default function StoryboardTimeline({
       )}
 
       {/* Storyboard grid */}
-      <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-4 scrollbar-thin">
+      <div className={`flex gap-3 sm:gap-4 overflow-x-auto scrollbar-thin ${
+        selectedCount > 0 ? "pb-2" : "pb-4"
+      }`}>
+
         {panels.map((panel, idx) => (
           <TimelineCard
             key={panel.id}
@@ -131,9 +169,24 @@ export default function StoryboardTimeline({
             handleModifySFX={handleModifySFX}
             handleModifyVisualDescription={handleModifyVisualDescription}
             handleAnalyzePanel={handleAnalyzePanel}
+            isSelected={selectedPanelIds.has(panel.id)}
+            onToggleSelect={() => togglePanelSelection(panel.id)}
           />
         ))}
       </div>
+
+      {/* Fixed floating selection bar — stays at bottom of screen when scrolling */}
+      <TimelineSelectionBar
+        selectedCount={selectedCount}
+        totalCount={panels.length}
+        isAnalyzingAll={isAnalyzingAll}
+        handleAnalyzeSelected={() => {
+          handleAnalyzeSelectedPanels(Array.from(selectedPanelIds));
+          clearSelection();
+        }}
+        selectAllPanels={selectAllPanels}
+        clearSelection={clearSelection}
+      />
     </div>
   );
 }

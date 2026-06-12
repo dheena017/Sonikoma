@@ -47,7 +47,7 @@ export default function LiveScraperDeck({
   croppingImgUrl,
   handleAutoCropSelected,
   handleCleanBubblesSelected,
-  addPanelsWithAutoAnalysis,
+  addPanelsToStoryboard,
 }: LiveScraperDeckProps) {
   const [isZipping, setIsZipping] = useState(false);
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
@@ -126,9 +126,9 @@ export default function LiveScraperDeck({
     setLastSelectedIndex(null);
   };
 
-  const handleAddToCanvas = () => {
+  const handleAddToStoryboard = () => {
     if (selectedScraped.length === 0) return;
-    addPanelsWithAutoAnalysis(selectedScraped);
+    addPanelsToStoryboard(selectedScraped);
     console.log(`[GUI] Adding ${selectedScraped.length} selected image(s) to storyboard.`);
     setSelectedScraped([]);
     setLastSelectedIndex(null);
@@ -137,6 +137,17 @@ export default function LiveScraperDeck({
   const handleClearAll = () => {
     setSelectedScraped([]);
     setLastSelectedIndex(null);
+  };
+
+  const handleSelectAllToggle = () => {
+    if (selectedScraped.length === scrapedImages.length && scrapedImages.length > 0) {
+      setSelectedScraped([]);
+      setLastSelectedIndex(null);
+      setConsoleLogs((prev) => ["[GUI] Cleared selections", ...prev]);
+    } else {
+      setSelectedScraped([...scrapedImages]);
+      setConsoleLogs((prev) => ["[GUI] Selected all extracted frames", ...prev]);
+    }
   };
 
   const handleBatchMergeSelected = async () => {
@@ -257,7 +268,7 @@ export default function LiveScraperDeck({
               setShowBubbleModal={setShowBubbleModal}
               isCleaningBubbles={isCleaningBubbles}
               cleanProgress={cleanProgress}
-              addPanelsWithAutoAnalysis={addPanelsWithAutoAnalysis}
+              addPanelsToStoryboard={addPanelsToStoryboard}
               showAutoCropModal={showAutoCropModal}
               setShowAutoCropModal={setShowAutoCropModal}
               isBatchCropping={isBatchCropping}
@@ -301,7 +312,7 @@ export default function LiveScraperDeck({
                     setScrapedImages={setScrapedImages}
                     setSelectedScraped={setSelectedScraped}
                     setConsoleLogs={setConsoleLogs}
-                    addPanelsWithAutoAnalysis={addPanelsWithAutoAnalysis}
+                    addPanelsToStoryboard={addPanelsToStoryboard}
                     addNotification={addNotification}
                     onCardClick={handleCardClick}
                   />
@@ -315,6 +326,7 @@ export default function LiveScraperDeck({
       {/* Floating Selection Action Bar */}
       <FloatingSelectionBar
         selectedCount={selectedScraped.length}
+        totalCount={scrapedImages.length}
         isBatchCropping={isBatchCropping}
         batchProgress={batchProgress}
         isCleaningBubbles={isCleaningBubbles}
@@ -323,9 +335,10 @@ export default function LiveScraperDeck({
         handleAutoCropSelected={handleAutoCropSelected}
         handleCleanBubblesSelected={handleCleanBubblesSelected}
         handleBatchMergeSelected={handleBatchMergeSelected}
-        handleAddToCanvas={handleAddToCanvas}
+        handleAddToStoryboard={handleAddToStoryboard}
         handleDeleteSelected={handleDeleteSelected}
         handleClearAll={handleClearAll}
+        handleSelectAllToggle={handleSelectAllToggle}
       />
     </>
   );

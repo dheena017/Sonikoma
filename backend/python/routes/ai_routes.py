@@ -36,7 +36,7 @@ MODEL_FALLBACKS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash']
 DEFAULT_ANALYSIS = {
     "speech_text":         "Narrative caption for this storyboard panel scene.",
     "sfx":                 "[Dramatic Beat]",
-    "duration":            4.5,
+    "duration":            0.0,
     "motion_type":         "zoom_in",
     "visual_description":  "A cropped illustration frame ready for cinematic playback.",
 }
@@ -206,14 +206,13 @@ class CopyrightScrubRequest(BaseModel):
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
 
-def clamp_duration(d: Any) -> float:
-    try:
-        val = float(d)
-        if val < 2.0: return 2.0
-        if val > 8.0: return 8.0
-        return val
-    except (ValueError, TypeError):
-        return 4.5
+def estimate_duration_from_speech(speech: str) -> float:
+    if not speech or not speech.strip():
+        return 0.0
+    words = len(speech.strip().split())
+    # Estimate speaking rate: 2.2 words per second plus 0.8 seconds safety padding
+    estimated = (words / 2.2) + 0.8
+    return round(estimated, 1)
 
 
 def validate_analysis(raw: Dict[str, Any]) -> Dict[str, Any]:
@@ -222,10 +221,29 @@ def validate_analysis(raw: Dict[str, Any]) -> Dict[str, Any]:
     vis = raw.get("visual_description", "")
     motion = raw.get("motion_type", "")
     
+    # 1. Get raw suggested duration from AI, defaulting to 4.5
+    raw_duration = raw.get("duration")
+    try:
+        suggested_duration = float(raw_duration) if raw_duration is not None else 4.5
+    except (ValueError, TypeError):
+        suggested_duration = 4.5
+        
+    # Clamp suggested duration between 2.0 and 10.0 seconds
+    suggested_duration = max(2.0, min(10.0, suggested_duration))
+        
+    # 2. Estimate minimum duration based on speech text length
+    speech_val = speech.strip()[:200] if isinstance(speech, str) and speech.strip() else ""
+    estimated_speech_duration = estimate_duration_from_speech(speech_val)
+    
+    # 3. Use the maximum of both to ensure the timing matches the speech and respects AI's intent
+    final_duration = max(suggested_duration, estimated_speech_duration)
+    # Clamp final duration to a reasonable range
+    final_duration = max(2.0, min(12.0, round(final_duration, 1)))
+    
     return {
-        "speech_text": speech.strip()[:200] if isinstance(speech, str) and speech.strip() else DEFAULT_ANALYSIS["speech_text"],
+        "speech_text": speech_val if speech_val else DEFAULT_ANALYSIS["speech_text"],
         "sfx": sfx.strip()[:50] if isinstance(sfx, str) and sfx.strip() else DEFAULT_ANALYSIS["sfx"],
-        "duration": clamp_duration(raw.get("duration")),
+        "duration": final_duration,
         "motion_type": motion if motion in VALID_MOTIONS else DEFAULT_ANALYSIS["motion_type"],
         "visual_description": vis.strip()[:400] if isinstance(vis, str) and vis.strip() else DEFAULT_ANALYSIS["visual_description"],
     }

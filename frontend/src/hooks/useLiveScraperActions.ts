@@ -8,7 +8,7 @@ interface UseLiveScraperActionsProps {
   setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
   setScrapedImages: React.Dispatch<React.SetStateAction<string[]>>;
   setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>>;
-  addPanelsWithAutoAnalysis: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
+  addPanelsToStoryboard: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
   fetchWithInterceptor?: typeof fetch;
   addNotification?: (message: string, type: any) => void;
 }
@@ -19,7 +19,7 @@ export function useLiveScraperActions({
   setSelectedScraped,
   setScrapedImages,
   setConsoleLogs,
-  addPanelsWithAutoAnalysis,
+  addPanelsToStoryboard,
   fetchWithInterceptor,
   addNotification,
 }: UseLiveScraperActionsProps) {
@@ -86,13 +86,13 @@ export function useLiveScraperActions({
     setSelectedScraped([]);
   };
 
-  const handleAddToCanvas = () => {
+  const handleAddToStoryboard = () => {
     if (selectedScraped.length === 0) {
       addNotification?.("No images selected to add to storyboard.", "warning");
       return;
     }
     console.log(`[GUI] Adding ${selectedScraped.length} image(s) to storyboard`);
-    addPanelsWithAutoAnalysis(selectedScraped);
+    addPanelsToStoryboard(selectedScraped);
     setSelectedScraped([]);
   };
 
@@ -100,6 +100,6 @@ export function useLiveScraperActions({
     isZipping,
     handleDownloadZip,
     handleDeleteSelected,
-    handleAddToCanvas,
+    handleAddToStoryboard,
   };
 }

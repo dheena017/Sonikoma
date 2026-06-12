@@ -19,6 +19,8 @@ interface UsePanelDetectionProps {
   setScrapedImages?: React.Dispatch<React.SetStateAction<string[]>>;
   setConsoleLogs?: React.Dispatch<React.SetStateAction<string[]>>;
   editAutoTrim: boolean;
+  addPanelsToStoryboard: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
+  setEditingImageIdx: (idx: number | null) => void;
 }
 
 export function usePanelDetection({
@@ -38,6 +40,8 @@ export function usePanelDetection({
   setScrapedImages,
   setConsoleLogs,
   editAutoTrim,
+  addPanelsToStoryboard,
+  setEditingImageIdx,
 }: UsePanelDetectionProps) {
 
   const handleAiCrop = async () => {
@@ -78,26 +82,28 @@ export function usePanelDetection({
         }
 
         const hasCroppedUrls = data.panels.every((p: DetectedPanel) => p.croppedUrl);
-        if (hasCroppedUrls && setScrapedImages) {
+        if (hasCroppedUrls) {
           const croppedUrls = data.panels.map((p: DetectedPanel) => p.croppedUrl);
 
           if (setConsoleLogs) {
             setConsoleLogs((prev) => [
-              `[AI Smart Crop] Segmented original image into ${croppedUrls.length} pre-cropped panels...`,
+              `[AI Smart Crop] Segmented original image into ${croppedUrls.length} pre-cropped panels and added to Storyboard...`,
               ...prev,
             ]);
           }
 
-          setScrapedImages((prev) => {
-            const copy = [...prev];
-            copy.splice(editingImageIdx, 1, ...croppedUrls);
-            return copy;
-          });
+          // Add directly to Storyboard only
+          addPanelsToStoryboard(croppedUrls);
 
           addNotification(
-            `AI Smart Crop automatically isolated ${croppedUrls.length} panels!`,
+            `AI Smart Crop automatically added ${croppedUrls.length} panels to Storyboard!`,
             "success"
           );
+
+          // Close editor and navigate home
+          setEditingImageIdx(null);
+          window.history.pushState({}, "", "/");
+          window.dispatchEvent(new Event("popstate"));
           return;
         }
 

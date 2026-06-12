@@ -77,7 +77,7 @@ export function useAutoAnalysis({
     }
   }, [fetchWithInterceptor, addNotification, setPanels, setConsoleLogs, selectedModel]);
 
-  const addPanelsWithAutoAnalysis = useCallback((imgUrls: string[], currentScrapedList?: string[], shouldScroll: boolean = true) => {
+  const addPanelsToStoryboard = useCallback((imgUrls: string[], currentScrapedList?: string[], shouldScroll: boolean = true) => {
     if (imgUrls.length === 0) return;
 
     if (shouldScroll) {
@@ -93,32 +93,28 @@ export function useAutoAnalysis({
       return {
         id: baseId + loopIdx,
         image_url: imgUrl,
-        speech_text: `Loading dialogue... ✦`,
-        sfx: "[Deep Scan]",
-        duration: 4.5,
-        motion_type: "zoom_in",
-        isAnalyzing: true,
+        speech_text: "",
+        sfx: "",
+        duration: 0.0,
+        motion_type: "",
+        isAnalyzing: false,
       };
     });
 
     setPanels((prev) => [...prev, ...newPanelsToAdd]);
 
     setConsoleLogs((prev) => [
-      `[GUI] Added ${imgUrls.length} frames; spawning staggered AI OCR dialogue & camera motion detection...`,
+      `[GUI] Added ${imgUrls.length} frame(s) to storyboard.`,
       ...prev,
     ]);
-    addNotification(`Added ${imgUrls.length} panel(s) to storyboard. Spawning AI analysis...`, 'info');
+    addNotification(`Added ${imgUrls.length} panel(s) to storyboard.`, 'info');
 
     // Developer console visibility
     console.log(`[GUI] Added ${imgUrls.length} frame(s) to storyboard`, newPanelsToAdd);
-
-    newPanelsToAdd.forEach((item) => {
-      runBackgroundAnalysis(item.id, item.image_url);
-    });
-  }, [panels, runBackgroundAnalysis, addNotification, setActivePreviewTab, setPanels, setConsoleLogs]);
+  }, [panels, addNotification, setActivePreviewTab, setPanels, setConsoleLogs]);
 
   return {
     runBackgroundAnalysis,
-    addPanelsWithAutoAnalysis,
+    addPanelsToStoryboard,
   };
 }

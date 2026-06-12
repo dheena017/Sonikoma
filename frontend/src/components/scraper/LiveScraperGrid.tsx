@@ -19,7 +19,7 @@ interface LiveScraperGridProps {
   setScrapedImages: React.Dispatch<React.SetStateAction<string[]>>;
   setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
   setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>>;
-  addPanelsWithAutoAnalysis: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
+  addPanelsToStoryboard: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
   addNotification: (message: string, type: "error" | "success" | "info" | "warning") => void;
   onCardClick: (idx: number, imgUrl: string, shiftKey: boolean) => void;
 }
@@ -42,7 +42,7 @@ export default function LiveScraperGrid({
   setScrapedImages,
   setSelectedScraped,
   setConsoleLogs,
-  addPanelsWithAutoAnalysis,
+  addPanelsToStoryboard,
   addNotification,
   onCardClick,
 }: LiveScraperGridProps) {
@@ -72,7 +72,7 @@ export default function LiveScraperGrid({
             setScrapedImages={setScrapedImages}
             setSelectedScraped={setSelectedScraped}
             setConsoleLogs={setConsoleLogs}
-            addPanelsWithAutoAnalysis={addPanelsWithAutoAnalysis}
+            addPanelsToStoryboard={addPanelsToStoryboard}
             addNotification={addNotification}
             onCardClick={onCardClick}
           />

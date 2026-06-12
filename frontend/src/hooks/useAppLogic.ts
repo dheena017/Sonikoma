@@ -40,7 +40,7 @@ export function useAppLogic() {
     handleSaveMultipleCuts,
     handleStitchWithNext,
     handleTriggerReprocess,
-    addPanelsWithAutoAnalysis,
+    addPanelsToStoryboard,
     handleCleanBubblesSelected,
     handleAutoCropSelected,
     isCleaningBubbles,
@@ -254,19 +254,7 @@ export function useAppLogic() {
             setPlaybackTime(0);
             setStoryboardPlaying(false);
             
-            // Progressive image loading one by one
-            let currentLoaded: string[] = [];
-            let currentImageIdx = 0;
-            const addNextImage = () => {
-              if (!isCurrent) return;
-              if (currentImageIdx < proxiedImages.length) {
-                currentLoaded.push(proxiedImages[currentImageIdx]);
-                state.setScrapedImages([...currentLoaded]);
-                currentImageIdx++;
-                setTimeout(addNextImage, 50); // Add next image after 50ms delay
-              }
-            };
-            addNextImage();
+            state.setScrapedImages(proxiedImages);
             
             state.addNotification(`Successfully extracted ${data.total_images} panel frames from the Webtoon page!`, 'success');
             
@@ -341,7 +329,7 @@ export function useAppLogic() {
     handleSaveMultipleCuts,
     handleStitchWithNext,
     handleTriggerReprocess,
-    addPanelsWithAutoAnalysis,
+    addPanelsToStoryboard,
     handleCleanBubblesSelected,
     handleAutoCropSelected,
     totalCalculatedDuration,

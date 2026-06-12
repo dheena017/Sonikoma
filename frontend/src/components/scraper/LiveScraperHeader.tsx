@@ -7,7 +7,7 @@ interface LiveScraperHeaderProps {
   isZipping: boolean;
   handleDownloadZip: () => void;
   handleDeleteSelected: () => void;
-  handleAddToCanvas: () => void;
+  handleAddToStoryboard: () => void;
 }
 
 export default function LiveScraperHeader({
@@ -16,7 +16,7 @@ export default function LiveScraperHeader({
   isZipping,
   handleDownloadZip,
   handleDeleteSelected,
-  handleAddToCanvas,
+  handleAddToStoryboard,
 }: LiveScraperHeaderProps) {
   return (
     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-neutral-800/60 pb-3">
@@ -60,12 +60,12 @@ export default function LiveScraperHeader({
         </button>
         <button
           type="button"
-          onClick={handleAddToCanvas}
+          onClick={handleAddToStoryboard}
           disabled={selectedCount === 0}
           className="text-[10px] font-mono rounded-lg px-3.5 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border border-purple-500/30 flex items-center gap-1.5 shadow-lg shadow-purple-900/20 hover:shadow-purple-900/35 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <Plus className="h-3.5 w-3.5" />
-          <span>Add to Canvas</span>
+          <span>Add to Storyboard</span>
         </button>
       </div>
     </div>

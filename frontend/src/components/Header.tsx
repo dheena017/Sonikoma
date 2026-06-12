@@ -13,9 +13,9 @@ interface HeaderProps {
   isCleaningBubbles: boolean;
 }
 
-export default function Header({ 
-  isProcessing, 
-  panels, 
+export default function Header({
+  isProcessing,
+  panels,
   totalCalculatedDuration,
   currentPath,
   editingImageIdx,
@@ -47,7 +47,7 @@ export default function Header({
   React.useEffect(() => {
     const nav = navRef.current;
     if (!nav) return;
-    
+
     // Find active button element
     const activeBtn = nav.querySelector("[data-active='true']") as HTMLButtonElement | null;
     if (activeBtn) {
@@ -64,9 +64,9 @@ export default function Header({
   return (
     <header id="header_pane" className="border-b border-neutral-800/80 bg-neutral-950/45 backdrop-blur-md sticky top-0 z-40 px-4 sm:px-6 py-4">
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-4">
-        
+
         {/* LOGO */}
-        <div 
+        <div
           className="flex items-center gap-3 cursor-pointer select-none hover:opacity-90 transition-opacity self-start lg:self-auto"
           onClick={() => navigateTo("/")}
         >
@@ -88,7 +88,7 @@ export default function Header({
         </div>
 
         {/* CENTER NAVIGATION PILLS */}
-        <nav 
+        <nav
           ref={navRef}
           className="nav-scroll-ribbon flex items-center gap-1 bg-neutral-900/60 p-1 rounded-2xl border border-neutral-800/80 w-full lg:w-auto overflow-x-auto relative select-none"
           style={{
@@ -100,11 +100,10 @@ export default function Header({
           <button
             onClick={() => navigateTo("/")}
             data-active={isDashboard}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-[11px] font-bold font-mono transition-all duration-200 cursor-pointer ${
-              isDashboard
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-[11px] font-bold font-mono transition-all duration-200 cursor-pointer ${isDashboard
                 ? "text-white bg-neutral-800/45 scale-[1.01]"
                 : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/20"
-            }`}
+              }`}
           >
             Dashboard
           </button>
@@ -114,11 +113,10 @@ export default function Header({
             onClick={() => navigateTo("/auto-crop")}
             disabled={panels.length === 0}
             data-active={isAutoCrop}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-[11px] font-bold font-mono transition-all duration-200 cursor-pointer relative disabled:opacity-35 disabled:cursor-not-allowed ${
-              isAutoCrop
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-[11px] font-bold font-mono transition-all duration-200 cursor-pointer relative disabled:opacity-35 disabled:cursor-not-allowed ${isAutoCrop
                 ? "text-white bg-neutral-800/45 scale-[1.01]"
                 : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/20"
-            } ${isBatchCropping ? "ring-1 ring-cyan-500/50 shadow-[0_0_8px_rgba(34,211,238,0.2)]" : ""}`}
+              } ${isBatchCropping ? "ring-1 ring-cyan-500/50 shadow-[0_0_8px_rgba(34,211,238,0.2)]" : ""}`}
             title="Auto-Crop Settings"
           >
             {isBatchCropping && (
@@ -134,11 +132,10 @@ export default function Header({
             onClick={() => navigateTo("/bubble-cleaner")}
             disabled={panels.length === 0}
             data-active={isBubbleCleaner}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-[11px] font-bold font-mono transition-all duration-200 cursor-pointer relative disabled:opacity-35 disabled:cursor-not-allowed ${
-              isBubbleCleaner
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-[11px] font-bold font-mono transition-all duration-200 cursor-pointer relative disabled:opacity-35 disabled:cursor-not-allowed ${isBubbleCleaner
                 ? "text-white bg-neutral-800/45 scale-[1.01]"
                 : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/20"
-            } ${isCleaningBubbles ? "ring-1 ring-purple-500/50 shadow-[0_0_8px_rgba(168,85,247,0.2)]" : ""}`}
+              } ${isCleaningBubbles ? "ring-1 ring-purple-500/50 shadow-[0_0_8px_rgba(168,85,247,0.2)]" : ""}`}
             title="Bubble Cleaner Settings"
           >
             {isCleaningBubbles && (
@@ -155,11 +152,10 @@ export default function Header({
             }}
             disabled={editingImageIdx === null && !lastEditorPath}
             data-active={isEditor}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-[11px] font-bold font-mono transition-all duration-200 cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed ${
-              isEditor
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-[11px] font-bold font-mono transition-all duration-200 cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed ${isEditor
                 ? "text-white bg-neutral-800/45 scale-[1.01]"
                 : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/20"
-            }`}
+              }`}
             title="Advanced Crop Editor"
           >
             <Film className="h-3 w-3 sm:hidden" />
@@ -171,11 +167,10 @@ export default function Header({
           <button
             onClick={() => navigateTo("/logs")}
             data-active={isLogs}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-[11px] font-bold font-mono transition-all duration-200 cursor-pointer ${
-              isLogs
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-[11px] font-bold font-mono transition-all duration-200 cursor-pointer ${isLogs
                 ? "text-white bg-neutral-800/45 scale-[1.01]"
                 : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/20"
-            }`}
+              }`}
             title="System logs"
           >
             <Terminal className="h-3 w-3 sm:hidden" />
@@ -186,11 +181,10 @@ export default function Header({
           <button
             onClick={() => navigateTo("/status")}
             data-active={isStatus}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-[11px] font-bold font-mono transition-all duration-200 cursor-pointer ${
-              isStatus
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-[11px] font-bold font-mono transition-all duration-200 cursor-pointer ${isStatus
                 ? "text-white bg-neutral-800/45 scale-[1.01]"
                 : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/20"
-            }`}
+              }`}
             title="Backend diagnostics status"
           >
             <Activity className="h-3 w-3 sm:hidden" />
@@ -201,11 +195,10 @@ export default function Header({
           <button
             onClick={() => navigateTo("/shortcuts")}
             data-active={isShortcuts}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-[11px] font-bold font-mono transition-all duration-200 cursor-pointer ${
-              isShortcuts
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-[11px] font-bold font-mono transition-all duration-200 cursor-pointer ${isShortcuts
                 ? "text-white bg-neutral-800/45 scale-[1.01]"
                 : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/20"
-            }`}
+              }`}
             title="Keyboard Shortcuts Settings"
           >
             <Keyboard className="h-3 w-3 sm:hidden" />
@@ -216,11 +209,10 @@ export default function Header({
           <button
             onClick={() => navigateTo("/settings")}
             data-active={isSettings}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-[11px] font-bold font-mono transition-all duration-200 cursor-pointer ${
-              isSettings
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] sm:text-[11px] font-bold font-mono transition-all duration-200 cursor-pointer ${isSettings
                 ? "text-white bg-neutral-800/45 scale-[1.01]"
                 : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/20"
-            }`}
+              }`}
             title="Advanced Render Settings"
           >
             <Sliders className="h-3 w-3 sm:hidden" />
@@ -228,7 +220,7 @@ export default function Header({
           </button>
 
           {/* Sliding glow underline indicator */}
-          <div 
+          <div
             style={indicatorStyle}
             className="absolute bottom-1 h-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-300 shadow-[0_0_8px_rgba(168,85,247,0.7)] pointer-events-none"
           />

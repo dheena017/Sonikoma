@@ -28,6 +28,7 @@ interface UseImageTransformProps {
   debugMode: boolean;
   fillColor: string;
   gpu: boolean;
+  addPanelsToStoryboard: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
 }
 
 export function useImageTransform({
@@ -56,6 +57,7 @@ export function useImageTransform({
   debugMode,
   fillColor,
   gpu,
+  addPanelsToStoryboard,
 }: UseImageTransformProps) {
 
   const handleTransform = async (type: "rotate" | "flip", value: string) => {
@@ -234,23 +236,20 @@ export function useImageTransform({
 
       const data = await response.json();
 
-      setScrapedImages((prev) => {
-        const copy = [...prev];
-        copy.splice(editingImageIdx + 1 + slicesCroppedCount, 0, data.url);
-        return copy;
-      });
+      // Add directly to Storyboard only
+      addPanelsToStoryboard([data.url]);
 
       setSlicesCroppedCount((prev) => prev + 1);
 
       if (setConsoleLogs) {
         setConsoleLogs((prev) => [
-          `[Image Editor] Extracted cut from Frame #${editingImageIdx + 1}`,
+          `[Image Editor] Extracted cut from Frame #${editingImageIdx + 1} and added to Storyboard`,
           ...prev,
         ]);
       }
 
       handleDeleteSlice(slice.id, e);
-      addNotification("Extracted Cut!", "success");
+      addNotification("Extracted Cut and added to Storyboard!", "success");
     } catch (err: any) {
       console.error(`[Image Editor] Single slice crop failed:`, err);
       addNotification(`Failed to crop: ${err.message}`, "error");

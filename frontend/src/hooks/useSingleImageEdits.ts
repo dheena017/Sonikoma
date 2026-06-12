@@ -14,6 +14,7 @@ interface UseSingleImageEditsProps {
   editCropLeft: number;
   editCropRight: number;
   editAutoTrim: boolean;
+  addPanelsToStoryboard: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
 }
 
 export function useSingleImageEdits({
@@ -29,6 +30,7 @@ export function useSingleImageEdits({
   editCropLeft,
   editCropRight,
   editAutoTrim,
+  addPanelsToStoryboard,
 }: UseSingleImageEditsProps) {
   const [mergingIndices, setMergingIndices] = useState<number[]>([]);
   const [isSavingEdit, setIsSavingEdit] = useState<boolean>(false);
@@ -61,27 +63,17 @@ export function useSingleImageEdits({
       const data = await response.json();
       const croppedUrl = data.url;
 
-      setScrapedImages(prev => {
-        const copy = [...prev];
-        copy[editingImageIdx] = croppedUrl;
-        return copy;
-      });
-
-      setSelectedScraped(prev => {
-        if (prev.includes(originalUrl)) {
-          return prev.map(img => img === originalUrl ? croppedUrl : img);
-        }
-        return prev;
-      });
+      // Add directly to Storyboard only
+      addPanelsToStoryboard([croppedUrl]);
 
       setConsoleLogs(prev => [
-        `[Image Editor] [SUCCESS] Successfully cropped and trimmed Frame #${editingImageIdx + 1}!`,
+        `[Image Editor] [SUCCESS] Successfully cropped Frame #${editingImageIdx + 1} and added to Storyboard!`,
         `[Image Editor]   - Sent (Original): ${originalUrl.substring(0, 60)}...`,
         `[Image Editor]   - Revise (Cropped): ${croppedUrl.substring(0, 60)}...`,
         ...prev
       ]);
-      console.log(`[Image Editor] Cropped Frame #${editingImageIdx + 1}:`, { original: originalUrl, cropped: croppedUrl });
-      addNotification(`Frame #${editingImageIdx + 1} cropped and trimmed successfully!`, 'success');
+      console.log(`[Image Editor] Cropped Frame #${editingImageIdx + 1} and added to Storyboard:`, { original: originalUrl, cropped: croppedUrl });
+      addNotification(`Frame #${editingImageIdx + 1} cropped and added to Storyboard successfully!`, 'success');
     } catch (err: any) {
       setConsoleLogs(prev => [
         `[Image Editor] [ERROR] Failed to save edits for Frame #${editingImageIdx + 1}: ${ (err as any).message || 'Unknown error'}`,
@@ -131,28 +123,15 @@ export function useSingleImageEdits({
         croppedUrls.push(data.url);
       }
 
-      setScrapedImages(prev => {
-        const copy = [...prev];
-        copy.splice(editingImageIdx, 1, ...croppedUrls);
-        return copy;
-      });
-
-      setSelectedScraped(prev => {
-        if (prev.includes(originalUrl)) {
-          const idx = prev.indexOf(originalUrl);
-          const copy = [...prev];
-          copy.splice(idx, 1, ...croppedUrls);
-          return copy;
-        }
-        return prev;
-      });
+      // Add all cropped urls directly to Storyboard
+      addPanelsToStoryboard(croppedUrls);
 
       setConsoleLogs(prev => [
-        `[Image Editor] Successfully generated ${cuts.length} cropped/trimmed frames from Frame #${editingImageIdx + 1}!`,
+        `[Image Editor] Successfully added ${cuts.length} cropped/trimmed frames to Storyboard!`,
         ...prev
       ]);
-      console.log(`[Image Editor] Generated ${cuts.length} cuts from Frame #${editingImageIdx + 1}:`, croppedUrls);
-      addNotification(`Generated ${cuts.length} separate cuts from Frame #${editingImageIdx + 1}!`, 'success');
+      console.log(`[Image Editor] Generated ${cuts.length} cuts from Frame #${editingImageIdx + 1} and added to Storyboard:`, croppedUrls);
+      addNotification(`Generated ${cuts.length} separate cuts added to Storyboard!`, 'success');
     } catch (err: any) {
       console.error(`[Image Editor] Batch crop failed for Frame #${editingImageIdx + 1}:`, err);
       if (! (err as any).intercepted) {

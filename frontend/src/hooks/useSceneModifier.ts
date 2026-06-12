@@ -19,19 +19,27 @@ export function useSceneModifier({
   const handleModifySpeechText = (panelId: number, text: string) => {
     const originalPanel = panels.find(p => p.id === panelId);
     const originalText = originalPanel ? originalPanel.speech_text : "";
-    setPanels(prev => prev.map(p => p.id === panelId ? { ...p, speech_text: text } : p));
-    console.log(`[StoryboardTimeline] [Text Edit] Panel #${panelId} dialogue revised:`);
+    
+    // Automatically calculate new duration based on speech text length
+    const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+    const estimatedDuration = text.trim() 
+      ? Math.max(2.5, Math.min(12.0, parseFloat(((words / 2.2) + 0.8).toFixed(1))))
+      : 0.0;
+
+    setPanels(prev => prev.map(p => p.id === panelId ? { ...p, speech_text: text, duration: estimatedDuration } : p));
+    
+    console.log(`[StoryboardTimeline] [Text Edit] Panel #${panelId} dialogue revised, auto-adjusted duration to ${estimatedDuration}s:`);
     console.log(`  - Sent (Original): "${originalText}"`);
     console.log(`  - Revise (Revised): "${text}"`);
     if (setConsoleLogs) {
       setConsoleLogs(prev => [
-        `[Speech Bubbles] Dialogue revised on Panel #${panelId}`,
+        `[Speech Bubbles] Dialogue revised on Panel #${panelId} (duration auto-adjusted to ${estimatedDuration}s)`,
         `[Speech Bubbles]   - Sent (Original): "${originalText}"`,
         `[Speech Bubbles]   - Revise (Revised): "${text}"`,
         ...prev
       ]);
     }
-    addNotification?.(`Panel #${panelId} dialogue updated.`, "info");
+    addNotification?.(`Panel #${panelId} dialogue updated. Duration adjusted to ${estimatedDuration}s.`, "info");
   };
 
   const handleModifyMotion = (panelId: number, motionVal: string) => {

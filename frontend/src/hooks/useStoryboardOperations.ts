@@ -55,10 +55,13 @@ export function useStoryboardOperations({
 
   const {
     analyzingPanelId,
+    isAnalyzingAll,
     isCompiling,
     isZipping,
     handleDownloadZip,
     handleAnalyzePanel,
+    handleAnalyzeAllPanels,
+    handleAnalyzeSelectedPanels,
     handleCompileVideo,
   } = useCompileActions({
     panels,
@@ -103,6 +106,9 @@ export function useStoryboardOperations({
     handleBulkSetPreset,
     handleClearTimeline,
     handleAnalyzePanel,
+    handleAnalyzeAllPanels,
+    handleAnalyzeSelectedPanels,
+    isAnalyzingAll,
     handleCompileVideo,
   };
 }

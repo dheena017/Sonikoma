@@ -2,6 +2,7 @@ import React from "react";
 import { useAppLogic } from "./hooks/useAppLogic.js";
 import { useAppRouter } from "./hooks/useAppRouter.js";
 import { useGlobalShortcuts, DEFAULT_SHORTCUTS } from "./hooks/useGlobalShortcuts.js";
+import { useBackendHealth } from "./hooks/useBackendHealth.js";
 
 // Child Components
 import Header from "./components/Header.js";
@@ -19,6 +20,7 @@ import ShortcutsPage from "./components/ShortcutsPage.js";
 export default function App() {
 
   const appLogic = useAppLogic();
+  const { status: backendStatus, checkHealth: recheckBackend } = useBackendHealth();
   const {
     panels,
     setPanels,
@@ -141,7 +143,7 @@ export default function App() {
     handleSaveMultipleCuts,
     handleStitchWithNext,
     handleTriggerReprocess,
-    addPanelsWithAutoAnalysis,
+    addPanelsToStoryboard,
     handleCleanBubblesSelected,
     handleAutoCropSelected,
     totalCalculatedDuration,
@@ -205,6 +207,21 @@ export default function App() {
   return (
     <div id="app_root" className="min-h-screen bg-[#070709] text-neutral-100 flex flex-col justify-between selection:bg-purple-600 selection:text-white relative">
       
+      {backendStatus === "offline" && (
+        <div className="bg-gradient-to-r from-rose-950/90 to-red-950/95 border-b border-rose-800/40 px-4 py-3 text-center text-xs sm:text-sm font-semibold text-rose-250 flex items-center justify-center gap-3 z-50 animate-slide-down w-full">
+          <span className="flex items-center gap-2 flex-wrap justify-center">
+            <span className="h-2.5 w-2.5 rounded-full bg-rose-550 animate-ping" />
+            <span>⚠️ Computational Engine Server is Offline. Make sure the Python backend is active (run <code className="bg-black/50 px-1.5 py-0.5 rounded text-rose-300 font-mono text-xs">npm run backend</code>).</span>
+          </span>
+          <button
+            onClick={recheckBackend}
+            className="px-3 py-1 bg-rose-900/60 hover:bg-rose-850 text-rose-100 text-[10px] rounded-lg font-mono uppercase tracking-wider font-bold transition-all border border-rose-700/50 shadow-sm cursor-pointer whitespace-nowrap"
+          >
+            Recheck Connection
+          </button>
+        </div>
+      )}
+
       {/* BRANDING HEADER */}
       <Header 
         isProcessing={isProcessing} 
@@ -266,7 +283,7 @@ export default function App() {
           isScraping={isScraping}
           mergingIndices={mergingIndices}
           handleStitchWithNext={handleStitchWithNext}
-          addPanelsWithAutoAnalysis={addPanelsWithAutoAnalysis}
+          addPanelsToStoryboard={addPanelsToStoryboard}
           progressStatus={progressStatus}
           videoUrl={videoUrl}
           setVideoUrl={setVideoUrl}

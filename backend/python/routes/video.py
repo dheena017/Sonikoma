@@ -52,7 +52,7 @@ class VideoCompileRequest(BaseModel):
 class ConvertVideoPanel(BaseModel):
     image_url: str = Field(..., description="Panel image source URL")
     speech_text: Optional[str] = Field("", description="Panel narration or subtitle text")
-    duration: Optional[float] = Field(4.5, description="Panel frame duration")
+    duration: Optional[float] = Field(0.0, description="Panel frame duration")
 
 
 class ConvertVideoRequest(BaseModel):

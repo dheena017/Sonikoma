@@ -1,7 +1,6 @@
 import React from "react";
 import { ScraperDeckProps } from "./types.js";
 import { ScraperSelectionToolbar } from "./ScraperSelectionToolbar.js";
-import { ScraperActionButtons } from "./ScraperActionButtons.js";
 
 interface ScraperControlsProps
   extends Pick<
@@ -22,7 +21,7 @@ interface ScraperControlsProps
     | "handleAutoCropSelected"
     | "handleCleanBubblesSelected"
   > {
-  addPanelsWithAutoAnalysis: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
+  addPanelsToStoryboard: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
   fetchWithInterceptor?: any;
   /** Called when a filter action resets selection — so parent can clear lastSelectedIndex anchor */
   onLastSelectedReset?: () => void;
@@ -136,24 +135,6 @@ export default function ScraperControls({
         handleSelectRange={handleSelectRange}
         handleClearAll={handleClearAll}
         setSelectedScraped={setSelectedScraped}
-      />
-
-      <ScraperActionButtons
-        scrapedImages={scrapedImages}
-        selectedScraped={selectedScraped}
-        handleSelectAllToggle={handleSelectAllToggle}
-        setShowAutoCropModal={setShowAutoCropModal}
-        isBatchCropping={isBatchCropping}
-        batchProgress={batchProgress}
-        handleAutoCropSelected={handleAutoCropSelected}
-        setShowBubbleModal={setShowBubbleModal}
-        isCleaningBubbles={isCleaningBubbles}
-        cleanProgress={cleanProgress}
-        handleCleanBubblesSelected={handleCleanBubblesSelected}
-        handleBatchMergeSelected={() => {
-          /* noop — stitch is now in FloatingSelectionBar */
-        }}
-        isBatchMerging={false}
       />
     </>
   );

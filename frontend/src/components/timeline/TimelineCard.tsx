@@ -20,6 +20,8 @@ interface TimelineCardProps {
   handleModifySFX: (id: number, val: string) => void;
   handleModifyVisualDescription: (id: number, val: string) => void;
   handleAnalyzePanel: (id: number, url: string) => void;
+  isSelected: boolean;
+  onToggleSelect: () => void;
 }
 
 export default function TimelineCard({
@@ -39,6 +41,8 @@ export default function TimelineCard({
   handleModifySFX,
   handleModifyVisualDescription,
   handleAnalyzePanel,
+  isSelected,
+  onToggleSelect,
 }: TimelineCardProps) {
   const isCurrent = idx === currentPanelIndex && activePreviewTab === "storyboard";
 
@@ -47,6 +51,8 @@ export default function TimelineCard({
       className={`w-[220px] sm:w-[260px] shrink-0 rounded-xl border p-3 space-y-2.5 transition-all ${
         isCurrent 
           ? "bg-neutral-800/80 border-purple-500 shadow-lg" 
+          : isSelected
+          ? "bg-neutral-900 border-purple-600 shadow-md shadow-purple-900/30"
           : "bg-neutral-950 border-neutral-800"
       }`}
     >
@@ -57,6 +63,7 @@ export default function TimelineCard({
           setCurrentPanelIndex(idx);
           setActivePreviewTab("storyboard");
           setPlaybackTime(0);
+          onToggleSelect();
         }}
         className="relative h-28 sm:h-32 rounded-lg overflow-hidden cursor-pointer select-none bg-neutral-950 border border-neutral-800 flex items-center justify-center group"
       >
@@ -80,8 +87,25 @@ export default function TimelineCard({
           </div>
         )}
         
+        {/* Selection checkbox */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleSelect();
+          }}
+          className="absolute top-2 left-2 h-5 w-5 rounded flex items-center justify-center z-20 transition-all"
+          title={isSelected ? "Deselect panel" : "Select panel for AI analysis"}
+        >
+          {isSelected ? (
+            <span className="h-4 w-4 rounded bg-purple-500 border border-purple-400 flex items-center justify-center text-white text-[9px] font-bold shadow-lg">✓</span>
+          ) : (
+            <span className="h-4 w-4 rounded border border-neutral-500 bg-black/70 hover:border-purple-400 hover:bg-purple-900/30 transition-all" />
+          )}
+        </button>
+
         {/* Number tag */}
-        <div className="absolute top-2 left-2 h-5 w-5 rounded bg-black/80 backdrop-blur flex items-center justify-center font-mono text-[10px] text-purple-400 font-bold border border-purple-900/40">
+        <div className="absolute top-2 left-8 h-5 rounded bg-black/80 backdrop-blur flex items-center justify-center font-mono text-[10px] text-purple-400 font-bold border border-purple-900/40 px-1.5">
           #{panel.id}
         </div>
 
@@ -116,8 +140,10 @@ export default function TimelineCard({
         </div>
 
         {/* Motion overlay text */}
-        <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 text-[9px] font-mono uppercase tracking-wider text-neutral-300">
-          {panel.motion_type}
+        <div className={`absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 text-[9px] font-mono uppercase tracking-wider ${
+          !panel.motion_type ? "text-purple-400 animate-pulse" : "text-neutral-300"
+        }`}>
+          {panel.motion_type || "✦ AI"}
         </div>
       </div>
 
@@ -177,10 +203,11 @@ export default function TimelineCard({
         <div>
           <span className="text-[9px] font-mono text-neutral-500 uppercase block">Cam Motion</span>
           <select
-            value={panel.motion_type}
+            value={panel.motion_type ?? ""}
             onChange={(e) => handleModifyMotion(panel.id, e.target.value)}
             className="bg-neutral-900 text-[11px] text-neutral-300 rounded border border-neutral-800 p-1 w-full outline-none"
           >
+            <option value="">AI Will Decide</option>
             <option value="zoom_in">Zoom In</option>
             <option value="zoom_out">Zoom Out</option>
             <option value="pan_right">Pan Right</option>
@@ -191,17 +218,30 @@ export default function TimelineCard({
 
         <div>
           <span className="text-[9px] font-mono text-neutral-500 uppercase block">Timing (sec)</span>
-          <div className="flex items-center gap-1">
+          {panel.duration === 0 ? (
+            <div className="bg-neutral-900 border border-purple-800/50 text-[10px] rounded p-1 w-full text-center font-mono text-purple-400 animate-pulse">
+              ✦ AI Will Decide
+            </div>
+          ) : (
             <input
               type="number"
-              min={1}
-              max={15}
+              min={0.5}
               step={0.5}
               value={panel.duration}
-              onChange={(e) => handleModifyDuration(panel.id, parseFloat(e.target.value) || 4.0)}
-              className="bg-neutral-900 text-[11px] text-neutral-300 rounded border border-neutral-800 p-1 w-full outline-none"
+              onChange={(e) => {
+                const num = parseFloat(e.target.value);
+                if (!isNaN(num) && num >= 0) {
+                  handleModifyDuration(panel.id, num);
+                }
+              }}
+              onBlur={(e) => {
+                if (e.target.value === "" || parseFloat(e.target.value) <= 0) {
+                  handleModifyDuration(panel.id, 0);
+                }
+              }}
+              className="bg-neutral-900 text-[11px] text-neutral-300 rounded border border-neutral-800 p-1 w-full outline-none text-center font-mono"
             />
-          </div>
+          )}
         </div>
       </div>
 

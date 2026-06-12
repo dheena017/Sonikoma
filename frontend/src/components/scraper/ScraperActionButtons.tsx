@@ -4,9 +4,9 @@ import {
   CheckSquare,
   Scissors,
   RefreshCw,
-  Brain,
+  Sparkles,
   Settings2,
-  Merge,
+  Link2,
 } from "lucide-react";
 
 interface ScraperActionButtonsProps {
@@ -40,109 +40,106 @@ export function ScraperActionButtons({
   handleBatchMergeSelected,
   isBatchMerging,
 }: ScraperActionButtonsProps) {
+  const isAllSelected =
+    selectedScraped.length === scrapedImages.length && scrapedImages.length > 0;
+
   return (
-    <div className="flex items-center justify-between gap-3 pt-3 border-t border-neutral-800/40 mt-1 w-full font-sans overflow-x-auto">
-      <div className="flex items-center gap-2 flex-nowrap">
-        {/* Select All Toggle */}
-        <button
-          onClick={handleSelectAllToggle}
-          disabled={scrapedImages.length === 0}
-          className="h-9 px-3.5 bg-neutral-900/60 hover:bg-neutral-800 text-neutral-300 hover:text-white rounded-xl text-[11px] uppercase tracking-wider font-bold border border-neutral-800/60 cursor-pointer flex items-center gap-1.5 transition-all shadow-sm active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          {selectedScraped.length === scrapedImages.length &&
-          scrapedImages.length > 0 ? (
-            <>
-              <Square className="h-3.5 w-3.5 text-neutral-500" />
-              <span>Deselect All</span>
-            </>
-          ) : (
-            <>
-              <CheckSquare className="h-3.5 w-3.5 text-indigo-400" />
-              <span>Select All</span>
-            </>
-          )}
-        </button>
+    <div className="flex items-center gap-2 flex-wrap pt-3 border-t border-neutral-800/40 mt-1 w-full font-sans">
 
-        {/* Auto-Crop Segmented Button Group */}
-        <div className="flex items-center h-9 animate-[fadeIn_0.2s_ease-out]">
-          <button
-            onClick={() => {
-              console.log("[ScraperActionButtons] Triggering auto-crop on", selectedScraped.length, "panels");
-              handleAutoCropSelected();
-            }}
-            disabled={isBatchCropping || selectedScraped.length === 0}
-            className="h-full px-3.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-300 hover:text-indigo-200 rounded-l-xl border-r-0 flex items-center gap-1.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm text-[11px] uppercase tracking-wider font-bold cursor-pointer active:scale-95"
-            title="Auto-crop selected panels"
-          >
-            {isBatchCropping ? (
-              <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Scissors className="h-3.5 w-3.5" />
-            )}
-            <span>
-              {isBatchCropping && batchProgress
-                ? `Cropping (${batchProgress.current}/${batchProgress.total})`
-                : "Auto-Crop"}
-            </span>
-          </button>
-          <button
-            onClick={() => setShowAutoCropModal(true)}
-            title="Auto-crop settings"
-            className="h-full px-2.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-300 hover:text-indigo-200 rounded-r-xl transition-all cursor-pointer active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center"
-          >
-            <Settings2 className="h-3.5 w-3.5" />
-          </button>
-        </div>
+      {/* Select All Toggle */}
+      <button
+        onClick={handleSelectAllToggle}
+        disabled={scrapedImages.length === 0}
+        className="px-3 sm:px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        {isAllSelected ? (
+          <>
+            <Square className="h-4 w-4 text-neutral-400" />
+            Deselect All
+          </>
+        ) : (
+          <>
+            <CheckSquare className="h-4 w-4 text-purple-400" />
+            Select All
+          </>
+        )}
+      </button>
 
-        {/* Clean Bubbles Button Group */}
-        <div className="flex items-center h-9">
-          <button
-            onClick={() => {
-              console.log("[ScraperActionButtons] Triggering clean bubbles on", selectedScraped.length, "panels");
-              handleCleanBubblesSelected();
-            }}
-            disabled={isCleaningBubbles || selectedScraped.length === 0}
-            className="h-full px-3.5 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300 hover:text-purple-200 rounded-l-xl border-r-0 flex items-center gap-1.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm cursor-pointer active:scale-95 text-[11px] uppercase tracking-wider font-bold"
-            title="Clean speech bubbles on selected panels"
-          >
-            {isCleaningBubbles ? (
-              <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Brain className="h-3.5 w-3.5" />
-            )}
-            <span>
-              {isCleaningBubbles && cleanProgress
-                ? `Cleaning (${cleanProgress.current}/${cleanProgress.total})`
-                : "Clean Bubbles"}
-            </span>
-          </button>
-          <button
-            onClick={() => setShowBubbleModal(true)}
-            title="Bubble cleaner settings"
-            className="h-full px-2.5 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300 hover:text-purple-200 rounded-r-xl transition-all cursor-pointer active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center"
-          >
-            <Settings2 className="h-3.5 w-3.5" />
-          </button>
-        </div>
-
-        {/* Stitch / Merge Selected */}
+      {/* Auto-Crop Segmented Button Group */}
+      <div className="flex items-center">
         <button
           onClick={() => {
-            console.log("[ScraperActionButtons] Triggering stitch on", selectedScraped.length, "panels");
-            handleBatchMergeSelected();
+            console.log("[ScraperActionButtons] Triggering auto-crop on", selectedScraped.length, "panels");
+            handleAutoCropSelected();
           }}
-          disabled={selectedScraped.length < 2 || isBatchMerging}
-          className="h-9 px-3.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-300 hover:text-emerald-200 rounded-xl flex items-center gap-1.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed text-[11px] uppercase tracking-wider font-bold cursor-pointer active:scale-95 shadow-sm"
-          title="Vertical stitch selected frames into a single image asset"
+          disabled={isBatchCropping || selectedScraped.length === 0}
+          title="Auto-crop selected panels"
+          className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-l-xl border-r-0"
         >
-          {isBatchMerging ? (
-            <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+          {isBatchCropping ? (
+            <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
           ) : (
-            <Merge className="h-3.5 w-3.5" />
+            <Scissors className="h-4 w-4 text-purple-400" />
           )}
-          <span>{isBatchMerging ? "Stitching..." : "Stitch Selected"}</span>
+          {isBatchCropping && batchProgress
+            ? `Cropping (${batchProgress.current}/${batchProgress.total})`
+            : "Auto-Crop"}
+        </button>
+        <button
+          onClick={() => setShowAutoCropModal(true)}
+          title="Auto-crop settings"
+          className="px-2.5 py-2 text-xs font-bold flex items-center justify-center cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 rounded-r-xl"
+        >
+          <Settings2 className="h-4 w-4" />
         </button>
       </div>
+
+      {/* Clean Bubbles Button Group */}
+      <div className="flex items-center">
+        <button
+          onClick={() => {
+            console.log("[ScraperActionButtons] Triggering clean bubbles on", selectedScraped.length, "panels");
+            handleCleanBubblesSelected();
+          }}
+          disabled={isCleaningBubbles || selectedScraped.length === 0}
+          title="Clean speech bubbles on selected panels"
+          className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-l-xl border-r-0"
+        >
+          {isCleaningBubbles ? (
+            <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
+          ) : (
+            <Sparkles className="h-4 w-4 text-purple-400" />
+          )}
+          {isCleaningBubbles && cleanProgress
+            ? `Cleaning (${cleanProgress.current}/${cleanProgress.total})`
+            : "Clean Bubbles"}
+        </button>
+        <button
+          onClick={() => setShowBubbleModal(true)}
+          title="Bubble cleaner settings"
+          className="px-2.5 py-2 text-xs font-bold flex items-center justify-center cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 rounded-r-xl"
+        >
+          <Settings2 className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Stitch / Merge Selected */}
+      <button
+        onClick={() => {
+          console.log("[ScraperActionButtons] Triggering stitch on", selectedScraped.length, "panels");
+          handleBatchMergeSelected();
+        }}
+        disabled={selectedScraped.length < 2 || isBatchMerging}
+        title="Vertical stitch selected frames into a single image asset"
+        className="px-3 sm:px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        {isBatchMerging ? (
+          <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
+        ) : (
+          <Link2 className="h-4 w-4 text-purple-400" />
+        )}
+        {isBatchMerging ? "Stitching..." : "Stitch Selected"}
+      </button>
     </div>
   );
 }

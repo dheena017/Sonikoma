@@ -36,6 +36,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
     fetchWithInterceptor,
     imageEditStates,
     setImageEditStates,
+    addPanelsToStoryboard,
   } = appLogic;
 
   const activeFetch = (fetchWithInterceptor || fetch) as typeof fetch;
@@ -98,6 +99,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
     editCropRight,
     setEditCropRight,
     editAutoTrim,
+    addPanelsToStoryboard,
 
     eraseMethod: state.eraseMethod,
     sensitivity: state.sensitivity,
@@ -335,13 +337,11 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
       if (!response.ok) throw new Error("Splits execution failed");
       const data = await response.json();
       if (data.success && Array.isArray(data.urls) && data.urls.length > 0) {
-        setScrapedImages((prev) => {
-          const copy = [...prev];
-          copy.splice(editingImageIdx, 1, ...data.urls);
-          return copy;
-        });
-        addNotification(`Successfully split panel into ${data.urls.length} images!`, "success");
+        addPanelsToStoryboard(data.urls);
+        addNotification(`Successfully split panel into ${data.urls.length} images and added to Storyboard!`, "success");
         setEditingImageIdx(null);
+        window.history.pushState({}, "", "/");
+        window.dispatchEvent(new Event("popstate"));
       }
     } catch (err: any) {
       addNotification(`Split execution failed: ${err.message}`, "error");

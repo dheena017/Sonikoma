@@ -14,6 +14,7 @@ interface UseCropEditorPipelinesProps {
   setPanels?: React.Dispatch<React.SetStateAction<any[]>>;
   setConsoleLogs?: React.Dispatch<React.SetStateAction<string[]>>;
   addNotification: (message: string, type: NotificationType) => void;
+  addPanelsToStoryboard: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
   
   editCropTop: number;
   setEditCropTop: (val: number) => void;
@@ -71,6 +72,8 @@ export function useCropEditorPipelines(props: UseCropEditorPipelinesProps) {
     setScrapedImages: props.setScrapedImages,
     setConsoleLogs: props.setConsoleLogs,
     editAutoTrim: props.editAutoTrim,
+    addPanelsToStoryboard: props.addPanelsToStoryboard,
+    setEditingImageIdx: props.setEditingImageIdx,
   });
 
   const {
@@ -105,6 +108,7 @@ export function useCropEditorPipelines(props: UseCropEditorPipelinesProps) {
     debugMode: props.debugMode,
     fillColor: props.fillColor,
     gpu: props.gpu,
+    addPanelsToStoryboard: props.addPanelsToStoryboard,
   });
 
   return {
