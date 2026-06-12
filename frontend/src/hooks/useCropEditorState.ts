@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Slice } from "../components/crop/types";
 
 interface UseCropEditorStateProps {
@@ -58,19 +58,54 @@ export function useCropEditorState({
   const [isAiDetecting, setIsAiDetecting] = useState<boolean>(false);
 
   // Sidebar Tab Configuration
+  const getTabFromPathName = () => {
+    const segments = window.location.pathname.split("/");
+    const tabSegment = segments[2];
+    const validTabs = ["adjust", "edit", "eraser", "slice", "crop", "merge"];
+    if (tabSegment && validTabs.includes(tabSegment)) {
+      return tabSegment as any;
+    }
+    return null;
+  };
+
   const savedActiveTab = savedState?.activeTab;
-  const [activeTab, setActiveTab] = useState<"adjust" | "edit" | "eraser" | "slice" | "crop" | "merge">(
-    savedActiveTab === "adjust" ||
-    savedActiveTab === "slice" ||
-    savedActiveTab === "crop" ||
-    savedActiveTab === "edit" ||
-    savedActiveTab === "merge" ||
-    savedActiveTab === "eraser"
-      ? savedActiveTab
-      : savedActiveTab === "tools"
-      ? "edit"
-      : "adjust"
-  );
+  const [activeTab, setActiveTabState] = useState<"adjust" | "edit" | "eraser" | "slice" | "crop" | "merge">(() => {
+    const pathTab = getTabFromPathName();
+    if (pathTab) return pathTab;
+    if (
+      savedActiveTab === "adjust" ||
+      savedActiveTab === "slice" ||
+      savedActiveTab === "crop" ||
+      savedActiveTab === "edit" ||
+      savedActiveTab === "merge" ||
+      savedActiveTab === "eraser"
+    ) {
+      return savedActiveTab;
+    }
+    return "adjust";
+  });
+
+  // Keep state in sync with back/forward history navigation
+  useEffect(() => {
+    const handleRouteSync = () => {
+      const pathTab = getTabFromPathName();
+      if (pathTab && pathTab !== activeTab) {
+        setActiveTabState(pathTab);
+      }
+    };
+    window.addEventListener("popstate", handleRouteSync);
+    return () => window.removeEventListener("popstate", handleRouteSync);
+  }, [activeTab]);
+
+  const setActiveTab = (newTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge") => {
+    setActiveTabState(newTab);
+    const params = new URLSearchParams(window.location.search);
+    const idx = params.get("idx") || "0";
+    const newPath = `/editor/${newTab}?idx=${idx}`;
+    if (window.location.pathname + window.location.search !== newPath) {
+      window.history.pushState({}, "", newPath);
+    }
+  };
 
   // Zoom & Transform
   const [zoom, setZoom] = useState<number>(1);

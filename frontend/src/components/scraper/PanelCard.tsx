@@ -167,6 +167,11 @@ function PanelCard({
   return (
     <div
       onClick={(e) => onCardClick(idx, imgUrl, e.shiftKey)}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        window.history.pushState({}, "", `/editor/adjust?idx=${idx}`);
+        window.dispatchEvent(new Event("popstate"));
+      }}
       className={[
         "group relative w-[140px] sm:w-[156px] shrink-0 rounded-2xl border p-2 space-y-2 transition-all duration-200 text-center cursor-pointer select-none",
         isSelected

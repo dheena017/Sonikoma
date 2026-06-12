@@ -7,6 +7,7 @@ import {
   Undo2,
   Redo2,
   Trash2,
+  Minimize2,
 } from "lucide-react";
 
 interface CropEditorHeaderProps {
@@ -20,6 +21,10 @@ interface CropEditorHeaderProps {
   redoHistoryLength: number;
   handleDeleteCurrentImage: () => void;
   setEditingImageIdx: (idx: number | null) => void;
+  activeTab: string;
+  isPipMode?: boolean;
+  setIsPipMode?: (val: boolean) => void;
+  slices?: any[];
 }
 
 export default function CropEditorHeader({
@@ -33,7 +38,23 @@ export default function CropEditorHeader({
   redoHistoryLength,
   handleDeleteCurrentImage,
   setEditingImageIdx,
+  activeTab,
+  isPipMode = false,
+  setIsPipMode,
+  slices = [],
 }: CropEditorHeaderProps) {
+  const handleCloseClick = () => {
+    if (historyLength > 0 || slices.length > 0) {
+      if (window.confirm("You have unsaved changes in the editor. Are you sure you want to navigate away?")) {
+        window.history.pushState({}, "", "/");
+        window.dispatchEvent(new Event("popstate"));
+      }
+    } else {
+      window.history.pushState({}, "", "/");
+      window.dispatchEvent(new Event("popstate"));
+    }
+  };
+
   return (
     <div className="relative px-5 sm:px-6 py-4 border-b border-white/5 bg-gradient-to-r from-neutral-950 via-neutral-950/95 to-purple-950/20">
       <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
@@ -61,6 +82,16 @@ export default function CropEditorHeader({
               <p className="max-w-2xl text-[10px] sm:text-[11px] text-neutral-400 font-mono leading-4">
                 Crop, trim, split, and clean the current frame without leaving the editor.
               </p>
+              {/* Breadcrumbs */}
+              <div className="flex flex-wrap items-center gap-1.5 text-[9px] font-bold font-mono text-neutral-500 uppercase tracking-wider pt-1 select-none">
+                <span className="hover:text-purple-400 cursor-pointer transition-colors" onClick={handleCloseClick}>Dashboard</span>
+                <span>/</span>
+                <span className="text-neutral-400">Editor</span>
+                <span>/</span>
+                <span className="text-purple-400">{activeTab}</span>
+                <span>/</span>
+                <span className="text-neutral-400 font-semibold">Frame #{editingImageIdx + 1}</span>
+              </div>
             </div>
           </div>
 
@@ -74,7 +105,7 @@ export default function CropEditorHeader({
               }}
               disabled={historyLength === 0}
               title="Undo last action (Ctrl+Z)"
-              className="relative inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-[11px] font-semibold font-mono text-neutral-300 bg-neutral-950/60 hover:bg-neutral-800/85 hover:text-white border border-white/5 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+              className="relative inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-[11px] font-semibold font-mono text-neutral-300 bg-neutral-950/60 hover:bg-neutral-800/85 hover:text-white border border-white/5 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
             >
               <Undo2 className="h-4 w-4" />
               <span className="hidden sm:inline">Undo</span>
@@ -92,7 +123,7 @@ export default function CropEditorHeader({
               }}
               disabled={redoHistoryLength === 0}
               title="Redo last action (Ctrl+Y)"
-              className="relative inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-[11px] font-semibold font-mono text-neutral-300 bg-neutral-950/60 hover:bg-neutral-800/85 hover:text-white border border-white/5 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+              className="relative inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-[11px] font-semibold font-mono text-neutral-300 bg-neutral-950/60 hover:bg-neutral-800/85 hover:text-white border border-white/5 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
             >
               <Redo2 className="h-4 w-4" />
               <span className="hidden sm:inline">Redo</span>
@@ -111,10 +142,38 @@ export default function CropEditorHeader({
               <Trash2 className="h-4 w-4 text-red-400" />
               <span className="hidden sm:inline">Delete</span>
             </button>
+            {setIsPipMode && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (isPipMode) {
+                    setIsPipMode(false);
+                    // restore path
+                    const params = new URLSearchParams(window.location.search);
+                    const idx = params.get("idx") || "0";
+                    window.history.pushState({}, "", `/editor/${activeTab}?idx=${idx}`);
+                    window.dispatchEvent(new Event("popstate"));
+                  } else {
+                    setIsPipMode(true);
+                    // navigate to dashboard
+                    window.history.pushState({}, "", "/");
+                    window.dispatchEvent(new Event("popstate"));
+                  }
+                }}
+                className={`inline-flex items-center justify-center rounded-2xl p-2 transition-all cursor-pointer ${
+                  isPipMode 
+                    ? "bg-purple-600 text-white shadow-lg" 
+                    : "bg-neutral-950/60 hover:bg-neutral-800/90 text-neutral-300 hover:text-white"
+                }`}
+                title={isPipMode ? "Exit Picture-in-Picture Mode" : "Minimize to Picture-in-Picture"}
+              >
+                <Minimize2 className="h-4 w-4" />
+              </button>
+            )}
             <div className="w-px h-6 bg-white/10" />
             <button
-              onClick={() => setEditingImageIdx(null)}
-              className="inline-flex items-center justify-center rounded-2xl p-2 bg-neutral-950/60 hover:bg-neutral-800/90 text-neutral-300 hover:text-white transition-all"
+              onClick={handleCloseClick}
+              className="inline-flex items-center justify-center rounded-2xl p-2 bg-neutral-950/60 hover:bg-neutral-800/90 text-neutral-300 hover:text-white transition-all cursor-pointer"
               title="Close crop editor"
             >
               <X className="h-4 w-4" />

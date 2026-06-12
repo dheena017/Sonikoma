@@ -1,5 +1,7 @@
 import React from "react";
 import { useAppLogic } from "./hooks/useAppLogic.js";
+import { useAppRouter } from "./hooks/useAppRouter.js";
+import { useGlobalShortcuts, DEFAULT_SHORTCUTS } from "./hooks/useGlobalShortcuts.js";
 
 // Child Components
 import Header from "./components/Header.js";
@@ -9,6 +11,10 @@ import AutoCropModal from "./components/processing/AutoCropModal.js";
 import NotificationStack from "./components/NotificationStack.js";
 import { AppWorkspace } from "./components/AppWorkspace.js";
 import PageNotFound from "./components/PageNotFound.js";
+import AdvancedSettings from "./components/AdvancedSettings.js";
+import LogsPage from "./components/LogsPage.js";
+import StatusPage from "./components/StatusPage.js";
+import ShortcutsPage from "./components/ShortcutsPage.js";
 
 export default function App() {
 
@@ -141,43 +147,62 @@ export default function App() {
     totalCalculatedDuration,
   } = appLogic;
 
-  const [currentPath, setCurrentPath] = React.useState(window.location.pathname);
+  const {
+    currentPath,
+    lastEditorPath,
+    activeTheme,
+    setActiveTheme,
+    isPipMode,
+    setIsPipMode,
+    navigateTo,
+  } = useAppRouter({
+    scrapedImages,
+    editingImageIdx,
+    setEditingImageIdx,
+    setShowAutoCropModal,
+    setShowBubbleModal,
+    setTargetUrl,
+    setSelectedModel,
+    setSelectedSource,
+    setVoiceActor,
+    setMusicTheme,
+    setAspectRatio,
+    setFrameRate,
+    addNotification,
+    voiceActor,
+    musicTheme,
+    aspectRatio,
+    frameRate,
+  });
 
-  React.useEffect(() => {
-    const handleLocationChange = () => {
-      setCurrentPath(window.location.pathname);
-    };
+  const { shortcuts, setShortcuts } = useGlobalShortcuts({
+    scrapedImages,
+    selectedScraped,
+    setSelectedScraped,
+    lastEditorPath,
+    targetUrl,
+    volume,
+    setVolume,
+    isMuted,
+    setIsMuted,
+    addNotification,
+    handleGenerateVideo,
+    toggleStoryboardPlayback,
+    resetStoryboardPlayback,
+    navigateTo,
+    setIsPipMode,
+  });
 
-    const originalPushState = window.history.pushState;
-    const originalReplaceState = window.history.replaceState;
-
-    window.history.pushState = function (...args) {
-      originalPushState.apply(this, args);
-      handleLocationChange();
-    };
-
-    window.history.replaceState = function (...args) {
-      originalReplaceState.apply(this, args);
-      handleLocationChange();
-    };
-
-    window.addEventListener("popstate", handleLocationChange);
-    
-    return () => {
-      window.history.pushState = originalPushState;
-      window.history.replaceState = originalReplaceState;
-      window.removeEventListener("popstate", handleLocationChange);
-    };
-  }, []);
-
-  const navigateTo = (path: string) => {
-    window.history.pushState({}, "", path);
-  };
-
-  const isPathValid = currentPath === "/" || currentPath === "" || currentPath === "/index.html";
+  const isDashboardPath = currentPath === "/" || currentPath === "" || currentPath === "/index.html" || currentPath === "/dashboard";
+  const isSettingsPath = currentPath === "/settings";
+  const isAutoCropPath = currentPath === "/auto-crop";
+  const isBubbleCleanerPath = currentPath === "/bubble-cleaner";
+  const isEditorPath = currentPath.startsWith("/editor");
+  const isLogsPath = currentPath === "/logs";
+  const isStatusPath = currentPath === "/status";
+  const isShortcutsPath = currentPath === "/shortcuts";
 
   return (
-
     <div id="app_root" className="min-h-screen bg-[#070709] text-neutral-100 flex flex-col justify-between selection:bg-purple-600 selection:text-white relative">
       
       {/* BRANDING HEADER */}
@@ -185,82 +210,18 @@ export default function App() {
         isProcessing={isProcessing} 
         panels={panels} 
         totalCalculatedDuration={totalCalculatedDuration}
+        currentPath={currentPath}
+        editingImageIdx={editingImageIdx}
+        lastEditorPath={lastEditorPath}
+        isBatchCropping={isBatchCropping}
+        isCleaningBubbles={isCleaningBubbles}
       />
 
-      {/* WORKSPACE AREA — AutoCropModal / BubbleCleanerModal / CropEditorModal / Main Grid */}
-      {!isPathValid ? (
-        <PageNotFound onNavigateHome={() => navigateTo("/")} />
-      ) : showAutoCropModal ? (
-        <AutoCropModal
-
-          onClose={() => setShowAutoCropModal(false)}
-          onApply={() => {
-             console.log("App: Triggering handleAutoCropSelected");
-             handleAutoCropSelected();
-             setShowAutoCropModal(false);
-          }}
-          sensitivity={cropSensitivity}
-          setSensitivity={setCropSensitivity}
-          padding={cropPaddingPx}
-          setPadding={setCropPaddingPx}
-          backgroundColorMode={cropBackgroundMode}
-          setBackgroundColorMode={setCropBackgroundMode}
-          autoSplitTallStrips={autoSplitTallStrips}
-          setAutoSplitTallStrips={setAutoSplitTallStrips}
-          aspectRatioLock={aspectRatioLock}
-          setAspectRatioLock={setAspectRatioLock}
-          minPanelAreaPct={minPanelAreaPct}
-          setMinPanelAreaPct={setMinPanelAreaPct}
-          overlapMergeThreshold={overlapMergeThreshold}
-          setOverlapMergeThreshold={setOverlapMergeThreshold}
-          useLocalCV={useLocalCV}
-          setUseLocalCV={setUseLocalCV}
-          cropModel={cropModel}
-          setCropModel={setCropModel}
-          cropMinHeightPx={cropMinHeightPx}
-          setCropMinHeightPx={setCropMinHeightPx}
-          cropCannyLow={cropCannyLow}
-          setCropCannyLow={setCropCannyLow}
-          cropCannyHigh={cropCannyHigh}
-          setCropCannyHigh={setCropCannyHigh}
-          cropCloseKernelSize={cropCloseKernelSize}
-          setCropCloseKernelSize={setCropCloseKernelSize}
-          activeTab={activeAutoCropTab}
-          setActiveTab={setActiveAutoCropTab}
-          selectedCount={selectedScraped.length}
-          isApplying={isBatchCropping}
-          scrapedImages={scrapedImages}
-          selectedScraped={selectedScraped}
-          setConsoleLogs={setConsoleLogs}
-          addNotification={addNotification}
-        />
-      ) : showBubbleModal ? (
-        <BubbleCleanerModal
-          onClose={() => setShowBubbleModal(false)}
-          onApply={() => {
-             console.log("App: Triggering handleCleanBubblesSelected");
-             handleCleanBubblesSelected();
-             setShowBubbleModal(false);
-          }}
-          detectionStyle={bubbleDetectionStyle}
-          setDetectionStyle={setBubbleDetectionStyle}
-          eraseMethod={bubbleEraseMethod}
-          setEraseMethod={setBubbleEraseMethod}
-          sensitivity={bubbleSensitivity}
-          setSensitivity={setBubbleSensitivity}
-          bubbleDilation={bubbleDilation}
-          setBubbleDilation={setBubbleDilation}
-          bubbleInpaintRadius={bubbleInpaintRadius}
-          setBubbleInpaintRadius={setBubbleInpaintRadius}
-          activeTab={activeBubbleTab}
-          setActiveTab={setActiveBubbleTab}
-          selectedCount={selectedScraped.length}
-          isApplying={isCleaningBubbles}
-          scrapedImages={scrapedImages}
-          selectedScraped={selectedScraped}
-          addNotification={addNotification}
-        />
-      ) : (
+      {/* PAGE 1: DASHBOARD */}
+      <div 
+        className="page-transition w-full flex-1 flex flex-col animate-[fadeIn_0.2s_ease-out]"
+        style={{ display: isDashboardPath ? "flex" : "none" }}
+      >
         <AppWorkspace
           panels={panels}
           setPanels={setPanels}
@@ -325,15 +286,179 @@ export default function App() {
           musicTheme={musicTheme}
           voiceActor={voiceActor}
         />
-      )}
+      </div>
 
-      {editingImageIdx !== null && isPathValid && (
-        <CropEditorModal
-          appLogic={appLogic}
+      {/* PAGE 2: ADVANCED RENDER SETTINGS */}
+      <div 
+        className="page-transition w-full flex-1 flex flex-col max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6"
+        style={{ display: isSettingsPath ? "flex" : "none" }}
+      >
+        <div className="flex items-center justify-between border-b border-neutral-800 pb-4">
+          <div>
+            <h2 className="text-2xl font-bold text-white tracking-tight">System Configuration Settings</h2>
+            <p className="text-xs text-neutral-400 font-mono">Manage voice synthesis, music composition, and output rendering profiles</p>
+          </div>
+          <button
+            onClick={() => navigateTo("/")}
+            className="px-4 py-2 bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-xl text-xs font-mono transition-all hover:bg-neutral-800/80 cursor-pointer"
+          >
+            ← Dashboard
+          </button>
+        </div>
+        <AdvancedSettings
+          voiceActor={voiceActor}
+          setVoiceActor={setVoiceActor}
+          musicTheme={musicTheme}
+          setMusicTheme={setMusicTheme}
+          aspectRatio={aspectRatio}
+          setAspectRatio={setAspectRatio}
+          frameRate={frameRate}
+          setFrameRate={setFrameRate}
+          activeTheme={activeTheme}
+          setActiveTheme={setActiveTheme}
+          targetUrl={targetUrl}
+          selectedModel={selectedModel}
+          selectedSource={selectedSource}
+          addNotification={addNotification}
         />
+      </div>
+
+      {/* PAGE 3: AUTO CROP */}
+      <div 
+        className="page-transition w-full flex-1"
+        style={{ display: isAutoCropPath ? "block" : "none" }}
+      >
+        <AutoCropModal
+          onClose={() => navigateTo("/")}
+          onApply={() => {
+             console.log("App: Triggering handleAutoCropSelected");
+             handleAutoCropSelected();
+             navigateTo("/");
+          }}
+          sensitivity={cropSensitivity}
+          setSensitivity={setCropSensitivity}
+          padding={cropPaddingPx}
+          setPadding={setCropPaddingPx}
+          backgroundColorMode={cropBackgroundMode}
+          setBackgroundColorMode={setCropBackgroundMode}
+          autoSplitTallStrips={autoSplitTallStrips}
+          setAutoSplitTallStrips={setAutoSplitTallStrips}
+          aspectRatioLock={aspectRatioLock}
+          setAspectRatioLock={setAspectRatioLock}
+          minPanelAreaPct={minPanelAreaPct}
+          setMinPanelAreaPct={setMinPanelAreaPct}
+          overlapMergeThreshold={overlapMergeThreshold}
+          setOverlapMergeThreshold={setOverlapMergeThreshold}
+          useLocalCV={useLocalCV}
+          setUseLocalCV={setUseLocalCV}
+          cropModel={cropModel}
+          setCropModel={setCropModel}
+          cropMinHeightPx={cropMinHeightPx}
+          setCropMinHeightPx={setCropMinHeightPx}
+          cropCannyLow={cropCannyLow}
+          setCropCannyLow={setCropCannyLow}
+          cropCannyHigh={cropCannyHigh}
+          setCropCannyHigh={setCropCannyHigh}
+          cropCloseKernelSize={cropCloseKernelSize}
+          setCropCloseKernelSize={setCropCloseKernelSize}
+          activeTab={activeAutoCropTab}
+          setActiveTab={setActiveAutoCropTab}
+          selectedCount={selectedScraped.length}
+          isApplying={isBatchCropping}
+          scrapedImages={scrapedImages}
+          selectedScraped={selectedScraped}
+          setConsoleLogs={setConsoleLogs}
+          addNotification={addNotification}
+        />
+      </div>
+
+      {/* PAGE 4: BUBBLE CLEANER */}
+      <div 
+        className="page-transition w-full flex-1"
+        style={{ display: isBubbleCleanerPath ? "block" : "none" }}
+      >
+        <BubbleCleanerModal
+          onClose={() => navigateTo("/")}
+          onApply={() => {
+             console.log("App: Triggering handleCleanBubblesSelected");
+             handleCleanBubblesSelected();
+             navigateTo("/");
+          }}
+          detectionStyle={bubbleDetectionStyle}
+          setDetectionStyle={setBubbleDetectionStyle}
+          eraseMethod={bubbleEraseMethod}
+          setEraseMethod={setBubbleEraseMethod}
+          sensitivity={bubbleSensitivity}
+          setSensitivity={setBubbleSensitivity}
+          bubbleDilation={bubbleDilation}
+          setBubbleDilation={setBubbleDilation}
+          bubbleInpaintRadius={bubbleInpaintRadius}
+          setBubbleInpaintRadius={setBubbleInpaintRadius}
+          activeTab={activeBubbleTab}
+          setActiveTab={setActiveBubbleTab}
+          selectedCount={selectedScraped.length}
+          isApplying={isCleaningBubbles}
+          scrapedImages={scrapedImages}
+          selectedScraped={selectedScraped}
+          addNotification={addNotification}
+        />
+      </div>
+
+      {/* PAGE 5: ADVANCED CROP EDITOR */}
+      <div 
+        className={isPipMode ? "fixed bottom-6 right-6 w-96 h-56 rounded-3xl border border-white/10 shadow-2xl z-50 overflow-hidden bg-neutral-950/95 backdrop-blur-xl animate-fade-in cursor-pointer" : "page-transition w-full flex-1"}
+        style={{ display: (isEditorPath || isPipMode) && editingImageIdx !== null ? "block" : "none" }}
+        onClick={isPipMode ? () => {
+          setIsPipMode(false);
+          navigateTo(lastEditorPath);
+        } : undefined}
+      >
+        {editingImageIdx !== null && (
+          <CropEditorModal appLogic={{ ...appLogic, isPipMode, setIsPipMode }} />
+        )}
+      </div>
+
+      {/* PAGE 6: DEDICATED LOGS CONSOLE */}
+      <div 
+        className="page-transition w-full flex-1 flex flex-col"
+        style={{ display: isLogsPath ? "flex" : "none" }}
+      >
+        <LogsPage 
+          consoleLogs={consoleLogs}
+          setConsoleLogs={setConsoleLogs}
+          onNavigateHome={() => navigateTo("/")}
+        />
+      </div>
+
+      {/* PAGE 7: COMPUTATIONAL DIAGNOSTICS */}
+      <div 
+        className="page-transition w-full flex-1 flex flex-col"
+        style={{ display: isStatusPath ? "flex" : "none" }}
+      >
+        <StatusPage 
+          onNavigateHome={() => navigateTo("/")}
+          fetchWithInterceptor={fetchWithInterceptor}
+        />
+      </div>
+
+      {/* PAGE 8: SHORTCUTS CONFIGURATION */}
+      <div 
+        className="page-transition w-full flex-1 flex flex-col"
+        style={{ display: isShortcutsPath ? "flex" : "none" }}
+      >
+        <ShortcutsPage 
+          shortcuts={shortcuts}
+          setShortcuts={setShortcuts}
+          defaultShortcuts={DEFAULT_SHORTCUTS}
+          onNavigateHome={() => navigateTo("/")}
+          addNotification={addNotification}
+        />
+      </div>
+
+      {/* PAGE 404 (FALLBACK) */}
+      {!isDashboardPath && !isSettingsPath && !isAutoCropPath && !isBubbleCleanerPath && !isEditorPath && !isLogsPath && !isStatusPath && !isShortcutsPath && (
+        <PageNotFound onNavigateHome={() => navigateTo("/")} />
       )}
-
-
 
       {/* FOOTER */}
       <footer id="footer_pane" className="border-t border-neutral-800 bg-neutral-950/20 py-6 text-center text-xs text-neutral-500">

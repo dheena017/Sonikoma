@@ -12,7 +12,10 @@ import { useCropEditor } from "../hooks/useCropEditor.js";
 import { useAppLogic } from "../hooks/useAppLogic.js";
 
 interface CropEditorModalProps {
-  appLogic: ReturnType<typeof useAppLogic>;
+  appLogic: ReturnType<typeof useAppLogic> & {
+    isPipMode?: boolean;
+    setIsPipMode?: (val: boolean) => void;
+  };
 }
 
 export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
@@ -45,9 +48,16 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
     setSelectedScraped,
     setErrorPopup,
     aspectRatio,
+    isPipMode = false,
+    setIsPipMode
   } = appLogic;
 
   useEffect(() => {
+    if (isPipMode) {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+      return;
+    }
     const originalBodyOverflow = document.body.style.overflow;
     const originalHtmlOverflow = document.documentElement.style.overflow;
     document.body.style.overflow = "hidden";
@@ -56,7 +66,8 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
       document.body.style.overflow = originalBodyOverflow;
       document.documentElement.style.overflow = originalHtmlOverflow;
     };
-  }, []);
+  }, [isPipMode]);
+
 
   const {
     containerRef,
@@ -166,6 +177,15 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
     appLogic,
   });
 
+  useEffect(() => {
+    (window as any).editorHasUnsavedChanges = () => {
+      return history.length > 0 || slices.length > 0;
+    };
+    return () => {
+      delete (window as any).editorHasUnsavedChanges;
+    };
+  }, [history.length, slices.length]);
+
   const activeStoryboardPanel = panels?.find(
     (p) => p.image_url === scrapedImages[editingImageIdx!]
   );
@@ -235,6 +255,62 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
 
   if (editingImageIdx === null) return null;
 
+  if (isPipMode) {
+    return (
+      <div 
+        className="w-full h-full relative group select-none overflow-hidden bg-neutral-950 flex flex-col justify-center items-center pointer-events-none"
+        title="Click to restore Editor"
+      >
+        <div className="absolute top-2 right-2 bg-purple-600 text-white text-[9px] font-bold font-mono px-2 py-0.5 rounded-md shadow-md z-50">
+          PIP ACTIVE
+        </div>
+        <CropEditorCanvasContainer
+          handleAiCrop={handleAiCrop}
+          isAiDetecting={isAiDetecting}
+          editingImageIdx={editingImageIdx}
+          scrapedImages={scrapedImages}
+          containerRef={containerRef}
+          editCropTop={editCropTop}
+          editCropBottom={editCropBottom}
+          editCropLeft={editCropLeft}
+          editCropRight={editCropRight}
+          slices={slices}
+          selectedSliceId={selectedSliceId}
+          showSplitPosition={showSplitPosition}
+          splitPosition={splitPosition}
+          splitLines={splitLines}
+          handleStart={handleStart}
+          handleMove={handleMove}
+          handleEnd={handleEnd}
+          isPointInsideSelection={isPointInsideSelection}
+          handleSelectSlice={handleSelectSlice}
+          handleDeleteSlice={handleDeleteSlice}
+          handleRemoveSplitLine={handleRemoveSplitLine}
+          dragType={dragType}
+          onResizeStart={onResizeStart}
+          handleSelectAndDragSlice={handleSelectAndDragSlice}
+          zoom={0.4}
+          editMode={editMode}
+          detectedBubbles={detectedBubbles}
+          selectedBubbleIdx={selectedBubbleIdx}
+          setSelectedBubbleIdx={setSelectedBubbleIdx}
+          brushSize={brushSize}
+          brushAction={brushAction}
+          canvasMaskRef={canvasMaskRef}
+          setSplitPosition={setSplitPosition}
+          setShowSplitPosition={setShowSplitPosition}
+          setEditCropTop={setEditCropTop}
+          setEditCropBottom={setEditCropBottom}
+          setEditCropLeft={setEditCropLeft}
+          setEditCropRight={setEditCropRight}
+          setSelectedSliceId={setSelectedSliceId}
+          activeTab={activeTab}
+          aspectRatio={aspectRatio}
+        />
+      </div>
+    );
+  }
+
   return (
     <div
       className="fixed inset-0 z-50 bg-[radial-gradient(circle_at_top,rgba(139,92,246,0.18),transparent_42%),linear-gradient(180deg,rgba(3,3,8,0.84),rgba(3,3,8,0.94))] backdrop-blur-xl flex items-center justify-center p-3 sm:p-4 md:p-6 animate-[fadeIn_0.2s_ease-out] overflow-hidden overscroll-contain"
@@ -260,6 +336,10 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
           redoHistoryLength={redoHistory.length}
           handleDeleteCurrentImage={handleDeleteCurrentImage}
           setEditingImageIdx={setEditingImageIdx}
+          activeTab={activeTab}
+          isPipMode={isPipMode}
+          setIsPipMode={setIsPipMode}
+          slices={slices}
         />
 
         {/* Main Content Pane */}

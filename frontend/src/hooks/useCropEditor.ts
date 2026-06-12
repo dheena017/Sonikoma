@@ -283,12 +283,18 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
 
   const handlePrevImage = () => {
     if (editingImageIdx === null || editingImageIdx <= 0) return;
-    setEditingImageIdx(editingImageIdx - 1);
+    const activeTabVal = window.location.pathname.split("/")[2] || "adjust";
+    const nextIdx = editingImageIdx - 1;
+    window.history.pushState({}, "", `/editor/${activeTabVal}?idx=${nextIdx}`);
+    window.dispatchEvent(new Event("popstate"));
   };
 
   const handleNextImage = () => {
     if (editingImageIdx === null || editingImageIdx >= scrapedImages.length - 1) return;
-    setEditingImageIdx(editingImageIdx + 1);
+    const activeTabVal = window.location.pathname.split("/")[2] || "adjust";
+    const nextIdx = editingImageIdx + 1;
+    window.history.pushState({}, "", `/editor/${activeTabVal}?idx=${nextIdx}`);
+    window.dispatchEvent(new Event("popstate"));
   };
 
   const handleApplyEqualSplits = (count: number) => {
@@ -359,7 +365,8 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
       // Default single frame crop
       await handleSaveEditedImageCallback();
     }
-    setEditingImageIdx(null);
+    window.history.pushState({}, "", "/");
+    window.dispatchEvent(new Event("popstate"));
   };
 
   const handleDeleteCurrentImage = () => {
@@ -375,16 +382,16 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
       
       // Only close editor if no images left
       if (filtered.length === 0) {
-        setEditingImageIdx(null);
+        window.history.pushState({}, "", "/");
+        window.dispatchEvent(new Event("popstate"));
         return filtered;
       }
 
       // Auto-navigate to next image, or previous if it was the last one
-      if (currentIdx >= filtered.length) {
-        setEditingImageIdx(currentIdx - 1);
-      } else {
-        setEditingImageIdx(currentIdx);
-      }
+      const nextIdx = currentIdx >= filtered.length ? currentIdx - 1 : currentIdx;
+      const activeTabVal = window.location.pathname.split("/")[2] || "adjust";
+      window.history.pushState({}, "", `/editor/${activeTabVal}?idx=${nextIdx}`);
+      window.dispatchEvent(new Event("popstate"));
 
       return filtered;
     });

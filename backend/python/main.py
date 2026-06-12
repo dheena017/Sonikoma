@@ -153,7 +153,8 @@ IS_PRODUCTION = os.getenv("NODE_ENV") == "production"
 class EndpointFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
         try:
-            if "/system-logs" in record.getMessage():
+            msg = record.getMessage()
+            if any(path in msg for path in ["/system-logs", "/api/metrics", "/api/health", "/metrics", "/health"]):
                 return False
         except Exception:
             pass
@@ -264,7 +265,7 @@ async def add_process_time_header(request: Request, call_next):
     response.headers["X-API-Version"]  = API_VERSION
     
     # Avoid logging SSE/logs polling endpoint spam
-    if "/system-logs" not in request.url.path:
+    if not any(path in request.url.path for path in ["/system-logs", "/api/metrics", "/api/health"]):
         logger.info(f"[{request_id}] {request.method} {request.url.path} -> {response.status_code} ({elapsed_ms}ms)")
     return response
 
