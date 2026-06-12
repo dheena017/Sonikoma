@@ -138,6 +138,8 @@ export function AppWorkspace({
   musicTheme,
   voiceActor,
 }: AppWorkspaceProps) {
+  console.log("[AppWorkspace] Rendering with", panels.length, "panels and", scrapedImages.length, "scraped images");
+
   return (
     <main id="main_workspace" className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-10 items-start">
       

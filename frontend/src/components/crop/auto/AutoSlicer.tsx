@@ -54,6 +54,7 @@ export default function AutoSlicer({
   const [showHelp, setShowHelp] = useState<boolean>(false);
 
   const resetSettings = () => {
+    console.log("[AutoSlicer] Resetting scanner settings");
     setStrategy("local-cv");
     setModel("gemini-2.5-flash");
     setSensitivity(30);
@@ -69,6 +70,7 @@ export default function AutoSlicer({
   };
 
   const handleScan = () => {
+    console.log(`[AutoSlicer] Initiating scan. Strategy: ${strategy}, DryRun: ${dryRun}`);
     handleDetectPanels({
       sensitivity,
       backgroundMode,
@@ -200,14 +202,20 @@ export default function AutoSlicer({
         <div className="grid grid-cols-2 gap-2 p-2 bg-neutral-900/60 border border-neutral-800 rounded-xl animate-fadeIn">
           <button
             type="button"
-            onClick={onCommitCuts}
+            onClick={() => {
+              console.log("[AutoSlicer] Committing detected cuts");
+              onCommitCuts?.();
+            }}
             className="py-1.5 px-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-300 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer"
           >
             Apply Detected Cuts
           </button>
           <button
             type="button"
-            onClick={clearDetectedBoxes}
+            onClick={() => {
+              console.log("[AutoSlicer] Clearing detected preview");
+              clearDetectedBoxes?.();
+            }}
             className="py-1.5 px-2.5 bg-red-950/20 hover:bg-red-900/20 border border-red-900/30 text-red-400 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer"
           >
             Clear Preview

@@ -27,7 +27,10 @@ export function CutsRegistryHeader({
       {slices.length > 0 && (
         <button
           type="button"
-          onClick={handleClearAllSlices}
+          onClick={() => {
+            console.log("[CutsRegistry] Clearing all slices");
+            handleClearAllSlices();
+          }}
           className="flex items-center gap-1 text-[9px] bg-red-950/60 hover:bg-red-900/80 text-red-400 border border-red-800/40 hover:border-red-700/60 px-2 py-1 rounded-lg cursor-pointer transition-all"
           title="Clear all defined crop tools from list"
         >

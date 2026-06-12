@@ -31,7 +31,10 @@ export default function TimelineHeader({
         {/* Bulk Action Toggle */}
         <button
           type="button"
-          onClick={() => setShowBulkOps(!showBulkOps)}
+          onClick={() => {
+            console.log("[TimelineHeader] Toggling bulk operations visibility");
+            setShowBulkOps(!showBulkOps);
+          }}
           className={`px-3 sm:px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
             showBulkOps
               ? "bg-purple-900/40 border-purple-500/50 text-purple-300"
@@ -46,7 +49,10 @@ export default function TimelineHeader({
         <button
           type="button"
           disabled={isZipping || panelsLength === 0}
-          onClick={handleDownloadZip}
+          onClick={() => {
+            console.log("[TimelineHeader] Download ZIP triggered");
+            handleDownloadZip();
+          }}
           className={`px-3 sm:px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
             isZipping
               ? "bg-neutral-800 border-neutral-700 text-neutral-500 cursor-not-allowed"
@@ -64,7 +70,10 @@ export default function TimelineHeader({
         <button
           type="button"
           disabled={isCompiling || panelsLength === 0}
-          onClick={handleCompileVideo}
+          onClick={() => {
+            console.log("[TimelineHeader] Compile video triggered");
+            handleCompileVideo();
+          }}
           className={`px-3 sm:px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
             isCompiling
               ? "bg-purple-900/40 border-purple-500/50 text-purple-200 cursor-not-allowed"

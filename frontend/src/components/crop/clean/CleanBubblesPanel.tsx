@@ -138,6 +138,7 @@ export default function CleanBubblesPanel({
   };
 
   const handleCleanCurrentBubble = async () => {
+    console.log(`[CleanBubblesPanel] Executing bubble clean on image #${editingImageIdx + 1}. Method: ${eraseMethod}`);
     setIsCleaning(true);
     if (setConsoleLogs) {
       setConsoleLogs((prev) => [
@@ -218,6 +219,7 @@ export default function CleanBubblesPanel({
 
   // Undo clean
   const handleUndoClean = () => {
+    console.log("[CleanBubblesPanel] Undo clean");
     if (historyPointer > 0) {
       const prevPointer = historyPointer - 1;
       const prevUrl = history[prevPointer];
@@ -229,6 +231,7 @@ export default function CleanBubblesPanel({
 
   // Redo clean
   const handleRedoClean = () => {
+    console.log("[CleanBubblesPanel] Redo clean");
     if (historyPointer < history.length - 1) {
       const nextPointer = historyPointer + 1;
       const nextUrl = history[nextPointer];
@@ -240,6 +243,7 @@ export default function CleanBubblesPanel({
 
   // Reset to original panel state
   const handleResetToOriginal = () => {
+    console.log("[CleanBubblesPanel] Reset to original uncleaned image");
     if (originalUrl && imgUrl !== originalUrl) {
       const newHistory = history.slice(0, historyPointer + 1);
       newHistory.push(originalUrl);

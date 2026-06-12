@@ -196,7 +196,10 @@ export default function MergePanel({
           {/* ── Merge button ── */}
           <button
             type="button"
-            onClick={() => onMerge(mergeCount, { direction, layout, spacing, spacingColor, scaleToFit, alignMode, padding })}
+            onClick={() => {
+              console.log(`[MergePanel] Executing merge for ${mergeCount} images in direction: ${direction}`);
+              onMerge(mergeCount, { direction, layout, spacing, spacingColor, scaleToFit, alignMode, padding });
+            }}
             disabled={isMerging || !canMerge}
             className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl bg-gradient-to-r from-teal-700 to-emerald-700 hover:from-teal-600 hover:to-emerald-600 text-white text-xs font-bold font-sans transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-lg shadow-teal-900/30"
             style={{ boxShadow: isMerging ? undefined : "0 0 20px rgba(20,184,166,0.2)" }}

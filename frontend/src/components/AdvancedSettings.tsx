@@ -42,7 +42,10 @@ export default function AdvancedSettings({
           <select 
             id="voice_select"
             value={voiceActor} 
-            onChange={(e) => setVoiceActor(e.target.value)}
+            onChange={(e) => {
+              console.log("[AdvancedSettings] Voice actor changed to:", e.target.value);
+              setVoiceActor(e.target.value);
+            }}
             className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2 text-neutral-300 focus:border-purple-500 outline-none"
           >
             <option>Standard Comic Narrator (Male)</option>
@@ -61,7 +64,10 @@ export default function AdvancedSettings({
           <select 
             id="bg_music_select"
             value={musicTheme} 
-            onChange={(e) => setMusicTheme(e.target.value)}
+            onChange={(e) => {
+              console.log("[AdvancedSettings] Music theme changed to:", e.target.value);
+              setMusicTheme(e.target.value);
+            }}
             className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2 text-neutral-400 focus:border-purple-500 outline-none"
           >
             <option>Orchestral Battle Theme</option>
@@ -80,7 +86,10 @@ export default function AdvancedSettings({
           </label>
           <div className="grid grid-cols-2 gap-2">
             <button
-              onClick={() => setAspectRatio("9:16")}
+              onClick={() => {
+                console.log("[AdvancedSettings] Aspect ratio changed to: 9:16");
+                setAspectRatio("9:16");
+              }}
               className={`py-1.5 px-3 text-xs rounded-xl border text-center transition-all cursor-pointer ${
                 aspectRatio === "9:16" 
                   ? "bg-purple-950/20 border-purple-500 text-purple-200 shadow-inner" 
@@ -90,7 +99,10 @@ export default function AdvancedSettings({
               9:16 Portrait
             </button>
             <button
-              onClick={() => setAspectRatio("16:9")}
+              onClick={() => {
+                console.log("[AdvancedSettings] Aspect ratio changed to: 16:9");
+                setAspectRatio("16:9");
+              }}
               className={`py-1.5 px-3 text-xs rounded-xl border text-center transition-all cursor-pointer ${
                 aspectRatio === "16:9" 
                   ? "bg-purple-950/20 border-purple-500 text-purple-200 shadow-inner" 
@@ -115,7 +127,10 @@ export default function AdvancedSettings({
               max={60} 
               step={6}
               value={frameRate} 
-              onChange={(e) => setFrameRate(Number(e.target.value))} 
+              onChange={(e) => {
+                console.log("[AdvancedSettings] Frame rate changed to:", e.target.value, "FPS");
+                setFrameRate(Number(e.target.value));
+              }}
               className="w-full accent-purple-500 bg-neutral-800 cursor-pointer"
             />
             <span className="text-xs font-mono text-[#dcdcdc] shrink-0 font-semibold">{frameRate} FPS</span>

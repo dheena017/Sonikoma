@@ -51,7 +51,10 @@ export function ScraperSelectionToolbar({
             {selectedScraped.length > 0 && (
               <button
                 type="button"
-                onClick={handleClearAll}
+                onClick={() => {
+                  console.log("[ScraperSelectionToolbar] Clearing all selections");
+                  handleClearAll();
+                }}
                 className="flex items-center gap-1 px-2 py-0.5 bg-neutral-900 hover:bg-red-950/40 border border-neutral-800 hover:border-red-800/40 text-neutral-500 hover:text-red-400 rounded-full text-[9px] font-mono font-bold transition-all cursor-pointer"
                 title="Clear all selections"
               >
@@ -128,6 +131,7 @@ export function ScraperSelectionToolbar({
                 type="button"
                 onClick={() => {
                   const n = Math.min(Math.max(1, parseInt(firstNValue) || 1), total);
+                  console.log(`[ScraperSelectionToolbar] Selecting first ${n} panels`);
                   handleSelectFirstN(n);
                 }}
                 className="px-2 py-1 bg-indigo-950/40 hover:bg-indigo-900/50 border border-indigo-800/40 hover:border-indigo-600/50 text-indigo-300 hover:text-white rounded-lg text-[9px] font-mono font-bold transition-all cursor-pointer"
@@ -154,6 +158,7 @@ export function ScraperSelectionToolbar({
                 type="button"
                 onClick={() => {
                   const n = Math.min(Math.max(1, parseInt(lastNValue) || 1), total);
+                  console.log(`[ScraperSelectionToolbar] Selecting last ${n} panels`);
                   handleSelectLastN(n);
                 }}
                 className="px-2 py-1 bg-indigo-950/40 hover:bg-indigo-900/50 border border-indigo-800/40 hover:border-indigo-600/50 text-indigo-300 hover:text-white rounded-lg text-[9px] font-mono font-bold transition-all cursor-pointer"
@@ -197,6 +202,7 @@ export function ScraperSelectionToolbar({
                 onClick={() => {
                   const a = Math.max(1, parseInt(rangeFrom) || 1);
                   const b = Math.min(total, parseInt(rangeTo) || total);
+                  console.log(`[ScraperSelectionToolbar] Selecting range from ${a} to ${b}`);
                   handleSelectRange(a, b);
                 }}
                 className="px-2.5 py-1 bg-purple-950/30 hover:bg-purple-900/40 border border-purple-900/40 hover:border-purple-800/50 text-purple-300 hover:text-white rounded-lg text-[9px] font-mono font-bold transition-all cursor-pointer"

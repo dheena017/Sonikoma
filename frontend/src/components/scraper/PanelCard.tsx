@@ -63,6 +63,7 @@ function PanelCard({
     croppingImgUrl === imgUrl || bubbleCroppingImgUrl === imgUrl || isEditing;
 
   const handleRotateClockwise = async () => {
+    console.log(`[PanelCard] Rotating image #${idx + 1} clockwise`);
     setIsEditing(true);
     setConsoleLogs?.((prev: any) => [
       `[Image Editor] Rotating Panel #${idx + 1} 90° clockwise...`,
@@ -96,6 +97,7 @@ function PanelCard({
   };
 
   const handleFlipHorizontal = async () => {
+    console.log(`[PanelCard] Flipping image #${idx + 1} horizontally`);
     setIsEditing(true);
     setConsoleLogs?.((prev: any) => [
       `[Image Editor] Flipping Panel #${idx + 1} horizontally...`,
@@ -129,6 +131,7 @@ function PanelCard({
   };
 
   const handleUndo = async () => {
+    console.log(`[PanelCard] Undoing last operation for image #${idx + 1}`);
     setIsEditing(true);
     setConsoleLogs?.((prev: any) => [
       `[Image Editor] Restoring previous state for Panel #${idx + 1}...`,

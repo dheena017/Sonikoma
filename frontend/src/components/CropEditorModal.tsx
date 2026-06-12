@@ -171,21 +171,25 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
   );
 
   const handleModifyBrightness = (panelId: number, val: number) => {
+    console.log(`[CropEditor] Modifying brightness for panel #${panelId}: ${val}`);
     setPanels?.((prev) =>
       prev.map((p) => (p.id === panelId ? { ...p, brightness: val } : p))
     );
   };
   const handleModifyContrast = (panelId: number, val: number) => {
+    console.log(`[CropEditor] Modifying contrast for panel #${panelId}: ${val}`);
     setPanels?.((prev) =>
       prev.map((p) => (p.id === panelId ? { ...p, contrast: val } : p))
     );
   };
   const handleModifySaturation = (panelId: number, val: number) => {
+    console.log(`[CropEditor] Modifying saturation for panel #${panelId}: ${val}`);
     setPanels?.((prev) =>
       prev.map((p) => (p.id === panelId ? { ...p, saturation: val } : p))
     );
   };
   const handleModifyFilterPreset = (panelId: number, preset: string) => {
+    console.log(`[CropEditor] Modifying filter preset for panel #${panelId}: ${preset}`);
     setPanels?.((prev) =>
       prev.map((p) =>
         p.id === panelId ? { ...p, filter_preset: preset } : p
@@ -193,31 +197,37 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
     );
   };
   const handleModifyGrayscale = (panelId: number, val: boolean) => {
+    console.log(`[CropEditor] Modifying grayscale for panel #${panelId}: ${val}`);
     setPanels?.((prev) =>
       prev.map((p) => (p.id === panelId ? { ...p, grayscale: val } : p))
     );
   };
   const handleModifyDuration = (panelId: number, val: number) => {
+    console.log(`[CropEditor] Modifying duration for panel #${panelId}: ${val}`);
     setPanels?.((prev) =>
       prev.map((p) => (p.id === panelId ? { ...p, duration: val } : p))
     );
   };
   const handleModifyMotionType = (panelId: number, val: string) => {
+    console.log(`[CropEditor] Modifying motion type for panel #${panelId}: ${val}`);
     setPanels?.((prev) =>
       prev.map((p) => (p.id === panelId ? { ...p, motion_type: val } : p))
     );
   };
   const handleModifySpeechText = (panelId: number, val: string) => {
+    console.log(`[CropEditor] Modifying speech text for panel #${panelId}`);
     setPanels?.((prev) =>
       prev.map((p) => (p.id === panelId ? { ...p, speech_text: val } : p))
     );
   };
   const handleModifySfx = (panelId: number, val: string) => {
+    console.log(`[CropEditor] Modifying sfx for panel #${panelId}: ${val}`);
     setPanels?.((prev) =>
       prev.map((p) => (p.id === panelId ? { ...p, sfx: val } : p))
     );
   };
   const handleModifyCropPadding = (panelId: number, val: number) => {
+    console.log(`[CropEditor] Modifying crop padding for panel #${panelId}: ${val}`);
     setPanels?.((prev) =>
       prev.map((p) => (p.id === panelId ? { ...p, crop_padding: val } : p))
     );

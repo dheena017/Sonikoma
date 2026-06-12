@@ -166,7 +166,10 @@ export default function CropToolsPanel({
           {/* Rotate CCW 90 */}
           <button
             type="button"
-            onClick={() => onRotate(-90)}
+            onClick={() => {
+              console.log("[CropToolsPanel] Rotating -90°");
+              onRotate(-90);
+            }}
             disabled={isTransforming}
             title="Rotate 90° Counter-Clockwise"
             className="flex flex-col items-center justify-center gap-1 py-2.5 bg-black/30 hover:bg-cyan-500/10 border border-white/6 hover:border-cyan-500/30 rounded-xl text-neutral-500 hover:text-cyan-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
@@ -178,7 +181,10 @@ export default function CropToolsPanel({
           {/* Rotate 180 */}
           <button
             type="button"
-            onClick={() => onRotate(180)}
+            onClick={() => {
+              console.log("[CropToolsPanel] Rotating 180°");
+              onRotate(180);
+            }}
             disabled={isTransforming}
             title="Rotate 180°"
             className="flex flex-col items-center justify-center gap-1 py-2.5 bg-black/30 hover:bg-cyan-500/10 border border-white/6 hover:border-cyan-500/30 rounded-xl text-neutral-500 hover:text-cyan-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
@@ -190,7 +196,10 @@ export default function CropToolsPanel({
           {/* Rotate CW 90 */}
           <button
             type="button"
-            onClick={() => onRotate(90)}
+            onClick={() => {
+              console.log("[CropToolsPanel] Rotating +90°");
+              onRotate(90);
+            }}
             disabled={isTransforming}
             title="Rotate 90° Clockwise"
             className="flex flex-col items-center justify-center gap-1 py-2.5 bg-black/30 hover:bg-cyan-500/10 border border-white/6 hover:border-cyan-500/30 rounded-xl text-neutral-500 hover:text-cyan-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
@@ -202,7 +211,10 @@ export default function CropToolsPanel({
           {/* Flip H */}
           <button
             type="button"
-            onClick={() => onFlip("h")}
+            onClick={() => {
+              console.log("[CropToolsPanel] Flipping Horizontally");
+              onFlip("h");
+            }}
             disabled={isTransforming}
             title="Flip Horizontal"
             className="flex flex-col items-center justify-center gap-1 py-2.5 bg-black/30 hover:bg-violet-500/10 border border-white/6 hover:border-violet-500/30 rounded-xl text-neutral-500 hover:text-violet-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
@@ -214,7 +226,10 @@ export default function CropToolsPanel({
           {/* Flip V */}
           <button
             type="button"
-            onClick={() => onFlip("v")}
+            onClick={() => {
+              console.log("[CropToolsPanel] Flipping Vertically");
+              onFlip("v");
+            }}
             disabled={isTransforming}
             title="Flip Vertical"
             className="flex flex-col items-center justify-center gap-1 py-2.5 bg-black/30 hover:bg-violet-500/10 border border-white/6 hover:border-violet-500/30 rounded-xl text-neutral-500 hover:text-violet-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
@@ -418,7 +433,10 @@ export default function CropToolsPanel({
       {/* ── Reset All ── */}
       <button
         type="button"
-        onClick={onReset}
+        onClick={() => {
+          console.log("[CropToolsPanel] Resetting all crop bounds");
+          onReset();
+        }}
         className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-red-900/30 bg-red-950/15 hover:bg-red-950/30 text-red-400/70 hover:text-red-300 text-[10px] font-bold font-mono transition-all cursor-pointer active:scale-95"
       >
         <RefreshCcw className="h-3 w-3" />
