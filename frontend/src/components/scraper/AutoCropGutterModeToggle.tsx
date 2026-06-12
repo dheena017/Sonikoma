@@ -15,6 +15,7 @@ export function AutoCropGutterModeToggle({ cropBackgroundMode, setCropBackground
 
   const detectGutterColor = async () => {
     if (!firstImageUrl) return;
+    console.log("[AutoCropGutterModeToggle] Auto-detecting gutter color");
     setIsDetecting(true);
     const img = new Image();
     img.crossOrigin = "anonymous";

@@ -274,6 +274,7 @@ class BaseAISkill:
 
     async def execute(self, model: Optional[str] = None, image_bytes: Optional[bytes] = None, **kwargs) -> Any:
         """Invokes the Gemini GenAI model resiliently with schema outputs and retry parameters."""
+        logger.info(f"[AI Skill] Executing skill '{self.name}' with model '{model or self.default_model}'")
         start_time = time.monotonic()
         target_model = model or self.default_model
         

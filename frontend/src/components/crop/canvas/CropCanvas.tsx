@@ -116,6 +116,7 @@ export default function CropCanvas({
 
   const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const { naturalWidth, naturalHeight } = e.currentTarget;
+    console.log(`[CropCanvas] Image loaded: ${naturalWidth}x${naturalHeight}`);
     if (naturalWidth && naturalHeight) {
       setNaturalAspect(naturalWidth / naturalHeight);
     }

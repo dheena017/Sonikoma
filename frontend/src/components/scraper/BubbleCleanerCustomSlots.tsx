@@ -20,6 +20,7 @@ export function BubbleCleanerCustomSlots({ customPresets, savePreset, loadPreset
 
   const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    console.log("[BubbleCleanerCustomSlots] Importing file:", file?.name);
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
@@ -48,10 +49,16 @@ export function BubbleCleanerCustomSlots({ customPresets, savePreset, loadPreset
           <div key={slot} className="flex items-center gap-2 p-2.5 bg-neutral-900/20 border border-neutral-800 rounded-2xl hover:bg-neutral-900/40 transition-colors">
             <input type="text" value={slotNames[slot as keyof typeof slotNames]} onChange={(e) => setSlotNames({ ...slotNames, [slot]: e.target.value })} placeholder="Custom Profile name..."
               className="bg-neutral-950 border border-neutral-800 text-neutral-200 text-[10px] font-mono px-3 py-1.5 rounded-xl flex-1 focus:border-purple-500/50 focus:outline-none" />
-            <button type="button" onClick={() => savePreset(slot, slotNames[slot as keyof typeof slotNames])} className="inline-flex items-center gap-1 rounded-xl border border-purple-950 bg-purple-950/20 hover:bg-purple-500/10 px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-purple-400 hover:text-purple-300 transition-all active:scale-95 cursor-pointer">
+            <button type="button" onClick={() => {
+              console.log(`[BubbleCleanerCustomSlots] Saving preset slot: ${slot}`);
+              savePreset(slot, slotNames[slot as keyof typeof slotNames]);
+            }} className="inline-flex items-center gap-1 rounded-xl border border-purple-950 bg-purple-950/20 hover:bg-purple-500/10 px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-purple-400 hover:text-purple-300 transition-all active:scale-95 cursor-pointer">
               <Save className="h-3 w-3" /> Save
             </button>
-            <button type="button" onClick={() => loadPreset(slot)} className="inline-flex items-center gap-1 rounded-xl border border-neutral-800 bg-neutral-950 hover:bg-neutral-800 px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-neutral-300 hover:text-white transition-all active:scale-95 cursor-pointer">
+            <button type="button" onClick={() => {
+              console.log(`[BubbleCleanerCustomSlots] Loading preset slot: ${slot}`);
+              loadPreset(slot);
+            }} className="inline-flex items-center gap-1 rounded-xl border border-neutral-800 bg-neutral-950 hover:bg-neutral-800 px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-neutral-300 hover:text-white transition-all active:scale-95 cursor-pointer">
               <RefreshCw className="h-3 w-3" /> Load
             </button>
           </div>

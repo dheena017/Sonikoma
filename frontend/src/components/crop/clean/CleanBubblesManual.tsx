@@ -32,6 +32,7 @@ export default function CleanBubblesManual({
             type="checkbox"
             checked={editMode === "clean_manual"}
             onChange={(e) => {
+              console.log("[CleanBubblesManual] Toggling manual brush mode:", e.target.checked);
               if (setEditMode) {
                 setEditMode(e.target.checked ? "clean_manual" : "crop");
               }
@@ -89,7 +90,10 @@ export default function CleanBubblesManual({
           {/* Clear Mask Button */}
           <button
             type="button"
-            onClick={handleClearBrushMask}
+            onClick={() => {
+              console.log("[CleanBubblesManual] Clearing manual brush mask");
+              handleClearBrushMask?.();
+            }}
             className="w-full py-1 bg-red-950/10 hover:bg-red-950/20 border border-red-900/20 text-red-400 rounded-lg text-[9px] font-mono font-bold transition-all"
           >
             Clear Drawing Mask

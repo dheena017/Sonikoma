@@ -76,8 +76,12 @@ export default function LiveScraperDeck({
 
   const handleDownloadZip = async () => {
     const toDownload = selectedScraped.length > 0 ? selectedScraped : scrapedImages;
-    if (toDownload.length === 0) return;
+    if (toDownload.length === 0) {
+      addNotification?.("No images to download.", "warning");
+      return;
+    }
     console.log("[LiveScraperDeck] Starting ZIP download for", toDownload.length, "images");
+    addNotification?.(`Generating ZIP for ${toDownload.length} images...`, "info");
 
     setIsZipping(true);
     try {
@@ -106,15 +110,20 @@ export default function LiveScraperDeck({
         `[GUI] Successfully generated zip for ${toDownload.length} images`,
         ...prev,
       ]);
-    } catch (err) {
+      addNotification?.("ZIP archive downloaded successfully!", "success");
+    } catch (err: any) {
       console.error("Zip generation failed:", err);
+      addNotification?.(`Failed to generate ZIP: ${err.message || err}`, "error");
     } finally {
       setIsZipping(false);
     }
   };
 
   const handleDeleteSelected = () => {
-    if (selectedScraped.length === 0) return;
+    if (selectedScraped.length === 0) {
+      addNotification?.("No images selected to delete.", "warning");
+      return;
+    }
     console.log("[LiveScraperDeck] Deleting", selectedScraped.length, "selected images");
     setScrapedImages((prev) => prev.filter((img) => !selectedScraped.includes(img)));
     setConsoleLogs((prev) => [
@@ -127,7 +136,10 @@ export default function LiveScraperDeck({
   };
 
   const handleAddToCanvas = () => {
-    if (selectedScraped.length === 0) return;
+    if (selectedScraped.length === 0) {
+      addNotification?.("No images selected to add to storyboard.", "warning");
+      return;
+    }
     addPanelsWithAutoAnalysis(selectedScraped);
     console.log(`[GUI] Adding ${selectedScraped.length} selected image(s) to storyboard.`);
     setSelectedScraped([]);

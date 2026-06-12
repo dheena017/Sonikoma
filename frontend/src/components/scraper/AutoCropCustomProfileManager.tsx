@@ -29,11 +29,17 @@ export function AutoCropCustomProfileManager({ customPresets, savePreset, loadPr
               placeholder="Custom Slot name..."
               className="bg-neutral-950 border border-neutral-800 text-neutral-200 text-[10px] font-mono px-2.5 py-1.5 rounded-lg flex-1 focus:border-emerald-500/50 focus:outline-none"
             />
-            <button type="button" onClick={() => savePreset(slot, slotNames[slot])}
+            <button type="button" onClick={() => {
+              console.log(`[AutoCropCustomProfileManager] Saving preset slot: ${slot}`);
+              savePreset(slot, slotNames[slot]);
+            }}
               className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-950 bg-emerald-950/20 hover:bg-emerald-500/10 px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wider text-emerald-400 hover:text-emerald-300 transition-all active:scale-95 cursor-pointer">
               <Save className="h-3 w-3" /> Save
             </button>
-            <button type="button" onClick={() => loadPreset(slot)}
+            <button type="button" onClick={() => {
+              console.log(`[AutoCropCustomProfileManager] Loading preset slot: ${slot}`);
+              loadPreset(slot);
+            }}
               className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-800 bg-neutral-950 hover:bg-neutral-800 px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wider text-neutral-300 hover:text-white transition-all active:scale-95 cursor-pointer">
               <RefreshCw className="h-3 w-3" /> Load
             </button>
