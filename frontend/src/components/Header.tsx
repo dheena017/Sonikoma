@@ -1,5 +1,5 @@
 import React from "react";
-import { Film, Activity, Terminal, Sliders, Scissors, Brain, Keyboard } from "lucide-react";
+import { Film, Activity, Terminal, Sliders, Scissors, Brain, Keyboard, Sparkles } from "lucide-react";
 import { GeneratedPanel } from "../types";
 
 interface HeaderProps {
@@ -204,6 +204,78 @@ export default function Header({
             <Keyboard className="h-3 w-3 sm:hidden" />
             <span className="hidden sm:inline">Keys</span>
           </button>
+
+          {/* AI Suite Dropdown */}
+          <div className="relative group">
+            <button
+              disabled={panels.length === 0}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-[10px] sm:text-[11px] font-bold font-mono transition-all duration-200 cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed ${
+                currentPath.startsWith("/ai-") || currentPath === "/panel-assistant"
+                  ? "text-purple-300 bg-purple-950/20 border border-purple-800"
+                  : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/20"
+              }`}
+            >
+              <Sparkles className="h-3 w-3 text-purple-400" />
+              <span>AI Suite</span>
+              <span className="text-[8px] ml-1">▼</span>
+            </button>
+            <div className="absolute left-0 mt-1.5 w-48 rounded-xl bg-neutral-900 border border-neutral-805 shadow-2xl p-1 hidden group-hover:block hover:block z-50">
+              <button
+                onClick={() => navigateTo("/ai-optimizer")}
+                className="w-full text-left px-3 py-2 rounded-lg text-[10px] font-mono hover:bg-neutral-800/85 hover:text-white transition-all text-neutral-350 cursor-pointer"
+              >
+                ✦ Video Optimizer
+              </button>
+              <button
+                onClick={() => navigateTo("/panel-assistant")}
+                className="w-full text-left px-3 py-2 rounded-lg text-[10px] font-mono hover:bg-neutral-800/85 hover:text-white transition-all text-neutral-350 cursor-pointer"
+              >
+                ✦ Panel AI Assistant
+              </button>
+              <button
+                onClick={() => navigateTo("/ai-characters")}
+                className="w-full text-left px-3 py-2 rounded-lg text-[10px] font-mono hover:bg-neutral-800/85 hover:text-white transition-all text-neutral-350 cursor-pointer"
+              >
+                ✦ Character DB
+              </button>
+              <button
+                onClick={() => navigateTo("/ai-translation")}
+                className="w-full text-left px-3 py-2 rounded-lg text-[10px] font-mono hover:bg-neutral-800/85 hover:text-white transition-all text-neutral-350 cursor-pointer"
+              >
+                ✦ Translation Studio
+              </button>
+              <button
+                onClick={() => navigateTo("/ai-audio-lab")}
+                className="w-full text-left px-3 py-2 rounded-lg text-[10px] font-mono hover:bg-neutral-800/85 hover:text-white transition-all text-neutral-350 cursor-pointer"
+              >
+                ✦ Sound Design Lab
+              </button>
+              <button
+                onClick={() => navigateTo("/ai-thumbnails")}
+                className="w-full text-left px-3 py-2 rounded-lg text-[10px] font-mono hover:bg-neutral-800/85 hover:text-white transition-all text-neutral-350 cursor-pointer"
+              >
+                ✦ Thumbnail Studio
+              </button>
+              <button
+                onClick={() => navigateTo("/ai-engagement")}
+                className="w-full text-left px-3 py-2 rounded-lg text-[10px] font-mono hover:bg-neutral-800/85 hover:text-white transition-all text-neutral-350 cursor-pointer"
+              >
+                ✦ Community Coach
+              </button>
+              <button
+                onClick={() => navigateTo("/ai-voice")}
+                className="w-full text-left px-3 py-2 rounded-lg text-[10px] font-mono hover:bg-neutral-800/85 hover:text-white transition-all text-neutral-350 cursor-pointer"
+              >
+                ✦ Voice Studio
+              </button>
+              <button
+                onClick={() => navigateTo("/ai-analytics")}
+                className="w-full text-left px-3 py-2 rounded-lg text-[10px] font-mono hover:bg-neutral-800/85 hover:text-white transition-all text-neutral-350 cursor-pointer"
+              >
+                ✦ CTR Predictor
+              </button>
+            </div>
+          </div>
 
           {/* Render Settings pill */}
           <button

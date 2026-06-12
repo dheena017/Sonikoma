@@ -268,6 +268,20 @@ export default function TimelineCard({
         </button>
       </div>
 
+      <div className="pt-1.5">
+        <button
+          type="button"
+          onClick={() => {
+            window.history.pushState({}, "", `/panel-assistant?idx=${idx}`);
+            window.dispatchEvent(new Event("popstate"));
+          }}
+          className="w-full py-1.5 rounded-lg border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-purple-600/50 text-neutral-350 hover:text-purple-300 text-[10px] font-mono font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all"
+        >
+          <Sparkles className="h-3 w-3 text-purple-400" />
+          <span>AI Panel Assistant</span>
+        </button>
+      </div>
+
       <div className="flex items-center justify-end text-[9px] text-neutral-500 pt-1 font-mono">
         <span>{idx + 1} / {panelsLength}</span>
       </div>

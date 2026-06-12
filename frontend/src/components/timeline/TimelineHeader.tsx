@@ -5,12 +5,24 @@ interface TimelineHeaderProps {
   panelsLength: number;
   isCompiling: boolean;
   handleCompileVideo: () => void;
+  showBulkOps?: boolean;
+  setShowBulkOps?: React.Dispatch<React.SetStateAction<boolean>> | ((v: boolean) => void);
+  isZipping?: boolean;
+  handleDownloadZip?: () => void;
+  isAnalyzingAll?: boolean;
+  handleAnalyzeAllPanels?: () => void;
 }
 
 export default function TimelineHeader({
   panelsLength,
   isCompiling,
   handleCompileVideo,
+  showBulkOps,
+  setShowBulkOps,
+  isZipping,
+  handleDownloadZip,
+  isAnalyzingAll,
+  handleAnalyzeAllPanels,
 }: TimelineHeaderProps) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-neutral-800 pb-4">

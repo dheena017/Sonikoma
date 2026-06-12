@@ -98,7 +98,21 @@ export function useAppRouter({
       const path = window.location.pathname;
       setCurrentPath(path);
 
-      if (path === "/settings" || path === "/logs" || path === "/status" || path === "/shortcuts") {
+      if (
+        path === "/settings" ||
+        path === "/logs" ||
+        path === "/status" ||
+        path === "/shortcuts" ||
+        path === "/ai-optimizer" ||
+        path === "/panel-assistant" ||
+        path === "/ai-characters" ||
+        path === "/ai-translation" ||
+        path === "/ai-audio-lab" ||
+        path === "/ai-thumbnails" ||
+        path === "/ai-engagement" ||
+        path === "/ai-voice" ||
+        path === "/ai-analytics"
+      ) {
         setShowAutoCropModal(false);
         setShowBubbleModal(false);
         setEditingImageIdx(null);

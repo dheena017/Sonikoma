@@ -17,6 +17,17 @@ import LogsPage from "./components/LogsPage.js";
 import StatusPage from "./components/StatusPage.js";
 import ShortcutsPage from "./components/ShortcutsPage.js";
 
+// AI Assistant Suite Page Imports
+import AIOptimizerPage from "./components/optimizer/AIOptimizerPage.js";
+import PanelAssistantPage from "./components/panel_assistant/PanelAssistantPage.js";
+import CharacterProfilePage from "./components/characters/CharacterProfilePage.js";
+import TranslationStudioPage from "./components/translation/TranslationStudioPage.js";
+import AudioLabPage from "./components/audio_lab/AudioLabPage.js";
+import ThumbnailStudioPage from "./components/thumbnails/ThumbnailStudioPage.js";
+import EngagementPage from "./components/engagement/EngagementPage.js";
+import VoiceStudioPage from "./components/voice/VoiceStudioPage.js";
+import CTRAnalyticsPage from "./components/analytics/CTRAnalyticsPage.js";
+
 export default function App() {
 
   const appLogic = useAppLogic();
@@ -203,6 +214,15 @@ export default function App() {
   const isLogsPath = currentPath === "/logs";
   const isStatusPath = currentPath === "/status";
   const isShortcutsPath = currentPath === "/shortcuts";
+  const isOptimizerPath = currentPath === "/ai-optimizer";
+  const isPanelAssistantPath = currentPath.startsWith("/panel-assistant");
+  const isCharacterPath = currentPath === "/ai-characters";
+  const isTranslationPath = currentPath === "/ai-translation";
+  const isAudioLabPath = currentPath === "/ai-audio-lab";
+  const isThumbnailPath = currentPath === "/ai-thumbnails";
+  const isEngagementPath = currentPath === "/ai-engagement";
+  const isVoicePath = currentPath === "/ai-voice";
+  const isAnalyticsPath = currentPath === "/ai-analytics";
 
   return (
     <div id="app_root" className="min-h-screen bg-[#070709] text-neutral-100 flex flex-col justify-between selection:bg-purple-600 selection:text-white relative">
@@ -472,8 +492,89 @@ export default function App() {
         />
       </div>
 
+      {/* PAGE 9: AI VIDEO OPTIMIZER */}
+      {isOptimizerPath && (
+        <AIOptimizerPage
+          panels={panels}
+          onNavigateHome={() => navigateTo("/")}
+          addNotification={addNotification}
+        />
+      )}
+
+      {/* PAGE 10: AI PANEL ASSISTANT */}
+      {isPanelAssistantPath && (
+        <PanelAssistantPage
+          panels={panels}
+          setPanels={setPanels}
+          onNavigateHome={() => navigateTo("/")}
+          addNotification={addNotification}
+        />
+      )}
+
+      {/* PAGE 11: AI CHARACTER DB */}
+      {isCharacterPath && (
+        <CharacterProfilePage
+          panels={panels}
+          onNavigateHome={() => navigateTo("/")}
+          addNotification={addNotification}
+        />
+      )}
+
+      {/* PAGE 12: AI TRANSLATION STUDIO */}
+      {isTranslationPath && (
+        <TranslationStudioPage
+          panels={panels}
+          setPanels={setPanels}
+          onNavigateHome={() => navigateTo("/")}
+          addNotification={addNotification}
+        />
+      )}
+
+      {/* PAGE 13: AI AUDIO PRODUCTION LAB */}
+      {isAudioLabPath && (
+        <AudioLabPage
+          panels={panels}
+          setMusicTheme={setMusicTheme}
+          onNavigateHome={() => navigateTo("/")}
+          addNotification={addNotification}
+        />
+      )}
+
+      {/* PAGE 14: AI THUMBNAIL STUDIO */}
+      {isThumbnailPath && (
+        <ThumbnailStudioPage
+          panels={panels}
+          onNavigateHome={() => navigateTo("/")}
+          addNotification={addNotification}
+        />
+      )}
+
+      {/* PAGE 15: AI COMMUNITY ENGAGEMENT */}
+      {isEngagementPath && (
+        <EngagementPage
+          onNavigateHome={() => navigateTo("/")}
+        />
+      )}
+
+      {/* PAGE 16: AI VOICE CASTING STUDIO */}
+      {isVoicePath && (
+        <VoiceStudioPage
+          panels={panels}
+          onNavigateHome={() => navigateTo("/")}
+          addNotification={addNotification}
+        />
+      )}
+
+      {/* PAGE 17: AI CTR PERFORMANCE PREDICTOR */}
+      {isAnalyticsPath && (
+        <CTRAnalyticsPage
+          onNavigateHome={() => navigateTo("/")}
+          addNotification={addNotification}
+        />
+      )}
+
       {/* PAGE 404 (FALLBACK) */}
-      {!isDashboardPath && !isSettingsPath && !isAutoCropPath && !isBubbleCleanerPath && !isEditorPath && !isLogsPath && !isStatusPath && !isShortcutsPath && (
+      {!isDashboardPath && !isSettingsPath && !isAutoCropPath && !isBubbleCleanerPath && !isEditorPath && !isLogsPath && !isStatusPath && !isShortcutsPath && !isOptimizerPath && !isPanelAssistantPath && !isCharacterPath && !isTranslationPath && !isAudioLabPath && !isThumbnailPath && !isEngagementPath && !isVoicePath && !isAnalyticsPath && (
         <PageNotFound onNavigateHome={() => navigateTo("/")} />
       )}
 

@@ -127,6 +127,63 @@ class CameraShakeModel(BaseModel):
     shake_frequency: float = Field(description="Camera shake speed frequency")
     ffmpeg_offset_formula: str = Field(description="FFmpeg offset filter string expression")
 
+class CharacterEmotionModel(BaseModel):
+    emotional_state: str = Field(description="Categorized emotional state, e.g. terrified, smug, enraged, affectionate, analytical")
+    voice_stability: float = Field(description="Target voice stability score from 0.0 to 1.0 (lower means trembling, higher means stable)")
+    expression_reasoning: str = Field(description="Brief description of visual cues justifying this emotional state")
+
+class CopyrightScrubModel(BaseModel):
+    contains_violation: bool = Field(description="True if the script contains policy violations like extreme violence, hate speech, or sexual themes")
+    violation_type: str = Field(description="Type of violation detected (e.g. violence, hate_speech, sexual, none)")
+    sanitized_text: str = Field(description="Sanitized replacement text. If clean, returns original text.")
+    explanation: str = Field(description="Explanation of what was flagged or why it is clean")
+
+class AdPlacement(BaseModel):
+    timestamp: str = Field(description="Timestamp formatting MM:SS indicating ad insertion point")
+    tension_reason: str = Field(description="Justification of why this point represents a high-tension cliffhanger")
+
+class MidrollPlacementModel(BaseModel):
+    placements: List[AdPlacement] = Field(description="List of suggested midroll ad placement timestamps")
+
+class OutroCTAModel(BaseModel):
+    outro_script: str = Field(description="Recap channel subscription speech script (strictly max 15 words)")
+    cta_focus: str = Field(description="Target call to action focus, e.g., subscribe, comment, next_video")
+
+class SceneCompositionModel(BaseModel):
+    visual_prompt: str = Field(description="Detailed image prompt for image generation AI (Stable Diffusion/SDXL)")
+    camera_angle: str = Field(description="Suggested shot type and angle (e.g., extreme close-up, low-angle)")
+    lighting: str = Field(description="Lighting style description (e.g., dramatic backlighting, neon highlights)")
+    style_description: str = Field(description="Drawing or rendering style description (e.g., detailed manhwa, watercolor)")
+
+class ShortsHookModel(BaseModel):
+    hook_sentence: str = Field(description="Scroll-stopping TikTok/Shorts vertical hook sentence (max 2 seconds)")
+    psychological_trigger: str = Field(description="Psychological trigger used (e.g. curiosity, shock, FOMO)")
+
+class SubtitleStylerModel(BaseModel):
+    font_name: str = Field(description="Recommended subtitle font (e.g. Impact, Montserrat, Arial, BadaBoom)")
+    scale_size: float = Field(description="Font scale size multiplier (e.g., 1.0 to 2.5)")
+    primary_fill_color: str = Field(description="Primary fill color hex code (e.g. #FFFFFF, #FFCC00)")
+    outline_stroke_thickness: float = Field(description="Outline border thickness in pixels")
+    bounce_animation_style: str = Field(description="Animation style tag (e.g., pop, shake, static, drift)")
+
+class ThumbnailVisualModel(BaseModel):
+    background_style: str = Field(description="Canvas background elements and colors description")
+    split_screen_ratio: str = Field(description="Layout partition/split-screen ratio (e.g. 50/50, left-heavy)")
+    highlight_borders: List[str] = Field(description="Highlights (e.g. red outlines, yellow glow, warning arrows)")
+    layout_margins: str = Field(description="Margins to avoid YouTube timestamp overlays")
+
+class TransitionSpeedModel(BaseModel):
+    transition_style: str = Field(description="Transition type (e.g. crossfade, cut, flash, zoom)")
+    duration_frames: int = Field(description="Exact transition duration in frames at 30fps")
+    pacing_rationale: str = Field(description="Pacing rationale matching dialogue/actions")
+
+class YouTubeChapterItem(BaseModel):
+    timestamp: str = Field(description="Chapter timestamp formatted as MM:SS")
+    title: str = Field(description="Engaging title for this video chapter")
+
+class YouTubeChapterModel(BaseModel):
+    chapters: List[YouTubeChapterItem] = Field(description="List of chronological video chapters")
+
 
 # ─── Pydantic Dynamic Schema Mapper ───────────────────────────────────────────
 
@@ -150,7 +207,17 @@ SCHEMA_MAP: Dict[str, Type[BaseModel]] = {
     "CliffhangerModel":        CliffhangerModel,
     "TitleABModel":            TitleABModel,
     "SFXOverlayModel":         SFXOverlayModel,
-    "CameraShakeModel":        CameraShakeModel
+    "CameraShakeModel":        CameraShakeModel,
+    "CharacterEmotionModel":   CharacterEmotionModel,
+    "CopyrightScrubModel":     CopyrightScrubModel,
+    "MidrollPlacementModel":   MidrollPlacementModel,
+    "OutroCTAModel":           OutroCTAModel,
+    "SceneCompositionModel":   SceneCompositionModel,
+    "ShortsHookModel":         ShortsHookModel,
+    "SubtitleStylerModel":     SubtitleStylerModel,
+    "ThumbnailVisualModel":    ThumbnailVisualModel,
+    "TransitionSpeedModel":    TransitionSpeedModel,
+    "YouTubeChapterModel":     YouTubeChapterModel
 }
 
 
@@ -198,9 +265,74 @@ class FallbackCoordinator:
                     for _ in range(kwargs.get("active_slices_count", 5))
                 ]
             }
+        elif skill_name == "character_emotion_class":
+            return {
+                "emotional_state": "analytical",
+                "voice_stability": 0.9,
+                "expression_reasoning": "Determined posture with centered focal gaze."
+            }
+        elif skill_name == "copyright_scrubber":
+            return {
+                "contains_violation": False,
+                "violation_type": "none",
+                "sanitized_text": kwargs.get("text", "Clean narration."),
+                "explanation": "Narration conforms to PG-13 community guidelines."
+            }
+        elif skill_name == "midroll_placement_ref":
+            return {
+                "placements": [
+                    {"timestamp": "01:15", "tension_reason": "High cliffhanger point before revelation."}
+                ]
+            }
+        elif skill_name == "outro_cta_generator":
+            return {
+                "outro_script": f"Subscribe to read the next peak chapter of {kwargs.get('title', 'this series')}!",
+                "cta_focus": "subscribe"
+            }
+        elif skill_name == "scene_composition_desc":
+            return {
+                "visual_prompt": "Cinematic manhwa page close-up, dramatic shadows, soft backlight",
+                "camera_angle": "low angle",
+                "lighting": "dramatic backlighting",
+                "style_description": "detailed manhwa"
+            }
+        elif skill_name == "shorts_retention_hook":
+            return {
+                "hook_sentence": "This S-Rank just unlocked absolute ruin!",
+                "psychological_trigger": "curiosity"
+            }
+        elif skill_name == "subtitle_styler":
+            return {
+                "font_name": "Montserrat",
+                "scale_size": 1.5,
+                "primary_fill_color": "#FFCC00",
+                "outline_stroke_thickness": 4.0,
+                "bounce_animation_style": "pop"
+            }
+        elif skill_name == "thumbnail_visual_comp":
+            return {
+                "background_style": "Dark radial purple smoke",
+                "split_screen_ratio": "50/50",
+                "highlight_borders": ["yellow glow", "red overlay arrow"],
+                "layout_margins": "safe bottom right corner"
+            }
+        elif skill_name == "transition_speed_tuner":
+            return {
+                "transition_style": "crossfade",
+                "duration_frames": 15,
+                "pacing_rationale": "Soft dialogue transitions."
+            }
+        elif skill_name == "youtube_chapter_gen":
+            return {
+                "chapters": [
+                    {"timestamp": "00:00", "title": "Introduction"},
+                    {"timestamp": "01:30", "title": "Climax Reveal"}
+                ]
+            }
         
         # Generic default response matching dynamic key-value schemas
         return {"success": False, "source": "fallback:error"}
+
 
 
 class SkillLogger:
@@ -291,7 +423,8 @@ class BaseAISkill:
             # Route to fallback coordinator
             fallback = FallbackCoordinator.get_programmatic_fallback(self.name, **kwargs)
             self.logger.log_execution(self.name, 0, False, kwargs, fallback)
-            return fallback
+            import json
+            return json.dumps(fallback)
 
         # Configure structured schemas
         config_args = {}
