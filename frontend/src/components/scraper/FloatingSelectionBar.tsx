@@ -61,10 +61,8 @@ export function FloatingSelectionBar({
           : "translate-y-full opacity-0 pointer-events-none",
       ].join(" ")}
     >
-      {/* Glow line at top */}
-      <div className="h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
-
-      <div className="bg-neutral-950/90 backdrop-blur-2xl border-t border-purple-900/40 px-4 py-3 shadow-[0_-8px_32px_rgba(88,28,235,0.15)]">
+      {/* Container with neutral border and standard dark shadow (no glow) */}
+      <div className="bg-neutral-950/90 backdrop-blur-2xl border-t border-neutral-800/80 px-4 py-3 shadow-2xl shadow-black/50">
         <div className="max-w-7xl mx-auto flex items-center gap-3 flex-wrap sm:flex-nowrap">
 
           {/* Selection Count Badge */}
