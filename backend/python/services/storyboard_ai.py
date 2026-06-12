@@ -73,6 +73,7 @@ async def generate_dynamic_panels(
     """
     active_slices_count = min(len(img_urls), 8)
     if active_slices_count == 0:
+        logger.warning("[Storyboard AI] No image URLs provided for storyboard generation.")
         return []
 
     # Construct the prompt arguments
@@ -117,7 +118,7 @@ async def generate_dynamic_panels(
                     })
                 return result
         except Exception as e:
-            logger.warning(f"HuggingFace storyboard generation failed: {e}. Falling back to Gemini.")
+            logger.warning(f"[HuggingFace] Storyboard generation failed: {e}. Falling back to Gemini.")
 
     # 2. Gemini generation using storyboard_narrative skill
     if ai_initialized:

@@ -272,6 +272,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
   };
 
   const handleResetCropBounds = () => {
+    console.log(`[Image Editor] Resetting crop bounds for image #${editingImageIdx + 1}`);
     setEditCropTop(0);
     setEditCropBottom(0);
     setEditCropLeft(0);
@@ -316,6 +317,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
   const handleExecuteHorizontalSplit = async () => {
     if (editingImageIdx === null || !setScrapedImages) return;
     const currentUrl = scrapedImages[editingImageIdx];
+    console.log(`[Split] Executing horizontal splits on image #${editingImageIdx + 1} with lines:`, state.splitLines);
     appLogic.setIsSavingEdit(true);
 
     try {
@@ -343,6 +345,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
   };
 
   const handleExecuteSave = async () => {
+    console.log(`[Image Editor] Executing save for image #${editingImageIdx + 1}. Slices: ${state.slices.length}, Selected: ${state.selectedSliceId}`);
     if (state.selectedSliceId) {
       // If a specific slice is selected, only execute that one
       const selectedSlice = state.slices.find(s => s.id === state.selectedSliceId);

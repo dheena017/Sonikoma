@@ -43,6 +43,7 @@ export function usePanelDetection({
   const handleAiCrop = async () => {
     if (editingImageIdx === null) return;
     const currentUrl = scrapedImages[editingImageIdx];
+    console.log(`[AI Smart Crop] Requesting AI detection for image #${editingImageIdx + 1}`);
     setIsAiDetecting(true);
     try {
       const response = await activeFetch("/api/ai-detect-panels", {
@@ -162,6 +163,7 @@ export function usePanelDetection({
   }) => {
     if (editingImageIdx === null) return;
     const currentUrl = scrapedImages[editingImageIdx];
+    console.log(`[Panel Detection] Requesting detection for image #${editingImageIdx + 1}`, settings);
     setIsDetecting(true);
     try {
       const response = await activeFetch("/api/detect-panels", {
