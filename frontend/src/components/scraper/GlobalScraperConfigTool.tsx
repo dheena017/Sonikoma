@@ -6,6 +6,7 @@ export function GlobalScraperConfigTool({ addNotification }: { addNotification?:
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const exportGlobalConfig = () => {
+    console.log("[GlobalScraperConfigTool] Exporting master configuration");
     try {
       const crop = localStorage.getItem("crop_custom_presets");
       const bubble = localStorage.getItem("bubble_custom_presets");
@@ -31,6 +32,7 @@ export function GlobalScraperConfigTool({ addNotification }: { addNotification?:
   };
 
   const syncAllPresets = () => {
+    console.log("[GlobalScraperConfigTool] Syncing all crop slots with Slot 1");
     try {
        const cropRaw = localStorage.getItem("crop_custom_presets");
        if (!cropRaw) return;
@@ -51,6 +53,7 @@ export function GlobalScraperConfigTool({ addNotification }: { addNotification?:
   };
 
   const copyToClipboard = () => {
+    console.log("[GlobalScraperConfigTool] Copying settings to clipboard");
     try {
       const cropRaw = localStorage.getItem("crop_custom_presets");
       const bubbleRaw = localStorage.getItem("bubble_custom_presets");
@@ -67,6 +70,7 @@ export function GlobalScraperConfigTool({ addNotification }: { addNotification?:
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    console.log("[GlobalScraperConfigTool] Importing config file:", file?.name);
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (ev) => {

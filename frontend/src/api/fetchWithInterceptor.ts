@@ -18,6 +18,7 @@ export interface FetchInterceptorHandlers {
 
 export function createFetchWithInterceptor({ addNotification, setErrorPopup }: FetchInterceptorHandlers) {
   return async (input: RequestInfo, init?: RequestInit): Promise<Response> => {
+    console.log(`[API Interceptor] Fetching: ${input}`);
     return new Promise<Response>((resolve, reject) => {
       const executeFetch = async () => {
         try {
@@ -131,6 +132,7 @@ export function createFetchWithInterceptor({ addNotification, setErrorPopup }: F
             return;
           }
 
+          console.log(`[API Interceptor] Response OK: ${input} (${response.status})`);
           resolve(response);
         } catch (error: any) {
           if (error.intercepted) {

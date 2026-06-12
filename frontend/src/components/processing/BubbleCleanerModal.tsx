@@ -53,6 +53,7 @@ export default function BubbleCleanerModal({
 }: BubbleCleanerModalProps) {
 
   const handleResetAll = () => {
+    console.log("[BubbleCleanerModal] Resetting all parameters to defaults");
     setDetectionStyle("all");
     setEraseMethod("auto");
     setSensitivity(50);
@@ -116,7 +117,10 @@ export default function BubbleCleanerModal({
               <button
                 key={tab.id}
                 type="button"
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  console.log(`[BubbleCleanerModal] Switching to tab: ${tab.id}`);
+                  setActiveTab(tab.id);
+                }}
                 className={`relative flex items-center gap-2 px-5 py-3 text-xs font-bold font-mono transition-all border-b-2 cursor-pointer select-none ${
                   activeTab === tab.id
                     ? "text-purple-400 border-purple-500 bg-purple-500/5"
@@ -185,7 +189,10 @@ export default function BubbleCleanerModal({
 
               <button
                 type="button"
-                onClick={onApply}
+                onClick={() => {
+                  console.log("[BubbleCleanerModal] Apply clicked");
+                  onApply();
+                }}
                 disabled={isApplying || selectedCount === 0}
                 className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold font-sans transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-purple-900/30 flex items-center gap-2 active:scale-95"
               >

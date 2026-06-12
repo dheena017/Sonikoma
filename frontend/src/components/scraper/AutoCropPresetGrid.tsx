@@ -23,9 +23,11 @@ export function AutoCropPresetGrid({ activeSlot, applyPreset, firstImageUrl }: P
 
   const autoOptimize = async () => {
     if (!firstImageUrl) return;
+    console.log("[AutoCropPresetGrid] Auto-optimizing crop preset based on image ratio");
     const img = new Image();
     img.onload = () => {
       const ratio = img.height / img.width;
+      console.log(`[AutoCropPresetGrid] Detected image ratio: ${ratio.toFixed(2)}`);
       if (ratio > 2.5) applyPreset({ ...presets.find(p => p.id === 'webtoon')?.config, id: 'webtoon' });
       else if (ratio < 0.8) applyPreset({ ...presets.find(p => p.id === 'square')?.config, id: 'square' });
       else applyPreset({ ...presets.find(p => p.id === 'standard')?.config, id: 'standard' });

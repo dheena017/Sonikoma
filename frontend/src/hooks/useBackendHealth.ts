@@ -16,6 +16,7 @@ export function useBackendHealth() {
   });
 
   const checkHealth = useCallback(async () => {
+    console.log("[BackendHealth] Checking server connectivity...");
     const start = performance.now();
     try {
       // Mock ping to the backend API

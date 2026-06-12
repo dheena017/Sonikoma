@@ -13,12 +13,15 @@ import os
 import time
 import httpx
 import numpy as np
+import logging
 from PIL import Image, ImageChops, ImageOps, ImageDraw, ImageFont, ImageEnhance, ImageFilter
 from typing import Dict, Any, Optional, List, Tuple
 from urllib.parse import urlparse, parse_qs
 
 # Import stitched_cache safely (we resolve circular import by keeping it clean)
 from utils.cache import stitched_cache
+
+logger = logging.getLogger("anivox.utils.image_utils")
 
 class ImageMeta:
     def __init__(self, width: int, height: int, format_str: str, channels: int, has_alpha: bool, size_bytes: int):
@@ -108,6 +111,7 @@ async def resolve_image_to_buffer(url_str: str) -> Dict[str, Any]:
         working_url = f"http://127.0.0.1:{port}{working_url}"
 
     # 6. Remote fetch with referrer-bypass headers
+    logger.info(f"[Image Utils] Fetching image from remote URL: {working_url[:60]}...")
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36',
         'Referer':    'https://www.webtoons.com/',
@@ -290,9 +294,10 @@ def crop_auto_borders(
         if output_format.lower() == 'jpg':
             mime = 'image/jpeg'
             
+        logger.info(f"[Image Utils] Auto-trim successful. New size: {extended.size[0]}x{extended.size[1]}")
         return {"data": out.getvalue(), "content_type": mime}
     except Exception as e:
-        print("[ImageUtils] crop_auto_borders failed:", str(e))
+        logger.error(f"[Image Utils] crop_auto_borders failed: {e}")
         return {"data": image_bytes, "content_type": "image/jpeg"}
 
 

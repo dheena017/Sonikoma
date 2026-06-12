@@ -77,6 +77,7 @@ export default function LiveScraperDeck({
   const handleDownloadZip = async () => {
     const toDownload = selectedScraped.length > 0 ? selectedScraped : scrapedImages;
     if (toDownload.length === 0) return;
+    console.log("[LiveScraperDeck] Starting ZIP download for", toDownload.length, "images");
 
     setIsZipping(true);
     try {
@@ -114,6 +115,7 @@ export default function LiveScraperDeck({
 
   const handleDeleteSelected = () => {
     if (selectedScraped.length === 0) return;
+    console.log("[LiveScraperDeck] Deleting", selectedScraped.length, "selected images");
     setScrapedImages((prev) => prev.filter((img) => !selectedScraped.includes(img)));
     setConsoleLogs((prev) => [
       `[GUI] Removed ${selectedScraped.length} images`,
@@ -142,6 +144,7 @@ export default function LiveScraperDeck({
       addNotification("Select at least 2 panels to stitch together", "info");
       return;
     }
+    console.log("[LiveScraperDeck] Starting batch vertical merge for", selectedScraped.length, "images");
     setIsBatchMerging(true);
     setConsoleLogs((prev) => [
       `[Stitch Generator] Merging ${selectedScraped.length} selected images vertically...`,

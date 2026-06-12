@@ -66,7 +66,10 @@ export function ScraperActionButtons({
         {/* Auto-Crop Segmented Button Group */}
         <div className="flex items-center h-9 animate-[fadeIn_0.2s_ease-out]">
           <button
-            onClick={handleAutoCropSelected}
+            onClick={() => {
+              console.log("[ScraperActionButtons] Triggering auto-crop on", selectedScraped.length, "panels");
+              handleAutoCropSelected();
+            }}
             disabled={isBatchCropping || selectedScraped.length === 0}
             className="h-full px-3.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-300 hover:text-indigo-200 rounded-l-xl border-r-0 flex items-center gap-1.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm text-[11px] uppercase tracking-wider font-bold cursor-pointer active:scale-95"
             title="Auto-crop selected panels"
@@ -94,7 +97,10 @@ export function ScraperActionButtons({
         {/* Clean Bubbles Button Group */}
         <div className="flex items-center h-9">
           <button
-            onClick={handleCleanBubblesSelected}
+            onClick={() => {
+              console.log("[ScraperActionButtons] Triggering clean bubbles on", selectedScraped.length, "panels");
+              handleCleanBubblesSelected();
+            }}
             disabled={isCleaningBubbles || selectedScraped.length === 0}
             className="h-full px-3.5 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300 hover:text-purple-200 rounded-l-xl border-r-0 flex items-center gap-1.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm cursor-pointer active:scale-95 text-[11px] uppercase tracking-wider font-bold"
             title="Clean speech bubbles on selected panels"
@@ -121,7 +127,10 @@ export function ScraperActionButtons({
 
         {/* Stitch / Merge Selected */}
         <button
-          onClick={handleBatchMergeSelected}
+          onClick={() => {
+            console.log("[ScraperActionButtons] Triggering stitch on", selectedScraped.length, "panels");
+            handleBatchMergeSelected();
+          }}
           disabled={selectedScraped.length < 2 || isBatchMerging}
           className="h-9 px-3.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-300 hover:text-emerald-200 rounded-xl flex items-center gap-1.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed text-[11px] uppercase tracking-wider font-bold cursor-pointer active:scale-95 shadow-sm"
           title="Vertical stitch selected frames into a single image asset"

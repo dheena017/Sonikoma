@@ -68,7 +68,10 @@ export default function CropEditorHeader({
           <div className="flex items-center gap-2 justify-end flex-shrink-0">
             <button
               type="button"
-              onClick={handleUndo}
+              onClick={() => {
+                console.log("[CropEditorHeader] Undo action triggered");
+                handleUndo();
+              }}
               disabled={historyLength === 0}
               title="Undo last action (Ctrl+Z)"
               className="relative inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-[11px] font-semibold font-mono text-neutral-300 bg-neutral-950/60 hover:bg-neutral-800/85 hover:text-white border border-white/5 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
@@ -83,7 +86,10 @@ export default function CropEditorHeader({
             </button>
             <button
               type="button"
-              onClick={handleRedo}
+              onClick={() => {
+                console.log("[CropEditorHeader] Redo action triggered");
+                handleRedo();
+              }}
               disabled={redoHistoryLength === 0}
               title="Redo last action (Ctrl+Y)"
               className="relative inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-[11px] font-semibold font-mono text-neutral-300 bg-neutral-950/60 hover:bg-neutral-800/85 hover:text-white border border-white/5 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
@@ -119,7 +125,10 @@ export default function CropEditorHeader({
         {/* Bottom Row: Panel Navigation */}
         <div className="flex items-center justify-between gap-2 bg-neutral-900/70 ring-1 ring-white/10 shadow-[0_10px_30px_rgba(15,23,42,0.35)] rounded-3xl p-1.5 select-none">
           <button
-            onClick={handlePrevImage}
+            onClick={() => {
+              console.log("[CropEditorHeader] Navigating to previous image");
+              handlePrevImage();
+            }}
             disabled={editingImageIdx === 0}
             className="inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-[11px] font-semibold font-mono text-neutral-300 bg-neutral-950/60 hover:text-white hover:bg-purple-600/10 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             title="Previous Panel (ArrowLeft or [)"
@@ -133,7 +142,10 @@ export default function CropEditorHeader({
           </div>
 
           <button
-            onClick={handleNextImage}
+            onClick={() => {
+              console.log("[CropEditorHeader] Navigating to next image");
+              handleNextImage();
+            }}
             disabled={editingImageIdx === scrapedImages.length - 1}
             className="inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-[11px] font-semibold font-mono text-neutral-300 bg-neutral-950/60 hover:text-white hover:bg-purple-600/10 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             title="Next Panel (ArrowRight or ])"

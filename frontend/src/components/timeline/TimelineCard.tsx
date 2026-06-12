@@ -53,6 +53,7 @@ export default function TimelineCard({
       {/* Image Thumbnail */}
       <div 
         onClick={() => {
+          console.log(`[TimelineCard] Selecting panel #${panel.id} at index ${idx}`);
           setCurrentPanelIndex(idx);
           setActivePreviewTab("storyboard");
           setPlaybackTime(0);
@@ -90,6 +91,7 @@ export default function TimelineCard({
             type="button"
             onClick={(e) => {
               e.stopPropagation();
+              console.log(`[TimelineCard] Shifting panel #${panel.id} left`);
               handleShiftPanel(idx, "left");
             }}
             disabled={idx === 0}
@@ -102,6 +104,7 @@ export default function TimelineCard({
             type="button"
             onClick={(e) => {
               e.stopPropagation();
+              console.log(`[TimelineCard] Shifting panel #${panel.id} right`);
               handleShiftPanel(idx, "right");
             }}
             disabled={idx === panelsLength - 1}
@@ -206,7 +209,10 @@ export default function TimelineCard({
         <button
           type="button"
           disabled={analyzingPanelId === panel.id}
-          onClick={() => handleAnalyzePanel(panel.id, panel.image_url)}
+          onClick={() => {
+            console.log(`[TimelineCard] Manual AI analysis triggered for panel #${panel.id}`);
+            handleAnalyzePanel(panel.id, panel.image_url);
+          }}
           className={`w-full py-1.5 rounded-lg border text-[10px] font-mono font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
             analyzingPanelId === panel.id
               ? "bg-purple-900/40 border-purple-500/50 text-purple-200"

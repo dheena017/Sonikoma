@@ -42,7 +42,10 @@ export default function TimelineBulkOps({
           />
           <button
             type="button"
-            onClick={handleBulkSetDuration}
+            onClick={() => {
+              console.log("[TimelineBulkOps] Bulk set duration");
+              handleBulkSetDuration();
+            }}
             className="flex-1 bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold py-1 rounded transition-colors cursor-pointer"
           >
             Apply All
@@ -67,7 +70,10 @@ export default function TimelineBulkOps({
           </select>
           <button
             type="button"
-            onClick={handleBulkSetMotion}
+            onClick={() => {
+              console.log("[TimelineBulkOps] Bulk set motion");
+              handleBulkSetMotion();
+            }}
             className="bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold px-3 py-1 rounded transition-colors cursor-pointer"
           >
             Apply All
@@ -93,7 +99,10 @@ export default function TimelineBulkOps({
           </select>
           <button
             type="button"
-            onClick={handleBulkSetPreset}
+            onClick={() => {
+              console.log("[TimelineBulkOps] Bulk set preset");
+              handleBulkSetPreset();
+            }}
             className="bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold px-3 py-1 rounded transition-colors cursor-pointer"
           >
             Apply All
@@ -105,7 +114,10 @@ export default function TimelineBulkOps({
       <div className="flex flex-col justify-end gap-2">
         <button
           type="button"
-          onClick={handleClearTimeline}
+          onClick={() => {
+            console.log("[TimelineBulkOps] Clear timeline requested");
+            handleClearTimeline();
+          }}
           className="w-full bg-red-950/40 hover:bg-red-950/60 border border-red-900/40 text-red-400 text-[10px] font-bold py-1.5 rounded transition-colors cursor-pointer"
         >
           Clear Storyboard Timeline

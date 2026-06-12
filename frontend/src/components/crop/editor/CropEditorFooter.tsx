@@ -49,7 +49,10 @@ export default function CropEditorFooter({
         {/* Undo Button in footer */}
         <button
           type="button"
-          onClick={handleUndo}
+          onClick={() => {
+            console.log("[CropEditorFooter] Undo action triggered");
+            handleUndo();
+          }}
           disabled={historyLength === 0 || isSavingEdit}
           title="Undo last action (Ctrl+Z)"
           className="inline-flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white hover:border-purple-600/50 disabled:opacity-25 disabled:cursor-not-allowed px-3 py-2 rounded-2xl text-xs font-semibold cursor-pointer transition-all"
@@ -64,7 +67,10 @@ export default function CropEditorFooter({
         </button>
         <button
           type="button"
-          onClick={() => setEditingImageIdx(null)}
+          onClick={() => {
+            console.log("[CropEditorFooter] Closing editor");
+            setEditingImageIdx(null);
+          }}
           disabled={isSavingEdit}
           className="inline-flex items-center justify-center bg-neutral-900/80 border border-white/5 text-neutral-400 hover:text-white px-3.5 py-2 rounded-2xl text-xs font-semibold cursor-pointer transition-colors hover:bg-neutral-800"
         >
@@ -72,7 +78,10 @@ export default function CropEditorFooter({
         </button>
         <button
           type="button"
-          onClick={handleDeleteCurrentImage}
+          onClick={() => {
+            console.log("[CropEditorFooter] Delete current image requested");
+            handleDeleteCurrentImage();
+          }}
           disabled={isSavingEdit}
           className="inline-flex items-center gap-1.5 bg-red-950/20 hover:bg-red-950/55 border border-red-900/30 hover:border-red-900/50 text-red-400 px-3.5 py-2 rounded-2xl text-xs font-semibold cursor-pointer transition-all"
         >
