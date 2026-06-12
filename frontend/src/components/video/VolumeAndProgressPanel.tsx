@@ -52,14 +52,20 @@ export default function VolumeAndProgressPanel({
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <button
-            onClick={toggleStoryboardPlayback}
+            onClick={() => {
+              console.log("[Playback] Toggling playback:", !storyboardPlaying);
+              toggleStoryboardPlayback();
+            }}
             className="bg-purple-600 hover:bg-purple-500 text-white p-3 rounded-full cursor-pointer hover:scale-105 transition-transform"
           >
             {storyboardPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 fill-white" />}
           </button>
           
           <button
-            onClick={resetStoryboardPlayback}
+            onClick={() => {
+              console.log("[Playback] Resetting playback");
+              resetStoryboardPlayback();
+            }}
             className="p-3 bg-neutral-800 hover:bg-neutral-700 hover:text-white rounded-xl text-neutral-400 cursor-pointer"
           >
             <RotateCcw className="h-4 w-4" />

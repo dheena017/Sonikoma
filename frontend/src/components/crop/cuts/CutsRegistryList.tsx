@@ -41,7 +41,10 @@ export function CutsRegistryList({
         return (
           <div
             key={slice.id}
-            onClick={() => handleSelectSlice(slice)}
+            onClick={() => {
+              console.log(`[CutsRegistry] Selecting slice #${index + 1}: ${slice.id}`);
+              handleSelectSlice(slice);
+            }}
             className={`p-2.5 rounded-xl text-[11px] font-mono border cursor-pointer transition-all flex items-center justify-between group ${
               isSelected
                 ? "bg-emerald-950/30 border-emerald-500/50 text-emerald-300 shadow shadow-emerald-900/20"
@@ -65,7 +68,10 @@ export function CutsRegistryList({
               </span>
               <button
                 type="button"
-                onClick={(e) => handleCropSingleSlice(slice, e)}
+                onClick={(e) => {
+                  console.log(`[CutsRegistry] Executing crop for slice: ${slice.id}`);
+                  handleCropSingleSlice(slice, e);
+                }}
                 disabled={isCroppingSlice === slice.id || isSavingEdit}
                 className="text-purple-500 hover:text-purple-300 disabled:opacity-50 disabled:cursor-wait p-1 rounded-lg hover:bg-purple-900/30 transition-all cursor-pointer"
                 title="Execute this crop immediately"
@@ -78,7 +84,10 @@ export function CutsRegistryList({
               </button>
               <button
                 type="button"
-                onClick={(e) => handleDeleteSlice(slice.id, e)}
+                onClick={(e) => {
+                  console.log(`[CutsRegistry] Deleting slice: ${slice.id}`);
+                  handleDeleteSlice(slice.id, e);
+                }}
                 className="text-neutral-700 hover:text-red-400 p-1 rounded-lg hover:bg-red-950/40 transition-all cursor-pointer opacity-0 group-hover:opacity-100"
                 title="Delete individual crop tool"
               >

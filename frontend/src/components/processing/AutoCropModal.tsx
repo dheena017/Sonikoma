@@ -86,6 +86,7 @@ export default function AutoCropModal({
 }: AutoCropModalProps) {
 
   const handleResetAll = () => {
+    console.log("[AutoCropModal] Resetting all parameters to defaults");
     setSensitivity(30);
     setPadding(10);
     setBackgroundColorMode("auto");
@@ -158,7 +159,10 @@ export default function AutoCropModal({
               <button
                 key={tab.id}
                 type="button"
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  console.log(`[AutoCropModal] Switching to tab: ${tab.id}`);
+                  setActiveTab(tab.id);
+                }}
                 className={`relative flex items-center gap-2 px-5 py-3 text-xs font-bold font-mono transition-all border-b-2 cursor-pointer select-none ${
                   activeTab === tab.id
                     ? "text-indigo-400 border-indigo-500 bg-indigo-500/5"
@@ -259,7 +263,10 @@ export default function AutoCropModal({
 
               <button
                 type="button"
-                onClick={onApply}
+                onClick={() => {
+                  console.log("[AutoCropModal] Apply clicked");
+                  onApply();
+                }}
                 disabled={isApplying || selectedCount === 0}
                 className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-bold font-sans transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-indigo-900/30 flex items-center gap-2 active:scale-95"
               >

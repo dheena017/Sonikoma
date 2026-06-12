@@ -40,7 +40,10 @@ export default function AutoCropSettingsPanel({
           min="5"
           max="90"
           value={cropSensitivity}
-          onChange={(e) => setCropSensitivity(Number(e.target.value))}
+          onChange={(e) => {
+            console.log(`[AutoCropSettings] Sensitivity changed to: ${e.target.value}%`);
+            setCropSensitivity(Number(e.target.value));
+          }}
           className="w-full accent-purple-500 bg-neutral-800 rounded-lg h-1.5 px-0 cursor-pointer hover:accent-purple-400 transition-colors"
         />
       </div>
@@ -55,7 +58,10 @@ export default function AutoCropSettingsPanel({
           min="0"
           max="50"
           value={cropPaddingPx}
-          onChange={(e) => setCropPaddingPx(Number(e.target.value))}
+          onChange={(e) => {
+            console.log(`[AutoCropSettings] Padding changed to: ${e.target.value}px`);
+            setCropPaddingPx(Number(e.target.value));
+          }}
           className="w-full accent-purple-500 bg-neutral-800 rounded-lg h-1.5 px-0 cursor-pointer hover:accent-purple-400 transition-colors"
         />
       </div>

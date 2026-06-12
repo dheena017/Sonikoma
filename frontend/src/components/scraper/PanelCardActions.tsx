@@ -27,6 +27,7 @@ export function PanelCardActions({
 
   const handleEditClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
+    console.log(`[PanelCardActions] Entering edit mode for image #${idx + 1}`);
     setEditingImageIdx(idx);
     if (openEditingImageIdx) openEditingImageIdx(idx);
   };

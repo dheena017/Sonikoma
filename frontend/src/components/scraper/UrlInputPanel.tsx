@@ -165,6 +165,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
               onPaste={handlePaste}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !isProcessing && targetUrl.trim()) {
+                  console.log("[UrlInputPanel] Enter key pressed. Triggering generation.");
                   if (isSourceMismatch) {
                     addNotification(
                       `Selected source ${selectedSourceName} does not match the current URL host (${currentHost}). Please choose the correct website or paste a matching URL.`,

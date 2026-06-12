@@ -109,6 +109,7 @@ export function usePlaybackEngine({
 
   const toggleStoryboardPlayback = () => {
     if (panels.length === 0) return;
+    console.log("[Playback] Toggling storyboard playback:", !storyboardPlaying);
     if (storyboardPlaying) {
       setStoryboardPlaying(false);
       if (window.speechSynthesis) window.speechSynthesis.pause();
@@ -119,6 +120,7 @@ export function usePlaybackEngine({
   };
 
   const resetStoryboardPlayback = () => {
+    console.log("[Playback] Resetting storyboard playback");
     setStoryboardPlaying(false);
     setCurrentPanelIndex(0);
     setPlaybackTime(0);

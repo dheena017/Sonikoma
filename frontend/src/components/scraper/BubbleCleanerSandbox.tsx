@@ -34,6 +34,7 @@ export function BubbleCleanerSandbox({ eraseMethod, addNotification, firstImageU
 
   const loadActivePanel = () => {
     if (!firstImageUrl || !canvasRef.current) return;
+    console.log("[BubbleCleanerSandbox] Loading active panel into sandbox");
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -65,6 +66,7 @@ export function BubbleCleanerSandbox({ eraseMethod, addNotification, firstImageU
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const rect = canvasRef.current!.getBoundingClientRect();
+    console.log("[BubbleCleanerSandbox] Mouse down on sandbox canvas");
     startDrawing(e.clientX - rect.left, e.clientY - rect.top);
   };
 

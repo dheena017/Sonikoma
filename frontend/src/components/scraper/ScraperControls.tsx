@@ -49,6 +49,7 @@ export default function ScraperControls({
   // ── Quick Selection Filters ──────────────────────────────────────────────
 
   const handleSelectAllToggle = () => {
+    console.log("[ScraperControls] Toggling select all");
     if (selectedScraped.length === scrapedImages.length) {
       setSelectedScraped([]);
       onLastSelectedReset?.();
@@ -60,24 +61,28 @@ export default function ScraperControls({
   };
 
   const handleInvertSelection = () => {
+    console.log("[ScraperControls] Inverting selection");
     setSelectedScraped((prev) => scrapedImages.filter((img) => !prev.includes(img)));
     onLastSelectedReset?.();
     setConsoleLogs((prev) => ["[GUI] Inverted selection set", ...prev]);
   };
 
   const handleSelectOdd = () => {
+    console.log("[ScraperControls] Selecting odd frames");
     setSelectedScraped(scrapedImages.filter((_, idx) => idx % 2 === 0));
     onLastSelectedReset?.();
     setConsoleLogs((prev) => ["[GUI] Selected odd-numbered frames", ...prev]);
   };
 
   const handleSelectEven = () => {
+    console.log("[ScraperControls] Selecting even frames");
     setSelectedScraped(scrapedImages.filter((_, idx) => idx % 2 !== 0));
     onLastSelectedReset?.();
     setConsoleLogs((prev) => ["[GUI] Selected even-numbered frames", ...prev]);
   };
 
   const handleReverseDeckOrder = () => {
+    console.log("[ScraperControls] Reversing deck order");
     setScrapedImages((prev) => [...prev].reverse());
     onLastSelectedReset?.();
     setConsoleLogs((prev) => ["[GUI] Reversed extracted frame sequence order in deck", ...prev]);

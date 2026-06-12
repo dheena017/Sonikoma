@@ -224,6 +224,7 @@ function CropEditorSidebar({
   handleExecuteSave,
 }: CropEditorSidebarProps) {
   const handleTabClick = useCallback((tab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge") => {
+    console.log(`[CropEditorSidebar] Switching to tab: ${tab}`);
     setActiveTab(tab);
 
     // Set the correct editMode based on which tab was clicked

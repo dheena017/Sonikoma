@@ -101,7 +101,10 @@ export function FloatingSelectionBar({
             {/* Auto-Crop */}
             <button
               type="button"
-              onClick={handleAutoCropSelected}
+              onClick={() => {
+                console.log("[FloatingSelectionBar] Triggering auto-crop on", selectedCount, "panels");
+                handleAutoCropSelected();
+              }}
               disabled={isAnyBusy}
               title="Auto-Crop selected panels"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-indigo-950/60 border border-neutral-800 hover:border-indigo-700/50 text-neutral-300 hover:text-indigo-300 text-[9px] font-bold font-mono transition-all active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
@@ -117,7 +120,10 @@ export function FloatingSelectionBar({
             {/* Clean Bubbles */}
             <button
               type="button"
-              onClick={handleCleanBubblesSelected}
+              onClick={() => {
+                console.log("[FloatingSelectionBar] Triggering clean bubbles on", selectedCount, "panels");
+                handleCleanBubblesSelected();
+              }}
               disabled={isAnyBusy}
               title="Clean speech bubbles from selected panels"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-violet-950/60 border border-neutral-800 hover:border-violet-700/50 text-neutral-300 hover:text-violet-300 text-[9px] font-bold font-mono transition-all active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
@@ -133,7 +139,10 @@ export function FloatingSelectionBar({
             {/* Stitch */}
             <button
               type="button"
-              onClick={handleBatchMergeSelected}
+              onClick={() => {
+                console.log("[FloatingSelectionBar] Triggering stitch on", selectedCount, "panels");
+                handleBatchMergeSelected();
+              }}
               disabled={isAnyBusy || selectedCount < 2}
               title="Stitch selected panels into one vertical strip"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-blue-950/60 border border-neutral-800 hover:border-blue-700/50 text-neutral-300 hover:text-blue-300 text-[9px] font-bold font-mono transition-all active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
@@ -149,7 +158,10 @@ export function FloatingSelectionBar({
             {/* Add to Canvas */}
             <button
               type="button"
-              onClick={handleAddToCanvas}
+              onClick={() => {
+                console.log("[FloatingSelectionBar] Adding", selectedCount, "panels to canvas");
+                handleAddToCanvas();
+              }}
               disabled={isAnyBusy}
               title="Add selected panels to storyboard canvas"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600/80 to-indigo-600/80 hover:from-purple-500/90 hover:to-indigo-500/90 border border-purple-500/30 text-white text-[9px] font-bold font-mono transition-all active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-purple-900/20"
@@ -161,7 +173,10 @@ export function FloatingSelectionBar({
             {/* Delete */}
             <button
               type="button"
-              onClick={handleDeleteSelected}
+              onClick={() => {
+                console.log("[FloatingSelectionBar] Deleting", selectedCount, "panels");
+                handleDeleteSelected();
+              }}
               disabled={isAnyBusy}
               title="Delete selected panels from the deck"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-red-950/60 border border-neutral-800 hover:border-red-700/50 text-neutral-400 hover:text-red-400 text-[9px] font-bold font-mono transition-all active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"

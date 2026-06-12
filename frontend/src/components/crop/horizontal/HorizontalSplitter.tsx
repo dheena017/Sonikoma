@@ -166,11 +166,13 @@ export default function HorizontalSplitter({
   };
 
   const handleSortSplitLines = () => {
+    console.log("[HorizontalSplitter] Sorting split lines");
     setSplitLines((prev) => [...prev].sort((a, b) => a - b));
   };
 
   const handleAutoPlaceCuts = () => {
     if (detectedGutters.length === 0) return;
+    console.log("[HorizontalSplitter] Auto-placing cuts based on detected gutters");
     setSplitLines([...detectedGutters].sort((a, b) => a - b));
     setShowSplitPosition(true);
   };
@@ -195,6 +197,7 @@ export default function HorizontalSplitter({
   const handleSaveTemplate = () => {
     if (!newTemplateName.trim() || splitLines.length === 0) return;
     const name = newTemplateName.trim();
+    console.log("[HorizontalSplitter] Saving template:", name);
     const updated = {
       ...savedTemplates,
       [name]: [...splitLines].sort((a, b) => a - b),
@@ -207,6 +210,7 @@ export default function HorizontalSplitter({
 
   const handleLoadTemplate = (name: string) => {
     if (!name || !savedTemplates[name]) return;
+    console.log("[HorizontalSplitter] Loading template:", name);
     setSplitLines([...savedTemplates[name]]);
     setShowSplitPosition(true);
     setSelectedTemplate(name);
@@ -226,15 +230,15 @@ export default function HorizontalSplitter({
     const sorted = [...splitLines].sort((a, b) => a - b);
     const segments = [];
     let prevPct = 0;
-    
+
     for (let i = 0; i <= sorted.length; i++) {
       const currentPct = i < sorted.length ? sorted[i] : 100;
       const heightPct = currentPct - prevPct;
-      
+
       const startPx = naturalHeight ? Math.round((prevPct / 100) * naturalHeight) : 0;
       const endPx = naturalHeight ? Math.round((currentPct / 100) * naturalHeight) : 0;
       const heightPx = naturalHeight ? endPx - startPx : null;
-      
+
       segments.push({
         index: i + 1,
         startPct: prevPct,
@@ -499,7 +503,7 @@ export default function HorizontalSplitter({
               <option value="pct">%</option>
               {naturalHeight && <option value="px">px</option>}
             </select>
-            
+
             <div className="flex flex-1 gap-1">
               <button
                 type="button"
