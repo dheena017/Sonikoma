@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import { Sparkles, CheckSquare, RefreshCw, X } from "lucide-react";
 
 interface TimelineSelectionBarProps {
@@ -20,7 +21,10 @@ export default function TimelineSelectionBar({
 }: TimelineSelectionBarProps) {
   const isVisible = selectedCount > 0;
 
-  return (
+  // Safeguard: Ensure we are in a browser environment before using the DOM
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <div
       className={[
         "fixed bottom-0 left-0 right-0 z-[9998] transition-all duration-300 ease-out",
@@ -106,6 +110,7 @@ export default function TimelineSelectionBar({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
