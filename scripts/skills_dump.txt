@@ -1,0 +1,458 @@
+Found 30 skill files:
+============================================================
+FILE: bgm_vibe_selector.md
+============================================================
+---
+name: bgm_vibe_selector
+description: Match panel emotion profile to music database vibe keywords.
+model: gemini-2.5-flash
+response_schema: BGMVibeModel
+---
+Map this panel context to musical theme labels.
+Narrative mood: "{narrative_mood}"
+Action scale: "{action_scale}"
+
+Provide background soundtrack tags (e.g. "tense horror drone", "high-tempo drum battle").
+
+============================================================
+FILE: camera_shake_dynamics.md
+============================================================
+---
+name: camera_shake_dynamics
+description: Suggest exact mathematical shake coefficients for rendering engine filters based on action scale.
+model: gemini-2.5-flash
+response_schema: CameraShakeModel
+---
+Recommend digital screen shake variables for video compilation:
+Action context: "{visual_description}"
+Sound design cue: "{sfx}"
+
+Recommend FFmpeg x/y offset formulas (amplitude, frequency multiplier) to simulate dynamic camera impacts.
+
+============================================================
+FILE: character_bio_profiler.md
+============================================================
+---
+name: character_bio_profiler
+description: Analyze visual character attributes to compile dynamic character databases.
+model: gemini-2.5-flash
+response_schema: CharacterBioModel
+---
+Inspect this character illustration panel and dialog. Construct a clean character profile card.
+Dialogue context: "{dialogue}"
+
+Specify character name, estimated age, power description, clothing theme color, and active role.
+
+============================================================
+FILE: character_emotion_class.md
+============================================================
+---
+name: character_emotion_class
+description: Evaluate character visual expressions to classify active emotional state.
+model: gemini-2.5-flash
+response_schema: CharacterEmotionModel
+---
+Evaluate the face and gesture of the character in this illustration:
+Illustration description: "{visual_description}"
+Character dialog: "{speech_text}"
+
+Categorize their emotional state (e.g. terrified, smug, enraged, affectionate, analytical) and estimate target voice stability score (0.0 to 1.0).
+
+============================================================
+FILE: cliffhanger_generator.md
+============================================================
+---
+name: cliffhanger_generator
+description: Generate a suspenseful end-of-video question/hook to drive next-episode CTR.
+model: gemini-2.5-flash
+response_schema: CliffhangerModel
+---
+Create the ultimate cliffhanger script ending line to make viewers click on the next video recapping this manhwa.
+Story up to this point:
+{story_outline}
+
+Develop a mystery question that challenges the viewer's expectations about the protagonist's survival or powers.
+
+============================================================
+FILE: copyright_scrubber.md
+============================================================
+---
+name: copyright_scrubber
+description: Scan dialogue transcripts and scripts to filter and sanitize community guideline violations.
+model: gemini-2.5-flash
+response_schema: CopyrightScrubModel
+---
+You are a content compliance editor. Scan the narration script below and flag any potential policy violations (extreme violence, hate speech, sexual themes) and suggest sanitized, monetization-friendly replacements.
+Script line: "{text}"
+
+============================================================
+FILE: midroll_placement_ref.md
+============================================================
+---
+name: midroll_placement_ref
+description: Identify high-suspense timestamps to locate ad midrolls for revenue maximization.
+model: gemini-2.5-flash
+response_schema: MidrollPlacementModel
+---
+Analyze this script timeline and recommend exactly {max_ads} midroll placements at high tension cliffhangers:
+Script:
+{compiled_script}
+
+============================================================
+FILE: narrative_pace_controller.md
+============================================================
+---
+name: narrative_pace_controller
+description: Suggest pacing settings, zoom transitions speeds and pause flags for rendering.
+model: gemini-2.5-flash
+response_schema: NarrativePacingModel
+---
+Analyze the dialogue tension level and visual speed metadata below:
+Visual Description: "{visual_description}"
+Dialogue/Narration: "{speech_text}"
+SFX context: "{sfx}"
+
+Recommend panel scene duration multiplier (0.5 for fast action, 1.8 for dramatic pauses), video transition speeds, and sound dampening triggers.
+
+============================================================
+FILE: outro_cta_generator.md
+============================================================
+---
+name: outro_cta_generator
+description: Generate dynamic call to action speech outro narration for recaps.
+model: gemini-2.5-flash
+response_schema: OutroCTAModel
+---
+Draft a dynamic video outro script (max 15 words) that encourages recap channel subscribers to click on the next video, comment, or subscribe.
+Manhwa title: "{title}"
+Climax hook: "{ending_cliffhanger}"
+
+============================================================
+FILE: panel_analysis.md
+============================================================
+---
+name: panel_analysis
+description: Generate narration script and cinematic metadata for a single panel.
+model: gemini-2.5-flash
+response_schema: GeminiAnalysisModel
+---
+Analyze this comic/manhwa illustration panel in detail and generate cinematic metadata.{tone_hint}
+Return a JSON object with these exact properties:
+- speech_text: A caption, subtitle, or character dialogue (max 25 words, impactful and dramatic).
+- sfx: An on-screen bracket-style sound effect (e.g., "[Whoosh]", "[Slash]", "[Crash]", "[Gasp]", "[Boom]").
+- duration: Suggested scene duration in seconds (between 2.0 and 8.0). Action scenes = shorter; dialogue scenes = longer.
+- motion_type: Camera motion. Must be one of: "zoom_in", "zoom_out", "pan_left", "pan_right", "pan_up", "pan_down".
+- visual_description: A single sentence describing what is happening in the panel.
+
+============================================================
+FILE: scene_composition_desc.md
+============================================================
+---
+name: scene_composition_desc
+description: Generate structured visual scene description for generative video synthesis prompting.
+model: gemini-2.5-flash
+response_schema: SceneCompositionModel
+---
+Write a detailed generative visual prompt describing this comic scene:
+Illustration description: "{visual_description}"
+Audio context: "{speech_text}"
+
+Describe characters, visual atmosphere, drawing style (e.g. watercolor, detailed ink), camera angle, light sources, and particle motion.
+
+============================================================
+FILE: script_dramatization.md
+============================================================
+---
+name: script_dramatization
+description: Transform raw dialogue extracted via OCR into high-retention cinematic narration.
+model: gemini-2.5-flash
+response_schema: DramatizedScriptModel
+---
+Translate or enhance these raw dialogue segments into a highly engaging, cinematic narration script.
+Raw dialogue text extracted from OCR:
+{raw_ocr_text}
+
+Genre: {genre}
+Scene Context: {scene_context}
+
+Output a single narrator line and an appropriate voice over tone context.
+
+============================================================
+FILE: series_intro_hook.md
+============================================================
+---
+name: series_intro_hook
+description: Generate high-engagement introductory video hook summarizing the manhwa premise.
+model: gemini-2.5-flash
+response_schema: SeriesIntroHookModel
+---
+You are a YouTube video retention specialist. Write an absolute banger of an intro hook (first 5 seconds of the video) to capture readers immediately for this manhwa:
+Title: "{title}"
+Premise Summary: "{premise_summary}"
+Genre: "{genre}"
+
+Provide hook speech text and dynamic background video description hints.
+
+============================================================
+FILE: sfx_audio_prompt.md
+============================================================
+---
+name: sfx_audio_prompt
+description: Generate descriptive prompt phrases for audio sound effect generators.
+model: gemini-2.5-flash
+response_schema: SFXAudioPromptModel
+---
+You are an expert sound designer. Analyze the following comic action scene and generate a descriptive, detailed sound effect prompt to synthesize realistic audio.
+Visual scene context:
+{visual_description}
+
+SFX tag: {sfx_tag}
+
+Provide a text-to-audio description prompt and suggest volume scaling.
+
+============================================================
+FILE: sfx_overlay_scheduler.md
+============================================================
+---
+name: sfx_overlay_scheduler
+description: Coordinate sound mixes by overlaying background environment elements and transient effects.
+model: gemini-2.5-flash
+response_schema: SFXOverlayModel
+---
+Plan the sound mix for this scene:
+Scene visual: "{visual_description}"
+Main audio lines: "{speech_text}"
+Sound Effect: "{sfx}"
+
+Select secondary environmental ambient tracks (e.g. rain loop, humming server room) and schedule their volume ratios relative to the transient effect triggers.
+
+============================================================
+FILE: shorts_retention_hook.md
+============================================================
+---
+name: shorts_retention_hook
+description: Formulate highly aggressive 2-second capture prompts for TikTok/Shorts vertical feeds.
+model: gemini-2.5-flash
+response_schema: ShortsHookModel
+---
+Create a highly aggressive 2-second visual hook sentence to stop vertical feed scrolling for this manhwa episode:
+Title: "{title}"
+Climax: "{key_event}"
+
+============================================================
+FILE: shorts_script_adapter.md
+============================================================
+---
+name: shorts_script_adapter
+description: Convert standard storyboard chapters into ultra-compressed 55-second vertical Shorts script.
+model: gemini-2.5-flash
+response_schema: ShortsScriptModel
+---
+You are a viral TikTok and YouTube Shorts script editor. Condense the dialogue and narration outline below into exactly 55 seconds of high-impact voiceover script:
+Storyboard summary:
+{storyboard_summary}
+
+Structure the output with an initial 3-second visual scroll grab, followed by fast narrative milestones.
+
+============================================================
+FILE: smart_crop.md
+============================================================
+---
+name: smart_crop
+description: Detect bounding box boundaries of panels within a comic strip.
+model: gemini-2.5-flash
+response_schema: CropList
+---
+Analyze this comic/webtoon image. Identify the main scene/illustration panels. 
+For each panel, detect its bounding box boundaries as coordinates (0 to 100) relative to the image edges:
+- cropTop: top boundary of the panel (0 is top edge, 100 is bottom)
+- cropBottom: bottom boundary of the panel (0 is top edge, 100 is bottom)
+- cropLeft: left boundary of the panel (0 is left edge, 100 is right)
+- cropRight: right boundary of the panel (0 is left edge, 100 is right)
+Make sure these are absolute coordinates from the top/left of the image, NOT margins. 
+Return a JSON object containing a 'panels' array.
+
+============================================================
+FILE: storyboard_narrative.md
+============================================================
+---
+name: storyboard_narrative
+description: Generate chronological narration script and camera motion directions.
+model: gemini-2.5-flash
+response_schema: StoryboardModel
+---
+You are a cinematic comic book editor and storyteller.
+Given this Comic Webtoon information:
+Title: "{title}"
+Genre: "{genre}"
+Episode: "{episode}"
+
+Please generate exactly {active_slices_count} distinct chronological narration or panel speech lines.
+For each of the {active_slices_count} panels, provide:
+1. "speech_text": An engaging, atmospheric description (under 20 words).
+2. "sfx": A punchy comic-style sound effect in brackets.
+3. "motion_type": One of 'zoom_in', 'zoom_out', 'pan_left', 'pan_right', 'pan_up', 'pan_down'.
+
+Output strictly valid JSON with top-level key "panels".
+
+============================================================
+FILE: subtitle_styler.md
+============================================================
+---
+name: subtitle_styler
+description: Choose subtitle visual fonts, coloring, and styling parameters based on genre.
+model: gemini-2.5-flash
+response_schema: SubtitleStylerModel
+---
+Recommend font styling based on scene intensity:
+Action tag: "{visual_description}"
+Dialogue: "{speech_text}"
+
+Specify font name (e.g. Impact, Montserrat, Arial), scale size, primary fill color, outline stroke thickness, and bounce animation style.
+
+============================================================
+FILE: thumbnail_concept.md
+============================================================
+---
+name: thumbnail_concept
+description: Create high-CTR thumbnail concept text and image generation prompts.
+model: gemini-2.5-flash
+response_schema: ThumbnailConceptModel
+---
+Create a high click-through-rate (CTR) concept for a YouTube thumbnail.
+Manhwa title: "{title}"
+Genre: "{genre}"
+Key plot highlight: "{plot_point}"
+
+Design a descriptive visual prompt to feed into image generation AI (Stable Diffusion/SDXL) and compile key hook text overlay.
+
+============================================================
+FILE: thumbnail_layout.md
+============================================================
+---
+name: thumbnail_layout
+description: Layout layering instructions for thumbnail artists/graphics templates.
+model: gemini-2.5-flash
+response_schema: ThumbnailLayoutModel
+---
+Given the thumbnail concept and main character:
+Concept: "{thumbnail_concept}"
+Character: "{main_character}"
+
+Describe the background style, subject position coordinates, glowing facial or weapon details, and shock facial expressions.
+
+============================================================
+FILE: thumbnail_visual_comp.md
+============================================================
+---
+name: thumbnail_visual_comp
+description: Compile visual layering templates and alignment guidelines for thumbnails.
+model: gemini-2.5-flash
+response_schema: ThumbnailVisualModel
+---
+Given the clickbait concept, recommend thumbnail composition details:
+Concept details: "{thumbnail_concept}"
+
+Specify background canvas colors, character split-screen ratios, target highlight borders (e.g. red outlines, shock emojis), and layout margins.
+
+============================================================
+FILE: title_ab_tester.md
+============================================================
+---
+name: title_ab_tester
+description: Formulate 3 contrasting title variations targeting distinct viewer psychological categories.
+model: gemini-2.5-flash
+response_schema: TitleABModel
+---
+Generate 3 viral YouTube titles for a recap of "{title}" where "{key_climax_event}" occurs.
+- Title A: Curiosity Gap (leaves a mystery open)
+- Title B: Protagonist Overpowered (focuses on absolute strength)
+- Title C: Extreme Contrast comparison (focuses on the weak-to-strong transition)
+
+============================================================
+FILE: transition_speed_tuner.md
+============================================================
+---
+name: transition_speed_tuner
+description: Configure rendering transition times in frames based on dialogue pace and actions.
+model: gemini-2.5-flash
+response_schema: TransitionSpeedModel
+---
+Analyze scene dynamics:
+Pacing description: "{visual_description}"
+Dialogue pace: "{speech_text}"
+
+Determine transition style (crossfade, cut, flash) and exact transition duration in frames at 30fps.
+
+============================================================
+FILE: translation.md
+============================================================
+---
+name: translation
+description: Translate comic scripts and narration to a target language.
+model: gemini-2.5-flash
+response_schema: TranslationModel
+---
+Translate the following dialogue or narration text into the requested target language. Ensure natural sounding flow, slang retention, and appropriate localization.
+Text to translate:
+"{text}"
+
+Target Language: "{target_lang}"
+
+============================================================
+FILE: video_seo_metadata.md
+============================================================
+---
+name: video_seo_metadata
+description: Generate high-ranking YouTube SEO Titles, tags, description, and chapters.
+model: gemini-2.5-flash
+response_schema: VideoSEOMetadataModel
+---
+You are a YouTube algorithm expert. Generate SEO metadata to maximize viral reach for this webtoon video compilation.
+Manhwa Title: "{title}"
+Genre: "{genre}"
+Complete story outline / recap:
+{storyboard_summary}
+
+============================================================
+FILE: voice_casting.md
+============================================================
+---
+name: voice_casting
+description: Analyze character personality and dialouge to select suitable voice parameters.
+model: gemini-2.5-flash
+response_schema: VoiceCastingModel
+---
+Analyze this comic character profile and voice line to cast the optimal Text-To-Speech voice parameters.
+Character Name: "{character_name}"
+Dialogue Sample: "{dialogue_sample}"
+Visual Description: "{visual_description}"
+
+============================================================
+FILE: youtube_chapter_gen.md
+============================================================
+---
+name: youtube_chapter_gen
+description: Create timestamp timeline markers for YouTube player chapters based on storyboard milestones.
+model: gemini-2.5-flash
+response_schema: YouTubeChapterModel
+---
+You are a video metadata editor. Parse this dynamic script timeline and compile chronological chapters:
+Script:
+{compiled_script}
+
+============================================================
+FILE: youtube_comment_coach.md
+============================================================
+---
+name: youtube_comment_coach
+description: Synthesize viral channel responses to subscriber comments.
+model: gemini-2.5-flash
+response_schema: CommentReplyModel
+---
+You are the community host of an automated Manhwa recap channel. Draft a high-engagement, witty response to this user comment:
+User Comment: "{user_comment}"
+Video Title: "{video_title}"
+
+Ensure the tone is warm, teasing, and invites subscribers to reply back.
+
