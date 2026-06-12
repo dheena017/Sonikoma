@@ -28,8 +28,8 @@ export function PanelCardActions({
   const handleEditClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     console.log(`[PanelCardActions] Entering edit mode for image #${idx + 1}`);
-    setEditingImageIdx(idx);
-    if (openEditingImageIdx) openEditingImageIdx(idx);
+    window.history.pushState({}, "", `/editor/adjust?idx=${idx}`);
+    window.dispatchEvent(new Event("popstate"));
   };
 
   const handleDeleteClick = (event: React.MouseEvent<HTMLButtonElement>) => {

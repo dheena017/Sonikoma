@@ -110,5 +110,58 @@ body {
   animation: float 4s ease-in-out infinite;
 }
 
+/* Page transitions, custom theme variables, and scrollable nav ribbon CSS */
+@keyframes page-entry {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition {
+  animation: page-entry 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.nav-scroll-ribbon {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.nav-scroll-ribbon::-webkit-scrollbar {
+  display: none;
+}
+
+/* Visual Theme Customizations */
+:root {
+  --theme-primary: 139, 92, 246; /* purple-500 default */
+  --theme-glow: rgba(139, 92, 246, 0.2);
+}
+
+[data-theme="obsidian"] {
+  --theme-primary: 168, 85, 247; /* purple-500 */
+  --theme-glow: rgba(168, 85, 247, 0.22);
+}
+
+[data-theme="cyberpunk"] {
+  --theme-primary: 6, 182, 212; /* cyan-500 */
+  --theme-glow: rgba(6, 182, 212, 0.25);
+}
+
+[data-theme="slate"] {
+  --theme-primary: 161, 161, 170; /* zinc-400 */
+  --theme-glow: rgba(161, 161, 170, 0.15);
+}
+
+[data-theme="indigo"] {
+  --theme-primary: 99, 102, 241; /* indigo-500 */
+  --theme-glow: rgba(99, 102, 241, 0.25);
+}
+
+
 
 
