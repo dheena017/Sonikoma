@@ -152,7 +152,9 @@ export function useSingleImageEdits({
         ...prev
       ]);
       console.log(`[Image Editor] Generated ${cuts.length} cuts from Frame #${editingImageIdx + 1}:`, croppedUrls);
+      addNotification(`Generated ${cuts.length} separate cuts from Frame #${editingImageIdx + 1}!`, 'success');
     } catch (err: any) {
+      console.error(`[Image Editor] Batch crop failed for Frame #${editingImageIdx + 1}:`, err);
       if (! (err as any).intercepted) {
         addNotification(`Batch crop failed. Please check the edits and try again.`, "error");
       }

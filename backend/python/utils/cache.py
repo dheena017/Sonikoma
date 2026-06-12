@@ -132,6 +132,9 @@ def get_all_cache_stats() -> Dict[str, Any]:
     }
 
 
+import logging
+logger = logging.getLogger("anivox.utils.cache")
+
 def purge_all_expired() -> None:
     m = stitched_cache.purge_expired()
     e = edit_history.purge_expired()
@@ -139,4 +142,4 @@ def purge_all_expired() -> None:
     p = proxy_cache.purge_expired()
     total = m + e + z + p
     if total > 0:
-        print(f"[Cache] ♻️  Purged {total} expired entries (merged:{m} edits:{e} zips:{z} proxy:{p})")
+        logger.info(f"[Cache] ♻️  Purged {total} expired entries (merged:{m} edits:{e} zips:{z} proxy:{p})")

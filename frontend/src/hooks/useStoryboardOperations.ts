@@ -51,7 +51,7 @@ export function useStoryboardOperations({
     handleShiftPanel,
     handleModifySFX,
     handleModifyVisualDescription,
-  } = useSceneModifier({ panels, setPanels, setCurrentPanelIndex, setConsoleLogs });
+  } = useSceneModifier({ panels, setPanels, setCurrentPanelIndex, setConsoleLogs, addNotification });
 
   const {
     analyzingPanelId,

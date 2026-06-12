@@ -49,6 +49,7 @@ async def scrape_images(body: ScrapeImagesRequest):
         logger.info(f"[Scraper] Scrape request received - source: {body.source or 'unknown'}, url: {normalized_url}")
         
         proxied_urls = await scrape_images_from_url(normalized_url, body.source, bypass_cache=body.bypass_cache)
+        logger.info(f"[Scraper] Successfully extracted {len(proxied_urls)} image URLs.")
 
         return {
             "success": True,
@@ -85,6 +86,7 @@ async def generate_storyboard(body: GenerateStoryboardRequest):
         logger.info(f"[Model] Processing storyboard request for url: \"{body.url}\". Parsed Title: \"{parsed['title']}\", Genre: \"{parsed['genre']}\"")
 
         # Select background video based on genre
+        logger.info(f"[Model] Selecting background video for genre: {parsed['genre']}")
         video_url = DYNAMIC_BACKGROUND_VIDEOS["general"]
         genre_lower = parsed["genre"].lower()
         
@@ -116,6 +118,7 @@ async def generate_storyboard(body: GenerateStoryboardRequest):
                 p_copy["image_url"] = resolved_img
                 resolved_panels.append(p_copy)
 
+            logger.info(f"[Model] Resolved {len(resolved_panels)} panels with client-provided data.")
             return {
                 "project_id": project_id,
                 "status": "success",

@@ -278,6 +278,7 @@ def adjust_to_aspect_ratio(
 @router.post("/analyze-image", summary="Generate narration script and SFX for a single panel")
 async def analyze_image(body: AnalyzeImageRequest):
     start_time = time.time()
+    logger.info(f"[Model] Received analysis request for model: {body.model}")
     
     # 1. Resolve image
     try:
@@ -315,9 +316,11 @@ async def analyze_image(body: AnalyzeImageRequest):
 
         # Execute using panel_analysis skill
         skill = registry.get("panel_analysis")
+        logger.info(f"[Model] Executing 'panel_analysis' skill using {target_model}...")
         raw_text = await skill.execute(model=target_model, image_bytes=img_buffer, tone_hint=tone_hint)
         
         analysis = validate_analysis(json.loads(raw_text))
+        logger.info(f"[Model] Analysis completed for panel.")
         elapsed = int((time.time() - start_time) * 1000)
         
         return {
@@ -404,6 +407,7 @@ async def analyze_batch(body: AnalyzeBatchRequest):
 @router.post("/detect-panels")
 @router.post("/ai-detect-panels")
 async def ai_smart_crop(body: SmartCropRequest):
+    logger.info(f"[AI Smart Crop] Request received. Strategy: {body.strategy}, Model: {body.model}")
     try:
         resolved = await img_utils.resolve_image_to_buffer(body.url)
         image_buffer = resolved["data"]
@@ -427,6 +431,7 @@ async def ai_smart_crop(body: SmartCropRequest):
                 
                 try:
                     skill = registry.get("smart_crop")
+                    logger.info(f"[AI Smart Crop] Executing Gemini-based detection...")
                     raw_text = await skill.execute(model=target_model, image_bytes=image_buffer)
                     data = json.loads(raw_text)
                     raw_panels = data.get("panels", [])
@@ -470,6 +475,7 @@ async def ai_smart_crop(body: SmartCropRequest):
                 if min_area_pct > 1.0:
                     min_area_pct = min_area_pct / 100.0
 
+                logger.info(f"[AI Smart Crop] Executing local CV-based detection...")
                 coord_panels = await asyncio.to_thread(
                     run_cv_detection,
                     image_path=temp_in_path,
@@ -530,6 +536,8 @@ async def ai_smart_crop(body: SmartCropRequest):
             stitched_cache.set(unique_id, {"data": cropped_buffer, "content_type": content_type})
             edit_history.set(cached_url, body.url)
 
+            logger.info(f"[AI Smart Crop] Cached cropped panel {i+1}/{len(coord_panels)}: {cached_url}")
+
             cropped_panels.append({
                 "cropTop": round(p_top, 2),
                 "cropBottom": round(p_bottom, 2),
@@ -538,6 +546,7 @@ async def ai_smart_crop(body: SmartCropRequest):
                 "croppedUrl": cached_url
             })
 
+        logger.info(f"[AI Smart Crop] Successfully processed {len(cropped_panels)} panels.")
         return {
             "success": True,
             "panels": cropped_panels,

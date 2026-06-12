@@ -6,7 +6,7 @@ import edge_tts
 from pydub import AudioSegment
 from pydub.effects import speedup
 
-logger = logging.getLogger("webtoon_engine.audio")
+logger = logging.getLogger("anivox.services.audio")
 
 async def generate_panel_audio(
     dialogue_list: List[str],
@@ -34,6 +34,7 @@ async def generate_panel_audio(
         silence_segment = AudioSegment.silent(duration=int(target_duration * 1000))
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         silence_segment.export(output_path, format="mp3")
+        logger.info(f"[Narration/TTS] Successfully generated {target_duration}s of silence.")
         return output_path
 
     target_duration_ms = int(target_duration * 1000)
@@ -50,7 +51,7 @@ async def generate_panel_audio(
             temp_file_path = os.path.join(temp_dir, f"dialog_segment_{uuid_hex()}_{idx}.mp3")
             temp_files.append(temp_file_path)
 
-            logger.info(f"Generating voice file for segment [{idx}]: '{text[:30]}...' via voice: {voice}")
+            logger.info(f"[Narration/TTS] Generating segment {idx+1}/{len(dialogue_list)}: '{text[:40]}...'")
             communicate = edge_tts.Communicate(text, voice or "en-US-GuyNeural")
             await communicate.save(temp_file_path)
 

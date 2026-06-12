@@ -666,16 +666,22 @@ async def scrape_images_from_url(
     if meta and meta.get("title"):
         logger.info(f"[Scraper] Extracted Meta Title: '{meta['title']}' | Creator: '{meta['author']}'")
         scraped_metadata_cache[fetch_url] = meta
+    else:
+        logger.warning(f"[Scraper] Metadata extraction failed or missing title for: {fetch_url}")
         
     image_dict = {}
     
     # 1. BeautifulSoup parsing
     bs_imgs = parse_with_bs4(html, fetch_url)
+    if bs_imgs:
+        logger.info(f"[Scraper] Found {len(bs_imgs)} images using BS4.")
     for img in bs_imgs:
         image_dict[img] = True
         
     # 2. Nuxt payload extraction
     nuxt_imgs = extract_images_from_nuxt_payload(html)
+    if nuxt_imgs:
+        logger.info(f"[Scraper] Found {len(nuxt_imgs)} images using Nuxt payload extraction.")
     for img in nuxt_imgs:
         image_dict[urljoin(fetch_url, img)] = True
         

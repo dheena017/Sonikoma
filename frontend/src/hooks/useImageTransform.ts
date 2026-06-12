@@ -61,6 +61,7 @@ export function useImageTransform({
   const handleTransform = async (type: "rotate" | "flip", value: string) => {
     if (editingImageIdx === null) return;
     const currentUrl = scrapedImages[editingImageIdx];
+    console.log(`[Image Editor] Transform requested: ${type} with value: ${value} on image #${editingImageIdx + 1}`);
     setIsTransforming(true);
     try {
       const response = await activeFetch("/api/transform-image", {
@@ -82,6 +83,7 @@ export function useImageTransform({
         );
       }
     } catch (err: any) {
+      console.error(`[Image Editor] Transform failed:`, err);
       addNotification(`Transform failed: ${err.message}`, "error");
     } finally {
       setIsTransforming(false);
@@ -105,6 +107,7 @@ export function useImageTransform({
     }
 
     if (urlsToMerge.length < 2) return;
+    console.log(`[Stitcher] Merging ${urlsToMerge.length} images starting from index ${spliceStart}`, urlsToMerge);
     setIsMerging(true);
     try {
       const response = await activeFetch("/api/stitch-images", {
@@ -135,6 +138,7 @@ export function useImageTransform({
         );
       }
     } catch (err: any) {
+      console.error(`[Stitcher] Merge failed:`, err);
       addNotification(`Merge failed: ${err.message}`, "error");
     } finally {
       setIsMerging(false);
@@ -149,6 +153,7 @@ export function useImageTransform({
     text: string
   ) => {
     if (editingImageIdx === null || !imageUrl) return;
+    console.log(`[Speech Bubbles] Cleaning single bubble on image #${editingImageIdx + 1}`, { box: { ymin, xmin, ymax, xmax }, text });
     setIsCleaning(true);
     try {
       const response = await activeFetch("/api/remove-speech-bubbles", {
@@ -206,6 +211,7 @@ export function useImageTransform({
     e.stopPropagation();
     if (editingImageIdx === null || !setScrapedImages) return;
     const originalUrl = scrapedImages[editingImageIdx];
+    console.log(`[Image Editor] Cropping single slice ${slice.id} from image #${editingImageIdx + 1}`, slice);
 
     setIsCroppingSlice(slice.id);
     try {
@@ -246,6 +252,7 @@ export function useImageTransform({
       handleDeleteSlice(slice.id, e);
       addNotification("Extracted Cut!", "success");
     } catch (err: any) {
+      console.error(`[Image Editor] Single slice crop failed:`, err);
       addNotification(`Failed to crop: ${err.message}`, "error");
     } finally {
       setIsCroppingSlice(null);
