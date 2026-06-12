@@ -76,6 +76,7 @@ class ColoredFormatter(logging.Formatter):
             "SUCCESS": "\x1b[38;5;120m",
             "WARNING": "\x1b[38;5;220m",
             "ERROR": "\x1b[38;5;196m",
+            "Vite": "\x1b[38;5;201m",        # Bright magenta/pink
             "MoviePy": "\x1b[38;5;208m",     # Orange
             "Video": "\x1b[38;5;208m",
             "Narration": "\x1b[38;5;177m",   # Purple

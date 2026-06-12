@@ -13,7 +13,10 @@ export default function Header({ isProcessing, panels, totalCalculatedDuration }
     <header id="header_pane" className="border-b border-neutral-800/80 bg-neutral-950/45 backdrop-blur-md sticky top-0 z-40 px-6 py-4">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         
-        <div className="flex items-center gap-3">
+        <div 
+          className="flex items-center gap-3 cursor-pointer select-none hover:opacity-90 transition-opacity"
+          onClick={() => window.history.pushState({}, "", "/")}
+        >
           <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-900/40">
             <Film className="h-5 w-5 text-white animate-pulse" />
           </div>
@@ -22,6 +25,7 @@ export default function Header({ isProcessing, panels, totalCalculatedDuration }
               <span className="font-bold text-xl tracking-tight text-white font-sans">
                 Webtoon<span className="text-purple-400">To</span>Video
               </span>
+
               <span className="text-[10px] px-2 py-0.5 font-mono tracking-wider bg-purple-950 text-purple-400 rounded border border-purple-800">
                 REAL-TIME API
               </span>

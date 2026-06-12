@@ -24,8 +24,11 @@ class UIStreamLogHandler(logging.Handler):
     def emit(self, record):
         global log_seq
         try:
-            raw_msg = self.format(record)
-            clean_msg = ANSI_ESCAPE.sub('', raw_msg)
+            if record.name == "anivox.vite":
+                clean_msg = record.getMessage()
+            else:
+                raw_msg = self.format(record)
+                clean_msg = ANSI_ESCAPE.sub('', raw_msg)
             
             # Determine prefix category tag matching Express logInterceptor
             prefix = "[Backend]"

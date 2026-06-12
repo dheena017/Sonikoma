@@ -68,6 +68,19 @@ export default defineConfig(({ mode }) => {
               `${statusColor}${res.statusCode}\x1b[0m ` +
               `\x1b[90m(${duration}ms)\x1b[0m`
             );
+
+            // Forward local file loading details to backend logger to show in the UI terminal
+            const isLocalSrc = url.startsWith('/src/') || url === '/' || url.endsWith('.html');
+            const isNoisy = url.includes('node_modules') || url.includes('@vite') || url.includes('@react-refresh') || url.includes('system-logs') || url.includes('/api/') || url.includes('/media/') || url.includes('.vite/deps');
+            if (isLocalSrc && !isNoisy) {
+              const logMsg = `[Vite] Loaded: ${url}`;
+              const level = res.statusCode >= 400 ? 'error' : 'info';
+              fetch(`${backendTarget}/api/system-logs/log`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: logMsg, level })
+              }).catch(() => {});
+            }
           });
           next();
         });

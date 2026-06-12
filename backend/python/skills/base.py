@@ -308,33 +308,45 @@ class BaseAISkill:
             contents.append(types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"))
         contents.append(prompt)
         
-        try:
-            # Gemini generation using retry helper
-            response = await call_gemini_with_retry(
-                lambda: genai_client.models.generate_content(
-                    model=target_model,
-                    contents=contents,
-                    config=config
+        # Determine candidate models to try in sequence
+        candidates = [target_model]
+        for fallback_model in ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]:
+            if fallback_model != target_model:
+                candidates.append(fallback_model)
+
+        last_exception = None
+        for candidate_model in candidates:
+            try:
+                # Gemini generation using retry helper
+                response = await call_gemini_with_retry(
+                    lambda: genai_client.models.generate_content(
+                        model=candidate_model,
+                        contents=contents,
+                        config=config
+                    )
                 )
-            )
-            
-            # Record execution metadata
-            elapsed_ms = int((time.monotonic() - start_time) * 1000)
-            raw_text = response.text or "{}"
-            
-            # Simple validation check (returns JSON string or parseable dict depending on route expectations)
-            import json
-            parsed_json = json.loads(raw_text)
-            
-            self.logger.log_execution(self.name, elapsed_ms, True, kwargs, parsed_json)
-            return raw_text
-            
-        except Exception as e:
-            elapsed_ms = int((time.monotonic() - start_time) * 1000)
-            logger.error(f"Skill '{self.name}' execution failed: {e}. Raising exception to propagate error.", exc_info=True)
-            
-            fallback = FallbackCoordinator.get_programmatic_fallback(self.name, **kwargs)
-            self.logger.log_execution(self.name, elapsed_ms, False, kwargs, fallback)
-            
-            # Raise the exception so endpoints can detect failure and return success: False with the error message
-            raise e
+                
+                # Record execution metadata
+                elapsed_ms = int((time.monotonic() - start_time) * 1000)
+                raw_text = response.text or "{}"
+                
+                # Simple validation check (returns JSON string or parseable dict depending on route expectations)
+                import json
+                parsed_json = json.loads(raw_text)
+                
+                self.logger.log_execution(self.name, elapsed_ms, True, kwargs, parsed_json)
+                return raw_text
+            except Exception as e:
+                logger.warning(f"Skill '{self.name}' execution failed with model {candidate_model}: {e}")
+                last_exception = e
+                # Continue loop to try the next model
+
+        # If we got here, all candidate models failed
+        elapsed_ms = int((time.monotonic() - start_time) * 1000)
+        logger.error(f"Skill '{self.name}' all candidate models failed. Last error: {last_exception}", exc_info=True)
+        
+        fallback = FallbackCoordinator.get_programmatic_fallback(self.name, **kwargs)
+        self.logger.log_execution(self.name, elapsed_ms, False, kwargs, fallback)
+        
+        # Raise the exception so endpoints can detect failure and return success: False with the error message
+        raise last_exception

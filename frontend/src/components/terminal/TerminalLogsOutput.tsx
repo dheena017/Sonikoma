@@ -25,6 +25,7 @@ function getLogColor(log: string): string {
   // Specific components
   if (log.includes("[Proxy]") || log.includes("[Proxy-image]") || log.includes("proxy-image") || log.includes("anivox.routes.proxy")) return "text-sky-300 font-medium";
   if (log.includes("[API]") || log.includes("[Network]") || log.includes("[HTTP]") || log.includes("anivox.api")) return "text-sky-400";
+  if (log.includes("[Vite]")) return "text-fuchsia-400 font-medium";
   if (log.includes("httpx") || log.includes("HTTP Request:")) return "text-purple-400 font-light";
 
   if (log.includes("[AI Auto-Analysis]") || log.includes("[AI Model]") || log.includes("[Gemini]")) return "text-purple-300 font-medium";
@@ -56,6 +57,7 @@ function getLogBorderColor(log: string): string {
   if (log.includes(" 404 ") || log.includes("-> 404")) return "border-amber-500/60";
   if (log.includes("[Proxy]") || log.includes("[Proxy-image]") || log.includes("proxy-image") || log.includes("anivox.routes.proxy")) return "border-sky-500/40";
   if (log.includes("[API]") || log.includes("[Network]") || log.includes("[HTTP]") || log.includes("anivox.api")) return "border-sky-500/40";
+  if (log.includes("[Vite]")) return "border-fuchsia-500/50";
   if (log.includes("httpx") || log.includes("HTTP Request:")) return "border-purple-500/40";
   if (log.includes("[AI") || log.includes("[Gemini]")) return "border-purple-500/50";
   if (log.includes("[Helper Scraper]")) return "border-cyan-400/40";
@@ -89,7 +91,7 @@ export function TerminalLogsOutput({
           </p>
         </div>
       ) : (
-        filteredLogs.map((log, index) => {
+        [...filteredLogs].reverse().map((log, index) => {
           const logColor = getLogColor(log);
           const borderColor = getLogBorderColor(log);
 

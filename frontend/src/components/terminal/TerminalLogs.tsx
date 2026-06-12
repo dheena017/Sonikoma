@@ -22,10 +22,10 @@ export default function TerminalLogs({ consoleLogs, setConsoleLogs }: TerminalLo
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<"all" | "errors" | "warnings" | "ai" | "success">("all");
 
-  // Auto-scroll to bottom when new logs arrive
+  // Auto-scroll to top when new logs arrive
   useEffect(() => {
     if (autoScroll && scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      scrollRef.current.scrollTop = 0;
     }
     // when not paused, keep visible count in sync
     if (!paused) {

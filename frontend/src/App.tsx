@@ -8,10 +8,10 @@ import BubbleCleanerModal from "./components/processing/BubbleCleanerModal.js";
 import AutoCropModal from "./components/processing/AutoCropModal.js";
 import NotificationStack from "./components/NotificationStack.js";
 import { AppWorkspace } from "./components/AppWorkspace.js";
-import { GlobalScraperConfigTool } from "./components/scraper/GlobalScraperConfigTool.js";
-import { ScraperLogStream } from "./components/scraper/ScraperLogStream.js";
+import PageNotFound from "./components/PageNotFound.js";
 
 export default function App() {
+
   const appLogic = useAppLogic();
   const {
     panels,
@@ -141,7 +141,43 @@ export default function App() {
     totalCalculatedDuration,
   } = appLogic;
 
+  const [currentPath, setCurrentPath] = React.useState(window.location.pathname);
+
+  React.useEffect(() => {
+    const handleLocationChange = () => {
+      setCurrentPath(window.location.pathname);
+    };
+
+    const originalPushState = window.history.pushState;
+    const originalReplaceState = window.history.replaceState;
+
+    window.history.pushState = function (...args) {
+      originalPushState.apply(this, args);
+      handleLocationChange();
+    };
+
+    window.history.replaceState = function (...args) {
+      originalReplaceState.apply(this, args);
+      handleLocationChange();
+    };
+
+    window.addEventListener("popstate", handleLocationChange);
+    
+    return () => {
+      window.history.pushState = originalPushState;
+      window.history.replaceState = originalReplaceState;
+      window.removeEventListener("popstate", handleLocationChange);
+    };
+  }, []);
+
+  const navigateTo = (path: string) => {
+    window.history.pushState({}, "", path);
+  };
+
+  const isPathValid = currentPath === "/" || currentPath === "" || currentPath === "/index.html";
+
   return (
+
     <div id="app_root" className="min-h-screen bg-[#070709] text-neutral-100 flex flex-col justify-between selection:bg-purple-600 selection:text-white relative">
       
       {/* BRANDING HEADER */}
@@ -152,8 +188,11 @@ export default function App() {
       />
 
       {/* WORKSPACE AREA — AutoCropModal / BubbleCleanerModal / CropEditorModal / Main Grid */}
-      {showAutoCropModal ? (
+      {!isPathValid ? (
+        <PageNotFound onNavigateHome={() => navigateTo("/")} />
+      ) : showAutoCropModal ? (
         <AutoCropModal
+
           onClose={() => setShowAutoCropModal(false)}
           onApply={() => {
              console.log("App: Triggering handleAutoCropSelected");
@@ -288,18 +327,13 @@ export default function App() {
         />
       )}
 
-      {editingImageIdx !== null && (
+      {editingImageIdx !== null && isPathValid && (
         <CropEditorModal
           appLogic={appLogic}
         />
       )}
 
-      {!showAutoCropModal && !showBubbleModal && (
-        <>
-          <GlobalScraperConfigTool addNotification={addNotification} />
-          <ScraperLogStream />
-        </>
-      )}
+
 
       {/* FOOTER */}
       <footer id="footer_pane" className="border-t border-neutral-800 bg-neutral-950/20 py-6 text-center text-xs text-neutral-500">

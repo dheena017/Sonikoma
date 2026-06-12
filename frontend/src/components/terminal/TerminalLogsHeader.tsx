@@ -1,5 +1,5 @@
 import React from "react";
-import { Terminal, Trash2, Copy, Check, ChevronDown, Download as DownloadIcon, Pause, Play } from "lucide-react";
+import { Terminal, Trash2, Copy, Check, ChevronUp, Download as DownloadIcon, Pause, Play } from "lucide-react";
 
 interface TerminalLogsHeaderProps {
   consoleLogs: string[];
@@ -58,7 +58,7 @@ export function TerminalLogsHeader({
           }`}
           title={autoScroll ? "Auto-scroll enabled" : "Auto-scroll disabled"}
         >
-          <ChevronDown className={`h-3 w-3 transition-transform ${autoScroll ? "rotate-0" : "-rotate-90"}`} />
+          <ChevronUp className={`h-3 w-3 transition-transform ${autoScroll ? "rotate-0" : "rotate-90"}`} />
           Auto
         </button>
 

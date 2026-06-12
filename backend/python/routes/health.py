@@ -15,6 +15,11 @@ import logging
 from typing import Optional
 from fastapi import APIRouter, Request, Query, HTTPException
 from fastapi.responses import JSONResponse, StreamingResponse
+from pydantic import BaseModel
+
+class CustomLogPayload(BaseModel):
+    message: str
+    level: str = "info"
 
 import database.db as db
 from utils.log_interceptor import get_logs, add_log_listener, remove_log_listener
@@ -90,6 +95,23 @@ async def system_logs(since: int = Query(0, description="Fetch logs generated af
         return {"success": True, "logs": logs}
     except Exception as e:
         logger.error(f"Failed to fetch system logs: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/system-logs/log", summary="Post a custom log entry to system logs")
+async def add_custom_log(payload: CustomLogPayload):
+    try:
+        vite_logger = logging.getLogger("anivox.vite")
+        lvl = payload.level.upper()
+        if lvl == "ERROR":
+            vite_logger.error(payload.message)
+        elif lvl == "WARNING" or lvl == "WARN":
+            vite_logger.warning(payload.message)
+        else:
+            vite_logger.info(payload.message)
+        return {"success": True}
+    except Exception as e:
+        logger.error(f"Failed to add custom log: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
