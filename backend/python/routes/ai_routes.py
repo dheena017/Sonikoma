@@ -231,14 +231,11 @@ def validate_analysis(raw: Dict[str, Any]) -> Dict[str, Any]:
     # Clamp suggested duration between 2.0 and 10.0 seconds
     suggested_duration = max(2.0, min(10.0, suggested_duration))
         
-    # 2. Estimate minimum duration based on speech text length
+    # 2. Extract and sanitize speech text
     speech_val = speech.strip()[:200] if isinstance(speech, str) and speech.strip() else ""
-    estimated_speech_duration = estimate_duration_from_speech(speech_val)
     
-    # 3. Use the maximum of both to ensure the timing matches the speech and respects AI's intent
-    final_duration = max(suggested_duration, estimated_speech_duration)
-    # Clamp final duration to a reasonable range
-    final_duration = max(2.0, min(12.0, round(final_duration, 1)))
+    # 3. Respect AI's suggested duration directly, clamping to a reasonable range [2.0, 12.0]
+    final_duration = max(2.0, min(12.0, round(suggested_duration, 1)))
     
     return {
         "speech_text": speech_val if speech_val else DEFAULT_ANALYSIS["speech_text"],
@@ -479,11 +476,8 @@ async def ai_smart_crop(body: SmartCropRequest):
                 ai_failed = True
                 ai_error_msg = "Gemini client not initialized"
 
-        if body.strategy != "local-cv" and body.model != "local-cv" and ai_failed:
-            raise HTTPException(status_code=500, detail=f"AI smart crop failed: {ai_error_msg}")
-
         # Strategy 2: Local CV panel detection (Pillow/OpenCV)
-        if body.strategy == "local-cv" or body.model == "local-cv":
+        if body.strategy == "local-cv" or body.model == "local-cv" or ai_failed:
             with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_in:
                 tmp_in.write(image_buffer)
                 temp_in_path = tmp_in.name

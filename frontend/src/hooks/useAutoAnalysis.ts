@@ -95,8 +95,8 @@ export function useAutoAnalysis({
         image_url: imgUrl,
         speech_text: "",
         sfx: "",
-        duration: 0.0,
-        motion_type: "",
+        duration: 4.5,
+        motion_type: "zoom_in",
         isAnalyzing: false,
       };
     });

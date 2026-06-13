@@ -58,6 +58,40 @@ class ConvertVideoPanel(BaseModel):
 class ConvertVideoRequest(BaseModel):
     panels: List[ConvertVideoPanel] = Field(..., min_length=1, description="Panels to convert to video")
     url: Optional[str] = Field(None, description="Source Webtoon page URL")
+    voice_actor: Optional[str] = Field(None, description="Selected voice actor character label")
+    music_theme: Optional[str] = Field(None, description="Selected background music theme loop")
+
+
+def download_bgm_to_temp(music_theme: Optional[str]) -> Optional[str]:
+    if not music_theme or music_theme == "No Music (Dialogue Only)":
+        return None
+        
+    theme_urls = {
+        "Orchestral Battle Theme": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+        "Mysterious Ambience": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+        "Sci-Fi Synth Wave": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+        "Calm Acoustic Melancholy": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
+    }
+    
+    url = theme_urls.get(music_theme)
+    if not url:
+        logger.warning(f"[BGM] Music theme '{music_theme}' not recognized. Skipping BGM.")
+        return None
+        
+    import urllib.request
+    import tempfile
+    
+    logger.info(f"[BGM] Mapping music theme '{music_theme}' to url: {url}")
+    try:
+        fd, path = tempfile.mkstemp(suffix=".mp3")
+        os.close(fd)
+        logger.info(f"[BGM] Downloading BGM loop from {url} to {path}...")
+        urllib.request.urlretrieve(url, path)
+        logger.info(f"[BGM] Download completed successfully. Size: {os.path.getsize(path)} bytes")
+        return path
+    except Exception as exc:
+        logger.error(f"[BGM] Failed to download BGM theme '{music_theme}': {exc}", exc_info=True)
+        return None
 
 
 # ─── Routes ───────────────────────────────────────────────────────────────────
@@ -147,8 +181,23 @@ async def convert_images_to_video(body: ConvertVideoRequest):
     os.makedirs(temp_dir, exist_ok=True)
 
     compiled_panels = []
+    bgm_temp_path = None
 
     try:
+        # Resolve background music (BGM) loop if selected
+        if body.music_theme and body.music_theme != "No Music (Dialogue Only)":
+            bgm_temp_path = download_bgm_to_temp(body.music_theme)
+
+        # Resolve voice actor code
+        voice_map = {
+            "Standard Comic Narrator (Male)": "en-US-GuyNeural",
+            "Sultry Narrative Tone (Female)": "en-US-AriaNeural",
+            "Shonen Protagonist (Energetic Male)": "en-GB-RyanNeural",
+            "Dark Anti-Hero voice (Raspy Deep)": "en-US-GuyNeural"
+        }
+        voice_code = voice_map.get(body.voice_actor, "en-US-GuyNeural") if body.voice_actor else "en-US-GuyNeural"
+        logger.info(f"[Compile Video] Selected voice actor: '{body.voice_actor or 'Default'}' -> Code: {voice_code}")
+
         # 1. Prepare panel assets (images and TTS audio)
         for idx, panel in enumerate(body.panels):
             image_path = os.path.join(temp_dir, f"panel_{idx}.png")
@@ -163,11 +212,12 @@ async def convert_images_to_video(body: ConvertVideoRequest):
             logger.info(f"[Compile Video] Saved panel_{idx}.png ({img_size_kb}KB)")
 
             # Generate TTS audio
-            logger.info(f"[Narration/TTS] Generating dialogue audio for panel {idx} | Text: '{panel.speech_text[:40]}...'")
+            logger.info(f"[Narration/TTS] Generating dialogue audio for panel {idx} | Voice: {voice_code} | Text: '{panel.speech_text[:40]}...'")
             await generate_panel_audio(
                 dialogue_list=[panel.speech_text or ""],
                 target_duration=panel.duration or 4.5,
-                output_path=audio_path
+                output_path=audio_path,
+                voice=voice_code
             )
             audio_size_kb = round(os.path.getsize(audio_path) / 1024, 1)
             logger.info(f"[Narration/TTS] Generated panel_{idx}.mp3 ({audio_size_kb}KB)")
@@ -182,10 +232,11 @@ async def convert_images_to_video(body: ConvertVideoRequest):
         # 2. Run video compiler
         output_video_path = os.path.join(temp_dir, f"render_{project_id}.mp4")
         
-        logger.info(f"[Compile Video] Starting video compiler for {len(compiled_panels)} panels.")
+        logger.info(f"[Compile Video] Starting video compiler for {len(compiled_panels)} panels with BGM={bgm_temp_path}.")
         saved_path = await compile_video(
             panel_data=compiled_panels,
             output_path=output_video_path,
+            bgm_path=bgm_temp_path,
             target_width=1920,
             target_height=1080,
             fps=24,
@@ -219,12 +270,16 @@ async def convert_images_to_video(body: ConvertVideoRequest):
         logger.error(f"[Convert Video API] Video compilation failed: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Video compilation failed: {e}")
     finally:
-        # Cleanup temp directory asynchronously or in try block
+        # Cleanup temp directory and downloaded bgm track
         try:
             if os.path.exists(temp_dir):
                 shutil.rmtree(temp_dir, ignore_errors=True)
+            if bgm_temp_path and os.path.exists(bgm_temp_path):
+                os.remove(bgm_temp_path)
+                logger.info(f"[Compile Video] Cleaned up temporary BGM path: {bgm_temp_path}")
         except Exception as cleanup_err:
             logger.warning(f"[Compile Video] Cleanup failed: {cleanup_err}")
+
 
 
 @router.get("/video/cached/{video_id}", summary="Retrieve compiled cached video stream")

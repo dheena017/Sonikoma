@@ -176,7 +176,7 @@ export default function TimelineCard({
           disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
           value={panel.sfx || ""}
           onChange={(e) => handleModifySFX(panel.id, e.target.value)}
-          placeholder="e.g. [Shatter], [Whoosh]"
+          placeholder="✦ AI Will Decide"
           className={`w-full bg-neutral-900 border border-neutral-800 text-[10px] rounded-lg px-2.5 py-1.5 text-neutral-100 outline-none focus:border-purple-500 font-mono transition-all ${
             (panel.isAnalyzing || analyzingPanelId === panel.id) ? "opacity-60 cursor-not-allowed text-purple-300 border-purple-900/40" : ""
           }`}
@@ -191,7 +191,7 @@ export default function TimelineCard({
           disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
           value={panel.visual_description || ""}
           onChange={(e) => handleModifyVisualDescription(panel.id, e.target.value)}
-          placeholder="Describe actions, visual cues, scene details..."
+          placeholder="✦ AI Will Decide"
           className={`w-full bg-neutral-900 border border-neutral-800 text-[10px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all resize-none ${
             (panel.isAnalyzing || analyzingPanelId === panel.id) ? "opacity-60 cursor-not-allowed text-purple-300 border-purple-900/40" : ""
           }`}

@@ -31,6 +31,20 @@ interface UseBatchImageActionsProps {
   cropCannyLow: number;
   cropCannyHigh: number;
   cropCloseKernelSize: number;
+
+  isCleaningBubbles: boolean;
+  setIsCleaningBubbles: React.Dispatch<React.SetStateAction<boolean>>;
+  cleanProgress: { current: number; total: number } | null;
+  setCleanProgress: React.Dispatch<React.SetStateAction<{ current: number; total: number } | null>>;
+  bubbleCroppingImgUrl: string | null;
+  setBubbleCroppingImgUrl: React.Dispatch<React.SetStateAction<string | null>>;
+
+  isBatchCropping: boolean;
+  setIsBatchCropping: React.Dispatch<React.SetStateAction<boolean>>;
+  batchProgress: { current: number; total: number } | null;
+  setBatchProgress: React.Dispatch<React.SetStateAction<{ current: number; total: number } | null>>;
+  croppingImgUrl: string | null;
+  setCroppingImgUrl: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 export function useBatchImageActions({
@@ -61,14 +75,20 @@ export function useBatchImageActions({
   cropCannyLow,
   cropCannyHigh,
   cropCloseKernelSize,
-}: UseBatchImageActionsProps) {
-  const [isCleaningBubbles, setIsCleaningBubbles] = useState<boolean>(false);
-  const [cleanProgress, setCleanProgress] = useState<{ current: number; total: number } | null>(null);
-  const [bubbleCroppingImgUrl, setBubbleCroppingImgUrl] = useState<string | null>(null);
 
-  const [isBatchCropping, setIsBatchCropping] = useState<boolean>(false);
-  const [batchProgress, setBatchProgress] = useState<{ current: number; total: number } | null>(null);
-  const [croppingImgUrl, setCroppingImgUrl] = useState<string | null>(null);
+  isCleaningBubbles,
+  setIsCleaningBubbles,
+  cleanProgress,
+  setCleanProgress,
+  bubbleCroppingImgUrl,
+  setBubbleCroppingImgUrl,
+  isBatchCropping,
+  setIsBatchCropping,
+  batchProgress,
+  setBatchProgress,
+  croppingImgUrl,
+  setCroppingImgUrl,
+}: UseBatchImageActionsProps) {
 
   const handleCleanBubblesSelected = async () => {
     if (selectedScraped.length === 0) {

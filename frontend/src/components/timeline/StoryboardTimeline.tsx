@@ -23,6 +23,8 @@ interface StoryboardTimelineProps {
   fetchWithInterceptor?: typeof fetch;
   selectedModel?: string;
   setConsoleLogs?: React.Dispatch<React.SetStateAction<string[]>>;
+  voiceActor?: string;
+  musicTheme?: string;
 }
 
 export default function StoryboardTimeline({
@@ -39,7 +41,9 @@ export default function StoryboardTimeline({
   targetUrl,
   fetchWithInterceptor,
   selectedModel,
-  setConsoleLogs
+  setConsoleLogs,
+  voiceActor,
+  musicTheme,
 }: StoryboardTimelineProps) {
 
   // ── Panel selection state ────────────────────────────────────────────────
@@ -60,6 +64,31 @@ export default function StoryboardTimeline({
 
   const clearSelection = () => {
     setSelectedPanelIds(new Set());
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedPanelIds.size === 0) return;
+    if (window.confirm(`Are you sure you want to delete the ${selectedPanelIds.size} selected panel(s)?`)) {
+      setPanels(prev => prev.filter(p => !selectedPanelIds.has(p.id)));
+      clearSelection();
+      addNotification?.(`Deleted ${selectedPanelIds.size} selected panels`, "info");
+    }
+  };
+
+  const handleBulkModifyDuration = (val: number) => {
+    if (selectedPanelIds.size === 0) return;
+    setPanels(prev =>
+      prev.map(p => (selectedPanelIds.has(p.id) ? { ...p, duration: val } : p))
+    );
+    addNotification?.(`Set duration of selected panels to ${val}s`, "success");
+  };
+
+  const handleBulkModifyMotion = (val: string) => {
+    if (selectedPanelIds.size === 0) return;
+    setPanels(prev =>
+      prev.map(p => (selectedPanelIds.has(p.id) ? { ...p, motion_type: val } : p))
+    );
+    addNotification?.(`Set motion style of selected panels to '${val}'`, "success");
   };
   // ────────────────────────────────────────────────────────────────────────
 
@@ -102,6 +131,8 @@ export default function StoryboardTimeline({
     fetchWithInterceptor,
     selectedModel,
     setConsoleLogs,
+    voiceActor,
+    musicTheme,
   });
 
   if (panels.length === 0) {
@@ -123,8 +154,6 @@ export default function StoryboardTimeline({
         isZipping={isZipping}
         panelsLength={panels.length}
         handleDownloadZip={handleDownloadZip}
-        isCompiling={isCompiling}
-        handleCompileVideo={handleCompileVideo}
         isAnalyzingAll={isAnalyzingAll}
         handleAnalyzeAllPanels={handleAnalyzeAllPanels}
       />
@@ -186,6 +215,11 @@ export default function StoryboardTimeline({
         }}
         selectAllPanels={selectAllPanels}
         clearSelection={clearSelection}
+        isCompiling={isCompiling}
+        handleCompileVideo={handleCompileVideo}
+        handleDeleteSelected={handleDeleteSelected}
+        handleBulkModifyDuration={handleBulkModifyDuration}
+        handleBulkModifyMotion={handleBulkModifyMotion}
       />
     </div>
   );

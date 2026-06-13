@@ -144,7 +144,9 @@ export function AppWorkspace({
     <main id="main_workspace" className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-10 items-start">
 
       {/* LEFT COLUMN: SOURCE INTEGRATION */}
-      <div id="controls_column" className="order-1 lg:order-1 lg:col-span-7 flex flex-col gap-6 md:gap-8">
+      <div id="controls_column" className={`order-1 lg:order-1 flex flex-col gap-6 md:gap-8 ${
+        panels.length > 0 ? "lg:col-span-7" : "lg:col-span-12"
+      }`}>
 
         {/* CONVERSION INPUT CARD */}
         <UrlInputPanel
@@ -223,13 +225,16 @@ export function AppWorkspace({
               fetchWithInterceptor={fetchWithInterceptor}
               selectedModel={selectedModel}
               setConsoleLogs={setConsoleLogs}
+              voiceActor={voiceActor}
+              musicTheme={musicTheme}
             />
           </div>
         )}
       </div>
 
       {/* RIGHT COLUMN: INTEGRATED CINEMA PLAYER */}
-      <div id="cinema_column" className="order-2 lg:order-2 lg:col-span-5 flex flex-col gap-6 lg:sticky lg:top-24">
+      {panels.length > 0 && (
+        <div id="cinema_column" className="order-2 lg:order-2 lg:col-span-5 flex flex-col gap-6 lg:sticky lg:top-24">
         <VideoMonitor
           activePreviewTab={activePreviewTab}
           setActivePreviewTab={setActivePreviewTab}
@@ -272,6 +277,7 @@ export function AppWorkspace({
           voiceActor={voiceActor}
         />
       </div>
+      )}
     </main>
   );
 }

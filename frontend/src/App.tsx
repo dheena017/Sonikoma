@@ -6,6 +6,7 @@ import { useBackendHealth } from "./hooks/useBackendHealth.js";
 
 // Child Components
 import Header from "./components/Header.js";
+import Sidebar from "./components/Sidebar.js";
 import CropEditorModal from "./components/CropEditorModal.js";
 import BubbleCleanerModal from "./components/processing/BubbleCleanerModal.js";
 import AutoCropModal from "./components/processing/AutoCropModal.js";
@@ -32,6 +33,7 @@ export default function App() {
 
   const appLogic = useAppLogic();
   const { status: backendStatus, checkHealth: recheckBackend } = useBackendHealth();
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const {
     panels,
     setPanels,
@@ -170,6 +172,7 @@ export default function App() {
     navigateTo,
   } = useAppRouter({
     scrapedImages,
+    panels,
     editingImageIdx,
     setEditingImageIdx,
     setShowAutoCropModal,
@@ -225,34 +228,55 @@ export default function App() {
   const isAnalyticsPath = currentPath === "/ai-analytics";
 
   return (
-    <div id="app_root" className="min-h-screen bg-[#070709] text-neutral-100 flex flex-col justify-between selection:bg-purple-600 selection:text-white relative">
+    <div id="app_root" className="min-h-screen bg-[#070709] text-neutral-100 flex flex-col lg:flex-row selection:bg-purple-600 selection:text-white relative">
       
-      {backendStatus === "offline" && (
-        <div className="bg-gradient-to-r from-rose-950/90 to-red-950/95 border-b border-rose-800/40 px-4 py-3 text-center text-xs sm:text-sm font-semibold text-rose-250 flex items-center justify-center gap-3 z-50 animate-slide-down w-full">
-          <span className="flex items-center gap-2 flex-wrap justify-center">
-            <span className="h-2.5 w-2.5 rounded-full bg-rose-550 animate-ping" />
-            <span>⚠️ Computational Engine Server is Offline. Make sure the Python backend is active (run <code className="bg-black/50 px-1.5 py-0.5 rounded text-rose-300 font-mono text-xs">npm run backend</code>).</span>
-          </span>
-          <button
-            onClick={recheckBackend}
-            className="px-3 py-1 bg-rose-900/60 hover:bg-rose-850 text-rose-100 text-[10px] rounded-lg font-mono uppercase tracking-wider font-bold transition-all border border-rose-700/50 shadow-sm cursor-pointer whitespace-nowrap"
-          >
-            Recheck Connection
-          </button>
-        </div>
-      )}
-
-      {/* BRANDING HEADER */}
-      <Header 
-        isProcessing={isProcessing} 
-        panels={panels} 
+      {/* SIDEBAR FOR NAV */}
+      <Sidebar
+        isProcessing={isProcessing}
+        panels={panels}
+        scrapedImages={scrapedImages}
         totalCalculatedDuration={totalCalculatedDuration}
         currentPath={currentPath}
         editingImageIdx={editingImageIdx}
         lastEditorPath={lastEditorPath}
         isBatchCropping={isBatchCropping}
         isCleaningBubbles={isCleaningBubbles}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
       />
+
+      {/* MAIN VIEW CONTROLLER */}
+      <div className="flex-grow flex-1 flex flex-col min-h-screen lg:max-h-screen lg:overflow-y-auto justify-between">
+        <div>
+          {backendStatus === "offline" && (
+            <div className="bg-gradient-to-r from-rose-950/90 to-red-950/95 border-b border-rose-800/40 px-4 py-3 text-center text-xs sm:text-sm font-semibold text-rose-250 flex items-center justify-center gap-3 z-50 animate-slide-down w-full">
+              <span className="flex items-center gap-2 flex-wrap justify-center">
+                <span className="h-2.5 w-2.5 rounded-full bg-rose-550 animate-ping" />
+                <span>⚠️ Computational Engine Server is Offline. Make sure the Python backend is active (run <code className="bg-black/50 px-1.5 py-0.5 rounded text-rose-300 font-mono text-xs">npm run backend</code>).</span>
+              </span>
+              <button
+                onClick={recheckBackend}
+                className="px-3 py-1 bg-rose-900/60 hover:bg-rose-850 text-rose-100 text-[10px] rounded-lg font-mono uppercase tracking-wider font-bold transition-all border border-rose-700/50 shadow-sm cursor-pointer whitespace-nowrap"
+              >
+                Recheck Connection
+              </button>
+            </div>
+          )}
+
+          {/* BRANDING HEADER */}
+          <Header 
+            isProcessing={isProcessing} 
+            panels={panels} 
+            totalCalculatedDuration={totalCalculatedDuration}
+            currentPath={currentPath}
+            editingImageIdx={editingImageIdx}
+            lastEditorPath={lastEditorPath}
+            isBatchCropping={isBatchCropping}
+            isCleaningBubbles={isCleaningBubbles}
+            onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+            isSidebarOpen={isSidebarOpen}
+            backendStatus={backendStatus}
+          />
 
       {/* PAGE 1: DASHBOARD */}
       <div 
@@ -578,10 +602,13 @@ export default function App() {
         <PageNotFound onNavigateHome={() => navigateTo("/")} />
       )}
 
-      {/* FOOTER */}
-      <footer id="footer_pane" className="border-t border-neutral-800 bg-neutral-950/20 py-6 text-center text-xs text-neutral-500">
-        <p className="font-mono">Webtoon-to-Video compilation dashboard &bull; Real-time Scraper Integration</p>
-      </footer>
+        </div>
+
+        {/* FOOTER */}
+        <footer id="footer_pane" className="border-t border-neutral-900 bg-neutral-950/20 py-6 text-center text-xs text-neutral-500">
+          <p className="font-mono">Webtoon-to-Video compilation dashboard &bull; Real-time Scraper Integration</p>
+        </footer>
+      </div>
 
       <NotificationStack notifications={notifications} removeNotification={removeNotification} />
     </div>

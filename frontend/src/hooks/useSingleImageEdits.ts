@@ -98,12 +98,9 @@ export function useSingleImageEdits({
     ]);
 
     try {
-      const croppedUrls: string[] = [];
-
-      for (let i = 0; i < cuts.length; i++) {
-        const cut = cuts[i];
+      const cutPromises = cuts.map(async (cut, index) => {
         setConsoleLogs(prev => [
-          `[Image Editor] Executing Crop Cut #${i + 1}/${cuts.length}...`,
+          `[Image Editor] Starting Crop Cut #${index + 1}/${cuts.length}...`,
           ...prev
         ]);
         const response = await fetchWithInterceptor("/api/edit-image", {
@@ -118,10 +115,15 @@ export function useSingleImageEdits({
             autoTrim: cut.autoTrim
           })
         });
-
         const data = await response.json();
-        croppedUrls.push(data.url);
-      }
+        setConsoleLogs(prev => [
+          `[Image Editor] Crop Cut #${index + 1}/${cuts.length} complete.`,
+          ...prev
+        ]);
+        return data.url;
+      });
+
+      const croppedUrls = await Promise.all(cutPromises);
 
       // Add all cropped urls directly to Storyboard
       addPanelsToStoryboard(croppedUrls);

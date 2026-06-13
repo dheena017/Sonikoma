@@ -67,14 +67,14 @@ export function VideoMonitorActive({
       {panels.length > 0 && activePreviewTab === "storyboard" && activeStoryboardPanel && (
         <div 
           className="relative bg-neutral-950 border border-neutral-800/80 overflow-hidden rounded-xl flex flex-col justify-between transition-all duration-300 shadow w-full text-center"
-          style={aspectRatio === "9:16" ? { maxWidth: "270px", height: "480px" } : { maxWidth: "100%", aspectRatio: "16/9" }}
+          style={aspectRatio === "9:16" ? { maxWidth: "270px", aspectRatio: "9/16" } : { maxWidth: "100%", aspectRatio: "16/9" }}
         >
           {/* Image under cinematic pan animations */}
           <div className="absolute inset-0 overflow-hidden flex items-center justify-center bg-black">
             <img
               src={activeStoryboardPanel.image_url}
               alt="Active Frame"
-              className="w-full h-full object-contain"
+              className="w-full h-full object-cover"
               referrerPolicy="no-referrer"
               style={{
                 transform: activeStoryboardPanel.motion_type === "zoom_in" ? `scale(${1 + (playbackTime * 0.02)})` :
@@ -118,9 +118,11 @@ export function VideoMonitorActive({
                   {activeStoryboardPanel.sfx}
                 </span>
               )}
-            <p className="text-white font-bold text-xs leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,1)] bg-black/60 p-2.5 rounded-lg border border-white/5 backdrop-blur-xs text-center font-sans">
-              {activeStoryboardPanel.speech_text}
-            </p>
+            {activeStoryboardPanel.speech_text?.trim() && (
+              <p className="text-white font-bold text-xs leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,1)] bg-black/60 p-2.5 rounded-lg border border-white/5 backdrop-blur-xs text-center font-sans">
+                {activeStoryboardPanel.speech_text}
+              </p>
+            )}
           </div>
         </div>
       )}

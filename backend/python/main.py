@@ -160,12 +160,26 @@ class EndpointFilter(logging.Filter):
             pass
         return True
 
+def _clean_temp_workspace():
+    import tempfile
+    import shutil
+    temp_dir = os.path.join(tempfile.gettempdir(), "webtoon_workspace")
+    if os.path.exists(temp_dir):
+        try:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+            logger.info(f"[Backend] Cleaned up temporary workspace directory: {temp_dir}")
+        except Exception as e:
+            logger.warning(f"[Backend] Failed to clean up temporary workspace: {e}")
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Filter out noisy system-logs polling/SSE stream logs
     for logger_name in ("uvicorn.access", "uvicorn.error", "uvicorn"):
         logging.getLogger(logger_name).addFilter(EndpointFilter())
     logging.getLogger().addFilter(EndpointFilter())
+
+    # Purge stale temporary workspace directories
+    _clean_temp_workspace()
 
     # Re-apply ColoredFormatter to all non-UI handlers for beautiful console output.
     # UIStreamLogHandler keeps its own plain formatter so log entries reach the frontend cleanly.

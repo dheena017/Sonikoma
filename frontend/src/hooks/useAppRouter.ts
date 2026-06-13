@@ -2,6 +2,7 @@ import React from "react";
 
 interface UseAppRouterProps {
   scrapedImages: string[];
+  panels: any[];
   editingImageIdx: number | null;
   setEditingImageIdx: (idx: number | null) => void;
   setShowAutoCropModal: (v: boolean) => void;
@@ -22,6 +23,7 @@ interface UseAppRouterProps {
 
 export function useAppRouter({
   scrapedImages,
+  panels,
   editingImageIdx,
   setEditingImageIdx,
   setShowAutoCropModal,
@@ -117,7 +119,7 @@ export function useAppRouter({
         setShowBubbleModal(false);
         setEditingImageIdx(null);
       } else if (path === "/auto-crop") {
-        if (scrapedImages.length === 0) {
+        if (scrapedImages.length === 0 && panels.length === 0) {
           window.history.replaceState({}, "", "/");
           setCurrentPath("/");
           return;
@@ -126,7 +128,7 @@ export function useAppRouter({
         setShowBubbleModal(false);
         setEditingImageIdx(null);
       } else if (path === "/bubble-cleaner") {
-        if (scrapedImages.length === 0) {
+        if (scrapedImages.length === 0 && panels.length === 0) {
           window.history.replaceState({}, "", "/");
           setCurrentPath("/");
           return;
@@ -135,7 +137,7 @@ export function useAppRouter({
         setShowBubbleModal(true);
         setEditingImageIdx(null);
       } else if (path.startsWith("/editor")) {
-        if (scrapedImages.length === 0) {
+        if (scrapedImages.length === 0 && panels.length === 0) {
           window.history.replaceState({}, "", "/");
           setCurrentPath("/");
           return;
@@ -184,7 +186,7 @@ export function useAppRouter({
       window.history.replaceState = originalReplaceState;
       window.removeEventListener("popstate", handleLocationChange);
     };
-  }, [scrapedImages, editingImageIdx]);
+  }, [scrapedImages, panels, editingImageIdx]);
 
   const navigateTo = React.useCallback((path: string) => {
     const isCurrentlyEditor = window.location.pathname.startsWith("/editor");

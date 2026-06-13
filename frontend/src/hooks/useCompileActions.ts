@@ -11,6 +11,8 @@ interface UseCompileActionsProps {
   fetchWithInterceptor?: typeof fetch;
   selectedModel?: string;
   setConsoleLogs?: React.Dispatch<React.SetStateAction<string[]>>;
+  voiceActor?: string;
+  musicTheme?: string;
 }
 
 export function useCompileActions({
@@ -23,6 +25,8 @@ export function useCompileActions({
   fetchWithInterceptor,
   selectedModel,
   setConsoleLogs,
+  voiceActor,
+  musicTheme,
 }: UseCompileActionsProps) {
   const activeFetch = fetchWithInterceptor || fetch;
   const [analyzingPanelId, setAnalyzingPanelId] = useState<number | null>(null);
@@ -159,7 +163,9 @@ export function useCompileActions({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           panels,
-          url: targetUrl || ""
+          url: targetUrl || "",
+          voice_actor: voiceActor,
+          music_theme: musicTheme,
         })
       });
       if (!res.ok) throw new Error("Compilation API returned status " + res.status);

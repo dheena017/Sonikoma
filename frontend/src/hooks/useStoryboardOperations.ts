@@ -15,6 +15,8 @@ interface UseStoryboardOperationsProps {
   fetchWithInterceptor?: typeof fetch;
   selectedModel?: string;
   setConsoleLogs?: React.Dispatch<React.SetStateAction<string[]>>;
+  voiceActor?: string;
+  musicTheme?: string;
 }
 
 export function useStoryboardOperations({
@@ -28,6 +30,8 @@ export function useStoryboardOperations({
   fetchWithInterceptor,
   selectedModel,
   setConsoleLogs,
+  voiceActor,
+  musicTheme,
 }: UseStoryboardOperationsProps) {
   
   const {
@@ -73,6 +77,8 @@ export function useStoryboardOperations({
     fetchWithInterceptor,
     selectedModel,
     setConsoleLogs,
+    voiceActor,
+    musicTheme,
   });
 
   const handleClearTimeline = () => {

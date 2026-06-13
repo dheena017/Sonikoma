@@ -126,6 +126,10 @@ export function useVideoGeneration({
       const responseData = await response.json();
       console.log(`[API] /api/generate response:`, responseData);
       
+      if (responseData.status !== "success" || !responseData.video_url) {
+        throw new Error(responseData.message || "Failed to compile cinematic video sequence.");
+      }
+      
       setConsoleLogs(prev => [
         ...prev,
         `[Scraper] Retrieved vertical strip elements successfully.`,

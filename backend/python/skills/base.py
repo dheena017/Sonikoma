@@ -441,29 +441,45 @@ class BaseAISkill:
             contents.append(types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"))
         contents.append(prompt)
         
-        try:
-            # Gemini generation using retry helper
-            response = await call_gemini_with_retry(
-                lambda: genai_client.models.generate_content(
-                    model=target_model,
-                    contents=contents,
-                    config=config
+        # Determine candidate models starting with target_model
+        candidates = [target_model]
+        for fallback_m in [
+            "gemini-2.5-flash",
+            "gemini-2.5-flash-lite",
+            "gemini-2.0-flash",
+            "gemini-2.0-flash-lite",
+            "gemini-flash-latest",
+            "gemini-flash-lite-latest"
+        ]:
+            if fallback_m not in candidates:
+                candidates.append(fallback_m)
+
+        last_exception = None
+        for current_model in candidates:
+            try:
+                logger.info(f"[base.py] Invoking Gemini client with model: {current_model}")
+                # Gemini generation using retry helper
+                response = await call_gemini_with_retry(
+                    lambda: genai_client.models.generate_content(
+                        model=current_model,
+                        contents=contents,
+                        config=config
+                    )
                 )
-            )
-            
-            # Record execution metadata
-            elapsed_ms = int((time.monotonic() - start_time) * 1000)
-            raw_text = response.text or "{}"
-            
-            # Simple validation check (returns JSON string or parseable dict depending on route expectations)
-            import json
-            parsed_json = json.loads(raw_text)
-            
-            self.logger.log_execution(self.name, elapsed_ms, True, kwargs, parsed_json)
-            return raw_text
-        except Exception as e:
-            logger.error(f"Skill '{self.name}' execution failed with model {target_model}: {e}", exc_info=True)
-            last_exception = e
+                
+                # Record execution metadata
+                elapsed_ms = int((time.monotonic() - start_time) * 1000)
+                raw_text = response.text or "{}"
+                
+                # Simple validation check (returns JSON string or parseable dict depending on route expectations)
+                import json
+                parsed_json = json.loads(raw_text)
+                
+                self.logger.log_execution(self.name, elapsed_ms, True, kwargs, parsed_json)
+                return raw_text
+            except Exception as e:
+                logger.warning(f"Skill '{self.name}' execution failed with model {current_model}: {e}. Trying next candidate model.")
+                last_exception = e
 
         # If we got here, all candidate models failed
         elapsed_ms = int((time.monotonic() - start_time) * 1000)
