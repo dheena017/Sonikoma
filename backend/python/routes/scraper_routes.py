@@ -8,6 +8,7 @@ Webtoon scraper and Storyboard generation routes.
 import logging
 import asyncio
 import time
+import httpx
 from typing import List, Optional, Any, Dict
 from fastapi import APIRouter, HTTPException, Body
 from pydantic import BaseModel, Field
@@ -63,9 +64,11 @@ async def scrape_images(body: ScrapeImagesRequest):
             t_stitch_start = time.time()
             try:
                 # 1. Resolve all images to buffers in parallel for speed
-                logger.info(f"[Scraper] Fetching {len(proxied_urls)} image buffers in parallel...")
-                fetch_tasks = [img_utils.resolve_image_to_buffer(url) for url in proxied_urls]
-                resolved_results = await asyncio.gather(*fetch_tasks, return_exceptions=True)
+                logger.info(f"[Scraper] Fetching {len(proxied_urls)} image buffers in parallel using shared HTTP client...")
+
+                async with httpx.AsyncClient(follow_redirects=True, timeout=60.0, limits=httpx.Limits(max_connections=50)) as client:
+                    fetch_tasks = [img_utils.resolve_image_to_buffer(url, client=client) for url in proxied_urls]
+                    resolved_results = await asyncio.gather(*fetch_tasks, return_exceptions=True)
 
                 resolved_buffers = []
                 for idx, res in enumerate(resolved_results):

@@ -57,7 +57,7 @@ class ImageMeta:
         }
 
 
-async def resolve_image_to_buffer(url_str: str) -> Dict[str, Any]:
+async def resolve_image_to_buffer(url_str: str, client: Optional[httpx.AsyncClient] = None) -> Dict[str, Any]:
     """
     Resolve ANY image URL (absolute, relative, /api/merge-images/cached, proxied)
     into a raw bytes + contentType.
@@ -118,13 +118,17 @@ async def resolve_image_to_buffer(url_str: str) -> Dict[str, Any]:
         'Accept':     'image/*,*/*;q=0.8',
     }
 
-    async with httpx.AsyncClient(follow_redirects=True, timeout=30.0) as client:
+    if client:
         response = await client.get(working_url, headers=headers)
-        if response.status_code != 200:
-            raise RuntimeError(f"Failed to fetch image: {response.status_code} — {working_url}")
+    else:
+        async with httpx.AsyncClient(follow_redirects=True, timeout=30.0) as new_client:
+            response = await new_client.get(working_url, headers=headers)
             
-        content_type = response.headers.get('Content-Type', 'image/jpeg')
-        return {"data": response.content, "content_type": content_type, "contentType": content_type}
+    if response.status_code != 200:
+        raise RuntimeError(f"Failed to fetch image: {response.status_code} — {working_url}")
+
+    content_type = response.headers.get('Content-Type', 'image/jpeg')
+    return {"data": response.content, "content_type": content_type, "contentType": content_type}
 
 
 def get_image_meta(image_bytes: bytes) -> ImageMeta:
@@ -420,8 +424,23 @@ def stitch_images_together(
             canvas.paste(img, (offset_x, offset_y))
             offset_y += h + gap
 
+    # Safety: check if final image is too large for browser rendering or memory
+    # 65535 is a common limit for many JPEG/browser contexts, 60k is a safe threshold
+    MAX_HEIGHT_LIMIT = 60000
+    if total_h > MAX_HEIGHT_LIMIT:
+        scale_factor = MAX_HEIGHT_LIMIT / total_h
+        new_size = (int(total_w * scale_factor), int(total_h * scale_factor))
+        logger.info(f"[Image Utils] Stitched image height ({total_h}px) exceeds safety limit. Downscaling to {new_size[1]}px.")
+        canvas = canvas.resize(new_size, Image.Resampling.LANCZOS)
+
     out = io.BytesIO()
-    canvas.save(out, format="PNG")
+    # Save as JPEG if it's very large to save memory/bandwidth, unless transparency is needed
+    if spacing_color == "transparent":
+        canvas.save(out, format="PNG")
+    else:
+        if canvas.mode == "RGBA":
+            canvas = canvas.convert("RGB")
+        canvas.save(out, format="JPEG", quality=85)
     return out.getvalue()
 
 
