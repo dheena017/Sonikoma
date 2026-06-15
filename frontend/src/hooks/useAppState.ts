@@ -272,26 +272,6 @@ export function useAppState() {
     [fetchWithInterceptor]
   );
 
-  const googleLogin = useCallback(
-    async (token: string) => {
-      const res = await fetchWithInterceptor("/api/auth/google", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token }),
-      });
-      const data = await res.json();
-      if (data.access_token) {
-        localStorage.setItem("anivox_token", data.access_token);
-        setUser(data.user);
-        setIsAuthenticated(true);
-        addNotification("Signed in with Google!", "success");
-      } else {
-        throw new Error(data.detail || "Google login failed");
-      }
-    },
-    [addNotification, fetchWithInterceptor]
-  );
-
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
@@ -338,7 +318,6 @@ export function useAppState() {
     register,
     logout,
     forgotPassword,
-    googleLogin,
     panels,
     setPanels,
     consoleLogs,

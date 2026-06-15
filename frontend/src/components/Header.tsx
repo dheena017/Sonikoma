@@ -101,7 +101,7 @@ export default function Header({
               ? "lg:opacity-0 lg:pointer-events-none"
               : "lg:opacity-100"
           }`}
-          onClick={() => navigateTo("/")}
+          onClick={() => navigateTo("/dashboard")}
         >
           <div className="h-8 w-8 rounded-lg bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-900/40">
             <Film className="h-4 w-4 text-white" />

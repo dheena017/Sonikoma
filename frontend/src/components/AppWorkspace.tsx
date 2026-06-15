@@ -150,13 +150,7 @@ export function AppWorkspace({
   narrationStyle,
   setNarrationStyle,
 }: AppWorkspaceProps) {
-  console.log(
-    "[AppWorkspace] Rendering with",
-    panels.length,
-    "panels and",
-    scrapedImages.length,
-    "scraped images"
-  );
+
 
   return (
     <main

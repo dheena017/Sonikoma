@@ -106,9 +106,10 @@ export function useGlobalShortcuts({
       if (event.shiftKey) parts.push("Shift");
 
       let key = event.key;
+      if (!key) return;
       if (key === " ") key = "Space";
 
-      if (!["Control", "Alt", "Shift"].includes(event.key)) {
+      if (!["Control", "Alt", "Shift"].includes(key)) {
         parts.push(key.length === 1 ? key.toUpperCase() : key);
       } else {
         return; // modifier-only
@@ -126,12 +127,12 @@ export function useGlobalShortcuts({
       event.preventDefault();
 
       const path = window.location.pathname;
-      const isDashboard = path === "/" || path === "" || path === "/index.html";
+      const isDashboard = path === "/dashboard";
       const isEditor = path.startsWith("/editor");
 
       switch (matchedAction) {
         case "nav_dashboard":
-          navigateTo("/");
+          navigateTo("/dashboard");
           break;
         case "nav_settings":
           navigateTo("/settings");

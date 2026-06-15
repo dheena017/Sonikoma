@@ -132,7 +132,6 @@ export default function App() {
     register,
     logout,
     forgotPassword,
-    googleLogin,
     notifications,
     errorPopup,
     setErrorPopup,
@@ -240,10 +239,8 @@ export default function App() {
     setIsPipMode,
   });
 
-  const isDashboardPath =
-    currentPath === "/" || currentPath === "" || currentPath === "/index.html";
-  const isDashboardOnly =
-    currentPath === "/" || currentPath === "" || currentPath === "/index.html";
+  const isDashboardPath = currentPath === "/dashboard";
+  const isDashboardOnly = currentPath === "/dashboard";
   const isSettingsPath = currentPath === "/settings";
   const isAutoCropPath = currentPath === "/auto-crop";
   const isBubbleCleanerPath = currentPath === "/bubble-cleaner";
@@ -261,7 +258,11 @@ export default function App() {
   const isVoicePath = currentPath === "/ai-voice";
   const isAnalyticsPath = currentPath === "/ai-analytics";
   const isProfilePath = currentPath === "/profile";
-  const isLandingPath = currentPath === "/landing";
+  const isLandingPath =
+    currentPath === "/" ||
+    currentPath === "/landing" ||
+    currentPath === "" ||
+    currentPath === "/index.html";
   const isLoginPath = currentPath === "/login";
   const isRegisterPath = currentPath === "/register";
   const isForgotPasswordPath = currentPath === "/forgot-password";
@@ -286,7 +287,6 @@ export default function App() {
         onLogin={login}
         onNavigateToRegister={() => navigateTo("/register")}
         onNavigateToForgotPassword={() => navigateTo("/forgot-password")}
-        onGoogleLogin={() => googleLogin("mock_google_token")}
       />
     );
   }
@@ -296,7 +296,6 @@ export default function App() {
       <RegisterPage
         onRegister={register}
         onNavigateToLogin={() => navigateTo("/login")}
-        onGoogleLogin={() => googleLogin("mock_google_token")}
       />
     );
   }
@@ -318,7 +317,7 @@ export default function App() {
     !isRegisterPath &&
     !isForgotPasswordPath
   ) {
-    setTimeout(() => navigateTo("/landing"), 0);
+    setTimeout(() => navigateTo("/"), 0);
     return <LoadingPage status="Redirecting to Landing..." />;
   }
   const isNotificationsPath = currentPath === "/notifications";

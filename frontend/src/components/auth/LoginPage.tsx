@@ -1,18 +1,16 @@
 import React from "react";
-import { LogIn, Mail, Lock, Chrome, ArrowRight, Loader2 } from "lucide-react";
+import { LogIn, Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 
 interface LoginPageProps {
   onLogin: (data: any) => Promise<void>;
   onNavigateToRegister: () => void;
   onNavigateToForgotPassword: () => void;
-  onGoogleLogin: () => void;
 }
 
 export default function LoginPage({
   onLogin,
   onNavigateToRegister,
   onNavigateToForgotPassword,
-  onGoogleLogin,
 }: LoginPageProps) {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -21,10 +19,12 @@ export default function LoginPage({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading) return;
     setIsLoading(true);
     setError(null);
     try {
       await onLogin({ email, password });
+      (window as any).navigateTo?.("/dashboard");
     } catch (err: any) {
       setError(err.message || "Invalid credentials. Please try again.");
     } finally {
@@ -113,25 +113,6 @@ export default function LoginPage({
               )}
             </button>
           </form>
-
-          <div className="relative my-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/5"></div>
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-neutral-900 px-2 text-neutral-500">
-                Or continue with
-              </span>
-            </div>
-          </div>
-
-          <button
-            onClick={onGoogleLogin}
-            className="w-full bg-white text-black hover:bg-neutral-200 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-3 shadow-lg"
-          >
-            <Chrome className="w-5 h-5" />
-            Google Authentication
-          </button>
         </div>
 
         <p className="text-center text-sm text-neutral-500">

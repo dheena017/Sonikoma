@@ -14,12 +14,9 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
-from passlib.context import CryptContext
+import bcrypt
 import jwt
-from google.oauth2 import id_token
-from google.auth.transport import requests
-
-from database.db import create_user, get_user_by_email, get_user_by_id, get_user_by_google_id, update_user
+from database.db import create_user, get_user_by_email, get_user_by_id, update_user
 
 logger = logging.getLogger("anivox.auth")
 
@@ -28,11 +25,9 @@ router = APIRouter()
 # ─── Configuration ────────────────────────────────────────────────────────────
 
 SECRET_KEY = os.getenv("JWT_SECRET_KEY", "anivox_super_secret_key_change_me")
-GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 1 week
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 # ─── Models ───────────────────────────────────────────────────────────────────
@@ -46,8 +41,7 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
-class GoogleAuthRequest(BaseModel):
-    token: str  # ID Token from Google
+
 
 class Token(BaseModel):
     access_token: str
@@ -59,11 +53,20 @@ class ForgotPasswordRequest(BaseModel):
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    try:
+        password_bytes = plain_password.encode('utf-8')[:72]
+        hashed_bytes = hashed_password.encode('utf-8')
+        return bcrypt.checkpw(password_bytes, hashed_bytes)
+    except Exception as e:
+        logger.error(f"[Auth] Password verification failed: {e}")
+        return False
 
-def get_password_hash(password):
-    return pwd_context.hash(password)
+def get_password_hash(password: str) -> str:
+    password_bytes = password.encode('utf-8')[:72]
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password_bytes, salt)
+    return hashed.decode('utf-8')
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
@@ -152,60 +155,7 @@ async def login(user_data: UserLogin):
     }
     return {"access_token": access_token, "token_type": "bearer", "user": user_info}
 
-@router.post("/google")
-async def google_auth(request: GoogleAuthRequest):
-    try:
-        # Verify the Google ID token
-        # If GOOGLE_CLIENT_ID is not set, we'll allow a mock for development ONLY
-        if not GOOGLE_CLIENT_ID:
-            logger.warning("[Auth] GOOGLE_CLIENT_ID not set. Using insecure mock verification.")
-            import json
-            if request.token.startswith("{"):
-                token_info = json.loads(request.token)
-            else:
-                 token_info = {
-                    "sub": "mock_google_id_" + request.token[:8],
-                    "email": "google_user@example.com",
-                    "name": "Google User",
-                    "picture": "https://api.dicebear.com/7.x/avataaars/svg?seed=google"
-                }
-        else:
-            token_info = id_token.verify_oauth2_token(request.token, requests.Request(), GOOGLE_CLIENT_ID)
-    except Exception as e:
-        logger.error(f"[Auth] Google verification failed: {e}")
-        raise HTTPException(status_code=400, detail="Invalid Google token")
 
-    google_id = token_info.get("sub")
-    email = token_info.get("email")
-
-    user = get_user_by_google_id(google_id)
-    if not user:
-        # Check if user with this email exists
-        user = get_user_by_email(email)
-        if user:
-            # Link Google ID to existing user
-            update_user(user["user_id"], {"google_id": google_id})
-        else:
-            # Create new user
-            user_id = f"user_{uuid.uuid4().hex[:8]}"
-            user = {
-                "user_id": user_id,
-                "email": email,
-                "google_id": google_id,
-                "full_name": token_info.get("name"),
-                "avatar_url": token_info.get("picture"),
-                "hashed_password": None
-            }
-            create_user(user)
-
-    access_token = create_access_token(data={"sub": user["user_id"]})
-    user_info = {
-        "user_id": user["user_id"],
-        "email": user["email"],
-        "full_name": user["full_name"],
-        "avatar_url": user["avatar_url"]
-    }
-    return {"access_token": access_token, "token_type": "bearer", "user": user_info}
 
 @router.post("/forgot-password")
 async def forgot_password(request: ForgotPasswordRequest):

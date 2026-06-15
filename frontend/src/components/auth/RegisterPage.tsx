@@ -1,24 +1,14 @@
 import React from "react";
-import {
-  UserPlus,
-  Mail,
-  Lock,
-  User,
-  Chrome,
-  ArrowRight,
-  Loader2,
-} from "lucide-react";
+import { UserPlus, Mail, Lock, User, ArrowRight, Loader2 } from "lucide-react";
 
 interface RegisterPageProps {
   onRegister: (data: any) => Promise<void>;
   onNavigateToLogin: () => void;
-  onGoogleLogin: () => void;
 }
 
 export default function RegisterPage({
   onRegister,
   onNavigateToLogin,
-  onGoogleLogin,
 }: RegisterPageProps) {
   const [fullName, setFullName] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -28,10 +18,12 @@ export default function RegisterPage({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading) return;
     setIsLoading(true);
     setError(null);
     try {
       await onRegister({ email, password, full_name: fullName });
+      (window as any).navigateTo?.("/dashboard");
     } catch (err: any) {
       setError(err.message || "Failed to create account. Please try again.");
     } finally {
@@ -128,25 +120,6 @@ export default function RegisterPage({
               )}
             </button>
           </form>
-
-          <div className="relative my-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/5"></div>
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-neutral-900 px-2 text-neutral-500">
-                Or sign up with
-              </span>
-            </div>
-          </div>
-
-          <button
-            onClick={onGoogleLogin}
-            className="w-full bg-white text-black hover:bg-neutral-200 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-3 shadow-lg"
-          >
-            <Chrome className="w-5 h-5" />
-            Google Authentication
-          </button>
         </div>
 
         <p className="text-center text-sm text-neutral-500">
