@@ -80,6 +80,22 @@ interface AppWorkspaceProps {
   voiceActor: string;
   narrationStyle: string;
   setNarrationStyle: (v: string) => void;
+  bubbleSensitivity?: number;
+  bubbleDetectionStyle?: string;
+  bubbleEraseMethod?: string;
+  bubbleDilation?: number;
+  bubbleInpaintRadius?: number;
+  cropSensitivity?: number;
+  cropBackgroundMode?: string;
+  aspectRatioLock?: string;
+  minPanelAreaPct?: number;
+  overlapMergeThreshold?: number;
+  useLocalCV?: boolean;
+  cropModel?: string;
+  cropMinHeightPx?: number;
+  cropCannyLow?: number;
+  cropCannyHigh?: number;
+  cropCloseKernelSize?: number;
 }
 
 export function AppWorkspace({
@@ -149,6 +165,22 @@ export function AppWorkspace({
   voiceActor,
   narrationStyle,
   setNarrationStyle,
+  bubbleSensitivity,
+  bubbleDetectionStyle,
+  bubbleEraseMethod,
+  bubbleDilation,
+  bubbleInpaintRadius,
+  cropSensitivity,
+  cropBackgroundMode,
+  aspectRatioLock,
+  minPanelAreaPct,
+  overlapMergeThreshold,
+  useLocalCV,
+  cropModel,
+  cropMinHeightPx,
+  cropCannyLow,
+  cropCannyHigh,
+  cropCloseKernelSize,
 }: AppWorkspaceProps) {
 
 
@@ -250,6 +282,22 @@ export function AppWorkspace({
               voiceActor={voiceActor}
               musicTheme={musicTheme}
               narrationStyle={narrationStyle}
+              bubbleSensitivity={bubbleSensitivity}
+              bubbleDetectionStyle={bubbleDetectionStyle}
+              bubbleEraseMethod={bubbleEraseMethod}
+              bubbleDilation={bubbleDilation}
+              bubbleInpaintRadius={bubbleInpaintRadius}
+              cropSensitivity={cropSensitivity}
+              cropBackgroundMode={cropBackgroundMode}
+              aspectRatioLock={aspectRatioLock}
+              minPanelAreaPct={minPanelAreaPct}
+              overlapMergeThreshold={overlapMergeThreshold}
+              useLocalCV={useLocalCV}
+              cropModel={cropModel}
+              cropMinHeightPx={cropMinHeightPx}
+              cropCannyLow={cropCannyLow}
+              cropCannyHigh={cropCannyHigh}
+              cropCloseKernelSize={cropCloseKernelSize}
             />
           </div>
         )}

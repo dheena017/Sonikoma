@@ -198,36 +198,46 @@ async def convert_images_to_video(body: ConvertVideoRequest):
         voice_code = voice_map.get(body.voice_actor, "en-US-GuyNeural") if body.voice_actor else "en-US-GuyNeural"
         logger.info(f"[Compile Video] Selected voice actor: '{body.voice_actor or 'Default'}' -> Code: {voice_code}")
 
-        # 1. Prepare panel assets (images and TTS audio)
-        for idx, panel in enumerate(body.panels):
+        # 1. Prepare panel assets concurrently (images and TTS audio)
+        async def process_single_panel(idx: int, panel: ConvertVideoPanel):
             image_path = os.path.join(temp_dir, f"panel_{idx}.png")
             audio_path = os.path.join(temp_dir, f"panel_{idx}.mp3")
 
-            # Resolve image and save to file
-            logger.info(f"[Compile Video] Resolving image {idx} from: {panel.image_url[:60]}...")
-            resolved = await resolve_image_to_buffer(panel.image_url)
-            with open(image_path, "wb") as f:
-                f.write(resolved["data"])
-            img_size_kb = round(len(resolved["data"]) / 1024, 1)
-            logger.info(f"[Compile Video] Saved panel_{idx}.png ({img_size_kb}KB)")
+            async def process_image():
+                logger.info(f"[Compile Video] Resolving image {idx} from: {panel.image_url[:60]}...")
+                resolved = await resolve_image_to_buffer(panel.image_url)
+                
+                def write_image():
+                    with open(image_path, "wb") as f:
+                        f.write(resolved["data"])
+                
+                await asyncio.to_thread(write_image)
+                img_size_kb = round(len(resolved["data"]) / 1024, 1)
+                logger.info(f"[Compile Video] Saved panel_{idx}.png ({img_size_kb}KB)")
 
-            # Generate TTS audio
-            logger.info(f"[Narration/TTS] Generating dialogue audio for panel {idx} | Voice: {voice_code} | Text: '{panel.speech_text[:40]}...'")
-            await generate_panel_audio(
-                dialogue_list=[panel.speech_text or ""],
-                target_duration=panel.duration or 4.5,
-                output_path=audio_path,
-                voice=voice_code
-            )
-            audio_size_kb = round(os.path.getsize(audio_path) / 1024, 1)
-            logger.info(f"[Narration/TTS] Generated panel_{idx}.mp3 ({audio_size_kb}KB)")
+            async def process_audio():
+                logger.info(f"[Narration/TTS] Generating dialogue audio for panel {idx} | Voice: {voice_code} | Text: '{panel.speech_text[:40]}...'")
+                await generate_panel_audio(
+                    dialogue_list=[panel.speech_text or ""],
+                    target_duration=panel.duration or 4.5,
+                    output_path=audio_path,
+                    voice=voice_code
+                )
+                audio_size_kb = round(os.path.getsize(audio_path) / 1024, 1)
+                logger.info(f"[Narration/TTS] Generated panel_{idx}.mp3 ({audio_size_kb}KB)")
 
-            compiled_panels.append({
+            await asyncio.gather(process_image(), process_audio())
+
+            return {
                 "image_path": image_path,
                 "audio_path": audio_path,
                 "duration": panel.duration or 4.5,
                 "caption": panel.speech_text or ""
-            })
+            }
+
+        tasks = [process_single_panel(idx, panel) for idx, panel in enumerate(body.panels)]
+        compiled_panels = await asyncio.gather(*tasks)
+
 
         # 2. Run video compiler
         output_video_path = os.path.join(temp_dir, f"render_{project_id}.mp4")

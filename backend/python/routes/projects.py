@@ -173,3 +173,23 @@ async def delete_single_project(projectId: str = Path(...)):
     except Exception as e:
         logger.error(f"Failed to delete project: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to delete project: {e}")
+
+
+class BatchDeleteRequest(BaseModel):
+    project_ids: List[str] = Field(..., description="List of Project IDs to delete")
+
+@router.post("/batch-delete", summary="Bulk delete multiple projects")
+async def batch_delete_projects(body: BatchDeleteRequest):
+    try:
+        logger.info(f"[Database] Bulk deleting {len(body.project_ids)} projects...")
+        deleted_count = 0
+        for pid in body.project_ids:
+            project = db.get_project(pid)
+            if project:
+                db.delete_project(pid)
+                deleted_count += 1
+        logger.info(f"[Database] Successfully deleted {deleted_count} projects out of {len(body.project_ids)} requested.")
+        return {"success": True, "deleted_count": deleted_count}
+    except Exception as e:
+        logger.error(f"Failed to batch delete projects: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to batch delete projects: {e}")

@@ -26,6 +26,22 @@ interface StoryboardTimelineProps {
   voiceActor?: string;
   musicTheme?: string;
   narrationStyle?: string;
+  bubbleSensitivity?: number;
+  bubbleDetectionStyle?: string;
+  bubbleEraseMethod?: string;
+  bubbleDilation?: number;
+  bubbleInpaintRadius?: number;
+  cropSensitivity?: number;
+  cropBackgroundMode?: string;
+  aspectRatioLock?: string;
+  minPanelAreaPct?: number;
+  overlapMergeThreshold?: number;
+  useLocalCV?: boolean;
+  cropModel?: string;
+  cropMinHeightPx?: number;
+  cropCannyLow?: number;
+  cropCannyHigh?: number;
+  cropCloseKernelSize?: number;
 }
 
 export default function StoryboardTimeline({
@@ -46,11 +62,34 @@ export default function StoryboardTimeline({
   voiceActor,
   musicTheme,
   narrationStyle = "long",
+  bubbleSensitivity = 50,
+  bubbleDetectionStyle = "all",
+  bubbleEraseMethod = "auto",
+  bubbleDilation = -1,
+  bubbleInpaintRadius = 3,
+  cropSensitivity = 30,
+  cropBackgroundMode = "auto",
+  aspectRatioLock = "free",
+  minPanelAreaPct = 2,
+  overlapMergeThreshold = 20,
+  useLocalCV = true,
+  cropModel = "gemini-2.5-flash",
+  cropMinHeightPx = 60,
+  cropCannyLow = 20,
+  cropCannyHigh = 100,
+  cropCloseKernelSize = 15,
 }: StoryboardTimelineProps) {
   // ── Panel selection state ────────────────────────────────────────────────
   const [selectedPanelIds, setSelectedPanelIds] = useState<Set<number>>(
     new Set()
   );
+
+  const [isBatchCropping, setIsBatchCropping] = useState(false);
+  const [isCleaningBubbles, setIsCleaningBubbles] = useState(false);
+  const [isBatchMerging, setIsBatchMerging] = useState(false);
+
+  const [cropProgress, setCropProgress] = useState<{ current: number; total: number } | null>(null);
+  const [cleanProgress, setCleanProgress] = useState<{ current: number; total: number } | null>(null);
 
   const togglePanelSelection = (id: number) => {
     setSelectedPanelIds((prev) => {
@@ -107,6 +146,270 @@ export default function StoryboardTimeline({
       "success"
     );
   };
+
+  const handleCleanBubblesSelected = async () => {
+    if (selectedPanelIds.size === 0) return;
+    const selectedIds = Array.from(selectedPanelIds);
+    const targetPanels = panels.filter((p) => selectedPanelIds.has(p.id));
+
+    setIsCleaningBubbles(true);
+    setCleanProgress({ current: 0, total: targetPanels.length });
+    setConsoleLogs?.((prev) => [
+      `[Speech Bubbles] Starting clean bubbles on ${selectedIds.length} storyboard panels...`,
+      ...prev,
+    ]);
+
+    let successCount = 0;
+    let errorCount = 0;
+    const activeFetch = fetchWithInterceptor || fetch;
+
+    try {
+      let updatedPanels = [...panels];
+      let completed = 0;
+
+      for (const panel of targetPanels) {
+        try {
+          const res = await activeFetch("/api/remove-speech-bubbles", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              url: panel.image_url,
+              method: bubbleEraseMethod,
+              sensitivity: bubbleSensitivity,
+              detection_style: bubbleDetectionStyle,
+              dilation: bubbleDilation,
+              inpaint_radius: bubbleInpaintRadius,
+            }),
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+
+          if (data.success && data.url) {
+            updatedPanels = updatedPanels.map((p) =>
+              p.id === panel.id ? { ...p, image_url: data.url } : p
+            );
+            successCount++;
+          } else {
+            throw new Error(data.message || "Removal failed");
+          }
+        } catch (err: any) {
+          console.error(`[Speech Bubbles] Error for panel #${panel.id}:`, err);
+          errorCount++;
+        } finally {
+          completed++;
+          setCleanProgress({ current: completed, total: targetPanels.length });
+        }
+      }
+
+      setPanels(updatedPanels);
+
+      if (successCount > 0) {
+        addNotification?.(`Cleaned speech bubbles for ${successCount} panel(s).`, "success");
+        setConsoleLogs?.((prev) => [
+          `[Speech Bubbles] Completed cleaning speech bubbles. Success: ${successCount}, Errors: ${errorCount}`,
+          ...prev,
+        ]);
+      } else {
+        addNotification?.("Failed to clean speech bubbles for selected panels.", "error");
+      }
+    } catch (err: any) {
+      console.error("[Speech Bubbles] Critical error:", err);
+    } finally {
+      setIsCleaningBubbles(false);
+      setCleanProgress(null);
+      clearSelection();
+    }
+  };
+
+  const handleAutoCropSelected = async () => {
+    if (selectedPanelIds.size === 0) return;
+    const selectedIds = Array.from(selectedPanelIds);
+    const targetPanels = panels.filter((p) => selectedPanelIds.has(p.id));
+
+    setIsBatchCropping(true);
+    setCropProgress({ current: 0, total: targetPanels.length });
+    setConsoleLogs?.((prev) => [
+      `[Auto Cropper] Starting auto-crop on ${selectedIds.length} storyboard panels...`,
+      ...prev,
+    ]);
+
+    const activeFetch = fetchWithInterceptor || fetch;
+    let nextId = Math.max(...panels.map((p) => p.id), 0) + 1;
+
+    try {
+      let updatedPanels: GeneratedPanel[] = [];
+      let successCount = 0;
+      let completed = 0;
+
+      for (const p of panels) {
+        if (!selectedPanelIds.has(p.id)) {
+          updatedPanels.push(p);
+          continue;
+        }
+
+        try {
+          const res = await activeFetch("/api/detect-panels", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              url: p.image_url,
+              sensitivity: cropSensitivity,
+              backgroundColorMode: cropBackgroundMode,
+              aspectRatio: aspectRatioLock,
+              minAreaPct: minPanelAreaPct / 100.0,
+              mergeThreshold: overlapMergeThreshold,
+              strategy: useLocalCV ? "local-cv" : "balanced",
+              model: cropModel,
+              cannyLow: cropCannyLow,
+              cannyHigh: cropCannyHigh,
+              closeKernelSize: cropCloseKernelSize,
+              minHeightPx: cropMinHeightPx,
+            }),
+          });
+
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+
+          if (data.success && Array.isArray(data.panels) && data.panels.length > 0) {
+            const newSubPanels: GeneratedPanel[] = [];
+
+            for (let i = 0; i < data.panels.length; i++) {
+              const box = data.panels[i];
+              let croppedUrl = box.croppedUrl;
+
+              if (!croppedUrl) {
+                const cropRes = await activeFetch("/api/edit-image", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    url: p.image_url,
+                    cropTop: box.cropTop,
+                    cropBottom: box.cropBottom,
+                    cropLeft: box.cropLeft,
+                    cropRight: box.cropRight,
+                    autoTrim: true,
+                    padding: 10,
+                  }),
+                });
+                if (!cropRes.ok) throw new Error(`Crop HTTP ${cropRes.status}`);
+                const cropData = await cropRes.json();
+                croppedUrl = cropData.url;
+              }
+
+              newSubPanels.push({
+                ...p,
+                id: nextId++,
+                image_url: croppedUrl,
+              });
+            }
+
+            updatedPanels.push(...newSubPanels);
+            successCount++;
+          } else {
+            updatedPanels.push(p);
+          }
+        } catch (err: any) {
+          console.error(`[Auto Cropper] Failed for panel #${p.id}:`, err);
+          updatedPanels.push(p);
+        } finally {
+          completed++;
+          setCropProgress({ current: completed, total: targetPanels.length });
+        }
+      }
+
+      setPanels(updatedPanels);
+      addNotification?.(`Auto-cropped selected storyboard panels!`, "success");
+      setConsoleLogs?.((prev) => [
+        `[Auto Cropper] Finished auto-cropping panels. Slices replaced.`,
+        ...prev,
+      ]);
+    } catch (err: any) {
+      console.error("[Auto Cropper] Critical error:", err);
+    } finally {
+      setIsBatchCropping(false);
+      setCropProgress(null);
+      clearSelection();
+    }
+  };
+
+  const handleBatchMergeSelected = async () => {
+    if (selectedPanelIds.size < 2) {
+      addNotification?.("Select at least 2 panels to stitch together", "info");
+      return;
+    }
+
+    const selectedIds = Array.from(selectedPanelIds);
+    const sortedSelectedPanels = panels.filter((p) => selectedPanelIds.has(p.id));
+    const urls = sortedSelectedPanels.map((p) => p.image_url);
+
+    setIsBatchMerging(true);
+    setConsoleLogs?.((prev) => [
+      `[Stitch Generator] Merging ${urls.length} storyboard panels vertically...`,
+      ...prev,
+    ]);
+
+    const activeFetch = fetchWithInterceptor || fetch;
+
+    try {
+      const response = await activeFetch("/api/stitch-images", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          urls: urls,
+          layout: "vertical",
+          spacing: 0,
+          spacingColor: "white",
+          scaleToFit: true,
+          alignMode: "center",
+          padding: 0,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Stitch failed: " + response.status);
+      const data = await response.json();
+
+      if (data.url) {
+        const firstPanelIdx = panels.findIndex((p) => selectedPanelIds.has(p.id));
+        const firstPanel = panels[firstPanelIdx];
+
+        const nextId = Math.max(...panels.map((p) => p.id), 0) + 1;
+        const stitchedPanel: GeneratedPanel = {
+          ...firstPanel,
+          id: nextId,
+          image_url: data.url,
+          speech_text: sortedSelectedPanels.map((p) => p.speech_text).filter(Boolean).join(" \n "),
+          sfx: sortedSelectedPanels.map((p) => p.sfx).filter(Boolean).join(" | "),
+          duration: sortedSelectedPanels.reduce((sum, p) => sum + (p.duration || 4.5), 0),
+        };
+
+        setPanels((prev) => {
+          const filtered = prev.filter((p) => !selectedPanelIds.has(p.id));
+          filtered.splice(
+            firstPanelIdx === -1 ? 0 : firstPanelIdx,
+            0,
+            stitchedPanel
+          );
+          return filtered;
+        });
+
+        setConsoleLogs?.((prev) => [
+          `[Stitch Generator] ✓ Storyboard stitching completed! URL: ${data.url}`,
+          ...prev,
+        ]);
+        addNotification?.(
+          "Stitched selected storyboard panels successfully!",
+          "success"
+        );
+      }
+    } catch (err: any) {
+      console.error("[Stitch Generator] Stitch failed:", err);
+      addNotification?.(`Merge failed: ${err.message}`, "error");
+    } finally {
+      setIsBatchMerging(false);
+      clearSelection();
+    }
+  };
+
   // ────────────────────────────────────────────────────────────────────────
 
   const {
@@ -239,6 +542,14 @@ export default function StoryboardTimeline({
         handleDeleteSelected={handleDeleteSelected}
         handleBulkModifyDuration={handleBulkModifyDuration}
         handleBulkModifyMotion={handleBulkModifyMotion}
+        isBatchCropping={isBatchCropping}
+        isCleaningBubbles={isCleaningBubbles}
+        isBatchMerging={isBatchMerging}
+        handleAutoCropSelected={handleAutoCropSelected}
+        handleCleanBubblesSelected={handleCleanBubblesSelected}
+        handleBatchMergeSelected={handleBatchMergeSelected}
+        batchProgress={cropProgress}
+        cleanProgress={cleanProgress}
       />
     </div>
   );

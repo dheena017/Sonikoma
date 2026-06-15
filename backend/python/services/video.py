@@ -86,7 +86,9 @@ async def compile_video(
     target_height: int = 1080,
     fps: int = 24,
     zoom_factor: float = 0.05,
-    ducking_volume: float = 0.15
+    ducking_volume: float = 0.15,
+    preset: str = "ultrafast",
+    threads: int = 4
 ) -> str:
     """
     Cinematically combines downloaded manhwa frames, binds high-fidelity TTS voiceover
@@ -94,6 +96,7 @@ async def compile_video(
     Applies continuous sub-pixel camera pan/zoom transformations to the images.
     """
     import asyncio
+    from PIL import Image
     
     def sync_compile():
         logger.info(f"[Video] Compiling cinematic timeline with {len(panel_data)} scenes.")
@@ -112,8 +115,40 @@ async def compile_video(
                     logger.warning(f"Image path missing or not found: {image_path}. Skipping slot {idx}.")
                     continue
 
-                # 1. Load the individual image frame
-                img_clip = ImageClip(image_path)
+                # 1. Load, scale and crop the individual image using Pillow to exact target resolution.
+                # This static operation is done once per panel and avoids frame-by-frame processing overhead.
+                try:
+                    with Image.open(image_path) as pil_img:
+                        if pil_img.mode != "RGB":
+                            pil_img = pil_img.convert("RGB")
+                        
+                        w, h = pil_img.size
+                        
+                        # Calculate optimal scale to fit screen dimensions without black bars
+                        if w / h > target_width / target_height:
+                            scale_to_fit = target_height / h
+                        else:
+                            scale_to_fit = target_width / w
+                            
+                        new_w = int(round(w * scale_to_fit))
+                        new_h = int(round(h * scale_to_fit))
+                        
+                        # High-speed static resize (Pillow bilinear)
+                        pil_img = pil_img.resize((new_w, new_h), Image.Resampling.BILINEAR)
+                        
+                        # Center-crop static image to exact target dimensions
+                        left = (new_w - target_width) // 2
+                        top = (new_h - target_height) // 2
+                        right = left + target_width
+                        bottom = top + target_height
+                        pil_img = pil_img.crop((left, top, right, bottom))
+                        
+                        # Convert to numpy array and build ImageClip
+                        img_array = np.array(pil_img)
+                        img_clip = ImageClip(img_array)
+                except Exception as img_err:
+                    logger.error(f"Failed to load/preprocess image at {image_path}: {img_err}")
+                    continue
                 
                 # 2. Determine duration based on dialogue voice track length
                 duration = nominal_duration
@@ -130,30 +165,23 @@ async def compile_video(
                 # Apply duration to the base image clip
                 img_clip = set_clip_duration(img_clip, duration)
                 
-                # 3. Apply continuous sub-pixel camera pan/zoom transformation
-                # Calculate optimal scale to fit screen dimensions without black bars
-                w, h = img_clip.size
-                if w / h > target_width / target_height:
-                    scale_to_fit = target_height / h
+                # 3. Apply continuous camera pan/zoom transformation (Ken-Burns) if zoom_factor > 0
+                if zoom_factor > 0.001:
+                    def zoom_func(t):
+                        return 1.0 + (zoom_factor * (t / duration))
+                        
+                    animated_clip = resize_clip(img_clip, zoom_func)
+                    
+                    # Center the animating clip within the target viewport (crops overflow gracefully)
+                    viewport_clip = set_clip_duration(
+                        CompositeVideoClip(
+                            [set_clip_position(animated_clip, ('center', 'center'))], 
+                            size=(target_width, target_height)
+                        ),
+                        duration
+                    )
                 else:
-                    scale_to_fit = target_width / w
-                    
-                img_clip = resize_clip(img_clip, scale_to_fit)
-                
-                # Define zoom function over time
-                def zoom_func(t):
-                    return 1.0 + (zoom_factor * (t / duration))
-                    
-                animated_clip = resize_clip(img_clip, zoom_func)
-                
-                # Center the animating clip within the target viewport (crops overflow gracefully)
-                viewport_clip = set_clip_duration(
-                    CompositeVideoClip(
-                        [set_clip_position(animated_clip, ('center', 'center'))], 
-                        size=(target_width, target_height)
-                    ),
-                    duration
-                )
+                    viewport_clip = img_clip
                 
                 # Attach the dialogue track to this specific temporal block
                 if panel_audio:
@@ -211,7 +239,7 @@ async def compile_video(
             # 6. Stitch frames and write output
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
             
-            logger.info(f"[Video] Rendering master MP4 payload to: {output_path}")
+            logger.info(f"[Video] Rendering master MP4 payload to: {output_path} (preset={preset}, threads={threads})")
             final_video_clip.write_videofile(
                 output_path,
                 fps=fps,
@@ -219,7 +247,9 @@ async def compile_video(
                 audio_codec="aac",
                 temp_audiofile=output_path.replace(".mp4", "_temp_audio.m4a"),
                 remove_temp=True,
-                logger=None
+                logger=None,
+                preset=preset,
+                threads=threads
             )
 
             # Cleanup memory locks

@@ -217,17 +217,17 @@ async def lifespan(app: FastAPI):
     for label, mod in caps.items():
         try:
             __import__(mod)
-            logger.info(f"[Backend] ✔ {label} loaded successfully")
+            logger.info(f"[Backend] [OK] {label} loaded successfully")
         except ImportError:
-            logger.warning(f"[WARNING] {label} not available — some features may be disabled")
+            logger.warning(f"[WARNING] {label} not available - some features may be disabled")
 
     # API key status
     if os.getenv("GEMINI_API_KEY"):
-        logger.info("[Backend] ✔ GEMINI_API_KEY detected — AI features enabled")
+        logger.info("[Backend] [OK] GEMINI_API_KEY detected - AI features enabled")
     else:
-        logger.warning("[WARNING] GEMINI_API_KEY not set — AI panel analysis disabled")
+        logger.warning("[WARNING] GEMINI_API_KEY not set - AI panel analysis disabled")
 
-    logger.info("[Backend] Server ready — waiting for requests")
+    logger.info("[Backend] Server ready - waiting for requests")
 
     yield
     uptime = round(time.time() - SERVER_START, 1)
@@ -486,3 +486,4 @@ if __name__ == "__main__":
         run_args["reload_dirs"] = ["backend/python"]
 
     uvicorn.run(**run_args)
+    # Trigger auto-reload for database re-seeding config

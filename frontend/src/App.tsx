@@ -461,6 +461,22 @@ export default function App() {
               voiceActor={voiceActor}
               narrationStyle={narrationStyle}
               setNarrationStyle={setNarrationStyle}
+              bubbleSensitivity={bubbleSensitivity}
+              bubbleDetectionStyle={bubbleDetectionStyle}
+              bubbleEraseMethod={bubbleEraseMethod}
+              bubbleDilation={bubbleDilation}
+              bubbleInpaintRadius={bubbleInpaintRadius}
+              cropSensitivity={cropSensitivity}
+              cropBackgroundMode={cropBackgroundMode}
+              aspectRatioLock={aspectRatioLock}
+              minPanelAreaPct={minPanelAreaPct}
+              overlapMergeThreshold={overlapMergeThreshold}
+              useLocalCV={useLocalCV}
+              cropModel={cropModel}
+              cropMinHeightPx={cropMinHeightPx}
+              cropCannyLow={cropCannyLow}
+              cropCannyHigh={cropCannyHigh}
+              cropCloseKernelSize={cropCloseKernelSize}
             />
           </div>
 
