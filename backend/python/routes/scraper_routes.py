@@ -30,6 +30,7 @@ class ScrapeImagesRequest(BaseModel):
     url: str
     source: Optional[str] = None
     bypass_cache: Optional[bool] = True
+    smart_slice: Optional[bool] = False # New option to return auto-cropped panels instead of a single strip
 
 class GenerateStoryboardRequest(BaseModel):
     url: str
@@ -81,7 +82,7 @@ async def scrape_images(body: ScrapeImagesRequest):
                 }
 
         # Automatically stitch multiple images into a single full strip
-        if len(proxied_urls) > 1:
+        if len(proxied_urls) > 1 and not body.smart_slice:
             logger.info(f"[Scraper] Consolidating {len(proxied_urls)} panels into a single unified strip asset...")
             t_stitch_start = time.time()
             try:
@@ -142,7 +143,8 @@ async def scrape_images(body: ScrapeImagesRequest):
             "debug": {
                 "normalized_url": normalized_url,
                 "source": body.source,
-                "original_count": len(proxied_urls)
+                "original_count": len(proxied_urls),
+                "smart_slice": body.smart_slice
             }
         }
     except Exception as e:

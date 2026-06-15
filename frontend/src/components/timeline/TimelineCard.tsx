@@ -24,7 +24,7 @@ interface TimelineCardProps {
   onToggleSelect: () => void;
 }
 
-export const TimelineCard = React.memo(function TimelineCard({
+export default function TimelineCard({
   panel,
   idx,
   currentPanelIndex,
@@ -287,4 +287,4 @@ export const TimelineCard = React.memo(function TimelineCard({
       </div>
     </div>
   );
-});
+}

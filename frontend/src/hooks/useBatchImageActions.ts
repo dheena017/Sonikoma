@@ -92,7 +92,7 @@ export function useBatchImageActions({
   setCroppingImgUrl,
 }: UseBatchImageActionsProps) {
 
-  const handleCleanBubblesSelected = React.useCallback(async () => {
+  const handleCleanBubblesSelected = async () => {
     const targetImages = selectedScraped.length > 0 ? selectedScraped : scrapedImages;
     if (targetImages.length === 0) {
       addNotification("No images available for bubble cleaning.", "warning");
@@ -166,14 +166,9 @@ export function useBatchImageActions({
       ]);
     }
     setSelectedScraped([]);
-  }, [
-    selectedScraped, scrapedImages, setSelectedScraped, setIsCleaningBubbles, setCleanProgress,
-    setConsoleLogs, setBubbleCroppingImgUrl, fetchWithInterceptor, bubbleEraseMethod,
-    bubbleSensitivity, bubbleDetectionStyle, bubbleDilation, bubbleInpaintRadius,
-    setScrapedImages, setPanels, addNotification
-  ]);
+  };
 
-  const handleAutoCropSelected = React.useCallback(async () => {
+  const handleAutoCropSelected = async () => {
     const targetImages = selectedScraped.length > 0 ? selectedScraped : scrapedImages;
     if (targetImages.length === 0) {
       addNotification("No images available for auto cropping.", "warning");
@@ -314,13 +309,7 @@ export function useBatchImageActions({
       ]);
     }
     setSelectedScraped([]);
-  }, [
-    selectedScraped, scrapedImages, setSelectedScraped, setIsBatchCropping, setBatchProgress,
-    setConsoleLogs, setCroppingImgUrl, fetchWithInterceptor, cropSensitivity,
-    cropBackgroundMode, aspectRatioLock, minPanelAreaPct, overlapMergeThreshold,
-    useLocalCV, selectedModel, cropModel, cropCannyLow, cropCannyHigh,
-    cropCloseKernelSize, cropMinHeightPx, cropPaddingPx, setScrapedImages, addNotification
-  ]);
+  };
 
   return {
     isCleaningBubbles,

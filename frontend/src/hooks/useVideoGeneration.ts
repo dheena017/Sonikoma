@@ -37,7 +37,7 @@ export function useVideoGeneration({
   const [progressStatus, setProgressStatus] = useState<string>("");
   const [reprocessingPanelId, setReprocessingPanelId] = useState<number | null>(null);
 
-  const handleGenerateVideo = React.useCallback(async () => {
+  const handleGenerateVideo = async () => {
     if (!targetUrl.trim()) {
       addNotification("Please enter or select a valid Webtoon URL to initiate the process.", "error");
       return;
@@ -163,13 +163,9 @@ export function useVideoGeneration({
     } finally {
       setIsProcessing(false);
     }
-  }, [
-    targetUrl, selectedSource, selectedModel, frameRate, voiceActor, musicTheme,
-    panels, fetchWithInterceptor, setConsoleLogs, setPanels, setVideoUrl,
-    setActivePreviewTab, addNotification
-  ]);
+  };
 
-  const handleTriggerReprocess = React.useCallback(async (panelId: number) => {
+  const handleTriggerReprocess = async (panelId: number) => {
     const activePanel = panels.find(p => p.id === panelId);
     if (!activePanel) return;
 
@@ -213,7 +209,7 @@ export function useVideoGeneration({
     } finally {
       setReprocessingPanelId(null);
     }
-  }, [panels, setConsoleLogs, addNotification, setPanels]);
+  };
 
   return {
     isProcessing,

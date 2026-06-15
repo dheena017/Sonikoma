@@ -51,39 +51,31 @@ export default function LiveScraperDeck({
   isDashboardOnly = true,
 }: LiveScraperDeckProps) {
   const [isZipping, setIsZipping] = useState(false);
-  const lastSelectedIndexRef = React.useRef<number | null>(null);
+  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
   const [isBatchMerging, setIsBatchMerging] = useState(false);
   const activeFetch = fetchWithInterceptor || fetch;
-
-  // Optimize selected items lookup
-  const selectedSet = React.useMemo(() => new Set(selectedScraped), [selectedScraped]);
 
   /** Core card click handler — supports shift-range selection */
   const handleCardClick = useCallback(
     (idx: number, imgUrl: string, shiftKey: boolean) => {
-      const lastIdx = lastSelectedIndexRef.current;
-      if (shiftKey && lastIdx !== null) {
+      if (shiftKey && lastSelectedIndex !== null) {
         // Build inclusive range and merge into the selection set
-        const lo = Math.min(lastIdx, idx);
-        const hi = Math.max(lastIdx, idx);
+        const lo = Math.min(lastSelectedIndex, idx);
+        const hi = Math.max(lastSelectedIndex, idx);
         const rangeUrls = scrapedImages.slice(lo, hi + 1);
         setSelectedScraped((prev) => Array.from(new Set([...prev, ...rangeUrls])));
         // Do NOT update lastSelectedIndex on shift-click — anchor stays put
       } else {
-        setSelectedScraped((prev) => {
-          if (prev.includes(imgUrl)) {
-            return prev.filter((u) => u !== imgUrl);
-          } else {
-            return [...prev, imgUrl];
-          }
-        });
-        lastSelectedIndexRef.current = idx;
+        setSelectedScraped((prev) =>
+          prev.includes(imgUrl) ? prev.filter((u) => u !== imgUrl) : [...prev, imgUrl]
+        );
+        setLastSelectedIndex(idx);
       }
     },
-    [scrapedImages, setSelectedScraped]
+    [lastSelectedIndex, scrapedImages, setSelectedScraped]
   );
 
-  const handleDownloadZip = useCallback(async () => {
+  const handleDownloadZip = async () => {
     const toDownload = selectedScraped.length > 0 ? selectedScraped : scrapedImages;
     if (toDownload.length === 0) return;
     console.log("[LiveScraperDeck] Starting ZIP download for", toDownload.length, "images");
@@ -120,9 +112,9 @@ export default function LiveScraperDeck({
     } finally {
       setIsZipping(false);
     }
-  }, [selectedScraped, scrapedImages, activeFetch, setConsoleLogs]);
+  };
 
-  const handleDeleteSelected = useCallback(() => {
+  const handleDeleteSelected = () => {
     if (selectedScraped.length === 0) return;
     console.log("[LiveScraperDeck] Deleting", selectedScraped.length, "selected images");
     setScrapedImages((prev) => prev.filter((img) => !selectedScraped.includes(img)));
@@ -132,34 +124,34 @@ export default function LiveScraperDeck({
     ]);
     addNotification(`Deleted ${selectedScraped.length} selected image(s) from the deck.`, "success");
     setSelectedScraped([]);
-    lastSelectedIndexRef.current = null;
-  }, [selectedScraped, setScrapedImages, setConsoleLogs, addNotification, setSelectedScraped]);
+    setLastSelectedIndex(null);
+  };
 
-  const handleAddToStoryboard = useCallback(() => {
+  const handleAddToStoryboard = () => {
     if (selectedScraped.length === 0) return;
     addPanelsToStoryboard(selectedScraped);
     console.log(`[GUI] Adding ${selectedScraped.length} selected image(s) to storyboard.`);
     setSelectedScraped([]);
-    lastSelectedIndexRef.current = null;
-  }, [selectedScraped, addPanelsToStoryboard, setSelectedScraped]);
+    setLastSelectedIndex(null);
+  };
 
-  const handleClearAll = useCallback(() => {
+  const handleClearAll = () => {
     setSelectedScraped([]);
-    lastSelectedIndexRef.current = null;
-  }, [setSelectedScraped]);
+    setLastSelectedIndex(null);
+  };
 
-  const handleSelectAllToggle = useCallback(() => {
+  const handleSelectAllToggle = () => {
     if (selectedScraped.length === scrapedImages.length && scrapedImages.length > 0) {
       setSelectedScraped([]);
-      lastSelectedIndexRef.current = null;
+      setLastSelectedIndex(null);
       setConsoleLogs((prev) => ["[GUI] Cleared selections", ...prev]);
     } else {
       setSelectedScraped([...scrapedImages]);
       setConsoleLogs((prev) => ["[GUI] Selected all extracted frames", ...prev]);
     }
-  }, [selectedScraped, scrapedImages, setSelectedScraped, setConsoleLogs]);
+  };
 
-  const handleBatchMergeSelected = useCallback(async () => {
+  const handleBatchMergeSelected = async () => {
     if (selectedScraped.length < 2) {
       addNotification("Select at least 2 panels to stitch together", "info");
       return;
@@ -196,7 +188,7 @@ export default function LiveScraperDeck({
           return filtered;
         });
         setSelectedScraped([]);
-        lastSelectedIndexRef.current = null;
+        setLastSelectedIndex(null);
         setConsoleLogs((prev) => [
           `[Stitch Generator] ✓ Stitching completed! Stored URL: ${data.url}`,
           ...prev,
@@ -209,48 +201,7 @@ export default function LiveScraperDeck({
     } finally {
       setIsBatchMerging(false);
     }
-  }, [selectedScraped, addNotification, activeFetch, scrapedImages, setScrapedImages, setSelectedScraped, setConsoleLogs]);
-
-  // ── Virtualization Logic ──────────────────────────────────────────────────
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const [visibleRange, setVisibleRange] = useState({ start: 0, end: 20 });
-  const CARD_WIDTH = 156 + 16; // w-[156px] + gap-4
-  const MOBILE_CARD_WIDTH = 140 + 16; // w-[140px] + gap-4
-
-  React.useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      const scrollLeft = container.scrollLeft;
-      const containerWidth = container.clientWidth;
-      const isMobile = window.innerWidth < 640;
-      const width = isMobile ? MOBILE_CARD_WIDTH : CARD_WIDTH;
-
-      const start = Math.floor(scrollLeft / width);
-      const end = Math.ceil((scrollLeft + containerWidth) / width) + 2; // +2 for buffer
-
-      setVisibleRange(prev => {
-        // Only update if the range has actually shifted significantly
-        if (Math.abs(prev.start - start) > 1 || Math.abs(prev.end - end) > 1 || end > prev.end) {
-           return { start: Math.max(0, start - 4), end: Math.min(scrapedImages.length, end + 4) };
-        }
-        return prev;
-      });
-    };
-
-    container.addEventListener("scroll", handleScroll, { passive: true });
-    // Initial check
-    handleScroll();
-
-    // Also re-check on window resize
-    window.addEventListener("resize", handleScroll);
-
-    return () => {
-      container.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
-    };
-  }, [scrapedImages.length]);
+  };
 
   if (!isScraping && scrapedImages.length === 0) return null;
 
@@ -326,7 +277,7 @@ export default function LiveScraperDeck({
               handleAutoCropSelected={handleAutoCropSelected}
               handleCleanBubblesSelected={handleCleanBubblesSelected}
               fetchWithInterceptor={fetchWithInterceptor}
-          onLastSelectedReset={() => { lastSelectedIndexRef.current = null; }}
+              onLastSelectedReset={() => setLastSelectedIndex(null)}
             />
 
             {/* Shift-select hint banner */}
@@ -336,63 +287,36 @@ export default function LiveScraperDeck({
               </p>
             )}
 
-            {/* Grid list of extracted cards (Virtualised) */}
-            <div
-              ref={containerRef}
-              className="flex gap-4 overflow-x-auto pb-8 pt-1.5 scrollbar-thin relative"
-              style={{ minHeight: '260px' }}
-            >
-              {/* Spacer to maintain scroll width */}
-              <div
-                style={{
-                  width: `${scrapedImages.length * (window.innerWidth < 640 ? MOBILE_CARD_WIDTH : CARD_WIDTH)}px`,
-                  height: '1px',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  pointerEvents: 'none'
-                }}
-              />
-
-              {scrapedImages.slice(visibleRange.start, visibleRange.end + 1).map((imgUrl, sliceIdx) => {
-                const idx = visibleRange.start + sliceIdx;
-                const isSelected = selectedSet.has(imgUrl);
-                const currentWidth = window.innerWidth < 640 ? MOBILE_CARD_WIDTH : CARD_WIDTH;
-
+            {/* Grid list of extracted cards */}
+            <div className="flex gap-4 overflow-x-auto pb-8 pt-1.5 scrollbar-thin">
+              {scrapedImages.map((imgUrl, idx) => {
+                const isSelected = selectedScraped.includes(imgUrl);
                 return (
-                  <div
+                  <PanelCard
                     key={`${imgUrl}-${idx}`}
-                    style={{
-                      position: 'absolute',
-                      left: `${idx * currentWidth}px`,
-                      width: currentWidth,
-                    }}
-                  >
-                    <PanelCard
-                      imgUrl={imgUrl}
-                      idx={idx}
-                      isSelected={isSelected}
-                      isBatchCropping={isBatchCropping}
-                      croppingImgUrl={croppingImgUrl}
-                      bubbleCroppingImgUrl={bubbleCroppingImgUrl}
-                      scrapedImagesCount={scrapedImages.length}
-                      mergingIndices={mergingIndices}
-                      handleMergeWithNext={handleMergeWithNext}
-                      setEditingImageIdx={setEditingImageIdx}
-                      openEditingImageIdx={openEditingImageIdx}
-                      setEditCropTop={setEditCropTop}
-                      setEditCropBottom={setEditCropBottom}
-                      setEditCropLeft={setEditCropLeft}
-                      setEditCropRight={setEditCropRight}
-                      setEditAutoTrim={setEditAutoTrim}
-                      setScrapedImages={setScrapedImages}
-                      setSelectedScraped={setSelectedScraped}
-                      setConsoleLogs={setConsoleLogs}
-                      addPanelsToStoryboard={addPanelsToStoryboard}
-                      addNotification={addNotification}
-                      onCardClick={handleCardClick}
-                    />
-                  </div>
+                    imgUrl={imgUrl}
+                    idx={idx}
+                    isSelected={isSelected}
+                    isBatchCropping={isBatchCropping}
+                    croppingImgUrl={croppingImgUrl}
+                    bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+                    scrapedImages={scrapedImages}
+                    mergingIndices={mergingIndices}
+                    handleMergeWithNext={handleMergeWithNext}
+                    setEditingImageIdx={setEditingImageIdx}
+                    openEditingImageIdx={openEditingImageIdx}
+                    setEditCropTop={setEditCropTop}
+                    setEditCropBottom={setEditCropBottom}
+                    setEditCropLeft={setEditCropLeft}
+                    setEditCropRight={setEditCropRight}
+                    setEditAutoTrim={setEditAutoTrim}
+                    setScrapedImages={setScrapedImages}
+                    setSelectedScraped={setSelectedScraped}
+                    setConsoleLogs={setConsoleLogs}
+                    addPanelsToStoryboard={addPanelsToStoryboard}
+                    addNotification={addNotification}
+                    onCardClick={handleCardClick}
+                  />
                 );
               })}
             </div>
