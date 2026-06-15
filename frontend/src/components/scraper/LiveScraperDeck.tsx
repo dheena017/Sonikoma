@@ -3,6 +3,7 @@ import {
   Image as ImageIcon,
   RefreshCw,
   Download,
+  Combine,
 } from "lucide-react";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
@@ -203,6 +204,52 @@ export default function LiveScraperDeck({
     }
   };
 
+  const handleStitchAll = async () => {
+    if (scrapedImages.length < 2) {
+      addNotification("Need at least 2 images to stitch all.", "info");
+      return;
+    }
+    setIsBatchMerging(true);
+    setConsoleLogs((prev) => [
+      `[Stitch Generator] Stitching ALL ${scrapedImages.length} images vertically into one single strip...`,
+      ...prev,
+    ]);
+
+    try {
+      const response = await activeFetch("/api/stitch-images", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          urls: scrapedImages,
+          layout: "vertical",
+          spacing: 0,
+          spacingColor: "white",
+          scaleToFit: true,
+          alignMode: "center",
+          padding: 0,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Stitch all failed: " + response.status);
+      const data = await response.json();
+      if (data.url) {
+        setScrapedImages([data.url]);
+        setSelectedScraped([]);
+        setLastSelectedIndex(null);
+        setConsoleLogs((prev) => [
+          `[Stitch Generator] ✓ Successfully stitched all images! Result: ${data.url}`,
+          ...prev,
+        ]);
+        addNotification("Stitched all panels into one single frame successfully!", "success");
+      }
+    } catch (err: any) {
+      console.error("Stitch all failed:", err);
+      addNotification(`Stitch all failed: ${err.message}`, "error");
+    } finally {
+      setIsBatchMerging(false);
+    }
+  };
+
   if (!isScraping && scrapedImages.length === 0) return null;
 
   return (
@@ -227,6 +274,16 @@ export default function LiveScraperDeck({
           </div>
 
           <div className="flex flex-nowrap items-center gap-2 overflow-x-auto self-end lg:self-auto ml-auto lg:ml-0">
+            <button
+              type="button"
+              onClick={handleStitchAll}
+              disabled={scrapedImages.length < 2 || isBatchMerging}
+              className="text-[10px] font-mono border border-purple-900/50 bg-purple-950/40 hover:bg-purple-900/60 text-purple-200 hover:text-white rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-sm shadow-purple-900/20"
+            >
+              <Combine className="h-3.5 w-3.5" />
+              <span>{isBatchMerging ? "Stitching..." : "Stitch All to One Image"}</span>
+            </button>
+
             <button
               type="button"
               onClick={handleDownloadZip}
