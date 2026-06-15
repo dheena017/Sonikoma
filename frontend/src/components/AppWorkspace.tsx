@@ -74,6 +74,8 @@ interface AppWorkspaceProps {
   setVolume: (v: number) => void;
   musicTheme: string;
   voiceActor: string;
+  narrationStyle: string;
+  setNarrationStyle: (v: string) => void;
 }
 
 export function AppWorkspace({
@@ -141,6 +143,8 @@ export function AppWorkspace({
   setVolume,
   musicTheme,
   voiceActor,
+  narrationStyle,
+  setNarrationStyle,
 }: AppWorkspaceProps) {
   console.log("[AppWorkspace] Rendering with", panels.length, "panels and", scrapedImages.length, "scraped images");
 
@@ -165,6 +169,8 @@ export function AppWorkspace({
           handleGenerateVideo={handleGenerateVideo}
           handleScrape={() => scrapeImages()}
           addNotification={addNotification}
+          narrationStyle={narrationStyle}
+          setNarrationStyle={setNarrationStyle}
         />
 
         {/* SEPARATED IMAGE STRIPS GALLERY */}
@@ -234,6 +240,7 @@ export function AppWorkspace({
               setConsoleLogs={setConsoleLogs}
               voiceActor={voiceActor}
               musicTheme={musicTheme}
+              narrationStyle={narrationStyle}
             />
           </div>
         )}

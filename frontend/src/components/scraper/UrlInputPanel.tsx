@@ -40,6 +40,8 @@ interface UrlInputPanelProps {
   handleGenerateVideo: () => void;
   handleScrape?: () => void;
   addNotification: (message: string, type: NotificationType) => void;
+  narrationStyle?: string;
+  setNarrationStyle?: (style: string) => void;
 }
 
 export default function UrlInputPanel(props: UrlInputPanelProps) {
@@ -55,6 +57,8 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
     handleGenerateVideo,
     handleScrape,
     addNotification,
+    narrationStyle = "long",
+    setNarrationStyle,
   } = props;
 
   const source = selectedSource || 'webtoons';
@@ -217,6 +221,44 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
         </div>
 
         <div className="space-y-3 pt-1">
+          {/* Narration Style Selector */}
+          <div className="space-y-2">
+            <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
+              <span className={`h-1.5 w-1.5 rounded-full ${narrationStyle === 'long' ? 'bg-purple-500 animate-ping' : 'bg-emerald-500 animate-ping'}`} />
+              AI Narration Style
+            </label>
+            <div className="relative">
+              <select
+                id="narration_style_select"
+                value={narrationStyle}
+                onChange={(e) => {
+                  setNarrationStyle?.(e.target.value);
+                  const label = e.target.value === 'long' ? 'Detailed Recap Narrator' : 'Short Subtitle Dialogue';
+                  addNotification(`Narration mode set to: ${label}`, 'info');
+                }}
+                className="relative w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-neutral-200 outline-none appearance-none focus:border-purple-500 transition-colors cursor-pointer"
+              >
+                <option value="long" className="bg-neutral-950 text-neutral-100">
+                  ✦ Detailed Recap Narrator (35-70 words/panel · 15+ Min YouTube Videos)
+                </option>
+                <option value="short" className="bg-neutral-950 text-neutral-100">
+                  ✦ Short Subtitle Dialogue (under 25 words/panel · Shorts / Quick Recaps)
+                </option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-neutral-500 select-none">▾</div>
+            </div>
+            <p className={`text-[10.5px] font-mono ${
+              narrationStyle === 'long'
+                ? 'text-purple-400/70'
+                : 'text-emerald-400/70'
+            }`}>
+              {narrationStyle === 'long'
+                ? '✦ STORYTELLER mode — AI generates cinematic, highly engaging 35-70 word narrations per panel'
+                : '✦ SUBTITLES mode — AI generates concise, punchy captions under 25 words per panel'
+              }
+            </p>
+          </div>
+
           <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-purple-500 animate-ping"></span>
             Active AI Model Engine (Free Models Recommended)

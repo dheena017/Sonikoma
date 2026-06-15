@@ -39,6 +39,7 @@ class GenerateStoryboardRequest(BaseModel):
     custom_background_video: Optional[str] = None
     model: Optional[str] = "gemini-2.5-flash"
     bypass_cache: Optional[bool] = True
+    narrationStyle: Optional[str] = "long"  # 'long' = detailed YouTube narration, 'short' = quick subtitles
 
 class ProcessUrlRequest(BaseModel):
     url: str
@@ -213,9 +214,10 @@ async def generate_storyboard(body: GenerateStoryboardRequest):
         # Generate panels using AI
         response_panels = []
         try:
-            logger.info(f"[Model] Dispatching panels generation via AI model: {body.model}...")
+            logger.info(f"[Model] Dispatching panels generation via AI model: {body.model} (narrationStyle={body.narrationStyle})...")
             response_panels = await generate_dynamic_panels(
-                parsed["title"], parsed["genre"], parsed["episode"], scraped_urls, body.model
+                parsed["title"], parsed["genre"], parsed["episode"], scraped_urls, body.model,
+                narration_style=body.narrationStyle or "long"
             )
             logger.info(f"[Model] Successfully generated {len(response_panels)} storyboard panels.")
         except Exception as e:

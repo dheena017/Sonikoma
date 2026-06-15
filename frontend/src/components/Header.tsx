@@ -14,6 +14,16 @@ interface HeaderProps {
   onToggleSidebar?: () => void;
   isSidebarOpen?: boolean;
   backendStatus: "online" | "offline" | "checking";
+  narrationStyle?: string;
+}
+
+/** Format seconds into a readable "Xm Ys" string */
+function formatDuration(totalSeconds: number): string {
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = Math.round(totalSeconds % 60);
+  if (mins === 0) return `${secs}s`;
+  if (secs === 0) return `${mins}m`;
+  return `${mins}m ${secs}s`;
 }
 
 export default function Header({
@@ -27,13 +37,16 @@ export default function Header({
   isCleaningBubbles,
   onToggleSidebar,
   isSidebarOpen = false,
-  backendStatus
+  backendStatus,
+  narrationStyle = "long",
 }: HeaderProps) {
   
   const navigateTo = (path: string) => {
     window.history.pushState({}, "", path);
     window.dispatchEvent(new Event("popstate"));
   };
+
+  const isLongMode = narrationStyle !== "short";
 
   return (
     <header id="header_pane" className="border-b border-neutral-900 bg-neutral-950/80 backdrop-blur-md sticky top-0 z-40 px-4 py-3 flex items-center justify-between">
@@ -62,17 +75,34 @@ export default function Header({
           </span>
         </div>
 
-
+        {/* Narration Mode Badge */}
+        {isLongMode ? (
+          <div
+            title="Storyteller Mode — 35-70 word narrations optimised for long-form YouTube videos"
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold font-mono tracking-wider select-none border border-purple-500/40 bg-purple-950/30 text-purple-300 shadow-[0_0_10px_-2px_rgba(168,85,247,0.35)] transition-all"
+          >
+            <span className="text-purple-400">✦</span>
+            <span>STORYTELLER</span>
+          </div>
+        ) : (
+          <div
+            title="Subtitle Mode — max 25 word snappy captions for Shorts or quick summaries"
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold font-mono tracking-wider select-none border border-emerald-500/40 bg-emerald-950/30 text-emerald-300 shadow-[0_0_10px_-2px_rgba(52,211,153,0.25)] transition-all"
+          >
+            <span className="text-emerald-400">✦</span>
+            <span>SUBTITLES</span>
+          </div>
+        )}
       </div>
 
       {/* Right side controls/status */}
       <div className="flex items-center gap-3">
         {/* Storyboard metrics */}
         {panels.length > 0 && (
-          <div className="hidden sm:flex items-center gap-3 font-mono text-[10px] text-neutral-405 bg-neutral-905/30 border border-neutral-800/60 px-3 py-1 rounded-lg select-none">
-            <span>panels: <strong className="text-purple-405 font-bold">{panels.length}</strong></span>
-            <span className="text-neutral-800 font-bold">|</span>
-            <span>est. duration: <strong className="text-purple-405 font-bold">{totalCalculatedDuration.toFixed(1)}s</strong></span>
+          <div className="hidden sm:flex items-center gap-3 font-mono text-[10px] text-neutral-400 bg-neutral-900/30 border border-neutral-800/60 px-3 py-1 rounded-lg select-none">
+            <span>panels: <strong className="text-purple-400 font-bold">{panels.length}</strong></span>
+            <span className="text-neutral-700 font-bold">|</span>
+            <span>est. duration: <strong className="text-purple-400 font-bold">{formatDuration(totalCalculatedDuration)}</strong></span>
           </div>
         )}
 

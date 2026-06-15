@@ -161,6 +161,8 @@ export default function App() {
     handleAutoCropSelected,
     totalCalculatedDuration,
     scrapeImages,
+    narrationStyle,
+    setNarrationStyle,
   } = appLogic;
 
   const {
@@ -284,6 +286,7 @@ export default function App() {
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
             isSidebarOpen={isSidebarOpen}
             backendStatus={backendStatus}
+            narrationStyle={narrationStyle}
           />
 
       {/* PAGE 1: DASHBOARD */}
@@ -356,6 +359,8 @@ export default function App() {
           setVolume={setVolume}
           musicTheme={musicTheme}
           voiceActor={voiceActor}
+          narrationStyle={narrationStyle}
+          setNarrationStyle={setNarrationStyle}
         />
       </div>
 

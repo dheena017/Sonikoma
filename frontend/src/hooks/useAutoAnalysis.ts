@@ -11,6 +11,7 @@ interface UseAutoAnalysisProps {
   addNotification: (message: string, type: NotificationType) => void;
   fetchWithInterceptor: any;
   setActivePreviewTab: (tab: "video" | "storyboard") => void;
+  narrationStyle?: string;
 }
 
 export function useAutoAnalysis({
@@ -22,6 +23,7 @@ export function useAutoAnalysis({
   addNotification,
   fetchWithInterceptor,
   setActivePreviewTab,
+  narrationStyle = "long",
 }: UseAutoAnalysisProps) {
   const runBackgroundAnalysis = useCallback(async (panelId: number, imageUrl: string) => {
     console.log(`[AI Auto-Analysis] Starting analysis for panel #${panelId}`);
@@ -29,7 +31,7 @@ export function useAutoAnalysis({
       const res = await fetchWithInterceptor("/api/analyze-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: imageUrl, model: selectedModel }),
+        body: JSON.stringify({ url: imageUrl, model: selectedModel, narrationStyle }),
       });
       if (!res.ok) throw new Error(`Analysis failed with status ${res.status}`);
       const data = await res.json();
@@ -75,7 +77,7 @@ export function useAutoAnalysis({
         )
       );
     }
-  }, [fetchWithInterceptor, addNotification, setPanels, setConsoleLogs, selectedModel]);
+  }, [fetchWithInterceptor, addNotification, setPanels, setConsoleLogs, selectedModel, narrationStyle]);
 
   const addPanelsToStoryboard = useCallback((imgUrls: string[], currentScrapedList?: string[], shouldScroll: boolean = true) => {
     if (imgUrls.length === 0) return;

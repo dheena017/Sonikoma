@@ -16,6 +16,7 @@ interface UseVideoGenerationProps {
   musicTheme: string;
   setVideoUrl: (url: string | null) => void;
   setActivePreviewTab: (tab: "video" | "storyboard") => void;
+  narrationStyle?: string;
 }
 
 export function useVideoGeneration({
@@ -32,6 +33,7 @@ export function useVideoGeneration({
   selectedSource,
   setVideoUrl,
   setActivePreviewTab,
+  narrationStyle = "long",
 }: UseVideoGenerationProps) {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [progressStatus, setProgressStatus] = useState<string>("");
@@ -113,7 +115,8 @@ export function useVideoGeneration({
         source: selectedSource,
         episode_id: `wp_${Math.random().toString(36).substring(2, 8)}`,
         panels: panels,
-        model: selectedModel
+        model: selectedModel,
+        narrationStyle,
       };
 
       console.log(`[API] POST /api/generate`, requestBody);
