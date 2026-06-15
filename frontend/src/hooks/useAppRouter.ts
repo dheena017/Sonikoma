@@ -17,6 +17,7 @@ interface UseAppRouterProps {
   addNotification: (msg: string, type: "success" | "info" | "warning" | "error") => void;
   isAuthenticated: boolean;
   authLoading: boolean;
+  isInitializing: boolean;
   voiceActor: string;
   musicTheme: string;
   aspectRatio: "9:16" | "16:9";
@@ -40,6 +41,7 @@ export function useAppRouter({
   addNotification,
   isAuthenticated,
   authLoading,
+  isInitializing,
   voiceActor,
   musicTheme,
   aspectRatio,
@@ -103,6 +105,15 @@ export function useAppRouter({
     const handleLocationChange = () => {
       const path = window.location.pathname;
       setCurrentPath(path);
+
+      // Root redirect logic
+      if (!isInitializing && !authLoading) {
+        if (!isAuthenticated && (path === "/" || path === "" || path === "/index.html")) {
+          window.history.replaceState({}, "", "/landing");
+          setCurrentPath("/landing");
+          return;
+        }
+      }
 
       if (
         path === "/settings" ||
@@ -181,7 +192,7 @@ export function useAppRouter({
       window.history.replaceState = originalReplaceState;
       window.removeEventListener("popstate", handleLocationChange);
     };
-  }, [scrapedImages, panels, editingImageIdx, isAuthenticated, authLoading]);
+  }, [scrapedImages, panels, editingImageIdx, isAuthenticated, authLoading, isInitializing]);
 
   const navigateTo = React.useCallback((path: string) => {
     const isCurrentlyEditor = window.location.pathname.startsWith("/editor");

@@ -9,6 +9,7 @@ export function useAppState() {
   const [user, setUser] = useState<any>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [authLoading, setAuthLoading] = useState<boolean>(true);
+  const [isInitializing, setIsInitializing] = useState<boolean>(true);
 
   const [panels, setPanels] = useState<GeneratedPanel[]>([]);
   const [consoleLogs, setConsoleLogs] = useState<string[]>([]);
@@ -147,8 +148,16 @@ export function useAppState() {
 
   const checkAuth = useCallback(async () => {
     const token = localStorage.getItem("anivox_token");
+
+    // Artificial delay to show the fancy loading screen
+    const delay = (ms: number) => new Promise(res => setTimeout(ms, res));
+    const start = Date.now();
+
     if (!token) {
+      const elapsed = Date.now() - start;
+      if (elapsed < 1500) await new Promise(r => setTimeout(r, 1500 - elapsed));
       setAuthLoading(false);
+      setIsInitializing(false);
       return;
     }
     try {
@@ -165,7 +174,10 @@ export function useAppState() {
     } catch (e) {
       console.error("Auth check failed", e);
     } finally {
+      const elapsed = Date.now() - start;
+      if (elapsed < 2000) await new Promise(r => setTimeout(r, 2000 - elapsed));
       setAuthLoading(false);
+      setIsInitializing(false);
     }
   }, []);
 
@@ -218,6 +230,7 @@ export function useAppState() {
     isAuthenticated,
     setIsAuthenticated,
     authLoading,
+    isInitializing,
     login,
     register,
     logout,

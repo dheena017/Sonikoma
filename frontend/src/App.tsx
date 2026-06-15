@@ -123,6 +123,7 @@ export default function App() {
     user,
     isAuthenticated,
     authLoading,
+    isInitializing,
     login,
     register,
     logout,
@@ -208,6 +209,7 @@ export default function App() {
     frameRate,
     isAuthenticated,
     authLoading,
+    isInitializing,
   });
 
   const { shortcuts, setShortcuts } = useGlobalShortcuts({
@@ -259,7 +261,7 @@ export default function App() {
   const isForgotPasswordPath = currentPath === "/forgot-password";
 
   // Auth Guard
-  if (authLoading) {
+  if (isInitializing || authLoading) {
     return <LoadingPage status="Authenticating Session..." />;
   }
 
