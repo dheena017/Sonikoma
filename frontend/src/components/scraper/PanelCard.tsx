@@ -18,9 +18,9 @@ interface PanelCardProps
     | "setConsoleLogs"
     | "mergingIndices"
     | "handleMergeWithNext"
+    | "scrapedImages"
     | "bubbleCroppingImgUrl"
   > {
-  scrapedImagesCount: number;
   imgUrl: string;
   idx: number;
   isSelected: boolean;
@@ -41,7 +41,7 @@ function PanelCard({
   isBatchCropping,
   croppingImgUrl,
   bubbleCroppingImgUrl,
-  scrapedImagesCount,
+  scrapedImages,
   mergingIndices,
   handleMergeWithNext,
   setEditingImageIdx,
@@ -194,7 +194,7 @@ function PanelCard({
       <PanelCardControls
         imgUrl={imgUrl}
         idx={idx}
-        scrapedImagesCount={scrapedImagesCount}
+        scrapedImages={scrapedImages}
         mergingIndices={mergingIndices}
         handleMergeWithNext={handleMergeWithNext}
         addPanelsToStoryboard={addPanelsToStoryboard}

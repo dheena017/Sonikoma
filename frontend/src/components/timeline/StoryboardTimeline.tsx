@@ -5,7 +5,7 @@ import { useStoryboardOperations } from "../../hooks/useStoryboardOperations";
 import TimelineEmptyState from "./TimelineEmptyState";
 import TimelineHeader from "./TimelineHeader";
 import TimelineBulkOps from "./TimelineBulkOps";
-import { TimelineCard } from "./TimelineCard";
+import TimelineCard from "./TimelineCard";
 import TimelineSelectionBar from "./TimelineSelectionBar";
 
 interface StoryboardTimelineProps {
@@ -141,40 +141,6 @@ export default function StoryboardTimeline({
 
   const selectedCount = selectedPanelIds.size;
 
-  // ── Virtualization Logic ──────────────────────────────────────────────────
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const [visibleRange, setVisibleRange] = useState({ start: 0, end: 20 });
-  const CARD_WIDTH = 224 + 16; // Approximately w-56 (224px) + gap-4
-
-  React.useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      const scrollLeft = container.scrollLeft;
-      const containerWidth = container.clientWidth;
-
-      const start = Math.floor(scrollLeft / CARD_WIDTH);
-      const end = Math.ceil((scrollLeft + containerWidth) / CARD_WIDTH) + 2;
-
-      setVisibleRange(prev => {
-        if (Math.abs(prev.start - start) > 1 || Math.abs(prev.end - end) > 1 || end > prev.end) {
-           return { start: Math.max(0, start - 4), end: Math.min(panels.length, end + 4) };
-        }
-        return prev;
-      });
-    };
-
-    container.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    window.addEventListener("resize", handleScroll);
-
-    return () => {
-      container.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
-    };
-  }, [panels.length]);
-
   return (
     <div
       id="panels_timeline_section"
@@ -208,59 +174,34 @@ export default function StoryboardTimeline({
         />
       )}
 
-      {/* Storyboard grid (Virtualised) */}
-      <div
-        ref={containerRef}
-        className={`flex gap-3 sm:gap-4 overflow-x-auto scrollbar-thin relative min-h-[380px] ${
-          selectedCount > 0 ? "pb-2" : "pb-4"
-        }`}
-      >
-        {/* Spacer to maintain scroll width */}
-        <div
-          style={{
-            width: `${panels.length * CARD_WIDTH}px`,
-            height: '1px',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            pointerEvents: 'none'
-          }}
-        />
+      {/* Storyboard grid */}
+      <div className={`flex gap-3 sm:gap-4 overflow-x-auto scrollbar-thin ${
+        selectedCount > 0 ? "pb-2" : "pb-4"
+      }`}>
 
-        {panels.slice(visibleRange.start, visibleRange.end + 1).map((panel, sliceIdx) => {
-          const idx = visibleRange.start + sliceIdx;
-          return (
-            <div
-              key={panel.id}
-              style={{
-                position: 'absolute',
-                left: `${idx * CARD_WIDTH}px`,
-                width: 224,
-              }}
-            >
-              <TimelineCard
-                panel={panel}
-                idx={idx}
-                currentPanelIndex={currentPanelIndex}
-                activePreviewTab={activePreviewTab}
-                setCurrentPanelIndex={setCurrentPanelIndex}
-                setActivePreviewTab={setActivePreviewTab}
-                setPlaybackTime={setPlaybackTime}
-                analyzingPanelId={analyzingPanelId}
-                handleShiftPanel={handleShiftPanel}
-                panelsLength={panels.length}
-                handleModifySpeechText={handleModifySpeechText}
-                handleModifyMotion={handleModifyMotion}
-                handleModifyDuration={handleModifyDuration}
-                handleModifySFX={handleModifySFX}
-                handleModifyVisualDescription={handleModifyVisualDescription}
-                handleAnalyzePanel={handleAnalyzePanel}
-                isSelected={selectedPanelIds.has(panel.id)}
-                onToggleSelect={() => togglePanelSelection(panel.id)}
-              />
-            </div>
-          );
-        })}
+        {panels.map((panel, idx) => (
+          <TimelineCard
+            key={panel.id}
+            panel={panel}
+            idx={idx}
+            currentPanelIndex={currentPanelIndex}
+            activePreviewTab={activePreviewTab}
+            setCurrentPanelIndex={setCurrentPanelIndex}
+            setActivePreviewTab={setActivePreviewTab}
+            setPlaybackTime={setPlaybackTime}
+            analyzingPanelId={analyzingPanelId}
+            handleShiftPanel={handleShiftPanel}
+            panelsLength={panels.length}
+            handleModifySpeechText={handleModifySpeechText}
+            handleModifyMotion={handleModifyMotion}
+            handleModifyDuration={handleModifyDuration}
+            handleModifySFX={handleModifySFX}
+            handleModifyVisualDescription={handleModifyVisualDescription}
+            handleAnalyzePanel={handleAnalyzePanel}
+            isSelected={selectedPanelIds.has(panel.id)}
+            onToggleSelect={() => togglePanelSelection(panel.id)}
+          />
+        ))}
       </div>
 
       {/* Fixed floating selection bar — stays at bottom of screen when scrolling */}

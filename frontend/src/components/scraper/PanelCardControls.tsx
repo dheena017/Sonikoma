@@ -4,22 +4,22 @@ import { Loader2, PlusCircle, Link2 } from "lucide-react";
 interface PanelCardControlsProps {
   imgUrl: string;
   idx: number;
-  scrapedImagesCount: number;
+  scrapedImages: string[];
   mergingIndices: number[];
   handleMergeWithNext: (index: number) => Promise<void>;
-  addPanelsToStoryboard: (urls: string[], _currentScrapedList?: string[], shouldScroll?: boolean) => void;
+  addPanelsToStoryboard: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
 }
 
-export const PanelCardControls = React.memo(function PanelCardControls({
+export function PanelCardControls({
   imgUrl,
   idx,
-  scrapedImagesCount,
+  scrapedImages,
   mergingIndices,
   handleMergeWithNext,
   addPanelsToStoryboard,
 }: PanelCardControlsProps) {
   const isMerging = mergingIndices.includes(idx);
-  const isLast = idx >= scrapedImagesCount - 1;
+  const isLast = idx >= scrapedImages.length - 1;
 
   return (
     <div className="space-y-1.5" onClick={(e) => e.stopPropagation()}>
@@ -60,4 +60,4 @@ export const PanelCardControls = React.memo(function PanelCardControls({
       )}
     </div>
   );
-});
+}
