@@ -60,12 +60,22 @@ async def scrape_images(body: ScrapeImagesRequest):
         # Automatically stitch multiple images into a single full strip
         if len(proxied_urls) > 1:
             logger.info(f"[Scraper] Consolidating {len(proxied_urls)} panels into a single unified strip asset...")
+            t_stitch_start = time.time()
             try:
-                # 1. Resolve all images to buffers
+                # 1. Resolve all images to buffers in parallel for speed
+                logger.info(f"[Scraper] Fetching {len(proxied_urls)} image buffers in parallel...")
+                fetch_tasks = [img_utils.resolve_image_to_buffer(url) for url in proxied_urls]
+                resolved_results = await asyncio.gather(*fetch_tasks, return_exceptions=True)
+
                 resolved_buffers = []
-                for url in proxied_urls:
-                    res = await img_utils.resolve_image_to_buffer(url)
+                for idx, res in enumerate(resolved_results):
+                    if isinstance(res, Exception):
+                        logger.warning(f"[Scraper] Failed to resolve image {idx}: {res}")
+                        continue
                     resolved_buffers.append(res["data"])
+
+                if not resolved_buffers:
+                    raise ValueError("Failed to resolve any image buffers for stitching")
 
                 # 2. Stitch them together
                 stitched_bytes = await asyncio.to_thread(
@@ -88,7 +98,8 @@ async def scrape_images(body: ScrapeImagesRequest):
                 edit_history.set(stitched_url, proxied_urls[0])
 
                 final_images = [stitched_url]
-                logger.info(f"[Scraper] Consolidated strip created successfully: {stitched_url}")
+                elapsed = round((time.time() - t_stitch_start) * 1000, 2)
+                logger.info(f"[Scraper] Consolidated strip created successfully in {elapsed}ms: {stitched_url}")
             except Exception as stitch_err:
                 logger.warning(f"[Scraper] Automatic stitching failed, falling back to separate images: {stitch_err}")
 
