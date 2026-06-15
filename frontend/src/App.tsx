@@ -28,6 +28,7 @@ import ThumbnailStudioPage from "./components/thumbnails/ThumbnailStudioPage.js"
 import EngagementPage from "./components/engagement/EngagementPage.js";
 import VoiceStudioPage from "./components/voice/VoiceStudioPage.js";
 import CTRAnalyticsPage from "./components/analytics/CTRAnalyticsPage.js";
+import NotificationsPage from "./components/NotificationsPage.js";
 
 export default function App() {
 
@@ -161,6 +162,10 @@ export default function App() {
     handleAutoCropSelected,
     totalCalculatedDuration,
     scrapeImages,
+    clearAllNotifications,
+    markAllNotificationsAsRead,
+    markNotificationAsRead,
+    deleteNotification,
   } = appLogic;
 
   const {
@@ -234,6 +239,7 @@ export default function App() {
   const isEngagementPath = currentPath === "/ai-engagement";
   const isVoicePath = currentPath === "/ai-voice";
   const isAnalyticsPath = currentPath === "/ai-analytics";
+  const isNotificationsPath = currentPath === "/notifications";
 
   return (
     <div id="app_root" className="min-h-screen bg-[#070709] text-neutral-100 flex flex-col lg:flex-row selection:bg-purple-600 selection:text-white relative">
@@ -284,6 +290,11 @@ export default function App() {
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
             isSidebarOpen={isSidebarOpen}
             backendStatus={backendStatus}
+            notifications={notifications}
+            markNotificationAsRead={markNotificationAsRead}
+            markAllNotificationsAsRead={markAllNotificationsAsRead}
+            deleteNotification={deleteNotification}
+            clearAllNotifications={clearAllNotifications}
           />
 
       {/* PAGE 1: DASHBOARD */}
@@ -516,8 +527,20 @@ export default function App() {
         />
       )}
 
+      {/* PAGE 18: NOTIFICATION HUB */}
+      {isNotificationsPath && (
+        <NotificationsPage
+          notifications={notifications}
+          onNavigateHome={() => navigateTo("/")}
+          onMarkAsRead={markNotificationAsRead}
+          onMarkAllAsRead={markAllNotificationsAsRead}
+          onDelete={deleteNotification}
+          onClearAll={clearAllNotifications}
+        />
+      )}
+
       {/* PAGE 404 (FALLBACK) */}
-      {!isDashboardPath && !isSettingsPath && !isAutoCropPath && !isBubbleCleanerPath && !isEditorPath && !isLogsPath && !isStatusPath && !isShortcutsPath && !isOptimizerPath && !isPanelAssistantPath && !isCharacterPath && !isTranslationPath && !isAudioLabPath && !isThumbnailPath && !isEngagementPath && !isVoicePath && !isAnalyticsPath && (
+      {!isDashboardPath && !isSettingsPath && !isAutoCropPath && !isBubbleCleanerPath && !isEditorPath && !isLogsPath && !isStatusPath && !isShortcutsPath && !isOptimizerPath && !isPanelAssistantPath && !isCharacterPath && !isTranslationPath && !isAudioLabPath && !isThumbnailPath && !isEngagementPath && !isVoicePath && !isAnalyticsPath && !isNotificationsPath && (
         <PageNotFound onNavigateHome={() => navigateTo("/")} />
       )}
 

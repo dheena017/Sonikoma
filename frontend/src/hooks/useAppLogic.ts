@@ -380,5 +380,9 @@ export function useAppLogic() {
     batchProgress,
     croppingImgUrl,
     scrapeImages,
+    clearAllNotifications: state.clearAllNotifications,
+    markAllNotificationsAsRead: state.markAllNotificationsAsRead,
+    markNotificationAsRead: state.markNotificationAsRead,
+    deleteNotification: state.deleteNotification,
   };
 }
