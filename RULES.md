@@ -208,6 +208,11 @@ All HTTP API endpoints are mounted via sub-routers. The server runs on **port 51
 
 | Endpoint | Method | Description |
 |---|---|---|
+| `/api/auth/register` | POST | Register a new user account |
+| `/api/auth/login` | POST | Login and receive a JWT token |
+| `/api/auth/google` | POST | Google ID token authentication |
+| `/api/auth/forgot-password` | POST | Mock forgot password flow |
+| `/api/auth/me` | GET | Get current authenticated user info |
 | `/api/health` | GET | Liveness probe / health check |
 | `/api/metrics` | GET | Live server + cache stats (memory, requests, rate limits) |
 | `/api/system-logs` | GET | JSON log polling fallback |
@@ -448,6 +453,7 @@ The project uses **SQLite** via `better-sqlite3`.
 |---|---|
 | `projects` | All processed webtoon projects |
 | `panels` | Every panel's image, text, filters, and settings |
+| `users` | Registered user accounts and profiles |
 | `scrape_sessions` | Cached scrape results per URL |
 | `edit_history` | Undo/redo history (persists across restarts) |
 
@@ -589,6 +595,7 @@ At the **end of every conversation**, append one row to the Session Changelog ta
 
 > Auto-updated by AI at the end of each conversation. Newest entries at the top.
 
+| 2026-06-15 | Implemented Authentication system, Landing page, Profile page, and Loading splash screen with Google Auth integration | `frontend/src/**/*`, `backend/python/**/*`, `backend/database/**/*` |
 | 2026-06-12 | Completed full-stack logging and notification overhaul, covering backend routes/services and all major frontend hooks/components | `frontend/src/**/*`, `backend/python/**/*` |
 | 2026-06-11 | Filtered system-logs polling spam; added regex-based status/method coloring for Python terminal and custom Vite request logger middleware for dev server terminal | `backend/python/main.py`, `frontend/vite.config.ts`, `frontend/src/components/terminal/TerminalLogsOutput.tsx` |
 | 2026-06-08 | Fixed critical paths, routes, insecure shell calls, implemented video pipeline, ported FastAPI logic, standardized cache | `backend/routes/*`, `backend/python/services/*`, `frontend/src/hooks/*`, `backend/utils/*` |
