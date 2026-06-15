@@ -58,6 +58,28 @@ async def scrape_images(body: ScrapeImagesRequest):
 
         final_images = proxied_urls
 
+        # Check cache for an existing stitched strip for this exact URL
+        cache_key = f"stitched_full_{normalized_url}"
+        if not body.bypass_cache:
+            cached_url = stitched_cache.get(cache_key)
+            if cached_url and isinstance(cached_url, str):
+                logger.info(f"[Scraper] Cache HIT: Returning existing stitched strip for {normalized_url}")
+                return {
+                    "success": True,
+                    "title": parsed["title"],
+                    "genre": parsed["genre"],
+                    "episode": parsed["episode"],
+                    "total_images": 1,
+                    "images": [cached_url],
+                    "raw_images": proxied_urls,
+                    "panels": [],
+                    "debug": {
+                        "normalized_url": normalized_url,
+                        "source": body.source,
+                        "cache": "HIT"
+                    }
+                }
+
         # Automatically stitch multiple images into a single full strip
         if len(proxied_urls) > 1:
             logger.info(f"[Scraper] Consolidating {len(proxied_urls)} panels into a single unified strip asset...")
@@ -66,7 +88,7 @@ async def scrape_images(body: ScrapeImagesRequest):
                 # 1. Resolve all images to buffers in parallel for speed
                 logger.info(f"[Scraper] Fetching {len(proxied_urls)} image buffers in parallel using shared HTTP client...")
 
-                async with httpx.AsyncClient(follow_redirects=True, timeout=60.0, limits=httpx.Limits(max_connections=50)) as client:
+                async with httpx.AsyncClient(follow_redirects=True, timeout=60.0, limits=httpx.Limits(max_connections=100)) as client:
                     fetch_tasks = [img_utils.resolve_image_to_buffer(url, client=client) for url in proxied_urls]
                     resolved_results = await asyncio.gather(*fetch_tasks, return_exceptions=True)
 
@@ -98,6 +120,8 @@ async def scrape_images(body: ScrapeImagesRequest):
                 stitched_url = f"/api/merge-images/cached/{unique_id}"
 
                 stitched_cache.set(unique_id, {"data": stitched_bytes, "content_type": "image/png"})
+                # Cache the mapping from the normalized URL to the cached asset URL
+                stitched_cache.set(cache_key, stitched_url)
                 edit_history.set(stitched_url, proxied_urls[0])
 
                 final_images = [stitched_url]

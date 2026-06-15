@@ -362,11 +362,11 @@ def stitch_images_together(
     if layout == "horizontal":
         canonical_h = imgs[0].size[1]
         for img in imgs:
-            if scale_to_fit:
+            w, h = img.size
+            if scale_to_fit and h != canonical_h:
                 # scale height
-                w, h = img.size
                 new_w = int(round(w * (canonical_h / h)))
-                img_res = img.resize((new_w, canonical_h), Image.Resampling.LANCZOS)
+                img_res = img.resize((new_w, canonical_h), Image.Resampling.BICUBIC)
                 prepared_images.append(img_res)
             else:
                 prepared_images.append(img)
@@ -374,11 +374,11 @@ def stitch_images_together(
         # vertical
         canonical_w = imgs[0].size[0]
         for img in imgs:
-            if scale_to_fit:
+            w, h = img.size
+            if scale_to_fit and w != canonical_w:
                 # scale width
-                w, h = img.size
                 new_h = int(round(h * (canonical_w / w)))
-                img_res = img.resize((canonical_w, new_h), Image.Resampling.LANCZOS)
+                img_res = img.resize((canonical_w, new_h), Image.Resampling.BICUBIC)
                 prepared_images.append(img_res)
             else:
                 prepared_images.append(img)
