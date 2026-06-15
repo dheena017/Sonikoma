@@ -6,12 +6,16 @@ Webtoon scraper and Storyboard generation routes.
 """
 
 import logging
+import asyncio
+import time
 from typing import List, Optional, Any, Dict
 from fastapi import APIRouter, HTTPException, Body
 from pydantic import BaseModel, Field
 
 from utils.url_utils import extract_webtoon_url, parse_webtoon_url
 from utils.id_utils import generate_project_id
+from utils.cache import stitched_cache, edit_history
+import utils.image_utils as img_utils
 from config.clients import DYNAMIC_BACKGROUND_VIDEOS
 from services.scraper import scrape_images_from_url
 from services.storyboard_ai import generate_dynamic_panels
@@ -49,20 +53,58 @@ async def scrape_images(body: ScrapeImagesRequest):
         logger.info(f"[Scraper] Scrape request received - source: {body.source or 'unknown'}, url: {normalized_url}")
         
         proxied_urls = await scrape_images_from_url(normalized_url, body.source, bypass_cache=body.bypass_cache)
-        logger.info(f"[Scraper] Successfully extracted {len(proxied_urls)} image URLs.")
+        logger.info(f"[Scraper] Successfully extracted {len(proxied_urls)} raw image URLs.")
+
+        final_images = proxied_urls
+
+        # Automatically stitch multiple images into a single full strip
+        if len(proxied_urls) > 1:
+            logger.info(f"[Scraper] Consolidating {len(proxied_urls)} panels into a single unified strip asset...")
+            try:
+                # 1. Resolve all images to buffers
+                resolved_buffers = []
+                for url in proxied_urls:
+                    res = await img_utils.resolve_image_to_buffer(url)
+                    resolved_buffers.append(res["data"])
+
+                # 2. Stitch them together
+                stitched_bytes = await asyncio.to_thread(
+                    img_utils.stitch_images_together,
+                    image_buffers=resolved_buffers,
+                    layout="vertical",
+                    spacing=0,
+                    spacing_color="white",
+                    scale_to_fit=True,
+                    align_mode="center",
+                    padding=0
+                )
+
+                # 3. Cache the result
+                unique_id = f"stitched_{int(time.time() * 1000)}_full"
+                # Use /api/merge-images/cached/ to match image_routes.py and avoid 404s
+                stitched_url = f"/api/merge-images/cached/{unique_id}"
+
+                stitched_cache.set(unique_id, {"data": stitched_bytes, "content_type": "image/png"})
+                edit_history.set(stitched_url, proxied_urls[0])
+
+                final_images = [stitched_url]
+                logger.info(f"[Scraper] Consolidated strip created successfully: {stitched_url}")
+            except Exception as stitch_err:
+                logger.warning(f"[Scraper] Automatic stitching failed, falling back to separate images: {stitch_err}")
 
         return {
             "success": True,
             "title": parsed["title"],
             "genre": parsed["genre"],
             "episode": parsed["episode"],
-            "total_images": len(proxied_urls),
-            "images": proxied_urls,
+            "total_images": len(final_images),
+            "images": final_images,
             "raw_images": proxied_urls,
             "panels": [],
             "debug": {
                 "normalized_url": normalized_url,
                 "source": body.source,
+                "original_count": len(proxied_urls)
             }
         }
     except Exception as e:

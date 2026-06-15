@@ -15,7 +15,7 @@ import httpx
 import numpy as np
 import logging
 from PIL import Image, ImageChops, ImageOps, ImageDraw, ImageFont, ImageEnhance, ImageFilter
-from typing import Dict, Any, Optional, List, Tuple
+from typing import Dict, Any, Optional, List, Tuple, Literal
 from urllib.parse import urlparse, parse_qs
 
 # Import stitched_cache safely (we resolve circular import by keeping it clean)
@@ -326,38 +326,121 @@ def compute_brightness(image_bytes: bytes) -> int:
         return 128
 
 
+def stitch_images_together(
+    image_buffers: List[bytes],
+    layout: Literal["vertical", "horizontal"] = "vertical",
+    spacing: int = 0,
+    spacing_color: str = "white",
+    scale_to_fit: bool = True,
+    align_mode: Literal["center", "start", "end"] = "center",
+    padding: int = 0
+) -> bytes:
+    """Consolidates multiple image buffers into a single stitched canvas."""
+    if not image_buffers:
+        raise ValueError("No image buffers provided for stitching")
+
+    if len(image_buffers) == 1:
+        return image_buffers[0]
+
+    imgs = [Image.open(io.BytesIO(b)) for b in image_buffers]
+
+    bg_color = (255, 255, 255)
+    if spacing_color == "black":
+        bg_color = (0, 0, 0)
+    elif spacing_color == "transparent":
+        bg_color = (0, 0, 0, 0)
+
+    gap = spacing
+    pad = padding
+
+    # First pass resizing
+    prepared_images = []
+    if layout == "horizontal":
+        canonical_h = imgs[0].size[1]
+        for img in imgs:
+            if scale_to_fit:
+                # scale height
+                w, h = img.size
+                new_w = int(round(w * (canonical_h / h)))
+                img_res = img.resize((new_w, canonical_h), Image.Resampling.LANCZOS)
+                prepared_images.append(img_res)
+            else:
+                prepared_images.append(img)
+    else:
+        # vertical
+        canonical_w = imgs[0].size[0]
+        for img in imgs:
+            if scale_to_fit:
+                # scale width
+                w, h = img.size
+                new_h = int(round(h * (canonical_w / w)))
+                img_res = img.resize((canonical_w, new_h), Image.Resampling.LANCZOS)
+                prepared_images.append(img_res)
+            else:
+                prepared_images.append(img)
+
+    # Calculate coordinates
+    widths = [img.size[0] for img in prepared_images]
+    heights = [img.size[1] for img in prepared_images]
+
+    total_w = 0
+    total_h = 0
+
+    if layout == "horizontal":
+        max_h = max(heights)
+        total_h = max_h + pad * 2
+        total_w = sum(widths) + gap * (len(prepared_images) - 1) + pad * 2
+
+        canvas = Image.new("RGBA" if spacing_color == "transparent" else "RGB", (total_w, total_h), bg_color)
+        offset_x = pad
+        for img in prepared_images:
+            w, h = img.size
+            offset_y = pad
+            if align_mode == "center":
+                offset_y = pad + (max_h - h) // 2
+            elif align_mode == "end":
+                offset_y = pad + (max_h - h)
+            canvas.paste(img, (offset_x, offset_y))
+            offset_x += w + gap
+    else:
+        # vertical
+        max_w = max(widths)
+        total_w = max_w + pad * 2
+        total_h = sum(heights) + gap * (len(prepared_images) - 1) + pad * 2
+
+        canvas = Image.new("RGBA" if spacing_color == "transparent" else "RGB", (total_w, total_h), bg_color)
+        offset_y = pad
+        for img in prepared_images:
+            w, h = img.size
+            offset_x = pad
+            if align_mode == "center":
+                offset_x = pad + (max_w - w) // 2
+            elif align_mode == "end":
+                offset_x = pad + (max_w - w)
+            canvas.paste(img, (offset_x, offset_y))
+            offset_y += h + gap
+
+    out = io.BytesIO()
+    canvas.save(out, format="PNG")
+    return out.getvalue()
+
+
 def stack_vertical(buffers: List[bytes], gap: int = 0, background: str = '#ffffff') -> Dict[str, Any]:
     """Vertically merge multiple image buffers into a unified tall canvas."""
     if not buffers:
         raise ValueError('No buffers provided to stack_vertical')
     if len(buffers) == 1:
         return {"data": buffers[0], "content_type": "image/jpeg"}
-
-    imgs = [Image.open(io.BytesIO(b)) for b in buffers]
-    widths = [img.size[0] for img in imgs]
-    heights = [img.size[1] for img in imgs]
     
-    max_w = max(widths)
-    total_h = sum(heights) + gap * (len(imgs) - 1)
-
-    # background hex to RGB tuple
-    hex_clean = background.lstrip('#')
-    if len(hex_clean) == 3:
-        hex_clean = ''.join(c*2 for c in hex_clean)
-    bg_color = tuple(int(hex_clean[i:i+2], 16) for i in (0, 2, 4))
-
-    canvas = Image.new('RGB', (max_w, total_h), bg_color)
-    
-    y_offset = 0
-    for img in imgs:
-        # Align center
-        x_offset = (max_w - img.size[0]) // 2
-        canvas.paste(img, (x_offset, y_offset))
-        y_offset += img.size[1] + gap
-
-    out = io.BytesIO()
-    canvas.save(out, format='JPEG', quality=90)
-    return {"data": out.getvalue(), "content_type": "image/jpeg"}
+    # Re-use our new robust stitcher
+    res_bytes = stitch_images_together(
+        buffers,
+        layout="vertical",
+        spacing=gap,
+        spacing_color="black" if background.lower() in ("#000", "#000000", "black") else "white",
+        scale_to_fit=True
+    )
+    return {"data": res_bytes, "content_type": "image/png"}
 
 
 def apply_filters(

@@ -226,90 +226,18 @@ async def merge_images(body: StitchImagesRequest):
 
         # Resolve image buffers
         resolved = [await img_utils.resolve_image_to_buffer(u) for u in urls]
-        def merge_sync():
-            imgs = [Image.open(io.BytesIO(r["data"])) for r in resolved]
 
-            bg_color = (255, 255, 255)
-            if body.spacingColor == "black":
-                bg_color = (0, 0, 0)
-            elif body.spacingColor == "transparent":
-                bg_color = (0, 0, 0, 0)
-
-            gap = body.spacing
-            pad = body.padding
-
-            # First pass resizing
-            prepared_images = []
-            if body.layout == "horizontal":
-                canonical_h = imgs[0].size[1]
-                for img in imgs:
-                    if body.scaleToFit:
-                        # scale height
-                        w, h = img.size
-                        new_w = int(round(w * (canonical_h / h)))
-                        img_res = img.resize((new_w, canonical_h), Image.Resampling.LANCZOS)
-                        prepared_images.append(img_res)
-                    else:
-                        prepared_images.append(img)
-            else:
-                # vertical
-                canonical_w = imgs[0].size[0]
-                for img in imgs:
-                    if body.scaleToFit:
-                        # scale width
-                        w, h = img.size
-                        new_h = int(round(h * (canonical_w / w)))
-                        img_res = img.resize((canonical_w, new_h), Image.Resampling.LANCZOS)
-                        prepared_images.append(img_res)
-                    else:
-                        prepared_images.append(img)
-
-            # Calculate coordinates
-            widths = [img.size[0] for img in prepared_images]
-            heights = [img.size[1] for img in prepared_images]
-
-            total_w = 0
-            total_h = 0
-
-            if body.layout == "horizontal":
-                max_h = max(heights)
-                total_h = max_h + pad * 2
-                total_w = sum(widths) + gap * (len(prepared_images) - 1) + pad * 2
-                
-                canvas = Image.new("RGBA" if body.spacingColor == "transparent" else "RGB", (total_w, total_h), bg_color)
-                offset_x = pad
-                for img in prepared_images:
-                    w, h = img.size
-                    offset_y = pad
-                    if body.alignMode == "center":
-                        offset_y = pad + (max_h - h) // 2
-                    elif body.alignMode == "end":
-                        offset_y = pad + (max_h - h)
-                    canvas.paste(img, (offset_x, offset_y))
-                    offset_x += w + gap
-            else:
-                # vertical
-                max_w = max(widths)
-                total_w = max_w + pad * 2
-                total_h = sum(heights) + gap * (len(prepared_images) - 1) + pad * 2
-                
-                canvas = Image.new("RGBA" if body.spacingColor == "transparent" else "RGB", (total_w, total_h), bg_color)
-                offset_y = pad
-                for img in prepared_images:
-                    w, h = img.size
-                    offset_x = pad
-                    if body.alignMode == "center":
-                        offset_x = pad + (max_w - w) // 2
-                    elif body.alignMode == "end":
-                        offset_x = pad + (max_w - w)
-                    canvas.paste(img, (offset_x, offset_y))
-                    offset_y += h + gap
-
-            out = io.BytesIO()
-            canvas.save(out, format="PNG")
-            return out.getvalue()
-
-        merged_bytes = await asyncio.to_thread(merge_sync)
+        # Use our centralized stitching utility
+        merged_bytes = await asyncio.to_thread(
+            img_utils.stitch_images_together,
+            image_buffers=[r["data"] for r in resolved],
+            layout=body.layout,
+            spacing=body.spacing,
+            spacing_color=body.spacingColor,
+            scale_to_fit=body.scaleToFit,
+            align_mode=body.alignMode,
+            padding=body.padding
+        )
 
         unique_id = f"merged_{int(time.time() * 1000)}_merged"
         new_url = f"/api/merge-images/cached/{unique_id}"
