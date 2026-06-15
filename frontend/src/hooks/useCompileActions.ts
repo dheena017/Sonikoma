@@ -13,6 +13,7 @@ interface UseCompileActionsProps {
   setConsoleLogs?: React.Dispatch<React.SetStateAction<string[]>>;
   voiceActor?: string;
   musicTheme?: string;
+  narrationStyle?: string;
 }
 
 export function useCompileActions({
@@ -27,6 +28,7 @@ export function useCompileActions({
   setConsoleLogs,
   voiceActor,
   musicTheme,
+  narrationStyle = "long",
 }: UseCompileActionsProps) {
   const activeFetch = fetchWithInterceptor || fetch;
   const [analyzingPanelId, setAnalyzingPanelId] = useState<number | null>(null);
@@ -101,7 +103,7 @@ export function useCompileActions({
       const res = await activeFetch("/api/analyze-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: imageUrl, model: activeModel })
+        body: JSON.stringify({ url: imageUrl, model: activeModel, narrationStyle })
       });
       if (!res.ok) throw new Error("Image analysis failed");
       const data = await res.json();

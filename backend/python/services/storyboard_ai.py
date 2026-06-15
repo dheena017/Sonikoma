@@ -66,7 +66,8 @@ async def generate_dynamic_panels(
     genre: str,
     episode: str,
     img_urls: List[str],
-    model: str
+    model: str,
+    narration_style: str = "long"
 ) -> List[Dict[str, Any]]:
     """
     Generates narration script and storyboard camera moves via AI Markdown Skills.
@@ -76,12 +77,19 @@ async def generate_dynamic_panels(
         logger.warning("[Storyboard AI] No image URLs provided for storyboard generation.")
         return []
 
+    # Map narration style to a length hint for the AI skill
+    if narration_style == "short":
+        narrative_length_hint = "An engaging, atmospheric description (under 20 words)."
+    else:
+        narrative_length_hint = "An engaging, atmospheric description, dialogue, or narrative storytelling (35 to 70 words, detailed for YouTube story narrations)."
+
     # Construct the prompt arguments
     prompt_args = {
         "title": title,
         "genre": genre,
         "episode": episode,
-        "active_slices_count": active_slices_count
+        "active_slices_count": active_slices_count,
+        "narrative_length_hint": narrative_length_hint
     }
 
     # 1. HuggingFace Fallback check

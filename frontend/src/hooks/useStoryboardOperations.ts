@@ -17,6 +17,7 @@ interface UseStoryboardOperationsProps {
   setConsoleLogs?: React.Dispatch<React.SetStateAction<string[]>>;
   voiceActor?: string;
   musicTheme?: string;
+  narrationStyle?: string;
 }
 
 export function useStoryboardOperations({
@@ -32,6 +33,7 @@ export function useStoryboardOperations({
   setConsoleLogs,
   voiceActor,
   musicTheme,
+  narrationStyle = "long",
 }: UseStoryboardOperationsProps) {
   
   const {
@@ -79,6 +81,7 @@ export function useStoryboardOperations({
     setConsoleLogs,
     voiceActor,
     musicTheme,
+    narrationStyle,
   });
 
   const handleClearTimeline = () => {

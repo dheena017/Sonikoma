@@ -25,6 +25,7 @@ interface StoryboardTimelineProps {
   setConsoleLogs?: React.Dispatch<React.SetStateAction<string[]>>;
   voiceActor?: string;
   musicTheme?: string;
+  narrationStyle?: string;
 }
 
 export default function StoryboardTimeline({
@@ -44,6 +45,7 @@ export default function StoryboardTimeline({
   setConsoleLogs,
   voiceActor,
   musicTheme,
+  narrationStyle = "long",
 }: StoryboardTimelineProps) {
 
   // ── Panel selection state ────────────────────────────────────────────────
@@ -133,6 +135,7 @@ export default function StoryboardTimeline({
     setConsoleLogs,
     voiceActor,
     musicTheme,
+    narrationStyle,
   });
 
   if (panels.length === 0) {

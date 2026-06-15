@@ -79,6 +79,7 @@ export function usePipelineActions({
     setActivePreviewTab,
     setVideoUrl,
     isScraping,
+    narrationStyle,
   } = state;
 
   const {
@@ -93,6 +94,7 @@ export function usePipelineActions({
     addNotification,
     fetchWithInterceptor,
     setActivePreviewTab,
+    narrationStyle,
   });
 
   const {
@@ -115,6 +117,7 @@ export function usePipelineActions({
     musicTheme,
     setVideoUrl,
     setActivePreviewTab,
+    narrationStyle,
   });
 
   const {

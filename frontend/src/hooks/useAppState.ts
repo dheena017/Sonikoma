@@ -71,6 +71,7 @@ export function useAppState() {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [isSavingEdit, setIsSavingEdit] = useState<boolean>(false);
   const [isScraping, setIsScraping] = useState<boolean>(false);
+  const [narrationStyle, setNarrationStyle] = useState<string>(() => localStorage.getItem('ai_comic_narration_style') || "long");
 
   // ── Callbacks & effects AFTER all useState declarations ──────────────────
 
@@ -108,7 +109,8 @@ export function useAppState() {
     localStorage.setItem('ai_comic_fps', frameRate.toString());
     localStorage.setItem('ai_comic_volume', volume.toString());
     localStorage.setItem('ai_comic_muted', isMuted.toString());
-  }, [targetUrl, voiceActor, musicTheme, aspectRatio, selectedModel, selectedSource, frameRate, volume, isMuted]);
+    localStorage.setItem('ai_comic_narration_style', narrationStyle);
+  }, [targetUrl, voiceActor, musicTheme, aspectRatio, selectedModel, selectedSource, frameRate, volume, isMuted, narrationStyle]);
 
   return {
     panels,
@@ -223,5 +225,7 @@ export function useAppState() {
     setIsSavingEdit,
     isScraping,
     setIsScraping,
+    narrationStyle,
+    setNarrationStyle,
   };
 }

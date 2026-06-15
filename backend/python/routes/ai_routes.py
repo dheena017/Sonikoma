@@ -46,10 +46,12 @@ DEFAULT_ANALYSIS = {
 class AnalyzeImageRequest(BaseModel):
     url: str
     model: Optional[str] = "gemini-2.5-flash"
+    narrationStyle: Optional[str] = "long"  # 'long' = detailed YouTube recap, 'short' = quick subtitles
 
 class AnalyzeBatchRequest(BaseModel):
     urls: List[str]
     model: Optional[str] = "gemini-2.5-flash"
+    narrationStyle: Optional[str] = "long"  # 'long' = detailed YouTube recap, 'short' = quick subtitles
 
 class SmartCropRequest(BaseModel):
     url: str
@@ -331,10 +333,17 @@ async def analyze_image(body: AnalyzeImageRequest):
             elif brightness > 200:
                 tone_hint = " The panel appears bright and vibrant — favour action or triumphant SFX."
 
+        # Map narration style to a hint for the AI skill
+        narration_style = (body.narrationStyle or "long").lower()
+        if narration_style == "short":
+            narrative_length_hint = "max 25 words, impactful and dramatic for quick subtitles."
+        else:
+            narrative_length_hint = "30-65 words, highly engaging and detailed for YouTube story narration, describing what the characters do, think, or speak."
+
         # Execute using panel_analysis skill
         skill = registry.get("panel_analysis")
-        logger.info(f"[Model] Executing 'panel_analysis' skill using {target_model}...")
-        raw_text = await skill.execute(model=target_model, image_bytes=img_buffer, tone_hint=tone_hint)
+        logger.info(f"[Model] Executing 'panel_analysis' skill using {target_model} (narration_style={narration_style})...")
+        raw_text = await skill.execute(model=target_model, image_bytes=img_buffer, tone_hint=tone_hint, narrative_length_hint=narrative_length_hint)
         
         analysis = validate_analysis(json.loads(raw_text))
         logger.info(f"[Model] Analysis completed for panel.")
@@ -397,8 +406,14 @@ async def analyze_batch(body: AnalyzeBatchRequest):
                     elif brightness > 200:
                         tone_hint = " The panel appears bright and vibrant — favour action or triumphant SFX."
 
+                narration_style = (body.narrationStyle or "long").lower()
+                if narration_style == "short":
+                    narrative_length_hint = "max 25 words, impactful and dramatic for quick subtitles."
+                else:
+                    narrative_length_hint = "30-65 words, highly engaging and detailed for YouTube story narration, describing what the characters do, think, or speak."
+
                 skill = registry.get("panel_analysis")
-                raw_text = await skill.execute(model=target_model, image_bytes=img_buffer, tone_hint=tone_hint)
+                raw_text = await skill.execute(model=target_model, image_bytes=img_buffer, tone_hint=tone_hint, narrative_length_hint=narrative_length_hint)
                 analysis = validate_analysis(json.loads(raw_text))
                 
                 results.append({"url": url, "analysis": analysis})
