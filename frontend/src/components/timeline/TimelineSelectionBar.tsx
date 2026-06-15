@@ -8,7 +8,11 @@ import {
   Trash,
   Clock,
   Move,
+  Scissors,
+  Link2,
+  Settings2,
 } from "lucide-react";
+
 
 interface TimelineSelectionBarProps {
   selectedCount: number;
@@ -22,6 +26,14 @@ interface TimelineSelectionBarProps {
   handleDeleteSelected: () => void;
   handleBulkModifyDuration: (val: number) => void;
   handleBulkModifyMotion: (val: string) => void;
+  isBatchCropping: boolean;
+  isCleaningBubbles: boolean;
+  isBatchMerging: boolean;
+  handleAutoCropSelected: () => void;
+  handleCleanBubblesSelected: () => void;
+  handleBatchMergeSelected: () => void;
+  batchProgress?: { current: number; total: number } | null;
+  cleanProgress?: { current: number; total: number } | null;
 }
 
 export default function TimelineSelectionBar({
@@ -36,12 +48,21 @@ export default function TimelineSelectionBar({
   handleDeleteSelected,
   handleBulkModifyDuration,
   handleBulkModifyMotion,
+  isBatchCropping,
+  isCleaningBubbles,
+  isBatchMerging,
+  handleAutoCropSelected,
+  handleCleanBubblesSelected,
+  handleBatchMergeSelected,
+  batchProgress,
+  cleanProgress,
 }: TimelineSelectionBarProps) {
   // Visible only when panels are selected
   const isVisible = selectedCount > 0;
 
   // Safeguard: Ensure we are in a browser environment before using the DOM
   if (typeof document === "undefined") return null;
+
 
   return createPortal(
     <div
@@ -74,6 +95,22 @@ export default function TimelineSelectionBar({
                     </p>
                   </div>
                 </div>
+
+                {/* Progress indicator when busy */}
+                {(isBatchCropping || isCleaningBubbles || isBatchMerging) && (
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-purple-950/30 border border-purple-800/40 text-purple-300 text-xs font-mono shrink-0">
+                    <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
+                    <span>
+                      {isBatchCropping && batchProgress
+                        ? `Cropping ${batchProgress.current}/${batchProgress.total}`
+                        : isCleaningBubbles && cleanProgress
+                        ? `Cleaning ${cleanProgress.current}/${cleanProgress.total}`
+                        : isBatchMerging
+                        ? "Stitching panels…"
+                        : "Processing…"}
+                    </span>
+                  </div>
+                )}
 
                 {/* Divider */}
                 <div className="hidden sm:block w-px h-6 bg-neutral-800 shrink-0" />
@@ -117,6 +154,82 @@ export default function TimelineSelectionBar({
                     {isAnalyzingAll
                       ? "Analyzing..."
                       : `AI Analyse Selected (${selectedCount})`}
+                  </button>
+
+                  {/* Auto-Crop */}
+                  <div className="flex items-center">
+                    <button
+                      type="button"
+                      disabled={isBatchCropping || isCleaningBubbles || isBatchMerging}
+                      onClick={handleAutoCropSelected}
+                      className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-l-xl border-r-0"
+                      title="Auto-Crop selected storyboard panels"
+                    >
+                      {isBatchCropping ? (
+                        <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
+                      ) : (
+                        <Scissors className="h-4 w-4 text-purple-400" />
+                      )}
+                      Auto-Crop
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if ((window as any).navigateTo) {
+                          (window as any).navigateTo("/auto-crop");
+                        }
+                      }}
+                      title="Auto-crop settings"
+                      className="px-2.5 py-2 text-xs font-bold flex items-center justify-center cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 rounded-r-xl"
+                    >
+                      <Settings2 className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  {/* Clean Bubbles */}
+                  <div className="flex items-center">
+                    <button
+                      type="button"
+                      disabled={isBatchCropping || isCleaningBubbles || isBatchMerging}
+                      onClick={handleCleanBubblesSelected}
+                      className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-l-xl border-r-0"
+                      title="Remove speech bubbles from selected storyboard panels"
+                    >
+                      {isCleaningBubbles ? (
+                        <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
+                      ) : (
+                        <Sparkles className="h-4 w-4 text-purple-400 animate-pulse" />
+                      )}
+                      Clean Bubbles
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if ((window as any).navigateTo) {
+                          (window as any).navigateTo("/bubble-cleaner");
+                        }
+                      }}
+                      title="Bubble cleaner settings"
+                      className="px-2.5 py-2 text-xs font-bold flex items-center justify-center cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 rounded-r-xl"
+                    >
+                      <Settings2 className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  {/* Stitch */}
+                  <button
+                    type="button"
+                    disabled={isBatchCropping || isCleaningBubbles || isBatchMerging || selectedCount < 2}
+                    onClick={handleBatchMergeSelected}
+                    className="px-3 sm:px-4 py-2 text-xs rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 font-bold flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                    title="Stitch selected storyboard panels vertically into one panel"
+                  >
+                    {isBatchMerging ? (
+                      <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
+                    ) : (
+                      <Link2 className="h-4 w-4 text-purple-400" />
+                    )}
+                    Stitch
                   </button>
 
                   {/* Set Duration for Selected */}

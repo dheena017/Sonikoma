@@ -120,181 +120,104 @@ def run_cv_detection(image_path, sensitivity, bg_mode, min_width_pct, min_height
     except ImportError:
         has_cv = False
 
+    # Load image and get dimensions
     if has_cv:
         img = cv2.imread(image_path)
         if img is None:
             return []
-            
         h, w, c = img.shape
-        if h == 0 or w == 0:
-            return []
-            
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        
-        # 1. Background color detection
-        if bg_mode == "auto":
-            # Sample edges more comprehensively
-            edge_samples = np.concatenate([gray[0, :], gray[-1, :], gray[:, 0], gray[:, -1]])
-            median_bg = np.median(edge_samples)
-            is_white_bg = median_bg > 127
-        else:
-            is_white_bg = bg_mode == "white"
-            
-        # 2. Threshold mask
-        threshold_val = int(255 - (sensitivity * 2.5)) if is_white_bg else int(sensitivity * 2.5)
-        threshold_val = max(5, min(250, threshold_val))
-        
-        if is_white_bg:
-            _, thresh = cv2.threshold(gray, threshold_val, 255, cv2.THRESH_BINARY_INV)
-        else:
-            _, thresh = cv2.threshold(gray, threshold_val, 255, cv2.THRESH_BINARY)
-            
-        # 3. Edges bitwise OR
-        edges = cv2.Canny(gray, canny_low, canny_high)
-        merged_mask = cv2.bitwise_or(thresh, edges)
-        
-        # 4. Morphological Close
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (close_kernel_size, close_kernel_size))
-        closed = cv2.morphologyEx(merged_mask, cv2.MORPH_CLOSE, kernel)
-        
-        # 5. Locate contours
-        contours, _ = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        
-        raw_boxes = []
-        if contours:
-            for contour in contours:
-                x_box, y_box, w_box, h_box = cv2.boundingRect(contour)
-                raw_boxes.append({"x": x_box, "y": y_box, "w": w_box, "h": h_box})
-
-        # 6. Gutter Detection Enhancement (Webtoon Optimized)
-        # Scan for full-width horizontal gaps that might be missing from contour detection
-        logger.info("[Panel Detection] Running Gutter Scanner for Webtoon strip optimization...")
-
-        # Calculate horizontal variance (low variance = likely gutter)
-        row_vars = np.var(gray, axis=1)
-        row_means = np.mean(gray, axis=1)
-
-        # Gutter conditions: low variance AND mean close to background color
-        if is_white_bg:
-            is_gutter_row = (row_vars < 10) & (row_means > threshold_val)
-        else:
-            is_gutter_row = (row_vars < 10) & (row_means < threshold_val)
-
-        # Refine boxes using gutter info
-        # If a box is very tall and contains a gutter, split it
-        refined_boxes = []
-        for box in raw_boxes:
-            bx, by, bw, bh = box["x"], box["y"], box["w"], box["h"]
-            if bh > min_height_px * 2:
-                box_gutters = is_gutter_row[by:by+bh]
-                # Find continuous gutter segments > 10px
-                gutter_indices = np.where(box_gutters)[0]
-                if len(gutter_indices) > 10:
-                    # Logic to split box at gutter
-                    # For simplicity in this implementation, we'll stick to contour boxes
-                    # but use gutter rows to potentially merge or split if they are extremely obvious.
-                    pass
-            refined_boxes.append(box)
-        raw_boxes = refined_boxes
-            
     else:
-        # PIL/NumPy Fallback
         try:
             pil_img = Image.open(image_path)
         except Exception:
             return []
-            
         w, h = pil_img.size
-        if w == 0 or h == 0:
-            return []
-            
         gray_img = pil_img.convert("L")
-        gray_arr = np.array(gray_img)
-        
-        if bg_mode == "auto":
-            corner_samples = [gray_arr[0, 0], gray_arr[0, w-1], gray_arr[h-1, 0], gray_arr[h-1, w-1]]
-            median_bg = np.median(corner_samples)
-            is_white_bg = median_bg > 127
-        else:
-            is_white_bg = bg_mode == "white"
-            
-        # Calculate horizontal projection profile
-        row_means = np.mean(gray_arr, axis=1)
-        
-        # Determine content rows
-        thresh_limit = int(255 - (sensitivity * 2.5)) if is_white_bg else int(sensitivity * 2.5)
-        thresh_limit = max(5, min(250, thresh_limit))
-        
-        if is_white_bg:
-            is_content_row = row_means < thresh_limit
-        else:
-            is_content_row = row_means > thresh_limit
-            
-        # Join small gaps
-        smoothed_content = np.copy(is_content_row)
-        gap_count = 0
-        for i in range(len(smoothed_content)):
-            if not smoothed_content[i]:
-                gap_count += 1
-            else:
-                if 0 < gap_count < 22:
-                    smoothed_content[i - gap_count : i] = True
-                gap_count = 0
-                
-        # Find panels y-coordinates
-        panels = []
-        in_panel = False
-        start_y = 0
-        
-        for i in range(h):
-            if smoothed_content[i] and not in_panel:
-                in_panel = True
-                start_y = i
-            elif not smoothed_content[i] and in_panel:
-                in_panel = False
-                end_y = i
-                if end_y - start_y >= min_height_px:
-                    panels.append((start_y, end_y))
-        if in_panel:
-            end_y = h
-            if end_y - start_y >= min_height_px:
-                panels.append((start_y, end_y))
-                
-        raw_boxes = []
-        for start_y, end_y in panels:
-            panel_slice = gray_arr[start_y:end_y, :]
-            col_means = np.mean(panel_slice, axis=0)
-            
-            if is_white_bg:
-                is_content_col = col_means < (thresh_limit + 2)
-            else:
-                is_content_col = col_means > (thresh_limit - 2)
-                
-            content_indices = np.where(is_content_col)[0]
-            if len(content_indices) > 0:
-                start_x = max(0, int(content_indices[0]) - 5)
-                end_x = min(w, int(content_indices[-1]) + 5)
-            else:
-                start_x = 0
-                end_x = w
-                
-            raw_boxes.append({
-                "x": start_x,
-                "y": start_y,
-                "w": end_x - start_x,
-                "h": end_y - start_y
-            })
+        gray = np.array(gray_img)
 
-    # Noise filter + Overlap Merge + Aspect Ratio adjust
+    if h == 0 or w == 0:
+        return []
+
+    # Calculate scale factor relative to 800px standard width
+    scale = w / 800.0
+    
+    # Scale user options based on image size to support low-res strips
+    scaled_min_height = max(10, int(min_height_px * scale))
+    scaled_merge_threshold = max(2, int(merge_threshold * scale))
+    scaled_min_gutter = max(2, int(5 * scale))
+
+    # Map sensitivity to variance threshold (sensitivity = 30 -> variance threshold = 300)
+    var_threshold = max(50, min(1000, sensitivity * 10))
+
+    logger.info(f"[Panel Detection] Width={w}, Height={h}, Scale={scale:.4f}, min_height={scaled_min_height}, merge_thresh={scaled_merge_threshold}, min_gutter={scaled_min_gutter}, var_thresh={var_threshold}")
+
+    # 1. Variance-based gutter detection (independent of background colors/gutters)
+    row_vars = np.var(gray, axis=1)
+    is_gutter = row_vars < var_threshold
+
+    gutter_blocks = []
+    in_gutter = False
+    start_y = 0
+    for y in range(h):
+        if is_gutter[y] and not in_gutter:
+            in_gutter = True
+            start_y = y
+        elif not is_gutter[y] and in_gutter:
+            in_gutter = False
+            end_y = y - 1
+            if (end_y - start_y + 1) >= scaled_min_gutter:
+                gutter_blocks.append((start_y, end_y))
+    if in_gutter:
+        end_y = h - 1
+        if (end_y - start_y + 1) >= scaled_min_gutter:
+            gutter_blocks.append((start_y, end_y))
+
+    # 2. Extract vertical panel candidates (non-gutter regions)
+    panel_candidates = []
+    current_y = 0
+    for g_start, g_end in gutter_blocks:
+        if g_start > current_y:
+            panel_h = g_start - current_y
+            if panel_h >= scaled_min_height:
+                panel_candidates.append((current_y, g_start - 1))
+        current_y = g_end + 1
+    if current_y < h:
+        panel_h = h - current_y
+        if panel_h >= scaled_min_height:
+            panel_candidates.append((current_y, h - 1))
+
+    # 3. For each candidate, find horizontal boundary (trim margins)
+    raw_boxes = []
+    for start_y, end_y in panel_candidates:
+        panel_slice = gray[start_y:end_y+1, :]
+        col_vars = np.var(panel_slice, axis=0)
+        # Identify content columns (where variance is higher than noise floor of 10)
+        content_cols = np.where(col_vars > 10)[0]
+        if len(content_cols) > 0:
+            start_x = max(0, int(content_cols[0]))
+            end_x = min(w, int(content_cols[-1]) + 1)
+        else:
+            start_x = 0
+            end_x = w
+            
+        raw_boxes.append({
+            "x": start_x,
+            "y": start_y,
+            "w": end_x - start_x,
+            "h": end_y - start_y + 1
+        })
+
+    # Noise filter
     filtered_boxes = []
     min_w = w * min_width_pct
     for box in raw_boxes:
-        if box["w"] >= min_w and box["h"] >= min_height_px:
+        if box["w"] >= min_w and box["h"] >= scaled_min_height:
             filtered_boxes.append(box)
-            
-    # Merge
-    merged_boxes = merge_overlapping_boxes(filtered_boxes, w, h, merge_threshold)
-    
+
+    # 4. Merge overlapping/nearby boxes
+    merged_boxes = merge_overlapping_boxes(filtered_boxes, w, h, scaled_merge_threshold)
+
     # Adjust to aspect ratio & format response
     final_panels = []
     logger.info(f"[Panel Detection] Found {len(merged_boxes)} panels after merging and filtering.")
