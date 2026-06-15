@@ -23,7 +23,7 @@ const processingLabel = (
   return "Processing";
 };
 
-export function PanelCardThumbnail({
+export const PanelCardThumbnail = React.memo(function PanelCardThumbnail({
   imgUrl,
   idx,
   isSelected,
@@ -143,4 +143,4 @@ export function PanelCardThumbnail({
       )}
     </div>
   );
-}
+});

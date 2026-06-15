@@ -13,7 +13,7 @@ interface PanelCardActionsProps {
   addNotification: (message: string, type: NotificationType) => void;
 }
 
-export function PanelCardActions({
+export const PanelCardActions = React.memo(function PanelCardActions({
   idx,
   imgUrl,
   openEditingImageIdx,
@@ -73,4 +73,4 @@ export function PanelCardActions({
       </button>
     </div>
   );
-}
+});

@@ -77,20 +77,20 @@ export function useAutoAnalysis({
     }
   }, [fetchWithInterceptor, addNotification, setPanels, setConsoleLogs, selectedModel]);
 
-  const addPanelsToStoryboard = useCallback((imgUrls: string[], currentScrapedList?: string[], shouldScroll: boolean = true) => {
+  const addPanelsToStoryboard = useCallback((imgUrls: string[], _currentScrapedList?: string[], shouldScroll: boolean = true) => {
     if (imgUrls.length === 0) return;
 
     if (shouldScroll) {
       setActivePreviewTab("storyboard");
       setTimeout(() => {
-        document.getElementById("storyboard_timeline_section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        const el = document.getElementById("storyboard_timeline_section");
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 100);
     }
 
-    const baseId = panels.length > 0 ? Math.max(...panels.map((p) => p.id)) + 1 : 1;
-
-    const newPanelsToAdd = imgUrls.map((imgUrl, loopIdx) => {
-      return {
+    setPanels((prev) => {
+      const baseId = prev.length > 0 ? Math.max(...prev.map((p) => p.id)) + 1 : 1;
+      const newPanelsToAdd = imgUrls.map((imgUrl, loopIdx) => ({
         id: baseId + loopIdx,
         image_url: imgUrl,
         speech_text: "",
@@ -98,20 +98,19 @@ export function useAutoAnalysis({
         duration: 4.5,
         motion_type: "zoom_in",
         isAnalyzing: false,
-      };
-    });
+      }));
 
-    setPanels((prev) => [...prev, ...newPanelsToAdd]);
+      // Developer console visibility
+      console.log(`[GUI] Added ${imgUrls.length} frame(s) to storyboard`, newPanelsToAdd);
+      return [...prev, ...newPanelsToAdd];
+    });
 
     setConsoleLogs((prev) => [
       `[GUI] Added ${imgUrls.length} frame(s) to storyboard.`,
       ...prev,
     ]);
     addNotification(`Added ${imgUrls.length} panel(s) to storyboard.`, 'info');
-
-    // Developer console visibility
-    console.log(`[GUI] Added ${imgUrls.length} frame(s) to storyboard`, newPanelsToAdd);
-  }, [panels, addNotification, setActivePreviewTab, setPanels, setConsoleLogs]);
+  }, [addNotification, setActivePreviewTab, setPanels, setConsoleLogs]);
 
   return {
     runBackgroundAnalysis,

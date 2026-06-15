@@ -59,7 +59,7 @@ export default function LiveScraperGrid({
             isBatchCropping={isBatchCropping}
             croppingImgUrl={croppingImgUrl}
             bubbleCroppingImgUrl={bubbleCroppingImgUrl}
-            scrapedImages={scrapedImages}
+            scrapedImagesCount={scrapedImages.length}
             mergingIndices={mergingIndices}
             handleMergeWithNext={handleMergeWithNext}
             setEditingImageIdx={setEditingImageIdx}
