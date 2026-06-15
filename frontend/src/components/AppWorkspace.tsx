@@ -52,6 +52,7 @@ interface AppWorkspaceProps {
   isProcessing: boolean;
   handleGenerateVideo: () => void;
   isScraping: boolean;
+  scrapeImages: (customUrl?: string) => Promise<void>;
   mergingIndices: number[];
   handleStitchWithNext: (idx: number) => Promise<void>;
   addPanelsToStoryboard: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
@@ -118,6 +119,7 @@ export function AppWorkspace({
   isProcessing,
   handleGenerateVideo,
   isScraping,
+  scrapeImages,
   mergingIndices,
   handleStitchWithNext,
   addPanelsToStoryboard,
@@ -159,7 +161,9 @@ export function AppWorkspace({
           selectedModel={selectedModel}
           setSelectedModel={setSelectedModel}
           isProcessing={isProcessing}
+          isScraping={isScraping}
           handleGenerateVideo={handleGenerateVideo}
+          handleScrape={() => scrapeImages()}
           addNotification={addNotification}
         />
 

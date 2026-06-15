@@ -289,7 +289,9 @@ export function useAppLogic() {
       return;
     }
 
-    // Only trigger if we have a real URL and we aren't already processing
+    // [Auto-Scrape Disabled]
+    // We now rely on the user clicking the "Scrape Assets" button in the UrlInputPanel.
+    /*
     if (targetUrl && targetUrl.includes("http") && !isProcessing) {
       if (targetUrl !== lastScrapedUrlRef.current) {
         lastScrapedUrlRef.current = targetUrl;
@@ -297,6 +299,7 @@ export function useAppLogic() {
         scrapeImages(); 
       }
     }
+    */
   }, [targetUrl, isProcessing, scrapeImages, state.setScrapedImages, state.setSelectedScraped, state.setPanels, state.setIsScraping]);
 
   const totalCalculatedDuration = state.panels.reduce((sum, p) => sum + (p.duration || 0), 0);

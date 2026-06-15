@@ -320,6 +320,7 @@ export default function App() {
           croppingImgUrl={croppingImgUrl}
           handleAutoCropSelected={handleAutoCropSelected}
           handleCleanBubblesSelected={handleCleanBubblesSelected}
+          scrapeImages={scrapeImages}
           videoPlayerRef={videoPlayerRef}
           addNotification={addNotification}
           setErrorPopup={setErrorPopup}

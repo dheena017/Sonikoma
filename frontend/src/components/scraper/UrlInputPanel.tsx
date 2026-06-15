@@ -36,7 +36,9 @@ interface UrlInputPanelProps {
   selectedModel: string;
   setSelectedModel: (model: string) => void;
   isProcessing: boolean;
+  isScraping?: boolean;
   handleGenerateVideo: () => void;
+  handleScrape?: () => void;
   addNotification: (message: string, type: NotificationType) => void;
 }
 
@@ -49,7 +51,9 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
     selectedModel,
     setSelectedModel,
     isProcessing,
+    isScraping = false,
     handleGenerateVideo,
+    handleScrape,
     addNotification,
   } = props;
 
@@ -155,30 +159,55 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
             </div>
           </div>
 
-          <div className="relative group">
-            <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 opacity-20 blur group-focus-within:opacity-40 transition-opacity duration-300" />
-            <input 
-              id="target_url_input"
-              type="url" 
-              value={targetUrl}
-              onChange={(e) => setTargetUrl(e.target.value)}
-              onPaste={handlePaste}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !isProcessing && targetUrl.trim()) {
-                  console.log("[UrlInputPanel] Enter key pressed. Triggering generation.");
-                  if (isSourceMismatch) {
-                    addNotification(
-                      `Selected source ${selectedSourceName} does not match the current URL host (${currentHost}). Please choose the correct website or paste a matching URL.`,
-                      'error'
-                    );
-                    return;
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative group flex-grow">
+              <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 opacity-20 blur group-focus-within:opacity-40 transition-opacity duration-300" />
+              <input
+                id="target_url_input"
+                type="url"
+                value={targetUrl}
+                onChange={(e) => setTargetUrl(e.target.value)}
+                onPaste={handlePaste}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !isProcessing && targetUrl.trim()) {
+                    console.log("[UrlInputPanel] Enter key pressed. Triggering generation.");
+                    if (isSourceMismatch) {
+                      addNotification(
+                        `Selected source ${selectedSourceName} does not match the current URL host (${currentHost}). Please choose the correct website or paste a matching URL.`,
+                        'error'
+                      );
+                      return;
+                    }
+                    handleGenerateVideo();
                   }
-                  handleGenerateVideo();
-                }
-              }}
-              placeholder={placeholderText}
-              className="relative w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-neutral-200 outline-none placeholder:text-neutral-600 focus:border-purple-500 transition-colors"
-            />
+                }}
+                placeholder={placeholderText}
+                className="relative w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-neutral-200 outline-none placeholder:text-neutral-600 focus:border-purple-500 transition-colors"
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={handleScrape}
+              disabled={isScraping || !targetUrl.trim() || isSourceMismatch}
+              className="relative px-6 py-3.5 bg-neutral-950 border border-neutral-800 rounded-xl text-sm font-bold text-white transition-all hover:border-purple-500/50 hover:bg-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed group overflow-hidden shrink-0"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-indigo-600/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <span className="relative flex items-center gap-2">
+                {isScraping ? (
+                  <>
+                    <div className="h-3.5 w-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                    <span>Scraping...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-3.5 w-3.5 text-purple-400" />
+                    <span>Scrape Assets</span>
+                  </>
+                )}
+              </span>
+            </button>
+          </div>
             {isSourceMismatch && (
               <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-[11px] text-amber-100 font-mono leading-5 mt-3">
                 <strong className="block text-amber-200 mb-1">Source mismatch detected</strong>
