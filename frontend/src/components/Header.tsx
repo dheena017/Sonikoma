@@ -1,6 +1,8 @@
-import React from "react";
-import { Film, Menu } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { Film, Menu, Bell } from "lucide-react";
 import { GeneratedPanel } from "../types";
+import NotificationDropdown from "./NotificationDropdown";
+import { Notification } from "./NotificationStack";
 
 interface HeaderProps {
   isProcessing: boolean;
@@ -16,7 +18,11 @@ interface HeaderProps {
   backendStatus: "online" | "offline" | "checking";
   narrationStyle?: string;
   user?: any;
-
+  notifications: Notification[];
+  markNotificationAsRead: (id: number) => void;
+  markAllNotificationsAsRead: () => void;
+  deleteNotification: (id: number) => void;
+  clearAllNotifications: () => void;
 }
 
 /** Format seconds into a readable "Xm Ys" string */
@@ -41,8 +47,28 @@ export default function Header({
   isSidebarOpen = false,
   backendStatus,
   narrationStyle = "long",
-  user
+  user,
+  notifications,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+  deleteNotification,
+  clearAllNotifications
 }: HeaderProps) {
+  const [showNotifications, setShowNotifications] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
   
   const navigateTo = (path: string) => {
     window.history.pushState({}, "", path);
@@ -100,6 +126,41 @@ export default function Header({
 
       {/* Right side controls/status */}
       <div className="flex items-center gap-3">
+        {/* Notifications Bell */}
+        <div className="relative" ref={dropdownRef}>
+          <button
+            onClick={() => setShowNotifications(!showNotifications)}
+            className={`p-1.5 rounded-lg border transition-all cursor-pointer relative ${
+              showNotifications
+                ? "bg-purple-600 border-purple-500 text-white"
+                : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
+            }`}
+            title="Notifications"
+          >
+            <Bell className="h-5 w-5" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white ring-2 ring-neutral-950">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </button>
+
+          {showNotifications && (
+            <NotificationDropdown
+              notifications={notifications}
+              onClose={() => setShowNotifications(false)}
+              onMarkAsRead={markNotificationAsRead}
+              onMarkAllAsRead={markAllNotificationsAsRead}
+              onDelete={deleteNotification}
+              onClearAll={clearAllNotifications}
+              onNavigateToAll={() => {
+                setShowNotifications(false);
+                navigateTo("/notifications");
+              }}
+            />
+          )}
+        </div>
+
         {/* Storyboard metrics */}
         {panels.length > 0 && (
           <div className="hidden sm:flex items-center gap-3 font-mono text-[10px] text-neutral-400 bg-neutral-900/30 border border-neutral-800/60 px-3 py-1 rounded-lg select-none">

@@ -60,7 +60,14 @@ export function useAppState() {
   const [activeAutoCropTab, setActiveAutoCropTab] = useState<string>("general");
 
   // Notifications
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>(() => {
+    try {
+      const saved = localStorage.getItem('ai_comic_notifications');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
   const [errorPopup, setErrorPopup] = useState<ErrorPopupDetail | null>(null);
 
   // Settings — all useState MUST come before any useCallback/useEffect
@@ -80,24 +87,33 @@ export function useAppState() {
 
   // ── Callbacks & effects AFTER all useState declarations ──────────────────
 
+  const removeNotification = useCallback((id: number) => {
+    setNotifications((prev) => prev.map(n => n.id === id ? { ...n, toastDismissed: true } : n));
+  }, []);
+
   const addNotification = useCallback((
     message: string,
     type: NotificationType,
-    options?: { errorCode?: number; retryDelay?: number; onRetry?: () => void }
+    options?: { errorCode?: number; retryDelay?: number; onRetry?: () => void; details?: string; link?: string }
   ) => {
     const id = Date.now() + Math.random();
-    setNotifications((prev) => [...prev, { id, message, type, ...options }]);
+    const newNote: Notification = {
+      id,
+      message,
+      type,
+      timestamp: Date.now(),
+      isRead: false,
+      ...options
+    };
+
+    setNotifications((prev) => [newNote, ...prev]);
 
     if (!options?.onRetry) {
       setTimeout(() => {
-        setNotifications((prev) => prev.filter((n) => n.id !== id));
+        removeNotification(id);
       }, 5000);
     }
-  }, []);
-
-  const removeNotification = useCallback((id: number) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-  }, []);
+  }, [removeNotification]);
 
   const fetchWithInterceptor = useCallback(
     createFetchWithInterceptor({ addNotification, setErrorPopup }),
@@ -212,6 +228,10 @@ export function useAppState() {
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
+
+  useEffect(() => {
+    localStorage.setItem('ai_comic_notifications', JSON.stringify(notifications));
+  }, [notifications]);
 
   useEffect(() => {
     localStorage.setItem('ai_comic_url', targetUrl);
@@ -352,5 +372,17 @@ export function useAppState() {
     setIsScraping,
     narrationStyle,
     setNarrationStyle,
+    clearAllNotifications: () => {
+      setNotifications([]);
+    },
+    markAllNotificationsAsRead: () => {
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    },
+    markNotificationAsRead: (id: number) => {
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+    },
+    deleteNotification: (id: number) => {
+      setNotifications(prev => prev.filter(n => n.id !== id));
+    }
   };
 }

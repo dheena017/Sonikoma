@@ -10,6 +10,11 @@ export interface Notification {
   errorCode?: number;
   retryDelay?: number;
   onRetry?: () => void;
+  timestamp: number;
+  details?: string;
+  link?: string;
+  isRead: boolean;
+  toastDismissed?: boolean;
 }
 
 interface NotificationStackProps {
@@ -18,9 +23,13 @@ interface NotificationStackProps {
 }
 
 export default function NotificationStack({ notifications, removeNotification }: NotificationStackProps) {
+  // Only show notifications that haven't been dismissed from toast stack
+  // and were created recently (within last 10 seconds) OR are errors/warnings that haven't been dismissed
+  const activeToasts = notifications.filter(n => !n.toastDismissed);
+
   return (
     <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none w-full max-w-sm sm:max-w-md">
-      {notifications.map((note) => (
+      {activeToasts.map((note) => (
         <IndividualNotification
           key={note.id}
           note={note}

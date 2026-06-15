@@ -129,7 +129,8 @@ export function useAppRouter({
         path === "/ai-engagement" ||
         path === "/ai-voice" ||
         path === "/ai-analytics" ||
-        path === "/profile"
+        path === "/profile" ||
+        path === "/notifications"
       ) {
         setShowAutoCropModal(false);
         setShowBubbleModal(false);
