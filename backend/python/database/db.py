@@ -25,21 +25,28 @@ import logging
 logger = logging.getLogger("anivox.database")
 
 def init_db() -> None:
-    if os.path.exists(DB_PATH):
-        return
     logger.info(f"[Database] Opening local SQLite database at: {DB_PATH}")
     os.makedirs(DB_DIR, exist_ok=True)
     conn = get_db_connection()
     try:
-        if os.path.exists(SCHEMA_PATH):
-            with open(SCHEMA_PATH, 'r', encoding='utf-8') as f:
-                schema = f.read()
-            conn.executescript(schema)
-            logger.info("[Database] Schema applied successfully.")
+        # Check if users table exists. If not, apply schema.sql
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
+        users_table_exists = cursor.fetchone() is not None
+        
+        if not users_table_exists:
+            if os.path.exists(SCHEMA_PATH):
+                logger.info("[Database] Schema not fully initialized (users table missing). Applying schema.sql...")
+                with open(SCHEMA_PATH, 'r', encoding='utf-8') as f:
+                    schema = f.read()
+                conn.executescript(schema)
+                logger.info("[Database] Schema applied successfully.")
+            else:
+                logger.warning("[Database] schema.sql not found — skipping schema apply.")
         else:
-            logger.warning("[Database] schema.sql not found — skipping schema apply.")
+            logger.info("[Database] Database schema is already initialized.")
     except Exception as e:
-        logger.error(f"[Database] Error applying schema: {e}")
+        logger.error(f"[Database] Error checking or applying schema: {e}")
     finally:
         conn.close()
     logger.info("[Database] SQLite database ready [OK]")
@@ -86,14 +93,7 @@ def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
     finally:
         conn.close()
 
-def get_user_by_google_id(google_id: str) -> Optional[Dict[str, Any]]:
-    """Get a user by their Google ID."""
-    conn = get_db_connection()
-    try:
-        row = conn.execute('SELECT * FROM users WHERE google_id = ?', (google_id,)).fetchone()
-        return dict(row) if row else None
-    finally:
-        conn.close()
+
 
 def update_user(user_id: str, updates: Dict[str, Any]) -> None:
     """Update user information."""

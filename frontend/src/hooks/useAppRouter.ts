@@ -130,13 +130,46 @@ export function useAppRouter({
 
       // Root redirect logic
       if (!isInitializing && !authLoading) {
-        if (
-          !isAuthenticated &&
-          (path === "/" || path === "" || path === "/index.html")
-        ) {
-          window.history.replaceState({}, "", "/landing");
-          setCurrentPath("/landing");
-          return;
+        if (!isAuthenticated) {
+          const isProtectedRoute =
+            path === "/dashboard" ||
+            path === "/settings" ||
+            path === "/logs" ||
+            path === "/status" ||
+            path === "/shortcuts" ||
+            path === "/ai-optimizer" ||
+            path === "/panel-assistant" ||
+            path === "/ai-characters" ||
+            path === "/ai-translation" ||
+            path === "/ai-audio-lab" ||
+            path === "/ai-thumbnails" ||
+            path === "/ai-engagement" ||
+            path === "/ai-voice" ||
+            path === "/ai-analytics" ||
+            path === "/profile" ||
+            path === "/notifications" ||
+            path === "/auto-crop" ||
+            path === "/bubble-cleaner" ||
+            path.startsWith("/editor");
+
+          if (isProtectedRoute) {
+            window.history.replaceState({}, "", "/");
+            setCurrentPath("/");
+            return;
+          }
+        } else {
+          if (
+            path === "/" ||
+            path === "" ||
+            path === "/index.html" ||
+            path === "/landing" ||
+            path === "/login" ||
+            path === "/register"
+          ) {
+            window.history.replaceState({}, "", "/dashboard");
+            setCurrentPath("/dashboard");
+            return;
+          }
         }
       }
 
@@ -170,8 +203,8 @@ export function useAppRouter({
         setEditingImageIdx(null);
       } else if (path.startsWith("/editor")) {
         if (scrapedImages.length === 0 && panels.length === 0) {
-          window.history.replaceState({}, "", "/");
-          setCurrentPath("/");
+          window.history.replaceState({}, "", "/dashboard");
+          setCurrentPath("/dashboard");
           return;
         }
         setIsPipMode(false);
@@ -227,26 +260,37 @@ export function useAppRouter({
     isInitializing,
   ]);
 
-  const navigateTo = React.useCallback((path: string) => {
-    const isCurrentlyEditor = window.location.pathname.startsWith("/editor");
-    const isTargetingEditor = path.startsWith("/editor");
+  const navigateTo = React.useCallback(
+    (path: string) => {
+      let targetPath = path;
+      if (
+        isAuthenticated &&
+        (path === "/" || path === "" || path === "/index.html")
+      ) {
+        targetPath = "/dashboard";
+      }
 
-    if (isCurrentlyEditor && !isTargetingEditor) {
-      const isDirty = (window as any).editorHasUnsavedChanges?.();
-      if (isDirty) {
-        if (
-          !window.confirm(
-            "You have unsaved changes in the editor. Are you sure you want to navigate away?"
-          )
-        ) {
-          return;
+      const isCurrentlyEditor = window.location.pathname.startsWith("/editor");
+      const isTargetingEditor = targetPath.startsWith("/editor");
+
+      if (isCurrentlyEditor && !isTargetingEditor) {
+        const isDirty = (window as any).editorHasUnsavedChanges?.();
+        if (isDirty) {
+          if (
+            !window.confirm(
+              "You have unsaved changes in the editor. Are you sure you want to navigate away?"
+            )
+          ) {
+            return;
+          }
         }
       }
-    }
 
-    window.history.pushState({}, "", path);
-    window.dispatchEvent(new Event("popstate"));
-  }, []);
+      window.history.pushState({}, "", targetPath);
+      window.dispatchEvent(new Event("popstate"));
+    },
+    [isAuthenticated]
+  );
 
   React.useEffect(() => {
     (window as any).navigateTo = navigateTo;
