@@ -214,7 +214,6 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                 Selected source <strong>{selectedSourceName}</strong> does not match the URL host <strong>{currentHost || 'unknown'}</strong>. Please choose the correct website or paste a matching URL.
               </div>
             )}
-          </div>
         </div>
 
         <div className="space-y-3 pt-1">

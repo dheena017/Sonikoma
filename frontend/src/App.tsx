@@ -160,6 +160,7 @@ export default function App() {
     handleCleanBubblesSelected,
     handleAutoCropSelected,
     totalCalculatedDuration,
+    scrapeImages,
   } = appLogic;
 
   const {
