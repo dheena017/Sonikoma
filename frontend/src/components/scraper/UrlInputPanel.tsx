@@ -1,5 +1,5 @@
 import React from "react";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Image as ImageIcon } from "lucide-react";
 import { AI_MODELS } from "../../models";
 import { NotificationType } from "../NotificationStack";
 import { extractWebtoonUrl } from "../../utils/url";
@@ -190,9 +190,9 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
               type="button"
               onClick={handleScrape}
               disabled={isScraping || !targetUrl.trim() || isSourceMismatch}
-              className="relative px-6 py-3.5 bg-neutral-950 border border-neutral-800 rounded-xl text-sm font-bold text-white transition-all hover:border-purple-500/50 hover:bg-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed group overflow-hidden shrink-0"
+              className="relative px-6 py-3.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 rounded-xl text-sm font-bold text-white transition-all shadow-[0_0_20px_-5px_rgba(147,51,234,0.5)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 group overflow-hidden shrink-0"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-indigo-600/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <span className="relative flex items-center gap-2">
                 {isScraping ? (
                   <>
@@ -201,7 +201,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                   </>
                 ) : (
                   <>
-                    <Sparkles className="h-3.5 w-3.5 text-purple-400" />
+                    <ImageIcon className="h-3.5 w-3.5" />
                     <span>Scrape Assets</span>
                   </>
                 )}

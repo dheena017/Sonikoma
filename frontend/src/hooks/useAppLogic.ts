@@ -229,7 +229,7 @@ export function useAppLogic() {
         body: JSON.stringify({ url: normalizedTargetUrl, model: selectedModel, source: selectedSource, bypass_cache: false }),
       });
       const data = await res.json();
-      state.setIsScraping(false);
+
       if (data.success && data.images && data.images.length > 0) {
         const proxiedImages = data.images.map((img: string) => 
            img.startsWith('http') ? `/api/proxy-image?url=${encodeURIComponent(img)}` : img
@@ -241,20 +241,62 @@ export function useAppLogic() {
         setPlaybackTime(0);
         setStoryboardPlaying(false);
         
-        state.setScrapedImages(proxiedImages);
-        state.addNotification(`Successfully extracted ${data.total_images} panel frames from the Webtoon page!`, 'success');
+        // Automatically stitch images into one if multiple are found
+        if (proxiedImages.length >= 2) {
+          state.setConsoleLogs(prev => [
+            `[Scraper] Found ${proxiedImages.length} panels. Automatically stitching into a single strip...`,
+            ...prev
+          ]);
+
+          try {
+            const stitchRes = await state.fetchWithInterceptor("/api/stitch-images", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                urls: proxiedImages,
+                layout: "vertical",
+                spacing: 0,
+                spacingColor: "white",
+                scaleToFit: true,
+                alignMode: "center",
+                padding: 0,
+              }),
+            });
+            const stitchData = await stitchRes.json();
+            if (stitchData.url) {
+              state.setScrapedImages([stitchData.url]);
+              state.addNotification(`Successfully extracted and stitched ${proxiedImages.length} panels into one image!`, 'success');
+              state.setConsoleLogs(prev => [
+                `[Scraper] ✓ Success! Stitched ${proxiedImages.length} panels into one continuous frame: ${stitchData.url}`,
+                ...prev
+              ]);
+            } else {
+              state.setScrapedImages(proxiedImages);
+              state.addNotification(`Extracted ${proxiedImages.length} panels, but automatic stitching failed.`, 'warning');
+            }
+          } catch (stitchErr) {
+            console.error("Auto-stitch failed:", stitchErr);
+            state.setScrapedImages(proxiedImages);
+            state.addNotification(`Extracted ${proxiedImages.length} panels, but automatic stitching encountered an error.`, 'warning');
+          }
+        } else {
+          state.setScrapedImages(proxiedImages);
+          state.addNotification(`Successfully extracted ${data.total_images} panel frame from the Webtoon page!`, 'success');
+        }
         
         state.setConsoleLogs(prev => {
-          const filtered = prev.filter(log => !log.startsWith("[Scraper]"));
+          // Only filter out the "Spawned live scraping..." log, keep the "Stitching..." logs
+          const filtered = prev.filter(log => !log.startsWith("[Scraper] Spawned live scraping task"));
           return [
-            `[Scraper] Success! Separated ${data.total_images} continuous panel strips from active page.`,
-            `[Scraper] Images loaded. Select and insert panels from the deck below.`,
+            `[Scraper] Extraction completed. Total images: ${data.total_images}`,
             `[API] Scrape response received — Model: ${selectedModel} | Images: ${data.total_images}`,
             ...filtered
           ];
         });
+        state.setIsScraping(false);
         console.log(`[Scraper] Loaded ${data.total_images} images from ${activeUrl}`);
       } else {
+        state.setIsScraping(false);
         const errMsg = data.message || "Connected but no native comic elements identified on page.";
         state.setScrapedImages([]);
         state.setPanels([]);
