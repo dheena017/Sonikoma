@@ -18,6 +18,14 @@ import LogsPage from "./components/LogsPage.js";
 import StatusPage from "./components/StatusPage.js";
 import ShortcutsPage from "./components/ShortcutsPage.js";
 
+// Auth & Landing Pages
+import LandingPage from "./components/landing/LandingPage.js";
+import LoginPage from "./components/auth/LoginPage.js";
+import RegisterPage from "./components/auth/RegisterPage.js";
+import ForgotPasswordPage from "./components/auth/ForgotPasswordPage.js";
+import ProfilePage from "./components/ProfilePage.js";
+import LoadingPage from "./components/LoadingPage.js";
+
 // AI Assistant Suite Page Imports
 import AIOptimizerPage from "./components/optimizer/AIOptimizerPage.js";
 import PanelAssistantPage from "./components/panel_assistant/PanelAssistantPage.js";
@@ -112,6 +120,15 @@ export default function App() {
     activeAutoCropTab,
     setActiveAutoCropTab,
     videoPlayerRef,
+    user,
+    isAuthenticated,
+    authLoading,
+    isInitializing,
+    login,
+    register,
+    logout,
+    forgotPassword,
+    googleLogin,
     notifications,
     errorPopup,
     setErrorPopup,
@@ -192,6 +209,9 @@ export default function App() {
     musicTheme,
     aspectRatio,
     frameRate,
+    isAuthenticated,
+    authLoading,
+    isInitializing,
   });
 
   const { shortcuts, setShortcuts } = useGlobalShortcuts({
@@ -236,6 +256,51 @@ export default function App() {
   const isEngagementPath = currentPath === "/ai-engagement";
   const isVoicePath = currentPath === "/ai-voice";
   const isAnalyticsPath = currentPath === "/ai-analytics";
+  const isProfilePath = currentPath === "/profile";
+  const isLandingPath = currentPath === "/landing";
+  const isLoginPath = currentPath === "/login";
+  const isRegisterPath = currentPath === "/register";
+  const isForgotPasswordPath = currentPath === "/forgot-password";
+
+  // Auth Guard
+  if (isInitializing || authLoading) {
+    return <LoadingPage status="Authenticating Session..." />;
+  }
+
+  if (isLandingPath) {
+    return <LandingPage onGetStarted={() => navigateTo("/register")} onLogin={() => navigateTo("/login")} />;
+  }
+
+  if (isLoginPath) {
+    return (
+      <LoginPage
+        onLogin={login}
+        onNavigateToRegister={() => navigateTo("/register")}
+        onNavigateToForgotPassword={() => navigateTo("/forgot-password")}
+        onGoogleLogin={() => googleLogin("mock_google_token")}
+      />
+    );
+  }
+
+  if (isRegisterPath) {
+    return (
+      <RegisterPage
+        onRegister={register}
+        onNavigateToLogin={() => navigateTo("/login")}
+        onGoogleLogin={() => googleLogin("mock_google_token")}
+      />
+    );
+  }
+
+  if (isForgotPasswordPath) {
+    return <ForgotPasswordPage onForgotPassword={forgotPassword} onNavigateToLogin={() => navigateTo("/login")} />;
+  }
+
+  // Protected Routes - Redirect to Landing if not authenticated
+  if (!isAuthenticated && !isLandingPath && !isLoginPath && !isRegisterPath && !isForgotPasswordPath) {
+    setTimeout(() => navigateTo("/landing"), 0);
+    return <LoadingPage status="Redirecting to Landing..." />;
+  }
 
   return (
     <div id="app_root" className="min-h-screen bg-[#070709] text-neutral-100 flex flex-col lg:flex-row selection:bg-purple-600 selection:text-white relative">
@@ -287,6 +352,7 @@ export default function App() {
             isSidebarOpen={isSidebarOpen}
             backendStatus={backendStatus}
             narrationStyle={narrationStyle}
+            user={user}
           />
 
       {/* PAGE 1: DASHBOARD */}
@@ -521,8 +587,18 @@ export default function App() {
         />
       )}
 
+      {/* PAGE 18: USER PROFILE */}
+      {isProfilePath && (
+        <ProfilePage
+          user={user}
+          projects={[]} // In a real app, fetch these
+          onLogout={logout}
+          onNavigateHome={() => navigateTo("/")}
+        />
+      )}
+
       {/* PAGE 404 (FALLBACK) */}
-      {!isDashboardPath && !isSettingsPath && !isAutoCropPath && !isBubbleCleanerPath && !isEditorPath && !isLogsPath && !isStatusPath && !isShortcutsPath && !isOptimizerPath && !isPanelAssistantPath && !isCharacterPath && !isTranslationPath && !isAudioLabPath && !isThumbnailPath && !isEngagementPath && !isVoicePath && !isAnalyticsPath && (
+      {!isDashboardPath && !isSettingsPath && !isAutoCropPath && !isBubbleCleanerPath && !isEditorPath && !isLogsPath && !isStatusPath && !isShortcutsPath && !isOptimizerPath && !isPanelAssistantPath && !isCharacterPath && !isTranslationPath && !isAudioLabPath && !isThumbnailPath && !isEngagementPath && !isVoicePath && !isAnalyticsPath && !isProfilePath && (
         <PageNotFound onNavigateHome={() => navigateTo("/")} />
       )}
 
