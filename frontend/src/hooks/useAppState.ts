@@ -167,12 +167,12 @@ export function useAppState() {
     const token = localStorage.getItem("anivox_token");
 
     // Artificial delay to show the fancy loading screen
-    const delay = (ms: number) => new Promise(res => setTimeout(ms, res));
+    const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
     const start = Date.now();
 
     if (!token) {
       const elapsed = Date.now() - start;
-      if (elapsed < 1500) await new Promise(r => setTimeout(r, 1500 - elapsed));
+      if (elapsed < 1500) await delay(1500 - elapsed);
       setAuthLoading(false);
       setIsInitializing(false);
       return;
@@ -192,7 +192,7 @@ export function useAppState() {
       console.error("Auth check failed", e);
     } finally {
       const elapsed = Date.now() - start;
-      if (elapsed < 2000) await new Promise(r => setTimeout(r, 2000 - elapsed));
+      if (elapsed < 2000) await delay(2000 - elapsed);
       setAuthLoading(false);
       setIsInitializing(false);
     }

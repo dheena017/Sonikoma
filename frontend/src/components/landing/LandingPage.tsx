@@ -267,10 +267,10 @@ export function LandingFooter() {
   );
 }
 
-function FooterSocial({ icon }: { icon: React.ReactNode }) {
+function FooterSocial({ icon }: { icon: React.ReactElement<any> }) {
   return (
     <a href="#" className="w-10 h-10 rounded-xl bg-neutral-900 border border-white/5 flex items-center justify-center text-neutral-500 hover:text-white hover:bg-neutral-800 transition-all">
-      {React.cloneElement(icon as React.ReactElement, { size: 18 })}
+      {React.cloneElement(icon, { size: 18 })}
     </a>
   );
 }
