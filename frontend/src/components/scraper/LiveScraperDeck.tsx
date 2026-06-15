@@ -354,10 +354,8 @@ export default function LiveScraperDeck({
                 }}
               />
 
-              {scrapedImages.map((imgUrl, idx) => {
-                // Only render if within visible range
-                if (idx < visibleRange.start || idx > visibleRange.end) return null;
-
+              {scrapedImages.slice(visibleRange.start, visibleRange.end + 1).map((imgUrl, sliceIdx) => {
+                const idx = visibleRange.start + sliceIdx;
                 const isSelected = selectedSet.has(imgUrl);
                 const currentWidth = window.innerWidth < 640 ? MOBILE_CARD_WIDTH : CARD_WIDTH;
 
@@ -367,6 +365,7 @@ export default function LiveScraperDeck({
                     style={{
                       position: 'absolute',
                       left: `${idx * currentWidth}px`,
+                      width: currentWidth,
                     }}
                   >
                     <PanelCard
