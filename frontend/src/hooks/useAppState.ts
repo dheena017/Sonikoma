@@ -6,6 +6,10 @@ import { Notification, NotificationType } from "../components/NotificationStack"
 import { ErrorPopupDetail } from "../components/ErrorPopupModal";
 
 export function useAppState() {
+  const [user, setUser] = useState<any>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [authLoading, setAuthLoading] = useState<boolean>(true);
+
   const [panels, setPanels] = useState<GeneratedPanel[]>([]);
   const [consoleLogs, setConsoleLogs] = useState<string[]>([]);
   const [scrapedImages, setScrapedImages] = useState<string[]>([]);
@@ -98,6 +102,104 @@ export function useAppState() {
     [addNotification, setErrorPopup]
   );
 
+  // --- Auth Actions ---
+  const login = useCallback(async (credentials: any) => {
+    const res = await fetchWithInterceptor("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(credentials),
+    });
+    const data = await res.json();
+    if (data.access_token) {
+      localStorage.setItem("anivox_token", data.access_token);
+      setUser(data.user);
+      setIsAuthenticated(true);
+      addNotification("Logged in successfully!", "success");
+    } else {
+      throw new Error(data.detail || "Login failed");
+    }
+  }, [addNotification, fetchWithInterceptor]);
+
+  const register = useCallback(async (userData: any) => {
+    const res = await fetchWithInterceptor("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(userData),
+    });
+    const data = await res.json();
+    if (data.access_token) {
+      localStorage.setItem("anivox_token", data.access_token);
+      setUser(data.user);
+      setIsAuthenticated(true);
+      addNotification("Account created successfully!", "success");
+    } else {
+      throw new Error(data.detail || "Registration failed");
+    }
+  }, [addNotification, fetchWithInterceptor]);
+
+  const logout = useCallback(() => {
+    localStorage.removeItem("anivox_token");
+    setUser(null);
+    setIsAuthenticated(false);
+    addNotification("Logged out successfully.", "info");
+    (window as any).navigateTo?.("/landing");
+  }, [addNotification]);
+
+  const checkAuth = useCallback(async () => {
+    const token = localStorage.getItem("anivox_token");
+    if (!token) {
+      setAuthLoading(false);
+      return;
+    }
+    try {
+      const res = await fetch("/api/auth/me", {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUser(data);
+        setIsAuthenticated(true);
+      } else {
+        localStorage.removeItem("anivox_token");
+      }
+    } catch (e) {
+      console.error("Auth check failed", e);
+    } finally {
+      setAuthLoading(false);
+    }
+  }, []);
+
+  const forgotPassword = useCallback(async (email: string) => {
+    const res = await fetchWithInterceptor("/api/auth/forgot-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    return data;
+  }, [fetchWithInterceptor]);
+
+  const googleLogin = useCallback(async (token: string) => {
+    const res = await fetchWithInterceptor("/api/auth/google", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    });
+    const data = await res.json();
+    if (data.access_token) {
+      localStorage.setItem("anivox_token", data.access_token);
+      setUser(data.user);
+      setIsAuthenticated(true);
+      addNotification("Signed in with Google!", "success");
+    } else {
+      throw new Error(data.detail || "Google login failed");
+    }
+  }, [addNotification, fetchWithInterceptor]);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
   useEffect(() => {
     localStorage.setItem('ai_comic_url', targetUrl);
     localStorage.setItem('ai_comic_voice', voiceActor);
@@ -111,6 +213,16 @@ export function useAppState() {
   }, [targetUrl, voiceActor, musicTheme, aspectRatio, selectedModel, selectedSource, frameRate, volume, isMuted]);
 
   return {
+    user,
+    setUser,
+    isAuthenticated,
+    setIsAuthenticated,
+    authLoading,
+    login,
+    register,
+    logout,
+    forgotPassword,
+    googleLogin,
     panels,
     setPanels,
     consoleLogs,

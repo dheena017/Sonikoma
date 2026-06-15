@@ -5,10 +5,24 @@
 -- Applied automatically on first run by backend/database/db.ts
 -- =============================================================================
 
+-- Stores registered users
+CREATE TABLE IF NOT EXISTS users (
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id         TEXT    NOT NULL UNIQUE,          -- e.g. "user_7f9e2b1a"
+  email           TEXT    NOT NULL UNIQUE,
+  hashed_password TEXT,                             -- NULL for Google-only users
+  full_name       TEXT,
+  avatar_url      TEXT,
+  google_id       TEXT    UNIQUE,                   -- Store Google's sub ID
+  created_at      TEXT    NOT NULL DEFAULT (datetime('now')),
+  updated_at      TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
 -- Stores each webtoon processing project
 CREATE TABLE IF NOT EXISTS projects (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   project_id  TEXT    NOT NULL UNIQUE,          -- e.g. "proj_a1b2c3d4"
+  user_id     TEXT    REFERENCES users(user_id) ON DELETE SET NULL,
   url         TEXT    NOT NULL,                 -- original webtoon URL
   title       TEXT    NOT NULL DEFAULT '',      -- parsed comic title
   genre       TEXT    NOT NULL DEFAULT 'general',

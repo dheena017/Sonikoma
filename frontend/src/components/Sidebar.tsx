@@ -140,6 +140,18 @@ export default function Sidebar({
           enabled: true,
         },
       ]
+    },
+    {
+      group: "Account",
+      items: [
+        {
+          label: "Profile",
+          icon: Sparkles,
+          active: currentPath === "/profile",
+          onClick: () => navigateTo("/profile"),
+          enabled: true,
+        },
+      ]
     }
   ];
 

@@ -15,6 +15,8 @@ interface UseAppRouterProps {
   setAspectRatio: (v: "9:16" | "16:9") => void;
   setFrameRate: (v: number) => void;
   addNotification: (msg: string, type: "success" | "info" | "warning" | "error") => void;
+  isAuthenticated: boolean;
+  authLoading: boolean;
   voiceActor: string;
   musicTheme: string;
   aspectRatio: "9:16" | "16:9";
@@ -36,6 +38,8 @@ export function useAppRouter({
   setAspectRatio,
   setFrameRate,
   addNotification,
+  isAuthenticated,
+  authLoading,
   voiceActor,
   musicTheme,
   aspectRatio,
@@ -113,7 +117,8 @@ export function useAppRouter({
         path === "/ai-thumbnails" ||
         path === "/ai-engagement" ||
         path === "/ai-voice" ||
-        path === "/ai-analytics"
+        path === "/ai-analytics" ||
+        path === "/profile"
       ) {
         setShowAutoCropModal(false);
         setShowBubbleModal(false);
@@ -176,7 +181,7 @@ export function useAppRouter({
       window.history.replaceState = originalReplaceState;
       window.removeEventListener("popstate", handleLocationChange);
     };
-  }, [scrapedImages, panels, editingImageIdx]);
+  }, [scrapedImages, panels, editingImageIdx, isAuthenticated, authLoading]);
 
   const navigateTo = React.useCallback((path: string) => {
     const isCurrentlyEditor = window.location.pathname.startsWith("/editor");
