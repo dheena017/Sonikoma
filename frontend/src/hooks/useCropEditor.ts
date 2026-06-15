@@ -227,8 +227,49 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
     return handleSaveEditedImage();
   }, [handleSaveEditedImage]);
 
+  const lastImageUrlRef = useRef<string | null>(null);
+
+  // Handle resetting and loading states when the active image changes
+  useEffect(() => {
+    if (state.imageUrl) {
+      const saved = imageEditStates?.[state.imageUrl];
+      state.setSlices(saved?.slices || []);
+      state.setSelectedSliceId(saved?.selectedSliceId || null);
+      state.setSplitLines(saved?.splitLines || []);
+      state.setDetectedBoxes(saved?.detectedBoxes || []);
+      state.setZoom(1);
+
+      // Reset history
+      setHistory(saved?.history || []);
+      setRedoHistory([]);
+
+      // Reset active crop bounds in parent
+      setEditCropTop(0);
+      setEditCropBottom(0);
+      setEditCropLeft(0);
+      setEditCropRight(0);
+      setEditAutoTrim(true);
+    }
+  }, [
+    state.imageUrl,
+    imageEditStates,
+    setEditCropTop,
+    setEditCropBottom,
+    setEditCropLeft,
+    setEditCropRight,
+    setEditAutoTrim,
+    setHistory,
+    setRedoHistory,
+  ]);
+
   // Sync state back to parent container if needed
   useEffect(() => {
+    // If imageUrl changed, don't sync stale data of the old image into the new image's slot!
+    if (state.imageUrl !== lastImageUrlRef.current) {
+      lastImageUrlRef.current = state.imageUrl;
+      return;
+    }
+
     if (state.imageUrl && setImageEditStates) {
       setImageEditStates((prev) => ({
         ...prev,

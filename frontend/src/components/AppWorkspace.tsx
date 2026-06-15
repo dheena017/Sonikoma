@@ -10,6 +10,7 @@ import VolumeAndProgressPanel from "./video/VolumeAndProgressPanel.js";
 import OutputMetadataPanel from "./OutputMetadataPanel.js";
 
 interface AppWorkspaceProps {
+  isDashboardOnly?: boolean;
   panels: any[];
   setPanels: any;
   consoleLogs: string[];
@@ -75,6 +76,7 @@ interface AppWorkspaceProps {
 }
 
 export function AppWorkspace({
+  isDashboardOnly = true,
   panels,
   setPanels,
   consoleLogs,
@@ -163,6 +165,7 @@ export function AppWorkspace({
 
         {/* SEPARATED IMAGE STRIPS GALLERY */}
         <LiveScraperDeck
+          isDashboardOnly={isDashboardOnly}
           scrapedImages={scrapedImages}
           isScraping={isScraping}
           selectedScraped={selectedScraped}

@@ -7,8 +7,10 @@ import { extractWebtoonUrl } from "../utils/url.js";
 
 export function useAppLogic() {
   const state = useAppState();
+  const { targetUrl, selectedSource, selectedModel } = state;
   const videoPlayerRef = useRef<HTMLVideoElement | null>(null);
   const sourceMismatchNotified = useRef(false);
+  const lastScrapedUrlRef = useRef<string>("");
 
   const {
     currentPanelIndex,
@@ -152,19 +154,11 @@ export function useAppLogic() {
   };
 
   // --- System Logs Engine ---
-  useEffect(() => {
-    let isCurrent = true;
-    const abortController = new AbortController();
+  const scrapeImages = useCallback(async (customUrl?: string) => {
+    const activeUrl = customUrl || targetUrl;
+    if (!activeUrl.trim()) return;
 
-    if (!state.targetUrl.trim()) {
-      state.setScrapedImages([]);
-      state.setSelectedScraped([]);
-      state.setPanels([]);
-      state.setIsScraping(false);
-      return;
-    }
-
-    const normalizedTargetUrl = extractWebtoonUrl(state.targetUrl);
+    const normalizedTargetUrl = extractWebtoonUrl(activeUrl);
     const currentHost = (() => {
       try {
         const urlWithScheme = normalizedTargetUrl.startsWith("http") ? normalizedTargetUrl : `https://${normalizedTargetUrl}`;
@@ -174,7 +168,7 @@ export function useAppLogic() {
       }
     })();
 
-    const allowedHosts = SOURCE_DOMAINS[state.selectedSource] || ["webtoons.com", "webtoon.com"];
+    const allowedHosts = SOURCE_DOMAINS[selectedSource] || ["webtoons.com", "webtoon.com"];
     const isSourceMismatch = Boolean(
       normalizedTargetUrl &&
       currentHost &&
@@ -186,7 +180,7 @@ export function useAppLogic() {
     if (isSourceMismatch) {
       if (!sourceMismatchNotified.current) {
         state.addNotification(
-          `Selected source ${state.selectedSource} does not match the current URL host (${currentHost}). Please choose the correct website or paste a matching URL.`,
+          `Selected source ${selectedSource} does not match the current URL host (${currentHost}). Please choose the correct website or paste a matching URL.`,
           'error'
         );
         sourceMismatchNotified.current = true;
@@ -199,7 +193,7 @@ export function useAppLogic() {
       setStoryboardPlaying(false);
       state.setIsScraping(false);
       state.setConsoleLogs(prev => [
-        `[Scraper] Aborting automatic scrape because selected source ${state.selectedSource} does not match the URL host ${currentHost}.`,
+        `[Scraper] Aborting automatic scrape because selected source ${selectedSource} does not match the URL host ${currentHost}.`,
         ...prev
       ]);
       return;
@@ -208,101 +202,102 @@ export function useAppLogic() {
     sourceMismatchNotified.current = false;
     state.setIsScraping(true);
 
-    const timer = setTimeout(() => {
-      const { genre, title, episode } = parseWebtoonUrl(normalizedTargetUrl);
-      
-      state.setPanels([]);
-      state.setScrapedImages([]);
-      state.setSelectedScraped([]);
-      setCurrentPanelIndex(0);
-      setPlaybackTime(0);
-      setStoryboardPlaying(false);
-      
-      state.setConsoleLogs(prev => {
-        const baseLogs = prev.filter(log => !log.startsWith("[Preloader]") && !log.startsWith("[Scraper]"));
-        return [
-          `[Scraper] Spawned live scraping task to separate strip images from: ${normalizedTargetUrl}`,
-          `[Model] Using AI engine: ${state.selectedModel} for panel analysis`,
-          `[Scraper] Selected source website: ${state.selectedSource}`,
-          `[Scraper] Parsed URL → Genre: ${genre} | Title: ${title} | Episode: ${episode}`,
-          ...baseLogs
-        ];
-      });
+    const { genre, title, episode } = parseWebtoonUrl(normalizedTargetUrl);
+    
+    state.setPanels([]);
+    state.setScrapedImages([]);
+    state.setSelectedScraped([]);
+    setCurrentPanelIndex(0);
+    setPlaybackTime(0);
+    setStoryboardPlaying(false);
+    
+    state.setConsoleLogs(prev => {
+      const baseLogs = prev.filter(log => !log.startsWith("[Preloader]") && !log.startsWith("[Scraper]"));
+      return [
+        `[Scraper] Spawned live scraping task to separate strip images from: ${normalizedTargetUrl}`,
+        `[Model] Using AI engine: ${selectedModel} for panel analysis`,
+        `[Scraper] Selected source website: ${selectedSource}`,
+        `[Scraper] Parsed URL → Genre: ${genre} | Title: ${title} | Episode: ${episode}`,
+        ...baseLogs
+      ];
+    });
 
-      // We trigger the scrape directly here since it touches states in useAppState
-      state.fetchWithInterceptor("/api/scrape-images", {
+    try {
+      const res = await state.fetchWithInterceptor("/api/scrape-images", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: normalizedTargetUrl, model: state.selectedModel, source: state.selectedSource, bypass_cache: false }),
-        signal: abortController.signal,
-      })
-        .then(res => {
-          if (!isCurrent) throw new Error("Stale request cleanup");
-          return res.json();
-        })
-        .then(data => {
-          if (!isCurrent) return;
-          state.setIsScraping(false);
-          if (data.success && data.images && data.images.length > 0) {
-            const proxiedImages = data.images.map((img: string) => 
-               img.startsWith('http') ? `/api/proxy-image?url=${encodeURIComponent(img)}` : img
-            );
+        body: JSON.stringify({ url: normalizedTargetUrl, model: selectedModel, source: selectedSource, bypass_cache: false }),
+      });
+      const data = await res.json();
+      state.setIsScraping(false);
+      if (data.success && data.images && data.images.length > 0) {
+        const proxiedImages = data.images.map((img: string) => 
+           img.startsWith('http') ? `/api/proxy-image?url=${encodeURIComponent(img)}` : img
+        );
 
-            state.setScrapedImages([]);
-            state.setPanels([]);
-            setCurrentPanelIndex(0);
-            setPlaybackTime(0);
-            setStoryboardPlaying(false);
-            
-            state.setScrapedImages(proxiedImages);
-            
-            state.addNotification(`Successfully extracted ${data.total_images} panel frames from the Webtoon page!`, 'success');
-            
-            state.setConsoleLogs(prev => {
-              const filtered = prev.filter(log => !log.startsWith("[Scraper]"));
-              return [
-                `[Scraper] Success! Separated ${data.total_images} continuous panel strips from active page.`,
-                `[Scraper] Images loaded. Select and insert panels from the deck below.`,
-                `[API] Scrape response received — Model: ${state.selectedModel} | Images: ${data.total_images}`,
-                ...filtered
-              ];
-            });
-              // Developer console visibility
-              console.log(`[Scraper] Loaded ${data.total_images} images from ${state.targetUrl}`);
-          } else {
-            const errMsg = data.message || "Connected but no native comic elements identified on page.";
-            state.setScrapedImages([]);
-            state.setPanels([]);
-            state.addNotification(`Failed to find comic panels: ${errMsg} Please check the URL and try again.`, "error");
-            state.setConsoleLogs(prev => [
-              `[Scraper] [WARNING] No comic panels detected on page. Server message: ${errMsg}`,
-              ...prev
-            ]);
-          }
-        })
-        .catch(err => {
-          if (!isCurrent) return;
-          state.setIsScraping(false);
-          state.setScrapedImages([]);
-          state.setPanels([]);
-          state.setConsoleLogs(prev => [
-            `[Scraper] [ERROR] Scrape failed: ${err.message || 'Unknown error'}`,
-            ...prev
-          ]);
-          
-          if (!err.intercepted) {
-            const errMsg = err.message || "Failed to retrieve comic panels from the specified URL.";
-            state.addNotification(`Service unable to access target site. Check the URL or refresh the page. (${errMsg})`, "error");
-          }
+        state.setScrapedImages([]);
+        state.setPanels([]);
+        setCurrentPanelIndex(0);
+        setPlaybackTime(0);
+        setStoryboardPlaying(false);
+        
+        state.setScrapedImages(proxiedImages);
+        state.addNotification(`Successfully extracted ${data.total_images} panel frames from the Webtoon page!`, 'success');
+        
+        state.setConsoleLogs(prev => {
+          const filtered = prev.filter(log => !log.startsWith("[Scraper]"));
+          return [
+            `[Scraper] Success! Separated ${data.total_images} continuous panel strips from active page.`,
+            `[Scraper] Images loaded. Select and insert panels from the deck below.`,
+            `[API] Scrape response received — Model: ${selectedModel} | Images: ${data.total_images}`,
+            ...filtered
+          ];
         });
-    }, 750);
+        console.log(`[Scraper] Loaded ${data.total_images} images from ${activeUrl}`);
+      } else {
+        const errMsg = data.message || "Connected but no native comic elements identified on page.";
+        state.setScrapedImages([]);
+        state.setPanels([]);
+        state.addNotification(`Failed to find comic panels: ${errMsg} Please check the URL and try again.`, "error");
+        state.setConsoleLogs(prev => [
+          `[Scraper] [WARNING] No comic panels detected on page. Server message: ${errMsg}`,
+          ...prev
+        ]);
+      }
+    } catch (err: any) {
+      state.setIsScraping(false);
+      state.setScrapedImages([]);
+      state.setPanels([]);
+      state.setConsoleLogs(prev => [
+        `[Scraper] [ERROR] Scrape failed: ${err.message || 'Unknown error'}`,
+        ...prev
+      ]);
+      if (!err.intercepted) {
+        const errMsg = err.message || "Failed to retrieve comic panels from the specified URL.";
+        state.addNotification(`Service unable to access target site. Check the URL or refresh the page. (${errMsg})`, "error");
+      }
+    }
+  }, [targetUrl, selectedModel, selectedSource, state.fetchWithInterceptor, state.addNotification, state.setPanels, state.setScrapedImages, state.setSelectedScraped, state.setConsoleLogs, setCurrentPanelIndex, setPlaybackTime, setStoryboardPlaying, state.setIsScraping]);
 
-    return () => {
-      isCurrent = false;
-      clearTimeout(timer);
-      abortController.abort();
-    };
-  }, [state.targetUrl, state.selectedModel, state.selectedSource, state.fetchWithInterceptor, state.addNotification, state.setPanels, state.setScrapedImages, state.setSelectedScraped, state.setConsoleLogs, setCurrentPanelIndex, setPlaybackTime, setStoryboardPlaying, state.setIsScraping]);
+  useEffect(() => {
+    if (!targetUrl.trim()) {
+      lastScrapedUrlRef.current = "";
+      state.setScrapedImages([]);
+      state.setSelectedScraped([]);
+      state.setPanels([]);
+      state.setIsScraping(false);
+      return;
+    }
+
+    // Only trigger if we have a real URL and we aren't already processing
+    if (targetUrl && targetUrl.includes("http") && !isProcessing) {
+      if (targetUrl !== lastScrapedUrlRef.current) {
+        lastScrapedUrlRef.current = targetUrl;
+        console.log("[Auto-Scrape] Target URL changed, initiating scrape for:", targetUrl);
+        scrapeImages(); 
+      }
+    }
+  }, [targetUrl, isProcessing, scrapeImages, state.setScrapedImages, state.setSelectedScraped, state.setPanels, state.setIsScraping]);
 
   const totalCalculatedDuration = state.panels.reduce((sum, p) => sum + (p.duration || 0), 0);
 
@@ -339,5 +334,6 @@ export function useAppLogic() {
     isBatchCropping,
     batchProgress,
     croppingImgUrl,
+    scrapeImages,
   };
 }

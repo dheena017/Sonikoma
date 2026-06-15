@@ -5,6 +5,7 @@ import { NotificationType } from "../components/NotificationStack";
 interface UseBatchImageActionsProps {
   selectedScraped: string[];
   setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
+  scrapedImages: string[];
   setScrapedImages: React.Dispatch<React.SetStateAction<string[]>>;
   setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
   setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>>;
@@ -50,6 +51,7 @@ interface UseBatchImageActionsProps {
 export function useBatchImageActions({
   selectedScraped,
   setSelectedScraped,
+  scrapedImages,
   setScrapedImages,
   setPanels,
   setConsoleLogs,
@@ -91,15 +93,16 @@ export function useBatchImageActions({
 }: UseBatchImageActionsProps) {
 
   const handleCleanBubblesSelected = async () => {
-    if (selectedScraped.length === 0) {
-      addNotification("No images selected for bubble cleaning.", "warning");
+    const targetImages = selectedScraped.length > 0 ? selectedScraped : scrapedImages;
+    if (targetImages.length === 0) {
+      addNotification("No images available for bubble cleaning.", "warning");
       return;
     }
-    console.log(`[Speech Bubbles] Starting batch clean on ${selectedScraped.length} images`, selectedScraped);
+    console.log(`[Speech Bubbles] Starting batch clean on ${targetImages.length} images`, targetImages);
     setIsCleaningBubbles(true);
-    setCleanProgress({ current: 0, total: selectedScraped.length });
+    setCleanProgress({ current: 0, total: targetImages.length });
     setConsoleLogs((prev) => [
-      `[Speech Bubbles] Starting batch clean bubbles job for ${selectedScraped.length} selected images...`,
+      `[Speech Bubbles] Starting batch clean bubbles job for ${targetImages.length} images...`,
       ...prev,
     ]);
 
@@ -107,7 +110,7 @@ export function useBatchImageActions({
     const errors: string[] = [];
 
     try {
-      for (const url of selectedScraped) {
+      for (const url of targetImages) {
         setBubbleCroppingImgUrl(url);
         try {
           const response = await fetchWithInterceptor("/api/remove-speech-bubbles", {
@@ -138,7 +141,7 @@ export function useBatchImageActions({
           errors.push(`Image: ${url.substring(0, 40)}... - Error: ${err.message}`);
         } finally {
           completedCount++;
-          setCleanProgress({ current: completedCount, total: selectedScraped.length });
+          setCleanProgress({ current: completedCount, total: targetImages.length });
         }
       }
     } catch (outerErr: any) {
@@ -156,7 +159,7 @@ export function useBatchImageActions({
         ...prev,
       ]);
     } else {
-      addNotification(`Successfully cleaned speech bubbles for ${selectedScraped.length} images!`, "success");
+      addNotification(`Successfully cleaned speech bubbles for ${targetImages.length} images!`, "success");
       setConsoleLogs((prev) => [
         `[Speech Bubbles] ✓ Batch clean speech bubbles job completed successfully!`,
         ...prev,
@@ -166,15 +169,16 @@ export function useBatchImageActions({
   };
 
   const handleAutoCropSelected = async () => {
-    if (selectedScraped.length === 0) {
-      addNotification("No images selected for auto cropping.", "warning");
+    const targetImages = selectedScraped.length > 0 ? selectedScraped : scrapedImages;
+    if (targetImages.length === 0) {
+      addNotification("No images available for auto cropping.", "warning");
       return;
     }
-    console.log(`[Auto Cropper] Starting batch auto-crop on ${selectedScraped.length} images`, selectedScraped);
+    console.log(`[Auto Cropper] Starting batch auto-crop on ${targetImages.length} images`, targetImages);
     setIsBatchCropping(true);
-    setBatchProgress({ current: 0, total: selectedScraped.length });
+    setBatchProgress({ current: 0, total: targetImages.length });
     setConsoleLogs((prev) => [
-      `[Auto Cropper] Starting batch auto crop job for ${selectedScraped.length} selected images...`,
+      `[Auto Cropper] Starting batch auto crop job for ${targetImages.length} images...`,
       ...prev,
     ]);
 
@@ -183,7 +187,7 @@ export function useBatchImageActions({
     const newSlicedUrlsMap: Record<string, string[]> = {};
 
     try {
-      for (const url of selectedScraped) {
+      for (const url of targetImages) {
         setCroppingImgUrl(url);
         try {
           const response = await fetchWithInterceptor("/api/detect-panels", {
@@ -229,14 +233,9 @@ export function useBatchImageActions({
               for (let i = 0; i < data.panels.length; i++) {
                 const box = data.panels[i];
 
-                // The /api/detect-panels backend already crops each panel and
-                // returns a ready-to-use croppedUrl. Use it directly to avoid a
-                // redundant second edit-image round-trip that was silently
-                // re-cropping the wrong region.
                 if (box.croppedUrl) {
                   croppedUrls.push(box.croppedUrl);
                 } else {
-                  // Fallback for any backend variant that doesn't embed croppedUrl
                   const cropResponse = await fetchWithInterceptor("/api/edit-image", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -257,7 +256,6 @@ export function useBatchImageActions({
               }
               newSlicedUrlsMap[url] = croppedUrls;
             } else {
-              // No panels detected - keep the original image as-is
               newSlicedUrlsMap[url] = [url];
               setConsoleLogs((prev) => [
                 `[Auto Cropper Warning] No panels detected for ${url.substring(0, 40)}... - keeping original image as a single panel.`,
@@ -274,7 +272,7 @@ export function useBatchImageActions({
           newSlicedUrlsMap[url] = [url];
         } finally {
           completedCount++;
-          setBatchProgress({ current: completedCount, total: selectedScraped.length });
+          setBatchProgress({ current: completedCount, total: targetImages.length });
         }
       }
     } catch (outerErr: any) {

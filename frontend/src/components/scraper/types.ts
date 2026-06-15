@@ -40,6 +40,7 @@ export interface ScraperDeckProps {
   croppingImgUrl: string | null;
   handleAutoCropSelected: () => void;
   handleCleanBubblesSelected: () => void;
+  isDashboardOnly?: boolean;
 }
 
 export type LiveScraperDeckProps = ScraperDeckProps;

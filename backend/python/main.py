@@ -7,12 +7,17 @@ Anivox Webtoon-to-Video Compiler — FastAPI Computational Engine & API Server
 
 import os
 import sys
+import asyncio
 import time
 import logging
 import platform
 import warnings
 import uuid
 from contextlib import asynccontextmanager
+
+# Fix Windows asyncio subprocess NotImplementedError
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
 # Suppress noisy external library warnings
 warnings.filterwarnings("ignore", category=FutureWarning)

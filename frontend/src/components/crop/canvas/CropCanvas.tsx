@@ -109,10 +109,46 @@ export default function CropCanvas({
   const isManualBrushActive = editMode === "clean_manual" && activeTab === "eraser";
 
   const [naturalAspect, setNaturalAspect] = useState<number | null>(null);
+  const imgRef = React.useRef<HTMLImageElement>(null);
+  const scrollParentRef = React.useRef<HTMLDivElement>(null);
+  const lastZoomRef = React.useRef(zoom);
 
   useEffect(() => {
     setNaturalAspect(null);
+    if (imgRef.current && imgRef.current.complete) {
+      const { naturalWidth, naturalHeight } = imgRef.current;
+      if (naturalWidth && naturalHeight) {
+        setNaturalAspect(naturalWidth / naturalHeight);
+      }
+    }
   }, [imgUrl]);
+
+  // Keep zoom centered inside scroll container on changes
+  useEffect(() => {
+    const parent = scrollParentRef.current;
+    if (!parent) return;
+
+    if (zoom !== lastZoomRef.current) {
+      const oldZoom = lastZoomRef.current;
+      lastZoomRef.current = zoom;
+
+      // Adjust scroll position to keep the center of the viewport focused
+      const scrollX = parent.scrollLeft;
+      const scrollY = parent.scrollTop;
+      const width = parent.clientWidth;
+      const height = parent.clientHeight;
+
+      const centerX = scrollX + width / 2;
+      const centerY = scrollY + height / 2;
+
+      const ratio = zoom / oldZoom;
+      const newCenterX = centerX * ratio;
+      const newCenterY = centerY * ratio;
+
+      parent.scrollLeft = newCenterX - width / 2;
+      parent.scrollTop = newCenterY - height / 2;
+    }
+  }, [zoom]);
 
   const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const { naturalWidth, naturalHeight } = e.currentTarget;
@@ -235,80 +271,101 @@ export default function CropCanvas({
 
   return (
     <div
-      className="relative border border-white/5 hover:border-purple-500/20 rounded-2xl bg-black overflow-hidden flex-1 h-0 flex items-center justify-center select-none transition-colors"
+      ref={scrollParentRef}
+      className={`relative border border-white/5 hover:border-purple-500/20 rounded-2xl bg-black ${zoom > 1 ? "overflow-auto" : "overflow-hidden"} flex-1 h-0 flex items-center justify-center select-none transition-colors`}
       style={{ boxShadow: "inset 0 0 30px rgba(0,0,0,0.5)" }}
     >
       <div
-        ref={containerRef}
-        onMouseDown={(e) => {
-          if (isManualBrushActive) return;
-          if (e.button !== 0) return;
-          handleStart(e.clientX, e.clientY);
-        }}
-        onMouseMove={(e) => {
-          if (isManualBrushActive) return;
-
-          const pct = getClientPct(e.clientX, e.clientY);
-          if (!pct) return;
-
-          // Skip hover state updates while dragging to reduce re-renders
-          if (dragType !== null) {
-            if (dragType) handleMove(pct.x, pct.y);
-            return;
-          }
-
-          setHoverPct(pct);
-        }}
-        onMouseUp={() => {
-          if (isManualBrushActive) return;
-          handleEnd();
-        }}
-        onMouseLeave={() => {
-          setHoverPct(null);
-          if (dragType) handleEnd();
-        }}
-        onTouchStart={(e) => {
-          if (isManualBrushActive) return;
-          if (e.touches && e.touches[0]) {
-            handleStart(e.touches[0].clientX, e.touches[0].clientY);
-          }
-        }}
-        onTouchMove={(e) => {
-          if (isManualBrushActive) return;
-          if (e.touches && e.touches[0]) {
-            const touch = e.touches[0];
-            const pct = getClientPct(touch.clientX, touch.clientY);
-            if (!pct) return;
-
-            if (dragType) {
-              handleMove(pct.x, pct.y);
-            } else {
-              setHoverPct(pct);
-            }
-          }
-        }}
-        onTouchEnd={() => {
-          if (isManualBrushActive) return;
-          handleEnd();
-        }}
-        className={`relative inline-flex flex-col ${activeTab === 'crop' ? 'cursor-crosshair' : ''}`}
         style={{
-          userSelect: "none",
-          touchAction: "none",
-          transform: zoom !== 1 ? `scale(${zoom})` : undefined,
-          transformOrigin: "top center",
-          transition: "transform 0.15s ease",
-          maxHeight: "100%",
-          maxWidth: "100%",
-          aspectRatio: naturalAspect || undefined,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: zoom > 1 ? `${zoom * 100}%` : "100%",
+          height: zoom > 1 ? `${zoom * 100}%` : "100%",
+          minWidth: zoom > 1 ? `${zoom * 100}%` : "100%",
+          minHeight: zoom > 1 ? `${zoom * 100}%` : "100%",
+          transition: "width 0.15s ease, height 0.15s ease",
         }}
       >
+        <div
+          ref={containerRef}
+          onMouseDown={(e) => {
+            if (isManualBrushActive) return;
+            if (e.button !== 0) return;
+            handleStart(e.clientX, e.clientY);
+          }}
+          onMouseMove={(e) => {
+            if (isManualBrushActive) return;
+
+            const pct = getClientPct(e.clientX, e.clientY);
+            if (!pct) return;
+
+            // Skip hover state updates while dragging to reduce re-renders
+            if (dragType !== null) {
+              if (dragType) handleMove(pct.x, pct.y);
+              return;
+            }
+
+            setHoverPct(pct);
+          }}
+          onMouseUp={() => {
+            if (isManualBrushActive) return;
+            handleEnd();
+          }}
+          onMouseLeave={() => {
+            setHoverPct(null);
+            if (dragType) handleEnd();
+          }}
+          onTouchStart={(e) => {
+            if (isManualBrushActive) return;
+            if (e.touches && e.touches[0]) {
+              handleStart(e.touches[0].clientX, e.touches[0].clientY);
+            }
+          }}
+          onTouchMove={(e) => {
+            if (isManualBrushActive) return;
+            if (e.touches && e.touches[0]) {
+              const touch = e.touches[0];
+              const pct = getClientPct(touch.clientX, touch.clientY);
+              if (!pct) return;
+
+              if (dragType) {
+                handleMove(pct.x, pct.y);
+              } else {
+                setHoverPct(pct);
+              }
+            }
+          }}
+          onTouchEnd={() => {
+            if (isManualBrushActive) return;
+            handleEnd();
+          }}
+          className={`relative inline-flex flex-col ${activeTab === 'crop' ? 'cursor-crosshair' : ''}`}
+          style={{
+            userSelect: "none",
+            touchAction: "none",
+            transform: zoom !== 1 ? `scale(${zoom})` : undefined,
+            transformOrigin: "center",
+            transition: "transform 0.15s ease",
+            width: "auto",
+            height: "auto",
+            maxHeight: "100%",
+            maxWidth: "100%",
+            aspectRatio: naturalAspect || undefined,
+          }}
+        >
         <img
+          ref={imgRef}
           src={imgUrl}
           alt="Preview"
           onLoad={handleImageLoad}
-          className="pointer-events-none select-none block w-full h-full"
-          style={{ width: "100%", height: "100%" }}
+          className="pointer-events-none select-none block"
+          style={{
+            maxWidth: "100%",
+            maxHeight: "100%",
+            width: "auto",
+            height: "auto",
+          }}
           draggable={false}
         />
 
@@ -381,5 +438,6 @@ export default function CropCanvas({
         })}
       </div>
     </div>
-  );
+  </div>
+);
 }

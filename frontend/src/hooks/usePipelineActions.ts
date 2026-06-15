@@ -129,6 +129,7 @@ export function usePipelineActions({
   } = useBatchImageActions({
     selectedScraped,
     setSelectedScraped,
+    scrapedImages,
     setScrapedImages,
     setPanels,
     setConsoleLogs,

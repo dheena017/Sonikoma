@@ -265,6 +265,7 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
           PIP ACTIVE
         </div>
         <CropEditorCanvasContainer
+          key={imageUrl || undefined}
           handleAiCrop={handleAiCrop}
           isAiDetecting={isAiDetecting}
           editingImageIdx={editingImageIdx}
@@ -342,9 +343,12 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
           slices={slices}
         />
 
+
+
         {/* Main Content Pane */}
         <div className="p-4 sm:p-5 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 flex-1 min-h-0 overflow-hidden select-none items-stretch">
           <CropEditorCanvasContainer
+            key={imageUrl || undefined}
             handleAiCrop={handleAiCrop}
             isAiDetecting={isAiDetecting}
             editingImageIdx={editingImageIdx}
@@ -499,6 +503,50 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
           />
         </div>
 
+        {/* Scrollable Horizontal Preview Ribbon */}
+        {scrapedImages.length > 0 && (
+          <div className="px-5 py-2.5 border-t border-white/5 bg-neutral-950/20 flex flex-col gap-1.5 shrink-0">
+            <span className="text-[9px] font-mono font-bold text-neutral-500 uppercase tracking-wider select-none">
+              Scraped Panels Deck ({scrapedImages.length})
+            </span>
+            <div className="flex flex-wrap gap-3 overflow-y-auto py-1.5 pr-2 scrollbar-thin max-h-28 sm:max-h-32">
+              {scrapedImages.map((imgUrl, idx) => {
+                const isCurrent = idx === editingImageIdx;
+                return (
+                  <div 
+                    key={imgUrl} 
+                    onClick={() => {
+                      console.log(`[CropEditor] Switching to image idx: ${idx}`);
+                      setEditingImageIdx(idx);
+                    }}
+                    className={[
+                      "relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-neutral-900 border shrink-0 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105",
+                      isCurrent
+                        ? "border-purple-500/80 shadow-[0_0_12px_rgba(168,85,247,0.3)] ring-1 ring-purple-500/30"
+                        : "border-neutral-800 hover:border-neutral-700"
+                    ].join(" ")}
+                  >
+                    <img 
+                      src={imgUrl} 
+                      alt={`Panel #${idx + 1}`} 
+                      className="w-full h-full object-contain pointer-events-none"
+                    />
+                    <div className={[
+                      "absolute bottom-1 right-1 backdrop-blur-sm px-1 py-0.5 rounded text-[8px] font-mono font-bold leading-none border transition-all duration-200",
+                      isCurrent
+                        ? "bg-purple-600/90 border-purple-400/60 text-white shadow-[0_0_8px_rgba(168,85,247,0.4)]"
+                        : "bg-black/80 border-purple-900/30 text-purple-400"
+                    ].join(" ")}
+                    >
+                      #{idx + 1}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         <CropEditorFooter
           slices={slices}
           historyLength={history.length}
@@ -510,6 +558,7 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
           isTransforming={isTransforming}
           addNotification={addNotification}
           handleExecuteHorizontalSplit={handleExecuteHorizontalSplit}
+          handleExecuteSave={handleExecuteSave}
         />
       </div>
     </div>

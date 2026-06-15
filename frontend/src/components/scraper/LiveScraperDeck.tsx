@@ -48,6 +48,7 @@ export default function LiveScraperDeck({
   handleAutoCropSelected,
   handleCleanBubblesSelected,
   addPanelsToStoryboard,
+  isDashboardOnly = true,
 }: LiveScraperDeckProps) {
   const [isZipping, setIsZipping] = useState(false);
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
@@ -324,22 +325,24 @@ export default function LiveScraperDeck({
       </div>
 
       {/* Floating Selection Action Bar */}
-      <FloatingSelectionBar
-        selectedCount={selectedScraped.length}
-        totalCount={scrapedImages.length}
-        isBatchCropping={isBatchCropping}
-        batchProgress={batchProgress}
-        isCleaningBubbles={isCleaningBubbles}
-        cleanProgress={cleanProgress}
-        isBatchMerging={isBatchMerging}
-        handleAutoCropSelected={handleAutoCropSelected}
-        handleCleanBubblesSelected={handleCleanBubblesSelected}
-        handleBatchMergeSelected={handleBatchMergeSelected}
-        handleAddToStoryboard={handleAddToStoryboard}
-        handleDeleteSelected={handleDeleteSelected}
-        handleClearAll={handleClearAll}
-        handleSelectAllToggle={handleSelectAllToggle}
-      />
+      {isDashboardOnly && (
+        <FloatingSelectionBar
+          selectedCount={selectedScraped.length}
+          totalCount={scrapedImages.length}
+          isBatchCropping={isBatchCropping}
+          batchProgress={batchProgress}
+          isCleaningBubbles={isCleaningBubbles}
+          cleanProgress={cleanProgress}
+          isBatchMerging={isBatchMerging}
+          handleAutoCropSelected={handleAutoCropSelected}
+          handleCleanBubblesSelected={handleCleanBubblesSelected}
+          handleBatchMergeSelected={handleBatchMergeSelected}
+          handleAddToStoryboard={handleAddToStoryboard}
+          handleDeleteSelected={handleDeleteSelected}
+          handleClearAll={handleClearAll}
+          handleSelectAllToggle={handleSelectAllToggle}
+        />
+      )}
     </>
   );
 }

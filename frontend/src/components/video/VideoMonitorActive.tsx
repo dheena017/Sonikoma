@@ -74,7 +74,7 @@ export function VideoMonitorActive({
             <img
               src={activeStoryboardPanel.image_url}
               alt="Active Frame"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
               referrerPolicy="no-referrer"
               style={{
                 transform: activeStoryboardPanel.motion_type === "zoom_in" ? `scale(${1 + (playbackTime * 0.02)})` :

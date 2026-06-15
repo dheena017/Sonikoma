@@ -119,20 +119,10 @@ export function useAppRouter({
         setShowBubbleModal(false);
         setEditingImageIdx(null);
       } else if (path === "/auto-crop") {
-        if (scrapedImages.length === 0 && panels.length === 0) {
-          window.history.replaceState({}, "", "/");
-          setCurrentPath("/");
-          return;
-        }
         setShowAutoCropModal(true);
         setShowBubbleModal(false);
         setEditingImageIdx(null);
       } else if (path === "/bubble-cleaner") {
-        if (scrapedImages.length === 0 && panels.length === 0) {
-          window.history.replaceState({}, "", "/");
-          setCurrentPath("/");
-          return;
-        }
         setShowAutoCropModal(false);
         setShowBubbleModal(true);
         setEditingImageIdx(null);

@@ -121,7 +121,7 @@ export function useGlobalShortcuts({
       event.preventDefault();
       
       const path = window.location.pathname;
-      const isDashboard = path === "/" || path === "" || path === "/index.html" || path === "/dashboard";
+      const isDashboard = path === "/" || path === "" || path === "/index.html";
       const isEditor = path.startsWith("/editor");
 
       switch (matchedAction) {

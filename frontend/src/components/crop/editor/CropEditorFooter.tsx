@@ -13,6 +13,7 @@ interface CropEditorFooterProps {
   isTransforming: boolean;
   addNotification: (msg: string, type: any) => void;
   handleExecuteHorizontalSplit: () => void;
+  handleExecuteSave: () => void;
 }
 
 export default function CropEditorFooter({
@@ -26,6 +27,7 @@ export default function CropEditorFooter({
   isTransforming,
   addNotification,
   handleExecuteHorizontalSplit,
+  handleExecuteSave,
 }: CropEditorFooterProps) {
   return (
     <div className="px-5 py-4 bg-gradient-to-r from-neutral-950/95 via-neutral-950 to-purple-950/10 border-t border-white/5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -89,7 +91,7 @@ export default function CropEditorFooter({
           <span>Delete</span>
         </button>
 
-        {activeTab === "slice" && (
+        {activeTab === "slice" ? (
           <button
             type="button"
             onClick={handleExecuteHorizontalSplit}
@@ -109,8 +111,27 @@ export default function CropEditorFooter({
               </>
             )}
           </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleExecuteSave}
+            disabled={isSavingEdit}
+            className="relative bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-2 shadow-lg shadow-purple-900/50"
+            style={{ boxShadow: isSavingEdit ? undefined : "0 0 20px rgba(139,92,246,0.25), 0 4px 12px rgba(0,0,0,0.4)" }}
+          >
+            {isSavingEdit ? (
+              <>
+                <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                <span>Saving Changes...</span>
+              </>
+            ) : (
+              <>
+                <Scissors className="h-3.5 w-3.5 text-purple-200" />
+                <span>Apply Changes</span>
+              </>
+            )}
+          </button>
         )}
-
       </div>
     </div>
   );

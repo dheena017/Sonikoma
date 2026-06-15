@@ -42,7 +42,7 @@ export default function Sidebar({
   isOpen,
   onClose,
 }: SidebarProps) {
-  const isDashboard = currentPath === "/" || currentPath === "" || currentPath === "/index.html" || currentPath === "/dashboard";
+  const isDashboard = currentPath === "/" || currentPath === "" || currentPath === "/index.html";
   const isSettings = currentPath === "/settings";
   const isAutoCrop = currentPath === "/auto-crop";
   const isBubbleCleaner = currentPath === "/bubble-cleaner";
@@ -83,19 +83,17 @@ export default function Sidebar({
           icon: Scissors,
           active: isAutoCrop,
           onClick: () => navigateTo("/auto-crop"),
-          enabled: scrapedImages.length > 0 || panels.length > 0,
+          enabled: true,
           badge: scrapedImages.length > 0 ? scrapedImages.length : (panels.length > 0 ? panels.length : undefined),
           isProcessing: isBatchCropping,
-          disabledTip: "Requires scraped images or storyboard panels"
         },
         {
           label: "Clean-Bubbles",
           icon: Brain,
           active: isBubbleCleaner,
           onClick: () => navigateTo("/bubble-cleaner"),
-          enabled: scrapedImages.length > 0 || panels.length > 0,
+          enabled: true,
           isProcessing: isCleaningBubbles,
-          disabledTip: "Requires scraped images or storyboard panels"
         },
         {
           label: "Editor",

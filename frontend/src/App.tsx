@@ -209,7 +209,14 @@ export default function App() {
     setIsPipMode,
   });
 
-  const isDashboardPath = currentPath === "/" || currentPath === "" || currentPath === "/index.html" || currentPath === "/dashboard";
+  const isDashboardPath = 
+    currentPath === "/" || 
+    currentPath === "" || 
+    currentPath === "/index.html";
+  const isDashboardOnly = 
+    currentPath === "/" || 
+    currentPath === "" || 
+    currentPath === "/index.html";
   const isSettingsPath = currentPath === "/settings";
   const isAutoCropPath = currentPath === "/auto-crop";
   const isBubbleCleanerPath = currentPath === "/bubble-cleaner";
@@ -284,6 +291,7 @@ export default function App() {
         style={{ display: isDashboardPath ? "flex" : "none" }}
       >
         <AppWorkspace
+          isDashboardOnly={isDashboardOnly}
           panels={panels}
           setPanels={setPanels}
           consoleLogs={consoleLogs}
@@ -384,100 +392,9 @@ export default function App() {
         />
       </div>
 
-      {/* PAGE 3: AUTO CROP */}
-      <div 
-        className="page-transition w-full flex-1"
-        style={{ display: isAutoCropPath ? "block" : "none" }}
-      >
-        <AutoCropModal
-          onClose={() => navigateTo("/")}
-          onApply={() => {
-             console.log("App: Triggering handleAutoCropSelected");
-             handleAutoCropSelected();
-             navigateTo("/");
-          }}
-          sensitivity={cropSensitivity}
-          setSensitivity={setCropSensitivity}
-          padding={cropPaddingPx}
-          setPadding={setCropPaddingPx}
-          backgroundColorMode={cropBackgroundMode}
-          setBackgroundColorMode={setCropBackgroundMode}
-          autoSplitTallStrips={autoSplitTallStrips}
-          setAutoSplitTallStrips={setAutoSplitTallStrips}
-          aspectRatioLock={aspectRatioLock}
-          setAspectRatioLock={setAspectRatioLock}
-          minPanelAreaPct={minPanelAreaPct}
-          setMinPanelAreaPct={setMinPanelAreaPct}
-          overlapMergeThreshold={overlapMergeThreshold}
-          setOverlapMergeThreshold={setOverlapMergeThreshold}
-          useLocalCV={useLocalCV}
-          setUseLocalCV={setUseLocalCV}
-          cropModel={cropModel}
-          setCropModel={setCropModel}
-          cropMinHeightPx={cropMinHeightPx}
-          setCropMinHeightPx={setCropMinHeightPx}
-          cropCannyLow={cropCannyLow}
-          setCropCannyLow={setCropCannyLow}
-          cropCannyHigh={cropCannyHigh}
-          setCropCannyHigh={setCropCannyHigh}
-          cropCloseKernelSize={cropCloseKernelSize}
-          setCropCloseKernelSize={setCropCloseKernelSize}
-          activeTab={activeAutoCropTab}
-          setActiveTab={setActiveAutoCropTab}
-          selectedCount={selectedScraped.length}
-          isApplying={isBatchCropping}
-          scrapedImages={scrapedImages}
-          selectedScraped={selectedScraped}
-          setConsoleLogs={setConsoleLogs}
-          addNotification={addNotification}
-        />
-      </div>
 
-      {/* PAGE 4: BUBBLE CLEANER */}
-      <div 
-        className="page-transition w-full flex-1"
-        style={{ display: isBubbleCleanerPath ? "block" : "none" }}
-      >
-        <BubbleCleanerModal
-          onClose={() => navigateTo("/")}
-          onApply={() => {
-             console.log("App: Triggering handleCleanBubblesSelected");
-             handleCleanBubblesSelected();
-             navigateTo("/");
-          }}
-          detectionStyle={bubbleDetectionStyle}
-          setDetectionStyle={setBubbleDetectionStyle}
-          eraseMethod={bubbleEraseMethod}
-          setEraseMethod={setBubbleEraseMethod}
-          sensitivity={bubbleSensitivity}
-          setSensitivity={setBubbleSensitivity}
-          bubbleDilation={bubbleDilation}
-          setBubbleDilation={setBubbleDilation}
-          bubbleInpaintRadius={bubbleInpaintRadius}
-          setBubbleInpaintRadius={setBubbleInpaintRadius}
-          activeTab={activeBubbleTab}
-          setActiveTab={setActiveBubbleTab}
-          selectedCount={selectedScraped.length}
-          isApplying={isCleaningBubbles}
-          scrapedImages={scrapedImages}
-          selectedScraped={selectedScraped}
-          addNotification={addNotification}
-        />
-      </div>
 
-      {/* PAGE 5: ADVANCED CROP EDITOR */}
-      <div 
-        className={isPipMode ? "fixed bottom-6 right-6 w-96 h-56 rounded-3xl border border-white/10 shadow-2xl z-50 overflow-hidden bg-neutral-950/95 backdrop-blur-xl animate-fade-in cursor-pointer" : "page-transition w-full flex-1"}
-        style={{ display: (isEditorPath || isPipMode) && editingImageIdx !== null ? "block" : "none" }}
-        onClick={isPipMode ? () => {
-          setIsPipMode(false);
-          navigateTo(lastEditorPath);
-        } : undefined}
-      >
-        {editingImageIdx !== null && (
-          <CropEditorModal appLogic={{ ...appLogic, isPipMode, setIsPipMode }} />
-        )}
-      </div>
+
 
       {/* PAGE 6: DEDICATED LOGS CONSOLE */}
       <div 
@@ -611,6 +528,96 @@ export default function App() {
       </div>
 
       <NotificationStack notifications={notifications} removeNotification={removeNotification} />
+
+      {/* PAGE 3: AUTO CROP */}
+      {isAutoCropPath && (
+        <AutoCropModal
+          onClose={() => navigateTo("/")}
+          onApply={() => {
+             console.log("App: Triggering handleAutoCropSelected");
+             handleAutoCropSelected();
+             navigateTo("/");
+          }}
+          sensitivity={cropSensitivity}
+          setSensitivity={setCropSensitivity}
+          padding={cropPaddingPx}
+          setPadding={setCropPaddingPx}
+          backgroundColorMode={cropBackgroundMode}
+          setBackgroundColorMode={setCropBackgroundMode}
+          autoSplitTallStrips={autoSplitTallStrips}
+          setAutoSplitTallStrips={setAutoSplitTallStrips}
+          aspectRatioLock={aspectRatioLock}
+          setAspectRatioLock={setAspectRatioLock}
+          minPanelAreaPct={minPanelAreaPct}
+          setMinPanelAreaPct={setMinPanelAreaPct}
+          overlapMergeThreshold={overlapMergeThreshold}
+          setOverlapMergeThreshold={setOverlapMergeThreshold}
+          useLocalCV={useLocalCV}
+          setUseLocalCV={setUseLocalCV}
+          cropModel={cropModel}
+          setCropModel={setCropModel}
+          cropMinHeightPx={cropMinHeightPx}
+          setCropMinHeightPx={setCropMinHeightPx}
+          cropCannyLow={cropCannyLow}
+          setCropCannyLow={setCropCannyLow}
+          cropCannyHigh={cropCannyHigh}
+          setCropCannyHigh={setCropCannyHigh}
+          cropCloseKernelSize={cropCloseKernelSize}
+          setCropCloseKernelSize={setCropCloseKernelSize}
+          activeTab={activeAutoCropTab}
+          setActiveTab={setActiveAutoCropTab}
+          selectedCount={selectedScraped.length > 0 ? selectedScraped.length : scrapedImages.length}
+          isApplying={isBatchCropping}
+          scrapedImages={scrapedImages}
+          selectedScraped={selectedScraped}
+          setSelectedScraped={setSelectedScraped}
+          setConsoleLogs={setConsoleLogs}
+          addNotification={addNotification}
+        />
+      )}
+
+      {/* PAGE 4: BUBBLE CLEANER */}
+      {isBubbleCleanerPath && (
+        <BubbleCleanerModal
+          onClose={() => navigateTo("/")}
+          onApply={() => {
+             console.log("App: Triggering handleCleanBubblesSelected");
+             handleCleanBubblesSelected();
+             navigateTo("/");
+          }}
+          detectionStyle={bubbleDetectionStyle}
+          setDetectionStyle={setBubbleDetectionStyle}
+          eraseMethod={bubbleEraseMethod}
+          setEraseMethod={setBubbleEraseMethod}
+          sensitivity={bubbleSensitivity}
+          setSensitivity={setBubbleSensitivity}
+          bubbleDilation={bubbleDilation}
+          setBubbleDilation={setBubbleDilation}
+          bubbleInpaintRadius={bubbleInpaintRadius}
+          setBubbleInpaintRadius={setBubbleInpaintRadius}
+          activeTab={activeBubbleTab}
+          setActiveTab={setActiveBubbleTab}
+          selectedCount={selectedScraped.length > 0 ? selectedScraped.length : scrapedImages.length}
+          isApplying={isCleaningBubbles}
+          scrapedImages={scrapedImages}
+          selectedScraped={selectedScraped}
+          setSelectedScraped={setSelectedScraped}
+          addNotification={addNotification}
+        />
+      )}
+
+      {/* PAGE 5: ADVANCED CROP EDITOR */}
+      {((isEditorPath || isPipMode) && editingImageIdx !== null) && (
+        <div 
+          className={isPipMode ? "fixed bottom-6 right-6 w-96 h-56 rounded-3xl border border-white/10 shadow-2xl z-50 overflow-hidden bg-neutral-950/95 backdrop-blur-xl animate-fade-in cursor-pointer" : ""}
+          onClick={isPipMode ? () => {
+            setIsPipMode(false);
+            navigateTo(lastEditorPath);
+          } : undefined}
+        >
+          <CropEditorModal appLogic={{ ...appLogic, isPipMode, setIsPipMode }} />
+        </div>
+      )}
     </div>
   );
 }

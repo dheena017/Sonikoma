@@ -62,13 +62,7 @@ export default function Header({
           </span>
         </div>
 
-        {/* Current Path Indicator */}
-        <div className="flex items-center gap-1.5 text-[11px] font-mono text-neutral-500 bg-neutral-900/50 border border-neutral-800/60 px-2 py-0.5 rounded-lg select-all">
-          <span className="text-purple-400 font-semibold">path:</span>
-          <span className="text-neutral-200 font-bold">
-            {currentPath === "/" || currentPath === "" || currentPath === "/index.html" ? "/dashboard" : currentPath}
-          </span>
-        </div>
+
       </div>
 
       {/* Right side controls/status */}
