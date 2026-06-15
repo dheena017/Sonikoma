@@ -10,17 +10,29 @@ interface TerminalLogsProps {
 
 function getTimestamp(): string {
   const now = new Date();
-  return now.toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  return now.toLocaleTimeString("en-US", {
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 }
 
-export default function TerminalLogs({ consoleLogs, setConsoleLogs }: TerminalLogsProps) {
+export default function TerminalLogs({
+  consoleLogs,
+  setConsoleLogs,
+}: TerminalLogsProps) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [copied, setCopied] = useState(false);
   const [autoScroll, setAutoScroll] = useState(true);
   const [paused, setPaused] = useState(false);
-  const [lastVisibleCount, setLastVisibleCount] = useState<number>(consoleLogs.length);
+  const [lastVisibleCount, setLastVisibleCount] = useState<number>(
+    consoleLogs.length
+  );
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState<"all" | "errors" | "warnings" | "ai" | "success">("all");
+  const [activeFilter, setActiveFilter] = useState<
+    "all" | "errors" | "warnings" | "ai" | "success"
+  >("all");
 
   // Auto-scroll to top when new logs arrive
   useEffect(() => {
@@ -42,7 +54,9 @@ export default function TerminalLogs({ consoleLogs, setConsoleLogs }: TerminalLo
   };
 
   const handleCopyVisible = () => {
-    const visible = (paused ? consoleLogs.slice(0, lastVisibleCount) : consoleLogs).join("\n");
+    const visible = (
+      paused ? consoleLogs.slice(0, lastVisibleCount) : consoleLogs
+    ).join("\n");
     navigator.clipboard.writeText(visible).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -50,7 +64,9 @@ export default function TerminalLogs({ consoleLogs, setConsoleLogs }: TerminalLo
   };
 
   const handleDownloadLogs = () => {
-    const blob = new Blob([consoleLogs.join("\n")], { type: "text/plain;charset=utf-8" });
+    const blob = new Blob([consoleLogs.join("\n")], {
+      type: "text/plain;charset=utf-8",
+    });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -62,7 +78,9 @@ export default function TerminalLogs({ consoleLogs, setConsoleLogs }: TerminalLo
   };
 
   const handleClear = () => {
-    setConsoleLogs([`[GUI] ${getTimestamp()} — Active shell cleared at user prompt.`]);
+    setConsoleLogs([
+      `[GUI] ${getTimestamp()} — Active shell cleared at user prompt.`,
+    ]);
   };
 
   // Filter and search logic
@@ -73,29 +91,57 @@ export default function TerminalLogs({ consoleLogs, setConsoleLogs }: TerminalLo
     if (!matchesQuery) return false;
 
     if (activeFilter === "errors") {
-      return log.includes("[ERROR]") || log.includes("ERROR]") || log.includes("[FATAL]");
+      return (
+        log.includes("[ERROR]") ||
+        log.includes("ERROR]") ||
+        log.includes("[FATAL]")
+      );
     }
     if (activeFilter === "warnings") {
       return log.includes("[WARNING]") || log.includes("[WARN]");
     }
     if (activeFilter === "ai") {
-      return log.includes("[AI") || log.includes("[Gemini]") || log.includes("Gemini");
+      return (
+        log.includes("[AI") ||
+        log.includes("[Gemini]") ||
+        log.includes("Gemini")
+      );
     }
     if (activeFilter === "success") {
-      return log.includes("[SUCCESS]") || log.includes("Successfully") || log.includes("completed cleanly");
+      return (
+        log.includes("[SUCCESS]") ||
+        log.includes("Successfully") ||
+        log.includes("completed cleanly")
+      );
     }
 
     return true;
   });
 
   // When paused, only show up to `lastVisibleCount` logs to avoid UI jumping
-  const displayedLogs = paused ? filteredLogs.slice(0, Math.max(0, Math.min(lastVisibleCount, filteredLogs.length))) : filteredLogs;
+  const displayedLogs = paused
+    ? filteredLogs.slice(
+        0,
+        Math.max(0, Math.min(lastVisibleCount, filteredLogs.length))
+      )
+    : filteredLogs;
 
   // Calculate statistics counts
-  const errorCount = consoleLogs.filter(log => log.includes("[ERROR]") || log.includes("ERROR]") || log.includes("[FATAL]")).length;
-  const warningCount = consoleLogs.filter(log => log.includes("[WARNING]") || log.includes("[WARN]")).length;
-  const successCount = consoleLogs.filter(log => log.includes("[SUCCESS]") || log.includes("Successfully")).length;
-  const aiCount = consoleLogs.filter(log => log.includes("[AI") || log.includes("[Gemini]")).length;
+  const errorCount = consoleLogs.filter(
+    (log) =>
+      log.includes("[ERROR]") ||
+      log.includes("ERROR]") ||
+      log.includes("[FATAL]")
+  ).length;
+  const warningCount = consoleLogs.filter(
+    (log) => log.includes("[WARNING]") || log.includes("[WARN]")
+  ).length;
+  const successCount = consoleLogs.filter(
+    (log) => log.includes("[SUCCESS]") || log.includes("Successfully")
+  ).length;
+  const aiCount = consoleLogs.filter(
+    (log) => log.includes("[AI") || log.includes("[Gemini]")
+  ).length;
 
   return (
     <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-3.5">

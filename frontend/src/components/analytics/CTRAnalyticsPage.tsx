@@ -8,7 +8,10 @@ interface CTRAnalyticsPageProps {
   addNotification?: (msg: string, type: any) => void;
 }
 
-export default function CTRAnalyticsPage({ onNavigateHome, addNotification }: CTRAnalyticsPageProps) {
+export default function CTRAnalyticsPage({
+  onNavigateHome,
+  addNotification,
+}: CTRAnalyticsPageProps) {
   const [activeTab, setActiveTab] = useState<"titles" | "outros">("titles");
 
   return (
@@ -20,7 +23,8 @@ export default function CTRAnalyticsPage({ onNavigateHome, addNotification }: CT
             AI CTR & Video Performance Predictor
           </h2>
           <p className="text-xs text-neutral-400 font-mono mt-0.5">
-            Analyze click-through rate indices and retention cliffhanger dynamics
+            Analyze click-through rate indices and retention cliffhanger
+            dynamics
           </p>
         </div>
         <button

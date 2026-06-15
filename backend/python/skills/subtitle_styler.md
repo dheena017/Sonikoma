@@ -4,6 +4,7 @@ description: Choose subtitle visual fonts, coloring, and styling parameters base
 model: gemini-2.5-flash
 response_schema: SubtitleStylerModel
 ---
+
 Recommend font styling based on scene intensity:
 Action tag: "{visual_description}"
 Dialogue: "{speech_text}"

@@ -4,6 +4,7 @@ description: Evaluate character visual expressions to classify active emotional 
 model: gemini-2.5-flash
 response_schema: CharacterEmotionModel
 ---
+
 Evaluate the face and gesture of the character in this illustration:
 Illustration description: "{visual_description}"
 Character dialog: "{speech_text}"

@@ -1,9 +1,5 @@
 import React, { useState, useCallback } from "react";
-import {
-  Image as ImageIcon,
-  RefreshCw,
-  Download,
-} from "lucide-react";
+import { Image as ImageIcon, RefreshCw, Download } from "lucide-react";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { LiveScraperDeckProps } from "./types";
@@ -51,7 +47,9 @@ export default function LiveScraperDeck({
   isDashboardOnly = true,
 }: LiveScraperDeckProps) {
   const [isZipping, setIsZipping] = useState(false);
-  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
+  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(
+    null
+  );
   const [isBatchMerging, setIsBatchMerging] = useState(false);
   const activeFetch = fetchWithInterceptor || fetch;
 
@@ -63,11 +61,15 @@ export default function LiveScraperDeck({
         const lo = Math.min(lastSelectedIndex, idx);
         const hi = Math.max(lastSelectedIndex, idx);
         const rangeUrls = scrapedImages.slice(lo, hi + 1);
-        setSelectedScraped((prev) => Array.from(new Set([...prev, ...rangeUrls])));
+        setSelectedScraped((prev) =>
+          Array.from(new Set([...prev, ...rangeUrls]))
+        );
         // Do NOT update lastSelectedIndex on shift-click — anchor stays put
       } else {
         setSelectedScraped((prev) =>
-          prev.includes(imgUrl) ? prev.filter((u) => u !== imgUrl) : [...prev, imgUrl]
+          prev.includes(imgUrl)
+            ? prev.filter((u) => u !== imgUrl)
+            : [...prev, imgUrl]
         );
         setLastSelectedIndex(idx);
       }
@@ -76,9 +78,14 @@ export default function LiveScraperDeck({
   );
 
   const handleDownloadZip = async () => {
-    const toDownload = selectedScraped.length > 0 ? selectedScraped : scrapedImages;
+    const toDownload =
+      selectedScraped.length > 0 ? selectedScraped : scrapedImages;
     if (toDownload.length === 0) return;
-    console.log("[LiveScraperDeck] Starting ZIP download for", toDownload.length, "images");
+    console.log(
+      "[LiveScraperDeck] Starting ZIP download for",
+      toDownload.length,
+      "images"
+    );
 
     setIsZipping(true);
     try {
@@ -94,7 +101,10 @@ export default function LiveScraperDeck({
           const url = toDownload[i];
           const res = await activeFetch(url);
           const blob = await res.blob();
-          const filename = `webtoon_frame_${String(i + 1).padStart(3, "0")}.png`;
+          const filename = `webtoon_frame_${String(i + 1).padStart(
+            3,
+            "0"
+          )}.png`;
           folder.file(filename, blob);
         } catch (err) {
           console.error("Download failed for:", toDownload[i], err);
@@ -116,13 +126,22 @@ export default function LiveScraperDeck({
 
   const handleDeleteSelected = () => {
     if (selectedScraped.length === 0) return;
-    console.log("[LiveScraperDeck] Deleting", selectedScraped.length, "selected images");
-    setScrapedImages((prev) => prev.filter((img) => !selectedScraped.includes(img)));
+    console.log(
+      "[LiveScraperDeck] Deleting",
+      selectedScraped.length,
+      "selected images"
+    );
+    setScrapedImages((prev) =>
+      prev.filter((img) => !selectedScraped.includes(img))
+    );
     setConsoleLogs((prev) => [
       `[GUI] Removed ${selectedScraped.length} images`,
       ...prev,
     ]);
-    addNotification(`Deleted ${selectedScraped.length} selected image(s) from the deck.`, "success");
+    addNotification(
+      `Deleted ${selectedScraped.length} selected image(s) from the deck.`,
+      "success"
+    );
     setSelectedScraped([]);
     setLastSelectedIndex(null);
   };
@@ -130,7 +149,9 @@ export default function LiveScraperDeck({
   const handleAddToStoryboard = () => {
     if (selectedScraped.length === 0) return;
     addPanelsToStoryboard(selectedScraped);
-    console.log(`[GUI] Adding ${selectedScraped.length} selected image(s) to storyboard.`);
+    console.log(
+      `[GUI] Adding ${selectedScraped.length} selected image(s) to storyboard.`
+    );
     setSelectedScraped([]);
     setLastSelectedIndex(null);
   };
@@ -141,13 +162,19 @@ export default function LiveScraperDeck({
   };
 
   const handleSelectAllToggle = () => {
-    if (selectedScraped.length === scrapedImages.length && scrapedImages.length > 0) {
+    if (
+      selectedScraped.length === scrapedImages.length &&
+      scrapedImages.length > 0
+    ) {
       setSelectedScraped([]);
       setLastSelectedIndex(null);
       setConsoleLogs((prev) => ["[GUI] Cleared selections", ...prev]);
     } else {
       setSelectedScraped([...scrapedImages]);
-      setConsoleLogs((prev) => ["[GUI] Selected all extracted frames", ...prev]);
+      setConsoleLogs((prev) => [
+        "[GUI] Selected all extracted frames",
+        ...prev,
+      ]);
     }
   };
 
@@ -156,7 +183,11 @@ export default function LiveScraperDeck({
       addNotification("Select at least 2 panels to stitch together", "info");
       return;
     }
-    console.log("[LiveScraperDeck] Starting batch vertical merge for", selectedScraped.length, "images");
+    console.log(
+      "[LiveScraperDeck] Starting batch vertical merge for",
+      selectedScraped.length,
+      "images"
+    );
     setIsBatchMerging(true);
     setConsoleLogs((prev) => [
       `[Stitch Generator] Merging ${selectedScraped.length} selected images vertically...`,
@@ -181,10 +212,16 @@ export default function LiveScraperDeck({
       if (!response.ok) throw new Error("Stitch failed: " + response.status);
       const data = await response.json();
       if (data.url) {
-        const firstSelectedIdx = scrapedImages.findIndex((img) => selectedScraped.includes(img));
+        const firstSelectedIdx = scrapedImages.findIndex((img) =>
+          selectedScraped.includes(img)
+        );
         setScrapedImages((prev) => {
           const filtered = prev.filter((img) => !selectedScraped.includes(img));
-          filtered.splice(firstSelectedIdx === -1 ? 0 : firstSelectedIdx, 0, data.url);
+          filtered.splice(
+            firstSelectedIdx === -1 ? 0 : firstSelectedIdx,
+            0,
+            data.url
+          );
           return filtered;
         });
         setSelectedScraped([]);
@@ -193,7 +230,10 @@ export default function LiveScraperDeck({
           `[Stitch Generator] ✓ Stitching completed! Stored URL: ${data.url}`,
           ...prev,
         ]);
-        addNotification("Stitched selected panels into one frame successfully!", "success");
+        addNotification(
+          "Stitched selected panels into one frame successfully!",
+          "success"
+        );
       }
     } catch (err: any) {
       console.error("Batch stitch failed:", err);
@@ -217,7 +257,9 @@ export default function LiveScraperDeck({
               <ImageIcon className="h-5 w-5" />
             </div>
             <div className="ml-2 flex items-center gap-2 min-w-0">
-              <h3 className="font-bold text-sm text-white truncate">Live Asset Extraction</h3>
+              <h3 className="font-bold text-sm text-white truncate">
+                Live Asset Extraction
+              </h3>
               {scrapedImages.length > 0 && (
                 <span className="text-[10px] px-3 py-1 rounded-full bg-purple-950/60 text-purple-300 border border-purple-800/50 shadow-inner font-mono uppercase tracking-wider">
                   {scrapedImages.length} Frames
@@ -243,7 +285,8 @@ export default function LiveScraperDeck({
           <div className="flex flex-col items-center justify-center py-8 space-y-3">
             <RefreshCw className="h-6 w-6 text-purple-500 animate-spin" />
             <p className="text-xs text-neutral-400 font-mono">
-              Launching browser to scrape webtoon panels... this may take up to 60 seconds.
+              Launching browser to scrape webtoon panels... this may take up to
+              60 seconds.
             </p>
           </div>
         ) : (
@@ -253,7 +296,10 @@ export default function LiveScraperDeck({
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-purple-950/30 border border-purple-800/40">
                 <RefreshCw className="h-3.5 w-3.5 text-purple-400 animate-spin flex-shrink-0" />
                 <p className="text-[11px] text-purple-300 font-mono">
-                  Extracting panels... {scrapedImages.length > 0 ? `${scrapedImages.length} loaded so far` : "launching browser renderer"}
+                  Extracting panels...{" "}
+                  {scrapedImages.length > 0
+                    ? `${scrapedImages.length} loaded so far`
+                    : "launching browser renderer"}
                 </p>
               </div>
             )}
@@ -283,7 +329,11 @@ export default function LiveScraperDeck({
             {/* Shift-select hint banner */}
             {scrapedImages.length > 1 && (
               <p className="text-[9px] text-neutral-600 font-mono px-1">
-                💡 Tip: Hold <kbd className="px-1 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono text-[8px]">Shift</kbd> and click a card to select a range of panels.
+                💡 Tip: Hold{" "}
+                <kbd className="px-1 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono text-[8px]">
+                  Shift
+                </kbd>{" "}
+                and click a card to select a range of panels.
               </p>
             )}
 

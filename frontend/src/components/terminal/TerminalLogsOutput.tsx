@@ -10,62 +10,169 @@ interface TerminalLogsOutputProps {
 
 function getLogColor(log: string): string {
   // Priority 1: Errors & Fatal errors
-  if (log.includes("[ERROR]") || log.includes("ERROR]") || log.includes("[Error]") || log.includes("Error]")) return "text-red-400 font-semibold";
+  if (
+    log.includes("[ERROR]") ||
+    log.includes("ERROR]") ||
+    log.includes("[Error]") ||
+    log.includes("Error]")
+  )
+    return "text-red-400 font-semibold";
   if (log.includes("[FATAL]")) return "text-red-500 font-bold";
-  if (log.includes(" 500 ") || log.includes("-> 500")) return "text-red-400 font-semibold";
-  
+  if (log.includes(" 500 ") || log.includes("-> 500"))
+    return "text-red-400 font-semibold";
+
   // Priority 2: Warnings
-  if (log.includes("[WARNING]") || log.includes("[WARN]") || log.includes("[Warning]") || log.includes("Warning]")) return "text-amber-400 font-semibold";
-  if (log.includes(" 404 ") || log.includes("-> 404")) return "text-amber-400 font-semibold";
+  if (
+    log.includes("[WARNING]") ||
+    log.includes("[WARN]") ||
+    log.includes("[Warning]") ||
+    log.includes("Warning]")
+  )
+    return "text-amber-400 font-semibold";
+  if (log.includes(" 404 ") || log.includes("-> 404"))
+    return "text-amber-400 font-semibold";
 
   // Priority 3: Success requests and messages
-  if (log.includes("[SUCCESS]") || log.includes("completed cleanly") || log.includes("Successfully")) return "text-emerald-400 font-medium";
-  if (log.includes(" 200 ") || log.includes(" 200 OK") || log.includes("-> 200")) return "text-emerald-400 font-medium";
+  if (
+    log.includes("[SUCCESS]") ||
+    log.includes("completed cleanly") ||
+    log.includes("Successfully")
+  )
+    return "text-emerald-400 font-medium";
+  if (
+    log.includes(" 200 ") ||
+    log.includes(" 200 OK") ||
+    log.includes("-> 200")
+  )
+    return "text-emerald-400 font-medium";
 
   // Specific components
-  if (log.includes("[Proxy]") || log.includes("[Proxy-image]") || log.includes("proxy-image") || log.includes("anivox.routes.proxy")) return "text-sky-300 font-medium";
-  if (log.includes("[API]") || log.includes("[Network]") || log.includes("[HTTP]") || log.includes("anivox.api")) return "text-sky-400";
+  if (
+    log.includes("[Proxy]") ||
+    log.includes("[Proxy-image]") ||
+    log.includes("proxy-image") ||
+    log.includes("anivox.routes.proxy")
+  )
+    return "text-sky-300 font-medium";
+  if (
+    log.includes("[API]") ||
+    log.includes("[Network]") ||
+    log.includes("[HTTP]") ||
+    log.includes("anivox.api")
+  )
+    return "text-sky-400";
   if (log.includes("[Vite]")) return "text-fuchsia-400 font-medium";
-  if (log.includes("httpx") || log.includes("HTTP Request:")) return "text-purple-400 font-light";
+  if (log.includes("httpx") || log.includes("HTTP Request:"))
+    return "text-purple-400 font-light";
 
-  if (log.includes("[AI Auto-Analysis]") || log.includes("[AI Model]") || log.includes("[Gemini]")) return "text-purple-300 font-medium";
+  if (
+    log.includes("[AI Auto-Analysis]") ||
+    log.includes("[AI Model]") ||
+    log.includes("[Gemini]")
+  )
+    return "text-purple-300 font-medium";
   if (log.includes("[AI Smart Crop]")) return "text-violet-400 font-medium";
-  if (log.includes("[OCR/CV Engine]") || log.includes("[Vision OCR]") || log.includes("[CV")) return "text-purple-300";
+  if (
+    log.includes("[OCR/CV Engine]") ||
+    log.includes("[Vision OCR]") ||
+    log.includes("[CV")
+  )
+    return "text-purple-300";
   if (log.includes("[Helper Scraper]")) return "text-cyan-300 font-medium";
   if (log.includes("[Scraper]")) return "text-cyan-400";
   if (log.includes("[Server]")) return "text-cyan-300 font-medium";
-  if (log.includes("HUGGINGFACE") || log.includes("injected env") || log.includes("No HUGGINGFACE_API_KEY")) return "text-amber-300";
-  if (log.includes("[Control]") || log.includes("[Pipeline]")) return "text-blue-400";
-  if (log.includes("[MoviePy]") || log.includes("[Video]") || log.includes("[FFmpeg]")) return "text-amber-300";
+  if (
+    log.includes("HUGGINGFACE") ||
+    log.includes("injected env") ||
+    log.includes("No HUGGINGFACE_API_KEY")
+  )
+    return "text-amber-300";
+  if (log.includes("[Control]") || log.includes("[Pipeline]"))
+    return "text-blue-400";
+  if (
+    log.includes("[MoviePy]") ||
+    log.includes("[Video]") ||
+    log.includes("[FFmpeg]")
+  )
+    return "text-amber-300";
   if (log.includes("[Image Editor]")) return "text-orange-400";
-  if (log.includes("[Stitcher]") || log.includes("Combined") || log.includes("[Stitch]")) return "text-indigo-300";
-  if (log.includes("[Auto Cropper]") || log.includes("[Crop]")) return "text-green-400";
+  if (
+    log.includes("[Stitcher]") ||
+    log.includes("Combined") ||
+    log.includes("[Stitch]")
+  )
+    return "text-indigo-300";
+  if (log.includes("[Auto Cropper]") || log.includes("[Crop]"))
+    return "text-green-400";
   if (log.includes("[Speech Bubbles]")) return "text-pink-400";
   if (log.includes("[GUI]")) return "text-neutral-300";
   if (log.includes("[Preloader]")) return "text-neutral-500";
   if (log.includes("[Model]")) return "text-violet-300";
-  if (log.includes("[Database]") || log.includes("[DB]")) return "text-emerald-400 font-bold";
+  if (log.includes("[Database]") || log.includes("[DB]"))
+    return "text-emerald-400 font-bold";
   return "text-neutral-400";
 }
 
 function getLogBorderColor(log: string): string {
-  if (log.includes("[ERROR]") || log.includes("ERROR]") || log.includes("[Error]") || log.includes("Error]") || log.includes("[FATAL]")) return "border-red-500/60";
-  if (log.includes(" 500 ") || log.includes("-> 500")) return "border-red-500/60";
-  if (log.includes("[SUCCESS]") || log.includes("Successfully")) return "border-emerald-500/60";
-  if (log.includes(" 200 ") || log.includes(" 200 OK") || log.includes("-> 200")) return "border-emerald-500/60";
-  if (log.includes("[WARNING]") || log.includes("[WARN]") || log.includes("[Warning]") || log.includes("Warning]")) return "border-amber-500/60";
-  if (log.includes(" 404 ") || log.includes("-> 404")) return "border-amber-500/60";
-  if (log.includes("[Proxy]") || log.includes("[Proxy-image]") || log.includes("proxy-image") || log.includes("anivox.routes.proxy")) return "border-sky-500/40";
-  if (log.includes("[API]") || log.includes("[Network]") || log.includes("[HTTP]") || log.includes("anivox.api")) return "border-sky-500/40";
+  if (
+    log.includes("[ERROR]") ||
+    log.includes("ERROR]") ||
+    log.includes("[Error]") ||
+    log.includes("Error]") ||
+    log.includes("[FATAL]")
+  )
+    return "border-red-500/60";
+  if (log.includes(" 500 ") || log.includes("-> 500"))
+    return "border-red-500/60";
+  if (log.includes("[SUCCESS]") || log.includes("Successfully"))
+    return "border-emerald-500/60";
+  if (
+    log.includes(" 200 ") ||
+    log.includes(" 200 OK") ||
+    log.includes("-> 200")
+  )
+    return "border-emerald-500/60";
+  if (
+    log.includes("[WARNING]") ||
+    log.includes("[WARN]") ||
+    log.includes("[Warning]") ||
+    log.includes("Warning]")
+  )
+    return "border-amber-500/60";
+  if (log.includes(" 404 ") || log.includes("-> 404"))
+    return "border-amber-500/60";
+  if (
+    log.includes("[Proxy]") ||
+    log.includes("[Proxy-image]") ||
+    log.includes("proxy-image") ||
+    log.includes("anivox.routes.proxy")
+  )
+    return "border-sky-500/40";
+  if (
+    log.includes("[API]") ||
+    log.includes("[Network]") ||
+    log.includes("[HTTP]") ||
+    log.includes("anivox.api")
+  )
+    return "border-sky-500/40";
   if (log.includes("[Vite]")) return "border-fuchsia-500/50";
-  if (log.includes("httpx") || log.includes("HTTP Request:")) return "border-purple-500/40";
-  if (log.includes("[AI") || log.includes("[Gemini]")) return "border-purple-500/50";
+  if (log.includes("httpx") || log.includes("HTTP Request:"))
+    return "border-purple-500/40";
+  if (log.includes("[AI") || log.includes("[Gemini]"))
+    return "border-purple-500/50";
   if (log.includes("[Helper Scraper]")) return "border-cyan-400/40";
   if (log.includes("[Scraper]")) return "border-cyan-500/40";
   if (log.includes("[Server]")) return "border-cyan-500/40";
-  if (log.includes("HUGGINGFACE") || log.includes("injected env") || log.includes("No HUGGINGFACE_API_KEY")) return "border-amber-500/40";
-  if (log.includes("[Control]") || log.includes("[Pipeline]")) return "border-blue-500/40";
-  if (log.includes("[Database]") || log.includes("[DB]")) return "border-emerald-500/60";
+  if (
+    log.includes("HUGGINGFACE") ||
+    log.includes("injected env") ||
+    log.includes("No HUGGINGFACE_API_KEY")
+  )
+    return "border-amber-500/40";
+  if (log.includes("[Control]") || log.includes("[Pipeline]"))
+    return "border-blue-500/40";
+  if (log.includes("[Database]") || log.includes("[DB]"))
+    return "border-emerald-500/60";
   return "border-neutral-800";
 }
 
@@ -84,10 +191,14 @@ export function TerminalLogsOutput({
         <div className="flex flex-col items-center justify-center h-full text-neutral-600 space-y-2">
           <Terminal className="h-6 w-6 opacity-30 animate-pulse" />
           <p className="text-[11px] font-mono">
-            {searchQuery || activeFilter !== "all" ? "No search results match query filters" : "Waiting for pipeline activity..."}
+            {searchQuery || activeFilter !== "all"
+              ? "No search results match query filters"
+              : "Waiting for pipeline activity..."}
           </p>
           <p className="text-[9px] text-neutral-700">
-            {searchQuery || activeFilter !== "all" ? "Try clearing the search query or tabs filter" : "Logs will print here on active script actions"}
+            {searchQuery || activeFilter !== "all"
+              ? "Try clearing the search query or tabs filter"
+              : "Logs will print here on active script actions"}
           </p>
         </div>
       ) : (
@@ -101,7 +212,7 @@ export function TerminalLogsOutput({
               className={`leading-relaxed border-l-2 pl-2 hover:bg-neutral-900/30 rounded-r transition-colors ${logColor} ${borderColor}`}
             >
               <span className="text-neutral-600 mr-2 select-none">
-                {String(filteredLogs.length - index).padStart(3, '0')}
+                {String(filteredLogs.length - index).padStart(3, "0")}
               </span>
               {log}
             </div>

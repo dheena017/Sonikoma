@@ -1,6 +1,14 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import { Sparkles, CheckSquare, RefreshCw, X, Trash, Clock, Move } from "lucide-react";
+import {
+  Sparkles,
+  CheckSquare,
+  RefreshCw,
+  X,
+  Trash,
+  Clock,
+  Move,
+} from "lucide-react";
 
 interface TimelineSelectionBarProps {
   selectedCount: number;
@@ -47,7 +55,6 @@ export default function TimelineSelectionBar({
       {/* Container with neutral border and standard dark shadow */}
       <div className="bg-neutral-950/90 backdrop-blur-2xl border-t border-neutral-800/80 px-4 py-3 shadow-2xl shadow-black/50">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
-
           {/* LEFT SECTION: Selection Actions or General Timeline Status */}
           <div className="flex items-center gap-3">
             {selectedCount > 0 ? (
@@ -59,7 +66,8 @@ export default function TimelineSelectionBar({
                   </div>
                   <div>
                     <p className="text-xs font-bold text-white leading-tight">
-                      {selectedCount} panel{selectedCount !== 1 ? "s" : ""} selected
+                      {selectedCount} panel{selectedCount !== 1 ? "s" : ""}{" "}
+                      selected
                     </p>
                     <p className="text-[9px] text-purple-400 font-mono leading-tight">
                       of {totalCount} in storyboard
@@ -90,7 +98,9 @@ export default function TimelineSelectionBar({
                     type="button"
                     disabled={isAnalyzingAll}
                     onClick={() => {
-                      console.log(`[TimelineSelectionBar] Analyze ${selectedCount} selected panels`);
+                      console.log(
+                        `[TimelineSelectionBar] Analyze ${selectedCount} selected panels`
+                      );
                       handleAnalyzeSelected();
                     }}
                     className={`px-3 sm:px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
@@ -104,13 +114,17 @@ export default function TimelineSelectionBar({
                     ) : (
                       <Sparkles className="h-4 w-4 text-white animate-pulse" />
                     )}
-                    {isAnalyzingAll ? "Analyzing..." : `AI Analyse Selected (${selectedCount})`}
+                    {isAnalyzingAll
+                      ? "Analyzing..."
+                      : `AI Analyse Selected (${selectedCount})`}
                   </button>
 
                   {/* Set Duration for Selected */}
                   <div className="flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 rounded-xl px-2.5 py-1.5 text-xs text-neutral-300">
                     <Clock className="h-3.5 w-3.5 text-purple-400" />
-                    <span className="font-mono text-[9px] text-neutral-500 uppercase tracking-tight hidden md:inline">Duration:</span>
+                    <span className="font-mono text-[9px] text-neutral-500 uppercase tracking-tight hidden md:inline">
+                      Duration:
+                    </span>
                     <input
                       type="number"
                       min={0.5}
@@ -129,13 +143,17 @@ export default function TimelineSelectionBar({
                   {/* Set Motion for Selected */}
                   <div className="flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 rounded-xl px-2.5 py-1.5 text-xs text-neutral-300">
                     <Move className="h-3.5 w-3.5 text-purple-400" />
-                    <span className="font-mono text-[9px] text-neutral-500 uppercase tracking-tight hidden md:inline">Motion:</span>
+                    <span className="font-mono text-[9px] text-neutral-500 uppercase tracking-tight hidden md:inline">
+                      Motion:
+                    </span>
                     <select
                       onChange={(e) => handleBulkModifyMotion(e.target.value)}
                       className="bg-neutral-950 border border-neutral-850 text-neutral-255 rounded text-xs outline-none py-0.5 cursor-pointer font-sans focus:border-purple-500"
                       defaultValue=""
                     >
-                      <option value="" disabled>Select...</option>
+                      <option value="" disabled>
+                        Select...
+                      </option>
                       <option value="">AI Decide</option>
                       <option value="zoom_in">Zoom In</option>
                       <option value="zoom_out">Zoom Out</option>
@@ -149,7 +167,9 @@ export default function TimelineSelectionBar({
                   <button
                     type="button"
                     onClick={() => {
-                      console.log(`[TimelineSelectionBar] Delete ${selectedCount} selected panels`);
+                      console.log(
+                        `[TimelineSelectionBar] Delete ${selectedCount} selected panels`
+                      );
                       handleDeleteSelected();
                     }}
                     className="px-3 sm:px-4 py-2 text-xs rounded-xl border border-rose-900/60 bg-rose-950/20 hover:bg-rose-900/40 text-rose-350 hover:text-rose-100 font-bold flex items-center justify-center gap-2 cursor-pointer transition-all"
@@ -157,7 +177,7 @@ export default function TimelineSelectionBar({
                     <Trash className="h-3.5 w-3.5 text-rose-400" />
                     Delete ({selectedCount})
                   </button>
-                  
+
                   {/* Clear / Dismiss */}
                   <button
                     type="button"
@@ -176,7 +196,9 @@ export default function TimelineSelectionBar({
               <div className="flex items-center gap-2.5 text-neutral-400 py-1.5 pl-1.5 select-none">
                 <span className="h-2 w-2 rounded-full bg-purple-500 animate-pulse" />
                 <span className="text-xs font-mono">
-                  Storyboard active: <strong className="text-white">{totalCount} panels</strong> ready for production.
+                  Storyboard active:{" "}
+                  <strong className="text-white">{totalCount} panels</strong>{" "}
+                  ready for production.
                 </span>
               </div>
             )}
@@ -202,10 +224,13 @@ export default function TimelineSelectionBar({
               ) : (
                 <Sparkles className="h-4 w-4 text-white animate-pulse shrink-0" />
               )}
-              <span>{isCompiling ? "Compiling Video..." : "Convert Storyboard to Video"}</span>
+              <span>
+                {isCompiling
+                  ? "Compiling Video..."
+                  : "Convert Storyboard to Video"}
+              </span>
             </button>
           </div>
-
         </div>
       </div>
     </div>,

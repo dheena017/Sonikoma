@@ -45,7 +45,11 @@ export default function CropEditorHeader({
 }: CropEditorHeaderProps) {
   const handleCloseClick = () => {
     if (historyLength > 0 || slices.length > 0) {
-      if (window.confirm("You have unsaved changes in the editor. Are you sure you want to navigate away?")) {
+      if (
+        window.confirm(
+          "You have unsaved changes in the editor. Are you sure you want to navigate away?"
+        )
+      ) {
         window.history.pushState({}, "", "/");
         window.dispatchEvent(new Event("popstate"));
       }
@@ -80,17 +84,25 @@ export default function CropEditorHeader({
                 Advanced Drag & Drop Crop Generator
               </h3>
               <p className="max-w-2xl text-[10px] sm:text-[11px] text-neutral-400 font-mono leading-4">
-                Crop, trim, split, and clean the current frame without leaving the editor.
+                Crop, trim, split, and clean the current frame without leaving
+                the editor.
               </p>
               {/* Breadcrumbs */}
               <div className="flex flex-wrap items-center gap-1.5 text-[9px] font-bold font-mono text-neutral-500 uppercase tracking-wider pt-1 select-none">
-                <span className="hover:text-purple-400 cursor-pointer transition-colors" onClick={handleCloseClick}>Dashboard</span>
+                <span
+                  className="hover:text-purple-400 cursor-pointer transition-colors"
+                  onClick={handleCloseClick}
+                >
+                  Dashboard
+                </span>
                 <span>/</span>
                 <span className="text-neutral-400">Editor</span>
                 <span>/</span>
                 <span className="text-purple-400">{activeTab}</span>
                 <span>/</span>
-                <span className="text-neutral-400 font-semibold">Frame #{editingImageIdx + 1}</span>
+                <span className="text-neutral-400 font-semibold">
+                  Frame #{editingImageIdx + 1}
+                </span>
               </div>
             </div>
           </div>
@@ -151,7 +163,11 @@ export default function CropEditorHeader({
                     // restore path
                     const params = new URLSearchParams(window.location.search);
                     const idx = params.get("idx") || "0";
-                    window.history.pushState({}, "", `/editor/${activeTab}?idx=${idx}`);
+                    window.history.pushState(
+                      {},
+                      "",
+                      `/editor/${activeTab}?idx=${idx}`
+                    );
                     window.dispatchEvent(new Event("popstate"));
                   } else {
                     setIsPipMode(true);
@@ -161,11 +177,15 @@ export default function CropEditorHeader({
                   }
                 }}
                 className={`inline-flex items-center justify-center rounded-2xl p-2 transition-all cursor-pointer ${
-                  isPipMode 
-                    ? "bg-purple-600 text-white shadow-lg" 
+                  isPipMode
+                    ? "bg-purple-600 text-white shadow-lg"
                     : "bg-neutral-950/60 hover:bg-neutral-800/90 text-neutral-300 hover:text-white"
                 }`}
-                title={isPipMode ? "Exit Picture-in-Picture Mode" : "Minimize to Picture-in-Picture"}
+                title={
+                  isPipMode
+                    ? "Exit Picture-in-Picture Mode"
+                    : "Minimize to Picture-in-Picture"
+                }
               >
                 <Minimize2 className="h-4 w-4" />
               </button>

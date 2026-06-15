@@ -45,7 +45,6 @@ export function ScraperActionButtons({
 
   return (
     <div className="flex items-center gap-2 flex-wrap pt-3 border-t border-neutral-800/40 mt-1 w-full font-sans">
-
       {/* Select All Toggle */}
       <button
         onClick={handleSelectAllToggle}
@@ -69,7 +68,11 @@ export function ScraperActionButtons({
       <div className="flex items-center">
         <button
           onClick={() => {
-            console.log("[ScraperActionButtons] Triggering auto-crop on", selectedScraped.length, "panels");
+            console.log(
+              "[ScraperActionButtons] Triggering auto-crop on",
+              selectedScraped.length,
+              "panels"
+            );
             handleAutoCropSelected();
           }}
           disabled={isBatchCropping || selectedScraped.length === 0}
@@ -98,7 +101,11 @@ export function ScraperActionButtons({
       <div className="flex items-center">
         <button
           onClick={() => {
-            console.log("[ScraperActionButtons] Triggering clean bubbles on", selectedScraped.length, "panels");
+            console.log(
+              "[ScraperActionButtons] Triggering clean bubbles on",
+              selectedScraped.length,
+              "panels"
+            );
             handleCleanBubblesSelected();
           }}
           disabled={isCleaningBubbles || selectedScraped.length === 0}
@@ -126,7 +133,11 @@ export function ScraperActionButtons({
       {/* Stitch / Merge Selected */}
       <button
         onClick={() => {
-          console.log("[ScraperActionButtons] Triggering stitch on", selectedScraped.length, "panels");
+          console.log(
+            "[ScraperActionButtons] Triggering stitch on",
+            selectedScraped.length,
+            "panels"
+          );
           handleBatchMergeSelected();
         }}
         disabled={selectedScraped.length < 2 || isBatchMerging}

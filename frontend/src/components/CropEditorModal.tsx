@@ -49,7 +49,7 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
     setErrorPopup,
     aspectRatio,
     isPipMode = false,
-    setIsPipMode
+    setIsPipMode,
   } = appLogic;
 
   useEffect(() => {
@@ -67,7 +67,6 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
       document.documentElement.style.overflow = originalHtmlOverflow;
     };
   }, [isPipMode]);
-
 
   const {
     containerRef,
@@ -191,45 +190,57 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
   );
 
   const handleModifyBrightness = (panelId: number, val: number) => {
-    console.log(`[CropEditor] Modifying brightness for panel #${panelId}: ${val}`);
+    console.log(
+      `[CropEditor] Modifying brightness for panel #${panelId}: ${val}`
+    );
     setPanels?.((prev) =>
       prev.map((p) => (p.id === panelId ? { ...p, brightness: val } : p))
     );
   };
   const handleModifyContrast = (panelId: number, val: number) => {
-    console.log(`[CropEditor] Modifying contrast for panel #${panelId}: ${val}`);
+    console.log(
+      `[CropEditor] Modifying contrast for panel #${panelId}: ${val}`
+    );
     setPanels?.((prev) =>
       prev.map((p) => (p.id === panelId ? { ...p, contrast: val } : p))
     );
   };
   const handleModifySaturation = (panelId: number, val: number) => {
-    console.log(`[CropEditor] Modifying saturation for panel #${panelId}: ${val}`);
+    console.log(
+      `[CropEditor] Modifying saturation for panel #${panelId}: ${val}`
+    );
     setPanels?.((prev) =>
       prev.map((p) => (p.id === panelId ? { ...p, saturation: val } : p))
     );
   };
   const handleModifyFilterPreset = (panelId: number, preset: string) => {
-    console.log(`[CropEditor] Modifying filter preset for panel #${panelId}: ${preset}`);
+    console.log(
+      `[CropEditor] Modifying filter preset for panel #${panelId}: ${preset}`
+    );
     setPanels?.((prev) =>
-      prev.map((p) =>
-        p.id === panelId ? { ...p, filter_preset: preset } : p
-      )
+      prev.map((p) => (p.id === panelId ? { ...p, filter_preset: preset } : p))
     );
   };
   const handleModifyGrayscale = (panelId: number, val: boolean) => {
-    console.log(`[CropEditor] Modifying grayscale for panel #${panelId}: ${val}`);
+    console.log(
+      `[CropEditor] Modifying grayscale for panel #${panelId}: ${val}`
+    );
     setPanels?.((prev) =>
       prev.map((p) => (p.id === panelId ? { ...p, grayscale: val } : p))
     );
   };
   const handleModifyDuration = (panelId: number, val: number) => {
-    console.log(`[CropEditor] Modifying duration for panel #${panelId}: ${val}`);
+    console.log(
+      `[CropEditor] Modifying duration for panel #${panelId}: ${val}`
+    );
     setPanels?.((prev) =>
       prev.map((p) => (p.id === panelId ? { ...p, duration: val } : p))
     );
   };
   const handleModifyMotionType = (panelId: number, val: string) => {
-    console.log(`[CropEditor] Modifying motion type for panel #${panelId}: ${val}`);
+    console.log(
+      `[CropEditor] Modifying motion type for panel #${panelId}: ${val}`
+    );
     setPanels?.((prev) =>
       prev.map((p) => (p.id === panelId ? { ...p, motion_type: val } : p))
     );
@@ -247,7 +258,9 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
     );
   };
   const handleModifyCropPadding = (panelId: number, val: number) => {
-    console.log(`[CropEditor] Modifying crop padding for panel #${panelId}: ${val}`);
+    console.log(
+      `[CropEditor] Modifying crop padding for panel #${panelId}: ${val}`
+    );
     setPanels?.((prev) =>
       prev.map((p) => (p.id === panelId ? { ...p, crop_padding: val } : p))
     );
@@ -257,7 +270,7 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
 
   if (isPipMode) {
     return (
-      <div 
+      <div
         className="w-full h-full relative group select-none overflow-hidden bg-neutral-950 flex flex-col justify-center items-center pointer-events-none"
         title="Click to restore Editor"
       >
@@ -320,7 +333,10 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
     >
       <div
         className="relative bg-neutral-950/95 border border-white/5 rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden shadow-2xl flex flex-col w-full max-w-7xl h-[min(100dvh-1.5rem,980px)] max-h-[calc(100vh-4rem)] my-auto"
-        style={{ boxShadow: "0 0 0 1px rgba(255,255,255,0.02), 0 0 70px rgba(139,92,246,0.14), 0 30px 60px rgba(0,0,0,0.78)" }}
+        style={{
+          boxShadow:
+            "0 0 0 1px rgba(255,255,255,0.02), 0 0 70px rgba(139,92,246,0.14), 0 30px 60px rgba(0,0,0,0.78)",
+        }}
       >
         {/* Subtle top-edge glow line */}
         <div className="absolute top-0 left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-purple-500/70 to-transparent" />
@@ -342,8 +358,6 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
           setIsPipMode={setIsPipMode}
           slices={slices}
         />
-
-
 
         {/* Main Content Pane */}
         <div className="p-4 sm:p-5 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 flex-1 min-h-0 overflow-hidden select-none items-stretch">
@@ -513,30 +527,33 @@ export default function CropEditorModal({ appLogic }: CropEditorModalProps) {
               {scrapedImages.map((imgUrl, idx) => {
                 const isCurrent = idx === editingImageIdx;
                 return (
-                  <div 
-                    key={imgUrl} 
+                  <div
+                    key={imgUrl}
                     onClick={() => {
-                      console.log(`[CropEditor] Switching to image idx: ${idx}`);
+                      console.log(
+                        `[CropEditor] Switching to image idx: ${idx}`
+                      );
                       setEditingImageIdx(idx);
                     }}
                     className={[
                       "relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-neutral-900 border shrink-0 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105",
                       isCurrent
                         ? "border-purple-500/80 shadow-[0_0_12px_rgba(168,85,247,0.3)] ring-1 ring-purple-500/30"
-                        : "border-neutral-800 hover:border-neutral-700"
+                        : "border-neutral-800 hover:border-neutral-700",
                     ].join(" ")}
                   >
-                    <img 
-                      src={imgUrl} 
-                      alt={`Panel #${idx + 1}`} 
+                    <img
+                      src={imgUrl}
+                      alt={`Panel #${idx + 1}`}
                       className="w-full h-full object-contain pointer-events-none"
                     />
-                    <div className={[
-                      "absolute bottom-1 right-1 backdrop-blur-sm px-1 py-0.5 rounded text-[8px] font-mono font-bold leading-none border transition-all duration-200",
-                      isCurrent
-                        ? "bg-purple-600/90 border-purple-400/60 text-white shadow-[0_0_8px_rgba(168,85,247,0.4)]"
-                        : "bg-black/80 border-purple-900/30 text-purple-400"
-                    ].join(" ")}
+                    <div
+                      className={[
+                        "absolute bottom-1 right-1 backdrop-blur-sm px-1 py-0.5 rounded text-[8px] font-mono font-bold leading-none border transition-all duration-200",
+                        isCurrent
+                          ? "bg-purple-600/90 border-purple-400/60 text-white shadow-[0_0_8px_rgba(168,85,247,0.4)]"
+                          : "bg-black/80 border-purple-900/30 text-purple-400",
+                      ].join(" ")}
                     >
                       #{idx + 1}
                     </div>

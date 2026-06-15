@@ -20,7 +20,9 @@ export function useBackendHealth() {
     const start = performance.now();
     try {
       // Mock ping to the backend API
-      const response = await fetch("/api/health", { method: "GET" }).catch(() => null);
+      const response = await fetch("/api/health", { method: "GET" }).catch(
+        () => null
+      );
       const end = performance.now();
 
       if (response && response.ok) {

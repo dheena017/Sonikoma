@@ -11,11 +11,17 @@ interface CastResult {
   match_confidence: number;
 }
 
-export default function VoiceSettingsPanel({ addNotification }: VoiceSettingsPanelProps) {
+export default function VoiceSettingsPanel({
+  addNotification,
+}: VoiceSettingsPanelProps) {
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("Shadow Sovereign");
-  const [dialogue, setDialogue] = useState("Arise. The darkness answers only to me.");
-  const [visual, setVisual] = useState("Tall male with glowing violet eyes, clad in midnight black armor radiating shadows.");
+  const [dialogue, setDialogue] = useState(
+    "Arise. The darkness answers only to me."
+  );
+  const [visual, setVisual] = useState(
+    "Tall male with glowing violet eyes, clad in midnight black armor radiating shadows."
+  );
   const [castData, setCastData] = useState<CastResult | null>(null);
 
   const handleCast = async () => {
@@ -28,8 +34,8 @@ export default function VoiceSettingsPanel({ addNotification }: VoiceSettingsPan
           character_name: name,
           dialogue_sample: dialogue,
           visual_description: visual,
-          model: "gemini-2.5-flash"
-        })
+          model: "gemini-2.5-flash",
+        }),
       });
       const json = await res.json();
       if (json.success && json.result) {
@@ -53,7 +59,9 @@ export default function VoiceSettingsPanel({ addNotification }: VoiceSettingsPan
       <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
         <div className="flex items-center gap-2">
           <Users className="h-4.5 w-4.5 text-purple-400" />
-          <h4 className="text-xs font-mono font-bold text-white uppercase">AI Voice Casting Selector</h4>
+          <h4 className="text-xs font-mono font-bold text-white uppercase">
+            AI Voice Casting Selector
+          </h4>
         </div>
         <button
           onClick={handleCast}
@@ -67,7 +75,9 @@ export default function VoiceSettingsPanel({ addNotification }: VoiceSettingsPan
       <div className="space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="space-y-1">
-            <label className="text-[9px] font-mono text-neutral-500 uppercase">Character Name</label>
+            <label className="text-[9px] font-mono text-neutral-500 uppercase">
+              Character Name
+            </label>
             <input
               type="text"
               value={name}
@@ -77,7 +87,9 @@ export default function VoiceSettingsPanel({ addNotification }: VoiceSettingsPan
             />
           </div>
           <div className="space-y-1">
-            <label className="text-[9px] font-mono text-neutral-500 uppercase">Dialogue Sample</label>
+            <label className="text-[9px] font-mono text-neutral-500 uppercase">
+              Dialogue Sample
+            </label>
             <input
               type="text"
               value={dialogue}
@@ -89,7 +101,9 @@ export default function VoiceSettingsPanel({ addNotification }: VoiceSettingsPan
         </div>
 
         <div className="space-y-1">
-          <label className="text-[9px] font-mono text-neutral-500 uppercase">Visual Appearance Description</label>
+          <label className="text-[9px] font-mono text-neutral-500 uppercase">
+            Visual Appearance Description
+          </label>
           <textarea
             rows={2}
             value={visual}
@@ -102,9 +116,12 @@ export default function VoiceSettingsPanel({ addNotification }: VoiceSettingsPan
         {castData && !loading && (
           <div className="bg-neutral-950 p-4 rounded-xl border border-neutral-850 space-y-3 animate-fade-in">
             <div className="flex justify-between items-center border-b border-neutral-900 pb-1.5">
-              <span className="text-[9px] font-mono text-purple-355 uppercase font-bold">Recommended Voice Cast:</span>
+              <span className="text-[9px] font-mono text-purple-355 uppercase font-bold">
+                Recommended Voice Cast:
+              </span>
               <span className="text-[9px] font-mono bg-purple-950/40 text-purple-400 px-2 py-0.5 border border-purple-800/40 rounded-full">
-                Confidence: {Math.round((castData.match_confidence || 0.9) * 100)}%
+                Confidence:{" "}
+                {Math.round((castData.match_confidence || 0.9) * 100)}%
               </span>
             </div>
             <div className="flex items-start gap-3">
@@ -112,9 +129,12 @@ export default function VoiceSettingsPanel({ addNotification }: VoiceSettingsPan
                 {castData.suggested_actor?.charAt(0) || "V"}
               </div>
               <div className="space-y-1 flex-1">
-                <h5 className="text-xs font-bold text-white font-sans">{castData.suggested_actor || "Male Deep Hero"}</h5>
+                <h5 className="text-xs font-bold text-white font-sans">
+                  {castData.suggested_actor || "Male Deep Hero"}
+                </h5>
                 <p className="text-[11px] font-sans text-neutral-350 leading-relaxed">
-                  {castData.tone_description || "A deep, authoritative resonance that commands presence, suitable for main protagonists with mysterious powers."}
+                  {castData.tone_description ||
+                    "A deep, authoritative resonance that commands presence, suitable for main protagonists with mysterious powers."}
                 </p>
               </div>
             </div>

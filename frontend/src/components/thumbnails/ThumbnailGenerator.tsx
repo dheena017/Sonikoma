@@ -13,9 +13,15 @@ interface ConceptData {
   ctr_explanation: string;
 }
 
-export default function ThumbnailGenerator({ title, genre, onGeneratedConcept }: ThumbnailGeneratorProps) {
+export default function ThumbnailGenerator({
+  title,
+  genre,
+  onGeneratedConcept,
+}: ThumbnailGeneratorProps) {
   const [loading, setLoading] = useState(false);
-  const [plotPoint, setPlotPoint] = useState("Protanogist awakens a hidden shadow general");
+  const [plotPoint, setPlotPoint] = useState(
+    "Protanogist awakens a hidden shadow general"
+  );
   const [concept, setConcept] = useState<ConceptData | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
@@ -29,8 +35,8 @@ export default function ThumbnailGenerator({ title, genre, onGeneratedConcept }:
           title: title || "Solo Leveling",
           genre: genre || "Fantasy",
           plot_point: plotPoint,
-          model: "gemini-2.5-flash"
-        })
+          model: "gemini-2.5-flash",
+        }),
       });
       const json = await res.json();
       if (json.success && json.result) {
@@ -53,7 +59,9 @@ export default function ThumbnailGenerator({ title, genre, onGeneratedConcept }:
   return (
     <div className="bg-neutral-900/40 border border-neutral-800 rounded-2xl p-5 space-y-4">
       <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
-        <h4 className="text-xs font-mono font-bold text-white uppercase">AI Thumbnail Concept Designer</h4>
+        <h4 className="text-xs font-mono font-bold text-white uppercase">
+          AI Thumbnail Concept Designer
+        </h4>
         <button
           onClick={handleGenerate}
           disabled={loading}
@@ -64,7 +72,9 @@ export default function ThumbnailGenerator({ title, genre, onGeneratedConcept }:
       </div>
 
       <div className="space-y-1">
-        <label className="text-[9px] font-mono text-neutral-500 uppercase">Climax Plot Point Highlight</label>
+        <label className="text-[9px] font-mono text-neutral-500 uppercase">
+          Climax Plot Point Highlight
+        </label>
         <input
           type="text"
           value={plotPoint}
@@ -77,25 +87,41 @@ export default function ThumbnailGenerator({ title, genre, onGeneratedConcept }:
         <div className="space-y-3 pt-1 animate-fade-in">
           <div className="bg-neutral-950 p-3 rounded-lg border border-neutral-850 space-y-2">
             <div className="flex justify-between items-center border-b border-neutral-900 pb-1">
-              <span className="text-[9px] font-mono text-neutral-500 uppercase">CTR Text Overlay:</span>
+              <span className="text-[9px] font-mono text-neutral-500 uppercase">
+                CTR Text Overlay:
+              </span>
               <button
                 onClick={() => copyToClipboard(concept.overlay_text, "overlay")}
                 className="text-neutral-500 hover:text-white"
               >
-                {copiedField === "overlay" ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+                {copiedField === "overlay" ? (
+                  <Check className="h-3 w-3 text-emerald-400" />
+                ) : (
+                  <Copy className="h-3 w-3" />
+                )}
               </button>
             </div>
-            <p className="text-sm font-sans font-bold text-yellow-400">"{concept.overlay_text}"</p>
+            <p className="text-sm font-sans font-bold text-yellow-400">
+              "{concept.overlay_text}"
+            </p>
           </div>
 
           <div className="bg-neutral-950 p-3 rounded-lg border border-neutral-850 space-y-2">
             <div className="flex justify-between items-center border-b border-neutral-900 pb-1">
-              <span className="text-[9px] font-mono text-neutral-500 uppercase">Stable Diffusion Image Prompt:</span>
+              <span className="text-[9px] font-mono text-neutral-500 uppercase">
+                Stable Diffusion Image Prompt:
+              </span>
               <button
-                onClick={() => copyToClipboard(concept.image_generation_prompt, "prompt")}
+                onClick={() =>
+                  copyToClipboard(concept.image_generation_prompt, "prompt")
+                }
                 className="text-neutral-500 hover:text-white"
               >
-                {copiedField === "prompt" ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+                {copiedField === "prompt" ? (
+                  <Check className="h-3 w-3 text-emerald-400" />
+                ) : (
+                  <Copy className="h-3 w-3" />
+                )}
               </button>
             </div>
             <p className="text-[11px] font-sans text-neutral-300 leading-relaxed font-semibold">
@@ -104,7 +130,9 @@ export default function ThumbnailGenerator({ title, genre, onGeneratedConcept }:
           </div>
 
           <p className="text-[10px] font-sans text-neutral-500 italic leading-relaxed pl-1">
-            <span className="font-mono text-[9px] uppercase font-bold text-purple-300 block">CTR Justification:</span>
+            <span className="font-mono text-[9px] uppercase font-bold text-purple-300 block">
+              CTR Justification:
+            </span>
             {concept.ctr_explanation}
           </p>
         </div>

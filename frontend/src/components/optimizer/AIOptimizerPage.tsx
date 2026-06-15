@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { Sliders, Search, ArrowLeft, Settings, Globe, Radio } from "lucide-react";
+import {
+  Sliders,
+  Search,
+  ArrowLeft,
+  Settings,
+  Globe,
+  Radio,
+} from "lucide-react";
 import { GeneratedPanel } from "../../types";
 
 import SeoOptimizationTab from "./SeoOptimizationTab.js";
@@ -13,15 +20,26 @@ interface AIOptimizerPageProps {
   addNotification?: (msg: string, type: any) => void;
 }
 
-export default function AIOptimizerPage({ panels, onNavigateHome, addNotification }: AIOptimizerPageProps) {
-  const [activeTab, setActiveTab] = useState<"seo" | "shorts" | "sound" | "ads">("seo");
+export default function AIOptimizerPage({
+  panels,
+  onNavigateHome,
+  addNotification,
+}: AIOptimizerPageProps) {
+  const [activeTab, setActiveTab] = useState<
+    "seo" | "shorts" | "sound" | "ads"
+  >("seo");
 
   // Compile overall storyboard details for prompts
   const title = "Overpowered S-Rank Recap";
   const genre = "Fantasy Action";
-  
+
   const storyboardSummary = panels
-    .map((p, idx) => `Panel ${idx + 1}: Dialogue: "${p.speech_text || 'Silent scene'}" | Visual action: ${p.visual_description || 'No visual details'}`)
+    .map(
+      (p, idx) =>
+        `Panel ${idx + 1}: Dialogue: "${
+          p.speech_text || "Silent scene"
+        }" | Visual action: ${p.visual_description || "No visual details"}`
+    )
     .join("\n");
 
   // Compile chronological script timestamps for chapter splits
@@ -30,9 +48,11 @@ export default function AIOptimizerPage({ panels, onNavigateHome, addNotificatio
     .map((p, idx) => {
       const minutes = Math.floor(currentAccumulator / 60);
       const seconds = Math.floor(currentAccumulator % 60);
-      const timestamp = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+      const timestamp = `${minutes.toString().padStart(2, "0")}:${seconds
+        .toString()
+        .padStart(2, "0")}`;
       currentAccumulator += p.duration || 4.5;
-      return `${timestamp} - Panel ${idx + 1}: ${p.speech_text || '(Silent)'}`;
+      return `${timestamp} - Panel ${idx + 1}: ${p.speech_text || "(Silent)"}`;
     })
     .join("\n");
 
@@ -45,7 +65,8 @@ export default function AIOptimizerPage({ panels, onNavigateHome, addNotificatio
             AI Video Production & SEO Assistant
           </h2>
           <p className="text-xs text-neutral-400 font-mono mt-0.5">
-            Optimize your recap video content metadata, hook retention, and chapters
+            Optimize your recap video content metadata, hook retention, and
+            chapters
           </p>
         </div>
         <button
@@ -103,10 +124,17 @@ export default function AIOptimizerPage({ panels, onNavigateHome, addNotificatio
       {/* ACTIVE TAB VIEWS */}
       <div className="bg-neutral-900/10 border border-neutral-800/80 rounded-2xl p-5 md:p-6 space-y-4">
         {activeTab === "seo" && (
-          <SeoOptimizationTab title={title} genre={genre} storyboardSummary={storyboardSummary} />
+          <SeoOptimizationTab
+            title={title}
+            genre={genre}
+            storyboardSummary={storyboardSummary}
+          />
         )}
         {activeTab === "shorts" && (
-          <ShortsScriptTab title={title} storyboardSummary={storyboardSummary} />
+          <ShortsScriptTab
+            title={title}
+            storyboardSummary={storyboardSummary}
+          />
         )}
         {activeTab === "sound" && (
           <SoundOutroTab title={title} storyboardSummary={storyboardSummary} />

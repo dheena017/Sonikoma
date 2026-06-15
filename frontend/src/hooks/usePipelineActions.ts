@@ -82,10 +82,7 @@ export function usePipelineActions({
     narrationStyle,
   } = state;
 
-  const {
-    runBackgroundAnalysis,
-    addPanelsToStoryboard,
-  } = useAutoAnalysis({
+  const { runBackgroundAnalysis, addPanelsToStoryboard } = useAutoAnalysis({
     panels,
     selectedModel,
     scrapedImages,

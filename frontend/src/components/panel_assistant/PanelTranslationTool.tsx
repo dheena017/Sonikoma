@@ -8,13 +8,24 @@ interface PanelTranslationToolProps {
   addNotification?: (msg: string, type: any) => void;
 }
 
-export default function PanelTranslationTool({ panel, onUpdateDialogue, addNotification }: PanelTranslationToolProps) {
+export default function PanelTranslationTool({
+  panel,
+  onUpdateDialogue,
+  addNotification,
+}: PanelTranslationToolProps) {
   const [lang, setLang] = useState("Spanish");
   const [translating, setTranslating] = useState(false);
   const [scrubbing, setScrubbing] = useState(false);
-  
-  const [translationResult, setTranslationResult] = useState<string | null>(null);
-  const [scrubResult, setScrubResult] = useState<{ contains_violation: boolean; violation_type: string; sanitized_text: string; explanation: string } | null>(null);
+
+  const [translationResult, setTranslationResult] = useState<string | null>(
+    null
+  );
+  const [scrubResult, setScrubResult] = useState<{
+    contains_violation: boolean;
+    violation_type: string;
+    sanitized_text: string;
+    explanation: string;
+  } | null>(null);
 
   const handleTranslate = async () => {
     setTranslating(true);
@@ -25,8 +36,8 @@ export default function PanelTranslationTool({ panel, onUpdateDialogue, addNotif
         body: JSON.stringify({
           text: panel.speech_text,
           target_lang: lang,
-          model: "gemini-2.5-flash"
-        })
+          model: "gemini-2.5-flash",
+        }),
       });
       const json = await res.json();
       if (json.success && json.result) {
@@ -47,8 +58,8 @@ export default function PanelTranslationTool({ panel, onUpdateDialogue, addNotif
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           text: panel.speech_text,
-          model: "gemini-2.5-flash"
-        })
+          model: "gemini-2.5-flash",
+        }),
       });
       const json = await res.json();
       if (json.success && json.result) {
@@ -69,8 +80,10 @@ export default function PanelTranslationTool({ panel, onUpdateDialogue, addNotif
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* Dialogue Translator */}
       <div className="bg-neutral-900/40 border border-neutral-800 rounded-xl p-4 space-y-3">
-        <h5 className="text-[11px] font-mono font-bold text-purple-450 uppercase tracking-wider">AI Dialogue Translation Studio</h5>
-        
+        <h5 className="text-[11px] font-mono font-bold text-purple-450 uppercase tracking-wider">
+          AI Dialogue Translation Studio
+        </h5>
+
         <div className="flex gap-2">
           <select
             value={lang}
@@ -95,13 +108,16 @@ export default function PanelTranslationTool({ panel, onUpdateDialogue, addNotif
 
         {translationResult && (
           <div className="bg-neutral-950 p-3 rounded-lg border border-neutral-850 space-y-2 animate-fade-in">
-            <span className="text-[9px] font-mono text-neutral-500 uppercase block">Result:</span>
+            <span className="text-[9px] font-mono text-neutral-500 uppercase block">
+              Result:
+            </span>
             <p className="text-xs text-neutral-200">{translationResult}</p>
             <button
               onClick={() => {
                 onUpdateDialogue(translationResult);
                 setTranslationResult(null);
-                if (addNotification) addNotification("Applied translated script!", "success");
+                if (addNotification)
+                  addNotification("Applied translated script!", "success");
               }}
               className="text-[9px] font-mono font-bold text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer"
             >
@@ -113,8 +129,10 @@ export default function PanelTranslationTool({ panel, onUpdateDialogue, addNotif
 
       {/* Safety compliance scrubber */}
       <div className="bg-neutral-900/40 border border-neutral-800 rounded-xl p-4 space-y-3">
-        <h5 className="text-[11px] font-mono font-bold text-purple-450 uppercase tracking-wider">Monetization Guidelines Scan</h5>
-        
+        <h5 className="text-[11px] font-mono font-bold text-purple-450 uppercase tracking-wider">
+          Monetization Guidelines Scan
+        </h5>
+
         <button
           onClick={handleScrub}
           disabled={scrubbing || !panel.speech_text}
@@ -128,22 +146,35 @@ export default function PanelTranslationTool({ panel, onUpdateDialogue, addNotif
             <div className="flex items-center gap-1.5">
               {scrubResult.contains_violation ? (
                 <span className="text-[10px] font-mono font-bold text-rose-400 flex items-center gap-1">
-                  <AlertTriangle className="h-3.5 w-3.5" /> Flagged: {scrubResult.violation_type}
+                  <AlertTriangle className="h-3.5 w-3.5" /> Flagged:{" "}
+                  {scrubResult.violation_type}
                 </span>
               ) : (
-                <span className="text-[10px] font-mono font-bold text-emerald-400">✓ Conforms to Guidelines</span>
+                <span className="text-[10px] font-mono font-bold text-emerald-400">
+                  ✓ Conforms to Guidelines
+                </span>
               )}
             </div>
-            <p className="text-[10px] font-sans text-neutral-450 leading-relaxed">{scrubResult.explanation}</p>
+            <p className="text-[10px] font-sans text-neutral-450 leading-relaxed">
+              {scrubResult.explanation}
+            </p>
             {scrubResult.contains_violation && (
               <div className="pt-1.5 space-y-1 border-t border-neutral-850 mt-1">
-                <span className="text-[9px] font-mono text-neutral-500 uppercase block">Sanitized Recommendation:</span>
-                <p className="text-xs text-neutral-200">{scrubResult.sanitized_text}</p>
+                <span className="text-[9px] font-mono text-neutral-500 uppercase block">
+                  Sanitized Recommendation:
+                </span>
+                <p className="text-xs text-neutral-200">
+                  {scrubResult.sanitized_text}
+                </p>
                 <button
                   onClick={() => {
                     onUpdateDialogue(scrubResult.sanitized_text);
                     setScrubResult(null);
-                    if (addNotification) addNotification("Applied clean script replacement!", "success");
+                    if (addNotification)
+                      addNotification(
+                        "Applied clean script replacement!",
+                        "success"
+                      );
                   }}
                   className="text-[9px] font-mono font-bold text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer pt-1"
                 >

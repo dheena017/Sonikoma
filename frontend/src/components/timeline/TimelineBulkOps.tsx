@@ -29,7 +29,9 @@ export default function TimelineBulkOps({
     <div className="bg-neutral-950/70 p-3 sm:p-4 rounded-xl border border-purple-900/30 grid grid-cols-1 md:grid-cols-4 gap-3 sm:gap-4 animate-fadeIn">
       {/* Duration */}
       <div className="space-y-2">
-        <label className="text-[10px] font-bold text-neutral-400 uppercase font-mono tracking-wider block">Bulk Set Timing</label>
+        <label className="text-[10px] font-bold text-neutral-400 uppercase font-mono tracking-wider block">
+          Bulk Set Timing
+        </label>
         <div className="flex gap-2">
           <input
             type="number"
@@ -55,7 +57,9 @@ export default function TimelineBulkOps({
 
       {/* Camera Motion */}
       <div className="space-y-2">
-        <label className="text-[10px] font-bold text-neutral-400 uppercase font-mono tracking-wider block">Bulk Set Cam Motion</label>
+        <label className="text-[10px] font-bold text-neutral-400 uppercase font-mono tracking-wider block">
+          Bulk Set Cam Motion
+        </label>
         <div className="flex gap-2">
           <select
             value={bulkMotion}
@@ -83,7 +87,9 @@ export default function TimelineBulkOps({
 
       {/* Color Grading Presets */}
       <div className="space-y-2">
-        <label className="text-[10px] font-bold text-neutral-400 uppercase font-mono tracking-wider block">Bulk Set Color Preset</label>
+        <label className="text-[10px] font-bold text-neutral-400 uppercase font-mono tracking-wider block">
+          Bulk Set Color Preset
+        </label>
         <div className="flex gap-2">
           <select
             value={bulkPreset}

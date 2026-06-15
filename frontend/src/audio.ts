@@ -9,7 +9,11 @@ export function stopAmbientBackgroundMusic() {
   // Ambient soundtrack loop - noop
 }
 
-export function startAmbientBackgroundMusic(theme: string, volume: number, isMuted: boolean = false) {
+export function startAmbientBackgroundMusic(
+  theme: string,
+  volume: number,
+  isMuted: boolean = false
+) {
   // Ambient soundtrack loop - noop
 }
 

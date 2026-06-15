@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { 
-  Film, 
-  Activity, 
-  Terminal, 
-  Sliders, 
-  Scissors, 
-  Brain, 
-  Keyboard, 
-  Sparkles, 
-  X, 
-  LayoutDashboard, 
-  ChevronDown, 
-  ChevronUp 
+import {
+  Film,
+  Activity,
+  Terminal,
+  Sliders,
+  Scissors,
+  Brain,
+  Keyboard,
+  Sparkles,
+  X,
+  LayoutDashboard,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { GeneratedPanel } from "../types";
 
@@ -42,7 +42,8 @@ export default function Sidebar({
   isOpen,
   onClose,
 }: SidebarProps) {
-  const isDashboard = currentPath === "/" || currentPath === "" || currentPath === "/index.html";
+  const isDashboard =
+    currentPath === "/" || currentPath === "" || currentPath === "/index.html";
   const isSettings = currentPath === "/settings";
   const isAutoCrop = currentPath === "/auto-crop";
   const isBubbleCleaner = currentPath === "/bubble-cleaner";
@@ -51,7 +52,8 @@ export default function Sidebar({
   const isStatus = currentPath === "/status";
   const isShortcuts = currentPath === "/shortcuts";
 
-  const isAiSuiteActive = currentPath.startsWith("/ai-") || currentPath === "/panel-assistant";
+  const isAiSuiteActive =
+    currentPath.startsWith("/ai-") || currentPath === "/panel-assistant";
   const [aiSuiteExpanded, setAiSuiteExpanded] = useState(isAiSuiteActive);
 
   // Automatically expand AI Suite if active route is an AI page
@@ -84,7 +86,12 @@ export default function Sidebar({
           active: isAutoCrop,
           onClick: () => navigateTo("/auto-crop"),
           enabled: true,
-          badge: scrapedImages.length > 0 ? scrapedImages.length : (panels.length > 0 ? panels.length : undefined),
+          badge:
+            scrapedImages.length > 0
+              ? scrapedImages.length
+              : panels.length > 0
+              ? panels.length
+              : undefined,
           isProcessing: isBatchCropping,
         },
         {
@@ -103,10 +110,15 @@ export default function Sidebar({
             if (lastEditorPath) navigateTo(lastEditorPath);
           },
           enabled: scrapedImages.length > 0 || panels.length > 0,
-          badge: editingImageIdx !== null ? `#${editingImageIdx + 1}` : (panels.length > 0 ? `Total: ${panels.length}` : undefined),
-          disabledTip: "Requires scraped images or storyboard panels"
+          badge:
+            editingImageIdx !== null
+              ? `#${editingImageIdx + 1}`
+              : panels.length > 0
+              ? `Total: ${panels.length}`
+              : undefined,
+          disabledTip: "Requires scraped images or storyboard panels",
         },
-      ]
+      ],
     },
     {
       group: "Diagnostics & Controls",
@@ -139,7 +151,7 @@ export default function Sidebar({
           onClick: () => navigateTo("/settings"),
           enabled: true,
         },
-      ]
+      ],
     },
     {
       group: "Account",
@@ -151,8 +163,8 @@ export default function Sidebar({
           onClick: () => navigateTo("/profile"),
           enabled: true,
         },
-      ]
-    }
+      ],
+    },
   ];
 
   const aiSuiteItems = [
@@ -169,7 +181,6 @@ export default function Sidebar({
 
   const sidebarContent = (
     <div className="flex flex-col h-full justify-between p-5 space-y-6">
-      
       {/* BRANDING LOGO */}
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -186,13 +197,15 @@ export default function Sidebar({
                   Webtoon<span className="text-purple-400">To</span>Video
                 </span>
               </div>
-              <p className="text-[10px] text-neutral-400 font-mono">Vision Pipeline Suite</p>
+              <p className="text-[10px] text-neutral-400 font-mono">
+                Vision Pipeline Suite
+              </p>
             </div>
           </div>
-          
+
           {/* Close button for Mobile drawer */}
-          <button 
-            onClick={onClose} 
+          <button
+            onClick={onClose}
             className="lg:hidden p-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white cursor-pointer"
           >
             <X className="h-4 w-4" />
@@ -218,17 +231,31 @@ export default function Sidebar({
                           item.active
                             ? "text-white bg-purple-950/20 border border-purple-900/60 shadow-inner"
                             : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 border border-transparent"
-                        } ${item.isProcessing ? "ring-1 ring-purple-500/50 shadow-[0_0_8px_rgba(168,85,247,0.2)]" : ""}`}
+                        } ${
+                          item.isProcessing
+                            ? "ring-1 ring-purple-500/50 shadow-[0_0_8px_rgba(168,85,247,0.2)]"
+                            : ""
+                        }`}
                         title={!item.enabled ? item.disabledTip : item.label}
                       >
                         <div className="flex items-center gap-2.5">
-                          <Icon className={`h-4 w-4 ${item.active ? "text-purple-400" : "text-neutral-500 group-hover:text-neutral-300"}`} />
+                          <Icon
+                            className={`h-4 w-4 ${
+                              item.active
+                                ? "text-purple-400"
+                                : "text-neutral-500 group-hover:text-neutral-300"
+                            }`}
+                          />
                           <span>{item.label}</span>
                         </div>
                         {item.badge && (
-                          <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono ${
-                            item.active ? "bg-purple-900 text-purple-200" : "bg-black/55 text-neutral-400"
-                          }`}>
+                          <span
+                            className={`text-[9px] px-1.5 py-0.5 rounded font-mono ${
+                              item.active
+                                ? "bg-purple-900 text-purple-200"
+                                : "bg-black/55 text-neutral-400"
+                            }`}
+                          >
                             {item.badge}
                           </span>
                         )}
@@ -257,13 +284,27 @@ export default function Sidebar({
                     ? "text-purple-300 bg-purple-950/10 border-purple-900/40"
                     : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 border-transparent"
                 }`}
-                title={panels.length === 0 ? "Requires active storyboard panels" : "AI Creative Suite"}
+                title={
+                  panels.length === 0
+                    ? "Requires active storyboard panels"
+                    : "AI Creative Suite"
+                }
               >
                 <div className="flex items-center gap-2.5">
-                  <Sparkles className={`h-4 w-4 ${isAiSuiteActive ? "text-purple-400 animate-pulse" : "text-neutral-500"}`} />
+                  <Sparkles
+                    className={`h-4 w-4 ${
+                      isAiSuiteActive
+                        ? "text-purple-400 animate-pulse"
+                        : "text-neutral-500"
+                    }`}
+                  />
                   <span>AI Suite</span>
                 </div>
-                {aiSuiteExpanded ? <ChevronUp className="h-3.5 w-3.5 text-neutral-500" /> : <ChevronDown className="h-3.5 w-3.5 text-neutral-500" />}
+                {aiSuiteExpanded ? (
+                  <ChevronUp className="h-3.5 w-3.5 text-neutral-500" />
+                ) : (
+                  <ChevronDown className="h-3.5 w-3.5 text-neutral-500" />
+                )}
               </button>
 
               {aiSuiteExpanded && panels.length > 0 && (
@@ -275,8 +316,8 @@ export default function Sidebar({
                         key={subItem.label}
                         onClick={() => navigateTo(subItem.path)}
                         className={`w-full text-left px-3 py-2 rounded-lg text-[11px] font-mono hover:bg-neutral-900 hover:text-white transition-all cursor-pointer ${
-                          isSubActive 
-                            ? "text-purple-300 font-bold bg-neutral-900/60" 
+                          isSubActive
+                            ? "text-purple-300 font-bold bg-neutral-900/60"
                             : "text-neutral-400"
                         }`}
                       >
@@ -293,11 +334,14 @@ export default function Sidebar({
 
       {/* BOTTOM STATUS CARD */}
       <div className="space-y-4 pt-4 border-t border-neutral-900">
-        
         {/* Status Indicator */}
         <div className="px-3 py-2.5 rounded-xl border flex items-center justify-between font-mono border-neutral-900 bg-neutral-950/80">
           <div className="flex items-center gap-2">
-            <span className={`h-2.5 w-2.5 rounded-full ${isProcessing ? 'bg-purple-500 animate-ping' : 'bg-emerald-500'}`} />
+            <span
+              className={`h-2.5 w-2.5 rounded-full ${
+                isProcessing ? "bg-purple-500 animate-ping" : "bg-emerald-500"
+              }`}
+            />
             <span className="text-[10px] text-neutral-300 font-bold">
               {isProcessing ? "PROCESSING" : "ENGINE READY"}
             </span>
@@ -311,37 +355,36 @@ export default function Sidebar({
         {panels.length > 0 && (
           <div className="px-3 py-2 rounded-xl bg-neutral-900/30 text-neutral-400 text-[10px] font-mono flex items-center justify-between border border-neutral-900/40">
             <span>Video Duration:</span>
-            <span className="font-bold text-neutral-200">{totalCalculatedDuration.toFixed(1)}s</span>
+            <span className="font-bold text-neutral-200">
+              {totalCalculatedDuration.toFixed(1)}s
+            </span>
           </div>
         )}
       </div>
-
     </div>
   );
 
   return (
     <>
       {/* Desktop sidebar */}
-      <aside 
+      <aside
         className={`hidden lg:block bg-neutral-950/80 border-r border-neutral-900 h-screen sticky top-0 flex-shrink-0 z-30 shadow-xl shadow-black/40 transition-all duration-300 ease-in-out ${
           isOpen ? "w-64 xl:w-72" : "w-0 border-r-0 overflow-hidden"
         }`}
       >
-        <div className="w-64 xl:w-72 h-full">
-          {sidebarContent}
-        </div>
+        <div className="w-64 xl:w-72 h-full">{sidebarContent}</div>
       </aside>
 
       {/* Mobile drawer backdrop */}
       {isOpen && (
-        <div 
+        <div
           className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity animate-fade-in"
           onClick={onClose}
         />
       )}
 
       {/* Mobile drawer container */}
-      <aside 
+      <aside
         className={`lg:hidden fixed inset-y-0 left-0 w-72 bg-neutral-950/95 border-r border-neutral-900 h-full z-50 transition-transform duration-300 ease-out transform ${
           isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
         }`}

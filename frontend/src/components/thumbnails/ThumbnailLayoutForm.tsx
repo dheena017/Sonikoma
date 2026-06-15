@@ -12,7 +12,9 @@ interface LayoutData {
   face_expression: string;
 }
 
-export default function ThumbnailLayoutForm({ conceptPrompt }: ThumbnailLayoutFormProps) {
+export default function ThumbnailLayoutForm({
+  conceptPrompt,
+}: ThumbnailLayoutFormProps) {
   const [loading, setLoading] = useState(false);
   const [character, setCharacter] = useState("Jinwoo");
   const [layout, setLayout] = useState<LayoutData | null>(null);
@@ -24,10 +26,11 @@ export default function ThumbnailLayoutForm({ conceptPrompt }: ThumbnailLayoutFo
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          thumbnail_concept: conceptPrompt || "Tense combat close-up illustration",
+          thumbnail_concept:
+            conceptPrompt || "Tense combat close-up illustration",
           main_character: character,
-          model: "gemini-2.5-flash"
-        })
+          model: "gemini-2.5-flash",
+        }),
       });
       const json = await res.json();
       if (json.success && json.result) {
@@ -45,7 +48,9 @@ export default function ThumbnailLayoutForm({ conceptPrompt }: ThumbnailLayoutFo
       <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
         <div className="flex items-center gap-2">
           <Layers className="h-4.5 w-4.5 text-purple-400" />
-          <h4 className="text-xs font-mono font-bold text-white uppercase">AI Graphic Artist Layering Instructions</h4>
+          <h4 className="text-xs font-mono font-bold text-white uppercase">
+            AI Graphic Artist Layering Instructions
+          </h4>
         </div>
         <button
           onClick={handleGenerate}
@@ -57,7 +62,9 @@ export default function ThumbnailLayoutForm({ conceptPrompt }: ThumbnailLayoutFo
       </div>
 
       <div className="space-y-1">
-        <label className="text-[9px] font-mono text-neutral-500 uppercase">Main Focus Character</label>
+        <label className="text-[9px] font-mono text-neutral-500 uppercase">
+          Main Focus Character
+        </label>
         <input
           type="text"
           value={character}
@@ -70,23 +77,35 @@ export default function ThumbnailLayoutForm({ conceptPrompt }: ThumbnailLayoutFo
         <div className="bg-neutral-950 p-3 rounded-lg border border-neutral-850 space-y-2 text-[10px] font-mono animate-fade-in">
           <div className="flex justify-between border-b border-neutral-900 pb-1.5">
             <span className="text-neutral-500">Subject Alignment</span>
-            <span className="text-neutral-350 font-bold uppercase">{layout.subject_placement}</span>
+            <span className="text-neutral-350 font-bold uppercase">
+              {layout.subject_placement}
+            </span>
           </div>
           <div className="flex justify-between border-b border-neutral-900 pb-1.5">
             <span className="text-neutral-500">Character Expression</span>
-            <span className="text-neutral-350 font-semibold">{layout.face_expression}</span>
+            <span className="text-neutral-350 font-semibold">
+              {layout.face_expression}
+            </span>
           </div>
           <div className="flex justify-between border-b border-neutral-900 pb-1.5">
             <span className="text-neutral-500">Canvas Background</span>
-            <span className="text-neutral-350 font-semibold truncate max-w-[200px]" title={layout.background_style}>
+            <span
+              className="text-neutral-350 font-semibold truncate max-w-[200px]"
+              title={layout.background_style}
+            >
               {layout.background_style}
             </span>
           </div>
           <div className="pt-1.5 space-y-1">
-            <span className="text-neutral-500 block">Glowing & Outline Effects:</span>
+            <span className="text-neutral-500 block">
+              Glowing & Outline Effects:
+            </span>
             <div className="flex flex-wrap gap-1">
               {layout.glowing_elements.map((glow, idx) => (
-                <span key={idx} className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-purple-300">
+                <span
+                  key={idx}
+                  className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-purple-300"
+                >
                   {glow}
                 </span>
               ))}

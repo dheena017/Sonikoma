@@ -6,7 +6,10 @@ interface LoadingPageProps {
   progress?: number;
 }
 
-export default function LoadingPage({ status = "Connecting to Computational Engine...", progress }: LoadingPageProps) {
+export default function LoadingPage({
+  status = "Connecting to Computational Engine...",
+  progress,
+}: LoadingPageProps) {
   return (
     <div className="min-h-screen bg-[#070709] flex flex-col items-center justify-center p-6 text-center space-y-12">
       <div className="relative">
@@ -21,31 +24,41 @@ export default function LoadingPage({ status = "Connecting to Computational Engi
 
       <div className="space-y-6 max-w-xs w-full">
         <div className="space-y-2">
-           <h2 className="text-2xl font-black tracking-tighter text-white uppercase">Anivox</h2>
-           <p className="text-neutral-500 text-xs font-mono tracking-widest uppercase">{status}</p>
+          <h2 className="text-2xl font-black tracking-tighter text-white uppercase">
+            Anivox
+          </h2>
+          <p className="text-neutral-500 text-xs font-mono tracking-widest uppercase">
+            {status}
+          </p>
         </div>
 
         <div className="relative h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
-           <div
-             className="absolute top-0 left-0 h-full bg-gradient-to-r from-purple-600 via-indigo-500 to-emerald-500 transition-all duration-500 rounded-full"
-             style={{ width: progress !== undefined ? `${progress}%` : "30%" }}
-           />
-           {progress === undefined && (
-             <div className="absolute top-0 left-0 h-full w-1/2 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
-           )}
+          <div
+            className="absolute top-0 left-0 h-full bg-gradient-to-r from-purple-600 via-indigo-500 to-emerald-500 transition-all duration-500 rounded-full"
+            style={{ width: progress !== undefined ? `${progress}%` : "30%" }}
+          />
+          {progress === undefined && (
+            <div className="absolute top-0 left-0 h-full w-1/2 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+          )}
         </div>
 
         <div className="flex items-center justify-center gap-2 text-purple-400/60">
-           <Loader2 className="w-3 h-3 animate-spin" />
-           <span className="text-[10px] font-bold uppercase tracking-tighter">System Initializing</span>
+          <Loader2 className="w-3 h-3 animate-spin" />
+          <span className="text-[10px] font-bold uppercase tracking-tighter">
+            System Initializing
+          </span>
         </div>
       </div>
 
       <div className="absolute bottom-10 left-0 right-0">
-         <p className="text-neutral-600 text-[10px] uppercase font-black tracking-[0.2em]">Built for the future of comics</p>
+        <p className="text-neutral-600 text-[10px] uppercase font-black tracking-[0.2em]">
+          Built for the future of comics
+        </p>
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         @keyframes shimmer {
           0% { transform: translateX(-100%); }
           100% { transform: translateX(200%); }
@@ -60,7 +73,9 @@ export default function LoadingPage({ status = "Connecting to Computational Engi
         .animate-bounce-slow {
           animation: bounce-slow 3s ease-in-out infinite;
         }
-      `}} />
+      `,
+        }}
+      />
     </div>
   );
 }

@@ -4,6 +4,7 @@ description: Generate high-ranking YouTube SEO Titles, tags, description, and ch
 model: gemini-2.5-flash
 response_schema: VideoSEOMetadataModel
 ---
+
 You are a YouTube algorithm expert. Generate SEO metadata to maximize viral reach for this webtoon video compilation.
 Manhwa Title: "{title}"
 Genre: "{genre}"

@@ -4,6 +4,7 @@ description: Layout layering instructions for thumbnail artists/graphics templat
 model: gemini-2.5-flash
 response_schema: ThumbnailLayoutModel
 ---
+
 Given the thumbnail concept and main character:
 Concept: "{thumbnail_concept}"
 Character: "{main_character}"

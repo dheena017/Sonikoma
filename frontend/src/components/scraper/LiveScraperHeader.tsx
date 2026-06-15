@@ -26,7 +26,9 @@ export default function LiveScraperHeader({
         </div>
         <div className="space-y-0.5">
           <div className="flex items-center gap-3">
-            <h3 className="font-bold text-sm text-white">Live Asset Extraction</h3>
+            <h3 className="font-bold text-sm text-white">
+              Live Asset Extraction
+            </h3>
             {imagesCount > 0 && (
               <span className="text-[10px] px-3 py-1 rounded-full bg-purple-950/60 text-purple-300 border border-purple-800/50 shadow-inner font-mono uppercase tracking-wider">
                 {imagesCount} Frames

@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import { 
-  X, 
-  AlertTriangle, 
-  Terminal, 
-  ChevronDown, 
-  ChevronUp, 
-  RefreshCw, 
-  Copy, 
-  Check
+import {
+  X,
+  AlertTriangle,
+  Terminal,
+  ChevronDown,
+  ChevronUp,
+  RefreshCw,
+  Copy,
+  Check,
 } from "lucide-react";
 
 export interface ErrorPopupDetail {
@@ -24,21 +24,26 @@ interface ErrorPopupModalProps {
   onClose: () => void;
 }
 
-export default function ErrorPopupModal({ error, onClose }: ErrorPopupModalProps) {
+export default function ErrorPopupModal({
+  error,
+  onClose,
+}: ErrorPopupModalProps) {
   if (!error) return null;
 
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    const textToCopy = `[Error Diagnosis]\nTitle: ${error.title}\nMessage: ${error.message}\nTechnical logs:\n${error.technicalDetails || "None"}`;
+    const textToCopy = `[Error Diagnosis]\nTitle: ${error.title}\nMessage: ${
+      error.message
+    }\nTechnical logs:\n${error.technicalDetails || "None"}`;
     navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const isWarning = error.type === "warning";
-  
+
   const handleApplyRetry = () => {
     if (error.onRetry) {
       error.onRetry();
@@ -49,21 +54,25 @@ export default function ErrorPopupModal({ error, onClose }: ErrorPopupModalProps
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
         onClick={onClose}
       />
-      
+
       {/* Container */}
-      <div 
+      <div
         className={`relative w-full max-w-2xl bg-neutral-900 border-2 ${
           isWarning ? "border-amber-500/50" : "border-red-500/50"
         } rounded-3xl shadow-2xl p-6 md:p-8 overflow-hidden z-10 animate-in zoom-in-95 duration-200`}
       >
         {/* Glow Element */}
-        <div className={`absolute top-0 left-1/4 right-1/4 h-1.5 bg-gradient-to-r ${
-          isWarning ? "from-transparent via-amber-500 to-transparent" : "from-transparent via-red-500 to-transparent"
-        } blur-[1px]`} />
+        <div
+          className={`absolute top-0 left-1/4 right-1/4 h-1.5 bg-gradient-to-r ${
+            isWarning
+              ? "from-transparent via-amber-500 to-transparent"
+              : "from-transparent via-red-500 to-transparent"
+          } blur-[1px]`}
+        />
 
         {/* Close Button */}
         <button
@@ -77,19 +86,31 @@ export default function ErrorPopupModal({ error, onClose }: ErrorPopupModalProps
         <div className="space-y-6">
           {/* Header */}
           <div className="flex items-start gap-4">
-            <div className={`p-3.5 rounded-2xl ${
-              isWarning ? "bg-amber-500/10 text-amber-400" : "bg-red-500/10 text-red-500"
-            } shrink-0`}>
+            <div
+              className={`p-3.5 rounded-2xl ${
+                isWarning
+                  ? "bg-amber-500/10 text-amber-400"
+                  : "bg-red-500/10 text-red-500"
+              } shrink-0`}
+            >
               <AlertTriangle className="h-7 w-7 animate-pulse" />
             </div>
             <div className="space-y-1">
-              <span className={`text-[9.5px] uppercase tracking-widest font-bold font-mono px-2.5 py-0.5 rounded-full ${
-                isWarning ? "bg-amber-500/15 text-amber-400 border border-amber-500/35" : "bg-red-500/15 text-red-400 border border-red-500/35"
-              }`}>
+              <span
+                className={`text-[9.5px] uppercase tracking-widest font-bold font-mono px-2.5 py-0.5 rounded-full ${
+                  isWarning
+                    ? "bg-amber-500/15 text-amber-400 border border-amber-500/35"
+                    : "bg-red-500/15 text-red-400 border border-red-500/35"
+                }`}
+              >
                 {isWarning ? "Heuristics Warning" : "Engine Fault Dialog"}
               </span>
-              <h2 className="text-xl font-bold font-sans text-white leading-snug">{error.title}</h2>
-              <p className="text-neutral-400 text-sm leading-relaxed mt-1 pr-4">{error.message}</p>
+              <h2 className="text-xl font-bold font-sans text-white leading-snug">
+                {error.title}
+              </h2>
+              <p className="text-neutral-400 text-sm leading-relaxed mt-1 pr-4">
+                {error.message}
+              </p>
             </div>
           </div>
 
@@ -97,7 +118,11 @@ export default function ErrorPopupModal({ error, onClose }: ErrorPopupModalProps
           {error.suggestion && (
             <div className="bg-neutral-950/60 rounded-2xl border border-neutral-800/40 p-5 space-y-4">
               <p className="text-xs text-neutral-300 leading-relaxed font-sans bg-purple-950/10 border border-purple-900/15 p-3 rounded-xl">
-                💡 <span className="font-semibold text-purple-300">Diagnostic Suggestion:</span> {error.suggestion}
+                💡{" "}
+                <span className="font-semibold text-purple-300">
+                  Diagnostic Suggestion:
+                </span>{" "}
+                {error.suggestion}
               </p>
             </div>
           )}
@@ -119,7 +144,7 @@ export default function ErrorPopupModal({ error, onClose }: ErrorPopupModalProps
                   <ChevronDown className="h-3.5 w-3.5 text-neutral-500" />
                 )}
               </button>
-              
+
               {expanded && (
                 <div className="relative p-4 font-mono text-[10px] text-neutral-400 bg-neutral-950 max-h-40 overflow-y-auto leading-relaxed whitespace-pre-wrap select-all">
                   <button
@@ -129,7 +154,9 @@ export default function ErrorPopupModal({ error, onClose }: ErrorPopupModalProps
                     {copied ? (
                       <>
                         <Check className="h-3 w-3 text-emerald-400" />
-                        <span className="text-emerald-400 font-bold">Copied!</span>
+                        <span className="text-emerald-400 font-bold">
+                          Copied!
+                        </span>
                       </>
                     ) : (
                       <>

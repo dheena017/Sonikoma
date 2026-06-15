@@ -4,6 +4,7 @@ description: Generate descriptive prompt phrases for audio sound effect generato
 model: gemini-2.5-flash
 response_schema: SFXAudioPromptModel
 ---
+
 You are an expert sound designer. Analyze the following comic action scene and generate a descriptive, detailed sound effect prompt to synthesize realistic audio.
 Visual scene context:
 {visual_description}

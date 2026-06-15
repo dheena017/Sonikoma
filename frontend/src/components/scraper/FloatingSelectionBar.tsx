@@ -65,7 +65,6 @@ export function FloatingSelectionBar({
       {/* Container with neutral border and standard dark shadow (no glow) */}
       <div className="bg-neutral-950/90 backdrop-blur-2xl border-t border-neutral-800/80 px-4 py-3 shadow-2xl shadow-black/50">
         <div className="max-w-7xl mx-auto flex items-center gap-3 flex-wrap sm:flex-nowrap">
-
           {/* Selection Count Badge */}
           <div className="flex items-center gap-2 bg-purple-950/60 border border-purple-700/50 rounded-xl px-3 py-2 shrink-0">
             <div className="h-5 w-5 rounded bg-purple-500 flex items-center justify-center text-white text-[9px] font-bold font-mono">
@@ -89,10 +88,10 @@ export function FloatingSelectionBar({
                 {isBatchCropping && batchProgress
                   ? `Cropping ${batchProgress.current}/${batchProgress.total}`
                   : isCleaningBubbles && cleanProgress
-                    ? `Cleaning ${cleanProgress.current}/${cleanProgress.total}`
-                    : isBatchMerging
-                      ? "Stitching panels…"
-                      : "Processing…"}
+                  ? `Cleaning ${cleanProgress.current}/${cleanProgress.total}`
+                  : isBatchMerging
+                  ? "Stitching panels…"
+                  : "Processing…"}
               </span>
             </div>
           )}
@@ -102,13 +101,14 @@ export function FloatingSelectionBar({
 
           {/* Action Buttons */}
           <div className="flex items-center gap-2 flex-wrap flex-1">
-
             {/* Select All / Deselect All */}
             <button
               type="button"
               onClick={handleSelectAllToggle}
               disabled={totalCount === 0}
-              title={isAllSelected ? "Deselect all panels" : "Select all panels"}
+              title={
+                isAllSelected ? "Deselect all panels" : "Select all panels"
+              }
               className="px-3 sm:px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {isAllSelected ? (
@@ -124,7 +124,11 @@ export function FloatingSelectionBar({
               <button
                 type="button"
                 onClick={() => {
-                  console.log("[FloatingSelectionBar] Triggering auto-crop on", selectedCount, "panels");
+                  console.log(
+                    "[FloatingSelectionBar] Triggering auto-crop on",
+                    selectedCount,
+                    "panels"
+                  );
                   handleAutoCropSelected();
                 }}
                 disabled={isAnyBusy}
@@ -157,7 +161,11 @@ export function FloatingSelectionBar({
               <button
                 type="button"
                 onClick={() => {
-                  console.log("[FloatingSelectionBar] Triggering clean bubbles on", selectedCount, "panels");
+                  console.log(
+                    "[FloatingSelectionBar] Triggering clean bubbles on",
+                    selectedCount,
+                    "panels"
+                  );
                   handleCleanBubblesSelected();
                 }}
                 disabled={isAnyBusy}
@@ -189,7 +197,11 @@ export function FloatingSelectionBar({
             <button
               type="button"
               onClick={() => {
-                console.log("[FloatingSelectionBar] Triggering stitch on", selectedCount, "panels");
+                console.log(
+                  "[FloatingSelectionBar] Triggering stitch on",
+                  selectedCount,
+                  "panels"
+                );
                 handleBatchMergeSelected();
               }}
               disabled={isAnyBusy || selectedCount < 2}
@@ -208,7 +220,11 @@ export function FloatingSelectionBar({
             <button
               type="button"
               onClick={() => {
-                console.log("[FloatingSelectionBar] Adding", selectedCount, "panels to storyboard");
+                console.log(
+                  "[FloatingSelectionBar] Adding",
+                  selectedCount,
+                  "panels to storyboard"
+                );
                 handleAddToStoryboard();
               }}
               disabled={isAnyBusy}
@@ -223,7 +239,11 @@ export function FloatingSelectionBar({
             <button
               type="button"
               onClick={() => {
-                console.log("[FloatingSelectionBar] Deleting", selectedCount, "panels");
+                console.log(
+                  "[FloatingSelectionBar] Deleting",
+                  selectedCount,
+                  "panels"
+                );
                 handleDeleteSelected();
               }}
               disabled={isAnyBusy}

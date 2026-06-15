@@ -15,16 +15,19 @@ export default function TranslationStudioPage({
   panels,
   setPanels,
   onNavigateHome,
-  addNotification
+  addNotification,
 }: TranslationStudioPageProps) {
-
   const handleUpdatePanelText = (id: number, val: string) => {
-    setPanels((prev) => prev.map((p) => (p.id === id ? { ...p, speech_text: val } : p)));
+    setPanels((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, speech_text: val } : p))
+    );
   };
 
   const handleApplyCleanScripts = (mappings: Record<number, string>) => {
     setPanels((prev) =>
-      prev.map((p) => (mappings[p.id] !== undefined ? { ...p, speech_text: mappings[p.id] } : p))
+      prev.map((p) =>
+        mappings[p.id] !== undefined ? { ...p, speech_text: mappings[p.id] } : p
+      )
     );
   };
 

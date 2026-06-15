@@ -25,25 +25,34 @@ export default function VolumeAndProgressPanel({
   isMuted,
   setIsMuted,
   volume,
-  setVolume
+  setVolume,
 }: VolumeAndProgressPanelProps) {
   const activeStoryboardPanel = panels[currentPanelIndex] || null;
 
   return (
-    <div id="video_controls_card" className="bg-neutral-900 p-4 rounded-2xl border border-neutral-800 space-y-4">
+    <div
+      id="video_controls_card"
+      className="bg-neutral-900 p-4 rounded-2xl border border-neutral-800 space-y-4"
+    >
       <div className="space-y-1">
         <div className="flex items-center justify-between text-xs font-mono text-neutral-400">
           <span>Storyboard Sync Progress</span>
           {activeStoryboardPanel && (
-            <span>{playbackTime.toFixed(1)}s / {activeStoryboardPanel.duration}s</span>
+            <span>
+              {playbackTime.toFixed(1)}s / {activeStoryboardPanel.duration}s
+            </span>
           )}
         </div>
-        
+
         <div className="relative h-2 bg-neutral-950 rounded-full overflow-hidden border border-neutral-800">
           {activeStoryboardPanel && (
-            <div 
+            <div
               className="bg-purple-500 h-full transition-all duration-100 ease-linear"
-              style={{ width: `${(playbackTime / activeStoryboardPanel.duration) * 100}%` }}
+              style={{
+                width: `${
+                  (playbackTime / activeStoryboardPanel.duration) * 100
+                }%`,
+              }}
             />
           )}
         </div>
@@ -58,9 +67,13 @@ export default function VolumeAndProgressPanel({
             }}
             className="bg-purple-600 hover:bg-purple-500 text-white p-3 rounded-full cursor-pointer hover:scale-105 transition-transform"
           >
-            {storyboardPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 fill-white" />}
+            {storyboardPlaying ? (
+              <Pause className="h-4 w-4" />
+            ) : (
+              <Play className="h-4 w-4 fill-white" />
+            )}
           </button>
-          
+
           <button
             onClick={() => {
               console.log("[Playback] Resetting playback");
@@ -73,8 +86,15 @@ export default function VolumeAndProgressPanel({
         </div>
 
         <div className="flex items-center gap-2">
-          <button onClick={() => setIsMuted(!isMuted)} className="text-neutral-400 hover:text-white cursor-pointer">
-            {isMuted || volume === 0 ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+          <button
+            onClick={() => setIsMuted(!isMuted)}
+            className="text-neutral-400 hover:text-white cursor-pointer"
+          >
+            {isMuted || volume === 0 ? (
+              <VolumeX className="h-4 w-4" />
+            ) : (
+              <Volume2 className="h-4 w-4" />
+            )}
           </button>
           <input
             type="range"
@@ -87,8 +107,12 @@ export default function VolumeAndProgressPanel({
         </div>
 
         <div className="text-right">
-          <span className="text-[10px] uppercase font-mono text-neutral-500 block">Active Scene</span>
-          <span className="text-xs font-semibold text-white">Scene #{currentPanelIndex + 1}</span>
+          <span className="text-[10px] uppercase font-mono text-neutral-500 block">
+            Active Scene
+          </span>
+          <span className="text-xs font-semibold text-white">
+            Scene #{currentPanelIndex + 1}
+          </span>
         </div>
       </div>
     </div>

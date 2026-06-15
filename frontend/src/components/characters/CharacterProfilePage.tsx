@@ -10,34 +10,46 @@ interface CharacterProfilePageProps {
   addNotification?: (msg: string, type: any) => void;
 }
 
-export default function CharacterProfilePage({ panels, onNavigateHome, addNotification }: CharacterProfilePageProps) {
+export default function CharacterProfilePage({
+  panels,
+  onNavigateHome,
+  addNotification,
+}: CharacterProfilePageProps) {
   const [characters, setCharacters] = useState<CharacterBio[]>([
     {
       name: "Sung Jin-Woo",
       estimated_age: "Late Teens / Early 20s",
-      power_description: "Necromancy shadow extraction, extreme strength, absolute speed agility.",
+      power_description:
+        "Necromancy shadow extraction, extreme strength, absolute speed agility.",
       clothing_color: "Midnight dark cloak, obsidian armor accents.",
-      active_role: "Protagonist"
+      active_role: "Protagonist",
     },
     {
       name: "Hwang Dong-Su",
       estimated_age: "Late 20s",
       power_description: "Hardened body scaling, earth impact shockwaves.",
       clothing_color: "Crimson fighting tunic.",
-      active_role: "Rival Antagonist"
-    }
+      active_role: "Rival Antagonist",
+    },
   ]);
 
   const handleDetected = (newChars: CharacterBio[]) => {
     // Deduplicate and append
     setCharacters((prev) => {
       const existing = new Set(prev.map((c) => c.name.toLowerCase()));
-      const filtered = newChars.filter((c) => !existing.has(c.name.toLowerCase()));
+      const filtered = newChars.filter(
+        (c) => !existing.has(c.name.toLowerCase())
+      );
       if (filtered.length > 0) {
-        if (addNotification) addNotification(`Scanned ${filtered.length} new character profiles!`, "success");
+        if (addNotification)
+          addNotification(
+            `Scanned ${filtered.length} new character profiles!`,
+            "success"
+          );
         return [...prev, ...filtered];
       }
-      if (addNotification) addNotification("No new character profiles detected.", "info");
+      if (addNotification)
+        addNotification("No new character profiles detected.", "info");
       return prev;
     });
   };
@@ -51,7 +63,8 @@ export default function CharacterProfilePage({ panels, onNavigateHome, addNotifi
             AI Character Database Profile Manager
           </h2>
           <p className="text-xs text-neutral-400 font-mono mt-0.5">
-            Compile visual biography stats and character assets from storyboard scripts
+            Compile visual biography stats and character assets from storyboard
+            scripts
           </p>
         </div>
         <button

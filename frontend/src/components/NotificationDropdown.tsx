@@ -11,7 +11,7 @@ import {
   ChevronDown,
   ChevronUp,
   ExternalLink,
-  Clock
+  Clock,
 } from "lucide-react";
 import { Notification } from "./NotificationStack";
 import { formatDistanceToNow } from "date-fns";
@@ -33,7 +33,7 @@ export default function NotificationDropdown({
   onMarkAllAsRead,
   onDelete,
   onClearAll,
-  onNavigateToAll
+  onNavigateToAll,
 }: NotificationDropdownProps) {
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
@@ -42,7 +42,7 @@ export default function NotificationDropdown({
     onMarkAsRead(id);
   };
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   return (
     <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right">
@@ -79,34 +79,50 @@ export default function NotificationDropdown({
         {notifications.length === 0 ? (
           <div className="px-4 py-12 text-center">
             <Bell className="h-10 w-10 text-neutral-700 mx-auto mb-3 opacity-20" />
-            <p className="text-neutral-500 text-sm italic font-mono">No notifications yet</p>
+            <p className="text-neutral-500 text-sm italic font-mono">
+              No notifications yet
+            </p>
           </div>
         ) : (
           <div className="divide-y divide-neutral-800/50">
             {notifications.slice(0, 10).map((note) => (
               <div
                 key={note.id}
-                className={`p-4 transition-colors relative group ${!note.isRead ? 'bg-purple-500/5' : 'hover:bg-neutral-800/30'}`}
+                className={`p-4 transition-colors relative group ${
+                  !note.isRead ? "bg-purple-500/5" : "hover:bg-neutral-800/30"
+                }`}
               >
                 <div className="flex gap-3">
                   <NotificationIcon type={note.type} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <p className={`text-sm leading-tight break-words pr-4 ${!note.isRead ? 'text-white font-bold' : 'text-neutral-300 font-medium'}`}>
+                      <p
+                        className={`text-sm leading-tight break-words pr-4 ${
+                          !note.isRead
+                            ? "text-white font-bold"
+                            : "text-neutral-300 font-medium"
+                        }`}
+                      >
                         {note.message}
                       </p>
                       <button
                         onClick={() => toggleExpand(note.id)}
                         className="text-neutral-500 hover:text-white shrink-0"
                       >
-                        {expandedId === note.id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        {expandedId === note.id ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
                       </button>
                     </div>
 
                     <div className="flex items-center gap-2 mt-1.5">
                       <Clock className="h-3 w-3 text-neutral-500" />
                       <span className="text-[10px] text-neutral-500 font-mono">
-                        {formatDistanceToNow(note.timestamp, { addSuffix: true })}
+                        {formatDistanceToNow(note.timestamp, {
+                          addSuffix: true,
+                        })}
                       </span>
                       {note.errorCode && (
                         <span className="text-[10px] font-bold text-rose-500 bg-rose-500/10 px-1 rounded uppercase tracking-tighter">

@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 
-export function usePersistedState<T>(key: string, defaultValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
+export function usePersistedState<T>(
+  key: string,
+  defaultValue: T
+): [T, React.Dispatch<React.SetStateAction<T>>] {
   const [value, setValue] = useState<T>(() => {
     if (typeof window === "undefined") return defaultValue;
     const stored = window.localStorage.getItem(key);

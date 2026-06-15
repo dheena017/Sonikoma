@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Keyboard, ArrowLeft, RefreshCw, Search, Edit3, ShieldAlert, Check } from "lucide-react";
+import {
+  Keyboard,
+  ArrowLeft,
+  RefreshCw,
+  Search,
+  Edit3,
+  ShieldAlert,
+  Check,
+} from "lucide-react";
 
 interface ShortcutsPageProps {
   shortcuts: Record<string, string>;
@@ -17,7 +25,9 @@ export default function ShortcutsPage({
   addNotification,
 }: ShortcutsPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [recordingActionId, setRecordingActionId] = useState<string | null>(null);
+  const [recordingActionId, setRecordingActionId] = useState<string | null>(
+    null
+  );
   const [conflictMsg, setConflictMsg] = useState<string | null>(null);
 
   // Set window global flag to lock main router listeners
@@ -66,7 +76,8 @@ export default function ShortcutsPage({
       // Check conflicts
       const conflictEntry = Object.entries(shortcuts).find(
         ([id, val]) =>
-          id !== recordingActionId && val.toLowerCase() === combination.toLowerCase()
+          id !== recordingActionId &&
+          val.toLowerCase() === combination.toLowerCase()
       );
 
       if (conflictEntry) {
@@ -77,7 +88,9 @@ export default function ShortcutsPage({
           .replace("editor_", "Editor ")
           .replace("deck_", "Scraper Deck ")
           .replace(/_/g, " ");
-        setConflictMsg(`Conflict: "${combination}" is already assigned to "${friendlyName}".`);
+        setConflictMsg(
+          `Conflict: "${combination}" is already assigned to "${friendlyName}".`
+        );
         return;
       }
 
@@ -89,7 +102,13 @@ export default function ShortcutsPage({
       });
 
       if (addNotification) {
-        addNotification(`Updated shortcut for ${recordingActionId.replace(/_/g, " ")} to ${combination}`, "success");
+        addNotification(
+          `Updated shortcut for ${recordingActionId.replace(
+            /_/g,
+            " "
+          )} to ${combination}`,
+          "success"
+        );
       }
 
       setRecordingActionId(null);
@@ -101,9 +120,16 @@ export default function ShortcutsPage({
   }, [recordingActionId, shortcuts, setShortcuts, addNotification]);
 
   const handleResetToDefaults = () => {
-    if (window.confirm("Are you sure you want to restore all keyboard shortcuts to factory defaults?")) {
+    if (
+      window.confirm(
+        "Are you sure you want to restore all keyboard shortcuts to factory defaults?"
+      )
+    ) {
       setShortcuts(defaultShortcuts);
-      localStorage.setItem("ai_comic_shortcuts", JSON.stringify(defaultShortcuts));
+      localStorage.setItem(
+        "ai_comic_shortcuts",
+        JSON.stringify(defaultShortcuts)
+      );
       if (addNotification) {
         addNotification("Restored default key configurations", "info");
       }
@@ -123,7 +149,12 @@ export default function ShortcutsPage({
 
     let scope = "Global";
     if (id.startsWith("editor_")) scope = "Crop Editor Only";
-    else if (id.startsWith("playback_") || id.startsWith("deck_") || id.startsWith("volume_")) scope = "Dashboard Only";
+    else if (
+      id.startsWith("playback_") ||
+      id.startsWith("deck_") ||
+      id.startsWith("volume_")
+    )
+      scope = "Dashboard Only";
 
     return { label: formattedId, scope };
   };
@@ -144,7 +175,12 @@ export default function ShortcutsPage({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
         <div>
           <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1.5">
-            <span className="hover:text-purple-400 cursor-pointer" onClick={onNavigateHome}>Dashboard</span>
+            <span
+              className="hover:text-purple-400 cursor-pointer"
+              onClick={onNavigateHome}
+            >
+              Dashboard
+            </span>
             <span>&gt;</span>
             <span className="text-purple-400">Key Bindings</span>
           </div>
@@ -152,7 +188,9 @@ export default function ShortcutsPage({
             <Keyboard className="h-6 w-6 text-purple-400" />
             Workspace Key Bindings Configuration
           </h2>
-          <p className="text-xs text-neutral-400 font-mono mt-0.5">Customize global accessibility keys and editor canvas macro hotkeys</p>
+          <p className="text-xs text-neutral-400 font-mono mt-0.5">
+            Customize global accessibility keys and editor canvas macro hotkeys
+          </p>
         </div>
 
         <div className="flex items-center gap-2.5">
@@ -213,8 +251,8 @@ export default function ShortcutsPage({
                     }
                   }}
                   className={`grid grid-cols-12 items-center px-6 py-3.5 text-xs transition-all cursor-pointer select-none group ${
-                    isRecording 
-                      ? "bg-purple-950/20 border-l-2 border-l-purple-500" 
+                    isRecording
+                      ? "bg-purple-950/20 border-l-2 border-l-purple-500"
                       : "hover:bg-neutral-900/40 border-l-2 border-l-transparent"
                   }`}
                 >
@@ -255,15 +293,24 @@ export default function ShortcutsPage({
               <Keyboard className="h-6 w-6 text-purple-300 animate-pulse" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-white">Record Key Combination</h3>
+              <h3 className="font-bold text-sm text-white">
+                Record Key Combination
+              </h3>
               <p className="text-[11px] text-neutral-450 font-mono mt-1">
-                Assigning hotkey for: <strong className="text-purple-300">{recordingActionId.replace(/_/g, " ")}</strong>
+                Assigning hotkey for:{" "}
+                <strong className="text-purple-300">
+                  {recordingActionId.replace(/_/g, " ")}
+                </strong>
               </p>
             </div>
 
             <div className="py-6 px-4 bg-neutral-900/60 border border-neutral-850 rounded-2xl flex flex-col justify-center items-center h-24">
-              <span className="text-xs text-neutral-400 font-mono">Press your custom hotkey on your keyboard now...</span>
-              <span className="text-[10px] text-neutral-600 font-mono mt-2">(e.g. Alt+S, Control+Shift+E, Space, or F5)</span>
+              <span className="text-xs text-neutral-400 font-mono">
+                Press your custom hotkey on your keyboard now...
+              </span>
+              <span className="text-[10px] text-neutral-600 font-mono mt-2">
+                (e.g. Alt+S, Control+Shift+E, Space, or F5)
+              </span>
             </div>
 
             {conflictMsg && (
@@ -274,7 +321,13 @@ export default function ShortcutsPage({
             )}
 
             <div className="flex justify-between items-center gap-3 pt-2">
-              <span className="text-[10px] font-mono text-neutral-500">Press <kbd className="px-1 py-0.5 rounded bg-neutral-900 text-neutral-400 border border-neutral-800">Esc</kbd> to cancel</span>
+              <span className="text-[10px] font-mono text-neutral-500">
+                Press{" "}
+                <kbd className="px-1 py-0.5 rounded bg-neutral-900 text-neutral-400 border border-neutral-800">
+                  Esc
+                </kbd>{" "}
+                to cancel
+              </span>
               <button
                 onClick={() => {
                   setRecordingActionId(null);

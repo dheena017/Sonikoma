@@ -25,21 +25,41 @@ interface CropCanvasProps {
   handleSelectSlice: (slice: Slice) => void;
   handleDeleteSlice: (id: string, e: React.MouseEvent) => void;
   handleRemoveSplitLine: (yVal: number) => void;
-  dragType: "draw" | "move" | "split" | "drag-split-line" | `resize-${string}` | null;
+  dragType:
+    | "draw"
+    | "move"
+    | "split"
+    | "drag-split-line"
+    | `resize-${string}`
+    | null;
   onResizeStart: (handle: string, clientX: number, clientY: number) => void;
-  handleSelectAndDragSlice: (slice: Slice, clientX: number, clientY: number) => void;
+  handleSelectAndDragSlice: (
+    slice: Slice,
+    clientX: number,
+    clientY: number
+  ) => void;
   zoom?: number;
   activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge";
 
   // Phase 4 Props
   editMode?: "crop" | "clean_auto" | "clean_manual" | "typeset" | "slices";
-  detectedBubbles?: Array<{ box: [number, number, number, number]; text: string; category?: string }>;
+  detectedBubbles?: Array<{
+    box: [number, number, number, number];
+    text: string;
+    category?: string;
+  }>;
   selectedBubbleIdx?: number | null;
   setSelectedBubbleIdx?: (idx: number | null) => void;
   brushSize?: number;
   brushAction?: "paint" | "erase";
   canvasMaskRef?: React.RefObject<HTMLCanvasElement | null>;
-  onCleanSingleBubble?: (ymin: number, xmin: number, ymax: number, xmax: number, text: string) => Promise<void>;
+  onCleanSingleBubble?: (
+    ymin: number,
+    xmin: number,
+    ymax: number,
+    xmax: number,
+    text: string
+  ) => Promise<void>;
   typesetText?: string;
   typesetFont?: string;
   typesetSize?: number;
@@ -104,9 +124,12 @@ export default function CropCanvas({
   aspectRatio = 0,
 }: CropCanvasProps) {
   // Track mouse position for dynamic cursor
-  const [hoverPct, setHoverPct] = useState<{ x: number; y: number } | null>(null);
+  const [hoverPct, setHoverPct] = useState<{ x: number; y: number } | null>(
+    null
+  );
   const [isDrawing, setIsDrawing] = useState(false);
-  const isManualBrushActive = editMode === "clean_manual" && activeTab === "eraser";
+  const isManualBrushActive =
+    editMode === "clean_manual" && activeTab === "eraser";
 
   const [naturalAspect, setNaturalAspect] = useState<number | null>(null);
   const imgRef = React.useRef<HTMLImageElement>(null);
@@ -161,8 +184,14 @@ export default function CropCanvas({
     (clientX: number, clientY: number) => {
       if (!containerRef.current) return null;
       const rect = containerRef.current.getBoundingClientRect();
-      const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
-      const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
+      const x = Math.max(
+        0,
+        Math.min(100, ((clientX - rect.left) / rect.width) * 100)
+      );
+      const y = Math.max(
+        0,
+        Math.min(100, ((clientY - rect.top) / rect.height) * 100)
+      );
       return { x, y };
     },
     [containerRef]
@@ -183,7 +212,7 @@ export default function CropCanvas({
       canvas.height = rect.height;
       const ctx = canvas.getContext("2d");
       if (ctx && tempCtx && tempCanvas.width > 0 && tempCanvas.height > 0) {
-          ctx.drawImage(tempCanvas, 0, 0, rect.width, rect.height);
+        ctx.drawImage(tempCanvas, 0, 0, rect.width, rect.height);
       }
     }
 
@@ -202,7 +231,10 @@ export default function CropCanvas({
     }
   };
 
-  const getCanvasCoords = (e: React.MouseEvent | React.TouchEvent, canvas: HTMLCanvasElement) => {
+  const getCanvasCoords = (
+    e: React.MouseEvent | React.TouchEvent,
+    canvas: HTMLCanvasElement
+  ) => {
     const rect = canvas.getBoundingClientRect();
     let clientX = 0;
     let clientY = 0;
@@ -218,7 +250,9 @@ export default function CropCanvas({
     return { x: (clientX - rect.left) / zoom, y: (clientY - rect.top) / zoom };
   };
 
-  const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+  const handleCanvasMouseDown = (
+    e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>
+  ) => {
     const canvas = canvasMaskRef?.current;
     if (!canvas) return;
     initCanvas(canvas);
@@ -234,7 +268,9 @@ export default function CropCanvas({
     }
   };
 
-  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+  const handleCanvasMouseMove = (
+    e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>
+  ) => {
     if (!isDrawing) return;
     const canvas = canvasMaskRef?.current;
     if (!canvas) return;
@@ -272,7 +308,9 @@ export default function CropCanvas({
   return (
     <div
       ref={scrollParentRef}
-      className={`relative border border-white/5 hover:border-purple-500/20 rounded-2xl bg-black ${zoom > 1 ? "overflow-auto" : "overflow-hidden"} flex-1 h-0 flex items-center justify-center select-none transition-colors`}
+      className={`relative border border-white/5 hover:border-purple-500/20 rounded-2xl bg-black ${
+        zoom > 1 ? "overflow-auto" : "overflow-hidden"
+      } flex-1 h-0 flex items-center justify-center select-none transition-colors`}
       style={{ boxShadow: "inset 0 0 30px rgba(0,0,0,0.5)" }}
     >
       <div
@@ -340,7 +378,9 @@ export default function CropCanvas({
             if (isManualBrushActive) return;
             handleEnd();
           }}
-          className={`relative inline-flex flex-col ${activeTab === 'crop' ? 'cursor-crosshair' : ''}`}
+          className={`relative inline-flex flex-col ${
+            activeTab === "crop" ? "cursor-crosshair" : ""
+          }`}
           style={{
             userSelect: "none",
             touchAction: "none",
@@ -354,90 +394,117 @@ export default function CropCanvas({
             aspectRatio: naturalAspect || undefined,
           }}
         >
-        <img
-          ref={imgRef}
-          src={imgUrl}
-          alt="Preview"
-          onLoad={handleImageLoad}
-          className="pointer-events-none select-none block"
-          style={{
-            maxWidth: "100%",
-            maxHeight: "100%",
-            width: "auto",
-            height: "auto",
-          }}
-          draggable={false}
-        />
-
-        {/* Brush Layer */}
-        {isManualBrushActive && (
-          <CanvasBrushLayer
-            canvasMaskRef={canvasMaskRef}
-            handleCanvasMouseDown={handleCanvasMouseDown}
-            handleCanvasMouseMove={handleCanvasMouseMove}
-            handleCanvasMouseUp={handleCanvasMouseUp}
+          <img
+            ref={imgRef}
+            src={imgUrl}
+            alt="Preview"
+            onLoad={handleImageLoad}
+            className="pointer-events-none select-none block"
+            style={{
+              maxWidth: "100%",
+              maxHeight: "100%",
+              width: "auto",
+              height: "auto",
+            }}
+            draggable={false}
           />
-        )}
 
-        {/* Bubble Layers */}
-        {(editMode === "clean_auto" || editMode === "typeset") && (
-          <CanvasBubbleBoxes
-            detectedBubbles={detectedBubbles}
-            selectedBubbleIdx={selectedBubbleIdx}
-            setSelectedBubbleIdx={setSelectedBubbleIdx}
-            onCleanSingleBubble={onCleanSingleBubble}
+          {/* Brush Layer */}
+          {isManualBrushActive && (
+            <CanvasBrushLayer
+              canvasMaskRef={canvasMaskRef}
+              handleCanvasMouseDown={handleCanvasMouseDown}
+              handleCanvasMouseMove={handleCanvasMouseMove}
+              handleCanvasMouseUp={handleCanvasMouseUp}
+            />
+          )}
+
+          {/* Bubble Layers */}
+          {(editMode === "clean_auto" || editMode === "typeset") && (
+            <CanvasBubbleBoxes
+              detectedBubbles={detectedBubbles}
+              selectedBubbleIdx={selectedBubbleIdx}
+              setSelectedBubbleIdx={setSelectedBubbleIdx}
+              onCleanSingleBubble={onCleanSingleBubble}
+            />
+          )}
+
+          {/* Persistent UI Components (Visibility controlled by CSS inside components) */}
+          <CanvasSplitLines
+            isVisible={showSplitPosition && activeTab === "slice"}
+            splitPosition={splitPosition}
+            splitLines={splitLines}
+            hoverPct={hoverPct}
+            handleRemoveSplitLine={handleRemoveSplitLine}
+            setSplitPosition={setSplitPosition}
+            setShowSplitPosition={setShowSplitPosition}
           />
-        )}
 
-        {/* Persistent UI Components (Visibility controlled by CSS inside components) */}
-        <CanvasSplitLines
-          isVisible={showSplitPosition && activeTab === "slice"}
-          splitPosition={splitPosition}
-          splitLines={splitLines}
-          hoverPct={hoverPct}
-          handleRemoveSplitLine={handleRemoveSplitLine}
-          setSplitPosition={setSplitPosition}
-          setShowSplitPosition={setShowSplitPosition}
-        />
+          {activeTab === "crop" && (
+            <CanvasCropSelection
+              editCropTop={editCropTop}
+              editCropBottom={editCropBottom}
+              editCropLeft={editCropLeft}
+              editCropRight={editCropRight}
+              onResizeStart={onResizeStart}
+              targetAspectRatio={aspectRatio}
+              isDragging={dragType !== null}
+            />
+          )}
 
-        {activeTab === 'crop' && (
-          <CanvasCropSelection
-            editCropTop={editCropTop}
-            editCropBottom={editCropBottom}
-            editCropLeft={editCropLeft}
-            editCropRight={editCropRight}
-            onResizeStart={onResizeStart}
-            targetAspectRatio={aspectRatio}
-            isDragging={dragType !== null}
-          />
-        )}
-
-        {/* Slices Overlay */}
-        {(editMode === "slices" || editMode === "crop") && slices.map((slice, index) => {
-          const isSelected = slice.id === selectedSliceId;
-          return (
-            <div
-              key={slice.id}
-              onClick={(e) => { e.stopPropagation(); handleSelectSlice(slice); }}
-              onMouseDown={(e) => { if (e.button === 0) { e.stopPropagation(); handleSelectAndDragSlice(slice, e.clientX, e.clientY); }}}
-              className={`absolute border-2 pointer-events-auto cursor-grab active:cursor-grabbing transition-colors flex flex-col justify-between ${
-                isSelected ? "border-purple-400 bg-purple-500/10 z-30 shadow-[0_0_15px_rgba(139,92,246,0.2)]" : "border-purple-500/40 bg-purple-500/5 hover:bg-purple-500/10 z-20"
-              }`}
-              style={{ top: `${slice.cropTop}%`, bottom: `${slice.cropBottom}%`, left: `${slice.cropLeft}%`, right: `${slice.cropRight}%` }}
-            >
-              <div className="p-1">
-                <span className={`inline-block font-mono text-[8px] font-bold px-1.5 py-0.5 rounded-lg ${isSelected ? "bg-purple-950 text-purple-300 border border-purple-500/30" : "bg-purple-950/90 text-purple-300"}`}>
-                  Cut #{index + 1}
-                </span>
-              </div>
-              <div className="flex justify-end p-1">
-                <button onClick={(e) => handleDeleteSlice(slice.id, e)} className="bg-red-950/90 text-red-300 p-0.5 rounded-lg"><Trash2 className="h-2.5 w-2.5" /></button>
-              </div>
-            </div>
-          );
-        })}
+          {/* Slices Overlay */}
+          {(editMode === "slices" || editMode === "crop") &&
+            slices.map((slice, index) => {
+              const isSelected = slice.id === selectedSliceId;
+              return (
+                <div
+                  key={slice.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSelectSlice(slice);
+                  }}
+                  onMouseDown={(e) => {
+                    if (e.button === 0) {
+                      e.stopPropagation();
+                      handleSelectAndDragSlice(slice, e.clientX, e.clientY);
+                    }
+                  }}
+                  className={`absolute border-2 pointer-events-auto cursor-grab active:cursor-grabbing transition-colors flex flex-col justify-between ${
+                    isSelected
+                      ? "border-purple-400 bg-purple-500/10 z-30 shadow-[0_0_15px_rgba(139,92,246,0.2)]"
+                      : "border-purple-500/40 bg-purple-500/5 hover:bg-purple-500/10 z-20"
+                  }`}
+                  style={{
+                    top: `${slice.cropTop}%`,
+                    bottom: `${slice.cropBottom}%`,
+                    left: `${slice.cropLeft}%`,
+                    right: `${slice.cropRight}%`,
+                  }}
+                >
+                  <div className="p-1">
+                    <span
+                      className={`inline-block font-mono text-[8px] font-bold px-1.5 py-0.5 rounded-lg ${
+                        isSelected
+                          ? "bg-purple-950 text-purple-300 border border-purple-500/30"
+                          : "bg-purple-950/90 text-purple-300"
+                      }`}
+                    >
+                      Cut #{index + 1}
+                    </span>
+                  </div>
+                  <div className="flex justify-end p-1">
+                    <button
+                      onClick={(e) => handleDeleteSlice(slice.id, e)}
+                      className="bg-red-950/90 text-red-300 p-0.5 rounded-lg"
+                    >
+                      <Trash2 className="h-2.5 w-2.5" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
 }

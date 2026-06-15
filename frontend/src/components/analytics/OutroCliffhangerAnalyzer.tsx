@@ -15,9 +15,13 @@ interface CliffhangerResult {
   cliffhangers: CliffhangerOption[];
 }
 
-export default function OutroCliffhangerAnalyzer({ addNotification }: OutroCliffhangerAnalyzerProps) {
+export default function OutroCliffhangerAnalyzer({
+  addNotification,
+}: OutroCliffhangerAnalyzerProps) {
   const [loading, setLoading] = useState(false);
-  const [outline, setOutline] = useState("The party enters the hidden demon vault and opens the main chest, only to trigger an ominous shadow portal that sucks their healer inside.");
+  const [outline, setOutline] = useState(
+    "The party enters the hidden demon vault and opens the main chest, only to trigger an ominous shadow portal that sucks their healer inside."
+  );
   const [results, setResults] = useState<CliffhangerResult | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
@@ -29,8 +33,8 @@ export default function OutroCliffhangerAnalyzer({ addNotification }: OutroCliff
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           story_outline: outline,
-          model: "gemini-2.5-flash"
-        })
+          model: "gemini-2.5-flash",
+        }),
       });
       const json = await res.json();
       if (json.success && json.result) {
@@ -60,7 +64,9 @@ export default function OutroCliffhangerAnalyzer({ addNotification }: OutroCliff
       <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
         <div className="flex items-center gap-2">
           <Trophy className="h-4.5 w-4.5 text-purple-400" />
-          <h4 className="text-xs font-mono font-bold text-white uppercase">Outro Cliffhanger Analyzer</h4>
+          <h4 className="text-xs font-mono font-bold text-white uppercase">
+            Outro Cliffhanger Analyzer
+          </h4>
         </div>
         <button
           onClick={handleAnalyze}
@@ -74,7 +80,9 @@ export default function OutroCliffhangerAnalyzer({ addNotification }: OutroCliff
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-3">
           <div className="space-y-1">
-            <label className="text-[9px] font-mono text-neutral-500 uppercase">Episode Story Outline / Ending Event</label>
+            <label className="text-[9px] font-mono text-neutral-500 uppercase">
+              Episode Story Outline / Ending Event
+            </label>
             <textarea
               rows={4}
               value={outline}
@@ -86,27 +94,42 @@ export default function OutroCliffhangerAnalyzer({ addNotification }: OutroCliff
         </div>
 
         <div className="space-y-3">
-          <label className="text-[9px] font-mono text-neutral-500 uppercase">Suggested Cliffhanger Hooks</label>
+          <label className="text-[9px] font-mono text-neutral-500 uppercase">
+            Suggested Cliffhanger Hooks
+          </label>
           <div className="bg-neutral-950 p-4 rounded-xl border border-neutral-850 h-full min-h-[220px] flex flex-col justify-between">
             {results && results.cliffhangers ? (
               <div className="space-y-3 overflow-y-auto max-h-60 pr-1">
                 {results.cliffhangers.map((opt, idx) => (
-                  <div key={idx} className="group relative bg-neutral-900/50 p-2.5 rounded-lg border border-neutral-850/60 flex flex-col gap-1.5">
+                  <div
+                    key={idx}
+                    className="group relative bg-neutral-900/50 p-2.5 rounded-lg border border-neutral-850/60 flex flex-col gap-1.5"
+                  >
                     <div className="flex justify-between items-center pr-8">
-                      <span className="text-[10px] font-bold text-purple-300 font-sans">Option {idx + 1}</span>
+                      <span className="text-[10px] font-bold text-purple-300 font-sans">
+                        Option {idx + 1}
+                      </span>
                       <span className="text-[9px] font-mono bg-purple-950 border border-purple-900/60 text-purple-400 px-1.5 py-0.5 rounded font-bold">
                         Suspense: {opt.suspense_rating || 9}/10
                       </span>
                     </div>
-                    <p className="text-xs text-neutral-200 leading-relaxed font-sans">{opt.cliffhanger_concept}</p>
+                    <p className="text-xs text-neutral-200 leading-relaxed font-sans">
+                      {opt.cliffhanger_concept}
+                    </p>
                     <div className="text-[9px] text-neutral-500 font-mono pt-1.5 border-t border-neutral-900/40">
                       Tactic: {opt.retention_tactic}
                     </div>
                     <button
-                      onClick={() => copyToClipboard(opt.cliffhanger_concept, idx)}
+                      onClick={() =>
+                        copyToClipboard(opt.cliffhanger_concept, idx)
+                      }
                       className="absolute top-2.5 right-2 text-neutral-500 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                      {copiedIndex === idx ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                      {copiedIndex === idx ? (
+                        <Check className="h-3.5 w-3.5 text-emerald-400" />
+                      ) : (
+                        <Copy className="h-3.5 w-3.5" />
+                      )}
                     </button>
                   </div>
                 ))}
@@ -114,7 +137,10 @@ export default function OutroCliffhangerAnalyzer({ addNotification }: OutroCliff
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-center py-8 text-neutral-500 space-y-2">
                 <HelpCircle className="h-8 w-8 text-neutral-700 animate-pulse" />
-                <p className="text-xs font-sans">No endings analysed yet. Put your plot outline to suggest high-impact cliffhangers.</p>
+                <p className="text-xs font-sans">
+                  No endings analysed yet. Put your plot outline to suggest
+                  high-impact cliffhangers.
+                </p>
               </div>
             )}
           </div>

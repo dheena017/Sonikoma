@@ -1,5 +1,12 @@
 import React from "react";
-import { KeyRound, Mail, ArrowLeft, Send, Loader2, CheckCircle2 } from "lucide-react";
+import {
+  KeyRound,
+  Mail,
+  ArrowLeft,
+  Send,
+  Loader2,
+  CheckCircle2,
+} from "lucide-react";
 
 interface ForgotPasswordPageProps {
   onForgotPassword: (email: string) => Promise<void>;
@@ -8,7 +15,7 @@ interface ForgotPasswordPageProps {
 
 export default function ForgotPasswordPage({
   onForgotPassword,
-  onNavigateToLogin
+  onNavigateToLogin,
 }: ForgotPasswordPageProps) {
   const [email, setEmail] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
@@ -54,7 +61,8 @@ export default function ForgotPasswordPage({
           {isSent ? (
             <div className="space-y-6">
               <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs leading-relaxed">
-                If an account exists for that email, you will receive password reset instructions shortly.
+                If an account exists for that email, you will receive password
+                reset instructions shortly.
               </div>
               <button
                 onClick={onNavigateToLogin}
@@ -73,7 +81,9 @@ export default function ForgotPasswordPage({
               )}
 
               <div className="space-y-2">
-                <label className="text-xs font-medium text-neutral-400 ml-1">Email Address</label>
+                <label className="text-xs font-medium text-neutral-400 ml-1">
+                  Email Address
+                </label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
                   <input

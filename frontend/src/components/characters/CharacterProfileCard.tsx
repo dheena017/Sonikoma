@@ -13,7 +13,9 @@ interface CharacterProfileCardProps {
   char: CharacterBio;
 }
 
-export default function CharacterProfileCard({ char }: CharacterProfileCardProps) {
+export default function CharacterProfileCard({
+  char,
+}: CharacterProfileCardProps) {
   const isProtagonist = char.active_role.toLowerCase().includes("pro");
   const isRival = char.active_role.toLowerCase().includes("riv");
 
@@ -24,15 +26,19 @@ export default function CharacterProfileCard({ char }: CharacterProfileCardProps
           <div className="h-7 w-7 rounded-lg bg-purple-950 flex items-center justify-center border border-purple-800/40">
             <User className="h-3.5 w-3.5 text-purple-400" />
           </div>
-          <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">{char.name}</span>
+          <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+            {char.name}
+          </span>
         </div>
-        <span className={`text-[8px] font-mono font-bold px-2 py-0.5 rounded border ${
-          isProtagonist 
-            ? "bg-emerald-950/20 border-emerald-900 text-emerald-450" 
-            : isRival 
-            ? "bg-rose-950/20 border-rose-900 text-rose-450"
-            : "bg-neutral-950 border-neutral-800 text-neutral-400"
-        }`}>
+        <span
+          className={`text-[8px] font-mono font-bold px-2 py-0.5 rounded border ${
+            isProtagonist
+              ? "bg-emerald-950/20 border-emerald-900 text-emerald-450"
+              : isRival
+              ? "bg-rose-950/20 border-rose-900 text-rose-450"
+              : "bg-neutral-950 border-neutral-800 text-neutral-400"
+          }`}
+        >
           {char.active_role}
         </span>
       </div>
@@ -40,11 +46,15 @@ export default function CharacterProfileCard({ char }: CharacterProfileCardProps
       <div className="space-y-2 text-[10px] font-mono">
         <div className="flex justify-between border-b border-neutral-900 pb-1">
           <span className="text-neutral-500">Estimated Age</span>
-          <span className="text-neutral-300 font-semibold">{char.estimated_age}</span>
+          <span className="text-neutral-300 font-semibold">
+            {char.estimated_age}
+          </span>
         </div>
         <div className="flex justify-between border-b border-neutral-900 pb-1">
           <span className="text-neutral-500">Clothing Colors</span>
-          <span className="text-neutral-300 font-semibold">{char.clothing_color}</span>
+          <span className="text-neutral-300 font-semibold">
+            {char.clothing_color}
+          </span>
         </div>
         <div className="space-y-0.5 pt-1">
           <span className="text-neutral-500 flex items-center gap-1">

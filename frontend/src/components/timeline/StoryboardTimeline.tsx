@@ -47,12 +47,13 @@ export default function StoryboardTimeline({
   musicTheme,
   narrationStyle = "long",
 }: StoryboardTimelineProps) {
-
   // ── Panel selection state ────────────────────────────────────────────────
-  const [selectedPanelIds, setSelectedPanelIds] = useState<Set<number>>(new Set());
+  const [selectedPanelIds, setSelectedPanelIds] = useState<Set<number>>(
+    new Set()
+  );
 
   const togglePanelSelection = (id: number) => {
-    setSelectedPanelIds(prev => {
+    setSelectedPanelIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -61,7 +62,7 @@ export default function StoryboardTimeline({
   };
 
   const selectAllPanels = () => {
-    setSelectedPanelIds(new Set(panels.map(p => p.id)));
+    setSelectedPanelIds(new Set(panels.map((p) => p.id)));
   };
 
   const clearSelection = () => {
@@ -70,27 +71,41 @@ export default function StoryboardTimeline({
 
   const handleDeleteSelected = () => {
     if (selectedPanelIds.size === 0) return;
-    if (window.confirm(`Are you sure you want to delete the ${selectedPanelIds.size} selected panel(s)?`)) {
-      setPanels(prev => prev.filter(p => !selectedPanelIds.has(p.id)));
+    if (
+      window.confirm(
+        `Are you sure you want to delete the ${selectedPanelIds.size} selected panel(s)?`
+      )
+    ) {
+      setPanels((prev) => prev.filter((p) => !selectedPanelIds.has(p.id)));
       clearSelection();
-      addNotification?.(`Deleted ${selectedPanelIds.size} selected panels`, "info");
+      addNotification?.(
+        `Deleted ${selectedPanelIds.size} selected panels`,
+        "info"
+      );
     }
   };
 
   const handleBulkModifyDuration = (val: number) => {
     if (selectedPanelIds.size === 0) return;
-    setPanels(prev =>
-      prev.map(p => (selectedPanelIds.has(p.id) ? { ...p, duration: val } : p))
+    setPanels((prev) =>
+      prev.map((p) =>
+        selectedPanelIds.has(p.id) ? { ...p, duration: val } : p
+      )
     );
     addNotification?.(`Set duration of selected panels to ${val}s`, "success");
   };
 
   const handleBulkModifyMotion = (val: string) => {
     if (selectedPanelIds.size === 0) return;
-    setPanels(prev =>
-      prev.map(p => (selectedPanelIds.has(p.id) ? { ...p, motion_type: val } : p))
+    setPanels((prev) =>
+      prev.map((p) =>
+        selectedPanelIds.has(p.id) ? { ...p, motion_type: val } : p
+      )
     );
-    addNotification?.(`Set motion style of selected panels to '${val}'`, "success");
+    addNotification?.(
+      `Set motion style of selected panels to '${val}'`,
+      "success"
+    );
   };
   // ────────────────────────────────────────────────────────────────────────
 
@@ -178,10 +193,11 @@ export default function StoryboardTimeline({
       )}
 
       {/* Storyboard grid */}
-      <div className={`flex gap-3 sm:gap-4 overflow-x-auto scrollbar-thin ${
-        selectedCount > 0 ? "pb-2" : "pb-4"
-      }`}>
-
+      <div
+        className={`flex gap-3 sm:gap-4 overflow-x-auto scrollbar-thin ${
+          selectedCount > 0 ? "pb-2" : "pb-4"
+        }`}
+      >
         {panels.map((panel, idx) => (
           <TimelineCard
             key={panel.id}

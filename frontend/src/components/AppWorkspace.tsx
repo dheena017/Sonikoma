@@ -55,7 +55,11 @@ interface AppWorkspaceProps {
   scrapeImages: (customUrl?: string) => Promise<void>;
   mergingIndices: number[];
   handleStitchWithNext: (idx: number) => Promise<void>;
-  addPanelsToStoryboard: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
+  addPanelsToStoryboard: (
+    urls: string[],
+    currentScrapedList?: string[],
+    shouldScroll?: boolean
+  ) => void;
   progressStatus: any;
   videoUrl: string | null;
   setVideoUrl: any;
@@ -146,16 +150,26 @@ export function AppWorkspace({
   narrationStyle,
   setNarrationStyle,
 }: AppWorkspaceProps) {
-  console.log("[AppWorkspace] Rendering with", panels.length, "panels and", scrapedImages.length, "scraped images");
+  console.log(
+    "[AppWorkspace] Rendering with",
+    panels.length,
+    "panels and",
+    scrapedImages.length,
+    "scraped images"
+  );
 
   return (
-    <main id="main_workspace" className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-10 items-start">
-
+    <main
+      id="main_workspace"
+      className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-10 items-start"
+    >
       {/* LEFT COLUMN: SOURCE INTEGRATION */}
-      <div id="controls_column" className={`order-1 lg:order-1 flex flex-col gap-6 md:gap-8 ${
-        panels.length > 0 ? "lg:col-span-7" : "lg:col-span-12"
-      }`}>
-
+      <div
+        id="controls_column"
+        className={`order-1 lg:order-1 flex flex-col gap-6 md:gap-8 ${
+          panels.length > 0 ? "lg:col-span-7" : "lg:col-span-12"
+        }`}
+      >
         {/* CONVERSION INPUT CARD */}
         <UrlInputPanel
           targetUrl={targetUrl}
@@ -213,12 +227,13 @@ export function AppWorkspace({
         />
 
         {/* ACTIVE QUEUE / LIVE PIPELINE PROGRESS */}
-        {isProcessing && (
-          <PipelineStatusCard progressStatus={progressStatus} />
-        )}
+        {isProcessing && <PipelineStatusCard progressStatus={progressStatus} />}
 
         {/* REAL-TIME LOG MONITOR — Always visible */}
-        <TerminalLogs consoleLogs={consoleLogs} setConsoleLogs={setConsoleLogs} />
+        <TerminalLogs
+          consoleLogs={consoleLogs}
+          setConsoleLogs={setConsoleLogs}
+        />
 
         {/* DYNAMIC STORYBOARD TIMELINE DECK (hidden when empty to save vertical space on mobile) */}
         {panels.length > 0 && (
@@ -248,49 +263,52 @@ export function AppWorkspace({
 
       {/* RIGHT COLUMN: INTEGRATED CINEMA PLAYER */}
       {panels.length > 0 && (
-        <div id="cinema_column" className="order-2 lg:order-2 lg:col-span-5 flex flex-col gap-6 lg:sticky lg:top-24">
-        <VideoMonitor
-          activePreviewTab={activePreviewTab}
-          setActivePreviewTab={setActivePreviewTab}
-          videoUrl={videoUrl}
-          panels={panels}
-          aspectRatio={aspectRatio}
-          videoPlayerRef={videoPlayerRef}
-          currentPanelIndex={currentPanelIndex}
-          playbackTime={playbackTime}
-          reprocessingPanelId={reprocessingPanelId}
-        />
-
-        {/* SECTION: FINAL COMPILED VIDEO PREVIEW */}
-        {videoUrl && (
-          <FinalVideoPlayer videoUrl={videoUrl} aspectRatio={aspectRatio} />
-        )}
-
-        {/* PLAYBACK CONTROLLER ACCESSORIES FOR STORYBOARD PREVIEW */}
-        {activePreviewTab === "storyboard" && panels.length > 0 && (
-          <VolumeAndProgressPanel
+        <div
+          id="cinema_column"
+          className="order-2 lg:order-2 lg:col-span-5 flex flex-col gap-6 lg:sticky lg:top-24"
+        >
+          <VideoMonitor
+            activePreviewTab={activePreviewTab}
+            setActivePreviewTab={setActivePreviewTab}
+            videoUrl={videoUrl}
             panels={panels}
+            aspectRatio={aspectRatio}
+            videoPlayerRef={videoPlayerRef}
             currentPanelIndex={currentPanelIndex}
             playbackTime={playbackTime}
-            storyboardPlaying={storyboardPlaying}
-            toggleStoryboardPlayback={toggleStoryboardPlayback}
-            resetStoryboardPlayback={resetStoryboardPlayback}
-            isMuted={isMuted}
-            setIsMuted={setIsMuted}
-            volume={volume}
-            setVolume={setVolume}
+            reprocessingPanelId={reprocessingPanelId}
           />
-        )}
 
-        {/* AI Model Capabilities panel intentionally removed */}
+          {/* SECTION: FINAL COMPILED VIDEO PREVIEW */}
+          {videoUrl && (
+            <FinalVideoPlayer videoUrl={videoUrl} aspectRatio={aspectRatio} />
+          )}
 
-        {/* METADATA RENDER MATRIX */}
-        <OutputMetadataPanel
-          videoUrl={videoUrl}
-          musicTheme={musicTheme}
-          voiceActor={voiceActor}
-        />
-      </div>
+          {/* PLAYBACK CONTROLLER ACCESSORIES FOR STORYBOARD PREVIEW */}
+          {activePreviewTab === "storyboard" && panels.length > 0 && (
+            <VolumeAndProgressPanel
+              panels={panels}
+              currentPanelIndex={currentPanelIndex}
+              playbackTime={playbackTime}
+              storyboardPlaying={storyboardPlaying}
+              toggleStoryboardPlayback={toggleStoryboardPlayback}
+              resetStoryboardPlayback={resetStoryboardPlayback}
+              isMuted={isMuted}
+              setIsMuted={setIsMuted}
+              volume={volume}
+              setVolume={setVolume}
+            />
+          )}
+
+          {/* AI Model Capabilities panel intentionally removed */}
+
+          {/* METADATA RENDER MATRIX */}
+          <OutputMetadataPanel
+            videoUrl={videoUrl}
+            musicTheme={musicTheme}
+            voiceActor={voiceActor}
+          />
+        </div>
       )}
     </main>
   );

@@ -12,7 +12,7 @@ export default function LoginPage({
   onLogin,
   onNavigateToRegister,
   onNavigateToForgotPassword,
-  onGoogleLogin
+  onGoogleLogin,
 }: LoginPageProps) {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -39,8 +39,12 @@ export default function LoginPage({
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-purple-600/20 border border-purple-500/30 mb-6">
             <LogIn className="w-8 h-8 text-purple-400" />
           </div>
-          <h2 className="text-3xl font-bold text-white tracking-tight">Welcome Back</h2>
-          <p className="mt-2 text-neutral-400 text-sm">Sign in to continue to Anivox</p>
+          <h2 className="text-3xl font-bold text-white tracking-tight">
+            Welcome Back
+          </h2>
+          <p className="mt-2 text-neutral-400 text-sm">
+            Sign in to continue to Anivox
+          </p>
         </div>
 
         <div className="bg-neutral-900/50 backdrop-blur-xl border border-white/5 rounded-3xl p-8 shadow-2xl">
@@ -52,7 +56,9 @@ export default function LoginPage({
             )}
 
             <div className="space-y-2">
-              <label className="text-xs font-medium text-neutral-400 ml-1">Email Address</label>
+              <label className="text-xs font-medium text-neutral-400 ml-1">
+                Email Address
+              </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
                 <input
@@ -68,7 +74,9 @@ export default function LoginPage({
 
             <div className="space-y-2">
               <div className="flex items-center justify-between ml-1">
-                <label className="text-xs font-medium text-neutral-400">Password</label>
+                <label className="text-xs font-medium text-neutral-400">
+                  Password
+                </label>
                 <button
                   type="button"
                   onClick={onNavigateToForgotPassword}
@@ -111,7 +119,9 @@ export default function LoginPage({
               <div className="w-full border-t border-white/5"></div>
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-neutral-900 px-2 text-neutral-500">Or continue with</span>
+              <span className="bg-neutral-900 px-2 text-neutral-500">
+                Or continue with
+              </span>
             </div>
           </div>
 

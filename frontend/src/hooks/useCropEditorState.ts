@@ -12,20 +12,61 @@ export function useCropEditorState({
   editingImageIdx,
   imageEditStates,
 }: UseCropEditorStateProps) {
-  const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
-  const [dragType, setDragType] = useState<"draw" | "move" | "split" | "drag-split-line" | `resize-${'nw'|'ne'|'sw'|'se'|'n'|'s'|'w'|'e'}` | null>(null);
-  const [dragStartPercent, setDragStartPercent] = useState<{ x: number; y: number } | null>(null);
-  const [originalCropBounds, setOriginalCropBounds] = useState<{ top: number; bottom: number; left: number; right: number } | null>(null);
-  const [draggingSplitLineIdx, setDraggingSplitLineIdx] = useState<number | null>(null);
-  const [editMode, setEditMode] = useState<"crop" | "clean_auto" | "clean_manual" | "typeset" | "slices">("crop");
-  const [detectedBubbles, setDetectedBubbles] = useState<Array<{ box: [number, number, number, number]; text: string; category?: string }>>([]);
-  const [selectedBubbleIdx, setSelectedBubbleIdx] = useState<number | null>(null);
+  const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(
+    null
+  );
+  const [dragType, setDragType] = useState<
+    | "draw"
+    | "move"
+    | "split"
+    | "drag-split-line"
+    | `resize-${"nw" | "ne" | "sw" | "se" | "n" | "s" | "w" | "e"}`
+    | null
+  >(null);
+  const [dragStartPercent, setDragStartPercent] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+  const [originalCropBounds, setOriginalCropBounds] = useState<{
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+  } | null>(null);
+  const [draggingSplitLineIdx, setDraggingSplitLineIdx] = useState<
+    number | null
+  >(null);
+  const [editMode, setEditMode] = useState<
+    "crop" | "clean_auto" | "clean_manual" | "typeset" | "slices"
+  >("crop");
+  const [detectedBubbles, setDetectedBubbles] = useState<
+    Array<{
+      box: [number, number, number, number];
+      text: string;
+      category?: string;
+    }>
+  >([]);
+  const [selectedBubbleIdx, setSelectedBubbleIdx] = useState<number | null>(
+    null
+  );
   const [brushSize, setBrushSize] = useState(20);
   const [brushAction, setBrushAction] = useState<"paint" | "erase">("paint");
 
   // Lifted Clean Bubbles Parameters States
-  const [detectionStyle, setDetectionStyle] = useState<"all" | "white_only" | "text_only">("all");
-  const [eraseMethod, setEraseMethod] = useState<"auto" | "inpaint" | "inpaint_ns" | "blur" | "solid_white" | "solid_black" | "solid_color" | "transparent" | "ocr">("auto");
+  const [detectionStyle, setDetectionStyle] = useState<
+    "all" | "white_only" | "text_only"
+  >("all");
+  const [eraseMethod, setEraseMethod] = useState<
+    | "auto"
+    | "inpaint"
+    | "inpaint_ns"
+    | "blur"
+    | "solid_white"
+    | "solid_black"
+    | "solid_color"
+    | "transparent"
+    | "ocr"
+  >("auto");
   const [sensitivity, setSensitivity] = useState<number>(50);
   const [dilation, setDilation] = useState<number>(-1);
   const [inpaintRadius, setInpaintRadius] = useState<number>(3);
@@ -35,13 +76,16 @@ export function useCropEditorState({
   const [gpu, setGpu] = useState<boolean>(false);
   const [morphKernelSize, setMorphKernelSize] = useState<number>(15);
   const [morphShape, setMorphShape] = useState<string>("ellipse");
-  const [useCustomColorTarget, setUseCustomColorTarget] = useState<boolean>(false);
+  const [useCustomColorTarget, setUseCustomColorTarget] =
+    useState<boolean>(false);
   const [customColorTarget, setCustomColorTarget] = useState<string>("#ffffcc");
   const [customColorTolerance, setCustomColorTolerance] = useState<number>(25);
   const [isCleaning, setIsCleaning] = useState<boolean>(false);
 
-  const imageUrl = editingImageIdx !== null ? scrapedImages[editingImageIdx] : null;
-  const savedState = imageUrl && imageEditStates ? imageEditStates[imageUrl] : null;
+  const imageUrl =
+    editingImageIdx !== null ? scrapedImages[editingImageIdx] : null;
+  const savedState =
+    imageUrl && imageEditStates ? imageEditStates[imageUrl] : null;
 
   const [detectedBoxes, setDetectedBoxes] = useState<
     Array<{
@@ -69,7 +113,9 @@ export function useCropEditorState({
   };
 
   const savedActiveTab = savedState?.activeTab;
-  const [activeTab, setActiveTabState] = useState<"adjust" | "edit" | "eraser" | "slice" | "crop" | "merge">(() => {
+  const [activeTab, setActiveTabState] = useState<
+    "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge"
+  >(() => {
     const pathTab = getTabFromPathName();
     if (pathTab) return pathTab;
     if (
@@ -97,7 +143,9 @@ export function useCropEditorState({
     return () => window.removeEventListener("popstate", handleRouteSync);
   }, [activeTab]);
 
-  const setActiveTab = (newTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge") => {
+  const setActiveTab = (
+    newTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge"
+  ) => {
     setActiveTabState(newTab);
     const params = new URLSearchParams(window.location.search);
     const idx = params.get("idx") || "0";
@@ -116,12 +164,18 @@ export function useCropEditorState({
 
   // Multiple Cut List
   const [slices, setSlices] = useState<Slice[]>(savedState?.slices || []);
-  const [selectedSliceId, setSelectedSliceId] = useState<string | null>(savedState?.selectedSliceId || null);
+  const [selectedSliceId, setSelectedSliceId] = useState<string | null>(
+    savedState?.selectedSliceId || null
+  );
   const [autoPushOnDraw, setAutoPushOnDraw] = useState<boolean>(false);
 
   const [splitPosition, setSplitPosition] = useState<number>(50);
-  const [splitLines, setSplitLines] = useState<number[]>(savedState?.splitLines || []);
-  const [showSplitPosition, setShowSplitPosition] = useState<boolean>(savedState?.activeTab === "slice" || false);
+  const [splitLines, setSplitLines] = useState<number[]>(
+    savedState?.splitLines || []
+  );
+  const [showSplitPosition, setShowSplitPosition] = useState<boolean>(
+    savedState?.activeTab === "slice" || false
+  );
   const [magneticSnap, setMagneticSnap] = useState<boolean>(true);
   const [detectedGutters, setDetectedGutters] = useState<number[]>([]);
 
@@ -129,49 +183,91 @@ export function useCropEditorState({
   const [slicesCroppedCount, setSlicesCroppedCount] = useState(0);
 
   return {
-    dragStart, setDragStart,
-    dragType, setDragType,
-    dragStartPercent, setDragStartPercent,
-    originalCropBounds, setOriginalCropBounds,
-    draggingSplitLineIdx, setDraggingSplitLineIdx,
-    editMode, setEditMode,
-    detectedBubbles, setDetectedBubbles,
-    selectedBubbleIdx, setSelectedBubbleIdx,
-    brushSize, setBrushSize,
-    brushAction, setBrushAction,
-    detectionStyle, setDetectionStyle,
-    eraseMethod, setEraseMethod,
-    sensitivity, setSensitivity,
-    dilation, setDilation,
-    inpaintRadius, setInpaintRadius,
-    debugMode, setDebugMode,
-    fillColor, setFillColor,
-    ocrLang, setOcrLang,
-    gpu, setGpu,
-    morphKernelSize, setMorphKernelSize,
-    morphShape, setMorphShape,
-    useCustomColorTarget, setUseCustomColorTarget,
-    customColorTarget, setCustomColorTarget,
-    customColorTolerance, setCustomColorTolerance,
-    isCleaning, setIsCleaning,
+    dragStart,
+    setDragStart,
+    dragType,
+    setDragType,
+    dragStartPercent,
+    setDragStartPercent,
+    originalCropBounds,
+    setOriginalCropBounds,
+    draggingSplitLineIdx,
+    setDraggingSplitLineIdx,
+    editMode,
+    setEditMode,
+    detectedBubbles,
+    setDetectedBubbles,
+    selectedBubbleIdx,
+    setSelectedBubbleIdx,
+    brushSize,
+    setBrushSize,
+    brushAction,
+    setBrushAction,
+    detectionStyle,
+    setDetectionStyle,
+    eraseMethod,
+    setEraseMethod,
+    sensitivity,
+    setSensitivity,
+    dilation,
+    setDilation,
+    inpaintRadius,
+    setInpaintRadius,
+    debugMode,
+    setDebugMode,
+    fillColor,
+    setFillColor,
+    ocrLang,
+    setOcrLang,
+    gpu,
+    setGpu,
+    morphKernelSize,
+    setMorphKernelSize,
+    morphShape,
+    setMorphShape,
+    useCustomColorTarget,
+    setUseCustomColorTarget,
+    customColorTarget,
+    setCustomColorTarget,
+    customColorTolerance,
+    setCustomColorTolerance,
+    isCleaning,
+    setIsCleaning,
     imageUrl,
     savedState,
-    detectedBoxes, setDetectedBoxes,
-    isDetecting, setIsDetecting,
-    isAiDetecting, setIsAiDetecting,
-    activeTab, setActiveTab,
-    zoom, setZoom,
-    isTransforming, setIsTransforming,
-    isMerging, setIsMerging,
-    slices, setSlices,
-    selectedSliceId, setSelectedSliceId,
-    autoPushOnDraw, setAutoPushOnDraw,
-    splitPosition, setSplitPosition,
-    splitLines, setSplitLines,
-    showSplitPosition, setShowSplitPosition,
-    magneticSnap, setMagneticSnap,
-    detectedGutters, setDetectedGutters,
-    isCroppingSlice, setIsCroppingSlice,
-    slicesCroppedCount, setSlicesCroppedCount,
+    detectedBoxes,
+    setDetectedBoxes,
+    isDetecting,
+    setIsDetecting,
+    isAiDetecting,
+    setIsAiDetecting,
+    activeTab,
+    setActiveTab,
+    zoom,
+    setZoom,
+    isTransforming,
+    setIsTransforming,
+    isMerging,
+    setIsMerging,
+    slices,
+    setSlices,
+    selectedSliceId,
+    setSelectedSliceId,
+    autoPushOnDraw,
+    setAutoPushOnDraw,
+    splitPosition,
+    setSplitPosition,
+    splitLines,
+    setSplitLines,
+    showSplitPosition,
+    setShowSplitPosition,
+    magneticSnap,
+    setMagneticSnap,
+    detectedGutters,
+    setDetectedGutters,
+    isCroppingSlice,
+    setIsCroppingSlice,
+    slicesCroppedCount,
+    setSlicesCroppedCount,
   };
 }

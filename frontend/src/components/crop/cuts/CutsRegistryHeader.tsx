@@ -21,7 +21,9 @@ export function CutsRegistryHeader({
           <span className="text-[10px] uppercase font-mono font-bold text-neutral-400 tracking-widest">
             Target Crop Tools Registry
           </span>
-          <p className="text-[9px] text-neutral-600 font-mono mt-0.5">{slices.length} Crop Tools Defined</p>
+          <p className="text-[9px] text-neutral-600 font-mono mt-0.5">
+            {slices.length} Crop Tools Defined
+          </p>
         </div>
       </div>
       {slices.length > 0 && (

@@ -14,9 +14,16 @@ interface PanelAssistantPageProps {
   addNotification?: (msg: string, type: any) => void;
 }
 
-export default function PanelAssistantPage({ panels, setPanels, onNavigateHome, addNotification }: PanelAssistantPageProps) {
+export default function PanelAssistantPage({
+  panels,
+  setPanels,
+  onNavigateHome,
+  addNotification,
+}: PanelAssistantPageProps) {
   const [selectedIdx, setSelectedIdx] = useState(0);
-  const [activeTab, setActiveTab] = useState<"translation" | "audio" | "creative" | "pacing">("translation");
+  const [activeTab, setActiveTab] = useState<
+    "translation" | "audio" | "creative" | "pacing"
+  >("translation");
 
   // Sync index from URL query param if present
   useEffect(() => {
@@ -34,15 +41,22 @@ export default function PanelAssistantPage({ panels, setPanels, onNavigateHome, 
 
   const handleUpdateDialogue = (val: string) => {
     setPanels((prev) =>
-      prev.map((p, idx) => (idx === selectedIdx ? { ...p, speech_text: val } : p))
+      prev.map((p, idx) =>
+        idx === selectedIdx ? { ...p, speech_text: val } : p
+      )
     );
   };
 
   if (panels.length === 0) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-        <p className="text-sm text-neutral-400 font-mono">No storyboard panels found. Scrape a Webtoon page first.</p>
-        <button onClick={onNavigateHome} className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-xl text-xs font-mono font-bold cursor-pointer">
+        <p className="text-sm text-neutral-400 font-mono">
+          No storyboard panels found. Scrape a Webtoon page first.
+        </p>
+        <button
+          onClick={onNavigateHome}
+          className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-xl text-xs font-mono font-bold cursor-pointer"
+        >
           Go to Dashboard
         </button>
       </div>
@@ -58,7 +72,8 @@ export default function PanelAssistantPage({ panels, setPanels, onNavigateHome, 
             AI Panel Assistant & Editor
           </h2>
           <p className="text-xs text-neutral-400 font-mono mt-0.5">
-            Optimize, translate, and style scripts for individual comic illustration frames
+            Optimize, translate, and style scripts for individual comic
+            illustration frames
           </p>
         </div>
         <button
@@ -76,7 +91,11 @@ export default function PanelAssistantPage({ panels, setPanels, onNavigateHome, 
             key={panel.id}
             onClick={() => {
               setSelectedIdx(idx);
-              window.history.replaceState({}, "", `/panel-assistant?idx=${idx}`);
+              window.history.replaceState(
+                {},
+                "",
+                `/panel-assistant?idx=${idx}`
+              );
             }}
             className={`w-20 shrink-0 h-16 rounded-lg overflow-hidden border transition-all cursor-pointer relative ${
               selectedIdx === idx
@@ -84,7 +103,11 @@ export default function PanelAssistantPage({ panels, setPanels, onNavigateHome, 
                 : "border-neutral-800 bg-neutral-950/60 opacity-60 hover:opacity-100"
             }`}
           >
-            <img src={panel.image_url} alt="" className="w-full h-full object-cover" />
+            <img
+              src={panel.image_url}
+              alt=""
+              className="w-full h-full object-cover"
+            />
             <div className="absolute bottom-1 right-1 bg-black/80 px-1 rounded text-[8px] font-mono font-bold text-neutral-300">
               #{panel.id}
             </div>
@@ -97,12 +120,22 @@ export default function PanelAssistantPage({ panels, setPanels, onNavigateHome, 
         {/* Left pane: Active Panel Card preview */}
         <div className="md:col-span-4 bg-neutral-950/45 border border-neutral-800 p-4 rounded-2xl space-y-4">
           <div className="h-44 sm:h-48 rounded-xl overflow-hidden border border-neutral-850 bg-neutral-900 flex items-center justify-center">
-            <img src={activePanel.image_url} alt="" className="max-h-full max-w-full object-contain" />
+            <img
+              src={activePanel.image_url}
+              alt=""
+              className="max-h-full max-w-full object-contain"
+            />
           </div>
           <div className="space-y-1">
-            <span className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest block">Active Dialogue</span>
+            <span className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest block">
+              Active Dialogue
+            </span>
             <p className="text-xs text-neutral-200 bg-neutral-900/60 p-2.5 rounded-xl border border-neutral-850/50 font-sans leading-relaxed">
-              {activePanel.speech_text || <span className="text-neutral-600 font-mono">(Silent panel script)</span>}
+              {activePanel.speech_text || (
+                <span className="text-neutral-600 font-mono">
+                  (Silent panel script)
+                </span>
+              )}
             </p>
           </div>
         </div>
@@ -113,7 +146,9 @@ export default function PanelAssistantPage({ panels, setPanels, onNavigateHome, 
             <button
               onClick={() => setActiveTab("translation")}
               className={`px-3 py-1.5 font-bold transition-all border-b-2 cursor-pointer ${
-                activeTab === "translation" ? "border-purple-500 text-white" : "border-transparent text-neutral-400 hover:text-white"
+                activeTab === "translation"
+                  ? "border-purple-500 text-white"
+                  : "border-transparent text-neutral-400 hover:text-white"
               }`}
             >
               Translation
@@ -121,7 +156,9 @@ export default function PanelAssistantPage({ panels, setPanels, onNavigateHome, 
             <button
               onClick={() => setActiveTab("audio")}
               className={`px-3 py-1.5 font-bold transition-all border-b-2 cursor-pointer ${
-                activeTab === "audio" ? "border-purple-500 text-white" : "border-transparent text-neutral-400 hover:text-white"
+                activeTab === "audio"
+                  ? "border-purple-500 text-white"
+                  : "border-transparent text-neutral-400 hover:text-white"
               }`}
             >
               Audio & TTS
@@ -129,7 +166,9 @@ export default function PanelAssistantPage({ panels, setPanels, onNavigateHome, 
             <button
               onClick={() => setActiveTab("creative")}
               className={`px-3 py-1.5 font-bold transition-all border-b-2 cursor-pointer ${
-                activeTab === "creative" ? "border-purple-500 text-white" : "border-transparent text-neutral-400 hover:text-white"
+                activeTab === "creative"
+                  ? "border-purple-500 text-white"
+                  : "border-transparent text-neutral-400 hover:text-white"
               }`}
             >
               Creative Prompts
@@ -137,7 +176,9 @@ export default function PanelAssistantPage({ panels, setPanels, onNavigateHome, 
             <button
               onClick={() => setActiveTab("pacing")}
               className={`px-3 py-1.5 font-bold transition-all border-b-2 cursor-pointer ${
-                activeTab === "pacing" ? "border-purple-500 text-white" : "border-transparent text-neutral-400 hover:text-white"
+                activeTab === "pacing"
+                  ? "border-purple-500 text-white"
+                  : "border-transparent text-neutral-400 hover:text-white"
               }`}
             >
               Pacing & Shake
@@ -153,7 +194,9 @@ export default function PanelAssistantPage({ panels, setPanels, onNavigateHome, 
               />
             )}
             {activeTab === "audio" && <PanelAudioTool panel={activePanel} />}
-            {activeTab === "creative" && <PanelCreativeTool panel={activePanel} />}
+            {activeTab === "creative" && (
+              <PanelCreativeTool panel={activePanel} />
+            )}
             {activeTab === "pacing" && <PanelPacingTool panel={activePanel} />}
           </div>
         </div>

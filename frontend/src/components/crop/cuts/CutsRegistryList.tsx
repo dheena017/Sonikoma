@@ -25,10 +25,12 @@ export function CutsRegistryList({
     return (
       <div className="border border-white/5 border-dashed rounded-2xl p-6 text-center">
         <Layers className="h-5 w-5 text-neutral-700 mx-auto mb-2" />
-        <p className="text-[11px] font-bold text-neutral-500">Crop tools list is empty</p>
+        <p className="text-[11px] font-bold text-neutral-500">
+          Crop tools list is empty
+        </p>
         <p className="text-[10px] text-neutral-600 leading-normal mt-1">
-          Draw on the image canvas and push to crop tools list, or use Auto Panel
-          contour detection below to auto-slice.
+          Draw on the image canvas and push to crop tools list, or use Auto
+          Panel contour detection below to auto-slice.
         </p>
       </div>
     );
@@ -42,7 +44,9 @@ export function CutsRegistryList({
           <div
             key={slice.id}
             onClick={() => {
-              console.log(`[CutsRegistry] Selecting slice #${index + 1}: ${slice.id}`);
+              console.log(
+                `[CutsRegistry] Selecting slice #${index + 1}: ${slice.id}`
+              );
               handleSelectSlice(slice);
             }}
             className={`p-2.5 rounded-xl text-[11px] font-mono border cursor-pointer transition-all flex items-center justify-between group ${
@@ -52,24 +56,36 @@ export function CutsRegistryList({
             }`}
           >
             <div className="flex items-center gap-2">
-              <span className={`font-bold ${isSelected ? "text-emerald-300" : "text-neutral-400"}`}>
+              <span
+                className={`font-bold ${
+                  isSelected ? "text-emerald-300" : "text-neutral-400"
+                }`}
+              >
                 #{index + 1}
               </span>
               <span className="text-[9px] opacity-60">
-                {parseFloat((100 - slice.cropLeft - slice.cropRight).toFixed(1))}%w
-                &nbsp;×&nbsp;
-                {parseFloat((100 - slice.cropTop - slice.cropBottom).toFixed(1))}%h
+                {parseFloat(
+                  (100 - slice.cropLeft - slice.cropRight).toFixed(1)
+                )}
+                %w &nbsp;×&nbsp;
+                {parseFloat(
+                  (100 - slice.cropTop - slice.cropBottom).toFixed(1)
+                )}
+                %h
               </span>
             </div>
 
             <div className="flex items-center gap-1">
               <span className="text-[9px] text-neutral-700 font-mono mr-1">
-                Y:{Math.round(slice.cropTop)}-{Math.round(100 - slice.cropBottom)}%
+                Y:{Math.round(slice.cropTop)}-
+                {Math.round(100 - slice.cropBottom)}%
               </span>
               <button
                 type="button"
                 onClick={(e) => {
-                  console.log(`[CutsRegistry] Executing crop for slice: ${slice.id}`);
+                  console.log(
+                    `[CutsRegistry] Executing crop for slice: ${slice.id}`
+                  );
                   handleCropSingleSlice(slice, e);
                 }}
                 disabled={isCroppingSlice === slice.id || isSavingEdit}

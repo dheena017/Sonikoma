@@ -48,7 +48,7 @@ export default function AutoCropTabContent(props: AutoCropTabContentProps) {
   return (
     <div className="flex-1 overflow-y-auto pr-2 space-y-6 relative">
       {activeTab === "general" && <AutoCropGeneralTab {...props} />}
-      {activeTab === "layout"  && (
+      {activeTab === "layout" && (
         <AutoCropLayoutTab
           cropPaddingPx={props.cropPaddingPx}
           setCropPaddingPx={props.setCropPaddingPx}

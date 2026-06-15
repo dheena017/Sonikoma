@@ -2,8 +2,12 @@ import React from "react";
 
 interface CanvasBrushLayerProps {
   canvasMaskRef?: React.RefObject<HTMLCanvasElement | null>;
-  handleCanvasMouseDown: (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => void;
-  handleCanvasMouseMove: (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => void;
+  handleCanvasMouseDown: (
+    e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>
+  ) => void;
+  handleCanvasMouseMove: (
+    e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>
+  ) => void;
   handleCanvasMouseUp: () => void;
 }
 

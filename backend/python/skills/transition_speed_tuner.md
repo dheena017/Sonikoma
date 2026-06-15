@@ -4,6 +4,7 @@ description: Configure rendering transition times in frames based on dialogue pa
 model: gemini-2.5-flash
 response_schema: TransitionSpeedModel
 ---
+
 Analyze scene dynamics:
 Pacing description: "{visual_description}"
 Dialogue pace: "{speech_text}"

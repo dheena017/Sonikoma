@@ -4,6 +4,7 @@ description: Suggest pacing settings, zoom transitions speeds and pause flags fo
 model: gemini-2.5-flash
 response_schema: NarrativePacingModel
 ---
+
 Analyze the dialogue tension level and visual speed metadata below:
 Visual Description: "{visual_description}"
 Dialogue/Narration: "{speech_text}"

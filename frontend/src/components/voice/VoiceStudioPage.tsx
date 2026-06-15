@@ -10,7 +10,11 @@ interface VoiceStudioPageProps {
   addNotification?: (msg: string, type: any) => void;
 }
 
-export default function VoiceStudioPage({ panels, onNavigateHome, addNotification }: VoiceStudioPageProps) {
+export default function VoiceStudioPage({
+  panels,
+  onNavigateHome,
+  addNotification,
+}: VoiceStudioPageProps) {
   const [activeTab, setActiveTab] = useState<"dramatize" | "cast">("dramatize");
 
   return (
@@ -22,7 +26,8 @@ export default function VoiceStudioPage({ panels, onNavigateHome, addNotificatio
             AI Voice Casting & Script Studio
           </h2>
           <p className="text-xs text-neutral-400 font-mono mt-0.5">
-            Dramatize dialogues and cast the perfect voice actors for your narration
+            Dramatize dialogues and cast the perfect voice actors for your
+            narration
           </p>
         </div>
         <button
@@ -59,9 +64,7 @@ export default function VoiceStudioPage({ panels, onNavigateHome, addNotificatio
 
       {/* ACTIVE VIEW */}
       <div className="space-y-4">
-        {activeTab === "dramatize" && (
-          <ScriptDramatizerForm panels={panels} />
-        )}
+        {activeTab === "dramatize" && <ScriptDramatizerForm panels={panels} />}
         {activeTab === "cast" && (
           <VoiceSettingsPanel addNotification={addNotification} />
         )}

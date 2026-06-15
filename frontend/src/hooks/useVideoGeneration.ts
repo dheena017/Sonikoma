@@ -37,11 +37,16 @@ export function useVideoGeneration({
 }: UseVideoGenerationProps) {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [progressStatus, setProgressStatus] = useState<string>("");
-  const [reprocessingPanelId, setReprocessingPanelId] = useState<number | null>(null);
+  const [reprocessingPanelId, setReprocessingPanelId] = useState<number | null>(
+    null
+  );
 
   const handleGenerateVideo = async () => {
     if (!targetUrl.trim()) {
-      addNotification("Please enter or select a valid Webtoon URL to initiate the process.", "error");
+      addNotification(
+        "Please enter or select a valid Webtoon URL to initiate the process.",
+        "error"
+      );
       return;
     }
 
@@ -53,10 +58,13 @@ export function useVideoGeneration({
       linewebtoon: "Line Webtoon",
     };
 
-    const selectedSourceName = sourceDisplayNames[selectedSource] || selectedSource;
+    const selectedSourceName =
+      sourceDisplayNames[selectedSource] || selectedSource;
     const normalizeTarget = (() => {
       try {
-        return targetUrl.trim().startsWith('http') ? targetUrl.trim() : `https://${targetUrl.trim()}`;
+        return targetUrl.trim().startsWith("http")
+          ? targetUrl.trim()
+          : `https://${targetUrl.trim()}`;
       } catch {
         return targetUrl.trim();
       }
@@ -66,7 +74,7 @@ export function useVideoGeneration({
       try {
         return new URL(normalizeTarget).hostname.toLowerCase();
       } catch {
-        return '';
+        return "";
       }
     })();
 
@@ -80,9 +88,11 @@ export function useVideoGeneration({
 
     const isSourceMismatch = Boolean(
       currentHost &&
-      !allowedHosts[selectedSource]?.some((allowedHost) =>
-        currentHost === allowedHost || currentHost.endsWith(`.${allowedHost}`)
-      )
+        !allowedHosts[selectedSource]?.some(
+          (allowedHost) =>
+            currentHost === allowedHost ||
+            currentHost.endsWith(`.${allowedHost}`)
+        )
     );
 
     if (isSourceMismatch) {
@@ -93,22 +103,30 @@ export function useVideoGeneration({
       return;
     }
 
-    console.log(`[Control] Starting video generation pipeline with model: ${selectedModel}`);
+    console.log(
+      `[Control] Starting video generation pipeline with model: ${selectedModel}`
+    );
     setIsProcessing(true);
     setProgressStatus("Contacting pipeline orchestration...");
-    addNotification('Pipeline initiated — generating video with ' + selectedModel + '...', 'info');
+    addNotification(
+      "Pipeline initiated — generating video with " + selectedModel + "...",
+      "info"
+    );
     setConsoleLogs([
       `[Control] Initiating dynamic production pipeline request...`,
       `[Control] Webtoon Destination target: ${targetUrl}`,
       `[Control] Cinematic parameters applied -> FPS: ${frameRate} | Actor: ${voiceActor} | Audio: ${musicTheme}`,
       `[Model] Active AI Engine: ${selectedModel}`,
       `[Model] Sending request to AI model for OCR transcription & scene analysis...`,
-      `[Pipeline] Storyboard contains ${panels.length} panel(s) queued for compilation`
+      `[Pipeline] Storyboard contains ${panels.length} panel(s) queued for compilation`,
     ]);
 
     try {
       setProgressStatus("Scraping Webtoon strips & downloading frames...");
-      setConsoleLogs(prev => [...prev, `[Scraper] Spawned crawler tasks to fetch strip images...`]);
+      setConsoleLogs((prev) => [
+        ...prev,
+        `[Scraper] Spawned crawler tasks to fetch strip images...`,
+      ]);
 
       const requestBody = {
         url: targetUrl,
@@ -123,45 +141,58 @@ export function useVideoGeneration({
       const response = await fetchWithInterceptor("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(requestBody),
       });
 
       const responseData = await response.json();
       console.log(`[API] /api/generate response:`, responseData);
-      
+
       if (responseData.status !== "success" || !responseData.video_url) {
-        throw new Error(responseData.message || "Failed to compile cinematic video sequence.");
+        throw new Error(
+          responseData.message || "Failed to compile cinematic video sequence."
+        );
       }
-      
-      setConsoleLogs(prev => [
+
+      setConsoleLogs((prev) => [
         ...prev,
         `[Scraper] Retrieved vertical strip elements successfully.`,
         `[Vision OCR] Isolated ${responseData.panels_processed} panels dynamically.`,
         `[Model] AI engine ${selectedModel} completed OCR + scene analysis`,
         `[MoviePy] Compiling timeline with Pan/Zoom animations...`,
         `[MoviePy] Encoded output video: ${responseData.video_url}`,
-        `[Pipeline] [SUCCESS] Video generation pipeline completed successfully!`
+        `[Pipeline] [SUCCESS] Video generation pipeline completed successfully!`,
       ]);
-      
+
       setPanels(responseData.panels || []);
       setVideoUrl(responseData.video_url);
       setProgressStatus("Slices mapped & MP4 master timeline generated!");
       setActivePreviewTab("video");
-      addNotification('Video generated successfully! Check the preview player.', 'success');
-      
+      addNotification(
+        "Video generated successfully! Check the preview player.",
+        "success"
+      );
     } catch (err: any) {
-      setConsoleLogs(prev => [
+      setConsoleLogs((prev) => [
         ...prev,
-        `[Pipeline] [ERROR] Video generation failed: ${ (err as any).message || 'Unknown error'}`,
-        `[Pipeline] Error code: ${ (err as any).status ||  (err as any).code || 'unknown'} | Model: ${selectedModel}`
+        `[Pipeline] [ERROR] Video generation failed: ${
+          (err as any).message || "Unknown error"
+        }`,
+        `[Pipeline] Error code: ${
+          (err as any).status || (err as any).code || "unknown"
+        } | Model: ${selectedModel}`,
       ]);
 
-      if (! (err as any).intercepted) {
-        let errMessage =  (err as any).message || "An unexpected connection error occurred.";
+      if (!(err as any).intercepted) {
+        let errMessage =
+          (err as any).message || "An unexpected connection error occurred.";
         if (errMessage.includes("429") || errMessage.includes("quota")) {
-          errMessage = "You've exceeded your daily/request quota for the Gemini API. Please wait a short while for the quota to reset, or check your billing plan in Google AI Studio to increase your limits.";
+          errMessage =
+            "You've exceeded your daily/request quota for the Gemini API. Please wait a short while for the quota to reset, or check your billing plan in Google AI Studio to increase your limits.";
         }
-        addNotification(`Pipeline failed: ${errMessage}. Please try refreshing the page or try again.`, "error");
+        addNotification(
+          `Pipeline failed: ${errMessage}. Please try refreshing the page or try again.`,
+          "error"
+        );
       }
     } finally {
       setIsProcessing(false);
@@ -169,14 +200,15 @@ export function useVideoGeneration({
   };
 
   const handleTriggerReprocess = async (panelId: number) => {
-    const activePanel = panels.find(p => p.id === panelId);
+    const activePanel = panels.find((p) => p.id === panelId);
     if (!activePanel) return;
 
     setReprocessingPanelId(panelId);
-    const activePadding = activePanel.crop_padding !== undefined ? activePanel.crop_padding : 4;
-    setConsoleLogs(prev => [
+    const activePadding =
+      activePanel.crop_padding !== undefined ? activePanel.crop_padding : 4;
+    setConsoleLogs((prev) => [
       `[OCR/CV Engine] Recalculating tighter cropping margins (padding: ${activePadding}%) & OCR vectors for Scene #${panelId}...`,
-      ...prev
+      ...prev,
     ]);
 
     try {
@@ -188,27 +220,42 @@ export function useVideoGeneration({
           urlObj.searchParams.set("tighter", "true");
         }
         if (activePanel.crop_padding !== undefined) {
-          urlObj.searchParams.set("crop_padding", activePanel.crop_padding.toString());
+          urlObj.searchParams.set(
+            "crop_padding",
+            activePanel.crop_padding.toString()
+          );
         }
         currentUrl = urlObj.pathname + urlObj.search;
       }
 
       console.log(`[OCR/CV Engine] Reprocessing panel #${panelId}...`);
-      await new Promise(resolve => setTimeout(resolve, 900));
+      await new Promise((resolve) => setTimeout(resolve, 900));
 
-      setPanels(prev => prev.map(p => p.id === panelId ? { ...p, image_url: currentUrl } : p));
-      
-      setConsoleLogs(prev => [
+      setPanels((prev) =>
+        prev.map((p) =>
+          p.id === panelId ? { ...p, image_url: currentUrl } : p
+        )
+      );
+
+      setConsoleLogs((prev) => [
         `[OCR/CV Engine] [SUCCESS] Scene #${panelId} output canvas successfully re-parsed into tighter boundaries with margin padding ${activePadding}%!`,
-        ...prev
+        ...prev,
       ]);
-      addNotification(`Panel #${panelId} reprocessed with tighter margins (${activePadding}% padding).`, 'success');
+      addNotification(
+        `Panel #${panelId} reprocessed with tighter margins (${activePadding}% padding).`,
+        "success"
+      );
     } catch (err: any) {
-      setConsoleLogs(prev => [
-        `[OCR/CV Engine] [ERROR] Reprocessing failed for Scene #${panelId}: ${ (err as any).message || 'Unknown error'}`,
-        ...prev
+      setConsoleLogs((prev) => [
+        `[OCR/CV Engine] [ERROR] Reprocessing failed for Scene #${panelId}: ${
+          (err as any).message || "Unknown error"
+        }`,
+        ...prev,
       ]);
-      addNotification(`Panel reprocessing failed. Please try again later.`, "error");
+      addNotification(
+        `Panel reprocessing failed. Please try again later.`,
+        "error"
+      );
     } finally {
       setReprocessingPanelId(null);
     }

@@ -56,8 +56,12 @@ export function AutoCropAdvancedTab({
   selectedScraped,
   addNotification,
 }: AutoCropAdvancedTabProps) {
-
-  const firstImageUrl = selectedScraped.length > 0 ? selectedScraped[0] : scrapedImages.length > 0 ? scrapedImages[0] : null;
+  const firstImageUrl =
+    selectedScraped.length > 0
+      ? selectedScraped[0]
+      : scrapedImages.length > 0
+      ? scrapedImages[0]
+      : null;
 
   const jsonPayload = {
     sensitivity: cropSensitivity,

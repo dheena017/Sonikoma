@@ -8,7 +8,11 @@ interface UseLiveScraperActionsProps {
   setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
   setScrapedImages: React.Dispatch<React.SetStateAction<string[]>>;
   setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>>;
-  addPanelsToStoryboard: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
+  addPanelsToStoryboard: (
+    urls: string[],
+    currentScrapedList?: string[],
+    shouldScroll?: boolean
+  ) => void;
   fetchWithInterceptor?: typeof fetch;
   addNotification?: (message: string, type: any) => void;
 }
@@ -27,14 +31,18 @@ export function useLiveScraperActions({
   const activeFetch = fetchWithInterceptor || fetch;
 
   const handleDownloadZip = async () => {
-    const toDownload = selectedScraped.length > 0 ? selectedScraped : scrapedImages;
+    const toDownload =
+      selectedScraped.length > 0 ? selectedScraped : scrapedImages;
     if (toDownload.length === 0) {
       addNotification?.("No images to download.", "warning");
       return;
     }
 
     console.log(`[GUI] Starting ZIP download for ${toDownload.length} images`);
-    addNotification?.(`Generating ZIP for ${toDownload.length} images...`, "info");
+    addNotification?.(
+      `Generating ZIP for ${toDownload.length} images...`,
+      "info"
+    );
     setIsZipping(true);
     try {
       const zip = new JSZip();
@@ -49,7 +57,10 @@ export function useLiveScraperActions({
           const url = toDownload[i];
           const res = await activeFetch(url);
           const blob = await res.blob();
-          const filename = `webtoon_frame_${String(i + 1).padStart(3, "0")}.png`;
+          const filename = `webtoon_frame_${String(i + 1).padStart(
+            3,
+            "0"
+          )}.png`;
           folder.file(filename, blob);
         } catch (err) {
           console.error("Download failed for:", toDownload[i], err);
@@ -65,7 +76,10 @@ export function useLiveScraperActions({
       addNotification?.("ZIP archive downloaded successfully!", "success");
     } catch (err: any) {
       console.error("Zip generation failed:", err);
-      addNotification?.(`Failed to generate ZIP: ${err.message || err}`, "error");
+      addNotification?.(
+        `Failed to generate ZIP: ${err.message || err}`,
+        "error"
+      );
     } finally {
       setIsZipping(false);
     }
@@ -76,13 +90,20 @@ export function useLiveScraperActions({
       addNotification?.("No images selected to delete.", "warning");
       return;
     }
-    setScrapedImages((prev) => prev.filter((img) => !selectedScraped.includes(img)));
+    setScrapedImages((prev) =>
+      prev.filter((img) => !selectedScraped.includes(img))
+    );
     setConsoleLogs((prev) => [
       `[GUI] Removed ${selectedScraped.length} images`,
       ...prev,
     ]);
-    console.log(`[GUI] Removed ${selectedScraped.length} image(s) from scraped deck`);
-    addNotification?.(`Removed ${selectedScraped.length} images from deck.`, "info");
+    console.log(
+      `[GUI] Removed ${selectedScraped.length} image(s) from scraped deck`
+    );
+    addNotification?.(
+      `Removed ${selectedScraped.length} images from deck.`,
+      "info"
+    );
     setSelectedScraped([]);
   };
 
@@ -91,7 +112,9 @@ export function useLiveScraperActions({
       addNotification?.("No images selected to add to storyboard.", "warning");
       return;
     }
-    console.log(`[GUI] Adding ${selectedScraped.length} image(s) to storyboard`);
+    console.log(
+      `[GUI] Adding ${selectedScraped.length} image(s) to storyboard`
+    );
     addPanelsToStoryboard(selectedScraped);
     setSelectedScraped([]);
   };

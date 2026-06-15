@@ -10,7 +10,10 @@ interface UseGlobalShortcutsProps {
   setVolume: React.Dispatch<React.SetStateAction<number>>;
   isMuted: boolean;
   setIsMuted: React.Dispatch<React.SetStateAction<boolean>>;
-  addNotification: (msg: string, type: "success" | "info" | "warning" | "error") => void;
+  addNotification: (
+    msg: string,
+    type: "success" | "info" | "warning" | "error"
+  ) => void;
   handleGenerateVideo: () => void;
   toggleStoryboardPlayback: () => void;
   resetStoryboardPlayback: () => void;
@@ -69,22 +72,24 @@ export function useGlobalShortcuts({
   navigateTo,
   setIsPipMode,
 }: UseGlobalShortcutsProps) {
-  const [shortcuts, setShortcuts] = React.useState<Record<string, string>>(() => {
-    try {
-      const stored = localStorage.getItem("ai_comic_shortcuts");
-      if (stored) {
-        return { ...DEFAULT_SHORTCUTS, ...JSON.parse(stored) };
-      }
-    } catch (e) {}
-    return DEFAULT_SHORTCUTS;
-  });
+  const [shortcuts, setShortcuts] = React.useState<Record<string, string>>(
+    () => {
+      try {
+        const stored = localStorage.getItem("ai_comic_shortcuts");
+        if (stored) {
+          return { ...DEFAULT_SHORTCUTS, ...JSON.parse(stored) };
+        }
+      } catch (e) {}
+      return DEFAULT_SHORTCUTS;
+    }
+  );
 
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const activeEl = document.activeElement;
       if (
-        activeEl instanceof HTMLInputElement || 
-        activeEl instanceof HTMLTextAreaElement || 
+        activeEl instanceof HTMLInputElement ||
+        activeEl instanceof HTMLTextAreaElement ||
         (activeEl instanceof HTMLElement && activeEl.isContentEditable)
       ) {
         return;
@@ -99,16 +104,16 @@ export function useGlobalShortcuts({
       if (event.ctrlKey) parts.push("Control");
       if (event.altKey) parts.push("Alt");
       if (event.shiftKey) parts.push("Shift");
-      
+
       let key = event.key;
       if (key === " ") key = "Space";
-      
+
       if (!["Control", "Alt", "Shift"].includes(event.key)) {
         parts.push(key.length === 1 ? key.toUpperCase() : key);
       } else {
         return; // modifier-only
       }
-      
+
       const combination = parts.join("+").toLowerCase();
 
       // Find matched keybind action
@@ -119,7 +124,7 @@ export function useGlobalShortcuts({
       if (!matchedAction) return;
 
       event.preventDefault();
-      
+
       const path = window.location.pathname;
       const isDashboard = path === "/" || path === "" || path === "/index.html";
       const isEditor = path.startsWith("/editor");
@@ -136,7 +141,10 @@ export function useGlobalShortcuts({
             setIsPipMode(false);
             navigateTo(lastEditorPath);
           } else {
-            addNotification("No scraped frames available. Scraping required.", "info");
+            addNotification(
+              "No scraped frames available. Scraping required.",
+              "info"
+            );
           }
           break;
         case "nav_autocrop":
@@ -167,7 +175,10 @@ export function useGlobalShortcuts({
           break;
         case "trigger_scrape":
           if (targetUrl) {
-            addNotification("Keyboard Trigger: Initializing comic scraper task...", "info");
+            addNotification(
+              "Keyboard Trigger: Initializing comic scraper task...",
+              "info"
+            );
           } else {
             addNotification("Enter a Webtoon URL first.", "warning");
           }
@@ -180,17 +191,17 @@ export function useGlobalShortcuts({
           break;
         case "volume_up":
           if (isDashboard) {
-            setVolume(v => Math.min(100, v + 10));
+            setVolume((v) => Math.min(100, v + 10));
           }
           break;
         case "volume_down":
           if (isDashboard) {
-            setVolume(v => Math.max(0, v - 10));
+            setVolume((v) => Math.max(0, v - 10));
           }
           break;
         case "volume_mute":
           if (isDashboard) {
-            setIsMuted(m => !m);
+            setIsMuted((m) => !m);
           }
           break;
         case "deck_select_all":
@@ -204,7 +215,9 @@ export function useGlobalShortcuts({
           break;
         case "deck_invert":
           if (isDashboard && scrapedImages.length > 0) {
-            setSelectedScraped(prev => scrapedImages.filter(img => !prev.includes(img)));
+            setSelectedScraped((prev) =>
+              scrapedImages.filter((img) => !prev.includes(img))
+            );
           }
           break;
         case "deck_clear":
@@ -212,55 +225,107 @@ export function useGlobalShortcuts({
           break;
         case "deck_stitch":
           if (isDashboard && selectedScraped.length >= 2) {
-            addNotification("Keyboard Trigger: Stitching selected panels...", "info");
-            const btn = document.querySelector('#scraped_strips_deck button[title*="Stitch"]') as HTMLButtonElement;
+            addNotification(
+              "Keyboard Trigger: Stitching selected panels...",
+              "info"
+            );
+            const btn = document.querySelector(
+              '#scraped_strips_deck button[title*="Stitch"]'
+            ) as HTMLButtonElement;
             btn?.click();
           }
           break;
-        
+
         // Editor Shortcuts
         case "editor_tab_1":
-          if (isEditor) (window as any).dispatchEditorAction?.({ type: "SWITCH_TAB", tab: "adjust" });
+          if (isEditor)
+            (window as any).dispatchEditorAction?.({
+              type: "SWITCH_TAB",
+              tab: "adjust",
+            });
           break;
         case "editor_tab_2":
-          if (isEditor) (window as any).dispatchEditorAction?.({ type: "SWITCH_TAB", tab: "edit" });
+          if (isEditor)
+            (window as any).dispatchEditorAction?.({
+              type: "SWITCH_TAB",
+              tab: "edit",
+            });
           break;
         case "editor_tab_3":
-          if (isEditor) (window as any).dispatchEditorAction?.({ type: "SWITCH_TAB", tab: "eraser" });
+          if (isEditor)
+            (window as any).dispatchEditorAction?.({
+              type: "SWITCH_TAB",
+              tab: "eraser",
+            });
           break;
         case "editor_tab_4":
-          if (isEditor) (window as any).dispatchEditorAction?.({ type: "SWITCH_TAB", tab: "slice" });
+          if (isEditor)
+            (window as any).dispatchEditorAction?.({
+              type: "SWITCH_TAB",
+              tab: "slice",
+            });
           break;
         case "editor_tab_5":
-          if (isEditor) (window as any).dispatchEditorAction?.({ type: "SWITCH_TAB", tab: "crop" });
+          if (isEditor)
+            (window as any).dispatchEditorAction?.({
+              type: "SWITCH_TAB",
+              tab: "crop",
+            });
           break;
         case "editor_tab_6":
-          if (isEditor) (window as any).dispatchEditorAction?.({ type: "SWITCH_TAB", tab: "merge" });
+          if (isEditor)
+            (window as any).dispatchEditorAction?.({
+              type: "SWITCH_TAB",
+              tab: "merge",
+            });
           break;
         case "editor_prev":
-          if (isEditor) (window as any).dispatchEditorAction?.({ type: "PREV_IMAGE" });
+          if (isEditor)
+            (window as any).dispatchEditorAction?.({ type: "PREV_IMAGE" });
           break;
         case "editor_next":
-          if (isEditor) (window as any).dispatchEditorAction?.({ type: "NEXT_IMAGE" });
+          if (isEditor)
+            (window as any).dispatchEditorAction?.({ type: "NEXT_IMAGE" });
           break;
         case "editor_undo":
-          if (isEditor) (window as any).dispatchEditorAction?.({ type: "UNDO" });
+          if (isEditor)
+            (window as any).dispatchEditorAction?.({ type: "UNDO" });
           break;
         case "editor_redo":
-          if (isEditor) (window as any).dispatchEditorAction?.({ type: "REDO" });
+          if (isEditor)
+            (window as any).dispatchEditorAction?.({ type: "REDO" });
           break;
         case "editor_save":
-          if (isEditor) (window as any).dispatchEditorAction?.({ type: "SAVE" });
+          if (isEditor)
+            (window as any).dispatchEditorAction?.({ type: "SAVE" });
           break;
         case "editor_close":
-          if (isEditor) (window as any).dispatchEditorAction?.({ type: "CLOSE" });
+          if (isEditor)
+            (window as any).dispatchEditorAction?.({ type: "CLOSE" });
           break;
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [shortcuts, scrapedImages, lastEditorPath, targetUrl, selectedScraped, volume, isMuted, addNotification, handleGenerateVideo, toggleStoryboardPlayback, resetStoryboardPlayback, setVolume, setIsMuted, setSelectedScraped, navigateTo, setIsPipMode]);
+  }, [
+    shortcuts,
+    scrapedImages,
+    lastEditorPath,
+    targetUrl,
+    selectedScraped,
+    volume,
+    isMuted,
+    addNotification,
+    handleGenerateVideo,
+    toggleStoryboardPlayback,
+    resetStoryboardPlayback,
+    setVolume,
+    setIsMuted,
+    setSelectedScraped,
+    navigateTo,
+    setIsPipMode,
+  ]);
 
   return {
     shortcuts,

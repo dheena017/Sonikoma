@@ -27,7 +27,10 @@ export function VideoMonitorActive({
   const activeStoryboardPanel = panels[currentPanelIndex] || null;
 
   return (
-    <div id="video_monitor_outer_wrapper" className="relative bg-neutral-950/40 border border-neutral-800/80 rounded-3xl overflow-hidden shadow-inner flex items-center justify-center p-3 sm:p-4 min-h-[320px] sm:min-h-[440px]">
+    <div
+      id="video_monitor_outer_wrapper"
+      className="relative bg-neutral-950/40 border border-neutral-800/80 rounded-3xl overflow-hidden shadow-inner flex items-center justify-center p-3 sm:p-4 min-h-[320px] sm:min-h-[440px]"
+    >
       {/* Ambient Background Glow */}
       <div className="absolute h-56 w-56 rounded-full bg-purple-600/10 blur-3xl" />
 
@@ -38,9 +41,12 @@ export function VideoMonitorActive({
             <Film className="h-6 w-6" />
           </div>
           <div className="space-y-1">
-            <p className="text-xs font-bold text-neutral-300 font-sans">Preview Screen Unallocated</p>
+            <p className="text-xs font-bold text-neutral-300 font-sans">
+              Preview Screen Unallocated
+            </p>
             <p className="text-[11px] text-neutral-500 max-w-[240px] leading-relaxed">
-              Paste your target webtoon viewer URL on the left and click "Generate Video" to execute the scraper compiler.
+              Paste your target webtoon viewer URL on the left and click
+              "Generate Video" to execute the scraper compiler.
             </p>
           </div>
         </div>
@@ -48,9 +54,13 @@ export function VideoMonitorActive({
 
       {/* TAB 1: HTML5 PREVIEWING MP4 PLAYER */}
       {videoUrl && activePreviewTab === "video" && (
-        <div 
+        <div
           className="relative bg-black border border-neutral-800 overflow-hidden rounded-xl flex flex-col justify-between transition-all duration-300 shadow w-full"
-          style={aspectRatio === "9:16" ? { maxWidth: "270px", aspectRatio: "9/16" } : { maxWidth: "100%", aspectRatio: "16/9" }}
+          style={
+            aspectRatio === "9:16"
+              ? { maxWidth: "270px", aspectRatio: "9/16" }
+              : { maxWidth: "100%", aspectRatio: "16/9" }
+          }
         >
           <video
             ref={videoPlayerRef}
@@ -64,68 +74,85 @@ export function VideoMonitorActive({
       )}
 
       {/* TAB 2: INTERACTIVE STORYBOARD PREVIEW SIMULATOR */}
-      {panels.length > 0 && activePreviewTab === "storyboard" && activeStoryboardPanel && (
-        <div 
-          className="relative bg-neutral-950 border border-neutral-800/80 overflow-hidden rounded-xl flex flex-col justify-between transition-all duration-300 shadow w-full text-center"
-          style={aspectRatio === "9:16" ? { maxWidth: "270px", aspectRatio: "9/16" } : { maxWidth: "100%", aspectRatio: "16/9" }}
-        >
-          {/* Image under cinematic pan animations */}
-          <div className="absolute inset-0 overflow-hidden flex items-center justify-center bg-black">
-            <img
-              src={activeStoryboardPanel.image_url}
-              alt="Active Frame"
-              className="w-full h-full object-contain"
-              referrerPolicy="no-referrer"
-              style={{
-                transform: activeStoryboardPanel.motion_type === "zoom_in" ? `scale(${1 + (playbackTime * 0.02)})` :
-                           activeStoryboardPanel.motion_type === "zoom_out" ? `scale(${1.15 - (playbackTime * 0.02)})` :
-                           activeStoryboardPanel.motion_type === "pan_right" ? `translateX(${playbackTime * 4}px)` :
-                           activeStoryboardPanel.motion_type === "pan_left" ? `translateX(${-playbackTime * 4}px)` :
-                           activeStoryboardPanel.motion_type === "pan_down" ? `translateY(${playbackTime * 4}px)` : "",
-                transition: "transform 100ms linear",
-                filter: getPanelFilterStyle(activeStoryboardPanel)
-              }}
-            />
-          </div>
-
-          {/* Reprocessing OCR/CV Recalculation overlay */}
-          {reprocessingPanelId === activeStoryboardPanel.id && (
-            <div className="absolute inset-0 bg-black/85 backdrop-blur-sm flex flex-col items-center justify-center space-y-3 z-30">
-              <RefreshCw className="h-8 w-8 text-purple-400 animate-spin" />
-              <p className="text-xs font-mono text-purple-300 font-semibold tracking-wider">Recalculating CV Margins...</p>
-              <p className="text-[10px] text-neutral-500 font-mono">Re-slicing boundaries live</p>
+      {panels.length > 0 &&
+        activePreviewTab === "storyboard" &&
+        activeStoryboardPanel && (
+          <div
+            className="relative bg-neutral-950 border border-neutral-800/80 overflow-hidden rounded-xl flex flex-col justify-between transition-all duration-300 shadow w-full text-center"
+            style={
+              aspectRatio === "9:16"
+                ? { maxWidth: "270px", aspectRatio: "9/16" }
+                : { maxWidth: "100%", aspectRatio: "16/9" }
+            }
+          >
+            {/* Image under cinematic pan animations */}
+            <div className="absolute inset-0 overflow-hidden flex items-center justify-center bg-black">
+              <img
+                src={activeStoryboardPanel.image_url}
+                alt="Active Frame"
+                className="w-full h-full object-contain"
+                referrerPolicy="no-referrer"
+                style={{
+                  transform:
+                    activeStoryboardPanel.motion_type === "zoom_in"
+                      ? `scale(${1 + playbackTime * 0.02})`
+                      : activeStoryboardPanel.motion_type === "zoom_out"
+                      ? `scale(${1.15 - playbackTime * 0.02})`
+                      : activeStoryboardPanel.motion_type === "pan_right"
+                      ? `translateX(${playbackTime * 4}px)`
+                      : activeStoryboardPanel.motion_type === "pan_left"
+                      ? `translateX(${-playbackTime * 4}px)`
+                      : activeStoryboardPanel.motion_type === "pan_down"
+                      ? `translateY(${playbackTime * 4}px)`
+                      : "",
+                  transition: "transform 100ms linear",
+                  filter: getPanelFilterStyle(activeStoryboardPanel),
+                }}
+              />
             </div>
-          )}
 
-          {/* Overlays */}
-          <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-black/80 to-transparent pointer-events-none" />
-          <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-black/90 to-transparent pointer-events-none" />
+            {/* Reprocessing OCR/CV Recalculation overlay */}
+            {reprocessingPanelId === activeStoryboardPanel.id && (
+              <div className="absolute inset-0 bg-black/85 backdrop-blur-sm flex flex-col items-center justify-center space-y-3 z-30">
+                <RefreshCw className="h-8 w-8 text-purple-400 animate-spin" />
+                <p className="text-xs font-mono text-purple-300 font-semibold tracking-wider">
+                  Recalculating CV Margins...
+                </p>
+                <p className="text-[10px] text-neutral-500 font-mono">
+                  Re-slicing boundaries live
+                </p>
+              </div>
+            )}
 
-          {/* Subtitle badge inside storyboard preview */}
-          <div className="absolute top-3 left-3 right-3 flex items-center justify-between text-[10px] font-mono text-neutral-300 select-none">
-            <span className="bg-black/80 px-2 py-1 rounded border border-neutral-800/50">
-              FRAME #{activeStoryboardPanel.id}
-            </span>
-            <span className="bg-purple-950/85 text-purple-400 px-2 py-0.5 rounded border border-purple-800/40">
-              STORYBOARD PREVIEW
-            </span>
-          </div>
+            {/* Overlays */}
+            <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-black/80 to-transparent pointer-events-none" />
+            <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-black/90 to-transparent pointer-events-none" />
 
-          {/* Subtitles Overlay */}
-          <div className="absolute bottom-4 left-3 right-3 z-10 text-center">
-            {activeStoryboardPanel.sfx && (
+            {/* Subtitle badge inside storyboard preview */}
+            <div className="absolute top-3 left-3 right-3 flex items-center justify-between text-[10px] font-mono text-neutral-300 select-none">
+              <span className="bg-black/80 px-2 py-1 rounded border border-neutral-800/50">
+                FRAME #{activeStoryboardPanel.id}
+              </span>
+              <span className="bg-purple-950/85 text-purple-400 px-2 py-0.5 rounded border border-purple-800/40">
+                STORYBOARD PREVIEW
+              </span>
+            </div>
+
+            {/* Subtitles Overlay */}
+            <div className="absolute bottom-4 left-3 right-3 z-10 text-center">
+              {activeStoryboardPanel.sfx && (
                 <span className="hidden sm:inline-block transform -rotate-2 bg-yellow-500 text-black font-extrabold text-[10px] px-2 py-0.5 rounded shadow-lg font-mono tracking-widest uppercase mb-1">
                   {activeStoryboardPanel.sfx}
                 </span>
               )}
-            {activeStoryboardPanel.speech_text?.trim() && (
-              <p className="text-white font-bold text-xs leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,1)] bg-black/60 p-2.5 rounded-lg border border-white/5 backdrop-blur-xs text-center font-sans">
-                {activeStoryboardPanel.speech_text}
-              </p>
-            )}
+              {activeStoryboardPanel.speech_text?.trim() && (
+                <p className="text-white font-bold text-xs leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,1)] bg-black/60 p-2.5 rounded-lg border border-white/5 backdrop-blur-xs text-center font-sans">
+                  {activeStoryboardPanel.speech_text}
+                </p>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
   );
 }

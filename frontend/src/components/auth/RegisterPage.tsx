@@ -1,5 +1,13 @@
 import React from "react";
-import { UserPlus, Mail, Lock, User, Chrome, ArrowRight, Loader2 } from "lucide-react";
+import {
+  UserPlus,
+  Mail,
+  Lock,
+  User,
+  Chrome,
+  ArrowRight,
+  Loader2,
+} from "lucide-react";
 
 interface RegisterPageProps {
   onRegister: (data: any) => Promise<void>;
@@ -10,7 +18,7 @@ interface RegisterPageProps {
 export default function RegisterPage({
   onRegister,
   onNavigateToLogin,
-  onGoogleLogin
+  onGoogleLogin,
 }: RegisterPageProps) {
   const [fullName, setFullName] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -38,8 +46,12 @@ export default function RegisterPage({
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-purple-600/20 border border-purple-500/30 mb-6">
             <UserPlus className="w-8 h-8 text-purple-400" />
           </div>
-          <h2 className="text-3xl font-bold text-white tracking-tight">Join Anivox</h2>
-          <p className="mt-2 text-neutral-400 text-sm">Create your account to start making magic</p>
+          <h2 className="text-3xl font-bold text-white tracking-tight">
+            Join Anivox
+          </h2>
+          <p className="mt-2 text-neutral-400 text-sm">
+            Create your account to start making magic
+          </p>
         </div>
 
         <div className="bg-neutral-900/50 backdrop-blur-xl border border-white/5 rounded-3xl p-8 shadow-2xl">
@@ -51,7 +63,9 @@ export default function RegisterPage({
             )}
 
             <div className="space-y-2">
-              <label className="text-xs font-medium text-neutral-400 ml-1">Full Name</label>
+              <label className="text-xs font-medium text-neutral-400 ml-1">
+                Full Name
+              </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
                 <input
@@ -66,7 +80,9 @@ export default function RegisterPage({
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-medium text-neutral-400 ml-1">Email Address</label>
+              <label className="text-xs font-medium text-neutral-400 ml-1">
+                Email Address
+              </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
                 <input
@@ -81,7 +97,9 @@ export default function RegisterPage({
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-medium text-neutral-400 ml-1">Password</label>
+              <label className="text-xs font-medium text-neutral-400 ml-1">
+                Password
+              </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
                 <input
@@ -116,7 +134,9 @@ export default function RegisterPage({
               <div className="w-full border-t border-white/5"></div>
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-neutral-900 px-2 text-neutral-500">Or sign up with</span>
+              <span className="bg-neutral-900 px-2 text-neutral-500">
+                Or sign up with
+              </span>
             </div>
           </div>
 

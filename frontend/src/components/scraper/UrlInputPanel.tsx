@@ -61,32 +61,35 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
     setNarrationStyle,
   } = props;
 
-  const source = selectedSource || 'webtoons';
+  const source = selectedSource || "webtoons";
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    const pasted = e.clipboardData?.getData('text') || '';
+    const pasted = e.clipboardData?.getData("text") || "";
     const url = pasted.trim();
     if (url) {
       const normalized = extractWebtoonUrl(url);
-      console.log('Pasted URL:', url, 'Normalized URL:', normalized);
+      console.log("Pasted URL:", url, "Normalized URL:", normalized);
       setTargetUrl(normalized);
       if (normalized !== url) {
         addNotification(
-          'Detected duplicate URLs in the paste buffer. Using the first valid URL.',
-          'info'
+          "Detected duplicate URLs in the paste buffer. Using the first valid URL.",
+          "info"
         );
       }
     }
   };
 
-  const selectedSourceName = SOURCE_OPTIONS.find((option) => option.id === source)?.name || "Webtoons";
+  const selectedSourceName =
+    SOURCE_OPTIONS.find((option) => option.id === source)?.name || "Webtoons";
   const targetExample = SOURCE_EXAMPLES[source] || "webtoons.com/...";
   const placeholderText = `Paste ${selectedSourceName} viewer URL (e.g. ${targetExample})`;
 
   const currentHost = (() => {
     try {
       const normalized = extractWebtoonUrl(targetUrl);
-      const urlWithScheme = normalized.startsWith('http') ? normalized : `https://${normalized}`;
+      const urlWithScheme = normalized.startsWith("http")
+        ? normalized
+        : `https://${normalized}`;
       return new URL(urlWithScheme).hostname.toLowerCase();
     } catch {
       return "";
@@ -95,10 +98,11 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
 
   const isSourceMismatch = Boolean(
     targetUrl.trim() &&
-    currentHost &&
-    !SOURCE_DOMAINS[source]?.some((allowedHost) =>
-      currentHost === allowedHost || currentHost.endsWith(`.${allowedHost}`)
-    )
+      currentHost &&
+      !SOURCE_DOMAINS[source]?.some(
+        (allowedHost) =>
+          currentHost === allowedHost || currentHost.endsWith(`.${allowedHost}`)
+      )
   );
 
   const modelDropdown = (
@@ -108,33 +112,54 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
         value={selectedModel}
         onChange={(e) => {
           setSelectedModel(e.target.value);
-          const selectedName = AI_MODELS.find(m => m.id === e.target.value)?.name || e.target.value;
-          console.log(`[UrlInputPanel] Model changed to: ${e.target.value} (${selectedName})`);
-          addNotification(`Model configured to ${selectedName}`, 'info');
+          const selectedName =
+            AI_MODELS.find((m) => m.id === e.target.value)?.name ||
+            e.target.value;
+          console.log(
+            `[UrlInputPanel] Model changed to: ${e.target.value} (${selectedName})`
+          );
+          addNotification(`Model configured to ${selectedName}`, "info");
         }}
         className="relative w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-neutral-200 outline-none appearance-none focus:border-purple-500 transition-colors cursor-pointer"
       >
-        <option value="" disabled>Select AI Model Engine...</option>
+        <option value="" disabled>
+          Select AI Model Engine...
+        </option>
         {AI_MODELS.map((modelItem) => (
-          <option key={modelItem.id} value={modelItem.id} className="bg-neutral-950 text-neutral-100">
+          <option
+            key={modelItem.id}
+            value={modelItem.id}
+            className="bg-neutral-950 text-neutral-100"
+          >
             {modelItem.name} ({modelItem.provider} - {modelItem.type})
           </option>
         ))}
       </select>
-      <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-neutral-500 select-none">▾</div>
+      <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-neutral-500 select-none">
+        ▾
+      </div>
     </div>
   );
 
   return (
-    <div id="dynamic_input_box" className="bg-neutral-900/40 rounded-3xl border border-neutral-800/80 p-5 sm:p-6 lg:p-8 backdrop-blur-md shadow-sm space-y-5 sm:space-y-6">
+    <div
+      id="dynamic_input_box"
+      className="bg-neutral-900/40 rounded-3xl border border-neutral-800/80 p-5 sm:p-6 lg:p-8 backdrop-blur-md shadow-sm space-y-5 sm:space-y-6"
+    >
       <div className="space-y-1">
         <div className="flex items-center gap-2 text-purple-400">
           <Sparkles className="h-4 w-4" />
-          <span className="text-xs font-semibold tracking-wider uppercase font-mono">Dynamic Webtoon Scraper</span>
+          <span className="text-xs font-semibold tracking-wider uppercase font-mono">
+            Dynamic Webtoon Scraper
+          </span>
         </div>
-        <h2 className="text-lg font-bold text-white tracking-tight">Generate Video from Live Incident URL</h2>
+        <h2 className="text-lg font-bold text-white tracking-tight">
+          Generate Video from Live Incident URL
+        </h2>
         <p className="hidden sm:block text-xs text-neutral-400 font-sans">
-          Enter an official Webtoon viewer URL page. The backend engine will scrape the live media assets, isolate panels, run OCR transcriptions, and compile the cinematic rendering dynamically.
+          Enter an official Webtoon viewer URL page. The backend engine will
+          scrape the live media assets, isolate panels, run OCR transcriptions,
+          and compile the cinematic rendering dynamically.
         </p>
       </div>
 
@@ -154,12 +179,18 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                 className="relative w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-neutral-200 outline-none appearance-none focus:border-purple-500 transition-colors"
               >
                 {SOURCE_OPTIONS.map((option) => (
-                  <option key={option.id} value={option.id} className="bg-neutral-950 text-neutral-100">
+                  <option
+                    key={option.id}
+                    value={option.id}
+                    className="bg-neutral-950 text-neutral-100"
+                  >
                     {option.name}
                   </option>
                 ))}
               </select>
-              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-neutral-500 select-none">▾</div>
+              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-neutral-500 select-none">
+                ▾
+              </div>
             </div>
           </div>
 
@@ -173,12 +204,14 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                 onChange={(e) => setTargetUrl(e.target.value)}
                 onPaste={handlePaste}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !isProcessing && targetUrl.trim()) {
-                    console.log("[UrlInputPanel] Enter key pressed. Triggering generation.");
+                  if (e.key === "Enter" && !isProcessing && targetUrl.trim()) {
+                    console.log(
+                      "[UrlInputPanel] Enter key pressed. Triggering generation."
+                    );
                     if (isSourceMismatch) {
                       addNotification(
                         `Selected source ${selectedSourceName} does not match the current URL host (${currentHost}). Please choose the correct website or paste a matching URL.`,
-                        'error'
+                        "error"
                       );
                       return;
                     }
@@ -212,19 +245,29 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
               </span>
             </button>
           </div>
-            {isSourceMismatch && (
-              <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-[11px] text-amber-100 font-mono leading-5 mt-3">
-                <strong className="block text-amber-200 mb-1">Source mismatch detected</strong>
-                Selected source <strong>{selectedSourceName}</strong> does not match the URL host <strong>{currentHost || 'unknown'}</strong>. Please choose the correct website or paste a matching URL.
-              </div>
-            )}
+          {isSourceMismatch && (
+            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-[11px] text-amber-100 font-mono leading-5 mt-3">
+              <strong className="block text-amber-200 mb-1">
+                Source mismatch detected
+              </strong>
+              Selected source <strong>{selectedSourceName}</strong> does not
+              match the URL host <strong>{currentHost || "unknown"}</strong>.
+              Please choose the correct website or paste a matching URL.
+            </div>
+          )}
         </div>
 
         <div className="space-y-3 pt-1">
           {/* Narration Style Selector */}
           <div className="space-y-2">
             <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
-              <span className={`h-1.5 w-1.5 rounded-full ${narrationStyle === 'long' ? 'bg-purple-500 animate-ping' : 'bg-emerald-500 animate-ping'}`} />
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${
+                  narrationStyle === "long"
+                    ? "bg-purple-500 animate-ping"
+                    : "bg-emerald-500 animate-ping"
+                }`}
+              />
               AI Narration Style
             </label>
             <div className="relative">
@@ -233,29 +276,43 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                 value={narrationStyle}
                 onChange={(e) => {
                   setNarrationStyle?.(e.target.value);
-                  const label = e.target.value === 'long' ? 'Detailed Recap Narrator' : 'Short Subtitle Dialogue';
-                  addNotification(`Narration mode set to: ${label}`, 'info');
+                  const label =
+                    e.target.value === "long"
+                      ? "Detailed Recap Narrator"
+                      : "Short Subtitle Dialogue";
+                  addNotification(`Narration mode set to: ${label}`, "info");
                 }}
                 className="relative w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-neutral-200 outline-none appearance-none focus:border-purple-500 transition-colors cursor-pointer"
               >
-                <option value="long" className="bg-neutral-950 text-neutral-100">
-                  ✦ Detailed Recap Narrator (35-70 words/panel · 15+ Min YouTube Videos)
+                <option
+                  value="long"
+                  className="bg-neutral-950 text-neutral-100"
+                >
+                  ✦ Detailed Recap Narrator (35-70 words/panel · 15+ Min YouTube
+                  Videos)
                 </option>
-                <option value="short" className="bg-neutral-950 text-neutral-100">
-                  ✦ Short Subtitle Dialogue (under 25 words/panel · Shorts / Quick Recaps)
+                <option
+                  value="short"
+                  className="bg-neutral-950 text-neutral-100"
+                >
+                  ✦ Short Subtitle Dialogue (under 25 words/panel · Shorts /
+                  Quick Recaps)
                 </option>
               </select>
-              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-neutral-500 select-none">▾</div>
+              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-neutral-500 select-none">
+                ▾
+              </div>
             </div>
-            <p className={`text-[10.5px] font-mono ${
-              narrationStyle === 'long'
-                ? 'text-purple-400/70'
-                : 'text-emerald-400/70'
-            }`}>
-              {narrationStyle === 'long'
-                ? '✦ STORYTELLER mode — AI generates cinematic, highly engaging 35-70 word narrations per panel'
-                : '✦ SUBTITLES mode — AI generates concise, punchy captions under 25 words per panel'
-              }
+            <p
+              className={`text-[10.5px] font-mono ${
+                narrationStyle === "long"
+                  ? "text-purple-400/70"
+                  : "text-emerald-400/70"
+              }`}
+            >
+              {narrationStyle === "long"
+                ? "✦ STORYTELLER mode — AI generates cinematic, highly engaging 35-70 word narrations per panel"
+                : "✦ SUBTITLES mode — AI generates concise, punchy captions under 25 words per panel"}
             </p>
           </div>
 
@@ -265,9 +322,10 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
           </label>
           {modelDropdown}
 
-          {selectedModel.includes('pro') && (
+          {selectedModel.includes("pro") && (
             <p className="text-[10.5px] text-amber-500/90 font-mono flex items-center gap-1.5 animate-pulse">
-              <span>⚠️</span> Note: Pro models may require billing/credits. Flash models (Free) are highly recommended.
+              <span>⚠️</span> Note: Pro models may require billing/credits.
+              Flash models (Free) are highly recommended.
             </p>
           )}
         </div>

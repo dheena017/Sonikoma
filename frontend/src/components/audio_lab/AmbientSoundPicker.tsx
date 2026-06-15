@@ -5,11 +5,16 @@ interface AmbientSoundPickerProps {
   onSelectMusicTheme: (theme: string) => void;
 }
 
-export default function AmbientSoundPicker({ onSelectMusicTheme }: AmbientSoundPickerProps) {
+export default function AmbientSoundPicker({
+  onSelectMusicTheme,
+}: AmbientSoundPickerProps) {
   const [loading, setLoading] = useState(false);
   const [mood, setMood] = useState("tense horror battle");
   const [actionScale, setActionScale] = useState("high");
-  const [vibe, setVibe] = useState<{ music_vibe_tags: string[]; target_bpm: number } | null>(null);
+  const [vibe, setVibe] = useState<{
+    music_vibe_tags: string[];
+    target_bpm: number;
+  } | null>(null);
 
   const handleGenerate = async () => {
     setLoading(true);
@@ -20,8 +25,8 @@ export default function AmbientSoundPicker({ onSelectMusicTheme }: AmbientSoundP
         body: JSON.stringify({
           narrative_mood: mood,
           action_scale: actionScale,
-          model: "gemini-2.5-flash"
-        })
+          model: "gemini-2.5-flash",
+        }),
       });
       const json = await res.json();
       if (json.success && json.result) {
@@ -39,7 +44,9 @@ export default function AmbientSoundPicker({ onSelectMusicTheme }: AmbientSoundP
       <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
         <div className="flex items-center gap-2">
           <Music className="h-4.5 w-4.5 text-purple-400" />
-          <h4 className="text-xs font-mono font-bold text-white uppercase">Background Soundtrack Matcher</h4>
+          <h4 className="text-xs font-mono font-bold text-white uppercase">
+            Background Soundtrack Matcher
+          </h4>
         </div>
         <button
           onClick={handleGenerate}
@@ -52,7 +59,9 @@ export default function AmbientSoundPicker({ onSelectMusicTheme }: AmbientSoundP
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <label className="text-[9px] font-mono text-neutral-500 uppercase">Target Narrative Mood</label>
+          <label className="text-[9px] font-mono text-neutral-500 uppercase">
+            Target Narrative Mood
+          </label>
           <input
             type="text"
             value={mood}
@@ -61,7 +70,9 @@ export default function AmbientSoundPicker({ onSelectMusicTheme }: AmbientSoundP
           />
         </div>
         <div className="space-y-1">
-          <label className="text-[9px] font-mono text-neutral-500 uppercase">Action Intensity Scale</label>
+          <label className="text-[9px] font-mono text-neutral-500 uppercase">
+            Action Intensity Scale
+          </label>
           <select
             value={actionScale}
             onChange={(e) => setActionScale(e.target.value)}
@@ -79,13 +90,19 @@ export default function AmbientSoundPicker({ onSelectMusicTheme }: AmbientSoundP
           <div className="space-y-1">
             <div className="flex flex-wrap gap-1">
               {vibe.music_vibe_tags.map((tag, idx) => (
-                <span key={idx} className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-neutral-300">
+                <span
+                  key={idx}
+                  className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-neutral-300"
+                >
                   {tag}
                 </span>
               ))}
             </div>
             <p className="text-neutral-500">
-              Suggested soundtrack tempo: <span className="text-purple-300 font-bold">{vibe.target_bpm} BPM</span>
+              Suggested soundtrack tempo:{" "}
+              <span className="text-purple-300 font-bold">
+                {vibe.target_bpm} BPM
+              </span>
             </p>
           </div>
           <button

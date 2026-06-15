@@ -9,11 +9,18 @@ interface UseCropEditorDragProps {
   setDragType: (val: any) => void;
   dragStartPercent: { x: number; y: number } | null;
   setDragStartPercent: (val: { x: number; y: number } | null) => void;
-  originalCropBounds: { top: number; bottom: number; left: number; right: number } | null;
-  setOriginalCropBounds: (val: { top: number; bottom: number; left: number; right: number } | null) => void;
+  originalCropBounds: {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+  } | null;
+  setOriginalCropBounds: (
+    val: { top: number; bottom: number; left: number; right: number } | null
+  ) => void;
   draggingSplitLineIdx: number | null;
   setDraggingSplitLineIdx: (idx: number | null) => void;
-  
+
   editCropTop: number;
   setEditCropTop: (val: number) => void;
   editCropBottom: number;
@@ -22,7 +29,7 @@ interface UseCropEditorDragProps {
   setEditCropLeft: (val: number) => void;
   editCropRight: number;
   setEditCropRight: (val: number) => void;
-  
+
   showSplitPosition: boolean;
   splitPosition: number;
   setSplitPosition: (val: number) => void;
@@ -30,7 +37,7 @@ interface UseCropEditorDragProps {
   setSplitLines: React.Dispatch<React.SetStateAction<number[]>>;
   magneticSnap: boolean;
   detectedGutters: number[];
-  
+
   slices: Slice[];
   setSlices: React.Dispatch<React.SetStateAction<Slice[]>>;
   setSelectedSliceId: (id: string | null) => void;
@@ -38,7 +45,7 @@ interface UseCropEditorDragProps {
   autoPushOnDraw: boolean;
   editAutoTrim: boolean;
   activeTab: string;
-  
+
   pushHistory: () => void;
   handleSelectSlice: (slice: Slice) => void;
   handlePushToSlices: () => void;
@@ -89,7 +96,12 @@ export function useCropEditorDrag({
   const [initialSplitLines, setInitialSplitLines] = useState<number[]>([]);
 
   const isPointInsideSelection = (x: number, y: number) => {
-    if (editCropTop === 0 && editCropBottom === 0 && editCropLeft === 0 && editCropRight === 0) {
+    if (
+      editCropTop === 0 &&
+      editCropBottom === 0 &&
+      editCropLeft === 0 &&
+      editCropRight === 0
+    ) {
       return false;
     }
     const top = editCropTop;
@@ -102,8 +114,14 @@ export function useCropEditorDrag({
   const onResizeStart = (handle: string, clientX: number, clientY: number) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
-    const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
+    const x = Math.max(
+      0,
+      Math.min(100, ((clientX - rect.left) / rect.width) * 100)
+    );
+    const y = Math.max(
+      0,
+      Math.min(100, ((clientY - rect.top) / rect.height) * 100)
+    );
 
     setDragType(`resize-${handle}` as any);
     setDragStartPercent({ x, y });
@@ -115,11 +133,21 @@ export function useCropEditorDrag({
     });
   };
 
-  const handleSelectAndDragSlice = (slice: Slice, clientX: number, clientY: number) => {
+  const handleSelectAndDragSlice = (
+    slice: Slice,
+    clientX: number,
+    clientY: number
+  ) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
-    const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
+    const x = Math.max(
+      0,
+      Math.min(100, ((clientX - rect.left) / rect.width) * 100)
+    );
+    const y = Math.max(
+      0,
+      Math.min(100, ((clientY - rect.top) / rect.height) * 100)
+    );
     handleSelectSlice(slice);
 
     setDragType("move");
@@ -133,14 +161,24 @@ export function useCropEditorDrag({
   };
 
   const handleStart = (clientX: number, clientY: number) => {
-    console.log(`[CropEditorDrag] Drag started at client coordinates: (${clientX}, ${clientY})`);
+    console.log(
+      `[CropEditorDrag] Drag started at client coordinates: (${clientX}, ${clientY})`
+    );
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
-    const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
+    const x = Math.max(
+      0,
+      Math.min(100, ((clientX - rect.left) / rect.width) * 100)
+    );
+    const y = Math.max(
+      0,
+      Math.min(100, ((clientY - rect.top) / rect.height) * 100)
+    );
 
-    if (activeTab === 'slice') {
-      const nearLineIdx = splitLines.findIndex(lineY => Math.abs(lineY - y) < 2.5);
+    if (activeTab === "slice") {
+      const nearLineIdx = splitLines.findIndex(
+        (lineY) => Math.abs(lineY - y) < 2.5
+      );
       if (nearLineIdx !== -1) {
         setDragType("drag-split-line" as any);
         setDraggingSplitLineIdx(nearLineIdx);
@@ -153,7 +191,7 @@ export function useCropEditorDrag({
       return;
     }
 
-    if (activeTab === 'crop') {
+    if (activeTab === "crop") {
       if (isPointInsideSelection(x, y)) {
         setDragType("move");
         setDragStartPercent({ x, y });
@@ -172,7 +210,11 @@ export function useCropEditorDrag({
   };
 
   const handleMove = (x: number, y: number) => {
-    if (activeTab === 'slice' && dragType === "drag-split-line" && draggingSplitLineIdx !== null) {
+    if (
+      activeTab === "slice" &&
+      dragType === "drag-split-line" &&
+      draggingSplitLineIdx !== null
+    ) {
       let targetY = y;
       if (magneticSnap && detectedGutters.length > 0) {
         let nearest = y;
@@ -187,7 +229,7 @@ export function useCropEditorDrag({
         targetY = nearest;
       }
       const newY = parseFloat(Math.max(5, Math.min(95, targetY)).toFixed(1));
-      setSplitLines(prev => {
+      setSplitLines((prev) => {
         const updated = [...prev];
         updated[draggingSplitLineIdx] = newY;
         return [...updated].sort((a, b) => a - b);
@@ -195,7 +237,7 @@ export function useCropEditorDrag({
       return;
     }
 
-    if (activeTab === 'slice' && dragType === "split") {
+    if (activeTab === "slice" && dragType === "split") {
       let targetY = y;
       if (magneticSnap && detectedGutters.length > 0) {
         let nearest = y;
@@ -209,11 +251,13 @@ export function useCropEditorDrag({
         }
         targetY = nearest;
       }
-      setSplitPosition(parseFloat(Math.max(5, Math.min(95, targetY)).toFixed(1)));
+      setSplitPosition(
+        parseFloat(Math.max(5, Math.min(95, targetY)).toFixed(1))
+      );
       return;
     }
 
-    if (activeTab === 'crop' && dragType === "draw" && dragStart) {
+    if (activeTab === "crop" && dragType === "draw" && dragStart) {
       const left = Math.min(dragStart.x, x);
       const right = 100 - Math.max(dragStart.x, x);
       const top = Math.min(dragStart.y, y);
@@ -222,18 +266,33 @@ export function useCropEditorDrag({
       setEditCropLeft(parseFloat(Math.max(0, Math.min(85, left)).toFixed(1)));
       setEditCropRight(parseFloat(Math.max(0, Math.min(85, right)).toFixed(1)));
       setEditCropTop(parseFloat(Math.max(0, Math.min(85, top)).toFixed(1)));
-      setEditCropBottom(parseFloat(Math.max(0, Math.min(85, bottom)).toFixed(1)));
+      setEditCropBottom(
+        parseFloat(Math.max(0, Math.min(85, bottom)).toFixed(1))
+      );
       return;
     }
 
-    if (activeTab === 'crop' && dragType === "move" && dragStartPercent && originalCropBounds) {
+    if (
+      activeTab === "crop" &&
+      dragType === "move" &&
+      dragStartPercent &&
+      originalCropBounds
+    ) {
       const dx = x - dragStartPercent.x;
       const dy = y - dragStartPercent.y;
 
-      let newLeft = parseFloat(Math.max(0, Math.min(100, originalCropBounds.left + dx)).toFixed(1));
-      let newRight = parseFloat(Math.max(0, Math.min(100, originalCropBounds.right - dx)).toFixed(1));
-      let newTop = parseFloat(Math.max(0, Math.min(100, originalCropBounds.top + dy)).toFixed(1));
-      let newBottom = parseFloat(Math.max(0, Math.min(100, originalCropBounds.bottom - dy)).toFixed(1));
+      let newLeft = parseFloat(
+        Math.max(0, Math.min(100, originalCropBounds.left + dx)).toFixed(1)
+      );
+      let newRight = parseFloat(
+        Math.max(0, Math.min(100, originalCropBounds.right - dx)).toFixed(1)
+      );
+      let newTop = parseFloat(
+        Math.max(0, Math.min(100, originalCropBounds.top + dy)).toFixed(1)
+      );
+      let newBottom = parseFloat(
+        Math.max(0, Math.min(100, originalCropBounds.bottom - dy)).toFixed(1)
+      );
 
       const width = 100 - newLeft - newRight;
       if (width < 5) {
@@ -276,7 +335,12 @@ export function useCropEditorDrag({
       return;
     }
 
-    if (activeTab === 'crop' && dragType?.startsWith("resize-") && dragStartPercent && originalCropBounds) {
+    if (
+      activeTab === "crop" &&
+      dragType?.startsWith("resize-") &&
+      dragStartPercent &&
+      originalCropBounds
+    ) {
       const handle = dragType.replace("resize-", "");
       const dx = x - dragStartPercent.x;
       const dy = y - dragStartPercent.y;
@@ -286,10 +350,34 @@ export function useCropEditorDrag({
       let newTop = originalCropBounds.top;
       let newBottom = originalCropBounds.bottom;
 
-      if (handle.includes("w")) newLeft = parseFloat(Math.max(0, Math.min(95 - newRight, originalCropBounds.left + dx)).toFixed(1));
-      if (handle.includes("e")) newRight = parseFloat(Math.max(0, Math.min(95 - newLeft, originalCropBounds.right - dx)).toFixed(1));
-      if (handle.includes("n")) newTop = parseFloat(Math.max(0, Math.min(95 - newBottom, originalCropBounds.top + dy)).toFixed(1));
-      if (handle.includes("s")) newBottom = parseFloat(Math.max(0, Math.min(95 - newTop, originalCropBounds.bottom - dy)).toFixed(1));
+      if (handle.includes("w"))
+        newLeft = parseFloat(
+          Math.max(
+            0,
+            Math.min(95 - newRight, originalCropBounds.left + dx)
+          ).toFixed(1)
+        );
+      if (handle.includes("e"))
+        newRight = parseFloat(
+          Math.max(
+            0,
+            Math.min(95 - newLeft, originalCropBounds.right - dx)
+          ).toFixed(1)
+        );
+      if (handle.includes("n"))
+        newTop = parseFloat(
+          Math.max(
+            0,
+            Math.min(95 - newBottom, originalCropBounds.top + dy)
+          ).toFixed(1)
+        );
+      if (handle.includes("s"))
+        newBottom = parseFloat(
+          Math.max(
+            0,
+            Math.min(95 - newTop, originalCropBounds.bottom - dy)
+          ).toFixed(1)
+        );
 
       setEditCropLeft(newLeft);
       setEditCropRight(newRight);
@@ -317,16 +405,23 @@ export function useCropEditorDrag({
   const handleEnd = () => {
     console.log(`[CropEditorDrag] Drag ended. Final type: ${dragType}`);
     // Only push history if state has actually changed
-    const cropChanged = originalCropBounds && (
-      editCropTop !== originalCropBounds.top ||
-      editCropBottom !== originalCropBounds.bottom ||
-      editCropLeft !== originalCropBounds.left ||
-      editCropRight !== originalCropBounds.right
-    );
+    const cropChanged =
+      originalCropBounds &&
+      (editCropTop !== originalCropBounds.top ||
+        editCropBottom !== originalCropBounds.bottom ||
+        editCropLeft !== originalCropBounds.left ||
+        editCropRight !== originalCropBounds.right);
 
-    const isDrawChange = dragType === "draw" && (editCropTop !== 0 || editCropBottom !== 0 || editCropLeft !== 0 || editCropRight !== 0);
+    const isDrawChange =
+      dragType === "draw" &&
+      (editCropTop !== 0 ||
+        editCropBottom !== 0 ||
+        editCropLeft !== 0 ||
+        editCropRight !== 0);
 
-    const splitLinesChanged = dragType === "drag-split-line" && JSON.stringify(splitLines) !== JSON.stringify(initialSplitLines);
+    const splitLinesChanged =
+      dragType === "drag-split-line" &&
+      JSON.stringify(splitLines) !== JSON.stringify(initialSplitLines);
 
     if (cropChanged || isDrawChange || splitLinesChanged) {
       pushHistory();
@@ -343,17 +438,32 @@ export function useCropEditorDrag({
     setInitialSplitLines([]);
   };
 
-  const handleNudge = (direction: "top" | "bottom" | "left" | "right", amount: number) => {
+  const handleNudge = (
+    direction: "top" | "bottom" | "left" | "right",
+    amount: number
+  ) => {
     pushHistory();
     let updatedTop = editCropTop;
     let updatedBottom = editCropBottom;
     let updatedLeft = editCropLeft;
     let updatedRight = editCropRight;
 
-    if (direction === "top") updatedTop = parseFloat(Math.max(0, Math.min(95, editCropTop + amount)).toFixed(1));
-    if (direction === "bottom") updatedBottom = parseFloat(Math.max(0, Math.min(95, editCropBottom + amount)).toFixed(1));
-    if (direction === "left") updatedLeft = parseFloat(Math.max(0, Math.min(95, editCropLeft + amount)).toFixed(1));
-    if (direction === "right") updatedRight = parseFloat(Math.max(0, Math.min(95, editCropRight + amount)).toFixed(1));
+    if (direction === "top")
+      updatedTop = parseFloat(
+        Math.max(0, Math.min(95, editCropTop + amount)).toFixed(1)
+      );
+    if (direction === "bottom")
+      updatedBottom = parseFloat(
+        Math.max(0, Math.min(95, editCropBottom + amount)).toFixed(1)
+      );
+    if (direction === "left")
+      updatedLeft = parseFloat(
+        Math.max(0, Math.min(95, editCropLeft + amount)).toFixed(1)
+      );
+    if (direction === "right")
+      updatedRight = parseFloat(
+        Math.max(0, Math.min(95, editCropRight + amount)).toFixed(1)
+      );
 
     setEditCropTop(updatedTop);
     setEditCropBottom(updatedBottom);

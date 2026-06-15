@@ -52,14 +52,17 @@ export default function Header({
   markNotificationAsRead,
   markAllNotificationsAsRead,
   deleteNotification,
-  clearAllNotifications
+  clearAllNotifications,
 }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setShowNotifications(false);
       }
     }
@@ -67,9 +70,8 @@ export default function Header({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
-  
   const navigateTo = (path: string) => {
     window.history.pushState({}, "", path);
     window.dispatchEvent(new Event("popstate"));
@@ -78,7 +80,10 @@ export default function Header({
   const isLongMode = narrationStyle !== "short";
 
   return (
-    <header id="header_pane" className="border-b border-neutral-900 bg-neutral-950/80 backdrop-blur-md sticky top-0 z-40 px-4 py-3 flex items-center justify-between">
+    <header
+      id="header_pane"
+      className="border-b border-neutral-900 bg-neutral-950/80 backdrop-blur-md sticky top-0 z-40 px-4 py-3 flex items-center justify-between"
+    >
       <div className="flex items-center gap-3">
         {/* Hamburger menu button */}
         <button
@@ -92,7 +97,9 @@ export default function Header({
         {/* Brand */}
         <div
           className={`flex items-center gap-2 cursor-pointer select-none transition-all duration-300 ${
-            isSidebarOpen ? "lg:opacity-0 lg:pointer-events-none" : "lg:opacity-100"
+            isSidebarOpen
+              ? "lg:opacity-0 lg:pointer-events-none"
+              : "lg:opacity-100"
           }`}
           onClick={() => navigateTo("/")}
         >
@@ -140,7 +147,7 @@ export default function Header({
             <Bell className="h-5 w-5" />
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white ring-2 ring-neutral-950">
-                {unreadCount > 9 ? '9+' : unreadCount}
+                {unreadCount > 9 ? "9+" : unreadCount}
               </span>
             )}
           </button>
@@ -164,26 +171,50 @@ export default function Header({
         {/* Storyboard metrics */}
         {panels.length > 0 && (
           <div className="hidden sm:flex items-center gap-3 font-mono text-[10px] text-neutral-400 bg-neutral-900/30 border border-neutral-800/60 px-3 py-1 rounded-lg select-none">
-            <span>panels: <strong className="text-purple-400 font-bold">{panels.length}</strong></span>
+            <span>
+              panels:{" "}
+              <strong className="text-purple-400 font-bold">
+                {panels.length}
+              </strong>
+            </span>
             <span className="text-neutral-700 font-bold">|</span>
-            <span>est. duration: <strong className="text-purple-400 font-bold">{formatDuration(totalCalculatedDuration)}</strong></span>
+            <span>
+              est. duration:{" "}
+              <strong className="text-purple-400 font-bold">
+                {formatDuration(totalCalculatedDuration)}
+              </strong>
+            </span>
           </div>
         )}
 
         {/* Connection status */}
-        <div className={`hidden md:flex items-center gap-1.5 font-mono text-[10px] border px-2.5 py-1 rounded-lg select-none ${
-          backendStatus === "offline"
-            ? "border-rose-900/50 bg-rose-950/20 text-rose-400"
-            : "border-neutral-800/80 bg-neutral-900/30 text-neutral-400"
-        }`}>
-          <span className={`h-1.5 w-1.5 rounded-full ${backendStatus === "offline" ? "bg-rose-500 animate-pulse" : "bg-emerald-500"}`} />
+        <div
+          className={`hidden md:flex items-center gap-1.5 font-mono text-[10px] border px-2.5 py-1 rounded-lg select-none ${
+            backendStatus === "offline"
+              ? "border-rose-900/50 bg-rose-950/20 text-rose-400"
+              : "border-neutral-800/80 bg-neutral-900/30 text-neutral-400"
+          }`}
+        >
+          <span
+            className={`h-1.5 w-1.5 rounded-full ${
+              backendStatus === "offline"
+                ? "bg-rose-500 animate-pulse"
+                : "bg-emerald-500"
+            }`}
+          />
           <span>engine: {backendStatus}</span>
         </div>
 
         {/* Processing status */}
         <div className="flex items-center gap-2 font-mono text-[10px] bg-neutral-900 border border-neutral-800 px-2.5 py-1 rounded-lg shrink-0">
-          <span className={`h-2 w-2 rounded-full ${isProcessing ? 'bg-purple-500 animate-ping' : 'bg-emerald-500'}`} />
-          <span className="text-neutral-300 font-bold">{isProcessing ? "PROCESSING" : "READY"}</span>
+          <span
+            className={`h-2 w-2 rounded-full ${
+              isProcessing ? "bg-purple-500 animate-ping" : "bg-emerald-500"
+            }`}
+          />
+          <span className="text-neutral-300 font-bold">
+            {isProcessing ? "PROCESSING" : "READY"}
+          </span>
         </div>
 
         {/* User Profile */}
@@ -194,13 +225,17 @@ export default function Header({
         >
           <div className="w-6 h-6 rounded-lg bg-purple-600/20 flex items-center justify-center overflow-hidden shrink-0 border border-purple-500/30">
             {user?.avatar_url ? (
-              <img src={user.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+              <img
+                src={user.avatar_url}
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
             ) : (
               <span className="text-[10px] font-bold text-purple-400">U</span>
             )}
           </div>
           <span className="text-[10px] font-bold text-neutral-300 truncate hidden sm:inline">
-            {user?.full_name?.split(' ')[0] || "User"}
+            {user?.full_name?.split(" ")[0] || "User"}
           </span>
         </button>
       </div>

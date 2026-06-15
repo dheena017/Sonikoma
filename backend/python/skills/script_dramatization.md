@@ -4,6 +4,7 @@ description: Transform raw dialogue extracted via OCR into high-retention cinema
 model: gemini-2.5-flash
 response_schema: DramatizedScriptModel
 ---
+
 Translate or enhance these raw dialogue segments into a highly engaging, cinematic narration script.
 Raw dialogue text extracted from OCR:
 {raw_ocr_text}

@@ -1,5 +1,15 @@
 import React from "react";
-import { Scissors, X, RefreshCw, Sparkles, RotateCcw, Cpu, Maximize2, Sliders, HelpCircle } from "lucide-react";
+import {
+  Scissors,
+  X,
+  RefreshCw,
+  Sparkles,
+  RotateCcw,
+  Cpu,
+  Maximize2,
+  Sliders,
+  HelpCircle,
+} from "lucide-react";
 import AutoCropTabContent from "../scraper/AutoCropTabContent";
 
 interface AutoCropModalProps {
@@ -21,7 +31,7 @@ interface AutoCropModalProps {
   setOverlapMergeThreshold: (v: number) => void;
   useLocalCV: boolean;
   setUseLocalCV: (v: boolean) => void;
-  
+
   // Advanced States
   cropModel: string;
   setCropModel: (v: string) => void;
@@ -35,7 +45,7 @@ interface AutoCropModalProps {
   setCropCloseKernelSize: (v: number) => void;
   activeTab: string;
   setActiveTab: (v: string) => void;
-  
+
   selectedCount: number;
   isApplying: boolean;
   scrapedImages: string[];
@@ -64,7 +74,7 @@ export default function AutoCropModal({
   setOverlapMergeThreshold,
   useLocalCV,
   setUseLocalCV,
-  
+
   cropModel,
   setCropModel,
   cropMinHeightPx,
@@ -77,16 +87,15 @@ export default function AutoCropModal({
   setCropCloseKernelSize,
   activeTab,
   setActiveTab,
-  
+
   selectedCount,
   isApplying,
   scrapedImages,
   selectedScraped,
   setSelectedScraped,
   setConsoleLogs,
-  addNotification
+  addNotification,
 }: AutoCropModalProps) {
-
   const handleResetAll = () => {
     console.log("[AutoCropModal] Resetting all parameters to defaults");
     setSensitivity(30);
@@ -110,9 +119,21 @@ export default function AutoCropModal({
 
   const tabs = [
     { id: "general", label: "General", icon: <Cpu className="h-3.5 w-3.5" /> },
-    { id: "layout", label: "Layout & Guides", icon: <Maximize2 className="h-3.5 w-3.5" /> },
-    { id: "advanced", label: "Advanced CV", icon: <Sliders className="h-3.5 w-3.5" /> },
-    { id: "help", label: "Help Guide", icon: <HelpCircle className="h-3.5 w-3.5" /> }
+    {
+      id: "layout",
+      label: "Layout & Guides",
+      icon: <Maximize2 className="h-3.5 w-3.5" />,
+    },
+    {
+      id: "advanced",
+      label: "Advanced CV",
+      icon: <Sliders className="h-3.5 w-3.5" />,
+    },
+    {
+      id: "help",
+      label: "Help Guide",
+      icon: <HelpCircle className="h-3.5 w-3.5" />,
+    },
   ];
 
   return (
@@ -126,12 +147,15 @@ export default function AutoCropModal({
                 <Scissors className="h-5 w-5 text-indigo-400" />
               </div>
               <div>
-                <h3 className="font-bold text-sm text-white">Smart Auto-Crop Settings</h3>
+                <h3 className="font-bold text-sm text-white">
+                  Smart Auto-Crop Settings
+                </h3>
                 <p className="text-[10px] text-neutral-400 font-mono mt-0.5">
                   Advanced CV border-detection & panel segmentation parameters
                   {selectedCount > 0 && (
                     <span className="ml-2 text-indigo-400 font-bold">
-                      · {selectedCount} panel{selectedCount !== 1 ? "s" : ""} selected
+                      · {selectedCount} panel{selectedCount !== 1 ? "s" : ""}{" "}
+                      selected
                     </span>
                   )}
                 </p>
@@ -154,8 +178,6 @@ export default function AutoCropModal({
               </button>
             </div>
           </div>
-
-
 
           {/* Tab Selection Row */}
           <div className="flex border-b border-neutral-800 bg-neutral-950/20 px-6">
@@ -218,65 +240,105 @@ export default function AutoCropModal({
 
           {/* Scrollable Horizontal Preview Ribbon */}
           {(() => {
-            const imagesToShow = selectedScraped.length > 0 ? selectedScraped : scrapedImages;
-            return imagesToShow.length > 0 && (
-              <div className="px-6 py-3 border-t border-neutral-800 bg-neutral-950/35 flex flex-col gap-2 shrink-0 animate-[fadeIn_0.15s_ease-out]">
-                <span className="text-[9px] font-mono font-bold text-neutral-500 uppercase tracking-wider select-none">
-                  {selectedScraped.length > 0 ? "Selected Panels to Crop" : "All Scraped Panels"} ({imagesToShow.length})
-                </span>
-                <div className="flex flex-wrap gap-3 overflow-y-auto py-1.5 pr-2 scrollbar-thin max-h-28 sm:max-h-32">
-                  {imagesToShow.map((imgUrl) => {
-                    const globalIdx = scrapedImages.indexOf(imgUrl);
-                    const isSelected = selectedScraped.includes(imgUrl);
-                    return (
-                      <div 
-                        key={imgUrl} 
-                        onClick={() => {
-                          console.log(`[AutoCropModal] Navigating to editor for image index ${globalIdx}`);
-                          window.history.pushState({}, "", `/editor/adjust?idx=${globalIdx}`);
-                          window.dispatchEvent(new Event("popstate"));
-                        }}
-                        className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-neutral-900 border shrink-0 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105 ${
-                          isSelected 
-                            ? "border-purple-500/80 shadow-[0_0_12px_rgba(168,85,247,0.3)] ring-1 ring-purple-500/30" 
-                            : "border-neutral-800 hover:border-neutral-700"
-                        }`}
-                      >
-                        <img 
-                          src={imgUrl} 
-                          alt={`Panel #${globalIdx + 1}`} 
-                          className="w-full h-full object-contain pointer-events-none"
-                        />
-                        <div className={`absolute bottom-1.5 right-1.5 backdrop-blur-sm px-1.5 py-0.5 rounded text-[8px] font-mono leading-none border transition-all duration-200 ${
-                          isSelected
-                            ? "bg-purple-600/90 border-purple-400/60 text-white shadow-[0_0_8px_rgba(168,85,247,0.4)]"
-                            : "bg-black/80 border-purple-900/30 text-purple-400"
-                        }`}>
-                          #{globalIdx + 1}
+            const imagesToShow =
+              selectedScraped.length > 0 ? selectedScraped : scrapedImages;
+            return (
+              imagesToShow.length > 0 && (
+                <div className="px-6 py-3 border-t border-neutral-800 bg-neutral-950/35 flex flex-col gap-2 shrink-0 animate-[fadeIn_0.15s_ease-out]">
+                  <span className="text-[9px] font-mono font-bold text-neutral-500 uppercase tracking-wider select-none">
+                    {selectedScraped.length > 0
+                      ? "Selected Panels to Crop"
+                      : "All Scraped Panels"}{" "}
+                    ({imagesToShow.length})
+                  </span>
+                  <div className="flex flex-wrap gap-3 overflow-y-auto py-1.5 pr-2 scrollbar-thin max-h-28 sm:max-h-32">
+                    {imagesToShow.map((imgUrl) => {
+                      const globalIdx = scrapedImages.indexOf(imgUrl);
+                      const isSelected = selectedScraped.includes(imgUrl);
+                      return (
+                        <div
+                          key={imgUrl}
+                          onClick={() => {
+                            console.log(
+                              `[AutoCropModal] Navigating to editor for image index ${globalIdx}`
+                            );
+                            window.history.pushState(
+                              {},
+                              "",
+                              `/editor/adjust?idx=${globalIdx}`
+                            );
+                            window.dispatchEvent(new Event("popstate"));
+                          }}
+                          className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-neutral-900 border shrink-0 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105 ${
+                            isSelected
+                              ? "border-purple-500/80 shadow-[0_0_12px_rgba(168,85,247,0.3)] ring-1 ring-purple-500/30"
+                              : "border-neutral-800 hover:border-neutral-700"
+                          }`}
+                        >
+                          <img
+                            src={imgUrl}
+                            alt={`Panel #${globalIdx + 1}`}
+                            className="w-full h-full object-contain pointer-events-none"
+                          />
+                          <div
+                            className={`absolute bottom-1.5 right-1.5 backdrop-blur-sm px-1.5 py-0.5 rounded text-[8px] font-mono leading-none border transition-all duration-200 ${
+                              isSelected
+                                ? "bg-purple-600/90 border-purple-400/60 text-white shadow-[0_0_8px_rgba(168,85,247,0.4)]"
+                                : "bg-black/80 border-purple-900/30 text-purple-400"
+                            }`}
+                          >
+                            #{globalIdx + 1}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              )
             );
           })()}
 
           {/* Live Config Summary Bar */}
           <div className="px-6 py-2.5 bg-neutral-950/20 border-t border-neutral-800 flex items-center gap-4 text-[9px] font-mono text-neutral-500 tracking-wider">
-            <span className="font-bold text-neutral-400 uppercase">Active Profile:</span>
+            <span className="font-bold text-neutral-400 uppercase">
+              Active Profile:
+            </span>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-              <span>Engine: <strong className="text-neutral-350">{useLocalCV ? "OPENCV ONLY" : `GEMINI AI (${cropModel})`}</strong></span>
+              <span>
+                Engine:{" "}
+                <strong className="text-neutral-350">
+                  {useLocalCV ? "OPENCV ONLY" : `GEMINI AI (${cropModel})`}
+                </strong>
+              </span>
               <span>•</span>
-              <span>Gutter: <strong className="text-neutral-350">{backgroundColorMode.toUpperCase()}</strong></span>
+              <span>
+                Gutter:{" "}
+                <strong className="text-neutral-350">
+                  {backgroundColorMode.toUpperCase()}
+                </strong>
+              </span>
               <span>•</span>
-              <span>Padding: <strong className="text-neutral-350">{padding}px</strong></span>
+              <span>
+                Padding:{" "}
+                <strong className="text-neutral-350">{padding}px</strong>
+              </span>
               <span>•</span>
-              <span>Lock: <strong className="text-neutral-350">{aspectRatioLock}</strong></span>
+              <span>
+                Lock:{" "}
+                <strong className="text-neutral-350">{aspectRatioLock}</strong>
+              </span>
               <span>•</span>
-              <span>Sensitivity: <strong className="text-neutral-350">{sensitivity}%</strong></span>
+              <span>
+                Sensitivity:{" "}
+                <strong className="text-neutral-350">{sensitivity}%</strong>
+              </span>
               <span>•</span>
-              <span>Canny: <strong className="text-neutral-350">{cropCannyLow}/{cropCannyHigh}</strong></span>
+              <span>
+                Canny:{" "}
+                <strong className="text-neutral-350">
+                  {cropCannyLow}/{cropCannyHigh}
+                </strong>
+              </span>
             </div>
           </div>
 
@@ -286,7 +348,9 @@ export default function AutoCropModal({
               <p className="text-[10px] text-neutral-500 font-mono">
                 {selectedCount === 0
                   ? "⚠️  No panels selected — select panels first in the scraper deck"
-                  : `Ready to auto-crop ${selectedCount} panel${selectedCount !== 1 ? "s" : ""}`}
+                  : `Ready to auto-crop ${selectedCount} panel${
+                      selectedCount !== 1 ? "s" : ""
+                    }`}
               </p>
               {useLocalCV ? (
                 <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-lg bg-cyan-950/80 text-cyan-400 border border-cyan-800/40">

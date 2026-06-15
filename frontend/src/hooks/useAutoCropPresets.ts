@@ -1,9 +1,14 @@
 import { useState, useCallback } from "react";
-import { CustomCropPreset, AutoCropSharedProps } from "../components/scraper/tabTypes";
+import {
+  CustomCropPreset,
+  AutoCropSharedProps,
+} from "../components/scraper/tabTypes";
 import { useConfigHistory } from "./useConfigHistory";
 
 export function useAutoCropPresets(props: AutoCropSharedProps) {
-  const [customPresets, setCustomPresets] = useState<Record<string, CustomCropPreset>>(() => {
+  const [customPresets, setCustomPresets] = useState<
+    Record<string, CustomCropPreset>
+  >(() => {
     try {
       const saved = localStorage.getItem("crop_custom_presets");
       if (saved) return JSON.parse(saved);
@@ -50,52 +55,80 @@ export function useAutoCropPresets(props: AutoCropSharedProps) {
     cropCloseKernelSize: props.cropCloseKernelSize,
   };
 
-  const { history, pushToHistory } = useConfigHistory<any>("crop_config", currentConfig);
+  const { history, pushToHistory } = useConfigHistory<any>(
+    "crop_config",
+    currentConfig
+  );
 
-  const applyState = useCallback((s: any) => {
-    if (s.useLocalCV !== undefined) props.setUseLocalCV(s.useLocalCV);
-    if (s.cropModel !== undefined) props.setCropModel(s.cropModel);
-    if (s.autoSplitTallStrips !== undefined) props.setAutoSplitTallStrips(s.autoSplitTallStrips);
-    if (s.cropSensitivity !== undefined) props.setCropSensitivity(s.cropSensitivity);
-    if (s.cropPaddingPx !== undefined) props.setCropPaddingPx(s.cropPaddingPx);
-    if (s.cropBackgroundMode !== undefined) props.setCropBackgroundMode(s.cropBackgroundMode);
-    if (s.aspectRatioLock !== undefined) props.setAspectRatioLock(s.aspectRatioLock);
-    if (s.minPanelAreaPct !== undefined) props.setMinPanelAreaPct(s.minPanelAreaPct);
-    if (s.overlapMergeThreshold !== undefined) props.setOverlapMergeThreshold(s.overlapMergeThreshold);
-    if (s.cropMinHeightPx !== undefined) props.setCropMinHeightPx(s.cropMinHeightPx);
-    if (s.cropCannyLow !== undefined) props.setCropCannyLow(s.cropCannyLow);
-    if (s.cropCannyHigh !== undefined) props.setCropCannyHigh(s.cropCannyHigh);
-    if (s.cropCloseKernelSize !== undefined) props.setCropCloseKernelSize(s.cropCloseKernelSize);
-  }, [props]);
+  const applyState = useCallback(
+    (s: any) => {
+      if (s.useLocalCV !== undefined) props.setUseLocalCV(s.useLocalCV);
+      if (s.cropModel !== undefined) props.setCropModel(s.cropModel);
+      if (s.autoSplitTallStrips !== undefined)
+        props.setAutoSplitTallStrips(s.autoSplitTallStrips);
+      if (s.cropSensitivity !== undefined)
+        props.setCropSensitivity(s.cropSensitivity);
+      if (s.cropPaddingPx !== undefined)
+        props.setCropPaddingPx(s.cropPaddingPx);
+      if (s.cropBackgroundMode !== undefined)
+        props.setCropBackgroundMode(s.cropBackgroundMode);
+      if (s.aspectRatioLock !== undefined)
+        props.setAspectRatioLock(s.aspectRatioLock);
+      if (s.minPanelAreaPct !== undefined)
+        props.setMinPanelAreaPct(s.minPanelAreaPct);
+      if (s.overlapMergeThreshold !== undefined)
+        props.setOverlapMergeThreshold(s.overlapMergeThreshold);
+      if (s.cropMinHeightPx !== undefined)
+        props.setCropMinHeightPx(s.cropMinHeightPx);
+      if (s.cropCannyLow !== undefined) props.setCropCannyLow(s.cropCannyLow);
+      if (s.cropCannyHigh !== undefined)
+        props.setCropCannyHigh(s.cropCannyHigh);
+      if (s.cropCloseKernelSize !== undefined)
+        props.setCropCloseKernelSize(s.cropCloseKernelSize);
+    },
+    [props]
+  );
 
-  const savePresetSlot = useCallback((slot: string, name: string) => {
-    const config = {
-      ...currentConfig,
-      name: name.trim() || `Custom ${slot.toUpperCase()}`,
-    };
-    console.log(`[Auto Cropper] Saving preset to slot ${slot}:`, config);
-    const updated = { ...customPresets, [slot]: config };
-    setCustomPresets(updated);
-    localStorage.setItem("crop_custom_presets", JSON.stringify(updated));
-    setActiveSlot(slot);
-    pushToHistory(config);
-    props.addNotification?.(`Saved configuration to preset: "${config.name}"`, "success");
-  }, [customPresets, currentConfig, props.addNotification, pushToHistory]);
+  const savePresetSlot = useCallback(
+    (slot: string, name: string) => {
+      const config = {
+        ...currentConfig,
+        name: name.trim() || `Custom ${slot.toUpperCase()}`,
+      };
+      console.log(`[Auto Cropper] Saving preset to slot ${slot}:`, config);
+      const updated = { ...customPresets, [slot]: config };
+      setCustomPresets(updated);
+      localStorage.setItem("crop_custom_presets", JSON.stringify(updated));
+      setActiveSlot(slot);
+      pushToHistory(config);
+      props.addNotification?.(
+        `Saved configuration to preset: "${config.name}"`,
+        "success"
+      );
+    },
+    [customPresets, currentConfig, props.addNotification, pushToHistory]
+  );
 
-  const loadPresetSlot = useCallback((slot: string) => {
-    const t = customPresets[slot];
-    if (!t) return;
-    console.log(`[Auto Cropper] Loading preset from slot ${slot}:`, t);
-    applyState(t);
-    setActiveSlot(slot);
-    props.addNotification?.(`Loaded preset config: "${t.name}"`, "info");
-  }, [customPresets, applyState, props.addNotification]);
+  const loadPresetSlot = useCallback(
+    (slot: string) => {
+      const t = customPresets[slot];
+      if (!t) return;
+      console.log(`[Auto Cropper] Loading preset from slot ${slot}:`, t);
+      applyState(t);
+      setActiveSlot(slot);
+      props.addNotification?.(`Loaded preset config: "${t.name}"`, "info");
+    },
+    [customPresets, applyState, props.addNotification]
+  );
 
-  const applyBuiltInPreset = useCallback((preset: Partial<CustomCropPreset> & { id: string }) => {
-    applyState(preset);
-    setActiveSlot(preset.id);
-    pushToHistory(preset);
-  }, [applyState, pushToHistory]);
+  const applyBuiltInPreset = useCallback(
+    (preset: Partial<CustomCropPreset> & { id: string }) => {
+      applyState(preset);
+      setActiveSlot(preset.id);
+      pushToHistory(preset);
+    },
+    [applyState, pushToHistory]
+  );
 
   return {
     customPresets,
@@ -105,6 +138,6 @@ export function useAutoCropPresets(props: AutoCropSharedProps) {
     loadPresetSlot,
     applyBuiltInPreset,
     history,
-    applyState
+    applyState,
   };
 }

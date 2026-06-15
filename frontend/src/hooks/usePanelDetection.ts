@@ -19,7 +19,11 @@ interface UsePanelDetectionProps {
   setScrapedImages?: React.Dispatch<React.SetStateAction<string[]>>;
   setConsoleLogs?: React.Dispatch<React.SetStateAction<string[]>>;
   editAutoTrim: boolean;
-  addPanelsToStoryboard: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
+  addPanelsToStoryboard: (
+    urls: string[],
+    currentScrapedList?: string[],
+    shouldScroll?: boolean
+  ) => void;
   setEditingImageIdx: (idx: number | null) => void;
 }
 
@@ -43,11 +47,14 @@ export function usePanelDetection({
   addPanelsToStoryboard,
   setEditingImageIdx,
 }: UsePanelDetectionProps) {
-
   const handleAiCrop = async () => {
     if (editingImageIdx === null) return;
     const currentUrl = scrapedImages[editingImageIdx];
-    console.log(`[AI Smart Crop] Requesting AI detection for image #${editingImageIdx + 1}`);
+    console.log(
+      `[AI Smart Crop] Requesting AI detection for image #${
+        editingImageIdx + 1
+      }`
+    );
     setIsAiDetecting(true);
     try {
       const response = await activeFetch("/api/ai-detect-panels", {
@@ -66,7 +73,11 @@ export function usePanelDetection({
         throw new Error(errMsg);
       }
       const data = await response.json();
-      if (data.success && Array.isArray(data.panels) && data.panels.length > 0) {
+      if (
+        data.success &&
+        Array.isArray(data.panels) &&
+        data.panels.length > 0
+      ) {
         // If the backend fell back to local CV, warn the user
         if (data.fallback) {
           addNotification(
@@ -75,15 +86,21 @@ export function usePanelDetection({
           );
           if (setConsoleLogs) {
             setConsoleLogs((prev) => [
-              `[AI Smart Crop Fallback] ${data.message || "Fell back to local CV detection."}`,
+              `[AI Smart Crop Fallback] ${
+                data.message || "Fell back to local CV detection."
+              }`,
               ...prev,
             ]);
           }
         }
 
-        const hasCroppedUrls = data.panels.every((p: DetectedPanel) => p.croppedUrl);
+        const hasCroppedUrls = data.panels.every(
+          (p: DetectedPanel) => p.croppedUrl
+        );
         if (hasCroppedUrls) {
-          const croppedUrls = data.panels.map((p: DetectedPanel) => p.croppedUrl);
+          const croppedUrls = data.panels.map(
+            (p: DetectedPanel) => p.croppedUrl
+          );
 
           if (setConsoleLogs) {
             setConsoleLogs((prev) => [
@@ -107,14 +124,16 @@ export function usePanelDetection({
           return;
         }
 
-        const newSlices = data.panels.map((box: DetectedPanel, index: number) => ({
-          id: `ai-${index}-${Date.now()}`,
-          cropTop: box.cropTop,
-          cropBottom: box.cropBottom,
-          cropLeft: box.cropLeft,
-          cropRight: box.cropRight,
-          autoTrim: editAutoTrim,
-        }));
+        const newSlices = data.panels.map(
+          (box: DetectedPanel, index: number) => ({
+            id: `ai-${index}-${Date.now()}`,
+            cropTop: box.cropTop,
+            cropBottom: box.cropBottom,
+            cropLeft: box.cropLeft,
+            cropRight: box.cropRight,
+            autoTrim: editAutoTrim,
+          })
+        );
 
         setSlices((prev) => [...prev, ...newSlices]);
 
@@ -132,7 +151,8 @@ export function usePanelDetection({
       } else {
         if (data.fallback) {
           addNotification(
-            data.message || "AI failed to detect panels, and fallback found no panels.",
+            data.message ||
+              "AI failed to detect panels, and fallback found no panels.",
             "warning"
           );
         } else {
@@ -169,7 +189,12 @@ export function usePanelDetection({
   }) => {
     if (editingImageIdx === null) return;
     const currentUrl = scrapedImages[editingImageIdx];
-    console.log(`[Panel Detection] Requesting detection for image #${editingImageIdx + 1}`, settings);
+    console.log(
+      `[Panel Detection] Requesting detection for image #${
+        editingImageIdx + 1
+      }`,
+      settings
+    );
     setIsDetecting(true);
     try {
       const response = await activeFetch("/api/detect-panels", {
@@ -187,7 +212,7 @@ export function usePanelDetection({
           cannyLow: settings?.cannyLow ?? 20,
           cannyHigh: settings?.cannyHigh ?? 100,
           closeKernelSize: settings?.closeKernelSize ?? 15,
-          minHeightPx: settings?.minHeightPx ?? 60
+          minHeightPx: settings?.minHeightPx ?? 60,
         }),
       });
       if (!response.ok) {
@@ -209,7 +234,9 @@ export function usePanelDetection({
           );
           if (setConsoleLogs) {
             setConsoleLogs((prev) => [
-              `[Panel Detection Fallback] ${data.message || "Fell back to local CV detection."}`,
+              `[Panel Detection Fallback] ${
+                data.message || "Fell back to local CV detection."
+              }`,
               ...prev,
             ]);
           }
@@ -227,14 +254,16 @@ export function usePanelDetection({
             `Successfully sliced ${data.panels.length} panel cuts!`,
             "success"
           );
-          const initialSlices = data.panels.map((box: DetectedPanel, index: number) => ({
-            id: `detected-${index}-${Date.now()}`,
-            cropTop: box.cropTop,
-            cropBottom: box.cropBottom,
-            cropLeft: box.cropLeft,
-            cropRight: box.cropRight,
-            autoTrim: editAutoTrim,
-          }));
+          const initialSlices = data.panels.map(
+            (box: DetectedPanel, index: number) => ({
+              id: `detected-${index}-${Date.now()}`,
+              cropTop: box.cropTop,
+              cropBottom: box.cropBottom,
+              cropLeft: box.cropLeft,
+              cropRight: box.cropRight,
+              autoTrim: editAutoTrim,
+            })
+          );
           setSlices(initialSlices);
 
           const first = initialSlices[0];

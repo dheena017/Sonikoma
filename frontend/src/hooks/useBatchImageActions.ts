@@ -36,14 +36,18 @@ interface UseBatchImageActionsProps {
   isCleaningBubbles: boolean;
   setIsCleaningBubbles: React.Dispatch<React.SetStateAction<boolean>>;
   cleanProgress: { current: number; total: number } | null;
-  setCleanProgress: React.Dispatch<React.SetStateAction<{ current: number; total: number } | null>>;
+  setCleanProgress: React.Dispatch<
+    React.SetStateAction<{ current: number; total: number } | null>
+  >;
   bubbleCroppingImgUrl: string | null;
   setBubbleCroppingImgUrl: React.Dispatch<React.SetStateAction<string | null>>;
 
   isBatchCropping: boolean;
   setIsBatchCropping: React.Dispatch<React.SetStateAction<boolean>>;
   batchProgress: { current: number; total: number } | null;
-  setBatchProgress: React.Dispatch<React.SetStateAction<{ current: number; total: number } | null>>;
+  setBatchProgress: React.Dispatch<
+    React.SetStateAction<{ current: number; total: number } | null>
+  >;
   croppingImgUrl: string | null;
   setCroppingImgUrl: React.Dispatch<React.SetStateAction<string | null>>;
 }
@@ -91,14 +95,17 @@ export function useBatchImageActions({
   croppingImgUrl,
   setCroppingImgUrl,
 }: UseBatchImageActionsProps) {
-
   const handleCleanBubblesSelected = async () => {
-    const targetImages = selectedScraped.length > 0 ? selectedScraped : scrapedImages;
+    const targetImages =
+      selectedScraped.length > 0 ? selectedScraped : scrapedImages;
     if (targetImages.length === 0) {
       addNotification("No images available for bubble cleaning.", "warning");
       return;
     }
-    console.log(`[Speech Bubbles] Starting batch clean on ${targetImages.length} images`, targetImages);
+    console.log(
+      `[Speech Bubbles] Starting batch clean on ${targetImages.length} images`,
+      targetImages
+    );
     setIsCleaningBubbles(true);
     setCleanProgress({ current: 0, total: targetImages.length });
     setConsoleLogs((prev) => [
@@ -113,39 +120,58 @@ export function useBatchImageActions({
       for (const url of targetImages) {
         setBubbleCroppingImgUrl(url);
         try {
-          const response = await fetchWithInterceptor("/api/remove-speech-bubbles", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              url: url,
-              method: bubbleEraseMethod,
-              sensitivity: bubbleSensitivity,
-              detection_style: bubbleDetectionStyle,
-              dilation: bubbleDilation,
-              inpaint_radius: bubbleInpaintRadius,
-            }),
-          });
+          const response = await fetchWithInterceptor(
+            "/api/remove-speech-bubbles",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                url: url,
+                method: bubbleEraseMethod,
+                sensitivity: bubbleSensitivity,
+                detection_style: bubbleDetectionStyle,
+                dilation: bubbleDilation,
+                inpaint_radius: bubbleInpaintRadius,
+              }),
+            }
+          );
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           const data = await response.json();
 
           if (data.success && data.url) {
-            setScrapedImages((prev) => prev.map((img) => (img === url ? data.url : img)));
-            setSelectedScraped((prev) => prev.map((img) => (img === url ? data.url : img)));
-            setPanels((prev) => prev.map((p) => (p.image_url === url ? { ...p, image_url: data.url } : p)));
+            setScrapedImages((prev) =>
+              prev.map((img) => (img === url ? data.url : img))
+            );
+            setSelectedScraped((prev) =>
+              prev.map((img) => (img === url ? data.url : img))
+            );
+            setPanels((prev) =>
+              prev.map((p) =>
+                p.image_url === url ? { ...p, image_url: data.url } : p
+              )
+            );
           } else {
-            const errMsg = data.message || "Failed to clean speech bubbles on this image.";
+            const errMsg =
+              data.message || "Failed to clean speech bubbles on this image.";
             throw new Error(errMsg);
           }
         } catch (err: any) {
           console.error(`[Speech Bubbles] Error cleaning image ${url}:`, err);
-          errors.push(`Image: ${url.substring(0, 40)}... - Error: ${err.message}`);
+          errors.push(
+            `Image: ${url.substring(0, 40)}... - Error: ${err.message}`
+          );
         } finally {
           completedCount++;
-          setCleanProgress({ current: completedCount, total: targetImages.length });
+          setCleanProgress({
+            current: completedCount,
+            total: targetImages.length,
+          });
         }
       }
     } catch (outerErr: any) {
-      errors.push(`Critical error in batch bubble cleaning: ${outerErr.message}`);
+      errors.push(
+        `Critical error in batch bubble cleaning: ${outerErr.message}`
+      );
     } finally {
       setIsCleaningBubbles(false);
       setCleanProgress(null);
@@ -153,13 +179,21 @@ export function useBatchImageActions({
     }
 
     if (errors.length > 0) {
-      addNotification(`Batch cleaning speech bubbles completed with ${errors.length} errors.`, "error");
+      addNotification(
+        `Batch cleaning speech bubbles completed with ${errors.length} errors.`,
+        "error"
+      );
       setConsoleLogs((prev) => [
-        `[Speech Bubbles] Batch cleaning finished with errors:\n${errors.join("\n")}`,
+        `[Speech Bubbles] Batch cleaning finished with errors:\n${errors.join(
+          "\n"
+        )}`,
         ...prev,
       ]);
     } else {
-      addNotification(`Successfully cleaned speech bubbles for ${targetImages.length} images!`, "success");
+      addNotification(
+        `Successfully cleaned speech bubbles for ${targetImages.length} images!`,
+        "success"
+      );
       setConsoleLogs((prev) => [
         `[Speech Bubbles] ✓ Batch clean speech bubbles job completed successfully!`,
         ...prev,
@@ -169,12 +203,16 @@ export function useBatchImageActions({
   };
 
   const handleAutoCropSelected = async () => {
-    const targetImages = selectedScraped.length > 0 ? selectedScraped : scrapedImages;
+    const targetImages =
+      selectedScraped.length > 0 ? selectedScraped : scrapedImages;
     if (targetImages.length === 0) {
       addNotification("No images available for auto cropping.", "warning");
       return;
     }
-    console.log(`[Auto Cropper] Starting batch auto-crop on ${targetImages.length} images`, targetImages);
+    console.log(
+      `[Auto Cropper] Starting batch auto-crop on ${targetImages.length} images`,
+      targetImages
+    );
     setIsBatchCropping(true);
     setBatchProgress({ current: 0, total: targetImages.length });
     setConsoleLogs((prev) => [
@@ -222,7 +260,10 @@ export function useBatchImageActions({
           const data = await response.json();
           if (data.fallback) {
             setConsoleLogs((prev) => [
-              `[Auto Cropper Fallback] AI detection failed on ${url.substring(0, 40)}..., fell back to local CV: ${data.message}`,
+              `[Auto Cropper Fallback] AI detection failed on ${url.substring(
+                0,
+                40
+              )}..., fell back to local CV: ${data.message}`,
               ...prev,
             ]);
           }
@@ -236,20 +277,24 @@ export function useBatchImageActions({
                 if (box.croppedUrl) {
                   croppedUrls.push(box.croppedUrl);
                 } else {
-                  const cropResponse = await fetchWithInterceptor("/api/edit-image", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      url: url,
-                      cropTop: box.cropTop,
-                      cropBottom: box.cropBottom,
-                      cropLeft: box.cropLeft,
-                      cropRight: box.cropRight,
-                      autoTrim: true,
-                      padding: cropPaddingPx,
-                    }),
-                  });
-                  if (!cropResponse.ok) throw new Error(`Edit-image HTTP ${cropResponse.status}`);
+                  const cropResponse = await fetchWithInterceptor(
+                    "/api/edit-image",
+                    {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        url: url,
+                        cropTop: box.cropTop,
+                        cropBottom: box.cropBottom,
+                        cropLeft: box.cropLeft,
+                        cropRight: box.cropRight,
+                        autoTrim: true,
+                        padding: cropPaddingPx,
+                      }),
+                    }
+                  );
+                  if (!cropResponse.ok)
+                    throw new Error(`Edit-image HTTP ${cropResponse.status}`);
                   const cropData = await cropResponse.json();
                   croppedUrls.push(cropData.url);
                 }
@@ -258,21 +303,31 @@ export function useBatchImageActions({
             } else {
               newSlicedUrlsMap[url] = [url];
               setConsoleLogs((prev) => [
-                `[Auto Cropper Warning] No panels detected for ${url.substring(0, 40)}... - keeping original image as a single panel.`,
+                `[Auto Cropper Warning] No panels detected for ${url.substring(
+                  0,
+                  40
+                )}... - keeping original image as a single panel.`,
                 ...prev,
               ]);
             }
           } else {
-            const errMsg = data.message || "No panels detected or backend service unavailable.";
+            const errMsg =
+              data.message ||
+              "No panels detected or backend service unavailable.";
             throw new Error(errMsg);
           }
         } catch (err: any) {
           console.error(`[Auto Cropper] Error cropping image ${url}:`, err);
-          errors.push(`Image: ${url.substring(0, 40)}... - Error: ${err.message}`);
+          errors.push(
+            `Image: ${url.substring(0, 40)}... - Error: ${err.message}`
+          );
           newSlicedUrlsMap[url] = [url];
         } finally {
           completedCount++;
-          setBatchProgress({ current: completedCount, total: targetImages.length });
+          setBatchProgress({
+            current: completedCount,
+            total: targetImages.length,
+          });
         }
       }
     } catch (outerErr: any) {
@@ -296,9 +351,14 @@ export function useBatchImageActions({
     });
 
     if (errors.length > 0) {
-      addNotification(`Batch auto crop completed with ${errors.length} errors.`, "error");
+      addNotification(
+        `Batch auto crop completed with ${errors.length} errors.`,
+        "error"
+      );
       setConsoleLogs((prev) => [
-        `[Auto Cropper] Batch auto crop finished with errors:\n${errors.join("\n")}`,
+        `[Auto Cropper] Batch auto crop finished with errors:\n${errors.join(
+          "\n"
+        )}`,
         ...prev,
       ]);
     } else {

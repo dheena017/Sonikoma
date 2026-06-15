@@ -44,9 +44,7 @@ export async function detectHorizontalGutters(
             const b = imgData[idx + 2];
 
             const dist = Math.sqrt(
-              (r - bgR) ** 2 +
-              (g - bgG) ** 2 +
-              (b - bgB) ** 2
+              (r - bgR) ** 2 + (g - bgG) ** 2 + (b - bgB) ** 2
             );
 
             if (dist > tolerance) {
@@ -73,7 +71,9 @@ export async function detectHorizontalGutters(
               const endRow = y - 1;
               if (endRow - startRow >= minGutterHeight) {
                 const center = (startRow + endRow) / 2;
-                const pct = parseFloat(((center / scanHeight) * 100).toFixed(1));
+                const pct = parseFloat(
+                  ((center / scanHeight) * 100).toFixed(1)
+                );
                 if (pct >= 5 && pct <= 95) {
                   gutters.push(pct);
                 }
@@ -82,7 +82,7 @@ export async function detectHorizontalGutters(
           }
         }
 
-        if (inGutter && (scanHeight - 1 - startRow >= minGutterHeight)) {
+        if (inGutter && scanHeight - 1 - startRow >= minGutterHeight) {
           const center = (startRow + scanHeight - 1) / 2;
           const pct = parseFloat(((center / scanHeight) * 100).toFixed(1));
           if (pct >= 5 && pct <= 95) {
@@ -92,7 +92,10 @@ export async function detectHorizontalGutters(
 
         resolve({ gutters, naturalWidth, naturalHeight });
       } catch (err) {
-        console.warn("Gutter detection failed (Canvas CORS or loading issue):", err);
+        console.warn(
+          "Gutter detection failed (Canvas CORS or loading issue):",
+          err
+        );
         resolve({ gutters: [], naturalWidth, naturalHeight });
       }
     };

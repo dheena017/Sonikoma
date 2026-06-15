@@ -13,7 +13,7 @@ import {
   CircleAlert,
   AlertCircle,
   CheckCircle,
-  Info
+  Info,
 } from "lucide-react";
 import { Notification } from "./NotificationStack";
 import { formatDistanceToNow } from "date-fns";
@@ -33,22 +33,26 @@ export default function NotificationsPage({
   onMarkAsRead,
   onMarkAllAsRead,
   onDelete,
-  onClearAll
+  onClearAll,
 }: NotificationsPageProps) {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [filter, setFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredNotifications = notifications.filter(n => {
-    const matchesSearch = n.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (n.details?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
-    const matchesFilter = filter === "all" || n.type === filter || (filter === "unread" && !n.isRead);
+  const filteredNotifications = notifications.filter((n) => {
+    const matchesSearch =
+      n.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (n.details?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+    const matchesFilter =
+      filter === "all" ||
+      n.type === filter ||
+      (filter === "unread" && !n.isRead);
     return matchesSearch && matchesFilter;
   });
 
   const toggleExpand = (id: number) => {
     setExpandedId(expandedId === id ? null : id);
-    if (!notifications.find(n => n.id === id)?.isRead) {
+    if (!notifications.find((n) => n.id === id)?.isRead) {
       onMarkAsRead(id);
     }
   };
@@ -69,13 +73,15 @@ export default function NotificationsPage({
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
                   Notification Hub
-                  {notifications.filter(n => !n.isRead).length > 0 && (
+                  {notifications.filter((n) => !n.isRead).length > 0 && (
                     <span className="bg-purple-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
-                      {notifications.filter(n => !n.isRead).length} UNREAD
+                      {notifications.filter((n) => !n.isRead).length} UNREAD
                     </span>
                   )}
                 </h1>
-                <p className="text-xs text-neutral-500 font-mono mt-0.5">Track system activity, AI processing updates, and error logs</p>
+                <p className="text-xs text-neutral-500 font-mono mt-0.5">
+                  Track system activity, AI processing updates, and error logs
+                </p>
               </div>
             </div>
 
@@ -120,15 +126,15 @@ export default function NotificationsPage({
                 { id: "unread", label: "Unread" },
                 { id: "error", label: "Errors" },
                 { id: "warning", label: "Warnings" },
-                { id: "success", label: "Success" }
+                { id: "success", label: "Success" },
               ].map((f) => (
                 <button
                   key={f.id}
                   onClick={() => setFilter(f.id)}
                   className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap cursor-pointer border ${
                     filter === f.id
-                      ? 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-900/20'
-                      : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-800'
+                      ? "bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-900/20"
+                      : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-800"
                   }`}
                 >
                   {f.label}
@@ -147,13 +153,19 @@ export default function NotificationsPage({
               <div className="h-20 w-20 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center mb-6 text-neutral-700">
                 <Bell className="h-10 w-10 opacity-20" />
               </div>
-              <h3 className="text-xl font-bold text-neutral-300">No matching notifications</h3>
+              <h3 className="text-xl font-bold text-neutral-300">
+                No matching notifications
+              </h3>
               <p className="text-neutral-500 max-w-sm mt-2">
-                We couldn't find any notifications matching your current filters or search query.
+                We couldn't find any notifications matching your current filters
+                or search query.
               </p>
               {(searchQuery || filter !== "all") && (
                 <button
-                  onClick={() => {setSearchQuery(""); setFilter("all");}}
+                  onClick={() => {
+                    setSearchQuery("");
+                    setFilter("all");
+                  }}
                   className="mt-6 text-purple-400 font-bold text-sm hover:text-purple-300 underline underline-offset-4"
                 >
                   Clear all filters
@@ -167,8 +179,8 @@ export default function NotificationsPage({
                   key={note.id}
                   className={`group relative rounded-2xl border transition-all duration-300 overflow-hidden ${
                     !note.isRead
-                      ? 'bg-purple-950/10 border-purple-500/30 ring-1 ring-purple-500/20 shadow-[0_0_20px_rgba(168,85,247,0.05)]'
-                      : 'bg-neutral-900/40 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900/60'
+                      ? "bg-purple-950/10 border-purple-500/30 ring-1 ring-purple-500/20 shadow-[0_0_20px_rgba(168,85,247,0.05)]"
+                      : "bg-neutral-900/40 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900/60"
                   }`}
                 >
                   <div
@@ -181,7 +193,11 @@ export default function NotificationsPage({
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-3 mb-1.5">
-                          <span className={`text-[10px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 rounded-md border ${getTypeStyles(note.type)}`}>
+                          <span
+                            className={`text-[10px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 rounded-md border ${getTypeStyles(
+                              note.type
+                            )}`}
+                          >
                             {note.type}
                           </span>
                           {note.errorCode && (
@@ -191,10 +207,18 @@ export default function NotificationsPage({
                           )}
                           <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 font-mono">
                             <Clock className="h-3 w-3" />
-                            {formatDistanceToNow(note.timestamp, { addSuffix: true })}
+                            {formatDistanceToNow(note.timestamp, {
+                              addSuffix: true,
+                            })}
                           </div>
                         </div>
-                        <h4 className={`text-base leading-snug break-words transition-colors ${!note.isRead ? 'text-white font-bold' : 'text-neutral-300 font-medium group-hover:text-neutral-100'}`}>
+                        <h4
+                          className={`text-base leading-snug break-words transition-colors ${
+                            !note.isRead
+                              ? "text-white font-bold"
+                              : "text-neutral-300 font-medium group-hover:text-neutral-100"
+                          }`}
+                        >
                           {note.message}
                         </h4>
                       </div>
@@ -224,7 +248,11 @@ export default function NotificationsPage({
                         )}
                       </div>
                       <div className="text-neutral-600 group-hover:text-neutral-400 transition-colors">
-                        {expandedId === note.id ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                        {expandedId === note.id ? (
+                          <ChevronUp className="h-5 w-5" />
+                        ) : (
+                          <ChevronDown className="h-5 w-5" />
+                        )}
                       </div>
                     </div>
                   </div>
@@ -234,20 +262,43 @@ export default function NotificationsPage({
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="md:col-span-2 space-y-4">
                           <div>
-                            <h5 className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-2">Detailed Log Output</h5>
+                            <h5 className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-2">
+                              Detailed Log Output
+                            </h5>
                             <div className="p-4 rounded-xl bg-black border border-neutral-800 font-mono text-xs text-neutral-400 leading-relaxed overflow-x-auto whitespace-pre-wrap">
-                              {note.details || "No technical details provided for this event."}
+                              {note.details ||
+                                "No technical details provided for this event."}
                             </div>
                           </div>
                         </div>
                         <div className="space-y-4">
                           <div>
-                            <h5 className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-2">Event Meta</h5>
+                            <h5 className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-2">
+                              Event Meta
+                            </h5>
                             <div className="space-y-2">
-                              <MetaItem label="Notification ID" value={`#${note.id.toString().slice(-6)}`} />
-                              <MetaItem label="Precise Time" value={new Date(note.timestamp).toLocaleString()} />
-                              <MetaItem label="Source Pipeline" value="Main Application Flow" />
-                              <MetaItem label="Status" value={note.isRead ? "Resolved / Read" : "Pending / Unread"} />
+                              <MetaItem
+                                label="Notification ID"
+                                value={`#${note.id.toString().slice(-6)}`}
+                              />
+                              <MetaItem
+                                label="Precise Time"
+                                value={new Date(
+                                  note.timestamp
+                                ).toLocaleString()}
+                              />
+                              <MetaItem
+                                label="Source Pipeline"
+                                value="Main Application Flow"
+                              />
+                              <MetaItem
+                                label="Status"
+                                value={
+                                  note.isRead
+                                    ? "Resolved / Read"
+                                    : "Pending / Unread"
+                                }
+                              />
                             </div>
                           </div>
                         </div>
@@ -271,22 +322,42 @@ export default function NotificationsPage({
 function NotificationIcon({ type }: { type: string }) {
   switch (type) {
     case "error":
-      return <div className="h-10 w-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center"><CircleAlert className="h-5 w-5 text-rose-500" /></div>;
+      return (
+        <div className="h-10 w-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
+          <CircleAlert className="h-5 w-5 text-rose-500" />
+        </div>
+      );
     case "warning":
-      return <div className="h-10 w-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center"><AlertCircle className="h-5 w-5 text-amber-500" /></div>;
+      return (
+        <div className="h-10 w-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+          <AlertCircle className="h-5 w-5 text-amber-500" />
+        </div>
+      );
     case "success":
-      return <div className="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center"><CheckCircle className="h-5 w-5 text-emerald-500" /></div>;
+      return (
+        <div className="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+          <CheckCircle className="h-5 w-5 text-emerald-500" />
+        </div>
+      );
     default:
-      return <div className="h-10 w-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center"><Info className="h-5 w-5 text-blue-500" /></div>;
+      return (
+        <div className="h-10 w-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+          <Info className="h-5 w-5 text-blue-500" />
+        </div>
+      );
   }
 }
 
 function getTypeStyles(type: string) {
   switch (type) {
-    case "error": return "text-rose-500 bg-rose-500/5 border-rose-500/20";
-    case "warning": return "text-amber-500 bg-amber-500/5 border-amber-500/20";
-    case "success": return "text-emerald-500 bg-emerald-500/5 border-emerald-500/20";
-    default: return "text-blue-500 bg-blue-500/5 border-blue-500/20";
+    case "error":
+      return "text-rose-500 bg-rose-500/5 border-rose-500/20";
+    case "warning":
+      return "text-amber-500 bg-amber-500/5 border-amber-500/20";
+    case "success":
+      return "text-emerald-500 bg-emerald-500/5 border-emerald-500/20";
+    default:
+      return "text-blue-500 bg-blue-500/5 border-blue-500/20";
   }
 }
 

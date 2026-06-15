@@ -34,7 +34,6 @@ export function ScraperSelectionToolbar({
   handleClearAll,
   setSelectedScraped,
 }: ScraperSelectionToolbarProps) {
-
   const selectEveryNth = (n: number) => {
     if (!setSelectedScraped) return;
     const selected = scrapedImages.filter((_, idx) => idx % n === 0);
@@ -45,8 +44,10 @@ export function ScraperSelectionToolbar({
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex items-center gap-1.5 px-2 py-1 bg-neutral-900 border border-neutral-800 rounded-lg">
-           <ListFilter className="h-3 w-3 text-neutral-500" />
-           <span className="text-[9px] font-bold text-neutral-400 uppercase font-mono">Selection Filter</span>
+          <ListFilter className="h-3 w-3 text-neutral-500" />
+          <span className="text-[9px] font-bold text-neutral-400 uppercase font-mono">
+            Selection Filter
+          </span>
         </div>
         <button
           onClick={handleSelectOdd}
@@ -90,7 +91,9 @@ export function ScraperSelectionToolbar({
 
       <div className="flex flex-wrap items-center gap-4 px-3 py-2 bg-neutral-900/30 border border-neutral-800/50 rounded-xl">
         <div className="flex items-center gap-2">
-          <span className="text-[9px] font-mono text-neutral-500 uppercase font-bold">Range:</span>
+          <span className="text-[9px] font-mono text-neutral-500 uppercase font-bold">
+            Range:
+          </span>
           <button
             onClick={() => handleSelectFirstN(5)}
             className="text-[9px] font-bold text-indigo-400 hover:text-indigo-300"
@@ -114,7 +117,9 @@ export function ScraperSelectionToolbar({
         <div className="h-3 w-[1px] bg-neutral-800" />
 
         <div className="flex items-center gap-2">
-          <span className="text-[9px] font-mono text-neutral-500 uppercase font-bold">Quick:</span>
+          <span className="text-[9px] font-mono text-neutral-500 uppercase font-bold">
+            Quick:
+          </span>
           <button
             onClick={() => handleSelectRange(1, 5)}
             className="text-[9px] font-bold text-emerald-400 hover:text-emerald-300 underline underline-offset-2"

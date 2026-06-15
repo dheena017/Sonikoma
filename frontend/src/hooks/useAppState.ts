@@ -2,7 +2,10 @@ import { useState, useCallback, useEffect } from "react";
 import { GeneratedPanel } from "../types";
 import { AI_MODELS } from "../models";
 import { createFetchWithInterceptor } from "../api/fetchWithInterceptor";
-import { Notification, NotificationType } from "../components/NotificationStack";
+import {
+  Notification,
+  NotificationType,
+} from "../components/NotificationStack";
 import { ErrorPopupDetail } from "../components/ErrorPopupModal";
 
 export function useAppState() {
@@ -15,7 +18,9 @@ export function useAppState() {
   const [consoleLogs, setConsoleLogs] = useState<string[]>([]);
   const [scrapedImages, setScrapedImages] = useState<string[]>([]);
   const [selectedScraped, setSelectedScraped] = useState<string[]>([]);
-  const [activePreviewTab, setActivePreviewTab] = useState<"video" | "storyboard">("video");
+  const [activePreviewTab, setActivePreviewTab] = useState<
+    "video" | "storyboard"
+  >("video");
 
   // Image editing/cropping states
   const [editingImageIdx, setEditingImageIdx] = useState<number | null>(null);
@@ -24,19 +29,30 @@ export function useAppState() {
   const [editCropLeft, setEditCropLeft] = useState<number>(0);
   const [editCropRight, setEditCropRight] = useState<number>(0);
   const [editAutoTrim, setEditAutoTrim] = useState<boolean>(true);
-  const [imageEditStates, setImageEditStates] = useState<Record<string, any>>({});
+  const [imageEditStates, setImageEditStates] = useState<Record<string, any>>(
+    {}
+  );
 
   // Bubble cleaner states
   const [showBubbleModal, setShowBubbleModal] = useState<boolean>(false);
-  const [bubbleDetectionStyle, setBubbleDetectionStyle] = useState<"all" | "white_only" | "text_only">("all");
-  const [bubbleEraseMethod, setBubbleEraseMethod] = useState<"auto" | "inpaint" | "blur" | "solid_white" | "solid_black">("auto");
+  const [bubbleDetectionStyle, setBubbleDetectionStyle] = useState<
+    "all" | "white_only" | "text_only"
+  >("all");
+  const [bubbleEraseMethod, setBubbleEraseMethod] = useState<
+    "auto" | "inpaint" | "blur" | "solid_white" | "solid_black"
+  >("auto");
   const [bubbleSensitivity, setBubbleSensitivity] = useState<number>(50);
   const [bubbleDilation, setBubbleDilation] = useState<number>(-1);
   const [bubbleInpaintRadius, setBubbleInpaintRadius] = useState<number>(3);
   const [activeBubbleTab, setActiveBubbleTab] = useState<string>("general");
   const [isCleaningBubbles, setIsCleaningBubbles] = useState<boolean>(false);
-  const [cleanProgress, setCleanProgress] = useState<{ current: number; total: number } | null>(null);
-  const [bubbleCroppingImgUrl, setBubbleCroppingImgUrl] = useState<string | null>(null);
+  const [cleanProgress, setCleanProgress] = useState<{
+    current: number;
+    total: number;
+  } | null>(null);
+  const [bubbleCroppingImgUrl, setBubbleCroppingImgUrl] = useState<
+    string | null
+  >(null);
 
   // Auto crop states
   const [showAutoCropModal, setShowAutoCropModal] = useState<boolean>(false);
@@ -44,13 +60,18 @@ export function useAppState() {
   const [cropPaddingPx, setCropPaddingPx] = useState<number>(10);
   const [cropBackgroundMode, setCropBackgroundMode] = useState<string>("auto");
   const [autoSplitTallStrips, setAutoSplitTallStrips] = useState<boolean>(true);
-  const [processingStrategy, setProcessingStrategy] = useState<string>("balanced");
+  const [processingStrategy, setProcessingStrategy] =
+    useState<string>("balanced");
   const [aspectRatioLock, setAspectRatioLock] = useState<string>("free");
   const [minPanelAreaPct, setMinPanelAreaPct] = useState<number>(2);
-  const [overlapMergeThreshold, setOverlapMergeThreshold] = useState<number>(20);
+  const [overlapMergeThreshold, setOverlapMergeThreshold] =
+    useState<number>(20);
   const [useLocalCV, setUseLocalCV] = useState<boolean>(true);
   const [isBatchCropping, setIsBatchCropping] = useState<boolean>(false);
-  const [batchProgress, setBatchProgress] = useState<{ current: number; total: number } | null>(null);
+  const [batchProgress, setBatchProgress] = useState<{
+    current: number;
+    total: number;
+  } | null>(null);
   const [croppingImgUrl, setCroppingImgUrl] = useState<string | null>(null);
   const [cropModel, setCropModel] = useState<string>("gemini-2.5-flash");
   const [cropMinHeightPx, setCropMinHeightPx] = useState<number>(60);
@@ -62,7 +83,7 @@ export function useAppState() {
   // Notifications
   const [notifications, setNotifications] = useState<Notification[]>(() => {
     try {
-      const saved = localStorage.getItem('ai_comic_notifications');
+      const saved = localStorage.getItem("ai_comic_notifications");
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -71,49 +92,83 @@ export function useAppState() {
   const [errorPopup, setErrorPopup] = useState<ErrorPopupDetail | null>(null);
 
   // Settings — all useState MUST come before any useCallback/useEffect
-  const [targetUrl, setTargetUrl] = useState<string>(() => localStorage.getItem('ai_comic_url') || "");
-  const [voiceActor, setVoiceActor] = useState<string>(() => localStorage.getItem('ai_comic_voice') || "Standard Comic Narrator (Male)");
-  const [musicTheme, setMusicTheme] = useState<string>(() => localStorage.getItem('ai_comic_music') || "Orchestral Battle Theme");
-  const [aspectRatio, setAspectRatio] = useState<"9:16" | "16:9">(() => (localStorage.getItem('ai_comic_aspectRatio') as "9:16" | "16:9") || "9:16");
-  const [selectedModel, setSelectedModel] = useState<string>(() => localStorage.getItem('ai_comic_model') || AI_MODELS[0].id);
-  const [selectedSource, setSelectedSource] = useState<string>(() => localStorage.getItem('ai_comic_source') || "webtoons");
-  const [frameRate, setFrameRate] = useState<number>(() => parseInt(localStorage.getItem('ai_comic_fps') || '24'));
-  const [volume, setVolume] = useState<number>(() => parseInt(localStorage.getItem('ai_comic_volume') || '80'));
-  const [isMuted, setIsMuted] = useState<boolean>(() => localStorage.getItem('ai_comic_muted') === 'true');
+  const [targetUrl, setTargetUrl] = useState<string>(
+    () => localStorage.getItem("ai_comic_url") || ""
+  );
+  const [voiceActor, setVoiceActor] = useState<string>(
+    () =>
+      localStorage.getItem("ai_comic_voice") || "Standard Comic Narrator (Male)"
+  );
+  const [musicTheme, setMusicTheme] = useState<string>(
+    () => localStorage.getItem("ai_comic_music") || "Orchestral Battle Theme"
+  );
+  const [aspectRatio, setAspectRatio] = useState<"9:16" | "16:9">(
+    () =>
+      (localStorage.getItem("ai_comic_aspectRatio") as "9:16" | "16:9") ||
+      "9:16"
+  );
+  const [selectedModel, setSelectedModel] = useState<string>(
+    () => localStorage.getItem("ai_comic_model") || AI_MODELS[0].id
+  );
+  const [selectedSource, setSelectedSource] = useState<string>(
+    () => localStorage.getItem("ai_comic_source") || "webtoons"
+  );
+  const [frameRate, setFrameRate] = useState<number>(() =>
+    parseInt(localStorage.getItem("ai_comic_fps") || "24")
+  );
+  const [volume, setVolume] = useState<number>(() =>
+    parseInt(localStorage.getItem("ai_comic_volume") || "80")
+  );
+  const [isMuted, setIsMuted] = useState<boolean>(
+    () => localStorage.getItem("ai_comic_muted") === "true"
+  );
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [isSavingEdit, setIsSavingEdit] = useState<boolean>(false);
   const [isScraping, setIsScraping] = useState<boolean>(false);
-  const [narrationStyle, setNarrationStyle] = useState<string>(() => localStorage.getItem('ai_comic_narration_style') || "long");
+  const [narrationStyle, setNarrationStyle] = useState<string>(
+    () => localStorage.getItem("ai_comic_narration_style") || "long"
+  );
 
   // ── Callbacks & effects AFTER all useState declarations ──────────────────
 
   const removeNotification = useCallback((id: number) => {
-    setNotifications((prev) => prev.map(n => n.id === id ? { ...n, toastDismissed: true } : n));
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, toastDismissed: true } : n))
+    );
   }, []);
 
-  const addNotification = useCallback((
-    message: string,
-    type: NotificationType,
-    options?: { errorCode?: number; retryDelay?: number; onRetry?: () => void; details?: string; link?: string }
-  ) => {
-    const id = Date.now() + Math.random();
-    const newNote: Notification = {
-      id,
-      message,
-      type,
-      timestamp: Date.now(),
-      isRead: false,
-      ...options
-    };
+  const addNotification = useCallback(
+    (
+      message: string,
+      type: NotificationType,
+      options?: {
+        errorCode?: number;
+        retryDelay?: number;
+        onRetry?: () => void;
+        details?: string;
+        link?: string;
+      }
+    ) => {
+      const id = Date.now() + Math.random();
+      const newNote: Notification = {
+        id,
+        message,
+        type,
+        timestamp: Date.now(),
+        isRead: false,
+        ...options,
+      };
 
-    setNotifications((prev) => [newNote, ...prev]);
+      setNotifications((prev) => [newNote, ...prev]);
 
-    if (!options?.onRetry) {
-      setTimeout(() => {
-        removeNotification(id);
-      }, 5000);
-    }
-  }, [removeNotification]);
+      if (!options?.onRetry) {
+        setTimeout(() => {
+          removeNotification(id);
+        }, 5000);
+      }
+    },
+    [removeNotification]
+  );
 
   const fetchWithInterceptor = useCallback(
     createFetchWithInterceptor({ addNotification, setErrorPopup }),
@@ -121,39 +176,45 @@ export function useAppState() {
   );
 
   // --- Auth Actions ---
-  const login = useCallback(async (credentials: any) => {
-    const res = await fetchWithInterceptor("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(credentials),
-    });
-    const data = await res.json();
-    if (data.access_token) {
-      localStorage.setItem("anivox_token", data.access_token);
-      setUser(data.user);
-      setIsAuthenticated(true);
-      addNotification("Logged in successfully!", "success");
-    } else {
-      throw new Error(data.detail || "Login failed");
-    }
-  }, [addNotification, fetchWithInterceptor]);
+  const login = useCallback(
+    async (credentials: any) => {
+      const res = await fetchWithInterceptor("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(credentials),
+      });
+      const data = await res.json();
+      if (data.access_token) {
+        localStorage.setItem("anivox_token", data.access_token);
+        setUser(data.user);
+        setIsAuthenticated(true);
+        addNotification("Logged in successfully!", "success");
+      } else {
+        throw new Error(data.detail || "Login failed");
+      }
+    },
+    [addNotification, fetchWithInterceptor]
+  );
 
-  const register = useCallback(async (userData: any) => {
-    const res = await fetchWithInterceptor("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(userData),
-    });
-    const data = await res.json();
-    if (data.access_token) {
-      localStorage.setItem("anivox_token", data.access_token);
-      setUser(data.user);
-      setIsAuthenticated(true);
-      addNotification("Account created successfully!", "success");
-    } else {
-      throw new Error(data.detail || "Registration failed");
-    }
-  }, [addNotification, fetchWithInterceptor]);
+  const register = useCallback(
+    async (userData: any) => {
+      const res = await fetchWithInterceptor("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(userData),
+      });
+      const data = await res.json();
+      if (data.access_token) {
+        localStorage.setItem("anivox_token", data.access_token);
+        setUser(data.user);
+        setIsAuthenticated(true);
+        addNotification("Account created successfully!", "success");
+      } else {
+        throw new Error(data.detail || "Registration failed");
+      }
+    },
+    [addNotification, fetchWithInterceptor]
+  );
 
   const logout = useCallback(() => {
     localStorage.removeItem("anivox_token");
@@ -167,7 +228,7 @@ export function useAppState() {
     const token = localStorage.getItem("anivox_token");
 
     // Artificial delay to show the fancy loading screen
-    const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+    const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
     const start = Date.now();
 
     if (!token) {
@@ -179,7 +240,7 @@ export function useAppState() {
     }
     try {
       const res = await fetch("/api/auth/me", {
-        headers: { "Authorization": `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
         const data = await res.json();
@@ -198,53 +259,73 @@ export function useAppState() {
     }
   }, []);
 
-  const forgotPassword = useCallback(async (email: string) => {
-    const res = await fetchWithInterceptor("/api/auth/forgot-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
-    const data = await res.json();
-    return data;
-  }, [fetchWithInterceptor]);
+  const forgotPassword = useCallback(
+    async (email: string) => {
+      const res = await fetchWithInterceptor("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      return data;
+    },
+    [fetchWithInterceptor]
+  );
 
-  const googleLogin = useCallback(async (token: string) => {
-    const res = await fetchWithInterceptor("/api/auth/google", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token }),
-    });
-    const data = await res.json();
-    if (data.access_token) {
-      localStorage.setItem("anivox_token", data.access_token);
-      setUser(data.user);
-      setIsAuthenticated(true);
-      addNotification("Signed in with Google!", "success");
-    } else {
-      throw new Error(data.detail || "Google login failed");
-    }
-  }, [addNotification, fetchWithInterceptor]);
+  const googleLogin = useCallback(
+    async (token: string) => {
+      const res = await fetchWithInterceptor("/api/auth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+      const data = await res.json();
+      if (data.access_token) {
+        localStorage.setItem("anivox_token", data.access_token);
+        setUser(data.user);
+        setIsAuthenticated(true);
+        addNotification("Signed in with Google!", "success");
+      } else {
+        throw new Error(data.detail || "Google login failed");
+      }
+    },
+    [addNotification, fetchWithInterceptor]
+  );
 
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
 
   useEffect(() => {
-    localStorage.setItem('ai_comic_notifications', JSON.stringify(notifications));
+    localStorage.setItem(
+      "ai_comic_notifications",
+      JSON.stringify(notifications)
+    );
   }, [notifications]);
 
   useEffect(() => {
-    localStorage.setItem('ai_comic_url', targetUrl);
-    localStorage.setItem('ai_comic_voice', voiceActor);
-    localStorage.setItem('ai_comic_music', musicTheme);
-    localStorage.setItem('ai_comic_aspectRatio', aspectRatio);
-    localStorage.setItem('ai_comic_model', selectedModel);
-    localStorage.setItem('ai_comic_source', selectedSource);
-    localStorage.setItem('ai_comic_fps', frameRate.toString());
-    localStorage.setItem('ai_comic_volume', volume.toString());
-    localStorage.setItem('ai_comic_muted', isMuted.toString());
-    localStorage.setItem('ai_comic_narration_style', narrationStyle);
-  }, [targetUrl, voiceActor, musicTheme, aspectRatio, selectedModel, selectedSource, frameRate, volume, isMuted, narrationStyle]);
+    localStorage.setItem("ai_comic_url", targetUrl);
+    localStorage.setItem("ai_comic_voice", voiceActor);
+    localStorage.setItem("ai_comic_music", musicTheme);
+    localStorage.setItem("ai_comic_aspectRatio", aspectRatio);
+    localStorage.setItem("ai_comic_model", selectedModel);
+    localStorage.setItem("ai_comic_source", selectedSource);
+    localStorage.setItem("ai_comic_fps", frameRate.toString());
+    localStorage.setItem("ai_comic_volume", volume.toString());
+    localStorage.setItem("ai_comic_muted", isMuted.toString());
+    localStorage.setItem("ai_comic_narration_style", narrationStyle);
+  }, [
+    targetUrl,
+    voiceActor,
+    musicTheme,
+    aspectRatio,
+    selectedModel,
+    selectedSource,
+    frameRate,
+    volume,
+    isMuted,
+    narrationStyle,
+  ]);
 
   return {
     user,
@@ -376,13 +457,15 @@ export function useAppState() {
       setNotifications([]);
     },
     markAllNotificationsAsRead: () => {
-      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
     },
     markNotificationAsRead: (id: number) => {
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+      );
     },
     deleteNotification: (id: number) => {
-      setNotifications(prev => prev.filter(n => n.id !== id));
-    }
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+    },
   };
 }

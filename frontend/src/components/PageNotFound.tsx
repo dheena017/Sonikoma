@@ -14,7 +14,6 @@ export default function PageNotFound({ onNavigateHome }: PageNotFoundProps) {
 
       {/* Main glassmorphic card */}
       <div className="relative w-full max-w-xl bg-neutral-950/40 backdrop-blur-xl border border-neutral-800/80 rounded-2xl p-8 md:p-12 text-center shadow-2xl shadow-purple-950/10 overflow-hidden">
-        
         {/* Subtle grid pattern background */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px] pointer-events-none" />
 
@@ -36,9 +35,10 @@ export default function PageNotFound({ onNavigateHome }: PageNotFoundProps) {
         <h2 className="relative z-10 text-xl md:text-2xl font-bold text-white mb-3 tracking-tight">
           Page Not Found
         </h2>
-        
+
         <p className="relative z-10 text-sm text-neutral-400 max-w-md mx-auto mb-8 font-sans leading-relaxed">
-          The route you are trying to reach is not defined in this application. It may have been moved, renamed, or vanished into the digital ether.
+          The route you are trying to reach is not defined in this application.
+          It may have been moved, renamed, or vanished into the digital ether.
         </p>
 
         {/* Action Buttons */}
@@ -50,7 +50,7 @@ export default function PageNotFound({ onNavigateHome }: PageNotFoundProps) {
             <ArrowLeft className="h-4 w-4" />
             Return to Dashboard
           </button>
-          
+
           <button
             onClick={() => window.location.reload()}
             className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-xl border border-neutral-800 bg-neutral-900/40 text-neutral-300 font-medium hover:bg-neutral-900 hover:text-white hover:border-neutral-700 transition-all duration-300 cursor-pointer"
@@ -66,7 +66,6 @@ export default function PageNotFound({ onNavigateHome }: PageNotFoundProps) {
             {window.location.pathname}
           </span>
         </div>
-
       </div>
     </div>
   );

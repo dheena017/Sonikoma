@@ -1,5 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
-import { X, AlertCircle, CheckCircle, Info, RefreshCw, Play, CircleAlert } from "lucide-react";
+import {
+  X,
+  AlertCircle,
+  CheckCircle,
+  Info,
+  RefreshCw,
+  Play,
+  CircleAlert,
+} from "lucide-react";
 
 export type NotificationType = "error" | "success" | "info" | "warning";
 
@@ -22,10 +30,13 @@ interface NotificationStackProps {
   removeNotification: (id: number) => void;
 }
 
-export default function NotificationStack({ notifications, removeNotification }: NotificationStackProps) {
+export default function NotificationStack({
+  notifications,
+  removeNotification,
+}: NotificationStackProps) {
   // Only show notifications that haven't been dismissed from toast stack
   // and were created recently (within last 10 seconds) OR are errors/warnings that haven't been dismissed
-  const activeToasts = notifications.filter(n => !n.toastDismissed);
+  const activeToasts = notifications.filter((n) => !n.toastDismissed);
 
   return (
     <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none w-full max-w-sm sm:max-w-md">
@@ -40,7 +51,14 @@ export default function NotificationStack({ notifications, removeNotification }:
   );
 }
 
-function IndividualNotification({ note, onRemove }: { note: Notification; onRemove: (id: number) => void; key?: React.Key }) {
+function IndividualNotification({
+  note,
+  onRemove,
+}: {
+  note: Notification;
+  onRemove: (id: number) => void;
+  key?: React.Key;
+}) {
   const [countdown, setCountdown] = useState<number | null>(() => {
     if (note.errorCode === 429 && note.onRetry) {
       return note.retryDelay || 10;
@@ -96,11 +114,18 @@ function IndividualNotification({ note, onRemove }: { note: Notification; onRemo
 
   if (note.errorCode === 429) {
     title = "Quota Exhausted (429)";
-    classes = "bg-amber-950/95 border-amber-500/85 text-amber-100 shadow-amber-950/40 shadow-xl border-2";
-    icon = <RefreshCw className="h-5 w-5 text-amber-400 shrink-0 animate-spin" style={{ animationDuration: "3s" }} />;
+    classes =
+      "bg-amber-950/95 border-amber-500/85 text-amber-100 shadow-amber-950/40 shadow-xl border-2";
+    icon = (
+      <RefreshCw
+        className="h-5 w-5 text-amber-400 shrink-0 animate-spin"
+        style={{ animationDuration: "3s" }}
+      />
+    );
   } else if (note.errorCode === 500) {
     title = "Pipeline Failure (500)";
-    classes = "bg-red-950/95 border-red-500 text-red-100 shadow-red-950/50 shadow-xl border-2";
+    classes =
+      "bg-red-950/95 border-red-500 text-red-100 shadow-red-950/50 shadow-xl border-2";
     icon = <AlertCircle className="h-5 w-5 text-red-400 shrink-0" />;
   } else if (note.type === "error") {
     title = "Operation Error";
@@ -151,7 +176,10 @@ function IndividualNotification({ note, onRemove }: { note: Notification; onRemo
               <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
             </span>
             <span className="text-xs font-mono font-medium text-amber-200 text-[11px]">
-              Auto-retry in <span className="font-bold text-sm bg-amber-900/60 px-1.5 py-0.5 rounded border border-amber-700/50 text-amber-100">{countdown}s</span>
+              Auto-retry in{" "}
+              <span className="font-bold text-sm bg-amber-900/60 px-1.5 py-0.5 rounded border border-amber-700/50 text-amber-100">
+                {countdown}s
+              </span>
             </span>
           </div>
           <div className="flex items-center gap-2 self-end sm:self-auto">

@@ -1,7 +1,12 @@
 // ─── Shared types for BubbleCleaner tab sub-components ───────────────────────
 
 export type DetectionStyle = "all" | "white_only" | "text_only";
-export type EraseMethod = "auto" | "inpaint" | "blur" | "solid_white" | "solid_black";
+export type EraseMethod =
+  | "auto"
+  | "inpaint"
+  | "blur"
+  | "solid_white"
+  | "solid_black";
 
 export interface CustomBubblePreset {
   name: string;

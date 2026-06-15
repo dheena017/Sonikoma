@@ -4,6 +4,7 @@ description: Generate a suspenseful end-of-video question/hook to drive next-epi
 model: gemini-2.5-flash
 response_schema: CliffhangerModel
 ---
+
 Create the ultimate cliffhanger script ending line to make viewers click on the next video recapping this manhwa.
 Story up to this point:
 {story_outline}

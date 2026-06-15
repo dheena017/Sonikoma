@@ -1,5 +1,16 @@
 import React from "react";
-import { Mic2, Music, Tv, Sliders, Palette, Save, Share2, Copy, Trash2, RotateCcw } from "lucide-react";
+import {
+  Mic2,
+  Music,
+  Tv,
+  Sliders,
+  Palette,
+  Save,
+  Share2,
+  Copy,
+  Trash2,
+  RotateCcw,
+} from "lucide-react";
 
 interface AdvancedSettingsProps {
   voiceActor: string;
@@ -15,7 +26,10 @@ interface AdvancedSettingsProps {
   targetUrl?: string;
   selectedModel?: string;
   selectedSource?: string;
-  addNotification?: (msg: string, type: "success" | "info" | "warning" | "error") => void;
+  addNotification?: (
+    msg: string,
+    type: "success" | "info" | "warning" | "error"
+  ) => void;
 }
 
 interface WorkspacePreset {
@@ -41,7 +55,7 @@ export default function AdvancedSettings({
   targetUrl = "",
   selectedModel = "",
   selectedSource = "",
-  addNotification
+  addNotification,
 }: AdvancedSettingsProps) {
   const [presetName, setPresetName] = React.useState("");
   const [presets, setPresets] = React.useState<WorkspacePreset[]>(() => {
@@ -60,7 +74,7 @@ export default function AdvancedSettings({
         musicTheme: "Orchestral Battle Theme",
         aspectRatio: "16:9",
         frameRate: 30,
-        activeTheme: "cyberpunk"
+        activeTheme: "cyberpunk",
       },
       {
         name: "B&W Manga Preset",
@@ -68,8 +82,8 @@ export default function AdvancedSettings({
         musicTheme: "Mysterious Ambience",
         aspectRatio: "9:16",
         frameRate: 24,
-        activeTheme: "obsidian"
-      }
+        activeTheme: "obsidian",
+      },
     ];
   });
 
@@ -83,20 +97,26 @@ export default function AdvancedSettings({
       musicTheme,
       aspectRatio,
       frameRate,
-      activeTheme
+      activeTheme,
     };
 
-    const updatedPresets = [...presets.filter(p => p.name !== newPreset.name), newPreset];
+    const updatedPresets = [
+      ...presets.filter((p) => p.name !== newPreset.name),
+      newPreset,
+    ];
     setPresets(updatedPresets);
     localStorage.setItem("ai_comic_presets", JSON.stringify(updatedPresets));
     setPresetName("");
     if (addNotification) {
-      addNotification(`Preset "${newPreset.name}" saved successfully!`, "success");
+      addNotification(
+        `Preset "${newPreset.name}" saved successfully!`,
+        "success"
+      );
     }
   };
 
   const handleLoadPreset = (name: string) => {
-    const preset = presets.find(p => p.name === name);
+    const preset = presets.find((p) => p.name === name);
     if (!preset) return;
 
     setVoiceActor(preset.voiceActor);
@@ -104,14 +124,14 @@ export default function AdvancedSettings({
     setAspectRatio(preset.aspectRatio);
     setFrameRate(preset.frameRate);
     setActiveTheme(preset.activeTheme);
-    
+
     if (addNotification) {
       addNotification(`Loaded preset "${name}"`, "info");
     }
   };
 
   const handleDeletePreset = (name: string) => {
-    const updated = presets.filter(p => p.name !== name);
+    const updated = presets.filter((p) => p.name !== name);
     setPresets(updated);
     localStorage.setItem("ai_comic_presets", JSON.stringify(updated));
     if (addNotification) {
@@ -128,26 +148,35 @@ export default function AdvancedSettings({
         aspectRatio,
         fps: frameRate,
         model: selectedModel,
-        source: selectedSource
+        source: selectedSource,
       };
       const hash = btoa(JSON.stringify(stateObj));
       const shareUrl = `${window.location.origin}${window.location.pathname}?state=${hash}`;
-      navigator.clipboard.writeText(shareUrl).then(() => {
-        if (addNotification) {
-          addNotification("Workspace session link copied to clipboard!", "success");
-        }
-      }).catch(() => {
-        // Fallback
-        const textarea = document.createElement("textarea");
-        textarea.value = shareUrl;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textarea);
-        if (addNotification) {
-          addNotification("Workspace session link copied to clipboard! (fallback)", "success");
-        }
-      });
+      navigator.clipboard
+        .writeText(shareUrl)
+        .then(() => {
+          if (addNotification) {
+            addNotification(
+              "Workspace session link copied to clipboard!",
+              "success"
+            );
+          }
+        })
+        .catch(() => {
+          // Fallback
+          const textarea = document.createElement("textarea");
+          textarea.value = shareUrl;
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand("copy");
+          document.body.removeChild(textarea);
+          if (addNotification) {
+            addNotification(
+              "Workspace session link copied to clipboard! (fallback)",
+              "success"
+            );
+          }
+        });
     } catch (e) {
       console.error("Failed to generate share link:", e);
       if (addNotification) {
@@ -159,12 +188,19 @@ export default function AdvancedSettings({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* LEFT COLUMN: Compile Parameters */}
-      <div id="settings_panel_card" className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-4">
+      <div
+        id="settings_panel_card"
+        className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-4"
+      >
         <div className="flex items-center gap-2 border-b border-neutral-800 pb-3">
           <Sliders className="h-4 w-4 text-purple-400" />
           <div>
-            <h3 className="font-bold text-sm text-white font-sans">Advanced Render Compile Specifications</h3>
-            <p className="text-[10px] text-neutral-400 font-mono">Customize audio, aspect ratios, and visual output presets</p>
+            <h3 className="font-bold text-sm text-white font-sans">
+              Advanced Render Compile Specifications
+            </h3>
+            <p className="text-[10px] text-neutral-400 font-mono">
+              Customize audio, aspect ratios, and visual output presets
+            </p>
           </div>
         </div>
 
@@ -175,9 +211,9 @@ export default function AdvancedSettings({
               <Mic2 className="h-3.5 w-3.5 text-purple-400" />
               AI Voice Speaker Character
             </label>
-            <select 
+            <select
               id="voice_select"
-              value={voiceActor} 
+              value={voiceActor}
               onChange={(e) => setVoiceActor(e.target.value)}
               className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2 text-neutral-350 focus:border-purple-500 outline-none"
             >
@@ -194,9 +230,9 @@ export default function AdvancedSettings({
               <Music className="h-3.5 w-3.5 text-purple-400" />
               Thematic Soundtrack Loop
             </label>
-            <select 
+            <select
               id="bg_music_select"
-              value={musicTheme} 
+              value={musicTheme}
               onChange={(e) => setMusicTheme(e.target.value)}
               className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2 text-neutral-350 focus:border-purple-500 outline-none"
             >
@@ -218,8 +254,8 @@ export default function AdvancedSettings({
               <button
                 onClick={() => setAspectRatio("9:16")}
                 className={`py-1.5 px-3 text-xs rounded-xl border text-center transition-all cursor-pointer font-bold font-mono ${
-                  aspectRatio === "9:16" 
-                    ? "bg-purple-950/20 border-purple-500 text-purple-300 shadow-inner" 
+                  aspectRatio === "9:16"
+                    ? "bg-purple-950/20 border-purple-500 text-purple-300 shadow-inner"
                     : "bg-neutral-950 border-neutral-800 text-neutral-400 hover:text-white"
                 }`}
               >
@@ -228,8 +264,8 @@ export default function AdvancedSettings({
               <button
                 onClick={() => setAspectRatio("16:9")}
                 className={`py-1.5 px-3 text-xs rounded-xl border text-center transition-all cursor-pointer font-bold font-mono ${
-                  aspectRatio === "16:9" 
-                    ? "bg-purple-950/20 border-purple-500 text-purple-300 shadow-inner" 
+                  aspectRatio === "16:9"
+                    ? "bg-purple-950/20 border-purple-500 text-purple-300 shadow-inner"
                     : "bg-neutral-950 border-neutral-800 text-neutral-400 hover:text-white"
                 }`}
               >
@@ -245,16 +281,18 @@ export default function AdvancedSettings({
               Frame Rate (FPS)
             </label>
             <div className="flex items-center gap-3 bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-1.5">
-              <input 
-                type="range" 
-                min={12} 
-                max={60} 
+              <input
+                type="range"
+                min={12}
+                max={60}
                 step={6}
-                value={frameRate} 
+                value={frameRate}
                 onChange={(e) => setFrameRate(Number(e.target.value))}
                 className="w-full accent-purple-500 bg-neutral-800 cursor-pointer"
               />
-              <span className="text-xs font-mono text-[#dcdcdc] shrink-0 font-semibold">{frameRate} FPS</span>
+              <span className="text-xs font-mono text-[#dcdcdc] shrink-0 font-semibold">
+                {frameRate} FPS
+              </span>
             </div>
           </div>
         </div>
@@ -267,17 +305,25 @@ export default function AdvancedSettings({
           <div className="flex items-center gap-2 border-b border-neutral-800 pb-3">
             <Palette className="h-4 w-4 text-purple-400" />
             <div>
-              <h3 className="font-bold text-sm text-white font-sans">Custom visual UI Themes</h3>
-              <p className="text-[10px] text-neutral-400 font-mono">Instantly customize visual color schemes</p>
+              <h3 className="font-bold text-sm text-white font-sans">
+                Custom visual UI Themes
+              </h3>
+              <p className="text-[10px] text-neutral-400 font-mono">
+                Instantly customize visual color schemes
+              </p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             {[
-              { id: "obsidian", name: "Midnight Obsidian", color: "bg-purple-600" },
+              {
+                id: "obsidian",
+                name: "Midnight Obsidian",
+                color: "bg-purple-600",
+              },
               { id: "cyberpunk", name: "Neon Cyberpunk", color: "bg-cyan-500" },
               { id: "slate", name: "Slate Minimal", color: "bg-zinc-400" },
-              { id: "indigo", name: "Electric Indigo", color: "bg-indigo-500" }
+              { id: "indigo", name: "Electric Indigo", color: "bg-indigo-500" },
             ].map((theme) => (
               <button
                 key={theme.id}
@@ -288,7 +334,9 @@ export default function AdvancedSettings({
                     : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-neutral-200"
                 }`}
               >
-                <span className={`h-3 w-3 rounded-full ${theme.color} shrink-0`} />
+                <span
+                  className={`h-3 w-3 rounded-full ${theme.color} shrink-0`}
+                />
                 <span className="font-mono">{theme.name}</span>
               </button>
             ))}
@@ -300,8 +348,12 @@ export default function AdvancedSettings({
           <div className="flex items-center gap-2 border-b border-neutral-800 pb-3">
             <Save className="h-4 w-4 text-purple-400" />
             <div>
-              <h3 className="font-bold text-sm text-white font-sans">Workspace Preset Profiles</h3>
-              <p className="text-[10px] text-neutral-400 font-mono">Store and load config bundles instantly</p>
+              <h3 className="font-bold text-sm text-white font-sans">
+                Workspace Preset Profiles
+              </h3>
+              <p className="text-[10px] text-neutral-400 font-mono">
+                Store and load config bundles instantly
+              </p>
             </div>
           </div>
 
@@ -309,7 +361,9 @@ export default function AdvancedSettings({
             {/* Load preset */}
             {presets.length > 0 && (
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-neutral-500 font-mono uppercase">Load Preset Profile</label>
+                <label className="text-[10px] font-bold text-neutral-500 font-mono uppercase">
+                  Load Preset Profile
+                </label>
                 <div className="flex gap-2">
                   <select
                     onChange={(e) => {
@@ -319,9 +373,13 @@ export default function AdvancedSettings({
                     defaultValue=""
                     className="flex-1 bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2 text-neutral-350 focus:border-purple-500 outline-none"
                   >
-                    <option value="" disabled>-- Choose a profile to load --</option>
+                    <option value="" disabled>
+                      -- Choose a profile to load --
+                    </option>
                     {presets.map((p) => (
-                      <option key={p.name} value={p.name}>{p.name}</option>
+                      <option key={p.name} value={p.name}>
+                        {p.name}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -332,8 +390,13 @@ export default function AdvancedSettings({
             {presets.length > 0 && (
               <div className="max-h-24 overflow-y-auto border border-neutral-800 rounded-xl bg-neutral-950/40 p-2 divide-y divide-neutral-800 scrollbar-thin">
                 {presets.map((p) => (
-                  <div key={p.name} className="flex items-center justify-between py-1 px-1.5 text-xs">
-                    <span className="font-semibold text-neutral-300 font-mono">{p.name}</span>
+                  <div
+                    key={p.name}
+                    className="flex items-center justify-between py-1 px-1.5 text-xs"
+                  >
+                    <span className="font-semibold text-neutral-300 font-mono">
+                      {p.name}
+                    </span>
                     <button
                       onClick={() => handleDeletePreset(p.name)}
                       className="text-neutral-500 hover:text-red-400 p-0.5 rounded transition-colors cursor-pointer"
@@ -348,7 +411,9 @@ export default function AdvancedSettings({
 
             {/* Create new preset */}
             <form onSubmit={handleSavePreset} className="space-y-1 pt-1">
-              <label className="text-[10px] font-bold text-neutral-500 font-mono uppercase">Save Current Config As Preset</label>
+              <label className="text-[10px] font-bold text-neutral-500 font-mono uppercase">
+                Save Current Config As Preset
+              </label>
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -375,8 +440,12 @@ export default function AdvancedSettings({
             <div className="flex items-center gap-2">
               <Share2 className="h-4 w-4 text-purple-400" />
               <div>
-                <h3 className="font-bold text-sm text-white font-sans">Workspace Session Sharing</h3>
-                <p className="text-[10px] text-neutral-400 font-mono">Create an instant share link containing active configurations</p>
+                <h3 className="font-bold text-sm text-white font-sans">
+                  Workspace Session Sharing
+                </h3>
+                <p className="text-[10px] text-neutral-400 font-mono">
+                  Create an instant share link containing active configurations
+                </p>
               </div>
             </div>
           </div>

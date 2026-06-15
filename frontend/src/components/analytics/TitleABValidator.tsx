@@ -17,10 +17,16 @@ interface ABResult {
   suggested_alternatives: TestedTitle[];
 }
 
-export default function TitleABValidator({ addNotification }: TitleABValidatorProps) {
+export default function TitleABValidator({
+  addNotification,
+}: TitleABValidatorProps) {
   const [loading, setLoading] = useState(false);
-  const [title, setTitle] = useState("I Was Reborn As The Overpowered Shadow Sovereign");
-  const [event, setEvent] = useState("The protagonist summons a giant shadow army to defeat the demonic beast lord.");
+  const [title, setTitle] = useState(
+    "I Was Reborn As The Overpowered Shadow Sovereign"
+  );
+  const [event, setEvent] = useState(
+    "The protagonist summons a giant shadow army to defeat the demonic beast lord."
+  );
   const [results, setResults] = useState<ABResult | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
@@ -33,8 +39,8 @@ export default function TitleABValidator({ addNotification }: TitleABValidatorPr
         body: JSON.stringify({
           title,
           key_climax_event: event,
-          model: "gemini-2.5-flash"
-        })
+          model: "gemini-2.5-flash",
+        }),
       });
       const json = await res.json();
       if (json.success && json.result) {
@@ -64,7 +70,9 @@ export default function TitleABValidator({ addNotification }: TitleABValidatorPr
       <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
         <div className="flex items-center gap-2">
           <BarChart2 className="h-4.5 w-4.5 text-purple-400" />
-          <h4 className="text-xs font-mono font-bold text-white uppercase">A/B Title Validator</h4>
+          <h4 className="text-xs font-mono font-bold text-white uppercase">
+            A/B Title Validator
+          </h4>
         </div>
         <button
           onClick={handleValidate}
@@ -78,7 +86,9 @@ export default function TitleABValidator({ addNotification }: TitleABValidatorPr
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-3">
           <div className="space-y-1">
-            <label className="text-[9px] font-mono text-neutral-500 uppercase">Current Video Title</label>
+            <label className="text-[9px] font-mono text-neutral-500 uppercase">
+              Current Video Title
+            </label>
             <input
               type="text"
               value={title}
@@ -88,7 +98,9 @@ export default function TitleABValidator({ addNotification }: TitleABValidatorPr
           </div>
 
           <div className="space-y-1">
-            <label className="text-[9px] font-mono text-neutral-500 uppercase">Climax / Story Hook Event</label>
+            <label className="text-[9px] font-mono text-neutral-500 uppercase">
+              Climax / Story Hook Event
+            </label>
             <textarea
               rows={3}
               value={event}
@@ -100,32 +112,51 @@ export default function TitleABValidator({ addNotification }: TitleABValidatorPr
         </div>
 
         <div className="space-y-3">
-          <label className="text-[9px] font-mono text-neutral-500 uppercase font-semibold">Evaluation Results</label>
+          <label className="text-[9px] font-mono text-neutral-500 uppercase font-semibold">
+            Evaluation Results
+          </label>
           <div className="bg-neutral-950 p-4 rounded-xl border border-neutral-850 h-full min-h-[220px] flex flex-col justify-between">
             {results ? (
               <div className="space-y-4">
                 <div className="flex justify-between items-center bg-neutral-900/50 p-3 rounded-lg border border-neutral-850">
-                  <span className="text-xs font-bold text-neutral-300 font-sans">Original Title Score:</span>
-                  <span className="text-sm font-mono font-bold text-purple-400">{(results.original_score || 6.2).toFixed(1)}/10</span>
+                  <span className="text-xs font-bold text-neutral-300 font-sans">
+                    Original Title Score:
+                  </span>
+                  <span className="text-sm font-mono font-bold text-purple-400">
+                    {(results.original_score || 6.2).toFixed(1)}/10
+                  </span>
                 </div>
 
                 <div className="space-y-3 max-h-52 overflow-y-auto pr-1">
                   {(results.suggested_alternatives || []).map((alt, idx) => (
-                    <div key={idx} className="group relative bg-neutral-900/40 p-2.5 rounded-lg border border-neutral-850/65 flex flex-col gap-1">
+                    <div
+                      key={idx}
+                      className="group relative bg-neutral-900/40 p-2.5 rounded-lg border border-neutral-850/65 flex flex-col gap-1"
+                    >
                       <div className="flex justify-between items-center pr-8">
-                        <span className="text-xs font-bold text-white font-sans">{alt.title}</span>
+                        <span className="text-xs font-bold text-white font-sans">
+                          {alt.title}
+                        </span>
                         <span className="text-[10px] font-mono bg-emerald-950 text-emerald-400 px-1.5 py-0.5 rounded font-bold">
                           {(alt.ctr_score || 8.5).toFixed(1)}/10
                         </span>
                       </div>
                       <p className="text-[10px] text-neutral-450 font-sans leading-relaxed">
-                        Reason: {alt.reasoning} (Bait Level: <span className="text-purple-300 uppercase font-mono text-[9px]">{alt.clickbait_level || "Medium"}</span>)
+                        Reason: {alt.reasoning} (Bait Level:{" "}
+                        <span className="text-purple-300 uppercase font-mono text-[9px]">
+                          {alt.clickbait_level || "Medium"}
+                        </span>
+                        )
                       </p>
                       <button
                         onClick={() => copyToClipboard(alt.title, idx)}
                         className="absolute top-2.5 right-2 text-neutral-500 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
                       >
-                        {copiedIndex === idx ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                        {copiedIndex === idx ? (
+                          <Check className="h-3.5 w-3.5 text-emerald-400" />
+                        ) : (
+                          <Copy className="h-3.5 w-3.5" />
+                        )}
                       </button>
                     </div>
                   ))}
@@ -134,7 +165,10 @@ export default function TitleABValidator({ addNotification }: TitleABValidatorPr
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-center py-8 text-neutral-500 space-y-2">
                 <Sparkles className="h-8 w-8 text-neutral-700 animate-pulse" />
-                <p className="text-xs font-sans">No scores generated yet. Run validation to see click-through suggestions.</p>
+                <p className="text-xs font-sans">
+                  No scores generated yet. Run validation to see click-through
+                  suggestions.
+                </p>
               </div>
             )}
           </div>

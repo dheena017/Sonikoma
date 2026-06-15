@@ -1,7 +1,10 @@
 import React from "react";
 import { useAppLogic } from "./hooks/useAppLogic.js";
 import { useAppRouter } from "./hooks/useAppRouter.js";
-import { useGlobalShortcuts, DEFAULT_SHORTCUTS } from "./hooks/useGlobalShortcuts.js";
+import {
+  useGlobalShortcuts,
+  DEFAULT_SHORTCUTS,
+} from "./hooks/useGlobalShortcuts.js";
 import { useBackendHealth } from "./hooks/useBackendHealth.js";
 
 // Child Components
@@ -39,9 +42,9 @@ import CTRAnalyticsPage from "./components/analytics/CTRAnalyticsPage.js";
 import NotificationsPage from "./components/NotificationsPage.js";
 
 export default function App() {
-
   const appLogic = useAppLogic();
-  const { status: backendStatus, checkHealth: recheckBackend } = useBackendHealth();
+  const { status: backendStatus, checkHealth: recheckBackend } =
+    useBackendHealth();
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const {
     panels,
@@ -237,14 +240,10 @@ export default function App() {
     setIsPipMode,
   });
 
-  const isDashboardPath = 
-    currentPath === "/" || 
-    currentPath === "" || 
-    currentPath === "/index.html";
-  const isDashboardOnly = 
-    currentPath === "/" || 
-    currentPath === "" || 
-    currentPath === "/index.html";
+  const isDashboardPath =
+    currentPath === "/" || currentPath === "" || currentPath === "/index.html";
+  const isDashboardOnly =
+    currentPath === "/" || currentPath === "" || currentPath === "/index.html";
   const isSettingsPath = currentPath === "/settings";
   const isAutoCropPath = currentPath === "/auto-crop";
   const isBubbleCleanerPath = currentPath === "/bubble-cleaner";
@@ -273,7 +272,12 @@ export default function App() {
   }
 
   if (isLandingPath) {
-    return <LandingPage onGetStarted={() => navigateTo("/register")} onLogin={() => navigateTo("/login")} />;
+    return (
+      <LandingPage
+        onGetStarted={() => navigateTo("/register")}
+        onLogin={() => navigateTo("/login")}
+      />
+    );
   }
 
   if (isLoginPath) {
@@ -298,19 +302,32 @@ export default function App() {
   }
 
   if (isForgotPasswordPath) {
-    return <ForgotPasswordPage onForgotPassword={forgotPassword} onNavigateToLogin={() => navigateTo("/login")} />;
+    return (
+      <ForgotPasswordPage
+        onForgotPassword={forgotPassword}
+        onNavigateToLogin={() => navigateTo("/login")}
+      />
+    );
   }
 
   // Protected Routes - Redirect to Landing if not authenticated
-  if (!isAuthenticated && !isLandingPath && !isLoginPath && !isRegisterPath && !isForgotPasswordPath) {
+  if (
+    !isAuthenticated &&
+    !isLandingPath &&
+    !isLoginPath &&
+    !isRegisterPath &&
+    !isForgotPasswordPath
+  ) {
     setTimeout(() => navigateTo("/landing"), 0);
     return <LoadingPage status="Redirecting to Landing..." />;
   }
   const isNotificationsPath = currentPath === "/notifications";
 
   return (
-    <div id="app_root" className="min-h-screen bg-[#070709] text-neutral-100 flex flex-col lg:flex-row selection:bg-purple-600 selection:text-white relative">
-      
+    <div
+      id="app_root"
+      className="min-h-screen bg-[#070709] text-neutral-100 flex flex-col lg:flex-row selection:bg-purple-600 selection:text-white relative"
+    >
       {/* SIDEBAR FOR NAV */}
       <Sidebar
         isProcessing={isProcessing}
@@ -333,7 +350,14 @@ export default function App() {
             <div className="bg-gradient-to-r from-rose-950/90 to-red-950/95 border-b border-rose-800/40 px-4 py-3 text-center text-xs sm:text-sm font-semibold text-rose-250 flex items-center justify-center gap-3 z-50 animate-slide-down w-full">
               <span className="flex items-center gap-2 flex-wrap justify-center">
                 <span className="h-2.5 w-2.5 rounded-full bg-rose-550 animate-ping" />
-                <span>⚠️ Computational Engine Server is Offline. Make sure the Python backend is active (run <code className="bg-black/50 px-1.5 py-0.5 rounded text-rose-300 font-mono text-xs">npm run backend</code>).</span>
+                <span>
+                  ⚠️ Computational Engine Server is Offline. Make sure the
+                  Python backend is active (run{" "}
+                  <code className="bg-black/50 px-1.5 py-0.5 rounded text-rose-300 font-mono text-xs">
+                    npm run backend
+                  </code>
+                  ).
+                </span>
               </span>
               <button
                 onClick={recheckBackend}
@@ -345,9 +369,9 @@ export default function App() {
           )}
 
           {/* BRANDING HEADER */}
-          <Header 
-            isProcessing={isProcessing} 
-            panels={panels} 
+          <Header
+            isProcessing={isProcessing}
+            panels={panels}
             totalCalculatedDuration={totalCalculatedDuration}
             currentPath={currentPath}
             editingImageIdx={editingImageIdx}
@@ -366,283 +390,308 @@ export default function App() {
             clearAllNotifications={clearAllNotifications}
           />
 
-      {/* PAGE 1: DASHBOARD */}
-      <div 
-        className="page-transition w-full flex-1 flex flex-col animate-[fadeIn_0.2s_ease-out]"
-        style={{ display: isDashboardPath ? "flex" : "none" }}
-      >
-        <AppWorkspace
-          isDashboardOnly={isDashboardOnly}
-          panels={panels}
-          setPanels={setPanels}
-          consoleLogs={consoleLogs}
-          setConsoleLogs={setConsoleLogs}
-          scrapedImages={scrapedImages}
-          setScrapedImages={setScrapedImages}
-          selectedScraped={selectedScraped}
-          setSelectedScraped={setSelectedScraped}
-          activePreviewTab={activePreviewTab}
-          setActivePreviewTab={setActivePreviewTab}
-          setEditingImageIdx={setEditingImageIdx}
-          setEditCropTop={setEditCropTop}
-          setEditCropBottom={setEditCropBottom}
-          setEditCropLeft={setEditCropLeft}
-          setEditCropRight={setEditCropRight}
-          setEditAutoTrim={setEditAutoTrim}
-          showBubbleModal={showBubbleModal}
-          setShowBubbleModal={setShowBubbleModal}
-          isCleaningBubbles={isCleaningBubbles}
-          cleanProgress={cleanProgress}
-          bubbleCroppingImgUrl={bubbleCroppingImgUrl}
-          showAutoCropModal={showAutoCropModal}
-          setShowAutoCropModal={setShowAutoCropModal}
-          isBatchCropping={isBatchCropping}
-          batchProgress={batchProgress}
-          croppingImgUrl={croppingImgUrl}
-          handleAutoCropSelected={handleAutoCropSelected}
-          handleCleanBubblesSelected={handleCleanBubblesSelected}
-          scrapeImages={scrapeImages}
-          videoPlayerRef={videoPlayerRef}
-          addNotification={addNotification}
-          setErrorPopup={setErrorPopup}
-          fetchWithInterceptor={fetchWithInterceptor}
-          targetUrl={targetUrl}
-          setTargetUrl={setTargetUrl}
-          selectedSource={selectedSource}
-          setSelectedSource={setSelectedSource}
-          selectedModel={selectedModel}
-          setSelectedModel={setSelectedModel}
-          isProcessing={isProcessing}
-          handleGenerateVideo={handleGenerateVideo}
-          isScraping={isScraping}
-          mergingIndices={mergingIndices}
-          handleStitchWithNext={handleStitchWithNext}
-          addPanelsToStoryboard={addPanelsToStoryboard}
-          progressStatus={progressStatus}
-          videoUrl={videoUrl}
-          setVideoUrl={setVideoUrl}
-          aspectRatio={aspectRatio}
-          currentPanelIndex={currentPanelIndex}
-          setCurrentPanelIndex={setCurrentPanelIndex}
-          playbackTime={playbackTime}
-          setPlaybackTime={setPlaybackTime}
-          reprocessingPanelId={reprocessingPanelId}
-          storyboardPlaying={storyboardPlaying}
-          toggleStoryboardPlayback={toggleStoryboardPlayback}
-          resetStoryboardPlayback={resetStoryboardPlayback}
-          isMuted={isMuted}
-          setIsMuted={setIsMuted}
-          volume={volume}
-          setVolume={setVolume}
-          musicTheme={musicTheme}
-          voiceActor={voiceActor}
-          narrationStyle={narrationStyle}
-          setNarrationStyle={setNarrationStyle}
-        />
-      </div>
-
-      {/* PAGE 2: ADVANCED RENDER SETTINGS */}
-      <div 
-        className="page-transition w-full flex-1 flex flex-col max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6"
-        style={{ display: isSettingsPath ? "flex" : "none" }}
-      >
-        <div className="flex items-center justify-between border-b border-neutral-800 pb-4">
-          <div>
-            <h2 className="text-2xl font-bold text-white tracking-tight">System Configuration Settings</h2>
-            <p className="text-xs text-neutral-400 font-mono">Manage voice synthesis, music composition, and output rendering profiles</p>
-          </div>
-          <button
-            onClick={() => navigateTo("/")}
-            className="px-4 py-2 bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-xl text-xs font-mono transition-all hover:bg-neutral-800/80 cursor-pointer"
+          {/* PAGE 1: DASHBOARD */}
+          <div
+            className="page-transition w-full flex-1 flex flex-col animate-[fadeIn_0.2s_ease-out]"
+            style={{ display: isDashboardPath ? "flex" : "none" }}
           >
-            ← Dashboard
-          </button>
-        </div>
-        <AdvancedSettings
-          voiceActor={voiceActor}
-          setVoiceActor={setVoiceActor}
-          musicTheme={musicTheme}
-          setMusicTheme={setMusicTheme}
-          aspectRatio={aspectRatio}
-          setAspectRatio={setAspectRatio}
-          frameRate={frameRate}
-          setFrameRate={setFrameRate}
-          activeTheme={activeTheme}
-          setActiveTheme={setActiveTheme}
-          targetUrl={targetUrl}
-          selectedModel={selectedModel}
-          selectedSource={selectedSource}
-          addNotification={addNotification}
-        />
-      </div>
+            <AppWorkspace
+              isDashboardOnly={isDashboardOnly}
+              panels={panels}
+              setPanels={setPanels}
+              consoleLogs={consoleLogs}
+              setConsoleLogs={setConsoleLogs}
+              scrapedImages={scrapedImages}
+              setScrapedImages={setScrapedImages}
+              selectedScraped={selectedScraped}
+              setSelectedScraped={setSelectedScraped}
+              activePreviewTab={activePreviewTab}
+              setActivePreviewTab={setActivePreviewTab}
+              setEditingImageIdx={setEditingImageIdx}
+              setEditCropTop={setEditCropTop}
+              setEditCropBottom={setEditCropBottom}
+              setEditCropLeft={setEditCropLeft}
+              setEditCropRight={setEditCropRight}
+              setEditAutoTrim={setEditAutoTrim}
+              showBubbleModal={showBubbleModal}
+              setShowBubbleModal={setShowBubbleModal}
+              isCleaningBubbles={isCleaningBubbles}
+              cleanProgress={cleanProgress}
+              bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+              showAutoCropModal={showAutoCropModal}
+              setShowAutoCropModal={setShowAutoCropModal}
+              isBatchCropping={isBatchCropping}
+              batchProgress={batchProgress}
+              croppingImgUrl={croppingImgUrl}
+              handleAutoCropSelected={handleAutoCropSelected}
+              handleCleanBubblesSelected={handleCleanBubblesSelected}
+              scrapeImages={scrapeImages}
+              videoPlayerRef={videoPlayerRef}
+              addNotification={addNotification}
+              setErrorPopup={setErrorPopup}
+              fetchWithInterceptor={fetchWithInterceptor}
+              targetUrl={targetUrl}
+              setTargetUrl={setTargetUrl}
+              selectedSource={selectedSource}
+              setSelectedSource={setSelectedSource}
+              selectedModel={selectedModel}
+              setSelectedModel={setSelectedModel}
+              isProcessing={isProcessing}
+              handleGenerateVideo={handleGenerateVideo}
+              isScraping={isScraping}
+              mergingIndices={mergingIndices}
+              handleStitchWithNext={handleStitchWithNext}
+              addPanelsToStoryboard={addPanelsToStoryboard}
+              progressStatus={progressStatus}
+              videoUrl={videoUrl}
+              setVideoUrl={setVideoUrl}
+              aspectRatio={aspectRatio}
+              currentPanelIndex={currentPanelIndex}
+              setCurrentPanelIndex={setCurrentPanelIndex}
+              playbackTime={playbackTime}
+              setPlaybackTime={setPlaybackTime}
+              reprocessingPanelId={reprocessingPanelId}
+              storyboardPlaying={storyboardPlaying}
+              toggleStoryboardPlayback={toggleStoryboardPlayback}
+              resetStoryboardPlayback={resetStoryboardPlayback}
+              isMuted={isMuted}
+              setIsMuted={setIsMuted}
+              volume={volume}
+              setVolume={setVolume}
+              musicTheme={musicTheme}
+              voiceActor={voiceActor}
+              narrationStyle={narrationStyle}
+              setNarrationStyle={setNarrationStyle}
+            />
+          </div>
 
+          {/* PAGE 2: ADVANCED RENDER SETTINGS */}
+          <div
+            className="page-transition w-full flex-1 flex flex-col max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6"
+            style={{ display: isSettingsPath ? "flex" : "none" }}
+          >
+            <div className="flex items-center justify-between border-b border-neutral-800 pb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-white tracking-tight">
+                  System Configuration Settings
+                </h2>
+                <p className="text-xs text-neutral-400 font-mono">
+                  Manage voice synthesis, music composition, and output
+                  rendering profiles
+                </p>
+              </div>
+              <button
+                onClick={() => navigateTo("/")}
+                className="px-4 py-2 bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-xl text-xs font-mono transition-all hover:bg-neutral-800/80 cursor-pointer"
+              >
+                ← Dashboard
+              </button>
+            </div>
+            <AdvancedSettings
+              voiceActor={voiceActor}
+              setVoiceActor={setVoiceActor}
+              musicTheme={musicTheme}
+              setMusicTheme={setMusicTheme}
+              aspectRatio={aspectRatio}
+              setAspectRatio={setAspectRatio}
+              frameRate={frameRate}
+              setFrameRate={setFrameRate}
+              activeTheme={activeTheme}
+              setActiveTheme={setActiveTheme}
+              targetUrl={targetUrl}
+              selectedModel={selectedModel}
+              selectedSource={selectedSource}
+              addNotification={addNotification}
+            />
+          </div>
 
+          {/* PAGE 6: DEDICATED LOGS CONSOLE */}
+          <div
+            className="page-transition w-full flex-1 flex flex-col"
+            style={{ display: isLogsPath ? "flex" : "none" }}
+          >
+            <LogsPage
+              consoleLogs={consoleLogs}
+              setConsoleLogs={setConsoleLogs}
+              onNavigateHome={() => navigateTo("/")}
+            />
+          </div>
 
+          {/* PAGE 7: COMPUTATIONAL DIAGNOSTICS */}
+          <div
+            className="page-transition w-full flex-1 flex flex-col"
+            style={{ display: isStatusPath ? "flex" : "none" }}
+          >
+            <StatusPage
+              onNavigateHome={() => navigateTo("/")}
+              fetchWithInterceptor={fetchWithInterceptor}
+            />
+          </div>
 
+          {/* PAGE 8: SHORTCUTS CONFIGURATION */}
+          <div
+            className="page-transition w-full flex-1 flex flex-col"
+            style={{ display: isShortcutsPath ? "flex" : "none" }}
+          >
+            <ShortcutsPage
+              shortcuts={shortcuts}
+              setShortcuts={setShortcuts}
+              defaultShortcuts={DEFAULT_SHORTCUTS}
+              onNavigateHome={() => navigateTo("/")}
+              addNotification={addNotification}
+            />
+          </div>
 
-      {/* PAGE 6: DEDICATED LOGS CONSOLE */}
-      <div 
-        className="page-transition w-full flex-1 flex flex-col"
-        style={{ display: isLogsPath ? "flex" : "none" }}
-      >
-        <LogsPage 
-          consoleLogs={consoleLogs}
-          setConsoleLogs={setConsoleLogs}
-          onNavigateHome={() => navigateTo("/")}
-        />
-      </div>
+          {/* PAGE 9: AI VIDEO OPTIMIZER */}
+          {isOptimizerPath && (
+            <AIOptimizerPage
+              panels={panels}
+              onNavigateHome={() => navigateTo("/")}
+              addNotification={addNotification}
+            />
+          )}
 
-      {/* PAGE 7: COMPUTATIONAL DIAGNOSTICS */}
-      <div 
-        className="page-transition w-full flex-1 flex flex-col"
-        style={{ display: isStatusPath ? "flex" : "none" }}
-      >
-        <StatusPage 
-          onNavigateHome={() => navigateTo("/")}
-          fetchWithInterceptor={fetchWithInterceptor}
-        />
-      </div>
+          {/* PAGE 10: AI PANEL ASSISTANT */}
+          {isPanelAssistantPath && (
+            <PanelAssistantPage
+              panels={panels}
+              setPanels={setPanels}
+              onNavigateHome={() => navigateTo("/")}
+              addNotification={addNotification}
+            />
+          )}
 
-      {/* PAGE 8: SHORTCUTS CONFIGURATION */}
-      <div 
-        className="page-transition w-full flex-1 flex flex-col"
-        style={{ display: isShortcutsPath ? "flex" : "none" }}
-      >
-        <ShortcutsPage 
-          shortcuts={shortcuts}
-          setShortcuts={setShortcuts}
-          defaultShortcuts={DEFAULT_SHORTCUTS}
-          onNavigateHome={() => navigateTo("/")}
-          addNotification={addNotification}
-        />
-      </div>
+          {/* PAGE 11: AI CHARACTER DB */}
+          {isCharacterPath && (
+            <CharacterProfilePage
+              panels={panels}
+              onNavigateHome={() => navigateTo("/")}
+              addNotification={addNotification}
+            />
+          )}
 
-      {/* PAGE 9: AI VIDEO OPTIMIZER */}
-      {isOptimizerPath && (
-        <AIOptimizerPage
-          panels={panels}
-          onNavigateHome={() => navigateTo("/")}
-          addNotification={addNotification}
-        />
-      )}
+          {/* PAGE 12: AI TRANSLATION STUDIO */}
+          {isTranslationPath && (
+            <TranslationStudioPage
+              panels={panels}
+              setPanels={setPanels}
+              onNavigateHome={() => navigateTo("/")}
+              addNotification={addNotification}
+            />
+          )}
 
-      {/* PAGE 10: AI PANEL ASSISTANT */}
-      {isPanelAssistantPath && (
-        <PanelAssistantPage
-          panels={panels}
-          setPanels={setPanels}
-          onNavigateHome={() => navigateTo("/")}
-          addNotification={addNotification}
-        />
-      )}
+          {/* PAGE 13: AI AUDIO PRODUCTION LAB */}
+          {isAudioLabPath && (
+            <AudioLabPage
+              panels={panels}
+              setMusicTheme={setMusicTheme}
+              onNavigateHome={() => navigateTo("/")}
+              addNotification={addNotification}
+            />
+          )}
 
-      {/* PAGE 11: AI CHARACTER DB */}
-      {isCharacterPath && (
-        <CharacterProfilePage
-          panels={panels}
-          onNavigateHome={() => navigateTo("/")}
-          addNotification={addNotification}
-        />
-      )}
+          {/* PAGE 14: AI THUMBNAIL STUDIO */}
+          {isThumbnailPath && (
+            <ThumbnailStudioPage
+              panels={panels}
+              onNavigateHome={() => navigateTo("/")}
+              addNotification={addNotification}
+            />
+          )}
 
-      {/* PAGE 12: AI TRANSLATION STUDIO */}
-      {isTranslationPath && (
-        <TranslationStudioPage
-          panels={panels}
-          setPanels={setPanels}
-          onNavigateHome={() => navigateTo("/")}
-          addNotification={addNotification}
-        />
-      )}
+          {/* PAGE 15: AI COMMUNITY ENGAGEMENT */}
+          {isEngagementPath && (
+            <EngagementPage onNavigateHome={() => navigateTo("/")} />
+          )}
 
-      {/* PAGE 13: AI AUDIO PRODUCTION LAB */}
-      {isAudioLabPath && (
-        <AudioLabPage
-          panels={panels}
-          setMusicTheme={setMusicTheme}
-          onNavigateHome={() => navigateTo("/")}
-          addNotification={addNotification}
-        />
-      )}
+          {/* PAGE 16: AI VOICE CASTING STUDIO */}
+          {isVoicePath && (
+            <VoiceStudioPage
+              panels={panels}
+              onNavigateHome={() => navigateTo("/")}
+              addNotification={addNotification}
+            />
+          )}
 
-      {/* PAGE 14: AI THUMBNAIL STUDIO */}
-      {isThumbnailPath && (
-        <ThumbnailStudioPage
-          panels={panels}
-          onNavigateHome={() => navigateTo("/")}
-          addNotification={addNotification}
-        />
-      )}
+          {/* PAGE 17: AI CTR PERFORMANCE PREDICTOR */}
+          {isAnalyticsPath && (
+            <CTRAnalyticsPage
+              onNavigateHome={() => navigateTo("/")}
+              addNotification={addNotification}
+            />
+          )}
 
-      {/* PAGE 15: AI COMMUNITY ENGAGEMENT */}
-      {isEngagementPath && (
-        <EngagementPage
-          onNavigateHome={() => navigateTo("/")}
-        />
-      )}
+          {/* PAGE 18: USER PROFILE */}
+          {isProfilePath && (
+            <ProfilePage
+              user={user}
+              projects={[]} // In a real app, fetch these
+              onLogout={logout}
+              onNavigateHome={() => navigateTo("/")}
+            />
+          )}
 
-      {/* PAGE 16: AI VOICE CASTING STUDIO */}
-      {isVoicePath && (
-        <VoiceStudioPage
-          panels={panels}
-          onNavigateHome={() => navigateTo("/")}
-          addNotification={addNotification}
-        />
-      )}
+          {/* PAGE 18: NOTIFICATION HUB */}
+          {isNotificationsPath && (
+            <NotificationsPage
+              notifications={notifications}
+              onNavigateHome={() => navigateTo("/")}
+              onMarkAsRead={markNotificationAsRead}
+              onMarkAllAsRead={markAllNotificationsAsRead}
+              onDelete={deleteNotification}
+              onClearAll={clearAllNotifications}
+            />
+          )}
 
-      {/* PAGE 17: AI CTR PERFORMANCE PREDICTOR */}
-      {isAnalyticsPath && (
-        <CTRAnalyticsPage
-          onNavigateHome={() => navigateTo("/")}
-          addNotification={addNotification}
-        />
-      )}
-
-      {/* PAGE 18: USER PROFILE */}
-      {isProfilePath && (
-        <ProfilePage
-          user={user}
-          projects={[]} // In a real app, fetch these
-          onLogout={logout}
-          onNavigateHome={() => navigateTo("/")}
-        />
-      )}
-
-      {/* PAGE 18: NOTIFICATION HUB */}
-      {isNotificationsPath && (
-        <NotificationsPage
-          notifications={notifications}
-          onNavigateHome={() => navigateTo("/")}
-          onMarkAsRead={markNotificationAsRead}
-          onMarkAllAsRead={markAllNotificationsAsRead}
-          onDelete={deleteNotification}
-          onClearAll={clearAllNotifications}
-        />
-      )}
-
-      {/* PAGE 404 (FALLBACK) */}
-      {!isDashboardPath && !isSettingsPath && !isAutoCropPath && !isBubbleCleanerPath && !isEditorPath && !isLogsPath && !isStatusPath && !isShortcutsPath && !isOptimizerPath && !isPanelAssistantPath && !isCharacterPath && !isTranslationPath && !isAudioLabPath && !isThumbnailPath && !isEngagementPath && !isVoicePath && !isAnalyticsPath && !isProfilePath && !isNotificationsPath && (
-        <PageNotFound onNavigateHome={() => navigateTo("/")} />
-      )}
-
+          {/* PAGE 404 (FALLBACK) */}
+          {!isDashboardPath &&
+            !isSettingsPath &&
+            !isAutoCropPath &&
+            !isBubbleCleanerPath &&
+            !isEditorPath &&
+            !isLogsPath &&
+            !isStatusPath &&
+            !isShortcutsPath &&
+            !isOptimizerPath &&
+            !isPanelAssistantPath &&
+            !isCharacterPath &&
+            !isTranslationPath &&
+            !isAudioLabPath &&
+            !isThumbnailPath &&
+            !isEngagementPath &&
+            !isVoicePath &&
+            !isAnalyticsPath &&
+            !isProfilePath &&
+            !isNotificationsPath && (
+              <PageNotFound onNavigateHome={() => navigateTo("/")} />
+            )}
         </div>
 
         {/* FOOTER */}
-        <footer id="footer_pane" className="border-t border-neutral-900 bg-neutral-950/20 py-6 text-center text-xs text-neutral-500">
-          <p className="font-mono">Webtoon-to-Video compilation dashboard &bull; Real-time Scraper Integration</p>
+        <footer
+          id="footer_pane"
+          className="border-t border-neutral-900 bg-neutral-950/20 py-6 text-center text-xs text-neutral-500"
+        >
+          <p className="font-mono">
+            Webtoon-to-Video compilation dashboard &bull; Real-time Scraper
+            Integration
+          </p>
         </footer>
       </div>
 
-      <NotificationStack notifications={notifications} removeNotification={removeNotification} />
+      <NotificationStack
+        notifications={notifications}
+        removeNotification={removeNotification}
+      />
 
       {/* PAGE 3: AUTO CROP */}
       {isAutoCropPath && (
         <AutoCropModal
           onClose={() => navigateTo("/")}
           onApply={() => {
-             console.log("App: Triggering handleAutoCropSelected");
-             handleAutoCropSelected();
-             navigateTo("/");
+            console.log("App: Triggering handleAutoCropSelected");
+            handleAutoCropSelected();
+            navigateTo("/");
           }}
           sensitivity={cropSensitivity}
           setSensitivity={setCropSensitivity}
@@ -672,7 +721,11 @@ export default function App() {
           setCropCloseKernelSize={setCropCloseKernelSize}
           activeTab={activeAutoCropTab}
           setActiveTab={setActiveAutoCropTab}
-          selectedCount={selectedScraped.length > 0 ? selectedScraped.length : scrapedImages.length}
+          selectedCount={
+            selectedScraped.length > 0
+              ? selectedScraped.length
+              : scrapedImages.length
+          }
           isApplying={isBatchCropping}
           scrapedImages={scrapedImages}
           selectedScraped={selectedScraped}
@@ -687,9 +740,9 @@ export default function App() {
         <BubbleCleanerModal
           onClose={() => navigateTo("/")}
           onApply={() => {
-             console.log("App: Triggering handleCleanBubblesSelected");
-             handleCleanBubblesSelected();
-             navigateTo("/");
+            console.log("App: Triggering handleCleanBubblesSelected");
+            handleCleanBubblesSelected();
+            navigateTo("/");
           }}
           detectionStyle={bubbleDetectionStyle}
           setDetectionStyle={setBubbleDetectionStyle}
@@ -703,7 +756,11 @@ export default function App() {
           setBubbleInpaintRadius={setBubbleInpaintRadius}
           activeTab={activeBubbleTab}
           setActiveTab={setActiveBubbleTab}
-          selectedCount={selectedScraped.length > 0 ? selectedScraped.length : scrapedImages.length}
+          selectedCount={
+            selectedScraped.length > 0
+              ? selectedScraped.length
+              : scrapedImages.length
+          }
           isApplying={isCleaningBubbles}
           scrapedImages={scrapedImages}
           selectedScraped={selectedScraped}
@@ -713,15 +770,25 @@ export default function App() {
       )}
 
       {/* PAGE 5: ADVANCED CROP EDITOR */}
-      {((isEditorPath || isPipMode) && editingImageIdx !== null) && (
-        <div 
-          className={isPipMode ? "fixed bottom-6 right-6 w-96 h-56 rounded-3xl border border-white/10 shadow-2xl z-50 overflow-hidden bg-neutral-950/95 backdrop-blur-xl animate-fade-in cursor-pointer" : ""}
-          onClick={isPipMode ? () => {
-            setIsPipMode(false);
-            navigateTo(lastEditorPath);
-          } : undefined}
+      {(isEditorPath || isPipMode) && editingImageIdx !== null && (
+        <div
+          className={
+            isPipMode
+              ? "fixed bottom-6 right-6 w-96 h-56 rounded-3xl border border-white/10 shadow-2xl z-50 overflow-hidden bg-neutral-950/95 backdrop-blur-xl animate-fade-in cursor-pointer"
+              : ""
+          }
+          onClick={
+            isPipMode
+              ? () => {
+                  setIsPipMode(false);
+                  navigateTo(lastEditorPath);
+                }
+              : undefined
+          }
         >
-          <CropEditorModal appLogic={{ ...appLogic, isPipMode, setIsPipMode }} />
+          <CropEditorModal
+            appLogic={{ ...appLogic, isPipMode, setIsPipMode }}
+          />
         </div>
       )}
     </div>

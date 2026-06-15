@@ -10,7 +10,12 @@ import { BubbleCleanerAdvancedTab } from "./BubbleCleanerAdvancedTab";
 import { BubbleCleanerHelpTab } from "./BubbleCleanerHelpTab";
 
 export type DetectionStyle = "all" | "white_only" | "text_only";
-export type EraseMethod = "auto" | "inpaint" | "blur" | "solid_white" | "solid_black";
+export type EraseMethod =
+  | "auto"
+  | "inpaint"
+  | "blur"
+  | "solid_white"
+  | "solid_black";
 
 interface BubbleCleanerTabContentProps {
   activeTab: string;
@@ -30,7 +35,9 @@ interface BubbleCleanerTabContentProps {
   addNotification?: (msg: string, type: any) => void;
 }
 
-export default function BubbleCleanerTabContent(props: BubbleCleanerTabContentProps) {
+export default function BubbleCleanerTabContent(
+  props: BubbleCleanerTabContentProps
+) {
   const { activeTab } = props;
 
   const shared = {
@@ -52,9 +59,9 @@ export default function BubbleCleanerTabContent(props: BubbleCleanerTabContentPr
 
   return (
     <div className="flex-1 overflow-y-auto pr-2 space-y-6 relative">
-      {activeTab === "general"  && <BubbleCleanerGeneralTab  {...shared} />}
+      {activeTab === "general" && <BubbleCleanerGeneralTab {...shared} />}
       {activeTab === "advanced" && <BubbleCleanerAdvancedTab {...shared} />}
-      {activeTab === "help"     && (
+      {activeTab === "help" && (
         <BubbleCleanerHelpTab
           eraseMethod={props.eraseMethod}
           bubbleDilation={props.bubbleDilation}

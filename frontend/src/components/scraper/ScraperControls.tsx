@@ -21,7 +21,11 @@ interface ScraperControlsProps
     | "handleAutoCropSelected"
     | "handleCleanBubblesSelected"
   > {
-  addPanelsToStoryboard: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
+  addPanelsToStoryboard: (
+    urls: string[],
+    currentScrapedList?: string[],
+    shouldScroll?: boolean
+  ) => void;
   fetchWithInterceptor?: any;
   /** Called when a filter action resets selection — so parent can clear lastSelectedIndex anchor */
   onLastSelectedReset?: () => void;
@@ -55,13 +59,18 @@ export default function ScraperControls({
       setConsoleLogs((prev) => ["[GUI] Cleared selections", ...prev]);
     } else {
       setSelectedScraped([...scrapedImages]);
-      setConsoleLogs((prev) => ["[GUI] Selected all extracted frames", ...prev]);
+      setConsoleLogs((prev) => [
+        "[GUI] Selected all extracted frames",
+        ...prev,
+      ]);
     }
   };
 
   const handleInvertSelection = () => {
     console.log("[ScraperControls] Inverting selection");
-    setSelectedScraped((prev) => scrapedImages.filter((img) => !prev.includes(img)));
+    setSelectedScraped((prev) =>
+      scrapedImages.filter((img) => !prev.includes(img))
+    );
     onLastSelectedReset?.();
     setConsoleLogs((prev) => ["[GUI] Inverted selection set", ...prev]);
   };
@@ -84,7 +93,10 @@ export default function ScraperControls({
     console.log("[ScraperControls] Reversing deck order");
     setScrapedImages((prev) => [...prev].reverse());
     onLastSelectedReset?.();
-    setConsoleLogs((prev) => ["[GUI] Reversed extracted frame sequence order in deck", ...prev]);
+    setConsoleLogs((prev) => [
+      "[GUI] Reversed extracted frame sequence order in deck",
+      ...prev,
+    ]);
     addNotification("Reversed sequence order of the scraped deck!", "info");
   };
 
@@ -94,19 +106,25 @@ export default function ScraperControls({
     const clamped = Math.min(Math.max(1, n), scrapedImages.length);
     setSelectedScraped(scrapedImages.slice(0, clamped));
     onLastSelectedReset?.();
-    setConsoleLogs((prev) => [`[GUI] Selected first ${clamped} frames`, ...prev]);
+    setConsoleLogs((prev) => [
+      `[GUI] Selected first ${clamped} frames`,
+      ...prev,
+    ]);
   };
 
   const handleSelectLastN = (n: number) => {
     const clamped = Math.min(Math.max(1, n), scrapedImages.length);
     setSelectedScraped(scrapedImages.slice(-clamped));
     onLastSelectedReset?.();
-    setConsoleLogs((prev) => [`[GUI] Selected last ${clamped} frames`, ...prev]);
+    setConsoleLogs((prev) => [
+      `[GUI] Selected last ${clamped} frames`,
+      ...prev,
+    ]);
   };
 
   /** a and b are 1-indexed inclusive panel numbers */
   const handleSelectRange = (a: number, b: number) => {
-    const lo = Math.max(0, Math.min(a, b) - 1);       // convert to 0-indexed
+    const lo = Math.max(0, Math.min(a, b) - 1); // convert to 0-indexed
     const hi = Math.min(scrapedImages.length, Math.max(a, b)); // exclusive end
     setSelectedScraped(scrapedImages.slice(lo, hi));
     onLastSelectedReset?.();
@@ -145,7 +163,9 @@ export default function ScraperControls({
         <details className="rounded-2xl border border-neutral-800/70 bg-neutral-950/70 p-3">
           <summary className="cursor-pointer list-none flex items-center justify-between gap-2 text-xs font-bold text-neutral-200 font-mono uppercase tracking-wider select-none">
             <span>Bulk tools</span>
-            <span className="text-[10px] text-neutral-500 normal-case tracking-normal">Tap to expand</span>
+            <span className="text-[10px] text-neutral-500 normal-case tracking-normal">
+              Tap to expand
+            </span>
           </summary>
           <div className="mt-4 space-y-4">{controlsContent}</div>
         </details>

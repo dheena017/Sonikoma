@@ -8,7 +8,11 @@ interface BulkScrubberControlProps {
   addNotification?: (msg: string, type: any) => void;
 }
 
-export default function BulkScrubberControl({ panels, onApplyCleanScripts, addNotification }: BulkScrubberControlProps) {
+export default function BulkScrubberControl({
+  panels,
+  onApplyCleanScripts,
+  addNotification,
+}: BulkScrubberControlProps) {
   const [loading, setLoading] = useState(false);
   const [flaggedCount, setFlaggedCount] = useState<number | null>(null);
   const [replacements, setReplacements] = useState<Record<number, string>>({});
@@ -18,7 +22,7 @@ export default function BulkScrubberControl({ panels, onApplyCleanScripts, addNo
     try {
       const cleanMappings: Record<number, string> = {};
       let flags = 0;
-      
+
       // Scrapes panels with dialogues
       for (const p of panels.slice(0, 4)) {
         if (!p.speech_text) continue;
@@ -27,8 +31,8 @@ export default function BulkScrubberControl({ panels, onApplyCleanScripts, addNo
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             text: p.speech_text,
-            model: "gemini-2.5-flash"
-          })
+            model: "gemini-2.5-flash",
+          }),
         });
         const json = await res.json();
         if (json.success && json.result) {
@@ -38,11 +42,14 @@ export default function BulkScrubberControl({ panels, onApplyCleanScripts, addNo
           }
         }
       }
-      
+
       setFlaggedCount(flags);
       setReplacements(cleanMappings);
       if (addNotification) {
-        addNotification(`Compliance scan completed. Flagged ${flags} dialogue violations.`, flags > 0 ? "warning" : "success");
+        addNotification(
+          `Compliance scan completed. Flagged ${flags} dialogue violations.`,
+          flags > 0 ? "warning" : "success"
+        );
       }
     } catch (e) {
       console.error(e);
@@ -58,7 +65,10 @@ export default function BulkScrubberControl({ panels, onApplyCleanScripts, addNo
           <h4 className="text-xs font-mono font-bold text-white uppercase flex items-center gap-1.5">
             Bulk Monetization Scrubber
           </h4>
-          <p className="text-[10px] text-neutral-500 font-mono mt-0.5">Scrapes timelines to check policy-safe speech and replace extreme tones</p>
+          <p className="text-[10px] text-neutral-500 font-mono mt-0.5">
+            Scrapes timelines to check policy-safe speech and replace extreme
+            tones
+          </p>
         </div>
         <button
           onClick={handleBulkScrub}
@@ -82,13 +92,19 @@ export default function BulkScrubberControl({ panels, onApplyCleanScripts, addNo
               <>
                 <AlertTriangle className="h-4 w-4 text-rose-450" />
                 <span className="text-neutral-350 font-mono">
-                  Flagged <span className="text-rose-450 font-bold">{flaggedCount}</span> dialogues matching violent or copyrighted tropes
+                  Flagged{" "}
+                  <span className="text-rose-450 font-bold">
+                    {flaggedCount}
+                  </span>{" "}
+                  dialogues matching violent or copyrighted tropes
                 </span>
               </>
             ) : (
               <>
                 <ShieldCheck className="h-4 w-4 text-emerald-450" />
-                <span className="text-emerald-450 font-mono font-bold">100% Monetization-Safe Script Audit Completed!</span>
+                <span className="text-emerald-450 font-mono font-bold">
+                  100% Monetization-Safe Script Audit Completed!
+                </span>
               </>
             )}
           </div>
@@ -98,7 +114,11 @@ export default function BulkScrubberControl({ panels, onApplyCleanScripts, addNo
                 onApplyCleanScripts(replacements);
                 setFlaggedCount(null);
                 setReplacements({});
-                if (addNotification) addNotification("Applied safety replacements successfully!", "success");
+                if (addNotification)
+                  addNotification(
+                    "Applied safety replacements successfully!",
+                    "success"
+                  );
               }}
               className="px-2.5 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer"
             >

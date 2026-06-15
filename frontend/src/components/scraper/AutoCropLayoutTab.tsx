@@ -43,7 +43,11 @@ export function AutoCropLayoutTab({
   addNotification,
 }: AutoCropLayoutTabProps) {
   const firstImageUrl =
-    selectedScraped.length > 0 ? selectedScraped[0] : scrapedImages.length > 0 ? scrapedImages[0] : null;
+    selectedScraped.length > 0
+      ? selectedScraped[0]
+      : scrapedImages.length > 0
+      ? scrapedImages[0]
+      : null;
 
   return (
     <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">

@@ -1,5 +1,14 @@
 import React from "react";
-import { Terminal, Trash2, Copy, Check, ChevronUp, Download as DownloadIcon, Pause, Play } from "lucide-react";
+import {
+  Terminal,
+  Trash2,
+  Copy,
+  Check,
+  ChevronUp,
+  Download as DownloadIcon,
+  Pause,
+  Play,
+} from "lucide-react";
 
 interface TerminalLogsHeaderProps {
   consoleLogs: string[];
@@ -43,7 +52,9 @@ export function TerminalLogsHeader({
               </span>
             )}
           </div>
-          <p className="text-[11px] text-neutral-400 font-mono">Live parser and AI status</p>
+          <p className="text-[11px] text-neutral-400 font-mono">
+            Live parser and AI status
+          </p>
         </div>
       </div>
 
@@ -51,25 +62,37 @@ export function TerminalLogsHeader({
       <div className="flex flex-nowrap items-center gap-2 justify-end overflow-x-auto">
         <button
           onClick={() => setAutoScroll(!autoScroll)}
-          className={`h-9 min-w-[72px] rounded-2xl border px-3 text-[10px] font-mono font-semibold transition duration-200 flex items-center justify-center gap-2 ${autoScroll
+          className={`h-9 min-w-[72px] rounded-2xl border px-3 text-[10px] font-mono font-semibold transition duration-200 flex items-center justify-center gap-2 ${
+            autoScroll
               ? "text-purple-300 border-purple-500/40 bg-purple-950/50 hover:bg-purple-950/70"
               : "text-neutral-300 border-neutral-800/60 bg-neutral-950/80 hover:bg-neutral-900"
-            }`}
+          }`}
           title={autoScroll ? "Auto-scroll enabled" : "Auto-scroll disabled"}
         >
-          <ChevronUp className={`h-3 w-3 transition-transform ${autoScroll ? "rotate-0" : "rotate-90"}`} />
+          <ChevronUp
+            className={`h-3 w-3 transition-transform ${
+              autoScroll ? "rotate-0" : "rotate-90"
+            }`}
+          />
           Auto
         </button>
 
         <button
           onClick={() => setPaused(!paused)}
-          className={`h-9 min-w-[78px] rounded-2xl border px-3 text-[10px] font-mono font-semibold transition duration-200 flex items-center justify-center gap-2 ${paused
+          className={`h-9 min-w-[78px] rounded-2xl border px-3 text-[10px] font-mono font-semibold transition duration-200 flex items-center justify-center gap-2 ${
+            paused
               ? "text-amber-300 border-amber-500/40 bg-amber-950/45 hover:bg-amber-950/65"
               : "text-neutral-300 border-neutral-800/60 bg-neutral-950/80 hover:bg-neutral-900"
-            }`}
-          title={paused ? "Paused — buffering incoming logs" : "Resume live logs"}
+          }`}
+          title={
+            paused ? "Paused — buffering incoming logs" : "Resume live logs"
+          }
         >
-          {paused ? <Play className="h-3 w-3 text-amber-300" /> : <Pause className="h-3 w-3" />}
+          {paused ? (
+            <Play className="h-3 w-3 text-amber-300" />
+          ) : (
+            <Pause className="h-3 w-3" />
+          )}
           {paused ? "Resume" : "Pause"}
         </button>
 

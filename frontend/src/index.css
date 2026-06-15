@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap");
 @import "tailwindcss";
 
 @theme {
@@ -62,7 +62,8 @@ body {
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
   }
   50% {
@@ -91,14 +92,20 @@ body {
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(to right, transparent, rgb(168, 85, 247), transparent);
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgb(168, 85, 247),
+    transparent
+  );
   box-shadow: 0 0 8px rgba(168, 85, 247, 0.8);
   animation: scan-laser 2.5s ease-in-out infinite;
   z-index: 20;
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px) rotate(0deg);
   }
   50% {
@@ -176,7 +183,3 @@ body {
 .animate-slide-down {
   animation: slide-down 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-
-
-
-

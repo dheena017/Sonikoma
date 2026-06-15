@@ -4,6 +4,7 @@ description: Coordinate sound mixes by overlaying background environment element
 model: gemini-2.5-flash
 response_schema: SFXOverlayModel
 ---
+
 Plan the sound mix for this scene:
 Scene visual: "{visual_description}"
 Main audio lines: "{speech_text}"

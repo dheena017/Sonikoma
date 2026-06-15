@@ -14,8 +14,12 @@ interface UseCropEditorPipelinesProps {
   setPanels?: React.Dispatch<React.SetStateAction<any[]>>;
   setConsoleLogs?: React.Dispatch<React.SetStateAction<string[]>>;
   addNotification: (message: string, type: NotificationType) => void;
-  addPanelsToStoryboard: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
-  
+  addPanelsToStoryboard: (
+    urls: string[],
+    currentScrapedList?: string[],
+    shouldScroll?: boolean
+  ) => void;
+
   editCropTop: number;
   setEditCropTop: (val: number) => void;
   editCropBottom: number;
@@ -44,7 +48,9 @@ interface UseCropEditorPipelinesProps {
   setIsDetecting: (val: boolean) => void;
   setDetectedBoxes: React.Dispatch<React.SetStateAction<any[]>>;
   setIsAiDetecting: (val: boolean) => void;
-  setEditMode: (mode: "crop" | "clean_auto" | "clean_manual" | "typeset" | "slices") => void;
+  setEditMode: (
+    mode: "crop" | "clean_auto" | "clean_manual" | "typeset" | "slices"
+  ) => void;
   setSlices: React.Dispatch<React.SetStateAction<Slice[]>>;
   setSelectedSliceId: (id: string | null) => void;
 
@@ -52,10 +58,7 @@ interface UseCropEditorPipelinesProps {
 }
 
 export function useCropEditorPipelines(props: UseCropEditorPipelinesProps) {
-  const {
-    handleAiCrop,
-    handleDetectPanels,
-  } = usePanelDetection({
+  const { handleAiCrop, handleDetectPanels } = usePanelDetection({
     activeFetch: props.activeFetch,
     editingImageIdx: props.editingImageIdx,
     scrapedImages: props.scrapedImages,

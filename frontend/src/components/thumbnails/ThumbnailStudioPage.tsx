@@ -15,7 +15,7 @@ interface ThumbnailStudioPageProps {
 export default function ThumbnailStudioPage({
   panels,
   onNavigateHome,
-  addNotification
+  addNotification,
 }: ThumbnailStudioPageProps) {
   const [conceptPrompt, setConceptPrompt] = useState("");
 
@@ -31,7 +31,8 @@ export default function ThumbnailStudioPage({
             AI Clickbait Thumbnail Studio
           </h2>
           <p className="text-xs text-neutral-400 font-mono mt-0.5">
-            Optimize thumbnail clickbait text overlays, split screens, and layout assets
+            Optimize thumbnail clickbait text overlays, split screens, and
+            layout assets
           </p>
         </div>
         <button
@@ -49,7 +50,11 @@ export default function ThumbnailStudioPage({
           genre={genre}
           onGeneratedConcept={(c) => {
             setConceptPrompt(c);
-            if (addNotification) addNotification("Thumbnail clickbait concept generated!", "success");
+            if (addNotification)
+              addNotification(
+                "Thumbnail clickbait concept generated!",
+                "success"
+              );
           }}
         />
 

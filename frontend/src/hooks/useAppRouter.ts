@@ -14,7 +14,10 @@ interface UseAppRouterProps {
   setMusicTheme: (v: string) => void;
   setAspectRatio: (v: "9:16" | "16:9") => void;
   setFrameRate: (v: number) => void;
-  addNotification: (msg: string, type: "success" | "info" | "warning" | "error") => void;
+  addNotification: (
+    msg: string,
+    type: "success" | "info" | "warning" | "error"
+  ) => void;
   isAuthenticated: boolean;
   authLoading: boolean;
   isInitializing: boolean;
@@ -47,9 +50,15 @@ export function useAppRouter({
   aspectRatio,
   frameRate,
 }: UseAppRouterProps) {
-  const [currentPath, setCurrentPath] = React.useState(window.location.pathname);
-  const [lastEditorPath, setLastEditorPath] = React.useState<string>("/editor/adjust?idx=0");
-  const [activeTheme, setActiveTheme] = React.useState<string>(() => localStorage.getItem("ai_comic_theme") || "obsidian");
+  const [currentPath, setCurrentPath] = React.useState(
+    window.location.pathname
+  );
+  const [lastEditorPath, setLastEditorPath] = React.useState<string>(
+    "/editor/adjust?idx=0"
+  );
+  const [activeTheme, setActiveTheme] = React.useState<string>(
+    () => localStorage.getItem("ai_comic_theme") || "obsidian"
+  );
   const [isPipMode, setIsPipMode] = React.useState<boolean>(false);
 
   // Sync visual theme with root html element
@@ -80,7 +89,10 @@ export function useAppRouter({
         if (decoded.fps) setFrameRate(decoded.fps);
         if (decoded.model) setSelectedModel(decoded.model);
         if (decoded.source) setSelectedSource(decoded.source);
-        addNotification("Workspace session state restored successfully!", "success");
+        addNotification(
+          "Workspace session state restored successfully!",
+          "success"
+        );
       } catch (e) {
         console.error("Failed to decode session state hash:", e);
       }
@@ -95,10 +107,20 @@ export function useAppRouter({
       return;
     }
     const timer = setTimeout(() => {
-      addNotification("System configurations auto-saved successfully!", "success");
+      addNotification(
+        "System configurations auto-saved successfully!",
+        "success"
+      );
     }, 400);
     return () => clearTimeout(timer);
-  }, [voiceActor, musicTheme, aspectRatio, frameRate, activeTheme, addNotification]);
+  }, [
+    voiceActor,
+    musicTheme,
+    aspectRatio,
+    frameRate,
+    activeTheme,
+    addNotification,
+  ]);
 
   // Core router change listener with equality guards
   React.useEffect(() => {
@@ -108,7 +130,10 @@ export function useAppRouter({
 
       // Root redirect logic
       if (!isInitializing && !authLoading) {
-        if (!isAuthenticated && (path === "/" || path === "" || path === "/index.html")) {
+        if (
+          !isAuthenticated &&
+          (path === "/" || path === "" || path === "/index.html")
+        ) {
           window.history.replaceState({}, "", "/landing");
           setCurrentPath("/landing");
           return;
@@ -187,27 +212,38 @@ export function useAppRouter({
     };
 
     window.addEventListener("popstate", handleLocationChange);
-    
+
     return () => {
       window.history.pushState = originalPushState;
       window.history.replaceState = originalReplaceState;
       window.removeEventListener("popstate", handleLocationChange);
     };
-  }, [scrapedImages, panels, editingImageIdx, isAuthenticated, authLoading, isInitializing]);
+  }, [
+    scrapedImages,
+    panels,
+    editingImageIdx,
+    isAuthenticated,
+    authLoading,
+    isInitializing,
+  ]);
 
   const navigateTo = React.useCallback((path: string) => {
     const isCurrentlyEditor = window.location.pathname.startsWith("/editor");
     const isTargetingEditor = path.startsWith("/editor");
-    
+
     if (isCurrentlyEditor && !isTargetingEditor) {
       const isDirty = (window as any).editorHasUnsavedChanges?.();
       if (isDirty) {
-        if (!window.confirm("You have unsaved changes in the editor. Are you sure you want to navigate away?")) {
+        if (
+          !window.confirm(
+            "You have unsaved changes in the editor. Are you sure you want to navigate away?"
+          )
+        ) {
           return;
         }
       }
     }
-    
+
     window.history.pushState({}, "", path);
     window.dispatchEvent(new Event("popstate"));
   }, []);

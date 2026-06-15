@@ -35,8 +35,8 @@ export default function PanelAudioTool({ panel }: PanelAudioToolProps) {
         body: JSON.stringify({
           visual_description: panel.visual_description || "Action scene panel",
           sfx_tag: panel.sfx || "[Action]",
-          model: "gemini-2.5-flash"
-        })
+          model: "gemini-2.5-flash",
+        }),
       });
       const json = await res.json();
       if (json.success && json.result) {
@@ -58,9 +58,10 @@ export default function PanelAudioTool({ panel }: PanelAudioToolProps) {
         body: JSON.stringify({
           character_name: "Protagonist",
           dialogue_sample: panel.speech_text || "Stop right there!",
-          visual_description: panel.visual_description || "Action scene character close-up",
-          model: "gemini-2.5-flash"
-        })
+          visual_description:
+            panel.visual_description || "Action scene character close-up",
+          model: "gemini-2.5-flash",
+        }),
       });
       const json = await res.json();
       if (json.success && json.result) {
@@ -84,7 +85,9 @@ export default function PanelAudioTool({ panel }: PanelAudioToolProps) {
       {/* Sound Effect Synth Prompter */}
       <div className="bg-neutral-900/40 border border-neutral-800 rounded-xl p-4 space-y-3">
         <div className="flex justify-between items-center border-b border-neutral-800 pb-2">
-          <h5 className="text-[11px] font-mono font-bold text-purple-450 uppercase tracking-wider">AI Sound Design Synthesis Prompt</h5>
+          <h5 className="text-[11px] font-mono font-bold text-purple-450 uppercase tracking-wider">
+            AI Sound Design Synthesis Prompt
+          </h5>
           <button
             onClick={handleGenerateSfx}
             disabled={loadingSfx || !panel.sfx}
@@ -103,12 +106,18 @@ export default function PanelAudioTool({ panel }: PanelAudioToolProps) {
         {sfxData && !loadingSfx && (
           <div className="bg-neutral-950 p-3 rounded-lg border border-neutral-850 space-y-2 animate-fade-in">
             <div>
-              <span className="text-[9px] font-mono text-neutral-500 uppercase block">Audio Generator Prompt:</span>
-              <p className="text-[11px] font-sans text-neutral-350 leading-relaxed font-semibold italic">"{sfxData.audio_prompt}"</p>
+              <span className="text-[9px] font-mono text-neutral-500 uppercase block">
+                Audio Generator Prompt:
+              </span>
+              <p className="text-[11px] font-sans text-neutral-350 leading-relaxed font-semibold italic">
+                "{sfxData.audio_prompt}"
+              </p>
             </div>
             <div className="flex justify-between items-center text-[10px] font-mono text-neutral-500 pt-1 border-t border-neutral-900">
               <span>Suggested Mix Volume:</span>
-              <span className="text-purple-400 font-bold">{(sfxData.suggested_volume * 100).toFixed(0)}%</span>
+              <span className="text-purple-400 font-bold">
+                {(sfxData.suggested_volume * 100).toFixed(0)}%
+              </span>
             </div>
           </div>
         )}
@@ -117,7 +126,9 @@ export default function PanelAudioTool({ panel }: PanelAudioToolProps) {
       {/* TTS voice casting parameters */}
       <div className="bg-neutral-900/40 border border-neutral-800 rounded-xl p-4 space-y-3">
         <div className="flex justify-between items-center border-b border-neutral-800 pb-2">
-          <h5 className="text-[11px] font-mono font-bold text-purple-450 uppercase tracking-wider">AI Voice Actor Casting Parameters</h5>
+          <h5 className="text-[11px] font-mono font-bold text-purple-450 uppercase tracking-wider">
+            AI Voice Actor Casting Parameters
+          </h5>
           <button
             onClick={handleGenerateVoice}
             disabled={loadingVoice || !panel.speech_text}
@@ -138,23 +149,35 @@ export default function PanelAudioTool({ panel }: PanelAudioToolProps) {
             <div className="grid grid-cols-2 gap-y-1.5 gap-x-4">
               <div className="flex justify-between border-b border-neutral-900 pb-1">
                 <span className="text-neutral-500">Gender profile</span>
-                <span className="text-neutral-300 font-semibold">{voiceData.gender}</span>
+                <span className="text-neutral-300 font-semibold">
+                  {voiceData.gender}
+                </span>
               </div>
               <div className="flex justify-between border-b border-neutral-900 pb-1">
                 <span className="text-neutral-500">Target age group</span>
-                <span className="text-neutral-300 font-semibold">{voiceData.suggested_age}</span>
+                <span className="text-neutral-300 font-semibold">
+                  {voiceData.suggested_age}
+                </span>
               </div>
               <div className="flex justify-between border-b border-neutral-900 pb-1">
                 <span className="text-neutral-500">Dialogue tempo</span>
-                <span className="text-neutral-300 font-semibold">{voiceData.speech_tempo}x</span>
+                <span className="text-neutral-300 font-semibold">
+                  {voiceData.speech_tempo}x
+                </span>
               </div>
               <div className="flex justify-between border-b border-neutral-900 pb-1">
                 <span className="text-neutral-500">Speech accent</span>
-                <span className="text-neutral-300 font-semibold">{voiceData.accent}</span>
+                <span className="text-neutral-300 font-semibold">
+                  {voiceData.accent}
+                </span>
               </div>
               <div className="col-span-2 pt-1">
-                <span className="text-neutral-500 block">Tonal quality descriptions:</span>
-                <span className="text-purple-300 font-semibold mt-0.5 block">{voiceData.voice_tone}</span>
+                <span className="text-neutral-500 block">
+                  Tonal quality descriptions:
+                </span>
+                <span className="text-purple-300 font-semibold mt-0.5 block">
+                  {voiceData.voice_tone}
+                </span>
               </div>
             </div>
           </div>

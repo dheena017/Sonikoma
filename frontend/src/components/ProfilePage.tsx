@@ -10,7 +10,7 @@ import {
   Camera,
   LayoutGrid,
   Video,
-  Clock
+  Clock,
 } from "lucide-react";
 
 interface ProfilePageProps {
@@ -20,18 +20,26 @@ interface ProfilePageProps {
   onNavigateHome: () => void;
 }
 
-export default function ProfilePage({ user, projects, onLogout, onNavigateHome }: ProfilePageProps) {
+export default function ProfilePage({
+  user,
+  projects,
+  onLogout,
+  onNavigateHome,
+}: ProfilePageProps) {
   return (
     <div className="min-h-screen bg-[#070709] text-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-
         {/* HEADER */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-white/5">
           <div className="flex items-center gap-6">
             <div className="relative group">
               <div className="w-24 h-24 rounded-3xl overflow-hidden border-2 border-purple-500/30 shadow-2xl shadow-purple-500/10 bg-neutral-900">
                 {user?.avatar_url ? (
-                  <img src={user.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                  <img
+                    src={user.avatar_url}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <User className="w-10 h-10 text-neutral-600" />
@@ -43,7 +51,9 @@ export default function ProfilePage({ user, projects, onLogout, onNavigateHome }
               </button>
             </div>
             <div className="space-y-1">
-              <h1 className="text-3xl font-black tracking-tight">{user?.full_name || "Anivox User"}</h1>
+              <h1 className="text-3xl font-black tracking-tight">
+                {user?.full_name || "Anivox User"}
+              </h1>
               <p className="text-neutral-500 flex items-center gap-2 text-sm font-medium">
                 <Mail className="w-4 h-4" />
                 {user?.email}
@@ -68,16 +78,33 @@ export default function ProfilePage({ user, projects, onLogout, onNavigateHome }
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
           {/* SIDEBAR INFO */}
           <div className="lg:col-span-1 space-y-6">
             <section className="bg-neutral-900/50 rounded-3xl p-6 border border-white/5 space-y-6">
-              <h3 className="text-sm font-black uppercase tracking-widest text-neutral-500">Account Details</h3>
+              <h3 className="text-sm font-black uppercase tracking-widest text-neutral-500">
+                Account Details
+              </h3>
               <div className="space-y-4">
-                <InfoItem icon={<Shield className="w-4 h-4" />} label="Member Since" value="January 2025" />
-                <InfoItem icon={<LayoutGrid className="w-4 h-4" />} label="Total Projects" value={projects.length.toString()} />
-                <InfoItem icon={<Video className="w-4 h-4" />} label="Videos Rendered" value="12" />
-                <InfoItem icon={<Clock className="w-4 h-4" />} label="AI Credits" value="840 / 1000" />
+                <InfoItem
+                  icon={<Shield className="w-4 h-4" />}
+                  label="Member Since"
+                  value="January 2025"
+                />
+                <InfoItem
+                  icon={<LayoutGrid className="w-4 h-4" />}
+                  label="Total Projects"
+                  value={projects.length.toString()}
+                />
+                <InfoItem
+                  icon={<Video className="w-4 h-4" />}
+                  label="Videos Rendered"
+                  value="12"
+                />
+                <InfoItem
+                  icon={<Clock className="w-4 h-4" />}
+                  label="AI Credits"
+                  value="840 / 1000"
+                />
               </div>
               <button className="w-full py-3 bg-neutral-800 hover:bg-neutral-700 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2">
                 <Settings className="w-3.5 h-3.5" />
@@ -101,27 +128,44 @@ export default function ProfilePage({ user, projects, onLogout, onNavigateHome }
             <div className="space-y-3">
               {projects.length === 0 ? (
                 <div className="py-12 bg-neutral-900/30 rounded-3xl border-2 border-dashed border-white/5 flex flex-col items-center justify-center text-center space-y-4">
-                   <div className="w-12 h-12 rounded-2xl bg-neutral-800 flex items-center justify-center">
-                     <LayoutGrid className="w-6 h-6 text-neutral-600" />
-                   </div>
-                   <p className="text-neutral-500 text-sm font-medium">No projects found. Start by scraping a Webtoon!</p>
-                   <button onClick={onNavigateHome} className="text-purple-400 font-bold hover:underline">Create your first project</button>
+                  <div className="w-12 h-12 rounded-2xl bg-neutral-800 flex items-center justify-center">
+                    <LayoutGrid className="w-6 h-6 text-neutral-600" />
+                  </div>
+                  <p className="text-neutral-500 text-sm font-medium">
+                    No projects found. Start by scraping a Webtoon!
+                  </p>
+                  <button
+                    onClick={onNavigateHome}
+                    className="text-purple-400 font-bold hover:underline"
+                  >
+                    Create your first project
+                  </button>
                 </div>
               ) : (
                 projects.map((project, idx) => (
-                  <ProjectItem key={project.project_id || idx} project={project} />
+                  <ProjectItem
+                    key={project.project_id || idx}
+                    project={project}
+                  />
                 ))
               )}
             </div>
           </div>
-
         </div>
       </div>
     </div>
   );
 }
 
-function InfoItem({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) {
+function InfoItem({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3 text-neutral-400">
@@ -145,7 +189,8 @@ function ProjectItem({ project }: { project: any }) {
             {project.title || "Untitled Project"}
           </h4>
           <p className="text-[10px] text-neutral-500 font-mono uppercase tracking-widest">
-            {project.status || "Completed"} • {project.created_at || "2 hours ago"}
+            {project.status || "Completed"} •{" "}
+            {project.created_at || "2 hours ago"}
           </p>
         </div>
       </div>

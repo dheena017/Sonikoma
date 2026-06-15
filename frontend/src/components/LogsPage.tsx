@@ -1,5 +1,12 @@
 import React, { useState, useMemo } from "react";
-import { Terminal, Search, Download, ArrowLeft, Trash2, Filter } from "lucide-react";
+import {
+  Terminal,
+  Search,
+  Download,
+  ArrowLeft,
+  Trash2,
+  Filter,
+} from "lucide-react";
 
 interface LogsPageProps {
   consoleLogs: string[];
@@ -7,22 +14,40 @@ interface LogsPageProps {
   onNavigateHome: () => void;
 }
 
-export default function LogsPage({ consoleLogs, setConsoleLogs, onNavigateHome }: LogsPageProps) {
+export default function LogsPage({
+  consoleLogs,
+  setConsoleLogs,
+  onNavigateHome,
+}: LogsPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [levelFilter, setLevelFilter] = useState<"ALL" | "INFO" | "WARNING" | "ERROR">("ALL");
+  const [levelFilter, setLevelFilter] = useState<
+    "ALL" | "INFO" | "WARNING" | "ERROR"
+  >("ALL");
 
   const filteredLogs = useMemo(() => {
     return consoleLogs.filter((log) => {
       // 1. Text Search matching
-      const matchesSearch = log.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = log
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
       if (!matchesSearch) return false;
 
       // 2. Level filter matching
       if (levelFilter === "ALL") return true;
-      if (levelFilter === "ERROR" && (log.toLowerCase().includes("[error]") || log.toLowerCase().includes("fail"))) return true;
-      if (levelFilter === "WARNING" && log.toLowerCase().includes("[warning]")) return true;
+      if (
+        levelFilter === "ERROR" &&
+        (log.toLowerCase().includes("[error]") ||
+          log.toLowerCase().includes("fail"))
+      )
+        return true;
+      if (levelFilter === "WARNING" && log.toLowerCase().includes("[warning]"))
+        return true;
       if (levelFilter === "INFO") {
-        return !log.toLowerCase().includes("[error]") && !log.toLowerCase().includes("fail") && !log.toLowerCase().includes("[warning]");
+        return (
+          !log.toLowerCase().includes("[error]") &&
+          !log.toLowerCase().includes("fail") &&
+          !log.toLowerCase().includes("[warning]")
+        );
       }
       return false;
     });
@@ -42,7 +67,9 @@ export default function LogsPage({ consoleLogs, setConsoleLogs, onNavigateHome }
   };
 
   const handleClearLogs = () => {
-    if (window.confirm("Are you sure you want to clear the logs console cache?")) {
+    if (
+      window.confirm("Are you sure you want to clear the logs console cache?")
+    ) {
       setConsoleLogs([]);
     }
   };
@@ -53,7 +80,12 @@ export default function LogsPage({ consoleLogs, setConsoleLogs, onNavigateHome }
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
         <div>
           <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1.5">
-            <span className="hover:text-purple-400 cursor-pointer" onClick={onNavigateHome}>Dashboard</span>
+            <span
+              className="hover:text-purple-400 cursor-pointer"
+              onClick={onNavigateHome}
+            >
+              Dashboard
+            </span>
             <span>&gt;</span>
             <span className="text-purple-400">System Logs</span>
           </div>
@@ -61,7 +93,10 @@ export default function LogsPage({ consoleLogs, setConsoleLogs, onNavigateHome }
             <Terminal className="h-6 w-6 text-purple-400" />
             Live System Orchestrator Console
           </h2>
-          <p className="text-xs text-neutral-400 font-mono mt-0.5">Real-time pipeline diagnostics, image processing threads, and API executions</p>
+          <p className="text-xs text-neutral-400 font-mono mt-0.5">
+            Real-time pipeline diagnostics, image processing threads, and API
+            executions
+          </p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -138,7 +173,9 @@ export default function LogsPage({ consoleLogs, setConsoleLogs, onNavigateHome }
             <span className="h-2.5 w-2.5 rounded-full bg-red-500/60" />
             <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/60" />
             <span className="h-2.5 w-2.5 rounded-full bg-green-500/60" />
-            <span className="ml-1.5 font-bold tracking-wider">system_stream.log</span>
+            <span className="ml-1.5 font-bold tracking-wider">
+              system_stream.log
+            </span>
           </div>
           <div>
             Showing {filteredLogs.length} of {consoleLogs.length} entries
@@ -156,7 +193,10 @@ export default function LogsPage({ consoleLogs, setConsoleLogs, onNavigateHome }
             filteredLogs.map((log, index) => {
               // Highlight log levels dynamically
               let logColorClass = "text-[#dcdcdc]";
-              if (log.toLowerCase().includes("[error]") || log.toLowerCase().includes("fail")) {
+              if (
+                log.toLowerCase().includes("[error]") ||
+                log.toLowerCase().includes("fail")
+              ) {
                 logColorClass = "text-red-400 font-semibold";
               } else if (log.toLowerCase().includes("[warning]")) {
                 logColorClass = "text-amber-400 font-semibold";
@@ -164,13 +204,21 @@ export default function LogsPage({ consoleLogs, setConsoleLogs, onNavigateHome }
                 logColorClass = "text-cyan-400";
               } else if (log.toLowerCase().includes("[scraper]")) {
                 logColorClass = "text-purple-400";
-              } else if (log.toLowerCase().includes("[api]") || log.toLowerCase().includes("success")) {
+              } else if (
+                log.toLowerCase().includes("[api]") ||
+                log.toLowerCase().includes("success")
+              ) {
                 logColorClass = "text-emerald-400";
               }
 
               return (
-                <div key={index} className={`hover:bg-neutral-900/40 px-2 py-0.5 rounded transition-colors whitespace-pre-wrap ${logColorClass}`}>
-                  <span className="text-neutral-600 mr-2 select-none">{(index + 1).toString().padStart(4, "0")}</span>
+                <div
+                  key={index}
+                  className={`hover:bg-neutral-900/40 px-2 py-0.5 rounded transition-colors whitespace-pre-wrap ${logColorClass}`}
+                >
+                  <span className="text-neutral-600 mr-2 select-none">
+                    {(index + 1).toString().padStart(4, "0")}
+                  </span>
                   {log}
                 </div>
               );

@@ -4,6 +4,7 @@ description: Generate structured visual scene description for generative video s
 model: gemini-2.5-flash
 response_schema: SceneCompositionModel
 ---
+
 Write a detailed generative visual prompt describing this comic scene:
 Illustration description: "{visual_description}"
 Audio context: "{speech_text}"

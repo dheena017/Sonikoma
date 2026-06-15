@@ -28,7 +28,11 @@ interface UseImageTransformProps {
   debugMode: boolean;
   fillColor: string;
   gpu: boolean;
-  addPanelsToStoryboard: (urls: string[], currentScrapedList?: string[], shouldScroll?: boolean) => void;
+  addPanelsToStoryboard: (
+    urls: string[],
+    currentScrapedList?: string[],
+    shouldScroll?: boolean
+  ) => void;
 }
 
 export function useImageTransform({
@@ -59,11 +63,14 @@ export function useImageTransform({
   gpu,
   addPanelsToStoryboard,
 }: UseImageTransformProps) {
-
   const handleTransform = async (type: "rotate" | "flip", value: string) => {
     if (editingImageIdx === null) return;
     const currentUrl = scrapedImages[editingImageIdx];
-    console.log(`[Image Editor] Transform requested: ${type} with value: ${value} on image #${editingImageIdx + 1}`);
+    console.log(
+      `[Image Editor] Transform requested: ${type} with value: ${value} on image #${
+        editingImageIdx + 1
+      }`
+    );
     setIsTransforming(true);
     try {
       const response = await activeFetch("/api/transform-image", {
@@ -80,7 +87,9 @@ export function useImageTransform({
           return copy;
         });
         addNotification(
-          type === "rotate" ? `Rotated ${value}°` : `Flipped ${value === "h" ? "Horizontally" : "Vertically"}`,
+          type === "rotate"
+            ? `Rotated ${value}°`
+            : `Flipped ${value === "h" ? "Horizontally" : "Vertically"}`,
           "success"
         );
       }
@@ -94,7 +103,23 @@ export function useImageTransform({
 
   const handleMergeWithNext = async (
     count: number,
-    config: { direction: "next" | "prev"; layout: "vertical" | "horizontal"; spacing: number; spacingColor: string; scaleToFit: boolean; alignMode: "center" | "start" | "end"; padding: number; } = { direction: "next", layout: "vertical", spacing: 0, spacingColor: "white", scaleToFit: true, alignMode: "center", padding: 0 }
+    config: {
+      direction: "next" | "prev";
+      layout: "vertical" | "horizontal";
+      spacing: number;
+      spacingColor: string;
+      scaleToFit: boolean;
+      alignMode: "center" | "start" | "end";
+      padding: number;
+    } = {
+      direction: "next",
+      layout: "vertical",
+      spacing: 0,
+      spacingColor: "white",
+      scaleToFit: true,
+      alignMode: "center",
+      padding: 0,
+    }
   ) => {
     if (editingImageIdx === null) return;
 
@@ -102,14 +127,20 @@ export function useImageTransform({
     let spliceStart = editingImageIdx;
 
     if (config.direction === "next") {
-      urlsToMerge = scrapedImages.slice(editingImageIdx, editingImageIdx + count + 1);
+      urlsToMerge = scrapedImages.slice(
+        editingImageIdx,
+        editingImageIdx + count + 1
+      );
     } else {
       spliceStart = Math.max(0, editingImageIdx - count);
       urlsToMerge = scrapedImages.slice(spliceStart, editingImageIdx + 1);
     }
 
     if (urlsToMerge.length < 2) return;
-    console.log(`[Stitcher] Merging ${urlsToMerge.length} images starting from index ${spliceStart}`, urlsToMerge);
+    console.log(
+      `[Stitcher] Merging ${urlsToMerge.length} images starting from index ${spliceStart}`,
+      urlsToMerge
+    );
     setIsMerging(true);
     try {
       const response = await activeFetch("/api/stitch-images", {
@@ -122,7 +153,7 @@ export function useImageTransform({
           spacingColor: config.spacingColor,
           scaleToFit: config.scaleToFit,
           alignMode: config.alignMode,
-          padding: config.padding
+          padding: config.padding,
         }),
       });
       if (!response.ok) throw new Error("Merge failed: " + response.status);
@@ -155,7 +186,12 @@ export function useImageTransform({
     text: string
   ) => {
     if (editingImageIdx === null || !imageUrl) return;
-    console.log(`[Speech Bubbles] Cleaning single bubble on image #${editingImageIdx + 1}`, { box: { ymin, xmin, ymax, xmax }, text });
+    console.log(
+      `[Speech Bubbles] Cleaning single bubble on image #${
+        editingImageIdx + 1
+      }`,
+      { box: { ymin, xmin, ymax, xmax }, text }
+    );
     setIsCleaning(true);
     try {
       const response = await activeFetch("/api/remove-speech-bubbles", {
@@ -175,7 +211,8 @@ export function useImageTransform({
           gpu,
         }),
       });
-      if (!response.ok) throw new Error(`Single bubble clean failed: ${response.status}`);
+      if (!response.ok)
+        throw new Error(`Single bubble clean failed: ${response.status}`);
       const data = await response.json();
       if (data.success && data.url) {
         if (setScrapedImages) {
@@ -213,7 +250,12 @@ export function useImageTransform({
     e.stopPropagation();
     if (editingImageIdx === null || !setScrapedImages) return;
     const originalUrl = scrapedImages[editingImageIdx];
-    console.log(`[Image Editor] Cropping single slice ${slice.id} from image #${editingImageIdx + 1}`, slice);
+    console.log(
+      `[Image Editor] Cropping single slice ${slice.id} from image #${
+        editingImageIdx + 1
+      }`,
+      slice
+    );
 
     setIsCroppingSlice(slice.id);
     try {
@@ -243,7 +285,9 @@ export function useImageTransform({
 
       if (setConsoleLogs) {
         setConsoleLogs((prev) => [
-          `[Image Editor] Extracted cut from Frame #${editingImageIdx + 1} and added to Storyboard`,
+          `[Image Editor] Extracted cut from Frame #${
+            editingImageIdx + 1
+          } and added to Storyboard`,
           ...prev,
         ]);
       }

@@ -35,7 +35,6 @@ export function useStoryboardOperations({
   musicTheme,
   narrationStyle = "long",
 }: UseStoryboardOperationsProps) {
-  
   const {
     showBulkOps,
     setShowBulkOps,
@@ -57,7 +56,13 @@ export function useStoryboardOperations({
     handleShiftPanel,
     handleModifySFX,
     handleModifyVisualDescription,
-  } = useSceneModifier({ panels, setPanels, setCurrentPanelIndex, setConsoleLogs, addNotification });
+  } = useSceneModifier({
+    panels,
+    setPanels,
+    setCurrentPanelIndex,
+    setConsoleLogs,
+    addNotification,
+  });
 
   const {
     analyzingPanelId,
@@ -85,7 +90,11 @@ export function useStoryboardOperations({
   });
 
   const handleClearTimeline = () => {
-    if (window.confirm("Are you sure you want to clear the entire storyboard timeline?")) {
+    if (
+      window.confirm(
+        "Are you sure you want to clear the entire storyboard timeline?"
+      )
+    ) {
       setPanels([]);
       addNotification?.("Storyboard cleared", "info");
     }

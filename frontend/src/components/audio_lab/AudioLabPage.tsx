@@ -15,9 +15,8 @@ export default function AudioLabPage({
   panels,
   setMusicTheme,
   onNavigateHome,
-  addNotification
+  addNotification,
 }: AudioLabPageProps) {
-
   const handleSelectMusicTheme = (theme: string) => {
     setMusicTheme(theme);
     if (addNotification) {
@@ -34,7 +33,8 @@ export default function AudioLabPage({
             AI Audio Production & Mixing Lab
           </h2>
           <p className="text-xs text-neutral-400 font-mono mt-0.5">
-            Coordinate sound effects overlays, ambient loops, and relative volume mixes
+            Coordinate sound effects overlays, ambient loops, and relative
+            volume mixes
           </p>
         </div>
         <button
