@@ -12,7 +12,7 @@ Episode: "{episode}"
 
 Please generate exactly {active_slices_count} distinct chronological narration or panel speech lines.
 For each of the {active_slices_count} panels, provide:
-1. "speech_text": An engaging, atmospheric description (under 20 words).
+1. "speech_text": An engaging, atmospheric description, dialogue, or narrative storytelling (35 to 70 words, detailed for YouTube story narrations).
 2. "sfx": A punchy comic-style sound effect in brackets.
 3. "motion_type": One of 'zoom_in', 'zoom_out', 'pan_left', 'pan_right', 'pan_up', 'pan_down'.
 

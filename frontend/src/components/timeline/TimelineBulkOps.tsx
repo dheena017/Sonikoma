@@ -34,7 +34,7 @@ export default function TimelineBulkOps({
           <input
             type="number"
             min={1}
-            max={15}
+            max={45}
             step={0.5}
             value={bulkDuration}
             onChange={(e) => setBulkDuration(parseFloat(e.target.value) || 4.0)}

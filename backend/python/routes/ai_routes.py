@@ -228,14 +228,16 @@ def validate_analysis(raw: Dict[str, Any]) -> Dict[str, Any]:
     except (ValueError, TypeError):
         suggested_duration = 4.5
         
-    # Clamp suggested duration between 2.0 and 10.0 seconds
-    suggested_duration = max(2.0, min(10.0, suggested_duration))
+    # Clamp suggested duration between 2.0 and 45.0 seconds
+    suggested_duration = max(2.0, min(45.0, suggested_duration))
         
-    # 2. Extract and sanitize speech text
-    speech_val = speech.strip()[:200] if isinstance(speech, str) and speech.strip() else ""
+    # 2. Extract and sanitize speech text (limit increased to 800 characters)
+    speech_val = speech.strip()[:800] if isinstance(speech, str) and speech.strip() else ""
     
-    # 3. Respect AI's suggested duration directly, clamping to a reasonable range [2.0, 12.0]
-    final_duration = max(2.0, min(12.0, round(suggested_duration, 1)))
+    # 3. Respect AI's suggested duration or dynamically align with speech voice track length
+    speech_duration = estimate_duration_from_speech(speech_val)
+    final_duration = max(suggested_duration, speech_duration)
+    final_duration = max(2.0, min(45.0, round(final_duration, 1)))
     
     return {
         "speech_text": speech_val if speech_val else DEFAULT_ANALYSIS["speech_text"],
