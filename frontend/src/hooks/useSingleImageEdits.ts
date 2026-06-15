@@ -144,7 +144,15 @@ export function useSingleImageEdits({
     }
   };
 
-  const handleStitchWithNext = async (idx: number) => {
+  const handleStitchWithNext = React.useCallback(async (idx: number) => {
+    // Need current state of scrapedImages. Since this is an async handler,
+    // we can use a functional update or just accept that it might be slightly stale
+    // if not in deps, but here we actually need the values to send to API.
+    // However, to keep the function stable, we can use a ref or just include it in deps.
+    // If we include it in deps, it changes every time scrapedImages changes.
+    // But scrapedImages ONLY changes when we add/remove/stitch.
+    // Selecting doesn't change scrapedImages. So it's fine for selection performance.
+
     if (idx < 0 || idx >= scrapedImages.length - 1) return;
     
     setMergingIndices(prev => [...prev, idx]);
@@ -199,7 +207,7 @@ export function useSingleImageEdits({
     } finally {
       setMergingIndices(prev => prev.filter(i => i !== idx));
     }
-  };
+  }, [scrapedImages, fetchWithInterceptor, setConsoleLogs, setScrapedImages, setSelectedScraped, addNotification]);
 
   return {
     mergingIndices,
