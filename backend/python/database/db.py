@@ -47,6 +47,73 @@ def init_db() -> None:
 # Initialize SQLite database immediately upon import
 init_db()
 
+# ─── User Helpers ─────────────────────────────────────────────────────────────
+
+def create_user(data: Dict[str, Any]) -> None:
+    """Create a new user."""
+    conn = get_db_connection()
+    try:
+        conn.execute("""
+            INSERT INTO users (user_id, email, hashed_password, full_name, avatar_url, google_id)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (
+            data['user_id'],
+            data['email'],
+            data.get('hashed_password'),
+            data.get('full_name'),
+            data.get('avatar_url'),
+            data.get('google_id')
+        ))
+        conn.commit()
+    finally:
+        conn.close()
+
+def get_user_by_email(email: str) -> Optional[Dict[str, Any]]:
+    """Get a user by their email address."""
+    conn = get_db_connection()
+    try:
+        row = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+        return dict(row) if row else None
+    finally:
+        conn.close()
+
+def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
+    """Get a user by their user_id."""
+    conn = get_db_connection()
+    try:
+        row = conn.execute('SELECT * FROM users WHERE user_id = ?', (user_id,)).fetchone()
+        return dict(row) if row else None
+    finally:
+        conn.close()
+
+def get_user_by_google_id(google_id: str) -> Optional[Dict[str, Any]]:
+    """Get a user by their Google ID."""
+    conn = get_db_connection()
+    try:
+        row = conn.execute('SELECT * FROM users WHERE google_id = ?', (google_id,)).fetchone()
+        return dict(row) if row else None
+    finally:
+        conn.close()
+
+def update_user(user_id: str, updates: Dict[str, Any]) -> None:
+    """Update user information."""
+    conn = get_db_connection()
+    try:
+        set_parts = []
+        params = []
+        for key in ('full_name', 'avatar_url', 'hashed_password'):
+            if key in updates:
+                set_parts.append(f"{key} = ?")
+                params.append(updates[key])
+        if set_parts:
+            set_parts.append("updated_at = datetime('now')")
+            params.append(user_id)
+            query = f"UPDATE users SET {', '.join(set_parts)} WHERE user_id = ?"
+            conn.execute(query, tuple(params))
+            conn.commit()
+    finally:
+        conn.close()
+
 # ─── Query Helpers ────────────────────────────────────────────────────────────
 
 def insert_project(data: Dict[str, Any]) -> None:
@@ -54,10 +121,11 @@ def insert_project(data: Dict[str, Any]) -> None:
     conn = get_db_connection()
     try:
         conn.execute("""
-            INSERT INTO projects (project_id, url, title, genre, episode, status, panels_count, video_url)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO projects (project_id, user_id, url, title, genre, episode, status, panels_count, video_url)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             data['project_id'],
+            data.get('user_id'),
             data['url'],
             data.get('title', 'Untitled Webtoon'),
             data.get('genre', 'general'),
@@ -70,11 +138,14 @@ def insert_project(data: Dict[str, Any]) -> None:
     finally:
         conn.close()
 
-def get_all_projects() -> List[Dict[str, Any]]:
+def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
     """Get all projects ordered by most recent first."""
     conn = get_db_connection()
     try:
-        rows = conn.execute('SELECT * FROM projects ORDER BY created_at DESC').fetchall()
+        if user_id:
+            rows = conn.execute('SELECT * FROM projects WHERE user_id = ? ORDER BY created_at DESC', (user_id,)).fetchall()
+        else:
+            rows = conn.execute('SELECT * FROM projects ORDER BY created_at DESC').fetchall()
         return [dict(r) for r in rows]
     finally:
         conn.close()

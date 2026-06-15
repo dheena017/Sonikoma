@@ -14,6 +14,7 @@ interface HeaderProps {
   onToggleSidebar?: () => void;
   isSidebarOpen?: boolean;
   backendStatus: "online" | "offline" | "checking";
+  user?: any;
 }
 
 export default function Header({
@@ -27,7 +28,8 @@ export default function Header({
   isCleaningBubbles,
   onToggleSidebar,
   isSidebarOpen = false,
-  backendStatus
+  backendStatus,
+  user
 }: HeaderProps) {
   
   const navigateTo = (path: string) => {
@@ -91,6 +93,24 @@ export default function Header({
           <span className={`h-2 w-2 rounded-full ${isProcessing ? 'bg-purple-500 animate-ping' : 'bg-emerald-500'}`} />
           <span className="text-neutral-300 font-bold">{isProcessing ? "PROCESSING" : "READY"}</span>
         </div>
+
+        {/* User Profile */}
+        <button
+          onClick={() => navigateTo("/profile")}
+          className="flex items-center gap-2 px-1.5 py-1 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 transition-all cursor-pointer overflow-hidden max-w-[120px]"
+          title="View Profile"
+        >
+          <div className="w-6 h-6 rounded-lg bg-purple-600/20 flex items-center justify-center overflow-hidden shrink-0 border border-purple-500/30">
+            {user?.avatar_url ? (
+              <img src={user.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-[10px] font-bold text-purple-400">U</span>
+            )}
+          </div>
+          <span className="text-[10px] font-bold text-neutral-300 truncate hidden sm:inline">
+            {user?.full_name?.split(' ')[0] || "User"}
+          </span>
+        </button>
       </div>
     </header>
   );

@@ -293,6 +293,7 @@ async def add_process_time_header(request: Request, call_next):
 # ─────────────────────────────────────────────────────────────────────────────
 from routes.health  import router as health_router
 from routes.projects import router as projects_router
+from routes.auth_routes import router as auth_router
 from routes.proxy import router as proxy_router
 from routes.image_routes import router as image_routes_router
 from routes.scraper_routes import router as scraper_routes_router
@@ -301,6 +302,7 @@ from routes.video import router as video_router
 
 # 1. Mount original Express routes under /api
 app.include_router(health_router,         prefix="/api", tags=["Health & System"])
+app.include_router(auth_router,           prefix="/api/auth", tags=["Authentication"])
 app.include_router(projects_router,       prefix="/api/projects", tags=["Projects"])
 app.include_router(proxy_router,          prefix="/api", tags=["Proxy"])
 app.include_router(image_routes_router,   prefix="/api", tags=["Image Editing"])
