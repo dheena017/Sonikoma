@@ -5,7 +5,6 @@ import PipelineStatusCard from "./pipeline/PipelineStatusCard.js";
 import TerminalLogs from "./terminal/TerminalLogs.js";
 import StoryboardTimeline from "./timeline/StoryboardTimeline.js";
 import VideoMonitor from "./video/VideoMonitor.js";
-import FinalVideoPlayer from "./video/FinalVideoPlayer.js";
 import VolumeAndProgressPanel from "./video/VolumeAndProgressPanel.js";
 import OutputMetadataPanel from "./OutputMetadataPanel.js";
 
@@ -29,6 +28,7 @@ interface AppWorkspaceProps {
   setEditAutoTrim: (v: boolean) => void;
   showBubbleModal: boolean;
   setShowBubbleModal: (v: boolean) => void;
+  playStoryboardAudio: (idx: number) => void;
   isCleaningBubbles: boolean;
   cleanProgress: any;
   bubbleCroppingImgUrl: string | null;
@@ -118,6 +118,7 @@ export function AppWorkspace({
   setEditAutoTrim,
   showBubbleModal,
   setShowBubbleModal,
+  playStoryboardAudio,
   isCleaningBubbles,
   cleanProgress,
   bubbleCroppingImgUrl,
@@ -282,6 +283,7 @@ export function AppWorkspace({
               voiceActor={voiceActor}
               musicTheme={musicTheme}
               narrationStyle={narrationStyle}
+              playStoryboardAudio={playStoryboardAudio}
               bubbleSensitivity={bubbleSensitivity}
               bubbleDetectionStyle={bubbleDetectionStyle}
               bubbleEraseMethod={bubbleEraseMethod}
@@ -321,15 +323,11 @@ export function AppWorkspace({
             reprocessingPanelId={reprocessingPanelId}
           />
 
-          {/* SECTION: FINAL COMPILED VIDEO PREVIEW */}
-          {videoUrl && (
-            <FinalVideoPlayer videoUrl={videoUrl} aspectRatio={aspectRatio} />
-          )}
-
           {/* PLAYBACK CONTROLLER ACCESSORIES FOR STORYBOARD PREVIEW */}
           {activePreviewTab === "storyboard" && panels.length > 0 && (
             <VolumeAndProgressPanel
               panels={panels}
+              setPanels={setPanels}
               currentPanelIndex={currentPanelIndex}
               playbackTime={playbackTime}
               storyboardPlaying={storyboardPlaying}
@@ -339,6 +337,7 @@ export function AppWorkspace({
               setIsMuted={setIsMuted}
               volume={volume}
               setVolume={setVolume}
+              addNotification={addNotification}
             />
           )}
 

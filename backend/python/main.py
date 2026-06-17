@@ -15,14 +15,14 @@ import warnings
 import uuid
 from contextlib import asynccontextmanager
 
-# Fix Windows asyncio subprocess NotImplementedError
-if sys.platform == "win32":
-    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
-
 # Suppress noisy external library warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning, module="pkg_resources")
+
+# Fix Windows asyncio subprocess NotImplementedError
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
 import uvicorn
 from fastapi import FastAPI, Request
@@ -55,13 +55,14 @@ class ColoredFormatter(logging.Formatter):
     RESET = "\x1b[0m"
     GREEN = "\x1b[38;5;120m"
     CYAN = "\x1b[38;5;86m"
+    MAGENTA = "\x1b[1;38;5;198m" # Bold Magenta for [BACKEND]
     
     FORMATS = {
-        logging.DEBUG: GREY + "%(asctime)s " + RESET + GREEN + "%(levelname)-8s" + RESET + CYAN + " %(name)s" + RESET + " - %(message)s",
-        logging.INFO: GREY + "%(asctime)s " + RESET + BLUE + "%(levelname)-8s" + RESET + CYAN + " %(name)s" + RESET + " - %(message)s",
-        logging.WARNING: GREY + "%(asctime)s " + RESET + YELLOW + "%(levelname)-8s" + RESET + CYAN + " %(name)s" + RESET + " - %(message)s",
-        logging.ERROR: GREY + "%(asctime)s " + RESET + RED + "%(levelname)-8s" + RESET + CYAN + " %(name)s" + RESET + " - %(message)s",
-        logging.CRITICAL: GREY + "%(asctime)s " + RESET + BOLD_RED + "%(levelname)-8s" + RESET + CYAN + " %(name)s" + RESET + " - %(message)s"
+        logging.DEBUG: GREY + "%(asctime)s " + RESET + MAGENTA + "[BACKEND] " + RESET + GREEN + "[%(levelname)s] " + RESET + CYAN + "[%(filename)s] " + RESET + "%(message)s",
+        logging.INFO: GREY + "%(asctime)s " + RESET + MAGENTA + "[BACKEND] " + RESET + BLUE + "[%(levelname)s] " + RESET + CYAN + "[%(filename)s] " + RESET + "%(message)s",
+        logging.WARNING: GREY + "%(asctime)s " + RESET + MAGENTA + "[BACKEND] " + RESET + YELLOW + "[%(levelname)s] " + RESET + CYAN + "[%(filename)s] " + RESET + "%(message)s",
+        logging.ERROR: GREY + "%(asctime)s " + RESET + MAGENTA + "[BACKEND] " + RESET + RED + "[%(levelname)s] " + RESET + CYAN + "[%(filename)s] " + RESET + "%(message)s",
+        logging.CRITICAL: GREY + "%(asctime)s " + RESET + MAGENTA + "[BACKEND] " + RESET + BOLD_RED + "[%(levelname)s] " + RESET + CYAN + "[%(filename)s] " + RESET + "%(message)s"
     }
 
     def format(self, record):
@@ -183,6 +184,12 @@ async def lifespan(app: FastAPI):
         logging.getLogger(logger_name).addFilter(EndpointFilter())
     logging.getLogger().addFilter(EndpointFilter())
 
+    # Initialize database and load skills inside the worker process
+    from database.db import init_db
+    init_db()
+    from skills.registry import registry
+    registry.load_skills()
+
     # Purge stale temporary workspace directories
     _clean_temp_workspace()
 
@@ -202,9 +209,9 @@ async def lifespan(app: FastAPI):
 
     # Emit structured startup logs so the frontend terminal shows them on connect.
     # (banner uses print() which bypasses the handler; these go through the buffer)
-    logger.info(f"[Backend] Anivox Compute Engine v{API_VERSION} started on port {BACKEND_PORT}")
-    logger.info(f"[Backend] Python {sys.version.split(' ')[0]} | {platform.system()} {platform.machine()}")
-    logger.info(f"[Backend] Swagger docs available at http://localhost:{BACKEND_PORT}/api/docs")
+    logger.info(f"Anivox Compute Engine v{API_VERSION} started on port {BACKEND_PORT}")
+    logger.info(f"Python {sys.version.split(' ')[0]} | {platform.system()} {platform.machine()}")
+    logger.info(f"Swagger docs available at http://localhost:{BACKEND_PORT}/api/docs")
 
     # Capability probe results
     caps = {
@@ -217,17 +224,17 @@ async def lifespan(app: FastAPI):
     for label, mod in caps.items():
         try:
             __import__(mod)
-            logger.info(f"[Backend] [OK] {label} loaded successfully")
+            logger.info(f"[OK] {label} loaded successfully")
         except ImportError:
-            logger.warning(f"[WARNING] {label} not available - some features may be disabled")
+            logger.warning(f"{label} not available - some features may be disabled")
 
     # API key status
     if os.getenv("GEMINI_API_KEY"):
-        logger.info("[Backend] [OK] GEMINI_API_KEY detected - AI features enabled")
+        logger.info("[OK] GEMINI_API_KEY detected - AI features enabled")
     else:
-        logger.warning("[WARNING] GEMINI_API_KEY not set - AI panel analysis disabled")
+        logger.warning("GEMINI_API_KEY not set - AI panel analysis disabled")
 
-    logger.info("[Backend] Server ready - waiting for requests")
+    logger.info("Server ready - waiting for requests")
 
     yield
     uptime = round(time.time() - SERVER_START, 1)
@@ -299,6 +306,7 @@ from routes.image_routes import router as image_routes_router
 from routes.scraper_routes import router as scraper_routes_router
 from routes.ai_routes import router as ai_routes_router
 from routes.video import router as video_router
+from routes.audio import router as audio_router
 
 # 1. Mount original Express routes under /api
 app.include_router(health_router,         prefix="/api", tags=["Health & System"])
@@ -309,10 +317,12 @@ app.include_router(image_routes_router,   prefix="/api", tags=["Image Editing"])
 app.include_router(scraper_routes_router, prefix="/api", tags=["Scraper"])
 app.include_router(ai_routes_router,      prefix="/api", tags=["AI Processing"])
 app.include_router(video_router,          prefix="/api", tags=["Video Compilation"])
+app.include_router(audio_router,          prefix="/api/audio", tags=["Audio Synthesis"])
 
 # 2. Maintain /api/py endpoints for backward compatibility (optional/fallback)
 app.include_router(health_router,         prefix="/api/py", tags=["Health & System (Legacy)"])
 app.include_router(video_router,          prefix="/api/py/video", tags=["Video Compilation (Legacy)"])
+app.include_router(audio_router,          prefix="/api/py/audio", tags=["Audio Synthesis (Legacy)"])
 
 # ─────────────────────────────────────────────────────────────────────────────
 # STATIC FRONTEND SERVING (Production Only)
@@ -422,48 +432,101 @@ def _print_startup_banner():
     ram_total = _get_ram_info()
     port = BACKEND_PORT
     mode = f"{CLR_ALERT}Production{CLR_RESET}" if IS_PRODUCTION else f"{CLR_SUCCESS}Development (Reload Active){CLR_RESET}"
+    url_api = f"http://localhost:{port}/api"
+    url_docs = f"http://localhost:{port}/api/docs"
+
+    def _visual_width(s: str) -> int:
+        import re
+        ansi_escape = re.compile(r'\x1b\[[0-9;]*[mK]')
+        clean = ansi_escape.sub('', s)
+        width = len(clean)
+        for char in clean:
+            if ord(char) > 0x1f000 or ord(char) in (0x2705, 0x274c, 0x2139):
+                width += 1
+        return width
+
+    def _format_line(content: str) -> str:
+        width = _visual_width(content)
+        pad = " " * (70 - width)
+        return f"{CLR_BORDER}║{CLR_RESET}{content}{pad}{CLR_BORDER}║{CLR_RESET}"
+
+    line_title    = _format_line(f"  🐍  {CLR_TITLE}ANIVOX COMPUTE ENGINE{CLR_RESET}  —  {CLR_HEADER}FastAPI v{API_VERSION}{CLR_RESET}")
+    line_py       = _format_line(f"  {CLR_LABEL}Python:{CLR_RESET}      {py_ver}")
+    line_plat     = _format_line(f"  {CLR_LABEL}Platform:{CLR_RESET}    {plat}")
+    line_hw       = _format_line(f"  {CLR_LABEL}Hardware:{CLR_RESET}    {cpu_cores} CPUs | {ram_total}")
+    line_mode     = _format_line(f"  {CLR_LABEL}Environment:{CLR_RESET} {mode}")
+    line_port     = _format_line(f"  {CLR_LABEL}Port:{CLR_RESET}        {port}")
+    line_keys_hdr = _format_line(f"  {CLR_LABEL}API Keys:{CLR_RESET}")
+    line_gemini   = _format_line(f"    - Gemini:    {masked_gemini}")
+    line_hf       = _format_line(f"    - HuggingFace: {masked_hf}")
+    line_caps_hdr = _format_line(f"  {CLR_LABEL}Core Capabilities:{CLR_RESET}")
+    line_cv2      = _format_line(f"    - OpenCV (cv2):      {cap_cv2}")
+    line_ocr      = _format_line(f"    - EasyOCR:           {cap_ocr}")
+    line_mpy      = _format_line(f"    - MoviePy:           {cap_mpy}")
+    line_tts      = _format_line(f"    - Edge TTS:          {cap_tts}")
+    line_gai      = _format_line(f"    - Google GenAI:      {cap_gai}")
+    line_api      = _format_line(f"  🚀 {CLR_SUCCESS}Unified API Active on: {url_api}{CLR_RESET}")
+    line_docs     = _format_line(f"  📖 {CLR_SUCCESS}Swagger API Docs:      {url_docs}{CLR_RESET}")
 
     banner = f"""{CLR_BORDER}╔══════════════════════════════════════════════════════════════════════╗{CLR_RESET}
-{CLR_BORDER}║{CLR_RESET}  🐍  {CLR_TITLE}ANIVOX COMPUTE ENGINE{CLR_RESET}  —  {CLR_HEADER}FastAPI v{API_VERSION:<10}{CLR_RESET}              {CLR_BORDER}║{CLR_RESET}
+{line_title}
 {CLR_BORDER}╠══════════════════════════════════════════════════════════════════════╣{CLR_RESET}
-{CLR_BORDER}║{CLR_RESET}  {CLR_LABEL}Python:{CLR_RESET}      {py_ver:<52}  {CLR_BORDER}║{CLR_RESET}
-{CLR_BORDER}║{CLR_RESET}  {CLR_LABEL}Platform:{CLR_RESET}    {plat:<52}  {CLR_BORDER}║{CLR_RESET}
-{CLR_BORDER}║{CLR_RESET}  {CLR_LABEL}Hardware:{CLR_RESET}    {f"{cpu_cores} CPUs | {ram_total} RAM":<52}  {CLR_BORDER}║{CLR_RESET}
-{CLR_BORDER}║{CLR_RESET}  {CLR_LABEL}Environment:{CLR_RESET} {mode:<61} {CLR_BORDER}║{CLR_RESET}
-{CLR_BORDER}║{CLR_RESET}  {CLR_LABEL}Port:{CLR_RESET}        {str(port):<52}  {CLR_BORDER}║{CLR_RESET}
+{line_py}
+{line_plat}
+{line_hw}
+{line_mode}
+{line_port}
 {CLR_BORDER}╠══════════════════════════════════════════════════════════════════════╣{CLR_RESET}
-{CLR_BORDER}║{CLR_RESET}  {CLR_LABEL}API Keys:{CLR_RESET}                                                    {CLR_BORDER}║{CLR_RESET}
-{CLR_BORDER}║{CLR_RESET}    - Gemini:    {masked_gemini:<64}  {CLR_BORDER}║{CLR_RESET}
-{CLR_BORDER}║{CLR_RESET}    - HuggingFace: {masked_hf:<62}  {CLR_BORDER}║{CLR_RESET}
+{line_keys_hdr}
+{line_gemini}
+{line_hf}
 {CLR_BORDER}╠══════════════════════════════════════════════════════════════════════╣{CLR_RESET}
-{CLR_BORDER}║{CLR_RESET}  {CLR_LABEL}Core Capabilities:{CLR_RESET}                                                   {CLR_BORDER}║{CLR_RESET}
-{CLR_BORDER}║{CLR_RESET}    - OpenCV (cv2):      {cap_cv2:<56} {CLR_BORDER}║{CLR_RESET}
-{CLR_BORDER}║{CLR_RESET}    - EasyOCR:           {cap_ocr:<56} {CLR_BORDER}║{CLR_RESET}
-{CLR_BORDER}║{CLR_RESET}    - MoviePy:           {cap_mpy:<56} {CLR_BORDER}║{CLR_RESET}
-{CLR_BORDER}║{CLR_RESET}    - Edge TTS:          {cap_tts:<56} {CLR_BORDER}║{CLR_RESET}
-{CLR_BORDER}║{CLR_RESET}    - Google GenAI:      {cap_gai:<56} {CLR_BORDER}║{CLR_RESET}
+{line_caps_hdr}
+{line_cv2}
+{line_ocr}
+{line_mpy}
+{line_tts}
+{line_gai}
 {CLR_BORDER}╠══════════════════════════════════════════════════════════════════════╣{CLR_RESET}
-{CLR_BORDER}║{CLR_RESET}  🚀 {CLR_SUCCESS}Unified API Active on: http://localhost:{port}/api{CLR_RESET:<15}   {CLR_BORDER}║{CLR_RESET}
-{CLR_BORDER}║{CLR_RESET}  📖 {CLR_SUCCESS}Swagger API Docs:      http://localhost:{port}/api/docs{CLR_RESET:<15}  {CLR_BORDER}║{CLR_RESET}
+{line_api}
+{line_docs}
 {CLR_BORDER}╚══════════════════════════════════════════════════════════════════════╝{CLR_RESET}"""
 
     try:
         print(banner)
     except UnicodeEncodeError:
         # Fallback to plain ASCII
+        def _format_ascii(content: str) -> str:
+            return f"|{content:<66}|"
+
+        url_api_ascii = f"http://localhost:{port}/api"
+        url_docs_ascii = f"http://localhost:{port}/api/docs"
+        
+        gemini_status_ascii = "Set" if os.getenv("GEMINI_API_KEY") else "Not set"
+        prod_mode_ascii = "Production" if IS_PRODUCTION else "Development"
+        
+        line_title_ascii = _format_ascii(f"  ANIVOX UNIFIED PYTHON BACKEND  -  FastAPI v{API_VERSION}")
+        line_py_ascii    = _format_ascii(f"  Python:    {py_ver}")
+        line_plat_ascii  = _format_ascii(f"  Platform:  {plat}")
+        line_port_ascii  = _format_ascii(f"  Port:      {port}")
+        line_gem_ascii   = _format_ascii(f"  Gemini:    {gemini_status_ascii}")
+        line_mode_ascii  = _format_ascii(f"  Prod Mode: {prod_mode_ascii}")
+        line_api_ascii   = _format_ascii(f"  Unified API active on: {url_api_ascii}")
+        line_docs_ascii  = _format_ascii(f"  Interactive API docs:  {url_docs_ascii}")
+
         ascii_banner = f"""
-+------------------------------------------------------------------+
-|  ANIVOX UNIFIED PYTHON BACKEND  -  FastAPI v{API_VERSION:<18}       |
-+------------------------------------------------------------------+
-|  Python:    {py_ver:<51}|
-|  Platform:  {plat:<51}|
-|  Port:      {port:<51}|
-|  Gemini:    {os.getenv("GEMINI_API_KEY") is not None:<51}|
-|  Prod Mode: {str(IS_PRODUCTION):<51}|
-+------------------------------------------------------------------+
-|  Unified API active on http://localhost:{port:<25}/api       |
-|  Interactive API docs: http://localhost:{port:<25}/api/docs  |
-+------------------------------------------------------------------+
++--------------------------------------------------------------------+
+{line_title_ascii}
++--------------------------------------------------------------------+
+{line_py_ascii}
+{line_plat_ascii}
+{line_port_ascii}
+{line_gem_ascii}
+{line_mode_ascii}
++--------------------------------------------------------------------+
+{line_api_ascii}
+{line_docs_ascii}
++--------------------------------------------------------------------+
         """
         print(ascii_banner)
 
@@ -472,18 +535,53 @@ def _print_startup_banner():
 # ENTRYPOINT
 # ─────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
+    custom_log_config = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "custom": {
+                "()": "main.ColoredFormatter",
+            },
+        },
+        "handlers": {
+            "default": {
+                "class": "logging.StreamHandler",
+                "formatter": "custom",
+                "stream": "ext://sys.stdout",
+            },
+        },
+        "loggers": {
+            "uvicorn": {
+                "handlers": ["default"],
+                "level": "INFO",
+                "propagate": False,
+            },
+            "uvicorn.error": {
+                "handlers": ["default"],
+                "level": "INFO",
+                "propagate": False,
+            },
+            "uvicorn.access": {
+                "handlers": ["default"],
+                "level": "INFO",
+                "propagate": False,
+            },
+        },
+    }
+
     run_args = {
         "app": "main:app",
         "host": "127.0.0.1",
         "port": BACKEND_PORT,
         "log_level": "info",
+        "log_config": custom_log_config,
     }
     if IS_PRODUCTION:
         run_args["reload"] = False
         run_args["workers"] = 2
     else:
         run_args["reload"] = True
-        run_args["reload_dirs"] = ["backend/python"]
+        run_args["reload_dirs"] = ["."]
 
     uvicorn.run(**run_args)
     # Trigger auto-reload for database re-seeding config

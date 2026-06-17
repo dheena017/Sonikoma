@@ -6,6 +6,7 @@ from PIL import Image
 # Add backend/python to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'backend', 'python')))
 
+# pyrefly: ignore [missing-import]
 from utils.image_utils import stitch_images_together
 
 def create_test_image(color, size=(100, 100)):

@@ -4,10 +4,12 @@ import CommentReplier from "./CommentReplier.js";
 
 interface EngagementPageProps {
   onNavigateHome: () => void;
+  scrapedTitle?: string;
 }
 
 export default function EngagementPage({
   onNavigateHome,
+  scrapedTitle,
 }: EngagementPageProps) {
   return (
     <div className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in">
@@ -37,7 +39,7 @@ export default function EngagementPage({
           </p>
         </div>
 
-        <CommentReplier title="Overpowered S-Rank Recap" />
+        <CommentReplier title={scrapedTitle || "Overpowered S-Rank Recap"} />
       </div>
     </div>
   );

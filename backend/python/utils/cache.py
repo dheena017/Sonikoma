@@ -6,6 +6,10 @@ Shared in-memory caches with TTL eviction, hit/miss tracking, and stats.
 """
 
 import time
+import os
+import json
+import tempfile
+import shutil
 from typing import Dict, Any, Optional, TypeVar, Generic
 
 T = TypeVar('T')
@@ -25,6 +29,41 @@ class CacheStore(Generic[T]):
         self.hits = 0
         self.misses = 0
         self.evictions = 0
+        self.disk_dir = os.path.join(tempfile.gettempdir(), "anivox_disk_cache", name)
+
+    def _write_to_disk(self, key: str, value: Any) -> None:
+        try:
+            os.makedirs(self.disk_dir, exist_ok=True)
+            if isinstance(value, bytes):
+                with open(os.path.join(self.disk_dir, f"{key}.bin"), "wb") as f:
+                    f.write(value)
+            elif isinstance(value, dict) and "data" in value and isinstance(value["data"], bytes):
+                # Save data bytes
+                with open(os.path.join(self.disk_dir, f"{key}.bin"), "wb") as f:
+                    f.write(value["data"])
+                # Save metadata
+                meta = {k: v for k, v in value.items() if k != "data"}
+                with open(os.path.join(self.disk_dir, f"{key}.json"), "w", encoding="utf-8") as f:
+                    json.dump(meta, f)
+        except Exception:
+            pass
+
+    def _read_from_disk(self, key: str) -> Optional[Any]:
+        try:
+            bin_path = os.path.join(self.disk_dir, f"{key}.bin")
+            json_path = os.path.join(self.disk_dir, f"{key}.json")
+            if os.path.exists(bin_path):
+                with open(bin_path, "rb") as f:
+                    data = f.read()
+                if os.path.exists(json_path):
+                    with open(json_path, "r", encoding="utf-8") as f:
+                        meta = json.load(f)
+                    meta["data"] = data
+                    return meta
+                return data
+        except Exception:
+            pass
+        return None
 
     def set(self, key: str, value: T, ttl_sec: Optional[float] = None) -> None:
         # Evict oldest entry if at capacity (dict keeps insertion order in Python 3.7+)
@@ -37,16 +76,31 @@ class CacheStore(Generic[T]):
         ttl = ttl_sec if ttl_sec is not None else self.default_ttl_sec
         expires_at = time.time() + ttl if ttl is not None else None
         self.store[key] = CacheEntry(value, expires_at)
+        self._write_to_disk(key, value)
 
     def get(self, key: str) -> Optional[T]:
         entry = self.store.get(key)
         if not entry:
+            disk_val = self._read_from_disk(key)
+            if disk_val is not None:
+                ttl = self.default_ttl_sec
+                expires_at = time.time() + ttl if ttl is not None else None
+                self.store[key] = CacheEntry(disk_val, expires_at)
+                self.hits += 1
+                return disk_val
             self.misses += 1
             return None
 
         # Check TTL expiration
         if entry.expires_at is not None and time.time() > entry.expires_at:
             self.store.pop(key, None)
+            try:
+                bin_path = os.path.join(self.disk_dir, f"{key}.bin")
+                json_path = os.path.join(self.disk_dir, f"{key}.json")
+                if os.path.exists(bin_path): os.remove(bin_path)
+                if os.path.exists(json_path): os.remove(json_path)
+            except Exception:
+                pass
             self.evictions += 1
             self.misses += 1
             return None
@@ -59,13 +113,31 @@ class CacheStore(Generic[T]):
         return self.get(key) is not None
 
     def delete(self, key: str) -> bool:
+        on_disk = False
+        try:
+            bin_path = os.path.join(self.disk_dir, f"{key}.bin")
+            json_path = os.path.join(self.disk_dir, f"{key}.json")
+            if os.path.exists(bin_path):
+                os.remove(bin_path)
+                on_disk = True
+            if os.path.exists(json_path):
+                os.remove(json_path)
+                on_disk = True
+        except Exception:
+            pass
+
         if key in self.store:
             self.store.pop(key)
             return True
-        return False
+        return on_disk
 
     def clear(self) -> None:
         self.store.clear()
+        try:
+            if os.path.exists(self.disk_dir):
+                shutil.rmtree(self.disk_dir, ignore_errors=True)
+        except Exception:
+            pass
 
     @property
     def size(self) -> int:
@@ -81,6 +153,13 @@ class CacheStore(Generic[T]):
         ]
         for k in expired_keys:
             self.store.pop(k, None)
+            try:
+                bin_path = os.path.join(self.disk_dir, f"{k}.bin")
+                json_path = os.path.join(self.disk_dir, f"{k}.json")
+                if os.path.exists(bin_path): os.remove(bin_path)
+                if os.path.exists(json_path): os.remove(json_path)
+            except Exception:
+                pass
             self.evictions += 1
             purged += 1
         return purged

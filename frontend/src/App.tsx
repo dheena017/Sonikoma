@@ -1,4 +1,11 @@
+// ============================================================================
+// SECTION 1: IMPORTS & CORE DEPENDENCIES
+// ============================================================================
+
+// --- React & State Hooks ---
 import React from "react";
+
+// --- Custom Logic Hooks ---
 import { useAppLogic } from "./hooks/useAppLogic.js";
 import { useAppRouter } from "./hooks/useAppRouter.js";
 import {
@@ -7,13 +14,9 @@ import {
 } from "./hooks/useGlobalShortcuts.js";
 import { useBackendHealth } from "./hooks/useBackendHealth.js";
 
-// Child Components
+// --- Layout & Main Workspace Components ---
 import Header from "./components/Header.js";
 import Sidebar from "./components/Sidebar.js";
-import CropEditorModal from "./components/CropEditorModal.js";
-import BubbleCleanerModal from "./components/processing/BubbleCleanerModal.js";
-import AutoCropModal from "./components/processing/AutoCropModal.js";
-import NotificationStack from "./components/NotificationStack.js";
 import { AppWorkspace } from "./components/AppWorkspace.js";
 import PageNotFound from "./components/PageNotFound.js";
 import AdvancedSettings from "./components/AdvancedSettings.js";
@@ -21,7 +24,13 @@ import LogsPage from "./components/LogsPage.js";
 import StatusPage from "./components/StatusPage.js";
 import ShortcutsPage from "./components/ShortcutsPage.js";
 
-// Auth & Landing Pages
+// --- Processing & Editor Modals ---
+import CropEditorModal from "./components/CropEditorModal.js";
+import BubbleCleanerModal from "./components/processing/BubbleCleanerModal.js";
+import AutoCropModal from "./components/processing/AutoCropModal.js";
+import NotificationStack from "./components/NotificationStack.js";
+
+// --- Authentication & Landing Views ---
 import LandingPage from "./components/landing/LandingPage.js";
 import LoginPage from "./components/auth/LoginPage.js";
 import RegisterPage from "./components/auth/RegisterPage.js";
@@ -29,7 +38,7 @@ import ForgotPasswordPage from "./components/auth/ForgotPasswordPage.js";
 import ProfilePage from "./components/ProfilePage.js";
 import LoadingPage from "./components/LoadingPage.js";
 
-// AI Assistant Suite Page Imports
+// --- AI Creator & Engagement Suite Views ---
 import AIOptimizerPage from "./components/optimizer/AIOptimizerPage.js";
 import PanelAssistantPage from "./components/panel_assistant/PanelAssistantPage.js";
 import CharacterProfilePage from "./components/characters/CharacterProfilePage.js";
@@ -41,12 +50,28 @@ import VoiceStudioPage from "./components/voice/VoiceStudioPage.js";
 import CTRAnalyticsPage from "./components/analytics/CTRAnalyticsPage.js";
 import NotificationsPage from "./components/NotificationsPage.js";
 
+// ============================================================================
+// SECTION 2: MAIN APP COMPONENT
+// ============================================================================
+
 export default function App() {
-  const appLogic = useAppLogic();
+  // --------------------------------------------------------------------------
+  // SUB-SECTION 2.1: INITIALIZE CUSTOM & CORE HOOKS
+  // --------------------------------------------------------------------------
+
+  // --- Backend Engine Diagnostic Hook ---
   const { status: backendStatus, checkHealth: recheckBackend } =
     useBackendHealth();
+
+  // --- Mobile Sidebar Toggle State ---
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+
+  // --- Main Application Logic & Hook ---
+  const appLogic = useAppLogic();
+
+  // --- Destructuring Logic Fields & Callbacks ---
   const {
+    // Workspace & Panel states
     panels,
     setPanels,
     consoleLogs,
@@ -57,6 +82,10 @@ export default function App() {
     setSelectedScraped,
     activePreviewTab,
     setActivePreviewTab,
+    scrapedTitle,
+    scrapedGenre,
+
+    // Image Editing states
     editingImageIdx,
     setEditingImageIdx,
     editCropTop,
@@ -71,6 +100,10 @@ export default function App() {
     setEditAutoTrim,
     imageEditStates,
     setImageEditStates,
+    reprocessingPanelId,
+    isSavingEdit,
+
+    // Bubble Cleaner configuration
     showBubbleModal,
     setShowBubbleModal,
     bubbleDetectionStyle,
@@ -88,6 +121,8 @@ export default function App() {
     isCleaningBubbles,
     cleanProgress,
     bubbleCroppingImgUrl,
+
+    // Panel Auto-Cropping configuration
     showAutoCropModal,
     setShowAutoCropModal,
     cropSensitivity,
@@ -123,27 +158,14 @@ export default function App() {
     setCropCloseKernelSize,
     activeAutoCropTab,
     setActiveAutoCropTab,
-    videoPlayerRef,
-    user,
-    isAuthenticated,
-    authLoading,
-    isInitializing,
-    login,
-    register,
-    logout,
-    forgotPassword,
-    notifications,
-    errorPopup,
-    setErrorPopup,
-    addNotification,
-    removeNotification,
-    fetchWithInterceptor,
-    targetUrl,
-    setTargetUrl,
+
+    // Video Synthesis settings
     voiceActor,
     setVoiceActor,
     musicTheme,
     setMusicTheme,
+    narrationStyle,
+    setNarrationStyle,
     aspectRatio,
     setAspectRatio,
     selectedModel,
@@ -152,6 +174,9 @@ export default function App() {
     setSelectedSource,
     frameRate,
     setFrameRate,
+
+    // Video Playback & Volume Control
+    videoPlayerRef,
     volume,
     setVolume,
     isMuted,
@@ -163,14 +188,17 @@ export default function App() {
     storyboardPlaying,
     toggleStoryboardPlayback,
     resetStoryboardPlayback,
+    playStoryboardAudio,
+
+    // Pipeline Engine Status & Actions
     isProcessing,
     progressStatus,
     isScraping,
     mergingIndices,
     videoUrl,
     setVideoUrl,
-    reprocessingPanelId,
-    isSavingEdit,
+    totalCalculatedDuration,
+    scrapeImages,
     handleGenerateVideo,
     handleSaveEditedImage,
     handleSaveMultipleCuts,
@@ -179,16 +207,35 @@ export default function App() {
     addPanelsToStoryboard,
     handleCleanBubblesSelected,
     handleAutoCropSelected,
-    totalCalculatedDuration,
-    scrapeImages,
-    narrationStyle,
-    setNarrationStyle,
+
+    // Authentication Profile & Actions
+    user,
+    isAuthenticated,
+    authLoading,
+    isInitializing,
+    login,
+    register,
+    logout,
+    forgotPassword,
+
+    // Notification Hub & Alerts
+    notifications,
+    errorPopup,
+    setErrorPopup,
+    addNotification,
+    removeNotification,
     clearAllNotifications,
     markAllNotificationsAsRead,
     markNotificationAsRead,
     deleteNotification,
+
+    // Utility Handlers
+    fetchWithInterceptor,
+    targetUrl,
+    setTargetUrl,
   } = appLogic;
 
+  // --- Router & Path Hook ---
   const {
     currentPath,
     lastEditorPath,
@@ -221,6 +268,7 @@ export default function App() {
     isInitializing,
   });
 
+  // --- Global Keyboard Shortcuts Hook ---
   const { shortcuts, setShortcuts } = useGlobalShortcuts({
     scrapedImages,
     selectedScraped,
@@ -239,6 +287,9 @@ export default function App() {
     setIsPipMode,
   });
 
+  // --------------------------------------------------------------------------
+  // SUB-SECTION 2.2: ROUTING / NAVIGATION PATH CHECKS
+  // --------------------------------------------------------------------------
   const isDashboardPath = currentPath === "/dashboard";
   const isDashboardOnly = currentPath === "/dashboard";
   const isSettingsPath = currentPath === "/settings";
@@ -258,6 +309,7 @@ export default function App() {
   const isVoicePath = currentPath === "/ai-voice";
   const isAnalyticsPath = currentPath === "/ai-analytics";
   const isProfilePath = currentPath === "/profile";
+  const isNotificationsPath = currentPath === "/notifications";
   const isLandingPath =
     currentPath === "/" ||
     currentPath === "/landing" ||
@@ -267,11 +319,16 @@ export default function App() {
   const isRegisterPath = currentPath === "/register";
   const isForgotPasswordPath = currentPath === "/forgot-password";
 
-  // Auth Guard
+  // --------------------------------------------------------------------------
+  // SUB-SECTION 2.3: AUTHENTICATION GUARDS & EARLY RETURNS
+  // --------------------------------------------------------------------------
+
+  // --- Guard: Session Initialization loading state ---
   if (isInitializing || authLoading) {
     return <LoadingPage status="Authenticating Session..." />;
   }
 
+  // --- Guard: Public Landing Page ---
   if (isLandingPath) {
     return (
       <LandingPage
@@ -281,6 +338,7 @@ export default function App() {
     );
   }
 
+  // --- Guard: Login Screen ---
   if (isLoginPath) {
     return (
       <LoginPage
@@ -291,6 +349,7 @@ export default function App() {
     );
   }
 
+  // --- Guard: Registration Screen ---
   if (isRegisterPath) {
     return (
       <RegisterPage
@@ -300,6 +359,7 @@ export default function App() {
     );
   }
 
+  // --- Guard: Password Recovery Screen ---
   if (isForgotPasswordPath) {
     return (
       <ForgotPasswordPage
@@ -309,7 +369,7 @@ export default function App() {
     );
   }
 
-  // Protected Routes - Redirect to Landing if not authenticated
+  // --- Guard: Protected Route Redirect ---
   if (
     !isAuthenticated &&
     !isLandingPath &&
@@ -320,14 +380,16 @@ export default function App() {
     setTimeout(() => navigateTo("/"), 0);
     return <LoadingPage status="Redirecting to Landing..." />;
   }
-  const isNotificationsPath = currentPath === "/notifications";
 
+  // --------------------------------------------------------------------------
+  // SUB-SECTION 2.4: APPLICATION WORKSPACE AND PAGE RENDERING (JSX)
+  // --------------------------------------------------------------------------
   return (
     <div
       id="app_root"
       className="min-h-screen bg-[#070709] text-neutral-100 flex flex-col lg:flex-row selection:bg-purple-600 selection:text-white relative"
     >
-      {/* SIDEBAR FOR NAV */}
+      {/* --- Page Navigation Sidebar --- */}
       <Sidebar
         isProcessing={isProcessing}
         panels={panels}
@@ -342,9 +404,10 @@ export default function App() {
         onClose={() => setIsSidebarOpen(false)}
       />
 
-      {/* MAIN VIEW CONTROLLER */}
+      {/* --- Main Contents Controller & Router --- */}
       <div className="flex-grow flex-1 flex flex-col min-h-screen lg:max-h-screen lg:overflow-y-auto justify-between">
         <div>
+          {/* Engine Health Banner */}
           {backendStatus === "offline" && (
             <div className="bg-gradient-to-r from-rose-950/90 to-red-950/95 border-b border-rose-800/40 px-4 py-3 text-center text-xs sm:text-sm font-semibold text-rose-250 flex items-center justify-center gap-3 z-50 animate-slide-down w-full">
               <span className="flex items-center gap-2 flex-wrap justify-center">
@@ -352,7 +415,7 @@ export default function App() {
                 <span>
                   ⚠️ Computational Engine Server is Offline. Make sure the
                   Python backend is active (run{" "}
-                  <code className="bg-black/50 px-1.5 py-0.5 rounded text-rose-300 font-mono text-xs">
+                  <code className="bg-black/50 px-1.5 py-0.5 rounded text-rose-350 font-mono text-xs">
                     npm run backend
                   </code>
                   ).
@@ -367,7 +430,7 @@ export default function App() {
             </div>
           )}
 
-          {/* BRANDING HEADER */}
+          {/* Top Header */}
           <Header
             isProcessing={isProcessing}
             panels={panels}
@@ -389,7 +452,7 @@ export default function App() {
             clearAllNotifications={clearAllNotifications}
           />
 
-          {/* PAGE 1: DASHBOARD */}
+          {/* PAGE VIEW 1: Main Dashboard Workspace */}
           <div
             className="page-transition w-full flex-1 flex flex-col animate-[fadeIn_0.2s_ease-out]"
             style={{ display: isDashboardPath ? "flex" : "none" }}
@@ -414,6 +477,7 @@ export default function App() {
               setEditAutoTrim={setEditAutoTrim}
               showBubbleModal={showBubbleModal}
               setShowBubbleModal={setShowBubbleModal}
+              playStoryboardAudio={playStoryboardAudio}
               isCleaningBubbles={isCleaningBubbles}
               cleanProgress={cleanProgress}
               bubbleCroppingImgUrl={bubbleCroppingImgUrl}
@@ -480,7 +544,7 @@ export default function App() {
             />
           </div>
 
-          {/* PAGE 2: ADVANCED RENDER SETTINGS */}
+          {/* PAGE VIEW 2: Advanced System Configuration Settings */}
           <div
             className="page-transition w-full flex-1 flex flex-col max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6"
             style={{ display: isSettingsPath ? "flex" : "none" }}
@@ -520,7 +584,7 @@ export default function App() {
             />
           </div>
 
-          {/* PAGE 6: DEDICATED LOGS CONSOLE */}
+          {/* PAGE VIEW 3: Real-Time Engine Logs Console */}
           <div
             className="page-transition w-full flex-1 flex flex-col"
             style={{ display: isLogsPath ? "flex" : "none" }}
@@ -532,7 +596,7 @@ export default function App() {
             />
           </div>
 
-          {/* PAGE 7: COMPUTATIONAL DIAGNOSTICS */}
+          {/* PAGE VIEW 4: Computational Diagnostics Status */}
           <div
             className="page-transition w-full flex-1 flex flex-col"
             style={{ display: isStatusPath ? "flex" : "none" }}
@@ -543,7 +607,7 @@ export default function App() {
             />
           </div>
 
-          {/* PAGE 8: SHORTCUTS CONFIGURATION */}
+          {/* PAGE VIEW 5: Global Shortcuts Configuration */}
           <div
             className="page-transition w-full flex-1 flex flex-col"
             style={{ display: isShortcutsPath ? "flex" : "none" }}
@@ -557,16 +621,18 @@ export default function App() {
             />
           </div>
 
-          {/* PAGE 9: AI VIDEO OPTIMIZER */}
+          {/* PAGE VIEW 6: AI Video Optimizer */}
           {isOptimizerPath && (
             <AIOptimizerPage
               panels={panels}
               onNavigateHome={() => navigateTo("/")}
               addNotification={addNotification}
+              scrapedTitle={scrapedTitle}
+              scrapedGenre={scrapedGenre}
             />
           )}
 
-          {/* PAGE 10: AI PANEL ASSISTANT */}
+          {/* PAGE VIEW 7: AI Panel Editing Assistant */}
           {isPanelAssistantPath && (
             <PanelAssistantPage
               panels={panels}
@@ -576,7 +642,7 @@ export default function App() {
             />
           )}
 
-          {/* PAGE 11: AI CHARACTER DB */}
+          {/* PAGE VIEW 8: AI Character Database */}
           {isCharacterPath && (
             <CharacterProfilePage
               panels={panels}
@@ -585,7 +651,7 @@ export default function App() {
             />
           )}
 
-          {/* PAGE 12: AI TRANSLATION STUDIO */}
+          {/* PAGE VIEW 9: AI Translation Studio */}
           {isTranslationPath && (
             <TranslationStudioPage
               panels={panels}
@@ -595,7 +661,7 @@ export default function App() {
             />
           )}
 
-          {/* PAGE 13: AI AUDIO PRODUCTION LAB */}
+          {/* PAGE VIEW 10: AI Audio Production Lab */}
           {isAudioLabPath && (
             <AudioLabPage
               panels={panels}
@@ -605,38 +671,47 @@ export default function App() {
             />
           )}
 
-          {/* PAGE 14: AI THUMBNAIL STUDIO */}
+          {/* PAGE VIEW 11: AI Video Thumbnail Studio */}
           {isThumbnailPath && (
             <ThumbnailStudioPage
               panels={panels}
               onNavigateHome={() => navigateTo("/")}
               addNotification={addNotification}
+              scrapedTitle={scrapedTitle}
+              scrapedGenre={scrapedGenre}
             />
           )}
 
-          {/* PAGE 15: AI COMMUNITY ENGAGEMENT */}
+          {/* PAGE VIEW 12: AI Community Engagement Studio */}
           {isEngagementPath && (
-            <EngagementPage onNavigateHome={() => navigateTo("/")} />
+            <EngagementPage
+              onNavigateHome={() => navigateTo("/")}
+              scrapedTitle={scrapedTitle}
+            />
           )}
 
-          {/* PAGE 16: AI VOICE CASTING STUDIO */}
+          {/* PAGE VIEW 13: AI Voice Casting & Synthesizer */}
           {isVoicePath && (
             <VoiceStudioPage
               panels={panels}
+              setPanels={setPanels}
               onNavigateHome={() => navigateTo("/")}
               addNotification={addNotification}
+              scrapedGenre={scrapedGenre}
             />
           )}
 
-          {/* PAGE 17: AI CTR PERFORMANCE PREDICTOR */}
+          {/* PAGE VIEW 14: AI CTR Performance & Analytics */}
           {isAnalyticsPath && (
             <CTRAnalyticsPage
               onNavigateHome={() => navigateTo("/")}
               addNotification={addNotification}
+              scrapedTitle={scrapedTitle}
+              panels={panels}
             />
           )}
 
-          {/* PAGE 18: USER PROFILE */}
+          {/* PAGE VIEW 15: User Profile & Account Settings */}
           {isProfilePath && (
             <ProfilePage
               user={user}
@@ -646,7 +721,7 @@ export default function App() {
             />
           )}
 
-          {/* PAGE 18: NOTIFICATION HUB */}
+          {/* PAGE VIEW 16: Notification Center Hub */}
           {isNotificationsPath && (
             <NotificationsPage
               notifications={notifications}
@@ -658,7 +733,7 @@ export default function App() {
             />
           )}
 
-          {/* PAGE 404 (FALLBACK) */}
+          {/* FALLBACK VIEW: 404 Route Not Found */}
           {!isDashboardPath &&
             !isSettingsPath &&
             !isAutoCropPath &&
@@ -682,7 +757,7 @@ export default function App() {
             )}
         </div>
 
-        {/* FOOTER */}
+        {/* --- Global Workspace Footer --- */}
         <footer
           id="footer_pane"
           className="border-t border-neutral-900 bg-neutral-950/20 py-6 text-center text-xs text-neutral-500"
@@ -694,12 +769,17 @@ export default function App() {
         </footer>
       </div>
 
+      {/* --------------------------------------------------------------------------
+      // SUB-SECTION 2.5: GLOBAL MODALS & FLOATERS LAYER
+      // -------------------------------------------------------------------------- */}
+
+      {/* Global Toast Stack */}
       <NotificationStack
         notifications={notifications}
         removeNotification={removeNotification}
       />
 
-      {/* PAGE 3: AUTO CROP */}
+      {/* Modal: Batch Panel Auto Crop */}
       {isAutoCropPath && (
         <AutoCropModal
           onClose={() => navigateTo("/")}
@@ -750,7 +830,7 @@ export default function App() {
         />
       )}
 
-      {/* PAGE 4: BUBBLE CLEANER */}
+      {/* Modal: Batch Speech Bubble Cleaner */}
       {isBubbleCleanerPath && (
         <BubbleCleanerModal
           onClose={() => navigateTo("/")}
@@ -784,7 +864,7 @@ export default function App() {
         />
       )}
 
-      {/* PAGE 5: ADVANCED CROP EDITOR */}
+      {/* Modal: Advanced Crop & Trim Editor */}
       {(isEditorPath || isPipMode) && editingImageIdx !== null && (
         <div
           className={

@@ -3,14 +3,20 @@ import { AreaChart, ArrowLeft } from "lucide-react";
 import TitleABValidator from "./TitleABValidator.js";
 import OutroCliffhangerAnalyzer from "./OutroCliffhangerAnalyzer.js";
 
+import { GeneratedPanel } from "../../types";
+
 interface CTRAnalyticsPageProps {
   onNavigateHome: () => void;
   addNotification?: (msg: string, type: any) => void;
+  scrapedTitle?: string;
+  panels?: GeneratedPanel[];
 }
 
 export default function CTRAnalyticsPage({
   onNavigateHome,
   addNotification,
+  scrapedTitle,
+  panels,
 }: CTRAnalyticsPageProps) {
   const [activeTab, setActiveTab] = useState<"titles" | "outros">("titles");
 
@@ -62,10 +68,17 @@ export default function CTRAnalyticsPage({
       {/* ACTIVE VIEW */}
       <div className="space-y-4">
         {activeTab === "titles" && (
-          <TitleABValidator addNotification={addNotification} />
+          <TitleABValidator
+            addNotification={addNotification}
+            scrapedTitle={scrapedTitle}
+            panels={panels}
+          />
         )}
         {activeTab === "outros" && (
-          <OutroCliffhangerAnalyzer addNotification={addNotification} />
+          <OutroCliffhangerAnalyzer
+            addNotification={addNotification}
+            panels={panels}
+          />
         )}
       </div>
     </div>

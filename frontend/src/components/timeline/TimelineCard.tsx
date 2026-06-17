@@ -22,6 +22,13 @@ interface TimelineCardProps {
   handleAnalyzePanel: (id: number, url: string) => void;
   isSelected: boolean;
   onToggleSelect: () => void;
+  playStoryboardAudio?: (idx: number) => void;
+  onDragStart?: (e: React.DragEvent, index: number) => void;
+  onDragOver?: (e: React.DragEvent, index: number) => void;
+  onDragEnd?: (e: React.DragEvent) => void;
+  onDrop?: (e: React.DragEvent, index: number) => void;
+  isDragging?: boolean;
+  isDragOver?: boolean;
 }
 
 export default function TimelineCard({
@@ -43,19 +50,54 @@ export default function TimelineCard({
   handleAnalyzePanel,
   isSelected,
   onToggleSelect,
+  playStoryboardAudio,
+  onDragStart,
+  onDragOver,
+  onDragEnd,
+  onDrop,
+  isDragging,
+  isDragOver,
 }: TimelineCardProps) {
   const isCurrent =
     idx === currentPanelIndex && activePreviewTab === "storyboard";
 
+  const handleDragStartLocal = (e: React.DragEvent) => {
+    const target = e.target as HTMLElement;
+    // Prevent dragging if interacting with inputs, textareas, selectors or buttons
+    if (
+      target.tagName.toLowerCase() === "textarea" ||
+      target.tagName.toLowerCase() === "input" ||
+      target.tagName.toLowerCase() === "select" ||
+      target.tagName.toLowerCase() === "option" ||
+      target.tagName.toLowerCase() === "button" ||
+      target.closest(".no-drag")
+    ) {
+      e.preventDefault();
+      return;
+    }
+    if (onDragStart) {
+      onDragStart(e, idx);
+    }
+  };
+
   return (
     <div
-      className={`w-[220px] sm:w-[260px] shrink-0 rounded-xl border p-3 space-y-2.5 transition-all ${
-        isCurrent
+      draggable={true}
+      onDragStart={handleDragStartLocal}
+      onDragOver={(e) => onDragOver && onDragOver(e, idx)}
+      onDragEnd={onDragEnd}
+      onDrop={(e) => onDrop && onDrop(e, idx)}
+      className={`w-[220px] sm:w-[260px] shrink-0 rounded-xl border p-3 space-y-2.5 transition-all duration-200 ${
+        isDragging
+          ? "opacity-35 border-dashed border-purple-500/50 bg-neutral-900/20 scale-98"
+          : isDragOver
+          ? "bg-neutral-900 border-purple-400 scale-102 ring-2 ring-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.3)]"
+          : isCurrent
           ? "bg-neutral-800/80 border-purple-500 shadow-lg"
           : isSelected
           ? "bg-neutral-900 border-purple-600 shadow-md shadow-purple-900/30"
           : "bg-neutral-950 border-neutral-800"
-      }`}
+      } cursor-grab active:cursor-grabbing`}
     >
       {/* Image Thumbnail */}
       <div
@@ -67,6 +109,12 @@ export default function TimelineCard({
           setActivePreviewTab("storyboard");
           setPlaybackTime(0);
           onToggleSelect();
+          if (playStoryboardAudio) {
+            // Delay voice synthesis slightly so the UI state change and outline render instantly
+            setTimeout(() => {
+              playStoryboardAudio(idx);
+            }, 50);
+          }
         }}
         className="relative h-28 sm:h-32 rounded-lg overflow-hidden cursor-pointer select-none bg-neutral-950 border border-neutral-800 flex items-center justify-center group"
       >
@@ -178,7 +226,8 @@ export default function TimelineCard({
           disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
           value={panel.speech_text}
           onChange={(e) => handleModifySpeechText(panel.id, e.target.value)}
-          className={`w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all ${
+          placeholder="✦ AI Will Decide"
+          className={`w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all no-drag ${
             panel.isAnalyzing || analyzingPanelId === panel.id
               ? "opacity-60 cursor-not-allowed border-purple-900/40 text-purple-300"
               : ""
@@ -197,7 +246,7 @@ export default function TimelineCard({
           value={panel.sfx || ""}
           onChange={(e) => handleModifySFX(panel.id, e.target.value)}
           placeholder="✦ AI Will Decide"
-          className={`w-full bg-neutral-900 border border-neutral-800 text-[10px] rounded-lg px-2.5 py-1.5 text-neutral-100 outline-none focus:border-purple-500 font-mono transition-all ${
+          className={`w-full bg-neutral-900 border border-neutral-800 text-[10px] rounded-lg px-2.5 py-1.5 text-neutral-100 outline-none focus:border-purple-500 font-mono transition-all no-drag ${
             panel.isAnalyzing || analyzingPanelId === panel.id
               ? "opacity-60 cursor-not-allowed text-purple-300 border-purple-900/40"
               : ""
@@ -218,7 +267,7 @@ export default function TimelineCard({
             handleModifyVisualDescription(panel.id, e.target.value)
           }
           placeholder="✦ AI Will Decide"
-          className={`w-full bg-neutral-900 border border-neutral-800 text-[10px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all resize-none ${
+          className={`w-full bg-neutral-900 border border-neutral-800 text-[10px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all resize-none no-drag ${
             panel.isAnalyzing || analyzingPanelId === panel.id
               ? "opacity-60 cursor-not-allowed text-purple-300 border-purple-900/40"
               : ""
@@ -235,7 +284,7 @@ export default function TimelineCard({
           <select
             value={panel.motion_type ?? ""}
             onChange={(e) => handleModifyMotion(panel.id, e.target.value)}
-            className="bg-neutral-900 text-[11px] text-neutral-300 rounded border border-neutral-800 p-1 w-full outline-none"
+            className="bg-neutral-900 text-[11px] text-neutral-300 rounded border border-neutral-800 p-1 w-full outline-none no-drag"
           >
             <option value="">AI Will Decide</option>
             <option value="zoom_in">Zoom In</option>
@@ -271,7 +320,7 @@ export default function TimelineCard({
                   handleModifyDuration(panel.id, 0);
                 }
               }}
-              className="bg-neutral-900 text-[11px] text-neutral-300 rounded border border-neutral-800 p-1 w-full outline-none text-center font-mono"
+              className="bg-neutral-900 text-[11px] text-neutral-300 rounded border border-neutral-800 p-1 w-full outline-none text-center font-mono no-drag"
             />
           )}
         </div>

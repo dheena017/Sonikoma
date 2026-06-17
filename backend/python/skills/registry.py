@@ -16,18 +16,21 @@ logger = logging.getLogger("anivox.skills.registry")
 class SkillRegistry:
     def __init__(self):
         self._skills: Dict[str, BaseAISkill] = {}
-        self.load_skills()
 
     def register(self, skill: BaseAISkill):
         self._skills[skill.name] = skill
         logger.info(f"Registered AI Skill: '{skill.name}' from {os.path.basename(skill.filepath)}")
 
     def get(self, name: str) -> BaseAISkill:
+        if not self._skills:
+            self.load_skills()
         if name not in self._skills:
             raise KeyError(f"Skill '{name}' is not registered in the AI Skills Registry.")
         return self._skills[name]
 
     def list_skills(self) -> Dict[str, str]:
+        if not self._skills:
+            self.load_skills()
         return {name: skill.description for name, skill in self._skills.items()}
 
     def load_skills(self):

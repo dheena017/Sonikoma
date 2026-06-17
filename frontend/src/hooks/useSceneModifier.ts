@@ -20,25 +20,17 @@ export function useSceneModifier({
     const originalPanel = panels.find((p) => p.id === panelId);
     const originalText = originalPanel ? originalPanel.speech_text : "";
 
-    // If the panel has an existing non-zero duration, preserve it.
-    // Otherwise, estimate based on speech text length.
-    let newDuration =
-      originalPanel && originalPanel.duration > 0.0
-        ? originalPanel.duration
-        : 0.0;
-    let autoAdjusted = false;
-
-    if (newDuration === 0.0 && text.trim()) {
-      const words = text
-        .trim()
-        .split(/\s+/)
-        .filter((w) => w.length > 0).length;
-      newDuration = Math.max(
-        2.5,
-        Math.min(12.0, parseFloat((words / 2.2 + 0.8).toFixed(1)))
-      );
-      autoAdjusted = true;
-    }
+    // Dynamically calculate estimated duration based on dialogue text length
+    const words = text
+      .trim()
+      .split(/\s+/)
+      .filter((w) => w.length > 0).length;
+    
+    const newDuration = text.trim()
+      ? Math.max(2.5, Math.min(12.0, parseFloat((words / 2.2 + 0.8).toFixed(1))))
+      : 3.0; // default for empty/blank panels
+      
+    const autoAdjusted = newDuration !== (originalPanel ? originalPanel.duration : 0.0);
 
     setPanels((prev) =>
       prev.map((p) =>
@@ -62,8 +54,8 @@ export function useSceneModifier({
       ]);
     }
     const durationMsg = autoAdjusted
-      ? `Duration adjusted to ${newDuration}s.`
-      : `Duration preserved at ${newDuration}s.`;
+      ? `Duration updated to ${newDuration}s to match text length.`
+      : `Duration kept at ${newDuration}s.`;
     addNotification?.(
       `Panel #${panelId} dialogue updated. ${durationMsg}`,
       "info"

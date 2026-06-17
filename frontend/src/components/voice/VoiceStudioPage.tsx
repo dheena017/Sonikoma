@@ -6,14 +6,18 @@ import VoiceSettingsPanel from "./VoiceSettingsPanel.js";
 
 interface VoiceStudioPageProps {
   panels: GeneratedPanel[];
+  setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
   onNavigateHome: () => void;
   addNotification?: (msg: string, type: any) => void;
+  scrapedGenre?: string;
 }
 
 export default function VoiceStudioPage({
   panels,
+  setPanels,
   onNavigateHome,
   addNotification,
+  scrapedGenre,
 }: VoiceStudioPageProps) {
   const [activeTab, setActiveTab] = useState<"dramatize" | "cast">("dramatize");
 
@@ -64,7 +68,14 @@ export default function VoiceStudioPage({
 
       {/* ACTIVE VIEW */}
       <div className="space-y-4">
-        {activeTab === "dramatize" && <ScriptDramatizerForm panels={panels} />}
+        {activeTab === "dramatize" && (
+          <ScriptDramatizerForm
+            panels={panels}
+            setPanels={setPanels}
+            addNotification={addNotification}
+            scrapedGenre={scrapedGenre}
+          />
+        )}
         {activeTab === "cast" && (
           <VoiceSettingsPanel addNotification={addNotification} />
         )}

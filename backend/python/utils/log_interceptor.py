@@ -24,29 +24,18 @@ class UIStreamLogHandler(logging.Handler):
     def emit(self, record):
         global log_seq
         try:
+            timestamp = time.strftime("%H:%M:%S", time.localtime(record.created))
             if record.name == "anivox.vite":
                 clean_msg = record.getMessage()
+                formatted_msg = f"{timestamp} [FRONTEND] [INFO] [Vite] {clean_msg}"
             else:
-                raw_msg = self.format(record)
-                clean_msg = ANSI_ESCAPE.sub('', raw_msg)
+                clean_details = ANSI_ESCAPE.sub('', record.getMessage())
+                formatted_msg = f"{timestamp} [BACKEND] [{record.levelname}] [{record.filename}] {clean_details}"
             
-            # Determine prefix category tag matching Express logInterceptor
-            prefix = "[Backend]"
-            if record.levelname == "WARNING" or record.levelname == "WARN":
-                prefix = "[WARNING]"
-            elif record.levelname in ("ERROR", "CRITICAL", "FATAL"):
-                prefix = "[ERROR]"
-                
-            # Prepend category tag if message doesn't start with a bracket prefix
-            if not clean_msg.startswith("["):
-                formatted_msg = f"{prefix} {clean_msg}"
-            else:
-                formatted_msg = clean_msg
-
             log_seq += 1
             entry = {
                 "id": log_seq,
-                "timestamp": time.strftime("%H:%M:%S", time.localtime(record.created)),
+                "timestamp": timestamp,
                 "message": formatted_msg
             }
             

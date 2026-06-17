@@ -42,6 +42,7 @@ interface StoryboardTimelineProps {
   cropCannyLow?: number;
   cropCannyHigh?: number;
   cropCloseKernelSize?: number;
+  playStoryboardAudio?: (idx: number) => void;
 }
 
 export default function StoryboardTimeline({
@@ -78,11 +79,57 @@ export default function StoryboardTimeline({
   cropCannyLow = 20,
   cropCannyHigh = 100,
   cropCloseKernelSize = 15,
+  playStoryboardAudio,
 }: StoryboardTimelineProps) {
   // ── Panel selection state ────────────────────────────────────────────────
   const [selectedPanelIds, setSelectedPanelIds] = useState<Set<number>>(
     new Set()
   );
+
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, idx: number) => {
+    setDraggedIndex(idx);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", idx.toString());
+  };
+
+  const handleDragOver = (e: React.DragEvent, idx: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === idx) return;
+    setDragOverIndex(idx);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetIdx: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === targetIdx) return;
+
+    setPanels((prev) => {
+      const nextPanels = [...prev];
+      const [draggedItem] = nextPanels.splice(draggedIndex, 1);
+      nextPanels.splice(targetIdx, 0, draggedItem);
+      return nextPanels;
+    });
+
+    // Adjust active currentPanelIndex to follow the dragged card
+    if (currentPanelIndex === draggedIndex) {
+      setCurrentPanelIndex(targetIdx);
+    } else if (currentPanelIndex > draggedIndex && currentPanelIndex <= targetIdx) {
+      setCurrentPanelIndex(currentPanelIndex - 1);
+    } else if (currentPanelIndex < draggedIndex && currentPanelIndex >= targetIdx) {
+      setCurrentPanelIndex(currentPanelIndex + 1);
+    }
+
+    addNotification?.("Reordered storyboard cards successfully!", "success");
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
 
   const [isBatchCropping, setIsBatchCropping] = useState(false);
   const [isCleaningBubbles, setIsCleaningBubbles] = useState(false);
@@ -410,6 +457,74 @@ export default function StoryboardTimeline({
     }
   };
 
+  const handleAddBlankPanel = () => {
+    const nextId = Math.max(...panels.map((p) => p.id), 0) + 1;
+    const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+      <defs>
+        <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#18181b"/>
+          <stop offset="100%" stop-color="#09090b"/>
+        </linearGradient>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#g)"/>
+      <rect x="15" y="15" width="770" height="420" rx="12" fill="none" stroke="#27272a" stroke-width="2" stroke-dasharray="8 6"/>
+      <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="bold" font-size="20" fill="#71717a">✦ CUSTOM PANEL ✦</text>
+    </svg>`;
+    const base64Svg = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgContent)));
+
+    const newPanel: GeneratedPanel = {
+      id: nextId,
+      image_url: base64Svg,
+      speech_text: "",
+      sfx: "",
+      duration: 4.5,
+      motion_type: "none",
+      visual_description: "Custom blank card",
+    };
+
+    setPanels((prev) => [...prev, newPanel]);
+    setCurrentPanelIndex(panels.length);
+    addNotification?.("Created custom blank panel card at the end of the timeline.", "success");
+  };
+
+  const handleUploadImagePanel = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      addNotification?.("Please upload a valid image file.", "error");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      if (!dataUrl) return;
+
+      const nextId = Math.max(...panels.map((p) => p.id), 0) + 1;
+      const newPanel: GeneratedPanel = {
+        id: nextId,
+        image_url: dataUrl,
+        speech_text: "",
+        sfx: "",
+        duration: 4.5,
+        motion_type: "none",
+        visual_description: `Uploaded panel: ${file.name}`,
+      };
+
+      setPanels((prev) => [...prev, newPanel]);
+      setCurrentPanelIndex(panels.length);
+      addNotification?.(`Uploaded and inserted "${file.name}" at the end of the timeline.`, "success");
+    };
+
+    reader.onerror = () => {
+      addNotification?.("Failed to read the image file.", "error");
+    };
+
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
   // ────────────────────────────────────────────────────────────────────────
 
   const {
@@ -457,7 +572,19 @@ export default function StoryboardTimeline({
   });
 
   if (panels.length === 0) {
-    return <TimelineEmptyState hasScrapedImages={hasScrapedImages} />;
+    return (
+      <div
+        id="panels_timeline_section"
+        className="bg-neutral-900/60 rounded-2xl border border-neutral-800 p-4 sm:p-6 space-y-4"
+      >
+        <TimelineHeader
+          panelsLength={0}
+          onAddBlankPanel={handleAddBlankPanel}
+          onUploadImagePanel={handleUploadImagePanel}
+        />
+        <TimelineEmptyState hasScrapedImages={hasScrapedImages} />
+      </div>
+    );
   }
 
   const selectedCount = selectedPanelIds.size;
@@ -477,6 +604,8 @@ export default function StoryboardTimeline({
         handleDownloadZip={handleDownloadZip}
         isAnalyzingAll={isAnalyzingAll}
         handleAnalyzeAllPanels={handleAnalyzeAllPanels}
+        onAddBlankPanel={handleAddBlankPanel}
+        onUploadImagePanel={handleUploadImagePanel}
       />
 
       {/* Bulk Operations Menu */}
@@ -522,6 +651,13 @@ export default function StoryboardTimeline({
             handleAnalyzePanel={handleAnalyzePanel}
             isSelected={selectedPanelIds.has(panel.id)}
             onToggleSelect={() => togglePanelSelection(panel.id)}
+            playStoryboardAudio={playStoryboardAudio}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+            onDrop={handleDrop}
+            isDragging={draggedIndex === idx}
+            isDragOver={dragOverIndex === idx}
           />
         ))}
       </div>

@@ -10,17 +10,21 @@ interface ThumbnailStudioPageProps {
   panels: GeneratedPanel[];
   onNavigateHome: () => void;
   addNotification?: (msg: string, type: any) => void;
+  scrapedTitle?: string;
+  scrapedGenre?: string;
 }
 
 export default function ThumbnailStudioPage({
   panels,
   onNavigateHome,
   addNotification,
+  scrapedTitle,
+  scrapedGenre,
 }: ThumbnailStudioPageProps) {
   const [conceptPrompt, setConceptPrompt] = useState("");
 
-  const title = "Overpowered S-Rank Recap";
-  const genre = "Fantasy Action";
+  const title = scrapedTitle || "Overpowered S-Rank Recap";
+  const genre = scrapedGenre || "Fantasy Action";
 
   return (
     <div className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in">

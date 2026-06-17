@@ -24,7 +24,51 @@ export function VideoMonitorActive({
   playbackTime,
   reprocessingPanelId,
 }: VideoMonitorActiveProps) {
+  const [videoCurrentTime, setVideoCurrentTime] = React.useState(0);
   const activeStoryboardPanel = panels[currentPanelIndex] || null;
+
+  // Helper to split and chunk long subtitle dialogues
+  const getSubtitleChunk = (text: string, duration: number, currentTime: number): string => {
+    if (!text) return "";
+    const words = text.trim().split(/\s+/);
+    if (words.length <= 8) return text;
+    
+    // Group words into segments of ~7 words
+    const maxWords = 7;
+    const chunks: string[] = [];
+    for (let i = 0; i < words.length; i += maxWords) {
+      chunks.push(words.slice(i, i + maxWords).join(" "));
+    }
+    
+    const progress = Math.max(0, Math.min(0.999, currentTime / duration));
+    const chunkIndex = Math.floor(progress * chunks.length);
+    return chunks[chunkIndex] || "";
+  };
+
+  React.useEffect(() => {
+    setVideoCurrentTime(0);
+  }, [videoUrl, activePreviewTab]);
+
+  // Find active panel and relative time during video playback
+  let activeVideoPanel: GeneratedPanel | null = null;
+  let relativeVideoTime = 0;
+  
+  if (activePreviewTab === "video" && videoUrl) {
+    let accumulatedTime = 0;
+    for (const panel of panels) {
+      const pDur = panel.duration || 4.5;
+      if (videoCurrentTime >= accumulatedTime && videoCurrentTime < accumulatedTime + pDur) {
+        activeVideoPanel = panel;
+        relativeVideoTime = videoCurrentTime - accumulatedTime;
+        break;
+      }
+      accumulatedTime += pDur;
+    }
+    if (!activeVideoPanel && panels.length > 0 && videoCurrentTime >= accumulatedTime) {
+      activeVideoPanel = panels[panels.length - 1];
+      relativeVideoTime = (activeVideoPanel.duration || 4.5) - 0.01;
+    }
+  }
 
   return (
     <div
@@ -69,7 +113,22 @@ export function VideoMonitorActive({
             autoPlay
             playsInline
             className="w-full h-full object-contain bg-black"
+            onTimeUpdate={(e) => setVideoCurrentTime(e.currentTarget.currentTime)}
           />
+
+          {/* Subtitles Overlay on top of the Video Player */}
+          {activeVideoPanel && activeVideoPanel.speech_text?.trim() && (
+            <div className="absolute bottom-16 left-3 right-3 z-10 text-center pointer-events-none">
+              {activeVideoPanel.sfx && (
+                <span className="hidden sm:inline-block transform -rotate-2 bg-yellow-500 text-black font-extrabold text-[10px] px-2 py-0.5 rounded shadow-lg font-mono tracking-widest uppercase mb-1">
+                  {activeVideoPanel.sfx}
+                </span>
+              )}
+              <p className="text-white font-bold text-xs leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,1)] bg-black/75 p-2.5 rounded-lg border border-white/5 backdrop-blur-xs text-center font-sans max-w-lg mx-auto">
+                {getSubtitleChunk(activeVideoPanel.speech_text, activeVideoPanel.duration || 4.5, relativeVideoTime)}
+              </p>
+            </div>
+          )}
         </div>
       )}
 
@@ -139,15 +198,15 @@ export function VideoMonitorActive({
             </div>
 
             {/* Subtitles Overlay */}
-            <div className="absolute bottom-4 left-3 right-3 z-10 text-center">
+            <div className="absolute bottom-4 left-3 right-3 z-10 text-center pointer-events-none">
               {activeStoryboardPanel.sfx && (
                 <span className="hidden sm:inline-block transform -rotate-2 bg-yellow-500 text-black font-extrabold text-[10px] px-2 py-0.5 rounded shadow-lg font-mono tracking-widest uppercase mb-1">
                   {activeStoryboardPanel.sfx}
                 </span>
               )}
               {activeStoryboardPanel.speech_text?.trim() && (
-                <p className="text-white font-bold text-xs leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,1)] bg-black/60 p-2.5 rounded-lg border border-white/5 backdrop-blur-xs text-center font-sans">
-                  {activeStoryboardPanel.speech_text}
+                <p className="text-white font-bold text-xs leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,1)] bg-black/75 p-2.5 rounded-lg border border-white/5 backdrop-blur-xs text-center font-sans max-w-lg mx-auto">
+                  {getSubtitleChunk(activeStoryboardPanel.speech_text, activeStoryboardPanel.duration || 4.5, playbackTime)}
                 </p>
               )}
             </div>

@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Sparkles, BarChart2, Check, Copy } from "lucide-react";
+import { GeneratedPanel } from "../../types";
 
 interface TitleABValidatorProps {
   addNotification?: (msg: string, type: any) => void;
+  scrapedTitle?: string;
+  panels?: GeneratedPanel[];
 }
 
 interface TestedTitle {
@@ -19,14 +22,44 @@ interface ABResult {
 
 export default function TitleABValidator({
   addNotification,
+  scrapedTitle,
+  panels,
 }: TitleABValidatorProps) {
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState(
-    "I Was Reborn As The Overpowered Shadow Sovereign"
+    scrapedTitle || "I Was Reborn As The Overpowered Shadow Sovereign"
   );
-  const [event, setEvent] = useState(
-    "The protagonist summons a giant shadow army to defeat the demonic beast lord."
-  );
+  
+  const getDeducedEvent = () => {
+    if (panels && panels.length > 0) {
+      const parts = panels
+        .map((p) => p.visual_description || p.speech_text)
+        .filter(Boolean);
+      if (parts.length > 0) {
+        return parts.slice(-3).join(". ");
+      }
+    }
+    return "The protagonist summons a giant shadow army to defeat the demonic beast lord.";
+  };
+
+  const [event, setEvent] = useState(getDeducedEvent());
+
+  useEffect(() => {
+    if (scrapedTitle) {
+      setTitle(scrapedTitle);
+    }
+  }, [scrapedTitle]);
+
+  useEffect(() => {
+    if (panels && panels.length > 0) {
+      const parts = panels
+        .map((p) => p.visual_description || p.speech_text)
+        .filter(Boolean);
+      if (parts.length > 0) {
+        setEvent(parts.slice(-3).join(". "));
+      }
+    }
+  }, [panels]);
   const [results, setResults] = useState<ABResult | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 

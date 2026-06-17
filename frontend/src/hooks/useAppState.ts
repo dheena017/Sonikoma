@@ -15,7 +15,65 @@ export function useAppState() {
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
 
   const [panels, setPanels] = useState<GeneratedPanel[]>([]);
-  const [consoleLogs, setConsoleLogs] = useState<string[]>([]);
+  const [consoleLogs, setRawConsoleLogs] = useState<string[]>([]);
+
+  const setConsoleLogs = useCallback((val: React.SetStateAction<string[]>) => {
+    setRawConsoleLogs((prev) => {
+      const resolved = typeof val === "function" ? val(prev) : val;
+      return resolved.map((log) => {
+        // Match standard format: HH:MM:SS [TAG]
+        const hasStandardFormat = /^\d{2}:\d{2}:\d{2} \[[A-Z_0-9]+\]/.test(log);
+        if (hasStandardFormat) {
+          return log;
+        }
+
+        let category = "FRONTEND";
+        let level = "INFO";
+        let filename = "App.tsx";
+        let message = log;
+
+        // Extract level categorizations from log content
+        if (log.includes("[ERROR]") || log.includes("[FATAL]") || log.toLowerCase().includes("failed")) {
+          level = "ERROR";
+        } else if (log.includes("[WARNING]") || log.includes("[WARN]")) {
+          level = "WARN";
+        } else if (log.includes("[SUCCESS]") || log.toLowerCase().includes("successfully")) {
+          level = "SUCCESS";
+        } else if (log.includes("[AI") || log.includes("[Gemini]")) {
+          level = "AI";
+        } else if (log.includes("[Database]") || log.includes("[DB]")) {
+          level = "DATABASE";
+        } else if (log.includes("[API]") || log.includes("[HTTP]")) {
+          level = "API";
+        }
+
+        // Parse brackets like [Scraper] Spawned... or [GUI] Mounted...
+        const bracketMatch = log.match(/^\[([^\]]+)\]\s*(?:\[([^\]]+)\])?\s*(.*)$/);
+        if (bracketMatch) {
+          const firstTag = bracketMatch[1];
+          const secondTag = bracketMatch[2];
+          const rest = bracketMatch[3];
+
+          if (secondTag && ["INFO", "DEBUG", "WARN", "WARNING", "ERROR", "SUCCESS", "FATAL"].includes(secondTag.toUpperCase())) {
+            level = secondTag.toUpperCase();
+            filename = firstTag;
+            message = rest;
+          } else {
+            if (["INFO", "DEBUG", "WARN", "WARNING", "ERROR", "SUCCESS", "FATAL"].includes(firstTag.toUpperCase())) {
+              level = firstTag.toUpperCase();
+              filename = "App.tsx";
+            } else {
+              filename = firstTag;
+            }
+            message = rest;
+          }
+        }
+
+        const timestamp = new Date().toLocaleTimeString("en-US", { hour12: false });
+        return `${timestamp} [${category}] [${level}] [${filename}] ${message}`;
+      });
+    });
+  }, []);
   const [scrapedImages, setScrapedImages] = useState<string[]>([]);
   const [selectedScraped, setSelectedScraped] = useState<string[]>([]);
   const [activePreviewTab, setActivePreviewTab] = useState<
@@ -128,6 +186,8 @@ export function useAppState() {
   const [narrationStyle, setNarrationStyle] = useState<string>(
     () => localStorage.getItem("ai_comic_narration_style") || "long"
   );
+  const [scrapedTitle, setScrapedTitle] = useState<string>("Overpowered S-Rank Recap");
+  const [scrapedGenre, setScrapedGenre] = useState<string>("Fantasy Action");
 
   // ── Callbacks & effects AFTER all useState declarations ──────────────────
 
@@ -432,6 +492,10 @@ export function useAppState() {
     setIsScraping,
     narrationStyle,
     setNarrationStyle,
+    scrapedTitle,
+    setScrapedTitle,
+    scrapedGenre,
+    setScrapedGenre,
     clearAllNotifications: () => {
       setNotifications([]);
     },

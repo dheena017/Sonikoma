@@ -55,7 +55,7 @@ except ImportError:
 
 async def call_gemini_with_retry(
     fn: Callable[[], Any],
-    max_attempts: int = 1,
+    max_attempts: int = 5,
     initial_delay_sec: float = 2.0
 ) -> Any:
     """
@@ -102,8 +102,30 @@ async def call_gemini_with_retry(
             )
 
             if (is_rate_limit or is_unavailable) and attempt < max_attempts:
-                # Exponential backoff with jitter
+                # Default delay: Exponential backoff with jitter
                 delay = initial_delay_sec * (2.2 ** (attempt - 1)) + random.uniform(0.1, 1.5)
+                
+                # Try parsing the specific wait time requested by Google API
+                # Pattern 1: "Please retry in 43.31459721s."
+                retry_match = re.search(r'please retry in\s+(\d+(?:\.\d+)?)s', str(err), re.IGNORECASE)
+                if retry_match:
+                    try:
+                        # Add a minimum 1.0s buffer plus random jitter (1.0 to 8.0s) to stagger concurrent wakeups
+                        delay = float(retry_match.group(1)) + 1.0 + random.uniform(1.0, 8.0)
+                        logger.info(f"[Gemini] Parsed required API retry delay (please retry in): {delay:.2f}s (includes jitter)")
+                    except ValueError:
+                        pass
+                else:
+                    # Pattern 2: "'retryDelay': '43s'"
+                    retry_json_match = re.search(r"['\"]retryDelay['\"]\s*:\s*['\"](\d+)s['\"]", str(err), re.IGNORECASE)
+                    if retry_json_match:
+                        try:
+                            # Add a minimum 1.5s buffer plus random jitter (1.0 to 8.0s) to stagger concurrent wakeups
+                            delay = float(retry_json_match.group(1)) + 1.5 + random.uniform(1.0, 8.0)
+                            logger.info(f"[Gemini] Parsed required API retry delay (retryDelay): {delay:.2f}s (includes jitter)")
+                        except ValueError:
+                            pass
+
                 logger.warning(
                     f"[Gemini] Error (attempt {attempt}/{max_attempts}). "
                     f"Retrying in {delay:.2f}s... {err}"

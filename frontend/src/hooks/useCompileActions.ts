@@ -92,6 +92,9 @@ export function useCompileActions({
 
   const handleAnalyzePanel = async (panelId: number, imageUrl: string) => {
     setAnalyzingPanelId(panelId);
+    setPanels((prev) =>
+      prev.map((p) => (p.id === panelId ? { ...p, isAnalyzing: true } : p))
+    );
     const activeModel = selectedModel || "gemini-2.5-flash";
     const originalPanel = panels.find((p) => p.id === panelId);
     const originalText = originalPanel ? originalPanel.speech_text : "";
@@ -140,6 +143,7 @@ export function useCompileActions({
                   motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
                   visual_description:
                     data.analysis.visual_description || p.visual_description,
+                  isAnalyzing: false,
                 }
               : p
           )
@@ -191,6 +195,9 @@ export function useCompileActions({
       }
     } finally {
       setAnalyzingPanelId(null);
+      setPanels((prev) =>
+        prev.map((p) => (p.id === panelId ? { ...p, isAnalyzing: false } : p))
+      );
     }
   };
 
@@ -255,30 +262,40 @@ export function useCompileActions({
     setIsAnalyzingAll(true);
     if (addNotification) {
       addNotification(
-        `Starting AI analysis for ${selectedIds.length} selected panel(s)...`,
+        `Starting AI analysis for ${selectedIds.length} selected panel(s) in parallel...`,
         "info"
       );
     }
-    console.log("[useCompileActions] Analyzing selected panels:", selectedIds);
+    console.log("[useCompileActions] Analyzing selected panels in parallel:", selectedIds);
     try {
-      for (let i = 0; i < selectedIds.length; i++) {
-        const panel = panels.find((p) => p.id === selectedIds[i]);
-        if (!panel) continue;
-        console.log(
-          `[useCompileActions] Analyzing selected panel ${i + 1}/${
-            selectedIds.length
-          } (ID: ${panel.id})`
-        );
-        try {
-          await handleAnalyzePanel(panel.id, panel.image_url);
-        } catch (err) {
-          console.error(
-            `[useCompileActions] Failed to analyze selected panel ID ${panel.id}:`,
-            err
-          );
-        }
-        await new Promise((resolve) => setTimeout(resolve, 300));
-      }
+      // Execute all analysis requests concurrently in batches of 2 to avoid triggering the 429 rate limit
+      let index = 0;
+      const concurrencyLimit = 2;
+      const workers = Array(Math.min(concurrencyLimit, selectedIds.length))
+        .fill(null)
+        .map(async (_, workerIdx) => {
+          // Stagger the launch of each worker slightly (300ms) to prevent initial API collision
+          if (workerIdx > 0) {
+            await new Promise((resolve) => setTimeout(resolve, workerIdx * 300));
+          }
+          
+          while (index < selectedIds.length) {
+            const currentIdx = index++;
+            if (currentIdx >= selectedIds.length) break;
+            const id = selectedIds[currentIdx];
+            const panel = panels.find((p) => p.id === id);
+            if (!panel) continue;
+            try {
+              await handleAnalyzePanel(panel.id, panel.image_url);
+            } catch (err) {
+              console.error(
+                `[useCompileActions] Failed to analyze selected panel ID ${panel.id}:`,
+                err
+              );
+            }
+          }
+        });
+      await Promise.all(workers);
       if (addNotification) {
         addNotification(
           `AI analysis completed for ${selectedIds.length} selected panel(s)!`,

@@ -216,6 +216,14 @@ export function useAppLogic() {
 
       const { genre, title, episode } = parseWebtoonUrl(normalizedTargetUrl);
 
+      // Save parsed details in global state for AI Suite tools to consume dynamically
+      if (title) {
+        state.setScrapedTitle(title.split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" "));
+      }
+      if (genre) {
+        state.setScrapedGenre(genre.split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" "));
+      }
+
       state.setPanels([]);
       state.setScrapedImages([]);
       state.setSelectedScraped([]);
@@ -388,6 +396,7 @@ export function useAppLogic() {
     storyboardPlaying,
     toggleStoryboardPlayback,
     resetStoryboardPlayback,
+    playStoryboardAudio,
     videoUrl: state.videoUrl,
     setVideoUrl: state.setVideoUrl,
     isProcessing,
@@ -416,5 +425,7 @@ export function useAppLogic() {
     markAllNotificationsAsRead: state.markAllNotificationsAsRead,
     markNotificationAsRead: state.markNotificationAsRead,
     deleteNotification: state.deleteNotification,
+    scrapedTitle: state.scrapedTitle,
+    scrapedGenre: state.scrapedGenre,
   };
 }

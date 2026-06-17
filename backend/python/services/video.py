@@ -156,7 +156,6 @@ async def compile_video(
                 if audio_path and os.path.exists(audio_path):
                     try:
                         panel_audio = AudioFileClip(audio_path)
-                        duration = panel_audio.duration
                         # Register interval for background music ducking
                         dialogue_intervals.append((current_time, current_time + duration))
                     except Exception as audio_err:
@@ -185,6 +184,7 @@ async def compile_video(
                 
                 # Attach the dialogue track to this specific temporal block
                 if panel_audio:
+                    panel_audio = set_clip_duration(panel_audio, duration)
                     viewport_clip = set_clip_audio(viewport_clip, panel_audio)
                     
                 video_clips.append(viewport_clip)

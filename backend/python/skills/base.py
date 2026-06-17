@@ -445,11 +445,10 @@ class BaseAISkill:
         candidates = [target_model]
         for fallback_m in [
             "gemini-2.5-flash",
-            "gemini-2.5-flash-lite",
             "gemini-2.0-flash",
             "gemini-2.0-flash-lite",
-            "gemini-flash-latest",
-            "gemini-flash-lite-latest"
+            "gemini-1.5-flash",
+            "gemini-1.5-pro"
         ]:
             if fallback_m not in candidates:
                 candidates.append(fallback_m)

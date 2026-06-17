@@ -14,17 +14,25 @@ DB_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'da
 DB_PATH = os.path.join(DB_DIR, 'webtoon_local.db')
 SCHEMA_PATH = os.path.join(DB_DIR, 'schema.sql')
 
+import logging
+logger = logging.getLogger("anivox.database")
+
+_db_initialized = False
+
 def get_db_connection() -> sqlite3.Connection:
+    if not _db_initialized:
+        init_db()
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     conn.execute('PRAGMA journal_mode = WAL')
     conn.execute('PRAGMA foreign_keys = ON')
     return conn
 
-import logging
-logger = logging.getLogger("anivox.database")
-
 def init_db() -> None:
+    global _db_initialized
+    if _db_initialized:
+        return
+    _db_initialized = True
     logger.info(f"[Database] Opening local SQLite database at: {DB_PATH}")
     os.makedirs(DB_DIR, exist_ok=True)
     conn = get_db_connection()
@@ -68,8 +76,7 @@ def init_db() -> None:
         conn.close()
     logger.info("[Database] SQLite database ready [OK]")
 
-# Initialize SQLite database immediately upon import
-init_db()
+# Database initialization is deferred and handled by the app lifespan or on first query.
 
 # ─── User Helpers ─────────────────────────────────────────────────────────────
 
@@ -247,10 +254,11 @@ def seed_default_invoices_if_empty(user_id: str) -> None:
         cursor.execute("SELECT COUNT(*) as c FROM user_invoices WHERE user_id = ?", (user_id,))
         count = cursor.fetchone()[0]
         if count == 0:
+            suffix = user_id.split('_')[-1] if '_' in user_id else user_id
             invoices = [
-                ("INV-2026-004", 19.00, "Paid", "2026-06-15 14:30:00"),
-                ("INV-2026-003", 19.00, "Paid", "2026-05-15 10:15:00"),
-                ("INV-2026-002", 19.00, "Paid", "2026-04-15 11:20:00")
+                (f"INV-2026-004-{suffix}", 19.00, "Paid", "2026-06-15 14:30:00"),
+                (f"INV-2026-003-{suffix}", 19.00, "Paid", "2026-05-15 10:15:00"),
+                (f"INV-2026-002-{suffix}", 19.00, "Paid", "2026-04-15 11:20:00")
             ]
             for inv_id, amt, stat, dt in invoices:
                 conn.execute("""

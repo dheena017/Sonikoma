@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Sparkles, Trophy, HelpCircle, Check, Copy } from "lucide-react";
+import { GeneratedPanel } from "../../types";
 
 interface OutroCliffhangerAnalyzerProps {
   addNotification?: (msg: string, type: any) => void;
+  panels?: GeneratedPanel[];
 }
 
 interface CliffhangerOption {
@@ -17,11 +19,34 @@ interface CliffhangerResult {
 
 export default function OutroCliffhangerAnalyzer({
   addNotification,
+  panels,
 }: OutroCliffhangerAnalyzerProps) {
   const [loading, setLoading] = useState(false);
-  const [outline, setOutline] = useState(
-    "The party enters the hidden demon vault and opens the main chest, only to trigger an ominous shadow portal that sucks their healer inside."
-  );
+
+  const getDeducedOutline = () => {
+    if (panels && panels.length > 0) {
+      const parts = panels
+        .map((p) => p.visual_description || p.speech_text)
+        .filter(Boolean);
+      if (parts.length > 0) {
+        return parts.slice(-3).join(". ");
+      }
+    }
+    return "The party enters the hidden demon vault and opens the main chest, only to trigger an ominous shadow portal that sucks their healer inside.";
+  };
+
+  const [outline, setOutline] = useState(getDeducedOutline());
+
+  useEffect(() => {
+    if (panels && panels.length > 0) {
+      const parts = panels
+        .map((p) => p.visual_description || p.speech_text)
+        .filter(Boolean);
+      if (parts.length > 0) {
+        setOutline(parts.slice(-3).join(". "));
+      }
+    }
+  }, [panels]);
   const [results, setResults] = useState<CliffhangerResult | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 

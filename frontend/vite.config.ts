@@ -103,25 +103,27 @@ export default defineConfig(({ mode }) => {
           proxyTimeout: 0,
           timeout: 0,
           configure: (proxy, _options) => {
-            proxy.removeAllListeners("error");
-            proxy.on("error", (err: any, req: any, res: any) => {
-              const isSystemLogs = req?.url?.includes("system-logs");
-              if (!isSystemLogs) {
-                console.error(
-                  "\x1b[31m[Vite Proxy]\x1b[0m \x1b[33m/api proxy error:\x1b[0m",
-                  err && err.message ? err.message : err
-                );
-              }
-              if (res && !res.headersSent) {
-                res.writeHead(502, { "Content-Type": "application/json" });
-                res.end(
-                  JSON.stringify({
-                    success: false,
-                    error: "Proxy Error",
-                    message: err && err.message ? err.message : String(err),
-                  })
-                );
-              }
+            process.nextTick(() => {
+              proxy.removeAllListeners("error");
+              proxy.on("error", (err: any, req: any, res: any) => {
+                const isSystemLogs = req?.url?.includes("system-logs");
+                if (!isSystemLogs) {
+                  console.error(
+                    "\x1b[31m[Vite Proxy]\x1b[0m \x1b[33m/api proxy error:\x1b[0m",
+                    err && err.message ? err.message : err
+                  );
+                }
+                if (res && !res.headersSent) {
+                  res.writeHead(502, { "Content-Type": "application/json" });
+                  res.end(
+                    JSON.stringify({
+                      success: false,
+                      error: "Proxy Error",
+                      message: err && err.message ? err.message : String(err),
+                    })
+                  );
+                }
+              });
             });
           },
         },

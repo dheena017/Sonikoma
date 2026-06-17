@@ -18,16 +18,29 @@ export default function TranslationStudioPage({
   addNotification,
 }: TranslationStudioPageProps) {
   const handleUpdatePanelText = (id: number, val: string) => {
+    const words = val.trim().split(/\s+/).filter(Boolean).length;
+    const newDuration = val.trim()
+      ? Math.max(2.5, Math.min(12.0, parseFloat((words / 2.2 + 0.8).toFixed(1))))
+      : 3.0;
+
     setPanels((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, speech_text: val } : p))
+      prev.map((p) => (p.id === id ? { ...p, speech_text: val, duration: newDuration } : p))
     );
   };
 
   const handleApplyCleanScripts = (mappings: Record<number, string>) => {
     setPanels((prev) =>
-      prev.map((p) =>
-        mappings[p.id] !== undefined ? { ...p, speech_text: mappings[p.id] } : p
-      )
+      prev.map((p) => {
+        if (mappings[p.id] !== undefined) {
+          const val = mappings[p.id];
+          const words = val.trim().split(/\s+/).filter(Boolean).length;
+          const newDuration = val.trim()
+            ? Math.max(2.5, Math.min(12.0, parseFloat((words / 2.2 + 0.8).toFixed(1))))
+            : 3.0;
+          return { ...p, speech_text: val, duration: newDuration };
+        }
+        return p;
+      })
     );
   };
 

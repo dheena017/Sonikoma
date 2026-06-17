@@ -13,15 +13,15 @@ export const AI_MODELS: AIModel[] = [
     provider: "Google",
   },
   {
-    id: "gemini-3.5-pro",
-    name: "Gemini 3.5 Pro",
-    type: "paid",
-    provider: "Google",
-  },
-  {
     id: "gemini-2.5-flash",
     name: "Gemini 2.5 Flash",
     type: "free",
+    provider: "Google",
+  },
+  {
+    id: "gemini-3.5-pro",
+    name: "Gemini 3.5 Pro",
+    type: "paid",
     provider: "Google",
   },
   {

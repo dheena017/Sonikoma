@@ -1,21 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Sparkles, Copy, Check, Wand2 } from "lucide-react";
 import { GeneratedPanel } from "../../types";
 
 interface ScriptDramatizerFormProps {
   panels: GeneratedPanel[];
+  setPanels?: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
+  addNotification?: (msg: string, type: any) => void;
+  scrapedGenre?: string;
 }
 
 export default function ScriptDramatizerForm({
   panels,
+  setPanels,
+  addNotification,
+  scrapedGenre,
 }: ScriptDramatizerFormProps) {
   const [loading, setLoading] = useState(false);
-  const [genre, setGenre] = useState("Fantasy Action");
+  const [genre, setGenre] = useState(scrapedGenre || "Fantasy Action");
   const [context, setContext] = useState(
     "The protagonist unlocks an ancient forbidden shadow power."
   );
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [results, setResults] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (scrapedGenre) {
+      setGenre(scrapedGenre);
+    }
+  }, [scrapedGenre]);
 
   // Collect raw speech text from panels
   const initialRawLines =
@@ -56,6 +68,33 @@ export default function ScriptDramatizerForm({
       console.error(e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleApplyToTimeline = () => {
+    if (!setPanels || results.length === 0) return;
+
+    setPanels((prev) => {
+      let resultIdx = 0;
+      return prev.map((p) => {
+        // If the panel has dialogue text originally
+        if (p.speech_text && resultIdx < results.length) {
+          const newText = results[resultIdx++];
+          // Calculate new duration based on word count to keep text and audio matched
+          const words = newText.trim().split(/\s+/).filter(Boolean).length;
+          const newDuration = Math.max(2.5, Math.min(12.0, parseFloat((words / 2.2 + 0.8).toFixed(1))));
+          return {
+            ...p,
+            speech_text: newText,
+            duration: newDuration,
+          };
+        }
+        return p;
+      });
+    });
+
+    if (addNotification) {
+      addNotification("Successfully applied enhanced script to the storyboard timeline!", "success");
     }
   };
 
@@ -167,6 +206,16 @@ export default function ScriptDramatizerForm({
                   Script".
                 </p>
               </div>
+            )}
+
+            {results.length > 0 && setPanels && (
+              <button
+                onClick={handleApplyToTimeline}
+                className="mt-4 w-full py-2.5 bg-gradient-to-r from-purple-650 to-indigo-600 hover:from-purple-550 hover:to-indigo-500 text-white rounded-xl text-xs font-mono font-bold transition-all shadow-lg flex items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.01] active:scale-95"
+              >
+                <Check className="h-4 w-4" />
+                Apply to Storyboard Cards
+              </button>
             )}
           </div>
         </div>

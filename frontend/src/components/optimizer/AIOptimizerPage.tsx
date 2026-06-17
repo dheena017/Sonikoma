@@ -18,20 +18,24 @@ interface AIOptimizerPageProps {
   panels: GeneratedPanel[];
   onNavigateHome: () => void;
   addNotification?: (msg: string, type: any) => void;
+  scrapedTitle?: string;
+  scrapedGenre?: string;
 }
 
 export default function AIOptimizerPage({
   panels,
   onNavigateHome,
   addNotification,
+  scrapedTitle,
+  scrapedGenre,
 }: AIOptimizerPageProps) {
   const [activeTab, setActiveTab] = useState<
     "seo" | "shorts" | "sound" | "ads"
   >("seo");
 
   // Compile overall storyboard details for prompts
-  const title = "Overpowered S-Rank Recap";
-  const genre = "Fantasy Action";
+  const title = scrapedTitle || "Overpowered S-Rank Recap";
+  const genre = scrapedGenre || "Fantasy Action";
 
   const storyboardSummary = panels
     .map(
