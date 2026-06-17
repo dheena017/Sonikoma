@@ -208,7 +208,7 @@ export function AppWorkspace({
           isProcessing={isProcessing}
           isScraping={isScraping}
           handleGenerateVideo={handleGenerateVideo}
-          handleScrape={() => scrapeImages()}
+          handleScrape={(url?: string) => scrapeImages(url)}
           addNotification={addNotification}
           narrationStyle={narrationStyle}
           setNarrationStyle={setNarrationStyle}

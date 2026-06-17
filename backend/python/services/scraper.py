@@ -576,6 +576,33 @@ async def scrape_images_from_url(
     if not fetch_url:
         return []
         
+    # Check if data URL image
+    if fetch_url.startswith("data:image/"):
+        logger.info("[Scraper] Direct Data URL image detected")
+        return [fetch_url]
+
+    # Check if direct image URL (jpg, jpeg, png, webp, gif, svg, bmp, tiff)
+    lower_url = fetch_url.lower()
+    is_img = False
+    if lower_url.startswith(('http://', 'https://')):
+        if any(ext in lower_url for ext in ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg', '.bmp', '.tiff']):
+            is_img = True
+        elif httpx:
+            try:
+                # Try a HEAD request to check Content-Type for query-parameterized or extensionless image URLs
+                async with httpx.AsyncClient(follow_redirects=True, timeout=3.0) as client:
+                    resp = await client.head(fetch_url, headers={"User-Agent": USER_AGENTS[0]})
+                    if resp.status_code == 200:
+                        ct = resp.headers.get("Content-Type", "").lower()
+                        if ct.startswith("image/"):
+                            is_img = True
+            except Exception:
+                pass
+        
+        if is_img:
+            logger.info(f"[Scraper] Direct image URL detected: {fetch_url}")
+            return [f"/api/proxy-image?url={quote(fetch_url)}"]
+        
     start_time = time.time()
     
     # Check if local path ZIP or CBZ

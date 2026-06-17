@@ -10,6 +10,7 @@ const SOURCE_OPTIONS = [
   { id: "mangadex", name: "MangaDex" },
   { id: "toomics", name: "Toomics" },
   { id: "linewebtoon", name: "Line Webtoon" },
+  { id: "custom", name: "Direct Image / Custom URL" },
 ];
 
 const SOURCE_EXAMPLES: Record<string, string> = {
@@ -18,6 +19,7 @@ const SOURCE_EXAMPLES: Record<string, string> = {
   mangadex: "mangadex.org/...",
   toomics: "toomics.com/...",
   linewebtoon: "webtoon.com/...",
+  custom: "example.com/image.jpg",
 };
 
 const SOURCE_DOMAINS: Record<string, string[]> = {
@@ -26,6 +28,7 @@ const SOURCE_DOMAINS: Record<string, string[]> = {
   mangadex: ["mangadex.org", "mangadex.com"],
   toomics: ["toomics.com"],
   linewebtoon: ["webtoon.com"],
+  custom: [],
 };
 
 interface UrlInputPanelProps {
@@ -96,8 +99,16 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
     }
   })();
 
+  const isDirectImage = Boolean(
+    targetUrl.trim() &&
+      (targetUrl.toLowerCase().match(/\.(png|jpg|jpeg|webp|gif|svg|bmp|tiff)(\?|$)/) ||
+       targetUrl.startsWith("data:image/"))
+  );
+
   const isSourceMismatch = Boolean(
     targetUrl.trim() &&
+      !isDirectImage &&
+      source !== "custom" &&
       currentHost &&
       !SOURCE_DOMAINS[source]?.some(
         (allowedHost) =>
@@ -225,7 +236,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
 
             <button
               type="button"
-              onClick={handleScrape}
+              onClick={() => handleScrape?.()}
               disabled={isScraping || !targetUrl.trim() || isSourceMismatch}
               className="relative px-6 py-3.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 rounded-xl text-sm font-bold text-white transition-all shadow-[0_0_20px_-5px_rgba(147,51,234,0.5)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 group overflow-hidden shrink-0"
             >

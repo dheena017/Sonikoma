@@ -57,6 +57,29 @@ class ImageMeta:
         }
 
 
+def spoof_referer(url: str) -> str:
+    """Derive a plausible Referer for CDN bypass based on the image URL."""
+    try:
+        from urllib.parse import urlparse
+        parsed = urlparse(url)
+        host = (parsed.hostname or "").lower()
+        if "webtoons" in host:
+            return "https://www.webtoons.com/"
+        if "naver" in host:
+            return "https://comic.naver.com/"
+        if "kakao" in host:
+            return "https://page.kakao.com/"
+        if "lezhin" in host:
+            return "https://www.lezhin.com/"
+        if "tapas" in host:
+            return "https://tapas.io/"
+        if "manhwa" in host:
+            return "https://manhwatop.com/"
+        return f"{parsed.scheme}://{parsed.netloc}/"
+    except Exception:
+        return "https://www.webtoons.com/"
+
+
 async def resolve_image_to_buffer(url_str: str, client: Optional[httpx.AsyncClient] = None) -> Dict[str, Any]:
     """
     Resolve ANY image URL (absolute, relative, /api/merge-images/cached, proxied)
@@ -92,7 +115,28 @@ async def resolve_image_to_buffer(url_str: str, client: Optional[httpx.AsyncClie
         mime = mime_match.group(1) if mime_match else "image/jpeg"
         return {"data": buf, "content_type": mime, "contentType": mime}
 
-    # 4. Normalize internal hostnames → relative paths to call localhost directly
+    # 4. Support local file:// URLs
+    if working_url.startswith('file://'):
+        from urllib.parse import unquote
+        file_path = working_url[7:]
+        # On Windows, a URL like file:///C:/... might have a leading slash
+        if file_path.startswith('/') and len(file_path) > 2 and file_path[2] == ':':
+            file_path = file_path[1:]
+        file_path = unquote(file_path)
+        with open(file_path, 'rb') as f:
+            buf = f.read()
+        ext = os.path.splitext(file_path)[1].lower()
+        mime_types = {
+            '.png': 'image/png',
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.webp': 'image/webp',
+            '.gif': 'image/gif'
+        }
+        mime = mime_types.get(ext, 'image/jpeg')
+        return {"data": buf, "content_type": mime, "contentType": mime}
+
+    # 5. Normalize internal hostnames → relative paths to call localhost directly
     if re.match(r'^https?://', working_url, re.IGNORECASE):
         try:
             parsed = urlparse(working_url)
@@ -104,17 +148,17 @@ async def resolve_image_to_buffer(url_str: str, client: Optional[httpx.AsyncClie
         except Exception:
             pass
 
-    # 5. Relative paths
+    # 6. Relative paths
     if working_url.startswith('/'):
         # Re-route to loopback port
         port = os.getenv("BACKEND_PORT", "5173")
         working_url = f"http://127.0.0.1:{port}{working_url}"
 
-    # 6. Remote fetch with referrer-bypass headers
+    # 7. Remote fetch with referrer-bypass headers
     logger.info(f"[Image Utils] Fetching image from remote URL: {working_url[:60]}...")
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36',
-        'Referer':    'https://www.webtoons.com/',
+        'Referer':    spoof_referer(working_url),
         'Accept':     'image/*,*/*;q=0.8',
     }
 

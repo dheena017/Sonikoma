@@ -155,13 +155,14 @@ export function useAppLogic() {
     mangadex: ["mangadex.org", "mangadex.com"],
     toomics: ["toomics.com"],
     linewebtoon: ["webtoon.com"],
+    custom: [],
   };
 
   // --- System Logs Engine ---
   const scrapeImages = useCallback(
-    async (customUrl?: string) => {
-      const activeUrl = customUrl || targetUrl;
-      if (!activeUrl.trim()) return;
+    async (customUrl?: any) => {
+      const activeUrl = typeof customUrl === "string" ? customUrl : targetUrl;
+      if (!activeUrl || !activeUrl.trim()) return;
 
       const normalizedTargetUrl = extractWebtoonUrl(activeUrl);
       const currentHost = (() => {
@@ -175,12 +176,17 @@ export function useAppLogic() {
         }
       })();
 
-      const allowedHosts = SOURCE_DOMAINS[selectedSource] || [
-        "webtoons.com",
-        "webtoon.com",
-      ];
+      const allowedHosts = SOURCE_DOMAINS[selectedSource] || [];
+      const isDirectImage = Boolean(
+        normalizedTargetUrl &&
+          (normalizedTargetUrl.toLowerCase().match(/\.(png|jpg|jpeg|webp|gif|svg|bmp|tiff)(\?|$)/) ||
+           normalizedTargetUrl.startsWith("data:image/"))
+      );
+
       const isSourceMismatch = Boolean(
         normalizedTargetUrl &&
+          !isDirectImage &&
+          selectedSource !== "custom" &&
           currentHost &&
           !allowedHosts.some(
             (allowedHost) =>
