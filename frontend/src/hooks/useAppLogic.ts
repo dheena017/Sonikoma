@@ -155,6 +155,7 @@ export function useAppLogic() {
     mangadex: ["mangadex.org", "mangadex.com"],
     toomics: ["toomics.com"],
     linewebtoon: ["webtoon.com"],
+    asurascans: ["asurascans.com"],
     custom: [],
   };
 

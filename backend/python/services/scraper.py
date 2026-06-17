@@ -331,7 +331,8 @@ def parse_with_bs4(html: str, base_url: str, custom_selectors: Optional[List[str
     selectors = custom_selectors or [
         '.viewer_lst', '._imageList', '.wt_viewer', '.reader-area', '.comic-page',
         '.chapter-content', '.episode-view', '.comic-content', '.panel-container',
-        '#comic_view_area', '#comic-image', '#comic-view', '.ep-contents', '.chapter-img'
+        '#comic_view_area', '#comic-image', '#comic-view', '.ep-contents', '.chapter-img',
+        '#readerarea', '.readerarea', '#reader-area', '.wp-manga-chapter-img'
     ]
     
     container = None
@@ -344,7 +345,15 @@ def parse_with_bs4(html: str, base_url: str, custom_selectors: Optional[List[str
     search_root = container if container else soup
     images = []
     for img in search_root.find_all('img'):
-        src = img.get('data-url') or img.get('data-src') or img.get('src') or img.get('origin-src') or img.get('lazy-src')
+        src = (
+            img.get('data-url') or 
+            img.get('data-src') or 
+            img.get('data-lazy-src') or 
+            img.get('data-original') or 
+            img.get('src') or 
+            img.get('origin-src') or 
+            img.get('lazy-src')
+        )
         if src:
             src = src.strip()
             abs_src = urljoin(base_url, src)

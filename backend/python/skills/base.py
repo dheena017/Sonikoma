@@ -340,10 +340,11 @@ class SkillLogger:
     def __init__(self):
         self.logger = logging.getLogger("anivox.skills.execution")
 
-    def log_execution(self, skill_name: str, latency_ms: int, success: bool, inputs: dict, outputs: dict):
+    def log_execution(self, skill_name: str, latency_ms: int, success: bool, inputs: dict, outputs: dict, prompt_tokens: int = 0, candidates_tokens: int = 0):
         status = "success" if success else "failed"
+        tokens_str = f" | Tok: {prompt_tokens} / {candidates_tokens}" if success and (prompt_tokens > 0 or candidates_tokens > 0) else ""
         # Standard prefix formatting to match console log hooks
-        self.logger.info(f"[AI Model] Executed skill: {skill_name} in {latency_ms}ms. Status: {status}")
+        self.logger.info(f"[AI Model] Executed skill: {skill_name} in {latency_ms}ms. Status: {status}{tokens_str}")
 
 
 class BaseAISkill:
@@ -447,6 +448,8 @@ class BaseAISkill:
             "gemini-2.5-flash",
             "gemini-2.0-flash",
             "gemini-2.0-flash-lite",
+            "gemini-flash-latest",
+            "gemini-pro-latest",
             "gemini-1.5-flash",
             "gemini-1.5-pro"
         ]:
@@ -474,7 +477,12 @@ class BaseAISkill:
                 import json
                 parsed_json = json.loads(raw_text)
                 
-                self.logger.log_execution(self.name, elapsed_ms, True, kwargs, parsed_json)
+                # Retrieve actual token counts from response
+                usage = getattr(response, 'usage_metadata', None)
+                p_tokens = getattr(usage, 'prompt_token_count', 0) if usage else 0
+                c_tokens = getattr(usage, 'candidates_token_count', 0) if usage else 0
+                
+                self.logger.log_execution(self.name, elapsed_ms, True, kwargs, parsed_json, p_tokens, c_tokens)
                 return raw_text
             except Exception as e:
                 logger.warning(f"Skill '{self.name}' execution failed with model {current_model}: {e}. Trying next candidate model.")
@@ -488,4 +496,6 @@ class BaseAISkill:
         self.logger.log_execution(self.name, elapsed_ms, False, kwargs, fallback)
         
         # Raise the exception so endpoints can detect failure and return success: False with the error message
+        if last_exception is None:
+            last_exception = RuntimeError(f"Skill '{self.name}' failed to execute: all candidate models failed.")
         raise last_exception

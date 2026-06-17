@@ -10,6 +10,7 @@ const SOURCE_OPTIONS = [
   { id: "mangadex", name: "MangaDex" },
   { id: "toomics", name: "Toomics" },
   { id: "linewebtoon", name: "Line Webtoon" },
+  { id: "asurascans", name: "Asura Scans" },
   { id: "custom", name: "Direct Image / Custom URL" },
 ];
 
@@ -19,6 +20,7 @@ const SOURCE_EXAMPLES: Record<string, string> = {
   mangadex: "mangadex.org/...",
   toomics: "toomics.com/...",
   linewebtoon: "webtoon.com/...",
+  asurascans: "asurascans.com/...",
   custom: "example.com/image.jpg",
 };
 
@@ -28,6 +30,7 @@ const SOURCE_DOMAINS: Record<string, string[]> = {
   mangadex: ["mangadex.org", "mangadex.com"],
   toomics: ["toomics.com"],
   linewebtoon: ["webtoon.com"],
+  asurascans: ["asurascans.com"],
   custom: [],
 };
 
@@ -65,6 +68,32 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
   } = props;
 
   const source = selectedSource || "webtoons";
+
+  React.useEffect(() => {
+    if (!targetUrl.trim()) return;
+    try {
+      const normalized = extractWebtoonUrl(targetUrl);
+      const urlWithScheme = normalized.startsWith("http")
+        ? normalized
+        : `https://${normalized}`;
+      const host = new URL(urlWithScheme).hostname.toLowerCase();
+      
+      let foundSource = "custom";
+      for (const [srcId, domains] of Object.entries(SOURCE_DOMAINS)) {
+        if (srcId === "custom") continue;
+        if (domains.some(domain => host === domain || host.endsWith(`.${domain}`))) {
+          foundSource = srcId;
+          break;
+        }
+      }
+      if (foundSource !== source) {
+        setSelectedSource(foundSource);
+        console.log(`[UrlInputPanel] Auto-detected source site for host "${host}" -> "${foundSource}"`);
+      }
+    } catch {
+      // Ignore invalid URL structures during typing
+    }
+  }, [targetUrl, source, setSelectedSource]);
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     const pasted = e.clipboardData?.getData("text") || "";

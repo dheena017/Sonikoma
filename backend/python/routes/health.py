@@ -83,6 +83,9 @@ async def health():
             },
             "env": {
                 "GEMINI_API_KEY": bool(os.getenv("GEMINI_API_KEY")),
+                "HUGGINGFACE_API_KEY": bool(os.getenv("HUGGINGFACE_API_KEY")),
+                "OPENAI_API_KEY": bool(os.getenv("OPENAI_API_KEY")),
+                "ANTHROPIC_API_KEY": bool(os.getenv("ANTHROPIC_API_KEY")),
             },
         }
     )

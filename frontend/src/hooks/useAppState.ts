@@ -142,7 +142,18 @@ export function useAppState() {
   const [notifications, setNotifications] = useState<Notification[]>(() => {
     try {
       const saved = localStorage.getItem("ai_comic_notifications");
-      return saved ? JSON.parse(saved) : [];
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.filter(
+            (n: any) =>
+              n &&
+              n.message &&
+              !n.message.includes("The backend server is not running")
+          );
+        }
+      }
+      return [];
     } catch {
       return [];
     }
