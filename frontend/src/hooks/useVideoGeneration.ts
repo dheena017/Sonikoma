@@ -56,6 +56,7 @@ export function useVideoGeneration({
       mangadex: "MangaDex",
       toomics: "Toomics",
       linewebtoon: "Line Webtoon",
+      asurascans: "Asura Scans",
     };
 
     const selectedSourceName =
@@ -84,6 +85,7 @@ export function useVideoGeneration({
       mangadex: ["mangadex.org", "mangadex.com"],
       toomics: ["toomics.com"],
       linewebtoon: ["webtoon.com"],
+      asurascans: ["asurascans.com"],
     };
 
     const isSourceMismatch = Boolean(

@@ -32,13 +32,32 @@ router = APIRouter()
 
 # ─── Constants ───────────────────────────────────────────────────────────────
 VALID_MOTIONS = ['zoom_in', 'zoom_out', 'pan_left', 'pan_right', 'pan_up', 'pan_down']
-MODEL_FALLBACKS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash']
+MODEL_FALLBACKS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-flash-latest']
 DEFAULT_ANALYSIS = {
     "speech_text":         "Narrative caption for this storyboard panel scene.",
     "sfx":                 "[Dramatic Beat]",
     "duration":            0.0,
     "motion_type":         "zoom_in",
     "visual_description":  "A cropped illustration frame ready for cinematic playback.",
+}
+
+STATIC_MODEL_METADATA = {
+    # OpenAI
+    "gpt-4o": {"in": 128000, "out": 4096, "desc": "OpenAI flagship high-intelligence multimodal model."},
+    "gpt-4o-mini": {"in": 128000, "out": 16384, "desc": "OpenAI fast, lightweight multimodal model."},
+    "gpt-4-turbo": {"in": 128000, "out": 4096, "desc": "GPT-4 Turbo model with 128k context."},
+    "gpt-4": {"in": 8192, "out": 4096, "desc": "Standard legacy GPT-4 model."},
+    "gpt-3.5-turbo": {"in": 16385, "out": 4096, "desc": "Standard legacy GPT-3.5 Turbo model."},
+    "o1-preview": {"in": 128000, "out": 32768, "desc": "OpenAI reasoning model for complex tasks."},
+    "o1-mini": {"in": 128000, "out": 65536, "desc": "Fast reasoning model optimized for coding/math."},
+    
+    # Anthropic
+    "claude-3-5-sonnet-20241022": {"in": 200000, "out": 8192, "desc": "Anthropic state-of-the-art model for intelligence and speed."},
+    "claude-3-5-sonnet-20240620": {"in": 200000, "out": 8192, "desc": "Anthropic Claude 3.5 Sonnet v1."},
+    "claude-3-5-haiku-20241022": {"in": 200000, "out": 8192, "desc": "Anthropic fastest Claude model for lightweight tasks."},
+    "claude-3-opus-20240229": {"in": 200000, "out": 4096, "desc": "Anthropic most powerful model for highly complex tasks."},
+    "claude-3-sonnet-20240229": {"in": 200000, "out": 4096, "desc": "Legacy Claude 3 Sonnet model."},
+    "claude-3-haiku-20240307": {"in": 200000, "out": 4096, "desc": "Legacy Claude 3 Haiku model."},
 }
 
 # ─── Pydantic Schemas for Requests ───────────────────────────────────────────
@@ -52,6 +71,16 @@ class AnalyzeBatchRequest(BaseModel):
     urls: List[str]
     model: Optional[str] = "gemini-2.5-flash"
     narrationStyle: Optional[str] = "long"  # 'long' = detailed YouTube recap, 'short' = quick subtitles
+
+class ListModelsRequest(BaseModel):
+    apiKey: Optional[str] = None
+    provider: Optional[str] = "gemini"
+
+class TestModelLatencyRequest(BaseModel):
+    provider: str
+    model: str
+    apiKey: Optional[str] = None
+    prompt: Optional[str] = "Say: Connection Successful!"
 
 class SmartCropRequest(BaseModel):
     url: str
@@ -293,6 +322,182 @@ def adjust_to_aspect_ratio(
 
 
 # ─── Routes ───────────────────────────────────────────────────────────────────
+
+@router.post("/list-models", summary="List available Gemini/HuggingFace models and token limits for any API key")
+@router.get("/list-models", summary="List available Gemini/HuggingFace models and token limits using server config key")
+async def api_list_models(body: Optional[ListModelsRequest] = None):
+    try:
+        api_key = None
+        provider = "gemini"
+        
+        if body:
+            api_key = body.apiKey
+            provider = body.provider or "gemini"
+            
+        # Detect key format to guess provider
+        if api_key:
+            import re
+            api_key = re.sub(r'^[\s\'"()\[\]{}]+|[\s\'"()\[\]{}]+$', '', api_key)
+            if api_key.startswith("hf_") or (api_key.startswith("f_") and len(api_key) >= 30):
+                provider = "huggingface"
+                if api_key.startswith("f_") and len(api_key) >= 30:
+                    api_key = "h" + api_key
+            elif api_key.startswith("sk-ant-"):
+                provider = "anthropic"
+            elif api_key.startswith("sk-"):
+                provider = "openai"
+        else:
+            # Fallback to server config keys
+            if provider == "huggingface":
+                api_key = os.getenv("HUGGINGFACE_API_KEY")
+            elif provider == "openai":
+                api_key = os.getenv("OPENAI_API_KEY")
+            elif provider == "anthropic":
+                api_key = os.getenv("ANTHROPIC_API_KEY")
+            else:
+                api_key = os.getenv("GEMINI_API_KEY")
+                
+        if not api_key:
+            return {
+                "success": False,
+                "error": f"No API key was provided and no fallback key is configured for {provider}."
+            }
+            
+        if provider == "gemini":
+            from google import genai
+            client = genai.Client(api_key=api_key)
+            models_iterator = client.models.list()
+            models = list(models_iterator)
+            
+            result_list = []
+            for m in models:
+                raw_name = m.name or ""
+                clean_name = raw_name.replace("models/", "")
+                
+                result_list.append({
+                    "name": clean_name,
+                    "fullName": raw_name,
+                    "displayName": m.display_name or "",
+                    "description": m.description or "",
+                    "inputTokenLimit": getattr(m, "input_token_limit", None),
+                    "outputTokenLimit": getattr(m, "output_token_limit", None),
+                    "supportedActions": getattr(m, "supported_actions", [])
+                })
+                
+            return {
+                "success": True,
+                "provider": "gemini",
+                "total": len(result_list),
+                "models": result_list
+            }
+            
+        elif provider == "huggingface":
+            import requests
+            headers = {"Authorization": f"Bearer {api_key}"}
+            auth_res = requests.get("https://huggingface.co/api/whoami-v2", headers=headers)
+            if auth_res.status_code != 200:
+                return {
+                    "success": False,
+                    "error": f"Hugging Face Authorization Failed: {auth_res.text}"
+                }
+                
+            params = {"limit": 60, "sort": "downloads", "direction": -1}
+            models_res = requests.get("https://huggingface.co/api/models", params=params, headers=headers)
+            if models_res.status_code != 200:
+                return {
+                    "success": False,
+                    "error": f"Failed to fetch models from Hugging Face Hub: {models_res.text}"
+                }
+                
+            models = models_res.json()
+            result_list = []
+            for m in models:
+                result_list.append({
+                    "name": m.get("id", ""),
+                    "fullName": m.get("id", ""),
+                    "displayName": m.get("id", ""),
+                    "description": f"Hugging Face repository model. Library: {m.get('library_name','N/A')}. Tags: {', '.join(m.get('tags', [])[:8])}",
+                    "inputTokenLimit": None,
+                    "outputTokenLimit": None,
+                    "supportedActions": [m.get("pipeline_tag")] if m.get("pipeline_tag") else []
+                })
+                
+            return {
+                "success": True,
+                "provider": "huggingface",
+                "total": len(result_list),
+                "models": result_list
+            }
+
+        elif provider == "openai":
+            import requests
+            headers = {"Authorization": f"Bearer {api_key}"}
+            models_res = requests.get("https://api.openai.com/v1/models", headers=headers)
+            if models_res.status_code != 200:
+                return {
+                    "success": False,
+                    "error": f"OpenAI Authorization Failed: {models_res.text}"
+                }
+            models = models_res.json().get("data", [])
+            result_list = []
+            for m in models:
+                model_id = m.get("id", "")
+                static_data = STATIC_MODEL_METADATA.get(model_id, {})
+                result_list.append({
+                    "name": model_id,
+                    "fullName": model_id,
+                    "displayName": model_id,
+                    "description": static_data.get("desc") or f"OpenAI model owned by {m.get('owned_by', 'N/A')}.",
+                    "inputTokenLimit": static_data.get("in"),
+                    "outputTokenLimit": static_data.get("out"),
+                    "supportedActions": ["chat"] if "gpt" in model_id or "o1" in model_id else []
+                })
+            return {
+                "success": True,
+                "provider": "openai",
+                "total": len(result_list),
+                "models": result_list
+            }
+
+        elif provider == "anthropic":
+            import requests
+            headers = {
+                "x-api-key": api_key,
+                "anthropic-version": "2023-06-01"
+            }
+            models_res = requests.get("https://api.anthropic.com/v1/models", headers=headers)
+            if models_res.status_code != 200:
+                return {
+                    "success": False,
+                    "error": f"Anthropic Authorization Failed: {models_res.text}"
+                }
+            models = models_res.json().get("data", [])
+            result_list = []
+            for m in models:
+                model_id = m.get("id", "")
+                static_data = STATIC_MODEL_METADATA.get(model_id, {})
+                result_list.append({
+                    "name": model_id,
+                    "fullName": model_id,
+                    "displayName": m.get("display_name") or model_id,
+                    "description": static_data.get("desc") or f"Anthropic model created at {m.get('created_at', 'N/A')}.",
+                    "inputTokenLimit": static_data.get("in"),
+                    "outputTokenLimit": static_data.get("out"),
+                    "supportedActions": ["chat"]
+                })
+            return {
+                "success": True,
+                "provider": "anthropic",
+                "total": len(result_list),
+                "models": result_list
+            }
+            
+    except Exception as e:
+        logger.error(f"[ListModels] API call failed: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
 
 @router.post("/analyze-image", summary="Generate narration script and SFX for a single panel")
 async def analyze_image(body: AnalyzeImageRequest):
@@ -567,13 +772,17 @@ async def ai_smart_crop(body: SmartCropRequest):
 
             logger.info(f"[AI Smart Crop] Cached cropped panel {i+1}/{len(coord_panels)}: {cached_url}")
 
-            cropped_panels.append({
+            panel_res = {
                 "cropTop": round(p_top, 2),
                 "cropBottom": round(p_bottom, 2),
                 "cropLeft": round(p_left, 2),
                 "cropRight": round(p_right, 2),
                 "croppedUrl": cached_url
-            })
+            }
+            for key in ["brightness", "contrast", "detailScore", "borderType", "width", "height", "area"]:
+                if key in box:
+                    panel_res[key] = box[key]
+            cropped_panels.append(panel_res)
 
         logger.info(f"[AI Smart Crop] Successfully processed {len(cropped_panels)} panels.")
         return {
@@ -706,3 +915,139 @@ async def get_outro_cta(body: OutroCTARequest):
 @router.post("/skills/copyright-scrub")
 async def get_copyright_scrub(body: CopyrightScrubRequest):
     return await run_md_skill("copyright_scrubber", body.model, text=body.text)
+
+@router.post("/test-model-latency", summary="Test latency and quota for any model of any provider")
+async def test_model_latency(body: TestModelLatencyRequest):
+    import time
+    import requests
+    
+    provider = body.provider.lower()
+    model_id = body.model
+    api_key = body.apiKey
+    prompt = body.prompt or "Say: Connection Successful!"
+    
+    # Detect / clean api key override
+    if api_key:
+        import re
+        api_key = re.sub(r'^[\s\'"()\[\]{}]+|[\s\'"()\[\]{}]+$', '', api_key)
+    else:
+        # Fallback to env
+        if provider == "huggingface":
+            api_key = os.getenv("HUGGINGFACE_API_KEY")
+        elif provider == "openai":
+            api_key = os.getenv("OPENAI_API_KEY")
+        elif provider == "anthropic":
+            api_key = os.getenv("ANTHROPIC_API_KEY")
+        else:
+            api_key = os.getenv("GEMINI_API_KEY")
+            
+    if not api_key:
+        return {
+            "success": False,
+            "error": f"Missing API Key for {provider}."
+        }
+        
+    start_time = time.monotonic()
+    try:
+        if provider == "gemini":
+            from google import genai
+            client = genai.Client(api_key=api_key)
+            response = client.models.generate_content(model=model_id, contents=prompt)
+            latency_ms = int((time.monotonic() - start_time) * 1000)
+            
+            usage = getattr(response, 'usage_metadata', None)
+            p_tokens = getattr(usage, 'prompt_token_count', 0) if usage else 0
+            c_tokens = getattr(usage, 'candidates_token_count', 0) if usage else 0
+            
+            return {
+                "success": True,
+                "latencyMs": latency_ms,
+                "inputTokens": p_tokens,
+                "outputTokens": c_tokens,
+                "response": response.text or ""
+            }
+            
+        elif provider == "huggingface":
+            url = f"https://api-inference.huggingface.co/models/{model_id}"
+            headers = {"Authorization": f"Bearer {api_key}"}
+            r = requests.post(url, json={"inputs": prompt, "parameters": {"max_new_tokens": 50}}, headers=headers)
+            latency_ms = int((time.monotonic() - start_time) * 1000)
+            if r.status_code == 200:
+                res_data = r.json()
+                reply = str(res_data)
+                if isinstance(res_data, list) and len(res_data) > 0:
+                    reply = res_data[0].get("generated_text", reply)
+                return {
+                    "success": True,
+                    "latencyMs": latency_ms,
+                    "response": reply
+                }
+            else:
+                return {
+                    "success": False,
+                    "error": f"Hugging Face Inference Error (HTTP {r.status_code}): {r.text}"
+                }
+                
+        elif provider == "openai":
+            url = "https://api.openai.com/v1/chat/completions"
+            headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+            payload = {
+                "model": model_id,
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": 100
+            }
+            r = requests.post(url, json=payload, headers=headers)
+            latency_ms = int((time.monotonic() - start_time) * 1005)
+            if r.status_code == 200:
+                res_data = r.json()
+                reply = res_data["choices"][0]["message"]["content"]
+                usage = res_data.get("usage", {})
+                return {
+                    "success": True,
+                    "latencyMs": latency_ms,
+                    "inputTokens": usage.get("prompt_tokens"),
+                    "outputTokens": usage.get("completion_tokens"),
+                    "response": reply
+                }
+            else:
+                return {
+                    "success": False,
+                    "error": f"OpenAI API Error (HTTP {r.status_code}): {r.text}"
+                }
+                
+        elif provider == "anthropic":
+            url = "https://api.anthropic.com/v1/messages"
+            headers = {
+                "x-api-key": api_key,
+                "anthropic-version": "2023-06-01",
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "model": model_id,
+                "max_tokens": 100,
+                "messages": [{"role": "user", "content": prompt}]
+            }
+            r = requests.post(url, json=payload, headers=headers)
+            latency_ms = int((time.monotonic() - start_time) * 1000)
+            if r.status_code == 200:
+                res_data = r.json()
+                reply = res_data["content"][0]["text"]
+                usage = res_data.get("usage", {})
+                return {
+                    "success": True,
+                    "latencyMs": latency_ms,
+                    "inputTokens": usage.get("input_tokens"),
+                    "outputTokens": usage.get("output_tokens"),
+                    "response": reply
+                }
+            else:
+                return {
+                    "success": False,
+                    "error": f"Anthropic API Error (HTTP {r.status_code}): {r.text}"
+                }
+                
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }

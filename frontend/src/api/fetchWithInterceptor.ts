@@ -175,7 +175,7 @@ export function createFetchWithInterceptor({
           if (isNetError) {
             const netErrMessage =
               "The backend server is not running. Please make sure the backend server is started.";
-            addNotification(netErrMessage, "error");
+            // Toast notification disabled as requested
             setErrorPopup({
               title: "Backend Server Offline",
               message: netErrMessage,

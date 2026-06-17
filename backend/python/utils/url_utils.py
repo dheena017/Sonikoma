@@ -13,7 +13,7 @@ def extract_webtoon_url(url_str: str) -> str:
     if not url_str:
         return ""
     trimmed = url_str.strip()
-    match = re.search(r'https?://(?:[^\s"\']+)(?=https?://|$)', trimmed, re.IGNORECASE)
+    match = re.search(r'https?://(?:[^\s"\']+?)(?=https?://|$)', trimmed, re.IGNORECASE)
     return match.group(0) if match else trimmed
 
 def strip_region_from_url(url_str: str) -> str:

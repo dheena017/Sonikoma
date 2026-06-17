@@ -13,7 +13,75 @@ import logging
 import platform
 import warnings
 import uuid
+import re
 from contextlib import asynccontextmanager
+
+# Force UTF-8 encoding on standard streams to support beautiful Unicode console outputs on all systems
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
+except Exception:
+    pass
+
+# ─────────────────────────────────────────────────────────────────────────────
+# COLORED LOGGING SETUP
+# ─────────────────────────────────────────────────────────────────────────────
+try:
+    import colorama
+    # Save the currently wrapped stdout/stderr before restoring
+    old_stdout = sys.stdout
+    old_stderr = sys.stderr
+    
+    # Restore original stdout/stderr if previously wrapped by uvicorn
+    colorama.deinit()
+    
+    # Override init to ensure colorama never strips or converts ANSI codes on Windows
+    _orig_init = colorama.init
+    def custom_init(*args, **kwargs):
+        kwargs['strip'] = False
+        kwargs['convert'] = False
+        return _orig_init(*args, **kwargs)
+    colorama.init = custom_init
+    colorama.init()
+    
+    # Update existing logging handlers to use the new un-stripped stdout/stderr streams
+    for name in list(logging.root.manager.loggerDict.keys()) + [""]:
+        l = logging.getLogger(name)
+        for h in l.handlers:
+            if isinstance(h, logging.StreamHandler):
+                if h.stream is old_stdout:
+                    h.stream = sys.stdout
+                elif h.stream is old_stderr:
+                    h.stream = sys.stderr
+except ImportError:
+    pass
+
+# Force enable Virtual Terminal Processing on Windows to render ANSI colors
+if sys.platform == "win32":
+    try:
+        import ctypes
+        kernel32 = ctypes.windll.kernel32
+        # Open the active console screen buffer directly, bypassing standard streams redirection
+        # GENERIC_READ = 0x80000000, GENERIC_WRITE = 0x40000000
+        # FILE_SHARE_READ = 1, FILE_SHARE_WRITE = 2
+        # OPEN_EXISTING = 3
+        h_conout = kernel32.CreateFileW(
+            "CONOUT$", 
+            0x80000000 | 0x40000000, 
+            1 | 2, 
+            None, 
+            3, 
+            0, 
+            None
+        )
+        if h_conout != -1:  # INVALID_HANDLE_VALUE
+            mode = ctypes.c_ulong()
+            if kernel32.GetConsoleMode(h_conout, ctypes.byref(mode)):
+                # 0x0004 = ENABLE_VIRTUAL_TERMINAL_PROCESSING
+                kernel32.SetConsoleMode(h_conout, mode.value | 0x0004)
+            kernel32.CloseHandle(h_conout)
+    except Exception:
+        pass
 
 # Suppress noisy external library warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -37,99 +105,250 @@ load_dotenv(dotenv_path=os.path.join(PROJECT_ROOT, ".env"))
 # Initialize global logging interceptor immediately
 import utils.log_interceptor
 
-# ─────────────────────────────────────────────────────────────────────────────
-# COLORED LOGGING SETUP
-# ─────────────────────────────────────────────────────────────────────────────
-try:
-    import colorama
-    colorama.just_fix_windows_console()
-except ImportError:
-    pass
+# Custom logging levels configuration
+logging.TRACE = 5
+logging.addLevelName(logging.TRACE, "TRACE")
+def trace(self, message, *args, **kws):
+    if self.isEnabledFor(logging.TRACE):
+        self._log(logging.TRACE, message, args, **kws)
+logging.Logger.trace = trace
+
+logging.NOTICE = 22
+logging.addLevelName(logging.NOTICE, "NOTICE")
+def notice(self, message, *args, **kws):
+    if self.isEnabledFor(logging.NOTICE):
+        self._log(logging.NOTICE, message, args, **kws)
+logging.Logger.notice = notice
+
+logging.SUCCESS = 25
+logging.addLevelName(logging.SUCCESS, "SUCCESS")
+def success(self, message, *args, **kws):
+    if self.isEnabledFor(logging.SUCCESS):
+        self._log(logging.SUCCESS, message, args, **kws)
+logging.Logger.success = success
+
 
 class ColoredFormatter(logging.Formatter):
-    GREY = "\x1b[38;5;244m"
-    BLUE = "\x1b[38;5;75m"
-    YELLOW = "\x1b[38;5;220m"
-    RED = "\x1b[38;5;196m"
-    BOLD_RED = "\x1b[1;38;5;196m"
-    RESET = "\x1b[0m"
-    GREEN = "\x1b[38;5;120m"
-    CYAN = "\x1b[38;5;86m"
-    MAGENTA = "\x1b[1;38;5;198m" # Bold Magenta for [BACKEND]
-    
-    FORMATS = {
-        logging.DEBUG: GREY + "%(asctime)s " + RESET + MAGENTA + "[BACKEND] " + RESET + GREEN + "[%(levelname)s] " + RESET + CYAN + "[%(filename)s] " + RESET + "%(message)s",
-        logging.INFO: GREY + "%(asctime)s " + RESET + MAGENTA + "[BACKEND] " + RESET + BLUE + "[%(levelname)s] " + RESET + CYAN + "[%(filename)s] " + RESET + "%(message)s",
-        logging.WARNING: GREY + "%(asctime)s " + RESET + MAGENTA + "[BACKEND] " + RESET + YELLOW + "[%(levelname)s] " + RESET + CYAN + "[%(filename)s] " + RESET + "%(message)s",
-        logging.ERROR: GREY + "%(asctime)s " + RESET + MAGENTA + "[BACKEND] " + RESET + RED + "[%(levelname)s] " + RESET + CYAN + "[%(filename)s] " + RESET + "%(message)s",
-        logging.CRITICAL: GREY + "%(asctime)s " + RESET + MAGENTA + "[BACKEND] " + RESET + BOLD_RED + "[%(levelname)s] " + RESET + CYAN + "[%(filename)s] " + RESET + "%(message)s"
+    COLORS = {
+        'TRACE': '\x1b[90m',     # Dark Grey
+        'DEBUG': '\x1b[37m',     # White
+        'INFO': '\x1b[36m',      # Cyan
+        'NOTICE': '\x1b[35m',    # Magenta
+        'SUCCESS': '\x1b[32m',   # Green
+        'WARNING': '\x1b[33m',   # Yellow
+        'ERROR': '\x1b[31m',     # Red
+        'CRITICAL': '\x1b[1;31m' # Bold Red
     }
+    RESET = '\x1b[0m'
+
+    def __init__(self, *args, **kwargs):
+        self.use_colors = kwargs.pop('use_colors', True)
+        super().__init__(*args, **kwargs)
+
+    def colorize_message(self, message: str) -> str:
+        # 1. Colorize AFC log line: "AFC is enabled with max remote calls: 10."
+        if "AFC is enabled" in message:
+            afc_match = re.match(r'^(.*?\b)?(AFC)(\s+is\s+)(\w+)(\s+with\s+max\s+remote\s+calls:\s*)(\d+)(.*)$', message)
+            if afc_match:
+                pre, afc, is_str, status, post_str, num, rest = afc_match.groups()
+                return (
+                    f"{pre or ''}"
+                    f"\x1b[1;35m{afc}\x1b[0m"
+                    f"{is_str}"
+                    f"\x1b[32m{status}\x1b[0m"
+                    f"{post_str}"
+                    f"\x1b[1;33m{num}\x1b[0m"
+                    f"{rest}"
+                )
+
+        # 2. Colorize HTTP Request logs with URLs
+        general_http_regex = re.compile(
+            r'^(.*?)(https?://[^\s"\'()]+)(?:\s+(["\']HTTP/\d\.\d \d{3} .*?["\']|\d{3}\b))?(.*)$',
+            re.IGNORECASE
+        )
+        match = general_http_regex.match(message)
+        if match:
+            prefix, url, status, suffix = match.groups()
+            
+            # Colorize prefix
+            colorized_prefix = ""
+            if prefix:
+                method_match = re.match(r'^(.*?\b)(POST|GET|PUT|DELETE)(\s*)$', prefix, re.IGNORECASE)
+                if method_match:
+                    pre, method, post = method_match.groups()
+                    pre_colorized = ""
+                    parts = re.split(r'(\s+|:|\[|\])', pre)
+                    for part in parts:
+                        if not part:
+                            continue
+                        if part.isspace():
+                            pre_colorized += part
+                        elif part == "INFO":
+                            pre_colorized += f"\x1b[90m{part}\x1b[0m"
+                        elif part == "httpx":
+                            pre_colorized += f"\x1b[95m{part}\x1b[0m"
+                        elif part == "HTTP":
+                            pre_colorized += f"\x1b[35m{part}\x1b[0m"
+                        elif part == "Request":
+                            pre_colorized += f"\x1b[35m{part}\x1b[0m"
+                        elif part in (":", "[", "]"):
+                            pre_colorized += f"\x1b[90m{part}\x1b[0m"
+                        else:
+                            pre_colorized += f"\x1b[90m{part}\x1b[0m"
+                            
+                    method_upper = method.upper()
+                    if method_upper == "POST":
+                        method_colorized = f"\x1b[1;33m{method}\x1b[0m"
+                    elif method_upper == "GET":
+                        method_colorized = f"\x1b[1;32m{method}\x1b[0m"
+                    elif method_upper == "PUT":
+                        method_colorized = f"\x1b[1;34m{method}\x1b[0m"
+                    elif method_upper == "DELETE":
+                        method_colorized = f"\x1b[1;31m{method}\x1b[0m"
+                    else:
+                        method_colorized = f"\x1b[1;35m{method}\x1b[0m"
+                    colorized_prefix = pre_colorized + method_colorized + post
+                else:
+                    parts = re.split(r'(\s+|:|\[|\])', prefix)
+                    for part in parts:
+                        if not part:
+                            continue
+                        if part.isspace():
+                            colorized_prefix += part
+                        elif part == "INFO":
+                            colorized_prefix += f"\x1b[90m{part}\x1b[0m"
+                        elif part == "httpx":
+                            colorized_prefix += f"\x1b[95m{part}\x1b[0m"
+                        elif part == "HTTP":
+                            colorized_prefix += f"\x1b[35m{part}\x1b[0m"
+                        elif part == "Request":
+                            colorized_prefix += f"\x1b[35m{part}\x1b[0m"
+                        elif part in (":", "[", "]"):
+                            colorized_prefix += f"\x1b[90m{part}\x1b[0m"
+                        else:
+                            colorized_prefix += f"\x1b[90m{part}\x1b[0m"
+
+            # Colorize URL
+            colorized_url = ""
+            gemini_match = re.match(r'^(https?://)(generativelanguage\.googleapis\.com)(/v1beta/models/)?([^/:]+)?(:[a-zA-Z0-9]+)?(.*)$', url)
+            if gemini_match:
+                protocol, host, models_path, model, action, rest = gemini_match.groups()
+                colorized_url = f"\x1b[36m{protocol}\x1b[0m\x1b[1;36m{host}\x1b[0m"
+                if models_path:
+                    colorized_url += f"\x1b[90m{models_path}\x1b[0m"
+                if model:
+                    colorized_url += f"\x1b[1;35m{model}\x1b[0m"
+                if action:
+                    colorized_url += f"\x1b[1;33m{action}\x1b[0m"
+                if rest:
+                    colorized_url += f"\x1b[37m{rest}\x1b[0m"
+            else:
+                url_parts = re.match(r'^(https?://)([^/]+)(/.*)?$', url)
+                if url_parts:
+                    protocol, host, path = url_parts.groups()
+                    colorized_url = f"\x1b[36m{protocol}\x1b[0m\x1b[1;36m{host}\x1b[0m"
+                    if path:
+                        segments = path.split('/')
+                        if segments:
+                            last = segments[-1]
+                            pre_path = '/'.join(segments[:-1]) + '/'
+                            colorized_url += f"\x1b[90m{pre_path}\x1b[0m\x1b[36m{last}\x1b[0m"
+                        else:
+                            colorized_url += f"\x1b[90m{path}\x1b[0m"
+                else:
+                    colorized_url = f"\x1b[36m{url}\x1b[0m"
+
+            # Colorize Status
+            colorized_status = ""
+            if status:
+                clean_status = status.strip()
+                has_quotes = (clean_status.startswith('"') and clean_status.endswith('"')) or \
+                             (clean_status.startswith("'") and clean_status.endswith("'"))
+                inner_status = clean_status[1:-1] if has_quotes else clean_status
+                
+                http_match = re.match(r'^(HTTP/\d\.\d)\s+(\d{3})\s*(.*)$', inner_status, re.IGNORECASE)
+                if http_match:
+                    http_version, code, status_msg = http_match.groups()
+                    
+                    if code.startswith('2'):
+                        code_color = "\x1b[1;32m"
+                        msg_color = "\x1b[32m"
+                    elif code == '429':
+                        code_color = "\x1b[1;33m"
+                        msg_color = "\x1b[1;33m"
+                    elif code.startswith('4'):
+                        code_color = "\x1b[1;33m"
+                        msg_color = "\x1b[33m"
+                    elif code.startswith('5'):
+                        code_color = "\x1b[1;31m"
+                        msg_color = "\x1b[31m"
+                    else:
+                        code_color = "\x1b[37m"
+                        msg_color = "\x1b[37m"
+                    
+                    inner_colorized = f"\x1b[36m{http_version}\x1b[0m {code_color}{code}\x1b[0m"
+                    if status_msg:
+                        inner_colorized += f" {msg_color}{status_msg}\x1b[0m"
+                        
+                    quotes_color = "\x1b[90m"
+                    if has_quotes:
+                        colorized_status = f" {quotes_color}\"{inner_colorized}{quotes_color}\""
+                    else:
+                        colorized_status = f" {inner_colorized}"
+                else:
+                    if re.match(r'^\d{3}$', inner_status):
+                        if inner_status.startswith('2'):
+                            code_color = "\x1b[1;32m"
+                        elif inner_status == '429':
+                            code_color = "\x1b[1;33m"
+                        elif inner_status.startswith('4'):
+                            code_color = "\x1b[1;33m"
+                        elif inner_status.startswith('5'):
+                            code_color = "\x1b[1;31m"
+                        else:
+                            code_color = "\x1b[37m"
+                        
+                        quotes_color = "\x1b[90m"
+                        if has_quotes:
+                            colorized_status = f" {quotes_color}\"{code_color}{inner_status}\x1b[0m{quotes_color}\""
+                        else:
+                            colorized_status = f" {code_color}{inner_status}\x1b[0m"
+                    else:
+                        colorized_status = f" \x1b[33m{status}\x1b[0m"
+
+            # Suffix
+            colorized_suffix = f"\x1b[90m{suffix}\x1b[0m" if suffix else ""
+
+            return f"{colorized_prefix}{colorized_url}{colorized_status}{colorized_suffix}"
+
+        return message
 
     def format(self, record):
-        log_fmt = self.FORMATS.get(record.levelno, self.GREY + "%(asctime)s " + self.RESET + "%(levelname)-8s - %(message)s")
-        formatter = logging.Formatter(log_fmt, datefmt="%H:%M:%S")
-        formatted = formatter.format(record)
-        
-        # Color specific tags in brackets like [Proxy], [API], [Narration], etc.
-        import re
-        bracket_colors = {
-            "Proxy": "\x1b[38;5;75m",        # Light blue
-            "API": "\x1b[38;5;86m",          # Cyan
-            "Scraper": "\x1b[38;5;120m",      # Green
-            "Helper Scraper": "\x1b[38;5;120m",
-            "Database": "\x1b[38;5;46m",     # Bold green
-            "DB": "\x1b[38;5;46m",
-            "SUCCESS": "\x1b[38;5;120m",
-            "WARNING": "\x1b[38;5;220m",
-            "ERROR": "\x1b[38;5;196m",
-            "Vite": "\x1b[38;5;201m",        # Bright magenta/pink
-            "MoviePy": "\x1b[38;5;208m",     # Orange
-            "Video": "\x1b[38;5;208m",
-            "Narration": "\x1b[38;5;177m",   # Purple
-            "TTS": "\x1b[38;5;177m",
-        }
-        
-        def color_bracket(match):
-            name = match.group(1)
-            color = bracket_colors.get(name, "\x1b[38;5;86m") # Default to cyan
-            return f"{color}[{name}]\x1b[0m"
-            
-        formatted = re.sub(r'\[([^\]]+)\]', color_bracket, formatted)
-        
-        # Color HTTP methods
-        formatted = re.sub(r'\b(GET|POST|PUT|DELETE)\b', lambda m: {
-            "GET": "\x1b[38;5;120mGET\x1b[0m",
-            "POST": "\x1b[38;5;220mPOST\x1b[0m",
-            "PUT": "\x1b[38;5;75mPUT\x1b[0m",
-            "DELETE": "\x1b[38;5;196mDELETE\x1b[0m"
-        }[m.group(1)], formatted)
-        
-        # Color HTTP status codes (2xx/3xx/4xx/5xx)
-        def color_status(match):
-            prefix = match.group(1)
-            code = match.group(2)
-            suffix = match.group(3) or ""
-            if code.startswith("2"):
-                color = "\x1b[38;5;120m" # Green
-            elif code.startswith("3"):
-                color = "\x1b[38;5;86m"  # Cyan
-            elif code.startswith("4"):
-                color = "\x1b[38;5;220m" # Yellow
-            else:
-                color = "\x1b[38;5;196m" # Red
-            return f"{prefix}{color}{code}\x1b[0m{suffix}"
+        orig_msg = record.msg
+        if self.use_colors and isinstance(record.msg, str):
+            record.msg = self.colorize_message(record.msg)
 
-        # Matches "HTTP/1.1" 200" or similar
-        formatted = re.sub(r'(HTTP/[0-9.]+"\s+)(\d{3})(\b)', color_status, formatted)
-        # Matches "-> 200" or similar
-        formatted = re.sub(r'(->\s+)(\d{3})(\b)', color_status, formatted)
-        # Matches standalone status codes at the end of the line preceded by space
-        formatted = re.sub(r'(\s+)(\d{3})($)', color_status, formatted)
+        if self.use_colors:
+            color = self.COLORS.get(record.levelname, '')
+            grey = '\x1b[90m'
+            magenta = '\x1b[35m'
+            blue = '\x1b[94m'
+            log_fmt = f"{grey}%(asctime)s{self.RESET} {magenta}[BACKEND]{self.RESET} [{color}%(levelname)s{self.RESET}] {blue}[%(filename)s]{self.RESET} %(message)s"
+        else:
+            log_fmt = "%(asctime)s [BACKEND] [%(levelname)s] [%(filename)s] %(message)s"
+        formatter = logging.Formatter(log_fmt, datefmt="%H:%M:%S")
+        result = formatter.format(record)
         
-        return formatted
+        # Restore original message to avoid side effects
+        record.msg = orig_msg
+        if hasattr(record, 'message'):
+            delattr(record, 'message')
+            
+        return result
 
 console_handler = logging.StreamHandler(sys.stdout)
 console_handler.setFormatter(ColoredFormatter())
+
 
 # Preserve UIStreamLogHandler (attached by log_interceptor at import time).
 # Remove only non-UI handlers so the SSE/polling log feed stays alive.
@@ -224,17 +443,24 @@ async def lifespan(app: FastAPI):
     for label, mod in caps.items():
         try:
             __import__(mod)
-            logger.info(f"[OK] {label} loaded successfully")
+            logger.success(f"{label} loaded successfully")
         except ImportError:
             logger.warning(f"{label} not available - some features may be disabled")
 
     # API key status
     if os.getenv("GEMINI_API_KEY"):
-        logger.info("[OK] GEMINI_API_KEY detected - AI features enabled")
+        logger.success("GEMINI_API_KEY detected - AI features enabled")
     else:
         logger.warning("GEMINI_API_KEY not set - AI panel analysis disabled")
 
-    logger.info("Server ready - waiting for requests")
+    # Perform concurrent AI model connection tests
+    try:
+        from utils.ai_test import run_ai_connection_tests
+        await run_ai_connection_tests()
+    except Exception as e:
+        logger.error(f"Failed to execute startup AI connection tests: {e}")
+
+    logger.success("Server ready - waiting for requests")
 
     yield
     uptime = round(time.time() - SERVER_START, 1)
@@ -292,7 +518,35 @@ async def add_process_time_header(request: Request, call_next):
     
     # Avoid logging SSE/logs polling endpoint spam
     if not any(path in request.url.path for path in ["/system-logs", "/api/metrics", "/api/health"]):
-        logger.info(f"[{request_id}] {request.method} {request.url.path} -> {response.status_code} ({elapsed_ms}ms)")
+        method_colors = {
+            "GET": "\x1b[32m",
+            "POST": "\x1b[33m",
+            "PUT": "\x1b[34m",
+            "DELETE": "\x1b[31m"
+        }
+        m_color = method_colors.get(request.method, "\x1b[37m")
+        
+        status = response.status_code
+        if status >= 500:
+            s_color = "\x1b[31m"
+        elif status >= 400:
+            s_color = "\x1b[33m"
+        elif status >= 300:
+            s_color = "\x1b[36m"
+        else:
+            s_color = "\x1b[32m"
+            
+        reset = "\x1b[0m"
+        grey = "\x1b[90m"
+        cyan = "\x1b[36m"
+        
+        logger.info(
+            f"{grey}[{request_id}]{reset} "
+            f"{m_color}{request.method}{reset} "
+            f"{cyan}{request.url.path}{reset} -> "
+            f"{s_color}{status}{reset} "
+            f"{grey}({elapsed_ms}ms){reset}"
+        )
     return response
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -396,12 +650,12 @@ def _get_ram_info() -> str:
 # ─────────────────────────────────────────────────────────────────────────────
 def _print_startup_banner():
     # ANSI color definitions
-    CLR_BORDER = "\x1b[38;5;34m"     # Green border
-    CLR_HEADER = "\x1b[1;38;5;75m"   # Bold light blue
-    CLR_TITLE  = "\x1b[1;38;5;220m"  # Bold gold/yellow
-    CLR_LABEL  = "\x1b[38;5;86m"     # Cyan labels
-    CLR_SUCCESS = "\x1b[38;5;120m"   # Bright green
-    CLR_ALERT   = "\x1b[38;5;203m"   # Bright coral/red
+    CLR_BORDER = "\x1b[32m"          # Green border
+    CLR_HEADER = "\x1b[1;34m"        # Bold Blue
+    CLR_TITLE  = "\x1b[1;33m"        # Bold Yellow
+    CLR_LABEL  = "\x1b[36m"          # Cyan labels
+    CLR_SUCCESS = "\x1b[32m"         # Green
+    CLR_ALERT   = "\x1b[31m"         # Red
     CLR_RESET  = "\x1b[0m"
 
     py_ver  = sys.version.split(" ")[0]
@@ -539,14 +793,17 @@ if __name__ == "__main__":
         "version": 1,
         "disable_existing_loggers": False,
         "formatters": {
-            "custom": {
-                "()": "main.ColoredFormatter",
+            "default": {
+                "()": ColoredFormatter,
+            },
+            "access": {
+                "()": ColoredFormatter,
             },
         },
         "handlers": {
             "default": {
                 "class": "logging.StreamHandler",
-                "formatter": "custom",
+                "formatter": "default",
                 "stream": "ext://sys.stdout",
             },
         },
@@ -575,6 +832,7 @@ if __name__ == "__main__":
         "port": BACKEND_PORT,
         "log_level": "info",
         "log_config": custom_log_config,
+        "use_colors": True,
     }
     if IS_PRODUCTION:
         run_args["reload"] = False
