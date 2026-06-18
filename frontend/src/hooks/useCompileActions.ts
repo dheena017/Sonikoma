@@ -266,7 +266,10 @@ export function useCompileActions({
         "info"
       );
     }
-    console.log("[useCompileActions] Analyzing selected panels in parallel:", selectedIds);
+    console.log(
+      "[useCompileActions] Analyzing selected panels in parallel:",
+      selectedIds
+    );
     try {
       // Execute all analysis requests concurrently in batches of 2 to avoid triggering the 429 rate limit
       let index = 0;
@@ -276,9 +279,11 @@ export function useCompileActions({
         .map(async (_, workerIdx) => {
           // Stagger the launch of each worker slightly (300ms) to prevent initial API collision
           if (workerIdx > 0) {
-            await new Promise((resolve) => setTimeout(resolve, workerIdx * 300));
+            await new Promise((resolve) =>
+              setTimeout(resolve, workerIdx * 300)
+            );
           }
-          
+
           while (index < selectedIds.length) {
             const currentIdx = index++;
             if (currentIdx >= selectedIds.length) break;

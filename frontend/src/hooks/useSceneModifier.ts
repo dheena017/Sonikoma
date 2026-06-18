@@ -25,12 +25,16 @@ export function useSceneModifier({
       .trim()
       .split(/\s+/)
       .filter((w) => w.length > 0).length;
-    
+
     const newDuration = text.trim()
-      ? Math.max(2.5, Math.min(12.0, parseFloat((words / 2.2 + 0.8).toFixed(1))))
+      ? Math.max(
+          2.5,
+          Math.min(12.0, parseFloat((words / 2.2 + 0.8).toFixed(1)))
+        )
       : 3.0; // default for empty/blank panels
-      
-    const autoAdjusted = newDuration !== (originalPanel ? originalPanel.duration : 0.0);
+
+    const autoAdjusted =
+      newDuration !== (originalPanel ? originalPanel.duration : 0.0);
 
     setPanels((prev) =>
       prev.map((p) =>

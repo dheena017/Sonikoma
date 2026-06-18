@@ -65,25 +65,7 @@ active_provider = "gemini"  # "gemini", "huggingface", "openai", "anthropic"
 client_instance = None      # Gemini client
 configured_api_key = None   # Current key in use
 
-# Context limits lookup for non-Gemini models
-STATIC_MODEL_METADATA = {
-    # OpenAI
-    "gpt-4o": {"in": 128000, "out": 4096, "desc": "OpenAI flagship high-intelligence multimodal model."},
-    "gpt-4o-mini": {"in": 128000, "out": 16384, "desc": "OpenAI fast, lightweight multimodal model."},
-    "gpt-4-turbo": {"in": 128000, "out": 4096, "desc": "GPT-4 Turbo model with 128k context."},
-    "gpt-4": {"in": 8192, "out": 4096, "desc": "Standard legacy GPT-4 model."},
-    "gpt-3.5-turbo": {"in": 16385, "out": 4096, "desc": "Standard legacy GPT-3.5 Turbo model."},
-    "o1-preview": {"in": 128000, "out": 32768, "desc": "OpenAI reasoning model for complex tasks."},
-    "o1-mini": {"in": 128000, "out": 65536, "desc": "Fast reasoning model optimized for coding/math."},
-    
-    # Anthropic
-    "claude-3-5-sonnet-20241022": {"in": 200000, "out": 8192, "desc": "Anthropic state-of-the-art model for intelligence and speed."},
-    "claude-3-5-sonnet-20240620": {"in": 200000, "out": 8192, "desc": "Anthropic Claude 3.5 Sonnet v1."},
-    "claude-3-5-haiku-20241022": {"in": 200000, "out": 8192, "desc": "Anthropic fastest Claude model for lightweight tasks."},
-    "claude-3-opus-20240229": {"in": 200000, "out": 4096, "desc": "Anthropic most powerful model for highly complex tasks."},
-    "claude-3-sonnet-20240229": {"in": 200000, "out": 4096, "desc": "Legacy Claude 3 Sonnet model."},
-    "claude-3-haiku-20240307": {"in": 200000, "out": 4096, "desc": "Legacy Claude 3 Haiku model."},
-}
+
 
 def visual_len(s: str) -> int:
     """Returns the visual length of a string, ignoring ANSI escape codes."""
@@ -222,8 +204,7 @@ def get_api_key() -> tuple:
     
     if guess == "huggingface_corrected":
         return "h" + cleaned, "huggingface"
-    else:
-        return cleaned, guess
+
 
 def fetch_and_store_models(api_key: str, provider: str) -> bool:
     global models_list, client_instance, configured_api_key, active_provider
@@ -238,7 +219,11 @@ def fetch_and_store_models(api_key: str, provider: str) -> bool:
             from google import genai
             client_instance = genai.Client(api_key=api_key)
             print(f"{CLR_MUTED}Fetching Gemini models list...{CLR_RESET}")
-            models_list = list(client_instance.models.list())
+            try:
+                models_list = list(client_instance.models.list())
+            except Exception as list_err:
+                print(f"{CLR_ERROR}❌ Failed to fetch models list dynamically: {list_err}{CLR_RESET}")
+                return False
             
         elif provider == "huggingface":
             headers = {"Authorization": f"Bearer {api_key}"}
@@ -284,7 +269,7 @@ def fetch_and_store_models(api_key: str, provider: str) -> bool:
         print(f"\n{CLR_ERROR}❌ Connection Failure:{CLR_RESET}\n  {CLR_WARNING}{str(e)}{CLR_RESET}")
         return False
 
-def draw_models_table(filter_query: str = None):
+def draw_models_table(filter_query: str = None, show_free_only: bool = False):
     global models_list, active_provider
     if not models_list:
         print(f"{CLR_WARNING}No models loaded.{CLR_RESET}")
@@ -299,7 +284,18 @@ def draw_models_table(filter_query: str = None):
             filtered = [m for m in models_list if q in (m.get("id") or "").lower() or q in (m.get("pipeline_tag") or "").lower()]
         else:
             filtered = [m for m in models_list if q in (m.get("id") or "").lower()]
-        print(f"\n{CLR_HIGHLIGHT}Filtered List (matching '{filter_query}'): {len(filtered)} / {len(models_list)} models{CLR_RESET}")
+            
+    if show_free_only:
+        if active_provider == "gemini":
+            filtered = [m for m in filtered if "flash" in (m.name or "").lower() or "lite" in (m.name or "").lower() or "8b" in (m.name or "").lower()]
+        elif active_provider == "huggingface":
+            # All HF Hub models are free under serverless inference
+            pass
+        else:
+            filtered = []
+
+    free_tag = " | Free Tier Only: ON" if show_free_only else ""
+    print(f"\n{CLR_HIGHLIGHT}Filtered List (matching '{filter_query or ''}'{free_tag}): {len(filtered)} / {len(models_list)} models{CLR_RESET}")
 
     if active_provider == "gemini":
         w_idx, w_id, w_display, w_in, w_out, w_actions = 4, 32, 24, 13, 11, 12
@@ -539,7 +535,6 @@ def run_interactive_inspection():
         ]
     elif active_provider in ("openai", "anthropic"):
         model_id = model.get("id")
-        static_data = STATIC_MODEL_METADATA.get(model_id, {"in": "Unknown", "out": "Unknown", "desc": f"Custom {active_provider.upper()} model."})
         
         print(f"\n{CLR_HIGHLIGHT}Details for {active_provider.upper()} Model: {model_id}{CLR_RESET}")
         print(f"╔" + ("═" * 70) + "╗")
@@ -552,9 +547,6 @@ def run_interactive_inspection():
                 ("Access / Cost", "Paid API (Billing Required)"),
                 ("Owned By", model.get("owned_by", "N/A")),
                 ("Created Date", created_str),
-                ("Static Input Limit", format_tokens(static_data.get("in"))),
-                ("Static Output Limit", format_tokens(static_data.get("out"))),
-                ("Description Hint", static_data.get("desc")),
             ]
         else:
             # Anthropic
@@ -564,9 +556,6 @@ def run_interactive_inspection():
                 ("Access / Cost", "Paid API (Billing Required)"),
                 ("Display Name", model.get("display_name", "N/A")),
                 ("Created Date", created_str),
-                ("Static Input Limit", format_tokens(static_data.get("in"))),
-                ("Static Output Limit", format_tokens(static_data.get("out"))),
-                ("Description Hint", static_data.get("desc")),
             ]
         
     for label, val in fields:
@@ -643,9 +632,18 @@ def run_diagnostic_test():
             r = requests.post(url, json={"inputs": prompt, "parameters": {"max_new_tokens": 50}}, headers=headers)
             latency_ms = int((time.monotonic() - start_time) * 1000)
             if r.status_code == 200:
+                res_data = r.json()
+                reply = str(res_data)
+                if isinstance(res_data, list) and len(res_data) > 0:
+                    reply = res_data[0].get("generated_text", reply)
+                p_tokens = max(1, len(prompt) // 4)
+                c_tokens = max(1, len(reply) // 4)
                 print(f"\n{CLR_SUCCESS}✅ Hugging Face Serverless Inference API Success!{CLR_RESET}")
                 print(f"  {CLR_HIGHLIGHT}Latency{CLR_RESET}      : {latency_ms} ms")
-                print(f"  {CLR_HIGHLIGHT}Response JSON{CLR_RESET}:\n  {CLR_MUTED}---{CLR_RESET}\n    {r.text}\n  {CLR_MUTED}---{CLR_RESET}")
+                print(f"  {CLR_HIGHLIGHT}Tokens Used{CLR_RESET}  : {p_tokens} input / {c_tokens} output (estimated)")
+                print(f"  {CLR_HIGHLIGHT}Response{CLR_RESET}     :\n  {CLR_MUTED}---{CLR_RESET}")
+                for line in reply.strip().split("\n"): print(f"    {line}")
+                print(f"  {CLR_MUTED}---{CLR_RESET}")
             else:
                 print(f"\n{CLR_ERROR}❌ HF Inference Error (HTTP {r.status_code}): {r.text}{CLR_RESET}")
                 
@@ -949,10 +947,34 @@ def run_export_report():
             print(f"{CLR_SUCCESS}✅ CSV successfully exported to {filepath}!{CLR_RESET}")
         except Exception as e: print(f"{CLR_ERROR}❌ Failed to write file: {e}{CLR_RESET}")
 
+def show_free_models_only():
+    global models_list, active_provider
+    if not models_list:
+        print(f"{CLR_WARNING}No models loaded.{CLR_RESET}")
+        return
+        
+    print(f"\n{CLR_HIGHLIGHT}=== Listing Free AI Models ({active_provider.upper()} mode) ==={CLR_RESET}")
+    
+    if active_provider == "gemini":
+        free_models = [m for m in models_list if "flash" in (m.name or "").lower() or "lite" in (m.name or "").lower() or "8b" in (m.name or "").lower()]
+        print(f"{CLR_SUCCESS}Gemini has free tier access. Displaying {len(free_models)} Flash & Lite models:{CLR_RESET}\n")
+        for idx, m in enumerate(free_models):
+            clean_name = (m.name or "").replace("models/", "")
+            print(f"  [{idx+1:<2}] {CLR_HIGHLIGHT}{clean_name:<34}{CLR_RESET} | {CLR_MUTED}In: {format_tokens(m.input_token_limit):<9} | Out: {format_tokens(m.output_token_limit):<9}{CLR_RESET}")
+            
+    elif active_provider == "huggingface":
+        print(f"{CLR_SUCCESS}All Hugging Face Hub models are free via the Serverless Inference API! Displaying all {len(models_list)} models:{CLR_RESET}\n")
+        for idx, m in enumerate(models_list):
+            print(f"  [{idx+1:<2}] {CLR_HIGHLIGHT}{m.get('id'):<50}{CLR_RESET} | {CLR_MUTED}Task: {m.get('pipeline_tag','N/A')}{CLR_RESET}")
+            
+    else:
+        print(f"{CLR_WARNING}⚠️  {active_provider.upper()} does not offer a free API tier. All models are paid and require active billing setup.{CLR_RESET}")
+
 def run_developer_console():
     filter_query = None
+    show_free_only = False
     while True:
-        draw_models_table(filter_query)
+        draw_models_table(filter_query, show_free_only)
         
         print(f"\n{CLR_HIGHLIGHT}🛠️  DEVELOPER TOOLKIT MENU ({active_provider.upper()} mode):{CLR_RESET}")
         print(f"  [{CLR_SUCCESS}1{CLR_RESET}] Filter/Search Models      [{CLR_SUCCESS}6{CLR_RESET}] Refresh / Reset Filter")
@@ -961,7 +983,11 @@ def run_developer_console():
         print(f"  [{CLR_SUCCESS}4{CLR_RESET}] Count Tokens for Text     [{CLR_SUCCESS}9{CLR_RESET}] Side-by-Side Benchmark Suite")
         print(f"  [{CLR_SUCCESS}5{CLR_RESET}] Export Report to File      [{CLR_SUCCESS}10{CLR_RESET}] Exit Console")
         
-        choice = input(f"\n{CLR_HIGHLIGHT}Select action [1-10]: {CLR_RESET}").strip()
+        free_status = "ON" if show_free_only else "OFF"
+        free_color = CLR_SUCCESS if show_free_only else CLR_MUTED
+        print(f"  [{CLR_SUCCESS}11{CLR_RESET}] Toggle Free Tier Only ({free_color}{free_status}{CLR_RESET})")
+        
+        choice = input(f"\n{CLR_HIGHLIGHT}Select action [1-11]: {CLR_RESET}").strip()
         
         if choice == "1":
             filter_query = input("Enter search query (case-insensitive): ").strip()
@@ -997,8 +1023,12 @@ def run_developer_console():
         elif choice == "10" or choice.lower() in ("exit", "quit", "q"):
             print(f"\n{CLR_TITLE}Thank you for using the Inspector Toolkit! Goodbye. ✨{CLR_RESET}\n")
             break
+        elif choice == "11":
+            show_free_only = not show_free_only
+            print(f"{CLR_SUCCESS}Free Tier Only filter is now {'ON' if show_free_only else 'OFF'}!{CLR_RESET}")
+            time.sleep(0.5)
         else:
-            print(f"{CLR_ERROR}Invalid selection [1-10].{CLR_RESET}")
+            print(f"{CLR_ERROR}Invalid selection [1-11].{CLR_RESET}")
             time.sleep(1.2)
 
 def main():

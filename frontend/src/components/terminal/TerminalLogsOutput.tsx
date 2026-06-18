@@ -206,15 +206,44 @@ function renderTokenizedPrefix(prefix: string) {
       {parts.map((part, idx) => {
         if (!part) return null;
         if (/^\s+$/.test(part)) return <span key={idx}>{part}</span>;
-        
+
         const clean = part.trim();
-        if (clean === "INFO") return <span key={idx} className="text-neutral-500 font-semibold">{part}</span>;
-        if (clean === "httpx") return <span key={idx} className="text-violet-400 font-semibold">{part}</span>;
-        if (clean === "HTTP") return <span key={idx} className="text-purple-400">{part}</span>;
-        if (clean === "Request") return <span key={idx} className="text-purple-400/80">{part}</span>;
-        if (clean === ":" || clean === "[" || clean === "]") return <span key={idx} className="text-neutral-600">{part}</span>;
-        
-        return <span key={idx} className="text-neutral-500">{part}</span>;
+        if (clean === "INFO")
+          return (
+            <span key={idx} className="text-neutral-500 font-semibold">
+              {part}
+            </span>
+          );
+        if (clean === "httpx")
+          return (
+            <span key={idx} className="text-violet-400 font-semibold">
+              {part}
+            </span>
+          );
+        if (clean === "HTTP")
+          return (
+            <span key={idx} className="text-purple-400">
+              {part}
+            </span>
+          );
+        if (clean === "Request")
+          return (
+            <span key={idx} className="text-purple-400/80">
+              {part}
+            </span>
+          );
+        if (clean === ":" || clean === "[" || clean === "]")
+          return (
+            <span key={idx} className="text-neutral-600">
+              {part}
+            </span>
+          );
+
+        return (
+          <span key={idx} className="text-neutral-500">
+            {part}
+          </span>
+        );
       })}
     </>
   );
@@ -222,9 +251,11 @@ function renderTokenizedPrefix(prefix: string) {
 
 function renderTokenizedUrl(url: string) {
   if (!url) return null;
-  
+
   // Check if it's a Gemini API URL
-  const geminiMatch = url.match(/^(https?:\/\/)(generativelanguage\.googleapis\.com)(\/v1beta\/models\/)?([a-zA-Z0-9.\-_]+)?(:[a-zA-Z0-9]+)?(.*)$/);
+  const geminiMatch = url.match(
+    /^(https?:\/\/)(generativelanguage\.googleapis\.com)(\/v1beta\/models\/)?([a-zA-Z0-9.\-_]+)?(:[a-zA-Z0-9]+)?(.*)$/
+  );
   if (geminiMatch) {
     const [_, protocol, host, modelsPath, model, action, rest] = geminiMatch;
     return (
@@ -232,8 +263,12 @@ function renderTokenizedUrl(url: string) {
         <span className="text-cyan-600/80">{protocol}</span>
         <span className="text-cyan-400/90 font-medium">{host}</span>
         {modelsPath && <span className="text-neutral-500">{modelsPath}</span>}
-        {model && <span className="text-violet-400 font-semibold">{model}</span>}
-        {action && <span className="text-amber-400 font-semibold">{action}</span>}
+        {model && (
+          <span className="text-violet-400 font-semibold">{model}</span>
+        )}
+        {action && (
+          <span className="text-amber-400 font-semibold">{action}</span>
+        )}
         {rest && <span className="text-neutral-400">{rest}</span>}
       </>
     );
@@ -247,11 +282,11 @@ function renderTokenizedUrl(url: string) {
     const pathname = parsed.pathname;
     const search = parsed.search;
     const hash = parsed.hash;
-    
+
     // Highlight last segment of path
-    const pathSegments = pathname.split('/');
-    const lastSegment = pathSegments.pop() || '';
-    const prefixPath = pathSegments.join('/') + '/';
+    const pathSegments = pathname.split("/");
+    const lastSegment = pathSegments.pop() || "";
+    const prefixPath = pathSegments.join("/") + "/";
 
     return (
       <>
@@ -264,24 +299,27 @@ function renderTokenizedUrl(url: string) {
       </>
     );
   } catch (e) {
-    return <span className="text-cyan-400/90 font-light select-all">{url}</span>;
+    return (
+      <span className="text-cyan-400/90 font-light select-all">{url}</span>
+    );
   }
 }
 
 function renderTokenizedStatus(status: string) {
   if (!status) return null;
   const cleanStatus = status.trim();
-  const hasQuotes = (cleanStatus.startsWith('"') && cleanStatus.endsWith('"')) || 
-                    (cleanStatus.startsWith("'") && cleanStatus.endsWith("'"));
+  const hasQuotes =
+    (cleanStatus.startsWith('"') && cleanStatus.endsWith('"')) ||
+    (cleanStatus.startsWith("'") && cleanStatus.endsWith("'"));
   const innerStatus = hasQuotes ? cleanStatus.slice(1, -1) : cleanStatus;
 
   const httpMatch = innerStatus.match(/^(HTTP\/\d\.\d)\s+(\d{3})\s*(.*)$/i);
   if (httpMatch) {
     const [_, httpVersion, code, message] = httpMatch;
-    
+
     let codeColor = "text-neutral-400";
     let messageColor = "text-neutral-500";
-    
+
     if (code.startsWith("2")) {
       codeColor = "text-emerald-400 font-bold";
       messageColor = "text-emerald-500/90 font-medium";
@@ -317,9 +355,10 @@ function renderTokenizedStatus(status: string) {
     let codeColor = "text-neutral-400";
     if (innerStatus.startsWith("2")) codeColor = "text-emerald-400 font-bold";
     else if (innerStatus === "429") codeColor = "text-amber-400 font-bold";
-    else if (innerStatus.startsWith("4")) codeColor = "text-amber-400 font-bold";
+    else if (innerStatus.startsWith("4"))
+      codeColor = "text-amber-400 font-bold";
     else if (innerStatus.startsWith("5")) codeColor = "text-red-400 font-bold";
-    
+
     return (
       <>
         {hasQuotes && <span className="text-neutral-600">"</span>}
@@ -335,15 +374,16 @@ function renderTokenizedStatus(status: string) {
 function renderParsedLog(log: string) {
   // Strip ANSI escape codes to parse clean text
   const ansi_escape = /\x1b\[[0-9;]*[mK]/g;
-  const cleanLog = log.replace(ansi_escape, '');
+  const cleanLog = log.replace(ansi_escape, "");
 
   // Regex to check if the line contains a URL followed optionally by status code info
-  const generalHttpRegex = /^(.*?)(https?:\/\/[^\s"'()]+)(?:\s+(["']HTTP\/\d\.\d \d{3} .*?["']|\d{3}\b))?(.*)$/i;
+  const generalHttpRegex =
+    /^(.*?)(https?:\/\/[^\s"'()]+)(?:\s+(["']HTTP\/\d\.\d \d{3} .*?["']|\d{3}\b))?(.*)$/i;
   const match = cleanLog.match(generalHttpRegex);
-  
+
   if (match) {
     const [_, rawPrefix, url, status, suffix] = match;
-    
+
     // Extract method from prefix if present (e.g. "POST", "GET", etc.)
     let method = "";
     let prefix = rawPrefix;
@@ -352,35 +392,51 @@ function renderParsedLog(log: string) {
       prefix = methodMatch[1];
       method = methodMatch[2];
     }
-    
+
     let methodColor = "text-purple-400";
-    if (method.toUpperCase() === "POST") methodColor = "text-amber-400 font-bold";
-    else if (method.toUpperCase() === "GET") methodColor = "text-emerald-400 font-bold";
-    else if (method.toUpperCase() === "PUT") methodColor = "text-sky-400 font-bold";
-    else if (method.toUpperCase() === "DELETE") methodColor = "text-red-400 font-bold";
+    if (method.toUpperCase() === "POST")
+      methodColor = "text-amber-400 font-bold";
+    else if (method.toUpperCase() === "GET")
+      methodColor = "text-emerald-400 font-bold";
+    else if (method.toUpperCase() === "PUT")
+      methodColor = "text-sky-400 font-bold";
+    else if (method.toUpperCase() === "DELETE")
+      methodColor = "text-red-400 font-bold";
 
     return (
       <>
         {prefix && renderTokenizedPrefix(prefix)}
         {method && <span className={methodColor}>{method} </span>}
         {renderTokenizedUrl(url)}
-        {status && <><span> </span>{renderTokenizedStatus(status)}</>}
+        {status && (
+          <>
+            <span> </span>
+            {renderTokenizedStatus(status)}
+          </>
+        )}
         {suffix && <span className="text-neutral-500">{suffix}</span>}
       </>
     );
   }
 
   // If it's a server-side request log, e.g. [a8f3b2d1] GET /api/health -> 200 (5.42ms)
-  const serverLogRegex = /^(\[.*?[a-f0-9]+.*?\]\s+)(GET|POST|PUT|DELETE)(\s+\S+)(\s+->\s+)(\d{3})(\s+\(.*?\))?$/i;
+  // We allow prefix (timestamp, [BACKEND], etc.) before the request ID block.
+  const serverLogRegex =
+    /^(.*?)(\[.*?[a-f0-9]+.*?\]\s+)(GET|POST|PUT|DELETE)(\s+\S+)(\s+->\s+)(\d{3})(\s+\(.*?\))?$/i;
   const serverMatch = cleanLog.match(serverLogRegex);
   if (serverMatch) {
-    const [_, reqId, method, path, arrow, status, duration] = serverMatch;
-    
+    const [_, prefix, reqId, method, path, arrow, status, duration] =
+      serverMatch;
+
     let methodColor = "text-purple-400";
-    if (method.toUpperCase() === "POST") methodColor = "text-amber-400 font-bold";
-    else if (method.toUpperCase() === "GET") methodColor = "text-emerald-400 font-bold";
-    else if (method.toUpperCase() === "PUT") methodColor = "text-sky-400 font-bold";
-    else if (method.toUpperCase() === "DELETE") methodColor = "text-red-400 font-bold";
+    if (method.toUpperCase() === "POST")
+      methodColor = "text-amber-400 font-bold";
+    else if (method.toUpperCase() === "GET")
+      methodColor = "text-emerald-400 font-bold";
+    else if (method.toUpperCase() === "PUT")
+      methodColor = "text-sky-400 font-bold";
+    else if (method.toUpperCase() === "DELETE")
+      methodColor = "text-red-400 font-bold";
 
     let statusColor = "text-neutral-400";
     if (status.startsWith("2")) statusColor = "text-emerald-400 font-medium";
@@ -389,14 +445,43 @@ function renderParsedLog(log: string) {
 
     return (
       <>
+        {prefix && renderTokenizedPrefix(prefix)}
         <span className="text-neutral-500 font-semibold">{reqId}</span>
         <span className={methodColor}>{method}</span>
         <span className="text-cyan-400/90 font-light">{path}</span>
         <span className="text-neutral-500">{arrow}</span>
         <span className={statusColor}>{status}</span>
-        {duration && <span className="text-neutral-500 font-light">{duration}</span>}
+        {duration && (
+          <span className="text-neutral-500 font-light">{duration}</span>
+        )}
       </>
     );
+  }
+
+  // Standalone HTTP request check when no URL is present (or URL failed to match)
+  if (cleanLog.includes("httpx") || cleanLog.includes("HTTP Request:")) {
+    const standaloneHttpRegex = /^(.*?)\b(POST|GET|PUT|DELETE)\b(.*)$/i;
+    const standaloneMatch = cleanLog.match(standaloneHttpRegex);
+    if (standaloneMatch) {
+      const [_, prefix, method, suffix] = standaloneMatch;
+      let methodColor = "text-purple-400";
+      if (method.toUpperCase() === "POST")
+        methodColor = "text-amber-400 font-bold";
+      else if (method.toUpperCase() === "GET")
+        methodColor = "text-emerald-400 font-bold";
+      else if (method.toUpperCase() === "PUT")
+        methodColor = "text-sky-400 font-bold";
+      else if (method.toUpperCase() === "DELETE")
+        methodColor = "text-red-400 font-bold";
+
+      return (
+        <>
+          {prefix && renderTokenizedPrefix(prefix)}
+          <span className={methodColor}>{method}</span>
+          {suffix && <span className="text-neutral-500">{suffix}</span>}
+        </>
+      );
+    }
   }
 
   return log;

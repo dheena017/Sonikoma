@@ -29,7 +29,7 @@ export default function TitleABValidator({
   const [title, setTitle] = useState(
     scrapedTitle || "I Was Reborn As The Overpowered Shadow Sovereign"
   );
-  
+
   const getDeducedEvent = () => {
     if (panels && panels.length > 0) {
       const parts = panels

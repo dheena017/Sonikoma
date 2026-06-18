@@ -1,32 +1,35 @@
 import React from "react";
-import { 
-  Sparkles, 
-  Film, 
-  Volume2, 
-  Cpu, 
-  LogIn, 
-  UserPlus, 
+import {
+  Sparkles,
+  Film,
+  Volume2,
+  Cpu,
+  LogIn,
+  UserPlus,
   KeyRound,
   Play,
   Pause,
   VolumeX,
   Volume1,
   X,
-  Maximize2
+  Maximize2,
 } from "lucide-react";
 
 export type ThemeKey = "purple" | "blue" | "emerald" | "amber";
 
-export const THEMES: Record<ThemeKey, {
-  glowPrimary: string;
-  glowSecondary: string;
-  accentText: string;
-  accentBg: string;
-  accentBorder: string;
-  button: string;
-  focus: string;
-  dot: string;
-}> = {
+export const THEMES: Record<
+  ThemeKey,
+  {
+    glowPrimary: string;
+    glowSecondary: string;
+    accentText: string;
+    accentBg: string;
+    accentBorder: string;
+    button: string;
+    focus: string;
+    dot: string;
+  }
+> = {
   purple: {
     glowPrimary: "bg-purple-600/10",
     glowSecondary: "bg-indigo-600/10",
@@ -35,7 +38,7 @@ export const THEMES: Record<ThemeKey, {
     accentBorder: "border-purple-500/20",
     button: "bg-purple-600 hover:bg-purple-500 shadow-purple-900/30",
     focus: "focus:border-purple-500/50 focus:ring-purple-600/20",
-    dot: "bg-purple-500"
+    dot: "bg-purple-500",
   },
   blue: {
     glowPrimary: "bg-blue-600/10",
@@ -45,7 +48,7 @@ export const THEMES: Record<ThemeKey, {
     accentBorder: "border-blue-500/20",
     button: "bg-blue-600 hover:bg-blue-500 shadow-blue-900/30",
     focus: "focus:border-blue-500/50 focus:ring-blue-600/20",
-    dot: "bg-blue-500"
+    dot: "bg-blue-500",
   },
   emerald: {
     glowPrimary: "bg-emerald-600/10",
@@ -55,7 +58,7 @@ export const THEMES: Record<ThemeKey, {
     accentBorder: "border-emerald-500/20",
     button: "bg-emerald-600 hover:bg-emerald-500 shadow-emerald-900/30",
     focus: "focus:border-emerald-500/50 focus:ring-emerald-600/20",
-    dot: "bg-emerald-500"
+    dot: "bg-emerald-500",
   },
   amber: {
     glowPrimary: "bg-amber-600/10",
@@ -65,39 +68,43 @@ export const THEMES: Record<ThemeKey, {
     accentBorder: "border-amber-500/20",
     button: "bg-amber-600 hover:bg-amber-500 shadow-amber-900/30",
     focus: "focus:border-amber-500/50 focus:ring-amber-600/20",
-    dot: "bg-amber-500"
-  }
+    dot: "bg-amber-500",
+  },
 };
 
 const SHOWCASE_SLIDES = [
   {
     icon: Sparkles,
     title: "AI Webtoon Parser",
-    description: "Instantly segment vertical webtoon strips into independent, perfectly cropped storyboard panels using our custom CV engine.",
+    description:
+      "Instantly segment vertical webtoon strips into independent, perfectly cropped storyboard panels using our custom CV engine.",
     badge: "Smart Detection",
-    color: "from-purple-500 to-indigo-500"
+    color: "from-purple-500 to-indigo-500",
   },
   {
     icon: Film,
     title: "Cinematic Motion Dynamics",
-    description: "Bring static frames to life with keyframe camera animations, auto zooms, responsive pans, and cinematic camera shakes.",
+    description:
+      "Bring static frames to life with keyframe camera animations, auto zooms, responsive pans, and cinematic camera shakes.",
     badge: "Motion Director",
-    color: "from-blue-500 to-cyan-500"
+    color: "from-blue-500 to-cyan-500",
   },
   {
     icon: Volume2,
     title: "AI Narrative Audio Mixer",
-    description: "Generate natural voice narration, synchronize multi-character dialogue, and mix contextual sound effects automatically.",
+    description:
+      "Generate natural voice narration, synchronize multi-character dialogue, and mix contextual sound effects automatically.",
     badge: "Voice & SFX",
-    color: "from-pink-500 to-rose-500"
+    color: "from-pink-500 to-rose-500",
   },
   {
     icon: Cpu,
     title: "One-Click Video Compiler",
-    description: "Review auto-generated scripts, translate text into target languages, and export high-definition video files ready for publishing.",
+    description:
+      "Review auto-generated scripts, translate text into target languages, and export high-definition video files ready for publishing.",
     badge: "Instant Render",
-    color: "from-amber-500 to-orange-500"
-  }
+    color: "from-amber-500 to-orange-500",
+  },
 ];
 
 interface AuthShowcaseProps {
@@ -105,7 +112,10 @@ interface AuthShowcaseProps {
   iconType: "login" | "register" | "forgot";
 }
 
-export default function AuthShowcase({ activeTheme, iconType }: AuthShowcaseProps) {
+export default function AuthShowcase({
+  activeTheme,
+  iconType,
+}: AuthShowcaseProps) {
   const [currentSlide, setCurrentSlide] = React.useState(0);
   const currentTheme = THEMES[activeTheme];
 
@@ -122,7 +132,8 @@ export default function AuthShowcase({ activeTheme, iconType }: AuthShowcaseProp
   const [particleSpeed, setParticleSpeed] = React.useState(50); // 0 to 100
   const [starDensity, setStarDensity] = React.useState(45); // count: 10 to 100
   const [showGridLines, setShowGridLines] = React.useState(true);
-  const [isParticleCustomizerOpen, setIsParticleCustomizerOpen] = React.useState(false);
+  const [isParticleCustomizerOpen, setIsParticleCustomizerOpen] =
+    React.useState(false);
 
   const speedRef = React.useRef(50);
   const densityRef = React.useRef(45);
@@ -138,9 +149,27 @@ export default function AuthShowcase({ activeTheme, iconType }: AuthShowcaseProp
   // Storyboard Sandbox timeline states
   const [isSandboxOpen, setIsSandboxOpen] = React.useState(false);
   const [sandboxSequence, setSandboxSequence] = React.useState([
-    { id: "action", label: "Action Crop", desc: "Close-up action pan", img: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800", text: "Wait, this cv slice is clean!" },
-    { id: "dialogue", label: "Dialogue Bubble", desc: "OCR Speech translation", img: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=800", text: "Translating bubble scripts..." },
-    { id: "sound", label: "SFX Splash", desc: "Audio synthesizer trigger", img: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800", text: "*WHOOSH* Soundscape mixed!" }
+    {
+      id: "action",
+      label: "Action Crop",
+      desc: "Close-up action pan",
+      img: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800",
+      text: "Wait, this cv slice is clean!",
+    },
+    {
+      id: "dialogue",
+      label: "Dialogue Bubble",
+      desc: "OCR Speech translation",
+      img: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=800",
+      text: "Translating bubble scripts...",
+    },
+    {
+      id: "sound",
+      label: "SFX Splash",
+      desc: "Audio synthesizer trigger",
+      img: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800",
+      text: "*WHOOSH* Soundscape mixed!",
+    },
   ]);
   const [sandboxActiveIdx, setSandboxActiveIdx] = React.useState(0);
   const [isSandboxPlaying, setIsSandboxPlaying] = React.useState(false);
@@ -192,7 +221,13 @@ export default function AuthShowcase({ activeTheme, iconType }: AuthShowcaseProp
     window.addEventListener("resize", handleResize);
 
     // Create particles
-    const particles: { x: number; y: number; vx: number; vy: number; radius: number }[] = [];
+    const particles: {
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      radius: number;
+    }[] = [];
 
     const draw = () => {
       ctx.clearRect(0, 0, width, height);
@@ -206,13 +241,13 @@ export default function AuthShowcase({ activeTheme, iconType }: AuthShowcaseProp
             y: Math.random() * height,
             vx: (Math.random() - 0.5) * 0.4,
             vy: (Math.random() - 0.5) * 0.4,
-            radius: Math.random() * 1.5 + 1
+            radius: Math.random() * 1.5 + 1,
           });
         }
       } else if (particles.length > targetCount) {
         particles.length = targetCount;
       }
-      
+
       // Determine line color based on active theme
       let lineColor = "rgba(168, 85, 247, 0.05)"; // default purple
       if (activeTheme === "blue") lineColor = "rgba(59, 130, 246, 0.05)";
@@ -238,9 +273,14 @@ export default function AuthShowcase({ activeTheme, iconType }: AuthShowcaseProp
 
       // Draw nodes
       particles.forEach((p) => {
-        ctx.fillStyle = activeTheme === "purple" ? "rgba(139, 92, 246, 0.15)" : 
-                        activeTheme === "blue" ? "rgba(59, 130, 246, 0.15)" :
-                        activeTheme === "emerald" ? "rgba(16, 185, 129, 0.15)" : "rgba(245, 158, 11, 0.15)";
+        ctx.fillStyle =
+          activeTheme === "purple"
+            ? "rgba(139, 92, 246, 0.15)"
+            : activeTheme === "blue"
+            ? "rgba(59, 130, 246, 0.15)"
+            : activeTheme === "emerald"
+            ? "rgba(16, 185, 129, 0.15)"
+            : "rgba(245, 158, 11, 0.15)";
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fill();
@@ -291,39 +331,56 @@ export default function AuthShowcase({ activeTheme, iconType }: AuthShowcaseProp
 
   return (
     <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-between p-16 bg-gradient-to-br from-[#0a0a10] to-[#040406] border-r border-white/5 overflow-hidden text-left select-none">
-      
       {/* Canvas for animated star nodes */}
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none opacity-80" />
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full pointer-events-none opacity-80"
+      />
 
       {/* Ambient background glows */}
-      <div className={`absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full ${currentTheme.glowPrimary} blur-[130px] pointer-events-none transition-all duration-1000 animate-pulse`} />
-      <div className={`absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full ${currentTheme.glowSecondary} blur-[130px] pointer-events-none transition-all duration-1000 animate-pulse`} />
-      
+      <div
+        className={`absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full ${currentTheme.glowPrimary} blur-[130px] pointer-events-none transition-all duration-1000 animate-pulse`}
+      />
+      <div
+        className={`absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full ${currentTheme.glowSecondary} blur-[130px] pointer-events-none transition-all duration-1000 animate-pulse`}
+      />
+
       {/* Fine grid overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#14141e_1px,transparent_1px),linear-gradient(to_bottom,#14141e_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_80%,transparent_100%)] opacity-30 pointer-events-none" />
 
       {/* Top Header Branding */}
       <div className="relative z-10 flex items-center justify-between w-full">
         <div className="flex items-center gap-3">
-          <div className={`flex items-center justify-center w-10 h-10 rounded-xl ${currentTheme.accentBg} border ${currentTheme.accentBorder} transition-all duration-500`}>
+          <div
+            className={`flex items-center justify-center w-10 h-10 rounded-xl ${currentTheme.accentBg} border ${currentTheme.accentBorder} transition-all duration-500`}
+          >
             <BrandIcon />
           </div>
           <div>
-            <span className="text-xl font-bold tracking-tight text-white">Anivox</span>
-            <span className={`ml-1.5 text-[9px] font-semibold tracking-wider ${currentTheme.accentText} uppercase ${currentTheme.accentBg} px-1.5 py-0.5 rounded-full border ${currentTheme.accentBorder} transition-all duration-500`}>Studio</span>
+            <span className="text-xl font-bold tracking-tight text-white">
+              Anivox
+            </span>
+            <span
+              className={`ml-1.5 text-[9px] font-semibold tracking-wider ${currentTheme.accentText} uppercase ${currentTheme.accentBg} px-1.5 py-0.5 rounded-full border ${currentTheme.accentBorder} transition-all duration-500`}
+            >
+              Studio
+            </span>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           {/* Dynamic button to trigger simulated video player demo */}
           <button
-            onClick={() => { setIsPlayerOpen(true); setIsPlaying(true); }}
+            onClick={() => {
+              setIsPlayerOpen(true);
+              setIsPlaying(true);
+            }}
             className="flex items-center gap-1.5 text-[10px] font-bold tracking-wider uppercase bg-white/5 border border-white/5 hover:border-white/10 px-3 py-1.5 rounded-full cursor-pointer hover:bg-white/10 transition-all text-neutral-300"
           >
             <Play className="w-3.5 h-3.5 fill-current text-purple-400" />
             Play Showcase Demo
           </button>
-          
+
           <button
             onClick={() => setIsSandboxOpen(true)}
             className="flex items-center gap-1.5 text-[10px] font-bold tracking-wider uppercase bg-white/5 border border-white/5 hover:border-white/10 px-3 py-1.5 rounded-full cursor-pointer hover:bg-white/10 transition-all text-neutral-300"
@@ -339,18 +396,20 @@ export default function AuthShowcase({ activeTheme, iconType }: AuthShowcaseProp
         {SHOWCASE_SLIDES.map((slide, idx) => {
           const IconComponent = slide.icon;
           const isActive = idx === currentSlide;
-          
+
           return (
             <div
               key={idx}
               className={`absolute inset-0 flex flex-col justify-center transition-all duration-700 ease-out transform ${
-                isActive 
-                  ? "opacity-100 scale-100 translate-y-0" 
+                isActive
+                  ? "opacity-100 scale-100 translate-y-0"
                   : "opacity-0 scale-95 translate-y-8 pointer-events-none"
               }`}
             >
               <div className="flex">
-                <span className={`text-[10px] font-bold tracking-wider uppercase bg-gradient-to-r ${slide.color} text-transparent bg-clip-text px-3 py-1 rounded-full border border-white/5 backdrop-blur-md`}>
+                <span
+                  className={`text-[10px] font-bold tracking-wider uppercase bg-gradient-to-r ${slide.color} text-transparent bg-clip-text px-3 py-1 rounded-full border border-white/5 backdrop-blur-md`}
+                >
                   {slide.badge}
                 </span>
               </div>
@@ -361,7 +420,9 @@ export default function AuthShowcase({ activeTheme, iconType }: AuthShowcaseProp
                 {slide.description}
               </p>
               <div className="flex items-center gap-3 mt-6">
-                <div className={`flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br ${slide.color} shadow-lg shadow-purple-500/10`}>
+                <div
+                  className={`flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br ${slide.color} shadow-lg shadow-purple-500/10`}
+                >
                   <IconComponent className="w-6 h-6 text-white" />
                 </div>
               </div>
@@ -379,7 +440,9 @@ export default function AuthShowcase({ activeTheme, iconType }: AuthShowcaseProp
                 key={idx}
                 onClick={() => setCurrentSlide(idx)}
                 className={`h-2 rounded-full transition-all duration-300 ${
-                  idx === currentSlide ? `w-8 ${currentTheme.dot}` : "w-2 bg-neutral-700 hover:bg-neutral-600"
+                  idx === currentSlide
+                    ? `w-8 ${currentTheme.dot}`
+                    : "w-2 bg-neutral-700 hover:bg-neutral-600"
                 }`}
                 aria-label={`Go to slide ${idx + 1}`}
               />
@@ -388,7 +451,9 @@ export default function AuthShowcase({ activeTheme, iconType }: AuthShowcaseProp
 
           <div className="relative">
             <button
-              onClick={() => setIsParticleCustomizerOpen(!isParticleCustomizerOpen)}
+              onClick={() =>
+                setIsParticleCustomizerOpen(!isParticleCustomizerOpen)
+              }
               className="px-2 py-1 bg-white/5 hover:bg-white/10 rounded border border-white/5 text-[9px] font-bold text-neutral-400 hover:text-white cursor-pointer transition-colors"
               title="Customize Star Particles"
             >
@@ -397,17 +462,19 @@ export default function AuthShowcase({ activeTheme, iconType }: AuthShowcaseProp
 
             {isParticleCustomizerOpen && (
               <div className="absolute bottom-7 left-0 bg-black/90 border border-white/10 p-3.5 rounded-2xl shadow-2xl backdrop-blur-md space-y-2.5 min-w-[160px] z-50 text-left animate-in slide-in-from-bottom-2 duration-250">
-                <div className="text-[8px] font-black text-purple-400 uppercase tracking-widest">Star Settings</div>
-                
+                <div className="text-[8px] font-black text-purple-400 uppercase tracking-widest">
+                  Star Settings
+                </div>
+
                 <div className="space-y-1">
                   <div className="flex justify-between text-[8px] text-neutral-400 font-mono">
                     <span>Speed</span>
                     <span>{particleSpeed}%</span>
                   </div>
-                  <input 
-                    type="range" 
-                    min="5" 
-                    max="150" 
+                  <input
+                    type="range"
+                    min="5"
+                    max="150"
                     value={particleSpeed}
                     onChange={(e) => setParticleSpeed(parseInt(e.target.value))}
                     className="w-full h-1 bg-white/10 rounded cursor-pointer accent-purple-500"
@@ -419,10 +486,10 @@ export default function AuthShowcase({ activeTheme, iconType }: AuthShowcaseProp
                     <span>Stars</span>
                     <span>{starDensity} stars</span>
                   </div>
-                  <input 
-                    type="range" 
-                    min="10" 
-                    max="100" 
+                  <input
+                    type="range"
+                    min="10"
+                    max="100"
                     value={starDensity}
                     onChange={(e) => setStarDensity(parseInt(e.target.value))}
                     className="w-full h-1 bg-white/10 rounded cursor-pointer accent-purple-500"
@@ -440,16 +507,20 @@ export default function AuthShowcase({ activeTheme, iconType }: AuthShowcaseProp
       {/* SIMULATED VIDEO STORYBOARD PREVIEW OVERLAY */}
       {isPlayerOpen && (
         <div className="absolute inset-0 bg-[#040406]/95 backdrop-blur-md flex flex-col justify-between p-12 z-40 animate-in fade-in duration-300">
-          
           {/* Header controls */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] font-bold tracking-wider uppercase text-neutral-400">Cinematic Motion Preview</span>
+              <span className="text-[10px] font-bold tracking-wider uppercase text-neutral-400">
+                Cinematic Motion Preview
+              </span>
             </div>
-            
+
             <button
-              onClick={() => { setIsPlayerOpen(false); setIsPlaying(false); }}
+              onClick={() => {
+                setIsPlayerOpen(false);
+                setIsPlaying(false);
+              }}
               className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-all text-neutral-400 hover:text-white cursor-pointer"
             >
               <X className="w-4 h-4" />
@@ -458,20 +529,24 @@ export default function AuthShowcase({ activeTheme, iconType }: AuthShowcaseProp
 
           {/* Interactive Mock Video Screen Canvas animation */}
           <div className="my-auto w-full max-w-lg mx-auto aspect-video rounded-2xl bg-[#09090d] border border-white/5 relative flex items-center justify-center overflow-hidden">
-            
             {/* Visual representation of animating webtoon frame */}
-            <div 
+            <div
               className="absolute inset-4 rounded-xl transition-all duration-[2000ms] ease-in-out bg-cover bg-center flex flex-col justify-end p-4"
               style={{
-                backgroundImage: "url('https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800')",
-                transform: isPlaying 
-                  ? `scale(${1.08 + Math.sin(playerProgress * 0.1) * 0.04}) translate(${Math.cos(playerProgress * 0.1) * 6}px, ${Math.sin(playerProgress * 0.1) * 4}px)` 
-                  : "scale(1.0) translate(0,0)"
+                backgroundImage:
+                  "url('https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800')",
+                transform: isPlaying
+                  ? `scale(${
+                      1.08 + Math.sin(playerProgress * 0.1) * 0.04
+                    }) translate(${Math.cos(playerProgress * 0.1) * 6}px, ${
+                      Math.sin(playerProgress * 0.1) * 4
+                    }px)`
+                  : "scale(1.0) translate(0,0)",
               }}
             >
               {/* Shading overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none rounded-xl" />
-              
+
               {/* Dynamic dialog balloon translation */}
               <div className="relative z-10 bg-white text-black text-[10px] font-extrabold px-3 py-1.5 rounded-2xl self-start max-w-[80%] border-2 border-black shadow-md shadow-black/20 animate-bounce">
                 "Wait, this computer vision slice is perfectly clean!"
@@ -480,7 +555,7 @@ export default function AuthShowcase({ activeTheme, iconType }: AuthShowcaseProp
 
             {/* Play overlay controls */}
             {!isPlaying && (
-              <button 
+              <button
                 onClick={() => setIsPlaying(true)}
                 className="absolute w-14 h-14 rounded-full bg-purple-600/90 hover:bg-purple-500 flex items-center justify-center text-white cursor-pointer shadow-lg animate-pulse"
               >
@@ -500,13 +575,13 @@ export default function AuthShowcase({ activeTheme, iconType }: AuthShowcaseProp
             {/* Progress line slider */}
             <div className="space-y-1.5">
               <div className="relative h-1 w-full bg-white/5 rounded-full overflow-hidden border border-white/5 shadow-inner cursor-pointer">
-                <div 
+                <div
                   className="absolute top-0 left-0 h-full bg-purple-500 transition-all"
                   style={{ width: `${playerProgress}%` }}
                 />
               </div>
               <div className="flex items-center justify-between text-[9px] font-bold text-neutral-500 font-mono">
-                <span>0:0{Math.floor(playerProgress/10)} / 0:10</span>
+                <span>0:0{Math.floor(playerProgress / 10)} / 0:10</span>
                 <span>Anivox Showcase Renderer v1.0</span>
               </div>
             </div>
@@ -518,14 +593,22 @@ export default function AuthShowcase({ activeTheme, iconType }: AuthShowcaseProp
                   onClick={() => setIsPlaying(!isPlaying)}
                   className="text-neutral-400 hover:text-white transition-colors cursor-pointer"
                 >
-                  {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                  {isPlaying ? (
+                    <Pause className="w-4 h-4" />
+                  ) : (
+                    <Play className="w-4 h-4" />
+                  )}
                 </button>
-                
+
                 <button
                   onClick={() => setIsMuted(!isMuted)}
                   className="text-neutral-400 hover:text-white transition-colors cursor-pointer"
                 >
-                  {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume1 className="w-4 h-4" />}
+                  {isMuted ? (
+                    <VolumeX className="w-4 h-4" />
+                  ) : (
+                    <Volume1 className="w-4 h-4" />
+                  )}
                 </button>
               </div>
 
@@ -535,22 +618,25 @@ export default function AuthShowcase({ activeTheme, iconType }: AuthShowcaseProp
               </div>
             </div>
           </div>
-
         </div>
       )}
 
       {/* STORYBOARD SANDBOX TIMELINE DRAWER */}
       {isSandboxOpen && (
         <div className="absolute inset-0 bg-[#040406]/95 backdrop-blur-md flex flex-col justify-between p-12 z-40 animate-in fade-in duration-300">
-          
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-purple-500 animate-ping" />
-              <span className="text-[10px] font-bold tracking-wider uppercase text-neutral-400">Interactive Storyboard Sandbox</span>
+              <span className="text-[10px] font-bold tracking-wider uppercase text-neutral-400">
+                Interactive Storyboard Sandbox
+              </span>
             </div>
-            
+
             <button
-              onClick={() => { setIsSandboxOpen(false); setIsSandboxPlaying(false); }}
+              onClick={() => {
+                setIsSandboxOpen(false);
+                setIsSandboxPlaying(false);
+              }}
               className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-all text-neutral-400 hover:text-white cursor-pointer"
             >
               <X className="w-4 h-4" />
@@ -559,15 +645,15 @@ export default function AuthShowcase({ activeTheme, iconType }: AuthShowcaseProp
 
           {/* Canvas frame mockup showing active step */}
           <div className="my-auto w-full max-w-lg mx-auto aspect-video rounded-2xl bg-[#09090d] border border-white/5 relative flex items-center justify-center overflow-hidden">
-            <div 
+            <div
               className="absolute inset-4 rounded-xl transition-all duration-[800ms] ease-in-out bg-cover bg-center flex flex-col justify-end p-4"
               style={{
                 backgroundImage: `url('${sandboxSequence[sandboxActiveIdx].img}')`,
-                transform: isSandboxPlaying ? "scale(1.06)" : "scale(1.0)"
+                transform: isSandboxPlaying ? "scale(1.06)" : "scale(1.0)",
               }}
             >
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent rounded-xl pointer-events-none" />
-              
+
               <div className="relative z-10 bg-white text-black text-[10px] font-extrabold px-3 py-1.5 rounded-2xl self-start max-w-[85%] border-2 border-black shadow-md shadow-black/20 animate-bounce">
                 {sandboxSequence[sandboxActiveIdx].text}
               </div>
@@ -583,25 +669,29 @@ export default function AuthShowcase({ activeTheme, iconType }: AuthShowcaseProp
             <div className="text-[10px] font-bold uppercase text-neutral-500 tracking-wider">
               Arrange Timeline Panels (Click to Reorder)
             </div>
-            
+
             <div className="grid grid-cols-3 gap-3">
               {sandboxSequence.map((item, idx) => {
                 const isActive = idx === sandboxActiveIdx;
                 return (
-                  <div 
+                  <div
                     key={item.id}
                     className={`p-3 rounded-2xl border transition-all text-[10px] ${
-                      isActive 
-                        ? "bg-purple-600/10 border-purple-500 text-white" 
+                      isActive
+                        ? "bg-purple-600/10 border-purple-500 text-white"
                         : "bg-white/5 border-white/5 text-neutral-400"
                     }`}
                   >
                     <div className="font-bold flex items-center justify-between">
                       <span>{item.label}</span>
-                      <span className="text-[8px] bg-black/40 px-1.5 rounded border border-white/5 font-mono">#{idx+1}</span>
+                      <span className="text-[8px] bg-black/40 px-1.5 rounded border border-white/5 font-mono">
+                        #{idx + 1}
+                      </span>
                     </div>
-                    <p className="text-[8px] text-neutral-500 mt-1 leading-normal">{item.desc}</p>
-                    
+                    <p className="text-[8px] text-neutral-500 mt-1 leading-normal">
+                      {item.desc}
+                    </p>
+
                     <div className="flex gap-1.5 mt-2.5 pt-2.5 border-t border-white/5">
                       <button
                         onClick={() => moveItem(idx, "left")}
@@ -629,8 +719,14 @@ export default function AuthShowcase({ activeTheme, iconType }: AuthShowcaseProp
                 onClick={() => setIsSandboxPlaying(!isSandboxPlaying)}
                 className="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 px-5 rounded-xl text-[10px] transition-all cursor-pointer flex items-center gap-1.5"
               >
-                {isSandboxPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-current" />}
-                {isSandboxPlaying ? "Pause Sandbox render" : "Render Sandbox timeline"}
+                {isSandboxPlaying ? (
+                  <Pause className="w-3.5 h-3.5" />
+                ) : (
+                  <Play className="w-3.5 h-3.5 fill-current" />
+                )}
+                {isSandboxPlaying
+                  ? "Pause Sandbox render"
+                  : "Render Sandbox timeline"}
               </button>
 
               <div className="text-[9px] font-mono text-neutral-500">
@@ -638,10 +734,8 @@ export default function AuthShowcase({ activeTheme, iconType }: AuthShowcaseProp
               </div>
             </div>
           </div>
-
         </div>
       )}
-
     </div>
   );
 }

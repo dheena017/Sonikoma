@@ -15,6 +15,7 @@ import tempfile
 import logging
 import uuid
 import shutil
+import jwt
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Path, Request, Response
 from fastapi.responses import JSONResponse, FileResponse
@@ -25,9 +26,25 @@ from services.audio import generate_panel_audio
 from utils.image_utils import resolve_image_to_buffer
 from utils.id_utils import generate_project_id
 from utils.cache import stitched_cache
+from utils.url_utils import parse_webtoon_url
+import database.db as db
 
 logger = logging.getLogger("anivox.routes.video")
 router = APIRouter()
+
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "anivox_super_secret_key_change_me")
+ALGORITHM = "HS256"
+
+def get_optional_user_id(request: Request) -> Optional[str]:
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return None
+    try:
+        token = auth_header.split(" ")[1]
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload.get("sub")
+    except Exception:
+        return None
 
 # ─── Schemas ──────────────────────────────────────────────────────────────────
 
@@ -169,7 +186,7 @@ async def compile_video_route(body: VideoCompileRequest):
 # ─── High Level API Routes (Migrated from Express server.ts / ai/video.ts) ───
 
 @router.post("/convert-images-to-video", summary="Synthesize dialogue voice-over and bundle storyboard panels into MP4")
-async def convert_images_to_video(body: ConvertVideoRequest):
+async def convert_images_to_video(request: Request, body: ConvertVideoRequest):
     """
     Accepts panel image URLs and dialogue text. Fetches images, synthesizes
     TTS voiceovers using edge-tts/pydub, and compiles a cinematic MP4 using MoviePy.
@@ -267,6 +284,46 @@ async def convert_images_to_video(body: ConvertVideoRequest):
         # Store in stitchedCache
         stitched_cache.set(video_cache_id, {"data": video_bytes, "content_type": "video/mp4"})
         logger.info(f"[Video] Successfully compiled and cached video with ID: {video_cache_id}")
+
+        user_id = get_optional_user_id(request)
+        if user_id:
+            try:
+                existing = db.get_project(project_id)
+                if existing:
+                    db.update_project(project_id, {
+                        "status": "completed",
+                        "video_url": video_url,
+                        "panels_count": len(body.panels)
+                    })
+                    db.delete_panels(project_id)
+                else:
+                    parsed = parse_webtoon_url(body.url) if body.url else {"title": "Untitled Webtoon", "genre": "general", "episode": "Chapter 1"}
+                    db.insert_project({
+                        "project_id": project_id,
+                        "url": body.url or "",
+                        "title": parsed["title"],
+                        "genre": parsed["genre"],
+                        "episode": parsed["episode"],
+                        "status": "completed",
+                        "panels_count": len(body.panels),
+                        "video_url": video_url,
+                        "user_id": user_id
+                    })
+                
+                db_panels = []
+                for p in body.panels:
+                    db_panels.append({
+                        "image_url": p.image_url,
+                        "original_url": p.image_url,
+                        "speech_text": p.speech_text or "",
+                        "sfx": "",
+                        "duration": p.duration or 4.5,
+                        "motion_type": "zoom_in",
+                    })
+                db.insert_panels(project_id, db_panels)
+                logger.info(f"[Database] Automatically updated project {project_id} with video URL and panels for user {user_id}")
+            except Exception as db_err:
+                logger.error(f"[Database] Failed to automatically save video output to project: {db_err}", exc_info=True)
 
         return {
             "success": True,

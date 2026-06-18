@@ -1,5 +1,13 @@
 import React from "react";
-import { CheckCircle2, Compass, Award, Link2, ToggleLeft, ToggleRight, Sparkles } from "lucide-react";
+import {
+  CheckCircle2,
+  Compass,
+  Award,
+  Link2,
+  ToggleLeft,
+  ToggleRight,
+  Sparkles,
+} from "lucide-react";
 
 interface ProfileAccountTabProps {
   user: any;
@@ -12,36 +20,70 @@ interface ProfileAccountTabProps {
     newsletter: boolean;
     language: string;
   };
-  setProfileUser: React.Dispatch<React.SetStateAction<{
-    fullName: string;
-    email: string;
-    avatarUrl: string;
-    role: string;
-    bio: string;
-    newsletter: boolean;
-    language: string;
-  }>>;
+  setProfileUser: React.Dispatch<
+    React.SetStateAction<{
+      fullName: string;
+      email: string;
+      avatarUrl: string;
+      role: string;
+      bio: string;
+      newsletter: boolean;
+      language: string;
+    }>
+  >;
   CREATOR_ROLES: { id: string; label: string; desc: string }[];
   handleProfileSave: (e: React.FormEvent) => void;
   saveSuccess: boolean;
-  
+
   // Lifted database profile props
   connections: { google: boolean; github: boolean; discord: boolean };
-  setConnections: React.Dispatch<React.SetStateAction<{ google: boolean; github: boolean; discord: boolean }>>;
+  setConnections: React.Dispatch<
+    React.SetStateAction<{ google: boolean; github: boolean; discord: boolean }>
+  >;
   achievementPoints: number;
   setAchievementPoints: React.Dispatch<React.SetStateAction<number>>;
   unlockedRewards: string[];
   setUnlockedRewards: React.Dispatch<React.SetStateAction<string[]>>;
   portfolios: { id: string; site: string; url: string }[];
-  setPortfolios: React.Dispatch<React.SetStateAction<{ id: string; site: string; url: string }[]>>;
-  onRedeemReward: (cost: number, type: string, value: string) => Promise<boolean>;
+  setPortfolios: React.Dispatch<
+    React.SetStateAction<{ id: string; site: string; url: string }[]>
+  >;
+  onRedeemReward: (
+    cost: number,
+    type: string,
+    value: string
+  ) => Promise<boolean>;
 }
 
 const ACHIEVEMENTS = [
-  { id: "1", title: "First Scrape", desc: "Parsed first vertical webtoon strip", unlocked: true, color: "from-purple-500 to-indigo-500" },
-  { id: "2", title: "Gemini Translator", desc: "Translated storyboard into Korean/Japanese", unlocked: true, color: "from-blue-500 to-cyan-500" },
-  { id: "3", title: "Keyframe Director", desc: "Added camera pan-zoom animation routes", unlocked: true, color: "from-emerald-500 to-teal-500" },
-  { id: "4", title: "Pro Producer", desc: "Compiled a 10-minute recap video stream", unlocked: false, color: "from-amber-500 to-orange-500" }
+  {
+    id: "1",
+    title: "First Scrape",
+    desc: "Parsed first vertical webtoon strip",
+    unlocked: true,
+    color: "from-purple-500 to-indigo-500",
+  },
+  {
+    id: "2",
+    title: "Gemini Translator",
+    desc: "Translated storyboard into Korean/Japanese",
+    unlocked: true,
+    color: "from-blue-500 to-cyan-500",
+  },
+  {
+    id: "3",
+    title: "Keyframe Director",
+    desc: "Added camera pan-zoom animation routes",
+    unlocked: true,
+    color: "from-emerald-500 to-teal-500",
+  },
+  {
+    id: "4",
+    title: "Pro Producer",
+    desc: "Compiled a 10-minute recap video stream",
+    unlocked: false,
+    color: "from-amber-500 to-orange-500",
+  },
 ];
 
 export default function ProfileAccountTab({
@@ -58,7 +100,7 @@ export default function ProfileAccountTab({
   setUnlockedRewards,
   portfolios,
   setPortfolios,
-  onRedeemReward
+  onRedeemReward,
 }: ProfileAccountTabProps) {
   const [rewardsToast, setRewardsToast] = React.useState<string | null>(null);
   const [newPortfolioUrl, setNewPortfolioUrl] = React.useState("");
@@ -70,19 +112,22 @@ export default function ProfileAccountTab({
       { label: "Display Name set", done: profileUser.fullName.length > 0 },
       { label: "Biography written", done: profileUser.bio.length > 15 },
       { label: "Creator Role picked", done: !!profileUser.role },
-      { label: "Social Account linked", done: connections.google || connections.github || connections.discord },
+      {
+        label: "Social Account linked",
+        done: connections.google || connections.github || connections.discord,
+      },
     ];
   }, [profileUser, connections]);
 
   const completionPct = React.useMemo(() => {
-    const doneCount = completionItems.filter(item => item.done).length;
+    const doneCount = completionItems.filter((item) => item.done).length;
     return Math.round((doneCount / completionItems.length) * 100);
   }, [completionItems]);
 
   const toggleLink = (provider: "google" | "github" | "discord") => {
-    setConnections(prev => ({
+    setConnections((prev) => ({
       ...prev,
-      [provider]: !prev[provider]
+      [provider]: !prev[provider],
     }));
   };
 
@@ -96,15 +141,15 @@ export default function ProfileAccountTab({
       setRewardsToast("You have already claimed this reward!");
       return;
     }
-    
+
     const isBadge = name.toLowerCase().includes("badge");
     const rewardType = isBadge ? "badge" : "credits";
     const rewardValue = isBadge ? name : "100";
-    
+
     const ok = await onRedeemReward(cost, rewardType, rewardValue);
     if (ok) {
-      setAchievementPoints(prev => prev - cost);
-      setUnlockedRewards(prev => [...prev, name]);
+      setAchievementPoints((prev) => prev - cost);
+      setUnlockedRewards((prev) => [...prev, name]);
       setRewardsToast(`Successfully claimed: ${name}!`);
     } else {
       setRewardsToast("Redemption failed on server.");
@@ -114,8 +159,11 @@ export default function ProfileAccountTab({
   const handleAddPortfolio = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newPortfolioUrl.trim()) return;
-    
-    if (!newPortfolioUrl.startsWith("http://") && !newPortfolioUrl.startsWith("https://")) {
+
+    if (
+      !newPortfolioUrl.startsWith("http://") &&
+      !newPortfolioUrl.startsWith("https://")
+    ) {
       alert("Portfolio link must start with http:// or https://");
       return;
     }
@@ -123,15 +171,15 @@ export default function ProfileAccountTab({
     const newLink = {
       id: Date.now().toString(),
       site: newPortfolioSite,
-      url: newPortfolioUrl
+      url: newPortfolioUrl,
     };
 
-    setPortfolios(prev => [...prev, newLink]);
+    setPortfolios((prev) => [...prev, newLink]);
     setNewPortfolioUrl("");
   };
 
   const handleDeletePortfolio = (id: string) => {
-    setPortfolios(prev => prev.filter(p => p.id !== id));
+    setPortfolios((prev) => prev.filter((p) => p.id !== id));
   };
 
   const handleCopyPortfolio = (url: string) => {
@@ -141,34 +189,45 @@ export default function ProfileAccountTab({
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 text-left">
-      
       {/* Dynamic Profile Profile Completion Meter & Connected Accounts Split grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        
         {/* Completion Progress ring card */}
         <div className="md:col-span-1 bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-6 flex flex-col items-center justify-center text-center space-y-4">
           <div className="relative w-24 h-24 flex items-center justify-center">
             {/* SVG circle track */}
             <svg className="w-full h-full transform -rotate-90">
-              <circle cx="48" cy="48" r="40" stroke="rgba(255,255,255,0.05)" strokeWidth="6" fill="transparent" />
-              <circle 
-                cx="48" 
-                cy="48" 
-                r="40" 
-                stroke="#a855f7" 
-                strokeWidth="6" 
-                fill="transparent" 
+              <circle
+                cx="48"
+                cy="48"
+                r="40"
+                stroke="rgba(255,255,255,0.05)"
+                strokeWidth="6"
+                fill="transparent"
+              />
+              <circle
+                cx="48"
+                cy="48"
+                r="40"
+                stroke="#a855f7"
+                strokeWidth="6"
+                fill="transparent"
                 strokeDasharray={251.2}
                 strokeDashoffset={251.2 - (251.2 * completionPct) / 100}
                 className="transition-all duration-1000 ease-out"
               />
             </svg>
-            <span className="absolute text-lg font-black text-white font-mono">{completionPct}%</span>
+            <span className="absolute text-lg font-black text-white font-mono">
+              {completionPct}%
+            </span>
           </div>
 
           <div className="space-y-1">
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Profile Status</h4>
-            <p className="text-[10px] text-neutral-500 font-semibold">Complete profile setups to unlock developer bonuses</p>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+              Profile Status
+            </h4>
+            <p className="text-[10px] text-neutral-500 font-semibold">
+              Complete profile setups to unlock developer bonuses
+            </p>
           </div>
         </div>
 
@@ -186,44 +245,74 @@ export default function ProfileAccountTab({
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 Google Account Login
               </span>
-              <button onClick={() => toggleLink("google")} className="cursor-pointer text-purple-400">
-                {connections.google ? <ToggleRight className="w-7 h-7 text-purple-500" /> : <ToggleLeft className="w-7 h-7 text-neutral-600" />}
+              <button
+                onClick={() => toggleLink("google")}
+                className="cursor-pointer text-purple-400"
+              >
+                {connections.google ? (
+                  <ToggleRight className="w-7 h-7 text-purple-500" />
+                ) : (
+                  <ToggleLeft className="w-7 h-7 text-neutral-600" />
+                )}
               </button>
             </div>
 
             {/* GitHub connection */}
             <div className="flex items-center justify-between text-xs py-1">
               <span className="text-neutral-300 font-medium flex items-center gap-2">
-                <span className={`w-1.5 h-1.5 rounded-full ${connections.github ? "bg-emerald-500" : "bg-neutral-600"}`} />
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    connections.github ? "bg-emerald-500" : "bg-neutral-600"
+                  }`}
+                />
                 GitHub Repositories
               </span>
-              <button onClick={() => toggleLink("github")} className="cursor-pointer text-purple-400">
-                {connections.github ? <ToggleRight className="w-7 h-7 text-purple-500" /> : <ToggleLeft className="w-7 h-7 text-neutral-600" />}
+              <button
+                onClick={() => toggleLink("github")}
+                className="cursor-pointer text-purple-400"
+              >
+                {connections.github ? (
+                  <ToggleRight className="w-7 h-7 text-purple-500" />
+                ) : (
+                  <ToggleLeft className="w-7 h-7 text-neutral-600" />
+                )}
               </button>
             </div>
 
             {/* Discord connection */}
             <div className="flex items-center justify-between text-xs py-1">
               <span className="text-neutral-300 font-medium flex items-center gap-2">
-                <span className={`w-1.5 h-1.5 rounded-full ${connections.discord ? "bg-emerald-500" : "bg-neutral-600"}`} />
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    connections.discord ? "bg-emerald-500" : "bg-neutral-600"
+                  }`}
+                />
                 Discord Publisher Community
               </span>
-              <button onClick={() => toggleLink("discord")} className="cursor-pointer text-purple-400">
-                {connections.discord ? <ToggleRight className="w-7 h-7 text-purple-500" /> : <ToggleLeft className="w-7 h-7 text-neutral-600" />}
+              <button
+                onClick={() => toggleLink("discord")}
+                className="cursor-pointer text-purple-400"
+              >
+                {connections.discord ? (
+                  <ToggleRight className="w-7 h-7 text-purple-500" />
+                ) : (
+                  <ToggleLeft className="w-7 h-7 text-neutral-600" />
+                )}
               </button>
             </div>
           </div>
         </div>
-
       </div>
 
       {/* Main Account details Form Card */}
       <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-8 shadow-2xl relative">
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
-        
+
         <div className="space-y-1 text-left mb-6">
           <h3 className="text-lg font-bold text-white">Profile Details</h3>
-          <p className="text-xs text-neutral-400">Edit account descriptions, names, and profiles</p>
+          <p className="text-xs text-neutral-400">
+            Edit account descriptions, names, and profiles
+          </p>
         </div>
 
         {saveSuccess && (
@@ -234,7 +323,6 @@ export default function ProfileAccountTab({
 
         <form onSubmit={handleProfileSave} className="space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
             <div className="space-y-1.5 text-left">
               <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 ml-1">
                 Full Display Name
@@ -243,7 +331,12 @@ export default function ProfileAccountTab({
                 type="text"
                 required
                 value={profileUser.fullName}
-                onChange={(e) => setProfileUser(prev => ({ ...prev, fullName: e.target.value }))}
+                onChange={(e) =>
+                  setProfileUser((prev) => ({
+                    ...prev,
+                    fullName: e.target.value,
+                  }))
+                }
                 className="w-full bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-3 px-4 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all"
               />
             </div>
@@ -251,13 +344,14 @@ export default function ProfileAccountTab({
             <div className="space-y-1.5 text-left opacity-75">
               <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 ml-1 flex items-center gap-1">
                 Email Address
-                <span className="text-[8px] bg-neutral-950 px-1 rounded border border-white/5 uppercase">Fixed</span>
+                <span className="text-[8px] bg-neutral-950 px-1 rounded border border-white/5 uppercase">
+                  Fixed
+                </span>
               </label>
               <div className="w-full bg-neutral-900/50 border border-white/5 rounded-xl py-3 px-4 text-xs font-mono text-neutral-400 select-all cursor-not-allowed">
                 {profileUser.email}
               </div>
             </div>
-
           </div>
 
           <div className="space-y-2 text-left">
@@ -272,7 +366,9 @@ export default function ProfileAccountTab({
                   <button
                     key={role.id}
                     type="button"
-                    onClick={() => setProfileUser(prev => ({ ...prev, role: role.id }))}
+                    onClick={() =>
+                      setProfileUser((prev) => ({ ...prev, role: role.id }))
+                    }
                     className={`text-left p-2.5 rounded-xl border transition-all duration-300 cursor-pointer ${
                       isSelected
                         ? "bg-purple-600/20 border-purple-500 text-white shadow-md shadow-purple-900/10"
@@ -280,7 +376,9 @@ export default function ProfileAccountTab({
                     }`}
                   >
                     <div className="text-[11px] font-bold">{role.label}</div>
-                    <div className="text-[8px] text-neutral-500 mt-0.5">{role.desc}</div>
+                    <div className="text-[8px] text-neutral-500 mt-0.5">
+                      {role.desc}
+                    </div>
                   </button>
                 );
               })}
@@ -294,7 +392,9 @@ export default function ProfileAccountTab({
             <textarea
               rows={3}
               value={profileUser.bio}
-              onChange={(e) => setProfileUser(prev => ({ ...prev, bio: e.target.value }))}
+              onChange={(e) =>
+                setProfileUser((prev) => ({ ...prev, bio: e.target.value }))
+              }
               className="w-full bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-2.5 px-4 text-xs font-medium text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all resize-none"
             />
           </div>
@@ -304,15 +404,24 @@ export default function ProfileAccountTab({
               <input
                 type="checkbox"
                 checked={profileUser.newsletter}
-                onChange={(e) => setProfileUser(prev => ({ ...prev, newsletter: e.target.checked }))}
+                onChange={(e) =>
+                  setProfileUser((prev) => ({
+                    ...prev,
+                    newsletter: e.target.checked,
+                  }))
+                }
                 className="sr-only"
               />
-              <div className={`w-4 h-4 rounded border transition-all flex items-center justify-center ${
-                profileUser.newsletter 
-                  ? "bg-purple-600 border-purple-500" 
-                  : "bg-black/40 border-white/10 group-hover:border-white/20"
-              }`}>
-                {profileUser.newsletter && <CheckCircle2 className="w-3 h-3 text-white" />}
+              <div
+                className={`w-4 h-4 rounded border transition-all flex items-center justify-center ${
+                  profileUser.newsletter
+                    ? "bg-purple-600 border-purple-500"
+                    : "bg-black/40 border-white/10 group-hover:border-white/20"
+                }`}
+              >
+                {profileUser.newsletter && (
+                  <CheckCircle2 className="w-3 h-3 text-white" />
+                )}
               </div>
               <span className="text-[11px] text-neutral-400 group-hover:text-neutral-300 font-medium">
                 Receive monthly creator roundups and core feature updates
@@ -327,25 +436,29 @@ export default function ProfileAccountTab({
             </button>
           </div>
         </form>
-
       </div>
 
       {/* Portfolios links manager card */}
       <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-8 shadow-2xl relative space-y-4">
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
-        
+
         <div className="space-y-1">
           <h3 className="text-base font-bold text-white flex items-center gap-2">
             <Compass className="w-5 h-5 text-purple-400" />
             Creator Portfolios URLs
           </h3>
-          <p className="text-xs text-neutral-400 font-semibold">Link your publications from popular webcomic hosting websites</p>
+          <p className="text-xs text-neutral-400 font-semibold">
+            Link your publications from popular webcomic hosting websites
+          </p>
         </div>
 
         {/* Existing portfolio links */}
         <div className="space-y-2">
           {portfolios.map((port) => (
-            <div key={port.id} className="bg-black/30 border border-white/5 rounded-2xl p-3 flex items-center justify-between gap-4">
+            <div
+              key={port.id}
+              className="bg-black/30 border border-white/5 rounded-2xl p-3 flex items-center justify-between gap-4"
+            >
               <div className="flex items-center gap-3">
                 <span className="text-[10px] font-black uppercase bg-purple-600/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded-md">
                   {port.site}
@@ -406,23 +519,28 @@ export default function ProfileAccountTab({
 
       {/* Unlocked Creator Achievements badges */}
       <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-6 space-y-6">
-        
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-white/5 pb-4">
           <div className="space-y-1">
             <h4 className="text-xs font-black uppercase text-neutral-400 tracking-wider flex items-center gap-1.5">
               <Award className="w-4 h-4 text-purple-400" />
               Creative Milestones & Achievements
             </h4>
-            <p className="text-[10px] text-neutral-500 font-semibold">Unlock milestones by using advanced studio configurations</p>
+            <p className="text-[10px] text-neutral-500 font-semibold">
+              Unlock milestones by using advanced studio configurations
+            </p>
           </div>
 
           {/* Points display & Exchange */}
           <div className="flex items-center gap-4 bg-black/40 border border-white/5 p-2 rounded-2xl">
             <div className="text-left">
-              <span className="text-[8px] text-neutral-500 block uppercase">Reward Points</span>
-              <span className="text-sm font-black text-purple-400 font-mono">{achievementPoints} pts</span>
+              <span className="text-[8px] text-neutral-500 block uppercase">
+                Reward Points
+              </span>
+              <span className="text-sm font-black text-purple-400 font-mono">
+                {achievementPoints} pts
+              </span>
             </div>
-            
+
             <div className="flex items-center gap-1.5">
               <button
                 type="button"
@@ -445,11 +563,13 @@ export default function ProfileAccountTab({
         </div>
 
         {rewardsToast && (
-          <div className={`p-2.5 rounded-xl border text-[10px] font-bold text-center animate-pulse ${
-            rewardsToast.includes("Successfully") 
-              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
-              : "bg-rose-500/10 border-rose-500/20 text-rose-400"
-          }`}>
+          <div
+            className={`p-2.5 rounded-xl border text-[10px] font-bold text-center animate-pulse ${
+              rewardsToast.includes("Successfully")
+                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                : "bg-rose-500/10 border-rose-500/20 text-rose-400"
+            }`}
+          >
             {rewardsToast}
           </div>
         )}
@@ -458,29 +578,38 @@ export default function ProfileAccountTab({
           <div className="flex flex-wrap gap-2 text-[10px] font-bold text-neutral-400 items-center">
             <span>Redeemed:</span>
             {unlockedRewards.map((reward, idx) => (
-              <span key={idx} className="bg-purple-500/15 border border-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full">
+              <span
+                key={idx}
+                className="bg-purple-500/15 border border-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full"
+              >
                 {reward}
               </span>
             ))}
           </div>
         )}
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {ACHIEVEMENTS.map((ach) => (
-            <div 
-              key={ach.id} 
+            <div
+              key={ach.id}
               className={`p-4 rounded-2xl border flex flex-col justify-between transition-all ${
-                ach.unlocked 
-                  ? "bg-black/30 border-white/5 shadow-inner" 
+                ach.unlocked
+                  ? "bg-black/30 border-white/5 shadow-inner"
                   : "bg-black/60 border-white/5 opacity-55"
               }`}
             >
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className={`text-xs font-bold ${ach.unlocked ? "text-white" : "text-neutral-500"}`}>
+                  <span
+                    className={`text-xs font-bold ${
+                      ach.unlocked ? "text-white" : "text-neutral-500"
+                    }`}
+                  >
                     {ach.title}
                   </span>
-                  {ach.unlocked && <Sparkles className="w-3.5 h-3.5 text-purple-400" />}
+                  {ach.unlocked && (
+                    <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                  )}
                 </div>
                 <p className="text-[9px] text-neutral-500 leading-relaxed font-semibold">
                   {ach.desc}
@@ -488,11 +617,13 @@ export default function ProfileAccountTab({
               </div>
 
               <div className="mt-3 text-right">
-                <span className={`text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                  ach.unlocked 
-                    ? "bg-purple-600/10 text-purple-400 border border-purple-500/20" 
-                    : "bg-neutral-800 text-neutral-500 border border-white/5"
-                }`}>
+                <span
+                  className={`text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                    ach.unlocked
+                      ? "bg-purple-600/10 text-purple-400 border border-purple-500/20"
+                      : "bg-neutral-800 text-neutral-500 border border-white/5"
+                  }`}
+                >
                   {ach.unlocked ? "Unlocked" : "Locked"}
                 </span>
               </div>
@@ -500,7 +631,6 @@ export default function ProfileAccountTab({
           ))}
         </div>
       </div>
-
     </div>
   );
 }

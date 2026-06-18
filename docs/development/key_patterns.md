@@ -13,17 +13,17 @@ Stores temporary stitched or processed images in memory, reducing disk reads.
 const uniqueId = `stitched_${Date.now()}_<descriptor>`;
 const newUrl = `/api/stitch-images/cached/${uniqueId}`;
 
-stitchedCache.set(uniqueId, { 
-  data: buffer, 
-  contentType: "image/png" 
+stitchedCache.set(uniqueId, {
+  data: buffer,
+  contentType: "image/png",
 });
 
 // Always register updates in editHistory for frontend undo/redo support
-editHistory.set(newUrl, originalUrl); 
+editHistory.set(newUrl, originalUrl);
 
-return res.json({ 
-  success: true, 
-  url: newUrl 
+return res.json({
+  success: true,
+  url: newUrl,
 });
 ```
 
@@ -37,13 +37,14 @@ Guards against rate-limiting (429) and server errors (503) when calling Google G
 import { callGeminiWithRetry } from "../utils/aiUtils.js";
 
 const result = await callGeminiWithRetry(
-  () => ai.models.generateContent({ 
-    model: "gemini-2.5-flash", 
-    contents: [{ role: "user", parts: [{ text: prompt }] }],
-    config: { responseMimeType: "application/json" }
-  }),
-  4,    // Maximum retries
-  1500  // Initial back-off delay in ms
+  () =>
+    ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      config: { responseMimeType: "application/json" },
+    }),
+  4, // Maximum retries
+  1500 // Initial back-off delay in ms
 );
 ```
 
@@ -93,6 +94,7 @@ All logs in the codebase must follow the standard structure:
 ### Python Backend Logger Pattern
 
 In Python services and routes, use modular namespace loggers. The logging middleware will automatically translate these calls into the standard layout:
+
 ```python
 import logging
 logger = logging.getLogger("anivox.routes.my_feature")
@@ -110,6 +112,7 @@ logger.error("Stitching process failed due to corrupt asset", exc_info=True)
 ### Frontend console.log Pattern
 
 In React components and custom hooks, the global console interceptor automatically formats log statements. Developers should include context in brackets to set the source file:
+
 ```typescript
 // Standard Info Log (outputs: HH:MM:SS [FRONTEND] [INFO] [useCropEditor.ts] Opening crop editor canvas)
 console.log("[useCropEditor] Opening crop editor canvas");
@@ -155,17 +158,23 @@ Separates visual rendering layout files from active React business hooks.
 import { useState, useCallback } from "react";
 import { GeneratedPanel } from "../types.js";
 
-export function useSingleImageEdits(panel: GeneratedPanel, onUpdate: (p: GeneratedPanel) => void) {
+export function useSingleImageEdits(
+  panel: GeneratedPanel,
+  onUpdate: (p: GeneratedPanel) => void
+) {
   const [isEditing, setIsEditing] = useState(false);
 
-  const handleRotate = useCallback(async (angle: number) => {
-    // API edit-image request...
-    onUpdate(updatedPanel);
-  }, [panel, onUpdate]);
+  const handleRotate = useCallback(
+    async (angle: number) => {
+      // API edit-image request...
+      onUpdate(updatedPanel);
+    },
+    [panel, onUpdate]
+  );
 
-  return { 
-    isEditing, 
-    handleRotate 
+  return {
+    isEditing,
+    handleRotate,
   };
 }
 ```

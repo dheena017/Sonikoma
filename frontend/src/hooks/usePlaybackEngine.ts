@@ -15,7 +15,6 @@ if (typeof window !== "undefined" && window.speechSynthesis) {
   };
 }
 
-
 interface UsePlaybackEngineProps {
   panels: GeneratedPanel[];
   volume: number;
@@ -46,7 +45,10 @@ export function usePlaybackEngine({
       // Wrap voice querying and speech trigger in a non-blocking timeout
       setTimeout(() => {
         const utterance = new SpeechSynthesisUtterance(text);
-        const voices = cachedVoices.length > 0 ? cachedVoices : window.speechSynthesis.getVoices();
+        const voices =
+          cachedVoices.length > 0
+            ? cachedVoices
+            : window.speechSynthesis.getVoices();
 
         let selectedVoice = null;
         if (
@@ -80,7 +82,7 @@ export function usePlaybackEngine({
           const naturalDuration = words / 2.2;
           // If card duration is shorter/longer, adjust playback speed
           let targetRate = naturalDuration / panelDuration;
-          
+
           // Clamp to a natural sounding range (0.6 to 2.2) to keep voice intelligible
           if (targetRate < 0.6) targetRate = 0.6;
           if (targetRate > 2.2) targetRate = 2.2;
@@ -153,7 +155,13 @@ export function usePlaybackEngine({
     return () => {
       if (playTimerRef.current) clearTimeout(playTimerRef.current);
     };
-  }, [storyboardPlaying, currentPanelIndex, panels, playStoryboardAudio, playbackTime]);
+  }, [
+    storyboardPlaying,
+    currentPanelIndex,
+    panels,
+    playStoryboardAudio,
+    playbackTime,
+  ]);
 
   const toggleStoryboardPlayback = () => {
     if (panels.length === 0) return;

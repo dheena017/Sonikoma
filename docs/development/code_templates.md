@@ -7,6 +7,7 @@ To maintain consistency and readability across the codebase, all code files must
 ## 1. React Component Files (`.tsx`)
 
 ### 📋 Component Checklist & Rules:
+
 - **Interfaces**: Always export a clear interface defining the component's props (e.g. `MyComponentProps`).
 - **Early Return Guards**: Always place early-return guards for loading states (`isLoading`) and error states (`isError`) before rendering the main layout.
 - **JSX Root Container**: The main return statement must return a single semantic root container with appropriate styling, layout classes (Tailwind), and accessibly annotated roles and labels (e.g. `role="region"`, `aria-label="..."`).
@@ -35,19 +36,19 @@ import { GeneratedPanel } from "../../types.js";
 // SECTION 2: COMPONENT DEFINITION & EXPORT
 // ============================================================================
 export interface MyComponentProps {
-  propA: string;                  // Short description of propA
+  propA: string; // Short description of propA
   onAction: (id: string) => void; // Standard trigger action callback
-  isLoading?: boolean;            // Status flag indicating loading
-  isError?: boolean;              // Status flag indicating loading error
-  onRetry?: () => void;           // Callback hook to retry loading
+  isLoading?: boolean; // Status flag indicating loading
+  isError?: boolean; // Status flag indicating loading error
+  onRetry?: () => void; // Callback hook to retry loading
 }
 
-export default function MyComponent({ 
-  propA, 
-  onAction, 
-  isLoading = false, 
-  isError = false, 
-  onRetry 
+export default function MyComponent({
+  propA,
+  onAction,
+  isLoading = false,
+  isError = false,
+  onRetry,
 }: MyComponentProps) {
   // --------------------------------------------------------------------------
   // SUB-SECTION 2.1: STATE & HOOK INITIALIZATION
@@ -65,14 +66,17 @@ export default function MyComponent({
   // --------------------------------------------------------------------------
   const handlePerformAction = React.useCallback(() => {
     if (!internalValue) return;
-    console.log("[MyComponent] Triggering action callback with value:", internalValue);
+    console.log(
+      "[MyComponent] Triggering action callback with value:",
+      internalValue
+    );
     onAction(internalValue);
   }, [internalValue, onAction]);
 
   // --------------------------------------------------------------------------
   // SUB-SECTION 2.3: RENDER OUT / JSX TREE
   // --------------------------------------------------------------------------
-  
+
   // Guard: If data is loading, show a loading placeholder instead of rendering empty layouts
   if (isLoading) {
     return (
@@ -85,7 +89,7 @@ export default function MyComponent({
   // Guard: If loading failed, render a structured error UI with retry action
   if (isError) {
     return (
-      <div 
+      <div
         className="p-6 bg-red-950/20 border border-red-900/40 rounded-2xl flex flex-col items-center justify-center space-y-3 text-red-400 font-mono text-xs"
         role="alert"
         aria-live="polite"
@@ -104,9 +108,9 @@ export default function MyComponent({
   }
 
   return (
-    <div 
+    <div
       className="p-6 bg-neutral-900 border border-neutral-800 rounded-2xl flex flex-col space-y-4"
-      role="region" 
+      role="region"
       aria-label="Interactive Component Workspace"
     >
       <div className="flex items-center gap-2 text-sm font-semibold text-neutral-200">
@@ -139,6 +143,7 @@ export default function MyComponent({
 ## 2. Custom React Hook Files (`.ts`)
 
 ### 📋 Hook Checklist & Rules:
+
 - **Naming**: Always prefix the hook name with `use` (e.g. `useMyHook`).
 - **Interfaces**: Clearly define the input parameter interface (`UseMyHookParams`) and return output interface (`UseMyHookResult`).
 - **Callback Memoization**: Wrap all returned event functions in `useCallback` to prevent unnecessary component re-renders.
@@ -162,18 +167,21 @@ import { GeneratedPanel } from "../types.js";
 // SECTION 2: HOOK IMPLEMENTATION
 // ============================================================================
 export interface UseMyHookParams {
-  sourceId: string;               // Parameter description
+  sourceId: string; // Parameter description
   onError: (msg: string) => void; // Callback hook error handler
 }
 
 export interface UseMyHookResult {
-  data: string | null;            // Fetched/processed string output
-  isLoading: boolean;             // Busy loading state status
-  isError: boolean;               // Hook execution error state
+  data: string | null; // Fetched/processed string output
+  isLoading: boolean; // Busy loading state status
+  isError: boolean; // Hook execution error state
   triggerFetch: (param: string) => Promise<void>; // Event caller action
 }
 
-export function useMyHook({ sourceId, onError }: UseMyHookParams): UseMyHookResult {
+export function useMyHook({
+  sourceId,
+  onError,
+}: UseMyHookParams): UseMyHookResult {
   // --------------------------------------------------------------------------
   // SUB-SECTION 2.1: STATE DEFINITIONS
   // --------------------------------------------------------------------------
@@ -186,40 +194,49 @@ export function useMyHook({ sourceId, onError }: UseMyHookParams): UseMyHookResu
   // --------------------------------------------------------------------------
   React.useEffect(() => {
     let isMounted = true;
-    console.log("[useMyHook] Initializing hook context for sourceId:", sourceId);
+    console.log(
+      "[useMyHook] Initializing hook context for sourceId:",
+      sourceId
+    );
 
     // cleanup hook references
     return () => {
       isMounted = false;
-      console.log("[useMyHook] Cleaning up hook context for sourceId:", sourceId);
+      console.log(
+        "[useMyHook] Cleaning up hook context for sourceId:",
+        sourceId
+      );
     };
   }, [sourceId]);
 
   // --------------------------------------------------------------------------
   // SUB-SECTION 2.3: EVENT ACTIONS & ASYNC OPERATIONS
   // --------------------------------------------------------------------------
-  const triggerFetch = React.useCallback(async (param: string) => {
-    setIsLoading(true);
-    setIsError(false);
-    try {
-      // Execute operation or remote fetch
-      const result = `Processed ${param} for source ${sourceId}`;
-      setData(result);
-    } catch (err: any) {
-      console.error("[useMyHook] Operation execution failed:", err);
-      setIsError(true);
-      onError(err.message || "Unknown error inside useMyHook");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [sourceId, onError]);
+  const triggerFetch = React.useCallback(
+    async (param: string) => {
+      setIsLoading(true);
+      setIsError(false);
+      try {
+        // Execute operation or remote fetch
+        const result = `Processed ${param} for source ${sourceId}`;
+        setData(result);
+      } catch (err: any) {
+        console.error("[useMyHook] Operation execution failed:", err);
+        setIsError(true);
+        onError(err.message || "Unknown error inside useMyHook");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [sourceId, onError]
+  );
 
   // Return formatted state & handler package
   return {
     data,
     isLoading,
     isError,
-    triggerFetch
+    triggerFetch,
   };
 }
 ```
@@ -229,6 +246,7 @@ export function useMyHook({ sourceId, onError }: UseMyHookParams): UseMyHookResu
 ## 3. Backend FastAPI Route Files (`.py`)
 
 ### 📋 Route Checklist & Rules:
+
 - **Type Annotations**: Always declare type hints for route function parameters and specify `JSONResponse` (or appropriate response models) as the return type.
 - **Validation**: Use Pydantic `BaseModel` and field parameters (e.g. `Field(ge=0)`) to strictly validate and cast request inputs.
 - **Timing Logs**: Calculate request processing times using `time.perf_counter()` to ensure visibility of bottlenecks.
@@ -269,7 +287,7 @@ async def execute_feature_action(body: MyFeatureRequest) -> JSONResponse:
         # 1. Processing Logic / Service Calls
         # mock resolving buffer size
         mock_size_bytes = 204857
-        
+
         duration = round((time.perf_counter() - start_time) * 1000, 1)
         logger.info(f"Completed action processing in {duration}ms")
 
@@ -302,6 +320,7 @@ async def execute_feature_action(body: MyFeatureRequest) -> JSONResponse:
 ## 4. Python Service Files (`.py`)
 
 ### 📋 Python Service Checklist & Rules:
+
 - **Type Hints**: Always add type hints to parameters and returns using the `typing` module.
 - **Exception Logs**: Log failing blocks using `logger.error(..., exc_info=True)` to track root exceptions.
 - **OS Path Safety**: Avoid using string concats for folder directories; always use cross-platform safe functions (e.g. `os.path.join`).
@@ -327,19 +346,19 @@ logger = logging.getLogger("webtoon_engine.services.myservice")
 def process_data(input_path: str, output_path: str, parameters: Dict[str, Any]) -> List[str]:
     """
     Processes the given comic files or panel boundaries.
-    
+
     Args:
         input_path: Absolute directory to the source file.
         output_path: Destination directory path for final output.
         parameters: Configuration dictionary.
-        
+
     Returns:
         List of generated file output names.
     """
     logger.info(f"Initiating process_data on: {input_path}")
     if not os.path.exists(input_path):
         raise FileNotFoundError(f"Source file not found: {input_path}")
-        
+
     try:
         results = []
         # Main execution block (e.g. OpenCV / Pillow manipulation)
@@ -364,7 +383,7 @@ if __name__ == "__main__":
     try:
         config_params = {"sensitivity": args.sensitivity}
         generated_files = process_data(args.input_path, args.output_path, config_params)
-        
+
         # Output markers for Node.js sub-process capture
         print("STATUS=SUCCESS")
         print(f"OUTPUTS={','.join(generated_files)}")

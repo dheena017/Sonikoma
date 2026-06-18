@@ -33,11 +33,18 @@ export function useAppState() {
         let message = log;
 
         // Extract level categorizations from log content
-        if (log.includes("[ERROR]") || log.includes("[FATAL]") || log.toLowerCase().includes("failed")) {
+        if (
+          log.includes("[ERROR]") ||
+          log.includes("[FATAL]") ||
+          log.toLowerCase().includes("failed")
+        ) {
           level = "ERROR";
         } else if (log.includes("[WARNING]") || log.includes("[WARN]")) {
           level = "WARN";
-        } else if (log.includes("[SUCCESS]") || log.toLowerCase().includes("successfully")) {
+        } else if (
+          log.includes("[SUCCESS]") ||
+          log.toLowerCase().includes("successfully")
+        ) {
           level = "SUCCESS";
         } else if (log.includes("[AI") || log.includes("[Gemini]")) {
           level = "AI";
@@ -48,18 +55,41 @@ export function useAppState() {
         }
 
         // Parse brackets like [Scraper] Spawned... or [GUI] Mounted...
-        const bracketMatch = log.match(/^\[([^\]]+)\]\s*(?:\[([^\]]+)\])?\s*(.*)$/);
+        const bracketMatch = log.match(
+          /^\[([^\]]+)\]\s*(?:\[([^\]]+)\])?\s*(.*)$/
+        );
         if (bracketMatch) {
           const firstTag = bracketMatch[1];
           const secondTag = bracketMatch[2];
           const rest = bracketMatch[3];
 
-          if (secondTag && ["INFO", "DEBUG", "WARN", "WARNING", "ERROR", "SUCCESS", "FATAL"].includes(secondTag.toUpperCase())) {
+          if (
+            secondTag &&
+            [
+              "INFO",
+              "DEBUG",
+              "WARN",
+              "WARNING",
+              "ERROR",
+              "SUCCESS",
+              "FATAL",
+            ].includes(secondTag.toUpperCase())
+          ) {
             level = secondTag.toUpperCase();
             filename = firstTag;
             message = rest;
           } else {
-            if (["INFO", "DEBUG", "WARN", "WARNING", "ERROR", "SUCCESS", "FATAL"].includes(firstTag.toUpperCase())) {
+            if (
+              [
+                "INFO",
+                "DEBUG",
+                "WARN",
+                "WARNING",
+                "ERROR",
+                "SUCCESS",
+                "FATAL",
+              ].includes(firstTag.toUpperCase())
+            ) {
               level = firstTag.toUpperCase();
               filename = "App.tsx";
             } else {
@@ -69,7 +99,9 @@ export function useAppState() {
           }
         }
 
-        const timestamp = new Date().toLocaleTimeString("en-US", { hour12: false });
+        const timestamp = new Date().toLocaleTimeString("en-US", {
+          hour12: false,
+        });
         return `${timestamp} [${category}] [${level}] [${filename}] ${message}`;
       });
     });
@@ -197,7 +229,9 @@ export function useAppState() {
   const [narrationStyle, setNarrationStyle] = useState<string>(
     () => localStorage.getItem("ai_comic_narration_style") || "long"
   );
-  const [scrapedTitle, setScrapedTitle] = useState<string>("Overpowered S-Rank Recap");
+  const [scrapedTitle, setScrapedTitle] = useState<string>(
+    "Overpowered S-Rank Recap"
+  );
   const [scrapedGenre, setScrapedGenre] = useState<string>("Fantasy Action");
 
   // ── Callbacks & effects AFTER all useState declarations ──────────────────

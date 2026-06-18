@@ -16,16 +16,20 @@ export default function BulkScrubberControl({
   const [loading, setLoading] = useState(false);
   const [flaggedCount, setFlaggedCount] = useState<number | null>(null);
   const [replacements, setReplacements] = useState<Record<number, string>>({});
-  
+
   // Custom compliance configurations
   const [scanMode, setScanMode] = useState<"quick" | "full">("quick");
-  const [scanFocus, setScanFocus] = useState<"copyright" | "monetization" | "family">("copyright");
+  const [scanFocus, setScanFocus] = useState<
+    "copyright" | "monetization" | "family"
+  >("copyright");
 
   const handleBulkScrub = async () => {
     setLoading(true);
     try {
       const targetPanels = scanMode === "quick" ? panels.slice(0, 4) : panels;
-      console.log(`[Compliance Scrubber] Running audit. Mode: ${scanMode}, Focus: ${scanFocus}, Panels count: ${targetPanels.length}`);
+      console.log(
+        `[Compliance Scrubber] Running audit. Mode: ${scanMode}, Focus: ${scanFocus}, Panels count: ${targetPanels.length}`
+      );
 
       // Process panels concurrently to avoid sequential fetch delays
       const scanTasks = targetPanels.map(async (p) => {
@@ -46,10 +50,16 @@ export default function BulkScrubberControl({
             let isViolating = json.result.contains_violation;
             let sanitizedText = json.result.sanitized_text;
 
-            if (scanFocus === "monetization" && p.speech_text.toLowerCase().includes("kill")) {
+            if (
+              scanFocus === "monetization" &&
+              p.speech_text.toLowerCase().includes("kill")
+            ) {
               isViolating = true;
               sanitizedText = p.speech_text.replace(/kill/gi, "defeat");
-            } else if (scanFocus === "family" && p.speech_text.toLowerCase().includes("damn")) {
+            } else if (
+              scanFocus === "family" &&
+              p.speech_text.toLowerCase().includes("damn")
+            ) {
               isViolating = true;
               sanitizedText = p.speech_text.replace(/damn/gi, "darn");
             }
@@ -59,13 +69,16 @@ export default function BulkScrubberControl({
             }
           }
         } catch (err) {
-          console.warn(`[Compliance Scrubber] Failed scanning panel #${p.id}:`, err);
+          console.warn(
+            `[Compliance Scrubber] Failed scanning panel #${p.id}:`,
+            err
+          );
         }
         return null;
       });
 
       const results = await Promise.all(scanTasks);
-      
+
       const cleanMappings: Record<number, string> = {};
       let flags = 0;
       for (const r of results) {
@@ -79,7 +92,9 @@ export default function BulkScrubberControl({
       setReplacements(cleanMappings);
       if (addNotification) {
         addNotification(
-          `Compliance scan completed (${scanMode === "full" ? "all" : "first 4"} panels). Flagged ${flags} violations.`,
+          `Compliance scan completed (${
+            scanMode === "full" ? "all" : "first 4"
+          } panels). Flagged ${flags} violations.`,
           flags > 0 ? "warning" : "success"
         );
       }
@@ -100,7 +115,8 @@ export default function BulkScrubberControl({
             Bulk Monetization Scrubber
           </h4>
           <p className="text-[10px] text-neutral-500 font-mono mt-0.5">
-            Audit dialogues for policy compliance, copyright safety, and rating criteria
+            Audit dialogues for policy compliance, copyright safety, and rating
+            criteria
           </p>
         </div>
         <button
@@ -128,7 +144,9 @@ export default function BulkScrubberControl({
             className="w-full bg-neutral-950 border border-neutral-850 text-[11px] rounded-xl p-2 text-neutral-300 outline-none focus:border-purple-650 transition-all font-mono cursor-pointer"
           >
             <option value="quick">Quick Scan (First 4 Panels)</option>
-            <option value="full">Full Timeline Scan (All Panels Concurrently)</option>
+            <option value="full">
+              Full Timeline Scan (All Panels Concurrently)
+            </option>
           </select>
         </div>
 

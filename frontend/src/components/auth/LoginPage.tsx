@@ -1,15 +1,15 @@
 import React from "react";
-import { 
-  LogIn, 
-  Mail, 
-  Lock, 
-  ArrowRight, 
-  Loader2, 
-  Eye, 
-  EyeOff, 
-  Check, 
-  Chrome, 
-  Github, 
+import {
+  LogIn,
+  Mail,
+  Lock,
+  ArrowRight,
+  Loader2,
+  Eye,
+  EyeOff,
+  Check,
+  Chrome,
+  Github,
   Languages,
   Activity,
   KeyRound,
@@ -20,7 +20,7 @@ import {
   Sparkles,
   Volume2,
   Keyboard,
-  QrCode
+  QrCode,
 } from "lucide-react";
 import AuthShowcase, { THEMES, ThemeKey } from "./AuthShowcase.js";
 
@@ -34,27 +34,31 @@ const TOUR_STEPS = [
   {
     icon: Film,
     title: "1. Upload Webtoon Strips",
-    description: "Paste a webtoon link or upload a long strip image. Our scraper automatically retrieves high-resolution content panels in seconds.",
-    color: "from-purple-500 to-indigo-500"
+    description:
+      "Paste a webtoon link or upload a long strip image. Our scraper automatically retrieves high-resolution content panels in seconds.",
+    color: "from-purple-500 to-indigo-500",
   },
   {
     icon: Sparkles,
     title: "2. Smart Gutter-Agnostic Slicing",
-    description: "Click Auto-Crop to let our local computer vision algorithm trace row variance and cut strips into clean panel storyboards automatically.",
-    color: "from-blue-500 to-cyan-500"
+    description:
+      "Click Auto-Crop to let our local computer vision algorithm trace row variance and cut strips into clean panel storyboards automatically.",
+    color: "from-blue-500 to-cyan-500",
   },
   {
     icon: Languages,
     title: "3. Dramatize & Translate",
-    description: "Use Gemini AI to transcribe bubble texts, translate storyboard dialogues into multiple languages, and generate detailed descriptions.",
-    color: "from-pink-500 to-rose-500"
+    description:
+      "Use Gemini AI to transcribe bubble texts, translate storyboard dialogues into multiple languages, and generate detailed descriptions.",
+    color: "from-pink-500 to-rose-500",
   },
   {
     icon: Volume2,
     title: "4. Cinematic Motion & SFX",
-    description: "Apply responsive pan/zoom effects and mix background tracks or speech scripts to transform static panels into animated movies.",
-    color: "from-amber-500 to-orange-500"
-  }
+    description:
+      "Apply responsive pan/zoom effects and mix background tracks or speech scripts to transform static panels into animated movies.",
+    color: "from-amber-500 to-orange-500",
+  },
 ];
 
 type Language = "en" | "ko" | "ja";
@@ -84,7 +88,7 @@ const TRANSLATIONS: Record<Language, any> = {
     qrToggle: "Sign In via Mobile QR",
     qrFormToggle: "Back to Email Login",
     qrSimulate: "Simulate mobile scan success",
-    qrExpire: "QR expires in: "
+    qrExpire: "QR expires in: ",
   },
   ko: {
     welcome: "다시 오신 것을 환영합니다",
@@ -110,11 +114,12 @@ const TRANSLATIONS: Record<Language, any> = {
     qrToggle: "모바일 QR 로그인",
     qrFormToggle: "이메일 로그인으로 돌아가기",
     qrSimulate: "모바일 스캔 성공 시뮬레이션",
-    qrExpire: "만료 시간: "
+    qrExpire: "만료 시간: ",
   },
   ja: {
     welcome: "おかえりなさい",
-    subtitle: "ダッシュボードとビデオプロジェクトにアクセスするにはログインしてください。",
+    subtitle:
+      "ダッシュボードとビデオプロジェクトにアクセスするにはログインしてください。",
     email: "メールアドレス",
     emailPlaceholder: "name@example.com",
     password: "パスワード",
@@ -136,8 +141,8 @@ const TRANSLATIONS: Record<Language, any> = {
     qrToggle: "モバイルQRサインイン",
     qrFormToggle: "メールログインに戻る",
     qrSimulate: "スキャン成功をシミュレート",
-    qrExpire: "コード有効期限: "
-  }
+    qrExpire: "コード有効期限: ",
+  },
 };
 
 export default function LoginPage({
@@ -149,7 +154,7 @@ export default function LoginPage({
   const [password, setPassword] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  
+
   // Custom states
   const [showPassword, setShowPassword] = React.useState(false);
   const [rememberMe, setRememberMe] = React.useState(false);
@@ -167,7 +172,7 @@ export default function LoginPage({
   // Passkey simulated auth states
   const [isPasskeyLoading, setIsPasskeyLoading] = React.useState(false);
   const [passkeyStatus, setPasskeyStatus] = React.useState<string | null>(null);
-  
+
   // Interactive tour state
   const [isTourOpen, setIsTourOpen] = React.useState(false);
   const [tourStep, setTourStep] = React.useState(0);
@@ -175,7 +180,9 @@ export default function LoginPage({
   // Slide verification captcha states
   const [showCaptcha, setShowCaptcha] = React.useState(false);
   const [captchaSliderPos, setCaptchaSliderPos] = React.useState(10);
-  const [captchaTargetPos, setCaptchaTargetPos] = React.useState(() => Math.floor(Math.random() * 40) + 45); // 45 to 85
+  const [captchaTargetPos, setCaptchaTargetPos] = React.useState(
+    () => Math.floor(Math.random() * 40) + 45
+  ); // 45 to 85
   const [isCaptchaVerified, setIsCaptchaVerified] = React.useState(false);
 
   // QR Code expiration timer tick
@@ -217,7 +224,9 @@ export default function LoginPage({
 
   const handleSocialLogin = (provider: string) => {
     console.log(`[OAuth] Initiate login with ${provider}`);
-    setError(`OAuth sign in with ${provider} is not configured for this environment yet.`);
+    setError(
+      `OAuth sign in with ${provider} is not configured for this environment yet.`
+    );
   };
 
   const handleQuickFill = () => {
@@ -269,40 +278,45 @@ export default function LoginPage({
   // Helper references for icons dynamically instantiated in Tour
   const getTourIconComponent = (idx: number) => {
     switch (idx) {
-      case 0: return Film;
-      case 1: return Sparkles;
-      case 2: return Languages;
-      default: return Volume2;
+      case 0:
+        return Film;
+      case 1:
+        return Sparkles;
+      case 2:
+        return Languages;
+      default:
+        return Volume2;
     }
   };
 
   return (
     <div className="min-h-screen flex bg-[#070709] text-white font-sans overflow-hidden">
-      
       {/* LEFT PANEL: Auth Product Slideshow (extracted child component) */}
       <AuthShowcase activeTheme={activeTheme} iconType="login" />
 
       {/* RIGHT PANEL: Login Form Interface */}
       <div className="w-full lg:w-1/2 min-h-screen flex flex-col justify-between p-8 lg:p-16 bg-[#040406] relative overflow-y-auto">
-        
         {/* Soft background glow (Theme-driven) */}
-        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] rounded-full ${currentTheme.glowPrimary} blur-[120px] pointer-events-none transition-all duration-1000`} />
+        <div
+          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] rounded-full ${currentTheme.glowPrimary} blur-[120px] pointer-events-none transition-all duration-1000`}
+        />
 
         {/* Top Controls Toolbar */}
         <div className="relative z-10 flex items-center justify-between mb-6">
           {/* Header branding (only visible on mobile/tablet) */}
           <div className="flex lg:hidden items-center gap-2">
-            <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${currentTheme.accentBg} border ${currentTheme.accentBorder}`}>
+            <div
+              className={`flex items-center justify-center w-8 h-8 rounded-lg ${currentTheme.accentBg} border ${currentTheme.accentBorder}`}
+            >
               <LogIn className={`w-4 h-4 ${currentTheme.accentText}`} />
             </div>
-            <span className="text-lg font-bold text-white tracking-tight">Anivox</span>
+            <span className="text-lg font-bold text-white tracking-tight">
+              Anivox
+            </span>
           </div>
-
           <div className="hidden lg:block" /> {/* Spacer */}
-
           {/* Theme Selector & Tour Button */}
           <div className="flex items-center gap-4">
-            
             {/* Keyboard Shortcuts Trigger Button */}
             <button
               onClick={() => setIsShortcutsOpen(true)}
@@ -320,9 +334,15 @@ export default function LoginPage({
                 onChange={(e) => setLanguage(e.target.value as Language)}
                 className="bg-transparent border-none text-[11px] font-bold text-white py-1 pl-1 pr-6 focus:outline-none cursor-pointer"
               >
-                <option value="en" className="bg-[#0c0c14] text-white">English</option>
-                <option value="ko" className="bg-[#0c0c14] text-white">한국어</option>
-                <option value="ja" className="bg-[#0c0c14] text-white">日本語</option>
+                <option value="en" className="bg-[#0c0c14] text-white">
+                  English
+                </option>
+                <option value="ko" className="bg-[#0c0c14] text-white">
+                  한국어
+                </option>
+                <option value="ja" className="bg-[#0c0c14] text-white">
+                  日本語
+                </option>
               </select>
             </div>
 
@@ -333,15 +353,19 @@ export default function LoginPage({
                   purple: "bg-purple-500",
                   blue: "bg-blue-500",
                   emerald: "bg-emerald-500",
-                  amber: "bg-amber-500"
+                  amber: "bg-amber-500",
                 };
-                
+
                 return (
                   <button
                     key={theme}
                     onClick={() => setActiveTheme(theme)}
-                    className={`w-4 h-4 rounded-full transition-transform active:scale-90 cursor-pointer ${colors[theme]} ${
-                      activeTheme === theme ? "scale-110 ring-2 ring-white/40" : "scale-90 opacity-60 hover:opacity-100"
+                    className={`w-4 h-4 rounded-full transition-transform active:scale-90 cursor-pointer ${
+                      colors[theme]
+                    } ${
+                      activeTheme === theme
+                        ? "scale-110 ring-2 ring-white/40"
+                        : "scale-90 opacity-60 hover:opacity-100"
                     }`}
                     title={`Switch to ${theme} theme`}
                   />
@@ -349,7 +373,7 @@ export default function LoginPage({
               })}
             </div>
 
-            <button 
+            <button
               onClick={() => setIsTourOpen(true)}
               className={`flex items-center gap-1 text-xs ${currentTheme.accentText} ${currentTheme.accentBg} border ${currentTheme.accentBorder} px-3 py-1.5 rounded-full cursor-pointer hover:bg-white/5 transition-all`}
             >
@@ -361,15 +385,12 @@ export default function LoginPage({
 
         {/* Form Container */}
         <div className="my-auto w-full max-w-md mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 relative z-10 py-6 text-left">
-          
           {/* Welcome Text */}
           <div className="space-y-2">
             <h2 className="text-3xl font-extrabold text-white tracking-tight">
               {t.welcome}
             </h2>
-            <p className="text-neutral-400 text-sm">
-              {t.subtitle}
-            </p>
+            <p className="text-neutral-400 text-sm">{t.subtitle}</p>
           </div>
 
           {/* Social Sign-In buttons */}
@@ -402,7 +423,7 @@ export default function LoginPage({
           {/* Login Card */}
           <div className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
-            
+
             {/* Passkey authentication status overlay */}
             {isPasskeyLoading && (
               <div className="absolute inset-0 z-30 bg-[#070709]/95 backdrop-blur-md flex flex-col items-center justify-center text-center p-6 space-y-6 animate-in fade-in duration-300">
@@ -411,8 +432,12 @@ export default function LoginPage({
                   <KeyRound className="w-8 h-8 text-purple-400" />
                 </div>
                 <div className="space-y-2 max-w-xs">
-                  <span className="text-xs font-black text-white uppercase tracking-wider block">Passkey Quick Authentication</span>
-                  <span className="text-[10px] text-neutral-400 font-medium leading-relaxed block">{passkeyStatus}</span>
+                  <span className="text-xs font-black text-white uppercase tracking-wider block">
+                    Passkey Quick Authentication
+                  </span>
+                  <span className="text-[10px] text-neutral-400 font-medium leading-relaxed block">
+                    {passkeyStatus}
+                  </span>
                 </div>
                 <button
                   type="button"
@@ -429,19 +454,22 @@ export default function LoginPage({
               <div className="space-y-5 flex flex-col items-center text-center py-2 animate-in fade-in duration-350">
                 <div className="space-y-1">
                   <h4 className="text-sm font-bold text-white">{t.qrTitle}</h4>
-                  <p className="text-[10px] text-neutral-500 max-w-xs">{t.qrDesc}</p>
+                  <p className="text-[10px] text-neutral-500 max-w-xs">
+                    {t.qrDesc}
+                  </p>
                 </div>
 
                 {/* Pulse QR Code Layout */}
                 <div className="w-44 h-44 bg-white p-3 rounded-2xl relative overflow-hidden flex items-center justify-center shadow-lg shadow-purple-500/10">
                   <QrCode className="w-full h-full text-black" />
-                  
+
                   {/* Neon scan beam */}
                   <div className="absolute inset-x-0 h-0.5 bg-purple-500 shadow-md shadow-purple-500 animate-scan-beam" />
                 </div>
 
                 <div className="text-[10px] font-bold text-purple-400 font-mono">
-                  {t.qrExpire}{qrTimer}s
+                  {t.qrExpire}
+                  {qrTimer}s
                 </div>
 
                 <button
@@ -476,22 +504,30 @@ export default function LoginPage({
                       {t.email}
                     </label>
                     {email && (
-                      <span className={`text-[9px] font-bold ${isEmailValid ? "text-emerald-400" : "text-amber-500"}`}>
+                      <span
+                        className={`text-[9px] font-bold ${
+                          isEmailValid ? "text-emerald-400" : "text-amber-500"
+                        }`}
+                      >
                         {isEmailValid ? "Valid Format" : "Invalid Email"}
                       </span>
                     )}
                   </div>
                   <div className="relative">
-                    <Mail className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${
-                      isEmailValid ? "text-emerald-400" : "text-neutral-500"
-                    }`} />
+                    <Mail
+                      className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${
+                        isEmailValid ? "text-emerald-400" : "text-neutral-500"
+                      }`}
+                    />
                     <input
                       type="email"
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className={`w-full bg-black/40 border rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:ring-2 transition-all font-medium ${
-                        isEmailValid ? "border-emerald-500/20 focus:ring-emerald-500/20 focus:border-emerald-500/40" : `border-white/5 ${currentTheme.focus}`
+                        isEmailValid
+                          ? "border-emerald-500/20 focus:ring-emerald-500/20 focus:border-emerald-500/40"
+                          : `border-white/5 ${currentTheme.focus}`
                       }`}
                       placeholder={t.emailPlaceholder}
                     />
@@ -513,9 +549,13 @@ export default function LoginPage({
                     </button>
                   </div>
                   <div className="relative">
-                    <Lock className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${
-                      isPasswordValid ? "text-emerald-400" : "text-neutral-500"
-                    }`} />
+                    <Lock
+                      className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${
+                        isPasswordValid
+                          ? "text-emerald-400"
+                          : "text-neutral-500"
+                      }`}
+                    />
                     <input
                       type={showPassword ? "text" : "password"}
                       required
@@ -524,15 +564,19 @@ export default function LoginPage({
                       onKeyDown={checkCapsLock}
                       onKeyUp={checkCapsLock}
                       className={`w-full bg-black/40 border rounded-xl py-3 pl-11 pr-10 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:ring-2 transition-all font-medium ${
-                        isPasswordValid ? "border-emerald-500/20 focus:ring-emerald-500/20 focus:border-emerald-500/40" : `border-white/5 ${currentTheme.focus}`
-                    }`}
+                        isPasswordValid
+                          ? "border-emerald-500/20 focus:ring-emerald-500/20 focus:border-emerald-500/40"
+                          : `border-white/5 ${currentTheme.focus}`
+                      }`}
                       placeholder={t.passwordPlaceholder}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-300 transition-colors focus:outline-none"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
                     >
                       {showPassword ? (
                         <EyeOff className="w-4 h-4" />
@@ -560,12 +604,19 @@ export default function LoginPage({
                         onChange={(e) => setRememberMe(e.target.checked)}
                         className="sr-only"
                       />
-                      <div className={`w-4 h-4 rounded border transition-all duration-300 flex items-center justify-center ${
-                        rememberMe 
-                          ? `${currentTheme.dot.replace("bg-", "bg-")} border-transparent shadow-md` 
-                          : "bg-black/40 border-white/10 group-hover:border-white/20"
-                      }`}>
-                        {rememberMe && <Check className="w-3 h-3 text-white stroke-[4px]" />}
+                      <div
+                        className={`w-4 h-4 rounded border transition-all duration-300 flex items-center justify-center ${
+                          rememberMe
+                            ? `${currentTheme.dot.replace(
+                                "bg-",
+                                "bg-"
+                              )} border-transparent shadow-md`
+                            : "bg-black/40 border-white/10 group-hover:border-white/20"
+                        }`}
+                      >
+                        {rememberMe && (
+                          <Check className="w-3 h-3 text-white stroke-[4px]" />
+                        )}
                       </div>
                     </div>
                     <span className="text-xs text-neutral-400 group-hover:text-neutral-300 transition-colors font-medium">
@@ -602,7 +653,7 @@ export default function LoginPage({
                 <KeyRound className="w-3.5 h-3.5 text-purple-400" />
                 {t.passkeyBtn}
               </button>
-              
+
               <button
                 type="button"
                 onClick={() => setIsQrLogin(!isQrLogin)}
@@ -628,7 +679,6 @@ export default function LoginPage({
                 </button>
               </div>
             )}
-
           </div>
 
           {/* Create Account Link */}
@@ -688,29 +738,51 @@ export default function LoginPage({
                 <Keyboard className="w-5 h-5 text-purple-400" />
                 Workspace Hotkeys Guide
               </h3>
-              <p className="text-xs text-neutral-500">Accelerate your Webtoon-to-Video compilation workflow</p>
+              <p className="text-xs text-neutral-500">
+                Accelerate your Webtoon-to-Video compilation workflow
+              </p>
             </div>
 
             <div className="space-y-2 border-t border-white/5 pt-3">
               <div className="flex items-center justify-between text-xs py-1.5 border-b border-white/5">
-                <span className="text-neutral-400 font-medium">Toggle Playback</span>
-                <kbd className="bg-neutral-800 text-neutral-200 border border-white/15 px-2 py-0.5 rounded text-[10px] font-mono shadow-sm">Space</kbd>
+                <span className="text-neutral-400 font-medium">
+                  Toggle Playback
+                </span>
+                <kbd className="bg-neutral-800 text-neutral-200 border border-white/15 px-2 py-0.5 rounded text-[10px] font-mono shadow-sm">
+                  Space
+                </kbd>
               </div>
               <div className="flex items-center justify-between text-xs py-1.5 border-b border-white/5">
-                <span className="text-neutral-400 font-medium">Auto-Crop Strip</span>
-                <kbd className="bg-neutral-800 text-neutral-200 border border-white/15 px-2 py-0.5 rounded text-[10px] font-mono shadow-sm">Ctrl + Shift + C</kbd>
+                <span className="text-neutral-400 font-medium">
+                  Auto-Crop Strip
+                </span>
+                <kbd className="bg-neutral-800 text-neutral-200 border border-white/15 px-2 py-0.5 rounded text-[10px] font-mono shadow-sm">
+                  Ctrl + Shift + C
+                </kbd>
               </div>
               <div className="flex items-center justify-between text-xs py-1.5 border-b border-white/5">
-                <span className="text-neutral-400 font-medium">Next Panel Frame</span>
-                <kbd className="bg-neutral-800 text-neutral-200 border border-white/15 px-2 py-0.5 rounded text-[10px] font-mono shadow-sm">→</kbd>
+                <span className="text-neutral-400 font-medium">
+                  Next Panel Frame
+                </span>
+                <kbd className="bg-neutral-800 text-neutral-200 border border-white/15 px-2 py-0.5 rounded text-[10px] font-mono shadow-sm">
+                  →
+                </kbd>
               </div>
               <div className="flex items-center justify-between text-xs py-1.5 border-b border-white/5">
-                <span className="text-neutral-400 font-medium">Previous Panel Frame</span>
-                <kbd className="bg-neutral-800 text-neutral-200 border border-white/15 px-2 py-0.5 rounded text-[10px] font-mono shadow-sm">←</kbd>
+                <span className="text-neutral-400 font-medium">
+                  Previous Panel Frame
+                </span>
+                <kbd className="bg-neutral-800 text-neutral-200 border border-white/15 px-2 py-0.5 rounded text-[10px] font-mono shadow-sm">
+                  ←
+                </kbd>
               </div>
               <div className="flex items-center justify-between text-xs py-1.5">
-                <span className="text-neutral-400 font-medium">Mute Synthesizer</span>
-                <kbd className="bg-neutral-800 text-neutral-200 border border-white/15 px-2 py-0.5 rounded text-[10px] font-mono shadow-sm">M</kbd>
+                <span className="text-neutral-400 font-medium">
+                  Mute Synthesizer
+                </span>
+                <kbd className="bg-neutral-800 text-neutral-200 border border-white/15 px-2 py-0.5 rounded text-[10px] font-mono shadow-sm">
+                  M
+                </kbd>
               </div>
             </div>
 
@@ -728,9 +800,8 @@ export default function LoginPage({
       {isTourOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-300">
           <div className="relative w-full max-w-2xl bg-gradient-to-b from-[#101018] to-[#070709] border border-white/10 rounded-3xl p-8 shadow-2xl flex flex-col md:flex-row gap-8 animate-in zoom-in-95 duration-300 text-left">
-            
             {/* Corner Close Button */}
-            <button 
+            <button
               onClick={() => setIsTourOpen(false)}
               className="absolute top-4 right-4 text-neutral-500 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full cursor-pointer transition-colors"
               aria-label="Close tour"
@@ -741,9 +812,11 @@ export default function LoginPage({
             {/* Left Column: Visual Representation of Step */}
             <div className="w-full md:w-2/5 flex flex-col items-center justify-center p-6 bg-black/40 border border-white/5 rounded-2xl relative overflow-hidden">
               <div className="absolute inset-0 bg-radial-gradient from-purple-500/10 via-transparent to-transparent pointer-events-none" />
-              
+
               <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/10 mb-6 animate-pulse">
-                {React.createElement(getTourIconComponent(tourStep), { className: "w-8 h-8 text-white" })}
+                {React.createElement(getTourIconComponent(tourStep), {
+                  className: "w-8 h-8 text-white",
+                })}
               </div>
               <span className="text-[10px] font-bold tracking-widest text-purple-400 uppercase bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-full">
                 Pipeline Step {tourStep + 1}
@@ -753,7 +826,9 @@ export default function LoginPage({
             {/* Right Column: Step Description and Navigation */}
             <div className="w-full md:w-3/5 flex flex-col justify-between py-2 text-left">
               <div className="space-y-4">
-                <span className="text-xs font-bold text-neutral-500 uppercase tracking-widest">Anivox Studio Tour</span>
+                <span className="text-xs font-bold text-neutral-500 uppercase tracking-widest">
+                  Anivox Studio Tour
+                </span>
                 <h3 className="text-2xl font-bold text-white tracking-tight leading-tight">
                   {TOUR_STEPS[tourStep].title}
                 </h3>
@@ -770,12 +845,14 @@ export default function LoginPage({
                       key={idx}
                       onClick={() => setTourStep(idx)}
                       className={`h-1.5 rounded-full transition-all duration-300 ${
-                        idx === tourStep ? "w-6 bg-purple-500" : "w-1.5 bg-neutral-700"
+                        idx === tourStep
+                          ? "w-6 bg-purple-500"
+                          : "w-1.5 bg-neutral-700"
                       }`}
                     />
                   ))}
                 </div>
-                
+
                 <div className="flex gap-2">
                   {tourStep > 0 && (
                     <button
@@ -802,9 +879,7 @@ export default function LoginPage({
                   )}
                 </div>
               </div>
-
             </div>
-
           </div>
         </div>
       )}
@@ -820,32 +895,44 @@ export default function LoginPage({
             </button>
 
             <div className="space-y-1">
-              <h3 className="text-sm font-black text-white uppercase tracking-wider">Security Panel Verification</h3>
-              <p className="text-[10px] text-neutral-500">Drag the speech balloon to match the panel bubble outline</p>
+              <h3 className="text-sm font-black text-white uppercase tracking-wider">
+                Security Panel Verification
+              </h3>
+              <p className="text-[10px] text-neutral-500">
+                Drag the speech balloon to match the panel bubble outline
+              </p>
             </div>
 
             {/* Captcha Track Area */}
             <div className="relative h-24 bg-black/40 border border-white/5 rounded-2xl overflow-hidden flex items-center p-2">
               {/* Target Outline (Fixed at target position) */}
-              <div 
+              <div
                 className="absolute w-12 h-12 border-2 border-dashed border-purple-500 rounded-xl bg-purple-500/10 flex items-center justify-center"
-                style={{ left: `${captchaTargetPos}%`, transform: "translateX(-50%)" }}
+                style={{
+                  left: `${captchaTargetPos}%`,
+                  transform: "translateX(-50%)",
+                }}
               >
                 <div className="w-6 h-6 border-b-2 border-r-2 border-purple-400 rotate-45 transform origin-bottom-right opacity-30" />
               </div>
 
               {/* Slidable element (Controlled by slider) */}
-              <div 
+              <div
                 className="absolute w-12 h-12 bg-purple-600 border border-purple-500 rounded-xl shadow-lg flex items-center justify-center cursor-ew-resize transition-all"
-                style={{ left: `${captchaSliderPos}%`, transform: "translateX(-50%)" }}
+                style={{
+                  left: `${captchaSliderPos}%`,
+                  transform: "translateX(-50%)",
+                }}
               >
-                <span className="text-[9px] font-black text-white uppercase tracking-tighter">*POW*</span>
+                <span className="text-[9px] font-black text-white uppercase tracking-tighter">
+                  *POW*
+                </span>
               </div>
             </div>
 
             {/* Slider track input */}
             <div className="space-y-1.5">
-              <input 
+              <input
                 type="range"
                 min="10"
                 max="90"
@@ -864,7 +951,10 @@ export default function LoginPage({
                           (window as any).navigateTo?.("/dashboard");
                         })
                         .catch((err: any) => {
-                          setError(err.message || "Invalid credentials. Please try again.");
+                          setError(
+                            err.message ||
+                              "Invalid credentials. Please try again."
+                          );
                           setIsLoading(false);
                         });
                     }, 500);
@@ -898,7 +988,6 @@ export default function LoginPage({
       `,
         }}
       />
-
     </div>
   );
 }

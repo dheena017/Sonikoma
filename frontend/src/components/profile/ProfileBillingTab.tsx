@@ -1,5 +1,12 @@
 import React from "react";
-import { Gift, Plus, CreditCard, ChevronRight, CheckCircle2, Ticket } from "lucide-react";
+import {
+  Gift,
+  Plus,
+  CreditCard,
+  ChevronRight,
+  CheckCircle2,
+  Ticket,
+} from "lucide-react";
 
 interface ProfileBillingTabProps {
   credits: number;
@@ -14,7 +21,7 @@ export default function ProfileBillingTab({
   hasClaimedToday,
   handleClaimCredits,
   claimNotification,
-  invoices
+  invoices,
 }: ProfileBillingTabProps) {
   const [currency, setCurrency] = React.useState<"USD" | "KRW" | "JPY">("USD");
   const [couponCode, setCouponCode] = React.useState("");
@@ -36,9 +43,9 @@ export default function ProfileBillingTab({
     const rate = {
       USD: { symbol: "$", value: 1, suffix: "/mo" },
       KRW: { symbol: "₩", value: 1300, suffix: "/월" },
-      JPY: { symbol: "¥", value: 150, suffix: "/月" }
+      JPY: { symbol: "¥", value: 150, suffix: "/月" },
     };
-    
+
     const curr = rate[currency];
     const converted = Math.round(baseUSD * curr.value * (1 - discount / 100));
     return `${curr.symbol}${converted.toLocaleString()}${curr.suffix}`;
@@ -50,7 +57,7 @@ export default function ProfileBillingTab({
     const rate = {
       USD: { symbol: "$", value: 1 },
       KRW: { symbol: "₩", value: 1300 },
-      JPY: { symbol: "¥", value: 150 }
+      JPY: { symbol: "¥", value: 150 },
     };
     const curr = rate[currency];
     const converted = Math.round(baseUSD * curr.value * (1 - discount / 100));
@@ -71,18 +78,21 @@ export default function ProfileBillingTab({
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 text-left">
-      
       {/* Plan details and currency switchers */}
       <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-8 shadow-2xl relative">
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
-        
+
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-white/5">
           <div className="space-y-1">
             <span className="text-[9px] font-extrabold text-purple-400 uppercase tracking-widest bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-full">
               Subscription Plan
             </span>
-            <h3 className="text-2xl font-black text-white">Creator Studio Free Tier</h3>
-            <p className="text-xs text-neutral-500 font-semibold">Includes 1000 rendering credits per month with core scraping tools</p>
+            <h3 className="text-2xl font-black text-white">
+              Creator Studio Free Tier
+            </h3>
+            <p className="text-xs text-neutral-500 font-semibold">
+              Includes 1000 rendering credits per month with core scraping tools
+            </p>
           </div>
 
           <div className="flex items-center gap-4 shrink-0">
@@ -93,8 +103,8 @@ export default function ProfileBillingTab({
                   key={curr}
                   onClick={() => setCurrency(curr)}
                   className={`py-1 px-2.5 rounded-lg text-[9px] font-bold transition-all cursor-pointer ${
-                    currency === curr 
-                      ? "bg-purple-600/15 border border-purple-500/30 text-purple-400" 
+                    currency === curr
+                      ? "bg-purple-600/15 border border-purple-500/30 text-purple-400"
                       : "text-neutral-500 hover:text-white"
                   }`}
                 >
@@ -103,7 +113,7 @@ export default function ProfileBillingTab({
               ))}
             </div>
 
-            <button 
+            <button
               onClick={() => alert("Premium upgrade payment modal triggered!")}
               className="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-md shadow-purple-900/30 text-xs flex items-center gap-1.5 cursor-pointer active:scale-95 duration-300"
             >
@@ -120,7 +130,9 @@ export default function ProfileBillingTab({
               <Gift className="w-4.5 h-4.5 text-amber-400" />
               Daily Claimable Credits
             </div>
-            <p className="text-xs text-neutral-400 font-semibold">Claim 50 free credits daily to parse additional panel stories.</p>
+            <p className="text-xs text-neutral-400 font-semibold">
+              Claim 50 free credits daily to parse additional panel stories.
+            </p>
           </div>
 
           <button
@@ -142,21 +154,21 @@ export default function ProfileBillingTab({
             🚀 Bonus claimed! +50 Credits added to your compute workspace.
           </div>
         )}
-
       </div>
 
       {/* Subscriptions Grid & Coupon Code Box */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        
         {/* Free Plan */}
         <div className="bg-black/30 border border-white/5 rounded-3xl p-6 text-left space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold tracking-wider uppercase text-neutral-500">Free Tier</span>
-            <span className="text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 rounded-full font-bold">Active</span>
+            <span className="text-[10px] font-bold tracking-wider uppercase text-neutral-500">
+              Free Tier
+            </span>
+            <span className="text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 rounded-full font-bold">
+              Active
+            </span>
           </div>
-          <div className="text-2xl font-black text-white">
-            {formatPrice(0)}
-          </div>
+          <div className="text-2xl font-black text-white">{formatPrice(0)}</div>
           <ul className="text-[11px] text-neutral-400 space-y-2 list-disc pl-4 leading-relaxed font-semibold">
             <li>Up to 10 webtoon strip scrapes / day</li>
             <li>Row-wise background panel segmentation</li>
@@ -167,10 +179,14 @@ export default function ProfileBillingTab({
         {/* Pro Plan */}
         <div className="bg-gradient-to-b from-[#121218]/80 to-[#070709]/80 border border-purple-500/20 rounded-3xl p-6 text-left space-y-4 shadow-xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
-          
+
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold tracking-wider uppercase text-purple-400">Studio Pro</span>
-            <span className="text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 rounded-full font-bold">Recommended</span>
+            <span className="text-[10px] font-bold tracking-wider uppercase text-purple-400">
+              Studio Pro
+            </span>
+            <span className="text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 rounded-full font-bold">
+              Recommended
+            </span>
           </div>
           <div className="text-2xl font-black text-white">
             {formatPrice(19)}
@@ -189,7 +205,9 @@ export default function ProfileBillingTab({
               <Ticket className="w-3.5 h-3.5 text-purple-400" />
               Promo Coupons
             </span>
-            <p className="text-[10px] text-neutral-500 font-semibold leading-relaxed">Enter coupon code to unlock premium subscription discounts</p>
+            <p className="text-[10px] text-neutral-500 font-semibold leading-relaxed">
+              Enter coupon code to unlock premium subscription discounts
+            </p>
           </div>
 
           <form onSubmit={handleApplyCoupon} className="space-y-2">
@@ -210,25 +228,32 @@ export default function ProfileBillingTab({
           </form>
 
           {couponStatus && (
-            <div className={`text-[10px] font-bold ${couponStatus.includes("Applied") ? "text-emerald-400" : "text-rose-400"}`}>
+            <div
+              className={`text-[10px] font-bold ${
+                couponStatus.includes("Applied")
+                  ? "text-emerald-400"
+                  : "text-rose-400"
+              }`}
+            >
               {couponStatus}
             </div>
           )}
         </div>
-
       </div>
 
       {/* Credit Volume Pricing Calculator slider card */}
       <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-8 shadow-2xl relative space-y-5">
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
-        
+
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
               <Gift className="w-5 h-5 text-purple-400" />
               Interactive Credit Purchase Calculator
             </h3>
-            <p className="text-xs text-neutral-400 font-semibold">Slide to estimate pricing for custom rendering volume packages</p>
+            <p className="text-xs text-neutral-400 font-semibold">
+              Slide to estimate pricing for custom rendering volume packages
+            </p>
           </div>
           <div className="bg-purple-600/10 border border-purple-500/20 px-4 py-2 rounded-2xl text-purple-400 text-sm font-black font-mono">
             Price: {getCustomPrice()}
@@ -236,7 +261,7 @@ export default function ProfileBillingTab({
         </div>
 
         <div className="space-y-2">
-          <input 
+          <input
             type="range"
             min="100"
             max="5000"
@@ -247,13 +272,19 @@ export default function ProfileBillingTab({
           />
           <div className="flex justify-between text-[9px] font-mono text-neutral-500 uppercase tracking-widest font-bold">
             <span>100 Credits</span>
-            <span className="text-white font-extrabold text-[11px]">{customCredits} Credits chosen</span>
+            <span className="text-white font-extrabold text-[11px]">
+              {customCredits} Credits chosen
+            </span>
             <span>5000 Credits</span>
           </div>
         </div>
 
-        <button 
-          onClick={() => alert(`Simulated purchase of ${customCredits} credits for ${getCustomPrice()} triggered!`)}
+        <button
+          onClick={() =>
+            alert(
+              `Simulated purchase of ${customCredits} credits for ${getCustomPrice()} triggered!`
+            )
+          }
           className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs transition-all cursor-pointer active:scale-95 shadow-md shadow-purple-900/10"
         >
           Purchase Package ({getCustomPrice()})
@@ -263,36 +294,47 @@ export default function ProfileBillingTab({
       {/* Dynamic Payment Card details and visual layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-8 shadow-2xl relative">
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
-        
+
         {/* Left: Input Form */}
         <div className="space-y-4">
           <div className="space-y-1 text-left">
-            <h4 className="text-sm font-bold text-white">Save Credit Card Info</h4>
-            <p className="text-xs text-neutral-500 font-semibold">Add credit card for automated high-priority rendering upgrades</p>
+            <h4 className="text-sm font-bold text-white">
+              Save Credit Card Info
+            </h4>
+            <p className="text-xs text-neutral-500 font-semibold">
+              Add credit card for automated high-priority rendering upgrades
+            </p>
           </div>
 
           <div className="space-y-3 text-xs">
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Cardholder Name</label>
-              <input 
-                type="text" 
-                value={cardHolder} 
-                onChange={(e) => setCardHolder(e.target.value)} 
+              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+                Cardholder Name
+              </label>
+              <input
+                type="text"
+                value={cardHolder}
+                onChange={(e) => setCardHolder(e.target.value)}
                 placeholder="e.g. John Doe"
                 className="w-full bg-black/40 border border-white/5 rounded-xl py-2 px-3 focus:border-purple-500/50 text-white focus:outline-none"
               />
             </div>
-            
+
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Card Number</label>
-              <input 
-                type="text" 
+              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+                Card Number
+              </label>
+              <input
+                type="text"
                 maxLength={19}
-                value={cardNo} 
+                value={cardNo}
                 onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, "").replace(/(.{4})/g, "$1 ").trim();
+                  const val = e.target.value
+                    .replace(/\D/g, "")
+                    .replace(/(.{4})/g, "$1 ")
+                    .trim();
                   setCardNo(val);
-                }} 
+                }}
                 placeholder="4111 2222 3333 4444"
                 className="w-full bg-black/40 border border-white/5 rounded-xl py-2.5 px-3 focus:border-purple-500/50 text-white focus:outline-none font-mono"
               />
@@ -300,41 +342,52 @@ export default function ProfileBillingTab({
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Expiry Date</label>
-                <input 
-                  type="text" 
+                <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+                  Expiry Date
+                </label>
+                <input
+                  type="text"
                   maxLength={5}
-                  value={cardExpiry} 
+                  value={cardExpiry}
                   onChange={(e) => {
                     const val = e.target.value.replace(/\D/g, "");
                     if (val.length >= 2) {
-                      setCardExpiry(val.substring(0, 2) + "/" + val.substring(2, 4));
+                      setCardExpiry(
+                        val.substring(0, 2) + "/" + val.substring(2, 4)
+                      );
                     } else {
                       setCardExpiry(val);
                     }
-                  }} 
+                  }}
                   placeholder="MM/YY"
                   className="w-full bg-black/40 border border-white/5 rounded-xl py-2 px-3 focus:border-purple-500/50 text-white focus:outline-none font-mono"
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">CVV</label>
-                <input 
-                  type="password" 
+                <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+                  CVV
+                </label>
+                <input
+                  type="password"
                   maxLength={3}
-                  value={cardCvv} 
-                  onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, ""))} 
+                  value={cardCvv}
+                  onChange={(e) =>
+                    setCardCvv(e.target.value.replace(/\D/g, ""))
+                  }
                   placeholder="•••"
                   className="w-full bg-black/40 border border-white/5 rounded-xl py-2 px-3 focus:border-purple-500/50 text-white focus:outline-none font-mono"
                 />
               </div>
             </div>
           </div>
-          
-          <button 
-            type="button" 
+
+          <button
+            type="button"
             onClick={() => {
-              if (!cardNo || !cardHolder) { alert("Please fill card details first!"); return; }
+              if (!cardNo || !cardHolder) {
+                alert("Please fill card details first!");
+                return;
+              }
               setIsCardSaved(true);
               alert("Payment method saved successfully!");
             }}
@@ -348,9 +401,11 @@ export default function ProfileBillingTab({
         <div className="flex items-center justify-center p-4">
           <div className="relative w-72 h-44 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-800 p-6 flex flex-col justify-between text-left text-white shadow-xl shadow-purple-950/20 overflow-hidden font-sans select-none">
             <div className="absolute top-[-10%] right-[-10%] w-32 h-32 rounded-full bg-indigo-500/20 blur-xl pointer-events-none" />
-            
+
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-widest text-purple-200">Anivox Premium Pay</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-purple-200">
+                Anivox Premium Pay
+              </span>
               <CreditCard className="w-5 h-5 text-white/80" />
             </div>
 
@@ -364,12 +419,18 @@ export default function ProfileBillingTab({
 
             <div className="flex items-center justify-between text-[9px] uppercase tracking-wider text-white/70">
               <div className="space-y-0.5">
-                <span className="text-[7px] text-white/55 block">Card Holder</span>
-                <span className="font-bold truncate max-w-[150px] block">{cardHolder || "ANIVOX CREATOR"}</span>
+                <span className="text-[7px] text-white/55 block">
+                  Card Holder
+                </span>
+                <span className="font-bold truncate max-w-[150px] block">
+                  {cardHolder || "ANIVOX CREATOR"}
+                </span>
               </div>
               <div className="space-y-0.5 text-right">
                 <span className="text-[7px] text-white/55 block">Expires</span>
-                <span className="font-bold font-mono">{cardExpiry || "MM/YY"}</span>
+                <span className="font-bold font-mono">
+                  {cardExpiry || "MM/YY"}
+                </span>
               </div>
             </div>
           </div>
@@ -396,10 +457,17 @@ export default function ProfileBillingTab({
             </thead>
             <tbody>
               {invoices.map((inv) => (
-                <tr key={inv.id} className="border-b border-white/5 text-neutral-300 hover:bg-white/5 transition-colors">
-                  <td className="py-3 px-3 font-mono font-bold text-white">{inv.id}</td>
+                <tr
+                  key={inv.id}
+                  className="border-b border-white/5 text-neutral-300 hover:bg-white/5 transition-colors"
+                >
+                  <td className="py-3 px-3 font-mono font-bold text-white">
+                    {inv.id}
+                  </td>
                   <td className="py-3 px-3 font-medium">{inv.date}</td>
-                  <td className="py-3 px-3 font-semibold">${inv.amount.toFixed(2)}</td>
+                  <td className="py-3 px-3 font-semibold">
+                    ${inv.amount.toFixed(2)}
+                  </td>
                   <td className="py-3 px-3">
                     <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-bold text-[9px] uppercase">
                       {inv.status}
@@ -407,7 +475,11 @@ export default function ProfileBillingTab({
                   </td>
                   <td className="py-3 px-3 text-right">
                     <button
-                      onClick={() => alert(`Simulated PDF receipt download for invoice ${inv.id}`)}
+                      onClick={() =>
+                        alert(
+                          `Simulated PDF receipt download for invoice ${inv.id}`
+                        )
+                      }
                       className="text-[10px] font-bold text-purple-400 hover:text-purple-300 hover:underline cursor-pointer"
                     >
                       Download PDF
@@ -419,7 +491,6 @@ export default function ProfileBillingTab({
           </table>
         </div>
       </div>
-
     </div>
   );
 }

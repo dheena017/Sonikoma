@@ -77,18 +77,24 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
         ? normalized
         : `https://${normalized}`;
       const host = new URL(urlWithScheme).hostname.toLowerCase();
-      
+
       let foundSource = "custom";
       for (const [srcId, domains] of Object.entries(SOURCE_DOMAINS)) {
         if (srcId === "custom") continue;
-        if (domains.some(domain => host === domain || host.endsWith(`.${domain}`))) {
+        if (
+          domains.some(
+            (domain) => host === domain || host.endsWith(`.${domain}`)
+          )
+        ) {
           foundSource = srcId;
           break;
         }
       }
       if (foundSource !== source) {
         setSelectedSource(foundSource);
-        console.log(`[UrlInputPanel] Auto-detected source site for host "${host}" -> "${foundSource}"`);
+        console.log(
+          `[UrlInputPanel] Auto-detected source site for host "${host}" -> "${foundSource}"`
+        );
       }
     } catch {
       // Ignore invalid URL structures during typing
@@ -130,8 +136,10 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
 
   const isDirectImage = Boolean(
     targetUrl.trim() &&
-      (targetUrl.toLowerCase().match(/\.(png|jpg|jpeg|webp|gif|svg|bmp|tiff)(\?|$)/) ||
-       targetUrl.startsWith("data:image/"))
+      (targetUrl
+        .toLowerCase()
+        .match(/\.(png|jpg|jpeg|webp|gif|svg|bmp|tiff)(\?|$)/) ||
+        targetUrl.startsWith("data:image/"))
   );
 
   const isSourceMismatch = Boolean(

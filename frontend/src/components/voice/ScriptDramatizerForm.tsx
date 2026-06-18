@@ -82,7 +82,10 @@ export default function ScriptDramatizerForm({
           const newText = results[resultIdx++];
           // Calculate new duration based on word count to keep text and audio matched
           const words = newText.trim().split(/\s+/).filter(Boolean).length;
-          const newDuration = Math.max(2.5, Math.min(12.0, parseFloat((words / 2.2 + 0.8).toFixed(1))));
+          const newDuration = Math.max(
+            2.5,
+            Math.min(12.0, parseFloat((words / 2.2 + 0.8).toFixed(1)))
+          );
           return {
             ...p,
             speech_text: newText,
@@ -94,7 +97,10 @@ export default function ScriptDramatizerForm({
     });
 
     if (addNotification) {
-      addNotification("Successfully applied enhanced script to the storyboard timeline!", "success");
+      addNotification(
+        "Successfully applied enhanced script to the storyboard timeline!",
+        "success"
+      );
     }
   };
 

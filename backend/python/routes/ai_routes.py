@@ -41,24 +41,7 @@ DEFAULT_ANALYSIS = {
     "visual_description":  "A cropped illustration frame ready for cinematic playback.",
 }
 
-STATIC_MODEL_METADATA = {
-    # OpenAI
-    "gpt-4o": {"in": 128000, "out": 4096, "desc": "OpenAI flagship high-intelligence multimodal model."},
-    "gpt-4o-mini": {"in": 128000, "out": 16384, "desc": "OpenAI fast, lightweight multimodal model."},
-    "gpt-4-turbo": {"in": 128000, "out": 4096, "desc": "GPT-4 Turbo model with 128k context."},
-    "gpt-4": {"in": 8192, "out": 4096, "desc": "Standard legacy GPT-4 model."},
-    "gpt-3.5-turbo": {"in": 16385, "out": 4096, "desc": "Standard legacy GPT-3.5 Turbo model."},
-    "o1-preview": {"in": 128000, "out": 32768, "desc": "OpenAI reasoning model for complex tasks."},
-    "o1-mini": {"in": 128000, "out": 65536, "desc": "Fast reasoning model optimized for coding/math."},
-    
-    # Anthropic
-    "claude-3-5-sonnet-20241022": {"in": 200000, "out": 8192, "desc": "Anthropic state-of-the-art model for intelligence and speed."},
-    "claude-3-5-sonnet-20240620": {"in": 200000, "out": 8192, "desc": "Anthropic Claude 3.5 Sonnet v1."},
-    "claude-3-5-haiku-20241022": {"in": 200000, "out": 8192, "desc": "Anthropic fastest Claude model for lightweight tasks."},
-    "claude-3-opus-20240229": {"in": 200000, "out": 4096, "desc": "Anthropic most powerful model for highly complex tasks."},
-    "claude-3-sonnet-20240229": {"in": 200000, "out": 4096, "desc": "Legacy Claude 3 Sonnet model."},
-    "claude-3-haiku-20240307": {"in": 200000, "out": 4096, "desc": "Legacy Claude 3 Haiku model."},
-}
+
 
 # ─── Pydantic Schemas for Requests ───────────────────────────────────────────
 
@@ -365,24 +348,31 @@ async def api_list_models(body: Optional[ListModelsRequest] = None):
             
         if provider == "gemini":
             from google import genai
-            client = genai.Client(api_key=api_key)
-            models_iterator = client.models.list()
-            models = list(models_iterator)
-            
             result_list = []
-            for m in models:
-                raw_name = m.name or ""
-                clean_name = raw_name.replace("models/", "")
+            try:
+                client = genai.Client(api_key=api_key)
+                models_iterator = client.models.list()
+                models = list(models_iterator)
                 
-                result_list.append({
-                    "name": clean_name,
-                    "fullName": raw_name,
-                    "displayName": m.display_name or "",
-                    "description": m.description or "",
-                    "inputTokenLimit": getattr(m, "input_token_limit", None),
-                    "outputTokenLimit": getattr(m, "output_token_limit", None),
-                    "supportedActions": getattr(m, "supported_actions", [])
-                })
+                for m in models:
+                    raw_name = m.name or ""
+                    clean_name = raw_name.replace("models/", "")
+                    
+                    result_list.append({
+                        "name": clean_name,
+                        "fullName": raw_name,
+                        "displayName": m.display_name or "",
+                        "description": m.description or "",
+                        "inputTokenLimit": getattr(m, "input_token_limit", None),
+                        "outputTokenLimit": getattr(m, "output_token_limit", None),
+                        "supportedActions": getattr(m, "supported_actions", [])
+                    })
+            except Exception as gemini_err:
+                logger.error(f"Failed to fetch dynamic Gemini models: {gemini_err}")
+                return {
+                    "success": False,
+                    "error": f"Failed to fetch Gemini models: {str(gemini_err)}"
+                }
                 
             return {
                 "success": True,
@@ -442,14 +432,13 @@ async def api_list_models(body: Optional[ListModelsRequest] = None):
             result_list = []
             for m in models:
                 model_id = m.get("id", "")
-                static_data = STATIC_MODEL_METADATA.get(model_id, {})
                 result_list.append({
                     "name": model_id,
                     "fullName": model_id,
                     "displayName": model_id,
-                    "description": static_data.get("desc") or f"OpenAI model owned by {m.get('owned_by', 'N/A')}.",
-                    "inputTokenLimit": static_data.get("in"),
-                    "outputTokenLimit": static_data.get("out"),
+                    "description": f"OpenAI model owned by {m.get('owned_by', 'N/A')}.",
+                    "inputTokenLimit": None,
+                    "outputTokenLimit": None,
                     "supportedActions": ["chat"] if "gpt" in model_id or "o1" in model_id else []
                 })
             return {
@@ -475,14 +464,13 @@ async def api_list_models(body: Optional[ListModelsRequest] = None):
             result_list = []
             for m in models:
                 model_id = m.get("id", "")
-                static_data = STATIC_MODEL_METADATA.get(model_id, {})
                 result_list.append({
                     "name": model_id,
                     "fullName": model_id,
                     "displayName": m.get("display_name") or model_id,
-                    "description": static_data.get("desc") or f"Anthropic model created at {m.get('created_at', 'N/A')}.",
-                    "inputTokenLimit": static_data.get("in"),
-                    "outputTokenLimit": static_data.get("out"),
+                    "description": f"Anthropic model created at {m.get('created_at', 'N/A')}.",
+                    "inputTokenLimit": None,
+                    "outputTokenLimit": None,
                     "supportedActions": ["chat"]
                 })
             return {
@@ -559,7 +547,9 @@ async def analyze_image(body: AnalyzeImageRequest):
             "analysis": analysis,
             "source": "gemini",
             "model": target_model,
-            "latencyMs": elapsed
+            "latencyMs": elapsed,
+            "inputTokens": getattr(skill, "last_input_tokens", 0),
+            "outputTokens": getattr(skill, "last_output_tokens", 0)
         }
 
     except Exception as e:
@@ -621,7 +611,12 @@ async def analyze_batch(body: AnalyzeBatchRequest):
                 raw_text = await skill.execute(model=target_model, image_bytes=img_buffer, tone_hint=tone_hint, narrative_length_hint=narrative_length_hint)
                 analysis = validate_analysis(json.loads(raw_text))
                 
-                results.append({"url": url, "analysis": analysis})
+                results.append({
+                    "url": url,
+                    "analysis": analysis,
+                    "inputTokens": getattr(skill, "last_input_tokens", 0),
+                    "outputTokens": getattr(skill, "last_output_tokens", 0)
+                })
                 
             except Exception as e:
                 logger.warning(f"[Batch] Failed {url[:50]}: {e}")
@@ -802,7 +797,12 @@ async def run_md_skill(skill_name: str, model: str, **kwargs) -> Dict[str, Any]:
     try:
         skill = registry.get(skill_name)
         raw_text = await skill.execute(model=model, **kwargs)
-        return {"success": True, "result": json.loads(raw_text)}
+        return {
+            "success": True,
+            "result": json.loads(raw_text),
+            "inputTokens": getattr(skill, "last_input_tokens", 0),
+            "outputTokens": getattr(skill, "last_output_tokens", 0)
+        }
     except Exception as e:
         logger.error(f"Endpoint skill execution failed for '{skill_name}': {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -977,9 +977,13 @@ async def test_model_latency(body: TestModelLatencyRequest):
                 reply = str(res_data)
                 if isinstance(res_data, list) and len(res_data) > 0:
                     reply = res_data[0].get("generated_text", reply)
+                p_tokens = max(1, len(prompt) // 4)
+                c_tokens = max(1, len(reply) // 4)
                 return {
                     "success": True,
                     "latencyMs": latency_ms,
+                    "inputTokens": p_tokens,
+                    "outputTokens": c_tokens,
                     "response": reply
                 }
             else:

@@ -28,18 +28,22 @@ export function VideoMonitorActive({
   const activeStoryboardPanel = panels[currentPanelIndex] || null;
 
   // Helper to split and chunk long subtitle dialogues
-  const getSubtitleChunk = (text: string, duration: number, currentTime: number): string => {
+  const getSubtitleChunk = (
+    text: string,
+    duration: number,
+    currentTime: number
+  ): string => {
     if (!text) return "";
     const words = text.trim().split(/\s+/);
     if (words.length <= 8) return text;
-    
+
     // Group words into segments of ~7 words
     const maxWords = 7;
     const chunks: string[] = [];
     for (let i = 0; i < words.length; i += maxWords) {
       chunks.push(words.slice(i, i + maxWords).join(" "));
     }
-    
+
     const progress = Math.max(0, Math.min(0.999, currentTime / duration));
     const chunkIndex = Math.floor(progress * chunks.length);
     return chunks[chunkIndex] || "";
@@ -52,19 +56,26 @@ export function VideoMonitorActive({
   // Find active panel and relative time during video playback
   let activeVideoPanel: GeneratedPanel | null = null;
   let relativeVideoTime = 0;
-  
+
   if (activePreviewTab === "video" && videoUrl) {
     let accumulatedTime = 0;
     for (const panel of panels) {
       const pDur = panel.duration || 4.5;
-      if (videoCurrentTime >= accumulatedTime && videoCurrentTime < accumulatedTime + pDur) {
+      if (
+        videoCurrentTime >= accumulatedTime &&
+        videoCurrentTime < accumulatedTime + pDur
+      ) {
         activeVideoPanel = panel;
         relativeVideoTime = videoCurrentTime - accumulatedTime;
         break;
       }
       accumulatedTime += pDur;
     }
-    if (!activeVideoPanel && panels.length > 0 && videoCurrentTime >= accumulatedTime) {
+    if (
+      !activeVideoPanel &&
+      panels.length > 0 &&
+      videoCurrentTime >= accumulatedTime
+    ) {
       activeVideoPanel = panels[panels.length - 1];
       relativeVideoTime = (activeVideoPanel.duration || 4.5) - 0.01;
     }
@@ -113,7 +124,9 @@ export function VideoMonitorActive({
             autoPlay
             playsInline
             className="w-full h-full object-contain bg-black"
-            onTimeUpdate={(e) => setVideoCurrentTime(e.currentTarget.currentTime)}
+            onTimeUpdate={(e) =>
+              setVideoCurrentTime(e.currentTarget.currentTime)
+            }
           />
 
           {/* Subtitles Overlay on top of the Video Player */}
@@ -125,7 +138,11 @@ export function VideoMonitorActive({
                 </span>
               )}
               <p className="text-white font-bold text-xs leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,1)] bg-black/75 p-2.5 rounded-lg border border-white/5 backdrop-blur-xs text-center font-sans max-w-lg mx-auto">
-                {getSubtitleChunk(activeVideoPanel.speech_text, activeVideoPanel.duration || 4.5, relativeVideoTime)}
+                {getSubtitleChunk(
+                  activeVideoPanel.speech_text,
+                  activeVideoPanel.duration || 4.5,
+                  relativeVideoTime
+                )}
               </p>
             </div>
           )}
@@ -206,7 +223,11 @@ export function VideoMonitorActive({
               )}
               {activeStoryboardPanel.speech_text?.trim() && (
                 <p className="text-white font-bold text-xs leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,1)] bg-black/75 p-2.5 rounded-lg border border-white/5 backdrop-blur-xs text-center font-sans max-w-lg mx-auto">
-                  {getSubtitleChunk(activeStoryboardPanel.speech_text, activeStoryboardPanel.duration || 4.5, playbackTime)}
+                  {getSubtitleChunk(
+                    activeStoryboardPanel.speech_text,
+                    activeStoryboardPanel.duration || 4.5,
+                    playbackTime
+                  )}
                 </p>
               )}
             </div>

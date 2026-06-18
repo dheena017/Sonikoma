@@ -23,21 +23,23 @@ export default function ProfileApiTab({
   handleGenerateToken,
   tokenToast,
   handleCopyToastKey,
-  handleDeleteToken
+  handleDeleteToken,
 }: ProfileApiTabProps) {
   return (
     <div className="space-y-6 animate-in fade-in duration-300 text-left">
-      
       {/* Generate token widget */}
       <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-8 shadow-2xl relative">
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
-        
+
         <div className="space-y-1 mb-6">
           <h3 className="text-lg font-bold text-white flex items-center gap-2">
             <Key className="w-5 h-5 text-purple-400" />
             Studio API Tokens
           </h3>
-          <p className="text-xs text-neutral-400">Generate developer keys to build automation tools and customize webtoon pipelines</p>
+          <p className="text-xs text-neutral-400">
+            Generate developer keys to build automation tools and customize
+            webtoon pipelines
+          </p>
         </div>
 
         {tokenToast && (
@@ -60,7 +62,10 @@ export default function ProfileApiTab({
           </div>
         )}
 
-        <form onSubmit={handleGenerateToken} className="flex flex-col md:flex-row gap-3">
+        <form
+          onSubmit={handleGenerateToken}
+          className="flex flex-col md:flex-row gap-3"
+        >
           <input
             type="text"
             required
@@ -82,8 +87,12 @@ export default function ProfileApiTab({
       {/* API Keys List */}
       <div className="bg-black/20 border border-white/5 rounded-3xl p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-bold tracking-wider uppercase text-neutral-500">Active API Keys</span>
-          <span className="text-[10px] text-neutral-600 font-medium font-mono">Headers: Authorization Bearer [Token]</span>
+          <span className="text-[10px] font-bold tracking-wider uppercase text-neutral-500">
+            Active API Keys
+          </span>
+          <span className="text-[10px] text-neutral-600 font-medium font-mono">
+            Headers: Authorization Bearer [Token]
+          </span>
         </div>
 
         {apiTokens.length === 0 ? (
@@ -93,8 +102,8 @@ export default function ProfileApiTab({
         ) : (
           <div className="space-y-2.5">
             {apiTokens.map((tok) => (
-              <div 
-                key={tok.id} 
+              <div
+                key={tok.id}
                 className="bg-black/30 border border-white/5 rounded-2xl p-4 flex items-center justify-between gap-4"
               >
                 <div>
@@ -116,7 +125,6 @@ export default function ProfileApiTab({
           </div>
         )}
       </div>
-
     </div>
   );
 }

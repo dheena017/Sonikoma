@@ -11,7 +11,7 @@ webtoon-to-video-backend/
 │
 ├── frontend/                         ← React 19 + TypeScript + Vite + Tailwind UI
 │   ├── src/
-│   │   ├── api/                      
+│   │   ├── api/
 │   │   │   └── fetchWithInterceptor.ts   ← Global fetch wrapper + error handler
 │   │   ├── components/               ← Modular UI component tree
 │   │   │   ├── crop/                 ← Modular Crop Editor workspace layout
@@ -49,15 +49,15 @@ webtoon-to-video-backend/
 │
 ├── backend/                          ← Express.js server + Python FastAPI wrappers
 │   ├── server.ts                     ← Server bootstrapping, middlewares, log SSE
-│   ├── config/                       
+│   ├── config/
 │   │   └── clients.ts                ← Gemini & HuggingFace API configurations
-│   ├── database/                     
+│   ├── database/
 │   │   ├── db.ts                     ← SQLite helper singleton (better-sqlite3)
 │   │   ├── schema.sql                ← Local SQL bootstrapping table setups
 │   │   └── webtoon_local.db          ← Git-ignored local DB file
 │   ├── routes/                       ← Express HTTP endpoints segregated by domain
-│   │   ├── health.ts                 
-│   │   ├── projects.ts               
+│   │   ├── health.ts
+│   │   ├── projects.ts
 │   │   ├── aiRoutes.ts               ← Mounted router routing to ai/
 │   │   ├── imageRoutes.ts            ← Mounted router routing to image/
 │   │   ├── scraperRoutes.ts          ← Mounted router routing to scraper/
@@ -66,15 +66,15 @@ webtoon-to-video-backend/
 │   │   └── scraper/                  ← Crawlers, storyboard AI pipelines
 │   ├── services/                     ← Scraper orchestrator and storyboard narrative AI
 │   ├── python/                       ← Python modules folder
-│   │   ├── routes/                   
+│   │   ├── routes/
 │   │   │   └── process.py            ← FastAPI panel extraction route
-│   │   └── services/                 
+│   │   └── services/
 │   │       ├── audio.py              ← edge-tts and pydub wrappers
 │   │       ├── cleaner.py            ← Bubble segmentation and cleanup CLI
 │   │       ├── detect_panels.py      ← OpenCV contour scanner
 │   │       ├── video.py              ← MoviePy movie compilation script
 │   │       └── ...
-│   └── utils/                        
+│   └── utils/
 │       ├── colors.ts                 ← ANSI logger color tools
 │       ├── cvUtils.py                ← Shared python OpenCV helper functions
 │       └── imageUtils.ts             ← Node image buffer fetch helpers
@@ -91,25 +91,28 @@ webtoon-to-video-backend/
 
 To maintain long-term architectural integrity, strictly adhere to the following file boundaries. Putting the wrong files in the wrong places is highly discouraged.
 
-| File Type / Content | ❌ Forbidden Locations | ✅ Approved Location |
-| :--- | :--- | :--- |
-| **React Components (`.tsx`)** | Project root directory, any subfolder inside `backend/` | `frontend/src/components/` (or modular nested subfolders) |
-| **Stateful Logic Hooks** | Direct layout components, root `App.tsx` | `frontend/src/hooks/` |
-| **Python Script Actions** | Anywhere inside `frontend/`, directly in `backend/services/` | `backend/python/services/` |
-| **API Endpoint Handlers** | Inside React components or inline routes inside `server.ts` | Segregated under `backend/routes/` |
-| **Type Definitions** | Scattered across files | Shared in `frontend/src/types.ts` |
-| **Test/Scratch Scripts** | Project root workspace, temporary folder | `tests/` folder (or `.gemini` sandbox folders) |
-| **Temporary Media Artifacts** | Root directory folder | `data/` or standard system temp folder (`os.tmpdir()`) |
+| File Type / Content           | ❌ Forbidden Locations                                       | ✅ Approved Location                                      |
+| :---------------------------- | :----------------------------------------------------------- | :-------------------------------------------------------- |
+| **React Components (`.tsx`)** | Project root directory, any subfolder inside `backend/`      | `frontend/src/components/` (or modular nested subfolders) |
+| **Stateful Logic Hooks**      | Direct layout components, root `App.tsx`                     | `frontend/src/hooks/`                                     |
+| **Python Script Actions**     | Anywhere inside `frontend/`, directly in `backend/services/` | `backend/python/services/`                                |
+| **API Endpoint Handlers**     | Inside React components or inline routes inside `server.ts`  | Segregated under `backend/routes/`                        |
+| **Type Definitions**          | Scattered across files                                       | Shared in `frontend/src/types.ts`                         |
+| **Test/Scratch Scripts**      | Project root workspace, temporary folder                     | `tests/` folder (or `.gemini` sandbox folders)            |
+| **Temporary Media Artifacts** | Root directory folder                                        | `data/` or standard system temp folder (`os.tmpdir()`)    |
 
 ---
 
 ## 📁 Key Folder Responsibilities
 
 ### `frontend/`
+
 Contains the browser-based single-page application built on Vite and React 19. All interactions, cropping editors, storyboard timelines, and SSE-based server log displays are defined here.
 
 ### `backend/`
+
 Contains the Express.js HTTP application server. It serves as an orchestrator, handling request validation, routing, database state management, caching, and calling Python services via sanitized CLI parameters.
 
 ### `backend/python/`
+
 Handles heavy computational tasks such as image inpainting, contour boundary extraction, speech bubble segmentation, text-to-speech voiceovers, and MoviePy compilation. Contains its own sub-routing system running on FastAPI for high-performance process detection.
