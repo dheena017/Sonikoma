@@ -115,6 +115,13 @@ export function usePipelineActions({
     setVideoUrl,
     setActivePreviewTab,
     narrationStyle,
+    seriesTitle: state.seriesTitle,
+    chapterNumber: state.chapterNumber,
+    chapterTitle: state.chapterTitle,
+    scrapedGenre: state.scrapedGenre,
+    seriesAuthor: state.seriesAuthor,
+    seriesCoverImage: state.seriesCoverImage,
+    seriesSynopsis: state.seriesSynopsis,
   });
 
   const {
@@ -145,6 +152,7 @@ export function usePipelineActions({
     aspectRatioLock,
     minPanelAreaPct,
     overlapMergeThreshold,
+    autoSplitTallStrips,
     useLocalCV,
     selectedModel,
     cropPaddingPx,

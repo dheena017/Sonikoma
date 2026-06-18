@@ -78,6 +78,9 @@ class SmartCropRequest(BaseModel):
     cannyHigh: Optional[int] = 100
     closeKernelSize: Optional[int] = 15
     minHeightPx: Optional[int] = 60
+    autoSplit: Optional[bool] = True
+    targetWidth: Optional[int] = None
+    targetHeight: Optional[int] = None
 
 # ─── Dynamic Endpoints Requests ──────────────────────────────────────────────
 
@@ -302,6 +305,72 @@ def adjust_to_aspect_ratio(
             new_x = x + (w_box - new_w) // 2
             
     return {"x": new_x, "y": new_y, "w": new_w, "h": new_h}
+
+
+def resize_and_pad_pil(img: Image.Image, target_w: int, target_h: int) -> Image.Image:
+    """
+    Resizes PIL image to fit within target_w x target_h preserving aspect ratio,
+    padding the rest with the dominant border color.
+    """
+    import numpy as np
+    w, h = img.size
+    
+    # Sample edges to detect background color
+    edge_pixels = []
+    # Sample top/bottom edges
+    for x in range(0, w, max(1, w // 20)):
+        edge_pixels.append(img.getpixel((x, 0)))
+        edge_pixels.append(img.getpixel((x, h - 1)))
+    # Sample left/right edges
+    for y in range(0, h, max(1, h // 20)):
+        edge_pixels.append(img.getpixel((0, y)))
+        edge_pixels.append(img.getpixel((w - 1, y)))
+        
+    try:
+        first_pixel = edge_pixels[0]
+        if isinstance(first_pixel, (list, tuple)):
+            # RGB/RGBA
+            r = int(np.median([p[0] for p in edge_pixels]))
+            g = int(np.median([p[1] for p in edge_pixels]))
+            b = int(np.median([p[2] for p in edge_pixels]))
+            if len(first_pixel) > 3:
+                a = int(np.median([p[3] for p in edge_pixels]))
+                pad_color = (r, g, b, a)
+            else:
+                pad_color = (r, g, b)
+        else:
+            # L / single value channel
+            pad_color = int(np.median(edge_pixels))
+    except Exception:
+        pad_color = (255, 255, 255) if img.mode in ("RGB", "RGBA") else 255
+
+    # Determine resampling filter based on Pillow version
+    try:
+        resample_filter = Image.Resampling.LANCZOS
+    except AttributeError:
+        try:
+            resample_filter = Image.LANCZOS
+        except AttributeError:
+            resample_filter = Image.BICUBIC
+
+    # Calculate scale factor
+    scale_w = target_w / w
+    scale_h = target_h / h
+    scale = min(scale_w, scale_h)
+    
+    new_w = max(1, int(w * scale))
+    new_h = max(1, int(h * scale))
+    
+    resized = img.resize((new_w, new_h), resample_filter)
+    
+    # Create target canvas filled with pad_color
+    canvas = Image.new(img.mode, (target_w, target_h), pad_color)
+    
+    # Centered paste
+    x_offset = (target_w - new_w) // 2
+    y_offset = (target_h - new_h) // 2
+    canvas.paste(resized, (x_offset, y_offset))
+    return canvas
 
 
 # ─── Routes ───────────────────────────────────────────────────────────────────
@@ -716,7 +785,8 @@ async def ai_smart_crop(body: SmartCropRequest):
                     aspect_ratio_str=body.aspectRatio,
                     canny_low=body.cannyLow,
                     canny_high=body.cannyHigh,
-                    close_kernel_size=body.closeKernelSize
+                    close_kernel_size=body.closeKernelSize,
+                    auto_split=body.autoSplit if body.autoSplit is not None else True
                 )
             finally:
                 if os.path.exists(temp_in_path):
@@ -751,10 +821,33 @@ async def ai_smart_crop(body: SmartCropRequest):
                 p_right = ((w - (left_px + crop_w)) / w) * 100.0
                 p_bottom = ((h - (top_px + crop_h)) / h) * 100.0
 
+            # Check if targetWidth and targetHeight should be resolved
+            t_w = body.targetWidth
+            t_h = body.targetHeight
+            if not t_w or not t_h:
+                if body.aspectRatio == "16:9":
+                    t_w, t_h = 1920, 1080
+                elif body.aspectRatio == "9:16":
+                    t_w, t_h = 1080, 1920
+                elif body.aspectRatio == "1:1":
+                    t_w, t_h = 1080, 1080
+                elif body.aspectRatio == "4:3":
+                    t_w, t_h = 1440, 1080
+                elif body.aspectRatio == "3:4":
+                    t_w, t_h = 1080, 1440
+
             if crop_w > 10 and crop_h > 10:
                 cropped_img = img.crop((left_px, top_px, left_px + crop_w, top_px + crop_h))
+                
+                if t_w and t_h:
+                    try:
+                        cropped_img = resize_and_pad_pil(cropped_img, t_w, t_h)
+                    except Exception as resize_err:
+                        logger.error(f"[AI Smart Crop] Failed to resize/pad: {resize_err}")
+                
                 out = io.BytesIO()
-                cropped_img.save(out, format=img.format or "JPEG")
+                save_format = img.format or "JPEG"
+                cropped_img.save(out, format=save_format)
                 cropped_buffer = out.getvalue()
             else:
                 cropped_buffer = image_buffer
@@ -774,9 +867,19 @@ async def ai_smart_crop(body: SmartCropRequest):
                 "cropRight": round(p_right, 2),
                 "croppedUrl": cached_url
             }
-            for key in ["brightness", "contrast", "detailScore", "borderType", "width", "height", "area"]:
+            for key in ["brightness", "contrast", "detailScore", "borderType"]:
                 if key in box:
                     panel_res[key] = box[key]
+            
+            if t_w and t_h:
+                panel_res["width"] = t_w
+                panel_res["height"] = t_h
+                panel_res["area"] = t_w * t_h
+            else:
+                panel_res["width"] = int(crop_w)
+                panel_res["height"] = int(crop_h)
+                panel_res["area"] = int(crop_w * crop_h)
+
             cropped_panels.append(panel_res)
 
         logger.info(f"[AI Smart Crop] Successfully processed {len(cropped_panels)} panels.")

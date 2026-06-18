@@ -17,6 +17,13 @@ interface UseVideoGenerationProps {
   setVideoUrl: (url: string | null) => void;
   setActivePreviewTab: (tab: "video" | "storyboard") => void;
   narrationStyle?: string;
+  seriesTitle: string;
+  chapterNumber: string;
+  chapterTitle: string;
+  scrapedGenre: string;
+  seriesAuthor?: string;
+  seriesCoverImage?: string;
+  seriesSynopsis?: string;
 }
 
 export function useVideoGeneration({
@@ -34,6 +41,13 @@ export function useVideoGeneration({
   setVideoUrl,
   setActivePreviewTab,
   narrationStyle = "long",
+  seriesTitle,
+  chapterNumber,
+  chapterTitle,
+  scrapedGenre,
+  seriesAuthor,
+  seriesCoverImage,
+  seriesSynopsis,
 }: UseVideoGenerationProps) {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [progressStatus, setProgressStatus] = useState<string>("");
@@ -57,6 +71,26 @@ export function useVideoGeneration({
       toomics: "Toomics",
       linewebtoon: "Line Webtoon",
       asurascans: "Asura Scans",
+      manhuato: "ManhuaTo",
+      reaperscans: "Reaper Scans",
+      flamecomics: "Flame Comics",
+      voidscans: "Void Scans",
+      luminousscans: "Luminous Scans",
+      tapas: "Tapas",
+      tappytoon: "Tappytoon",
+      copincomics: "Copin Comics",
+      pocketcomics: "Pocket Comics",
+      lezhin: "Lezhin",
+      bilibilicomics: "Bilibili Comics",
+      mangatoon: "MangaToon",
+      webnovel: "Webnovel",
+      manhuaplus: "Manhua Plus",
+      manhwaclan: "Manhwa Clan",
+      "1stkissmanga": "1st Kiss Manga",
+      manganato: "Manganato",
+      mangakakalot: "Mangakakalot",
+      batoto: "Bato.to",
+      custom: "Direct Image / Custom URL"
     };
 
     const selectedSourceName =
@@ -86,6 +120,26 @@ export function useVideoGeneration({
       toomics: ["toomics.com"],
       linewebtoon: ["webtoon.com"],
       asurascans: ["asurascans.com"],
+      manhuato: ["manhuato.com"],
+      reaperscans: ["reaperscans.com"],
+      flamecomics: ["flamecomics.com", "flamescans.org"],
+      voidscans: ["voidscans.com", "void-scans.com"],
+      luminousscans: ["luminousscans.com"],
+      tapas: ["tapas.io"],
+      tappytoon: ["tappytoon.com"],
+      copincomics: ["copincomics.com"],
+      pocketcomics: ["pocketcomics.com"],
+      lezhin: ["lezhin.com", "lezhinus.com"],
+      bilibilicomics: ["bilibilicomics.com"],
+      mangatoon: ["mangatoon.mobi"],
+      webnovel: ["webnovel.com"],
+      manhuaplus: ["manhuaplus.com"],
+      manhwaclan: ["manhwaclan.com"],
+      "1stkissmanga": ["1stkissmanga.io", "1stkissmanga.com"],
+      manganato: ["manganato.com", "readmanganato.com"],
+      mangakakalot: ["mangakakalot.com"],
+      batoto: ["bato.to"],
+      custom: [],
     };
 
     const isSourceMismatch = Boolean(
@@ -130,6 +184,15 @@ export function useVideoGeneration({
         `[Scraper] Spawned crawler tasks to fetch strip images...`,
       ]);
 
+      const formattedEpisode = (() => {
+        const num = chapterNumber.trim();
+        const name = chapterTitle.trim();
+        if (num && name) return `Chapter ${num} - ${name}`;
+        if (num) return `Chapter ${num}`;
+        if (name) return name;
+        return "";
+      })();
+
       const requestBody = {
         url: targetUrl,
         source: selectedSource,
@@ -137,6 +200,12 @@ export function useVideoGeneration({
         panels: panels,
         model: selectedModel,
         narrationStyle,
+        title: seriesTitle ? seriesTitle.trim() : undefined,
+        episode: formattedEpisode || undefined,
+        genre: scrapedGenre ? scrapedGenre.trim() : undefined,
+        author: seriesAuthor ? seriesAuthor.trim() : undefined,
+        cover_image: seriesCoverImage ? seriesCoverImage.trim() : undefined,
+        synopsis: seriesSynopsis ? seriesSynopsis.trim() : undefined,
       };
 
       console.log(`[API] POST /api/generate`, requestBody);

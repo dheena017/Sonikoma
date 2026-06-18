@@ -42,6 +42,7 @@ interface StoryboardTimelineProps {
   cropCannyLow?: number;
   cropCannyHigh?: number;
   cropCloseKernelSize?: number;
+  autoSplitTallStrips?: boolean;
   playStoryboardAudio?: (idx: number) => void;
 }
 
@@ -79,6 +80,7 @@ export default function StoryboardTimeline({
   cropCannyLow = 20,
   cropCannyHigh = 100,
   cropCloseKernelSize = 15,
+  autoSplitTallStrips = true,
   playStoryboardAudio,
 }: StoryboardTimelineProps) {
   // ── Panel selection state ────────────────────────────────────────────────
@@ -329,6 +331,7 @@ export default function StoryboardTimeline({
               cannyHigh: cropCannyHigh,
               closeKernelSize: cropCloseKernelSize,
               minHeightPx: cropMinHeightPx,
+              autoSplit: autoSplitTallStrips,
             }),
           });
 

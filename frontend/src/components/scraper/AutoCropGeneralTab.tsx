@@ -73,6 +73,7 @@ export function AutoCropGeneralTab(props: AutoCropSharedProps) {
           cannyLow={props.cropCannyLow}
           cannyHigh={props.cropCannyHigh}
           closeKernel={props.cropCloseKernelSize}
+          autoSplit={props.autoSplitTallStrips}
         />
       </div>
 

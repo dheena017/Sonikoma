@@ -11,6 +11,25 @@ const SOURCE_OPTIONS = [
   { id: "toomics", name: "Toomics" },
   { id: "linewebtoon", name: "Line Webtoon" },
   { id: "asurascans", name: "Asura Scans" },
+  { id: "manhuato", name: "ManhuaTo" },
+  { id: "reaperscans", name: "Reaper Scans" },
+  { id: "flamecomics", name: "Flame Comics" },
+  { id: "voidscans", name: "Void Scans" },
+  { id: "luminousscans", name: "Luminous Scans" },
+  { id: "tapas", name: "Tapas" },
+  { id: "tappytoon", name: "Tappytoon" },
+  { id: "copincomics", name: "Copin Comics" },
+  { id: "pocketcomics", name: "Pocket Comics" },
+  { id: "lezhin", name: "Lezhin" },
+  { id: "bilibilicomics", name: "Bilibili Comics" },
+  { id: "mangatoon", name: "MangaToon" },
+  { id: "webnovel", name: "Webnovel" },
+  { id: "manhuaplus", name: "Manhua Plus" },
+  { id: "manhwaclan", name: "Manhwa Clan" },
+  { id: "1stkissmanga", name: "1st Kiss Manga" },
+  { id: "manganato", name: "Manganato" },
+  { id: "mangakakalot", name: "Mangakakalot" },
+  { id: "batoto", name: "Bato.to" },
   { id: "custom", name: "Direct Image / Custom URL" },
 ];
 
@@ -21,6 +40,25 @@ const SOURCE_EXAMPLES: Record<string, string> = {
   toomics: "toomics.com/...",
   linewebtoon: "webtoon.com/...",
   asurascans: "asurascans.com/...",
+  manhuato: "manhuato.com/...",
+  reaperscans: "reaperscans.com/...",
+  flamecomics: "flamecomics.com/...",
+  voidscans: "voidscans.com/...",
+  luminousscans: "luminousscans.com/...",
+  tapas: "tapas.io/...",
+  tappytoon: "tappytoon.com/...",
+  copincomics: "copincomics.com/...",
+  pocketcomics: "pocketcomics.com/...",
+  lezhin: "lezhin.com/...",
+  bilibilicomics: "bilibilicomics.com/...",
+  mangatoon: "mangatoon.mobi/...",
+  webnovel: "webnovel.com/...",
+  manhuaplus: "manhuaplus.com/...",
+  manhwaclan: "manhwaclan.com/...",
+  "1stkissmanga": "1stkissmanga.io/...",
+  manganato: "manganato.com/...",
+  mangakakalot: "mangakakalot.com/...",
+  batoto: "bato.to/...",
   custom: "example.com/image.jpg",
 };
 
@@ -31,6 +69,25 @@ const SOURCE_DOMAINS: Record<string, string[]> = {
   toomics: ["toomics.com"],
   linewebtoon: ["webtoon.com"],
   asurascans: ["asurascans.com"],
+  manhuato: ["manhuato.com"],
+  reaperscans: ["reaperscans.com"],
+  flamecomics: ["flamecomics.com", "flamescans.org"],
+  voidscans: ["voidscans.com", "void-scans.com"],
+  luminousscans: ["luminousscans.com"],
+  tapas: ["tapas.io"],
+  tappytoon: ["tappytoon.com"],
+  copincomics: ["copincomics.com"],
+  pocketcomics: ["pocketcomics.com"],
+  lezhin: ["lezhin.com", "lezhinus.com"],
+  bilibilicomics: ["bilibilicomics.com"],
+  mangatoon: ["mangatoon.mobi"],
+  webnovel: ["webnovel.com"],
+  manhuaplus: ["manhuaplus.com"],
+  manhwaclan: ["manhwaclan.com"],
+  "1stkissmanga": ["1stkissmanga.io", "1stkissmanga.com"],
+  manganato: ["manganato.com", "readmanganato.com"],
+  mangakakalot: ["mangakakalot.com"],
+  batoto: ["bato.to"],
   custom: [],
 };
 
@@ -48,6 +105,20 @@ interface UrlInputPanelProps {
   addNotification: (message: string, type: NotificationType) => void;
   narrationStyle?: string;
   setNarrationStyle?: (style: string) => void;
+  seriesTitle?: string;
+  setSeriesTitle?: (title: string) => void;
+  chapterNumber?: string;
+  setChapterNumber?: (num: string) => void;
+  chapterTitle?: string;
+  setChapterTitle?: (title: string) => void;
+  scrapedGenre?: string;
+  setScrapedGenre?: (genre: string) => void;
+  seriesAuthor?: string;
+  setSeriesAuthor?: (author: string) => void;
+  seriesCoverImage?: string;
+  setSeriesCoverImage?: (coverImage: string) => void;
+  seriesSynopsis?: string;
+  setSeriesSynopsis?: (synopsis: string) => void;
 }
 
 export default function UrlInputPanel(props: UrlInputPanelProps) {
@@ -65,6 +136,20 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
     addNotification,
     narrationStyle = "long",
     setNarrationStyle,
+    seriesTitle = "",
+    setSeriesTitle,
+    chapterNumber = "",
+    setChapterNumber,
+    chapterTitle = "",
+    setChapterTitle,
+    scrapedGenre = "",
+    setScrapedGenre,
+    seriesAuthor = "",
+    setSeriesAuthor,
+    seriesCoverImage = "",
+    setSeriesCoverImage,
+    seriesSynopsis = "",
+    setSeriesSynopsis,
   } = props;
 
   const source = selectedSource || "webtoons";
@@ -293,6 +378,118 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
               </span>
             </button>
           </div>
+
+          {/* Series & Chapter Metadata Override Card */}
+          <div className="p-4 bg-black/40 border border-neutral-800/80 rounded-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-white/5 pb-2">
+              <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+                Comic Series & Chapter Metadata
+              </span>
+              <span className="text-[9px] text-neutral-500 font-bold font-mono">Editable Overrides</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+              {/* Series Name */}
+              <div className="md:col-span-6 space-y-1">
+                <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                  Comic/Manhwa Series Title
+                </label>
+                <input
+                  type="text"
+                  value={seriesTitle}
+                  onChange={(e) => setSeriesTitle?.(e.target.value)}
+                  placeholder="e.g. Boundless Necromancer"
+                  className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-neutral-200 outline-none transition-colors"
+                />
+              </div>
+
+              {/* Genre */}
+              <div className="md:col-span-6 space-y-1">
+                <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                  Genre / Category
+                </label>
+                <input
+                  type="text"
+                  value={scrapedGenre}
+                  onChange={(e) => setScrapedGenre?.(e.target.value)}
+                  placeholder="e.g. Fantasy Action"
+                  className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-neutral-200 outline-none transition-colors"
+                />
+              </div>
+
+              {/* Chapter Number */}
+              <div className="md:col-span-4 space-y-1">
+                <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                  Chapter / Episode Number
+                </label>
+                <input
+                  type="text"
+                  value={chapterNumber}
+                  onChange={(e) => setChapterNumber?.(e.target.value)}
+                  placeholder="e.g. 72"
+                  className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-neutral-200 outline-none transition-colors font-mono"
+                />
+              </div>
+
+              {/* Chapter Title */}
+              <div className="md:col-span-8 space-y-1">
+                <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                  Chapter Title / Name (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={chapterTitle}
+                  onChange={(e) => setChapterTitle?.(e.target.value)}
+                  placeholder="e.g. The S-Rank Awakens"
+                  className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-neutral-200 outline-none transition-colors"
+                />
+              </div>
+
+              {/* Author / Illustrator */}
+              <div className="md:col-span-6 space-y-1">
+                <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                  Author / Illustrator
+                </label>
+                <input
+                  type="text"
+                  value={seriesAuthor}
+                  onChange={(e) => setSeriesAuthor?.(e.target.value)}
+                  placeholder="e.g. Chugong, DUBU"
+                  className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-neutral-200 outline-none transition-colors"
+                />
+              </div>
+
+              {/* Cover Image URL */}
+              <div className="md:col-span-6 space-y-1">
+                <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                  Series Cover Image URL (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={seriesCoverImage}
+                  onChange={(e) => setSeriesCoverImage?.(e.target.value)}
+                  placeholder="e.g. https://example.com/cover.jpg"
+                  className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-neutral-200 outline-none transition-colors"
+                />
+              </div>
+
+              {/* Synopsis / Description */}
+              <div className="md:col-span-12 space-y-1">
+                <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                  Series Synopsis / Description (Optional)
+                </label>
+                <textarea
+                  value={seriesSynopsis}
+                  onChange={(e) => setSeriesSynopsis?.(e.target.value)}
+                  placeholder="Describe the series storyline..."
+                  rows={2}
+                  className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-neutral-200 outline-none transition-colors resize-none font-sans"
+                />
+              </div>
+            </div>
+          </div>
+
           {isSourceMismatch && (
             <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-[11px] text-amber-100 font-mono leading-5 mt-3">
               <strong className="block text-amber-200 mb-1">

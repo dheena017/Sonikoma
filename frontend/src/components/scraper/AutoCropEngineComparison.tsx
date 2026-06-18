@@ -20,6 +20,7 @@ export function AutoCropEngineComparison({
   cannyLow,
   cannyHigh,
   closeKernel,
+  autoSplit = true,
 }: {
   firstImageUrl: string | null;
   sensitivity: number;
@@ -29,11 +30,13 @@ export function AutoCropEngineComparison({
   cannyLow: number;
   cannyHigh: number;
   closeKernel: number;
+  autoSplit?: boolean;
 }) {
   const [activeEngine, setActiveEngine] = useState<"opencv" | "gemini">(
     "opencv"
   );
   const [opencvPanels, setOpencvPanels] = useState<any[]>([]);
+  const [geminiPanels, setGeminiPanels] = useState<any[]>([]);
   const [isDetecting, setIsDetecting] = useState(false);
   const [ocrActive, setOcrActive] = useState(false);
   const [ocrResults, setOcrResults] = useState<any[]>([]);
@@ -48,39 +51,85 @@ export function AutoCropEngineComparison({
     setIsDetecting(true);
     const start = performance.now();
     try {
-      const resp = await fetch(firstImageUrl);
-      const blob = await resp.blob();
-      const reader = new FileReader();
-      const b64 = await new Promise<string>((resolve) => {
-        reader.onloadend = () =>
-          resolve((reader.result as string).split(",")[1]);
-        reader.readAsDataURL(blob);
-      });
-
-      const detectResp = await fetch("/api/py/panels/detect-b64", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          image_base64: b64,
-          sensitivity,
-          background_mode: bgMode,
-          min_width_pct: 0.15,
-          min_height_px: 60,
-          merge_threshold: overlapMerge,
-          aspect_ratio: aspectRatio,
-          canny_low: cannyLow,
-          canny_high: cannyHigh,
-          close_kernel_size: closeKernel,
-        }),
-      });
-
-      const data = await detectResp.json();
-      if (data.success) {
-        setOpencvPanels(data.panels);
-        setPerfMetrics({
-          duration: Math.round(performance.now() - start),
-          count: data.panels.length,
+      if (activeEngine === "opencv") {
+        const resp = await fetch(firstImageUrl);
+        const blob = await resp.blob();
+        const reader = new FileReader();
+        const b64 = await new Promise<string>((resolve) => {
+          reader.onloadend = () =>
+            resolve((reader.result as string).split(",")[1]);
+          reader.readAsDataURL(blob);
         });
+
+        const detectResp = await fetch("/api/py/panels/detect-b64", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            image_base64: b64,
+            sensitivity,
+            background_mode: bgMode,
+            min_width_pct: 0.15,
+            min_height_px: 60,
+            merge_threshold: overlapMerge,
+            aspect_ratio: aspectRatio,
+            canny_low: cannyLow,
+            canny_high: cannyHigh,
+            close_kernel_size: closeKernel,
+            auto_split: autoSplit,
+          }),
+        });
+
+        const data = await detectResp.json();
+        if (data.success) {
+          const mapped = data.panels.map((p: any) => ({
+            ...p,
+            top_pct: p.cropTop / 100,
+            left_pct: p.cropLeft / 100,
+            right_pct: p.cropRight / 100,
+            bottom_pct: p.cropBottom / 100,
+          }));
+          setOpencvPanels(mapped);
+          setPerfMetrics({
+            duration: Math.round(performance.now() - start),
+            count: data.panels.length,
+          });
+        }
+      } else {
+        const detectResp = await fetch("/api/detect-panels", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            url: firstImageUrl,
+            sensitivity,
+            backgroundColorMode: bgMode,
+            aspectRatio: aspectRatio,
+            minAreaPct: 0.15,
+            mergeThreshold: overlapMerge,
+            strategy: "balanced",
+            model: "gemini-2.5-flash",
+            cannyLow,
+            cannyHigh,
+            closeKernelSize: closeKernel,
+            minHeightPx: 60,
+            autoSplit,
+          }),
+        });
+
+        const data = await detectResp.json();
+        if (data.success && Array.isArray(data.panels)) {
+          const mapped = data.panels.map((p: any) => ({
+            ...p,
+            top_pct: p.cropTop / 100,
+            left_pct: p.cropLeft / 100,
+            right_pct: p.cropRight / 100,
+            bottom_pct: p.cropBottom / 100,
+          }));
+          setGeminiPanels(mapped);
+          setPerfMetrics({
+            duration: Math.round(performance.now() - start),
+            count: data.panels.length,
+          });
+        }
       }
     } catch (err) {
       console.error("Preview failed:", err);
@@ -164,7 +213,7 @@ export function AutoCropEngineComparison({
           <button
             onClick={runPreview}
             disabled={
-              isDetecting || !firstImageUrl || activeEngine === "gemini"
+              isDetecting || !firstImageUrl
             }
             className="px-2 py-1 rounded bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-[8px] font-bold uppercase hover:bg-cyan-500/20 disabled:opacity-20"
           >
@@ -237,13 +286,28 @@ export function AutoCropEngineComparison({
               )}
             </>
           ) : (
-            <div className="absolute inset-0 border-2 border-indigo-500/40 bg-indigo-500/5 rounded flex items-center justify-center">
-              <div className="w-3/4 h-3/4 border border-indigo-400 bg-indigo-400/10 rounded flex items-center justify-center p-4 text-center">
-                <span className="text-[9px] font-mono font-bold text-indigo-300 animate-pulse uppercase tracking-widest">
-                  GEMINI_SEMANTIC_ENGINE
-                </span>
-              </div>
-            </div>
+            <>
+              {geminiPanels.length > 0 ? (
+                geminiPanels.map((p, i) => (
+                  <div
+                    key={i}
+                    className="absolute border border-indigo-400 bg-indigo-400/10 shadow-[0_0_8px_rgba(99,102,241,0.2)]"
+                    style={{
+                      top: `${p.top_pct * 100}%`,
+                      left: `${p.left_pct * 100}%`,
+                      width: `${(1 - p.left_pct - p.right_pct) * 100}%`,
+                      height: `${(1 - p.top_pct - p.bottom_pct) * 100}%`,
+                    }}
+                  />
+                ))
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 opacity-40">
+                  <span className="text-[8px] font-mono text-indigo-300 uppercase tracking-widest">
+                    RUN SCAN TO SEE SEMANTIC PANELS
+                  </span>
+                </div>
+              )}
+            </>
           )}
 
           {/* Real OCR Overlay */}

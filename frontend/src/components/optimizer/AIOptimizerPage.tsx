@@ -13,6 +13,7 @@ import SeoOptimizationTab from "./SeoOptimizationTab.js";
 import ShortsScriptTab from "./ShortsScriptTab.js";
 import SoundOutroTab from "./SoundOutroTab.js";
 import AdPlacementTab from "./AdPlacementTab.js";
+import EngagementTab from "./EngagementTab.js";
 
 interface AIOptimizerPageProps {
   panels: GeneratedPanel[];
@@ -30,7 +31,7 @@ export default function AIOptimizerPage({
   scrapedGenre,
 }: AIOptimizerPageProps) {
   const [activeTab, setActiveTab] = useState<
-    "seo" | "shorts" | "sound" | "ads"
+    "seo" | "shorts" | "sound" | "ads" | "engagement"
   >("seo");
 
   // Compile overall storyboard details for prompts
@@ -123,6 +124,16 @@ export default function AIOptimizerPage({
         >
           ✦ Ad Placements
         </button>
+        <button
+          onClick={() => setActiveTab("engagement")}
+          className={`px-4 py-2 text-xs font-bold transition-all border-b-2 cursor-pointer whitespace-nowrap ${
+            activeTab === "engagement"
+              ? "border-purple-500 text-white"
+              : "border-transparent text-neutral-400 hover:text-neutral-250"
+          }`}
+        >
+          ✦ Engagement & Outros
+        </button>
       </div>
 
       {/* ACTIVE TAB VIEWS */}
@@ -145,6 +156,9 @@ export default function AIOptimizerPage({
         )}
         {activeTab === "ads" && (
           <AdPlacementTab compiledScript={compiledScript} />
+        )}
+        {activeTab === "engagement" && (
+          <EngagementTab title={title} storyboardSummary={storyboardSummary} />
         )}
       </div>
     </div>

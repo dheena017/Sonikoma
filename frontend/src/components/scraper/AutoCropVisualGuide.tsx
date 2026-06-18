@@ -83,6 +83,7 @@ export function AutoCropVisualGuide({
           canny_low: cannyLow,
           canny_high: cannyHigh,
           close_kernel_size: closeKernel,
+          auto_split: autoSplit,
         }),
       });
 

@@ -22,12 +22,16 @@ ALGORITHM = "HS256"
 def get_optional_user_id(request: Request) -> Optional[str]:
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
+        logger.info("[Auth] No Authorization header or Bearer prefix found.")
         return None
     try:
         token = auth_header.split(" ")[1]
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return payload.get("sub")
-    except Exception:
+        user_id = payload.get("sub")
+        logger.info(f"[Auth] Successfully decoded token for user_id: {user_id}")
+        return user_id
+    except Exception as e:
+        logger.warning(f"[Auth] Failed to decode JWT token: {e}", exc_info=True)
         return None
 
 from utils.url_utils import extract_webtoon_url, parse_webtoon_url
@@ -48,6 +52,12 @@ class ScrapeImagesRequest(BaseModel):
     source: Optional[str] = None
     bypass_cache: Optional[bool] = True
     smart_slice: Optional[bool] = False # New option to return auto-cropped panels instead of a single strip
+    title: Optional[str] = None
+    episode: Optional[str] = None
+    genre: Optional[str] = None
+    author: Optional[str] = None
+    cover_image: Optional[str] = None
+    synopsis: Optional[str] = None
 
 class GenerateStoryboardRequest(BaseModel):
     url: str
@@ -57,6 +67,12 @@ class GenerateStoryboardRequest(BaseModel):
     model: Optional[str] = "gemini-2.5-flash"
     bypass_cache: Optional[bool] = True
     narrationStyle: Optional[str] = "long"  # 'long' = detailed YouTube narration, 'short' = quick subtitles
+    title: Optional[str] = None
+    episode: Optional[str] = None
+    genre: Optional[str] = None
+    author: Optional[str] = None
+    cover_image: Optional[str] = None
+    synopsis: Optional[str] = None
 
 class ProcessUrlRequest(BaseModel):
     url: str
@@ -69,6 +85,18 @@ async def scrape_images(body: ScrapeImagesRequest):
     try:
         normalized_url = extract_webtoon_url(body.url)
         parsed = parse_webtoon_url(normalized_url)
+        if body.title:
+            parsed["title"] = body.title
+        if body.episode:
+            parsed["episode"] = body.episode
+        if body.genre:
+            parsed["genre"] = body.genre
+        if body.author:
+            parsed["author"] = body.author
+        if body.cover_image:
+            parsed["cover_image"] = body.cover_image
+        if body.synopsis:
+            parsed["synopsis"] = body.synopsis
         
         logger.info(f"[Scraper] Scrape request received - source: {body.source or 'unknown'}, url: {normalized_url}")
         
@@ -181,6 +209,18 @@ async def scrape_images(body: ScrapeImagesRequest):
 async def generate_storyboard(request: Request, body: GenerateStoryboardRequest):
     try:
         parsed = parse_webtoon_url(body.url)
+        if body.title:
+            parsed["title"] = body.title
+        if body.episode:
+            parsed["episode"] = body.episode
+        if body.genre:
+            parsed["genre"] = body.genre
+        if body.author:
+            parsed["author"] = body.author
+        if body.cover_image:
+            parsed["cover_image"] = body.cover_image
+        if body.synopsis:
+            parsed["synopsis"] = body.synopsis
         project_id = body.episode_id or generate_project_id()
         
         logger.info(f"[Model] Processing storyboard request for url: \"{body.url}\". Parsed Title: \"{parsed['title']}\", Genre: \"{parsed['genre']}\"")
@@ -230,6 +270,9 @@ async def generate_storyboard(request: Request, body: GenerateStoryboardRequest)
                         "title": parsed["title"],
                         "genre": parsed["genre"],
                         "episode": parsed["episode"],
+                        "author": parsed.get("author"),
+                        "cover_image": parsed.get("cover_image"),
+                        "synopsis": parsed.get("synopsis"),
                         "status": "pending",
                         "panels_count": len(resolved_panels),
                         "video_url": None,
@@ -286,6 +329,9 @@ async def generate_storyboard(request: Request, body: GenerateStoryboardRequest)
                     "title": parsed["title"],
                     "genre": parsed["genre"],
                     "episode": parsed["episode"],
+                    "author": parsed.get("author"),
+                    "cover_image": parsed.get("cover_image"),
+                    "synopsis": parsed.get("synopsis"),
                     "status": "pending",
                     "panels_count": len(response_panels),
                     "video_url": None,

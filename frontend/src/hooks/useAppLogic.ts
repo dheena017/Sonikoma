@@ -156,6 +156,25 @@ export function useAppLogic() {
     toomics: ["toomics.com"],
     linewebtoon: ["webtoon.com"],
     asurascans: ["asurascans.com"],
+    manhuato: ["manhuato.com"],
+    reaperscans: ["reaperscans.com"],
+    flamecomics: ["flamecomics.com", "flamescans.org"],
+    voidscans: ["voidscans.com", "void-scans.com"],
+    luminousscans: ["luminousscans.com"],
+    tapas: ["tapas.io"],
+    tappytoon: ["tappytoon.com"],
+    copincomics: ["copincomics.com"],
+    pocketcomics: ["pocketcomics.com"],
+    lezhin: ["lezhin.com", "lezhinus.com"],
+    bilibilicomics: ["bilibilicomics.com"],
+    mangatoon: ["mangatoon.mobi"],
+    webnovel: ["webnovel.com"],
+    manhuaplus: ["manhuaplus.com"],
+    manhwaclan: ["manhwaclan.com"],
+    "1stkissmanga": ["1stkissmanga.io", "1stkissmanga.com"],
+    manganato: ["manganato.com", "readmanganato.com"],
+    mangakakalot: ["mangakakalot.com"],
+    batoto: ["bato.to"],
     custom: [],
   };
 
@@ -265,6 +284,15 @@ export function useAppLogic() {
       });
 
       try {
+        const formattedEpisode = (() => {
+          const num = state.chapterNumber.trim();
+          const name = state.chapterTitle.trim();
+          if (num && name) return `Chapter ${num} - ${name}`;
+          if (num) return `Chapter ${num}`;
+          if (name) return name;
+          return "";
+        })();
+
         const res = await state.fetchWithInterceptor("/api/scrape-images", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -273,6 +301,12 @@ export function useAppLogic() {
             model: selectedModel,
             source: selectedSource,
             bypass_cache: false,
+            title: state.seriesTitle ? state.seriesTitle.trim() : undefined,
+            episode: formattedEpisode || undefined,
+            genre: state.scrapedGenre ? state.scrapedGenre.trim() : undefined,
+            author: state.seriesAuthor ? state.seriesAuthor.trim() : undefined,
+            cover_image: state.seriesCoverImage ? state.seriesCoverImage.trim() : undefined,
+            synopsis: state.seriesSynopsis ? state.seriesSynopsis.trim() : undefined,
           }),
         });
         const data = await res.json();

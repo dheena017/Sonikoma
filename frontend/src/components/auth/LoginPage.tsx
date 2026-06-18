@@ -230,7 +230,7 @@ export default function LoginPage({
   };
 
   const handleQuickFill = () => {
-    setEmail("admin@anivox.com");
+    setEmail("creator@anivox.com");
     setPassword("password123");
     setRememberMe(true);
     if (error) setError(null);

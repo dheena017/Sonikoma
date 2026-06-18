@@ -43,6 +43,7 @@ class DetectPanelsBase64Request(BaseModel):
     canny_low: int  = Field(20, ge=0, le=255)
     canny_high: int = Field(100, ge=0, le=255)
     close_kernel_size: int = Field(15, ge=1, le=99)
+    auto_split: bool = Field(True, description="Automatically split tall strips at gutters")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -60,6 +61,7 @@ def _detect(image_path: str, params: dict) -> List[dict]:
         canny_low=params["canny_low"],
         canny_high=params["canny_high"],
         close_kernel_size=params["close_kernel_size"],
+        auto_split=params.get("auto_split", True),
     )
 
 
@@ -81,6 +83,7 @@ async def detect_panels_upload(
     canny_low: int           = Form(20),
     canny_high: int          = Form(100),
     close_kernel_size: int   = Form(15),
+    auto_split: bool         = Form(True),
 ):
     """
     Runs OpenCV-based contour detection on the uploaded image and returns
@@ -102,6 +105,7 @@ async def detect_panels_upload(
         canny_low=canny_low,
         canny_high=canny_high,
         close_kernel_size=close_kernel_size,
+        auto_split=auto_split,
     )
 
     try:

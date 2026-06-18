@@ -292,8 +292,11 @@ def crop_auto_borders(
         # Threshold
         threshold_val = sensitivity if sensitivity is not None else (50.0 if tighter else 25.0)
 
-        bg = Image.new(img.mode, img.size, bg_color)
-        diff = ImageChops.difference(img, bg).convert('L')
+        # To avoid ValueError: color must be a 4-tuple for RGBA or mode mismatch in ImageChops.difference,
+        # we calculate diff using RGB mode copies.
+        img_rgb = img.convert('RGB')
+        bg_rgb = Image.new('RGB', img.size, bg_color)
+        diff = ImageChops.difference(img_rgb, bg_rgb).convert('L')
         
         diff = diff.point(lambda p: 255 if p > threshold_val else 0)
         bbox = diff.getbbox()
@@ -327,7 +330,19 @@ def crop_auto_borders(
                     e_t += extra // 2
                     e_b += extra - (extra // 2)
 
-        extended = ImageOps.expand(trimmed, border=(e_l, e_t, e_r, e_b), fill=bg_color)
+        # Resolve background color matching the image mode to prevent expand ValueError
+        if img.mode == 'RGBA':
+            bg_color_mode = bg_color + (255,)
+        elif img.mode == 'LA':
+            lum = int(0.299 * bg_color[0] + 0.587 * bg_color[1] + 0.114 * bg_color[2])
+            bg_color_mode = (lum, 255)
+        elif img.mode == 'L':
+            lum = int(0.299 * bg_color[0] + 0.587 * bg_color[1] + 0.114 * bg_color[2])
+            bg_color_mode = lum
+        else:
+            bg_color_mode = bg_color
+
+        extended = ImageOps.expand(trimmed, border=(e_l, e_t, e_r, e_b), fill=bg_color_mode)
         
         out = io.BytesIO()
         fmt = output_format.upper()

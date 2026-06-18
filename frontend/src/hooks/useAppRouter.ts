@@ -150,6 +150,7 @@ export function useAppRouter({
             path === "/notifications" ||
             path === "/auto-crop" ||
             path === "/bubble-cleaner" ||
+            path === "/project-details" ||
             path.startsWith("/editor");
 
           if (isProtectedRoute) {
@@ -188,7 +189,8 @@ export function useAppRouter({
         path === "/ai-voice" ||
         path === "/ai-analytics" ||
         path === "/profile" ||
-        path === "/notifications"
+        path === "/notifications" ||
+        path === "/project-details"
       ) {
         setShowAutoCropModal(false);
         setShowBubbleModal(false);

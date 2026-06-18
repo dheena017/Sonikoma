@@ -3,6 +3,9 @@ import {
   History,
   LayoutGrid,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  BookOpen,
   Search,
   Trash2,
   SlidersHorizontal,
@@ -16,7 +19,24 @@ import {
   Video,
   ExternalLink,
   Calendar,
+  Eye,
 } from "lucide-react";
+import { getSourceName } from "../../utils";
+
+const parseEpisodeString = (epStr: string) => {
+  if (!epStr) return { numberStr: "Chapter 1", titleStr: "" };
+  const match = epStr.match(/^(Chapter\s+\d+)(?:\s*[-:]\s*(.*))?$/i);
+  if (match) {
+    return {
+      numberStr: match[1],
+      titleStr: match[2] ? match[2].trim() : ""
+    };
+  }
+  return {
+    numberStr: epStr,
+    titleStr: ""
+  };
+};
 
 interface ProfileProjectsTabProps {
   projects: any[];
@@ -38,12 +58,15 @@ export default function ProfileProjectsTab({
     "date-desc" | "date-asc" | "title-asc" | "title-desc"
   >("date-desc");
   const [viewMode, setViewMode] = React.useState<"list" | "grid">("list");
-  const [selectedProjectDetail, setSelectedProjectDetail] = React.useState<
-    any | null
-  >(null);
-  const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
-  const [isLoadingDetail, setIsLoadingDetail] = React.useState(false);
-  const [drawerError, setDrawerError] = React.useState<string | null>(null);
+  const [expandedSeries, setExpandedSeries] = React.useState<Record<string, boolean>>({});
+
+  const toggleSeries = (title: string) => {
+    setExpandedSeries((prev) => ({
+      ...prev,
+      [title]: !prev[title]
+    }));
+  };
+
 
   // Sort and Filter project entries
   const sortedAndFilteredProjects = React.useMemo(() => {
@@ -82,6 +105,25 @@ export default function ProfileProjectsTab({
       return 0;
     });
   }, [projects, searchQuery, statusFilter, sortBy]);
+
+  // Group the sorted and filtered projects by series title
+  const groupedProjects = React.useMemo(() => {
+    const groups: Record<string, { title: string; genre: string; chapters: any[] }> = {};
+    
+    sortedAndFilteredProjects.forEach((project) => {
+      const seriesTitle = (project.title || "Untitled Comic").replace(/\s+[a-fA-F0-9]{8}$/, "");
+      if (!groups[seriesTitle]) {
+        groups[seriesTitle] = {
+          title: seriesTitle,
+          genre: project.genre || "general",
+          chapters: []
+        };
+      }
+      groups[seriesTitle].chapters.push(project);
+    });
+    
+    return Object.values(groups);
+  }, [sortedAndFilteredProjects]);
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) =>
@@ -136,31 +178,8 @@ export default function ProfileProjectsTab({
     downloadAnchor.remove();
   };
 
-  const handleViewDetails = async (projectId: string) => {
-    setIsLoadingDetail(true);
-    setDrawerError(null);
-    setIsDrawerOpen(true);
-    try {
-      const token = localStorage.getItem("anivox_token");
-      const headers: HeadersInit = {};
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-      const res = await fetch(`/api/projects/${projectId}`, { headers });
-      if (!res.ok) {
-        throw new Error(`Failed to fetch project details (HTTP ${res.status})`);
-      }
-      const data = await res.json();
-      if (data.success) {
-        setSelectedProjectDetail(data);
-      } else {
-        throw new Error(data.message || "Failed to load project details");
-      }
-    } catch (err: any) {
-      setDrawerError(err.message || "An unexpected error occurred");
-    } finally {
-      setIsLoadingDetail(false);
-    }
+  const handleViewDetails = (projectId: string) => {
+    (window as any).navigateTo?.(`/project-details?id=${projectId}`);
   };
 
   // Calculate statistics
@@ -406,329 +425,238 @@ export default function ProfileProjectsTab({
           </button>
         </div>
       ) : viewMode === "list" ? (
-        <div className="space-y-3">
-          {sortedAndFilteredProjects.map((project, idx) => {
-            const pId = project.project_id || idx.toString();
-            const isChecked = selectedIds.includes(pId);
+        <div className="space-y-4">
+          {groupedProjects.map((group) => {
+            const isExpanded = !!expandedSeries[group.title];
+            const chapterCount = group.chapters.length;
 
             return (
               <div
-                key={pId}
-                className={`group border p-4 rounded-2xl flex items-center justify-between transition-all cursor-pointer ${
-                  isChecked
-                    ? "bg-purple-900/10 border-purple-500/30"
-                    : "bg-neutral-900/40 hover:bg-neutral-800/60 border-white/5"
-                }`}
-                onClick={() => handleViewDetails(pId)}
+                key={group.title}
+                className="bg-[#0b0b0e]/80 border border-white/5 rounded-3xl overflow-hidden transition-all shadow-xl"
               >
-                <div className="flex items-center gap-4">
-                  {/* Select Checkbox indicator */}
-                  <div
-                    className="text-neutral-600 hover:text-purple-400 transition-colors shrink-0 p-1"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleSelect(pId);
-                    }}
-                  >
-                    {isChecked ? (
-                      <CheckSquare className="w-4 h-4 text-purple-400" />
+                {/* Series Header Row */}
+                <div
+                  onClick={() => toggleSeries(group.title)}
+                  className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors select-none"
+                >
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="w-12 h-12 rounded-2xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center shrink-0">
+                      <BookOpen className="w-5 h-5 text-purple-400" />
+                    </div>
+                    <div className="text-left">
+                      <h4 className="text-base font-black text-white leading-tight">
+                        {group.title}
+                      </h4>
+                      <p className="text-[10px] text-neutral-500 font-mono uppercase tracking-widest mt-1">
+                        {getSourceName(group.chapters[0]?.url)} • {group.genre} • {chapterCount} {chapterCount === 1 ? "Chapter" : "Chapters"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] px-2.5 py-1 rounded-xl bg-neutral-900 border border-white/5 text-neutral-400 font-bold font-mono">
+                      {chapterCount} {chapterCount === 1 ? "CH" : "CHS"}
+                    </span>
+                    {isExpanded ? (
+                      <ChevronUp className="w-5 h-5 text-neutral-400" />
                     ) : (
-                      <Square className="w-4 h-4 text-neutral-700" />
+                      <ChevronDown className="w-5 h-5 text-neutral-400" />
                     )}
-                  </div>
-
-                  <div className="w-12 h-12 rounded-xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center shrink-0">
-                    <LayoutGrid className="w-6 h-6 text-purple-400" />
-                  </div>
-
-                  <div className="text-left">
-                    <h4 className="text-sm font-bold text-white group-hover:text-purple-400 transition-colors">
-                      {project.title || "Untitled Project"}
-                    </h4>
-                    <p className="text-[10px] text-neutral-500 font-mono uppercase tracking-widest mt-0.5">
-                      {project.status || "Completed"} •{" "}
-                      {project.created_at || "2 hours ago"}
-                    </p>
                   </div>
                 </div>
 
-                <ChevronRight className="w-4 h-4 text-neutral-600 group-hover:text-white transition-colors" />
+                {/* Chapters list under Series */}
+                {isExpanded && (
+                  <div className="border-t border-white/5 bg-black/20 p-4 space-y-2">
+                    {group.chapters.map((chapter, cIdx) => {
+                      const pId = chapter.project_id;
+                      const isChecked = selectedIds.includes(pId);
+                      const isChCompleted = (chapter.status || "").toLowerCase() === "completed";
+                      const { numberStr, titleStr } = parseEpisodeString(chapter.episode || `Chapter #${cIdx + 1}`);
+
+                      return (
+                        <div
+                          key={pId}
+                          className={`p-3 rounded-2xl border flex items-center justify-between transition-all hover:bg-neutral-955/60 ${
+                            isChecked
+                              ? "bg-purple-900/10 border-purple-500/20"
+                              : "bg-neutral-900/30 border-white/5"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            {/* Checkbox */}
+                            <div
+                              className="text-neutral-600 hover:text-purple-400 transition-colors shrink-0 p-1 cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleSelect(pId);
+                              }}
+                            >
+                              {isChecked ? (
+                                <CheckSquare className="w-4 h-4 text-purple-400" />
+                              ) : (
+                                <Square className="w-4 h-4 text-neutral-700" />
+                              )}
+                            </div>
+
+                            <div className="text-left">
+                              <div className="flex flex-wrap items-baseline gap-1.5">
+                                <span className="text-xs font-bold text-white leading-tight">
+                                  {numberStr}
+                                </span>
+                                {titleStr && (
+                                  <span className="text-[10px] text-neutral-400 font-semibold leading-tight">
+                                    • {titleStr}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span
+                                  className={`text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full ${
+                                    isChCompleted
+                                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                      : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                  }`}
+                                >
+                                  {chapter.status || "Pending"}
+                                </span>
+                                <span className="text-[9px] text-neutral-500 font-semibold font-mono">
+                                  {chapter.created_at || "Just now"} • via {getSourceName(chapter.url)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            <span className="text-[10px] text-neutral-500 font-bold">
+                              {chapter.panels_count || 0} panels
+                            </span>
+                            <button
+                              onClick={() => handleViewDetails(pId)}
+                              className="px-3.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 border border-white/5 text-purple-400 hover:text-purple-300 rounded-xl text-[10px] font-extrabold transition-all cursor-pointer flex items-center gap-1 active:scale-95"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              <span>View Details</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             );
           })}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {sortedAndFilteredProjects.map((project, idx) => {
-            const pId = project.project_id || idx.toString();
-            const isChecked = selectedIds.includes(pId);
-            const isCompleted =
-              (project.status || "").toLowerCase() === "completed";
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {groupedProjects.map((group) => {
+            const isExpanded = !!expandedSeries[group.title];
+            const chapterCount = group.chapters.length;
 
             return (
               <div
-                key={pId}
-                className={`group border p-4 rounded-2xl flex flex-col justify-between transition-all cursor-pointer relative ${
-                  isChecked
-                    ? "bg-purple-900/10 border-purple-500/30"
-                    : "bg-neutral-900/40 hover:bg-neutral-800/60 border-white/5"
-                }`}
-                onClick={() => handleViewDetails(pId)}
+                key={group.title}
+                className="bg-[#0b0b0e]/80 border border-white/5 rounded-3xl overflow-hidden transition-all shadow-xl flex flex-col justify-between"
               >
-                {/* Checkbox placement at top-right of grid card */}
-                <div
-                  className="absolute top-3 right-3 text-neutral-600 hover:text-purple-400 transition-colors p-1"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleSelect(pId);
-                  }}
-                >
-                  {isChecked ? (
-                    <CheckSquare className="w-4 h-4 text-purple-400" />
-                  ) : (
-                    <Square className="w-4 h-4 text-neutral-700" />
-                  )}
-                </div>
-
-                <div className="space-y-3 text-left">
-                  <div className="w-10 h-10 rounded-xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center shrink-0">
-                    {isCompleted ? (
-                      <Video className="w-5 h-5 text-purple-400" />
-                    ) : (
-                      <Loader2 className="w-5 h-5 text-amber-500 animate-spin" />
-                    )}
+                {/* Series Content */}
+                <div className="p-5 space-y-4">
+                  <div className="flex items-start justify-between">
+                    <div className="w-10 h-10 rounded-2xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center shrink-0">
+                      <BookOpen className="w-5 h-5 text-purple-400" />
+                    </div>
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 font-bold uppercase tracking-wider">
+                      {group.genre}
+                    </span>
                   </div>
 
-                  <div>
-                    <h4 className="text-xs font-bold text-white group-hover:text-purple-400 transition-colors line-clamp-2 pr-4">
-                      {project.title || "Untitled Project"}
+                  <div className="text-left space-y-1">
+                    <h4 className="text-base font-black text-white line-clamp-2 leading-tight">
+                      {group.title}
                     </h4>
-                    <p className="text-[9px] text-neutral-500 font-mono uppercase tracking-widest mt-1">
-                      {project.created_at || "Just now"}
+                    <p className="text-[10px] text-neutral-500 font-semibold font-mono">
+                      {getSourceName(group.chapters[0]?.url)} • {chapterCount} {chapterCount === 1 ? "Chapter" : "Chapters"}
                     </p>
                   </div>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
-                  <span
-                    className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                      isCompleted
-                        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                        : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                    }`}
+                {/* Toggler Bar */}
+                <div className="border-t border-white/5 bg-black/10">
+                  <button
+                    onClick={() => toggleSeries(group.title)}
+                    className="w-full py-3 px-5 flex items-center justify-between text-xs font-bold text-neutral-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer select-none"
                   >
-                    {project.status || "Pending"}
-                  </span>
-                  <span className="text-[9px] text-neutral-500 font-bold">
-                    {project.panels_count || 0} panels
-                  </span>
+                    <span>{isExpanded ? "Hide Chapters" : "Show Chapters"}</span>
+                    {isExpanded ? (
+                      <ChevronUp className="w-4 h-4" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4" />
+                    )}
+                  </button>
+
+                  {/* Expanded chapters inside grid card */}
+                  {isExpanded && (
+                    <div className="p-4 bg-black/35 border-t border-white/5 space-y-2 max-h-[260px] overflow-y-auto pr-1">
+                      {group.chapters.map((chapter, cIdx) => {
+                        const pId = chapter.project_id;
+                        const isChecked = selectedIds.includes(pId);
+                        const { numberStr, titleStr } = parseEpisodeString(chapter.episode || `Chapter #${cIdx + 1}`);
+
+                        return (
+                          <div
+                            key={pId}
+                            className={`p-2.5 rounded-xl border flex items-center justify-between text-left transition-all ${
+                              isChecked
+                                ? "bg-purple-900/10 border-purple-500/20"
+                                : "bg-neutral-900/30 border-white/5"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              {/* Checkbox */}
+                              <div
+                                className="text-neutral-600 hover:text-purple-400 transition-colors shrink-0 p-0.5 cursor-pointer"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleSelect(pId);
+                                }}
+                              >
+                                {isChecked ? (
+                                  <CheckSquare className="w-3.5 h-3.5 text-purple-400" />
+                                ) : (
+                                  <Square className="w-3.5 h-3.5 text-neutral-700" />
+                                )}
+                              </div>
+                              <div>
+                                <p className="text-[11px] font-bold text-white leading-tight">
+                                  {numberStr}
+                                </p>
+                                {titleStr && (
+                                  <p className="text-[9.5px] text-neutral-400 font-medium truncate max-w-[125px] mt-0.5" title={titleStr}>
+                                    {titleStr}
+                                  </p>
+                                )}
+                                <span className="text-[8px] text-neutral-500 font-semibold font-mono mt-0.5 block">
+                                  {chapter.created_at || "Just now"} • via {getSourceName(chapter.url)}
+                                </span>
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={() => handleViewDetails(pId)}
+                              className="p-1 bg-neutral-900 hover:bg-neutral-800 border border-white/5 rounded-lg text-purple-400 hover:text-purple-300 transition-all cursor-pointer"
+                              title="View details"
+                            >
+                              <ChevronRight className="w-4 h-4" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
             );
           })}
-        </div>
-      )}
-
-      {/* Inspect Side Drawer Panel */}
-      {isDrawerOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden text-left">
-          {/* Backdrop overlay */}
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
-            onClick={() => setIsDrawerOpen(false)}
-          />
-
-          <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
-            <div className="w-screen max-w-md bg-[#0d0d12]/95 border-l border-white/10 shadow-2xl relative flex flex-col transition-all duration-300">
-              {/* Header */}
-              <div className="p-6 border-b border-white/10 flex items-center justify-between bg-black/20">
-                <div className="space-y-1">
-                  <h3 className="text-sm font-black text-purple-400 uppercase tracking-widest">
-                    Project Details
-                  </h3>
-                  <h2 className="text-base font-extrabold text-white line-clamp-1">
-                    {selectedProjectDetail?.project?.title || "Loading..."}
-                  </h2>
-                </div>
-                <button
-                  onClick={() => setIsDrawerOpen(false)}
-                  className="p-1.5 rounded-lg bg-neutral-900 border border-white/5 text-neutral-400 hover:text-white hover:border-white/10 transition-all cursor-pointer active:scale-95"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Scrollable Content Body */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                {isLoadingDetail ? (
-                  <div className="flex flex-col items-center justify-center py-20 space-y-3">
-                    <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
-                    <p className="text-xs text-neutral-500 font-semibold">
-                      Retrieving storyboard components...
-                    </p>
-                  </div>
-                ) : drawerError ? (
-                  <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-center space-y-2">
-                    <p className="text-xs text-rose-400 font-bold">
-                      Failed to load details
-                    </p>
-                    <p className="text-[10px] text-neutral-500 font-mono">
-                      {drawerError}
-                    </p>
-                  </div>
-                ) : selectedProjectDetail ? (
-                  <>
-                    {/* Metadata Card */}
-                    <div className="bg-black/30 border border-white/5 rounded-2xl p-4 space-y-3">
-                      <div className="flex items-center justify-between text-xs border-b border-white/5 pb-2">
-                        <span className="text-neutral-500 font-bold">
-                          Status:
-                        </span>
-                        <span
-                          className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                            (
-                              selectedProjectDetail.project?.status || ""
-                            ).toLowerCase() === "completed"
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                              : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                          }`}
-                        >
-                          {selectedProjectDetail.project?.status || "Completed"}
-                        </span>
-                      </div>
-
-                      {selectedProjectDetail.project?.genre && (
-                        <div className="flex items-center justify-between text-xs border-b border-white/5 pb-2">
-                          <span className="text-neutral-500 font-bold">
-                            Genre:
-                          </span>
-                          <span className="text-neutral-300 font-semibold">
-                            {selectedProjectDetail.project.genre}
-                          </span>
-                        </div>
-                      )}
-
-                      {selectedProjectDetail.project?.episode && (
-                        <div className="flex items-center justify-between text-xs border-b border-white/5 pb-2">
-                          <span className="text-neutral-500 font-bold">
-                            Episode:
-                          </span>
-                          <span className="text-neutral-300 font-mono font-semibold">
-                            {selectedProjectDetail.project.episode}
-                          </span>
-                        </div>
-                      )}
-
-                      {selectedProjectDetail.project?.created_at && (
-                        <div className="flex items-center justify-between text-xs border-b border-white/5 pb-2">
-                          <span className="text-neutral-500 font-bold">
-                            Created At:
-                          </span>
-                          <span className="text-neutral-300 font-semibold">
-                            {selectedProjectDetail.project.created_at}
-                          </span>
-                        </div>
-                      )}
-
-                      {selectedProjectDetail.project?.url && (
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-neutral-500 font-bold">
-                            Source URL:
-                          </span>
-                          <a
-                            href={selectedProjectDetail.project.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-purple-400 hover:underline flex items-center gap-1 font-semibold truncate max-w-[200px]"
-                          >
-                            <ExternalLink className="w-3 h-3" />
-                            View Source
-                          </a>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* HTML5 Video Preview */}
-                    {selectedProjectDetail.project?.video_url && (
-                      <div className="space-y-2">
-                        <h4 className="text-xs font-black uppercase text-neutral-400 tracking-wider flex items-center gap-1.5">
-                          <Play className="w-3.5 h-3.5 text-purple-400" />
-                          Video Preview
-                        </h4>
-                        <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 bg-black group">
-                          <video
-                            src={selectedProjectDetail.project.video_url}
-                            controls
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Segmented Panels */}
-                    <div className="space-y-3">
-                      <h4 className="text-xs font-black uppercase text-neutral-400 tracking-wider flex items-center justify-between">
-                        <span>
-                          Storyboard Frames (
-                          {selectedProjectDetail.panels?.length || 0})
-                        </span>
-                      </h4>
-
-                      {!selectedProjectDetail.panels ||
-                      selectedProjectDetail.panels.length === 0 ? (
-                        <p className="text-xs text-neutral-600 font-semibold italic text-center py-4 bg-black/10 border border-dashed border-white/5 rounded-xl">
-                          No panels segmented for this project yet.
-                        </p>
-                      ) : (
-                        <div className="grid grid-cols-2 gap-3 max-h-[360px] overflow-y-auto pr-1 select-none">
-                          {selectedProjectDetail.panels.map(
-                            (panel: any, pIdx: number) => (
-                              <div
-                                key={pIdx}
-                                className="bg-black/30 border border-white/5 hover:border-purple-500/20 rounded-xl p-2.5 transition-all space-y-2"
-                              >
-                                <div className="aspect-square rounded-lg overflow-hidden border border-white/5 bg-black/60">
-                                  <img
-                                    src={panel.image_url}
-                                    alt={`Panel ${pIdx + 1}`}
-                                    className="w-full h-full object-cover"
-                                    loading="lazy"
-                                  />
-                                </div>
-                                <div className="space-y-1">
-                                  <div className="text-[8px] font-black uppercase text-neutral-500 font-mono">
-                                    Frame {pIdx + 1}
-                                  </div>
-                                  {panel.speech_text ? (
-                                    <p className="text-[10px] text-neutral-300 font-medium line-clamp-3 italic leading-relaxed">
-                                      "{panel.speech_text}"
-                                    </p>
-                                  ) : (
-                                    <p className="text-[9px] text-neutral-600 font-medium italic">
-                                      (No dialog detected)
-                                    </p>
-                                  )}
-                                  {panel.sfx && (
-                                    <div className="text-[8px] text-amber-500 font-bold bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded w-max mt-1">
-                                      SFX: {panel.sfx}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            )
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-center py-10 text-neutral-500 text-xs font-semibold">
-                    Select a project to inspect panels.
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
         </div>
       )}
     </div>

@@ -7,6 +7,7 @@ import {
   NotificationType,
 } from "../components/NotificationStack";
 import { ErrorPopupDetail } from "../components/ErrorPopupModal";
+import { parseWebtoonUrl } from "../utils/url";
 
 export function useAppState() {
   const [user, setUser] = useState<any>(null);
@@ -15,6 +16,7 @@ export function useAppState() {
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
 
   const [panels, setPanels] = useState<GeneratedPanel[]>([]);
+  const [projectId, setProjectId] = useState<string | null>(null);
   const [consoleLogs, setRawConsoleLogs] = useState<string[]>([]);
 
   const setConsoleLogs = useCallback((val: React.SetStateAction<string[]>) => {
@@ -233,6 +235,36 @@ export function useAppState() {
     "Overpowered S-Rank Recap"
   );
   const [scrapedGenre, setScrapedGenre] = useState<string>("Fantasy Action");
+  const [seriesTitle, setSeriesTitle] = useState<string>("");
+  const [chapterNumber, setChapterNumber] = useState<string>("");
+  const [chapterTitle, setChapterTitle] = useState<string>("");
+  const [seriesAuthor, setSeriesAuthor] = useState<string>("");
+  const [seriesCoverImage, setSeriesCoverImage] = useState<string>("");
+  const [seriesSynopsis, setSeriesSynopsis] = useState<string>("");
+
+  useEffect(() => {
+    if (!targetUrl.trim()) {
+      setSeriesTitle("");
+      setChapterNumber("");
+      setChapterTitle("");
+      setSeriesAuthor("");
+      setSeriesCoverImage("");
+      setSeriesSynopsis("");
+      return;
+    }
+    try {
+      const parsed = parseWebtoonUrl(targetUrl);
+      if (parsed) {
+        setSeriesTitle(parsed.title || "");
+        setChapterNumber(parsed.chapterNumber || "");
+        setChapterTitle(parsed.chapterTitle || "");
+        setScrapedGenre(parsed.genre || "general");
+        setScrapedTitle(parsed.title || "");
+      }
+    } catch {
+      // ignore
+    }
+  }, [targetUrl]);
 
   // ── Callbacks & effects AFTER all useState declarations ──────────────────
 
@@ -380,6 +412,51 @@ export function useAppState() {
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
+
+  // Load active project into workspace if url query parameter id/project_id exists
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const urlProjectId = params.get("id") || params.get("project_id");
+    if (!urlProjectId) return;
+
+    const loadProject = async () => {
+      try {
+        const token = localStorage.getItem("anivox_token");
+        const headers: HeadersInit = {};
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+        const res = await fetch(`/api/projects/${urlProjectId}`, { headers });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.project) {
+            setProjectId(data.project.project_id);
+            setTargetUrl(data.project.url || "");
+            setVideoUrl(data.project.video_url || null);
+            
+            if (data.panels && data.panels.length > 0) {
+              const mappedPanels = data.panels.map((p: any) => ({
+                ...p,
+                grayscale: p.grayscale === 1 || p.grayscale === true,
+              }));
+              setPanels(mappedPanels);
+              
+              // Populate scraped images list from panels
+              const panelImages = data.panels.map((p: any) => p.image_url).filter(Boolean);
+              setScrapedImages(panelImages);
+            }
+            addNotification(`Loaded project "${data.project.title || 'Untitled'}" into active workspace!`, "success");
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load project into workspace:", err);
+      }
+    };
+
+    loadProject();
+  }, [isAuthenticated, addNotification]);
 
   useEffect(() => {
     localStorage.setItem(
@@ -541,6 +618,20 @@ export function useAppState() {
     setScrapedTitle,
     scrapedGenre,
     setScrapedGenre,
+    seriesTitle,
+    setSeriesTitle,
+    chapterNumber,
+    setChapterNumber,
+    chapterTitle,
+    setChapterTitle,
+    seriesAuthor,
+    setSeriesAuthor,
+    seriesCoverImage,
+    setSeriesCoverImage,
+    seriesSynopsis,
+    setSeriesSynopsis,
+    projectId,
+    setProjectId,
     clearAllNotifications: () => {
       setNotifications([]);
     },

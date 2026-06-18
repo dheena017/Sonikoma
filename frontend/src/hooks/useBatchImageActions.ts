@@ -24,6 +24,7 @@ interface UseBatchImageActionsProps {
   aspectRatioLock: string;
   minPanelAreaPct: number;
   overlapMergeThreshold: number;
+  autoSplitTallStrips: boolean;
   useLocalCV: boolean;
   selectedModel: string;
   cropPaddingPx: number;
@@ -73,6 +74,7 @@ export function useBatchImageActions({
   aspectRatioLock,
   minPanelAreaPct,
   overlapMergeThreshold,
+  autoSplitTallStrips,
   useLocalCV,
   selectedModel,
   cropPaddingPx,
@@ -244,6 +246,7 @@ export function useBatchImageActions({
               cannyHigh: cropCannyHigh,
               closeKernelSize: cropCloseKernelSize,
               minHeightPx: cropMinHeightPx,
+              autoSplit: autoSplitTallStrips,
             }),
           });
 

@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   ChevronDown,
   ChevronUp,
+  FileText,
 } from "lucide-react";
 import { GeneratedPanel } from "../types";
 
@@ -27,6 +28,7 @@ interface SidebarProps {
   isCleaningBubbles: boolean;
   isOpen: boolean;
   onClose: () => void;
+  projectId?: string | null;
 }
 
 export default function Sidebar({
@@ -41,6 +43,7 @@ export default function Sidebar({
   isCleaningBubbles,
   isOpen,
   onClose,
+  projectId = null,
 }: SidebarProps) {
   const isDashboard = currentPath === "/dashboard";
   const isSettings = currentPath === "/settings";
@@ -50,6 +53,10 @@ export default function Sidebar({
   const isLogs = currentPath === "/logs";
   const isStatus = currentPath === "/status";
   const isShortcuts = currentPath === "/shortcuts";
+  const isProjectDetails = currentPath === "/project-details";
+
+  const params = new URLSearchParams(window.location.search);
+  const activeProjectId = params.get("id") || projectId;
 
   const isAiSuiteActive =
     currentPath.startsWith("/ai-") || currentPath === "/panel-assistant";
@@ -79,6 +86,17 @@ export default function Sidebar({
           onClick: () => navigateTo("/dashboard"),
           enabled: true,
         },
+        ...(activeProjectId
+          ? [
+              {
+                label: "Project Details",
+                icon: FileText,
+                active: isProjectDetails,
+                onClick: () => navigateTo(`/project-details?id=${activeProjectId}`),
+                enabled: true,
+              },
+            ]
+          : []),
         {
           label: "Auto-Crop",
           icon: Scissors,

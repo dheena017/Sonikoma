@@ -38,12 +38,16 @@ ALGORITHM = "HS256"
 def get_optional_user_id(request: Request) -> Optional[str]:
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
+        logger.info("[Auth] No Authorization header or Bearer prefix found.")
         return None
     try:
         token = auth_header.split(" ")[1]
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return payload.get("sub")
-    except Exception:
+        user_id = payload.get("sub")
+        logger.info(f"[Auth] Successfully decoded token for user_id: {user_id}")
+        return user_id
+    except Exception as e:
+        logger.warning(f"[Auth] Failed to decode JWT token: {e}", exc_info=True)
         return None
 
 # ─── Schemas ──────────────────────────────────────────────────────────────────
@@ -77,6 +81,7 @@ class ConvertVideoRequest(BaseModel):
     url: Optional[str] = Field(None, description="Source Webtoon page URL")
     voice_actor: Optional[str] = Field(None, description="Selected voice actor character label")
     music_theme: Optional[str] = Field(None, description="Selected background music theme loop")
+    project_id: Optional[str] = Field(None, description="Optional Project ID to update")
 
 
 def download_bgm_to_temp(music_theme: Optional[str]) -> Optional[str]:
@@ -193,7 +198,7 @@ async def convert_images_to_video(request: Request, body: ConvertVideoRequest):
     Caches output video in memory and returns a cached video endpoint.
     """
     logger.info(f"[Video] High-level conversion request for {len(body.panels)} panels")
-    project_id = generate_project_id()
+    project_id = body.project_id or generate_project_id()
     temp_dir = os.path.join(tempfile.gettempdir(), "webtoon_workspace", project_id)
     os.makedirs(temp_dir, exist_ok=True)
 

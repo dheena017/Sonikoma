@@ -69,6 +69,15 @@ def init_db() -> None:
         else:
             logger.info("[Database] Relational database schema is already initialized.")
         
+        # Safe migration check: add synopsis column to series table if missing
+        try:
+            cursor.execute("ALTER TABLE series ADD COLUMN synopsis TEXT")
+            conn.commit()
+            logger.info("[Database] Successfully ran migration: added 'synopsis' column to 'series' table.")
+        except Exception:
+            # Column already exists
+            pass
+            
         conn.commit()
     except Exception as e:
         logger.error(f"[Database] Error checking or applying schema: {e}")
@@ -314,23 +323,35 @@ def insert_project(data: Dict[str, Any]) -> None:
     """
     conn = get_db_connection()
     try:
-        # First, check if a Series matching this title and user already exists.
-        # If not, create a series.
         user_id = data.get('user_id') or 'system_default'
         title = data.get('title') or 'Untitled Webtoon'
         genre = data.get('genre') or 'general'
+        author = data.get('author') or 'Unknown Author'
+        cover_image = data.get('cover_image')
+        synopsis = data.get('synopsis')
         
-        # Look up existing series ID
+        # First, check if a Series matching this title and user already exists.
+        # If not, create a series.
         row = conn.execute("SELECT id FROM series WHERE user_id = ? AND title = ? LIMIT 1", (user_id, title)).fetchone()
         if row:
             series_id = row['id']
+            # Update the series with newly provided metadata if present
+            if data.get('author') or data.get('genre') or data.get('cover_image') or data.get('synopsis'):
+                conn.execute("""
+                    UPDATE series 
+                    SET author = COALESCE(?, author), 
+                        genre = COALESCE(?, genre), 
+                        cover_image = COALESCE(?, cover_image),
+                        synopsis = COALESCE(?, synopsis)
+                    WHERE id = ?
+                """, (data.get('author'), data.get('genre'), data.get('cover_image'), data.get('synopsis'), series_id))
         else:
             # Create a new Series
             series_id = f"ser_{uuid_hex()}"
             conn.execute("""
-                INSERT INTO series (id, user_id, title, author, cover_image, genre)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (series_id, user_id, title, 'Unknown Author', None, genre))
+                INSERT INTO series (id, user_id, title, author, cover_image, genre, synopsis)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (series_id, user_id, title, author, cover_image, genre, synopsis))
         
         # Now, insert the Chapter (which represents the flat Project)
         chapter_id = data['project_id']
@@ -354,7 +375,7 @@ def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
     try:
         if user_id:
             rows = conn.execute("""
-                SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, 
+                SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                        c.episode_number AS episode, c.status, c.panels_count, c.video_url, 
                        c.created_at, c.updated_at, s.user_id
                 FROM chapters c
@@ -364,7 +385,7 @@ def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
             """, (user_id,)).fetchall()
         else:
             rows = conn.execute("""
-                SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, 
+                SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                        c.episode_number AS episode, c.status, c.panels_count, c.video_url, 
                        c.created_at, c.updated_at, s.user_id
                 FROM chapters c
@@ -380,7 +401,7 @@ def get_project(project_id: str) -> Optional[Dict[str, Any]]:
     conn = get_db_connection()
     try:
         row = conn.execute("""
-            SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, 
+            SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                    c.episode_number AS episode, c.status, c.panels_count, c.video_url, 
                    c.created_at, c.updated_at, s.user_id
             FROM chapters c

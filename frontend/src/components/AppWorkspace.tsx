@@ -91,11 +91,26 @@ interface AppWorkspaceProps {
   minPanelAreaPct?: number;
   overlapMergeThreshold?: number;
   useLocalCV?: boolean;
+  autoSplitTallStrips?: boolean;
   cropModel?: string;
   cropMinHeightPx?: number;
   cropCannyLow?: number;
   cropCannyHigh?: number;
   cropCloseKernelSize?: number;
+  seriesTitle: string;
+  setSeriesTitle: (v: string) => void;
+  chapterNumber: string;
+  setChapterNumber: (v: string) => void;
+  chapterTitle: string;
+  setChapterTitle: (v: string) => void;
+  scrapedGenre: string;
+  setScrapedGenre: (v: string) => void;
+  seriesAuthor: string;
+  setSeriesAuthor: (v: string) => void;
+  seriesCoverImage: string;
+  setSeriesCoverImage: (v: string) => void;
+  seriesSynopsis: string;
+  setSeriesSynopsis: (v: string) => void;
 }
 
 export function AppWorkspace({
@@ -177,11 +192,26 @@ export function AppWorkspace({
   minPanelAreaPct,
   overlapMergeThreshold,
   useLocalCV,
+  autoSplitTallStrips,
   cropModel,
   cropMinHeightPx,
   cropCannyLow,
   cropCannyHigh,
   cropCloseKernelSize,
+  seriesTitle,
+  setSeriesTitle,
+  chapterNumber,
+  setChapterNumber,
+  chapterTitle,
+  setChapterTitle,
+  scrapedGenre,
+  setScrapedGenre,
+  seriesAuthor,
+  setSeriesAuthor,
+  seriesCoverImage,
+  setSeriesCoverImage,
+  seriesSynopsis,
+  setSeriesSynopsis,
 }: AppWorkspaceProps) {
   return (
     <main
@@ -210,6 +240,20 @@ export function AppWorkspace({
           addNotification={addNotification}
           narrationStyle={narrationStyle}
           setNarrationStyle={setNarrationStyle}
+          seriesTitle={seriesTitle}
+          setSeriesTitle={setSeriesTitle}
+          chapterNumber={chapterNumber}
+          setChapterNumber={setChapterNumber}
+          chapterTitle={chapterTitle}
+          setChapterTitle={setChapterTitle}
+          scrapedGenre={scrapedGenre}
+          setScrapedGenre={setScrapedGenre}
+          seriesAuthor={seriesAuthor}
+          setSeriesAuthor={setSeriesAuthor}
+          seriesCoverImage={seriesCoverImage}
+          setSeriesCoverImage={setSeriesCoverImage}
+          seriesSynopsis={seriesSynopsis}
+          setSeriesSynopsis={setSeriesSynopsis}
         />
 
         {/* SEPARATED IMAGE STRIPS GALLERY */}
@@ -298,6 +342,7 @@ export function AppWorkspace({
               cropCannyLow={cropCannyLow}
               cropCannyHigh={cropCannyHigh}
               cropCloseKernelSize={cropCloseKernelSize}
+              autoSplitTallStrips={autoSplitTallStrips}
             />
           </div>
         )}

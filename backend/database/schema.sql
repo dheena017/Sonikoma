@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS series (
   author          TEXT    NOT NULL,
   cover_image     TEXT,                             -- URL to the thumbnail/cover image
   genre           TEXT    NOT NULL DEFAULT 'general',
+  synopsis        TEXT,                             -- Series synopsis/description
   created_at      TEXT    NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
