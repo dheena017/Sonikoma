@@ -469,6 +469,15 @@ def get_panels(project_id: str) -> List[Dict[str, Any]]:
     finally:
         conn.close()
 
+def delete_panels(project_id: str) -> None:
+    """Delete all panels belonging to a project."""
+    conn = get_db_connection()
+    try:
+        conn.execute('DELETE FROM panels WHERE chapter_id = ?', (project_id,))
+        conn.commit()
+    finally:
+        conn.close()
+
 def save_scrape_session(url: str, image_urls: List[str]) -> None:
     """Save a scrape session result."""
     conn = get_db_connection()

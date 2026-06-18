@@ -31,6 +31,8 @@ class StoryboardPanelModel(BaseModel):
     speech_text: str = Field(description="Narration or panel speech line")
     sfx: str = Field(description="Sound effect in brackets")
     motion_type: str = Field(description="Camera motion direction tag")
+    visual_description: str = Field(description="Vivid description of the visual scene action and layout (10-25 words)")
+    duration: float = Field(description="Suggested panel duration in seconds (typically between 3.0 and 7.0)")
 
 class StoryboardModel(BaseModel):
     panels: List[StoryboardPanelModel] = Field(description="List of chronological panels")
@@ -357,6 +359,8 @@ class BaseAISkill:
         self.response_schema_name = ""
         self.prompt_template = ""
         self.logger = SkillLogger()
+        self.last_input_tokens = 0
+        self.last_output_tokens = 0
         self.load()
 
     def load(self):
@@ -482,6 +486,8 @@ class BaseAISkill:
                 p_tokens = getattr(usage, 'prompt_token_count', 0) if usage else 0
                 c_tokens = getattr(usage, 'candidates_token_count', 0) if usage else 0
                 
+                self.last_input_tokens = p_tokens
+                self.last_output_tokens = c_tokens
                 self.logger.log_execution(self.name, elapsed_ms, True, kwargs, parsed_json, p_tokens, c_tokens)
                 return raw_text
             except Exception as e:

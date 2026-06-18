@@ -36,7 +36,8 @@ export default function TimelineHeader({
           </span>
         </h3>
         <p className="hidden sm:block text-xs text-neutral-400 mt-0.5">
-          Review live isolated panel frames. Adjust speech transcripts locally below.
+          Review live isolated panel frames. Adjust speech transcripts locally
+          below.
         </p>
       </div>
 
@@ -46,8 +47,7 @@ export default function TimelineHeader({
             onClick={onAddBlankPanel}
             className="px-3 py-1.5 bg-neutral-950/40 hover:bg-neutral-850 text-neutral-350 border border-neutral-850 hover:border-neutral-750 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer"
           >
-            <FileText className="h-3.5 w-3.5 text-purple-400" />
-            + Blank Panel
+            <FileText className="h-3.5 w-3.5 text-purple-400" />+ Blank Panel
           </button>
         )}
 

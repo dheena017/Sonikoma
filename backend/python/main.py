@@ -321,6 +321,53 @@ class ColoredFormatter(logging.Formatter):
 
             return f"{colorized_prefix}{colorized_url}{colorized_status}{colorized_suffix}"
 
+        # 3. Standalone colorization fallback when no URL is present
+        if "HTTP Request" in message or "httpx" in message:
+            standalone_http_regex = re.compile(
+                r'^(.*?)\b(POST|GET|PUT|DELETE)\b(.*)$',
+                re.IGNORECASE
+            )
+            st_match = standalone_http_regex.match(message)
+            if st_match:
+                prefix, method, suffix = st_match.groups()
+                
+                # Colorize prefix
+                colorized_prefix = ""
+                if prefix:
+                    parts = re.split(r'(\s+|:|\[|\])', prefix)
+                    for part in parts:
+                        if not part:
+                            continue
+                        if part.isspace():
+                            colorized_prefix += part
+                        elif part == "INFO":
+                            colorized_prefix += f"\x1b[90m{part}\x1b[0m"
+                        elif part == "httpx":
+                            colorized_prefix += f"\x1b[95m{part}\x1b[0m"
+                        elif part == "HTTP":
+                            colorized_prefix += f"\x1b[35m{part}\x1b[0m"
+                        elif part == "Request":
+                            colorized_prefix += f"\x1b[35m{part}\x1b[0m"
+                        elif part in (":", "[", "]"):
+                            colorized_prefix += f"\x1b[90m{part}\x1b[0m"
+                        else:
+                            colorized_prefix += f"\x1b[90m{part}\x1b[0m"
+                
+                method_upper = method.upper()
+                if method_upper == "POST":
+                    method_colorized = f"\x1b[1;33m{method}\x1b[0m"
+                elif method_upper == "GET":
+                    method_colorized = f"\x1b[1;32m{method}\x1b[0m"
+                elif method_upper == "PUT":
+                    method_colorized = f"\x1b[1;34m{method}\x1b[0m"
+                elif method_upper == "DELETE":
+                    method_colorized = f"\x1b[1;31m{method}\x1b[0m"
+                else:
+                    method_colorized = f"\x1b[1;35m{method}\x1b[0m"
+                    
+                colorized_suffix = f"\x1b[90m{suffix}\x1b[0m" if suffix else ""
+                return f"{colorized_prefix}{method_colorized}{colorized_suffix}"
+
         return message
 
     def format(self, record):

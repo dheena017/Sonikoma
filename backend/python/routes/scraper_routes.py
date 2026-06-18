@@ -10,8 +10,25 @@ import asyncio
 import time
 import httpx
 from typing import List, Optional, Any, Dict
-from fastapi import APIRouter, HTTPException, Body
+from fastapi import APIRouter, HTTPException, Body, Request
 from pydantic import BaseModel, Field
+import os
+import jwt
+import database.db as db
+
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "anivox_super_secret_key_change_me")
+ALGORITHM = "HS256"
+
+def get_optional_user_id(request: Request) -> Optional[str]:
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return None
+    try:
+        token = auth_header.split(" ")[1]
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload.get("sub")
+    except Exception:
+        return None
 
 from utils.url_utils import extract_webtoon_url, parse_webtoon_url
 from utils.id_utils import generate_project_id
@@ -161,7 +178,7 @@ async def scrape_images(body: ScrapeImagesRequest):
 
 
 @router.post("/generate", summary="Generate storyboard storyboard and narrative scripts")
-async def generate_storyboard(body: GenerateStoryboardRequest):
+async def generate_storyboard(request: Request, body: GenerateStoryboardRequest):
     try:
         parsed = parse_webtoon_url(body.url)
         project_id = body.episode_id or generate_project_id()
@@ -186,6 +203,8 @@ async def generate_storyboard(body: GenerateStoryboardRequest):
 
         scraped_urls = await scrape_images_from_url(body.url, bypass_cache=body.bypass_cache)
 
+        user_id = get_optional_user_id(request)
+
         # Re-use client panels if provided
         if body.panels and len(body.panels) > 0:
             logger.info("[Model] Utilizing client-provided storyboard modifications directly. Resolving placeholders.")
@@ -202,6 +221,43 @@ async def generate_storyboard(body: GenerateStoryboardRequest):
                 resolved_panels.append(p_copy)
 
             logger.info(f"[Model] Resolved {len(resolved_panels)} panels with client-provided data.")
+            
+            if user_id:
+                try:
+                    db.insert_project({
+                        "project_id": project_id,
+                        "url": body.url,
+                        "title": parsed["title"],
+                        "genre": parsed["genre"],
+                        "episode": parsed["episode"],
+                        "status": "pending",
+                        "panels_count": len(resolved_panels),
+                        "video_url": None,
+                        "user_id": user_id
+                    })
+                    db.insert_panels(project_id, [{
+                        "image_url": p.get("image_url") or "",
+                        "original_url": p.get("original_image_url") or p.get("original_url"),
+                        "speech_text": p.get("speech_text") or "",
+                        "sfx": p.get("sfx") or "",
+                        "duration": p.get("duration") if p.get("duration") is not None else 4.5,
+                        "motion_type": p.get("motion_type") or "zoom_in",
+                        "visual_description": p.get("visual_description"),
+                        "brightness": p.get("brightness"),
+                        "contrast": p.get("contrast"),
+                        "saturation": p.get("saturation"),
+                        "grayscale": p.get("grayscale", False),
+                        "filter_preset": p.get("filter_preset"),
+                        "bubble_method": p.get("bubble_method"),
+                        "bubble_sensitivity": p.get("bubble_sensitivity"),
+                        "bubble_dilation": p.get("bubble_dilation"),
+                        "inpaint_radius": p.get("inpaint_radius"),
+                        "detection_style": p.get("detection_style")
+                    } for p in resolved_panels])
+                    logger.info(f"[Database] Automatically saved client-provided storyboard for project {project_id} and user {user_id}")
+                except Exception as db_err:
+                    logger.error(f"[Database] Failed to automatically save client panels: {db_err}", exc_info=True)
+
             return {
                 "project_id": project_id,
                 "status": "success",
@@ -212,42 +268,56 @@ async def generate_storyboard(body: GenerateStoryboardRequest):
             }
 
         # Generate panels using AI
-        response_panels = []
-        try:
-            logger.info(f"[Model] Dispatching panels generation via AI model: {body.model} (narrationStyle={body.narrationStyle})...")
-            response_panels = await generate_dynamic_panels(
-                parsed["title"], parsed["genre"], parsed["episode"], scraped_urls, body.model,
-                narration_style=body.narrationStyle or "long"
-            )
-            logger.info(f"[Model] Successfully generated {len(response_panels)} storyboard panels.")
-        except Exception as e:
-            logger.warning(f"[Model] Dynamic panels generation helper failed, using fallback: {e}")
+        logger.info(f"[Model] Dispatching panels generation via AI model: {body.model} (narrationStyle={body.narrationStyle})...")
+        response_panels = await generate_dynamic_panels(
+            parsed["title"], parsed["genre"], parsed["episode"], scraped_urls, body.model,
+            narration_style=body.narrationStyle or "long"
+        )
+        logger.info(f"[Model] Successfully generated {len(response_panels)} storyboard panels.")
 
-        # Programmatic placeholder fallback if AI returns empty
         if not response_panels:
-            logger.info("[Model] Compiling storyboard with fully programmatic metadata extraction...")
-            num_panels = min(len(scraped_urls), 5)
-            placeholders = [
-                {"speech_text": f"The saga of {parsed['title']} begins! Welcome to this breathtaking adventure.", "sfx": "[Echoing Footsteps]", "motion": "zoom_in"},
-                {"speech_text": f"Each path unfurls dangerous secrets hidden within the {parsed['genre']} realm.", "sfx": "[Mystical Whispers]", "motion": "pan_right"},
-                {"speech_text": f"Tension rises as rivals and allies cross paths silently in {parsed['episode']}.", "sfx": "[Drums Swell]", "motion": "zoom_out"},
-                {"speech_text": f"An overwhelming power is unlocked, casting light across the battlefield!", "sfx": "[Energy Burst]", "motion": "pan_up"},
-                {"speech_text": f"Thus the chapter rests. Stay tuned for the ultimate epic resolution!", "sfx": "[Flute Melancholy]", "motion": "zoom_in"}
-            ]
+            raise ValueError("Model failed to generate valid storyboard panels.")
 
-            response_panels = []
-            for idx in range(num_panels):
-                p = placeholders[idx % len(placeholders)]
-                img_url = scraped_urls[idx] if scraped_urls else f"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600'><rect width='100%' height='100%' fill='%230f0f11'/><text x='50%' y='50%' fill='%233f3f46' font-weight='bold' font-size='20' text-anchor='middle'>Frame Awaiting Source</text></svg>"
-                
-                response_panels.append({
-                    "id": idx + 1,
-                    "speech_text": p["speech_text"],
-                    "sfx": p["sfx"],
-                    "duration": 4.5,
-                    "motion_type": p["motion"],
-                    "image_url": img_url
+        if user_id:
+            try:
+                db.insert_project({
+                    "project_id": project_id,
+                    "url": body.url,
+                    "title": parsed["title"],
+                    "genre": parsed["genre"],
+                    "episode": parsed["episode"],
+                    "status": "pending",
+                    "panels_count": len(response_panels),
+                    "video_url": None,
+                    "user_id": user_id
                 })
+                db.insert_panels(project_id, [{
+                    "image_url": p.get("image_url") or "",
+                    "original_url": p.get("original_image_url") or p.get("original_url"),
+                    "speech_text": p.get("speech_text") or "",
+                    "sfx": p.get("sfx") or "",
+                    "duration": p.get("duration") if p.get("duration") is not None else 4.5,
+                    "motion_type": p.get("motion_type") or "zoom_in",
+                    "visual_description": p.get("visual_description"),
+                    "brightness": p.get("brightness"),
+                    "contrast": p.get("contrast"),
+                    "saturation": p.get("saturation"),
+                    "grayscale": p.get("grayscale", False),
+                    "filter_preset": p.get("filter_preset"),
+                    "bubble_method": p.get("bubble_method"),
+                    "bubble_sensitivity": p.get("bubble_sensitivity"),
+                    "bubble_dilation": p.get("bubble_dilation"),
+                    "inpaint_radius": p.get("inpaint_radius"),
+                    "detection_style": p.get("detection_style")
+                } for p in response_panels])
+                logger.info(f"[Database] Automatically saved AI-generated storyboard for project {project_id} and user {user_id}")
+            except Exception as db_err:
+                logger.error(f"[Database] Failed to automatically save AI storyboard: {db_err}", exc_info=True)
+
+        from skills.registry import registry
+        storyboard_skill = registry.get("storyboard_narrative")
+        input_tokens = getattr(storyboard_skill, 'last_input_tokens', 0)
+        output_tokens = getattr(storyboard_skill, 'last_output_tokens', 0)
 
         return {
             "project_id": project_id,
@@ -255,7 +325,9 @@ async def generate_storyboard(body: GenerateStoryboardRequest):
             "video_url": video_url,
             "panels_processed": len(response_panels),
             "message": f"Webtoon {parsed['title']} animation compilation created dynamically.",
-            "panels": response_panels
+            "panels": response_panels,
+            "inputTokens": input_tokens,
+            "outputTokens": output_tokens
         }
     except Exception as e:
         logger.error(f"[API Generate Error] {e}", exc_info=True)

@@ -12,16 +12,18 @@
 All structural, architectural, database, and coding guidelines have been separated into modular, detailed files inside the [docs/](./docs/) folder.
 
 ### 🏛️ System Architecture
-* **[Project Structure & Boundaries](./docs/architecture/project_structure.md)** — Visual hierarchy of frontend/backend components, and rules of where files belong.
-* **[API Reference](./docs/architecture/api_reference.md)** — Complete route endpoints table for the Express backend and Python services.
-* **[Local Database](./docs/architecture/database.md)** — Table schemas for `projects`, `panels`, and query caching logic with SQLite.
-* **[Environment Variables](./docs/architecture/environment_variables.md)** — Port mappings, API credentials setup, and limits checking configurations.
-* **[npm Scripts](./docs/architecture/npm_scripts.md)** — Compiling, building, hot-reloading dev, and docker commands.
+
+- **[Project Structure & Boundaries](./docs/architecture/project_structure.md)** — Visual hierarchy of frontend/backend components, and rules of where files belong.
+- **[API Reference](./docs/architecture/api_reference.md)** — Complete route endpoints table for the Express backend and Python services.
+- **[Local Database](./docs/architecture/database.md)** — Table schemas for `projects`, `panels`, and query caching logic with SQLite.
+- **[Environment Variables](./docs/architecture/environment_variables.md)** — Port mappings, API credentials setup, and limits checking configurations.
+- **[npm Scripts](./docs/architecture/npm_scripts.md)** — Compiling, building, hot-reloading dev, and docker commands.
 
 ### 💻 Development & Engineering Standards
-* **[Coding Guidelines](./docs/development/coding_guidelines.md)** — Rules for Express route processing, custom React hooks lifecycle, and FastAPI wrapper setups.
-* **[Standard Code Templates](./docs/development/code_templates.md)** — Standard layouts and section definitions for components, hooks, Express routes, and Python modules.
-* **[Key Coding Patterns](./docs/development/key_patterns.md)** — Standard code implementations for Gemini retries, Sharp cropping, shell exec calls, and colors logging.
+
+- **[Coding Guidelines](./docs/development/coding_guidelines.md)** — Rules for Express route processing, custom React hooks lifecycle, and FastAPI wrapper setups.
+- **[Standard Code Templates](./docs/development/code_templates.md)** — Standard layouts and section definitions for components, hooks, Express routes, and Python modules.
+- **[Key Coding Patterns](./docs/development/key_patterns.md)** — Standard code implementations for Gemini retries, Sharp cropping, shell exec calls, and colors logging.
 
 ---
 
@@ -131,8 +133,7 @@ At the **end of every conversation**, append one row to the Session Changelog ta
 
 ---
 
-> [!IMPORTANT]
-> **AI Agent Reminder:** Before ending this conversation, scroll up to the 📅 Session Changelog
+> [!IMPORTANT] > **AI Agent Reminder:** Before ending this conversation, scroll up to the 📅 Session Changelog
 > and add a row describing what you changed. Then update any stale sections above.
 > This is not optional — it is a required step of every session.
 

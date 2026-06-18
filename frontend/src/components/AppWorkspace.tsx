@@ -183,8 +183,6 @@ export function AppWorkspace({
   cropCannyHigh,
   cropCloseKernelSize,
 }: AppWorkspaceProps) {
-
-
   return (
     <main
       id="main_workspace"

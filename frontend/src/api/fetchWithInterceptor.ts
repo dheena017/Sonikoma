@@ -25,7 +25,15 @@ export function createFetchWithInterceptor({
     return new Promise<Response>((resolve, reject) => {
       const executeFetch = async () => {
         try {
-          const response = await fetch(input, init);
+          const token = localStorage.getItem("anivox_token");
+          const headers = new Headers(init?.headers);
+          if (token && !headers.has("Authorization")) {
+            headers.set("Authorization", `Bearer ${token}`);
+          }
+          const response = await fetch(input, {
+            ...init,
+            headers,
+          });
           const contentType = response.headers.get("content-type") || "";
           const isHtml =
             contentType.includes("text/html") ||

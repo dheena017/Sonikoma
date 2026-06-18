@@ -13,7 +13,6 @@ import {
   Settings2,
 } from "lucide-react";
 
-
 interface TimelineSelectionBarProps {
   selectedCount: number;
   totalCount: number;
@@ -62,7 +61,6 @@ export default function TimelineSelectionBar({
 
   // Safeguard: Ensure we are in a browser environment before using the DOM
   if (typeof document === "undefined") return null;
-
 
   return createPortal(
     <div
@@ -160,7 +158,9 @@ export default function TimelineSelectionBar({
                   <div className="flex items-center">
                     <button
                       type="button"
-                      disabled={isBatchCropping || isCleaningBubbles || isBatchMerging}
+                      disabled={
+                        isBatchCropping || isCleaningBubbles || isBatchMerging
+                      }
                       onClick={handleAutoCropSelected}
                       className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-l-xl border-r-0"
                       title="Auto-Crop selected storyboard panels"
@@ -190,7 +190,9 @@ export default function TimelineSelectionBar({
                   <div className="flex items-center">
                     <button
                       type="button"
-                      disabled={isBatchCropping || isCleaningBubbles || isBatchMerging}
+                      disabled={
+                        isBatchCropping || isCleaningBubbles || isBatchMerging
+                      }
                       onClick={handleCleanBubblesSelected}
                       className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-l-xl border-r-0"
                       title="Remove speech bubbles from selected storyboard panels"
@@ -219,7 +221,12 @@ export default function TimelineSelectionBar({
                   {/* Stitch */}
                   <button
                     type="button"
-                    disabled={isBatchCropping || isCleaningBubbles || isBatchMerging || selectedCount < 2}
+                    disabled={
+                      isBatchCropping ||
+                      isCleaningBubbles ||
+                      isBatchMerging ||
+                      selectedCount < 2
+                    }
                     onClick={handleBatchMergeSelected}
                     className="px-3 sm:px-4 py-2 text-xs rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 font-bold flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                     title="Stitch selected storyboard panels vertically into one panel"

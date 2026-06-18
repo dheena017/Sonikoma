@@ -16,13 +16,13 @@ Anivox uses a localized file-based **SQLite** database. This eliminates complex 
 
 The database manages persistent states for scraped episodes, edited segments, user authentication, and undo/redo caches.
 
-| Table Name | Description | Key Fields / Relational Schema |
-| :--- | :--- | :--- |
-| **`users`** | Registered user accounts. | `id`, `username`, `email`, `password_hash`, `created_at` |
-| **`projects`** | High-level containers for processed comic books/episodes. | `id`, `name`, `source_url`, `created_at`, `user_id` (foreign key) |
-| **`panels`** | Granular data mappings for individual comic frames. | `id`, `project_id` (foreign key), `image_url`, `speech_text`, `duration`, `motion_type`, `sort_order` |
-| **`scrape_sessions`** | Caching layers to prevent scraping the same Webtoon URL multiple times. | `id`, `url`, `panels_json` (serialized cache), `scraped_at` |
-| **`edit_history`** | Persistent undo/redo stacks. | `id`, `panel_id` (foreign key), `before_url`, `after_url`, `action_type`, `timestamp` |
+| Table Name            | Description                                                             | Key Fields / Relational Schema                                                                        |
+| :-------------------- | :---------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------- |
+| **`users`**           | Registered user accounts.                                               | `id`, `username`, `email`, `password_hash`, `created_at`                                              |
+| **`projects`**        | High-level containers for processed comic books/episodes.               | `id`, `name`, `source_url`, `created_at`, `user_id` (foreign key)                                     |
+| **`panels`**          | Granular data mappings for individual comic frames.                     | `id`, `project_id` (foreign key), `image_url`, `speech_text`, `duration`, `motion_type`, `sort_order` |
+| **`scrape_sessions`** | Caching layers to prevent scraping the same Webtoon URL multiple times. | `id`, `url`, `panels_json` (serialized cache), `scraped_at`                                           |
+| **`edit_history`**    | Persistent undo/redo stacks.                                            | `id`, `panel_id` (foreign key), `before_url`, `after_url`, `action_type`, `timestamp`                 |
 
 ---
 
@@ -33,6 +33,7 @@ The database manages persistent states for scraped episodes, edited segments, us
 
 2. **Always Use Parameterized Queries:**
    To prevent SQL injection vulnerabilities, strings should **never** be concatenated directly into SQL queries.
+
    ```typescript
    // ✅ CORRECT — parameterized queries protect from injection
    const stmt = db.prepare("SELECT * FROM projects WHERE id = ?");

@@ -180,8 +180,10 @@ export function useAppLogic() {
       const allowedHosts = SOURCE_DOMAINS[selectedSource] || [];
       const isDirectImage = Boolean(
         normalizedTargetUrl &&
-          (normalizedTargetUrl.toLowerCase().match(/\.(png|jpg|jpeg|webp|gif|svg|bmp|tiff)(\?|$)/) ||
-           normalizedTargetUrl.startsWith("data:image/"))
+          (normalizedTargetUrl
+            .toLowerCase()
+            .match(/\.(png|jpg|jpeg|webp|gif|svg|bmp|tiff)(\?|$)/) ||
+            normalizedTargetUrl.startsWith("data:image/"))
       );
 
       const isSourceMismatch = Boolean(
@@ -225,10 +227,20 @@ export function useAppLogic() {
 
       // Save parsed details in global state for AI Suite tools to consume dynamically
       if (title) {
-        state.setScrapedTitle(title.split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" "));
+        state.setScrapedTitle(
+          title
+            .split("-")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ")
+        );
       }
       if (genre) {
-        state.setScrapedGenre(genre.split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" "));
+        state.setScrapedGenre(
+          genre
+            .split("-")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ")
+        );
       }
 
       state.setPanels([]);

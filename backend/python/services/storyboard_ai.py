@@ -56,7 +56,8 @@ def get_programmatic_panels(title: str, genre: str, episode: str, img_urls: List
             "speech_text": text,
             "sfx": sfx,
             "duration": 4.5,
-            "motion_type": motion
+            "motion_type": motion,
+            "visual_description": f"Recap scene for {title} showing {genre} themed illustration panel."
         })
     return panels_list
 
@@ -115,14 +116,21 @@ async def generate_dynamic_panels(
             if parsed and isinstance(parsed.get('panels'), list):
                 result = []
                 for idx, p in enumerate(parsed['panels'][:active_slices_count]):
+                    duration_val = p.get("duration", 5.0)
+                    try:
+                        duration_val = float(duration_val)
+                    except (ValueError, TypeError):
+                        duration_val = 5.0
+                    
                     result.append({
                         "id": idx + 1,
                         "image_url": img_urls[idx],
                         "original_image_url": img_urls[idx],
                         "speech_text": p.get("speech_text") or f"Scene {idx + 1}",
                         "sfx": p.get("sfx") or "[Action]",
-                        "duration": 5.0,
-                        "motion_type": p.get("motion_type") or "zoom_in"
+                        "duration": duration_val,
+                        "motion_type": p.get("motion_type") or "zoom_in",
+                        "visual_description": p.get("visual_description") or f"Recap storyboard illustration panel {idx + 1}."
                     })
                 return result
         except Exception as e:
@@ -149,20 +157,26 @@ async def generate_dynamic_panels(
                 if parsed and isinstance(parsed.get('panels'), list) and len(parsed['panels']) > 0:
                     result = []
                     for idx, p in enumerate(parsed['panels'][:active_slices_count]):
+                        duration_val = p.get("duration", 4.5)
+                        try:
+                            duration_val = float(duration_val)
+                        except (ValueError, TypeError):
+                            duration_val = 4.5
+
                         result.append({
                             "id": idx + 1,
                             "image_url": img_urls[idx],
                             "original_image_url": img_urls[idx],
                             "speech_text": p.get("speech_text") or f"Scene {idx + 1} of {title}",
                             "sfx": p.get("sfx") or "[Action Sounds]",
-                            "duration": 4.5,
-                            "motion_type": p.get("motion_type") or "zoom_in"
+                            "duration": duration_val,
+                            "motion_type": p.get("motion_type") or "zoom_in",
+                            "visual_description": p.get("visual_description") or f"Recap scene for {title} showing {genre} themed illustration panel."
                         })
                     logger.info(f"[Gemini] Storyboard narration generated successfully for {len(result)} slices.")
                     return result
         except Exception as e:
             logger.warning(f"[Gemini] Storyboard generation failed: {e}")
+            raise e
 
-    # 3. Final programmatic fallback
-    logger.info("[Scraper Service] Falling back to programmatic storyboard generation.")
-    return get_programmatic_panels(title, genre, episode, img_urls, active_slices_count)
+    raise RuntimeError("AI Storyboard generation failed: No active providers resolved the storyboard narrative script.")

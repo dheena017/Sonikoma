@@ -26,7 +26,10 @@ const DEFAULT_VOICES: VoiceOption[] = [
   { code: "ko-KR-SunHiNeural", label: "Korean — SunHi (Female)" },
   { code: "ko-KR-InJoonNeural", label: "Korean — InJoon (Male)" },
   { code: "ja-JP-NanamiNeural", label: "Japanese — Nanami (Female)" },
-  { code: "zh-CN-XiaoxiaoNeural", label: "Chinese (Mandarin) — Xiaoxiao (Female)" },
+  {
+    code: "zh-CN-XiaoxiaoNeural",
+    label: "Chinese (Mandarin) — Xiaoxiao (Female)",
+  },
 ];
 
 export default function VoiceSettingsPanel({
@@ -44,7 +47,9 @@ export default function VoiceSettingsPanel({
 
   const [voices, setVoices] = useState<VoiceOption[]>(DEFAULT_VOICES);
   const [selectedVoice, setSelectedVoice] = useState("en-US-GuyNeural");
-  const [testScript, setTestScript] = useState("Arise. The darkness answers only to me.");
+  const [testScript, setTestScript] = useState(
+    "Arise. The darkness answers only to me."
+  );
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
@@ -57,7 +62,9 @@ export default function VoiceSettingsPanel({
           setVoices(data.voices);
         }
       })
-      .catch((e) => console.warn("Failed to fetch voices list, using defaults.", e));
+      .catch((e) =>
+        console.warn("Failed to fetch voices list, using defaults.", e)
+      );
 
     return () => {
       if (audioRef.current) {
@@ -90,13 +97,14 @@ export default function VoiceSettingsPanel({
         if (addNotification) {
           addNotification("Character voice recommendation parsed!", "success");
         }
-        
+
         // Auto-select recommended voice code if it matches any of the labels or codes
         const suggested = json.result.suggested_actor?.toLowerCase() || "";
-        const matchingVoice = voices.find(v => 
-          suggested.includes(v.code.toLowerCase()) || 
-          suggested.includes(v.label.toLowerCase()) ||
-          v.label.toLowerCase().includes(suggested)
+        const matchingVoice = voices.find(
+          (v) =>
+            suggested.includes(v.code.toLowerCase()) ||
+            suggested.includes(v.label.toLowerCase()) ||
+            v.label.toLowerCase().includes(suggested)
         );
         if (matchingVoice) {
           setSelectedVoice(matchingVoice.code);
@@ -125,7 +133,10 @@ export default function VoiceSettingsPanel({
     try {
       // Estimate duration based on word count to keep text and audio matched
       const words = testScript.trim().split(/\s+/).filter(Boolean).length;
-      const estimatedDuration = Math.max(2.0, parseFloat((words / 2.2 + 0.8).toFixed(1)));
+      const estimatedDuration = Math.max(
+        2.0,
+        parseFloat((words / 2.2 + 0.8).toFixed(1))
+      );
 
       const res = await fetch("/api/audio/generate", {
         method: "POST",
@@ -140,18 +151,20 @@ export default function VoiceSettingsPanel({
 
       const json = await res.json();
       if (json.success && json.audio_base64) {
-        const audioSrc = `data:${json.mime_type || "audio/mpeg"};base64,${json.audio_base64}`;
+        const audioSrc = `data:${json.mime_type || "audio/mpeg"};base64,${
+          json.audio_base64
+        }`;
         if (audioRef.current) {
           audioRef.current.pause();
         }
-        
+
         const audio = new Audio(audioSrc);
         audioRef.current = audio;
-        
+
         audio.onended = () => {
           setIsPlaying(false);
         };
-        
+
         audio.onerror = (err) => {
           console.error("HTML5 Audio playback error:", err);
           setIsPlaying(false);
@@ -168,7 +181,10 @@ export default function VoiceSettingsPanel({
     } catch (e: any) {
       console.error(e);
       if (addNotification) {
-        addNotification(e.message || "Failed to generate voice preview", "error");
+        addNotification(
+          e.message || "Failed to generate voice preview",
+          "error"
+        );
       }
     } finally {
       setIsGenerating(false);
@@ -281,7 +297,11 @@ export default function VoiceSettingsPanel({
                 className="w-full bg-neutral-950 border border-neutral-850 text-xs rounded-xl p-2.5 text-neutral-300 outline-none focus:border-purple-650 transition-all font-sans cursor-pointer"
               >
                 {voices.map((v) => (
-                  <option key={v.code} value={v.code} className="bg-neutral-950">
+                  <option
+                    key={v.code}
+                    value={v.code}
+                    className="bg-neutral-950"
+                  >
                     {v.label}
                   </option>
                 ))}
@@ -319,12 +339,26 @@ export default function VoiceSettingsPanel({
           {/* Premium sound visualizer animation */}
           {isPlaying && (
             <div className="flex items-center justify-center gap-1 bg-purple-950/20 border border-purple-900/30 rounded-xl p-2.5 animate-fade-in">
-              <span className="text-[10px] font-mono text-purple-400 mr-2">Synthesizing & Playing Preview...</span>
+              <span className="text-[10px] font-mono text-purple-400 mr-2">
+                Synthesizing & Playing Preview...
+              </span>
               <div className="flex items-end gap-0.5 h-3">
-                <span className="w-0.5 bg-purple-400 rounded-full animate-bounce h-2" style={{ animationDelay: "0.1s" }} />
-                <span className="w-0.5 bg-purple-400 rounded-full animate-bounce h-3" style={{ animationDelay: "0.2s" }} />
-                <span className="w-0.5 bg-purple-400 rounded-full animate-bounce h-1.5" style={{ animationDelay: "0.3s" }} />
-                <span className="w-0.5 bg-purple-400 rounded-full animate-bounce h-2.5" style={{ animationDelay: "0.4s" }} />
+                <span
+                  className="w-0.5 bg-purple-400 rounded-full animate-bounce h-2"
+                  style={{ animationDelay: "0.1s" }}
+                />
+                <span
+                  className="w-0.5 bg-purple-400 rounded-full animate-bounce h-3"
+                  style={{ animationDelay: "0.2s" }}
+                />
+                <span
+                  className="w-0.5 bg-purple-400 rounded-full animate-bounce h-1.5"
+                  style={{ animationDelay: "0.3s" }}
+                />
+                <span
+                  className="w-0.5 bg-purple-400 rounded-full animate-bounce h-2.5"
+                  style={{ animationDelay: "0.4s" }}
+                />
               </div>
             </div>
           )}

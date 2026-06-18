@@ -64,9 +64,12 @@ export default function VolumeAndProgressPanel({
       .trim()
       .split(/\s+/)
       .filter((w) => w.length > 0).length;
-    
+
     const newDuration = text.trim()
-      ? Math.max(2.5, Math.min(12.0, parseFloat((words / 2.2 + 0.8).toFixed(1))))
+      ? Math.max(
+          2.5,
+          Math.min(12.0, parseFloat((words / 2.2 + 0.8).toFixed(1)))
+        )
       : 3.0; // default for empty/blank panels
 
     setPanels((prev) =>
@@ -178,12 +181,14 @@ export default function VolumeAndProgressPanel({
           <button
             onClick={() => setShowCustomizer(!showCustomizer)}
             className={`w-full py-2 px-3 bg-neutral-950/40 hover:bg-neutral-950 border border-neutral-850 hover:border-neutral-750 rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-between cursor-pointer ${
-              showCustomizer ? "text-purple-400 border-purple-900/60" : "text-neutral-350"
+              showCustomizer
+                ? "text-purple-400 border-purple-900/60"
+                : "text-neutral-350"
             }`}
           >
             <span className="flex items-center gap-1.5">
-              <Sliders className="h-3.5 w-3.5 text-purple-400" />
-              ✦ Quick Scene Customizer
+              <Sliders className="h-3.5 w-3.5 text-purple-400" />✦ Quick Scene
+              Customizer
             </span>
             {showCustomizer ? (
               <ChevronUp className="h-3.5 w-3.5" />
@@ -238,9 +243,12 @@ export default function VolumeAndProgressPanel({
                       ].map((preset) => (
                         <button
                           key={preset.code}
-                          onClick={() => handleUpdateField("filter_preset", preset.code)}
+                          onClick={() =>
+                            handleUpdateField("filter_preset", preset.code)
+                          }
                           className={`py-1 px-1.5 rounded-lg text-[9px] font-mono border transition-all cursor-pointer truncate ${
-                            (activeStoryboardPanel.filter_preset || "") === preset.code
+                            (activeStoryboardPanel.filter_preset || "") ===
+                            preset.code
                               ? "bg-purple-650 text-white border-purple-550 shadow-md"
                               : "bg-neutral-955 text-neutral-400 border-neutral-850 hover:bg-neutral-850 hover:text-neutral-350"
                           }`}
@@ -268,7 +276,12 @@ export default function VolumeAndProgressPanel({
                         min={50}
                         max={150}
                         value={activeStoryboardPanel.brightness ?? 100}
-                        onChange={(e) => handleUpdateField("brightness", Number(e.target.value))}
+                        onChange={(e) =>
+                          handleUpdateField(
+                            "brightness",
+                            Number(e.target.value)
+                          )
+                        }
                         className="w-full h-1 bg-neutral-950 rounded-lg appearance-none cursor-pointer accent-purple-500"
                       />
                     </div>
@@ -277,7 +290,8 @@ export default function VolumeAndProgressPanel({
                     <div className="space-y-1">
                       <div className="flex justify-between items-center text-[9px] font-mono text-neutral-500">
                         <span className="flex items-center gap-1">
-                          <Contrast className="h-3 w-3 text-purple-400" /> Contrast
+                          <Contrast className="h-3 w-3 text-purple-400" />{" "}
+                          Contrast
                         </span>
                         <span className="text-neutral-350 font-bold">
                           {activeStoryboardPanel.contrast ?? 100}%
@@ -288,7 +302,9 @@ export default function VolumeAndProgressPanel({
                         min={50}
                         max={150}
                         value={activeStoryboardPanel.contrast ?? 100}
-                        onChange={(e) => handleUpdateField("contrast", Number(e.target.value))}
+                        onChange={(e) =>
+                          handleUpdateField("contrast", Number(e.target.value))
+                        }
                         className="w-full h-1 bg-neutral-950 rounded-lg appearance-none cursor-pointer accent-purple-500"
                       />
                     </div>
@@ -308,7 +324,12 @@ export default function VolumeAndProgressPanel({
                         min={50}
                         max={150}
                         value={activeStoryboardPanel.saturation ?? 100}
-                        onChange={(e) => handleUpdateField("saturation", Number(e.target.value))}
+                        onChange={(e) =>
+                          handleUpdateField(
+                            "saturation",
+                            Number(e.target.value)
+                          )
+                        }
                         className="w-full h-1 bg-neutral-950 rounded-lg appearance-none cursor-pointer accent-purple-500"
                       />
                     </div>
@@ -319,14 +340,21 @@ export default function VolumeAndProgressPanel({
                         Noir Grayscale
                       </span>
                       <button
-                        onClick={() => handleUpdateField("grayscale", !activeStoryboardPanel.grayscale)}
+                        onClick={() =>
+                          handleUpdateField(
+                            "grayscale",
+                            !activeStoryboardPanel.grayscale
+                          )
+                        }
                         className={`px-2.5 py-1 text-[9px] font-mono rounded-lg transition-all font-bold cursor-pointer ${
                           activeStoryboardPanel.grayscale
                             ? "bg-purple-650 text-white border border-purple-550 shadow-sm"
                             : "bg-neutral-900 text-neutral-450 border border-neutral-800"
                         }`}
                       >
-                        {activeStoryboardPanel.grayscale ? "ENABLED" : "DISABLED"}
+                        {activeStoryboardPanel.grayscale
+                          ? "ENABLED"
+                          : "DISABLED"}
                       </button>
                     </div>
                   </div>
@@ -358,7 +386,9 @@ export default function VolumeAndProgressPanel({
                       </label>
                       <select
                         value={activeStoryboardPanel.motion_type ?? ""}
-                        onChange={(e) => handleUpdateField("motion_type", e.target.value)}
+                        onChange={(e) =>
+                          handleUpdateField("motion_type", e.target.value)
+                        }
                         className="w-full bg-neutral-955 border border-neutral-850 text-[11px] rounded-xl p-2.5 text-neutral-300 outline-none focus:border-purple-650 transition-all font-mono cursor-pointer"
                       >
                         <option value="">AI Will Decide</option>

@@ -7,8 +7,9 @@ Project History and Panel management routes.
 
 import logging
 from typing import List, Optional, Any, Dict
-from fastapi import APIRouter, HTTPException, Path, Body
+from fastapi import APIRouter, HTTPException, Path, Body, Depends
 from pydantic import BaseModel, Field
+from routes.auth_routes import get_current_user
 
 import database.db as db
 
@@ -55,10 +56,10 @@ class PanelsSaveRequest(BaseModel):
 # ─── Routes ───────────────────────────────────────────────────────────────────
 
 @router.get("", summary="Get all projects")
-async def get_projects():
+async def get_projects(current_user: dict = Depends(get_current_user)):
     try:
-        logger.info("[Database] Fetching all project histories from local SQLite...")
-        projects = db.get_all_projects()
+        logger.info(f"[Database] Fetching project histories for user {current_user['user_id']} from local SQLite...")
+        projects = db.get_all_projects(user_id=current_user['user_id'])
         logger.info(f"[Database] Retrieved {len(projects)} projects.")
         return {"success": True, "projects": projects}
     except Exception as e:
@@ -67,13 +68,22 @@ async def get_projects():
 
 
 @router.get("/{projectId}", summary="Get a project and its panels")
-async def get_single_project(projectId: str = Path(..., description="Project ID")):
+async def get_single_project(
+    projectId: str = Path(..., description="Project ID"),
+    current_user: dict = Depends(get_current_user)
+):
     try:
         logger.info(f"[Database] Querying project details and panels for: {projectId}")
         project = db.get_project(projectId)
         if not project:
             logger.warning(f"[Database] Project {projectId} not found.")
             raise HTTPException(status_code=404, detail="Project not found.")
+        
+        # Verify ownership
+        if project.get("user_id") != current_user["user_id"]:
+            logger.warning(f"[Database] Access denied for user {current_user['user_id']} to project {projectId}")
+            raise HTTPException(status_code=403, detail="Access denied.")
+
         panels = db.get_panels(projectId)
         logger.info(f"[Database] Project {projectId} found with {len(panels)} panels.")
         return {"success": True, "project": project, "panels": panels}
@@ -85,9 +95,9 @@ async def get_single_project(projectId: str = Path(..., description="Project ID"
 
 
 @router.post("", summary="Create a new project entry")
-async def create_project(body: ProjectCreateRequest):
+async def create_project(body: ProjectCreateRequest, current_user: dict = Depends(get_current_user)):
     try:
-        logger.info(f"[Database] Attempting to create new project: {body.project_id}")
+        logger.info(f"[Database] Attempting to create new project: {body.project_id} for user {current_user['user_id']}")
         # Check if project already exists to avoid UniqueConstraint errors
         existing = db.get_project(body.project_id)
         if existing:
@@ -102,7 +112,8 @@ async def create_project(body: ProjectCreateRequest):
             "episode": body.episode,
             "status": "pending",
             "panels_count": body.panels_count,
-            "video_url": body.video_url
+            "video_url": body.video_url,
+            "user_id": current_user["user_id"]
         })
         logger.info(f"[Database] Created project {body.project_id} successfully: '{body.title}'")
         return {"success": True, "project_id": body.project_id}
@@ -112,7 +123,11 @@ async def create_project(body: ProjectCreateRequest):
 
 
 @router.post("/{projectId}/panels", summary="Save storyboard panels for a project")
-async def save_project_panels(projectId: str = Path(...), body: PanelsSaveRequest = Body(...)):
+async def save_project_panels(
+    projectId: str = Path(...),
+    body: PanelsSaveRequest = Body(...),
+    current_user: dict = Depends(get_current_user)
+):
     try:
         logger.info(f"[Database] Saving {len(body.panels)} panels for project: {projectId}")
         # Check if project exists
@@ -120,6 +135,11 @@ async def save_project_panels(projectId: str = Path(...), body: PanelsSaveReques
         if not project:
             logger.warning(f"[Database] Cannot save panels, project {projectId} not found.")
             raise HTTPException(status_code=404, detail="Project not found.")
+
+        # Verify ownership
+        if project.get("user_id") != current_user["user_id"]:
+            logger.warning(f"[Database] Access denied for user {current_user['user_id']} to modify project {projectId}")
+            raise HTTPException(status_code=403, detail="Access denied.")
 
         # Re-map panel items to database format
         db_panels = []
@@ -158,13 +178,19 @@ async def save_project_panels(projectId: str = Path(...), body: PanelsSaveReques
 
 
 @router.delete("/{projectId}", summary="Delete a project and its panels")
-async def delete_single_project(projectId: str = Path(...)):
+async def delete_single_project(projectId: str = Path(...), current_user: dict = Depends(get_current_user)):
     try:
         logger.info(f"[Database] Deleting project and panels for: {projectId}")
         project = db.get_project(projectId)
         if not project:
             logger.warning(f"[Database] Project {projectId} not found for deletion.")
             raise HTTPException(status_code=404, detail="Project not found.")
+
+        # Verify ownership
+        if project.get("user_id") != current_user["user_id"]:
+            logger.warning(f"[Database] Access denied for user {current_user['user_id']} to delete project {projectId}")
+            raise HTTPException(status_code=403, detail="Access denied.")
+
         db.delete_project(projectId)
         logger.info(f"[Database] Deleted project and panels successfully: {projectId}")
         return {"success": True}
@@ -179,15 +205,16 @@ class BatchDeleteRequest(BaseModel):
     project_ids: List[str] = Field(..., description="List of Project IDs to delete")
 
 @router.post("/batch-delete", summary="Bulk delete multiple projects")
-async def batch_delete_projects(body: BatchDeleteRequest):
+async def batch_delete_projects(body: BatchDeleteRequest, current_user: dict = Depends(get_current_user)):
     try:
-        logger.info(f"[Database] Bulk deleting {len(body.project_ids)} projects...")
+        logger.info(f"[Database] Bulk deleting {len(body.project_ids)} projects for user {current_user['user_id']}...")
         deleted_count = 0
         for pid in body.project_ids:
             project = db.get_project(pid)
             if project:
-                db.delete_project(pid)
-                deleted_count += 1
+                if project.get("user_id") == current_user["user_id"]:
+                    db.delete_project(pid)
+                    deleted_count += 1
         logger.info(f"[Database] Successfully deleted {deleted_count} projects out of {len(body.project_ids)} requested.")
         return {"success": True, "deleted_count": deleted_count}
     except Exception as e:

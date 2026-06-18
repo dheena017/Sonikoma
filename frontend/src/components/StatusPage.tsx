@@ -31,35 +31,49 @@ export default function StatusPage({
   const [modelsError, setModelsError] = useState<string | null>(null);
   const [filterQuery, setFilterQuery] = useState("");
   const [selectedModel, setSelectedModel] = useState<any | null>(null);
-  const [selectedProvider, setSelectedProvider] = useState<"gemini" | "huggingface" | "openai" | "anthropic">("gemini");
+  const [selectedProvider, setSelectedProvider] = useState<
+    "gemini" | "huggingface" | "openai" | "anthropic"
+  >("gemini");
 
   // Latency & Connection Tester states
   const [testPrompt, setTestPrompt] = useState("Say: Connection Successful!");
   const [testingModelId, setTestingModelId] = useState<string | null>(null);
   const [testResult, setTestResult] = useState<any | null>(null);
+  const [showFreeOnly, setShowFreeOnly] = useState(false);
 
   const activeFetch = fetchWithInterceptor || fetch;
 
   const getPricingTag = (provider: string, modelName: string) => {
     if (provider === "huggingface") {
-      return { text: "Free", className: "bg-emerald-950/40 text-emerald-400 border-emerald-800/30" };
+      return {
+        text: "Free",
+        className: "bg-emerald-950/40 text-emerald-400 border-emerald-800/30",
+      };
     }
     if (provider === "gemini") {
-      return { text: "Free Tier", className: "bg-purple-950/40 text-purple-300 border-purple-800/30" };
+      return {
+        text: "Free Tier",
+        className: "bg-purple-950/40 text-purple-300 border-purple-800/30",
+      };
     }
-    return { text: "Paid", className: "bg-amber-950/40 text-amber-400 border-amber-800/30" };
+    return {
+      text: "Paid",
+      className: "bg-amber-950/40 text-amber-400 border-amber-800/30",
+    };
   };
 
-  const fetchModels = async (prov: "gemini" | "huggingface" | "openai" | "anthropic" = selectedProvider) => {
+  const fetchModels = async (
+    prov: "gemini" | "huggingface" | "openai" | "anthropic" = selectedProvider
+  ) => {
     setLoadingModels(true);
     setModelsError(null);
     try {
       const res = await activeFetch("/api/list-models", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ provider: prov })
+        body: JSON.stringify({ provider: prov }),
       });
       const data = await res.json();
       if (data.success) {
@@ -74,13 +88,16 @@ export default function StatusPage({
     }
   };
 
-  const handleProviderChange = (prov: "gemini" | "huggingface" | "openai" | "anthropic") => {
+  const handleProviderChange = (
+    prov: "gemini" | "huggingface" | "openai" | "anthropic"
+  ) => {
     setSelectedProvider(prov);
     setSelectedModel(null);
     setFilterQuery("");
     setModels([]);
     setTestResult(null);
     setTestPrompt("Say: Connection Successful!");
+    setShowFreeOnly(false);
     fetchModels(prov);
   };
 
@@ -101,13 +118,13 @@ export default function StatusPage({
       const res = await activeFetch("/api/test-model-latency", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           provider: selectedProvider,
           model: modelName,
-          prompt: testPrompt
-        })
+          prompt: testPrompt,
+        }),
       });
       const data = await res.json();
       setTestResult(data);
@@ -481,12 +498,17 @@ export default function StatusPage({
               </div>
 
               <p className="text-[9px] text-neutral-500 leading-3.5">
-                Note: A missing Gemini API Key disables AI storyboard generation. Missing Hugging Face, OpenAI, or Anthropic keys disable optional models and benchmarks for those providers.
+                Note: A missing Gemini API Key disables AI storyboard
+                generation. Missing Hugging Face, OpenAI, or Anthropic keys
+                disable optional models and benchmarks for those providers.
               </p>
             </div>
           </div>
-                {/* Gemini, Hugging Face, OpenAI & Anthropic Model Inspector */}
-          {(healthData?.env?.GEMINI_API_KEY || healthData?.env?.HUGGINGFACE_API_KEY || healthData?.env?.OPENAI_API_KEY || healthData?.env?.ANTHROPIC_API_KEY) && (
+          {/* Gemini, Hugging Face, OpenAI & Anthropic Model Inspector */}
+          {(healthData?.env?.GEMINI_API_KEY ||
+            healthData?.env?.HUGGINGFACE_API_KEY ||
+            healthData?.env?.OPENAI_API_KEY ||
+            healthData?.env?.ANTHROPIC_API_KEY) && (
             <div className="bg-neutral-955/40 border border-neutral-850 p-6 rounded-3xl space-y-4 animate-[fadeIn_0.18s_ease-out]">
               <h3 className="text-sm font-bold text-white flex items-center justify-between border-b border-neutral-800 pb-3">
                 <div className="flex items-center gap-2">
@@ -506,8 +528,8 @@ export default function StatusPage({
                   <button
                     onClick={() => handleProviderChange("gemini")}
                     className={`flex-1 py-1.5 text-center rounded-lg transition-all cursor-pointer ${
-                      selectedProvider === "gemini" 
-                        ? "bg-purple-650 text-white font-bold" 
+                      selectedProvider === "gemini"
+                        ? "bg-purple-650 text-white font-bold"
                         : "text-neutral-400 hover:text-white"
                     }`}
                   >
@@ -518,8 +540,8 @@ export default function StatusPage({
                   <button
                     onClick={() => handleProviderChange("huggingface")}
                     className={`flex-1 py-1.5 text-center rounded-lg transition-all cursor-pointer ${
-                      selectedProvider === "huggingface" 
-                        ? "bg-purple-650 text-white font-bold" 
+                      selectedProvider === "huggingface"
+                        ? "bg-purple-650 text-white font-bold"
                         : "text-neutral-400 hover:text-white"
                     }`}
                   >
@@ -530,8 +552,8 @@ export default function StatusPage({
                   <button
                     onClick={() => handleProviderChange("openai")}
                     className={`flex-1 py-1.5 text-center rounded-lg transition-all cursor-pointer ${
-                      selectedProvider === "openai" 
-                        ? "bg-purple-650 text-white font-bold" 
+                      selectedProvider === "openai"
+                        ? "bg-purple-650 text-white font-bold"
                         : "text-neutral-400 hover:text-white"
                     }`}
                   >
@@ -542,8 +564,8 @@ export default function StatusPage({
                   <button
                     onClick={() => handleProviderChange("anthropic")}
                     className={`flex-1 py-1.5 text-center rounded-lg transition-all cursor-pointer ${
-                      selectedProvider === "anthropic" 
-                        ? "bg-purple-650 text-white font-bold" 
+                      selectedProvider === "anthropic"
+                        ? "bg-purple-650 text-white font-bold"
                         : "text-neutral-400 hover:text-white"
                     }`}
                   >
@@ -551,16 +573,32 @@ export default function StatusPage({
                   </button>
                 )}
               </div>
-                        {models.length === 0 && !loadingModels && (
+              {models.length === 0 && !loadingModels && (
                 <div className="text-center py-4">
                   <p className="text-xs text-neutral-400 mb-3 font-mono leading-relaxed">
-                    Query the active {selectedProvider === "gemini" ? "Gemini" : selectedProvider === "huggingface" ? "Hugging Face" : selectedProvider === "openai" ? "OpenAI" : "Anthropic"} configurations to explore supported AI models.
+                    Query the active{" "}
+                    {selectedProvider === "gemini"
+                      ? "Gemini"
+                      : selectedProvider === "huggingface"
+                      ? "Hugging Face"
+                      : selectedProvider === "openai"
+                      ? "OpenAI"
+                      : "Anthropic"}{" "}
+                    configurations to explore supported AI models.
                   </p>
                   <button
                     onClick={() => fetchModels(selectedProvider)}
                     className="px-4 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-mono font-bold transition-all cursor-pointer shadow-lg shadow-purple-950/40 hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    Fetch {selectedProvider === "gemini" ? "Gemini" : selectedProvider === "huggingface" ? "Hugging Face" : selectedProvider === "openai" ? "OpenAI" : "Anthropic"} Matrix
+                    Fetch{" "}
+                    {selectedProvider === "gemini"
+                      ? "Gemini"
+                      : selectedProvider === "huggingface"
+                      ? "Hugging Face"
+                      : selectedProvider === "openai"
+                      ? "OpenAI"
+                      : "Anthropic"}{" "}
+                    Matrix
                   </button>
                   {modelsError && (
                     <p className="text-xs text-rose-455 mt-2 font-mono">
@@ -573,21 +611,51 @@ export default function StatusPage({
               {loadingModels && (
                 <div className="text-center py-6 text-xs text-neutral-500 font-mono flex items-center justify-center gap-2">
                   <RefreshCw className="h-3.5 w-3.5 animate-spin text-purple-400" />
-                  Querying {selectedProvider === "gemini" ? "Gemini" : selectedProvider === "huggingface" ? "Hugging Face" : selectedProvider === "openai" ? "OpenAI" : "Anthropic"} models...
+                  Querying{" "}
+                  {selectedProvider === "gemini"
+                    ? "Gemini"
+                    : selectedProvider === "huggingface"
+                    ? "Hugging Face"
+                    : selectedProvider === "openai"
+                    ? "OpenAI"
+                    : "Anthropic"}{" "}
+                  models...
                 </div>
               )}
 
               {models.length > 0 && (
                 <div className="space-y-3">
-                  {/* Search Input */}
-                  <div className="relative">
+                  {/* Filters Row */}
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <input
                       type="text"
-                      placeholder={`Search ${selectedProvider === "gemini" ? "Gemini" : selectedProvider === "huggingface" ? "HF" : selectedProvider === "openai" ? "OpenAI" : "Anthropic"} models...`}
+                      placeholder={`Search ${
+                        selectedProvider === "gemini"
+                          ? "Gemini"
+                          : selectedProvider === "huggingface"
+                          ? "HF"
+                          : selectedProvider === "openai"
+                          ? "OpenAI"
+                          : "Anthropic"
+                      } models...`}
                       value={filterQuery}
                       onChange={(e) => setFilterQuery(e.target.value)}
-                      className="w-full bg-neutral-900 border border-neutral-800 text-white rounded-xl px-3 py-2 text-xs font-mono placeholder:text-neutral-500 focus:outline-none focus:border-purple-500 transition-colors"
+                      className="flex-1 bg-neutral-900 border border-neutral-800 text-white rounded-xl px-3 py-2 text-xs font-mono placeholder:text-neutral-500 focus:outline-none focus:border-purple-500 transition-colors"
                     />
+                    {selectedProvider === "gemini" && (
+                      <button
+                        onClick={() => setShowFreeOnly(!showFreeOnly)}
+                        className={`px-3 py-2 rounded-xl border text-xs font-mono transition-all duration-200 cursor-pointer shrink-0 ${
+                          showFreeOnly
+                            ? "bg-purple-950/40 text-purple-300 border-purple-500/40 font-bold"
+                            : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
+                        }`}
+                      >
+                        {showFreeOnly
+                          ? "⚡ Free Tier Only"
+                          : "Show Free Tier Only"}
+                      </button>
+                    )}
                   </div>
 
                   {/* List Container */}
@@ -596,6 +664,19 @@ export default function StatusPage({
                       .filter((m) =>
                         m.name.toLowerCase().includes(filterQuery.toLowerCase())
                       )
+                      .filter((m) => {
+                        if (!showFreeOnly) return true;
+                        if (selectedProvider === "huggingface") return true;
+                        if (selectedProvider === "gemini") {
+                          const name = m.name.toLowerCase();
+                          return (
+                            name.includes("flash") ||
+                            name.includes("lite") ||
+                            name.includes("8b")
+                          );
+                        }
+                        return false;
+                      })
                       .map((m) => (
                         <div
                           key={m.fullName}
@@ -607,44 +688,73 @@ export default function StatusPage({
                           }`}
                         >
                           <div className="flex items-center justify-between">
-                            <span className="font-semibold text-neutral-200 truncate pr-2" title={m.name}>
+                            <span
+                              className="font-semibold text-neutral-200 truncate pr-2"
+                              title={m.name}
+                            >
                               {m.name}
                             </span>
                             <div className="flex items-center gap-1.5 shrink-0">
-                              <span className={`text-[8px] px-1.5 py-0.5 rounded border font-bold uppercase ${getPricingTag(selectedProvider, m.name).className}`}>
+                              <span
+                                className={`text-[8px] px-1.5 py-0.5 rounded border font-bold uppercase ${
+                                  getPricingTag(selectedProvider, m.name)
+                                    .className
+                                }`}
+                              >
                                 {getPricingTag(selectedProvider, m.name).text}
                               </span>
                               <span className="text-[9px] bg-neutral-950 text-neutral-400 px-1.5 py-0.5 rounded border border-white/5 uppercase font-bold">
-                                {selectedProvider === "gemini" 
-                                  ? (m.supportedActions.includes("generateContent") ? "Gen" : "Embed")
+                                {selectedProvider === "gemini"
+                                  ? m.supportedActions.includes(
+                                      "generateContent"
+                                    )
+                                    ? "Gen"
+                                    : "Embed"
                                   : selectedProvider === "huggingface"
-                                  ? (m.supportedActions[0] || "Model")
-                                  : (m.supportedActions[0] || "Chat")
-                                }
+                                  ? m.supportedActions[0] || "Model"
+                                  : m.supportedActions[0] || "Chat"}
                               </span>
                             </div>
                           </div>
-                          
+
                           {selectedModel?.fullName === m.fullName ? (
                             <div className="mt-2 pt-2 border-t border-neutral-800 space-y-2 text-[10px] leading-relaxed text-neutral-350">
                               {selectedProvider === "gemini" ? (
                                 <>
                                   <div>
-                                    <span className="text-neutral-550 font-bold">Display Name:</span> {m.displayName || "N/A"}
+                                    <span className="text-neutral-550 font-bold">
+                                      Display Name:
+                                    </span>{" "}
+                                    {m.displayName || "N/A"}
                                   </div>
                                   {m.description && (
                                     <div>
-                                      <span className="text-neutral-555">Description:</span> {m.description}
+                                      <span className="text-neutral-555">
+                                        Description:
+                                      </span>{" "}
+                                      {m.description}
                                     </div>
                                   )}
                                   <div className="grid grid-cols-2 gap-2 pt-1">
                                     <div className="bg-black/20 p-1.5 rounded border border-white/5">
-                                      <span className="text-neutral-500 block uppercase text-[8px] tracking-wider">Input Limit</span>
-                                      <span className="text-neutral-200 font-bold">{m.inputTokenLimit ? m.inputTokenLimit.toLocaleString() : "-"}</span>
+                                      <span className="text-neutral-500 block uppercase text-[8px] tracking-wider">
+                                        Input Limit
+                                      </span>
+                                      <span className="text-neutral-200 font-bold">
+                                        {m.inputTokenLimit
+                                          ? m.inputTokenLimit.toLocaleString()
+                                          : "-"}
+                                      </span>
                                     </div>
                                     <div className="bg-black/20 p-1.5 rounded border border-white/5">
-                                      <span className="text-neutral-500 block uppercase text-[8px] tracking-wider">Output Limit</span>
-                                      <span className="text-neutral-200 font-bold">{m.outputTokenLimit ? m.outputTokenLimit.toLocaleString() : "-"}</span>
+                                      <span className="text-neutral-500 block uppercase text-[8px] tracking-wider">
+                                        Output Limit
+                                      </span>
+                                      <span className="text-neutral-200 font-bold">
+                                        {m.outputTokenLimit
+                                          ? m.outputTokenLimit.toLocaleString()
+                                          : "-"}
+                                      </span>
                                     </div>
                                   </div>
                                 </>
@@ -652,28 +762,48 @@ export default function StatusPage({
                                 <>
                                   {m.description && (
                                     <div>
-                                      <span className="text-neutral-500">Meta:</span> {m.description}
+                                      <span className="text-neutral-500">
+                                        Meta:
+                                      </span>{" "}
+                                      {m.description}
                                     </div>
                                   )}
                                   <div className="flex justify-between items-center text-[10px] text-neutral-500 pt-1 border-t border-neutral-850">
-                                    <span>Task: {m.supportedActions[0] || "N/A"}</span>
+                                    <span>
+                                      Task: {m.supportedActions[0] || "N/A"}
+                                    </span>
                                   </div>
                                 </>
                               ) : (
                                 <>
                                   {m.description && (
                                     <div>
-                                      <span className="text-neutral-500 font-bold">Description:</span> {m.description}
+                                      <span className="text-neutral-500 font-bold">
+                                        Description:
+                                      </span>{" "}
+                                      {m.description}
                                     </div>
                                   )}
                                   <div className="grid grid-cols-2 gap-2 pt-1">
                                     <div className="bg-black/20 p-1.5 rounded border border-white/5">
-                                      <span className="text-neutral-500 block uppercase text-[8px] tracking-wider">Input Limit</span>
-                                      <span className="text-neutral-200 font-bold">{m.inputTokenLimit ? m.inputTokenLimit.toLocaleString() : "-"}</span>
+                                      <span className="text-neutral-500 block uppercase text-[8px] tracking-wider">
+                                        Input Limit
+                                      </span>
+                                      <span className="text-neutral-200 font-bold">
+                                        {m.inputTokenLimit
+                                          ? m.inputTokenLimit.toLocaleString()
+                                          : "-"}
+                                      </span>
                                     </div>
                                     <div className="bg-black/20 p-1.5 rounded border border-white/5">
-                                      <span className="text-neutral-500 block uppercase text-[8px] tracking-wider">Output Limit</span>
-                                      <span className="text-neutral-200 font-bold">{m.outputTokenLimit ? m.outputTokenLimit.toLocaleString() : "-"}</span>
+                                      <span className="text-neutral-500 block uppercase text-[8px] tracking-wider">
+                                        Output Limit
+                                      </span>
+                                      <span className="text-neutral-200 font-bold">
+                                        {m.outputTokenLimit
+                                          ? m.outputTokenLimit.toLocaleString()
+                                          : "-"}
+                                      </span>
                                     </div>
                                   </div>
                                 </>
@@ -689,7 +819,9 @@ export default function StatusPage({
                                     type="text"
                                     placeholder="Enter test prompt..."
                                     value={testPrompt}
-                                    onChange={(e) => setTestPrompt(e.target.value)}
+                                    onChange={(e) =>
+                                      setTestPrompt(e.target.value)
+                                    }
                                     className="flex-1 bg-black/40 border border-neutral-800 text-neutral-200 rounded-lg px-2.5 py-1.5 text-[10px] font-mono focus:outline-none focus:border-purple-500 transition-colors"
                                     onClick={(e) => e.stopPropagation()}
                                   />
@@ -713,29 +845,52 @@ export default function StatusPage({
                                 </div>
 
                                 {testResult && (
-                                  <div className="bg-black/30 border border-neutral-850 p-2.5 rounded-lg space-y-1.5 text-[9px] font-mono leading-relaxed select-text" onClick={(e) => e.stopPropagation()}>
+                                  <div
+                                    className="bg-black/30 border border-neutral-850 p-2.5 rounded-lg space-y-1.5 text-[9px] font-mono leading-relaxed select-text"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
                                     <div className="flex justify-between items-center border-b border-neutral-900 pb-1.5">
-                                      <span className="text-neutral-500 uppercase">Status</span>
-                                      <span className={testResult.success ? "text-emerald-450 font-bold" : "text-rose-455 font-bold"}>
-                                        {testResult.success ? "SUCCESS" : "FAILED"}
+                                      <span className="text-neutral-500 uppercase">
+                                        Status
+                                      </span>
+                                      <span
+                                        className={
+                                          testResult.success
+                                            ? "text-emerald-450 font-bold"
+                                            : "text-rose-455 font-bold"
+                                        }
+                                      >
+                                        {testResult.success
+                                          ? "SUCCESS"
+                                          : "FAILED"}
                                       </span>
                                     </div>
                                     {testResult.success ? (
                                       <>
                                         <div className="flex justify-between items-center">
-                                          <span className="text-neutral-500 uppercase">Latency</span>
-                                          <span className="text-cyan-400 font-bold">{testResult.latencyMs} ms</span>
+                                          <span className="text-neutral-500 uppercase">
+                                            Latency
+                                          </span>
+                                          <span className="text-cyan-400 font-bold">
+                                            {testResult.latencyMs} ms
+                                          </span>
                                         </div>
-                                        {testResult.inputTokens !== undefined && (
+                                        {testResult.inputTokens !==
+                                          undefined && (
                                           <div className="flex justify-between items-center">
-                                            <span className="text-neutral-500 uppercase">Tokens</span>
+                                            <span className="text-neutral-500 uppercase">
+                                              Tokens
+                                            </span>
                                             <span className="text-neutral-300">
-                                              {testResult.inputTokens} in / {testResult.outputTokens} out
+                                              {testResult.inputTokens} in /{" "}
+                                              {testResult.outputTokens} out
                                             </span>
                                           </div>
                                         )}
                                         <div className="pt-1 border-t border-neutral-900 mt-1">
-                                          <span className="text-neutral-500 block uppercase mb-1">Response</span>
+                                          <span className="text-neutral-500 block uppercase mb-1">
+                                            Response
+                                          </span>
                                           <div className="bg-black/60 p-2 rounded text-neutral-200 overflow-x-auto whitespace-pre-wrap max-h-[100px] border border-neutral-900">
                                             {testResult.response}
                                           </div>
@@ -750,17 +905,32 @@ export default function StatusPage({
                                 )}
                               </div>
                             </div>
+                          ) : selectedProvider === "gemini" ||
+                            selectedProvider === "openai" ||
+                            selectedProvider === "anthropic" ? (
+                            <div className="flex justify-between items-center text-[10px] text-neutral-500 font-mono">
+                              <span>
+                                In:{" "}
+                                {m.inputTokenLimit
+                                  ? m.inputTokenLimit.toLocaleString()
+                                  : "-"}
+                              </span>
+                              <span>
+                                Out:{" "}
+                                {m.outputTokenLimit
+                                  ? m.outputTokenLimit.toLocaleString()
+                                  : "-"}
+                              </span>
+                            </div>
                           ) : (
-                            selectedProvider === "gemini" || selectedProvider === "openai" || selectedProvider === "anthropic" ? (
-                              <div className="flex justify-between items-center text-[10px] text-neutral-500 font-mono">
-                                <span>In: {m.inputTokenLimit ? m.inputTokenLimit.toLocaleString() : "-"}</span>
-                                <span>Out: {m.outputTokenLimit ? m.outputTokenLimit.toLocaleString() : "-"}</span>
-                              </div>
-                            ) : (
-                              <div className="flex justify-between items-center text-[10px] text-neutral-500 font-mono">
-                                <span>Library: {m.description.split("Library: ")[1]?.split(".")[0] || "N/A"}</span>
-                              </div>
-                            )
+                            <div className="flex justify-between items-center text-[10px] text-neutral-500 font-mono">
+                              <span>
+                                Library:{" "}
+                                {m.description
+                                  .split("Library: ")[1]
+                                  ?.split(".")[0] || "N/A"}
+                              </span>
+                            </div>
                           )}
                         </div>
                       ))}

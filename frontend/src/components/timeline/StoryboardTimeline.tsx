@@ -120,9 +120,15 @@ export default function StoryboardTimeline({
     // Adjust active currentPanelIndex to follow the dragged card
     if (currentPanelIndex === draggedIndex) {
       setCurrentPanelIndex(targetIdx);
-    } else if (currentPanelIndex > draggedIndex && currentPanelIndex <= targetIdx) {
+    } else if (
+      currentPanelIndex > draggedIndex &&
+      currentPanelIndex <= targetIdx
+    ) {
       setCurrentPanelIndex(currentPanelIndex - 1);
-    } else if (currentPanelIndex < draggedIndex && currentPanelIndex >= targetIdx) {
+    } else if (
+      currentPanelIndex < draggedIndex &&
+      currentPanelIndex >= targetIdx
+    ) {
       setCurrentPanelIndex(currentPanelIndex + 1);
     }
 
@@ -135,8 +141,14 @@ export default function StoryboardTimeline({
   const [isCleaningBubbles, setIsCleaningBubbles] = useState(false);
   const [isBatchMerging, setIsBatchMerging] = useState(false);
 
-  const [cropProgress, setCropProgress] = useState<{ current: number; total: number } | null>(null);
-  const [cleanProgress, setCleanProgress] = useState<{ current: number; total: number } | null>(null);
+  const [cropProgress, setCropProgress] = useState<{
+    current: number;
+    total: number;
+  } | null>(null);
+  const [cleanProgress, setCleanProgress] = useState<{
+    current: number;
+    total: number;
+  } | null>(null);
 
   const togglePanelSelection = (id: number) => {
     setSelectedPanelIds((prev) => {
@@ -251,13 +263,19 @@ export default function StoryboardTimeline({
       setPanels(updatedPanels);
 
       if (successCount > 0) {
-        addNotification?.(`Cleaned speech bubbles for ${successCount} panel(s).`, "success");
+        addNotification?.(
+          `Cleaned speech bubbles for ${successCount} panel(s).`,
+          "success"
+        );
         setConsoleLogs?.((prev) => [
           `[Speech Bubbles] Completed cleaning speech bubbles. Success: ${successCount}, Errors: ${errorCount}`,
           ...prev,
         ]);
       } else {
-        addNotification?.("Failed to clean speech bubbles for selected panels.", "error");
+        addNotification?.(
+          "Failed to clean speech bubbles for selected panels.",
+          "error"
+        );
       }
     } catch (err: any) {
       console.error("[Speech Bubbles] Critical error:", err);
@@ -317,7 +335,11 @@ export default function StoryboardTimeline({
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
 
-          if (data.success && Array.isArray(data.panels) && data.panels.length > 0) {
+          if (
+            data.success &&
+            Array.isArray(data.panels) &&
+            data.panels.length > 0
+          ) {
             const newSubPanels: GeneratedPanel[] = [];
 
             for (let i = 0; i < data.panels.length; i++) {
@@ -386,7 +408,9 @@ export default function StoryboardTimeline({
     }
 
     const selectedIds = Array.from(selectedPanelIds);
-    const sortedSelectedPanels = panels.filter((p) => selectedPanelIds.has(p.id));
+    const sortedSelectedPanels = panels.filter((p) =>
+      selectedPanelIds.has(p.id)
+    );
     const urls = sortedSelectedPanels.map((p) => p.image_url);
 
     setIsBatchMerging(true);
@@ -416,7 +440,9 @@ export default function StoryboardTimeline({
       const data = await response.json();
 
       if (data.url) {
-        const firstPanelIdx = panels.findIndex((p) => selectedPanelIds.has(p.id));
+        const firstPanelIdx = panels.findIndex((p) =>
+          selectedPanelIds.has(p.id)
+        );
         const firstPanel = panels[firstPanelIdx];
 
         const nextId = Math.max(...panels.map((p) => p.id), 0) + 1;
@@ -424,9 +450,18 @@ export default function StoryboardTimeline({
           ...firstPanel,
           id: nextId,
           image_url: data.url,
-          speech_text: sortedSelectedPanels.map((p) => p.speech_text).filter(Boolean).join(" \n "),
-          sfx: sortedSelectedPanels.map((p) => p.sfx).filter(Boolean).join(" | "),
-          duration: sortedSelectedPanels.reduce((sum, p) => sum + (p.duration || 4.5), 0),
+          speech_text: sortedSelectedPanels
+            .map((p) => p.speech_text)
+            .filter(Boolean)
+            .join(" \n "),
+          sfx: sortedSelectedPanels
+            .map((p) => p.sfx)
+            .filter(Boolean)
+            .join(" | "),
+          duration: sortedSelectedPanels.reduce(
+            (sum, p) => sum + (p.duration || 4.5),
+            0
+          ),
         };
 
         setPanels((prev) => {
@@ -470,7 +505,9 @@ export default function StoryboardTimeline({
       <rect x="15" y="15" width="770" height="420" rx="12" fill="none" stroke="#27272a" stroke-width="2" stroke-dasharray="8 6"/>
       <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="bold" font-size="20" fill="#71717a">✦ CUSTOM PANEL ✦</text>
     </svg>`;
-    const base64Svg = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgContent)));
+    const base64Svg =
+      "data:image/svg+xml;base64," +
+      btoa(unescape(encodeURIComponent(svgContent)));
 
     const newPanel: GeneratedPanel = {
       id: nextId,
@@ -484,7 +521,10 @@ export default function StoryboardTimeline({
 
     setPanels((prev) => [...prev, newPanel]);
     setCurrentPanelIndex(panels.length);
-    addNotification?.("Created custom blank panel card at the end of the timeline.", "success");
+    addNotification?.(
+      "Created custom blank panel card at the end of the timeline.",
+      "success"
+    );
   };
 
   const handleUploadImagePanel = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -514,7 +554,10 @@ export default function StoryboardTimeline({
 
       setPanels((prev) => [...prev, newPanel]);
       setCurrentPanelIndex(panels.length);
-      addNotification?.(`Uploaded and inserted "${file.name}" at the end of the timeline.`, "success");
+      addNotification?.(
+        `Uploaded and inserted "${file.name}" at the end of the timeline.`,
+        "success"
+      );
     };
 
     reader.onerror = () => {
