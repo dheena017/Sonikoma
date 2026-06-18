@@ -5,6 +5,7 @@ dist/
 coverage/
 .DS_Store
 *.log
+*scraped_html/
 .env*
 !.env.example
 # Local SQLite database files
