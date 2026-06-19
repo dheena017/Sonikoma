@@ -13,4 +13,7 @@ For each panel, detect its bounding box boundaries as coordinates (0 to 100) rel
 - cropLeft: left boundary of the panel (0 is left edge, 100 is right)
 - cropRight: right boundary of the panel (0 is left edge, 100 is right)
   Make sure these are absolute coordinates from the top/left of the image, NOT margins.
+
+  {guidance_instructions}
+
   Return a JSON object containing a 'panels' array.

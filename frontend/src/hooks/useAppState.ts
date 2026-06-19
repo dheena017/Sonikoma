@@ -171,6 +171,8 @@ export function useAppState() {
   const [cropCannyHigh, setCropCannyHigh] = useState<number>(100);
   const [cropCloseKernelSize, setCropCloseKernelSize] = useState<number>(15);
   const [activeAutoCropTab, setActiveAutoCropTab] = useState<string>("general");
+  const [cropGuidance, setCropGuidance] = useState<string>("");
+  const [cropFocusMode, setCropFocusMode] = useState<string>("standard");
 
   // Notifications
   const [notifications, setNotifications] = useState<Notification[]>(() => {
@@ -230,6 +232,9 @@ export function useAppState() {
   const [isScraping, setIsScraping] = useState<boolean>(false);
   const [narrationStyle, setNarrationStyle] = useState<string>(
     () => localStorage.getItem("ai_comic_narration_style") || "long"
+  );
+  const [smartSlice, setSmartSlice] = useState<boolean>(
+    () => localStorage.getItem("ai_comic_smart_slice") !== "false"
   );
   const [scrapedTitle, setScrapedTitle] = useState<string>(
     "Overpowered S-Rank Recap"
@@ -476,6 +481,7 @@ export function useAppState() {
     localStorage.setItem("ai_comic_volume", volume.toString());
     localStorage.setItem("ai_comic_muted", isMuted.toString());
     localStorage.setItem("ai_comic_narration_style", narrationStyle);
+    localStorage.setItem("ai_comic_smart_slice", smartSlice.toString());
   }, [
     targetUrl,
     voiceActor,
@@ -487,6 +493,7 @@ export function useAppState() {
     volume,
     isMuted,
     narrationStyle,
+    smartSlice,
   ]);
 
   return {
@@ -582,6 +589,10 @@ export function useAppState() {
     setCropCloseKernelSize,
     activeAutoCropTab,
     setActiveAutoCropTab,
+    cropGuidance,
+    setCropGuidance,
+    cropFocusMode,
+    setCropFocusMode,
     notifications,
     errorPopup,
     setErrorPopup,
@@ -632,6 +643,8 @@ export function useAppState() {
     setSeriesSynopsis,
     projectId,
     setProjectId,
+    smartSlice,
+    setSmartSlice,
     clearAllNotifications: () => {
       setNotifications([]);
     },

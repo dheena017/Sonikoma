@@ -73,9 +73,18 @@ def spoof_referer(url: str) -> str:
             return "https://www.lezhin.com/"
         if "tapas" in host:
             return "https://tapas.io/"
-        if "manhwa" in host:
+        if "manhwatop" in host or "manhwa" in host:
             return "https://manhwatop.com/"
-        return f"{parsed.scheme}://{parsed.netloc}/"
+        if "manhuato" in host or "manhua" in host:
+            return "https://manhuato.com/"
+        
+        # Remove common CDN subdomains to construct a clean fallback base domain referer
+        clean_host = host
+        for prefix in ["cdn.", "img.", "images.", "pic.", "pics.", "static.", "assets.", "media.", "uploads.", "files.", "storage."]:
+            if clean_host.startswith(prefix):
+                clean_host = clean_host[len(prefix):]
+                break
+        return f"{parsed.scheme}://{clean_host}/"
     except Exception:
         return "https://www.webtoons.com/"
 
@@ -154,20 +163,48 @@ async def resolve_image_to_buffer(url_str: str, client: Optional[httpx.AsyncClie
         port = os.getenv("BACKEND_PORT", "5173")
         working_url = f"http://127.0.0.1:{port}{working_url}"
 
-    # 7. Remote fetch with referrer-bypass headers
+    # 7. Remote fetch with referrer-bypass headers & retry logic
+    import asyncio
     logger.info(f"[Image Utils] Fetching image from remote URL: {working_url[:60]}...")
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
         'Referer':    spoof_referer(working_url),
-        'Accept':     'image/*,*/*;q=0.8',
+        'Accept':     'image/webp,image/avif,image/jpeg,image/png,image/*,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
     }
 
-    if client:
-        response = await client.get(working_url, headers=headers)
-    else:
-        async with httpx.AsyncClient(follow_redirects=True, timeout=30.0) as new_client:
-            response = await new_client.get(working_url, headers=headers)
+    max_retries = 3
+    base_delay = 0.5
+    response = None
+    last_error = None
+
+    for attempt in range(max_retries):
+        try:
+            if client:
+                response = await client.get(working_url, headers=headers)
+            else:
+                async with httpx.AsyncClient(follow_redirects=True, timeout=30.0) as new_client:
+                    response = await new_client.get(working_url, headers=headers)
             
+            # Retry on 5xx or server disconnect codes
+            if response.status_code >= 500 and attempt < max_retries - 1:
+                delay = base_delay * (2 ** attempt)
+                logger.warning(f"[Image Utils] Fetch status {response.status_code} (attempt {attempt + 1}/{max_retries}) | waiting {delay:.2f}s for {working_url[:50]}")
+                await asyncio.sleep(delay)
+                continue
+            break
+        except (httpx.HTTPError, httpx.RequestError) as req_err:
+            last_error = req_err
+            if attempt < max_retries - 1:
+                delay = base_delay * (2 ** attempt)
+                logger.warning(f"[Image Utils] Fetch network error: {req_err} (attempt {attempt + 1}/{max_retries}) | waiting {delay:.2f}s for {working_url[:50]}")
+                await asyncio.sleep(delay)
+            else:
+                raise RuntimeError(f"Network error fetching image: {req_err} — {working_url}")
+
+    if not response:
+        raise RuntimeError(f"Failed to fetch image due to network errors: {last_error} — {working_url}")
+
     if response.status_code != 200:
         raise RuntimeError(f"Failed to fetch image: {response.status_code} — {working_url}")
 

@@ -29,36 +29,40 @@ export default defineConfig(({ mode }) => {
             if (!isNoisy) {
               console.log("[Vite Middleware] Incoming request:", req.method, req.url);
             }
-            if (req.url === "/start-backend" && req.method === "POST") {
-              const checkHealth = (): Promise<boolean> => {
-                return new Promise((resolve) => {
-                  const checkReq = http.get(`${backendTarget}/api/health`, (checkRes) => {
-                    if (
-                      checkRes.statusCode === 200 ||
-                      checkRes.statusCode === 307 ||
-                      checkRes.statusCode === 302
-                    ) {
-                      resolve(true);
-                    } else {
+            if (req.url?.startsWith("/start-backend") && req.method === "POST") {
+              try {
+                const checkHealth = (): Promise<boolean> => {
+                  return new Promise((resolve) => {
+                    try {
+                      const checkReq = http.get(`${backendTarget}/api/health`, (checkRes) => {
+                        if (
+                          checkRes.statusCode === 200 ||
+                          checkRes.statusCode === 307 ||
+                          checkRes.statusCode === 302
+                        ) {
+                          resolve(true);
+                        } else {
+                          resolve(false);
+                        }
+                      });
+                      checkReq.on("error", () => resolve(false));
+                      checkReq.setTimeout(550, () => {
+                        checkReq.destroy();
+                        resolve(false);
+                      });
+                    } catch (e) {
                       resolve(false);
                     }
                   });
-                  checkReq.on("error", () => resolve(false));
-                  checkReq.setTimeout(550, () => {
-                    checkReq.destroy();
-                    resolve(false);
-                  });
-                });
-              };
+                };
 
-              const isRunning = await checkHealth();
-              if (isRunning) {
-                res.writeHead(200, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ success: true, message: "Backend is already running." }));
-                return;
-              }
+                const isRunning = await checkHealth();
+                if (isRunning) {
+                  res.writeHead(200, { "Content-Type": "application/json" });
+                  res.end(JSON.stringify({ success: true, message: "Backend is already running." }));
+                  return;
+                }
 
-              try {
                 const pythonPath = path.resolve(__dirname, "../.venv/Scripts/python.exe");
                 const backendDir = path.resolve(__dirname, "../backend/python");
 

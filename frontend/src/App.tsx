@@ -217,6 +217,10 @@ export default function App() {
     setCropCloseKernelSize,
     activeAutoCropTab,
     setActiveAutoCropTab,
+    cropGuidance,
+    setCropGuidance,
+    cropFocusMode,
+    setCropFocusMode,
 
     // Video Synthesis settings
     voiceActor,
@@ -225,6 +229,8 @@ export default function App() {
     setMusicTheme,
     narrationStyle,
     setNarrationStyle,
+    smartSlice,
+    setSmartSlice,
     aspectRatio,
     setAspectRatio,
     selectedModel,
@@ -636,6 +642,8 @@ export default function App() {
               voiceActor={voiceActor}
               narrationStyle={narrationStyle}
               setNarrationStyle={setNarrationStyle}
+              smartSlice={smartSlice}
+              setSmartSlice={setSmartSlice}
               bubbleSensitivity={bubbleSensitivity}
               bubbleDetectionStyle={bubbleDetectionStyle}
               bubbleEraseMethod={bubbleEraseMethod}
@@ -853,6 +861,97 @@ export default function App() {
             />
           )}
 
+          {/* PAGE VIEW 18: Batch Panel Auto Crop Page */}
+          {isAutoCropPath && (
+            <AutoCropModal
+              isPage={true}
+              onClose={() => navigateTo("/")}
+              onApply={() => {
+                console.log("App: Applying AutoCrop configuration parameter changes");
+                addNotification("Auto-crop configurations applied successfully!", "success");
+                navigateTo("/");
+              }}
+              sensitivity={cropSensitivity}
+              setSensitivity={setCropSensitivity}
+              padding={cropPaddingPx}
+              setPadding={setCropPaddingPx}
+              backgroundColorMode={cropBackgroundMode}
+              setBackgroundColorMode={setCropBackgroundMode}
+              autoSplitTallStrips={autoSplitTallStrips}
+              setAutoSplitTallStrips={setAutoSplitTallStrips}
+              aspectRatioLock={aspectRatioLock}
+              setAspectRatioLock={setAspectRatioLock}
+              minPanelAreaPct={minPanelAreaPct}
+              setMinPanelAreaPct={setMinPanelAreaPct}
+              overlapMergeThreshold={overlapMergeThreshold}
+              setOverlapMergeThreshold={setOverlapMergeThreshold}
+              useLocalCV={useLocalCV}
+              setUseLocalCV={setUseLocalCV}
+              cropModel={cropModel}
+              setCropModel={setCropModel}
+              cropMinHeightPx={cropMinHeightPx}
+              setCropMinHeightPx={setCropMinHeightPx}
+              cropCannyLow={cropCannyLow}
+              setCropCannyLow={setCropCannyLow}
+              cropCannyHigh={cropCannyHigh}
+              setCropCannyHigh={setCropCannyHigh}
+              cropCloseKernelSize={cropCloseKernelSize}
+              setCropCloseKernelSize={setCropCloseKernelSize}
+              activeTab={activeAutoCropTab}
+              setActiveTab={setActiveAutoCropTab}
+              selectedCount={selectedScraped.length}
+              isApplying={isBatchCropping}
+              scrapedImages={scrapedImages}
+              selectedScraped={selectedScraped}
+              setSelectedScraped={setSelectedScraped}
+              setConsoleLogs={setConsoleLogs}
+              addNotification={addNotification}
+              cropGuidance={cropGuidance}
+              setCropGuidance={setCropGuidance}
+              cropFocusMode={cropFocusMode}
+              setCropFocusMode={setCropFocusMode}
+            />
+          )}
+
+          {/* PAGE VIEW 19: Batch Speech Bubble Cleaner Page */}
+          {isBubbleCleanerPath && (
+            <BubbleCleanerModal
+              isPage={true}
+              onClose={() => navigateTo("/")}
+              onApply={() => {
+                console.log("App: Applying BubbleCleaner configuration parameter changes");
+                addNotification("Speech bubble cleanup configurations applied successfully!", "success");
+                navigateTo("/");
+              }}
+              detectionStyle={bubbleDetectionStyle}
+              setDetectionStyle={setBubbleDetectionStyle}
+              eraseMethod={bubbleEraseMethod}
+              setEraseMethod={setBubbleEraseMethod}
+              sensitivity={bubbleSensitivity}
+              setSensitivity={setBubbleSensitivity}
+              bubbleDilation={bubbleDilation}
+              setBubbleDilation={setBubbleDilation}
+              bubbleInpaintRadius={bubbleInpaintRadius}
+              setBubbleInpaintRadius={setBubbleInpaintRadius}
+              activeTab={activeBubbleTab}
+              setActiveTab={setActiveBubbleTab}
+              selectedCount={selectedScraped.length}
+              isApplying={isCleaningBubbles}
+              scrapedImages={scrapedImages}
+              selectedScraped={selectedScraped}
+              setSelectedScraped={setSelectedScraped}
+              addNotification={addNotification}
+            />
+          )}
+
+          {/* PAGE VIEW 20: Advanced Crop & Trim Editor Page */}
+          {isEditorPath && !isPipMode && editingImageIdx !== null && (
+            <CropEditorModal
+              isPage={true}
+              appLogic={{ ...appLogic, isPipMode, setIsPipMode }}
+            />
+          )}
+
           {/* FALLBACK VIEW: 404 Route Not Found */}
           {!isDashboardPath &&
             !isSettingsPath &&
@@ -900,14 +999,15 @@ export default function App() {
         removeNotification={removeNotification}
       />
 
-      {/* Modal: Batch Panel Auto Crop */}
-      {isAutoCropPath && (
+      {/* Dashboard Modal: Batch Panel Auto Crop */}
+      {isDashboardPath && showAutoCropModal && (
         <AutoCropModal
-          onClose={() => navigateTo("/")}
+          isPage={false}
+          onClose={() => setShowAutoCropModal(false)}
           onApply={() => {
-            console.log("App: Triggering handleAutoCropSelected");
-            handleAutoCropSelected();
-            navigateTo("/");
+            console.log("App: Applying AutoCrop configuration parameter changes");
+            addNotification("Auto-crop configurations applied successfully!", "success");
+            setShowAutoCropModal(false);
           }}
           sensitivity={cropSensitivity}
           setSensitivity={setCropSensitivity}
@@ -937,28 +1037,29 @@ export default function App() {
           setCropCloseKernelSize={setCropCloseKernelSize}
           activeTab={activeAutoCropTab}
           setActiveTab={setActiveAutoCropTab}
-          selectedCount={
-            selectedScraped.length > 0
-              ? selectedScraped.length
-              : scrapedImages.length
-          }
+          selectedCount={selectedScraped.length}
           isApplying={isBatchCropping}
           scrapedImages={scrapedImages}
           selectedScraped={selectedScraped}
           setSelectedScraped={setSelectedScraped}
           setConsoleLogs={setConsoleLogs}
           addNotification={addNotification}
+          cropGuidance={cropGuidance}
+          setCropGuidance={setCropGuidance}
+          cropFocusMode={cropFocusMode}
+          setCropFocusMode={setCropFocusMode}
         />
       )}
 
-      {/* Modal: Batch Speech Bubble Cleaner */}
-      {isBubbleCleanerPath && (
+      {/* Dashboard Modal: Batch Speech Bubble Cleaner */}
+      {isDashboardPath && showBubbleModal && (
         <BubbleCleanerModal
-          onClose={() => navigateTo("/")}
+          isPage={false}
+          onClose={() => setShowBubbleModal(false)}
           onApply={() => {
-            console.log("App: Triggering handleCleanBubblesSelected");
-            handleCleanBubblesSelected();
-            navigateTo("/");
+            console.log("App: Applying BubbleCleaner configuration parameter changes");
+            addNotification("Speech bubble cleanup configurations applied successfully!", "success");
+            setShowBubbleModal(false);
           }}
           detectionStyle={bubbleDetectionStyle}
           setDetectionStyle={setBubbleDetectionStyle}
@@ -972,11 +1073,7 @@ export default function App() {
           setBubbleInpaintRadius={setBubbleInpaintRadius}
           activeTab={activeBubbleTab}
           setActiveTab={setActiveBubbleTab}
-          selectedCount={
-            selectedScraped.length > 0
-              ? selectedScraped.length
-              : scrapedImages.length
-          }
+          selectedCount={selectedScraped.length}
           isApplying={isCleaningBubbles}
           scrapedImages={scrapedImages}
           selectedScraped={selectedScraped}
@@ -985,22 +1082,24 @@ export default function App() {
         />
       )}
 
-      {/* Modal: Advanced Crop & Trim Editor */}
-      {(isEditorPath || isPipMode) && editingImageIdx !== null && (
+      {/* Dashboard Modal: Advanced Crop & Trim Editor */}
+      {isDashboardPath && !isPipMode && editingImageIdx !== null && (
+        <CropEditorModal
+          isPage={false}
+          appLogic={{ ...appLogic, isPipMode, setIsPipMode }}
+        />
+      )}
+
+
+
+      {/* Modal: Advanced Crop & Trim Editor (PIP Mode only) */}
+      {isPipMode && editingImageIdx !== null && (
         <div
-          className={
-            isPipMode
-              ? "fixed bottom-6 right-6 w-96 h-56 rounded-3xl border border-white/10 shadow-2xl z-50 overflow-hidden bg-neutral-950/95 backdrop-blur-xl animate-fade-in cursor-pointer"
-              : ""
-          }
-          onClick={
-            isPipMode
-              ? () => {
-                  setIsPipMode(false);
-                  navigateTo(lastEditorPath);
-                }
-              : undefined
-          }
+          className="fixed bottom-6 right-6 w-96 h-56 rounded-3xl border border-white/10 shadow-2xl z-50 overflow-hidden bg-neutral-950/95 backdrop-blur-xl animate-fade-in cursor-pointer"
+          onClick={() => {
+            setIsPipMode(false);
+            navigateTo(lastEditorPath);
+          }}
         >
           <CropEditorModal
             appLogic={{ ...appLogic, isPipMode, setIsPipMode }}

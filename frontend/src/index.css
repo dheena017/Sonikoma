@@ -4,6 +4,18 @@
 @theme {
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Custom color extensions to map non-standard values (e.g. neutral-850) */
+  --color-neutral-150: #ededed;
+  --color-neutral-250: #dcdcdc;
+  --color-neutral-350: #b5b5b5;
+  --color-neutral-450: #8a8a8a;
+  --color-neutral-750: #333333;
+  --color-neutral-850: #1f1f1f;
+  --color-neutral-925: #0f0f0f;
+
+  --color-rose-250: #fecdd3;
+  --color-rose-350: #fb7185;
 }
 
 body {
@@ -183,3 +195,30 @@ body {
 .animate-slide-down {
   animation: slide-down 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+@keyframes infinite-scroll {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(150%);
+  }
+}
+
+.animate-infinite-scroll {
+  animation: infinite-scroll 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes shimmer-sweep {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+.animate-shimmer-sweep {
+  animation: shimmer-sweep 2.5s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+

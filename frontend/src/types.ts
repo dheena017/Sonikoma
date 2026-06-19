@@ -20,4 +20,6 @@ export interface GeneratedPanel {
   inpaint_radius?: number;
   detection_style?: string;
   bubble_method?: string;
+  audio_url?: string;
 }
+

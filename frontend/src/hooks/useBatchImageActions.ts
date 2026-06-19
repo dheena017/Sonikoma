@@ -33,6 +33,8 @@ interface UseBatchImageActionsProps {
   cropCannyLow: number;
   cropCannyHigh: number;
   cropCloseKernelSize: number;
+  cropGuidance: string;
+  cropFocusMode: string;
 
   isCleaningBubbles: boolean;
   setIsCleaningBubbles: React.Dispatch<React.SetStateAction<boolean>>;
@@ -83,6 +85,8 @@ export function useBatchImageActions({
   cropCannyLow,
   cropCannyHigh,
   cropCloseKernelSize,
+  cropGuidance,
+  cropFocusMode,
 
   isCleaningBubbles,
   setIsCleaningBubbles,
@@ -98,10 +102,9 @@ export function useBatchImageActions({
   setCroppingImgUrl,
 }: UseBatchImageActionsProps) {
   const handleCleanBubblesSelected = async () => {
-    const targetImages =
-      selectedScraped.length > 0 ? selectedScraped : scrapedImages;
+    const targetImages = selectedScraped;
     if (targetImages.length === 0) {
-      addNotification("No images available for bubble cleaning.", "warning");
+      addNotification("No panels selected — select panels first in the scraper deck.", "warning");
       return;
     }
     console.log(
@@ -205,10 +208,9 @@ export function useBatchImageActions({
   };
 
   const handleAutoCropSelected = async () => {
-    const targetImages =
-      selectedScraped.length > 0 ? selectedScraped : scrapedImages;
+    const targetImages = selectedScraped;
     if (targetImages.length === 0) {
-      addNotification("No images available for auto cropping.", "warning");
+      addNotification("No panels selected — select panels first in the scraper deck.", "warning");
       return;
     }
     console.log(
@@ -247,6 +249,8 @@ export function useBatchImageActions({
               closeKernelSize: cropCloseKernelSize,
               minHeightPx: cropMinHeightPx,
               autoSplit: autoSplitTallStrips,
+              guidanceInstructions: cropGuidance,
+              focusMode: cropFocusMode,
             }),
           });
 
@@ -269,6 +273,7 @@ export function useBatchImageActions({
               )}..., fell back to local CV: ${data.message}`,
               ...prev,
             ]);
+            addNotification(`Gemini AI failed (quota/connection). Fell back to local CV detection.`, "info");
           }
 
           if (data.success && Array.isArray(data.panels)) {

@@ -70,6 +70,7 @@ class SplitImagesRequest(BaseModel):
 
 class DownloadZipRequest(BaseModel):
     urls: List[str]
+    url: Optional[str] = None
 
 class RemoveBubblesRequest(BaseModel):
     url: str
@@ -337,10 +338,9 @@ async def execute_splits(body: SplitImagesRequest):
 
 
 # ─── ZIP Packager Routes ────────────────────────────────────────────────────────
-
 @router.post("/download-zip", summary="Create ZIP archive containing storyboard panels")
 async def download_zip(body: DownloadZipRequest):
-    logger.info(f"[ZIP API] Request received for {len(body.urls)} image URLs.")
+    logger.info(f"[ZIP API] Request received for {len(body.urls)} image URLs. url={body.url}")
     try:
         # Resolve all buffers asynchronously first
         resolved_buffers = []
@@ -370,11 +370,44 @@ async def download_zip(body: DownloadZipRequest):
             return zip_buffer.getvalue()
 
         zip_bytes = await asyncio.to_thread(generate_zip_sync)
-        zip_id = f"zip_{int(time.time() * 1000)}"
-        zip_cache.set(zip_id, zip_bytes)
+        
+        # Build custom filename
+        zip_filename = "comic_panels_archive.zip"
+        if body.url:
+            try:
+                import re
+                from utils.url_utils import parse_webtoon_url
+                
+                parsed = parse_webtoon_url(body.url)
+                
+                def make_safe_filename(name: str) -> str:
+                    cleaned = re.sub(r'[^\w\s-]', '', name)
+                    cleaned = re.sub(r'[-\s]+', '_', cleaned)
+                    return cleaned.strip('_')
+                
+                source = make_safe_filename(parsed.get("source_name", "Source"))
+                title = make_safe_filename(parsed.get("title", "Manhwa"))
+                episode = make_safe_filename(parsed.get("episode", "Chapter"))
+                
+                if source or title or episode:
+                    parts = []
+                    if source and source.lower() != "custom_source" and source.lower() != "custom":
+                        parts.append(source)
+                    if title and title.lower() != "custom_storyboard" and title.lower() != "comic":
+                        parts.append(title)
+                    if episode and episode.lower() != "dynamic_chapter":
+                        parts.append(episode)
+                    
+                    if parts:
+                        zip_filename = "_".join(parts) + ".zip"
+            except Exception as e:
+                logger.warning(f"[ZIP API] Failed to construct safe filename from URL: {e}")
 
-        logger.info(f"[ZIP API] Successfully generated ZIP archive with ID: {zip_id}")
-        return {"success": True, "downloadUrl": f"/api/download-zip/get/{zip_id}"}
+        zip_id = f"zip_{int(time.time() * 1000)}"
+        zip_cache.set(zip_id, {"data": zip_bytes, "filename": zip_filename})
+
+        logger.info(f"[ZIP API] Successfully generated ZIP archive with ID: {zip_id}, filename: {zip_filename}")
+        return {"success": True, "downloadUrl": f"/api/download-zip/get/{zip_id}", "filename": zip_filename}
     except Exception as e:
         logger.error(f"[ZIP API Error] Generation failed: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"ZIP packaging failed: {e}")
@@ -382,21 +415,27 @@ async def download_zip(body: DownloadZipRequest):
 
 @router.get("/download-zip/get/{zip_id}", summary="Download packaged ZIP archive")
 async def get_download_zip(zip_id: str = Path(...)):
-    buffer = zip_cache.get(zip_id)
-    if not buffer:
+    cached = zip_cache.get(zip_id)
+    if not cached:
         raise HTTPException(
             status_code=404, 
             detail="The requested ZIP archive has expired or was not found. Please package again."
         )
+        
+    if isinstance(cached, dict):
+        buffer = cached["data"]
+        filename = cached.get("filename", "comic_panels_archive.zip")
+    else:
+        buffer = cached
+        filename = "comic_panels_archive.zip"
+        
     return Response(
         content=buffer,
         media_type="application/zip",
         headers={
-            "Content-Disposition": "attachment; filename=comic_panels_archive.zip"
+            "Content-Disposition": f"attachment; filename={filename}"
         }
     )
-
-
 # ─── Speech Bubble Removal Route (migrated from Express image/cleanup.ts) ──────
 
 @router.post("/remove-speech-bubbles", summary="Inpaint speech bubbles out of a panel image")

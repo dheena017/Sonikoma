@@ -301,6 +301,7 @@ export function useAppLogic() {
             model: selectedModel,
             source: selectedSource,
             bypass_cache: false,
+            smart_slice: state.smartSlice,
             title: state.seriesTitle ? state.seriesTitle.trim() : undefined,
             episode: formattedEpisode || undefined,
             genre: state.scrapedGenre ? state.scrapedGenre.trim() : undefined,
@@ -320,7 +321,22 @@ export function useAppLogic() {
           );
 
           state.setScrapedImages(finalImages);
-          state.setPanels([]);
+          if (data.project_id) {
+            state.setProjectId(data.project_id);
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set("project_id", data.project_id);
+            urlParams.set("id", data.project_id);
+            window.history.pushState(null, "", "?" + urlParams.toString());
+          }
+          if (data.panels && data.panels.length > 0) {
+            const mappedPanels = data.panels.map((p: any) => ({
+              ...p,
+              grayscale: p.grayscale === 1 || p.grayscale === true,
+            }));
+            state.setPanels(mappedPanels);
+          } else {
+            state.setPanels([]);
+          }
           setCurrentPanelIndex(0);
           setPlaybackTime(0);
           setStoryboardPlaying(false);

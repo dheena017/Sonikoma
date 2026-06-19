@@ -22,6 +22,8 @@ import utils.image_utils as img_utils
 from utils.cache import stitched_cache, edit_history
 from config.clients import ai_initialized, call_gemini_with_retry, genai_client
 from services.detect_panels import run_cv_detection
+from services.audio import generate_panel_audio
+
 
 # AI Skills registry and models imports
 from skills.registry import registry
@@ -49,6 +51,8 @@ class AnalyzeImageRequest(BaseModel):
     url: str
     model: Optional[str] = "gemini-2.5-flash"
     narrationStyle: Optional[str] = "long"  # 'long' = detailed YouTube recap, 'short' = quick subtitles
+    voice: Optional[str] = "en-US-GuyNeural"
+
 
 class AnalyzeBatchRequest(BaseModel):
     urls: List[str]
@@ -81,6 +85,8 @@ class SmartCropRequest(BaseModel):
     autoSplit: Optional[bool] = True
     targetWidth: Optional[int] = None
     targetHeight: Optional[int] = None
+    guidanceInstructions: Optional[str] = None
+    focusMode: Optional[str] = None
 
 # ─── Dynamic Endpoints Requests ──────────────────────────────────────────────
 
@@ -609,11 +615,44 @@ async def analyze_image(body: AnalyzeImageRequest):
         
         analysis = validate_analysis(json.loads(raw_text))
         logger.info(f"[Model] Analysis completed for panel.")
+        
+        # Generate and cache panel TTS audio
+        audio_url = None
+        try:
+            with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_audio:
+                temp_audio_path = tmp_audio.name
+            
+            voice_code = body.voice or "en-US-GuyNeural"
+            logger.info(f"[analyze_image] Pre-generating audio: speech_text='{analysis['speech_text'][:40]}...', duration={analysis['duration']}s, voice={voice_code}")
+            
+            await generate_panel_audio(
+                dialogue_list=[analysis["speech_text"]],
+                target_duration=analysis["duration"],
+                output_path=temp_audio_path,
+                voice=voice_code
+            )
+            
+            if os.path.exists(temp_audio_path) and os.path.getsize(temp_audio_path) > 0:
+                with open(temp_audio_path, "rb") as f:
+                    audio_bytes = f.read()
+                
+                import uuid
+                unique_audio_id = f"audio_{uuid.uuid4().hex[:8]}"
+                stitched_cache.set(unique_audio_id, {"data": audio_bytes, "content_type": "audio/mpeg"})
+                audio_url = f"/api/merge-images/cached/{unique_audio_id}"
+                logger.info(f"[analyze_image] Successfully pre-generated panel audio. Cached as: {audio_url}")
+            
+            if os.path.exists(temp_audio_path):
+                os.remove(temp_audio_path)
+        except Exception as audio_err:
+            logger.error(f"[analyze_image] Failed to pre-generate panel audio: {audio_err}", exc_info=True)
+            
         elapsed = int((time.time() - start_time) * 1000)
         
         return {
             "success": True,
             "analysis": analysis,
+            "audio_url": audio_url,
             "source": "gemini",
             "model": target_model,
             "latencyMs": elapsed,
@@ -733,7 +772,28 @@ async def ai_smart_crop(body: SmartCropRequest):
                 try:
                     skill = registry.get("smart_crop")
                     logger.info(f"[AI Smart Crop] Executing Gemini-based detection...")
-                    raw_text = await skill.execute(model=target_model, image_bytes=image_buffer)
+
+                    # Prepare focus mode instructions
+                    focus_instr = ""
+                    if body.focusMode == "tight":
+                        focus_instr = "Focus Mode: Tight Illustration Cropping. Identify only illustration boxes, strictly excluding speech balloons/text bubbles."
+                    elif body.focusMode == "cinematic":
+                        focus_instr = "Focus Mode: Cinematic Widescreen. Prioritize wider horizontal crop boundaries and merge adjacent horizontal storyboard layouts when relevant."
+                    elif body.focusMode == "portrait":
+                        focus_instr = "Focus Mode: Close-up Portrait. Target character faces and central focal points with tighter aspect borders."
+                    else:
+                        focus_instr = "Focus Mode: Standard Panel Detection. Detect standard panel boundaries layout."
+
+                    # Combine focus mode with custom user instructions
+                    final_guidance = focus_instr
+                    if body.guidanceInstructions:
+                        final_guidance += f"\nCustom User Instructions: {body.guidanceInstructions}"
+
+                    raw_text = await skill.execute(
+                        model=target_model,
+                        image_bytes=image_buffer,
+                        guidance_instructions=final_guidance
+                    )
                     data = json.loads(raw_text)
                     raw_panels = data.get("panels", [])
                     

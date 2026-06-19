@@ -31,6 +31,26 @@ export function AutoCropGeneralTab(props: AutoCropSharedProps) {
           setUseLocalCV={props.setUseLocalCV}
           cropModel={props.cropModel}
           setCropModel={props.setCropModel}
+          cropSensitivity={props.cropSensitivity}
+          setCropSensitivity={props.setCropSensitivity}
+          cropMinHeightPx={props.cropMinHeightPx}
+          setCropMinHeightPx={props.setCropMinHeightPx}
+          overlapMergeThreshold={props.overlapMergeThreshold}
+          setOverlapMergeThreshold={props.setOverlapMergeThreshold}
+          minPanelAreaPct={props.minPanelAreaPct}
+          setMinPanelAreaPct={props.setMinPanelAreaPct}
+          cropCannyLow={props.cropCannyLow}
+          setCropCannyLow={props.setCropCannyLow}
+          cropCannyHigh={props.cropCannyHigh}
+          setCropCannyHigh={props.setCropCannyHigh}
+          cropCloseKernelSize={props.cropCloseKernelSize}
+          setCropCloseKernelSize={props.setCropCloseKernelSize}
+          cropBackgroundMode={props.cropBackgroundMode}
+          setCropBackgroundMode={props.setCropBackgroundMode}
+          cropGuidance={props.cropGuidance}
+          setCropGuidance={props.setCropGuidance}
+          cropFocusMode={props.cropFocusMode}
+          setCropFocusMode={props.setCropFocusMode}
         />
 
         <label className="relative flex items-center gap-3 bg-neutral-950/40 border border-neutral-800 rounded-2xl px-5 py-4 cursor-pointer hover:bg-neutral-900 transition-all select-none">

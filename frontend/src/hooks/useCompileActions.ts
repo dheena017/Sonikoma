@@ -54,7 +54,7 @@ export function useCompileActions({
       const res = await activeFetch("/api/download-zip", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ urls }),
+        body: JSON.stringify({ urls, url: targetUrl }),
       });
       if (!res.ok) {
         throw new Error("ZIP generation failed");
@@ -63,7 +63,7 @@ export function useCompileActions({
       if (data.success && data.downloadUrl) {
         const link = document.createElement("a");
         link.href = data.downloadUrl;
-        link.download = "comic_panels_archive.zip";
+        link.download = data.filename || "comic_panels_archive.zip";
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -123,6 +123,7 @@ export function useCompileActions({
           url: imageUrl,
           model: activeModel,
           narrationStyle,
+          voice: voiceActor,
         }),
       });
       if (!res.ok) throw new Error("Image analysis failed");
@@ -143,6 +144,7 @@ export function useCompileActions({
                   motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
                   visual_description:
                     data.analysis.visual_description || p.visual_description,
+                  audio_url: data.audio_url || p.audio_url,
                   isAnalyzing: false,
                 }
               : p

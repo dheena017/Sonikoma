@@ -1,5 +1,6 @@
 import React from "react";
 import { Cpu } from "lucide-react";
+import ProcessBar from "./ProcessBar.js";
 
 interface PipelineStatusCardProps {
   progressStatus: string;
@@ -11,29 +12,32 @@ export default function PipelineStatusCard({
   return (
     <div
       id="pipeline_status_card"
-      className="bg-neutral-900/90 rounded-2xl border border-neutral-800 p-6 space-y-5 animate-pulse"
+      className="bg-neutral-900/80 border border-neutral-800/70 rounded-3xl p-5 sm:p-6 space-y-5 shadow-2xl backdrop-blur-md transition-all duration-300"
     >
+      {/* Header telemetry info */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Cpu className="h-4 w-4 text-purple-400 animate-spin" />
-          <span className="font-bold text-sm text-white">
-            Pipeline executing asynchronously
+        <div className="flex items-center gap-2.5">
+          <div className="h-7 w-7 rounded-lg bg-purple-950/40 border border-purple-800/30 flex items-center justify-center">
+            <Cpu className="h-4 w-4 text-purple-400 animate-spin" />
+          </div>
+          <span className="font-bold text-xs sm:text-sm text-white font-sans tracking-tight">
+            Cinematic Render Pipeline Active
           </span>
         </div>
-        <span className="text-xs font-mono text-purple-400 font-semibold">
-          Live status
+        <span className="text-[10px] font-mono text-purple-400 font-bold bg-purple-950/40 px-2 py-0.5 rounded-lg border border-purple-900/30">
+          LIVE TELEMETRY
         </span>
       </div>
 
-      <div className="bg-neutral-950/80 px-4 py-3 rounded-xl border border-neutral-800/80 text-xs font-mono text-neutral-200">
-        <span className="text-purple-400 font-bold">&gt;&gt;</span>{" "}
-        {progressStatus}
+      {/* Console log status snippet */}
+      <div className="bg-neutral-950/90 px-4 py-3 rounded-2xl border border-neutral-850 text-[11px] font-mono text-neutral-300 flex items-center gap-2">
+        <span className="text-purple-400 font-bold shrink-0">&gt;&gt;</span>
+        <span className="truncate">{progressStatus}</span>
       </div>
 
-      {/* Progress animation track */}
-      <div className="w-full bg-neutral-950 h-2 rounded-full overflow-hidden border border-neutral-800">
-        <div className="bg-gradient-to-r from-purple-500 via-indigo-500 to-purple-600 h-full w-2/3 rounded-full animate-infinite-scroll" />
-      </div>
+      {/* Stepper Progress Bar */}
+      <ProcessBar progressStatus={progressStatus} />
     </div>
   );
 }
+

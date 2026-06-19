@@ -29,6 +29,8 @@ interface FloatingSelectionBarProps {
   handleDeleteSelected: () => void;
   handleClearAll: () => void;
   handleSelectAllToggle: () => void;
+  setShowAutoCropModal?: (v: boolean) => void;
+  setShowBubbleModal?: (v: boolean) => void;
 }
 
 export function FloatingSelectionBar({
@@ -46,6 +48,8 @@ export function FloatingSelectionBar({
   handleDeleteSelected,
   handleClearAll,
   handleSelectAllToggle,
+  setShowAutoCropModal,
+  setShowBubbleModal,
 }: FloatingSelectionBarProps) {
   const isAllSelected = totalCount > 0 && selectedCount === totalCount;
   const isAnyBusy = isBatchCropping || isCleaningBubbles || isBatchMerging;
@@ -82,17 +86,43 @@ export function FloatingSelectionBar({
 
           {/* Progress indicator when busy */}
           {isAnyBusy && (
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-purple-950/30 border border-purple-800/40 text-purple-300 text-xs font-mono shrink-0">
-              <RefreshCw className="h-4 w-4 animate-spin" />
-              <span>
-                {isBatchCropping && batchProgress
-                  ? `Cropping ${batchProgress.current}/${batchProgress.total}`
-                  : isCleaningBubbles && cleanProgress
-                  ? `Cleaning ${cleanProgress.current}/${cleanProgress.total}`
-                  : isBatchMerging
-                  ? "Stitching panels…"
-                  : "Processing…"}
-              </span>
+            <div className="flex flex-col gap-1.5 px-3.5 py-2.5 rounded-xl bg-purple-950/25 border border-purple-800/40 text-purple-300 text-xs font-mono shrink-0 min-w-[170px]">
+              <div className="flex items-center gap-2">
+                <RefreshCw className="h-3.5 w-3.5 animate-spin text-purple-400" />
+                <span className="font-bold tracking-tight">
+                  {isBatchCropping && batchProgress
+                    ? `Cropping ${batchProgress.current}/${batchProgress.total}`
+                    : isCleaningBubbles && cleanProgress
+                    ? `Cleaning ${cleanProgress.current}/${cleanProgress.total}`
+                    : isBatchMerging
+                    ? "Stitching panels…"
+                    : "Processing…"}
+                </span>
+              </div>
+              
+              {/* Process Bar for Batch Operations */}
+              {((isBatchCropping && batchProgress) || (isCleaningBubbles && cleanProgress)) && (
+                (() => {
+                  const prog = isBatchCropping ? batchProgress : cleanProgress;
+                  if (!prog || prog.total === 0) return null;
+                  const pct = Math.round((prog.current / prog.total) * 100);
+                  return (
+                    <div className="w-full space-y-1">
+                      <div className="relative h-1.5 w-full bg-black/60 rounded-full overflow-hidden border border-purple-950 shadow-inner">
+                        <div
+                          className="absolute top-0 left-0 h-full bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400 rounded-full transition-all duration-300 ease-out"
+                          style={{ width: `${pct}%` }}
+                        />
+                        <div className="absolute top-0 bottom-0 w-2/3 bg-gradient-to-r from-transparent via-white/10 to-transparent rounded-full animate-shimmer-sweep" />
+                      </div>
+                      <div className="flex justify-between items-center text-[8px] font-bold text-purple-450 font-mono tracking-tighter">
+                        <span>PROGRESS</span>
+                        <span>{pct}%</span>
+                      </div>
+                    </div>
+                  );
+                })()
+              )}
             </div>
           )}
 
@@ -145,7 +175,9 @@ export function FloatingSelectionBar({
               <button
                 type="button"
                 onClick={() => {
-                  if ((window as any).navigateTo) {
+                  if (setShowAutoCropModal) {
+                    setShowAutoCropModal(true);
+                  } else if ((window as any).navigateTo) {
                     (window as any).navigateTo("/auto-crop");
                   }
                 }}
@@ -182,7 +214,9 @@ export function FloatingSelectionBar({
               <button
                 type="button"
                 onClick={() => {
-                  if ((window as any).navigateTo) {
+                  if (setShowBubbleModal) {
+                    setShowBubbleModal(true);
+                  } else if ((window as any).navigateTo) {
                     (window as any).navigateTo("/bubble-cleaner");
                   }
                 }}

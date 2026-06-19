@@ -45,6 +45,11 @@ export interface ScraperDeckProps {
   handleAutoCropSelected: () => void;
   handleCleanBubblesSelected: () => void;
   isDashboardOnly?: boolean;
+  seriesTitle?: string;
+  chapterNumber?: string;
+  chapterTitle?: string;
+  targetUrl?: string;
+  selectedSource?: string;
 }
 
 export type LiveScraperDeckProps = ScraperDeckProps;

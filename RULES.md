@@ -68,6 +68,8 @@ At the **end of every conversation**, append one row to the Session Changelog ta
 
 > Auto-updated by AI at the end of each conversation. Newest entries at the top.
 
+| 2026-06-18 | Parsed ZIP file name details exclusively from targetUrl | `frontend/src/components/scraper/LiveScraperDeck.tsx` |
+| 2026-06-18 | Created premium ProcessBar stepper and integrated progress bars for URL scraping, batch tasks & custom ZIP naming | `frontend/src/components/pipeline/ProcessBar.tsx`, `frontend/src/components/pipeline/PipelineStatusCard.tsx`, `frontend/src/components/scraper/UrlInputPanel.tsx`, `frontend/src/components/scraper/LiveScraperDeck.tsx`, `frontend/src/components/scraper/types.ts`, `frontend/src/components/AppWorkspace.tsx`, `frontend/src/components/scraper/FloatingSelectionBar.tsx`, `frontend/src/components/timeline/TimelineSelectionBar.tsx`, `frontend/src/index.css` |
 | 2026-06-17 | Standardized logs format, added console interceptor, and updated package.json scripts | `backend/python/main.py`, `backend/python/utils/log_interceptor.py`, `frontend/src/main.tsx`, `frontend/src/utils/logger.ts`, `frontend/src/hooks/useAppState.ts`, `docs/development/key_patterns.md`, `package.json` |
 | 2026-06-17 | Added React Component checklist and improved early-return guards (loading/error state layout) | `docs/development/code_templates.md` |
 | 2026-06-17 | Replaced Express route template with FastAPI route template and improved return standards in templates | `docs/development/code_templates.md` |

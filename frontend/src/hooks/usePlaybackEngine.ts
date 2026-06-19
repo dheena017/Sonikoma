@@ -34,7 +34,17 @@ export function usePlaybackEngine({
   const [playbackTime, setPlaybackTime] = useState<number>(0);
   const [storyboardPlaying, setStoryboardPlaying] = useState<boolean>(false);
   const playTimerRef = useRef<any>(null);
+  const activeAudioRef = useRef<HTMLAudioElement | null>(null);
 
+  useEffect(() => {
+    return () => {
+      if (activeAudioRef.current) {
+        activeAudioRef.current.pause();
+        activeAudioRef.current = null;
+      }
+    };
+  }, []);
+// ...
   const speakDialogue = useCallback(
     (text: string, panelDuration?: number) => {
       if (!window.speechSynthesis || isMuted) return;
@@ -102,13 +112,33 @@ export function usePlaybackEngine({
       const activePanel = panels[panelIdx];
       if (!activePanel) return;
 
-      speakDialogue(activePanel.speech_text, activePanel.duration);
+      // Stop any currently playing audio track
+      if (activeAudioRef.current) {
+        activeAudioRef.current.pause();
+        activeAudioRef.current = null;
+      }
+
+      if (activePanel.audio_url && !isMuted) {
+        // Stop browser speech synthesis if active
+        if (window.speechSynthesis) {
+          window.speechSynthesis.cancel();
+        }
+        const audio = new Audio(activePanel.audio_url);
+        audio.volume = volume / 100;
+        activeAudioRef.current = audio;
+        audio.play().catch((err) => {
+          console.error("[Playback] Failed playing pre-generated panel audio, falling back to speech synthesis:", err);
+          speakDialogue(activePanel.speech_text, activePanel.duration);
+        });
+      } else {
+        speakDialogue(activePanel.speech_text, activePanel.duration);
+      }
 
       if (activePanel.sfx && !isMuted) {
         playComicSoundEffect(activePanel.sfx);
       }
     },
-    [panels, speakDialogue, isMuted]
+    [panels, speakDialogue, isMuted, volume]
   );
 
   useEffect(() => {
@@ -169,6 +199,9 @@ export function usePlaybackEngine({
     if (storyboardPlaying) {
       setStoryboardPlaying(false);
       if (window.speechSynthesis) window.speechSynthesis.pause();
+      if (activeAudioRef.current) {
+        activeAudioRef.current.pause();
+      }
     } else {
       setStoryboardPlaying(true);
       playStoryboardAudio(currentPanelIndex);
@@ -181,6 +214,10 @@ export function usePlaybackEngine({
     setCurrentPanelIndex(0);
     setPlaybackTime(0);
     if (window.speechSynthesis) window.speechSynthesis.cancel();
+    if (activeAudioRef.current) {
+      activeAudioRef.current.pause();
+      activeAudioRef.current = null;
+    }
     stopAmbientBackgroundMusic();
   };
 

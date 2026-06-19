@@ -155,15 +155,15 @@ def run_cv_detection(image_path, sensitivity, bg_mode, min_width_pct, min_height
 
             # Gutter row definition: low variance AND mean close to background color (adaptive to white/black/colored transitions)
             if is_white_bg:
-                is_gutter_row = (row_vars < 64) & ((row_means > threshold_val) | (row_vars < 4))
+                is_gutter_row = (row_vars < 64) & ((row_means > threshold_val) | (row_vars < 25))
             else:
-                is_gutter_row = (row_vars < 64) & ((row_means < threshold_val) | (row_vars < 4))
+                is_gutter_row = (row_vars < 64) & ((row_means < threshold_val) | (row_vars < 25))
             is_content_row = ~is_gutter_row
 
             # Join small content gaps to avoid splitting inside panels (dynamic threshold based on width)
             smoothed_content = np.copy(is_content_row)
             gap_count = 0
-            gap_thresh = max(8, min(30, int(w * 0.04)))
+            gap_thresh = max(2, min(30, int(w * 0.01)))
             for i in range(len(smoothed_content)):
                 if not smoothed_content[i]:
                     gap_count += 1
@@ -304,15 +304,15 @@ def run_cv_detection(image_path, sensitivity, bg_mode, min_width_pct, min_height
             row_means = np.mean(gray_arr, axis=1)
 
             if is_white_bg:
-                is_gutter_row = (row_vars < 64) & ((row_means > threshold_val) | (row_vars < 4))
+                is_gutter_row = (row_vars < 64) & ((row_means > threshold_val) | (row_vars < 25))
             else:
-                is_gutter_row = (row_vars < 64) & ((row_means < threshold_val) | (row_vars < 4))
+                is_gutter_row = (row_vars < 64) & ((row_means < threshold_val) | (row_vars < 25))
             is_content_row = ~is_gutter_row
 
             # Join small content gaps (dynamic threshold based on width)
             smoothed_content = np.copy(is_content_row)
             gap_count = 0
-            gap_thresh = max(8, min(30, int(w * 0.04)))
+            gap_thresh = max(2, min(30, int(w * 0.01)))
             for i in range(len(smoothed_content)):
                 if not smoothed_content[i]:
                     gap_count += 1

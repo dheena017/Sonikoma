@@ -6,6 +6,7 @@ import { LiveScraperDeckProps } from "./types";
 import PanelCard from "./PanelCard.js";
 import ScraperControls from "./ScraperControls.js";
 import { FloatingSelectionBar } from "./FloatingSelectionBar.js";
+import { parseWebtoonUrl, getSourceName } from "../../utils.js";
 
 export default function LiveScraperDeck({
   scrapedImages,
@@ -45,6 +46,11 @@ export default function LiveScraperDeck({
   handleCleanBubblesSelected,
   addPanelsToStoryboard,
   isDashboardOnly = true,
+  seriesTitle = "",
+  chapterNumber = "",
+  chapterTitle = "",
+  targetUrl = "",
+  selectedSource = "",
 }: LiveScraperDeckProps) {
   const [isZipping, setIsZipping] = useState(false);
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(
@@ -76,6 +82,48 @@ export default function LiveScraperDeck({
     },
     [lastSelectedIndex, scrapedImages, setSelectedScraped]
   );
+
+  const makeSafeFilename = (name: string) => {
+    const cleaned = name.replace(/[^\w\s-]/g, "");
+    const replaced = cleaned.replace(/[-\s]+/g, "_");
+    return replaced.replace(/^_+|_+$/g, ""); // trim underscores
+  };
+
+  const getZipFilename = () => {
+    if (!targetUrl || !targetUrl.trim()) {
+      return "webtoon_frames.zip";
+    }
+
+    try {
+      const parsed = parseWebtoonUrl(targetUrl);
+      const source = getSourceName(targetUrl);
+      const parts: string[] = [];
+
+      if (source && source.toLowerCase() !== "custom source") {
+        parts.push(makeSafeFilename(source));
+      }
+
+      if (parsed.title && parsed.title.trim()) {
+        parts.push(makeSafeFilename(parsed.title.trim()));
+      }
+
+      if (parsed.chapterNumber && parsed.chapterNumber.trim()) {
+        parts.push(`Chapter_${makeSafeFilename(parsed.chapterNumber.trim())}`);
+      }
+
+      if (parsed.chapterTitle && parsed.chapterTitle.trim()) {
+        parts.push(makeSafeFilename(parsed.chapterTitle.trim()));
+      }
+
+      if (parts.length > 0) {
+        return `${parts.join("_")}.zip`;
+      }
+    } catch (err) {
+      console.error("[LiveScraperDeck] Failed to parse targetUrl for ZIP filename:", err);
+    }
+
+    return "webtoon_frames.zip";
+  };
 
   const handleDownloadZip = async () => {
     const toDownload =
@@ -112,9 +160,10 @@ export default function LiveScraperDeck({
       }
 
       const blobContent = await zip.generateAsync({ type: "blob" });
-      saveAs(blobContent, "webtoon_frames.zip");
+      const targetFilename = getZipFilename();
+      saveAs(blobContent, targetFilename);
       setConsoleLogs((prev) => [
-        `[GUI] Successfully generated zip for ${toDownload.length} images`,
+        `[GUI] Successfully generated zip named ${targetFilename} for ${toDownload.length} images`,
         ...prev,
       ]);
     } catch (err) {
@@ -293,14 +342,19 @@ export default function LiveScraperDeck({
           <div className="space-y-4">
             {/* Live scraping progress banner */}
             {isScraping && (
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-purple-950/30 border border-purple-800/40">
-                <RefreshCw className="h-3.5 w-3.5 text-purple-400 animate-spin flex-shrink-0" />
-                <p className="text-[11px] text-purple-300 font-mono">
-                  Extracting panels...{" "}
-                  {scrapedImages.length > 0
-                    ? `${scrapedImages.length} loaded so far`
-                    : "launching browser renderer"}
-                </p>
+              <div className="flex flex-col gap-2.5 p-4 rounded-2xl bg-purple-950/20 border border-purple-800/30 shadow-md">
+                <div className="flex items-center gap-2">
+                  <RefreshCw className="h-3.5 w-3.5 text-purple-400 animate-spin flex-shrink-0" />
+                  <p className="text-xs text-purple-300 font-mono font-bold tracking-tight">
+                    Extracting panels...{" "}
+                    {scrapedImages.length > 0
+                      ? `${scrapedImages.length} loaded so far`
+                      : "launching browser renderer"}
+                  </p>
+                </div>
+                <div className="relative h-1.5 w-full bg-black/60 rounded-full overflow-hidden border border-purple-950/40 shadow-inner">
+                  <div className="absolute top-0 bottom-0 bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400 rounded-full w-1/3 animate-infinite-scroll" />
+                </div>
               </div>
             )}
 
@@ -391,6 +445,8 @@ export default function LiveScraperDeck({
           handleDeleteSelected={handleDeleteSelected}
           handleClearAll={handleClearAll}
           handleSelectAllToggle={handleSelectAllToggle}
+          setShowAutoCropModal={setShowAutoCropModal}
+          setShowBubbleModal={setShowBubbleModal}
         />
       )}
     </>

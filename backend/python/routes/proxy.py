@@ -50,9 +50,18 @@ def spoof_referer(url: str) -> str:
             return "https://www.lezhin.com/"
         if "tapas" in host:
             return "https://tapas.io/"
-        if "manhwa" in host:
+        if "manhwatop" in host or "manhwa" in host:
             return "https://manhwatop.com/"
-        return f"{parsed.scheme}://{parsed.netloc}/"
+        if "manhuato" in host or "manhua" in host:
+            return "https://manhuato.com/"
+        
+        # Remove common CDN subdomains to construct a clean fallback base domain referer
+        clean_host = host
+        for prefix in ["cdn.", "img.", "images.", "pic.", "pics.", "static.", "assets.", "media.", "uploads.", "files.", "storage."]:
+            if clean_host.startswith(prefix):
+                clean_host = clean_host[len(prefix):]
+                break
+        return f"{parsed.scheme}://{clean_host}/"
     except Exception:
         return "https://www.webtoons.com/"
 

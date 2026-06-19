@@ -119,6 +119,8 @@ interface UrlInputPanelProps {
   setSeriesCoverImage?: (coverImage: string) => void;
   seriesSynopsis?: string;
   setSeriesSynopsis?: (synopsis: string) => void;
+  smartSlice?: boolean;
+  setSmartSlice?: (v: boolean) => void;
 }
 
 export default function UrlInputPanel(props: UrlInputPanelProps) {
@@ -150,6 +152,8 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
     setSeriesCoverImage,
     seriesSynopsis = "",
     setSeriesSynopsis,
+    smartSlice = true,
+    setSmartSlice,
   } = props;
 
   const source = selectedSource || "webtoons";
@@ -221,21 +225,21 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
 
   const isDirectImage = Boolean(
     targetUrl.trim() &&
-      (targetUrl
-        .toLowerCase()
-        .match(/\.(png|jpg|jpeg|webp|gif|svg|bmp|tiff)(\?|$)/) ||
-        targetUrl.startsWith("data:image/"))
+    (targetUrl
+      .toLowerCase()
+      .match(/\.(png|jpg|jpeg|webp|gif|svg|bmp|tiff)(\?|$)/) ||
+      targetUrl.startsWith("data:image/"))
   );
 
   const isSourceMismatch = Boolean(
     targetUrl.trim() &&
-      !isDirectImage &&
-      source !== "custom" &&
-      currentHost &&
-      !SOURCE_DOMAINS[source]?.some(
-        (allowedHost) =>
-          currentHost === allowedHost || currentHost.endsWith(`.${allowedHost}`)
-      )
+    !isDirectImage &&
+    source !== "custom" &&
+    currentHost &&
+    !SOURCE_DOMAINS[source]?.some(
+      (allowedHost) =>
+        currentHost === allowedHost || currentHost.endsWith(`.${allowedHost}`)
+    )
   );
 
   const modelDropdown = (
@@ -339,7 +343,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !isProcessing && targetUrl.trim()) {
                     console.log(
-                      "[UrlInputPanel] Enter key pressed. Triggering generation."
+                      "[UrlInputPanel] Enter key pressed. Triggering asset scraper."
                     );
                     if (isSourceMismatch) {
                       addNotification(
@@ -348,7 +352,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                       );
                       return;
                     }
-                    handleGenerateVideo();
+                    handleScrape?.();
                   }
                 }}
                 placeholder={placeholderText}
@@ -378,6 +382,27 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
               </span>
             </button>
           </div>
+
+          {/* Scraping Progress Bar */}
+          {isScraping && (
+            <div className="space-y-2.5 p-4 bg-purple-950/20 border border-purple-800/40 rounded-2xl animate-[fadeIn_0.22s_ease-out] shadow-xl">
+              <div className="flex justify-between items-center text-[10px] font-mono text-purple-350 font-bold uppercase tracking-wider">
+                <span className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-purple-500 animate-ping" />
+                  Extracting Webtoon assets
+                </span>
+                <span>Est. Wait Time: 15-45s</span>
+              </div>
+
+              <div className="relative h-2 w-full bg-black/60 rounded-full overflow-hidden border border-purple-950/50 shadow-inner">
+                {/* Indeterminate animated progress fill */}
+                <div className="absolute top-0 bottom-0 bg-gradient-to-r from-purple-600 via-indigo-500 to-cyan-400 rounded-full w-1/3 animate-infinite-scroll" />
+              </div>
+              <p className="text-[9.5px] text-neutral-500 font-mono leading-normal">
+                Launching headless browser worker on the server backend to extract layout strips.
+              </p>
+            </div>
+          )}
 
           {/* Series & Chapter Metadata Override Card */}
           <div className="p-4 bg-black/40 border border-neutral-800/80 rounded-2xl space-y-4">
@@ -507,11 +532,10 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
           <div className="space-y-2">
             <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
               <span
-                className={`h-1.5 w-1.5 rounded-full ${
-                  narrationStyle === "long"
-                    ? "bg-purple-500 animate-ping"
-                    : "bg-emerald-500 animate-ping"
-                }`}
+                className={`h-1.5 w-1.5 rounded-full ${narrationStyle === "long"
+                  ? "bg-purple-500 animate-ping"
+                  : "bg-emerald-500 animate-ping"
+                  }`}
               />
               AI Narration Style
             </label>
@@ -549,15 +573,68 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
               </div>
             </div>
             <p
-              className={`text-[10.5px] font-mono ${
-                narrationStyle === "long"
-                  ? "text-purple-400/70"
-                  : "text-emerald-400/70"
-              }`}
+              className={`text-[10.5px] font-mono ${narrationStyle === "long"
+                ? "text-purple-400/70"
+                : "text-emerald-400/70"
+                }`}
             >
               {narrationStyle === "long"
-                ? "✦ STORYTELLER mode — AI generates cinematic, highly engaging 35-70 word narrations per panel"
-                : "✦ SUBTITLES mode — AI generates concise, punchy captions under 25 words per panel"}
+                ? "✦ DETAILED RECAP — Generates detailed recap scripts suitable for 10-20 min videos"
+                : "✦ SHORT RECAP — Generates shorter dialog lines ideal for shorts and fast pacing"}
+            </p>
+          </div>
+
+          {/* Scrape Layout Mode Selector */}
+          <div className="space-y-2">
+            <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${smartSlice
+                  ? "bg-indigo-500 animate-ping"
+                  : "bg-amber-500 animate-ping"
+                  }`}
+              />
+              Scrape Layout Mode
+            </label>
+            <div className="relative">
+              <select
+                id="scrape_layout_mode_select"
+                value={smartSlice ? "separate" : "stitched"}
+                onChange={(e) => {
+                  const val = e.target.value === "separate";
+                  setSmartSlice?.(val);
+                  const label = val
+                    ? "Separate Panel Images (Fast Scrape)"
+                    : "Single Stitched Strip";
+                  addNotification(`Scrape layout mode set to: ${label}`, "info");
+                }}
+                className="relative w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-neutral-200 outline-none appearance-none focus:border-purple-500 transition-colors cursor-pointer"
+              >
+                <option
+                  value="separate"
+                  className="bg-neutral-950 text-neutral-100"
+                >
+                  ✦ Separate Panel Images (Fast Scrape · Under 2s)
+                </option>
+                <option
+                  value="stitched"
+                  className="bg-neutral-950 text-neutral-100"
+                >
+                  ✦ Single Stitched Strip (Takes 15-45s)
+                </option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-neutral-500 select-none">
+                ▾
+              </div>
+            </div>
+            <p
+              className={`text-[10.5px] font-mono ${smartSlice
+                ? "text-indigo-400/70"
+                : "text-amber-400/70"
+                }`}
+            >
+              {smartSlice
+                ? "✦ SEPARATE IMAGES — Scrapes chapter pages instantly as individual panel cards in storyboard"
+                : "✦ SINGLE STITCHED — Stitches all chapter pages together on the backend into a single image"}
             </p>
           </div>
 

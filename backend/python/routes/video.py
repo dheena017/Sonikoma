@@ -257,7 +257,12 @@ async def convert_images_to_video(request: Request, body: ConvertVideoRequest):
                 "caption": panel.speech_text or ""
             }
 
-        tasks = [process_single_panel(idx, panel) for idx, panel in enumerate(body.panels)]
+        sem = asyncio.Semaphore(15)
+        async def process_with_sem(idx, panel):
+            async with sem:
+                return await process_single_panel(idx, panel)
+
+        tasks = [process_with_sem(idx, panel) for idx, panel in enumerate(body.panels)]
         compiled_panels = await asyncio.gather(*tasks)
 
 

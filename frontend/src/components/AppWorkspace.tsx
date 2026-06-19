@@ -111,6 +111,8 @@ interface AppWorkspaceProps {
   setSeriesCoverImage: (v: string) => void;
   seriesSynopsis: string;
   setSeriesSynopsis: (v: string) => void;
+  smartSlice?: boolean;
+  setSmartSlice?: (v: boolean) => void;
 }
 
 export function AppWorkspace({
@@ -212,6 +214,8 @@ export function AppWorkspace({
   setSeriesCoverImage,
   seriesSynopsis,
   setSeriesSynopsis,
+  smartSlice,
+  setSmartSlice,
 }: AppWorkspaceProps) {
   return (
     <main
@@ -254,6 +258,8 @@ export function AppWorkspace({
           setSeriesCoverImage={setSeriesCoverImage}
           seriesSynopsis={seriesSynopsis}
           setSeriesSynopsis={setSeriesSynopsis}
+          smartSlice={smartSlice}
+          setSmartSlice={setSmartSlice}
         />
 
         {/* SEPARATED IMAGE STRIPS GALLERY */}
@@ -293,6 +299,11 @@ export function AppWorkspace({
           handleAutoCropSelected={handleAutoCropSelected}
           handleCleanBubblesSelected={handleCleanBubblesSelected}
           addPanelsToStoryboard={addPanelsToStoryboard}
+          seriesTitle={seriesTitle}
+          chapterNumber={chapterNumber}
+          chapterTitle={chapterTitle}
+          targetUrl={targetUrl}
+          selectedSource={selectedSource}
         />
 
         {/* ACTIVE QUEUE / LIVE PIPELINE PROGRESS */}

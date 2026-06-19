@@ -86,4 +86,8 @@ export interface AutoCropSharedProps {
   selectedScraped: string[];
   setConsoleLogs?: React.Dispatch<React.SetStateAction<string[]>>;
   addNotification?: (msg: string, type: any) => void;
+  cropGuidance: string;
+  setCropGuidance: (v: string) => void;
+  cropFocusMode: string;
+  setCropFocusMode: (v: string) => void;
 }

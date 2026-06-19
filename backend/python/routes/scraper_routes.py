@@ -51,7 +51,7 @@ class ScrapeImagesRequest(BaseModel):
     url: str
     source: Optional[str] = None
     bypass_cache: Optional[bool] = True
-    smart_slice: Optional[bool] = False # New option to return auto-cropped panels instead of a single strip
+    smart_slice: Optional[bool] = True # New option to return auto-cropped panels instead of a single strip
     title: Optional[str] = None
     episode: Optional[str] = None
     genre: Optional[str] = None
@@ -81,8 +81,9 @@ class ProcessUrlRequest(BaseModel):
 # ─── Routes ───────────────────────────────────────────────────────────────────
 
 @router.post("/scrape-images", summary="Scrape comic panels from Webtoon URL")
-async def scrape_images(body: ScrapeImagesRequest):
+async def scrape_images(request: Request, body: ScrapeImagesRequest):
     try:
+        user_id = get_optional_user_id(request)
         normalized_url = extract_webtoon_url(body.url)
         parsed = parse_webtoon_url(normalized_url)
         if body.title:
@@ -104,6 +105,7 @@ async def scrape_images(body: ScrapeImagesRequest):
         logger.info(f"[Scraper] Successfully extracted {len(proxied_urls)} raw image URLs.")
 
         final_images = proxied_urls
+        cache_hit = False
 
         # Check cache for an existing stitched strip for this exact URL
         cache_key = f"stitched_full_{normalized_url}"
@@ -111,32 +113,25 @@ async def scrape_images(body: ScrapeImagesRequest):
             cached_url = stitched_cache.get(cache_key)
             if cached_url and isinstance(cached_url, str):
                 logger.info(f"[Scraper] Cache HIT: Returning existing stitched strip for {normalized_url}")
-                return {
-                    "success": True,
-                    "title": parsed["title"],
-                    "genre": parsed["genre"],
-                    "episode": parsed["episode"],
-                    "total_images": 1,
-                    "images": [cached_url],
-                    "raw_images": proxied_urls,
-                    "panels": [],
-                    "debug": {
-                        "normalized_url": normalized_url,
-                        "source": body.source,
-                        "cache": "HIT"
-                    }
-                }
+                final_images = [cached_url]
+                cache_hit = True
 
-        # Automatically stitch multiple images into a single full strip
-        if len(proxied_urls) > 1 and not body.smart_slice:
+        # Automatically stitch multiple images into a single full strip if not a cache hit
+        if not cache_hit and len(proxied_urls) > 1 and not body.smart_slice:
             logger.info(f"[Scraper] Consolidating {len(proxied_urls)} panels into a single unified strip asset...")
             t_stitch_start = time.time()
             try:
                 # 1. Resolve all images to buffers in parallel for speed
                 logger.info(f"[Scraper] Fetching {len(proxied_urls)} image buffers in parallel using shared HTTP client...")
 
-                async with httpx.AsyncClient(follow_redirects=True, timeout=60.0, limits=httpx.Limits(max_connections=100)) as client:
-                    fetch_tasks = [img_utils.resolve_image_to_buffer(url, client=client) for url in proxied_urls]
+                async with httpx.AsyncClient(follow_redirects=True, timeout=60.0, limits=httpx.Limits(max_connections=50)) as client:
+                    sem = asyncio.Semaphore(15)
+                    
+                    async def fetch_with_sem(url):
+                        async with sem:
+                            return await img_utils.resolve_image_to_buffer(url, client=client)
+                            
+                    fetch_tasks = [fetch_with_sem(url) for url in proxied_urls]
                     resolved_results = await asyncio.gather(*fetch_tasks, return_exceptions=True)
 
                 resolved_buffers = []
@@ -163,11 +158,9 @@ async def scrape_images(body: ScrapeImagesRequest):
 
                 # 3. Cache the result
                 unique_id = f"stitched_{int(time.time() * 1000)}_full"
-                # Use /api/merge-images/cached/ to match image_routes.py and avoid 404s
                 stitched_url = f"/api/merge-images/cached/{unique_id}"
 
                 stitched_cache.set(unique_id, {"data": stitched_bytes, "content_type": "image/png"})
-                # Cache the mapping from the normalized URL to the cached asset URL
                 stitched_cache.set(cache_key, stitched_url)
                 edit_history.set(stitched_url, proxied_urls[0])
 
@@ -177,20 +170,82 @@ async def scrape_images(body: ScrapeImagesRequest):
             except Exception as stitch_err:
                 logger.warning(f"[Scraper] Automatic stitching failed, falling back to separate images: {stitch_err}")
 
+        # Automatically generate default panels in SQLite if authenticated
+        project_id = generate_project_id()
+        db_panels = []
+        for i, img_url in enumerate(final_images):
+            db_panels.append({
+                "image_url": img_url,
+                "original_url": img_url,
+                "speech_text": "",
+                "sfx": "",
+                "duration": 4.5,
+                "motion_type": "zoom_in",
+                "visual_description": None,
+                "brightness": None,
+                "contrast": None,
+                "saturation": None,
+                "grayscale": False,
+                "filter_preset": None,
+                "bubble_method": None,
+                "bubble_sensitivity": None,
+                "bubble_dilation": None,
+                "inpaint_radius": None,
+                "detection_style": None
+            })
+
+        if user_id:
+            try:
+                db.insert_project({
+                    "project_id": project_id,
+                    "url": body.url,
+                    "title": parsed["title"],
+                    "genre": parsed["genre"],
+                    "episode": parsed["episode"],
+                    "author": parsed.get("author"),
+                    "cover_image": parsed.get("cover_image"),
+                    "synopsis": parsed.get("synopsis"),
+                    "status": "pending",
+                    "panels_count": len(db_panels),
+                    "video_url": None,
+                    "user_id": user_id
+                })
+                db.insert_panels(project_id, db_panels)
+                logger.info(f"[Database] Automatically created project {project_id} during scrape for user {user_id}")
+            except Exception as db_err:
+                logger.error(f"[Database] Failed to automatically create project on scrape: {db_err}", exc_info=True)
+
+        return_panels = []
+        for i, p in enumerate(db_panels):
+            return_panels.append({
+                "id": i,
+                "project_id": project_id,
+                "panel_index": i,
+                "image_url": p["image_url"],
+                "original_url": p["original_url"],
+                "speech_text": p["speech_text"],
+                "sfx": p["sfx"],
+                "duration": p["duration"],
+                "motion_type": p["motion_type"],
+                "grayscale": p["grayscale"]
+            })
+
         return {
             "success": True,
+            "project_id": project_id,
             "title": parsed["title"],
             "genre": parsed["genre"],
             "episode": parsed["episode"],
             "total_images": len(final_images),
             "images": final_images,
             "raw_images": proxied_urls,
-            "panels": [],
+            "panels": return_panels,
             "debug": {
                 "normalized_url": normalized_url,
                 "source": body.source,
                 "original_count": len(proxied_urls),
-                "smart_slice": body.smart_slice
+                "smart_slice": body.smart_slice,
+                "cache": "HIT" if cache_hit else "MISS"
             }
         }
     except Exception as e:
