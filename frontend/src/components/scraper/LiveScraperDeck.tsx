@@ -395,16 +395,12 @@ export default function LiveScraperDeck({
             <div className="flex gap-4 overflow-x-auto pb-8 pt-1.5 scrollbar-thin">
               {scrapedImages.map((imgUrl, idx) => {
                 const isSelected = selectedScraped.includes(imgUrl);
-                const isImported = panels.some(
-                  (p) => p.image_url === imgUrl || p.original_url === imgUrl
-                );
                 return (
                   <PanelCard
                     key={`${imgUrl}-${idx}`}
                     imgUrl={imgUrl}
                     idx={idx}
                     isSelected={isSelected}
-                    isImported={isImported}
                     isBatchCropping={isBatchCropping}
                     croppingImgUrl={croppingImgUrl}
                     bubbleCroppingImgUrl={bubbleCroppingImgUrl}

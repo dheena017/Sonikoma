@@ -12,7 +12,6 @@ interface PanelCardThumbnailProps {
   imgUrl: string;
   idx: number;
   isSelected: boolean;
-  isImported?: boolean;
   isProcessing: boolean;
   isBatchCropping: boolean;
   bubbleCroppingImgUrl: string | null;
@@ -52,7 +51,6 @@ export function PanelCardThumbnail({
   imgUrl,
   idx,
   isSelected,
-  isImported,
   isProcessing,
   isBatchCropping,
   bubbleCroppingImgUrl,
@@ -110,19 +108,12 @@ export function PanelCardThumbnail({
         #{idx + 1}
       </div>
 
-      {/* Added badge if imported */}
-      {isImported && (
-        <div className="absolute top-1.5 left-11 backdrop-blur-sm px-1.5 py-0.5 rounded-md text-[8px] font-mono font-bold leading-none bg-emerald-500/80 border border-emerald-400/60 text-white shadow-[0_0_8px_rgba(16,185,129,0.5)] z-20 flex items-center gap-0.5">
-          ✓ ADDED
-        </div>
-      )}
-
       {/* Operation status badge */}
       {status && (
         <div
           className={[
             "absolute top-1.5 backdrop-blur-sm px-1.5 py-0.5 rounded-md text-[8px] font-mono font-bold leading-none border z-20 transition-all",
-            isImported ? "left-[90px]" : "left-11",
+            "left-11",
             status.bg
           ].join(" ")}
         >
