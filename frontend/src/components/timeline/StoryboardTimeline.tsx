@@ -637,11 +637,7 @@ export default function StoryboardTimeline({
         }}
         selectAllPanels={selectAllPanels}
         clearSelection={clearSelection}
-        isCompiling={isCompiling}
-        handleCompileVideo={handleCompileVideo}
         handleDeleteSelected={handleDeleteSelected}
-        handleBulkModifyDuration={handleBulkModifyDuration}
-        handleBulkModifyMotion={handleBulkModifyMotion}
         isBatchCropping={isBatchCropping}
         isCleaningBubbles={isCleaningBubbles}
         isBatchMerging={isBatchMerging}

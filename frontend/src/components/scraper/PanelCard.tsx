@@ -24,7 +24,6 @@ interface PanelCardProps
   imgUrl: string;
   idx: number;
   isSelected: boolean;
-  isImported?: boolean;
   isBatchCropping: boolean;
   croppingImgUrl: string | null;
   openEditingImageIdx?: (idx: number | null) => void;
@@ -46,7 +45,6 @@ function PanelCard({
   imgUrl,
   idx,
   isSelected,
-  isImported,
   isBatchCropping,
   croppingImgUrl,
   bubbleCroppingImgUrl,
@@ -220,7 +218,6 @@ function PanelCard({
         imgUrl={imgUrl}
         idx={idx}
         isSelected={isSelected}
-        isImported={isImported}
         isProcessing={isProcessing}
         isBatchCropping={isBatchCropping}
         bubbleCroppingImgUrl={bubbleCroppingImgUrl}
