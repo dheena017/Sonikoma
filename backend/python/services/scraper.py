@@ -298,6 +298,12 @@ def extract_metadata(html: str, url: str) -> Dict[str, str]:
         og_title = soup.find('meta', attrs={'property': 'og:title'}) or soup.find('meta', attrs={'name': 'twitter:title'})
         metadata["title"] = og_title['content'] if og_title and og_title.has_attr('content') else (soup.title.string if soup.title else "")
         
+        # Clean up title: remove common site suffix brandings
+        title_str = metadata["title"]
+        if title_str:
+            title_str = re.sub(r'\s*[-|–—]\s*(?:Asura Scans|MangaDex|Webtoons|Line Webtoon|Flame Comics|Reaper Scans|Void Scans|Luminous Scans|Tapas|Tappytoon|ManhuaTo|Manhua Plus|Manganato|Mangakakalot|Bato\.to|Toomics|WebComics App|Copin Comics|Pocket Comics|Lezhin|Bilibili Comics|MangaToon|Webnovel)\b.*$', '', title_str, flags=re.IGNORECASE)
+            metadata["title"] = title_str.strip()
+
         og_desc = soup.find('meta', attrs={'property': 'og:description'}) or soup.find('meta', attrs={'name': 'description'})
         metadata["description"] = og_desc['content'] if og_desc and og_desc.has_attr('content') else ""
         
@@ -305,6 +311,34 @@ def extract_metadata(html: str, url: str) -> Dict[str, str]:
         if og_img and og_img.has_attr('content'):
             metadata["cover_image"] = urljoin(url, og_img['content'])
             
+        # Fallback selectors for cover image from DOM if meta tag missing or empty
+        if not metadata["cover_image"]:
+            cover_selectors = [
+                'img.wp-post-image',
+                'img[src*="cover"]',
+                '.summary_image img',
+                '.thumb img',
+                '.manga-poster img',
+                'img.cover',
+                'img.thumbnail',
+                '.poster img',
+                '.cover-image img',
+                '#manga-cover',
+                '.anime-cover img',
+                '.series-cover img',
+                'img[src*="thumbnail"]'
+            ]
+            for sel in cover_selectors:
+                try:
+                    img_tag = soup.select_one(sel)
+                    if img_tag:
+                        src = img_tag.get('src') or img_tag.get('data-src') or img_tag.get('data-lazy-src') or img_tag.get('data-original')
+                        if src:
+                            metadata["cover_image"] = urljoin(url, src.strip())
+                            break
+                except Exception:
+                    continue
+
         author_tag = soup.find('meta', attrs={'name': 'author'}) or soup.find('meta', attrs={'property': 'og:creator'})
         metadata["author"] = author_tag['content'] if author_tag and author_tag.has_attr('content') else ""
         

@@ -56,8 +56,8 @@ export default function TimelineSelectionBar({
   batchProgress,
   cleanProgress,
 }: TimelineSelectionBarProps) {
-  // Visible only when panels are selected
-  const isVisible = selectedCount > 0;
+  // Visible whenever there are panels in the storyboard
+  const isVisible = totalCount > 0;
 
   // Safeguard: Ensure we are in a browser environment before using the DOM
   if (typeof document === "undefined") return null;
@@ -181,68 +181,40 @@ export default function TimelineSelectionBar({
                   </button>
 
                   {/* Auto-Crop */}
-                  <div className="flex items-center">
-                    <button
-                      type="button"
-                      disabled={
-                        isBatchCropping || isCleaningBubbles || isBatchMerging
-                      }
-                      onClick={handleAutoCropSelected}
-                      className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-l-xl border-r-0"
-                      title="Auto-Crop selected storyboard panels"
-                    >
-                      {isBatchCropping ? (
-                        <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
-                      ) : (
-                        <Scissors className="h-4 w-4 text-purple-400" />
-                      )}
-                      Auto-Crop
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if ((window as any).navigateTo) {
-                          (window as any).navigateTo("/auto-crop");
-                        }
-                      }}
-                      title="Auto-crop settings"
-                      className="px-2.5 py-2 text-xs font-bold flex items-center justify-center cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 rounded-r-xl"
-                    >
-                      <Settings2 className="h-4 w-4" />
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    disabled={
+                      isBatchCropping || isCleaningBubbles || isBatchMerging
+                    }
+                    onClick={handleAutoCropSelected}
+                    className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl"
+                    title="Auto-Crop selected storyboard panels"
+                  >
+                    {isBatchCropping ? (
+                      <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
+                    ) : (
+                      <Scissors className="h-4 w-4 text-purple-400" />
+                    )}
+                    Auto-Crop
+                  </button>
 
                   {/* Clean Bubbles */}
-                  <div className="flex items-center">
-                    <button
-                      type="button"
-                      disabled={
-                        isBatchCropping || isCleaningBubbles || isBatchMerging
-                      }
-                      onClick={handleCleanBubblesSelected}
-                      className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-l-xl border-r-0"
-                      title="Remove speech bubbles from selected storyboard panels"
-                    >
-                      {isCleaningBubbles ? (
-                        <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
-                      ) : (
-                        <Sparkles className="h-4 w-4 text-purple-400 animate-pulse" />
-                      )}
-                      Clean Bubbles
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if ((window as any).navigateTo) {
-                          (window as any).navigateTo("/bubble-cleaner");
-                        }
-                      }}
-                      title="Bubble cleaner settings"
-                      className="px-2.5 py-2 text-xs font-bold flex items-center justify-center cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 rounded-r-xl"
-                    >
-                      <Settings2 className="h-4 w-4" />
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    disabled={
+                      isBatchCropping || isCleaningBubbles || isBatchMerging
+                    }
+                    onClick={handleCleanBubblesSelected}
+                    className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl"
+                    title="Remove speech bubbles from selected storyboard panels"
+                  >
+                    {isCleaningBubbles ? (
+                      <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
+                    ) : (
+                      <Sparkles className="h-4 w-4 text-purple-400 animate-pulse" />
+                    )}
+                    Clean Bubbles
+                  </button>
 
                   {/* Stitch */}
                   <button

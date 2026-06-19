@@ -252,6 +252,7 @@ export function useSingleImageEdits({
         `Frames #${idx + 1} and #${idx + 2} stitched successfully!`,
         "success"
       );
+      return stitchedUrl;
     } catch (err: any) {
       setConsoleLogs((prev) => [
         `[Stitcher] [ERROR] Merge failed for Frame #${idx + 1} + #${idx + 2}: ${
@@ -265,6 +266,7 @@ export function useSingleImageEdits({
           "error"
         );
       }
+      return null;
     } finally {
       setMergingIndices((prev) => prev.filter((i) => i !== idx));
     }

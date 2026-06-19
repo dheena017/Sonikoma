@@ -97,7 +97,7 @@ export default function PanelAssistantPage({
                 `/panel-assistant?idx=${idx}`
               );
             }}
-            className={`w-20 shrink-0 h-16 rounded-lg overflow-hidden border transition-all cursor-pointer relative ${
+            className={`w-20 shrink-0 h-16 rounded-lg overflow-hidden border transition-all cursor-pointer relative flex items-center justify-center bg-black/40 ${
               selectedIdx === idx
                 ? "border-purple-500 shadow-md shadow-purple-900/30 scale-102 bg-neutral-900"
                 : "border-neutral-800 bg-neutral-950/60 opacity-60 hover:opacity-100"
@@ -106,7 +106,7 @@ export default function PanelAssistantPage({
             <img
               src={panel.image_url}
               alt=""
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
             <div className="absolute bottom-1 right-1 bg-black/80 px-1 rounded text-[8px] font-mono font-bold text-neutral-300">
               #{panel.id}

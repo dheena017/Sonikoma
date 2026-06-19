@@ -39,7 +39,7 @@ from utils.id_utils import generate_project_id
 from utils.cache import stitched_cache, edit_history
 import utils.image_utils as img_utils
 from config.clients import DYNAMIC_BACKGROUND_VIDEOS
-from services.scraper import scrape_images_from_url
+from services.scraper import scrape_images_from_url, scraped_metadata_cache
 from services.storyboard_ai import generate_dynamic_panels
 
 logger = logging.getLogger("anivox.routes.scraper_routes")
@@ -77,6 +77,10 @@ class GenerateStoryboardRequest(BaseModel):
 class ProcessUrlRequest(BaseModel):
     url: str
 
+class SaveScrapedImagesRequest(BaseModel):
+    url: str
+    images: List[str]
+
 
 # ─── Routes ───────────────────────────────────────────────────────────────────
 
@@ -102,6 +106,21 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
         logger.info(f"[Scraper] Scrape request received - source: {body.source or 'unknown'}, url: {normalized_url}")
         
         proxied_urls = await scrape_images_from_url(normalized_url, body.source, bypass_cache=body.bypass_cache)
+        
+        # Merge scraped metadata into parsed dictionary
+        metadata = scraped_metadata_cache.get(normalized_url, {})
+        if metadata:
+            if not body.title and metadata.get("title"):
+                parsed["title"] = metadata["title"]
+            if not body.genre and metadata.get("genre"):
+                parsed["genre"] = metadata["genre"]
+            if not body.author and metadata.get("author"):
+                parsed["author"] = metadata["author"]
+            if not body.cover_image and metadata.get("cover_image"):
+                parsed["cover_image"] = metadata["cover_image"]
+            if not body.synopsis and (metadata.get("description") or metadata.get("synopsis")):
+                parsed["synopsis"] = metadata.get("description") or metadata.get("synopsis")
+
         logger.info(f"[Scraper] Successfully extracted {len(proxied_urls)} raw image URLs.")
 
         final_images = proxied_urls
@@ -233,9 +252,12 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
         return {
             "success": True,
             "project_id": project_id,
-            "title": parsed["title"],
-            "genre": parsed["genre"],
-            "episode": parsed["episode"],
+            "title": parsed.get("title"),
+            "genre": parsed.get("genre"),
+            "episode": parsed.get("episode"),
+            "author": parsed.get("author"),
+            "cover_image": parsed.get("cover_image"),
+            "synopsis": parsed.get("synopsis"),
             "total_images": len(final_images),
             "images": final_images,
             "raw_images": proxied_urls,
@@ -446,3 +468,14 @@ async def process_url(body: ProcessUrlRequest):
             "panels_found": 5
         }
     }
+
+@router.put("/save-scraped-images", summary="Update/persist edited scraped images cache list in database")
+async def save_scraped_images(body: SaveScrapedImagesRequest):
+    try:
+        normalized_url = extract_webtoon_url(body.url)
+        db.save_scrape_session(normalized_url, body.images)
+        logger.info(f"[Scraper] Successfully updated scrape session cache for {normalized_url} with {len(body.images)} images")
+        return {"success": True, "message": "Scraped images updated successfully."}
+    except Exception as e:
+        logger.error(f"[Scraper] Failed to save scraped images cache: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))

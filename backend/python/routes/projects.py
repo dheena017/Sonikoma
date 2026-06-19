@@ -53,6 +53,17 @@ class PanelsSaveRequest(BaseModel):
     panels: List[PanelSaveItem] = Field(..., description="Curated panel items list")
 
 
+class ProjectUpdateRequest(BaseModel):
+    title: Optional[str] = Field(None, description="Series Title")
+    genre: Optional[str] = Field(None, description="Series Genre")
+    episode: Optional[str] = Field(None, description="Chapter/Episode Number")
+    author: Optional[str] = Field(None, description="Series Author")
+    cover_image: Optional[str] = Field(None, description="Series Cover Image URL")
+    synopsis: Optional[str] = Field(None, description="Series Synopsis")
+    panels: Optional[List[PanelSaveItem]] = Field(None, description="Storyboard panels list")
+
+
+
 # ─── Routes ───────────────────────────────────────────────────────────────────
 
 @router.get("", summary="Get all projects")
@@ -177,6 +188,72 @@ async def save_project_panels(
         raise HTTPException(status_code=500, detail=f"Failed to save panels: {e}")
 
 
+@router.put("/{projectId}", summary="Update project metadata and panels")
+async def update_project_details(
+    projectId: str = Path(...),
+    body: ProjectUpdateRequest = Body(...),
+    current_user: dict = Depends(get_current_user)
+):
+    try:
+        logger.info(f"[Database] Updating project details and/or panels for: {projectId}")
+        project = db.get_project(projectId)
+        if not project:
+            logger.warning(f"[Database] Project {projectId} not found.")
+            raise HTTPException(status_code=404, detail="Project not found.")
+
+        # Verify ownership
+        if project.get("user_id") != current_user["user_id"]:
+            logger.warning(f"[Database] Access denied for user {current_user['user_id']} to modify project {projectId}")
+            raise HTTPException(status_code=403, detail="Access denied.")
+
+        updates = {}
+        if body.title is not None:
+            updates['title'] = body.title
+        if body.genre is not None:
+            updates['genre'] = body.genre
+        if body.episode is not None:
+            updates['episode'] = body.episode
+        if body.author is not None:
+            updates['author'] = body.author
+        if body.cover_image is not None:
+            updates['cover_image'] = body.cover_image
+        if body.synopsis is not None:
+            updates['synopsis'] = body.synopsis
+
+        db_panels = None
+        if body.panels is not None:
+            db_panels = []
+            for p in body.panels:
+                db_panels.append({
+                    "image_url": p.image_url,
+                    "original_image_url": p.original_image_url,
+                    "speech_text": p.speech_text,
+                    "sfx": p.sfx,
+                    "duration": p.duration,
+                    "motion_type": p.motion_type,
+                    "visual_description": p.visual_description,
+                    "brightness": p.brightness,
+                    "contrast": p.contrast,
+                    "saturation": p.saturation,
+                    "grayscale": p.grayscale,
+                    "filter_preset": p.filter_preset,
+                    "bubble_method": p.bubble_method,
+                    "bubble_sensitivity": p.bubble_sensitivity,
+                    "bubble_dilation": p.bubble_dilation,
+                    "inpaint_radius": p.inpaint_radius,
+                    "detection_style": p.detection_style
+                })
+
+        db.update_project_full(projectId, updates, db_panels)
+        logger.info(f"[Database] Project {projectId} updated successfully.")
+        return {"success": True}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to update project: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to update project: {e}")
+
+
 @router.delete("/{projectId}", summary="Delete a project and its panels")
 async def delete_single_project(projectId: str = Path(...), current_user: dict = Depends(get_current_user)):
     try:
@@ -199,6 +276,33 @@ async def delete_single_project(projectId: str = Path(...), current_user: dict =
     except Exception as e:
         logger.error(f"Failed to delete project: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to delete project: {e}")
+
+
+@router.delete("/series/{seriesId}", summary="Delete a series and all its chapters")
+async def delete_series_route(seriesId: str = Path(...), current_user: dict = Depends(get_current_user)):
+    try:
+        logger.info(f"[Database] Deleting series for: {seriesId}")
+        # Verify ownership: check that the series belongs to current_user
+        conn = db.get_db_connection()
+        row = conn.execute("SELECT user_id FROM series WHERE id = ?", (seriesId,)).fetchone()
+        conn.close()
+        
+        if not row:
+            logger.warning(f"[Database] Series {seriesId} not found for deletion.")
+            raise HTTPException(status_code=404, detail="Series not found.")
+            
+        if row['user_id'] != current_user['user_id']:
+            logger.warning(f"[Database] Access denied for user {current_user['user_id']} to delete series {seriesId}")
+            raise HTTPException(status_code=403, detail="Access denied.")
+            
+        db.delete_series(seriesId)
+        logger.info(f"[Database] Deleted series successfully: {seriesId}")
+        return {"success": True}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to delete series: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to delete series: {e}")
 
 
 class BatchDeleteRequest(BaseModel):

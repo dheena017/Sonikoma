@@ -72,7 +72,8 @@ export default function CropEditorFooter({
           type="button"
           onClick={() => {
             console.log("[CropEditorFooter] Closing editor");
-            setEditingImageIdx(null);
+            window.history.pushState({}, "", "/");
+            window.dispatchEvent(new Event("popstate"));
           }}
           disabled={isSavingEdit}
           className="inline-flex items-center justify-center bg-neutral-900/80 border border-white/5 text-neutral-400 hover:text-white px-3.5 py-2 rounded-2xl text-xs font-semibold cursor-pointer transition-colors hover:bg-neutral-800"

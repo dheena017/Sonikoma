@@ -318,6 +318,28 @@ export default function LiveScraperDeck({
           </div>
 
           <div className="flex flex-nowrap items-center gap-2 overflow-x-auto self-end lg:self-auto ml-auto lg:ml-0">
+            {scrapedImages.length > 0 && (
+              <ScraperControls
+                scrapedImages={scrapedImages}
+                selectedScraped={selectedScraped}
+                setSelectedScraped={setSelectedScraped}
+                setScrapedImages={setScrapedImages}
+                setConsoleLogs={setConsoleLogs}
+                addNotification={addNotification}
+                setShowBubbleModal={setShowBubbleModal}
+                isCleaningBubbles={isCleaningBubbles}
+                cleanProgress={cleanProgress}
+                addPanelsToStoryboard={addPanelsToStoryboard}
+                showAutoCropModal={showAutoCropModal}
+                setShowAutoCropModal={setShowAutoCropModal}
+                isBatchCropping={isBatchCropping}
+                batchProgress={batchProgress}
+                handleAutoCropSelected={handleAutoCropSelected}
+                handleCleanBubblesSelected={handleCleanBubblesSelected}
+                fetchWithInterceptor={fetchWithInterceptor}
+                onLastSelectedReset={() => setLastSelectedIndex(null)}
+              />
+            )}
             <button
               type="button"
               onClick={handleDownloadZip}
@@ -358,28 +380,6 @@ export default function LiveScraperDeck({
               </div>
             )}
 
-            {/* Scraper Controls Toolbar */}
-            <ScraperControls
-              scrapedImages={scrapedImages}
-              selectedScraped={selectedScraped}
-              setSelectedScraped={setSelectedScraped}
-              setScrapedImages={setScrapedImages}
-              setConsoleLogs={setConsoleLogs}
-              addNotification={addNotification}
-              setShowBubbleModal={setShowBubbleModal}
-              isCleaningBubbles={isCleaningBubbles}
-              cleanProgress={cleanProgress}
-              addPanelsToStoryboard={addPanelsToStoryboard}
-              showAutoCropModal={showAutoCropModal}
-              setShowAutoCropModal={setShowAutoCropModal}
-              isBatchCropping={isBatchCropping}
-              batchProgress={batchProgress}
-              handleAutoCropSelected={handleAutoCropSelected}
-              handleCleanBubblesSelected={handleCleanBubblesSelected}
-              fetchWithInterceptor={fetchWithInterceptor}
-              onLastSelectedReset={() => setLastSelectedIndex(null)}
-            />
-
             {/* Shift-select hint banner */}
             {scrapedImages.length > 1 && (
               <p className="text-[9px] text-neutral-600 font-mono px-1">
@@ -395,12 +395,16 @@ export default function LiveScraperDeck({
             <div className="flex gap-4 overflow-x-auto pb-8 pt-1.5 scrollbar-thin">
               {scrapedImages.map((imgUrl, idx) => {
                 const isSelected = selectedScraped.includes(imgUrl);
+                const isImported = panels.some(
+                  (p) => p.image_url === imgUrl || p.original_url === imgUrl
+                );
                 return (
                   <PanelCard
                     key={`${imgUrl}-${idx}`}
                     imgUrl={imgUrl}
                     idx={idx}
                     isSelected={isSelected}
+                    isImported={isImported}
                     isBatchCropping={isBatchCropping}
                     croppingImgUrl={croppingImgUrl}
                     bubbleCroppingImgUrl={bubbleCroppingImgUrl}

@@ -1,5 +1,4 @@
 import React from "react";
-import { Image, FileText } from "lucide-react";
 
 interface TimelineHeaderProps {
   panelsLength: number;
@@ -11,8 +10,6 @@ interface TimelineHeaderProps {
   handleDownloadZip?: () => void;
   isAnalyzingAll?: boolean;
   handleAnalyzeAllPanels?: () => void;
-  onAddBlankPanel?: () => void;
-  onUploadImagePanel?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export default function TimelineHeader({
@@ -23,8 +20,6 @@ export default function TimelineHeader({
   handleDownloadZip,
   isAnalyzingAll,
   handleAnalyzeAllPanels,
-  onAddBlankPanel,
-  onUploadImagePanel,
 }: TimelineHeaderProps) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-neutral-800 pb-4">
@@ -42,27 +37,7 @@ export default function TimelineHeader({
       </div>
 
       <div className="flex items-center gap-2 flex-wrap">
-        {onAddBlankPanel && (
-          <button
-            onClick={onAddBlankPanel}
-            className="px-3 py-1.5 bg-neutral-950/40 hover:bg-neutral-850 text-neutral-350 border border-neutral-850 hover:border-neutral-750 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-          >
-            <FileText className="h-3.5 w-3.5 text-purple-400" />+ Blank Panel
-          </button>
-        )}
-
-        {onUploadImagePanel && (
-          <label className="px-3 py-1.5 bg-neutral-950/40 hover:bg-neutral-850 text-neutral-350 border border-neutral-850 hover:border-neutral-750 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer">
-            <Image className="h-3.5 w-3.5 text-purple-400" />
-            + Upload Image
-            <input
-              type="file"
-              accept="image/*"
-              onChange={onUploadImagePanel}
-              className="hidden"
-            />
-          </label>
-        )}
+        {/* Buttons removed as requested */}
       </div>
     </div>
   );

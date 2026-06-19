@@ -33,6 +33,7 @@ export interface BubbleCleanerSharedProps {
   scrapedImages: string[];
   selectedScraped: string[];
   addNotification?: (msg: string, type: any) => void;
+  previewImageUrl?: string | null;
 }
 
 // ─── Shared types for AutoCrop tab sub-components ────────────────────────────
@@ -90,4 +91,5 @@ export interface AutoCropSharedProps {
   setCropGuidance: (v: string) => void;
   cropFocusMode: string;
   setCropFocusMode: (v: string) => void;
+  previewImageUrl?: string | null;
 }

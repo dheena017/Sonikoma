@@ -337,6 +337,25 @@ export function useAppLogic() {
           } else {
             state.setPanels([]);
           }
+
+          // Populate the scraped metadata in the input boxes
+          if (data.cover_image) {
+            state.setSeriesCoverImage(data.cover_image);
+          }
+          if (data.title) {
+            state.setSeriesTitle(data.title);
+            state.setScrapedTitle(data.title);
+          }
+          if (data.author) {
+            state.setSeriesAuthor(data.author);
+          }
+          if (data.synopsis) {
+            state.setSeriesSynopsis(data.synopsis);
+          }
+          if (data.genre) {
+            state.setScrapedGenre(data.genre);
+          }
+
           setCurrentPanelIndex(0);
           setPlaybackTime(0);
           setStoryboardPlaying(false);

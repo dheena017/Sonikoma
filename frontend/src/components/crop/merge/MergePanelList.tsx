@@ -39,11 +39,11 @@ export default function MergePanelList({
                     : "bg-black/20 border-white/5"
                 }`}
               >
-                <div className="w-8 h-8 rounded-lg overflow-hidden border border-white/10 flex-shrink-0 bg-neutral-900">
+                <div className="w-8 h-8 rounded-lg overflow-hidden border border-white/10 flex-shrink-0 bg-neutral-900 flex items-center justify-center">
                   <img
                     src={imgUrl}
                     alt={`Frame ${imgIdx + 1}`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                     referrerPolicy="no-referrer"
                   />
                 </div>

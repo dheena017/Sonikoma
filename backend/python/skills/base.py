@@ -491,6 +491,19 @@ class BaseAISkill:
                 self.logger.log_execution(self.name, elapsed_ms, True, kwargs, parsed_json, p_tokens, c_tokens)
                 return raw_text
             except Exception as e:
+                err_msg = str(e).lower()
+                status_code = getattr(e, 'code', None)
+                is_rate_limit = (
+                    status_code == 429 or 
+                    "quota" in err_msg or 
+                    "limit" in err_msg or 
+                    "rate limit" in err_msg or
+                    "resource_exhausted" in err_msg
+                )
+                if is_rate_limit:
+                    logger.error(f"Skill '{self.name}' hit rate limit/quota with model {current_model}: {e}. Skipping other candidate fallbacks to avoid spamming.")
+                    last_exception = e
+                    break
                 logger.warning(f"Skill '{self.name}' execution failed with model {current_model}: {e}. Trying next candidate model.")
                 last_exception = e
 

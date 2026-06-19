@@ -7,6 +7,10 @@ import {
   Sliders,
   HelpCircle,
   RotateCcw,
+  ChevronLeft,
+  ChevronRight,
+  Link2,
+  Loader2,
 } from "lucide-react";
 import BubbleCleanerTabContent from "../scraper/BubbleCleanerTabContent";
 
@@ -35,9 +39,12 @@ interface BubbleCleanerModalProps {
   isApplying: boolean;
   scrapedImages: string[];
   selectedScraped: string[];
-  setSelectedScraped: (v: string[]) => void;
+  setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
   addNotification?: (msg: string, type: any) => void;
   isPage?: boolean;
+
+  handleMergeWithNext?: (idx: number) => Promise<any>;
+  mergingIndices?: number[];
 }
 
 export default function BubbleCleanerModal({
@@ -64,7 +71,20 @@ export default function BubbleCleanerModal({
   setSelectedScraped,
   addNotification,
   isPage = false,
+  handleMergeWithNext,
+  mergingIndices = [],
 }: BubbleCleanerModalProps) {
+  const [isDeckExpanded, setIsDeckExpanded] = React.useState<boolean>(true);
+  const [activePreviewUrl, setActivePreviewUrl] = React.useState<string | null>(null);
+
+  const previewImageUrl = activePreviewUrl || (
+    selectedScraped.length > 0
+      ? selectedScraped[0]
+      : scrapedImages.length > 0
+      ? scrapedImages[0]
+      : null
+  );
+
   const handleResetAll = () => {
     console.log("[BubbleCleanerModal] Resetting all parameters to defaults");
     setDetectionStyle("all");
@@ -73,6 +93,7 @@ export default function BubbleCleanerModal({
     setBubbleDilation(-1);
     setBubbleInpaintRadius(3);
     setActiveTab("general");
+    setActivePreviewUrl(null);
     if (addNotification) {
       addNotification(
         "Restored all speech bubble cleaner parameters to defaults.",
@@ -116,7 +137,7 @@ export default function BubbleCleanerModal({
           <button
             type="button"
             onClick={handleResetAll}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-800 bg-neutral-900/60 hover:bg-neutral-800 text-neutral-400 hover:text-white transition-all text-[10px] font-bold font-mono active:scale-95 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-800 bg-neutral-900/60 hover:bg-neutral-800 text-neutral-450 hover:text-white transition-all text-[10px] font-bold font-mono active:scale-95 cursor-pointer"
           >
             <RotateCcw className="h-3.5 w-3.5 text-neutral-500" />
             Reset Defaults
@@ -154,86 +175,158 @@ export default function BubbleCleanerModal({
         ))}
       </div>
 
-      {/* Scrollable Body */}
-      <div className="p-6 overflow-y-auto flex flex-col flex-1 min-h-0 bg-neutral-900/50">
-        <BubbleCleanerTabContent
-          activeTab={activeTab}
-          detectionStyle={detectionStyle}
-          setDetectionStyle={setDetectionStyle}
-          eraseMethod={eraseMethod}
-          setEraseMethod={setEraseMethod}
-          sensitivity={sensitivity}
-          setSensitivity={setSensitivity}
-          bubbleDilation={bubbleDilation}
-          setBubbleDilation={setBubbleDilation}
-          bubbleInpaintRadius={bubbleInpaintRadius}
-          setBubbleInpaintRadius={setBubbleInpaintRadius}
-          selectedCount={selectedCount}
-          scrapedImages={scrapedImages}
-          selectedScraped={selectedScraped}
-          addNotification={addNotification}
-        />
-      </div>
+      {/* Middle Workspace Area */}
+      <div className="flex flex-1 min-h-0 overflow-hidden bg-neutral-900/50">
+        {/* Collapsible Left Deck */}
+        {scrapedImages.length > 0 && (
+          <div
+            className={[
+              "flex flex-col border-r border-neutral-800 bg-neutral-950/35 shrink-0 transition-all duration-300 ease-in-out overflow-hidden select-none",
+              isDeckExpanded ? "w-36 sm:w-44" : "w-11 sm:w-12",
+            ].join(" ")}
+          >
+            {/* Header / Toggle button */}
+            <div
+              onClick={() => setIsDeckExpanded(!isDeckExpanded)}
+              className={[
+                "flex items-center justify-between p-2 border-b border-neutral-800 cursor-pointer bg-neutral-900/40 hover:bg-neutral-900 transition-colors duration-150 select-none",
+                !isDeckExpanded && "flex-col gap-3 py-3",
+              ].join(" ")}
+              title={isDeckExpanded ? "Collapse Deck" : "Expand Deck"}
+            >
+              {isDeckExpanded ? (
+                <>
+                  <span className="text-[9px] font-mono font-bold text-neutral-400 uppercase tracking-wider pl-1">
+                    Panels ({scrapedImages.length})
+                  </span>
+                  <div className="p-1 rounded hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors duration-150">
+                    <ChevronLeft className="h-4 w-4" />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="p-1 rounded hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors duration-150">
+                    <ChevronRight className="h-4 w-4" />
+                  </div>
+                  <span
+                    className="text-[9px] font-mono font-bold text-neutral-500 uppercase tracking-widest select-none origin-center"
+                    style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
+                  >
+                    PANELS ({scrapedImages.length})
+                  </span>
+                </>
+              )}
+            </div>
 
-      {/* Scrollable Horizontal Preview Ribbon */}
-      {(() => {
-        const imagesToShow =
-          selectedScraped.length > 0 ? selectedScraped : scrapedImages;
-        return (
-          imagesToShow.length > 0 && (
-            <div className="px-6 py-3 border-t border-neutral-800 bg-neutral-950/35 flex flex-col gap-2 shrink-0 animate-[fadeIn_0.15s_ease-out]">
-              <span className="text-[9px] font-mono font-bold text-neutral-500 uppercase tracking-wider select-none">
-                {selectedScraped.length > 0
-                  ? "Selected Panels to Clean"
-                  : "All Scraped Panels"}{" "}
-                ({imagesToShow.length})
-              </span>
-              <div className="flex flex-wrap gap-3 overflow-y-auto py-1.5 pr-2 scrollbar-thin max-h-28 sm:max-h-32">
-                {imagesToShow.map((imgUrl) => {
-                  const globalIdx = scrapedImages.indexOf(imgUrl);
+            {/* Scrollable List of thumbnails */}
+            {isDeckExpanded && (
+              <div className="flex-1 overflow-y-auto p-2.5 flex flex-col gap-3 scrollbar-thin">
+                {scrapedImages.map((imgUrl, globalIdx) => {
                   const isSelected = selectedScraped.includes(imgUrl);
+                  const isCurrentPreview = imgUrl === previewImageUrl;
+                  const isStitching = mergingIndices.includes(globalIdx);
                   return (
-                    <div
-                      key={imgUrl}
-                      onClick={() => {
-                        console.log(
-                          `[BubbleCleanerModal] Navigating to editor for image index ${globalIdx}`
-                        );
-                        window.history.pushState(
-                          {},
-                          "",
-                          `/editor/adjust?idx=${globalIdx}`
-                        );
-                        window.dispatchEvent(new Event("popstate"));
-                      }}
-                      className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-neutral-900 border shrink-0 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105 ${
-                        isSelected
-                          ? "border-purple-500/80 shadow-[0_0_12px_rgba(168,85,247,0.3)] ring-1 ring-purple-500/30"
-                          : "border-neutral-800 hover:border-neutral-700"
-                      }`}
-                    >
-                      <img
-                        src={imgUrl}
-                        alt={`Panel #${globalIdx + 1}`}
-                        className="w-full h-full object-contain pointer-events-none"
-                      />
+                    <React.Fragment key={imgUrl}>
                       <div
-                        className={`absolute bottom-1.5 right-1.5 backdrop-blur-sm px-1.5 py-0.5 rounded text-[8px] font-mono leading-none border transition-all duration-200 ${
-                          isSelected
-                            ? "bg-purple-600/90 border-purple-400/60 text-white shadow-[0_0_8px_rgba(168,85,247,0.4)]"
-                            : "bg-black/80 border-purple-900/30 text-purple-400"
-                        }`}
+                        onClick={() => {
+                          console.log(`[BubbleCleanerModal] Selected preview image: ${imgUrl}`);
+                          setActivePreviewUrl(imgUrl);
+                          setSelectedScraped((prev) =>
+                            prev.includes(imgUrl)
+                              ? prev.filter((u) => u !== imgUrl)
+                              : [...prev, imgUrl]
+                          );
+                        }}
+                        className={[
+                          "relative w-full aspect-square rounded-xl overflow-hidden bg-neutral-900 border shrink-0 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105",
+                          isCurrentPreview
+                            ? "border-emerald-500/80 shadow-[0_0_12px_rgba(16,185,129,0.3)] ring-1 ring-emerald-500/30"
+                            : isSelected
+                            ? "border-purple-500/50 shadow-[0_0_8px_rgba(168,85,247,0.15)]"
+                            : "border-neutral-800 hover:border-neutral-700",
+                        ].join(" ")}
                       >
-                        #{globalIdx + 1}
+                        <img
+                          src={imgUrl}
+                          alt={`Panel #${globalIdx + 1}`}
+                          className="w-full h-full object-contain pointer-events-none"
+                        />
+                        <div
+                          className={[
+                            "absolute bottom-1.5 right-1.5 backdrop-blur-sm px-1.5 py-0.5 rounded text-[8px] font-mono leading-none border transition-all duration-200",
+                            isCurrentPreview
+                              ? "bg-emerald-600/90 border-emerald-400/60 text-white"
+                              : isSelected
+                              ? "bg-purple-600/90 border-purple-400/60 text-white"
+                              : "bg-black/80 border-purple-900/30 text-purple-400",
+                          ].join(" ")}
+                        >
+                          #{globalIdx + 1}
+                        </div>
                       </div>
-                    </div>
+
+                      {globalIdx < scrapedImages.length - 1 && handleMergeWithNext && (
+                        <div className="flex justify-center -my-1.5 h-6 items-center">
+                          <button
+                            type="button"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              console.log(`[BubbleCleanerModal] Stitching idx ${globalIdx} with next`);
+                              const img1 = scrapedImages[globalIdx];
+                              const img2 = scrapedImages[globalIdx + 1];
+                              const stitched = await handleMergeWithNext(globalIdx);
+                              if (stitched) {
+                                if (activePreviewUrl === img1 || activePreviewUrl === img2) {
+                                  setActivePreviewUrl(stitched);
+                                }
+                              }
+                            }}
+                            disabled={isStitching}
+                            className={`w-6 h-6 rounded-full bg-neutral-900 border flex items-center justify-center transition-all duration-200 shadow-md cursor-pointer hover:scale-110 active:scale-95 z-10 opacity-60 hover:opacity-100 ${
+                              isStitching
+                                ? "border-purple-500/40 text-purple-400 bg-purple-950/20 cursor-wait"
+                                : "border-neutral-800 hover:border-purple-500/50 hover:bg-purple-600/90 text-neutral-400 hover:text-white"
+                            }`}
+                            title="Stitch with next panel"
+                          >
+                            {isStitching ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <Link2 className="h-3 w-3" />
+                            )}
+                          </button>
+                        </div>
+                      )}
+                    </React.Fragment>
                   );
                 })}
               </div>
-            </div>
-          )
-        );
-      })()}
+            )}
+          </div>
+        )}
+
+        {/* Scrollable Tab Content Settings Pane */}
+        <div className="p-6 overflow-y-auto flex flex-col flex-1 min-h-0">
+          <BubbleCleanerTabContent
+            activeTab={activeTab}
+            detectionStyle={detectionStyle}
+            setDetectionStyle={setDetectionStyle}
+            eraseMethod={eraseMethod}
+            setEraseMethod={setEraseMethod}
+            sensitivity={sensitivity}
+            setSensitivity={setSensitivity}
+            bubbleDilation={bubbleDilation}
+            setBubbleDilation={setBubbleDilation}
+            bubbleInpaintRadius={bubbleInpaintRadius}
+            setBubbleInpaintRadius={setBubbleInpaintRadius}
+            selectedCount={selectedCount}
+            scrapedImages={scrapedImages}
+            selectedScraped={selectedScraped}
+            addNotification={addNotification}
+            previewImageUrl={previewImageUrl}
+          />
+        </div>
+      </div>
 
       {/* Live Config Summary Bar */}
       <div className="px-6 py-2.5 bg-neutral-950/20 border-t border-neutral-800 flex items-center gap-4 text-[9px] font-mono text-neutral-500 tracking-wider">

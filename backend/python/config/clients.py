@@ -53,6 +53,10 @@ except ImportError:
     pass
 
 
+# Global lock to serialize all Gemini API calls and avoid concurrent 429 errors
+import asyncio
+_gemini_global_lock = asyncio.Lock()
+
 async def call_gemini_with_retry(
     fn: Callable[[], Any],
     max_attempts: int = 5,
@@ -66,73 +70,75 @@ async def call_gemini_with_retry(
     attempt = 0
     import inspect
     import asyncio
-    while True:
-        try:
-            # Check if fn is coroutine, but we run blocking or thread-pool generate_content typically
-            if inspect.iscoroutinefunction(fn):
-                return await fn()
-            else:
-                return await asyncio.to_thread(fn)
-        except Exception as err:
-            attempt += 1
-            err_msg = str(err).lower()
-            
-            # Check status code if available (e.g. from googleapi errors)
-            status_code = getattr(err, 'code', None)
-            if not status_code:
-                # Try parsing code from exception message
-                status_match = re.search(r'status[^0-9]*(\d+)', err_msg)
-                if status_match:
-                    try:
-                        status_code = int(status_match.group(1))
-                    except ValueError:
-                        pass
-                        
-            is_rate_limit = (
-                status_code == 429 or 
-                "quota" in err_msg or 
-                "limit" in err_msg or 
-                "rate limit" in err_msg
-            )
-            is_unavailable = (
-                status_code == 503 or 
-                "high demand" in err_msg or 
-                "unavailable" in err_msg or 
-                "service unavailable" in err_msg
-            )
-
-            if (is_rate_limit or is_unavailable) and attempt < max_attempts:
-                # Default delay: Exponential backoff with jitter
-                delay = initial_delay_sec * (2.2 ** (attempt - 1)) + random.uniform(0.1, 1.5)
-                
-                # Try parsing the specific wait time requested by Google API
-                # Pattern 1: "Please retry in 43.31459721s."
-                retry_match = re.search(r'please retry in\s+(\d+(?:\.\d+)?)s', str(err), re.IGNORECASE)
-                if retry_match:
-                    try:
-                        # Add a minimum 1.0s buffer plus random jitter (1.0 to 8.0s) to stagger concurrent wakeups
-                        delay = float(retry_match.group(1)) + 1.0 + random.uniform(1.0, 8.0)
-                        logger.info(f"[Gemini] Parsed required API retry delay (please retry in): {delay:.2f}s (includes jitter)")
-                    except ValueError:
-                        pass
+    
+    async with _gemini_global_lock:
+        while True:
+            try:
+                # Check if fn is coroutine, but we run blocking or thread-pool generate_content typically
+                if inspect.iscoroutinefunction(fn):
+                    return await fn()
                 else:
-                    # Pattern 2: "'retryDelay': '43s'"
-                    retry_json_match = re.search(r"['\"]retryDelay['\"]\s*:\s*['\"](\d+)s['\"]", str(err), re.IGNORECASE)
-                    if retry_json_match:
+                    return await asyncio.to_thread(fn)
+            except Exception as err:
+                attempt += 1
+                err_msg = str(err).lower()
+            
+                # Check status code if available (e.g. from googleapi errors)
+                status_code = getattr(err, 'code', None)
+                if not status_code:
+                    # Try parsing code from exception message
+                    status_match = re.search(r'status[^0-9]*(\d+)', err_msg)
+                    if status_match:
                         try:
-                            # Add a minimum 1.5s buffer plus random jitter (1.0 to 8.0s) to stagger concurrent wakeups
-                            delay = float(retry_json_match.group(1)) + 1.5 + random.uniform(1.0, 8.0)
-                            logger.info(f"[Gemini] Parsed required API retry delay (retryDelay): {delay:.2f}s (includes jitter)")
+                            status_code = int(status_match.group(1))
                         except ValueError:
                             pass
-
-                logger.warning(
-                    f"[Gemini] Error (attempt {attempt}/{max_attempts}). "
-                    f"Retrying in {delay:.2f}s... {err}"
+                            
+                is_rate_limit = (
+                    status_code == 429 or 
+                    "quota" in err_msg or 
+                    "limit" in err_msg or 
+                    "rate limit" in err_msg
                 )
-                await asyncio.sleep(delay)
-            else:
-                raise err
+                is_unavailable = (
+                    status_code == 503 or 
+                    "high demand" in err_msg or 
+                    "unavailable" in err_msg or 
+                    "service unavailable" in err_msg
+                )
+
+                if (is_rate_limit or is_unavailable) and attempt < max_attempts:
+                    # Default delay: Exponential backoff with jitter
+                    delay = initial_delay_sec * (2.2 ** (attempt - 1)) + random.uniform(0.1, 1.5)
+                    
+                    # Try parsing the specific wait time requested by Google API
+                    # Pattern 1: "Please retry in 43.31459721s."
+                    retry_match = re.search(r'please retry in\s+(\d+(?:\.\d+)?)s', str(err), re.IGNORECASE)
+                    if retry_match:
+                        try:
+                            # Add a minimum 1.0s buffer plus random jitter (1.0 to 8.0s) to stagger concurrent wakeups
+                            delay = float(retry_match.group(1)) + 1.0 + random.uniform(1.0, 8.0)
+                            logger.info(f"[Gemini] Parsed required API retry delay (please retry in): {delay:.2f}s (includes jitter)")
+                        except ValueError:
+                            pass
+                    else:
+                        # Pattern 2: "'retryDelay': '43s'"
+                        retry_json_match = re.search(r"['\"]retryDelay['\"]\s*:\s*['\"](\d+)s['\"]", str(err), re.IGNORECASE)
+                        if retry_json_match:
+                            try:
+                                # Add a minimum 1.5s buffer plus random jitter (1.0 to 8.0s) to stagger concurrent wakeups
+                                delay = float(retry_json_match.group(1)) + 1.5 + random.uniform(1.0, 8.0)
+                                logger.info(f"[Gemini] Parsed required API retry delay (retryDelay): {delay:.2f}s (includes jitter)")
+                            except ValueError:
+                                pass
+
+                    logger.warning(
+                        f"[Gemini] Error (attempt {attempt}/{max_attempts}). "
+                        f"Retrying in {delay:.2f}s... {err}"
+                    )
+                    await asyncio.sleep(delay)
+                else:
+                    raise err
 
 
 # ── Background video URLs by genre ────────────────────────────────────────────

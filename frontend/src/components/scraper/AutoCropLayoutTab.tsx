@@ -23,7 +23,9 @@ interface AutoCropLayoutTabProps
     | "cropCannyHigh"
     | "cropCloseKernelSize"
     | "addNotification"
-  > {}
+  > {
+  previewImageUrl?: string | null;
+}
 
 export function AutoCropLayoutTab({
   cropPaddingPx,
@@ -41,13 +43,15 @@ export function AutoCropLayoutTab({
   cropCannyHigh,
   cropCloseKernelSize,
   addNotification,
+  previewImageUrl,
 }: AutoCropLayoutTabProps) {
   const firstImageUrl =
-    selectedScraped.length > 0
+    previewImageUrl ||
+    (selectedScraped.length > 0
       ? selectedScraped[0]
       : scrapedImages.length > 0
       ? scrapedImages[0]
-      : null;
+      : null);
 
   return (
     <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">

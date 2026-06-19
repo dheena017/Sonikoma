@@ -12,6 +12,7 @@ interface PanelCardThumbnailProps {
   imgUrl: string;
   idx: number;
   isSelected: boolean;
+  isImported?: boolean;
   isProcessing: boolean;
   isBatchCropping: boolean;
   bubbleCroppingImgUrl: string | null;
@@ -19,6 +20,23 @@ interface PanelCardThumbnailProps {
   handleFlipHorizontal: () => void;
   handleUndo: () => void;
 }
+
+const getScrapedImageStatus = (url: string) => {
+  if (!url) return null;
+  if (url.includes("_cropped")) {
+    return { text: "CROPPED", bg: "bg-blue-600/90 border-blue-400/60 text-blue-100 shadow-[0_0_8px_rgba(59,130,246,0.5)]" };
+  }
+  if (url.includes("_cleaned")) {
+    return { text: "CLEANED", bg: "bg-purple-600/90 border-purple-400/60 text-purple-100 shadow-[0_0_8px_rgba(168,85,247,0.5)]" };
+  }
+  if (url.includes("_merged") || url.includes("stitch") || url.includes("stitched")) {
+    return { text: "MERGED", bg: "bg-pink-600/90 border-pink-400/60 text-pink-100 shadow-[0_0_8px_rgba(236,72,153,0.5)]" };
+  }
+  if (url.includes("transform_")) {
+    return { text: "EDITED", bg: "bg-amber-600/90 border-amber-400/60 text-amber-100 shadow-[0_0_8px_rgba(245,158,11,0.5)]" };
+  }
+  return null;
+};
 
 const processingLabel = (
   isBatchCropping: boolean,
@@ -34,6 +52,7 @@ export function PanelCardThumbnail({
   imgUrl,
   idx,
   isSelected,
+  isImported,
   isProcessing,
   isBatchCropping,
   bubbleCroppingImgUrl,
@@ -42,6 +61,7 @@ export function PanelCardThumbnail({
   handleUndo,
 }: PanelCardThumbnailProps) {
   const label = processingLabel(isBatchCropping, bubbleCroppingImgUrl, imgUrl);
+  const status = getScrapedImageStatus(imgUrl);
 
   return (
     <div className="relative h-28 sm:h-32 rounded-xl overflow-hidden bg-neutral-900 flex items-center justify-center ring-1 ring-neutral-800/60 group-hover:ring-purple-800/30 transition-all duration-200">
@@ -89,6 +109,26 @@ export function PanelCardThumbnail({
       >
         #{idx + 1}
       </div>
+
+      {/* Added badge if imported */}
+      {isImported && (
+        <div className="absolute top-1.5 left-11 backdrop-blur-sm px-1.5 py-0.5 rounded-md text-[8px] font-mono font-bold leading-none bg-emerald-500/80 border border-emerald-400/60 text-white shadow-[0_0_8px_rgba(16,185,129,0.5)] z-20 flex items-center gap-0.5">
+          ✓ ADDED
+        </div>
+      )}
+
+      {/* Operation status badge */}
+      {status && (
+        <div
+          className={[
+            "absolute top-1.5 backdrop-blur-sm px-1.5 py-0.5 rounded-md text-[8px] font-mono font-bold leading-none border z-20 transition-all",
+            isImported ? "left-[90px]" : "left-11",
+            status.bg
+          ].join(" ")}
+        >
+          {status.text}
+        </div>
+      )}
 
       {/* Selection check badge with animated ping ring */}
       <div className="absolute top-1.5 right-1.5">

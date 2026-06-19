@@ -13,6 +13,7 @@ import {
   DEFAULT_SHORTCUTS,
 } from "./hooks/useGlobalShortcuts.js";
 import { useBackendHealth } from "./hooks/useBackendHealth.js";
+import { useAutoSave } from "./hooks/useAutoSave.js";
 
 // --- Layout & Main Workspace Components ---
 import Header from "./components/Header.js";
@@ -282,6 +283,7 @@ export default function App() {
     register,
     logout,
     forgotPassword,
+    checkAuth,
 
     // Notification Hub & Alerts
     notifications,
@@ -299,6 +301,23 @@ export default function App() {
     targetUrl,
     setTargetUrl,
   } = appLogic;
+
+  // --- Auto Save Hook ---
+  const { saveStatus, saveProject, isDirty } = useAutoSave({
+    projectId,
+    seriesTitle,
+    chapterNumber,
+    chapterTitle,
+    scrapedGenre,
+    seriesAuthor,
+    seriesCoverImage,
+    seriesSynopsis,
+    panels,
+    scrapedImages,
+    targetUrl,
+    fetchWithInterceptor,
+    addNotification,
+  });
 
   // --- Router & Path Hook ---
   const {
@@ -352,6 +371,14 @@ export default function App() {
     setIsPipMode,
   });
 
+  // --- Project Details Page Save Sync State ---
+  const [projectDetailsDirty, setProjectDetailsDirty] = React.useState(false);
+  const [projectDetailsSaveStatus, setProjectDetailsSaveStatus] = React.useState<"idle" | "saving" | "saved" | "error">("idle");
+  const projectDetailsSaveRef = React.useRef<(() => Promise<void>) | null>(null);
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const detailsProjectId = urlParams.get("id");
+
   // --------------------------------------------------------------------------
   // SUB-SECTION 2.2: ROUTING / NAVIGATION PATH CHECKS
   // --------------------------------------------------------------------------
@@ -384,6 +411,11 @@ export default function App() {
   const isLoginPath = currentPath === "/login";
   const isRegisterPath = currentPath === "/register";
   const isForgotPasswordPath = currentPath === "/forgot-password";
+
+  const headerProjectId = isProjectDetailsPath ? detailsProjectId : projectId;
+  const headerIsDirty = isProjectDetailsPath ? projectDetailsDirty : isDirty;
+  const headerSaveStatus = isProjectDetailsPath ? projectDetailsSaveStatus : saveStatus;
+  const headerOnSave = isProjectDetailsPath ? (() => { projectDetailsSaveRef.current?.(); }) : saveProject;
 
   // --------------------------------------------------------------------------
   // SUB-SECTION 2.3: AUTHENTICATION GUARDS & EARLY RETURNS
@@ -553,6 +585,10 @@ export default function App() {
             markAllNotificationsAsRead={markAllNotificationsAsRead}
             deleteNotification={deleteNotification}
             clearAllNotifications={clearAllNotifications}
+            projectId={headerProjectId}
+            saveStatus={headerSaveStatus}
+            isDirty={headerIsDirty}
+            onSave={headerOnSave}
           />
 
           {/* PAGE VIEW 1: Main Dashboard Workspace */}
@@ -749,6 +785,7 @@ export default function App() {
               addNotification={addNotification}
               scrapedTitle={scrapedTitle}
               scrapedGenre={scrapedGenre}
+              videoUrl={videoUrl}
             />
           )}
 
@@ -838,6 +875,7 @@ export default function App() {
               projects={[]} // In a real app, fetch these
               onLogout={logout}
               onNavigateHome={() => navigateTo("/")}
+              onRefreshUser={checkAuth}
             />
           )}
 
@@ -858,6 +896,9 @@ export default function App() {
             <ProjectDetailsPage
               onNavigateHome={() => navigateTo("/")}
               navigateTo={navigateTo}
+              setGlobalDirty={setProjectDetailsDirty}
+              setGlobalSaveStatus={setProjectDetailsSaveStatus}
+              registerSaveHandler={(handler) => { projectDetailsSaveRef.current = handler; }}
             />
           )}
 
@@ -941,6 +982,8 @@ export default function App() {
               selectedScraped={selectedScraped}
               setSelectedScraped={setSelectedScraped}
               addNotification={addNotification}
+              handleMergeWithNext={handleStitchWithNext}
+              mergingIndices={mergingIndices}
             />
           )}
 
@@ -1079,6 +1122,8 @@ export default function App() {
           selectedScraped={selectedScraped}
           setSelectedScraped={setSelectedScraped}
           addNotification={addNotification}
+          handleMergeWithNext={handleStitchWithNext}
+          mergingIndices={mergingIndices}
         />
       )}
 

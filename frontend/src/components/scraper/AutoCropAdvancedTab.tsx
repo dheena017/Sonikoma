@@ -31,7 +31,9 @@ interface AutoCropAdvancedTabProps
     | "scrapedImages"
     | "selectedScraped"
     | "addNotification"
-  > {}
+  > {
+  previewImageUrl?: string | null;
+}
 
 export function AutoCropAdvancedTab({
   useLocalCV,
@@ -55,13 +57,15 @@ export function AutoCropAdvancedTab({
   scrapedImages,
   selectedScraped,
   addNotification,
+  previewImageUrl,
 }: AutoCropAdvancedTabProps) {
   const firstImageUrl =
-    selectedScraped.length > 0
+    previewImageUrl ||
+    (selectedScraped.length > 0
       ? selectedScraped[0]
       : scrapedImages.length > 0
       ? scrapedImages[0]
-      : null;
+      : null);
 
   const jsonPayload = {
     sensitivity: cropSensitivity,

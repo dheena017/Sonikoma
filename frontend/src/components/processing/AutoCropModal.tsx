@@ -54,7 +54,7 @@ interface AutoCropModalProps {
   isApplying: boolean;
   scrapedImages: string[];
   selectedScraped: string[];
-  setSelectedScraped: (v: string[]) => void;
+  setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
   setConsoleLogs?: React.Dispatch<React.SetStateAction<string[]>>;
   addNotification?: (msg: string, type: any) => void;
   isPage?: boolean;
@@ -106,6 +106,16 @@ export default function AutoCropModal({
   addNotification,
   isPage = false,
 }: AutoCropModalProps) {
+  const [activePreviewUrl, setActivePreviewUrl] = React.useState<string | null>(null);
+
+  const previewImageUrl = activePreviewUrl || (
+    selectedScraped.length > 0
+      ? selectedScraped[0]
+      : scrapedImages.length > 0
+      ? scrapedImages[0]
+      : null
+  );
+
   const handleResetAll = () => {
     console.log("[AutoCropModal] Resetting all parameters to defaults");
     setSensitivity(30);
@@ -124,6 +134,7 @@ export default function AutoCropModal({
     setActiveTab("general");
     setCropGuidance("");
     setCropFocusMode("standard");
+    setActivePreviewUrl(null);
     if (addNotification) {
       addNotification("Restored all crop parameters to defaults.", "info");
     }
@@ -243,68 +254,63 @@ export default function AutoCropModal({
           setCropGuidance={setCropGuidance}
           cropFocusMode={cropFocusMode}
           setCropFocusMode={setCropFocusMode}
+          previewImageUrl={previewImageUrl}
         />
       </div>
 
       {/* Scrollable Horizontal Preview Ribbon */}
-      {(() => {
-        const imagesToShow =
-          selectedScraped.length > 0 ? selectedScraped : scrapedImages;
-        return (
-          imagesToShow.length > 0 && (
-            <div className="px-6 py-3 border-t border-neutral-800 bg-neutral-950/35 flex flex-col gap-2 shrink-0 animate-[fadeIn_0.15s_ease-out]">
-              <span className="text-[9px] font-mono font-bold text-neutral-500 uppercase tracking-wider select-none">
-                {selectedScraped.length > 0
-                  ? "Selected Panels to Crop"
-                  : "All Scraped Panels"}{" "}
-                ({imagesToShow.length})
-              </span>
-              <div className="flex flex-wrap gap-3 overflow-y-auto py-1.5 pr-2 scrollbar-thin max-h-28 sm:max-h-32">
-                {imagesToShow.map((imgUrl) => {
-                  const globalIdx = scrapedImages.indexOf(imgUrl);
-                  const isSelected = selectedScraped.includes(imgUrl);
-                  return (
-                    <div
-                      key={imgUrl}
-                      onClick={() => {
-                        console.log(
-                          `[AutoCropModal] Navigating to editor for image index ${globalIdx}`
-                        );
-                        window.history.pushState(
-                          {},
-                          "",
-                          `/editor/adjust?idx=${globalIdx}`
-                        );
-                        window.dispatchEvent(new Event("popstate"));
-                      }}
-                      className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-neutral-900 border shrink-0 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105 ${
-                        isSelected
-                          ? "border-indigo-500/80 shadow-[0_0_12px_rgba(99,102,241,0.3)] ring-1 ring-indigo-500/30"
-                          : "border-neutral-800 hover:border-neutral-700"
-                      }`}
-                    >
-                      <img
-                        src={imgUrl}
-                        alt={`Panel #${globalIdx + 1}`}
-                        className="w-full h-full object-contain pointer-events-none"
-                      />
-                      <div
-                        className={`absolute bottom-1.5 right-1.5 backdrop-blur-sm px-1.5 py-0.5 rounded text-[8px] font-mono leading-none border transition-all duration-200 ${
-                          isSelected
-                            ? "bg-indigo-600/90 border-indigo-400/60 text-white shadow-[0_0_8px_rgba(99,102,241,0.4)]"
-                            : "bg-black/80 border-indigo-900/30 text-indigo-400"
-                        }`}
-                      >
-                        #{globalIdx + 1}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )
-        );
-      })()}
+      {scrapedImages.length > 0 && (
+        <div className="px-6 py-3 border-t border-neutral-800 bg-neutral-950/35 flex flex-col gap-2 shrink-0 animate-[fadeIn_0.15s_ease-out]">
+          <span className="text-[9px] font-mono font-bold text-neutral-500 uppercase tracking-wider select-none">
+            All Scraped Panels ({scrapedImages.length})
+          </span>
+          <div className="flex flex-wrap gap-3 overflow-y-auto py-1.5 pr-2 scrollbar-thin max-h-28 sm:max-h-32">
+            {scrapedImages.map((imgUrl) => {
+              const globalIdx = scrapedImages.indexOf(imgUrl);
+              const isSelected = selectedScraped.includes(imgUrl);
+              const isCurrentPreview = imgUrl === previewImageUrl;
+              return (
+                <div
+                  key={imgUrl}
+                  onClick={() => {
+                    console.log(`[AutoCropModal] Selected preview image: ${imgUrl}`);
+                    setActivePreviewUrl(imgUrl);
+                    setSelectedScraped((prev) =>
+                      prev.includes(imgUrl)
+                        ? prev.filter((u) => u !== imgUrl)
+                        : [...prev, imgUrl]
+                    );
+                  }}
+                  className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-neutral-900 border shrink-0 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105 ${
+                    isCurrentPreview
+                      ? "border-emerald-500/80 shadow-[0_0_12px_rgba(16,185,129,0.3)] ring-2 ring-emerald-500/30"
+                      : isSelected
+                      ? "border-indigo-500/50 shadow-[0_0_8px_rgba(99,102,241,0.15)]"
+                      : "border-neutral-800 hover:border-neutral-700"
+                  }`}
+                >
+                  <img
+                    src={imgUrl}
+                    alt={`Panel #${globalIdx + 1}`}
+                    className="w-full h-full object-contain pointer-events-none"
+                  />
+                  <div
+                    className={`absolute bottom-1.5 right-1.5 backdrop-blur-sm px-1.5 py-0.5 rounded text-[8px] font-mono leading-none border transition-all duration-200 ${
+                      isCurrentPreview
+                        ? "bg-emerald-600/90 border-emerald-400/60 text-white"
+                        : isSelected
+                        ? "bg-indigo-600/90 border-indigo-400/60 text-white"
+                        : "bg-black/80 border-indigo-900/30 text-indigo-400"
+                    }`}
+                  >
+                    #{globalIdx + 1}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Live Config Summary Bar */}
       <div className="px-6 py-2.5 bg-neutral-950/20 border-t border-neutral-800 flex items-center gap-4 text-[9px] font-mono text-neutral-500 tracking-wider">

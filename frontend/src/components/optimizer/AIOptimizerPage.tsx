@@ -21,6 +21,7 @@ interface AIOptimizerPageProps {
   addNotification?: (msg: string, type: any) => void;
   scrapedTitle?: string;
   scrapedGenre?: string;
+  videoUrl?: string | null;
 }
 
 export default function AIOptimizerPage({
@@ -29,6 +30,7 @@ export default function AIOptimizerPage({
   addNotification,
   scrapedTitle,
   scrapedGenre,
+  videoUrl,
 }: AIOptimizerPageProps) {
   const [activeTab, setActiveTab] = useState<
     "seo" | "shorts" | "sound" | "ads" | "engagement"
@@ -143,22 +145,45 @@ export default function AIOptimizerPage({
             title={title}
             genre={genre}
             storyboardSummary={storyboardSummary}
+            videoUrl={videoUrl}
+            panels={panels}
+            addNotification={addNotification}
           />
         )}
         {activeTab === "shorts" && (
           <ShortsScriptTab
             title={title}
             storyboardSummary={storyboardSummary}
+            videoUrl={videoUrl}
+            panels={panels}
+            addNotification={addNotification}
           />
         )}
         {activeTab === "sound" && (
-          <SoundOutroTab title={title} storyboardSummary={storyboardSummary} />
+          <SoundOutroTab
+            title={title}
+            storyboardSummary={storyboardSummary}
+            videoUrl={videoUrl}
+            panels={panels}
+            addNotification={addNotification}
+          />
         )}
         {activeTab === "ads" && (
-          <AdPlacementTab compiledScript={compiledScript} />
+          <AdPlacementTab
+            compiledScript={compiledScript}
+            videoUrl={videoUrl}
+            panels={panels}
+            addNotification={addNotification}
+          />
         )}
         {activeTab === "engagement" && (
-          <EngagementTab title={title} storyboardSummary={storyboardSummary} />
+          <EngagementTab
+            title={title}
+            storyboardSummary={storyboardSummary}
+            videoUrl={videoUrl}
+            panels={panels}
+            addNotification={addNotification}
+          />
         )}
       </div>
     </div>

@@ -11,11 +11,12 @@ export function AutoCropGeneralTab(props: AutoCropSharedProps) {
   } = useAutoCropPresets(props);
 
   const firstImageUrl =
-    props.selectedScraped.length > 0
+    props.previewImageUrl ||
+    (props.selectedScraped.length > 0
       ? props.selectedScraped[0]
       : props.scrapedImages.length > 0
       ? props.scrapedImages[0]
-      : null;
+      : null);
 
   return (
     <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">

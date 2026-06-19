@@ -248,6 +248,8 @@ export function useAppState() {
   const [seriesSynopsis, setSeriesSynopsis] = useState<string>("");
 
   useEffect(() => {
+    if (projectId) return;
+
     if (!targetUrl.trim()) {
       setSeriesTitle("");
       setChapterNumber("");
@@ -269,7 +271,7 @@ export function useAppState() {
     } catch {
       // ignore
     }
-  }, [targetUrl]);
+  }, [targetUrl, projectId]);
 
   // ── Callbacks & effects AFTER all useState declarations ──────────────────
 
@@ -366,7 +368,7 @@ export function useAppState() {
     (window as any).navigateTo?.("/landing");
   }, [addNotification]);
 
-  const checkAuth = useCallback(async () => {
+  const checkAuth = useCallback(async (showDelay: boolean = true) => {
     const token = localStorage.getItem("anivox_token");
 
     // Artificial delay to show the fancy loading screen
@@ -374,8 +376,10 @@ export function useAppState() {
     const start = Date.now();
 
     if (!token) {
-      const elapsed = Date.now() - start;
-      if (elapsed < 1500) await delay(1500 - elapsed);
+      if (showDelay) {
+        const elapsed = Date.now() - start;
+        if (elapsed < 1500) await delay(1500 - elapsed);
+      }
       setAuthLoading(false);
       setIsInitializing(false);
       return;
@@ -394,8 +398,10 @@ export function useAppState() {
     } catch (e) {
       console.error("Auth check failed", e);
     } finally {
-      const elapsed = Date.now() - start;
-      if (elapsed < 2000) await delay(2000 - elapsed);
+      if (showDelay) {
+        const elapsed = Date.now() - start;
+        if (elapsed < 2000) await delay(2000 - elapsed);
+      }
       setAuthLoading(false);
       setIsInitializing(false);
     }
@@ -440,6 +446,32 @@ export function useAppState() {
             setProjectId(data.project.project_id);
             setTargetUrl(data.project.url || "");
             setVideoUrl(data.project.video_url || null);
+
+            // Populate details from loaded project
+            if (data.project.cover_image) {
+              setSeriesCoverImage(data.project.cover_image);
+            }
+            if (data.project.title) {
+              setSeriesTitle(data.project.title);
+              setScrapedTitle(data.project.title);
+            }
+            if (data.project.author) {
+              setSeriesAuthor(data.project.author);
+            }
+            if (data.project.synopsis) {
+              setSeriesSynopsis(data.project.synopsis);
+            }
+                        if (data.project.genre) {
+              setScrapedGenre(data.project.genre);
+            }
+            if (data.project.episode) {
+              const epStr = data.project.episode;
+              const epParts = epStr.split(" - ");
+              const numStr = epParts[0].replace("Chapter ", "").trim();
+              const nameStr = epParts.slice(1).join(" - ").trim();
+              setChapterNumber(numStr);
+              setChapterTitle(nameStr);
+            }
             
             if (data.panels && data.panels.length > 0) {
               const mappedPanels = data.panels.map((p: any) => ({
@@ -599,6 +631,7 @@ export function useAppState() {
     addNotification,
     removeNotification,
     fetchWithInterceptor,
+    checkAuth,
     targetUrl,
     setTargetUrl,
     voiceActor,

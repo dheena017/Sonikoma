@@ -377,7 +377,7 @@ def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
             rows = conn.execute("""
                 SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                        c.episode_number AS episode, c.status, c.panels_count, c.video_url, 
-                       c.created_at, c.updated_at, s.user_id
+                       c.created_at, c.updated_at, s.user_id, s.id AS series_id
                 FROM chapters c
                 JOIN series s ON c.series_id = s.id
                 WHERE s.user_id = ?
@@ -387,7 +387,7 @@ def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
             rows = conn.execute("""
                 SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                        c.episode_number AS episode, c.status, c.panels_count, c.video_url, 
-                       c.created_at, c.updated_at, s.user_id
+                       c.created_at, c.updated_at, s.user_id, s.id AS series_id
                 FROM chapters c
                 JOIN series s ON c.series_id = s.id
                 ORDER BY c.created_at DESC
@@ -403,7 +403,7 @@ def get_project(project_id: str) -> Optional[Dict[str, Any]]:
         row = conn.execute("""
             SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                    c.episode_number AS episode, c.status, c.panels_count, c.video_url, 
-                   c.created_at, c.updated_at, s.user_id
+                   c.created_at, c.updated_at, s.user_id, s.id AS series_id
             FROM chapters c
             JOIN series s ON c.series_id = s.id
             WHERE c.id = ?
@@ -431,11 +431,110 @@ def update_project(project_id: str, updates: Dict[str, Any]) -> None:
     finally:
         conn.close()
 
+def update_project_full(project_id: str, updates: Dict[str, Any], panels: Optional[List[Dict[str, Any]]] = None) -> None:
+    """Update project metadata across chapters and series tables, and sync panels list atomically."""
+    conn = get_db_connection()
+    try:
+        with conn:
+            # 1. Fetch series_id for this project/chapter
+            row = conn.execute("SELECT series_id FROM chapters WHERE id = ? LIMIT 1", (project_id,)).fetchone()
+            if not row:
+                raise ValueError(f"Project/Chapter {project_id} not found")
+            series_id = row['series_id']
+            
+            # 2. Update chapters table fields
+            chapter_set_parts = []
+            chapter_params = []
+            if 'episode' in updates:
+                chapter_set_parts.append("episode_number = ?")
+                chapter_params.append(updates['episode'])
+            if 'status' in updates:
+                chapter_set_parts.append("status = ?")
+                chapter_params.append(updates['status'])
+            if 'video_url' in updates:
+                chapter_set_parts.append("video_url = ?")
+                chapter_params.append(updates['video_url'])
+            if 'panels_count' in updates:
+                chapter_set_parts.append("panels_count = ?")
+                chapter_params.append(updates['panels_count'])
+                
+            if chapter_set_parts:
+                chapter_set_parts.append("updated_at = datetime('now')")
+                chapter_params.append(project_id)
+                query = f"UPDATE chapters SET {', '.join(chapter_set_parts)} WHERE id = ?"
+                conn.execute(query, tuple(chapter_params))
+                
+            # 3. Update series table fields
+            series_set_parts = []
+            series_params = []
+            for key in ('title', 'author', 'cover_image', 'genre', 'synopsis'):
+                if key in updates:
+                    series_set_parts.append(f"{key} = ?")
+                    series_params.append(updates[key])
+            if series_set_parts:
+                series_params.append(series_id)
+                query = f"UPDATE series SET {', '.join(series_set_parts)} WHERE id = ?"
+                conn.execute(query, tuple(series_params))
+                
+            # 4. Update panels if provided
+            if panels is not None:
+                # Delete existing panels for this chapter
+                conn.execute('DELETE FROM panels WHERE chapter_id = ?', (project_id,))
+                
+                # Insert the new ones
+                for i, p in enumerate(panels):
+                    speech_text = (p.get('speech_text') or "")[:1000]
+                    visual_description = (p.get('visual_description') or "")[:2000]
+                    
+                    conn.execute("""
+                        INSERT INTO panels (
+                            chapter_id, panel_index, image_url, original_url, speech_text, sfx,
+                            duration, motion_type, visual_description, brightness, contrast, saturation,
+                            grayscale, filter_preset, bubble_method, bubble_sensitivity, bubble_dilation,
+                            inpaint_radius, detection_style
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        project_id,
+                        i,
+                        p.get('image_url') or "",
+                        p.get('original_image_url') or p.get('original_url', None),
+                        speech_text,
+                        p.get('sfx') or "",
+                        p.get('duration') if p.get('duration') is not None else 4.5,
+                        p.get('motion_type') or "zoom_in",
+                        visual_description or None,
+                        p.get('brightness'),
+                        p.get('contrast'),
+                        p.get('saturation'),
+                        1 if p.get('grayscale') else 0,
+                        p.get('filter_preset'),
+                        p.get('bubble_method'),
+                        p.get('bubble_sensitivity'),
+                        p.get('bubble_dilation'),
+                        p.get('inpaint_radius'),
+                        p.get('detection_style')
+                    ))
+                
+                # Sync panel count
+                conn.execute("UPDATE chapters SET panels_count = ?, updated_at = datetime('now') WHERE id = ?", (len(panels), project_id))
+    finally:
+        conn.close()
+
+
 def delete_project(project_id: str) -> None:
     """Delete a project and all its panels (via SQL CASCADE)."""
     conn = get_db_connection()
     try:
         conn.execute('DELETE FROM chapters WHERE id = ?', (project_id,))
+        conn.commit()
+    finally:
+        conn.close()
+
+def delete_series(series_id: str) -> None:
+    """Delete a series and all its chapters & panels (via SQL CASCADE)."""
+    conn = get_db_connection()
+    try:
+        conn.execute('DELETE FROM series WHERE id = ?', (series_id,))
         conn.commit()
     finally:
         conn.close()

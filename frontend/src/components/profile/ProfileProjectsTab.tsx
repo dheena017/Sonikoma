@@ -42,12 +42,16 @@ interface ProfileProjectsTabProps {
   projects: any[];
   onNavigateHome: () => void;
   onBatchDelete: (ids: string[]) => void;
+  onDeleteChapter: (id: string) => void;
+  onDeleteSeries: (seriesId: string) => void;
 }
 
 export default function ProfileProjectsTab({
   projects,
   onNavigateHome,
   onBatchDelete,
+  onDeleteChapter,
+  onDeleteSeries,
 }: ProfileProjectsTabProps) {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<
@@ -108,7 +112,7 @@ export default function ProfileProjectsTab({
 
   // Group the sorted and filtered projects by series title
   const groupedProjects = React.useMemo(() => {
-    const groups: Record<string, { title: string; genre: string; chapters: any[] }> = {};
+    const groups: Record<string, { title: string; genre: string; series_id: string; chapters: any[] }> = {};
     
     sortedAndFilteredProjects.forEach((project) => {
       const seriesTitle = (project.title || "Untitled Comic").replace(/\s+[a-fA-F0-9]{8}$/, "");
@@ -116,6 +120,7 @@ export default function ProfileProjectsTab({
         groups[seriesTitle] = {
           title: seriesTitle,
           genre: project.genre || "general",
+          series_id: project.series_id,
           chapters: []
         };
       }
@@ -457,6 +462,20 @@ export default function ProfileProjectsTab({
                     <span className="text-[10px] px-2.5 py-1 rounded-xl bg-neutral-900 border border-white/5 text-neutral-400 font-bold font-mono">
                       {chapterCount} {chapterCount === 1 ? "CH" : "CHS"}
                     </span>
+                    {group.series_id && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm(`Are you sure you want to delete the entire series "${group.title}" and all its chapters?`)) {
+                            onDeleteSeries(group.series_id);
+                          }
+                        }}
+                        className="p-1.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 hover:border-rose-500/40 text-rose-400 rounded-xl transition-all cursor-pointer"
+                        title="Delete Series"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                     {isExpanded ? (
                       <ChevronUp className="w-5 h-5 text-neutral-400" />
                     ) : (
@@ -532,6 +551,17 @@ export default function ProfileProjectsTab({
                               {chapter.panels_count || 0} panels
                             </span>
                             <button
+                              onClick={() => {
+                                if (confirm(`Are you sure you want to delete ${numberStr}?`)) {
+                                  onDeleteChapter(pId);
+                                }
+                              }}
+                              className="p-1.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 hover:border-rose-500/40 text-rose-400 rounded-xl transition-all cursor-pointer active:scale-95"
+                              title="Delete Chapter"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
                               onClick={() => handleViewDetails(pId)}
                               className="px-3.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 border border-white/5 text-purple-400 hover:text-purple-300 rounded-xl text-[10px] font-extrabold transition-all cursor-pointer flex items-center gap-1 active:scale-95"
                             >
@@ -565,9 +595,24 @@ export default function ProfileProjectsTab({
                     <div className="w-10 h-10 rounded-2xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center shrink-0">
                       <BookOpen className="w-5 h-5 text-purple-400" />
                     </div>
-                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 font-bold uppercase tracking-wider">
-                      {group.genre}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {group.series_id && (
+                        <button
+                          onClick={() => {
+                            if (confirm(`Are you sure you want to delete the entire series "${group.title}" and all its chapters?`)) {
+                              onDeleteSeries(group.series_id);
+                            }
+                          }}
+                          className="p-1.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 hover:border-rose-500/40 text-rose-400 rounded-xl transition-all cursor-pointer"
+                          title="Delete Series"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                      <span className="text-[9px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 font-bold uppercase tracking-wider">
+                        {group.genre}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="text-left space-y-1">
@@ -641,13 +686,26 @@ export default function ProfileProjectsTab({
                               </div>
                             </div>
 
-                            <button
-                              onClick={() => handleViewDetails(pId)}
-                              className="p-1 bg-neutral-900 hover:bg-neutral-800 border border-white/5 rounded-lg text-purple-400 hover:text-purple-300 transition-all cursor-pointer"
-                              title="View details"
-                            >
-                              <ChevronRight className="w-4 h-4" />
-                            </button>
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                onClick={() => {
+                                  if (confirm(`Are you sure you want to delete ${numberStr}?`)) {
+                                    onDeleteChapter(pId);
+                                  }
+                                }}
+                                className="p-1 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 hover:border-rose-500/40 text-rose-400 rounded-lg transition-all cursor-pointer"
+                                title="Delete chapter"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleViewDetails(pId)}
+                                className="p-1 bg-neutral-900 hover:bg-neutral-800 border border-white/5 rounded-lg text-purple-400 hover:text-purple-300 transition-all cursor-pointer"
+                                title="View details"
+                              >
+                                <ChevronRight className="w-4 h-4" />
+                              </button>
+                            </div>
                           </div>
                         );
                       })}

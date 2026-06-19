@@ -31,7 +31,6 @@ interface ProfileAccountTabProps {
       language: string;
     }>
   >;
-  CREATOR_ROLES: { id: string; label: string; desc: string }[];
   handleProfileSave: (e: React.FormEvent) => void;
   saveSuccess: boolean;
 
@@ -53,6 +52,7 @@ interface ProfileAccountTabProps {
     type: string,
     value: string
   ) => Promise<boolean>;
+  isDirty?: boolean;
 }
 
 const ACHIEVEMENTS = [
@@ -89,7 +89,6 @@ const ACHIEVEMENTS = [
 export default function ProfileAccountTab({
   profileUser,
   setProfileUser,
-  CREATOR_ROLES,
   handleProfileSave,
   saveSuccess,
   connections,
@@ -101,6 +100,7 @@ export default function ProfileAccountTab({
   portfolios,
   setPortfolios,
   onRedeemReward,
+  isDirty = false,
 }: ProfileAccountTabProps) {
   const [rewardsToast, setRewardsToast] = React.useState<string | null>(null);
   const [newPortfolioUrl, setNewPortfolioUrl] = React.useState("");
@@ -354,35 +354,23 @@ export default function ProfileAccountTab({
             </div>
           </div>
 
-          <div className="space-y-2 text-left">
+          <div className="space-y-1.5 text-left">
             <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 ml-1 flex items-center gap-1">
               <Compass className="w-3.5 h-3.5 text-purple-400" />
               Studio Creator Role
             </label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              {CREATOR_ROLES.map((role) => {
-                const isSelected = role.id === profileUser.role;
-                return (
-                  <button
-                    key={role.id}
-                    type="button"
-                    onClick={() =>
-                      setProfileUser((prev) => ({ ...prev, role: role.id }))
-                    }
-                    className={`text-left p-2.5 rounded-xl border transition-all duration-300 cursor-pointer ${
-                      isSelected
-                        ? "bg-purple-600/20 border-purple-500 text-white shadow-md shadow-purple-900/10"
-                        : "bg-black/30 border-white/5 hover:border-white/10 text-neutral-400"
-                    }`}
-                  >
-                    <div className="text-[11px] font-bold">{role.label}</div>
-                    <div className="text-[8px] text-neutral-500 mt-0.5">
-                      {role.desc}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+            <input
+              type="text"
+              required
+              value={profileUser.role}
+              onChange={(e) =>
+                setProfileUser((prev) => ({
+                  ...prev,
+                  role: e.target.value,
+                }))
+              }
+              className="w-full bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-3 px-4 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all"
+            />
           </div>
 
           <div className="space-y-1.5 text-left">
@@ -428,12 +416,24 @@ export default function ProfileAccountTab({
               </span>
             </label>
 
-            <button
-              type="submit"
-              className="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-md shadow-purple-900/30 text-xs cursor-pointer active:scale-95 duration-300"
-            >
-              Save Profile Changes
-            </button>
+            {isDirty ? (
+              <button
+                type="submit"
+                className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl border border-purple-500/30 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-white text-xs font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95 shadow-md shadow-purple-950/30 hover:shadow-purple-900/40 animate-pulse"
+              >
+                <span>✦</span>
+                <span>Save Profile Changes</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl border border-emerald-500/40 bg-emerald-950/30 text-emerald-300 text-xs font-bold tracking-wider select-none shadow-[0_0_10px_-2px_rgba(52,211,153,0.2)] cursor-not-allowed"
+              >
+                <span className="text-emerald-400">✓</span>
+                <span>Saved</span>
+              </button>
+            )}
           </div>
         </form>
       </div>

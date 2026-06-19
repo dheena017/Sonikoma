@@ -241,3 +241,26 @@ async def run_ai_connection_tests():
         print(row_str)
         
     print(border_bot + "\n")
+
+
+if __name__ == "__main__":
+    import sys
+    import os
+    # Add backend/python to sys.path
+    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+    
+    from dotenv import load_dotenv
+    # Load dotenv from project root
+    PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+    dotenv_path = os.path.join(PROJECT_ROOT, ".env")
+    if os.path.exists(dotenv_path):
+        load_dotenv(dotenv_path=dotenv_path)
+    else:
+        load_dotenv()
+        
+    async def main():
+        # Setup basic logging to stdout so we can see any warnings/errors
+        logging.basicConfig(level=logging.INFO)
+        await run_ai_connection_tests()
+        
+    asyncio.run(main())

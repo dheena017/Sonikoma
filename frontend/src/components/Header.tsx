@@ -23,6 +23,10 @@ interface HeaderProps {
   markAllNotificationsAsRead: () => void;
   deleteNotification: (id: number) => void;
   clearAllNotifications: () => void;
+  projectId?: string | null;
+  saveStatus?: string;
+  isDirty?: boolean;
+  onSave?: () => void;
 }
 
 /** Format seconds into a readable "Xm Ys" string */
@@ -53,6 +57,10 @@ export default function Header({
   markAllNotificationsAsRead,
   deleteNotification,
   clearAllNotifications,
+  projectId = null,
+  saveStatus = "idle",
+  isDirty = false,
+  onSave,
 }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -128,6 +136,48 @@ export default function Header({
             <span className="text-emerald-400">✦</span>
             <span>SUBTITLES</span>
           </div>
+        )}
+
+        {/* Manual Save Button */}
+        {projectId && (
+          <>
+            {saveStatus === "saving" ? (
+              <button
+                disabled
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-500/40 bg-amber-950/30 text-amber-300 text-[10px] font-bold font-mono tracking-wider select-none shadow-[0_0_10px_-2px_rgba(245,158,11,0.2)] cursor-not-allowed"
+              >
+                <svg className="animate-spin h-3.5 w-3.5 text-amber-400" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                <span>SAVING...</span>
+              </button>
+            ) : saveStatus === "error" ? (
+              <button
+                onClick={onSave}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-500/40 bg-rose-950/35 hover:bg-rose-900/40 text-rose-300 hover:text-rose-200 text-[10px] font-bold font-mono tracking-wider cursor-pointer transition-all active:scale-95 shadow-[0_0_10px_-2px_rgba(239,68,68,0.25)]"
+              >
+                <span className="text-rose-450">⚠️</span>
+                <span>RETRY SAVE</span>
+              </button>
+            ) : isDirty ? (
+              <button
+                onClick={onSave}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-purple-500/30 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-white text-[10px] font-black font-sans uppercase tracking-wider cursor-pointer transition-all active:scale-95 shadow-md shadow-purple-950/30 hover:shadow-purple-900/40 animate-pulse"
+              >
+                <span>✦</span>
+                <span>SAVE CHANGES</span>
+              </button>
+            ) : (
+              <button
+                disabled
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-500/40 bg-emerald-950/30 text-emerald-300 text-[10px] font-bold font-mono tracking-wider select-none shadow-[0_0_10px_-2px_rgba(52,211,153,0.2)]"
+              >
+                <span className="text-emerald-400">✓</span>
+                <span>SAVED</span>
+              </button>
+            )}
+          </>
         )}
       </div>
 
@@ -225,11 +275,18 @@ export default function Header({
         >
           <div className="w-6 h-6 rounded-lg bg-purple-600/20 flex items-center justify-center overflow-hidden shrink-0 border border-purple-500/30">
             {user?.avatar_url ? (
-              <img
-                src={user.avatar_url}
-                alt="Profile"
-                className="w-full h-full object-cover"
-              />
+              user.avatar_url.startsWith("linear-gradient") ? (
+                <div
+                  className="w-full h-full"
+                  style={{ background: user.avatar_url }}
+                />
+              ) : (
+                <img
+                  src={user.avatar_url}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
+              )
             ) : (
               <span className="text-[10px] font-bold text-purple-400">U</span>
             )}

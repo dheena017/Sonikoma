@@ -33,6 +33,7 @@ interface BubbleCleanerTabContentProps {
   scrapedImages: string[];
   selectedScraped: string[];
   addNotification?: (msg: string, type: any) => void;
+  previewImageUrl?: string | null;
 }
 
 export default function BubbleCleanerTabContent(
@@ -55,6 +56,7 @@ export default function BubbleCleanerTabContent(
     scrapedImages: props.scrapedImages,
     selectedScraped: props.selectedScraped,
     addNotification: props.addNotification,
+    previewImageUrl: props.previewImageUrl,
   };
 
   return (
@@ -69,6 +71,7 @@ export default function BubbleCleanerTabContent(
           addNotification={props.addNotification}
           scrapedImages={props.scrapedImages}
           selectedScraped={props.selectedScraped}
+          previewImageUrl={props.previewImageUrl}
         />
       )}
     </div>

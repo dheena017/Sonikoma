@@ -24,6 +24,7 @@ interface PanelCardProps
   imgUrl: string;
   idx: number;
   isSelected: boolean;
+  isImported?: boolean;
   isBatchCropping: boolean;
   croppingImgUrl: string | null;
   openEditingImageIdx?: (idx: number | null) => void;
@@ -45,6 +46,7 @@ function PanelCard({
   imgUrl,
   idx,
   isSelected,
+  isImported,
   isBatchCropping,
   croppingImgUrl,
   bubbleCroppingImgUrl,
@@ -204,7 +206,8 @@ function PanelCard({
       onClick={(e) => onCardClick(idx, imgUrl, e.shiftKey)}
       onDoubleClick={(e) => {
         e.stopPropagation();
-        setEditingImageIdx(idx);
+        window.history.pushState({}, "", `/editor/adjust?idx=${idx}`);
+        window.dispatchEvent(new Event("popstate"));
       }}
       className={[
         "group relative w-[140px] sm:w-[156px] shrink-0 rounded-2xl border p-2 space-y-2 transition-all duration-200 text-center cursor-pointer select-none",
@@ -217,6 +220,7 @@ function PanelCard({
         imgUrl={imgUrl}
         idx={idx}
         isSelected={isSelected}
+        isImported={isImported}
         isProcessing={isProcessing}
         isBatchCropping={isBatchCropping}
         bubbleCroppingImgUrl={bubbleCroppingImgUrl}

@@ -44,6 +44,7 @@ export interface AutoCropTabContentProps {
   setCropGuidance: (v: string) => void;
   cropFocusMode: string;
   setCropFocusMode: (v: string) => void;
+  previewImageUrl?: string | null;
 }
 
 export default function AutoCropTabContent(props: AutoCropTabContentProps) {
@@ -69,6 +70,7 @@ export default function AutoCropTabContent(props: AutoCropTabContentProps) {
           cropCannyHigh={props.cropCannyHigh}
           cropCloseKernelSize={props.cropCloseKernelSize}
           addNotification={props.addNotification}
+          previewImageUrl={props.previewImageUrl}
         />
       )}
       {activeTab === "advanced" && (
@@ -95,6 +97,7 @@ export default function AutoCropTabContent(props: AutoCropTabContentProps) {
           setCropCloseKernelSize={props.setCropCloseKernelSize}
           scrapedImages={props.scrapedImages}
           selectedScraped={props.selectedScraped}
+          previewImageUrl={props.previewImageUrl}
         />
       )}
       {activeTab === "help" && <AutoCropHelpTab />}

@@ -26,30 +26,112 @@ interface ProfilePageProps {
   projects: any[];
   onLogout: () => void;
   onNavigateHome: () => void;
+  onRefreshUser?: (showDelay?: boolean) => void | Promise<void>;
 }
 
-const AVATAR_TEMPLATES = [
-  "linear-gradient(135deg, #a855f7 0%, #6366f1 100%)", // Purple-indigo
-  "linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%)", // Blue-cyan
-  "linear-gradient(135deg, #10b981 0%, #14b8a6 100%)", // Emerald-teal
-  "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)", // Amber-orange
-  "linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)", // Pink-rose
-  "linear-gradient(135deg, #64748b 0%, #475569 100%)", // Slate-gray
-];
 
-const CREATOR_ROLES = [
-  { id: "artist", label: "Artist", desc: "Draw and design characters" },
-  { id: "creator", label: "Video Editor", desc: "Compile clips and recaps" },
-  { id: "producer", label: "Producer", desc: "Manage voice and soundscapes" },
-  { id: "fan", label: "Comic Lover", desc: "Experiment with scripts" },
-];
 
 export default function ProfilePage({
   user,
   projects = [],
   onLogout,
   onNavigateHome,
+  onRefreshUser,
 }: ProfilePageProps) {
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  const [showConfirmModal, setShowConfirmModal] = React.useState(false);
+  const [tempAvatarUrl, setTempAvatarUrl] = React.useState<string | null>(null);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Image is too large. Please choose an image smaller than 2MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result === "string") {
+        setTempAvatarUrl(reader.result);
+        setShowConfirmModal(true);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleConfirmAvatarUpdate = async () => {
+    if (!tempAvatarUrl) return;
+
+    const token = localStorage.getItem("anivox_token");
+    if (!token) return;
+
+    try {
+      const response = await fetch("/api/auth/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          full_name: profileUser.fullName,
+          avatar_url: tempAvatarUrl,
+          creator_role: profileUser.role,
+          bio: profileUser.bio,
+          newsletter: profileUser.newsletter,
+          language: profileUser.language,
+          portfolio_links: portfolios.map((p) => p.url),
+          social_connections: connections,
+        }),
+      });
+
+      const res = await response.json();
+      if (!response.ok) {
+        throw new Error(res.detail || "Profile picture update failed");
+      }
+
+      setProfileUser((prev) => ({
+        ...prev,
+        avatarUrl: tempAvatarUrl,
+      }));
+
+      // Update comparison ref to avoid dirty warnings
+      const updatedUser = {
+        ...profileUser,
+        avatarUrl: tempAvatarUrl
+      };
+      lastSavedProfileRef.current = getSerializedProfile(
+        updatedUser,
+        connections,
+        portfolios
+      );
+
+      if (onRefreshUser) {
+        await onRefreshUser(false);
+      }
+
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err: any) {
+      alert(err.message || "Failed to update profile picture");
+    } finally {
+      setShowConfirmModal(false);
+      setTempAvatarUrl(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleCancelAvatarUpdate = () => {
+    setShowConfirmModal(false);
+    setTempAvatarUrl(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
   // Navigation tabs
   const [activeTab, setActiveTab] = React.useState<
     "projects" | "account" | "security" | "billing" | "api"
@@ -59,7 +141,7 @@ export default function ProfilePage({
   const [profileUser, setProfileUser] = React.useState({
     fullName: user?.full_name || "Anivox Creator",
     email: user?.email || "creator@anivox.com",
-    avatarUrl: user?.avatar_url || AVATAR_TEMPLATES[0],
+    avatarUrl: user?.avatar_url || "",
     role: user?.creator_role || "creator",
     bio:
       user?.bio ||
@@ -68,7 +150,6 @@ export default function ProfilePage({
     language: user?.language || "en",
   });
 
-  const [isEditingAvatar, setIsEditingAvatar] = React.useState(false);
   const [saveSuccess, setSaveSuccess] = React.useState(false);
 
   // Password Update Fields
@@ -116,8 +197,48 @@ export default function ProfilePage({
   // MFA state
   const [is2faEnabled, setIs2faEnabled] = React.useState(false);
 
-  // Track initial load for profile auto-syncs
-  const isInitialLoad = React.useRef(true);
+  // Serialization helper for dirty state comparison
+  const getSerializedProfile = React.useCallback(
+    (
+      userObj: typeof profileUser,
+      connObj: typeof connections,
+      portList: typeof portfolios
+    ) => {
+      return JSON.stringify({
+        fullName: userObj.fullName,
+        avatarUrl: userObj.avatarUrl,
+        role: userObj.role,
+        bio: userObj.bio,
+        newsletter: userObj.newsletter,
+        language: userObj.language,
+        connections: {
+          google: !!connObj.google,
+          github: !!connObj.github,
+          discord: !!connObj.discord,
+        },
+        portfolios: portList.map((p) => ({ site: p.site, url: p.url })),
+      });
+    },
+    []
+  );
+
+  const lastSavedProfileRef = React.useRef<string>("");
+
+  // Initialize the ref on the first render if not already set
+  if (!lastSavedProfileRef.current) {
+    lastSavedProfileRef.current = getSerializedProfile(
+      profileUser,
+      connections,
+      portfolios
+    );
+  }
+
+  const currentProfileStr = getSerializedProfile(
+    profileUser,
+    connections,
+    portfolios
+  );
+  const isDirty = currentProfileStr !== lastSavedProfileRef.current;
 
   // Load profile assets dynamically on mount
   React.useEffect(() => {
@@ -132,50 +253,52 @@ export default function ProfilePage({
         if (data.user_id) {
           setCredits(data.credits);
           setUnlockedRewards(data.unlocked_rewards || []);
-          setConnections(
-            data.social_connections || {
-              google: true,
-              github: false,
-              discord: false,
-            }
-          );
+          
+          const loadedConnections = data.social_connections || {
+            google: true,
+            github: false,
+            discord: false,
+          };
+          setConnections(loadedConnections);
 
           // Calculate achievement points based on unlocked rewards count
           setAchievementPoints(
             300 - (data.unlocked_rewards?.length || 0) * 100
           );
 
-          setPortfolios(
-            (data.portfolio_links || []).map((url: string, idx: number) => ({
-              id: idx.toString(),
-              site: url.includes("webtoons")
-                ? "Webtoons"
-                : url.includes("tapas")
-                ? "Tapas"
-                : "ArtStation",
-              url: url,
-            }))
-          );
+          const loadedPortfolios = (data.portfolio_links || []).map((url: string, idx: number) => ({
+            id: idx.toString(),
+            site: url.includes("webtoons")
+              ? "Webtoons"
+              : url.includes("tapas")
+              ? "Tapas"
+              : "ArtStation",
+            url: url,
+          }));
+          setPortfolios(loadedPortfolios);
 
-          setProfileUser({
+          const loadedUser = {
             fullName: data.full_name || "Anivox Creator",
             email: data.email || "creator@anivox.com",
-            avatarUrl: data.avatar_url || AVATAR_TEMPLATES[0],
+            avatarUrl: data.avatar_url || "",
             role: data.creator_role || "creator",
             bio:
               data.bio ||
               "Comic visual director and anime fan editing high-quality cinematic stories.",
             newsletter: data.newsletter !== undefined ? data.newsletter : true,
             language: data.language || "en",
-          });
+          };
+          setProfileUser(loadedUser);
 
           setIs2faEnabled(!!data.mfa_enabled);
           setHasClaimedToday(!!data.has_claimed_today);
 
-          // Mark initial load complete after state updates apply
-          setTimeout(() => {
-            isInitialLoad.current = false;
-          }, 100);
+          // Update last saved ref with loaded data
+          lastSavedProfileRef.current = getSerializedProfile(
+            loadedUser,
+            loadedConnections,
+            loadedPortfolios
+          );
         }
       })
       .catch(console.error);
@@ -247,24 +370,7 @@ export default function ProfilePage({
       .catch(console.error);
   }, [user]);
 
-  // Dynamic portfolio and connection auto-saves in background
-  React.useEffect(() => {
-    if (isInitialLoad.current) return;
-    const token = localStorage.getItem("anivox_token");
-    if (!token) return;
 
-    fetch("/api/auth/profile", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        portfolio_links: portfolios.map((p) => p.url),
-        social_connections: connections,
-      }),
-    }).catch(console.error);
-  }, [connections, portfolios]);
 
   // Render initials or background gradients for avatar
   const renderAvatarContent = (url: string, name: string) => {
@@ -321,6 +427,8 @@ export default function ProfilePage({
       })
       .then(() => {
         setSaveSuccess(true);
+        lastSavedProfileRef.current = currentProfileStr;
+        onRefreshUser?.();
         setTimeout(() => setSaveSuccess(false), 3000);
       })
       .catch((err) => {
@@ -584,8 +692,113 @@ export default function ProfilePage({
       });
   };
 
+  const handleDeleteChapter = (id: string) => {
+    const token = localStorage.getItem("anivox_token");
+    if (!token) return;
+
+    fetch(`/api/projects/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(async (r) => {
+        const res = await r.json();
+        if (!r.ok) {
+          throw new Error(res.detail || "Deletion failed");
+        }
+        return res;
+      })
+      .then((res) => {
+        if (res.success) {
+          setLocalProjects((prev) => prev.filter((p) => p.project_id !== id));
+        }
+      })
+      .catch((err) => {
+        alert(err.message || "Failed to delete chapter");
+      });
+  };
+
+  const handleDeleteSeries = (seriesId: string) => {
+    const token = localStorage.getItem("anivox_token");
+    if (!token) return;
+
+    fetch(`/api/projects/series/${seriesId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(async (r) => {
+        const res = await r.json();
+        if (!r.ok) {
+          throw new Error(res.detail || "Deletion failed");
+        }
+        return res;
+      })
+      .then((res) => {
+        if (res.success) {
+          setLocalProjects((prev) => prev.filter((p) => p.series_id !== seriesId));
+        }
+      })
+      .catch((err) => {
+        alert(err.message || "Failed to delete series");
+      });
+  };
+
+  // Dynamic calculations for overall stats using real data from localProjects
+  const queueProjects = localProjects.filter(
+    (p) => p.status === "pending" || p.status === "processing"
+  );
+  const queueSeconds = queueProjects.reduce(
+    (sum, p) => sum + (p.panels_count || 0) * 4.5,
+    0
+  );
+  const queueMinutes = queueSeconds / 60;
+  const queueText =
+    queueMinutes > 0
+      ? queueMinutes >= 60
+        ? `${(queueMinutes / 60).toFixed(1)} hrs`
+        : `${queueMinutes.toFixed(1)} mins`
+      : "0 mins";
+  const queueSubtext =
+    queueProjects.length > 0
+      ? `${queueProjects.length} active compilation job(s)`
+      : "No active compilation jobs";
+
+  const totalPanels = localProjects.reduce(
+    (sum, p) => sum + (p.panels_count || 0),
+    0
+  );
+  const avgPanels =
+    localProjects.length > 0 ? Math.round(totalPanels / localProjects.length) : 0;
+  const avgPanelsSubtext =
+    localProjects.length > 0
+      ? `Total: ${totalPanels} panels across ${localProjects.length} chapters`
+      : "No chapters created yet";
+
+  const completedCount = localProjects.filter(
+    (p) => p.status === "completed"
+  ).length;
+  const failedCount = localProjects.filter(
+    (p) => p.status === "failed"
+  ).length;
+  const totalFinished = completedCount + failedCount;
+  const successRate =
+    totalFinished > 0
+      ? ((completedCount / totalFinished) * 100).toFixed(1)
+      : "100.0";
+  const successRateSubtext =
+    totalFinished > 0
+      ? `${completedCount} succeeded / ${failedCount} failed compiles`
+      : "No finished compiles yet";
+
   return (
     <div className="min-h-screen bg-[#070709] text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Hidden file input for custom profile image upload */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept="image/*"
+        onChange={handleImageUpload}
+        style={{ display: "none" }}
+      />
       {/* Background ambient glows */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-600/5 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-600/5 blur-[120px] pointer-events-none" />
@@ -604,9 +817,10 @@ export default function ProfilePage({
               </div>
 
               <button
-                onClick={() => setIsEditingAvatar(!isEditingAvatar)}
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
                 className="absolute -bottom-2 -right-2 p-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl shadow-lg border border-white/10 transition-all scale-95 hover:scale-100 cursor-pointer"
-                title="Change Avatar Style"
+                title="Upload Profile Image"
               >
                 <Camera className="w-4 h-4" />
               </button>
@@ -643,67 +857,33 @@ export default function ProfilePage({
           </div>
         </div>
 
-        {/* Change Avatar Template Selector Widget */}
-        {isEditingAvatar && (
-          <div className="p-6 bg-[#0f0f13]/80 border border-white/5 rounded-3xl animate-in slide-in-from-top-4 duration-300 space-y-4">
-            <div className="text-left">
-              <h4 className="text-sm font-bold text-white">
-                Select Profile Avatar Theme
-              </h4>
-              <p className="text-xs text-neutral-500">
-                Pick a curated comic color gradient avatar style
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-4">
-              {AVATAR_TEMPLATES.map((gradient, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => {
-                    setProfileUser((prev) => ({
-                      ...prev,
-                      avatarUrl: gradient,
-                    }));
-                    setIsEditingAvatar(false);
-                  }}
-                  className={`w-12 h-12 rounded-2xl cursor-pointer transition-transform hover:scale-105 active:scale-90 border-2 ${
-                    profileUser.avatarUrl === gradient
-                      ? "border-purple-500 ring-2 ring-purple-500/30"
-                      : "border-transparent"
-                  }`}
-                  style={{ background: gradient }}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Premium overall stats counters row */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-neutral-900/40 border border-white/5 rounded-3xl p-5 text-left relative overflow-hidden shadow-xl">
             <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
               Total Compilation Queue
             </div>
-            <div className="text-2xl font-black text-white mt-1">12.8 hrs</div>
+            <div className="text-2xl font-black text-white mt-1">{queueText}</div>
             <div className="text-[9px] text-purple-400 font-semibold mt-1 flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5" /> High-priority GPU instances
+              <Sparkles className="w-3.5 h-3.5" /> {queueSubtext}
             </div>
           </div>
           <div className="bg-neutral-900/40 border border-white/5 rounded-3xl p-5 text-left relative overflow-hidden shadow-xl">
             <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
               Average Panels per Strip
             </div>
-            <div className="text-2xl font-black text-white mt-1">14 frames</div>
+            <div className="text-2xl font-black text-white mt-1">{avgPanels} frames</div>
             <div className="text-[9px] text-indigo-400 font-semibold mt-1">
-              CV bounding variance: optimal
+              {avgPanelsSubtext}
             </div>
           </div>
           <div className="bg-neutral-900/40 border border-white/5 rounded-3xl p-5 text-left relative overflow-hidden shadow-xl">
             <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
               AI Sync Success Rate
             </div>
-            <div className="text-2xl font-black text-white mt-1">99.8%</div>
+            <div className="text-2xl font-black text-white mt-1">{successRate}%</div>
             <div className="text-[9px] text-emerald-400 font-semibold mt-1">
-              Narration voice pitch matched
+              {successRateSubtext}
             </div>
           </div>
         </div>
@@ -833,6 +1013,8 @@ export default function ProfilePage({
                 projects={localProjects}
                 onNavigateHome={onNavigateHome}
                 onBatchDelete={handleBatchDeleteProjects}
+                onDeleteChapter={handleDeleteChapter}
+                onDeleteSeries={handleDeleteSeries}
               />
             )}
 
@@ -842,7 +1024,6 @@ export default function ProfilePage({
                 user={user}
                 profileUser={profileUser}
                 setProfileUser={setProfileUser}
-                CREATOR_ROLES={CREATOR_ROLES}
                 handleProfileSave={handleProfileSave}
                 saveSuccess={saveSuccess}
                 connections={connections}
@@ -854,6 +1035,7 @@ export default function ProfilePage({
                 portfolios={portfolios}
                 setPortfolios={setPortfolios}
                 onRedeemReward={onRedeemReward}
+                isDirty={isDirty}
               />
             )}
 
@@ -898,6 +1080,60 @@ export default function ProfilePage({
           </div>
         </div>
       </div>
+
+      {/* Profile Picture Upload Confirmation Modal */}
+      {showConfirmModal && tempAvatarUrl && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-200">
+          <div className="bg-[#0f0f13] border border-white/10 rounded-3xl p-6 max-w-sm w-full space-y-6 shadow-2xl relative animate-in zoom-in-95 duration-200 text-center">
+            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
+            
+            <div className="space-y-2">
+              <h3 className="text-lg font-bold text-white tracking-tight">Update Profile Picture?</h3>
+              <p className="text-xs text-neutral-400">
+                Confirm updating your avatar image. This will automatically save changes to your profile.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-center gap-6 py-2">
+              {/* Old avatar */}
+              <div className="flex flex-col items-center gap-1.5">
+                <span className="text-[9px] text-neutral-500 font-bold uppercase tracking-wider">Current</span>
+                <div className="w-16 h-16 rounded-2xl overflow-hidden border border-white/5 bg-neutral-900 flex items-center justify-center">
+                  {renderAvatarContent(profileUser.avatarUrl, profileUser.fullName)}
+                </div>
+              </div>
+
+              {/* Arrow */}
+              <div className="text-purple-500 font-bold text-xl">➔</div>
+
+              {/* New avatar preview */}
+              <div className="flex flex-col items-center gap-1.5">
+                <span className="text-[9px] text-purple-400 font-bold uppercase tracking-wider">New Preview</span>
+                <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-purple-500/50 bg-neutral-900 flex items-center justify-center shadow-lg shadow-purple-500/10">
+                  <img src={tempAvatarUrl} alt="Preview" className="w-full h-full object-cover" />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={handleCancelAvatarUpdate}
+                className="flex-1 py-2.5 bg-neutral-900 border border-white/5 hover:border-white/10 text-neutral-400 hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-95 duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmAvatarUpdate}
+                className="flex-1 py-2.5 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-white rounded-xl text-xs font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95 duration-200 shadow-md shadow-purple-950/30"
+              >
+                Confirm & Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
