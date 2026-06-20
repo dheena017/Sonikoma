@@ -332,6 +332,8 @@ export default function App() {
 
     // Notification Hub & Alerts
     notifications,
+    notificationsMuted,
+    setNotificationsMuted,
     errorPopup,
     setErrorPopup,
     addNotification,
@@ -680,6 +682,8 @@ export default function App() {
             isDirty={headerIsDirty}
             onSave={headerOnSave}
             navigateTo={navigateTo}
+            notificationsMuted={notificationsMuted}
+            setNotificationsMuted={setNotificationsMuted}
           />
 
           {/* PAGE VIEW 1: Main Dashboard Workspace */}
@@ -982,6 +986,8 @@ export default function App() {
               onMarkAllAsRead={markAllNotificationsAsRead}
               onDelete={deleteNotification}
               onClearAll={clearAllNotifications}
+              notificationsMuted={notificationsMuted}
+              onToggleMute={() => setNotificationsMuted(!notificationsMuted)}
             />
           )}
 

@@ -16,7 +16,17 @@ interface AutoSaveState {
   scrapedImages: string[];
   targetUrl: string;
   fetchWithInterceptor: typeof fetch;
-  addNotification?: (message: string, type: any) => void;
+  addNotification?: (
+    message: string,
+    type: any,
+    options?: {
+      errorCode?: number;
+      retryDelay?: number;
+      onRetry?: () => void;
+      details?: string;
+      link?: string;
+    }
+  ) => void;
 }
 
 export function useAutoSave(state: AutoSaveState) {
@@ -226,9 +236,19 @@ export function useAutoSave(state: AutoSaveState) {
         console.log("[Save Hook] Project saved successfully.");
         lastSavedStateRef.current = currentStateStr;
         setSaveStatus("saved");
+        const detailMsg = [
+          `Project ID: ${state.projectId}`,
+          `Series Title: ${state.seriesTitle || "Untitled"}`,
+          `Chapter: ${state.chapterNumber ? `Chapter ${state.chapterNumber}` : "N/A"}${state.chapterTitle ? ` - ${state.chapterTitle}` : ""}`,
+          `Storyboard Panels: ${state.panels.length} panels`,
+          `Scraped Source Images: ${state.scrapedImages.length} images`
+        ].join("\n");
         state.addNotification?.(
           "Project changes saved successfully!",
-          "success"
+          "success",
+          {
+            details: detailMsg
+          }
         );
         return true;
       } else {
@@ -239,7 +259,10 @@ export function useAutoSave(state: AutoSaveState) {
       setSaveStatus("error");
       state.addNotification?.(
         err.message || "Failed to save project changes.",
-        "error"
+        "error",
+        {
+          details: err.stack || String(err)
+        }
       );
       return false;
     }

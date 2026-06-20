@@ -120,13 +120,31 @@ async def proxy_image(
         if "url" in query:
             fetch_url = query["url"][0]
 
-    # Validate URL format
+    # Validate URL format and handle local/internal URLs by redirecting directly
     try:
         parsed_url = urlparse(fetch_url)
+        is_local = False
+        if not parsed_url.scheme:
+            is_local = fetch_url.startswith("/")
+        else:
+            host = (parsed_url.hostname or "").lower()
+            if host in ("localhost", "127.0.0.1") or parsed_url.path.startswith("/api/"):
+                is_local = True
+
+        if is_local:
+            redirect_url = parsed_url.path
+            if parsed_url.query:
+                redirect_url += f"?{parsed_url.query}"
+            from fastapi.responses import RedirectResponse
+            logger.info(f"[Proxy] Redirecting local/internal URL directly to: {redirect_url}")
+            return RedirectResponse(url=redirect_url)
+
         if parsed_url.scheme not in ('http', 'https'):
             raise HTTPException(status_code=400, detail="Only HTTP/HTTPS URLs are supported.")
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid URL format.")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid URL format: {e}")
 
     # Cache lookup
     cache_key = hashlib.md5(fetch_url.encode('utf-8')).hexdigest()

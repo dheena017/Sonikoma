@@ -183,12 +183,19 @@ export function useAppState() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          return parsed.filter(
+          const filtered = parsed.filter(
             (n: any) =>
               n &&
               n.message &&
               !n.message.includes("The backend server is not running")
           );
+          // Deduplicate by message to show only the most recent one
+          const seen = new Set<string>();
+          return filtered.filter((n: any) => {
+            if (seen.has(n.message)) return false;
+            seen.add(n.message);
+            return true;
+          });
         }
       }
       return [];
@@ -196,7 +203,14 @@ export function useAppState() {
       return [];
     }
   });
+  const [notificationsMuted, setNotificationsMuted] = useState<boolean>(() => {
+    return localStorage.getItem("ai_comic_notifications_muted") === "true";
+  });
   const [errorPopup, setErrorPopup] = useState<ErrorPopupDetail | null>(null);
+
+  useEffect(() => {
+    localStorage.setItem("ai_comic_notifications_muted", String(notificationsMuted));
+  }, [notificationsMuted]);
 
   // Settings — all useState MUST come before any useCallback/useEffect
   const [targetUrl, setTargetUrl] = useState<string>(
@@ -305,7 +319,39 @@ export function useAppState() {
         ...options,
       };
 
-      setNotifications((prev) => [newNote, ...prev]);
+      setNotifications((prev) => {
+        const filtered = prev.filter((n) => n.message !== message);
+        return [newNote, ...filtered];
+      });
+
+      // Play soft chime sound if not muted
+      const isNotificationMuted = localStorage.getItem("ai_comic_notifications_muted") === "true";
+      if (!isNotificationMuted) {
+        try {
+          const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+          if (AudioContextClass) {
+            const ctx = new AudioContextClass();
+            const playTone = (freq: number, start: number, duration: number) => {
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              osc.type = "sine";
+              osc.frequency.setValueAtTime(freq, start);
+              gain.gain.setValueAtTime(0, start);
+              gain.gain.linearRampToValueAtTime(0.08, start + 0.04);
+              gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              osc.start(start);
+              osc.stop(start + duration);
+            };
+            const now = ctx.currentTime;
+            playTone(587.33, now, 0.25); // D5
+            playTone(880.00, now + 0.08, 0.35); // A5
+          }
+        } catch (err) {
+          console.warn("Failed to play notification sound:", err);
+        }
+      }
 
       if (!options?.onRetry) {
         setTimeout(() => {
@@ -353,7 +399,9 @@ export function useAppState() {
         }
         setUser(data.user);
         setIsAuthenticated(true);
-        addNotification("Logged in successfully!", "success");
+        addNotification("Logged in successfully!", "success", {
+          details: `User ID: ${data.user.id}\nEmail: ${data.user.email}\nWelcome back, ${data.user.name || data.user.email}!`
+        });
       } else {
         throw new Error(data.detail || "Login failed");
       }
@@ -375,7 +423,9 @@ export function useAppState() {
         sessionStorage.removeItem("anivox_token");
         setUser(data.user);
         setIsAuthenticated(true);
-        addNotification("Account created successfully!", "success");
+        addNotification("Account created successfully!", "success", {
+          details: `User ID: ${data.user.id}\nEmail: ${data.user.email}\nWelcome to WebtoonToVideo, ${data.user.name || data.user.email}!`
+        });
       } else {
         throw new Error(data.detail || "Registration failed");
       }
@@ -388,7 +438,9 @@ export function useAppState() {
     sessionStorage.removeItem("anivox_token");
     setUser(null);
     setIsAuthenticated(false);
-    addNotification("Logged out successfully.", "info");
+    addNotification("Logged out successfully.", "info", {
+      details: `Your session token has been cleared. You have been securely logged out.`
+    });
     (window as any).navigateTo?.("/landing");
   }, [addNotification]);
 
@@ -524,9 +576,11 @@ export function useAppState() {
               setScrapedImages(panelImages);
             }
             addNotification(
-              `Loaded project "${data.project.title || "Untitled"
-              }" into active workspace!`,
-              "success"
+              `Loaded project "${data.project.title || "Untitled"}" into active workspace!`,
+              "success",
+              {
+                details: `Project ID: ${data.project.project_id}\nTitle: ${data.project.title || "Untitled"}\nAuthor: ${data.project.author || "Unknown"}\nGenre: ${data.project.genre || "General"}\nTotal Panels Loaded: ${data.panels?.length || 0}`
+              }
             );
           }
         }
@@ -671,6 +725,8 @@ export function useAppState() {
     showScrapeConfirmModal,
     setShowScrapeConfirmModal,
     notifications,
+    notificationsMuted,
+    setNotificationsMuted,
     errorPopup,
     setErrorPopup,
     addNotification,

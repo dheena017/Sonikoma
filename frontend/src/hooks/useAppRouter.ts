@@ -16,7 +16,14 @@ interface UseAppRouterProps {
   setFrameRate: (v: number) => void;
   addNotification: (
     msg: string,
-    type: "success" | "info" | "warning" | "error"
+    type: "success" | "info" | "warning" | "error",
+    options?: {
+      errorCode?: number;
+      retryDelay?: number;
+      onRetry?: () => void;
+      details?: string;
+      link?: string;
+    }
   ) => void;
   isAuthenticated: boolean;
   authLoading: boolean;
@@ -125,9 +132,19 @@ export function useAppRouter({
       return;
     }
     const timer = setTimeout(() => {
+      const detailMsg = [
+        `Voice Actor: ${voiceActor}`,
+        `Music Theme: ${musicTheme}`,
+        `Aspect Ratio: ${aspectRatio}`,
+        `Frame Rate: ${frameRate} FPS`,
+        `Theme Mode: ${activeTheme}`
+      ].join("\n");
       addNotification(
         "System configurations auto-saved successfully!",
-        "success"
+        "success",
+        {
+          details: detailMsg
+        }
       );
     }, 400);
     return () => clearTimeout(timer);

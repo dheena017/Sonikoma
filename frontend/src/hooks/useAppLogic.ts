@@ -366,14 +366,34 @@ export function useAppLogic() {
           setStoryboardPlaying(false);
 
           if (data.debug?.original_count && data.debug.original_count > 1) {
+            const detailMsg = [
+              `Original Panel Count: ${data.debug.original_count}`,
+              `Consolidated Image URL: ${data.images?.[0] || "N/A"}`,
+              `Source URL: ${normalizedTargetUrl}`,
+              `Smart Slice Mode: Enabled`,
+              `Scraped Genre: ${state.scrapedGenre || "General"}`
+            ].join("\n");
             state.addNotification(
               `Successfully extracted and consolidated ${data.debug.original_count} panels into one image!`,
-              "success"
+              "success",
+              {
+                details: detailMsg
+              }
             );
           } else {
+            const detailMsg = [
+              `Total Frames Extracted: ${data.total_images}`,
+              `Source URL: ${normalizedTargetUrl}`,
+              `AI Vision Model: ${selectedModel}`,
+              `Target Domain: ${currentHost}`,
+              `Smart Slice Mode: Disabled`
+            ].join("\n");
             state.addNotification(
               `Successfully extracted ${data.total_images} panel frame from the Webtoon page!`,
-              "success"
+              "success",
+              {
+                details: detailMsg
+              }
             );
           }
 
@@ -400,7 +420,10 @@ export function useAppLogic() {
           state.setPanels([]);
           state.addNotification(
             `Failed to find comic panels: ${errMsg} Please check the URL and try again.`,
-            "error"
+            "error",
+            {
+              details: `Error Response Message: ${errMsg}\nTarget URL: ${normalizedTargetUrl}\nSelected Source Portal: ${selectedSource}\nHost: ${currentHost}`
+            }
           );
           state.setConsoleLogs((prev) => [
             `[Scraper] [WARNING] No comic panels detected on page. Server message: ${errMsg}`,
@@ -421,7 +444,10 @@ export function useAppLogic() {
             "Failed to retrieve comic panels from the specified URL.";
           state.addNotification(
             `Service unable to access target site. Check the URL or refresh the page. (${errMsg})`,
-            "error"
+            "error",
+            {
+              details: `Error Details: ${err.message || String(err)}\nStack Trace: ${err.stack || "N/A"}\nTarget URL: ${normalizedTargetUrl}\nSelected Source Portal: ${selectedSource}`
+            }
           );
         }
       }

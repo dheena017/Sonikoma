@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   Bell,
+  BellOff,
   X,
   Check,
   Trash2,
@@ -24,6 +25,8 @@ interface NotificationDropdownProps {
   onDelete: (id: number) => void;
   onClearAll: () => void;
   onNavigateToAll: () => void;
+  notificationsMuted?: boolean;
+  onToggleMute?: () => void;
 }
 
 export default function NotificationDropdown({
@@ -34,6 +37,8 @@ export default function NotificationDropdown({
   onDelete,
   onClearAll,
   onNavigateToAll,
+  notificationsMuted = false,
+  onToggleMute,
 }: NotificationDropdownProps) {
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
@@ -48,7 +53,11 @@ export default function NotificationDropdown({
     <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right">
       <div className="px-4 py-3 border-b border-neutral-800 flex items-center justify-between bg-neutral-900/50 backdrop-blur-md">
         <div className="flex items-center gap-2">
-          <Bell className="h-4 w-4 text-purple-400" />
+          {notificationsMuted ? (
+            <BellOff className="h-4 w-4 text-rose-500 animate-pulse" />
+          ) : (
+            <Bell className="h-4 w-4 text-purple-400" />
+          )}
           <h3 className="font-bold text-sm text-white">Notifications</h3>
           {unreadCount > 0 && (
             <span className="bg-purple-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
@@ -57,6 +66,21 @@ export default function NotificationDropdown({
           )}
         </div>
         <div className="flex items-center gap-1">
+          <button
+            onClick={onToggleMute}
+            className={`p-1.5 rounded-lg transition-colors ${
+              notificationsMuted
+                ? "text-rose-500 hover:text-rose-450 hover:bg-neutral-800"
+                : "text-neutral-400 hover:text-white hover:bg-neutral-800"
+            }`}
+            title={notificationsMuted ? "Unmute notification sounds" : "Mute notification sounds"}
+          >
+            {notificationsMuted ? (
+              <BellOff className="h-4 w-4 animate-bounce" style={{ animationDuration: "1.5s" }} />
+            ) : (
+              <Bell className="h-4 w-4" />
+            )}
+          </button>
           {notifications.length > 0 && (
             <button
               onClick={onMarkAllAsRead}

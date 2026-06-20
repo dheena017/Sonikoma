@@ -78,7 +78,7 @@ async def get_projects(current_user: dict = Depends(get_current_user)):
         # Ensure all project cover images are proxied if external
         from urllib.parse import quote
         for proj in projects:
-            if proj.get("cover_image") and proj["cover_image"].startswith("http") and not proj["cover_image"].startswith("/api/"):
+            if proj.get("cover_image") and proj["cover_image"].startswith("http") and "/api/" not in proj["cover_image"]:
                 proj["cover_image"] = f"/api/proxy-image?url={quote(proj['cover_image'])}"
                 
         logger.info(f"[Database] Retrieved {len(projects)} projects.")
@@ -107,14 +107,14 @@ async def get_single_project(
 
         from urllib.parse import quote
         # Ensure project cover image is proxied
-        if project.get("cover_image") and project["cover_image"].startswith("http") and not project["cover_image"].startswith("/api/"):
+        if project.get("cover_image") and project["cover_image"].startswith("http") and "/api/" not in project["cover_image"]:
             project["cover_image"] = f"/api/proxy-image?url={quote(project['cover_image'])}"
 
         panels = db.get_panels(projectId)
         # Ensure all panel images are proxied
         for p in panels:
             img = p.get("image_url")
-            if img and img.startswith("http") and not img.startswith("/api/"):
+            if img and img.startswith("http") and "/api/" not in img:
                 p["image_url"] = f"/api/proxy-image?url={quote(img)}"
 
         logger.info(f"[Database] Project {projectId} found with {len(panels)} panels.")

@@ -4,6 +4,7 @@ import {
   Film,
   Menu,
   Bell,
+  BellOff,
   X,
   Settings,
   Search,
@@ -54,6 +55,8 @@ interface HeaderProps {
   isDirty?: boolean;
   onSave?: () => void;
   navigateTo?: (path: string) => void;
+  notificationsMuted?: boolean;
+  setNotificationsMuted?: (muted: boolean) => void;
 }
 
 /** Format seconds into a readable "Xm Ys" string */
@@ -96,6 +99,8 @@ export default function Header({
   isDirty = false,
   onSave,
   navigateTo: routerNavigateTo,
+  notificationsMuted = false,
+  setNotificationsMuted,
 }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -569,7 +574,11 @@ export default function Header({
             }`}
             title="Notifications"
           >
-            <Bell className="h-4 w-4" />
+            {notificationsMuted ? (
+              <BellOff className="h-4 w-4 text-rose-455 animate-pulse" />
+            ) : (
+              <Bell className="h-4 w-4" />
+            )}
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white ring-2 ring-neutral-950">
                 {unreadCount > 9 ? "9+" : unreadCount}
@@ -589,6 +598,8 @@ export default function Header({
                 setShowNotifications(false);
                 navigateTo("/notifications");
               }}
+              notificationsMuted={notificationsMuted}
+              onToggleMute={() => setNotificationsMuted && setNotificationsMuted(!notificationsMuted)}
             />
           )}
         </div>

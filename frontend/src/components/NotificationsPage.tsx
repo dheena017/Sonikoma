@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   Bell,
+  BellOff,
   Trash2,
   Check,
   ChevronDown,
@@ -25,6 +26,8 @@ interface NotificationsPageProps {
   onMarkAllAsRead: () => void;
   onDelete: (id: number) => void;
   onClearAll: () => void;
+  notificationsMuted?: boolean;
+  onToggleMute?: () => void;
 }
 
 export default function NotificationsPage({
@@ -34,6 +37,8 @@ export default function NotificationsPage({
   onMarkAllAsRead,
   onDelete,
   onClearAll,
+  notificationsMuted = false,
+  onToggleMute,
 }: NotificationsPageProps) {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [filter, setFilter] = useState<string>("all");
@@ -86,6 +91,22 @@ export default function NotificationsPage({
             </div>
 
             <div className="flex items-center gap-2">
+              <button
+                onClick={onToggleMute}
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-[11px] font-bold uppercase tracking-widest transition-all cursor-pointer ${
+                  notificationsMuted
+                    ? "bg-rose-950/20 border-rose-900/30 text-rose-455 hover:bg-rose-900/40"
+                    : "bg-neutral-900 border-neutral-850 text-neutral-300 hover:text-white hover:border-neutral-750"
+                }`}
+                title={notificationsMuted ? "Unmute notification sounds" : "Mute notification sounds"}
+              >
+                {notificationsMuted ? (
+                  <BellOff className="h-4 w-4 animate-bounce" style={{ animationDuration: "2s" }} />
+                ) : (
+                  <Bell className="h-4 w-4 text-purple-400" />
+                )}
+                <span>{notificationsMuted ? "Muted" : "Mute Sound"}</span>
+              </button>
               {notifications.length > 0 && (
                 <>
                   <button
@@ -97,7 +118,7 @@ export default function NotificationsPage({
                   </button>
                   <button
                     onClick={onClearAll}
-                    className="flex items-center gap-2 px-3 py-2 rounded-xl bg-rose-950/20 border border-rose-900/30 text-rose-400 hover:bg-rose-900/40 text-[11px] font-bold uppercase tracking-widest transition-all cursor-pointer"
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl bg-rose-950/20 border border-rose-900/30 text-rose-450 hover:bg-rose-900/40 text-[11px] font-bold uppercase tracking-widest transition-all cursor-pointer"
                   >
                     <Trash2 className="h-4 w-4" />
                     <span className="hidden sm:inline">Clear history</span>
