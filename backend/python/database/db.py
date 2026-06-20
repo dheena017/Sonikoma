@@ -361,10 +361,18 @@ def insert_project(data: Dict[str, Any]) -> None:
         panels_count = data.get('panels_count') or 0
         video_url = data.get('video_url')
         
-        conn.execute("""
-            INSERT INTO chapters (id, series_id, episode_number, original_url, status, panels_count, video_url)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (chapter_id, series_id, episode_number, original_url, status, panels_count, video_url))
+        row_ch = conn.execute("SELECT id FROM chapters WHERE id = ? LIMIT 1", (chapter_id,)).fetchone()
+        if row_ch:
+            conn.execute("""
+                UPDATE chapters 
+                SET episode_number = ?, original_url = ?, status = ?, panels_count = ?, video_url = ?
+                WHERE id = ?
+            """, (episode_number, original_url, status, panels_count, video_url, chapter_id))
+        else:
+            conn.execute("""
+                INSERT INTO chapters (id, series_id, episode_number, original_url, status, panels_count, video_url)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (chapter_id, series_id, episode_number, original_url, status, panels_count, video_url))
         conn.commit()
     finally:
         conn.close()

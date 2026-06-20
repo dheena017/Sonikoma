@@ -25,6 +25,7 @@ interface UseAppRouterProps {
   musicTheme: string;
   aspectRatio: "9:16" | "16:9";
   frameRate: number;
+  isDirty?: boolean;
 }
 
 export function useAppRouter({
@@ -49,6 +50,7 @@ export function useAppRouter({
   musicTheme,
   aspectRatio,
   frameRate,
+  isDirty = false,
 }: UseAppRouterProps) {
   const [currentPath, setCurrentPath] = React.useState(
     window.location.pathname
@@ -60,12 +62,28 @@ export function useAppRouter({
     () => localStorage.getItem("ai_comic_theme") || "obsidian"
   );
   const [isPipMode, setIsPipMode] = React.useState<boolean>(false);
+  const [pendingNavigationPath, setPendingNavigationPath] = React.useState<
+    string | null
+  >(null);
 
   // Sync visual theme with root html element
   React.useEffect(() => {
     document.documentElement.setAttribute("data-theme", activeTheme);
     localStorage.setItem("ai_comic_theme", activeTheme);
   }, [activeTheme]);
+
+  // Browser refresh/close/unload warning for unsaved changes
+  React.useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        const msg = "You have unsaved changes. Are you sure you want to leave?";
+        e.returnValue = msg;
+        return msg;
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
 
   // Sync settings and state URL parameters on load
   React.useEffect(() => {
@@ -272,26 +290,27 @@ export function useAppRouter({
         targetPath = "/dashboard";
       }
 
+      if (window.location.pathname === targetPath) {
+        return;
+      }
+
       const isCurrentlyEditor = window.location.pathname.startsWith("/editor");
       const isTargetingEditor = targetPath.startsWith("/editor");
+      const isEditorDirty =
+        !isDirty &&
+        isCurrentlyEditor &&
+        !isTargetingEditor &&
+        (window as any).editorHasUnsavedChanges?.();
 
-      if (isCurrentlyEditor && !isTargetingEditor) {
-        const isDirty = (window as any).editorHasUnsavedChanges?.();
-        if (isDirty) {
-          if (
-            !window.confirm(
-              "You have unsaved changes in the editor. Are you sure you want to navigate away?"
-            )
-          ) {
-            return;
-          }
-        }
+      if (isDirty || isEditorDirty) {
+        setPendingNavigationPath(targetPath);
+        return;
       }
 
       window.history.pushState({}, "", targetPath);
       window.dispatchEvent(new Event("popstate"));
     },
-    [isAuthenticated]
+    [isAuthenticated, isDirty]
   );
 
   React.useEffect(() => {
@@ -309,5 +328,7 @@ export function useAppRouter({
     isPipMode,
     setIsPipMode,
     navigateTo,
+    pendingNavigationPath,
+    setPendingNavigationPath,
   };
 }

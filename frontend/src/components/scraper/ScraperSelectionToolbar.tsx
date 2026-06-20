@@ -128,16 +128,22 @@ export function ScraperSelectionToolbar({
 
             {/* Custom Every Nth */}
             <div className="flex items-center gap-1.5 px-2.5 py-1">
-              <span className="text-[10px] text-neutral-400 font-sans">Every</span>
+              <span className="text-[10px] text-neutral-400 font-sans">
+                Every
+              </span>
               <input
                 type="number"
                 min="1"
                 max="99"
                 value={everyN}
-                onChange={(e) => setEveryN(Math.max(1, parseInt(e.target.value) || 1))}
+                onChange={(e) =>
+                  setEveryN(Math.max(1, parseInt(e.target.value) || 1))
+                }
                 className="w-8 px-1 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-white text-[10px] font-mono focus:outline-none focus:border-indigo-500 text-center"
               />
-              <span className="text-[10px] text-neutral-400 font-sans">th panel</span>
+              <span className="text-[10px] text-neutral-400 font-sans">
+                th panel
+              </span>
               <button
                 type="button"
                 onClick={() => {
@@ -232,13 +238,17 @@ export function ScraperSelectionToolbar({
 
             {/* Custom Range Input */}
             <div className="flex items-center gap-1.5 px-2.5 py-1.5 border-t border-neutral-900 mt-1.5">
-              <span className="text-[10px] text-neutral-400 font-sans">Range</span>
+              <span className="text-[10px] text-neutral-400 font-sans">
+                Range
+              </span>
               <input
                 type="number"
                 min="1"
                 max={scrapedImages.length}
                 value={rangeFrom}
-                onChange={(e) => setRangeFrom(Math.max(1, parseInt(e.target.value) || 1))}
+                onChange={(e) =>
+                  setRangeFrom(Math.max(1, parseInt(e.target.value) || 1))
+                }
                 className="w-10 px-1 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-white text-[10px] font-mono focus:outline-none focus:border-indigo-500 text-center"
               />
               <span className="text-[10px] text-neutral-400 font-sans">to</span>
@@ -247,7 +257,9 @@ export function ScraperSelectionToolbar({
                 min="1"
                 max={scrapedImages.length}
                 value={rangeTo}
-                onChange={(e) => setRangeTo(Math.max(1, parseInt(e.target.value) || 1))}
+                onChange={(e) =>
+                  setRangeTo(Math.max(1, parseInt(e.target.value) || 1))
+                }
                 className="w-10 px-1 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-white text-[10px] font-mono focus:outline-none focus:border-indigo-500 text-center"
               />
               <button

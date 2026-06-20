@@ -67,13 +67,11 @@ export function useStoryboardOperations({
   const {
     analyzingPanelId,
     isAnalyzingAll,
-    isCompiling,
     isZipping,
     handleDownloadZip,
     handleAnalyzePanel,
     handleAnalyzeAllPanels,
     handleAnalyzeSelectedPanels,
-    handleCompileVideo,
   } = useCompileActions({
     panels,
     setPanels,
@@ -89,12 +87,14 @@ export function useStoryboardOperations({
     narrationStyle,
   });
 
-  const handleClearTimeline = () => {
-    if (
-      window.confirm(
-        "Are you sure you want to clear the entire storyboard timeline?"
-      )
-    ) {
+  const handleClearTimeline = async () => {
+    const confirm = (window as any).confirmAsync || window.confirm;
+    const confirmClear = await confirm(
+      "Are you sure you want to clear the entire storyboard timeline?",
+      "Clear Storyboard",
+      "red"
+    );
+    if (confirmClear) {
       setPanels([]);
       addNotification?.("Storyboard cleared", "info");
     }
@@ -102,7 +102,6 @@ export function useStoryboardOperations({
 
   return {
     analyzingPanelId,
-    isCompiling,
     isZipping,
     showBulkOps,
     setShowBulkOps,
@@ -127,6 +126,5 @@ export function useStoryboardOperations({
     handleAnalyzeAllPanels,
     handleAnalyzeSelectedPanels,
     isAnalyzingAll,
-    handleCompileVideo,
   };
 }

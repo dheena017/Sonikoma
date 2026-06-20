@@ -7,6 +7,7 @@ import StoryboardTimeline from "./timeline/StoryboardTimeline.js";
 import VideoMonitor from "./video/VideoMonitor.js";
 import VolumeAndProgressPanel from "./video/VolumeAndProgressPanel.js";
 import OutputMetadataPanel from "./OutputMetadataPanel.js";
+import ProjectConfirmModal from "./scraper/ProjectConfirmModal.js";
 
 interface AppWorkspaceProps {
   isDashboardOnly?: boolean;
@@ -52,7 +53,10 @@ interface AppWorkspaceProps {
   isProcessing: boolean;
   handleGenerateVideo: () => void;
   isScraping: boolean;
-  scrapeImages: (customUrl?: string) => Promise<void>;
+  scrapeImages: (
+    customUrl?: string,
+    overrideProjectId?: string
+  ) => Promise<void>;
   mergingIndices: number[];
   handleStitchWithNext: (idx: number) => Promise<void>;
   addPanelsToStoryboard: (
@@ -113,6 +117,9 @@ interface AppWorkspaceProps {
   setSeriesSynopsis: (v: string) => void;
   smartSlice?: boolean;
   setSmartSlice?: (v: boolean) => void;
+  showScrapeConfirmModal: boolean;
+  setShowScrapeConfirmModal: (v: boolean) => void;
+  saveProject?: (customPanels?: any[]) => Promise<boolean>;
 }
 
 export function AppWorkspace({
@@ -216,7 +223,96 @@ export function AppWorkspace({
   setSeriesSynopsis,
   smartSlice,
   setSmartSlice,
+  showScrapeConfirmModal,
+  setShowScrapeConfirmModal,
+  saveProject,
 }: AppWorkspaceProps) {
+  const handleConfirmProjectAndScrape = async (details: {
+    seriesTitle: string;
+    chapterNumber: string;
+    chapterTitle: string;
+    scrapedGenre: string;
+    seriesAuthor: string;
+    seriesCoverImage: string;
+    seriesSynopsis: string;
+  }) => {
+    setShowScrapeConfirmModal(false);
+
+    // Update parent states
+    setSeriesTitle(details.seriesTitle);
+    setChapterNumber(details.chapterNumber);
+    setChapterTitle(details.chapterTitle);
+    setScrapedGenre(details.scrapedGenre);
+    setSeriesAuthor(details.seriesAuthor);
+    setSeriesCoverImage(details.seriesCoverImage);
+    setSeriesSynopsis(details.seriesSynopsis);
+
+    // Generate project_id
+    const generatedProjectId =
+      "proj_" + Date.now() + "_" + Math.random().toString(36).substring(2, 10);
+
+    try {
+      const formattedEpisode = (() => {
+        const num = details.chapterNumber.trim();
+        const name = details.chapterTitle.trim();
+        if (num && name) return `Chapter ${num} - ${name}`;
+        if (num) return `Chapter ${num}`;
+        if (name) return name;
+        return "";
+      })();
+
+      addNotification("Initializing project entry...", "info");
+
+      const token = localStorage.getItem("anivox_token");
+      const headers: HeadersInit = { "Content-Type": "application/json" };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const res = await fetch("/api/projects", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          project_id: generatedProjectId,
+          url: targetUrl,
+          title: details.seriesTitle,
+          genre: details.scrapedGenre,
+          episode: formattedEpisode,
+          panels_count: 0,
+          video_url: null,
+          author: details.seriesAuthor,
+          cover_image: details.seriesCoverImage,
+          synopsis: details.seriesSynopsis,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Failed to create project entry");
+      }
+
+      addNotification(
+        `Project "${details.seriesTitle}" created successfully!`,
+        "success"
+      );
+
+      // Update projectId in query parameters so workspace loads it on reload
+      const urlParams = new URLSearchParams(window.location.search);
+      urlParams.set("project_id", generatedProjectId);
+      urlParams.set("id", generatedProjectId);
+      window.history.pushState(null, "", "?" + urlParams.toString());
+
+      // Start the actual scrape
+      await scrapeImages(targetUrl, generatedProjectId);
+    } catch (err: any) {
+      console.error(err);
+      addNotification(
+        `Failed to create project: ${err.message || "Unknown error"}`,
+        "error"
+      );
+    }
+  };
+
   return (
     <main
       id="main_workspace"
@@ -240,7 +336,7 @@ export function AppWorkspace({
           isProcessing={isProcessing}
           isScraping={isScraping}
           handleGenerateVideo={handleGenerateVideo}
-          handleScrape={(url?: string) => scrapeImages(url)}
+          handleScrape={() => setShowScrapeConfirmModal(true)}
           addNotification={addNotification}
           narrationStyle={narrationStyle}
           setNarrationStyle={setNarrationStyle}
@@ -348,6 +444,7 @@ export function AppWorkspace({
               minPanelAreaPct={minPanelAreaPct}
               overlapMergeThreshold={overlapMergeThreshold}
               useLocalCV={useLocalCV}
+              saveProject={saveProject}
               cropModel={cropModel}
               cropMinHeightPx={cropMinHeightPx}
               cropCannyLow={cropCannyLow}
@@ -405,6 +502,20 @@ export function AppWorkspace({
           />
         </div>
       )}
+      <ProjectConfirmModal
+        isOpen={showScrapeConfirmModal}
+        onClose={() => setShowScrapeConfirmModal(false)}
+        onConfirm={handleConfirmProjectAndScrape}
+        initialDetails={{
+          seriesTitle,
+          chapterNumber,
+          chapterTitle,
+          scrapedGenre,
+          seriesAuthor,
+          seriesCoverImage,
+          seriesSynopsis,
+        }}
+      />
     </main>
   );
 }

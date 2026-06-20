@@ -29,6 +29,8 @@ interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   projectId?: string | null;
+  isDirty?: boolean;
+  navigateTo?: (path: string) => void;
 }
 
 export default function Sidebar({
@@ -44,6 +46,8 @@ export default function Sidebar({
   isOpen,
   onClose,
   projectId = null,
+  isDirty = false,
+  navigateTo: routerNavigateTo,
 }: SidebarProps) {
   const isDashboard = currentPath === "/dashboard";
   const isSettings = currentPath === "/settings";
@@ -69,9 +73,22 @@ export default function Sidebar({
     }
   }, [isAiSuiteActive]);
 
-  const navigateTo = (path: string) => {
-    window.history.pushState({}, "", path);
-    window.dispatchEvent(new Event("popstate"));
+  const navigateTo = async (path: string) => {
+    if (routerNavigateTo) {
+      routerNavigateTo(path);
+    } else {
+      if (isDirty) {
+        const confirm = (window as any).confirmAsync || window.confirm;
+        const confirmed = await confirm(
+          "You have unsaved changes. Are you sure you want to navigate away? Your changes will be lost."
+        );
+        if (!confirmed) {
+          return;
+        }
+      }
+      window.history.pushState({}, "", path);
+      window.dispatchEvent(new Event("popstate"));
+    }
     onClose(); // Close mobile drawer when navigating
   };
 
@@ -92,7 +109,8 @@ export default function Sidebar({
                 label: "Project Details",
                 icon: FileText,
                 active: isProjectDetails,
-                onClick: () => navigateTo(`/project-details?id=${activeProjectId}`),
+                onClick: () =>
+                  navigateTo(`/project-details?id=${activeProjectId}`),
                 enabled: true,
               },
             ]

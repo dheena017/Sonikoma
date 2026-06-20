@@ -606,7 +606,6 @@ from routes.proxy import router as proxy_router
 from routes.image_routes import router as image_routes_router
 from routes.scraper_routes import router as scraper_routes_router
 from routes.ai_routes import router as ai_routes_router
-from routes.video import router as video_router
 from routes.audio import router as audio_router
 
 # 1. Mount original Express routes under /api
@@ -617,12 +616,10 @@ app.include_router(proxy_router,          prefix="/api", tags=["Proxy"])
 app.include_router(image_routes_router,   prefix="/api", tags=["Image Editing"])
 app.include_router(scraper_routes_router, prefix="/api", tags=["Scraper"])
 app.include_router(ai_routes_router,      prefix="/api", tags=["AI Processing"])
-app.include_router(video_router,          prefix="/api", tags=["Video Compilation"])
 app.include_router(audio_router,          prefix="/api/audio", tags=["Audio Synthesis"])
 
 # 2. Maintain /api/py endpoints for backward compatibility (optional/fallback)
 app.include_router(health_router,         prefix="/api/py", tags=["Health & System (Legacy)"])
-app.include_router(video_router,          prefix="/api/py/video", tags=["Video Compilation (Legacy)"])
 app.include_router(audio_router,          prefix="/api/py/audio", tags=["Audio Synthesis (Legacy)"])
 
 # ─────────────────────────────────────────────────────────────────────────────

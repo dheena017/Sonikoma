@@ -119,12 +119,12 @@ export default function ShortcutsPage({
     return () => window.removeEventListener("keydown", handleKeyDown, true);
   }, [recordingActionId, shortcuts, setShortcuts, addNotification]);
 
-  const handleResetToDefaults = () => {
-    if (
-      window.confirm(
-        "Are you sure you want to restore all keyboard shortcuts to factory defaults?"
-      )
-    ) {
+  const handleResetToDefaults = async () => {
+    const confirm = (window as any).confirmAsync || window.confirm;
+    const confirmed = await confirm(
+      "Are you sure you want to restore all keyboard shortcuts to factory defaults?"
+    );
+    if (confirmed) {
       setShortcuts(defaultShortcuts);
       localStorage.setItem(
         "ai_comic_shortcuts",

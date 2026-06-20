@@ -401,7 +401,10 @@ export default function CropEditorModal({
                   </div>
                   <span
                     className="text-[9px] font-mono font-bold text-neutral-500 uppercase tracking-widest select-none origin-center"
-                    style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
+                    style={{
+                      writingMode: "vertical-rl",
+                      textOrientation: "mixed",
+                    }}
                   >
                     PANELS ({scrapedImages.length})
                   </span>
@@ -419,8 +422,11 @@ export default function CropEditorModal({
                     <React.Fragment key={imgUrl}>
                       <div
                         onClick={() => {
-                          console.log(`[CropEditor] Switching to image idx: ${idx}`);
-                          const activeTabVal = window.location.pathname.split("/")[2] || "adjust";
+                          console.log(
+                            `[CropEditor] Switching to image idx: ${idx}`
+                          );
+                          const activeTabVal =
+                            window.location.pathname.split("/")[2] || "adjust";
                           window.history.pushState(
                             {},
                             "",
@@ -458,17 +464,24 @@ export default function CropEditorModal({
                             type="button"
                             onClick={async (e) => {
                               e.stopPropagation();
-                              console.log(`[CropEditor] Stitching idx ${idx} with next`);
+                              console.log(
+                                `[CropEditor] Stitching idx ${idx} with next`
+                              );
                               const stitched = await handleStitchWithNext(idx);
                               if (stitched && editingImageIdx !== null) {
                                 let newIdx = editingImageIdx;
-                                if (editingImageIdx === idx || editingImageIdx === idx + 1) {
+                                if (
+                                  editingImageIdx === idx ||
+                                  editingImageIdx === idx + 1
+                                ) {
                                   newIdx = idx;
                                 } else if (editingImageIdx > idx + 1) {
                                   newIdx = editingImageIdx - 1;
                                 }
                                 if (newIdx !== editingImageIdx) {
-                                  const activeTabVal = window.location.pathname.split("/")[2] || "adjust";
+                                  const activeTabVal =
+                                    window.location.pathname.split("/")[2] ||
+                                    "adjust";
                                   window.history.pushState(
                                     {},
                                     "",
@@ -680,9 +693,7 @@ export default function CropEditorModal({
   if (isPage) {
     return (
       <div className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10 flex flex-col space-y-6 animate-[fadeIn_0.22s_ease-out]">
-        <div className="flex-grow min-h-0">
-          {mainCard}
-        </div>
+        <div className="flex-grow min-h-0">{mainCard}</div>
       </div>
     );
   }

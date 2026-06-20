@@ -5,10 +5,7 @@ import { AutoCropPresetGrid } from "./AutoCropPresetGrid";
 import { AutoCropEngineSelector } from "./AutoCropEngineSelector";
 
 export function AutoCropGeneralTab(props: AutoCropSharedProps) {
-  const {
-    activeSlot,
-    applyBuiltInPreset,
-  } = useAutoCropPresets(props);
+  const { activeSlot, applyBuiltInPreset } = useAutoCropPresets(props);
 
   const firstImageUrl =
     props.previewImageUrl ||

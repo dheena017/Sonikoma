@@ -99,9 +99,10 @@ export function FloatingSelectionBar({
                     : "Processing…"}
                 </span>
               </div>
-              
+
               {/* Process Bar for Batch Operations */}
-              {((isBatchCropping && batchProgress) || (isCleaningBubbles && cleanProgress)) && (
+              {((isBatchCropping && batchProgress) ||
+                (isCleaningBubbles && cleanProgress)) &&
                 (() => {
                   const prog = isBatchCropping ? batchProgress : cleanProgress;
                   if (!prog || prog.total === 0) return null;
@@ -121,8 +122,7 @@ export function FloatingSelectionBar({
                       </div>
                     </div>
                   );
-                })()
-              )}
+                })()}
             </div>
           )}
 

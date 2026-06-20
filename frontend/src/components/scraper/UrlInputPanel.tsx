@@ -225,21 +225,21 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
 
   const isDirectImage = Boolean(
     targetUrl.trim() &&
-    (targetUrl
-      .toLowerCase()
-      .match(/\.(png|jpg|jpeg|webp|gif|svg|bmp|tiff)(\?|$)/) ||
-      targetUrl.startsWith("data:image/"))
+      (targetUrl
+        .toLowerCase()
+        .match(/\.(png|jpg|jpeg|webp|gif|svg|bmp|tiff)(\?|$)/) ||
+        targetUrl.startsWith("data:image/"))
   );
 
   const isSourceMismatch = Boolean(
     targetUrl.trim() &&
-    !isDirectImage &&
-    source !== "custom" &&
-    currentHost &&
-    !SOURCE_DOMAINS[source]?.some(
-      (allowedHost) =>
-        currentHost === allowedHost || currentHost.endsWith(`.${allowedHost}`)
-    )
+      !isDirectImage &&
+      source !== "custom" &&
+      currentHost &&
+      !SOURCE_DOMAINS[source]?.some(
+        (allowedHost) =>
+          currentHost === allowedHost || currentHost.endsWith(`.${allowedHost}`)
+      )
   );
 
   const modelDropdown = (
@@ -399,7 +399,8 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                 <div className="absolute top-0 bottom-0 bg-gradient-to-r from-purple-600 via-indigo-500 to-cyan-400 rounded-full w-1/3 animate-infinite-scroll" />
               </div>
               <p className="text-[9.5px] text-neutral-500 font-mono leading-normal">
-                Launching headless browser worker on the server backend to extract layout strips.
+                Launching headless browser worker on the server backend to
+                extract layout strips.
               </p>
             </div>
           )}
@@ -411,7 +412,9 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                 <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
                 Comic Series & Chapter Metadata
               </span>
-              <span className="text-[9px] text-neutral-500 font-bold font-mono">Editable Overrides</span>
+              <span className="text-[9px] text-neutral-500 font-bold font-mono">
+                Editable Overrides
+              </span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
@@ -532,10 +535,11 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
           <div className="space-y-2">
             <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
               <span
-                className={`h-1.5 w-1.5 rounded-full ${narrationStyle === "long"
-                  ? "bg-purple-500 animate-ping"
-                  : "bg-emerald-500 animate-ping"
-                  }`}
+                className={`h-1.5 w-1.5 rounded-full ${
+                  narrationStyle === "long"
+                    ? "bg-purple-500 animate-ping"
+                    : "bg-emerald-500 animate-ping"
+                }`}
               />
               AI Narration Style
             </label>
@@ -573,10 +577,11 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
               </div>
             </div>
             <p
-              className={`text-[10.5px] font-mono ${narrationStyle === "long"
-                ? "text-purple-400/70"
-                : "text-emerald-400/70"
-                }`}
+              className={`text-[10.5px] font-mono ${
+                narrationStyle === "long"
+                  ? "text-purple-400/70"
+                  : "text-emerald-400/70"
+              }`}
             >
               {narrationStyle === "long"
                 ? "✦ DETAILED RECAP — Generates detailed recap scripts suitable for 10-20 min videos"
@@ -588,10 +593,11 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
           <div className="space-y-2">
             <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
               <span
-                className={`h-1.5 w-1.5 rounded-full ${smartSlice
-                  ? "bg-indigo-500 animate-ping"
-                  : "bg-amber-500 animate-ping"
-                  }`}
+                className={`h-1.5 w-1.5 rounded-full ${
+                  smartSlice
+                    ? "bg-indigo-500 animate-ping"
+                    : "bg-amber-500 animate-ping"
+                }`}
               />
               Scrape Layout Mode
             </label>
@@ -605,7 +611,10 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                   const label = val
                     ? "Separate Panel Images (Fast Scrape)"
                     : "Single Stitched Strip";
-                  addNotification(`Scrape layout mode set to: ${label}`, "info");
+                  addNotification(
+                    `Scrape layout mode set to: ${label}`,
+                    "info"
+                  );
                 }}
                 className="relative w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-neutral-200 outline-none appearance-none focus:border-purple-500 transition-colors cursor-pointer"
               >
@@ -627,10 +636,9 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
               </div>
             </div>
             <p
-              className={`text-[10.5px] font-mono ${smartSlice
-                ? "text-indigo-400/70"
-                : "text-amber-400/70"
-                }`}
+              className={`text-[10.5px] font-mono ${
+                smartSlice ? "text-indigo-400/70" : "text-amber-400/70"
+              }`}
             >
               {smartSlice
                 ? "✦ SEPARATE IMAGES — Scrapes chapter pages instantly as individual panel cards in storyboard"

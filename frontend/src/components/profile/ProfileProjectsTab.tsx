@@ -29,12 +29,12 @@ const parseEpisodeString = (epStr: string) => {
   if (match) {
     return {
       numberStr: match[1],
-      titleStr: match[2] ? match[2].trim() : ""
+      titleStr: match[2] ? match[2].trim() : "",
     };
   }
   return {
     numberStr: epStr,
-    titleStr: ""
+    titleStr: "",
   };
 };
 
@@ -62,15 +62,16 @@ export default function ProfileProjectsTab({
     "date-desc" | "date-asc" | "title-asc" | "title-desc"
   >("date-desc");
   const [viewMode, setViewMode] = React.useState<"list" | "grid">("list");
-  const [expandedSeries, setExpandedSeries] = React.useState<Record<string, boolean>>({});
+  const [expandedSeries, setExpandedSeries] = React.useState<
+    Record<string, boolean>
+  >({});
 
   const toggleSeries = (title: string) => {
     setExpandedSeries((prev) => ({
       ...prev,
-      [title]: !prev[title]
+      [title]: !prev[title],
     }));
   };
-
 
   // Sort and Filter project entries
   const sortedAndFilteredProjects = React.useMemo(() => {
@@ -112,21 +113,27 @@ export default function ProfileProjectsTab({
 
   // Group the sorted and filtered projects by series title
   const groupedProjects = React.useMemo(() => {
-    const groups: Record<string, { title: string; genre: string; series_id: string; chapters: any[] }> = {};
-    
+    const groups: Record<
+      string,
+      { title: string; genre: string; series_id: string; chapters: any[] }
+    > = {};
+
     sortedAndFilteredProjects.forEach((project) => {
-      const seriesTitle = (project.title || "Untitled Comic").replace(/\s+[a-fA-F0-9]{8}$/, "");
+      const seriesTitle = (project.title || "Untitled Comic").replace(
+        /\s+[a-fA-F0-9]{8}$/,
+        ""
+      );
       if (!groups[seriesTitle]) {
         groups[seriesTitle] = {
           title: seriesTitle,
           genre: project.genre || "general",
           series_id: project.series_id,
-          chapters: []
+          chapters: [],
         };
       }
       groups[seriesTitle].chapters.push(project);
     });
-    
+
     return Object.values(groups);
   }, [sortedAndFilteredProjects]);
 
@@ -150,8 +157,14 @@ export default function ProfileProjectsTab({
 
   const handleBatchDelete = () => {
     if (selectedIds.length === 0) return;
-    onBatchDelete(selectedIds);
-    setSelectedIds([]);
+    if (
+      window.confirm(
+        `Are you sure you want to delete the ${selectedIds.length} selected project(s)?`
+      )
+    ) {
+      onBatchDelete(selectedIds);
+      setSelectedIds([]);
+    }
   };
 
   const handleExportJSON = () => {
@@ -454,7 +467,9 @@ export default function ProfileProjectsTab({
                         {group.title}
                       </h4>
                       <p className="text-[10px] text-neutral-500 font-mono uppercase tracking-widest mt-1">
-                        {getSourceName(group.chapters[0]?.url)} • {group.genre} • {chapterCount} {chapterCount === 1 ? "Chapter" : "Chapters"}
+                        {getSourceName(group.chapters[0]?.url)} • {group.genre}{" "}
+                        • {chapterCount}{" "}
+                        {chapterCount === 1 ? "Chapter" : "Chapters"}
                       </p>
                     </div>
                   </div>
@@ -466,7 +481,11 @@ export default function ProfileProjectsTab({
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (confirm(`Are you sure you want to delete the entire series "${group.title}" and all its chapters?`)) {
+                          if (
+                            confirm(
+                              `Are you sure you want to delete the entire series "${group.title}" and all its chapters?`
+                            )
+                          ) {
                             onDeleteSeries(group.series_id);
                           }
                         }}
@@ -490,8 +509,11 @@ export default function ProfileProjectsTab({
                     {group.chapters.map((chapter, cIdx) => {
                       const pId = chapter.project_id;
                       const isChecked = selectedIds.includes(pId);
-                      const isChCompleted = (chapter.status || "").toLowerCase() === "completed";
-                      const { numberStr, titleStr } = parseEpisodeString(chapter.episode || `Chapter #${cIdx + 1}`);
+                      const isChCompleted =
+                        (chapter.status || "").toLowerCase() === "completed";
+                      const { numberStr, titleStr } = parseEpisodeString(
+                        chapter.episode || `Chapter #${cIdx + 1}`
+                      );
 
                       return (
                         <div
@@ -540,7 +562,8 @@ export default function ProfileProjectsTab({
                                   {chapter.status || "Pending"}
                                 </span>
                                 <span className="text-[9px] text-neutral-500 font-semibold font-mono">
-                                  {chapter.created_at || "Just now"} • via {getSourceName(chapter.url)}
+                                  {chapter.created_at || "Just now"} • via{" "}
+                                  {getSourceName(chapter.url)}
                                 </span>
                               </div>
                             </div>
@@ -552,7 +575,11 @@ export default function ProfileProjectsTab({
                             </span>
                             <button
                               onClick={() => {
-                                if (confirm(`Are you sure you want to delete ${numberStr}?`)) {
+                                if (
+                                  confirm(
+                                    `Are you sure you want to delete ${numberStr}?`
+                                  )
+                                ) {
                                   onDeleteChapter(pId);
                                 }
                               }}
@@ -599,7 +626,11 @@ export default function ProfileProjectsTab({
                       {group.series_id && (
                         <button
                           onClick={() => {
-                            if (confirm(`Are you sure you want to delete the entire series "${group.title}" and all its chapters?`)) {
+                            if (
+                              confirm(
+                                `Are you sure you want to delete the entire series "${group.title}" and all its chapters?`
+                              )
+                            ) {
                               onDeleteSeries(group.series_id);
                             }
                           }}
@@ -620,7 +651,8 @@ export default function ProfileProjectsTab({
                       {group.title}
                     </h4>
                     <p className="text-[10px] text-neutral-500 font-semibold font-mono">
-                      {getSourceName(group.chapters[0]?.url)} • {chapterCount} {chapterCount === 1 ? "Chapter" : "Chapters"}
+                      {getSourceName(group.chapters[0]?.url)} • {chapterCount}{" "}
+                      {chapterCount === 1 ? "Chapter" : "Chapters"}
                     </p>
                   </div>
                 </div>
@@ -631,7 +663,9 @@ export default function ProfileProjectsTab({
                     onClick={() => toggleSeries(group.title)}
                     className="w-full py-3 px-5 flex items-center justify-between text-xs font-bold text-neutral-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer select-none"
                   >
-                    <span>{isExpanded ? "Hide Chapters" : "Show Chapters"}</span>
+                    <span>
+                      {isExpanded ? "Hide Chapters" : "Show Chapters"}
+                    </span>
                     {isExpanded ? (
                       <ChevronUp className="w-4 h-4" />
                     ) : (
@@ -645,7 +679,9 @@ export default function ProfileProjectsTab({
                       {group.chapters.map((chapter, cIdx) => {
                         const pId = chapter.project_id;
                         const isChecked = selectedIds.includes(pId);
-                        const { numberStr, titleStr } = parseEpisodeString(chapter.episode || `Chapter #${cIdx + 1}`);
+                        const { numberStr, titleStr } = parseEpisodeString(
+                          chapter.episode || `Chapter #${cIdx + 1}`
+                        );
 
                         return (
                           <div
@@ -676,12 +712,16 @@ export default function ProfileProjectsTab({
                                   {numberStr}
                                 </p>
                                 {titleStr && (
-                                  <p className="text-[9.5px] text-neutral-400 font-medium truncate max-w-[125px] mt-0.5" title={titleStr}>
+                                  <p
+                                    className="text-[9.5px] text-neutral-400 font-medium truncate max-w-[125px] mt-0.5"
+                                    title={titleStr}
+                                  >
                                     {titleStr}
                                   </p>
                                 )}
                                 <span className="text-[8px] text-neutral-500 font-semibold font-mono mt-0.5 block">
-                                  {chapter.created_at || "Just now"} • via {getSourceName(chapter.url)}
+                                  {chapter.created_at || "Just now"} • via{" "}
+                                  {getSourceName(chapter.url)}
                                 </span>
                               </div>
                             </div>
@@ -689,7 +729,11 @@ export default function ProfileProjectsTab({
                             <div className="flex items-center gap-1.5">
                               <button
                                 onClick={() => {
-                                  if (confirm(`Are you sure you want to delete ${numberStr}?`)) {
+                                  if (
+                                    confirm(
+                                      `Are you sure you want to delete ${numberStr}?`
+                                    )
+                                  ) {
                                     onDeleteChapter(pId);
                                   }
                                 }}

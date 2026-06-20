@@ -1,5 +1,15 @@
 import React, { useState } from "react";
-import { Sparkles, Copy, Check, MessageSquare, Flame, HelpCircle, Video, AlertTriangle, Image as ImageIcon } from "lucide-react";
+import {
+  Sparkles,
+  Copy,
+  Check,
+  MessageSquare,
+  Flame,
+  HelpCircle,
+  Video,
+  AlertTriangle,
+  Image as ImageIcon,
+} from "lucide-react";
 import { GeneratedPanel } from "../../types";
 
 interface EngagementTabProps {
@@ -37,11 +47,15 @@ export default function EngagementTab({
 
   const [loadingOutro, setLoadingOutro] = useState(false);
   const [outroData, setOutroData] = useState<OutroData | null>(null);
-  const [climaxHook, setClimaxHook] = useState("Will the S-Rank Protagonist survive the dungeon gate collapse?");
+  const [climaxHook, setClimaxHook] = useState(
+    "Will the S-Rank Protagonist survive the dungeon gate collapse?"
+  );
 
   const [loadingComment, setLoadingComment] = useState(false);
   const [commentData, setCommentData] = useState<CommentReplyData | null>(null);
-  const [userComment, setUserComment] = useState("Bro has infinite plot armor, how does he keep surviving this? 💀");
+  const [userComment, setUserComment] = useState(
+    "Bro has infinite plot armor, how does he keep surviving this? 💀"
+  );
 
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
@@ -54,7 +68,10 @@ export default function EngagementTab({
   const handleGenerateCliff = async () => {
     if (!videoUrl) {
       if (addNotification) {
-        addNotification("Please compile your video first on the Dashboard before generating cliffhangers.", "warning");
+        addNotification(
+          "Please compile your video first on the Dashboard before generating cliffhangers.",
+          "warning"
+        );
       }
       return;
     }
@@ -65,7 +82,9 @@ export default function EngagementTab({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          story_outline: storyboardSummary || "The protagonist faces an unbeatable dungeon boss.",
+          story_outline:
+            storyboardSummary ||
+            "The protagonist faces an unbeatable dungeon boss.",
           model: "gemini-2.5-flash",
         }),
       });
@@ -73,7 +92,10 @@ export default function EngagementTab({
       if (json.success && json.result) {
         setCliffData(json.result);
         if (addNotification) {
-          addNotification("Successfully compiled End-of-Video Cliffhanger!", "success");
+          addNotification(
+            "Successfully compiled End-of-Video Cliffhanger!",
+            "success"
+          );
         }
       }
     } catch (e) {
@@ -89,7 +111,10 @@ export default function EngagementTab({
   const handleGenerateOutro = async () => {
     if (!videoUrl) {
       if (addNotification) {
-        addNotification("Please compile your video first on the Dashboard before generating outro CTAs.", "warning");
+        addNotification(
+          "Please compile your video first on the Dashboard before generating outro CTAs.",
+          "warning"
+        );
       }
       return;
     }
@@ -109,7 +134,10 @@ export default function EngagementTab({
       if (json.success && json.result) {
         setOutroData(json.result);
         if (addNotification) {
-          addNotification("Successfully generated Outro CTA Speech!", "success");
+          addNotification(
+            "Successfully generated Outro CTA Speech!",
+            "success"
+          );
         }
       }
     } catch (e) {
@@ -125,7 +153,10 @@ export default function EngagementTab({
   const handleGenerateComment = async () => {
     if (!videoUrl) {
       if (addNotification) {
-        addNotification("Please compile your video first on the Dashboard before using the Comment Coach.", "warning");
+        addNotification(
+          "Please compile your video first on the Dashboard before using the Comment Coach.",
+          "warning"
+        );
       }
       return;
     }
@@ -145,7 +176,10 @@ export default function EngagementTab({
       if (json.success && json.result) {
         setCommentData(json.result);
         if (addNotification) {
-          addNotification("Successfully compiled fan reply suggestion!", "success");
+          addNotification(
+            "Successfully compiled fan reply suggestion!",
+            "success"
+          );
         }
       }
     } catch (e) {
@@ -179,9 +213,12 @@ export default function EngagementTab({
           ) : (
             <div className="border border-dashed border-neutral-800/80 rounded-xl p-8 text-center bg-neutral-950/20 flex flex-col items-center justify-center space-y-2">
               <AlertTriangle className="h-8 w-8 text-amber-500/80" />
-              <p className="text-xs text-neutral-400 font-mono">No compiled video found</p>
+              <p className="text-xs text-neutral-400 font-mono">
+                No compiled video found
+              </p>
               <p className="text-[10px] text-neutral-500 font-sans max-w-[250px]">
-                Please compile your story panels on the main workspace dashboard to view the preview here.
+                Please compile your story panels on the main workspace dashboard
+                to view the preview here.
               </p>
             </div>
           )}
@@ -217,14 +254,18 @@ export default function EngagementTab({
                     </span>
                   </div>
                   <p className="text-[10px] text-neutral-350 line-clamp-2 italic leading-tight px-1 font-sans">
-                    {panel.speech_text ? `"${panel.speech_text}"` : "(No Dialogue)"}
+                    {panel.speech_text
+                      ? `"${panel.speech_text}"`
+                      : "(No Dialogue)"}
                   </p>
                 </div>
               ))}
             </div>
           ) : (
             <div className="text-center py-6 border border-neutral-855 rounded-xl bg-neutral-950/10">
-              <p className="text-xs text-neutral-500 font-mono">No story panels in timeline</p>
+              <p className="text-xs text-neutral-500 font-mono">
+                No story panels in timeline
+              </p>
             </div>
           )}
         </div>
@@ -237,9 +278,13 @@ export default function EngagementTab({
           <div className="bg-amber-950/20 border border-amber-900/40 rounded-xl p-4 flex gap-3 text-amber-250 animate-fade-in">
             <AlertTriangle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
             <div className="space-y-1 text-xs">
-              <span className="font-mono font-bold block">⚠️ COMPILATION CHECK REQUIRED</span>
+              <span className="font-mono font-bold block">
+                ⚠️ COMPILATION CHECK REQUIRED
+              </span>
               <p className="text-neutral-400 leading-relaxed font-sans">
-                Engagement utilities and subscriber outro CTAs require complete visual and audio duration reference from the compiled video. Please compile the video on the Dashboard first.
+                Engagement utilities and subscriber outro CTAs require complete
+                visual and audio duration reference from the compiled video.
+                Please compile the video on the Dashboard first.
               </p>
             </div>
           </div>
@@ -275,7 +320,12 @@ export default function EngagementTab({
                     Cliffhanger Narration Script
                   </span>
                   <button
-                    onClick={() => copyToClipboard(cliffData.ending_narration, "cliff_narration")}
+                    onClick={() =>
+                      copyToClipboard(
+                        cliffData.ending_narration,
+                        "cliff_narration"
+                      )
+                    }
                     className="text-neutral-500 hover:text-white p-1 rounded hover:bg-neutral-900"
                   >
                     {copiedField === "cliff_narration" ? (
@@ -296,7 +346,9 @@ export default function EngagementTab({
                     Engagement Hook Question
                   </span>
                   <button
-                    onClick={() => copyToClipboard(cliffData.suspense_question, "cliff_q")}
+                    onClick={() =>
+                      copyToClipboard(cliffData.suspense_question, "cliff_q")
+                    }
                     className="text-neutral-500 hover:text-white p-1 rounded hover:bg-neutral-900"
                   >
                     {copiedField === "cliff_q" ? (
@@ -364,7 +416,9 @@ export default function EngagementTab({
                     Focus: {outroData.cta_focus}
                   </span>
                   <button
-                    onClick={() => copyToClipboard(outroData.outro_script, "outro")}
+                    onClick={() =>
+                      copyToClipboard(outroData.outro_script, "outro")
+                    }
                     className="text-neutral-500 hover:text-white p-1 rounded hover:bg-neutral-900"
                   >
                     {copiedField === "outro" ? (
@@ -421,7 +475,9 @@ export default function EngagementTab({
                     Witty Fan Reply Suggestion
                   </span>
                   <button
-                    onClick={() => copyToClipboard(commentData.reply_text, "reply")}
+                    onClick={() =>
+                      copyToClipboard(commentData.reply_text, "reply")
+                    }
                     className="text-neutral-500 hover:text-white p-1 rounded hover:bg-neutral-900"
                   >
                     {copiedField === "reply" ? (

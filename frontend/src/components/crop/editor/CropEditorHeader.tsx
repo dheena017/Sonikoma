@@ -43,13 +43,15 @@ export default function CropEditorHeader({
   setIsPipMode,
   slices = [],
 }: CropEditorHeaderProps) {
-  const handleCloseClick = () => {
+  const handleCloseClick = async () => {
     if (historyLength > 0 || slices.length > 0) {
-      if (
-        window.confirm(
-          "You have unsaved changes in the editor. Are you sure you want to navigate away?"
-        )
-      ) {
+      const confirm = (window as any).confirmAsync || window.confirm;
+      const confirmClose = await confirm(
+        "You have unsaved changes in the editor. Are you sure you want to navigate away?",
+        "Unsaved Changes",
+        "red"
+      );
+      if (confirmClose) {
         window.history.pushState({}, "", "/");
         window.dispatchEvent(new Event("popstate"));
       }

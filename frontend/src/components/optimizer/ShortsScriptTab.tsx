@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { Sparkles, Copy, Check, Video, AlertTriangle, Image as ImageIcon } from "lucide-react";
+import {
+  Sparkles,
+  Copy,
+  Check,
+  Video,
+  AlertTriangle,
+  Image as ImageIcon,
+} from "lucide-react";
 import { GeneratedPanel } from "../../types";
 
 interface ShortsScriptTabProps {
@@ -35,7 +42,10 @@ export default function ShortsScriptTab({
   const handleGenerate = async () => {
     if (!videoUrl) {
       if (addNotification) {
-        addNotification("Please compile your video first on the Dashboard before generating Reels & Shorts content.", "warning");
+        addNotification(
+          "Please compile your video first on the Dashboard before generating Reels & Shorts content.",
+          "warning"
+        );
       }
       return;
     }
@@ -73,7 +83,10 @@ export default function ShortsScriptTab({
       }
 
       if (addNotification) {
-        addNotification("Successfully compiled Reels & Shorts specs!", "success");
+        addNotification(
+          "Successfully compiled Reels & Shorts specs!",
+          "success"
+        );
       }
     } catch (e) {
       console.error(e);
@@ -112,9 +125,12 @@ export default function ShortsScriptTab({
           ) : (
             <div className="border border-dashed border-neutral-800/80 rounded-xl p-8 text-center bg-neutral-950/20 flex flex-col items-center justify-center space-y-2">
               <AlertTriangle className="h-8 w-8 text-amber-500/80" />
-              <p className="text-xs text-neutral-400 font-mono">No compiled video found</p>
+              <p className="text-xs text-neutral-400 font-mono">
+                No compiled video found
+              </p>
               <p className="text-[10px] text-neutral-500 font-sans max-w-[250px]">
-                Please compile your story panels on the main workspace dashboard to view the preview here.
+                Please compile your story panels on the main workspace dashboard
+                to view the preview here.
               </p>
             </div>
           )}
@@ -150,14 +166,18 @@ export default function ShortsScriptTab({
                     </span>
                   </div>
                   <p className="text-[10px] text-neutral-350 line-clamp-2 italic leading-tight px-1 font-sans">
-                    {panel.speech_text ? `"${panel.speech_text}"` : "(No Dialogue)"}
+                    {panel.speech_text
+                      ? `"${panel.speech_text}"`
+                      : "(No Dialogue)"}
                   </p>
                 </div>
               ))}
             </div>
           ) : (
             <div className="text-center py-6 border border-neutral-855 rounded-xl bg-neutral-950/10">
-              <p className="text-xs text-neutral-500 font-mono">No story panels in timeline</p>
+              <p className="text-xs text-neutral-500 font-mono">
+                No story panels in timeline
+              </p>
             </div>
           )}
         </div>
@@ -193,9 +213,13 @@ export default function ShortsScriptTab({
           <div className="bg-amber-950/20 border border-amber-900/40 rounded-xl p-4 flex gap-3 text-amber-250 animate-fade-in">
             <AlertTriangle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
             <div className="space-y-1 text-xs">
-              <span className="font-mono font-bold block">⚠️ COMPILATION CHECK REQUIRED</span>
+              <span className="font-mono font-bold block">
+                ⚠️ COMPILATION CHECK REQUIRED
+              </span>
               <p className="text-neutral-400 leading-relaxed font-sans">
-                Reels & Shorts visual timelines and timing-dependent voiceovers cannot be generated accurately without the completed video duration. Please compile the video on the Dashboard first.
+                Reels & Shorts visual timelines and timing-dependent voiceovers
+                cannot be generated accurately without the completed video
+                duration. Please compile the video on the Dashboard first.
               </p>
             </div>
           </div>

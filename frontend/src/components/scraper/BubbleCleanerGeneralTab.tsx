@@ -6,10 +6,7 @@ import { BubbleCleanerDetectionStyle } from "./BubbleCleanerDetectionStyle";
 import { BubbleCleanerEraseMethod } from "./BubbleCleanerEraseMethod";
 
 export function BubbleCleanerGeneralTab(props: BubbleCleanerSharedProps) {
-  const {
-    activeSlot,
-    applyQuickPreset,
-  } = useBubbleCleanerPresets(props);
+  const { activeSlot, applyQuickPreset } = useBubbleCleanerPresets(props);
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-[fadeIn_0.2s_ease-out]">

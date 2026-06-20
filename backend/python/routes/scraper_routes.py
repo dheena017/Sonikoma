@@ -58,6 +58,7 @@ class ScrapeImagesRequest(BaseModel):
     author: Optional[str] = None
     cover_image: Optional[str] = None
     synopsis: Optional[str] = None
+    project_id: Optional[str] = None
 
 class GenerateStoryboardRequest(BaseModel):
     url: str
@@ -190,7 +191,7 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
                 logger.warning(f"[Scraper] Automatic stitching failed, falling back to separate images: {stitch_err}")
 
         # Automatically generate default panels in SQLite if authenticated
-        project_id = generate_project_id()
+        project_id = body.project_id or generate_project_id()
         db_panels = []
         for i, img_url in enumerate(final_images):
             db_panels.append({

@@ -98,10 +98,11 @@ export default function ProcessBar({ progressStatus }: ProcessBarProps) {
 
   useEffect(() => {
     if (displayPercent >= 100 || displayPercent >= targetPercent + 18) return;
-    
+
     const interval = setInterval(() => {
       setDisplayPercent((prev) => {
-        const cap = targetPercent === 100 ? 100 : Math.min(targetPercent + 18, 99);
+        const cap =
+          targetPercent === 100 ? 100 : Math.min(targetPercent + 18, 99);
         if (prev < cap) {
           return parseFloat((prev + 0.4).toFixed(1));
         }
@@ -186,7 +187,9 @@ export default function ProcessBar({ progressStatus }: ProcessBarProps) {
         {/* Telemetry percentage readout */}
         <div className="flex items-center justify-between text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-500 px-1">
           <span className="animate-pulse text-purple-400/80">
-            {activeStep === 4 ? "Compilation Finished" : "Asynchronous Compilation Running..."}
+            {activeStep === 4
+              ? "Compilation Finished"
+              : "Asynchronous Compilation Running..."}
           </span>
           <span className="text-white bg-neutral-900/80 border border-neutral-800/60 px-2 py-0.5 rounded-full shadow-inner">
             {Math.round(displayPercent)}%

@@ -26,6 +26,9 @@ class ProjectCreateRequest(BaseModel):
     episode: Optional[str] = Field("")
     panels_count: Optional[int] = Field(0)
     video_url: Optional[str] = Field(None)
+    author: Optional[str] = Field(None)
+    cover_image: Optional[str] = Field(None)
+    synopsis: Optional[str] = Field(None)
 
 class PanelSaveItem(BaseModel):
     image_url: Optional[str] = Field("")
@@ -124,7 +127,10 @@ async def create_project(body: ProjectCreateRequest, current_user: dict = Depend
             "status": "pending",
             "panels_count": body.panels_count,
             "video_url": body.video_url,
-            "user_id": current_user["user_id"]
+            "user_id": current_user["user_id"],
+            "author": body.author,
+            "cover_image": body.cover_image,
+            "synopsis": body.synopsis
         })
         logger.info(f"[Database] Created project {body.project_id} successfully: '{body.title}'")
         return {"success": True, "project_id": body.project_id}

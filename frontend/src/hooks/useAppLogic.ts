@@ -180,7 +180,7 @@ export function useAppLogic() {
 
   // --- System Logs Engine ---
   const scrapeImages = useCallback(
-    async (customUrl?: any) => {
+    async (customUrl?: any, overrideProjectId?: string) => {
       const activeUrl = typeof customUrl === "string" ? customUrl : targetUrl;
       if (!activeUrl || !activeUrl.trim()) return;
 
@@ -306,8 +306,13 @@ export function useAppLogic() {
             episode: formattedEpisode || undefined,
             genre: state.scrapedGenre ? state.scrapedGenre.trim() : undefined,
             author: state.seriesAuthor ? state.seriesAuthor.trim() : undefined,
-            cover_image: state.seriesCoverImage ? state.seriesCoverImage.trim() : undefined,
-            synopsis: state.seriesSynopsis ? state.seriesSynopsis.trim() : undefined,
+            cover_image: state.seriesCoverImage
+              ? state.seriesCoverImage.trim()
+              : undefined,
+            synopsis: state.seriesSynopsis
+              ? state.seriesSynopsis.trim()
+              : undefined,
+            project_id: overrideProjectId || undefined,
           }),
         });
         const data = await res.json();
