@@ -323,7 +323,14 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
     addNotification("Saved crop tool", "success");
   };
 
-  const handleClearAllSlices = () => {
+  const handleClearAllSlices = async () => {
+    const confirm = (window as any).confirmAsync || window.confirm;
+    const confirmClear = await confirm(
+      "Are you sure you want to clear all crop tools/slices?",
+      "Clear Crop Tools",
+      "red"
+    );
+    if (!confirmClear) return;
     pushHistory();
     state.setSlices([]);
     state.setSelectedSliceId(null);
@@ -445,12 +452,15 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
     window.dispatchEvent(new Event("popstate"));
   };
 
-  const handleDeleteCurrentImage = () => {
+  const handleDeleteCurrentImage = async () => {
     if (editingImageIdx === null || !setScrapedImages) return;
-    const confirmDelete = window.confirm(
+    const confirm = (window as any).confirmAsync || window.confirm;
+    const confirmDelete = await confirm(
       `Are you sure you want to delete Panel #${
         editingImageIdx + 1
-      } from your deck?`
+      } from your deck?`,
+      "Delete Panel",
+      "red"
     );
     if (!confirmDelete) return;
 

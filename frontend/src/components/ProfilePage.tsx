@@ -29,8 +29,6 @@ interface ProfilePageProps {
   onRefreshUser?: (showDelay?: boolean) => void | Promise<void>;
 }
 
-
-
 export default function ProfilePage({
   user,
   projects = [],
@@ -100,7 +98,7 @@ export default function ProfilePage({
       // Update comparison ref to avoid dirty warnings
       const updatedUser = {
         ...profileUser,
-        avatarUrl: tempAvatarUrl
+        avatarUrl: tempAvatarUrl,
       };
       lastSavedProfileRef.current = getSerializedProfile(
         updatedUser,
@@ -253,7 +251,7 @@ export default function ProfilePage({
         if (data.user_id) {
           setCredits(data.credits);
           setUnlockedRewards(data.unlocked_rewards || []);
-          
+
           const loadedConnections = data.social_connections || {
             google: true,
             github: false,
@@ -266,15 +264,17 @@ export default function ProfilePage({
             300 - (data.unlocked_rewards?.length || 0) * 100
           );
 
-          const loadedPortfolios = (data.portfolio_links || []).map((url: string, idx: number) => ({
-            id: idx.toString(),
-            site: url.includes("webtoons")
-              ? "Webtoons"
-              : url.includes("tapas")
-              ? "Tapas"
-              : "ArtStation",
-            url: url,
-          }));
+          const loadedPortfolios = (data.portfolio_links || []).map(
+            (url: string, idx: number) => ({
+              id: idx.toString(),
+              site: url.includes("webtoons")
+                ? "Webtoons"
+                : url.includes("tapas")
+                ? "Tapas"
+                : "ArtStation",
+              url: url,
+            })
+          );
           setPortfolios(loadedPortfolios);
 
           const loadedUser = {
@@ -369,8 +369,6 @@ export default function ProfilePage({
       })
       .catch(console.error);
   }, [user]);
-
-
 
   // Render initials or background gradients for avatar
   const renderAvatarContent = (url: string, name: string) => {
@@ -489,6 +487,14 @@ export default function ProfilePage({
     const token = localStorage.getItem("anivox_token");
     if (!token) return;
 
+    if (
+      !window.confirm(
+        "Are you sure you want to terminate this session? You will be logged out on that device."
+      )
+    ) {
+      return;
+    }
+
     fetch(`/api/auth/sessions/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
@@ -581,6 +587,14 @@ export default function ProfilePage({
   const handleDeleteToken = (id: string) => {
     const token = localStorage.getItem("anivox_token");
     if (!token) return;
+
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this API key? Apps using it will immediately lose access."
+      )
+    ) {
+      return;
+    }
 
     fetch(`/api/auth/api-keys/${id}`, {
       method: "DELETE",
@@ -734,7 +748,9 @@ export default function ProfilePage({
       })
       .then((res) => {
         if (res.success) {
-          setLocalProjects((prev) => prev.filter((p) => p.series_id !== seriesId));
+          setLocalProjects((prev) =>
+            prev.filter((p) => p.series_id !== seriesId)
+          );
         }
       })
       .catch((err) => {
@@ -767,7 +783,9 @@ export default function ProfilePage({
     0
   );
   const avgPanels =
-    localProjects.length > 0 ? Math.round(totalPanels / localProjects.length) : 0;
+    localProjects.length > 0
+      ? Math.round(totalPanels / localProjects.length)
+      : 0;
   const avgPanelsSubtext =
     localProjects.length > 0
       ? `Total: ${totalPanels} panels across ${localProjects.length} chapters`
@@ -776,9 +794,7 @@ export default function ProfilePage({
   const completedCount = localProjects.filter(
     (p) => p.status === "completed"
   ).length;
-  const failedCount = localProjects.filter(
-    (p) => p.status === "failed"
-  ).length;
+  const failedCount = localProjects.filter((p) => p.status === "failed").length;
   const totalFinished = completedCount + failedCount;
   const successRate =
     totalFinished > 0
@@ -863,7 +879,9 @@ export default function ProfilePage({
             <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
               Total Compilation Queue
             </div>
-            <div className="text-2xl font-black text-white mt-1">{queueText}</div>
+            <div className="text-2xl font-black text-white mt-1">
+              {queueText}
+            </div>
             <div className="text-[9px] text-purple-400 font-semibold mt-1 flex items-center gap-1">
               <Sparkles className="w-3.5 h-3.5" /> {queueSubtext}
             </div>
@@ -872,7 +890,9 @@ export default function ProfilePage({
             <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
               Average Panels per Strip
             </div>
-            <div className="text-2xl font-black text-white mt-1">{avgPanels} frames</div>
+            <div className="text-2xl font-black text-white mt-1">
+              {avgPanels} frames
+            </div>
             <div className="text-[9px] text-indigo-400 font-semibold mt-1">
               {avgPanelsSubtext}
             </div>
@@ -881,7 +901,9 @@ export default function ProfilePage({
             <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
               AI Sync Success Rate
             </div>
-            <div className="text-2xl font-black text-white mt-1">{successRate}%</div>
+            <div className="text-2xl font-black text-white mt-1">
+              {successRate}%
+            </div>
             <div className="text-[9px] text-emerald-400 font-semibold mt-1">
               {successRateSubtext}
             </div>
@@ -1086,20 +1108,28 @@ export default function ProfilePage({
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-200">
           <div className="bg-[#0f0f13] border border-white/10 rounded-3xl p-6 max-w-sm w-full space-y-6 shadow-2xl relative animate-in zoom-in-95 duration-200 text-center">
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
-            
+
             <div className="space-y-2">
-              <h3 className="text-lg font-bold text-white tracking-tight">Update Profile Picture?</h3>
+              <h3 className="text-lg font-bold text-white tracking-tight">
+                Update Profile Picture?
+              </h3>
               <p className="text-xs text-neutral-400">
-                Confirm updating your avatar image. This will automatically save changes to your profile.
+                Confirm updating your avatar image. This will automatically save
+                changes to your profile.
               </p>
             </div>
 
             <div className="flex items-center justify-center gap-6 py-2">
               {/* Old avatar */}
               <div className="flex flex-col items-center gap-1.5">
-                <span className="text-[9px] text-neutral-500 font-bold uppercase tracking-wider">Current</span>
+                <span className="text-[9px] text-neutral-500 font-bold uppercase tracking-wider">
+                  Current
+                </span>
                 <div className="w-16 h-16 rounded-2xl overflow-hidden border border-white/5 bg-neutral-900 flex items-center justify-center">
-                  {renderAvatarContent(profileUser.avatarUrl, profileUser.fullName)}
+                  {renderAvatarContent(
+                    profileUser.avatarUrl,
+                    profileUser.fullName
+                  )}
                 </div>
               </div>
 
@@ -1108,9 +1138,15 @@ export default function ProfilePage({
 
               {/* New avatar preview */}
               <div className="flex flex-col items-center gap-1.5">
-                <span className="text-[9px] text-purple-400 font-bold uppercase tracking-wider">New Preview</span>
+                <span className="text-[9px] text-purple-400 font-bold uppercase tracking-wider">
+                  New Preview
+                </span>
                 <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-purple-500/50 bg-neutral-900 flex items-center justify-center shadow-lg shadow-purple-500/10">
-                  <img src={tempAvatarUrl} alt="Preview" className="w-full h-full object-cover" />
+                  <img
+                    src={tempAvatarUrl}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               </div>
             </div>

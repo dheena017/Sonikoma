@@ -33,7 +33,6 @@ export function useCompileActions({
   const activeFetch = fetchWithInterceptor || fetch;
   const [analyzingPanelId, setAnalyzingPanelId] = useState<number | null>(null);
   const [isAnalyzingAll, setIsAnalyzingAll] = useState<boolean>(false);
-  const [isCompiling, setIsCompiling] = useState<boolean>(false);
   const [isZipping, setIsZipping] = useState<boolean>(false);
 
   const handleDownloadZip = async () => {
@@ -203,62 +202,6 @@ export function useCompileActions({
     }
   };
 
-  const handleCompileVideo = async () => {
-    setIsCompiling(true);
-    console.log(
-      "[StoryboardTimeline] Starting video compilation with",
-      panels.length,
-      "panels"
-    );
-    try {
-      console.log(
-        "[API] POST /api/convert-images-to-video with",
-        panels.length,
-        "panels"
-      );
-      const res = await activeFetch("/api/convert-images-to-video", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          panels,
-          url: targetUrl || "",
-          voice_actor: voiceActor,
-          music_theme: musicTheme,
-        }),
-      });
-      if (!res.ok)
-        throw new Error("Compilation API returned status " + res.status);
-      const data = await res.json();
-      if (data.success && data.video_url) {
-        if (setVideoUrl) {
-          setVideoUrl(data.video_url);
-        }
-        setActivePreviewTab("video");
-        console.log(
-          "[StoryboardTimeline] Video compiled successfully:",
-          data.video_url
-        );
-        if (addNotification) {
-          addNotification("Cinematic video converted successfully!", "success");
-        }
-      } else {
-        throw new Error(
-          data.message || "Failed to locate generated video output URL."
-        );
-      }
-    } catch (err: any) {
-      console.error("[StoryboardTimeline] Video compilation failed:", err);
-      if (addNotification) {
-        addNotification(
-          err.message || "Video compilation failed. Please try again.",
-          "error"
-        );
-      }
-    } finally {
-      setIsCompiling(false);
-    }
-  };
-
   const handleAnalyzeSelectedPanels = async (selectedIds: number[]) => {
     if (selectedIds.length === 0) return;
     setIsAnalyzingAll(true);
@@ -375,12 +318,10 @@ export function useCompileActions({
   return {
     analyzingPanelId,
     isAnalyzingAll,
-    isCompiling,
     isZipping,
     handleDownloadZip,
     handleAnalyzePanel,
     handleAnalyzeAllPanels,
     handleAnalyzeSelectedPanels,
-    handleCompileVideo,
   };
 }

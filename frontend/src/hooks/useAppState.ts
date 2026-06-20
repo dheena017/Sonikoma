@@ -173,6 +173,8 @@ export function useAppState() {
   const [activeAutoCropTab, setActiveAutoCropTab] = useState<string>("general");
   const [cropGuidance, setCropGuidance] = useState<string>("");
   const [cropFocusMode, setCropFocusMode] = useState<string>("standard");
+  const [showScrapeConfirmModal, setShowScrapeConfirmModal] =
+    useState<boolean>(false);
 
   // Notifications
   const [notifications, setNotifications] = useState<Notification[]>(() => {
@@ -461,7 +463,7 @@ export function useAppState() {
             if (data.project.synopsis) {
               setSeriesSynopsis(data.project.synopsis);
             }
-                        if (data.project.genre) {
+            if (data.project.genre) {
               setScrapedGenre(data.project.genre);
             }
             if (data.project.episode) {
@@ -472,19 +474,26 @@ export function useAppState() {
               setChapterNumber(numStr);
               setChapterTitle(nameStr);
             }
-            
+
             if (data.panels && data.panels.length > 0) {
               const mappedPanels = data.panels.map((p: any) => ({
                 ...p,
                 grayscale: p.grayscale === 1 || p.grayscale === true,
               }));
               setPanels(mappedPanels);
-              
+
               // Populate scraped images list from panels
-              const panelImages = data.panels.map((p: any) => p.image_url).filter(Boolean);
+              const panelImages = data.panels
+                .map((p: any) => p.image_url)
+                .filter(Boolean);
               setScrapedImages(panelImages);
             }
-            addNotification(`Loaded project "${data.project.title || 'Untitled'}" into active workspace!`, "success");
+            addNotification(
+              `Loaded project "${
+                data.project.title || "Untitled"
+              }" into active workspace!`,
+              "success"
+            );
           }
         }
       } catch (err) {
@@ -625,6 +634,8 @@ export function useAppState() {
     setCropGuidance,
     cropFocusMode,
     setCropFocusMode,
+    showScrapeConfirmModal,
+    setShowScrapeConfirmModal,
     notifications,
     errorPopup,
     setErrorPopup,

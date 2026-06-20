@@ -23,16 +23,23 @@ interface PanelCardThumbnailProps {
 const getScrapedImageStatus = (url: string) => {
   if (!url) return null;
   if (url.includes("_cropped")) {
-    return { text: "CROPPED", bg: "bg-blue-600/90 border-blue-400/60 text-blue-100 shadow-[0_0_8px_rgba(59,130,246,0.5)]" };
+    return {
+      text: "CROPPED",
+      bg: "bg-blue-600/90 border-blue-400/60 text-blue-100 shadow-[0_0_8px_rgba(59,130,246,0.5)]",
+    };
   }
   if (url.includes("_cleaned")) {
-    return { text: "CLEANED", bg: "bg-purple-600/90 border-purple-400/60 text-purple-100 shadow-[0_0_8px_rgba(168,85,247,0.5)]" };
+    return {
+      text: "CLEANED",
+      bg: "bg-purple-600/90 border-purple-400/60 text-purple-100 shadow-[0_0_8px_rgba(168,85,247,0.5)]",
+    };
   }
-  if (url.includes("_merged") || url.includes("stitch") || url.includes("stitched")) {
-    return { text: "MERGED", bg: "bg-pink-600/90 border-pink-400/60 text-pink-100 shadow-[0_0_8px_rgba(236,72,153,0.5)]" };
-  }
+
   if (url.includes("transform_")) {
-    return { text: "EDITED", bg: "bg-amber-600/90 border-amber-400/60 text-amber-100 shadow-[0_0_8px_rgba(245,158,11,0.5)]" };
+    return {
+      text: "EDITED",
+      bg: "bg-amber-600/90 border-amber-400/60 text-amber-100 shadow-[0_0_8px_rgba(245,158,11,0.5)]",
+    };
   }
   return null;
 };
@@ -114,7 +121,7 @@ export function PanelCardThumbnail({
           className={[
             "absolute top-1.5 backdrop-blur-sm px-1.5 py-0.5 rounded-md text-[8px] font-mono font-bold leading-none border z-20 transition-all",
             "left-11",
-            status.bg
+            status.bg,
           ].join(" ")}
         >
           {status.text}

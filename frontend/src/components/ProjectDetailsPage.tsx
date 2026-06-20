@@ -17,7 +17,7 @@ import {
   Layers,
   ArrowRight,
   Eye,
-  FileText
+  FileText,
 } from "lucide-react";
 import { getSourceName, getPanelFilterStyle } from "../utils";
 
@@ -41,11 +41,14 @@ export default function ProjectDetailsPage({
   const [panels, setPanels] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
-  const [activePanelPreview, setActivePanelPreview] = React.useState<any | null>(null);
+  const [activePanelPreview, setActivePanelPreview] = React.useState<
+    any | null
+  >(null);
   const [deleting, setDeleting] = React.useState(false);
 
-
-  const [saveStatus, setSaveStatus] = React.useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [saveStatus, setSaveStatus] = React.useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
   const initialProjectRef = React.useRef<string>("");
   const initialPanelsRef = React.useRef<any[]>([]);
 
@@ -56,31 +59,42 @@ export default function ProjectDetailsPage({
     return !initialPanelsRef.current.some((p) => p.id === panel.id);
   }, []);
 
-  const isPanelEdited = React.useCallback((panel: any) => {
-    if (isPanelNew(panel)) return false;
-    const original = initialPanelsRef.current.find((p) => p.id === panel.id);
-    if (!original) return false;
+  const isPanelEdited = React.useCallback(
+    (panel: any) => {
+      if (isPanelNew(panel)) return false;
+      const original = initialPanelsRef.current.find((p) => p.id === panel.id);
+      if (!original) return false;
 
-    return (
-      (panel.speech_text || "").trim() !== (original.speech_text || "").trim() ||
-      (panel.sfx || "").trim() !== (original.sfx || "").trim() ||
-      Number(panel.duration ?? 4.5) !== Number(original.duration ?? 4.5) ||
-      (panel.motion_type || "zoom_in") !== (original.motion_type || "zoom_in") ||
-      (panel.visual_description || "").trim() !== (original.visual_description || "").trim() ||
-      Number(panel.brightness ?? 100) !== Number(original.brightness ?? 100) ||
-      Number(panel.contrast ?? 100) !== Number(original.contrast ?? 100) ||
-      Number(panel.saturation ?? 100) !== Number(original.saturation ?? 100) ||
-      Boolean(panel.grayscale) !== Boolean(original.grayscale) ||
-      (panel.filter_preset || "") !== (original.filter_preset || "") ||
-      (panel.bubble_method || "connected_components") !== (original.bubble_method || "connected_components") ||
-      Number(panel.bubble_sensitivity ?? 0.5) !== Number(original.bubble_sensitivity ?? 0.5) ||
-      Number(panel.bubble_dilation ?? 4) !== Number(original.bubble_dilation ?? 4) ||
-      Number(panel.inpaint_radius ?? 3) !== Number(original.inpaint_radius ?? 3) ||
-      (panel.detection_style || "standard") !== (original.detection_style || "standard")
-    );
-  }, [isPanelNew]);
-
-
+      return (
+        (panel.speech_text || "").trim() !==
+          (original.speech_text || "").trim() ||
+        (panel.sfx || "").trim() !== (original.sfx || "").trim() ||
+        Number(panel.duration ?? 4.5) !== Number(original.duration ?? 4.5) ||
+        (panel.motion_type || "zoom_in") !==
+          (original.motion_type || "zoom_in") ||
+        (panel.visual_description || "").trim() !==
+          (original.visual_description || "").trim() ||
+        Number(panel.brightness ?? 100) !==
+          Number(original.brightness ?? 100) ||
+        Number(panel.contrast ?? 100) !== Number(original.contrast ?? 100) ||
+        Number(panel.saturation ?? 100) !==
+          Number(original.saturation ?? 100) ||
+        Boolean(panel.grayscale) !== Boolean(original.grayscale) ||
+        (panel.filter_preset || "") !== (original.filter_preset || "") ||
+        (panel.bubble_method || "connected_components") !==
+          (original.bubble_method || "connected_components") ||
+        Number(panel.bubble_sensitivity ?? 0.5) !==
+          Number(original.bubble_sensitivity ?? 0.5) ||
+        Number(panel.bubble_dilation ?? 4) !==
+          Number(original.bubble_dilation ?? 4) ||
+        Number(panel.inpaint_radius ?? 3) !==
+          Number(original.inpaint_radius ?? 3) ||
+        (panel.detection_style || "standard") !==
+          (original.detection_style || "standard")
+      );
+    },
+    [isPanelNew]
+  );
 
   const serializeState = React.useCallback((pObj: any, pList: any[]) => {
     return JSON.stringify({
@@ -117,7 +131,6 @@ export default function ProjectDetailsPage({
     return serializeState(project, panels) !== initialProjectRef.current;
   }, [project, panels, serializeState]);
 
-
   // Extract projectId from query string
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -140,22 +153,31 @@ export default function ProjectDetailsPage({
         }
         const res = await fetch(`/api/projects/${projectId}`, { headers });
         if (!res.ok) {
-          throw new Error(`Failed to load project details (HTTP ${res.status})`);
+          throw new Error(
+            `Failed to load project details (HTTP ${res.status})`
+          );
         }
         const data = await res.json();
         if (data.success) {
           setProject(data.project);
           setPanels(data.panels || []);
-          initialPanelsRef.current = JSON.parse(JSON.stringify(data.panels || []));
+          initialPanelsRef.current = JSON.parse(
+            JSON.stringify(data.panels || [])
+          );
           if (data.panels && data.panels.length > 0) {
             setActivePanelPreview(data.panels[0]);
           }
-          initialProjectRef.current = serializeState(data.project, data.panels || []);
+          initialProjectRef.current = serializeState(
+            data.project,
+            data.panels || []
+          );
         } else {
           throw new Error(data.message || "Failed to load project details");
         }
       } catch (err: any) {
-        setError(err.message || "An unexpected error occurred while fetching details.");
+        setError(
+          err.message || "An unexpected error occurred while fetching details."
+        );
       } finally {
         setLoading(false);
       }
@@ -164,13 +186,15 @@ export default function ProjectDetailsPage({
     fetchDetails();
   }, [projectId, serializeState]);
 
-
-
   // Load project into active workspace
   const handleLoadToWorkspace = async () => {
     if (!project) return;
     try {
-      navigateTo(`/dashboard?id=${project.project_id}&url=${encodeURIComponent(project.url)}&model=gemini-2.5-flash&source=custom`);
+      navigateTo(
+        `/dashboard?id=${project.project_id}&url=${encodeURIComponent(
+          project.url
+        )}&model=gemini-2.5-flash&source=custom`
+      );
       setTimeout(() => {
         window.location.reload();
       }, 100);
@@ -181,7 +205,14 @@ export default function ProjectDetailsPage({
 
   // Delete project
   const handleDelete = async () => {
-    if (!projectId || !window.confirm("Are you sure you want to delete this project and all its storyboard panels permanently? This cannot be undone.")) return;
+    if (!projectId) return;
+    const confirm = (window as any).confirmAsync || window.confirm;
+    const confirmDelete = await confirm(
+      "Are you sure you want to delete this project and all its storyboard panels permanently? This cannot be undone.",
+      "Delete Project",
+      "red"
+    );
+    if (!confirmDelete) return;
     setDeleting(true);
     try {
       const token = localStorage.getItem("anivox_token");
@@ -191,7 +222,7 @@ export default function ProjectDetailsPage({
       }
       const res = await fetch(`/api/projects/${projectId}`, {
         method: "DELETE",
-        headers
+        headers,
       });
       if (!res.ok) {
         throw new Error(`Failed to delete (HTTP ${res.status})`);
@@ -212,11 +243,15 @@ export default function ProjectDetailsPage({
   const handleProjectFieldChange = (field: string, value: any) => {
     setProject((prev: any) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
-  const handlePanelFieldChange = (panelId: string | number, field: string, value: any) => {
+  const handlePanelFieldChange = (
+    panelId: string | number,
+    field: string,
+    value: any
+  ) => {
     const updatedPanels = panels.map((p) => {
       if (p.id === panelId) {
         const updated = { ...p, [field]: value };
@@ -336,9 +371,12 @@ export default function ProjectDetailsPage({
     return (
       <div className="min-h-screen bg-[#070709] flex flex-col items-center justify-center p-6 space-y-4 text-center">
         <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-3xl max-w-md space-y-3">
-          <h2 className="text-lg font-black text-rose-400">Error Loading Project</h2>
+          <h2 className="text-lg font-black text-rose-400">
+            Error Loading Project
+          </h2>
           <p className="text-xs text-neutral-400 leading-relaxed">
-            {error || "Project metadata could not be fetched. The project ID might be invalid or deleted."}
+            {error ||
+              "Project metadata could not be fetched. The project ID might be invalid or deleted."}
           </p>
         </div>
         <button
@@ -361,7 +399,6 @@ export default function ProjectDetailsPage({
       <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] rounded-full bg-indigo-600/5 blur-[130px] pointer-events-none" />
 
       <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 relative z-10">
-        
         {/* TOP BAR / NAVIGATION */}
         <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-white/5 pb-6 gap-4">
           <div className="flex items-center gap-3">
@@ -383,7 +420,10 @@ export default function ProjectDetailsPage({
                 </span>
               </div>
               <h1 className="text-2xl font-black text-white leading-tight">
-                {(project.title || "Untitled Project").replace(/\s+[a-fA-F0-9]{8}$/, "")}
+                {(project.title || "Untitled Project").replace(
+                  /\s+[a-fA-F0-9]{8}$/,
+                  ""
+                )}
               </h1>
               {project.author && project.author !== "Unknown Author" && (
                 <p className="text-xs text-neutral-400 font-bold mt-0.5">
@@ -400,9 +440,24 @@ export default function ProjectDetailsPage({
                 disabled
                 className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-amber-500/40 bg-amber-950/30 text-amber-300 text-xs font-bold font-mono tracking-wider select-none shadow-[0_0_10px_-2px_rgba(245,158,11,0.2)] cursor-not-allowed"
               >
-                <svg className="animate-spin h-3.5 w-3.5 text-amber-400" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                <svg
+                  className="animate-spin h-3.5 w-3.5 text-amber-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
                 </svg>
                 <span>SAVING...</span>
               </button>
@@ -461,7 +516,7 @@ export default function ProjectDetailsPage({
             {/* Metadata Statistics Card */}
             <div className="bg-[#0c0c10]/80 border border-white/5 rounded-3xl p-6 space-y-6 shadow-xl relative overflow-hidden backdrop-blur-xl w-full">
               <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
-              
+
               {project.cover_image && (
                 <div className="w-full aspect-[2/3] max-h-[200px] rounded-2xl overflow-hidden border border-white/5 relative group flex items-center justify-center bg-black/40">
                   <img
@@ -482,64 +537,88 @@ export default function ProjectDetailsPage({
 
               <div className="space-y-3.5 text-left text-xs">
                 <div className="flex flex-col gap-1">
-                  <label className="text-[9px] text-neutral-500 font-black uppercase tracking-widest">Comic / Manhwa Title</label>
+                  <label className="text-[9px] text-neutral-500 font-black uppercase tracking-widest">
+                    Comic / Manhwa Title
+                  </label>
                   <input
                     type="text"
                     value={project.title || ""}
-                    onChange={(e) => handleProjectFieldChange("title", e.target.value)}
+                    onChange={(e) =>
+                      handleProjectFieldChange("title", e.target.value)
+                    }
                     className="w-full bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-purple-600/20 transition-all"
                   />
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-[9px] text-neutral-500 font-black uppercase tracking-widest">Author / Creator</label>
+                  <label className="text-[9px] text-neutral-500 font-black uppercase tracking-widest">
+                    Author / Creator
+                  </label>
                   <input
                     type="text"
                     value={project.author || ""}
-                    onChange={(e) => handleProjectFieldChange("author", e.target.value)}
+                    onChange={(e) =>
+                      handleProjectFieldChange("author", e.target.value)
+                    }
                     className="w-full bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-purple-600/20 transition-all"
                   />
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-[9px] text-neutral-500 font-black uppercase tracking-widest">Category Genre</label>
+                  <label className="text-[9px] text-neutral-500 font-black uppercase tracking-widest">
+                    Category Genre
+                  </label>
                   <input
                     type="text"
                     value={project.genre || ""}
-                    onChange={(e) => handleProjectFieldChange("genre", e.target.value)}
+                    onChange={(e) =>
+                      handleProjectFieldChange("genre", e.target.value)
+                    }
                     className="w-full bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-purple-600/20 transition-all"
                   />
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-[9px] text-neutral-500 font-black uppercase tracking-widest">Chapter / Episode</label>
+                  <label className="text-[9px] text-neutral-500 font-black uppercase tracking-widest">
+                    Chapter / Episode
+                  </label>
                   <input
                     type="text"
                     value={project.episode || ""}
-                    onChange={(e) => handleProjectFieldChange("episode", e.target.value)}
+                    onChange={(e) =>
+                      handleProjectFieldChange("episode", e.target.value)
+                    }
                     className="w-full bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-purple-600/20 transition-all"
                   />
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-[9px] text-neutral-500 font-black uppercase tracking-widest">Cover Image URL</label>
+                  <label className="text-[9px] text-neutral-500 font-black uppercase tracking-widest">
+                    Cover Image URL
+                  </label>
                   <input
                     type="text"
                     value={project.cover_image || ""}
-                    onChange={(e) => handleProjectFieldChange("cover_image", e.target.value)}
+                    onChange={(e) =>
+                      handleProjectFieldChange("cover_image", e.target.value)
+                    }
                     className="w-full bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-purple-600/20 transition-all font-mono"
                   />
                 </div>
 
                 <div className="flex items-center justify-between py-1.5 border-b border-white/5">
-                  <span className="text-neutral-500 font-bold">Source Website</span>
+                  <span className="text-neutral-500 font-bold">
+                    Source Website
+                  </span>
                   <span className="text-neutral-300 font-bold font-mono">
                     {getSourceName(project.url)}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between py-1.5 border-b border-white/5">
-                  <span className="text-neutral-500 font-bold">Status Profile</span>
+                  <span className="text-neutral-500 font-bold">
+                    Status Profile
+                  </span>
                   <span
                     className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${
                       isCompleted
@@ -552,24 +631,32 @@ export default function ProjectDetailsPage({
                 </div>
 
                 <div className="flex items-center justify-between py-1.5 border-b border-white/5">
-                  <span className="text-neutral-500 font-bold">Total Panels</span>
+                  <span className="text-neutral-500 font-bold">
+                    Total Panels
+                  </span>
                   <span className="text-neutral-300 font-bold">
                     {panels.length} frames
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between py-1.5 border-b border-white/5">
-                  <span className="text-neutral-500 font-bold">Video Length</span>
+                  <span className="text-neutral-500 font-bold">
+                    Video Length
+                  </span>
                   <span className="text-neutral-300 font-bold">
                     {totalDuration.toFixed(1)}s
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between py-1.5">
-                  <span className="text-neutral-500 font-bold">Date Seeded</span>
+                  <span className="text-neutral-500 font-bold">
+                    Date Seeded
+                  </span>
                   <span className="text-neutral-400 font-semibold flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5 text-neutral-600" />
-                    {project.created_at ? project.created_at.split(" ")[0] : "N/A"}
+                    {project.created_at
+                      ? project.created_at.split(" ")[0]
+                      : "N/A"}
                   </span>
                 </div>
               </div>
@@ -598,7 +685,9 @@ export default function ProjectDetailsPage({
                 </h4>
                 <textarea
                   value={project.synopsis || ""}
-                  onChange={(e) => handleProjectFieldChange("synopsis", e.target.value)}
+                  onChange={(e) =>
+                    handleProjectFieldChange("synopsis", e.target.value)
+                  }
                   className="w-full bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-purple-600/20 transition-all font-sans resize-none"
                   rows={5}
                   placeholder="Type synopsis here..."
@@ -610,7 +699,7 @@ export default function ProjectDetailsPage({
           {/* Render Preview Video Card */}
           <div className="lg:col-span-2 bg-[#0c0c10]/80 border border-white/5 rounded-3xl p-6 shadow-xl backdrop-blur-xl relative flex flex-col justify-between min-h-[300px]">
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent" />
-            
+
             {project.video_url ? (
               <div className="space-y-4 h-full flex flex-col justify-between">
                 <div className="flex items-center justify-between border-b border-white/5 pb-3">
@@ -640,9 +729,13 @@ export default function ProjectDetailsPage({
                   <Video className="w-8 h-8" />
                 </div>
                 <div className="space-y-1">
-                  <h4 className="text-sm font-bold text-neutral-300">No Rendered Video Available</h4>
+                  <h4 className="text-sm font-bold text-neutral-300">
+                    No Rendered Video Available
+                  </h4>
                   <p className="text-xs text-neutral-550 max-w-xs leading-relaxed font-semibold">
-                    The storyboard is ready, but the cinematic MP4 compiler hasn't run yet. Load it into your active workspace to generate speech voiceovers and pan/zoom effects.
+                    The storyboard is ready, but the cinematic MP4 compiler
+                    hasn't run yet. Load it into your active workspace to
+                    generate speech voiceovers and pan/zoom effects.
                   </p>
                 </div>
                 <button
@@ -661,7 +754,7 @@ export default function ProjectDetailsPage({
         {activePanelPreview && (
           <div className="bg-[#0b0b0e]/75 border border-white/10 rounded-3xl p-6 shadow-xl relative backdrop-blur-xl">
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Panel Image Container */}
               <div className="md:col-span-1 aspect-square rounded-2xl overflow-hidden border border-white/10 bg-black/60 shadow-lg relative group flex items-center justify-center">
@@ -697,7 +790,13 @@ export default function ProjectDetailsPage({
                       </h4>
                       <textarea
                         value={activePanelPreview.speech_text || ""}
-                        onChange={(e) => handlePanelFieldChange(activePanelPreview.id, "speech_text", e.target.value)}
+                        onChange={(e) =>
+                          handlePanelFieldChange(
+                            activePanelPreview.id,
+                            "speech_text",
+                            e.target.value
+                          )
+                        }
                         className="w-full bg-neutral-900 border border-white/5 focus:border-purple-500/50 rounded-xl p-3 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 mt-1.5 font-sans resize-none"
                         rows={3}
                         placeholder="Type dialogue transcript..."
@@ -710,7 +809,13 @@ export default function ProjectDetailsPage({
                       </h4>
                       <textarea
                         value={activePanelPreview.visual_description || ""}
-                        onChange={(e) => handlePanelFieldChange(activePanelPreview.id, "visual_description", e.target.value)}
+                        onChange={(e) =>
+                          handlePanelFieldChange(
+                            activePanelPreview.id,
+                            "visual_description",
+                            e.target.value
+                          )
+                        }
                         className="w-full bg-neutral-900 border border-white/5 focus:border-purple-500/50 rounded-xl p-3 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 mt-1.5 font-sans resize-none"
                         rows={3}
                         placeholder="Describe panel scene actions..."
@@ -726,7 +831,13 @@ export default function ProjectDetailsPage({
                     <input
                       type="text"
                       value={activePanelPreview.sfx || ""}
-                      onChange={(e) => handlePanelFieldChange(activePanelPreview.id, "sfx", e.target.value)}
+                      onChange={(e) =>
+                        handlePanelFieldChange(
+                          activePanelPreview.id,
+                          "sfx",
+                          e.target.value
+                        )
+                      }
                       placeholder="e.g. BOOM, SLASH..."
                       className="w-full bg-neutral-900 border border-white/5 focus:border-purple-500/50 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 mt-1.5"
                     />
@@ -737,13 +848,23 @@ export default function ProjectDetailsPage({
                 <div className="border-t border-white/5 pt-4 space-y-4">
                   {/* Grid 1: Dynamics & Color Preset */}
                   <div>
-                    <h5 className="text-[9px] font-black uppercase text-neutral-500 tracking-wider mb-2">Panel Dynamics & Styling</h5>
+                    <h5 className="text-[9px] font-black uppercase text-neutral-500 tracking-wider mb-2">
+                      Panel Dynamics & Styling
+                    </h5>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
                       <div>
-                        <span className="block text-neutral-500 font-bold mb-1">Motion Type</span>
+                        <span className="block text-neutral-500 font-bold mb-1">
+                          Motion Type
+                        </span>
                         <select
                           value={activePanelPreview.motion_type || "zoom_in"}
-                          onChange={(e) => handlePanelFieldChange(activePanelPreview.id, "motion_type", e.target.value)}
+                          onChange={(e) =>
+                            handlePanelFieldChange(
+                              activePanelPreview.id,
+                              "motion_type",
+                              e.target.value
+                            )
+                          }
                           className="bg-neutral-900 border border-white/5 focus:border-purple-500/50 rounded-xl p-1.5 text-[10px] font-bold text-neutral-200 focus:outline-none focus:ring-2 focus:ring-purple-600/20 w-full"
                         >
                           <option value="zoom_in">Zoom In</option>
@@ -757,22 +878,38 @@ export default function ProjectDetailsPage({
                       </div>
 
                       <div>
-                        <span className="block text-neutral-500 font-bold mb-1">Duration</span>
+                        <span className="block text-neutral-500 font-bold mb-1">
+                          Duration
+                        </span>
                         <input
                           type="number"
                           step={0.1}
                           min={0.5}
                           value={activePanelPreview.duration || 4.5}
-                          onChange={(e) => handlePanelFieldChange(activePanelPreview.id, "duration", parseFloat(e.target.value) || 4.5)}
+                          onChange={(e) =>
+                            handlePanelFieldChange(
+                              activePanelPreview.id,
+                              "duration",
+                              parseFloat(e.target.value) || 4.5
+                            )
+                          }
                           className="bg-neutral-900 border border-white/5 focus:border-purple-500/50 rounded-xl p-1.5 text-[10px] font-bold text-neutral-200 focus:outline-none focus:ring-2 focus:ring-purple-600/20 w-full"
                         />
                       </div>
 
                       <div>
-                        <span className="block text-neutral-500 font-bold mb-1">Color Filter</span>
+                        <span className="block text-neutral-500 font-bold mb-1">
+                          Color Filter
+                        </span>
                         <select
                           value={activePanelPreview.filter_preset || ""}
-                          onChange={(e) => handlePanelFieldChange(activePanelPreview.id, "filter_preset", e.target.value || null)}
+                          onChange={(e) =>
+                            handlePanelFieldChange(
+                              activePanelPreview.id,
+                              "filter_preset",
+                              e.target.value || null
+                            )
+                          }
                           className="bg-neutral-900 border border-white/5 focus:border-purple-500/50 rounded-xl p-1.5 text-[10px] font-bold text-neutral-200 focus:outline-none focus:ring-2 focus:ring-purple-600/20 w-full"
                         >
                           <option value="">None</option>
@@ -785,15 +922,25 @@ export default function ProjectDetailsPage({
                       </div>
 
                       <div>
-                        <span className="block text-neutral-500 font-bold mb-1">Grayscale Mode</span>
+                        <span className="block text-neutral-500 font-bold mb-1">
+                          Grayscale Mode
+                        </span>
                         <label className="flex items-center gap-2 mt-2 select-none cursor-pointer">
                           <input
                             type="checkbox"
                             checked={!!activePanelPreview.grayscale}
-                            onChange={(e) => handlePanelFieldChange(activePanelPreview.id, "grayscale", e.target.checked)}
+                            onChange={(e) =>
+                              handlePanelFieldChange(
+                                activePanelPreview.id,
+                                "grayscale",
+                                e.target.checked
+                              )
+                            }
                             className="w-3.5 h-3.5 text-purple-600 focus:ring-purple-500 border-neutral-700 bg-neutral-900 rounded"
                           />
-                          <span className="text-[10px] font-semibold text-neutral-300">Grayscale</span>
+                          <span className="text-[10px] font-semibold text-neutral-300">
+                            Grayscale
+                          </span>
                         </label>
                       </div>
                     </div>
@@ -801,13 +948,25 @@ export default function ProjectDetailsPage({
 
                   {/* Grid 2: Advanced CV Detection Settings */}
                   <div>
-                    <h5 className="text-[9px] font-black uppercase text-neutral-500 tracking-wider mb-2">Advanced CV & Inpainting</h5>
+                    <h5 className="text-[9px] font-black uppercase text-neutral-500 tracking-wider mb-2">
+                      Advanced CV & Inpainting
+                    </h5>
                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 text-xs">
                       <div>
-                        <span className="block text-neutral-500 font-bold mb-1">Detection Style</span>
+                        <span className="block text-neutral-500 font-bold mb-1">
+                          Detection Style
+                        </span>
                         <select
-                          value={activePanelPreview.detection_style || "standard"}
-                          onChange={(e) => handlePanelFieldChange(activePanelPreview.id, "detection_style", e.target.value)}
+                          value={
+                            activePanelPreview.detection_style || "standard"
+                          }
+                          onChange={(e) =>
+                            handlePanelFieldChange(
+                              activePanelPreview.id,
+                              "detection_style",
+                              e.target.value
+                            )
+                          }
                           className="bg-neutral-900 border border-white/5 focus:border-purple-500/50 rounded-xl p-1.5 text-[10px] font-bold text-neutral-200 focus:outline-none focus:ring-2 focus:ring-purple-600/20 w-full"
                         >
                           <option value="standard">Standard</option>
@@ -817,50 +976,104 @@ export default function ProjectDetailsPage({
                       </div>
 
                       <div>
-                        <span className="block text-neutral-500 font-bold mb-1">Inpaint Sensitivity</span>
+                        <span className="block text-neutral-500 font-bold mb-1">
+                          Inpaint Sensitivity
+                        </span>
                         <input
                           type="number"
                           step={0.05}
                           min={0.0}
                           max={1.0}
-                          value={activePanelPreview.bubble_sensitivity !== null && activePanelPreview.bubble_sensitivity !== undefined ? activePanelPreview.bubble_sensitivity : 0.5}
-                          onChange={(e) => handlePanelFieldChange(activePanelPreview.id, "bubble_sensitivity", parseFloat(e.target.value) || 0.5)}
+                          value={
+                            activePanelPreview.bubble_sensitivity !== null &&
+                            activePanelPreview.bubble_sensitivity !== undefined
+                              ? activePanelPreview.bubble_sensitivity
+                              : 0.5
+                          }
+                          onChange={(e) =>
+                            handlePanelFieldChange(
+                              activePanelPreview.id,
+                              "bubble_sensitivity",
+                              parseFloat(e.target.value) || 0.5
+                            )
+                          }
                           className="bg-neutral-900 border border-white/5 focus:border-purple-500/50 rounded-xl p-1.5 text-[10px] font-bold text-neutral-200 focus:outline-none focus:ring-2 focus:ring-purple-600/20 w-full"
                         />
                       </div>
 
                       <div>
-                        <span className="block text-neutral-500 font-bold mb-1">Bubble Method</span>
+                        <span className="block text-neutral-500 font-bold mb-1">
+                          Bubble Method
+                        </span>
                         <select
-                          value={activePanelPreview.bubble_method || "connected_components"}
-                          onChange={(e) => handlePanelFieldChange(activePanelPreview.id, "bubble_method", e.target.value)}
+                          value={
+                            activePanelPreview.bubble_method ||
+                            "connected_components"
+                          }
+                          onChange={(e) =>
+                            handlePanelFieldChange(
+                              activePanelPreview.id,
+                              "bubble_method",
+                              e.target.value
+                            )
+                          }
                           className="bg-neutral-900 border border-white/5 focus:border-purple-500/50 rounded-xl p-1.5 text-[10px] font-bold text-neutral-200 focus:outline-none focus:ring-2 focus:ring-purple-600/20 w-full"
                         >
-                          <option value="connected_components">Connected Components</option>
-                          <option value="contour_detection">Contour Detection</option>
+                          <option value="connected_components">
+                            Connected Components
+                          </option>
+                          <option value="contour_detection">
+                            Contour Detection
+                          </option>
                         </select>
                       </div>
 
                       <div>
-                        <span className="block text-neutral-500 font-bold mb-1">Bubble Dilation</span>
+                        <span className="block text-neutral-500 font-bold mb-1">
+                          Bubble Dilation
+                        </span>
                         <input
                           type="number"
                           step={1}
                           min={0}
-                          value={activePanelPreview.bubble_dilation !== null && activePanelPreview.bubble_dilation !== undefined ? activePanelPreview.bubble_dilation : 4}
-                          onChange={(e) => handlePanelFieldChange(activePanelPreview.id, "bubble_dilation", parseInt(e.target.value) || 0)}
+                          value={
+                            activePanelPreview.bubble_dilation !== null &&
+                            activePanelPreview.bubble_dilation !== undefined
+                              ? activePanelPreview.bubble_dilation
+                              : 4
+                          }
+                          onChange={(e) =>
+                            handlePanelFieldChange(
+                              activePanelPreview.id,
+                              "bubble_dilation",
+                              parseInt(e.target.value) || 0
+                            )
+                          }
                           className="bg-neutral-900 border border-white/5 focus:border-purple-500/50 rounded-xl p-1.5 text-[10px] font-bold text-neutral-200 focus:outline-none focus:ring-2 focus:ring-purple-600/20 w-full"
                         />
                       </div>
 
                       <div>
-                        <span className="block text-neutral-500 font-bold mb-1">Inpaint Radius</span>
+                        <span className="block text-neutral-500 font-bold mb-1">
+                          Inpaint Radius
+                        </span>
                         <input
                           type="number"
                           step={1}
                           min={0}
-                          value={activePanelPreview.inpaint_radius !== null && activePanelPreview.inpaint_radius !== undefined ? activePanelPreview.inpaint_radius : 3}
-                          onChange={(e) => handlePanelFieldChange(activePanelPreview.id, "inpaint_radius", parseInt(e.target.value) || 0)}
+                          value={
+                            activePanelPreview.inpaint_radius !== null &&
+                            activePanelPreview.inpaint_radius !== undefined
+                              ? activePanelPreview.inpaint_radius
+                              : 3
+                          }
+                          onChange={(e) =>
+                            handlePanelFieldChange(
+                              activePanelPreview.id,
+                              "inpaint_radius",
+                              parseInt(e.target.value) || 0
+                            )
+                          }
                           className="bg-neutral-900 border border-white/5 focus:border-purple-500/50 rounded-xl p-1.5 text-[10px] font-bold text-neutral-200 focus:outline-none focus:ring-2 focus:ring-purple-600/20 w-full"
                         />
                       </div>
@@ -869,43 +1082,84 @@ export default function ProjectDetailsPage({
 
                   {/* Grid 3: Fine-Tuning Image Adjustment Parameters */}
                   <div className="border-t border-white/5 pt-3">
-                    <h5 className="text-[9px] font-black uppercase text-neutral-500 tracking-wider mb-2">Image Adjustments</h5>
+                    <h5 className="text-[9px] font-black uppercase text-neutral-500 tracking-wider mb-2">
+                      Image Adjustments
+                    </h5>
                     <div className="grid grid-cols-3 gap-4 text-xs">
                       <div>
-                        <span className="block text-neutral-500 font-bold mb-1">Brightness (%)</span>
+                        <span className="block text-neutral-500 font-bold mb-1">
+                          Brightness (%)
+                        </span>
                         <input
                           type="number"
                           step={5}
                           min={0}
                           max={300}
-                          value={activePanelPreview.brightness !== null && activePanelPreview.brightness !== undefined ? activePanelPreview.brightness : 100}
-                          onChange={(e) => handlePanelFieldChange(activePanelPreview.id, "brightness", parseInt(e.target.value) || 100)}
+                          value={
+                            activePanelPreview.brightness !== null &&
+                            activePanelPreview.brightness !== undefined
+                              ? activePanelPreview.brightness
+                              : 100
+                          }
+                          onChange={(e) =>
+                            handlePanelFieldChange(
+                              activePanelPreview.id,
+                              "brightness",
+                              parseInt(e.target.value) || 100
+                            )
+                          }
                           className="bg-neutral-900 border border-white/5 focus:border-purple-500/50 rounded-xl p-1.5 text-[10px] font-bold text-neutral-200 focus:outline-none focus:ring-2 focus:ring-purple-600/20 w-full"
                         />
                       </div>
 
                       <div>
-                        <span className="block text-neutral-500 font-bold mb-1">Contrast (%)</span>
+                        <span className="block text-neutral-500 font-bold mb-1">
+                          Contrast (%)
+                        </span>
                         <input
                           type="number"
                           step={5}
                           min={0}
                           max={300}
-                          value={activePanelPreview.contrast !== null && activePanelPreview.contrast !== undefined ? activePanelPreview.contrast : 100}
-                          onChange={(e) => handlePanelFieldChange(activePanelPreview.id, "contrast", parseInt(e.target.value) || 100)}
+                          value={
+                            activePanelPreview.contrast !== null &&
+                            activePanelPreview.contrast !== undefined
+                              ? activePanelPreview.contrast
+                              : 100
+                          }
+                          onChange={(e) =>
+                            handlePanelFieldChange(
+                              activePanelPreview.id,
+                              "contrast",
+                              parseInt(e.target.value) || 100
+                            )
+                          }
                           className="bg-neutral-900 border border-white/5 focus:border-purple-500/50 rounded-xl p-1.5 text-[10px] font-bold text-neutral-200 focus:outline-none focus:ring-2 focus:ring-purple-600/20 w-full"
                         />
                       </div>
 
                       <div>
-                        <span className="block text-neutral-500 font-bold mb-1">Saturation (%)</span>
+                        <span className="block text-neutral-500 font-bold mb-1">
+                          Saturation (%)
+                        </span>
                         <input
                           type="number"
                           step={5}
                           min={0}
                           max={300}
-                          value={activePanelPreview.saturation !== null && activePanelPreview.saturation !== undefined ? activePanelPreview.saturation : 100}
-                          onChange={(e) => handlePanelFieldChange(activePanelPreview.id, "saturation", parseInt(e.target.value) || 100)}
+                          value={
+                            activePanelPreview.saturation !== null &&
+                            activePanelPreview.saturation !== undefined
+                              ? activePanelPreview.saturation
+                              : 100
+                          }
+                          onChange={(e) =>
+                            handlePanelFieldChange(
+                              activePanelPreview.id,
+                              "saturation",
+                              parseInt(e.target.value) || 100
+                            )
+                          }
                           className="bg-neutral-900 border border-white/5 focus:border-purple-500/50 rounded-xl p-1.5 text-[10px] font-bold text-neutral-200 focus:outline-none focus:ring-2 focus:ring-purple-600/20 w-full"
                         />
                       </div>
@@ -925,14 +1179,16 @@ export default function ProjectDetailsPage({
               Dynamic Storyboard &amp; OCR Transcription ({panels.length})
             </h3>
             <span className="text-[10px] text-neutral-500 font-bold">
-              Click on a panel to inspect its advanced CV settings and edit dialogue details above
+              Click on a panel to inspect its advanced CV settings and edit
+              dialogue details above
             </span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {panels.map((panel, idx) => {
-              const isActive = activePanelPreview && activePanelPreview.id === panel.id;
-              
+              const isActive =
+                activePanelPreview && activePanelPreview.id === panel.id;
+
               return (
                 <div
                   key={panel.id || idx}
@@ -963,12 +1219,24 @@ export default function ProjectDetailsPage({
                   {/* Delete Panel Button */}
                   <button
                     type="button"
-                    onClick={(e) => {
+                    onClick={async (e) => {
                       e.stopPropagation();
-                      if (confirm(`Remove panel #${idx + 1} from storyboard sequence?`)) {
-                        const updated = panels.filter((_, pIdx) => pIdx !== idx);
+                      const confirm =
+                        (window as any).confirmAsync || window.confirm;
+                      const confirmed = await confirm(
+                        `Remove panel #${idx + 1} from storyboard sequence?`,
+                        "Remove Panel",
+                        "red"
+                      );
+                      if (confirmed) {
+                        const updated = panels.filter(
+                          (_, pIdx) => pIdx !== idx
+                        );
                         setPanels(updated);
-                        if (activePanelPreview && activePanelPreview.id === panel.id) {
+                        if (
+                          activePanelPreview &&
+                          activePanelPreview.id === panel.id
+                        ) {
                           setActivePanelPreview(updated[0] || null);
                         }
                       }
@@ -992,19 +1260,22 @@ export default function ProjectDetailsPage({
                   {/* Panel Snippets */}
                   <div className="mt-2 space-y-1">
                     <p className="text-[10px] text-neutral-300 font-bold truncate">
-                      {panel.speech_text ? `"${panel.speech_text}"` : "(No Speech)"}
+                      {panel.speech_text
+                        ? `"${panel.speech_text}"`
+                        : "(No Speech)"}
                     </p>
                     <div className="flex items-center justify-between text-[8px] text-neutral-500 font-mono">
                       <span>{panel.duration || 4.5}s</span>
-                      <span className="uppercase text-purple-450">{panel.motion_type || "zoom_in"}</span>
+                      <span className="uppercase text-purple-450">
+                        {panel.motion_type || "zoom_in"}
+                      </span>
                     </div>
                   </div>
                 </div>
               );
             })}
           </div>
-            </div>
-
+        </div>
       </div>
     </div>
   );

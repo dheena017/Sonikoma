@@ -212,9 +212,7 @@ export function AutoCropEngineComparison({
           </button>
           <button
             onClick={runPreview}
-            disabled={
-              isDetecting || !firstImageUrl
-            }
+            disabled={isDetecting || !firstImageUrl}
             className="px-2 py-1 rounded bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-[8px] font-bold uppercase hover:bg-cyan-500/20 disabled:opacity-20"
           >
             {isDetecting ? (

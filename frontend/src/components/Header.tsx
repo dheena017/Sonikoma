@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Film, Menu, Bell } from "lucide-react";
+import { createPortal } from "react-dom";
+import { Film, Menu, Bell, X } from "lucide-react";
 import { GeneratedPanel } from "../types";
 import NotificationDropdown from "./NotificationDropdown";
 import { Notification } from "./NotificationStack";
@@ -27,6 +28,7 @@ interface HeaderProps {
   saveStatus?: string;
   isDirty?: boolean;
   onSave?: () => void;
+  navigateTo?: (path: string) => void;
 }
 
 /** Format seconds into a readable "Xm Ys" string */
@@ -61,8 +63,10 @@ export default function Header({
   saveStatus = "idle",
   isDirty = false,
   onSave,
+  navigateTo: routerNavigateTo,
 }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -80,9 +84,22 @@ export default function Header({
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
-  const navigateTo = (path: string) => {
-    window.history.pushState({}, "", path);
-    window.dispatchEvent(new Event("popstate"));
+  const navigateTo = async (path: string) => {
+    if (routerNavigateTo) {
+      routerNavigateTo(path);
+    } else {
+      if (isDirty) {
+        const confirm = (window as any).confirmAsync || window.confirm;
+        const confirmed = await confirm(
+          "You have unsaved changes. Are you sure you want to navigate away? Your changes will be lost."
+        );
+        if (!confirmed) {
+          return;
+        }
+      }
+      window.history.pushState({}, "", path);
+      window.dispatchEvent(new Event("popstate"));
+    }
   };
 
   const isLongMode = narrationStyle !== "short";
@@ -146,9 +163,24 @@ export default function Header({
                 disabled
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-500/40 bg-amber-950/30 text-amber-300 text-[10px] font-bold font-mono tracking-wider select-none shadow-[0_0_10px_-2px_rgba(245,158,11,0.2)] cursor-not-allowed"
               >
-                <svg className="animate-spin h-3.5 w-3.5 text-amber-400" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                <svg
+                  className="animate-spin h-3.5 w-3.5 text-amber-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
                 </svg>
                 <span>SAVING...</span>
               </button>
@@ -162,7 +194,7 @@ export default function Header({
               </button>
             ) : isDirty ? (
               <button
-                onClick={onSave}
+                onClick={() => setShowSaveConfirm(true)}
                 className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-purple-500/30 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-white text-[10px] font-black font-sans uppercase tracking-wider cursor-pointer transition-all active:scale-95 shadow-md shadow-purple-950/30 hover:shadow-purple-900/40 animate-pulse"
               >
                 <span>✦</span>
@@ -296,6 +328,90 @@ export default function Header({
           </span>
         </button>
       </div>
+
+      {/* Save Changes Confirmation Modal */}
+      {showSaveConfirm &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+              onClick={() => setShowSaveConfirm(false)}
+            />
+
+            {/* Modal Container */}
+            <div className="relative w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-3xl shadow-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-200 flex flex-col">
+              {/* Glow Accent */}
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500 blur-[1px]" />
+
+              {/* Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-850 shrink-0 bg-neutral-900/50">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-purple-500/10 rounded-xl text-purple-400">
+                    <Film className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold text-white tracking-tight">
+                      Save Changes?
+                    </h2>
+                    <p className="text-[10px] text-neutral-400 font-mono">
+                      Confirm saving your current storyboard modifications
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowSaveConfirm(false)}
+                  className="text-neutral-400 hover:text-white bg-neutral-950/40 hover:bg-neutral-950 p-2 rounded-full transition-all cursor-pointer"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 space-y-4">
+                <p className="text-xs text-neutral-300 leading-relaxed font-sans">
+                  You are about to commit all recent changes to the database.
+                  This will update the panels, narration scripts, and timings
+                  for your current project.
+                </p>
+
+                {projectId && (
+                  <div className="bg-neutral-950/50 border border-neutral-850 rounded-2xl p-4 flex gap-3 items-center">
+                    <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] font-bold text-neutral-300 font-mono truncate">
+                        Project ID: {projectId}
+                      </p>
+                      <p className="text-[10px] text-neutral-500 font-mono">
+                        Estimated panels: {panels.length}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="px-6 py-4 bg-neutral-950/40 border-t border-neutral-850 flex items-center justify-end gap-3 shrink-0">
+                <button
+                  onClick={() => setShowSaveConfirm(false)}
+                  className="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-750 text-neutral-200 hover:text-white rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border border-neutral-750/30"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setShowSaveConfirm(false);
+                    if (onSave) onSave();
+                  }}
+                  className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 border border-purple-500/30 text-white font-bold rounded-xl text-xs tracking-wide transition-all shadow-[0_0_20px_-5px_rgba(147,51,234,0.5)] active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>Confirm & Save</span>
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </header>
   );
 }

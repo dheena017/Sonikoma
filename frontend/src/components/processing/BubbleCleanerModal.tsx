@@ -75,15 +75,17 @@ export default function BubbleCleanerModal({
   mergingIndices = [],
 }: BubbleCleanerModalProps) {
   const [isDeckExpanded, setIsDeckExpanded] = React.useState<boolean>(true);
-  const [activePreviewUrl, setActivePreviewUrl] = React.useState<string | null>(null);
+  const [activePreviewUrl, setActivePreviewUrl] = React.useState<string | null>(
+    null
+  );
 
-  const previewImageUrl = activePreviewUrl || (
-    selectedScraped.length > 0
+  const previewImageUrl =
+    activePreviewUrl ||
+    (selectedScraped.length > 0
       ? selectedScraped[0]
       : scrapedImages.length > 0
       ? scrapedImages[0]
-      : null
-  );
+      : null);
 
   const handleResetAll = () => {
     console.log("[BubbleCleanerModal] Resetting all parameters to defaults");
@@ -158,9 +160,7 @@ export default function BubbleCleanerModal({
             key={tab.id}
             type="button"
             onClick={() => {
-              console.log(
-                `[BubbleCleanerModal] Switching to tab: ${tab.id}`
-              );
+              console.log(`[BubbleCleanerModal] Switching to tab: ${tab.id}`);
               setActiveTab(tab.id);
             }}
             className={`relative flex items-center gap-2 px-5 py-3 text-xs font-bold font-mono transition-all border-b-2 cursor-pointer select-none ${
@@ -210,7 +210,10 @@ export default function BubbleCleanerModal({
                   </div>
                   <span
                     className="text-[9px] font-mono font-bold text-neutral-500 uppercase tracking-widest select-none origin-center"
-                    style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
+                    style={{
+                      writingMode: "vertical-rl",
+                      textOrientation: "mixed",
+                    }}
                   >
                     PANELS ({scrapedImages.length})
                   </span>
@@ -229,7 +232,9 @@ export default function BubbleCleanerModal({
                     <React.Fragment key={imgUrl}>
                       <div
                         onClick={() => {
-                          console.log(`[BubbleCleanerModal] Selected preview image: ${imgUrl}`);
+                          console.log(
+                            `[BubbleCleanerModal] Selected preview image: ${imgUrl}`
+                          );
                           setActivePreviewUrl(imgUrl);
                           setSelectedScraped((prev) =>
                             prev.includes(imgUrl)
@@ -265,38 +270,46 @@ export default function BubbleCleanerModal({
                         </div>
                       </div>
 
-                      {globalIdx < scrapedImages.length - 1 && handleMergeWithNext && (
-                        <div className="flex justify-center -my-1.5 h-6 items-center">
-                          <button
-                            type="button"
-                            onClick={async (e) => {
-                              e.stopPropagation();
-                              console.log(`[BubbleCleanerModal] Stitching idx ${globalIdx} with next`);
-                              const img1 = scrapedImages[globalIdx];
-                              const img2 = scrapedImages[globalIdx + 1];
-                              const stitched = await handleMergeWithNext(globalIdx);
-                              if (stitched) {
-                                if (activePreviewUrl === img1 || activePreviewUrl === img2) {
-                                  setActivePreviewUrl(stitched);
+                      {globalIdx < scrapedImages.length - 1 &&
+                        handleMergeWithNext && (
+                          <div className="flex justify-center -my-1.5 h-6 items-center">
+                            <button
+                              type="button"
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                console.log(
+                                  `[BubbleCleanerModal] Stitching idx ${globalIdx} with next`
+                                );
+                                const img1 = scrapedImages[globalIdx];
+                                const img2 = scrapedImages[globalIdx + 1];
+                                const stitched = await handleMergeWithNext(
+                                  globalIdx
+                                );
+                                if (stitched) {
+                                  if (
+                                    activePreviewUrl === img1 ||
+                                    activePreviewUrl === img2
+                                  ) {
+                                    setActivePreviewUrl(stitched);
+                                  }
                                 }
-                              }
-                            }}
-                            disabled={isStitching}
-                            className={`w-6 h-6 rounded-full bg-neutral-900 border flex items-center justify-center transition-all duration-200 shadow-md cursor-pointer hover:scale-110 active:scale-95 z-10 opacity-60 hover:opacity-100 ${
-                              isStitching
-                                ? "border-purple-500/40 text-purple-400 bg-purple-950/20 cursor-wait"
-                                : "border-neutral-800 hover:border-purple-500/50 hover:bg-purple-600/90 text-neutral-400 hover:text-white"
-                            }`}
-                            title="Stitch with next panel"
-                          >
-                            {isStitching ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                            ) : (
-                              <Link2 className="h-3 w-3" />
-                            )}
-                          </button>
-                        </div>
-                      )}
+                              }}
+                              disabled={isStitching}
+                              className={`w-6 h-6 rounded-full bg-neutral-900 border flex items-center justify-center transition-all duration-200 shadow-md cursor-pointer hover:scale-110 active:scale-95 z-10 opacity-60 hover:opacity-100 ${
+                                isStitching
+                                  ? "border-purple-500/40 text-purple-400 bg-purple-950/20 cursor-wait"
+                                  : "border-neutral-800 hover:border-purple-500/50 hover:bg-purple-600/90 text-neutral-400 hover:text-white"
+                              }`}
+                              title="Stitch with next panel"
+                            >
+                              {isStitching ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <Link2 className="h-3 w-3" />
+                              )}
+                            </button>
+                          </div>
+                        )}
                     </React.Fragment>
                   );
                 })}
@@ -420,7 +433,8 @@ export default function BubbleCleanerModal({
               Speech Bubble Cleaner Settings
             </h2>
             <p className="text-xs text-neutral-400 font-mono mt-0.5">
-              Configure parameters for OpenCV inpainting, text boundary cleanup and dilation offsets
+              Configure parameters for OpenCV inpainting, text boundary cleanup
+              and dilation offsets
             </p>
           </div>
           <button

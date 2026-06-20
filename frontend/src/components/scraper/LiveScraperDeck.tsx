@@ -1,5 +1,12 @@
 import React, { useState, useCallback } from "react";
-import { Image as ImageIcon, RefreshCw, Download } from "lucide-react";
+import { createPortal } from "react-dom";
+import {
+  Image as ImageIcon,
+  RefreshCw,
+  Download,
+  X,
+  Trash2,
+} from "lucide-react";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { LiveScraperDeckProps } from "./types";
@@ -119,7 +126,10 @@ export default function LiveScraperDeck({
         return `${parts.join("_")}.zip`;
       }
     } catch (err) {
-      console.error("[LiveScraperDeck] Failed to parse targetUrl for ZIP filename:", err);
+      console.error(
+        "[LiveScraperDeck] Failed to parse targetUrl for ZIP filename:",
+        err
+      );
     }
 
     return "webtoon_frames.zip";
@@ -173,13 +183,9 @@ export default function LiveScraperDeck({
     }
   };
 
-  const handleDeleteSelected = () => {
-    if (selectedScraped.length === 0) return;
-    console.log(
-      "[LiveScraperDeck] Deleting",
-      selectedScraped.length,
-      "selected images"
-    );
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const executeDeleteSelected = () => {
     setScrapedImages((prev) =>
       prev.filter((img) => !selectedScraped.includes(img))
     );
@@ -193,6 +199,11 @@ export default function LiveScraperDeck({
     );
     setSelectedScraped([]);
     setLastSelectedIndex(null);
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedScraped.length === 0) return;
+    setShowDeleteConfirm(true);
   };
 
   const handleAddToStoryboard = () => {
@@ -449,6 +460,73 @@ export default function LiveScraperDeck({
           setShowBubbleModal={setShowBubbleModal}
         />
       )}
+
+      {/* Delete Scraped Frames Confirmation Modal */}
+      {showDeleteConfirm &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div
+              className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+              onClick={() => setShowDeleteConfirm(false)}
+            />
+            <div className="relative w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-3xl shadow-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-200 flex flex-col">
+              {/* Glow Accent */}
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-red-500 via-rose-500 to-amber-500 blur-[1px]" />
+
+              {/* Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-850 shrink-0 bg-neutral-900/50">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-red-500/10 rounded-xl text-red-400">
+                    <Trash2 className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold text-white tracking-tight">
+                      Delete Extracted Frames?
+                    </h2>
+                    <p className="text-[10px] text-neutral-450 font-mono">
+                      Warning: This action cannot be undone
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="text-neutral-400 hover:text-white bg-neutral-950/40 hover:bg-neutral-950 p-2 rounded-full transition-all cursor-pointer"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 space-y-4">
+                <p className="text-xs text-neutral-350 leading-relaxed font-sans">
+                  Are you sure you want to delete the{" "}
+                  <strong>{selectedScraped.length}</strong> selected image
+                  frame(s) from the deck?
+                </p>
+              </div>
+
+              {/* Footer */}
+              <div className="px-6 py-4 bg-neutral-950/40 border-t border-neutral-850 flex items-center justify-end gap-3 shrink-0">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-750 text-neutral-200 hover:text-white rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border border-neutral-750/30"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDeleteConfirm(false);
+                    executeDeleteSelected();
+                  }}
+                  className="px-6 py-2.5 bg-gradient-to-r from-red-650 to-rose-650 hover:from-red-550 hover:to-rose-550 border border-red-550/30 text-white font-bold rounded-xl text-xs tracking-wide transition-all shadow-[0_0_20px_-5px_rgba(239,68,68,0.5)] active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>Confirm & Delete</span>
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </>
   );
 }

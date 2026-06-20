@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
+import { X, Trash2 } from "lucide-react";
 import { GeneratedPanel } from "../../types";
 import { useStoryboardOperations } from "../../hooks/useStoryboardOperations";
 
@@ -44,6 +46,7 @@ interface StoryboardTimelineProps {
   cropCloseKernelSize?: number;
   autoSplitTallStrips?: boolean;
   playStoryboardAudio?: (idx: number) => void;
+  saveProject?: (customPanels?: GeneratedPanel[]) => Promise<boolean>;
 }
 
 export default function StoryboardTimeline({
@@ -82,6 +85,7 @@ export default function StoryboardTimeline({
   cropCloseKernelSize = 15,
   autoSplitTallStrips = true,
   playStoryboardAudio,
+  saveProject,
 }: StoryboardTimelineProps) {
   // ── Panel selection state ────────────────────────────────────────────────
   const [selectedPanelIds, setSelectedPanelIds] = useState<Set<number>>(
@@ -169,20 +173,24 @@ export default function StoryboardTimeline({
     setSelectedPanelIds(new Set());
   };
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const executeDeleteSelected = async () => {
+    const remainingPanels = panels.filter((p) => !selectedPanelIds.has(p.id));
+    setPanels(remainingPanels);
+    clearSelection();
+    addNotification?.(
+      `Deleted ${selectedPanelIds.size} selected panels`,
+      "info"
+    );
+    if (saveProject) {
+      await saveProject(remainingPanels);
+    }
+  };
+
   const handleDeleteSelected = () => {
     if (selectedPanelIds.size === 0) return;
-    if (
-      window.confirm(
-        `Are you sure you want to delete the ${selectedPanelIds.size} selected panel(s)?`
-      )
-    ) {
-      setPanels((prev) => prev.filter((p) => !selectedPanelIds.has(p.id)));
-      clearSelection();
-      addNotification?.(
-        `Deleted ${selectedPanelIds.size} selected panels`,
-        "info"
-      );
-    }
+    setShowDeleteConfirm(true);
   };
 
   const handleBulkModifyDuration = (val: number) => {
@@ -499,7 +507,6 @@ export default function StoryboardTimeline({
 
   const {
     analyzingPanelId,
-    isCompiling,
     isZipping,
     showBulkOps,
     setShowBulkOps,
@@ -524,7 +531,6 @@ export default function StoryboardTimeline({
     handleAnalyzeAllPanels,
     handleAnalyzeSelectedPanels,
     isAnalyzingAll,
-    handleCompileVideo,
   } = useStoryboardOperations({
     panels,
     setPanels,
@@ -547,9 +553,7 @@ export default function StoryboardTimeline({
         id="panels_timeline_section"
         className="bg-neutral-900/60 rounded-2xl border border-neutral-800 p-4 sm:p-6 space-y-4"
       >
-        <TimelineHeader
-          panelsLength={0}
-        />
+        <TimelineHeader panelsLength={0} />
         <TimelineEmptyState hasScrapedImages={hasScrapedImages} />
       </div>
     );
@@ -647,6 +651,73 @@ export default function StoryboardTimeline({
         batchProgress={cropProgress}
         cleanProgress={cleanProgress}
       />
+
+      {/* Delete Panels Confirmation Modal */}
+      {showDeleteConfirm &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div
+              className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+              onClick={() => setShowDeleteConfirm(false)}
+            />
+            <div className="relative w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-3xl shadow-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-200 flex flex-col">
+              {/* Glow Accent */}
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-red-500 via-rose-500 to-amber-500 blur-[1px]" />
+
+              {/* Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-850 shrink-0 bg-neutral-900/50">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-red-500/10 rounded-xl text-red-400">
+                    <Trash2 className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold text-white tracking-tight">
+                      Delete Selected Panels?
+                    </h2>
+                    <p className="text-[10px] text-neutral-450 font-mono">
+                      Warning: This action cannot be undone
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="text-neutral-400 hover:text-white bg-neutral-950/40 hover:bg-neutral-950 p-2 rounded-full transition-all cursor-pointer"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 space-y-4">
+                <p className="text-xs text-neutral-300 leading-relaxed font-sans">
+                  Are you sure you want to delete the{" "}
+                  <strong>{selectedPanelIds.size}</strong> selected panel(s)
+                  from your storyboard timeline?
+                </p>
+              </div>
+
+              {/* Footer */}
+              <div className="px-6 py-4 bg-neutral-950/40 border-t border-neutral-850 flex items-center justify-end gap-3 shrink-0">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-750 text-neutral-200 hover:text-white rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border border-neutral-750/30"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    setShowDeleteConfirm(false);
+                    await executeDeleteSelected();
+                  }}
+                  className="px-6 py-2.5 bg-gradient-to-r from-red-650 to-rose-650 hover:from-red-550 hover:to-rose-550 border border-red-550/30 text-white font-bold rounded-xl text-xs tracking-wide transition-all shadow-[0_0_20px_-5px_rgba(239,68,68,0.5)] active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>Confirm & Delete</span>
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

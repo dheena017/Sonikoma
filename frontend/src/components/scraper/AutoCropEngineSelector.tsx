@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { 
-  Cpu, 
-  ChevronDown, 
-  Settings2, 
-  Check, 
-  Sparkles, 
-  HelpCircle, 
-  RefreshCw, 
-  Radio, 
-  ChevronRight, 
-  ShieldCheck, 
-  ShieldAlert, 
-  Compass, 
-  Clock 
+import {
+  Cpu,
+  ChevronDown,
+  Settings2,
+  Check,
+  Sparkles,
+  HelpCircle,
+  RefreshCw,
+  Radio,
+  ChevronRight,
+  ShieldCheck,
+  ShieldAlert,
+  Compass,
+  Clock,
 } from "lucide-react";
 import SectionTitle from "../crop/SectionTitle";
 
@@ -21,7 +21,7 @@ interface Props {
   setUseLocalCV: (v: boolean) => void;
   cropModel: string;
   setCropModel: (v: string) => void;
-  
+
   // OpenCV Props
   cropSensitivity: number;
   setCropSensitivity: (v: number) => void;
@@ -92,7 +92,7 @@ export function AutoCropEngineSelector({
       .then((res) => res.json())
       .then((data) => {
         if (isMounted) {
-          const hasKey = !!(data?.env?.GEMINI_API_KEY);
+          const hasKey = !!data?.env?.GEMINI_API_KEY;
           setApiKeyDetected(hasKey);
           setCheckingStatus(false);
         }
@@ -111,7 +111,9 @@ export function AutoCropEngineSelector({
 
   // Quick Switch Presets for OpenCV
   const handleApplyPreset = (presetName: string) => {
-    console.log(`[AutoCropEngineSelector] Applying OpenCV Preset: ${presetName}`);
+    console.log(
+      `[AutoCropEngineSelector] Applying OpenCV Preset: ${presetName}`
+    );
     if (presetName === "balanced") {
       setCropSensitivity(30);
       setCropMinHeightPx(60);
@@ -157,7 +159,9 @@ export function AutoCropEngineSelector({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           provider: "gemini",
-          model: cropModel.includes("pro") ? "gemini-2.5-pro" : "gemini-2.5-flash",
+          model: cropModel.includes("pro")
+            ? "gemini-2.5-pro"
+            : "gemini-2.5-flash",
         }),
       });
       const data = await response.json();
@@ -174,10 +178,26 @@ export function AutoCropEngineSelector({
 
   // Clickable Prompt helpers template tags
   const promptHelpers = [
-    { label: "Ignore Title Banner", prompt: "Ignore the first panel logo / series title banner at the top of the image." },
-    { label: "Strict Rectangles", prompt: "Extract only rectangular illustration boundaries, ignoring non-rectangular speech or effect clouds." },
-    { label: "Merge Split Panels", prompt: "Merge adjacent frames that form a single panoramic scene split by white lines." },
-    { label: "Exclude Text bubbles", prompt: "Focus strictly on visual drawing frames and crop tight borders excluding dialogue text." },
+    {
+      label: "Ignore Title Banner",
+      prompt:
+        "Ignore the first panel logo / series title banner at the top of the image.",
+    },
+    {
+      label: "Strict Rectangles",
+      prompt:
+        "Extract only rectangular illustration boundaries, ignoring non-rectangular speech or effect clouds.",
+    },
+    {
+      label: "Merge Split Panels",
+      prompt:
+        "Merge adjacent frames that form a single panoramic scene split by white lines.",
+    },
+    {
+      label: "Exclude Text bubbles",
+      prompt:
+        "Focus strictly on visual drawing frames and crop tight borders excluding dialogue text.",
+    },
   ];
 
   const handleAddHelperPrompt = (text: string) => {
@@ -200,7 +220,7 @@ export function AutoCropEngineSelector({
       name: "Gemini 3.5 Pro",
       badge: "🧠 Deep Visual AI",
       desc: "Deep visual comprehension. Best for complex overlapping panels, dark background panels, and artwork-only separation.",
-    }
+    },
   ];
 
   return (
@@ -225,21 +245,28 @@ export function AutoCropEngineSelector({
             <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-full blur-2xl -mr-4 -mt-4 pointer-events-none" />
           )}
           <div className="flex items-center justify-between w-full">
-            <span className={`text-[11px] font-extrabold uppercase tracking-wider ${useLocalCV ? "text-cyan-400" : "text-neutral-400"}`}>
+            <span
+              className={`text-[11px] font-extrabold uppercase tracking-wider ${
+                useLocalCV ? "text-cyan-400" : "text-neutral-400"
+              }`}
+            >
               OPENCV ONLY
             </span>
             <span
               className={`h-3.5 w-3.5 rounded-full border flex items-center justify-center transition-all ${
-                useLocalCV 
-                  ? "border-cyan-400 bg-cyan-950 text-cyan-400" 
+                useLocalCV
+                  ? "border-cyan-400 bg-cyan-950 text-cyan-400"
                   : "border-neutral-800 bg-neutral-900"
               }`}
             >
-              {useLocalCV && <div className="h-1.5 w-1.5 rounded-full bg-cyan-400" />}
+              {useLocalCV && (
+                <div className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
+              )}
             </span>
           </div>
           <p className="text-[10px] text-neutral-400 leading-relaxed font-sans font-medium">
-            Local Python edge and contour finder. Uses Canny filtering for fast page gutter cutting. Offline capable, fast, and completely reliable.
+            Local Python edge and contour finder. Uses Canny filtering for fast
+            page gutter cutting. Offline capable, fast, and completely reliable.
           </p>
         </button>
 
@@ -257,21 +284,31 @@ export function AutoCropEngineSelector({
             <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl -mr-4 -mt-4 pointer-events-none animate-pulse" />
           )}
           <div className="flex items-center justify-between w-full">
-            <span className={`text-[11px] font-extrabold uppercase tracking-wider ${!useLocalCV ? "text-indigo-400 animate-pulse" : "text-neutral-400"}`}>
+            <span
+              className={`text-[11px] font-extrabold uppercase tracking-wider ${
+                !useLocalCV
+                  ? "text-indigo-400 animate-pulse"
+                  : "text-neutral-400"
+              }`}
+            >
               GEMINI VISION AI
             </span>
             <span
               className={`h-3.5 w-3.5 rounded-full border flex items-center justify-center transition-all ${
-                !useLocalCV 
-                  ? "border-indigo-400 bg-indigo-950 text-indigo-400" 
+                !useLocalCV
+                  ? "border-indigo-400 bg-indigo-950 text-indigo-400"
                   : "border-neutral-800 bg-neutral-900"
               }`}
             >
-              {!useLocalCV && <div className="h-1.5 w-1.5 rounded-full bg-indigo-400" />}
+              {!useLocalCV && (
+                <div className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+              )}
             </span>
           </div>
           <p className="text-[10px] text-neutral-400 leading-relaxed font-sans font-medium">
-            Vision LLM segmentation. Understands panel layouts semantically, ignoring overlapping speech balloons, background splash lines, and complex gutters.
+            Vision LLM segmentation. Understands panel layouts semantically,
+            ignoring overlapping speech balloons, background splash lines, and
+            complex gutters.
           </p>
         </button>
       </div>
@@ -281,7 +318,9 @@ export function AutoCropEngineSelector({
         <div className="space-y-4 p-5 bg-neutral-950/40 border border-neutral-800 rounded-3xl animate-[fadeIn_0.22s_ease-out] shadow-xl">
           <div className="flex items-center gap-2 border-b border-neutral-900 pb-3">
             <Settings2 className="h-3.5 w-3.5 text-cyan-400" />
-            <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider">OpenCV Configuration</h4>
+            <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider">
+              OpenCV Configuration
+            </h4>
           </div>
 
           {/* Preset buttons */}
@@ -340,8 +379,12 @@ export function AutoCropEngineSelector({
             {/* Edge Sensitivity */}
             <div className="space-y-1.5 p-3 bg-neutral-900/30 border border-neutral-900 rounded-2xl">
               <div className="flex justify-between items-center text-[9px] font-mono">
-                <span className="text-neutral-500 uppercase tracking-wider font-bold">Edge Sensitivity</span>
-                <span className="text-cyan-450 font-bold">{cropSensitivity}%</span>
+                <span className="text-neutral-500 uppercase tracking-wider font-bold">
+                  Edge Sensitivity
+                </span>
+                <span className="text-cyan-450 font-bold">
+                  {cropSensitivity}%
+                </span>
               </div>
               <input
                 type="range"
@@ -352,15 +395,20 @@ export function AutoCropEngineSelector({
                 className="w-full h-1 bg-neutral-900 rounded-lg appearance-none cursor-pointer accent-cyan-500"
               />
               <p className="text-[8px] text-neutral-500 leading-normal font-sans">
-                Contrast threshold for borders. Higher values locate borders aggressively, lower is selective.
+                Contrast threshold for borders. Higher values locate borders
+                aggressively, lower is selective.
               </p>
             </div>
 
             {/* Min Height */}
             <div className="space-y-1.5 p-3 bg-neutral-900/30 border border-neutral-900 rounded-2xl">
               <div className="flex justify-between items-center text-[9px] font-mono">
-                <span className="text-neutral-500 uppercase tracking-wider font-bold">Min Panel Height</span>
-                <span className="text-cyan-450 font-bold">{cropMinHeightPx}px</span>
+                <span className="text-neutral-500 uppercase tracking-wider font-bold">
+                  Min Panel Height
+                </span>
+                <span className="text-cyan-450 font-bold">
+                  {cropMinHeightPx}px
+                </span>
               </div>
               <input
                 type="range"
@@ -371,15 +419,20 @@ export function AutoCropEngineSelector({
                 className="w-full h-1 bg-neutral-900 rounded-lg appearance-none cursor-pointer accent-cyan-500"
               />
               <p className="text-[8px] text-neutral-500 leading-normal font-sans">
-                Ignores layout blocks smaller than this height (filters speech text fields or artifacts).
+                Ignores layout blocks smaller than this height (filters speech
+                text fields or artifacts).
               </p>
             </div>
 
             {/* Overlap Merge */}
             <div className="space-y-1.5 p-3 bg-neutral-900/30 border border-neutral-900 rounded-2xl">
               <div className="flex justify-between items-center text-[9px] font-mono">
-                <span className="text-neutral-500 uppercase tracking-wider font-bold">Overlap Merge</span>
-                <span className="text-cyan-450 font-bold">{overlapMergeThreshold}%</span>
+                <span className="text-neutral-500 uppercase tracking-wider font-bold">
+                  Overlap Merge
+                </span>
+                <span className="text-cyan-450 font-bold">
+                  {overlapMergeThreshold}%
+                </span>
               </div>
               <input
                 type="range"
@@ -387,19 +440,26 @@ export function AutoCropEngineSelector({
                 max="80"
                 step="5"
                 value={overlapMergeThreshold}
-                onChange={(e) => setOverlapMergeThreshold(Number(e.target.value))}
+                onChange={(e) =>
+                  setOverlapMergeThreshold(Number(e.target.value))
+                }
                 className="w-full h-1 bg-neutral-900 rounded-lg appearance-none cursor-pointer accent-cyan-500"
               />
               <p className="text-[8px] text-neutral-500 leading-normal font-sans">
-                Merges adjacent boxes if their vertical boundaries overlap by more than this percentage.
+                Merges adjacent boxes if their vertical boundaries overlap by
+                more than this percentage.
               </p>
             </div>
 
             {/* Min Panel Width Ratio */}
             <div className="space-y-1.5 p-3 bg-neutral-900/30 border border-neutral-900 rounded-2xl">
               <div className="flex justify-between items-center text-[9px] font-mono">
-                <span className="text-neutral-500 uppercase tracking-wider font-bold">Min Width Ratio</span>
-                <span className="text-cyan-450 font-bold">{minPanelAreaPct}%</span>
+                <span className="text-neutral-500 uppercase tracking-wider font-bold">
+                  Min Width Ratio
+                </span>
+                <span className="text-cyan-450 font-bold">
+                  {minPanelAreaPct}%
+                </span>
               </div>
               <input
                 type="range"
@@ -411,7 +471,8 @@ export function AutoCropEngineSelector({
                 className="w-full h-1 bg-neutral-900 rounded-lg appearance-none cursor-pointer accent-cyan-500"
               />
               <p className="text-[8px] text-neutral-500 leading-normal font-sans">
-                Discards small segments whose width ratio is below this percent of full image.
+                Discards small segments whose width ratio is below this percent
+                of full image.
               </p>
             </div>
           </div>
@@ -423,7 +484,11 @@ export function AutoCropEngineSelector({
               onClick={() => setShowAdvancedCV(!showAdvancedCV)}
               className="flex items-center gap-1.5 text-[10px] font-mono font-bold text-neutral-500 hover:text-cyan-450 transition cursor-pointer select-none"
             >
-              <ChevronRight className={`h-3.5 w-3.5 transition-transform duration-200 ${showAdvancedCV ? "rotate-90 text-cyan-450" : ""}`} />
+              <ChevronRight
+                className={`h-3.5 w-3.5 transition-transform duration-200 ${
+                  showAdvancedCV ? "rotate-90 text-cyan-450" : ""
+                }`}
+              />
               Advanced Canny Tuning ({showAdvancedCV ? "Collapse" : "Expand"})
             </button>
 
@@ -432,8 +497,12 @@ export function AutoCropEngineSelector({
                 {/* Canny Low */}
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-[8px] font-mono">
-                    <span className="text-neutral-500 uppercase font-bold">Canny Low Edge</span>
-                    <span className="text-cyan-400 font-bold">{cropCannyLow}</span>
+                    <span className="text-neutral-500 uppercase font-bold">
+                      Canny Low Edge
+                    </span>
+                    <span className="text-cyan-400 font-bold">
+                      {cropCannyLow}
+                    </span>
                   </div>
                   <input
                     type="range"
@@ -447,8 +516,12 @@ export function AutoCropEngineSelector({
                 {/* Canny High */}
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-[8px] font-mono">
-                    <span className="text-neutral-500 uppercase font-bold">Canny High Edge</span>
-                    <span className="text-cyan-400 font-bold">{cropCannyHigh}</span>
+                    <span className="text-neutral-500 uppercase font-bold">
+                      Canny High Edge
+                    </span>
+                    <span className="text-cyan-400 font-bold">
+                      {cropCannyHigh}
+                    </span>
                   </div>
                   <input
                     type="range"
@@ -462,8 +535,12 @@ export function AutoCropEngineSelector({
                 {/* Close Kernel */}
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-[8px] font-mono">
-                    <span className="text-neutral-500 uppercase font-bold">Close Kernel</span>
-                    <span className="text-cyan-400 font-bold">{cropCloseKernelSize}px</span>
+                    <span className="text-neutral-500 uppercase font-bold">
+                      Close Kernel
+                    </span>
+                    <span className="text-cyan-400 font-bold">
+                      {cropCloseKernelSize}px
+                    </span>
                   </div>
                   <input
                     type="range"
@@ -471,7 +548,9 @@ export function AutoCropEngineSelector({
                     max="51"
                     step="2"
                     value={cropCloseKernelSize}
-                    onChange={(e) => setCropCloseKernelSize(Number(e.target.value))}
+                    onChange={(e) =>
+                      setCropCloseKernelSize(Number(e.target.value))
+                    }
                     className="w-full h-1 bg-neutral-900 rounded appearance-none cursor-pointer accent-cyan-500"
                   />
                 </div>
@@ -488,7 +567,9 @@ export function AutoCropEngineSelector({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-900 pb-3">
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-indigo-400 animate-pulse" />
-              <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider">Gemini Vision AI Engine</h4>
+              <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider">
+                Gemini Vision AI Engine
+              </h4>
             </div>
 
             {/* API Key Connection Validation Status */}
@@ -504,7 +585,10 @@ export function AutoCropEngineSelector({
                   Gemini API Key Detected
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 text-[8.5px] font-mono font-bold px-2 py-0.5 rounded-md bg-amber-950/40 border border-amber-900/30 text-amber-400 shadow-sm" title="Requests will fall back to local OpenCV automatically.">
+                <span
+                  className="inline-flex items-center gap-1 text-[8.5px] font-mono font-bold px-2 py-0.5 rounded-md bg-amber-950/40 border border-amber-900/30 text-amber-400 shadow-sm"
+                  title="Requests will fall back to local OpenCV automatically."
+                >
                   <ShieldAlert className="h-3 w-3 text-amber-400" />
                   No API Key (OpenCV Fallback Active)
                 </span>
@@ -535,12 +619,16 @@ export function AutoCropEngineSelector({
                     }`}
                   >
                     <div className="flex items-center justify-between w-full">
-                      <span className="text-[10px] font-bold text-white">{model.name}</span>
-                      <span className={`text-[8px] font-mono px-1.5 py-0.5 rounded border leading-none font-bold uppercase select-none ${
-                        isSelected 
-                          ? "bg-indigo-950 border-indigo-700/50 text-indigo-400" 
-                          : "bg-neutral-950 border-neutral-850 text-neutral-550"
-                      }`}>
+                      <span className="text-[10px] font-bold text-white">
+                        {model.name}
+                      </span>
+                      <span
+                        className={`text-[8px] font-mono px-1.5 py-0.5 rounded border leading-none font-bold uppercase select-none ${
+                          isSelected
+                            ? "bg-indigo-950 border-indigo-700/50 text-indigo-400"
+                            : "bg-neutral-950 border-neutral-850 text-neutral-550"
+                        }`}
+                      >
                         {model.badge}
                       </span>
                     </div>
@@ -564,14 +652,24 @@ export function AutoCropEngineSelector({
                   value={cropFocusMode}
                   onChange={(e) => {
                     setCropFocusMode(e.target.value);
-                    console.log(`[AutoCropEngineSelector] Focus mode changed to: ${e.target.value}`);
+                    console.log(
+                      `[AutoCropEngineSelector] Focus mode changed to: ${e.target.value}`
+                    );
                   }}
                   className="w-full bg-neutral-900 border border-neutral-800 text-neutral-350 rounded-xl px-3.5 py-2.5 text-[10px] font-mono focus:border-indigo-550 focus:outline-none cursor-pointer appearance-none transition-colors hover:border-neutral-700 font-bold"
                 >
-                  <option value="standard">Standard Panel Detection (Balanced)</option>
-                  <option value="tight">Tight Illustration Only (Exclude Text)</option>
-                  <option value="cinematic">Cinematic Widescreen (Merge Wide Panels)</option>
-                  <option value="portrait">Close-up Portrait (Focus Character Faces)</option>
+                  <option value="standard">
+                    Standard Panel Detection (Balanced)
+                  </option>
+                  <option value="tight">
+                    Tight Illustration Only (Exclude Text)
+                  </option>
+                  <option value="cinematic">
+                    Cinematic Widescreen (Merge Wide Panels)
+                  </option>
+                  <option value="portrait">
+                    Close-up Portrait (Focus Character Faces)
+                  </option>
                 </select>
                 <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500 pointer-events-none" />
               </div>
@@ -637,7 +735,7 @@ export function AutoCropEngineSelector({
               rows={2}
               className="w-full bg-neutral-900 border border-neutral-800 text-neutral-300 rounded-xl px-4 py-2.5 text-[10px] font-sans placeholder:text-neutral-600 focus:border-indigo-550 focus:outline-none resize-none leading-relaxed transition-all"
             />
-            
+
             {/* Quick helper tag list */}
             <div className="space-y-1.5 pt-1">
               <span className="text-[8px] font-bold text-neutral-500 uppercase tracking-wider font-mono block">
@@ -661,7 +759,9 @@ export function AutoCropEngineSelector({
           {/* Diagnostics Connection Testing Error Details */}
           {testResult && !testResult.success && (
             <div className="p-3.5 bg-rose-950/20 border border-rose-900/30 text-[9px] font-mono text-rose-350 rounded-xl leading-relaxed animate-fadeIn">
-              ⚠️ <strong>Connection Error:</strong> {testResult.error || "The test query returned an invalid response. Verify your GEMINI_API_KEY environment credentials on the status dashboard."}
+              ⚠️ <strong>Connection Error:</strong>{" "}
+              {testResult.error ||
+                "The test query returned an invalid response. Verify your GEMINI_API_KEY environment credentials on the status dashboard."}
             </div>
           )}
 
@@ -669,7 +769,10 @@ export function AutoCropEngineSelector({
           <div className="p-3.5 bg-indigo-950/10 border border-indigo-900/30 text-[9.5px] font-mono text-indigo-400 rounded-2xl leading-relaxed flex items-start gap-2 select-none">
             <Compass className="h-4 w-4 shrink-0 text-indigo-400/80 mt-0.5 animate-pulse" />
             <p>
-              <strong>OpenCV Auto-Fallback Enabled:</strong> If Gemini Vision AI hits resource quotas, network timeouts, or lacks environment keys, the slicer engine falls back to local OpenCV contours seamlessly so that cropping is completed successfully.
+              <strong>OpenCV Auto-Fallback Enabled:</strong> If Gemini Vision AI
+              hits resource quotas, network timeouts, or lacks environment keys,
+              the slicer engine falls back to local OpenCV contours seamlessly
+              so that cropping is completed successfully.
             </p>
           </div>
         </div>

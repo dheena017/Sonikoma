@@ -67,7 +67,9 @@ export function useAutoSave(state: AutoSaveState) {
   // Reset or initialize state ref when switching projects
   useEffect(() => {
     if (state.projectId) {
-      console.log(`[Save Hook] Switched project to ${state.projectId}. Initializing state ref.`);
+      console.log(
+        `[Save Hook] Switched project to ${state.projectId}. Initializing state ref.`
+      );
       prevProjectIdRef.current = state.projectId;
       wasScrapedImagesLoadedRef.current = false;
       lastSavedStateRef.current = getSerializedState();
@@ -88,21 +90,59 @@ export function useAutoSave(state: AutoSaveState) {
       state.scrapedImages.length > 0 &&
       !wasScrapedImagesLoadedRef.current
     ) {
-      console.log("[Save Hook] Scraped images initially populated. Syncing initial state ref.");
+      console.log(
+        "[Save Hook] Scraped images initially populated. Syncing initial state ref."
+      );
       wasScrapedImagesLoadedRef.current = true;
       lastSavedStateRef.current = getSerializedState();
     }
   }, [state.scrapedImages, state.projectId]);
 
   // Manual save trigger function
-  const saveProject = async () => {
+  const saveProject = async (customPanels?: GeneratedPanel[]) => {
     if (!state.projectId) return false;
 
     setSaveStatus("saving");
     try {
-      console.log(`[Save Hook] Saving modifications for project: ${state.projectId}...`);
-      const currentStateStr = getSerializedState();
-      
+      console.log(
+        `[Save Hook] Saving modifications for project: ${state.projectId}...`
+      );
+      const targetPanels = customPanels || state.panels;
+
+      const serializePanels = (panelsList: GeneratedPanel[]) => {
+        return panelsList.map((p) => ({
+          image_url: p.image_url,
+          original_url: p.original_url || null,
+          speech_text: p.speech_text || "",
+          sfx: p.sfx || "",
+          duration: p.duration || 4.5,
+          motion_type: p.motion_type || "zoom_in",
+          visual_description: p.visual_description || null,
+          brightness: p.brightness ?? null,
+          contrast: p.contrast ?? null,
+          saturation: p.saturation ?? null,
+          grayscale: p.grayscale ? 1 : 0,
+          filter_preset: p.filter_preset || null,
+          bubble_method: p.bubble_method || null,
+          bubble_sensitivity: p.bubble_sensitivity ?? null,
+          bubble_dilation: p.bubble_dilation ?? null,
+          inpaint_radius: p.inpaint_radius ?? null,
+          detection_style: p.detection_style || null,
+        }));
+      };
+
+      const currentStateStr = JSON.stringify({
+        title: state.seriesTitle.trim(),
+        genre: state.scrapedGenre.trim(),
+        chapterNumber: state.chapterNumber.trim(),
+        chapterTitle: state.chapterTitle.trim(),
+        author: state.seriesAuthor.trim(),
+        cover_image: state.seriesCoverImage.trim(),
+        synopsis: state.seriesSynopsis.trim(),
+        scraped_images: state.scrapedImages,
+        panels: serializePanels(targetPanels),
+      });
+
       const formattedEpisode = (() => {
         const num = state.chapterNumber.trim();
         const name = state.chapterTitle.trim();
@@ -128,7 +168,7 @@ export function useAutoSave(state: AutoSaveState) {
           author: state.seriesAuthor.trim() || "Unknown Author",
           cover_image: state.seriesCoverImage.trim() || null,
           synopsis: state.seriesSynopsis.trim() || null,
-          panels: state.panels.map((p) => ({
+          panels: targetPanels.map((p) => ({
             image_url: p.image_url,
             original_url: p.original_url || null,
             speech_text: p.speech_text || "",
@@ -159,27 +199,37 @@ export function useAutoSave(state: AutoSaveState) {
         // Save raw scraped images cache list in database
         if (state.targetUrl) {
           try {
-            console.log(`[Save Hook] Saving raw scraped images cache list to backend for URL: ${state.targetUrl}`);
+            console.log(
+              `[Save Hook] Saving raw scraped images cache list to backend for URL: ${state.targetUrl}`
+            );
             const scrapeRes = await fetch("/api/save-scraped-images", {
               method: "PUT",
               headers,
               body: JSON.stringify({
                 url: state.targetUrl,
-                images: state.scrapedImages
-              })
+                images: state.scrapedImages,
+              }),
             });
             if (!scrapeRes.ok) {
-              console.warn("[Save Hook] Failed to save updated scraped images cache.");
+              console.warn(
+                "[Save Hook] Failed to save updated scraped images cache."
+              );
             }
           } catch (scrapeErr) {
-            console.error("[Save Hook] Error saving raw scraped images cache list:", scrapeErr);
+            console.error(
+              "[Save Hook] Error saving raw scraped images cache list:",
+              scrapeErr
+            );
           }
         }
 
         console.log("[Save Hook] Project saved successfully.");
         lastSavedStateRef.current = currentStateStr;
         setSaveStatus("saved");
-        state.addNotification?.("Project changes saved successfully!", "success");
+        state.addNotification?.(
+          "Project changes saved successfully!",
+          "success"
+        );
         return true;
       } else {
         throw new Error(data.message || "Failed to save project.");
@@ -187,7 +237,10 @@ export function useAutoSave(state: AutoSaveState) {
     } catch (err: any) {
       console.error("[Save Hook] Error during save:", err);
       setSaveStatus("error");
-      state.addNotification?.(err.message || "Failed to save project changes.", "error");
+      state.addNotification?.(
+        err.message || "Failed to save project changes.",
+        "error"
+      );
       return false;
     }
   };

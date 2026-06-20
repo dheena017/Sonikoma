@@ -106,15 +106,17 @@ export default function AutoCropModal({
   addNotification,
   isPage = false,
 }: AutoCropModalProps) {
-  const [activePreviewUrl, setActivePreviewUrl] = React.useState<string | null>(null);
+  const [activePreviewUrl, setActivePreviewUrl] = React.useState<string | null>(
+    null
+  );
 
-  const previewImageUrl = activePreviewUrl || (
-    selectedScraped.length > 0
+  const previewImageUrl =
+    activePreviewUrl ||
+    (selectedScraped.length > 0
       ? selectedScraped[0]
       : scrapedImages.length > 0
       ? scrapedImages[0]
-      : null
-  );
+      : null);
 
   const handleResetAll = () => {
     console.log("[AutoCropModal] Resetting all parameters to defaults");
@@ -172,7 +174,8 @@ export default function AutoCropModal({
               Auto-Crop Settings & Configuration
             </h3>
             <p className="text-[10px] text-neutral-400 font-mono mt-0.5">
-              Configure OpenCV contour models or Gemini Vision AI prompts for segmenting comic strips
+              Configure OpenCV contour models or Gemini Vision AI prompts for
+              segmenting comic strips
             </p>
           </div>
         </div>
@@ -273,7 +276,9 @@ export default function AutoCropModal({
                 <div
                   key={imgUrl}
                   onClick={() => {
-                    console.log(`[AutoCropModal] Selected preview image: ${imgUrl}`);
+                    console.log(
+                      `[AutoCropModal] Selected preview image: ${imgUrl}`
+                    );
                     setActivePreviewUrl(imgUrl);
                     setSelectedScraped((prev) =>
                       prev.includes(imgUrl)
@@ -352,8 +357,7 @@ export default function AutoCropModal({
             </>
           )}
           <span>
-            Padding:{" "}
-            <strong className="text-neutral-350">{padding}px</strong>
+            Padding: <strong className="text-neutral-350">{padding}px</strong>
           </span>
           <span>•</span>
           <span>
@@ -437,7 +441,8 @@ export default function AutoCropModal({
               Auto-Crop Settings & Configuration
             </h2>
             <p className="text-xs text-neutral-400 font-mono mt-0.5">
-              Configure parameters for Canny thresholds, model sizes, overlap filters or Gemini AI custom prompts
+              Configure parameters for Canny thresholds, model sizes, overlap
+              filters or Gemini AI custom prompts
             </p>
           </div>
           <button
