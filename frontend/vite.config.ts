@@ -27,24 +27,34 @@ export default defineConfig(({ mode }) => {
               url.includes("metrics");
 
             if (!isNoisy) {
-              console.log("[Vite Middleware] Incoming request:", req.method, req.url);
+              console.log(
+                "[Vite Middleware] Incoming request:",
+                req.method,
+                req.url
+              );
             }
-            if (req.url?.startsWith("/start-backend") && req.method === "POST") {
+            if (
+              req.url?.startsWith("/start-backend") &&
+              req.method === "POST"
+            ) {
               try {
                 const checkHealth = (): Promise<boolean> => {
                   return new Promise((resolve) => {
                     try {
-                      const checkReq = http.get(`${backendTarget}/api/health`, (checkRes) => {
-                        if (
-                          checkRes.statusCode === 200 ||
-                          checkRes.statusCode === 307 ||
-                          checkRes.statusCode === 302
-                        ) {
-                          resolve(true);
-                        } else {
-                          resolve(false);
+                      const checkReq = http.get(
+                        `${backendTarget}/api/health`,
+                        (checkRes) => {
+                          if (
+                            checkRes.statusCode === 200 ||
+                            checkRes.statusCode === 307 ||
+                            checkRes.statusCode === 302
+                          ) {
+                            resolve(true);
+                          } else {
+                            resolve(false);
+                          }
                         }
-                      });
+                      );
                       checkReq.on("error", () => resolve(false));
                       checkReq.setTimeout(550, () => {
                         checkReq.destroy();
@@ -59,11 +69,19 @@ export default defineConfig(({ mode }) => {
                 const isRunning = await checkHealth();
                 if (isRunning) {
                   res.writeHead(200, { "Content-Type": "application/json" });
-                  res.end(JSON.stringify({ success: true, message: "Backend is already running." }));
+                  res.end(
+                    JSON.stringify({
+                      success: true,
+                      message: "Backend is already running.",
+                    })
+                  );
                   return;
                 }
 
-                const pythonPath = path.resolve(__dirname, "../.venv/Scripts/python.exe");
+                const pythonPath = path.resolve(
+                  __dirname,
+                  "../.venv/Scripts/python.exe"
+                );
                 const backendDir = path.resolve(__dirname, "../backend/python");
 
                 if (!fs.existsSync(pythonPath)) {
@@ -78,16 +96,28 @@ export default defineConfig(({ mode }) => {
                 }
 
                 const globalVal = global as any;
-                if (globalVal.pyBackendProcess && globalVal.pyBackendProcess.exitCode === null) {
+                if (
+                  globalVal.pyBackendProcess &&
+                  globalVal.pyBackendProcess.exitCode === null
+                ) {
                   res.writeHead(200, { "Content-Type": "application/json" });
-                  res.end(JSON.stringify({ success: true, message: "Backend is already starting." }));
+                  res.end(
+                    JSON.stringify({
+                      success: true,
+                      message: "Backend is already starting.",
+                    })
+                  );
                   return;
                 }
 
                 const pyProcess = spawn(pythonPath, ["main.py"], {
                   cwd: backendDir,
                   stdio: ["ignore", "pipe", "pipe"],
-                  env: { ...process.env, PYTHONIOENCODING: "utf-8", FORCE_COLOR: "1" },
+                  env: {
+                    ...process.env,
+                    PYTHONIOENCODING: "utf-8",
+                    FORCE_COLOR: "1",
+                  },
                 });
 
                 pyProcess.stdout?.on("data", (data) => {
@@ -101,12 +131,17 @@ export default defineConfig(({ mode }) => {
                 globalVal.pyBackendProcess = pyProcess;
 
                 pyProcess.on("error", (err) => {
-                  console.error("[Vite Proxy] Failed to start backend process:", err);
+                  console.error(
+                    "[Vite Proxy] Failed to start backend process:",
+                    err
+                  );
                   globalVal.pyBackendProcess = null;
                 });
 
                 pyProcess.on("exit", (code) => {
-                  console.log(`[Vite Proxy] Backend process exited with code ${code}`);
+                  console.log(
+                    `[Vite Proxy] Backend process exited with code ${code}`
+                  );
                   globalVal.pyBackendProcess = null;
                 });
 
@@ -119,7 +154,12 @@ export default defineConfig(({ mode }) => {
                 );
               } catch (err: any) {
                 res.writeHead(500, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ success: false, message: err.message || String(err) }));
+                res.end(
+                  JSON.stringify({
+                    success: false,
+                    message: err.message || String(err),
+                  })
+                );
               }
               return;
             }
@@ -137,7 +177,8 @@ export default defineConfig(({ mode }) => {
 
               const duration = Date.now() - startTime;
               let statusColor = "\x1b[32m"; // Green for 2xx
-              if (res.statusCode >= 500) statusColor = "\x1b[31m"; // Red for 5xx
+              if (res.statusCode >= 500)
+                statusColor = "\x1b[31m"; // Red for 5xx
               else if (res.statusCode >= 400)
                 statusColor = "\x1b[33m"; // Yellow for 4xx
               else if (res.statusCode >= 300) statusColor = "\x1b[36m"; // Cyan for 3xx
@@ -182,8 +223,8 @@ export default defineConfig(({ mode }) => {
             });
             next();
           });
-        }
-      }
+        },
+      },
     ],
     resolve: {
       alias: {

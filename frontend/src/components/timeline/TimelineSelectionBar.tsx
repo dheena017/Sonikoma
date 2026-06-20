@@ -103,11 +103,16 @@ export default function TimelineSelectionBar({
                     </div>
 
                     {/* Process Bar for Batch Operations */}
-                    {((isBatchCropping && batchProgress) || (isCleaningBubbles && cleanProgress)) && (
+                    {((isBatchCropping && batchProgress) ||
+                      (isCleaningBubbles && cleanProgress)) &&
                       (() => {
-                        const prog = isBatchCropping ? batchProgress : cleanProgress;
+                        const prog = isBatchCropping
+                          ? batchProgress
+                          : cleanProgress;
                         if (!prog || prog.total === 0) return null;
-                        const pct = Math.round((prog.current / prog.total) * 100);
+                        const pct = Math.round(
+                          (prog.current / prog.total) * 100
+                        );
                         return (
                           <div className="w-full space-y-1">
                             <div className="relative h-1.5 w-full bg-black/60 rounded-full overflow-hidden border border-purple-950 shadow-inner">
@@ -123,8 +128,7 @@ export default function TimelineSelectionBar({
                             </div>
                           </div>
                         );
-                      })()
-                    )}
+                      })()}
                   </div>
                 )}
 

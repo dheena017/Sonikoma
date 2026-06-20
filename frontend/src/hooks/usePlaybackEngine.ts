@@ -44,7 +44,7 @@ export function usePlaybackEngine({
       }
     };
   }, []);
-// ...
+  // ...
   const speakDialogue = useCallback(
     (text: string, panelDuration?: number) => {
       if (!window.speechSynthesis || isMuted) return;
@@ -127,7 +127,10 @@ export function usePlaybackEngine({
         audio.volume = volume / 100;
         activeAudioRef.current = audio;
         audio.play().catch((err) => {
-          console.error("[Playback] Failed playing pre-generated panel audio, falling back to speech synthesis:", err);
+          console.error(
+            "[Playback] Failed playing pre-generated panel audio, falling back to speech synthesis:",
+            err
+          );
           speakDialogue(activePanel.speech_text, activePanel.duration);
         });
       } else {

@@ -90,7 +90,7 @@ export function useVideoGeneration({
       manganato: "Manganato",
       mangakakalot: "Mangakakalot",
       batoto: "Bato.to",
-      custom: "Direct Image / Custom URL"
+      custom: "Direct Image / Custom URL",
     };
 
     const selectedSourceName =

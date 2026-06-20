@@ -50,7 +50,14 @@ export function parseWebtoonUrl(urlStr: string) {
 
     // Check query params for episode/chapter indicators
     let epVal: string | null = null;
-    const searchKeys = ['episode_no', 'episode', 'chapter', 'ep', 'no', 'chapter_no'];
+    const searchKeys = [
+      "episode_no",
+      "episode",
+      "chapter",
+      "ep",
+      "no",
+      "chapter_no",
+    ];
     for (const key of searchKeys) {
       const val = urlObj.searchParams.get(key);
       if (val) {
@@ -66,7 +73,10 @@ export function parseWebtoonUrl(urlStr: string) {
 
     const cleanTitle = (raw: string) => {
       // Check if original is UUID
-      const isOriginalUuid = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(raw);
+      const isOriginalUuid =
+        /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(
+          raw
+        );
       if (isOriginalUuid) {
         return getSourceName(urlStr) + " Comic";
       }
@@ -83,9 +93,11 @@ export function parseWebtoonUrl(urlStr: string) {
 
     if (parts.length >= 2) {
       genre = parts[0] || "general";
-      
+
       // Check if series title and chapter number are merged in parts[1]
-      const mergeMatch = parts[1].match(/^(.*?)[-_](?:chapter|episode|ep|ch|no)[-_]?(\d+)(?:[-_].*)?$/i);
+      const mergeMatch = parts[1].match(
+        /^(.*?)[-_](?:chapter|episode|ep|ch|no)[-_]?(\d+)(?:[-_].*)?$/i
+      );
       if (mergeMatch) {
         title = cleanTitle(mergeMatch[1]);
         if (!epVal) {
@@ -94,7 +106,7 @@ export function parseWebtoonUrl(urlStr: string) {
       } else {
         title = cleanTitle(parts[1]);
       }
-      
+
       // Look for a chapter segment in remaining path parts containing a digit
       let epPart = "";
       for (let i = 2; i < parts.length; i++) {
@@ -103,7 +115,7 @@ export function parseWebtoonUrl(urlStr: string) {
           break;
         }
       }
-      
+
       if (!epPart && parts[2] && parts[2] !== "viewer") {
         epPart = parts[2];
       }
@@ -112,7 +124,7 @@ export function parseWebtoonUrl(urlStr: string) {
         // Find first number sequence as chapter number
         const numMatch = epPart.match(/(?:^|[^0-9])(\d+)(?:[^0-9]|$)/);
         let pathNum = numMatch ? numMatch[1] : "";
-        
+
         if (!epVal && pathNum) {
           chapterNumber = pathNum;
         }
@@ -125,16 +137,24 @@ export function parseWebtoonUrl(urlStr: string) {
           rawTitle = after.replace(/[-_]+/g, " ").trim();
           if (!rawTitle) {
             const before = epPart.substring(0, numIdx);
-            rawTitle = before.replace(/(?:chapter|episode|ep|no)/gi, "").replace(/[-_]+/g, " ").trim();
+            rawTitle = before
+              .replace(/(?:chapter|episode|ep|no)/gi, "")
+              .replace(/[-_]+/g, " ")
+              .trim();
           }
         } else {
-          rawTitle = epPart.replace(/(?:chapter|episode|ep|no)/gi, "").replace(/[-_]+/g, " ").trim();
+          rawTitle = epPart
+            .replace(/(?:chapter|episode|ep|no)/gi, "")
+            .replace(/[-_]+/g, " ")
+            .trim();
         }
         chapterTitle = rawTitle.replace(/\b\w/g, (c) => c.toUpperCase());
       }
     } else if (parts.length === 1) {
       // Check if series title and chapter number are merged in parts[0]
-      const mergeMatch = parts[0].match(/^(.*?)[-_](?:chapter|episode|ep|ch|no)[-_]?(\d+)(?:[-_].*)?$/i);
+      const mergeMatch = parts[0].match(
+        /^(.*?)[-_](?:chapter|episode|ep|ch|no)[-_]?(\d+)(?:[-_].*)?$/i
+      );
       if (mergeMatch) {
         title = cleanTitle(mergeMatch[1]);
         if (!epVal) {
@@ -166,16 +186,19 @@ export function getSourceName(urlStr: string): string {
   try {
     if (!urlStr) return "Custom Source";
     const cleaned = urlStr.trim();
-    const urlObj = new URL(cleaned.startsWith("http") ? cleaned : "https://" + cleaned);
+    const urlObj = new URL(
+      cleaned.startsWith("http") ? cleaned : "https://" + cleaned
+    );
     const host = urlObj.hostname.toLowerCase();
-    
+
     if (host.includes("asurascans.com")) return "Asura Scans";
-    if (host.includes("webtoons.com") || host.includes("webtoon.com")) return "Webtoons";
+    if (host.includes("webtoons.com") || host.includes("webtoon.com"))
+      return "Webtoons";
     if (host.includes("manhuato.com")) return "ManhuaTo";
     if (host.includes("mangadex.org")) return "MangaDex";
     if (host.includes("webcomicsapp.com")) return "WebComics App";
     if (host.includes("toomics.com")) return "Toomics";
-    
+
     const parts = host.replace("www.", "").split(".");
     if (parts.length > 0) {
       return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);

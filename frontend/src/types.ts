@@ -22,4 +22,3 @@ export interface GeneratedPanel {
   bubble_method?: string;
   audio_url?: string;
 }
-

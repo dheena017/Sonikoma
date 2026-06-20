@@ -39,7 +39,12 @@ export function useSceneModifier({
     setPanels((prev) =>
       prev.map((p) =>
         p.id === panelId
-          ? { ...p, speech_text: text, duration: newDuration, audio_url: undefined }
+          ? {
+              ...p,
+              speech_text: text,
+              duration: newDuration,
+              audio_url: undefined,
+            }
           : p
       )
     );
@@ -95,7 +100,9 @@ export function useSceneModifier({
     const originalPanel = panels.find((p) => p.id === panelId);
     const originalDuration = originalPanel ? originalPanel.duration : 0;
     setPanels((prev) =>
-      prev.map((p) => (p.id === panelId ? { ...p, duration: durVal, audio_url: undefined } : p))
+      prev.map((p) =>
+        p.id === panelId ? { ...p, duration: durVal, audio_url: undefined } : p
+      )
     );
     console.log(
       `[StoryboardTimeline] [Duration Edit] Panel #${panelId} duration changed:`

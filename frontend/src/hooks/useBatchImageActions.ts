@@ -104,7 +104,10 @@ export function useBatchImageActions({
   const handleCleanBubblesSelected = async () => {
     const targetImages = selectedScraped;
     if (targetImages.length === 0) {
-      addNotification("No panels selected — select panels first in the scraper deck.", "warning");
+      addNotification(
+        "No panels selected — select panels first in the scraper deck.",
+        "warning"
+      );
       return;
     }
     console.log(
@@ -210,7 +213,10 @@ export function useBatchImageActions({
   const handleAutoCropSelected = async () => {
     const targetImages = selectedScraped;
     if (targetImages.length === 0) {
-      addNotification("No panels selected — select panels first in the scraper deck.", "warning");
+      addNotification(
+        "No panels selected — select panels first in the scraper deck.",
+        "warning"
+      );
       return;
     }
     console.log(
@@ -273,7 +279,10 @@ export function useBatchImageActions({
               )}..., fell back to local CV: ${data.message}`,
               ...prev,
             ]);
-            addNotification(`Gemini AI failed (quota/connection). Fell back to local CV detection.`, "info");
+            addNotification(
+              `Gemini AI failed (quota/connection). Fell back to local CV detection.`,
+              "info"
+            );
           }
 
           if (data.success && Array.isArray(data.panels)) {
