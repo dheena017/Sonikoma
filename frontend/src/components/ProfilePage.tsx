@@ -483,15 +483,15 @@ export default function ProfilePage({
       });
   };
 
-  const handleTerminateSession = (id: string) => {
+  const handleTerminateSession = async (id: string) => {
     const token = localStorage.getItem("anivox_token");
     if (!token) return;
 
-    if (
-      !window.confirm(
-        "Are you sure you want to terminate this session? You will be logged out on that device."
-      )
-    ) {
+    const confirm = (window as any).confirmAsync || window.confirm;
+    const confirmed = await confirm(
+      "Are you sure you want to terminate this session? You will be logged out on that device."
+    );
+    if (!confirmed) {
       return;
     }
 
@@ -584,15 +584,15 @@ export default function ProfilePage({
     alert("Copied full API key to clipboard!");
   };
 
-  const handleDeleteToken = (id: string) => {
+  const handleDeleteToken = async (id: string) => {
     const token = localStorage.getItem("anivox_token");
     if (!token) return;
 
-    if (
-      !window.confirm(
-        "Are you sure you want to delete this API key? Apps using it will immediately lose access."
-      )
-    ) {
+    const confirm = (window as any).confirmAsync || window.confirm;
+    const confirmed = await confirm(
+      "Are you sure you want to delete this API key? Apps using it will immediately lose access."
+    );
+    if (!confirmed) {
       return;
     }
 

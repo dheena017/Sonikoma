@@ -74,6 +74,13 @@ async def get_projects(current_user: dict = Depends(get_current_user)):
     try:
         logger.info(f"[Database] Fetching project histories for user {current_user['user_id']} from local SQLite...")
         projects = db.get_all_projects(user_id=current_user['user_id'])
+        
+        # Ensure all project cover images are proxied if external
+        from urllib.parse import quote
+        for proj in projects:
+            if proj.get("cover_image") and proj["cover_image"].startswith("http") and not proj["cover_image"].startswith("/api/"):
+                proj["cover_image"] = f"/api/proxy-image?url={quote(proj['cover_image'])}"
+                
         logger.info(f"[Database] Retrieved {len(projects)} projects.")
         return {"success": True, "projects": projects}
     except Exception as e:
@@ -98,7 +105,18 @@ async def get_single_project(
             logger.warning(f"[Database] Access denied for user {current_user['user_id']} to project {projectId}")
             raise HTTPException(status_code=403, detail="Access denied.")
 
+        from urllib.parse import quote
+        # Ensure project cover image is proxied
+        if project.get("cover_image") and project["cover_image"].startswith("http") and not project["cover_image"].startswith("/api/"):
+            project["cover_image"] = f"/api/proxy-image?url={quote(project['cover_image'])}"
+
         panels = db.get_panels(projectId)
+        # Ensure all panel images are proxied
+        for p in panels:
+            img = p.get("image_url")
+            if img and img.startswith("http") and not img.startswith("/api/"):
+                p["image_url"] = f"/api/proxy-image?url={quote(img)}"
+
         logger.info(f"[Database] Project {projectId} found with {len(panels)} panels.")
         return {"success": True, "project": project, "panels": panels}
     except HTTPException:
