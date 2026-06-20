@@ -7,6 +7,24 @@ export interface AIModel {
 
 export const AI_MODELS: AIModel[] = [
   {
+    id: "gemini-2.0-flash-lite",
+    name: "Gemini 2.0 Flash Lite",
+    type: "free",
+    provider: "Google",
+  },
+  {
+    id: "gemini-1.5-flash",
+    name: "Gemini 1.5 Flash",
+    type: "free",
+    provider: "Google",
+  },
+  {
+    id: "gemini-2.0-flash",
+    name: "Gemini 2.0 Flash",
+    type: "free",
+    provider: "Google",
+  },
+  {
     id: "gemini-3.5-flash",
     name: "Gemini 3.5 Flash",
     type: "free",
@@ -21,6 +39,12 @@ export const AI_MODELS: AIModel[] = [
   {
     id: "gemini-3.5-pro",
     name: "Gemini 3.5 Pro",
+    type: "paid",
+    provider: "Google",
+  },
+  {
+    id: "gemini-2.5-pro",
+    name: "Gemini 2.5 Pro",
     type: "paid",
     provider: "Google",
   },

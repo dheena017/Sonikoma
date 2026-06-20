@@ -165,7 +165,7 @@ export function useAppState() {
     total: number;
   } | null>(null);
   const [croppingImgUrl, setCroppingImgUrl] = useState<string | null>(null);
-  const [cropModel, setCropModel] = useState<string>("gemini-2.5-flash");
+  const [cropModel, setCropModel] = useState<string>("gemini-2.0-flash-lite");
   const [cropMinHeightPx, setCropMinHeightPx] = useState<number>(60);
   const [cropCannyLow, setCropCannyLow] = useState<number>(20);
   const [cropCannyHigh, setCropCannyHigh] = useState<number>(100);
@@ -476,21 +476,28 @@ export function useAppState() {
             }
 
             if (data.panels && data.panels.length > 0) {
-              const mappedPanels = data.panels.map((p: any) => ({
-                ...p,
-                grayscale: p.grayscale === 1 || p.grayscale === true,
-              }));
+              const mappedPanels = data.panels.map((p: any) => {
+                const img = p.image_url;
+                const proxiedImg =
+                  img && img.startsWith("http") && !img.includes("/api/")
+                    ? `/api/proxy-image?url=${encodeURIComponent(img)}`
+                    : img;
+                return {
+                  ...p,
+                  image_url: proxiedImg,
+                  grayscale: p.grayscale === 1 || p.grayscale === true,
+                };
+              });
               setPanels(mappedPanels);
 
               // Populate scraped images list from panels
-              const panelImages = data.panels
+              const panelImages = mappedPanels
                 .map((p: any) => p.image_url)
                 .filter(Boolean);
               setScrapedImages(panelImages);
             }
             addNotification(
-              `Loaded project "${
-                data.project.title || "Untitled"
+              `Loaded project "${data.project.title || "Untitled"
               }" into active workspace!`,
               "success"
             );

@@ -155,13 +155,13 @@ export default function ProfileProjectsTab({
     }
   };
 
-  const handleBatchDelete = () => {
+  const handleBatchDelete = async () => {
     if (selectedIds.length === 0) return;
-    if (
-      window.confirm(
-        `Are you sure you want to delete the ${selectedIds.length} selected project(s)?`
-      )
-    ) {
+    const confirm = (window as any).confirmAsync || window.confirm;
+    const confirmed = await confirm(
+      `Are you sure you want to delete the ${selectedIds.length} selected project(s)?`
+    );
+    if (confirmed) {
       onBatchDelete(selectedIds);
       setSelectedIds([]);
     }
@@ -479,13 +479,13 @@ export default function ProfileProjectsTab({
                     </span>
                     {group.series_id && (
                       <button
-                        onClick={(e) => {
+                        onClick={async (e) => {
                           e.stopPropagation();
-                          if (
-                            confirm(
-                              `Are you sure you want to delete the entire series "${group.title}" and all its chapters?`
-                            )
-                          ) {
+                          const confirm = (window as any).confirmAsync || window.confirm;
+                          const confirmed = await confirm(
+                            `Are you sure you want to delete the entire series "${group.title}" and all its chapters?`
+                          );
+                          if (confirmed) {
                             onDeleteSeries(group.series_id);
                           }
                         }}
@@ -574,12 +574,12 @@ export default function ProfileProjectsTab({
                               {chapter.panels_count || 0} panels
                             </span>
                             <button
-                              onClick={() => {
-                                if (
-                                  confirm(
-                                    `Are you sure you want to delete ${numberStr}?`
-                                  )
-                                ) {
+                              onClick={async () => {
+                                const confirm = (window as any).confirmAsync || window.confirm;
+                                const confirmed = await confirm(
+                                  `Are you sure you want to delete ${numberStr}?`
+                                );
+                                if (confirmed) {
                                   onDeleteChapter(pId);
                                 }
                               }}
@@ -625,12 +625,12 @@ export default function ProfileProjectsTab({
                     <div className="flex items-center gap-2">
                       {group.series_id && (
                         <button
-                          onClick={() => {
-                            if (
-                              confirm(
-                                `Are you sure you want to delete the entire series "${group.title}" and all its chapters?`
-                              )
-                            ) {
+                          onClick={async () => {
+                            const confirm = (window as any).confirmAsync || window.confirm;
+                            const confirmed = await confirm(
+                              `Are you sure you want to delete the entire series "${group.title}" and all its chapters?`
+                            );
+                            if (confirmed) {
                               onDeleteSeries(group.series_id);
                             }
                           }}
@@ -728,12 +728,12 @@ export default function ProfileProjectsTab({
 
                             <div className="flex items-center gap-1.5">
                               <button
-                                onClick={() => {
-                                  if (
-                                    confirm(
-                                      `Are you sure you want to delete ${numberStr}?`
-                                    )
-                                  ) {
+                                onClick={async () => {
+                                  const confirm = (window as any).confirmAsync || window.confirm;
+                                  const confirmed = await confirm(
+                                    `Are you sure you want to delete ${numberStr}?`
+                                  );
+                                  if (confirmed) {
                                     onDeleteChapter(pId);
                                   }
                                 }}
