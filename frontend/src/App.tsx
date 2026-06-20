@@ -505,6 +505,7 @@ export default function App() {
         onLogin={login}
         onNavigateToRegister={() => navigateTo("/register")}
         onNavigateToForgotPassword={() => navigateTo("/forgot-password")}
+        onNavigateHome={() => navigateTo("/")}
       />
     );
   }
@@ -515,6 +516,7 @@ export default function App() {
       <RegisterPage
         onRegister={register}
         onNavigateToLogin={() => navigateTo("/login")}
+        onNavigateHome={() => navigateTo("/")}
       />
     );
   }
@@ -525,6 +527,7 @@ export default function App() {
       <ForgotPasswordPage
         onForgotPassword={forgotPassword}
         onNavigateToLogin={() => navigateTo("/login")}
+        onNavigateHome={() => navigateTo("/")}
       />
     );
   }

@@ -68,6 +68,7 @@ At the **end of every conversation**, append one row to the Session Changelog ta
 
 > Auto-updated by AI at the end of each conversation. Newest entries at the top.
 
+| 2026-06-20 | Resolved favicon.ico 404 error by creating public folder, adding modern SVG and ICO favicons, and middleware handling | `frontend/public/favicon.svg`, `frontend/public/favicon.ico`, `frontend/index.html`, `frontend/vite.config.ts`, `docs/architecture/project_structure.md`, `RULES.md` |
 | 2026-06-19 | Removed 'Storyboard active' status message and bullet point from the timeline selection bar | `frontend/src/components/timeline/TimelineSelectionBar.tsx` |
 | 2026-06-19 | Removed Live Asset Extraction section and related states/effects from ProjectDetailsPage.tsx | `frontend/src/components/ProjectDetailsPage.tsx` |
 | 2026-06-19 | Fixed timeline selection bar visibility and padding to make compile video button always accessible | `frontend/src/components/timeline/TimelineSelectionBar.tsx`, `frontend/src/components/timeline/StoryboardTimeline.tsx` |

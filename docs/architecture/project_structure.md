@@ -10,6 +10,9 @@ This document details the folder hierarchy of the **Anivox — Webtoon-to-Video*
 webtoon-to-video-backend/
 │
 ├── frontend/                         ← React 19 + TypeScript + Vite + Tailwind UI
+│   ├── public/                       ← Static assets (favicons, etc.)
+│   │   ├── favicon.svg               ← Modern SVG favicon
+│   │   └── favicon.ico               ← Fallback legacy favicon
 │   ├── src/
 │   │   ├── api/
 │   │   │   └── fetchWithInterceptor.ts   ← Global fetch wrapper + error handler

@@ -5,6 +5,7 @@ import {
   Lock,
   User,
   ArrowRight,
+  ArrowLeft,
   Loader2,
   Eye,
   EyeOff,
@@ -20,6 +21,7 @@ import AuthShowcase, { THEMES, ThemeKey } from "./AuthShowcase.js";
 interface RegisterPageProps {
   onRegister: (data: any) => Promise<void>;
   onNavigateToLogin: () => void;
+  onNavigateHome?: () => void;
 }
 
 const CREATOR_ROLES = [
@@ -32,6 +34,7 @@ const CREATOR_ROLES = [
 export default function RegisterPage({
   onRegister,
   onNavigateToLogin,
+  onNavigateHome,
 }: RegisterPageProps) {
   const [fullName, setFullName] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -155,15 +158,27 @@ export default function RegisterPage({
         {/* Soft background glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] rounded-full bg-purple-600/5 blur-[120px] pointer-events-none" />
 
-        {/* Header branding & Theme Selector (only visible on mobile/tablet) */}
+        {/* Header branding & Theme Selector */}
         <div className="flex items-center justify-between mb-8 relative z-10">
-          <div className="flex lg:hidden items-center gap-2">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-purple-600/20 border border-purple-500/30">
-              <UserPlus className="w-4 h-4 text-purple-400" />
+          <div className="flex items-center gap-3">
+            {onNavigateHome && (
+              <button
+                onClick={onNavigateHome}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900/60 hover:bg-neutral-800/80 border border-white/5 hover:border-white/10 rounded-xl text-neutral-400 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm group"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+                <span>Back</span>
+              </button>
+            )}
+
+            <div className="flex lg:hidden items-center gap-2">
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-purple-600/20 border border-purple-500/30">
+                <UserPlus className="w-4 h-4 text-purple-400" />
+              </div>
+              <span className="text-lg font-bold text-white tracking-tight">
+                Anivox
+              </span>
             </div>
-            <span className="text-lg font-bold text-white tracking-tight">
-              Anivox
-            </span>
           </div>
 
           {/* Minimal Palette Switcher */}

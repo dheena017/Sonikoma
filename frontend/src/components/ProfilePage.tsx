@@ -63,7 +63,7 @@ export default function ProfilePage({
   const handleConfirmAvatarUpdate = async () => {
     if (!tempAvatarUrl) return;
 
-    const token = localStorage.getItem("anivox_token");
+    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
     if (!token) return;
 
     try {
@@ -240,7 +240,7 @@ export default function ProfilePage({
 
   // Load profile assets dynamically on mount
   React.useEffect(() => {
-    const token = localStorage.getItem("anivox_token");
+    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
     if (!token) return;
 
     fetch("/api/auth/me", {
@@ -396,7 +396,7 @@ export default function ProfilePage({
 
   const handleProfileSave = (e: React.FormEvent) => {
     e.preventDefault();
-    const token = localStorage.getItem("anivox_token");
+    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
     if (!token) return;
 
     fetch("/api/auth/profile", {
@@ -452,7 +452,7 @@ export default function ProfilePage({
       return;
     }
 
-    const token = localStorage.getItem("anivox_token");
+    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
     if (!token) return;
 
     fetch("/api/auth/password", {
@@ -484,7 +484,7 @@ export default function ProfilePage({
   };
 
   const handleTerminateSession = async (id: string) => {
-    const token = localStorage.getItem("anivox_token");
+    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
     if (!token) return;
 
     const confirm = (window as any).confirmAsync || window.confirm;
@@ -510,7 +510,7 @@ export default function ProfilePage({
 
   const handleClaimCredits = () => {
     if (hasClaimedToday) return;
-    const token = localStorage.getItem("anivox_token");
+    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
     if (!token) return;
 
     fetch("/api/auth/claim-credits", {
@@ -541,7 +541,7 @@ export default function ProfilePage({
     e.preventDefault();
     if (!newTokenName.trim()) return;
 
-    const token = localStorage.getItem("anivox_token");
+    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
     if (!token) return;
 
     fetch("/api/auth/api-keys", {
@@ -585,7 +585,7 @@ export default function ProfilePage({
   };
 
   const handleDeleteToken = async (id: string) => {
-    const token = localStorage.getItem("anivox_token");
+    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
     if (!token) return;
 
     const confirm = (window as any).confirmAsync || window.confirm;
@@ -610,7 +610,7 @@ export default function ProfilePage({
   };
 
   const handleToggleMfa = async (enabled: boolean): Promise<boolean> => {
-    const token = localStorage.getItem("anivox_token");
+    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
     if (!token) return false;
 
     try {
@@ -641,7 +641,7 @@ export default function ProfilePage({
     type: string,
     value: string
   ): Promise<boolean> => {
-    const token = localStorage.getItem("anivox_token");
+    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
     if (!token) return false;
 
     try {
@@ -676,7 +676,7 @@ export default function ProfilePage({
   };
 
   const handleBatchDeleteProjects = (ids: string[]) => {
-    const token = localStorage.getItem("anivox_token");
+    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
     if (!token) return;
 
     fetch("/api/projects/batch-delete", {
@@ -707,7 +707,7 @@ export default function ProfilePage({
   };
 
   const handleDeleteChapter = (id: string) => {
-    const token = localStorage.getItem("anivox_token");
+    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
     if (!token) return;
 
     fetch(`/api/projects/${id}`, {
@@ -732,7 +732,7 @@ export default function ProfilePage({
   };
 
   const handleDeleteSeries = (seriesId: string) => {
-    const token = localStorage.getItem("anivox_token");
+    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
     if (!token) return;
 
     fetch(`/api/projects/series/${seriesId}`, {
@@ -864,7 +864,17 @@ export default function ProfilePage({
               Back to Dashboard
             </button>
             <button
-              onClick={onLogout}
+              onClick={async () => {
+                const confirm = (window as any).confirmAsync || window.confirm;
+                const confirmed = await confirm(
+                  "Are you sure you want to sign out? You will need to log back in to access your projects.",
+                  "Sign Out",
+                  "red"
+                );
+                if (confirmed) {
+                  onLogout();
+                }
+              }}
               className="px-4 py-2 bg-rose-600/10 border border-rose-500/20 hover:bg-rose-600 rounded-xl text-sm font-bold text-rose-400 hover:text-white transition-all flex items-center gap-2 cursor-pointer shadow-sm active:scale-95 duration-300"
             >
               <LogOut className="w-4 h-4" />

@@ -32,7 +32,7 @@ router = APIRouter()
 
 SECRET_KEY = os.getenv("JWT_SECRET_KEY", "anivox_super_secret_key_change_me")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 1 week
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 365  # 1 year default
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
@@ -46,6 +46,7 @@ class UserRegister(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+    rememberMe: Optional[bool] = False
 
 
 
@@ -170,7 +171,8 @@ async def login(user_data: UserLogin, request: Request):
     create_user_session(user["user_id"], session_id, browser_name, ip_addr, "New York, USA")
     write_audit_log(user["user_id"], f"User login via {browser_name}", ip_addr, "Success")
 
-    access_token = create_access_token(data={"sub": user["user_id"]})
+    expires_delta = timedelta(days=365) if user_data.rememberMe else timedelta(days=30)
+    access_token = create_access_token(data={"sub": user["user_id"]}, expires_delta=expires_delta)
     user_info = {
         "user_id": user["user_id"],
         "email": user["email"],

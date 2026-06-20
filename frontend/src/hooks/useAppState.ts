@@ -317,9 +317,22 @@ export function useAppState() {
   );
 
   const fetchWithInterceptor = useCallback(
-    createFetchWithInterceptor({ addNotification, setErrorPopup }),
+    createFetchWithInterceptor({
+      addNotification,
+      setErrorPopup,
+      onUnauthorized: () => {
+        localStorage.removeItem("anivox_token");
+        sessionStorage.removeItem("anivox_token");
+        setUser(null);
+        setIsAuthenticated(false);
+      },
+    }),
     [addNotification, setErrorPopup]
   );
+
+  const getToken = useCallback(() => {
+    return localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token");
+  }, []);
 
   // --- Auth Actions ---
   const login = useCallback(
@@ -331,7 +344,13 @@ export function useAppState() {
       });
       const data = await res.json();
       if (data.access_token) {
-        localStorage.setItem("anivox_token", data.access_token);
+        if (credentials.rememberMe) {
+          localStorage.setItem("anivox_token", data.access_token);
+          sessionStorage.removeItem("anivox_token");
+        } else {
+          sessionStorage.setItem("anivox_token", data.access_token);
+          localStorage.removeItem("anivox_token");
+        }
         setUser(data.user);
         setIsAuthenticated(true);
         addNotification("Logged in successfully!", "success");
@@ -351,7 +370,9 @@ export function useAppState() {
       });
       const data = await res.json();
       if (data.access_token) {
+        // Default to localStorage for registration/new accounts
         localStorage.setItem("anivox_token", data.access_token);
+        sessionStorage.removeItem("anivox_token");
         setUser(data.user);
         setIsAuthenticated(true);
         addNotification("Account created successfully!", "success");
@@ -364,6 +385,7 @@ export function useAppState() {
 
   const logout = useCallback(() => {
     localStorage.removeItem("anivox_token");
+    sessionStorage.removeItem("anivox_token");
     setUser(null);
     setIsAuthenticated(false);
     addNotification("Logged out successfully.", "info");
@@ -371,7 +393,7 @@ export function useAppState() {
   }, [addNotification]);
 
   const checkAuth = useCallback(async (showDelay: boolean = true) => {
-    const token = localStorage.getItem("anivox_token");
+    const token = getToken();
 
     // Artificial delay to show the fancy loading screen
     const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
@@ -395,7 +417,12 @@ export function useAppState() {
         setUser(data);
         setIsAuthenticated(true);
       } else {
-        localStorage.removeItem("anivox_token");
+        // Only clear token on 401 Unauthorized or 403 Forbidden.
+        // Server offline or gateway errors (500, 502, 503, 504) should not clear the token.
+        if (res.status === 401 || res.status === 403) {
+          localStorage.removeItem("anivox_token");
+          sessionStorage.removeItem("anivox_token");
+        }
       }
     } catch (e) {
       console.error("Auth check failed", e);
@@ -407,7 +434,7 @@ export function useAppState() {
       setAuthLoading(false);
       setIsInitializing(false);
     }
-  }, []);
+  }, [getToken]);
 
   const forgotPassword = useCallback(
     async (email: string) => {

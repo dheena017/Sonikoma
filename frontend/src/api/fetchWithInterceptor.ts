@@ -14,11 +14,13 @@ export type AddNotificationFn = (
 export interface FetchInterceptorHandlers {
   addNotification: AddNotificationFn;
   setErrorPopup: (detail: ErrorPopupDetail | null) => void;
+  onUnauthorized?: () => void;
 }
 
 export function createFetchWithInterceptor({
   addNotification,
   setErrorPopup,
+  onUnauthorized,
 }: FetchInterceptorHandlers) {
   return async (input: RequestInfo, init?: RequestInit): Promise<Response> => {
     console.log(`[API Interceptor] Fetching: ${input}`);
@@ -68,6 +70,7 @@ export function createFetchWithInterceptor({
                 suggestion:
                   "This action is protected. Please check that any API keys, credentials, or secrets are correctly declared in your container environment.",
               });
+              onUnauthorized?.();
               handled = true;
             } else if (response.status === 429) {
               errMsg =

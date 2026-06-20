@@ -878,12 +878,10 @@ if __name__ == "__main__":
         "log_config": custom_log_config,
         "use_colors": True,
     }
+    # Reload is disabled because reloading is managed externally by the Node runner
+    run_args["reload"] = False
     if IS_PRODUCTION:
-        run_args["reload"] = False
         run_args["workers"] = 2
-    else:
-        run_args["reload"] = True
-        run_args["reload_dirs"] = ["."]
 
     uvicorn.run(**run_args)
-    # Trigger auto-reload for database re-seeding config
+    # Trigger auto-reload for database re-seeding config v3

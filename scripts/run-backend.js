@@ -72,32 +72,86 @@ try {
 const pythonPath = path.resolve(__dirname, "../.venv/Scripts/python.exe");
 const backendDir = path.resolve(__dirname, "../backend/python");
 
+let pyProcess = null;
+let isRestarting = false;
+
+function handleBackendExit(proc, code) {
+  if (proc !== pyProcess) return; // Ignore old killed processes
+  if (code !== 0 && code !== null) {
+    logger.error(`Backend process exited unexpectedly with code ${code}`);
+    process.exit(code);
+  } else {
+    logger.info(`Backend process exited cleanly.`);
+    process.exit(0);
+  }
+}
+
+async function restartBackend(changedFile) {
+  if (isRestarting) return;
+  isRestarting = true;
+  logger.warn(`🔄 Detected change in backend Python files (${changedFile || "unknown"}). Restarting backend process...`);
+
+  const oldProcess = pyProcess;
+  if (oldProcess) {
+    pyProcess = null; // Mark as no longer active to ignore its exit event
+    await new Promise((resolve) => {
+      oldProcess.on("exit", () => resolve());
+      if (process.platform === "win32") {
+        spawn("taskkill", ["/F", "/T", "/PID", oldProcess.pid.toString()]);
+      } else {
+        oldProcess.kill("SIGINT");
+      }
+      setTimeout(resolve, 2000);
+    });
+  }
+
+  pyProcess = spawn(pythonPath, ["main.py"], {
+    cwd: backendDir,
+    stdio: "inherit",
+    env: { ...process.env, PYTHONIOENCODING: "utf-8", FORCE_COLOR: "1" },
+  });
+
+  const currentProcess = pyProcess;
+  currentProcess.on("error", (err) => {
+    logger.error(`Failed to start backend process:`, err);
+    if (currentProcess === pyProcess) process.exit(1);
+  });
+
+  currentProcess.on("exit", (code) => {
+    handleBackendExit(currentProcess, code);
+  });
+
+  logger.info(`Waiting for backend to re-initialize...`);
+  setTimeout(checkHealth, 500);
+  isRestarting = false;
+}
+
 logger.info(`Starting python backend from ${backendDir}...`);
 
-const pyProcess = spawn(pythonPath, ["main.py"], {
+pyProcess = spawn(pythonPath, ["main.py"], {
   cwd: backendDir,
   stdio: "inherit",
   env: { ...process.env, PYTHONIOENCODING: "utf-8", FORCE_COLOR: "1" },
 });
 
-pyProcess.on("error", (err) => {
+const initialProcess = pyProcess;
+initialProcess.on("error", (err) => {
   logger.error(`Failed to start backend process:`, err);
   process.exit(1);
 });
 
-pyProcess.on("exit", (code) => {
-  if (code !== 0 && code !== null) {
-    logger.error(`Backend process exited with code ${code}`);
-  } else {
-    logger.info(`Backend process exited with code ${code}`);
-  }
-  process.exit(code !== null ? code : 0);
+initialProcess.on("exit", (code) => {
+  handleBackendExit(initialProcess, code);
 });
 
 // Poll the health endpoint
 const url = `http://127.0.0.1:${port}/api/health`;
 
 function checkHealth() {
+  if (pyProcess && pyProcess.exitCode !== null) {
+    // Stop polling if the active process has already exited
+    return;
+  }
   http
     .get(url, (res) => {
       // 200 OK, 307 Temporary Redirect, or 302 Found indicate the server is active
@@ -119,6 +173,64 @@ function checkHealth() {
 
 // Start checking after a short delay
 setTimeout(checkHealth, 500);
+
+// Set up file watcher to restart backend on changes
+const fileMtimes = new Map();
+
+function populateMtimes(dir) {
+  try {
+    const files = fs.readdirSync(dir);
+    for (const file of files) {
+      const fullPath = path.resolve(dir, file);
+      const stat = fs.statSync(fullPath);
+      if (stat.isDirectory()) {
+        if (file !== "__pycache__" && file !== "node_modules" && file !== ".venv" && file !== ".git") {
+          populateMtimes(fullPath);
+        }
+      } else if (stat.isFile() && file.endsWith(".py")) {
+        fileMtimes.set(fullPath.toLowerCase(), stat.mtimeMs);
+      }
+    }
+  } catch (err) {
+    // Ignore errors
+  }
+}
+
+populateMtimes(backendDir);
+
+let restartTimeout = null;
+fs.watch(backendDir, { recursive: true }, (eventType, filename) => {
+  if (filename && filename.endsWith(".py")) {
+    const fullPath = path.resolve(backendDir, filename);
+    const key = fullPath.toLowerCase();
+    try {
+      if (fs.existsSync(fullPath)) {
+        const stat = fs.statSync(fullPath);
+        if (stat.isFile()) {
+          const lastMtime = fileMtimes.get(key) || 0;
+          if (stat.mtimeMs > lastMtime) {
+            fileMtimes.set(key, stat.mtimeMs);
+            if (restartTimeout) clearTimeout(restartTimeout);
+            restartTimeout = setTimeout(() => {
+              restartBackend(filename);
+            }, 500);
+          }
+        }
+      } else {
+        // File was deleted
+        if (fileMtimes.has(key)) {
+          fileMtimes.delete(key);
+          if (restartTimeout) clearTimeout(restartTimeout);
+          restartTimeout = setTimeout(() => {
+            restartBackend(filename);
+          }, 500);
+        }
+      }
+    } catch (e) {
+      // Ignore stat errors
+    }
+  }
+});
 
 // Clean up and wait for backend to close to prevent output collision in terminal on Ctrl+C
 let isExiting = false;

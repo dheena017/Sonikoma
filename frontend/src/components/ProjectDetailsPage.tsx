@@ -146,7 +146,7 @@ export default function ProjectDetailsPage({
       setLoading(true);
       setError(null);
       try {
-        const token = localStorage.getItem("anivox_token");
+        const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
         const headers: HeadersInit = {};
         if (token) {
           headers["Authorization"] = `Bearer ${token}`;
@@ -215,7 +215,7 @@ export default function ProjectDetailsPage({
     if (!confirmDelete) return;
     setDeleting(true);
     try {
-      const token = localStorage.getItem("anivox_token");
+      const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
       const headers: HeadersInit = { "Content-Type": "application/json" };
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
@@ -269,7 +269,7 @@ export default function ProjectDetailsPage({
     if (!projectId || !project) return;
     setSaveStatus("saving");
     try {
-      const token = localStorage.getItem("anivox_token");
+      const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
       const headers: HeadersInit = {
         "Content-Type": "application/json",
       };

@@ -21,11 +21,13 @@ import AuthShowcase, { THEMES, ThemeKey } from "./AuthShowcase.js";
 interface ForgotPasswordPageProps {
   onForgotPassword: (email: string) => Promise<void>;
   onNavigateToLogin: () => void;
+  onNavigateHome?: () => void;
 }
 
 export default function ForgotPasswordPage({
   onForgotPassword,
   onNavigateToLogin,
+  onNavigateHome,
 }: ForgotPasswordPageProps) {
   const [email, setEmail] = React.useState("");
   const [phoneNumber, setPhoneNumber] = React.useState("");
@@ -227,17 +229,29 @@ export default function ForgotPasswordPage({
 
         {/* Top Controls Toolbar */}
         <div className="relative z-10 flex items-center justify-between mb-6">
-          <div className="flex lg:hidden items-center gap-2">
-            <div
-              className={`flex items-center justify-center w-8 h-8 rounded-lg ${currentTheme.accentBg} border ${currentTheme.accentBorder}`}
-            >
-              <KeyRound className={`w-4 h-4 ${currentTheme.accentText}`} />
+          {/* Header branding & Back Button */}
+          <div className="flex items-center gap-3">
+            {onNavigateHome && (
+              <button
+                onClick={onNavigateHome}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900/60 hover:bg-neutral-800/80 border border-white/5 hover:border-white/10 rounded-xl text-neutral-400 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm group"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+                <span>Back</span>
+              </button>
+            )}
+
+            <div className="flex lg:hidden items-center gap-2">
+              <div
+                className={`flex items-center justify-center w-8 h-8 rounded-lg ${currentTheme.accentBg} border ${currentTheme.accentBorder}`}
+              >
+                <KeyRound className={`w-4 h-4 ${currentTheme.accentText}`} />
+              </div>
+              <span className="text-lg font-bold text-white tracking-tight">
+                Anivox
+              </span>
             </div>
-            <span className="text-lg font-bold text-white tracking-tight">
-              Anivox
-            </span>
           </div>
-          <div className="hidden lg:block" /> {/* Spacer */}
           <div className="flex items-center gap-4">
             {/* Color Palette Theme Switcher */}
             <div className="flex items-center gap-1.5 bg-neutral-900/60 border border-white/5 p-1 rounded-full backdrop-blur-md">

@@ -33,6 +33,17 @@ export default defineConfig(({ mode }) => {
                 req.url
               );
             }
+
+            if (url === "/favicon.ico" || url === "/favicon.svg") {
+              const filePath = path.resolve(__dirname, "public", url.slice(1));
+              if (fs.existsSync(filePath)) {
+                res.writeHead(200, {
+                  "Content-Type": url.endsWith(".svg") ? "image/svg+xml" : "image/x-icon",
+                });
+                res.end(fs.readFileSync(filePath));
+                return;
+              }
+            }
             if (
               req.url?.startsWith("/start-backend") &&
               req.method === "POST"

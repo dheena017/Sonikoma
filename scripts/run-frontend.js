@@ -161,6 +161,95 @@ function checkBackendRunning() {
 
 const onlyFrontend = process.argv.includes("--only-frontend");
 
+let isRestarting = false;
+
+function handleBackendExit(proc, code) {
+  if (proc !== pyProcess) return; // Ignore old killed processes
+  if (code !== 0 && code !== null) {
+    logger.error(`Backend process exited unexpectedly with code ${code}`);
+    cleanup();
+    process.exit(code);
+  } else {
+    logger.info(`Backend process exited cleanly.`);
+    cleanup();
+    process.exit(0);
+  }
+}
+
+async function restartBackend(changedFile) {
+  if (isRestarting) return;
+  isRestarting = true;
+  logger.warn(`🔄 Detected change in backend Python files (${changedFile || "unknown"}). Restarting backend process...`);
+
+  const oldProcess = pyProcess;
+  if (oldProcess) {
+    pyProcess = null; // Mark as no longer active to ignore its exit event
+    await new Promise((resolve) => {
+      oldProcess.on("exit", () => resolve());
+      if (process.platform === "win32") {
+        spawn("taskkill", ["/F", "/T", "/PID", oldProcess.pid.toString()]);
+      } else {
+        oldProcess.kill("SIGINT");
+      }
+      setTimeout(resolve, 2000);
+    });
+  }
+
+  const pythonPath = path.resolve(__dirname, "../.venv/Scripts/python.exe");
+  const backendDir = path.resolve(__dirname, "../backend/python");
+
+  pyProcess = spawn(pythonPath, ["main.py"], {
+    cwd: backendDir,
+    stdio: "inherit",
+    env: { ...process.env, PYTHONIOENCODING: "utf-8", FORCE_COLOR: "1" },
+  });
+
+  const currentProcess = pyProcess;
+  currentProcess.on("error", (err) => {
+    logger.error(`Failed to start backend process:`, err);
+    if (currentProcess === pyProcess) {
+      cleanup();
+      process.exit(1);
+    }
+  });
+
+  currentProcess.on("exit", (code) => {
+    handleBackendExit(currentProcess, code);
+  });
+
+  logger.info(`Waiting for backend to re-initialize...`);
+  await new Promise((resolve) => {
+    function check() {
+      // If the process has already exited, resolve immediately to let the exit handler run
+      if (currentProcess.exitCode !== null) {
+        resolve();
+        return;
+      }
+      http
+        .get(url, (res) => {
+          if (
+            res.statusCode === 200 ||
+            res.statusCode === 307 ||
+            res.statusCode === 302
+          ) {
+            resolve();
+          } else {
+            setTimeout(check, 300);
+          }
+        })
+        .on("error", () => {
+          setTimeout(check, 300);
+        });
+    }
+    check();
+  });
+
+  if (currentProcess.exitCode === null) {
+    logger.success(`Backend reloaded and online!`);
+  }
+  isRestarting = false;
+}
+
 async function start() {
   const isRunning = await checkBackendRunning();
 
@@ -183,24 +272,26 @@ async function start() {
         env: { ...process.env, PYTHONIOENCODING: "utf-8", FORCE_COLOR: "1" },
       });
 
-      pyProcess.on("error", (err) => {
+      const initialProcess = pyProcess;
+      initialProcess.on("error", (err) => {
         logger.error(`Failed to start backend process:`, err);
         cleanup();
         process.exit(1);
       });
 
-      pyProcess.on("exit", (code) => {
-        if (code !== 0 && code !== null) {
-          logger.error(`Backend process exited unexpectedly with code ${code}`);
-          cleanup();
-          process.exit(code);
-        }
+      initialProcess.on("exit", (code) => {
+        handleBackendExit(initialProcess, code);
       });
 
       // Wait for backend to respond to health check
       logger.info(`Waiting for backend to initialize...`);
       await new Promise((resolve) => {
         function check() {
+          // If the process has already exited, resolve immediately to let the exit handler run
+          if (initialProcess.exitCode !== null) {
+            resolve();
+            return;
+          }
           http
             .get(url, (res) => {
               if (
@@ -219,8 +310,72 @@ async function start() {
         }
         check();
       });
-      logger.success(`Backend initialized successfully!`);
+
+      if (initialProcess.exitCode === null) {
+        logger.success(`Backend initialized successfully!`);
+      }
     }
+  }
+
+  // Set up file watcher to restart backend on changes
+  if (!onlyFrontend) {
+    const backendDir = path.resolve(__dirname, "../backend/python");
+    const fileMtimes = new Map();
+
+    function populateMtimes(dir) {
+      try {
+        const files = fs.readdirSync(dir);
+        for (const file of files) {
+          const fullPath = path.resolve(dir, file);
+          const stat = fs.statSync(fullPath);
+          if (stat.isDirectory()) {
+            if (file !== "__pycache__" && file !== "node_modules" && file !== ".venv" && file !== ".git") {
+              populateMtimes(fullPath);
+            }
+          } else if (stat.isFile() && file.endsWith(".py")) {
+            fileMtimes.set(fullPath.toLowerCase(), stat.mtimeMs);
+          }
+        }
+      } catch (err) {
+        // Ignore errors
+      }
+    }
+
+    populateMtimes(backendDir);
+
+    let restartTimeout = null;
+    fs.watch(backendDir, { recursive: true }, (eventType, filename) => {
+      if (filename && filename.endsWith(".py")) {
+        const fullPath = path.resolve(backendDir, filename);
+        const key = fullPath.toLowerCase();
+        try {
+          if (fs.existsSync(fullPath)) {
+            const stat = fs.statSync(fullPath);
+            if (stat.isFile()) {
+              const lastMtime = fileMtimes.get(key) || 0;
+              if (stat.mtimeMs > lastMtime) {
+                fileMtimes.set(key, stat.mtimeMs);
+                if (restartTimeout) clearTimeout(restartTimeout);
+                restartTimeout = setTimeout(() => {
+                  restartBackend(filename);
+                }, 500);
+              }
+            }
+          } else {
+            // File was deleted
+            if (fileMtimes.has(key)) {
+              fileMtimes.delete(key);
+              if (restartTimeout) clearTimeout(restartTimeout);
+              restartTimeout = setTimeout(() => {
+                restartBackend(filename);
+              }, 500);
+            }
+          }
+        } catch (e) {
+          // Ignore stat errors
+        }
+      }
+    });
   }
 
   // Now start the Vite frontend dev server

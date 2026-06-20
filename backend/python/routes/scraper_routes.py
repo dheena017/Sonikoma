@@ -34,6 +34,11 @@ def get_optional_user_id(request: Request) -> Optional[str]:
         logger.warning(f"[Auth] Failed to decode JWT token: {e}", exc_info=True)
         return None
 
+import io
+import tempfile
+import random
+from PIL import Image
+from services.detect_panels import run_cv_detection
 from utils.url_utils import extract_webtoon_url, parse_webtoon_url
 from utils.id_utils import generate_project_id
 from utils.cache import stitched_cache, edit_history
@@ -136,14 +141,12 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
                 final_images = [cached_url]
                 cache_hit = True
 
-        # Automatically stitch multiple images into a single full strip if not a cache hit
-        if not cache_hit and len(proxied_urls) > 1 and not body.smart_slice:
-            logger.info(f"[Scraper] Consolidating {len(proxied_urls)} panels into a single unified strip asset...")
-            t_stitch_start = time.time()
+        # Fetch image buffers in parallel if not a cache hit and we need layout processing (stitch or smart_slice)
+        resolved_buffers_data = []
+        if not cache_hit and len(proxied_urls) > 0:
+            logger.info(f"[Scraper] Fetching {len(proxied_urls)} image buffers in parallel for layout processing...")
+            t_fetch_start = time.time()
             try:
-                # 1. Resolve all images to buffers in parallel for speed
-                logger.info(f"[Scraper] Fetching {len(proxied_urls)} image buffers in parallel using shared HTTP client...")
-
                 async with httpx.AsyncClient(follow_redirects=True, timeout=60.0, limits=httpx.Limits(max_connections=50)) as client:
                     sem = asyncio.Semaphore(15)
                     
@@ -154,20 +157,27 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
                     fetch_tasks = [fetch_with_sem(url) for url in proxied_urls]
                     resolved_results = await asyncio.gather(*fetch_tasks, return_exceptions=True)
 
-                resolved_buffers = []
                 for idx, res in enumerate(resolved_results):
                     if isinstance(res, Exception):
                         logger.warning(f"[Scraper] Failed to resolve image {idx}: {res}")
                         continue
-                    resolved_buffers.append(res["data"])
+                    resolved_buffers_data.append({
+                        "url": proxied_urls[idx],
+                        "data": res["data"],
+                        "content_type": res["contentType"]
+                    })
+                logger.info(f"[Scraper] Parallel fetch completed in {round((time.time() - t_fetch_start)*1000, 2)}ms. Fetched {len(resolved_buffers_data)} of {len(proxied_urls)} images.")
+            except Exception as fetch_err:
+                logger.error(f"[Scraper] Failed to download images in parallel: {fetch_err}")
 
-                if not resolved_buffers:
-                    raise ValueError("Failed to resolve any image buffers for stitching")
-
-                # 2. Stitch them together
+        # Automatically stitch multiple images into a single full strip if not a cache hit
+        if not cache_hit and len(resolved_buffers_data) > 1 and not body.smart_slice:
+            logger.info(f"[Scraper] Consolidating {len(resolved_buffers_data)} panels into a single unified strip asset...")
+            t_stitch_start = time.time()
+            try:
                 stitched_bytes = await asyncio.to_thread(
                     img_utils.stitch_images_together,
-                    image_buffers=resolved_buffers,
+                    image_buffers=[item["data"] for item in resolved_buffers_data],
                     layout="vertical",
                     spacing=0,
                     spacing_color="white",
@@ -176,7 +186,7 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
                     padding=0
                 )
 
-                # 3. Cache the result
+                # Cache the result
                 unique_id = f"stitched_{int(time.time() * 1000)}_full"
                 stitched_url = f"/api/merge-images/cached/{unique_id}"
 
@@ -189,6 +199,88 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
                 logger.info(f"[Scraper] Consolidated strip created successfully in {elapsed}ms: {stitched_url}")
             except Exception as stitch_err:
                 logger.warning(f"[Scraper] Automatic stitching failed, falling back to separate images: {stitch_err}")
+                final_images = proxied_urls
+
+        # Automatically run smart slice (panel slicing/detection) on separate vertical strip images if smart_slice is active
+        elif not cache_hit and body.smart_slice and len(resolved_buffers_data) > 0:
+            logger.info(f"[Scraper] Slicing/cropping comic images into panels...")
+            t_slice_start = time.time()
+            final_images = []
+            
+            for idx, item in enumerate(resolved_buffers_data):
+                img_url = item["url"]
+                image_buffer = item["data"]
+                content_type = item["content_type"]
+                
+                try:
+                    img = Image.open(io.BytesIO(image_buffer))
+                    w, h = img.size
+                    
+                    # Only slice if it's a vertical strip (height/width > 1.2)
+                    if h / w > 1.2:
+                        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_in:
+                            tmp_in.write(image_buffer)
+                            temp_in_path = tmp_in.name
+                            
+                        try:
+                            # Run local CV panel detection with defaults
+                            coord_panels = await asyncio.to_thread(
+                                run_cv_detection,
+                                image_path=temp_in_path,
+                                sensitivity=30.0,
+                                bg_mode="auto",
+                                min_width_pct=0.15,
+                                min_height_px=60,
+                                merge_threshold=20,
+                                aspect_ratio_str="free",
+                                canny_low=20,
+                                canny_high=100,
+                                close_kernel_size=15,
+                                auto_split=True
+                            )
+                        finally:
+                            if os.path.exists(temp_in_path):
+                                os.remove(temp_in_path)
+                                
+                        if coord_panels and len(coord_panels) > 1:
+                            logger.info(f"[Scraper] Slicing strip {idx + 1} into {len(coord_panels)} panels")
+                            for p_idx, box in enumerate(coord_panels):
+                                p_top = max(0.0, min(100.0, float(box.get("cropTop", 0))))
+                                p_bottom = max(0.0, min(100.0, float(box.get("cropBottom", 0))))
+                                p_left = max(0.0, min(100.0, float(box.get("cropLeft", 0))))
+                                p_right = max(0.0, min(100.0, float(box.get("cropRight", 0))))
+
+                                top_px = int(round((p_top / 100.0) * h))
+                                bot_px = int(round((p_bottom / 100.0) * h))
+                                left_px = int(round((p_left / 100.0) * w))
+                                right_px = int(round((p_right / 100.0) * w))
+
+                                crop_w = w - left_px - right_px
+                                crop_h = h - top_px - bot_px
+                                
+                                if crop_w > 10 and crop_h > 10:
+                                    cropped_img = img.crop((left_px, top_px, left_px + crop_w, top_px + crop_h))
+                                    out = io.BytesIO()
+                                    save_format = img.format or "JPEG"
+                                    cropped_img.save(out, format=save_format)
+                                    cropped_buffer = out.getvalue()
+                                    
+                                    unique_id = f"merged_{int(time.time() * 1000)}_smartcrop_{idx}_{p_idx}_{random.randint(0, 1000)}"
+                                    cached_url = f"/api/merge-images/cached/{unique_id}"
+                                    
+                                    stitched_cache.set(unique_id, {"data": cropped_buffer, "content_type": content_type})
+                                    edit_history.set(cached_url, img_url)
+                                    final_images.append(cached_url)
+                        else:
+                            final_images.append(img_url)
+                    else:
+                        final_images.append(img_url)
+                except Exception as slice_err:
+                    logger.warning(f"[Scraper] Failed to slice image {idx}: {slice_err}")
+                    final_images.append(img_url)
+                    
+            elapsed = round((time.time() - t_slice_start) * 1000, 2)
+            logger.info(f"[Scraper] Auto-sliced panels generated successfully in {elapsed}ms. Total sliced: {len(final_images)} panels from {len(resolved_buffers_data)} strips.")
 
         # Automatically generate default panels in SQLite if authenticated
         project_id = body.project_id or generate_project_id()

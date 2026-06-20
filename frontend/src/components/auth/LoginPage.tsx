@@ -4,6 +4,7 @@ import {
   Mail,
   Lock,
   ArrowRight,
+  ArrowLeft,
   Loader2,
   Eye,
   EyeOff,
@@ -28,6 +29,7 @@ interface LoginPageProps {
   onLogin: (data: any) => Promise<void>;
   onNavigateToRegister: () => void;
   onNavigateToForgotPassword: () => void;
+  onNavigateHome?: () => void;
 }
 
 const TOUR_STEPS = [
@@ -149,6 +151,7 @@ export default function LoginPage({
   onLogin,
   onNavigateToRegister,
   onNavigateToForgotPassword,
+  onNavigateHome,
 }: LoginPageProps) {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -303,18 +306,29 @@ export default function LoginPage({
 
         {/* Top Controls Toolbar */}
         <div className="relative z-10 flex items-center justify-between mb-6">
-          {/* Header branding (only visible on mobile/tablet) */}
-          <div className="flex lg:hidden items-center gap-2">
-            <div
-              className={`flex items-center justify-center w-8 h-8 rounded-lg ${currentTheme.accentBg} border ${currentTheme.accentBorder}`}
-            >
-              <LogIn className={`w-4 h-4 ${currentTheme.accentText}`} />
+          {/* Header branding & Back Button */}
+          <div className="flex items-center gap-3">
+            {onNavigateHome && (
+              <button
+                onClick={onNavigateHome}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900/60 hover:bg-neutral-800/80 border border-white/5 hover:border-white/10 rounded-xl text-neutral-400 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm group"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+                <span>Back</span>
+              </button>
+            )}
+
+            <div className="flex lg:hidden items-center gap-2">
+              <div
+                className={`flex items-center justify-center w-8 h-8 rounded-lg ${currentTheme.accentBg} border ${currentTheme.accentBorder}`}
+              >
+                <LogIn className={`w-4 h-4 ${currentTheme.accentText}`} />
+              </div>
+              <span className="text-lg font-bold text-white tracking-tight">
+                Anivox
+              </span>
             </div>
-            <span className="text-lg font-bold text-white tracking-tight">
-              Anivox
-            </span>
           </div>
-          <div className="hidden lg:block" /> {/* Spacer */}
           {/* Theme Selector & Tour Button */}
           <div className="flex items-center gap-4">
             {/* Keyboard Shortcuts Trigger Button */}

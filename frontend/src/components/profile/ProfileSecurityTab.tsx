@@ -61,7 +61,7 @@ export default function ProfileSecurityTab({
   const [totalLogsCount, setTotalLogsCount] = React.useState(0);
 
   React.useEffect(() => {
-    const token = localStorage.getItem("anivox_token");
+    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
     if (!token) return;
 
     fetch(
