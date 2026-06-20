@@ -568,6 +568,7 @@ export default function App() {
         projectId={projectId}
         isDirty={isWorkspaceDirty}
         navigateTo={navigateTo}
+        notifications={notifications}
       />
 
       {/* --- Main Contents Controller & Router --- */}
@@ -661,6 +662,13 @@ export default function App() {
             isSidebarOpen={isSidebarOpen}
             backendStatus={backendStatus}
             narrationStyle={narrationStyle}
+            setNarrationStyle={setNarrationStyle}
+            selectedModel={selectedModel}
+            setSelectedModel={setSelectedModel}
+            volume={volume}
+            setVolume={setVolume}
+            isMuted={isMuted}
+            setIsMuted={setIsMuted}
             user={user}
             notifications={notifications}
             markNotificationAsRead={markNotificationAsRead}

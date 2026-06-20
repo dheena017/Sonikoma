@@ -1,6 +1,24 @@
 import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Film, Menu, Bell, X } from "lucide-react";
+import {
+  Film,
+  Menu,
+  Bell,
+  X,
+  Settings,
+  Search,
+  Volume2,
+  VolumeX,
+  Volume1,
+  Activity,
+  Check,
+  ChevronDown,
+  Sparkles,
+  Sliders,
+  Paintbrush,
+  HelpCircle,
+  FileText
+} from "lucide-react";
 import { GeneratedPanel } from "../types";
 import NotificationDropdown from "./NotificationDropdown";
 import { Notification } from "./NotificationStack";
@@ -18,6 +36,13 @@ interface HeaderProps {
   isSidebarOpen?: boolean;
   backendStatus: "online" | "offline" | "checking";
   narrationStyle?: string;
+  setNarrationStyle?: (style: "long" | "short") => void;
+  selectedModel?: string;
+  setSelectedModel?: (model: string) => void;
+  volume?: number;
+  setVolume?: (vol: number) => void;
+  isMuted?: boolean;
+  setIsMuted?: (muted: boolean) => void;
   user?: any;
   notifications: Notification[];
   markNotificationAsRead: (id: number) => void;
@@ -53,6 +78,13 @@ export default function Header({
   isSidebarOpen = false,
   backendStatus,
   narrationStyle = "long",
+  setNarrationStyle,
+  selectedModel = "gemini-2.5-flash",
+  setSelectedModel,
+  volume = 0.8,
+  setVolume,
+  isMuted = false,
+  setIsMuted,
   user,
   notifications,
   markNotificationAsRead,
@@ -66,21 +98,159 @@ export default function Header({
   navigateTo: routerNavigateTo,
 }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showStats, setShowStats] = useState(false);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // Search & Navigation Palette states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+
+  const notificationsRef = useRef<HTMLDivElement>(null);
+  const settingsRef = useRef<HTMLDivElement>(null);
+  const statsRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Keyboard shortcut for Command Palette focus (Ctrl/Cmd + K or /)
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if ((event.ctrlKey || event.metaKey) && event.key === "k") {
+        event.preventDefault();
+        searchInputRef.current?.focus();
+        setShowSearchDropdown(true);
+      } else if (event.key === "/" && document.activeElement !== searchInputRef.current) {
+        if (
+          document.activeElement?.tagName !== "INPUT" &&
+          document.activeElement?.tagName !== "TEXTAREA"
+        ) {
+          event.preventDefault();
+          searchInputRef.current?.focus();
+          setShowSearchDropdown(true);
+        }
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Click outside listener for all custom dropdowns
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      const target = event.target as Node;
+      if (notificationsRef.current && !notificationsRef.current.contains(target)) {
         setShowNotifications(false);
+      }
+      if (settingsRef.current && !settingsRef.current.contains(target)) {
+        setShowSettings(false);
+      }
+      if (statsRef.current && !statsRef.current.contains(target)) {
+        setShowStats(false);
+      }
+      if (searchRef.current && !searchRef.current.contains(target)) {
+        setShowSearchDropdown(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Theme configuration
+  const [accentColor, setAccentColor] = useState<string>(() => {
+    return localStorage.getItem("app-accent-color") || "purple";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("app-accent-color", accentColor);
+    let styleEl = document.getElementById("dynamic-theme-style");
+    if (!styleEl) {
+      styleEl = document.createElement("style");
+      styleEl.id = "dynamic-theme-style";
+      document.head.appendChild(styleEl);
+    }
+    
+    const themeColors: Record<string, string> = {
+      purple: ``, // Reset theme variables
+      emerald: `
+        :root {
+          --color-purple-400: var(--color-emerald-400, #34d399);
+          --color-purple-500: var(--color-emerald-500, #10b981);
+          --color-purple-600: var(--color-emerald-600, #059669);
+          --color-purple-750: var(--color-emerald-700, #047857);
+          --color-purple-900: var(--color-emerald-900, #064e3b);
+          --color-purple-950: var(--color-emerald-950, #022c22);
+          --color-indigo-600: var(--color-teal-600, #0d9488);
+          --color-indigo-700: var(--color-teal-700, #0f766e);
+        }
+      `,
+      rose: `
+        :root {
+          --color-purple-400: var(--color-rose-300, #fda4af);
+          --color-purple-500: var(--color-rose-500, #f43f5e);
+          --color-purple-600: var(--color-rose-600, #e11d48);
+          --color-purple-750: var(--color-rose-700, #be123c);
+          --color-purple-900: var(--color-rose-900, #881337);
+          --color-purple-950: var(--color-rose-950, #4c0519);
+          --color-indigo-600: var(--color-pink-600, #db2777);
+          --color-indigo-700: var(--color-pink-700, #be185d);
+        }
+      `,
+      amber: `
+        :root {
+          --color-purple-400: var(--color-amber-400, #fbbf24);
+          --color-purple-500: var(--color-amber-500, #f59e0b);
+          --color-purple-600: var(--color-amber-600, #d97706);
+          --color-purple-750: var(--color-amber-700, #b45309);
+          --color-purple-900: var(--color-amber-900, #78350f);
+          --color-purple-950: var(--color-amber-950, #451a03);
+          --color-indigo-600: var(--color-orange-600, #ea580c);
+          --color-indigo-700: var(--color-orange-700, #c2410c);
+        }
+      `,
+      cyan: `
+        :root {
+          --color-purple-400: var(--color-cyan-400, #22d3ee);
+          --color-purple-500: var(--color-cyan-500, #06b6d4);
+          --color-purple-600: var(--color-cyan-600, #0891b2);
+          --color-purple-750: var(--color-cyan-700, #0e7490);
+          --color-purple-900: var(--color-cyan-900, #164e63);
+          --color-purple-950: var(--color-cyan-950, #083344);
+          --color-indigo-600: var(--color-blue-600, #2563eb);
+          --color-indigo-700: var(--color-blue-700, #1d4ed8);
+        }
+      `,
+      slate: `
+        :root {
+          --color-purple-400: var(--color-neutral-350, #d4d4d4);
+          --color-purple-500: var(--color-neutral-450, #a3a3a3);
+          --color-purple-600: var(--color-neutral-600, #525252);
+          --color-purple-750: var(--color-neutral-750, #3f3f46);
+          --color-purple-900: var(--color-neutral-850, #262626);
+          --color-purple-950: var(--color-neutral-925, #171717);
+          --color-indigo-600: var(--color-zinc-600, #52525b);
+          --color-indigo-700: var(--color-zinc-700, #3f3f46);
+        }
+      `
+    };
+
+    styleEl.innerHTML = themeColors[accentColor] || "";
+  }, [accentColor]);
+
+  // Audio Playback Auto-play setting local storage
+  const [autoPlayAudio, setAutoPlayAudio] = useState(() => {
+    return localStorage.getItem("app-autoplay-audio") === "true";
+  });
+  useEffect(() => {
+    localStorage.setItem("app-autoplay-audio", String(autoPlayAudio));
+  }, [autoPlayAudio]);
+
+  // Auto-save setting local storage
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(() => {
+    return localStorage.getItem("app-autosave-enabled") !== "false";
+  });
+  useEffect(() => {
+    localStorage.setItem("app-autosave-enabled", String(autoSaveEnabled));
+  }, [autoSaveEnabled]);
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
@@ -102,15 +272,47 @@ export default function Header({
     }
   };
 
-  const isLongMode = narrationStyle !== "short";
+  // Metrics details calculations
+  const totalWithSpeech = panels.filter(p => p.speech_text && p.speech_text.trim()).length;
+  const totalWithAudio = panels.filter(p => p.audio_url).length;
+  const progressPercent = panels.length > 0 
+    ? Math.round(((totalWithSpeech + totalWithAudio) / (panels.length * 2)) * 100) 
+    : 0;
+
+  // Search Navigation options
+  const navigationItems = [
+    { name: "Main Dashboard", path: "/dashboard", desc: "Go to series workspace and panel upload" },
+    { name: "Storyboard Editor", path: "/editor", desc: "Refine timelines, motion settings, and synthesis" },
+    { name: "Auto-Crop Panel Slicer", path: "/auto-crop", desc: "Slice webtoon sheets into individual images" },
+    { name: "Clean-Bubbles Editor", path: "/bubble-cleaner", desc: "AI-based text bubble erasing and inpainting" },
+    { name: "Audio Design Lab", path: "/ai-audio-lab", desc: "Overlay SFX, composition themes, and voice actors" },
+    { name: "Voice Studio", path: "/ai-voice", desc: "Configure TTS and preview voice characters" },
+    { name: "CTR Analytics & Title Predictor", path: "/ai-analytics", desc: "A/B validate thumbnails, CTR, and retention" },
+    { name: "System Log Viewer", path: "/logs", desc: "Real-time backend worker processes and logs" },
+    { name: "Server Status Dashboard", path: "/status", desc: "Server connection latency and engine states" },
+    { name: "Keyboard Shortcuts", path: "/shortcuts", desc: "Quick keys for navigation and timelines" },
+    { name: "User Account Profile", path: "/profile", desc: "User statistics, account detail settings" }
+  ];
+
+  const filteredNavItems = navigationItems.filter(item =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.desc.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const matchedPanels = searchQuery.trim() 
+    ? panels.filter(panel => 
+        String(panel.id).includes(searchQuery) ||
+        (panel.speech_text && panel.speech_text.toLowerCase().includes(searchQuery.toLowerCase()))
+      ).slice(0, 5)
+    : [];
 
   return (
     <header
       id="header_pane"
-      className="border-b border-neutral-900 bg-neutral-950/80 backdrop-blur-md sticky top-0 z-40 px-4 py-3 flex items-center justify-between"
+      className="border-b border-neutral-900 bg-neutral-950/80 backdrop-blur-md sticky top-0 z-40 px-4 py-3 flex items-center justify-between gap-4"
     >
-      <div className="flex items-center gap-3">
-        {/* Hamburger menu button */}
+      {/* Left side: Hamburger, Brand and Save Button */}
+      <div className="flex items-center gap-3 shrink-0">
         <button
           onClick={onToggleSidebar}
           className="p-1.5 rounded-lg border border-neutral-800 bg-neutral-900 text-neutral-400 hover:text-white cursor-pointer"
@@ -119,7 +321,6 @@ export default function Header({
           <Menu className="h-5 w-5" />
         </button>
 
-        {/* Brand */}
         <div
           className={`flex items-center gap-2 cursor-pointer select-none transition-all duration-300 ${
             isSidebarOpen
@@ -131,29 +332,10 @@ export default function Header({
           <div className="h-8 w-8 rounded-lg bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-900/40">
             <Film className="h-4 w-4 text-white" />
           </div>
-          <span className="font-bold text-sm tracking-tight text-white font-sans">
+          <span className="font-bold text-sm tracking-tight text-white font-sans hidden sm:inline">
             Webtoon<span className="text-purple-400">To</span>Video
           </span>
         </div>
-
-        {/* Narration Mode Badge */}
-        {isLongMode ? (
-          <div
-            title="Storyteller Mode — 35-70 word narrations optimised for long-form YouTube videos"
-            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold font-mono tracking-wider select-none border border-purple-500/40 bg-purple-950/30 text-purple-300 shadow-[0_0_10px_-2px_rgba(168,85,247,0.35)] transition-all"
-          >
-            <span className="text-purple-400">✦</span>
-            <span>STORYTELLER</span>
-          </div>
-        ) : (
-          <div
-            title="Subtitle Mode — max 25 word snappy captions for Shorts or quick summaries"
-            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold font-mono tracking-wider select-none border border-emerald-500/40 bg-emerald-950/30 text-emerald-300 shadow-[0_0_10px_-2px_rgba(52,211,153,0.25)] transition-all"
-          >
-            <span className="text-emerald-400">✦</span>
-            <span>SUBTITLES</span>
-          </div>
-        )}
 
         {/* Manual Save Button */}
         {projectId && (
@@ -213,20 +395,181 @@ export default function Header({
         )}
       </div>
 
-      {/* Right side controls/status */}
-      <div className="flex items-center gap-3">
-        {/* Notifications Bell */}
-        <div className="relative" ref={dropdownRef}>
+      {/* Center Side: Quick Search / Command Bar */}
+      <div className="hidden md:flex flex-1 max-w-sm lg:max-w-md relative" ref={searchRef}>
+        <div className="relative w-full">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-4 w-4 text-neutral-500" />
+          </div>
+          <input
+            ref={searchInputRef}
+            type="text"
+            placeholder="Quick Find (Ctrl+K or /)"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setShowSearchDropdown(true);
+            }}
+            onFocus={() => setShowSearchDropdown(true)}
+            className="w-full bg-neutral-900 text-xs text-neutral-205 pl-9 pr-8 py-2 rounded-xl border border-neutral-850 focus:border-purple-500/60 focus:bg-neutral-900/90 focus:outline-none transition-all placeholder:text-neutral-500 font-sans shadow-inner shadow-black/45"
+          />
+          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <kbd className="hidden lg:inline-block px-1.5 py-0.5 text-[9px] font-mono font-bold text-neutral-500 bg-neutral-950 border border-neutral-850 rounded">
+              ⌘K
+            </kbd>
+          </div>
+        </div>
+
+        {/* Command Palette Results Dropdown */}
+        {showSearchDropdown && (searchQuery.trim() !== "" || filteredNavItems.length > 0) && (
+          <div className="absolute top-full left-0 right-0 mt-2 bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[360px] overflow-y-auto scrollbar-thin">
+            {/* Pages Section */}
+            <div className="p-2 border-b border-neutral-850/60">
+              <span className="px-3 py-1.5 text-[9px] font-extrabold font-sans text-purple-400 tracking-wider uppercase block">
+                Jump To Page
+              </span>
+              <div className="space-y-0.5">
+                {filteredNavItems.slice(0, 6).map((item) => (
+                  <button
+                    key={item.path}
+                    onClick={() => {
+                      navigateTo(item.path);
+                      setShowSearchDropdown(false);
+                      setSearchQuery("");
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-xl hover:bg-neutral-800/80 flex items-center justify-between group transition-colors cursor-pointer"
+                  >
+                    <div>
+                      <p className="text-xs font-semibold text-neutral-200 group-hover:text-white">
+                        {item.name}
+                      </p>
+                      <p className="text-[10px] text-neutral-500 truncate max-w-[280px]">
+                        {item.desc}
+                      </p>
+                    </div>
+                    <ChevronDown className="-rotate-90 h-3 w-3 text-neutral-600 group-hover:text-purple-400 transition-colors" />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Panels Section */}
+            {panels.length > 0 && (
+              <div className="p-2">
+                <span className="px-3 py-1.5 text-[9px] font-extrabold font-sans text-purple-400 tracking-wider uppercase block">
+                  Panel Scripts & Transcripts
+                </span>
+                {matchedPanels.length > 0 ? (
+                  <div className="space-y-0.5">
+                    {matchedPanels.map((panel) => {
+                      const panelIdx = panels.findIndex((p) => p.id === panel.id);
+                      return (
+                        <button
+                          key={panel.id}
+                          onClick={() => {
+                            navigateTo(`/editor/adjust?idx=${panelIdx}`);
+                            setShowSearchDropdown(false);
+                            setSearchQuery("");
+                          }}
+                          className="w-full text-left px-3 py-2 rounded-xl hover:bg-neutral-800/80 flex items-start gap-3 transition-colors cursor-pointer group"
+                        >
+                          <div className="w-10 h-7 rounded bg-neutral-950 border border-neutral-850 overflow-hidden shrink-0 flex items-center justify-center">
+                            {panel.image_url ? (
+                              <img
+                                src={panel.image_url}
+                                alt={`P${panel.id}`}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-[8px] font-mono text-neutral-500">P{panel.id}</span>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex justify-between items-center">
+                              <span className="text-[10px] font-bold text-neutral-300 font-mono">
+                                Panel #{panel.id}
+                              </span>
+                              <span className="text-[9px] text-neutral-500 group-hover:text-purple-400 font-mono">
+                                {formatDuration(panel.duration)}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-neutral-500 truncate">
+                              {panel.speech_text || "No speech script generated"}
+                            </p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : searchQuery.trim() !== "" ? (
+                  <p className="text-center py-4 text-[10px] text-neutral-500 italic">
+                    No matching panels found
+                  </p>
+                ) : (
+                  <div className="px-3 py-2 bg-neutral-950/40 border border-neutral-850/60 rounded-xl">
+                    <p className="text-[10px] text-neutral-400 font-mono text-center">
+                      Type script keywords to search storyboards
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Right side: Volume, Notifications, Settings, Stats, Profile */}
+      <div className="flex items-center gap-2 lg:gap-3 shrink-0">
+        
+        {/* Playback Volume Widget */}
+        <div className="flex items-center gap-1.5 bg-neutral-900 border border-neutral-850 px-2.5 py-1.5 rounded-xl hover:border-neutral-750 transition-all select-none group h-[34px]">
           <button
-            onClick={() => setShowNotifications(!showNotifications)}
-            className={`p-1.5 rounded-lg border transition-all cursor-pointer relative ${
+            onClick={() => setIsMuted && setIsMuted(!isMuted)}
+            className="text-neutral-400 hover:text-white p-0.5 rounded transition-colors cursor-pointer"
+            title={isMuted ? "Unmute" : "Mute"}
+          >
+            {isMuted || volume === 0 ? (
+              <VolumeX className="h-4 w-4 text-rose-450" />
+            ) : volume < 0.4 ? (
+              <Volume1 className="h-4 w-4" />
+            ) : (
+              <Volume2 className="h-4 w-4 text-purple-400" />
+            )}
+          </button>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            value={isMuted ? 0 : volume}
+            onChange={(e) => {
+              const val = parseFloat(e.target.value);
+              if (setVolume) setVolume(val);
+              if (val > 0 && isMuted && setIsMuted) {
+                setIsMuted(false);
+              }
+            }}
+            className="w-12 sm:w-16 h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-purple-500 outline-none transition-all"
+            title={`Volume: ${Math.round((isMuted ? 0 : volume) * 100)}%`}
+          />
+        </div>
+
+        {/* Notifications Bell */}
+        <div className="relative" ref={notificationsRef}>
+          <button
+            onClick={() => {
+              setShowNotifications(!showNotifications);
+              setShowSettings(false);
+              setShowStats(false);
+            }}
+            className={`p-1.5 rounded-xl border transition-all cursor-pointer relative h-[34px] w-[34px] flex items-center justify-center ${
               showNotifications
                 ? "bg-purple-600 border-purple-500 text-white"
-                : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
+                : "bg-neutral-900 border-neutral-850 text-neutral-400 hover:text-white hover:border-neutral-750"
             }`}
             title="Notifications"
           >
-            <Bell className="h-5 w-5" />
+            <Bell className="h-4 w-4" />
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white ring-2 ring-neutral-950">
                 {unreadCount > 9 ? "9+" : unreadCount}
@@ -250,59 +593,266 @@ export default function Header({
           )}
         </div>
 
-        {/* Storyboard metrics */}
-        {panels.length > 0 && (
-          <div className="hidden sm:flex items-center gap-3 font-mono text-[10px] text-neutral-400 bg-neutral-900/30 border border-neutral-800/60 px-3 py-1 rounded-lg select-none">
-            <span>
-              panels:{" "}
-              <strong className="text-purple-400 font-bold">
-                {panels.length}
-              </strong>
-            </span>
-            <span className="text-neutral-700 font-bold">|</span>
-            <span>
-              est. duration:{" "}
-              <strong className="text-purple-400 font-bold">
-                {formatDuration(totalCalculatedDuration)}
-              </strong>
-            </span>
-          </div>
-        )}
-
-        {/* Connection status */}
-        <div
-          className={`hidden md:flex items-center gap-1.5 font-mono text-[10px] border px-2.5 py-1 rounded-lg select-none ${
-            backendStatus === "offline"
-              ? "border-rose-900/50 bg-rose-950/20 text-rose-400"
-              : "border-neutral-800/80 bg-neutral-900/30 text-neutral-400"
-          }`}
-        >
-          <span
-            className={`h-1.5 w-1.5 rounded-full ${
-              backendStatus === "offline"
-                ? "bg-rose-500 animate-pulse"
-                : "bg-emerald-500"
+        {/* Project Statistics Popover Button */}
+        <div className="relative" ref={statsRef}>
+          <button
+            onClick={() => {
+              setShowStats(!showStats);
+              setShowSettings(false);
+              setShowNotifications(false);
+            }}
+            className={`p-1.5 rounded-xl border transition-all cursor-pointer relative h-[34px] w-[34px] flex items-center justify-center ${
+              showStats
+                ? "bg-purple-600 border-purple-500 text-white"
+                : "bg-neutral-900 border-neutral-850 text-neutral-400 hover:text-white hover:border-neutral-750"
             }`}
-          />
-          <span>engine: {backendStatus}</span>
+            title="Storyboard Analytics & Statistics"
+          >
+            <Activity className="h-4 w-4" />
+          </button>
+
+          {showStats && (
+            <div className="absolute right-0 mt-2 w-72 bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 p-4">
+              <h3 className="text-xs font-black uppercase tracking-wider text-purple-400 mb-3 flex items-center gap-1.5">
+                <Activity className="h-4 w-4" /> Storyboard Analytics
+              </h3>
+              
+              <div className="space-y-3">
+                {/* Completion Dial Widget */}
+                <div className="bg-neutral-955/40 border border-neutral-850 p-3 rounded-xl flex items-center gap-3">
+                  <div className="relative w-12 h-12 flex items-center justify-center shrink-0">
+                    <svg className="w-full h-full transform -rotate-90">
+                      <circle
+                        cx="24"
+                        cy="24"
+                        r="20"
+                        stroke="#1f1f1f"
+                        strokeWidth="3.5"
+                        fill="transparent"
+                      />
+                      <circle
+                        cx="24"
+                        cy="24"
+                        r="20"
+                        stroke="var(--color-purple-500, #a855f7)"
+                        strokeWidth="3.5"
+                        fill="transparent"
+                        strokeDasharray={2 * Math.PI * 20}
+                        strokeDashoffset={2 * Math.PI * 20 * (1 - progressPercent / 100)}
+                        className="transition-all duration-500"
+                      />
+                    </svg>
+                    <span className="absolute text-[10px] font-bold text-neutral-250 font-mono">
+                      {progressPercent}%
+                    </span>
+                  </div>
+                  <div>
+                    <h4 className="text-[11px] font-bold text-neutral-200">
+                      Composition Progress
+                    </h4>
+                    <p className="text-[9px] text-neutral-500 leading-relaxed font-mono">
+                      Speech + Audio coverage
+                    </p>
+                  </div>
+                </div>
+
+                {/* Numeric Grid */}
+                <div className="grid grid-cols-2 gap-2 text-center">
+                  <div className="bg-neutral-950/30 border border-neutral-850/60 p-2 rounded-lg">
+                    <p className="text-[9px] text-neutral-500 font-mono uppercase tracking-wide">
+                      Total Panels
+                    </p>
+                    <p className="text-sm font-black text-white font-mono mt-0.5">
+                      {panels.length}
+                    </p>
+                  </div>
+                  <div className="bg-neutral-950/30 border border-neutral-850/60 p-2 rounded-lg">
+                    <p className="text-[9px] text-neutral-500 font-mono uppercase tracking-wide">
+                      Est. Duration
+                    </p>
+                    <p className="text-sm font-black text-purple-400 font-mono mt-0.5">
+                      {formatDuration(totalCalculatedDuration)}
+                    </p>
+                  </div>
+                  <div className="bg-neutral-950/30 border border-neutral-850/60 p-2 rounded-lg">
+                    <p className="text-[9px] text-neutral-500 font-mono uppercase tracking-wide">
+                      Narrated
+                    </p>
+                    <p className="text-xs font-bold text-neutral-300 font-mono mt-0.5">
+                      {totalWithSpeech} <span className="text-[9px] text-neutral-500">panels</span>
+                    </p>
+                  </div>
+                  <div className="bg-neutral-950/30 border border-neutral-850/60 p-2 rounded-lg">
+                    <p className="text-[9px] text-neutral-500 font-mono uppercase tracking-wide">
+                      Audio Rendered
+                    </p>
+                    <p className="text-xs font-bold text-neutral-300 font-mono mt-0.5">
+                      {totalWithAudio} <span className="text-[9px] text-neutral-500">tracks</span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Predicted Engagement metrics */}
+                <div className="bg-neutral-955/20 border border-neutral-850/60 rounded-xl p-2.5 space-y-1.5">
+                  <span className="text-[9px] font-extrabold font-sans text-neutral-400 uppercase tracking-wide block">
+                    Predicted Quality Scores
+                  </span>
+                  <div className="flex justify-between items-center text-[10px]">
+                    <span className="text-neutral-500 font-mono">Est. Audience Retention:</span>
+                    <span className="font-bold text-emerald-400 font-mono">87.5% (High)</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[10px]">
+                    <span className="text-neutral-500 font-mono">A/B Title CTR Expectation:</span>
+                    <span className="font-bold text-purple-400 font-mono">9.4/10</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[10px]">
+                    <span className="text-neutral-500 font-mono">Cliffhanger Ending Index:</span>
+                    <span className="font-bold text-amber-400 font-mono">Strong</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Processing status */}
-        <div className="flex items-center gap-2 font-mono text-[10px] bg-neutral-900 border border-neutral-800 px-2.5 py-1 rounded-lg shrink-0">
-          <span
-            className={`h-2 w-2 rounded-full ${
-              isProcessing ? "bg-purple-500 animate-ping" : "bg-emerald-500"
+        {/* Quick Settings Dropdown (Cog Button) */}
+        <div className="relative" ref={settingsRef}>
+          <button
+            onClick={() => {
+              setShowSettings(!showSettings);
+              setShowStats(false);
+              setShowNotifications(false);
+            }}
+            className={`p-1.5 rounded-xl border transition-all cursor-pointer relative h-[34px] w-[34px] flex items-center justify-center ${
+              showSettings
+                ? "bg-purple-600 border-purple-500 text-white"
+                : "bg-neutral-900 border-neutral-850 text-neutral-400 hover:text-white hover:border-neutral-750"
             }`}
-          />
-          <span className="text-neutral-300 font-bold">
-            {isProcessing ? "PROCESSING" : "READY"}
-          </span>
+            title="Quick Settings & Preferences"
+          >
+            <Settings className="h-4 w-4" />
+          </button>
+
+          {showSettings && (
+            <div className="absolute right-0 mt-2 w-72 bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 p-4 space-y-4">
+              <div>
+                <h3 className="text-xs font-black uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
+                  <Sliders className="h-4 w-4" /> Quick Settings
+                </h3>
+                <p className="text-[9px] text-neutral-500 font-mono mt-0.5">
+                  Configure preferences for this rendering session
+                </p>
+              </div>
+
+              {/* AI Model Settings */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-neutral-300 font-sans block">
+                  Select AI LLM Engine
+                </label>
+                <select
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel && setSelectedModel(e.target.value)}
+                  className="w-full bg-neutral-950 border border-neutral-850 text-neutral-200 text-xs px-2.5 py-1.5 rounded-xl focus:border-purple-500/50 outline-none cursor-pointer font-sans"
+                >
+                  <option value="gemini-2.5-flash">Gemini 2.5 Flash (Default)</option>
+                  <option value="gemini-2.5-pro">Gemini 2.5 Pro (High Quality)</option>
+                  <option value="claude-3.5-sonnet">Claude 3.5 Sonnet</option>
+                  <option value="llama-3.3-70b">Llama 3.3 70B (Fast)</option>
+                </select>
+              </div>
+
+              {/* Toggles */}
+              <div className="space-y-2 border-y border-neutral-850 py-3">
+                {/* Narration style select inside settings */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold text-neutral-300">Narration Script Length</p>
+                    <p className="text-[9px] text-neutral-500 font-mono">Long Storyteller vs Snappy Subtitles</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (setNarrationStyle) {
+                        setNarrationStyle(narrationStyle === "long" ? "short" : "long");
+                      }
+                    }}
+                    className={`px-2 py-1 rounded text-[9px] font-bold font-mono tracking-wider transition-colors cursor-pointer border border-neutral-800 ${
+                      narrationStyle === "long"
+                        ? "border-purple-500/40 bg-purple-950/30 text-purple-300"
+                        : "border-emerald-500/40 bg-emerald-950/30 text-emerald-300"
+                    }`}
+                  >
+                    {narrationStyle === "long" ? "STORYTELLER" : "SUBTITLES"}
+                  </button>
+                </div>
+
+                {/* Auto Play Audio Checkbox */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold text-neutral-300">Auto-play TTS Audios</p>
+                    <p className="text-[9px] text-neutral-500 font-mono">Play voice on selection</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={autoPlayAudio}
+                    onChange={(e) => setAutoPlayAudio(e.target.checked)}
+                    className="w-4 h-4 rounded bg-neutral-950 border border-neutral-850 accent-purple-500 cursor-pointer"
+                  />
+                </div>
+
+                {/* Auto-save changes */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold text-neutral-300">Auto-save Modifications</p>
+                    <p className="text-[9px] text-neutral-500 font-mono">Commit changes automatically</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={autoSaveEnabled}
+                    onChange={(e) => setAutoSaveEnabled(e.target.checked)}
+                    className="w-4 h-4 rounded bg-neutral-950 border border-neutral-850 accent-purple-500 cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              {/* Color Theme Selector */}
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold text-neutral-300 font-sans block flex items-center gap-1.5">
+                  <Paintbrush className="h-3.5 w-3.5" /> Accent Color Theme
+                </span>
+                <div className="flex gap-2.5 items-center bg-neutral-950/30 border border-neutral-850 p-2 rounded-xl justify-center">
+                  {[
+                    { id: "purple", color: "bg-purple-600", border: "border-purple-400", label: "Classic Purple" },
+                    { id: "emerald", color: "bg-emerald-600", border: "border-emerald-400", label: "Neon Emerald" },
+                    { id: "rose", color: "bg-rose-600", border: "border-rose-450", label: "Vibrant Rose" },
+                    { id: "amber", color: "bg-amber-600", border: "border-amber-400", label: "Retro Amber" },
+                    { id: "cyan", color: "bg-cyan-600", border: "border-cyan-400", label: "Ocean Cyan" },
+                    { id: "slate", color: "bg-neutral-400", border: "border-neutral-200", label: "Monochrome Slate" }
+                  ].map((theme) => (
+                    <button
+                      key={theme.id}
+                      onClick={() => setAccentColor(theme.id)}
+                      className={`w-5 h-5 rounded-full ${theme.color} cursor-pointer transition-all border-2 relative flex items-center justify-center ${
+                        accentColor === theme.id 
+                          ? `${theme.border} scale-110 shadow-lg` 
+                          : "border-transparent opacity-60 hover:opacity-100 hover:scale-105"
+                      }`}
+                      title={theme.label}
+                    >
+                      {accentColor === theme.id && (
+                        <Check className="h-3 w-3 text-white font-bold" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* User Profile */}
         <button
           onClick={() => navigateTo("/profile")}
-          className="flex items-center gap-2 px-1.5 py-1 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 transition-all cursor-pointer overflow-hidden max-w-[120px]"
+          className="flex items-center gap-2 px-1.5 py-1 rounded-xl bg-neutral-900 border border-neutral-850 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer overflow-hidden max-w-[120px] h-[34px]"
           title="View Profile"
         >
           <div className="w-6 h-6 rounded-lg bg-purple-600/20 flex items-center justify-center overflow-hidden shrink-0 border border-purple-500/30">

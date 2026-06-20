@@ -13,8 +13,10 @@ import {
   ChevronDown,
   ChevronUp,
   FileText,
+  Bell,
 } from "lucide-react";
 import { GeneratedPanel } from "../types";
+import { Notification } from "./NotificationStack";
 
 interface SidebarProps {
   isProcessing: boolean;
@@ -31,6 +33,7 @@ interface SidebarProps {
   projectId?: string | null;
   isDirty?: boolean;
   navigateTo?: (path: string) => void;
+  notifications?: Notification[];
 }
 
 export default function Sidebar({
@@ -48,6 +51,7 @@ export default function Sidebar({
   projectId = null,
   isDirty = false,
   navigateTo: routerNavigateTo,
+  notifications = [],
 }: SidebarProps) {
   const isDashboard = currentPath === "/dashboard";
   const isSettings = currentPath === "/settings";
@@ -91,6 +95,8 @@ export default function Sidebar({
     }
     onClose(); // Close mobile drawer when navigating
   };
+
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const menuItems = [
     {
@@ -189,8 +195,16 @@ export default function Sidebar({
       ],
     },
     {
-      group: "Account",
+      group: "Account & Alerts",
       items: [
+        {
+          label: "Notifications",
+          icon: Bell,
+          active: currentPath === "/notifications",
+          onClick: () => navigateTo("/notifications"),
+          enabled: true,
+          badge: unreadCount > 0 ? unreadCount : undefined,
+        },
         {
           label: "Profile",
           icon: Sparkles,
@@ -238,10 +252,10 @@ export default function Sidebar({
             </div>
           </div>
 
-          {/* Close button for Mobile drawer */}
+          {/* Close button for drawer */}
           <button
             onClick={onClose}
-            className="lg:hidden p-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white cursor-pointer"
+            className="p-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white cursor-pointer"
           >
             <X className="h-4 w-4" />
           </button>
@@ -285,8 +299,10 @@ export default function Sidebar({
                         </div>
                         {item.badge && (
                           <span
-                            className={`text-[9px] px-1.5 py-0.5 rounded font-mono ${
-                              item.active
+                            className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
+                              item.label === "Notifications" && !item.active
+                                ? "bg-purple-600 text-white shadow-sm shadow-purple-900/50"
+                                : item.active
                                 ? "bg-purple-900 text-purple-200"
                                 : "bg-black/55 text-neutral-400"
                             }`}
@@ -313,17 +329,12 @@ export default function Sidebar({
             <div className="space-y-1">
               <button
                 onClick={() => setAiSuiteExpanded(!aiSuiteExpanded)}
-                disabled={panels.length === 0}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold font-mono transition-all duration-200 cursor-pointer text-left border disabled:opacity-35 disabled:cursor-not-allowed ${
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold font-mono transition-all duration-200 cursor-pointer text-left border ${
                   isAiSuiteActive
                     ? "text-purple-300 bg-purple-950/10 border-purple-900/40"
                     : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 border-transparent"
                 }`}
-                title={
-                  panels.length === 0
-                    ? "Requires active storyboard panels"
-                    : "AI Creative Suite"
-                }
+                title="AI Creative Suite"
               >
                 <div className="flex items-center gap-2.5">
                   <Sparkles
@@ -342,21 +353,38 @@ export default function Sidebar({
                 )}
               </button>
 
-              {aiSuiteExpanded && panels.length > 0 && (
+              {aiSuiteExpanded && (
                 <div className="pl-4 pr-1 py-1.5 space-y-1 bg-neutral-950/40 rounded-xl border border-neutral-900/40 mt-1">
                   {aiSuiteItems.map((subItem) => {
                     const isSubActive = currentPath === subItem.path;
+                    const requiresPanels = [
+                      "/ai-optimizer",
+                      "/panel-assistant",
+                      "/ai-translation",
+                      "/ai-audio-lab",
+                      "/ai-voice"
+                    ].includes(subItem.path);
+                    const isLocked = requiresPanels && panels.length === 0;
+
                     return (
                       <button
                         key={subItem.label}
                         onClick={() => navigateTo(subItem.path)}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-[11px] font-mono hover:bg-neutral-900 hover:text-white transition-all cursor-pointer ${
+                        className={`w-full text-left px-3 py-2 rounded-lg text-[11px] font-mono hover:bg-neutral-900 hover:text-white transition-all cursor-pointer flex items-center justify-between ${
                           isSubActive
                             ? "text-purple-300 font-bold bg-neutral-900/60"
+                            : isLocked
+                            ? "text-neutral-500 hover:text-neutral-350"
                             : "text-neutral-400"
                         }`}
+                        title={isLocked ? "Requires storyboard panels (Click to view details)" : undefined}
                       >
-                        ✦ {subItem.label}
+                        <span>✦ {subItem.label}</span>
+                        {isLocked && (
+                          <span className="text-[9px] text-neutral-600 bg-neutral-950 px-1 py-0.5 rounded border border-neutral-900 font-mono scale-90">
+                            🔒 LCK
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -401,27 +429,18 @@ export default function Sidebar({
 
   return (
     <>
-      {/* Desktop sidebar */}
-      <aside
-        className={`hidden lg:block bg-neutral-950/80 border-r border-neutral-900 h-screen sticky top-0 flex-shrink-0 z-30 shadow-xl shadow-black/40 transition-all duration-300 ease-in-out ${
-          isOpen ? "w-64 xl:w-72" : "w-0 border-r-0 overflow-hidden"
-        }`}
-      >
-        <div className="w-64 xl:w-72 h-full">{sidebarContent}</div>
-      </aside>
-
-      {/* Mobile drawer backdrop */}
+      {/* Drawer backdrop (visible on both mobile and desktop when open) */}
       {isOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity animate-fade-in"
+          className="fixed inset-0 bg-black/60 backdrop-blur-md z-45 transition-opacity animate-fade-in"
           onClick={onClose}
         />
       )}
 
-      {/* Mobile drawer container */}
+      {/* Sidebar drawer container (visible on both mobile and desktop, slides in/out) */}
       <aside
-        className={`lg:hidden fixed inset-y-0 left-0 w-72 bg-neutral-950/95 border-r border-neutral-900 h-full z-50 transition-transform duration-300 ease-out transform ${
-          isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
+        className={`fixed inset-y-0 left-0 w-72 bg-neutral-950/95 border-r border-neutral-900 h-full z-50 transition-transform duration-300 ease-out transform ${
+          isOpen ? "translate-x-0 shadow-2xl shadow-black/60" : "-translate-x-full"
         }`}
       >
         {sidebarContent}

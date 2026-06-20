@@ -12,6 +12,7 @@ import {
   Key,
   Globe,
   Sparkles,
+  BarChart3,
 } from "lucide-react";
 
 // Sub-components
@@ -20,6 +21,7 @@ import ProfileAccountTab from "./profile/ProfileAccountTab.js";
 import ProfileSecurityTab from "./profile/ProfileSecurityTab.js";
 import ProfileBillingTab from "./profile/ProfileBillingTab.js";
 import ProfileApiTab from "./profile/ProfileApiTab.js";
+import ProfileAnalyticsTab from "./profile/ProfileAnalyticsTab.js";
 
 interface ProfilePageProps {
   user: any;
@@ -132,7 +134,7 @@ export default function ProfilePage({
   };
   // Navigation tabs
   const [activeTab, setActiveTab] = React.useState<
-    "projects" | "account" | "security" | "billing" | "api"
+    "projects" | "account" | "security" | "billing" | "api" | "analytics"
   >("projects");
 
   // Local state for profile values
@@ -943,6 +945,18 @@ export default function ProfilePage({
               </button>
 
               <button
+                onClick={() => setActiveTab("analytics")}
+                className={`w-full py-2.5 px-4 rounded-xl text-left text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                  activeTab === "analytics"
+                    ? "bg-purple-600/10 border border-purple-500/20 text-purple-400"
+                    : "text-neutral-400 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <BarChart3 className="w-4 h-4" />
+                Creator Analytics
+              </button>
+
+              <button
                 onClick={() => setActiveTab("account")}
                 className={`w-full py-2.5 px-4 rounded-xl text-left text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
                   activeTab === "account"
@@ -1039,6 +1053,11 @@ export default function ProfilePage({
 
           {/* RIGHT COLUMN: Tab content panel switcher */}
           <div className="lg:col-span-3 space-y-6">
+            {/* TAB 0: CREATOR PERFORMANCE ANALYTICS */}
+            {activeTab === "analytics" && (
+              <ProfileAnalyticsTab />
+            )}
+
             {/* TAB 1: RECENT PROJECTS */}
             {activeTab === "projects" && (
               <ProfileProjectsTab
