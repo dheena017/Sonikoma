@@ -70,6 +70,7 @@ At the **end of every conversation**, append one row to the Session Changelog ta
 
 | Date       | Brief summary of what changed | Files affected |
 | ---------- | ----------------------------- | -------------- |
+| 2026-06-21 | Added global window message listener to handle showRuleLimitsAlert and display warning details | `frontend/src/hooks/useAppState.ts`, `RULES.md` |
 | 2026-06-21 | Enhanced index.html pre-render splash screen with checklist, tips, and background layout | `frontend/index.html`, `RULES.md` |
 | 2026-06-20 | Added Notifications to sidebar, unlocked AI Suite, and added premium empty states for locked AI pages | `frontend/src/components/Sidebar.tsx`, `frontend/src/App.tsx`, `frontend/src/components/optimizer/AIOptimizerPage.tsx`, `frontend/src/components/audio_lab/AudioLabPage.tsx`, `frontend/src/components/voice/VoiceStudioPage.tsx`, `frontend/src/components/translation/TranslationStudioPage.tsx`, `RULES.md` |
 | 2026-06-20 | Resolved favicon.ico 404 error by creating public folder, adding modern SVG and ICO favicons, and middleware handling | `frontend/public/favicon.svg`, `frontend/public/favicon.ico`, `frontend/index.html`, `frontend/vite.config.ts`, `docs/architecture/project_structure.md`, `RULES.md` |

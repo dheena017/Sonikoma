@@ -19,95 +19,7 @@ export function useAppState() {
   const [projectId, setProjectId] = useState<string | null>(null);
   const [consoleLogs, setRawConsoleLogs] = useState<string[]>([]);
 
-  const setConsoleLogs = useCallback((val: React.SetStateAction<string[]>) => {
-    setRawConsoleLogs((prev) => {
-      const resolved = typeof val === "function" ? val(prev) : val;
-      return resolved.map((log) => {
-        // Match standard format: HH:MM:SS [TAG]
-        const hasStandardFormat = /^\d{2}:\d{2}:\d{2} \[[A-Z_0-9]+\]/.test(log);
-        if (hasStandardFormat) {
-          return log;
-        }
 
-        let category = "FRONTEND";
-        let level = "INFO";
-        let filename = "App.tsx";
-        let message = log;
-
-        // Extract level categorizations from log content
-        if (
-          log.includes("[ERROR]") ||
-          log.includes("[FATAL]") ||
-          log.toLowerCase().includes("failed")
-        ) {
-          level = "ERROR";
-        } else if (log.includes("[WARNING]") || log.includes("[WARN]")) {
-          level = "WARN";
-        } else if (
-          log.includes("[SUCCESS]") ||
-          log.toLowerCase().includes("successfully")
-        ) {
-          level = "SUCCESS";
-        } else if (log.includes("[AI") || log.includes("[Gemini]")) {
-          level = "AI";
-        } else if (log.includes("[Database]") || log.includes("[DB]")) {
-          level = "DATABASE";
-        } else if (log.includes("[API]") || log.includes("[HTTP]")) {
-          level = "API";
-        }
-
-        // Parse brackets like [Scraper] Spawned... or [GUI] Mounted...
-        const bracketMatch = log.match(
-          /^\[([^\]]+)\]\s*(?:\[([^\]]+)\])?\s*(.*)$/
-        );
-        if (bracketMatch) {
-          const firstTag = bracketMatch[1];
-          const secondTag = bracketMatch[2];
-          const rest = bracketMatch[3];
-
-          if (
-            secondTag &&
-            [
-              "INFO",
-              "DEBUG",
-              "WARN",
-              "WARNING",
-              "ERROR",
-              "SUCCESS",
-              "FATAL",
-            ].includes(secondTag.toUpperCase())
-          ) {
-            level = secondTag.toUpperCase();
-            filename = firstTag;
-            message = rest;
-          } else {
-            if (
-              [
-                "INFO",
-                "DEBUG",
-                "WARN",
-                "WARNING",
-                "ERROR",
-                "SUCCESS",
-                "FATAL",
-              ].includes(firstTag.toUpperCase())
-            ) {
-              level = firstTag.toUpperCase();
-              filename = "App.tsx";
-            } else {
-              filename = firstTag;
-            }
-            message = rest;
-          }
-        }
-
-        const timestamp = new Date().toLocaleTimeString("en-US", {
-          hour12: false,
-        });
-        return `${timestamp} [${category}] [${level}] [${filename}] ${message}`;
-      });
-    });
-  }, []);
   const [scrapedImages, setScrapedImages] = useState<string[]>([]);
   const [selectedScraped, setSelectedScraped] = useState<string[]>([]);
   const [activePreviewTab, setActivePreviewTab] = useState<
@@ -208,9 +120,7 @@ export function useAppState() {
   });
   const [errorPopup, setErrorPopup] = useState<ErrorPopupDetail | null>(null);
 
-  useEffect(() => {
-    localStorage.setItem("ai_comic_notifications_muted", String(notificationsMuted));
-  }, [notificationsMuted]);
+
 
   // Settings — all useState MUST come before any useCallback/useEffect
   const [targetUrl, setTargetUrl] = useState<string>(
@@ -290,6 +200,100 @@ export function useAppState() {
   }, [targetUrl, projectId]);
 
   // ── Callbacks & effects AFTER all useState declarations ──────────────────
+
+  const setConsoleLogs = useCallback((val: React.SetStateAction<string[]>) => {
+    setRawConsoleLogs((prev) => {
+      const resolved = typeof val === "function" ? val(prev) : val;
+      return resolved.map((log) => {
+        // Match standard format: HH:MM:SS [TAG]
+        const hasStandardFormat = /^\d{2}:\d{2}:\d{2} \[[A-Z_0-9]+\]/.test(log);
+        if (hasStandardFormat) {
+          return log;
+        }
+
+        let category = "FRONTEND";
+        let level = "INFO";
+        let filename = "App.tsx";
+        let message = log;
+
+        // Extract level categorizations from log content
+        if (
+          log.includes("[ERROR]") ||
+          log.includes("[FATAL]") ||
+          log.toLowerCase().includes("failed")
+        ) {
+          level = "ERROR";
+        } else if (log.includes("[WARNING]") || log.includes("[WARN]")) {
+          level = "WARN";
+        } else if (
+          log.includes("[SUCCESS]") ||
+          log.toLowerCase().includes("successfully")
+        ) {
+          level = "SUCCESS";
+        } else if (log.includes("[AI") || log.includes("[Gemini]")) {
+          level = "AI";
+        } else if (log.includes("[Database]") || log.includes("[DB]")) {
+          level = "DATABASE";
+        } else if (log.includes("[API]") || log.includes("[HTTP]")) {
+          level = "API";
+        }
+
+        // Parse brackets like [Scraper] Spawned... or [GUI] Mounted...
+        const bracketMatch = log.match(
+          /^\[([^\]]+)\]\s*(?:\[([^\]]+)\])?\s*(.*)$/
+        );
+        if (bracketMatch) {
+          const firstTag = bracketMatch[1];
+          const secondTag = bracketMatch[2];
+          const rest = bracketMatch[3];
+
+          if (
+            secondTag &&
+            [
+              "INFO",
+              "DEBUG",
+              "WARN",
+              "WARNING",
+              "ERROR",
+              "SUCCESS",
+              "FATAL",
+            ].includes(secondTag.toUpperCase())
+          ) {
+            level = secondTag.toUpperCase();
+            filename = firstTag;
+            message = rest;
+          } else {
+            if (
+              [
+                "INFO",
+                "DEBUG",
+                "WARN",
+                "WARNING",
+                "ERROR",
+                "SUCCESS",
+                "FATAL",
+              ].includes(firstTag.toUpperCase())
+            ) {
+              level = firstTag.toUpperCase();
+              filename = "App.tsx";
+            } else {
+              filename = firstTag;
+            }
+            message = rest;
+          }
+        }
+
+        const timestamp = new Date().toLocaleTimeString("en-US", {
+          hour12: false,
+        });
+        return `${timestamp} [${category}] [${level}] [${filename}] ${message}`;
+      });
+    });
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("ai_comic_notifications_muted", String(notificationsMuted));
+  }, [notificationsMuted]);
 
   const removeNotification = useCallback((id: number) => {
     setNotifications((prev) =>
@@ -505,6 +509,37 @@ export function useAppState() {
     checkAuth();
   }, [checkAuth]);
 
+  // --- Extension/IDE Communication Event Listener ---
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      const data = event.data;
+      if (data && data.type === "showRuleLimitsAlert") {
+        console.log("[tsweb.assistant-listener] Handling showRuleLimitsAlert event:", data);
+        const title = data.title || data.data?.title || "Assistant Rule Limits Enforced";
+        const message = data.message || data.data?.message || "You have reached the system rule or usage limits for this active session.";
+        const technicalDetails = data.technicalDetails || data.data?.technicalDetails || "";
+        const suggestion = data.suggestion || data.data?.suggestion || "Please review the RULES.md guidelines, optimize your files/tokens, or adjust model configurations.";
+
+        setErrorPopup({
+          title,
+          message,
+          type: "warning",
+          technicalDetails: technicalDetails || `Source: tsweb.assistant-listener\nTimestamp: ${new Date().toISOString()}`,
+          suggestion,
+        });
+
+        addNotification(message, "warning", {
+          details: technicalDetails || undefined,
+        });
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
+  }, [addNotification, setErrorPopup]);
+
   // Load active project into workspace if url query parameter id/project_id exists
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -515,7 +550,7 @@ export function useAppState() {
 
     const loadProject = async () => {
       try {
-        const token = localStorage.getItem("anivox_token");
+        const token = getToken();
         const headers: HeadersInit = {};
         if (token) {
           headers["Authorization"] = `Bearer ${token}`;
@@ -590,7 +625,7 @@ export function useAppState() {
     };
 
     loadProject();
-  }, [isAuthenticated, addNotification]);
+  }, [isAuthenticated, addNotification, getToken]);
 
   useEffect(() => {
     localStorage.setItem(
