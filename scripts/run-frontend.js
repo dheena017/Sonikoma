@@ -179,7 +179,11 @@ function handleBackendExit(proc, code) {
 async function restartBackend(changedFile) {
   if (isRestarting) return;
   isRestarting = true;
-  logger.warn(`🔄 Detected change in backend Python files (${changedFile || "unknown"}). Restarting backend process...`);
+  logger.warn(
+    `🔄 Detected change in backend Python files (${
+      changedFile || "unknown"
+    }). Restarting backend process...`
+  );
 
   const oldProcess = pyProcess;
   if (oldProcess) {
@@ -329,7 +333,12 @@ async function start() {
           const fullPath = path.resolve(dir, file);
           const stat = fs.statSync(fullPath);
           if (stat.isDirectory()) {
-            if (file !== "__pycache__" && file !== "node_modules" && file !== ".venv" && file !== ".git") {
+            if (
+              file !== "__pycache__" &&
+              file !== "node_modules" &&
+              file !== ".venv" &&
+              file !== ".git"
+            ) {
               populateMtimes(fullPath);
             }
           } else if (stat.isFile() && file.endsWith(".py")) {
