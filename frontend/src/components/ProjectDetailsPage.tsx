@@ -277,7 +277,7 @@ export default function ProjectDetailsPage({
       setLoadingScraped(true);
       try {
         const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
-        const response = await fetch("/api/scraper/scrape-images", {
+        const response = await fetch("/api/scrape-images", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

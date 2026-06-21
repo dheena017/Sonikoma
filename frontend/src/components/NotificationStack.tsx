@@ -28,12 +28,17 @@ export interface Notification {
 interface NotificationStackProps {
   notifications: Notification[];
   removeNotification: (id: number) => void;
+  notificationsMuted?: boolean;
 }
 
 export default function NotificationStack({
   notifications,
   removeNotification,
+  notificationsMuted = false,
 }: NotificationStackProps) {
+  // Only show notifications if not muted
+  if (notificationsMuted) return null;
+
   // Only show notifications that haven't been dismissed from toast stack
   // and were created recently (within last 10 seconds) OR are errors/warnings that haven't been dismissed
   const activeToasts = notifications.filter((n) => !n.toastDismissed);

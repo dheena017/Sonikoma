@@ -69,6 +69,7 @@
           z-index: 9999;
           font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
           color: #fafafa;
+          overflow: hidden;
         }
         .splash-logo-container {
           position: relative;
@@ -118,7 +119,7 @@
           font-size: 0.75rem;
           color: #8a8a8a;
           letter-spacing: 0.15em;
-          margin-bottom: 3.5rem;
+          margin-bottom: 2.5rem;
           text-transform: uppercase;
           font-weight: 600;
         }
@@ -148,8 +149,152 @@
           50% { left: 0%; }
           100% { left: 100%; }
         }
+
+        /* Ambient Decorative Elements */
+        .splash-grid {
+          position: absolute;
+          inset: 0;
+          background-image: 
+            linear-gradient(rgba(168, 85, 247, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(168, 85, 247, 0.02) 1px, transparent 1px);
+          background-size: 30px 30px;
+          background-position: center;
+          mask-image: radial-gradient(circle 350px at center, black 30%, transparent 100%);
+          -webkit-mask-image: radial-gradient(circle 350px at center, black 30%, transparent 100%);
+          z-index: 1;
+          pointer-events: none;
+        }
+        .splash-blob {
+          position: absolute;
+          width: 320px;
+          height: 320px;
+          background: radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, rgba(99, 102, 241, 0) 70%);
+          filter: blur(40px);
+          border-radius: 50%;
+          z-index: 1;
+          pointer-events: none;
+        }
+        .splash-blob-1 {
+          top: 15%;
+          left: 15%;
+          animation: blob-float 12s infinite alternate ease-in-out;
+        }
+        .splash-blob-2 {
+          bottom: 15%;
+          right: 15%;
+          animation: blob-float 15s infinite alternate-reverse ease-in-out;
+        }
+        @keyframes blob-float {
+          0% { transform: translate(0, 0) scale(1); }
+          100% { transform: translate(40px, -40px) scale(1.15); }
+        }
+
+        /* Z-Index alignment */
+        .splash-logo-container,
+        .splash-title,
+        .splash-subtitle,
+        .splash-loader-bar,
+        .splash-checklist,
+        .splash-tip-container,
+        .splash-footer {
+          z-index: 2;
+        }
+
+        /* Checklist Styles */
+        .splash-checklist {
+          margin-top: 1.75rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          min-width: 220px;
+          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+          font-size: 0.72rem;
+          color: #52525b;
+        }
+        .checklist-item {
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
+          transition: all 0.3s ease;
+        }
+        .checklist-item.active {
+          color: #c084fc;
+        }
+        .checklist-item.success {
+          color: #10b981;
+        }
+        .status-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background-color: #27272a;
+          transition: all 0.3s ease;
+        }
+        .checklist-item.active .status-dot {
+          background-color: #c084fc;
+          box-shadow: 0 0 8px #c084fc;
+          animation: dot-pulse 1s infinite alternate;
+        }
+        .checklist-item.success .status-dot {
+          background-color: #10b981;
+          box-shadow: 0 0 6px #10b981;
+        }
+        @keyframes dot-pulse {
+          0% { opacity: 0.4; }
+          100% { opacity: 1; }
+        }
+
+        /* Dynamic Tips Styles */
+        .splash-tip-container {
+          margin-top: 3.5rem;
+          max-width: 340px;
+          text-align: center;
+          background: rgba(15, 15, 20, 0.4);
+          border: 1px solid rgba(168, 85, 247, 0.12);
+          padding: 0.75rem 1.25rem;
+          border-radius: 14px;
+          min-height: 52px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+        }
+        .tip-tag {
+          font-size: 0.55rem;
+          font-weight: 800;
+          text-transform: uppercase;
+          color: #c084fc;
+          letter-spacing: 0.12em;
+          margin-bottom: 0.35rem;
+          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        .splash-tip-text {
+          font-size: 0.72rem;
+          color: #a1a1aa;
+          margin: 0;
+          line-height: 1.45;
+          transition: opacity 0.3s ease;
+        }
+
+        /* Footer Styles */
+        .splash-footer {
+          position: absolute;
+          bottom: 2rem;
+          font-size: 0.65rem;
+          color: #3f3f46;
+          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+          letter-spacing: 0.08em;
+        }
       </style>
       <div id="splash-screen-root" class="splash-container">
+        <!-- Ambient Decorative Elements -->
+        <div class="splash-grid"></div>
+        <div class="splash-blob splash-blob-1"></div>
+        <div class="splash-blob splash-blob-2"></div>
+
         <div class="splash-logo-container">
           <div class="splash-glow"></div>
           <div id="splash-logo-graphic" class="splash-logo">
@@ -163,6 +308,93 @@
         <div id="splash-loading-bar" class="splash-loader-bar">
           <div class="splash-loader-progress"></div>
         </div>
+
+        <!-- Dynamic Checklist -->
+        <div class="splash-checklist">
+          <div class="checklist-item" id="step-core">
+            <span class="status-dot"></span> Loading core bundle...
+          </div>
+          <div class="checklist-item" id="step-assets">
+            <span class="status-dot"></span> Caching UI static assets...
+          </div>
+          <div class="checklist-item" id="step-gpu">
+            <span class="status-dot"></span> Readying CUDA & vision modules...
+          </div>
+        </div>
+
+        <!-- Dynamic Tips Container -->
+        <div class="splash-tip-container">
+          <span class="tip-tag">Pro Tip</span>
+          <p id="splash-tip-text" class="splash-tip-text">Use Sound Design Lab to customize background music styles.</p>
+        </div>
+
+        <!-- Branding Footer -->
+        <div class="splash-footer">
+          VISION PIPELINE SUITE v1.0.4 • SECURE DEPLOYMENT
+        </div>
+
+        <!-- Inline Checklist & Tips Controller Script -->
+        <script>
+          (function() {
+            const tips = [
+              "Use Sound Design Lab to customize background music styles (Lofi, 8-Bit, Techno, Space).",
+              "Adjust the Gutter Detection sensitivity if panels are not extracted perfectly.",
+              "Synthesize professional actor voices for narration in the Voice Studio.",
+              "Check out keyboard shortcuts in the Keys panel for maximum workflow speed.",
+              "You can preview active pipeline stages and CPU/GPU status live in the Status page.",
+              "Crop webtoon strips into vertical or horizontal panels automatically."
+            ];
+            
+            let currentTipIdx = 0;
+            const tipTextEl = document.getElementById("splash-tip-text");
+            
+            if (tipTextEl) {
+              setInterval(() => {
+                tipTextEl.style.opacity = 0;
+                setTimeout(() => {
+                  currentTipIdx = (currentTipIdx + 1) % tips.length;
+                  tipTextEl.textContent = tips[currentTipIdx];
+                  tipTextEl.style.opacity = 1;
+                }, 300);
+              }, 3500);
+            }
+
+            // Checklist simulation
+            const steps = [
+              { id: "step-core", duration: 800 },
+              { id: "step-assets", duration: 1600 },
+              { id: "step-gpu", duration: 2500 }
+            ];
+
+            steps.forEach((step, idx) => {
+              setTimeout(() => {
+                const el = document.getElementById(step.id);
+                if (el) {
+                  // Mark previous step as success
+                  if (idx > 0) {
+                    const prevEl = document.getElementById(steps[idx - 1].id);
+                    if (prevEl) {
+                      prevEl.classList.remove("active");
+                      prevEl.classList.add("success");
+                    }
+                  }
+                  // Mark current step as active
+                  el.classList.add("active");
+                }
+              }, idx === 0 ? 100 : steps[idx - 1].duration);
+
+              if (idx === steps.length - 1) {
+                setTimeout(() => {
+                  const el = document.getElementById(step.id);
+                  if (el) {
+                    el.classList.remove("active");
+                    el.classList.add("success");
+                  }
+                }, step.duration);
+              }
+            });
+          })();
+        </script>
       </div>
     </div>
     

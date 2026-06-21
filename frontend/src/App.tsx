@@ -1152,6 +1152,7 @@ export default function App() {
       <NotificationStack
         notifications={notifications}
         removeNotification={removeNotification}
+        notificationsMuted={notificationsMuted}
       />
 
       {/* Dashboard Modal: Batch Panel Auto Crop */}
