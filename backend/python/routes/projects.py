@@ -306,8 +306,18 @@ async def update_project_details(
                 })
 
         db.update_project_full(projectId, updates, db_panels)
-        logger.info(f"[Database] Project {projectId} updated successfully.")
-        return {"success": True}
+
+        # Fetch updated slugs to return to frontend
+        updated_project = db.get_project(projectId)
+        series_slug = updated_project.get("series_slug") if updated_project else None
+        chapter_slug = updated_project.get("chapter_slug") if updated_project else None
+
+        logger.info(f"[Database] Project {projectId} updated successfully. slugs: {series_slug}/{chapter_slug}")
+        return {
+            "success": True,
+            "series_slug": series_slug,
+            "chapter_slug": chapter_slug
+        }
     except HTTPException:
         raise
     except Exception as e:

@@ -350,26 +350,32 @@ export default function ProjectDetailsPage({
 
   // Extract projectId or Slug from query string or URL path
   React.useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get("id") || params.get("project_id");
-    if (id) {
-      setProjectId(id);
-      return;
-    }
+    const handlePathChange = () => {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id") || params.get("project_id");
+      if (id) {
+        setProjectId(id);
+        return;
+      }
 
-    const path = window.location.pathname;
-    // Check if we are on a slug-based path: /series/:seriesSlug/chapters/:chapterSlug
-    const match = path.match(/\/series\/[^\/]+\/chapters\/([^\/]+)/);
-    if (match) {
-      setProjectId(match[1]);
-      return;
-    }
+      const path = window.location.pathname;
+      // Check if we are on a slug-based path: /series/:seriesSlug/chapters/:chapterSlug
+      const match = path.match(/\/series\/[^\/]+\/chapters\/([^\/]+)/);
+      if (match) {
+        setProjectId(match[1]);
+        return;
+      }
 
-    // Or just /series/:seriesSlug
-    const seriesMatch = path.match(/\/series\/([^\/]+)$/);
-    if (seriesMatch) {
-      setProjectId(seriesMatch[1]);
-    }
+      // Or just /series/:seriesSlug
+      const seriesMatch = path.match(/\/series\/([^\/]+)$/);
+      if (seriesMatch) {
+        setProjectId(seriesMatch[1]);
+      }
+    };
+
+    handlePathChange();
+    window.addEventListener("popstate", handlePathChange);
+    return () => window.removeEventListener("popstate", handlePathChange);
   }, []);
 
   // Fetch project details
@@ -616,6 +622,14 @@ export default function ProjectDetailsPage({
       if (data.success) {
         initialProjectRef.current = serializeState(project, panels);
         initialPanelsRef.current = JSON.parse(JSON.stringify(panels));
+
+        if (data.series_slug && data.chapter_slug) {
+          const newPath = `/series/${data.series_slug}/chapters/${data.chapter_slug}/details`;
+          if (window.location.pathname !== newPath) {
+            window.history.pushState(null, "", newPath);
+          }
+        }
+
         setSaveStatus("saved");
         setTimeout(() => setSaveStatus("idle"), 3000);
       } else {

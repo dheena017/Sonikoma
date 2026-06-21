@@ -265,19 +265,7 @@ export default defineConfig(({ mode }) => {
     server: {
       port: parseInt(env.FRONTEND_PORT || "3000", 10),
       hmr: process.env.DISABLE_HMR !== "true",
-      watch: process.env.DISABLE_HMR === "true" ? null : {
-        ignored: [
-          "**/database/**",
-          "**/.venv/**",
-          "**/backend/**",
-          "**/*.db",
-          "**/*.db-journal",
-          "**/*.db-wal",
-          "**/*.db-shm",
-          "**/dist/**",
-          "**/node_modules/**"
-        ]
-      },
+      watch: process.env.DISABLE_HMR === "true" ? null : {},
       proxy: {
         "/api": {
           target: backendTarget,

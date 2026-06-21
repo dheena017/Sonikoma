@@ -425,7 +425,12 @@ export function useAppLogic() {
           state.setScrapedImages(finalImages);
           if (data.project_id) {
             state.setProjectId(data.project_id);
-            if (!data.project_id.startsWith("temp_")) {
+            if (data.series_slug && data.chapter_slug) {
+              const newPath = `/series/${data.series_slug}/chapters/${data.chapter_slug}`;
+              if (window.location.pathname !== newPath) {
+                window.history.pushState(null, "", newPath);
+              }
+            } else if (!data.project_id.startsWith("temp_")) {
               const urlParams = new URLSearchParams(window.location.search);
               urlParams.delete("project_id");
               urlParams.delete("url"); // Delete the raw pasted manhwa URL parameter!

@@ -179,6 +179,10 @@ export function useAppRouter({
         }
       }
 
+      const isSeriesPath = path.startsWith("/series/");
+      const isChapterDetails = isSeriesPath && path.endsWith("/details");
+      const isWorkspacePath = path === "/dashboard" || (isSeriesPath && !isChapterDetails);
+
       if (
         path === "/settings" ||
         path === "/logs" ||
@@ -196,7 +200,7 @@ export function useAppRouter({
         path === "/profile" ||
         path === "/notifications" ||
         path === "/project-details" ||
-        path.startsWith("/series/")
+        isChapterDetails
       ) {
         setShowAutoCropModal(false);
         setShowBubbleModal(false);

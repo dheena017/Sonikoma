@@ -321,9 +321,16 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
             elif final_url in proxied_urls:
                 image_origins[final_url] = final_url
 
+        # If project already exists, fetch its slugs
+        existing_project = db.get_project(project_id) if project_id and not project_id.startswith("temp_") else None
+        series_slug = existing_project.get("series_slug") if existing_project else None
+        chapter_slug = existing_project.get("chapter_slug") if existing_project else None
+
         return {
             "success": True,
             "project_id": project_id,
+            "series_slug": series_slug,
+            "chapter_slug": chapter_slug,
             "title": parsed.get("title"),
             "genre": parsed.get("genre"),
             "episode": parsed.get("episode"),

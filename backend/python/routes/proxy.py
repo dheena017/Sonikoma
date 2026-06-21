@@ -112,15 +112,13 @@ async def proxy_image(
     
     start_time = time.time()
     
-    # Unwrap any double-proxied URLs recursively
+    # Unwrap any double-proxied URLs
     fetch_url = url
-    while "/api/proxy-image" in fetch_url:
+    if "/api/proxy-image" in fetch_url:
         parsed = urlparse(fetch_url)
         query = parse_qs(parsed.query)
         if "url" in query:
             fetch_url = query["url"][0]
-        else:
-            break
 
     # Validate URL format and handle local/internal URLs by redirecting directly
     try:

@@ -569,22 +569,43 @@ export function useAppState() {
     };
   }, [addNotification, setErrorPopup]);
 
-  // Load active project into workspace if url query parameter id/project_id exists
+  // Load active project into workspace if url query parameter id/project_id exists or slug in path
   useEffect(() => {
-    if (!isAuthenticated) return;
+    const handlePopState = () => {
+      if (!isAuthenticated) return;
 
-    const params = new URLSearchParams(window.location.search);
-    const urlProjectId = params.get("id") || params.get("project_id");
-    if (!urlProjectId) return;
+      const params = new URLSearchParams(window.location.search);
+      const urlProjectId = params.get("id") || params.get("project_id");
 
-    const loadProject = async () => {
+      const path = window.location.pathname;
+      const match = path.match(/\/series\/[^\/]+\/chapters\/([^\/]+)/);
+      const chapterSlug = match ? match[1] : null;
+
+      if (!urlProjectId && !chapterSlug) {
+        // If we cleared the state (navigated to clean /dashboard), reset workspace
+        if (path === "/dashboard") {
+          setProjectId(null);
+          setPanels([]);
+          setScrapedImages([]);
+          setTargetUrl("");
+        }
+        return;
+      }
+
+      const lookupId = urlProjectId || chapterSlug;
+      if (lookupId === projectId) return;
+
+      loadProject(lookupId);
+    };
+
+    const loadProject = async (lookupId: string) => {
       try {
         const token = getToken();
         const headers: HeadersInit = {};
         if (token) {
           headers["Authorization"] = `Bearer ${token}`;
         }
-        const res = await fetch(`/api/projects/${urlProjectId}`, { headers });
+        const res = await fetch(`/api/projects/${lookupId}`, { headers });
         if (res.ok) {
           const data = await res.json();
           if (data.success && data.project) {
@@ -665,8 +686,10 @@ export function useAppState() {
       }
     };
 
-    loadProject();
-  }, [isAuthenticated, addNotification, getToken]);
+    window.addEventListener("popstate", handlePopState);
+    handlePopState();
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [isAuthenticated, addNotification, getToken, projectId]);
 
   useEffect(() => {
     localStorage.setItem(

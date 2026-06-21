@@ -475,8 +475,11 @@ export default function App() {
   // --------------------------------------------------------------------------
   // SUB-SECTION 2.2: ROUTING / NAVIGATION PATH CHECKS
   // --------------------------------------------------------------------------
-  const isDashboardPath = currentPath === "/dashboard";
-  const isDashboardOnly = currentPath === "/dashboard";
+  const chapterPathMatch = currentPath.match(/\/series\/[^\/]+\/chapters\/([^\/]+)/);
+  const isDetailsMode = currentPath.endsWith("/details");
+
+  const isDashboardPath = currentPath === "/dashboard" || (chapterPathMatch !== null && !isDetailsMode);
+  const isDashboardOnly = isDashboardPath;
   const isSettingsPath = currentPath === "/settings";
   const isAutoCropPath = currentPath === "/auto-crop";
   const isBubbleCleanerPath = currentPath === "/bubble-cleaner";
@@ -497,9 +500,9 @@ export default function App() {
   const isNotificationsPath = currentPath === "/notifications";
   const isChapterDetailsPath =
     currentPath === "/project-details" ||
-    currentPath.match(/\/series\/[^\/]+\/chapters\/([^\/]+)/) !== null;
+    (chapterPathMatch !== null && isDetailsMode);
   const isSeriesDetailsPath =
-    !isChapterDetailsPath && currentPath.match(/\/series\/([^\/]+)$/) !== null;
+    !chapterPathMatch && currentPath.match(/\/series\/([^\/]+)$/) !== null;
 
   const isLandingPath =
     currentPath === "/" ||

@@ -35,11 +35,17 @@ export default function SeriesDetailsPage({
   const [isDeleting, setIsDeleting] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    const path = window.location.pathname;
-    const match = path.match(/\/series\/([^\/]+)$/);
-    if (match) {
-      setSeriesSlug(match[1]);
-    }
+    const handlePathChange = () => {
+      const path = window.location.pathname;
+      const match = path.match(/\/series\/([^\/]+)$/);
+      if (match) {
+        setSeriesSlug(match[1]);
+      }
+    };
+
+    handlePathChange();
+    window.addEventListener("popstate", handlePathChange);
+    return () => window.removeEventListener("popstate", handlePathChange);
   }, []);
 
   React.useEffect(() => {

@@ -116,10 +116,12 @@ export default function Sidebar({
                 icon: FileText,
                 active: isProjectDetails,
                 onClick: () => {
-                   // If activeProjectId looks like an ID, use old way, otherwise it might be a slug
-                   // But since Sidebar doesn't have the full project object with slugs, we check if it's already a path
                    if (window.location.pathname.startsWith("/series/")) {
-                     navigateTo(window.location.pathname);
+                     if (window.location.pathname.endsWith("/details")) {
+                       navigateTo(window.location.pathname);
+                     } else {
+                       navigateTo(`${window.location.pathname}/details`);
+                     }
                    } else {
                      navigateTo(`/project-details?id=${activeProjectId}`);
                    }

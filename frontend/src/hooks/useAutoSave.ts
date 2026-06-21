@@ -234,13 +234,20 @@ export function useAutoSave(state: AutoSaveState) {
 
       const data = await res.json();
       if (data.success) {
-        if (isConvertingTemp) {
+        if (isConvertingTemp || data.series_slug) {
           state.setProjectId?.(targetProjectId);
-          const urlParams = new URLSearchParams(window.location.search);
-          urlParams.delete("project_id");
-          urlParams.delete("url");
-          urlParams.set("id", targetProjectId);
-          window.history.pushState(null, "", "?" + urlParams.toString());
+          if (data.series_slug && data.chapter_slug) {
+            const newPath = `/series/${data.series_slug}/chapters/${data.chapter_slug}`;
+            if (window.location.pathname !== newPath) {
+              window.history.pushState(null, "", newPath);
+            }
+          } else {
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.delete("project_id");
+            urlParams.delete("url");
+            urlParams.set("id", targetProjectId);
+            window.history.pushState(null, "", window.location.pathname + "?" + urlParams.toString());
+          }
         }
 
         // Save raw scraped images cache list in database

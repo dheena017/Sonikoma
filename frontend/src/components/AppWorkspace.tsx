@@ -280,17 +280,8 @@ export function AppWorkspace({
       addNotification(logMsg, "info");
 
       if (!isTemporary) {
-        // Update projectId in query parameters so workspace loads it on reload
-        const urlParams = new URLSearchParams(window.location.search);
-        urlParams.delete("project_id");
-        urlParams.delete("url"); // Delete the raw pasted manhwa URL parameter!
-        urlParams.set("id", generatedProjectId);
-        const newSearch = urlParams.toString();
-        window.history.pushState(
-          null,
-          "",
-          window.location.pathname + (newSearch ? "?" + newSearch : "")
-        );
+        // Clear query parameters when moving into a managed project
+        window.history.pushState(null, "", "/dashboard");
       }
 
       // Start the actual scrape
