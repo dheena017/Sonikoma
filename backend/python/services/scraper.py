@@ -667,7 +667,11 @@ async def scrape_images_from_url(
     if not bypass_cache:
         cached = check_sqlite_cache(fetch_url)
         if cached:
-            return [f"/api/proxy-image?url={quote(img)}" for img in cached]
+            return [
+                img if ('/api/' in img or img.startswith('data:'))
+                else f"/api/proxy-image?url={quote(img)}"
+                for img in cached
+            ]
             
     parsed_domain = urlparse(fetch_url)
     base_domain = f"{parsed_domain.scheme}://{parsed_domain.netloc}/"

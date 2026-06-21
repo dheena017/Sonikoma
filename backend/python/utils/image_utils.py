@@ -109,12 +109,14 @@ async def resolve_image_to_buffer(url_str: str, client: Optional[httpx.AsyncClie
                 mime = cached.get("content_type", "image/png")
                 return {"data": cached["data"], "content_type": mime, "contentType": mime}
 
-    # 2. Unwrap any double-proxied URLs
-    if '/api/proxy-image' in working_url:
+    # 2. Unwrap any double-proxied URLs recursively
+    while '/api/proxy-image' in working_url:
         parsed = urlparse(working_url)
         query = parse_qs(parsed.query)
         if "url" in query:
             working_url = query["url"][0]
+        else:
+            break
 
     # 3. Base64 data-URL shortcut — decode inline without any HTTP
     if working_url.startswith('data:image/'):
