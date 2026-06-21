@@ -708,196 +708,191 @@ export default function App() {
           />
 
           {/* PAGE VIEW 1: Main Dashboard Workspace */}
-          <div
-            className="page-transition w-full flex-1 flex flex-col animate-[fadeIn_0.2s_ease-out]"
-            style={{ display: isDashboardPath ? "flex" : "none" }}
-          >
-            <AppWorkspace
-              isDashboardOnly={isDashboardOnly}
-              projectId={projectId}
-              isGeneratingStoryboard={isGeneratingStoryboard}
-              handleGenerateStoryboardAI={handleGenerateStoryboardAI}
-              panels={panels}
-              setPanels={setPanels}
-              saveProject={saveProject}
-              consoleLogs={consoleLogs}
-              setConsoleLogs={setConsoleLogs}
-              scrapedImages={scrapedImages}
-              setScrapedImages={setScrapedImages}
-              selectedScraped={selectedScraped}
-              setSelectedScraped={setSelectedScraped}
-              activePreviewTab={activePreviewTab}
-              setActivePreviewTab={setActivePreviewTab}
-              setEditingImageIdx={setEditingImageIdx}
-              setEditCropTop={setEditCropTop}
-              setEditCropBottom={setEditCropBottom}
-              setEditCropLeft={setEditCropLeft}
-              setEditCropRight={setEditCropRight}
-              setEditAutoTrim={setEditAutoTrim}
-              showBubbleModal={showBubbleModal}
-              setShowBubbleModal={setShowBubbleModal}
-              playStoryboardAudio={playStoryboardAudio}
-              isCleaningBubbles={isCleaningBubbles}
-              cleanProgress={cleanProgress}
-              bubbleCroppingImgUrl={bubbleCroppingImgUrl}
-              showAutoCropModal={showAutoCropModal}
-              setShowAutoCropModal={setShowAutoCropModal}
-              isBatchCropping={isBatchCropping}
-              batchProgress={batchProgress}
-              croppingImgUrl={croppingImgUrl}
-              handleAutoCropSelected={handleAutoCropSelected}
-              handleCleanBubblesSelected={handleCleanBubblesSelected}
-              scrapeImages={scrapeImages}
-              videoPlayerRef={videoPlayerRef}
-              addNotification={addNotification}
-              setErrorPopup={setErrorPopup}
-              fetchWithInterceptor={fetchWithInterceptor}
-              targetUrl={targetUrl}
-              setTargetUrl={setTargetUrl}
-              selectedSource={selectedSource}
-              setSelectedSource={setSelectedSource}
-              seriesTitle={seriesTitle}
-              setSeriesTitle={setSeriesTitle}
-              chapterNumber={chapterNumber}
-              setChapterNumber={setChapterNumber}
-              chapterTitle={chapterTitle}
-              setChapterTitle={setChapterTitle}
-              scrapedGenre={scrapedGenre}
-              setScrapedGenre={setScrapedGenre}
-              seriesAuthor={seriesAuthor}
-              setSeriesAuthor={setSeriesAuthor}
-              seriesCoverImage={seriesCoverImage}
-              setSeriesCoverImage={setSeriesCoverImage}
-              seriesSynopsis={seriesSynopsis}
-              setSeriesSynopsis={setSeriesSynopsis}
-              selectedModel={selectedModel}
-              setSelectedModel={setSelectedModel}
-              isProcessing={isProcessing}
-              handleGenerateVideo={handleGenerateVideo}
-              isScraping={isScraping}
-              mergingIndices={mergingIndices}
-              handleStitchWithNext={handleStitchWithNext}
-              addPanelsToStoryboard={addPanelsToStoryboard}
-              progressStatus={progressStatus}
-              videoUrl={videoUrl}
-              setVideoUrl={setVideoUrl}
-              aspectRatio={aspectRatio}
-              currentPanelIndex={currentPanelIndex}
-              setCurrentPanelIndex={setCurrentPanelIndex}
-              playbackTime={playbackTime}
-              setPlaybackTime={setPlaybackTime}
-              reprocessingPanelId={reprocessingPanelId}
-              storyboardPlaying={storyboardPlaying}
-              toggleStoryboardPlayback={toggleStoryboardPlayback}
-              resetStoryboardPlayback={resetStoryboardPlayback}
-              isMuted={isMuted}
-              setIsMuted={setIsMuted}
-              volume={volume}
-              setVolume={setVolume}
-              musicTheme={musicTheme}
-              voiceActor={voiceActor}
-              narrationStyle={narrationStyle}
-              setNarrationStyle={setNarrationStyle}
-              smartSlice={smartSlice}
-              setSmartSlice={setSmartSlice}
-              bubbleSensitivity={bubbleSensitivity}
-              bubbleDetectionStyle={bubbleDetectionStyle}
-              bubbleEraseMethod={bubbleEraseMethod}
-              bubbleDilation={bubbleDilation}
-              bubbleInpaintRadius={bubbleInpaintRadius}
-              cropSensitivity={cropSensitivity}
-              cropBackgroundMode={cropBackgroundMode}
-              aspectRatioLock={aspectRatioLock}
-              minPanelAreaPct={minPanelAreaPct}
-              overlapMergeThreshold={overlapMergeThreshold}
-              useLocalCV={useLocalCV}
-              autoSplitTallStrips={autoSplitTallStrips}
-              cropModel={cropModel}
-              cropMinHeightPx={cropMinHeightPx}
-              cropCannyLow={cropCannyLow}
-              cropCannyHigh={cropCannyHigh}
-              cropCloseKernelSize={cropCloseKernelSize}
-              showScrapeConfirmModal={showScrapeConfirmModal}
-              setShowScrapeConfirmModal={setShowScrapeConfirmModal}
-            />
-          </div>
+          {isDashboardPath && (
+            <div className="page-transition w-full flex-1 flex flex-col animate-[fadeIn_0.2s_ease-out]">
+              <AppWorkspace
+                isDashboardOnly={isDashboardOnly}
+                projectId={projectId}
+                isGeneratingStoryboard={isGeneratingStoryboard}
+                handleGenerateStoryboardAI={handleGenerateStoryboardAI}
+                panels={panels}
+                setPanels={setPanels}
+                saveProject={saveProject}
+                consoleLogs={consoleLogs}
+                setConsoleLogs={setConsoleLogs}
+                scrapedImages={scrapedImages}
+                setScrapedImages={setScrapedImages}
+                selectedScraped={selectedScraped}
+                setSelectedScraped={setSelectedScraped}
+                activePreviewTab={activePreviewTab}
+                setActivePreviewTab={setActivePreviewTab}
+                setEditingImageIdx={setEditingImageIdx}
+                setEditCropTop={setEditCropTop}
+                setEditCropBottom={setEditCropBottom}
+                setEditCropLeft={setEditCropLeft}
+                setEditCropRight={setEditCropRight}
+                setEditAutoTrim={setEditAutoTrim}
+                showBubbleModal={showBubbleModal}
+                setShowBubbleModal={setShowBubbleModal}
+                playStoryboardAudio={playStoryboardAudio}
+                isCleaningBubbles={isCleaningBubbles}
+                cleanProgress={cleanProgress}
+                bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+                showAutoCropModal={showAutoCropModal}
+                setShowAutoCropModal={setShowAutoCropModal}
+                isBatchCropping={isBatchCropping}
+                batchProgress={batchProgress}
+                croppingImgUrl={croppingImgUrl}
+                handleAutoCropSelected={handleAutoCropSelected}
+                handleCleanBubblesSelected={handleCleanBubblesSelected}
+                scrapeImages={scrapeImages}
+                videoPlayerRef={videoPlayerRef}
+                addNotification={addNotification}
+                setErrorPopup={setErrorPopup}
+                fetchWithInterceptor={fetchWithInterceptor}
+                targetUrl={targetUrl}
+                setTargetUrl={setTargetUrl}
+                selectedSource={selectedSource}
+                setSelectedSource={setSelectedSource}
+                seriesTitle={seriesTitle}
+                setSeriesTitle={setSeriesTitle}
+                chapterNumber={chapterNumber}
+                setChapterNumber={setChapterNumber}
+                chapterTitle={chapterTitle}
+                setChapterTitle={setChapterTitle}
+                scrapedGenre={scrapedGenre}
+                setScrapedGenre={setScrapedGenre}
+                seriesAuthor={seriesAuthor}
+                setSeriesAuthor={setSeriesAuthor}
+                seriesCoverImage={seriesCoverImage}
+                setSeriesCoverImage={setSeriesCoverImage}
+                seriesSynopsis={seriesSynopsis}
+                setSeriesSynopsis={setSeriesSynopsis}
+                selectedModel={selectedModel}
+                setSelectedModel={setSelectedModel}
+                isProcessing={isProcessing}
+                handleGenerateVideo={handleGenerateVideo}
+                isScraping={isScraping}
+                mergingIndices={mergingIndices}
+                handleStitchWithNext={handleStitchWithNext}
+                addPanelsToStoryboard={addPanelsToStoryboard}
+                progressStatus={progressStatus}
+                videoUrl={videoUrl}
+                setVideoUrl={setVideoUrl}
+                aspectRatio={aspectRatio}
+                currentPanelIndex={currentPanelIndex}
+                setCurrentPanelIndex={setCurrentPanelIndex}
+                playbackTime={playbackTime}
+                setPlaybackTime={setPlaybackTime}
+                reprocessingPanelId={reprocessingPanelId}
+                storyboardPlaying={storyboardPlaying}
+                toggleStoryboardPlayback={toggleStoryboardPlayback}
+                resetStoryboardPlayback={resetStoryboardPlayback}
+                isMuted={isMuted}
+                setIsMuted={setIsMuted}
+                volume={volume}
+                setVolume={setVolume}
+                musicTheme={musicTheme}
+                voiceActor={voiceActor}
+                narrationStyle={narrationStyle}
+                setNarrationStyle={setNarrationStyle}
+                smartSlice={smartSlice}
+                setSmartSlice={setSmartSlice}
+                bubbleSensitivity={bubbleSensitivity}
+                bubbleDetectionStyle={bubbleDetectionStyle}
+                bubbleEraseMethod={bubbleEraseMethod}
+                bubbleDilation={bubbleDilation}
+                bubbleInpaintRadius={bubbleInpaintRadius}
+                cropSensitivity={cropSensitivity}
+                cropBackgroundMode={cropBackgroundMode}
+                aspectRatioLock={aspectRatioLock}
+                minPanelAreaPct={minPanelAreaPct}
+                overlapMergeThreshold={overlapMergeThreshold}
+                useLocalCV={useLocalCV}
+                autoSplitTallStrips={autoSplitTallStrips}
+                cropModel={cropModel}
+                cropMinHeightPx={cropMinHeightPx}
+                cropCannyLow={cropCannyLow}
+                cropCannyHigh={cropCannyHigh}
+                cropCloseKernelSize={cropCloseKernelSize}
+                showScrapeConfirmModal={showScrapeConfirmModal}
+                setShowScrapeConfirmModal={setShowScrapeConfirmModal}
+              />
+            </div>
+          )}
 
           {/* PAGE VIEW 2: Advanced System Configuration Settings */}
-          <div
-            className="page-transition w-full flex-1 flex flex-col max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6"
-            style={{ display: isSettingsPath ? "flex" : "none" }}
-          >
-            <div className="flex items-center justify-between border-b border-neutral-800 pb-4">
-              <div>
-                <h2 className="text-2xl font-bold text-white tracking-tight">
-                  System Configuration Settings
-                </h2>
-                <p className="text-xs text-neutral-400 font-mono">
-                  Manage voice synthesis, music composition, and output
-                  rendering profiles
-                </p>
+          {isSettingsPath && (
+            <div className="page-transition w-full flex-1 flex flex-col max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6">
+              <div className="flex items-center justify-between border-b border-neutral-800 pb-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-white tracking-tight">
+                    System Configuration Settings
+                  </h2>
+                  <p className="text-xs text-neutral-400 font-mono">
+                    Manage voice synthesis, music composition, and output
+                    rendering profiles
+                  </p>
+                </div>
+                <button
+                  onClick={() => navigateTo("/")}
+                  className="px-4 py-2 bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-xl text-xs font-mono transition-all hover:bg-neutral-800/80 cursor-pointer"
+                >
+                  ← Dashboard
+                </button>
               </div>
-              <button
-                onClick={() => navigateTo("/")}
-                className="px-4 py-2 bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-xl text-xs font-mono transition-all hover:bg-neutral-800/80 cursor-pointer"
-              >
-                ← Dashboard
-              </button>
+              <AdvancedSettings
+                voiceActor={voiceActor}
+                setVoiceActor={setVoiceActor}
+                musicTheme={musicTheme}
+                setMusicTheme={setMusicTheme}
+                aspectRatio={aspectRatio}
+                setAspectRatio={setAspectRatio}
+                frameRate={frameRate}
+                setFrameRate={setFrameRate}
+                activeTheme={activeTheme}
+                setActiveTheme={setActiveTheme}
+                targetUrl={targetUrl}
+                selectedModel={selectedModel}
+                selectedSource={selectedSource}
+                addNotification={addNotification}
+              />
             </div>
-            <AdvancedSettings
-              voiceActor={voiceActor}
-              setVoiceActor={setVoiceActor}
-              musicTheme={musicTheme}
-              setMusicTheme={setMusicTheme}
-              aspectRatio={aspectRatio}
-              setAspectRatio={setAspectRatio}
-              frameRate={frameRate}
-              setFrameRate={setFrameRate}
-              activeTheme={activeTheme}
-              setActiveTheme={setActiveTheme}
-              targetUrl={targetUrl}
-              selectedModel={selectedModel}
-              selectedSource={selectedSource}
-              addNotification={addNotification}
-            />
-          </div>
+          )}
 
           {/* PAGE VIEW 3: Real-Time Engine Logs Console */}
-          <div
-            className="page-transition w-full flex-1 flex flex-col"
-            style={{ display: isLogsPath ? "flex" : "none" }}
-          >
-            <LogsPage
-              consoleLogs={consoleLogs}
-              setConsoleLogs={setConsoleLogs}
-              onNavigateHome={() => navigateTo("/")}
-            />
-          </div>
+          {isLogsPath && (
+            <div className="page-transition w-full flex-1 flex flex-col">
+              <LogsPage
+                consoleLogs={consoleLogs}
+                setConsoleLogs={setConsoleLogs}
+                onNavigateHome={() => navigateTo("/")}
+              />
+            </div>
+          )}
 
           {/* PAGE VIEW 4: Computational Diagnostics Status */}
-          <div
-            className="page-transition w-full flex-1 flex flex-col"
-            style={{ display: isStatusPath ? "flex" : "none" }}
-          >
-            <StatusPage
-              onNavigateHome={() => navigateTo("/")}
-              fetchWithInterceptor={fetchWithInterceptor}
-            />
-          </div>
+          {isStatusPath && (
+            <div className="page-transition w-full flex-1 flex flex-col">
+              <StatusPage
+                onNavigateHome={() => navigateTo("/")}
+                fetchWithInterceptor={fetchWithInterceptor}
+              />
+            </div>
+          )}
 
           {/* PAGE VIEW 5: Global Shortcuts Configuration */}
-          <div
-            className="page-transition w-full flex-1 flex flex-col"
-            style={{ display: isShortcutsPath ? "flex" : "none" }}
-          >
-            <ShortcutsPage
-              shortcuts={shortcuts}
-              setShortcuts={setShortcuts}
-              defaultShortcuts={DEFAULT_SHORTCUTS}
-              onNavigateHome={() => navigateTo("/")}
-              addNotification={addNotification}
-            />
-          </div>
+          {isShortcutsPath && (
+            <div className="page-transition w-full flex-1 flex flex-col">
+              <ShortcutsPage
+                shortcuts={shortcuts}
+                setShortcuts={setShortcuts}
+                defaultShortcuts={DEFAULT_SHORTCUTS}
+                onNavigateHome={() => navigateTo("/")}
+                addNotification={addNotification}
+              />
+            </div>
+          )}
 
           {/* PAGE VIEW 6: AI Video Optimizer */}
           {isOptimizerPath && (
@@ -1125,10 +1120,12 @@ export default function App() {
 
           {/* PAGE VIEW 20: Advanced Crop & Trim Editor Page */}
           {isEditorPath && !isPipMode && editingImageIdx !== null && (
-            <CropEditorModal
-              isPage={true}
-              appLogic={{ ...appLogic, isPipMode, setIsPipMode }}
-            />
+            <div className="page-transition w-full flex-1 flex flex-col">
+              <CropEditorModal
+                isPage={true}
+                appLogic={{ ...appLogic, isPipMode, setIsPipMode }}
+              />
+            </div>
           )}
 
           {/* FALLBACK VIEW: 404 Route Not Found */}
@@ -1152,7 +1149,9 @@ export default function App() {
             !isProfilePath &&
             !isNotificationsPath &&
             !isProjectDetailsPath && (
-              <PageNotFound onNavigateHome={() => navigateTo("/")} />
+              <div className="page-transition w-full flex-1 flex flex-col">
+                <PageNotFound onNavigateHome={() => navigateTo("/")} />
+              </div>
             )}
         </div>
 

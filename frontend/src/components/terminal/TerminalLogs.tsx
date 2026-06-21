@@ -84,64 +84,87 @@ export default function TerminalLogs({
   };
 
   // Filter and search logic
-  const filteredLogs = consoleLogs.filter((log) => {
-    const query = searchQuery.toLowerCase().trim();
-    const matchesQuery = query === "" || log.toLowerCase().includes(query);
+  const filteredLogs = React.useMemo(() => {
+    return consoleLogs.filter((log) => {
+      const query = searchQuery.toLowerCase().trim();
+      const matchesQuery = query === "" || log.toLowerCase().includes(query);
 
-    if (!matchesQuery) return false;
+      if (!matchesQuery) return false;
 
-    if (activeFilter === "errors") {
-      return (
+      if (activeFilter === "errors") {
+        return (
+          log.includes("[ERROR]") ||
+          log.includes("ERROR]") ||
+          log.includes("[FATAL]")
+        );
+      }
+      if (activeFilter === "warnings") {
+        return log.includes("[WARNING]") || log.includes("[WARN]");
+      }
+      if (activeFilter === "ai") {
+        return (
+          log.includes("[AI") ||
+          log.includes("[Gemini]") ||
+          log.includes("Gemini")
+        );
+      }
+      if (activeFilter === "success") {
+        return (
+          log.includes("[SUCCESS]") ||
+          log.includes("Successfully") ||
+          log.includes("completed cleanly")
+        );
+      }
+
+      return true;
+    });
+  }, [consoleLogs, searchQuery, activeFilter]);
+
+  // When paused, only show up to `lastVisibleCount` logs to avoid UI jumping
+  const displayedLogs = React.useMemo(() => {
+    return paused
+      ? filteredLogs.slice(
+          0,
+          Math.max(0, Math.min(lastVisibleCount, filteredLogs.length))
+        )
+      : filteredLogs;
+  }, [paused, filteredLogs, lastVisibleCount]);
+
+  // Calculate statistics counts
+  const stats = React.useMemo(() => {
+    let errors = 0;
+    let warnings = 0;
+    let success = 0;
+    let ai = 0;
+
+    consoleLogs.forEach((log) => {
+      if (
         log.includes("[ERROR]") ||
         log.includes("ERROR]") ||
         log.includes("[FATAL]")
-      );
-    }
-    if (activeFilter === "warnings") {
-      return log.includes("[WARNING]") || log.includes("[WARN]");
-    }
-    if (activeFilter === "ai") {
-      return (
-        log.includes("[AI") ||
-        log.includes("[Gemini]") ||
-        log.includes("Gemini")
-      );
-    }
-    if (activeFilter === "success") {
-      return (
-        log.includes("[SUCCESS]") ||
-        log.includes("Successfully") ||
-        log.includes("completed cleanly")
-      );
-    }
+      ) {
+        errors++;
+      }
+      if (log.includes("[WARNING]") || log.includes("[WARN]")) {
+        warnings++;
+      }
+      if (log.includes("[SUCCESS]") || log.includes("Successfully")) {
+        success++;
+      }
+      if (log.includes("[AI") || log.includes("[Gemini]")) {
+        ai++;
+      }
+    });
 
-    return true;
-  });
+    return { errors, warnings, success, ai };
+  }, [consoleLogs]);
 
-  // When paused, only show up to `lastVisibleCount` logs to avoid UI jumping
-  const displayedLogs = paused
-    ? filteredLogs.slice(
-        0,
-        Math.max(0, Math.min(lastVisibleCount, filteredLogs.length))
-      )
-    : filteredLogs;
-
-  // Calculate statistics counts
-  const errorCount = consoleLogs.filter(
-    (log) =>
-      log.includes("[ERROR]") ||
-      log.includes("ERROR]") ||
-      log.includes("[FATAL]")
-  ).length;
-  const warningCount = consoleLogs.filter(
-    (log) => log.includes("[WARNING]") || log.includes("[WARN]")
-  ).length;
-  const successCount = consoleLogs.filter(
-    (log) => log.includes("[SUCCESS]") || log.includes("Successfully")
-  ).length;
-  const aiCount = consoleLogs.filter(
-    (log) => log.includes("[AI") || log.includes("[Gemini]")
-  ).length;
+  const {
+    errors: errorCount,
+    warnings: warningCount,
+    success: successCount,
+    ai: aiCount,
+  } = stats;
 
   return (
     <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-3.5">

@@ -198,95 +198,103 @@ export function useAppState() {
 
   // ── Callbacks & effects AFTER all useState declarations ──────────────────
 
-  const setConsoleLogs = useCallback((val: React.SetStateAction<string[]>) => {
-    setRawConsoleLogs((prev) => {
-      const resolved = typeof val === "function" ? val(prev) : val;
-      return resolved.map((log) => {
-        // Match standard format: HH:MM:SS [TAG]
-        const hasStandardFormat = /^\d{2}:\d{2}:\d{2} \[[A-Z_0-9]+\]/.test(log);
-        if (hasStandardFormat) {
-          return log;
-        }
+  const formatLogLine = useCallback((log: string) => {
+    // Match standard format: HH:MM:SS [TAG]
+    const hasStandardFormat = /^\d{2}:\d{2}:\d{2} \[[A-Z_0-9]+\]/.test(log);
+    if (hasStandardFormat) {
+      return log;
+    }
 
-        let category = "FRONTEND";
-        let level = "INFO";
-        let filename = "App.tsx";
-        let message = log;
+    let category = "FRONTEND";
+    let level = "INFO";
+    let filename = "App.tsx";
+    let message = log;
 
-        // Extract level categorizations from log content
+    // Extract level categorizations from log content
+    if (
+      log.includes("[ERROR]") ||
+      log.includes("[FATAL]") ||
+      log.toLowerCase().includes("failed")
+    ) {
+      level = "ERROR";
+    } else if (log.includes("[WARNING]") || log.includes("[WARN]")) {
+      level = "WARN";
+    } else if (
+      log.includes("[SUCCESS]") ||
+      log.toLowerCase().includes("successfully")
+    ) {
+      level = "SUCCESS";
+    } else if (log.includes("[AI") || log.includes("[Gemini]")) {
+      level = "AI";
+    } else if (log.includes("[Database]") || log.includes("[DB]")) {
+      level = "DATABASE";
+    } else if (log.includes("[API]") || log.includes("[HTTP]")) {
+      level = "API";
+    }
+
+    // Parse brackets like [Scraper] Spawned... or [GUI] Mounted...
+    const bracketMatch = log.match(/^\[([^\]]+)\]\s*(?:\[([^\]]+)\])?\s*(.*)$/);
+    if (bracketMatch) {
+      const firstTag = bracketMatch[1];
+      const secondTag = bracketMatch[2];
+      const rest = bracketMatch[3];
+
+      if (
+        secondTag &&
+        ["INFO", "DEBUG", "WARN", "WARNING", "ERROR", "SUCCESS", "FATAL"].includes(
+          secondTag.toUpperCase()
+        )
+      ) {
+        level = secondTag.toUpperCase();
+        filename = firstTag;
+        message = rest;
+      } else {
         if (
-          log.includes("[ERROR]") ||
-          log.includes("[FATAL]") ||
-          log.toLowerCase().includes("failed")
+          ["INFO", "DEBUG", "WARN", "WARNING", "ERROR", "SUCCESS", "FATAL"].includes(
+            firstTag.toUpperCase()
+          )
         ) {
-          level = "ERROR";
-        } else if (log.includes("[WARNING]") || log.includes("[WARN]")) {
-          level = "WARN";
-        } else if (
-          log.includes("[SUCCESS]") ||
-          log.toLowerCase().includes("successfully")
-        ) {
-          level = "SUCCESS";
-        } else if (log.includes("[AI") || log.includes("[Gemini]")) {
-          level = "AI";
-        } else if (log.includes("[Database]") || log.includes("[DB]")) {
-          level = "DATABASE";
-        } else if (log.includes("[API]") || log.includes("[HTTP]")) {
-          level = "API";
+          level = firstTag.toUpperCase();
+          filename = "App.tsx";
+        } else {
+          filename = firstTag;
         }
+        message = rest;
+      }
+    }
 
-        // Parse brackets like [Scraper] Spawned... or [GUI] Mounted...
-        const bracketMatch = log.match(
-          /^\[([^\]]+)\]\s*(?:\[([^\]]+)\])?\s*(.*)$/
-        );
-        if (bracketMatch) {
-          const firstTag = bracketMatch[1];
-          const secondTag = bracketMatch[2];
-          const rest = bracketMatch[3];
-
-          if (
-            secondTag &&
-            [
-              "INFO",
-              "DEBUG",
-              "WARN",
-              "WARNING",
-              "ERROR",
-              "SUCCESS",
-              "FATAL",
-            ].includes(secondTag.toUpperCase())
-          ) {
-            level = secondTag.toUpperCase();
-            filename = firstTag;
-            message = rest;
-          } else {
-            if (
-              [
-                "INFO",
-                "DEBUG",
-                "WARN",
-                "WARNING",
-                "ERROR",
-                "SUCCESS",
-                "FATAL",
-              ].includes(firstTag.toUpperCase())
-            ) {
-              level = firstTag.toUpperCase();
-              filename = "App.tsx";
-            } else {
-              filename = firstTag;
-            }
-            message = rest;
-          }
-        }
-
-        const timestamp = new Date().toLocaleTimeString("en-US", {
-          hour12: false,
-        });
-        return `${timestamp} [${category}] [${level}] [${filename}] ${message}`;
-      });
+    const timestamp = new Date().toLocaleTimeString("en-US", {
+      hour12: false,
     });
+    return `${timestamp} [${category}] [${level}] [${filename}] ${message}`;
   }, []);
+
+  const setConsoleLogs = useCallback(
+    (val: React.SetStateAction<string[]>) => {
+      setRawConsoleLogs((prev) => {
+        const resolved = typeof val === "function" ? val(prev) : val;
+
+        // Optimization: If we are just adding new logs to the end, only process the new ones
+        if (resolved.length > prev.length && resolved.slice(0, prev.length).every((log, i) => log === prev[i])) {
+          const newLogs = resolved.slice(prev.length).map(log => formatLogLine(log));
+          return [...prev, ...newLogs];
+        }
+
+        // Fallback: process all if it's not a simple append
+        let hasNew = false;
+        const processed = resolved.map((log) => {
+          if (/^\d{2}:\d{2}:\d{2} \[[A-Z_0-9]+\]/.test(log)) {
+            return log;
+          }
+          hasNew = true;
+          return formatLogLine(log);
+        });
+
+        return hasNew ? processed : resolved;
+      });
+    },
+    [formatLogLine]
+  );
 
   useEffect(() => {
     localStorage.setItem(
@@ -465,15 +473,7 @@ export function useAppState() {
     async (showDelay: boolean = true) => {
       const token = getToken();
 
-      // Artificial delay to show the fancy loading screen
-      const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
-      const start = Date.now();
-
       if (!token) {
-        if (showDelay) {
-          const elapsed = Date.now() - start;
-          if (elapsed < 1500) await delay(1500 - elapsed);
-        }
         setAuthLoading(false);
         setIsInitializing(false);
         return;
@@ -497,10 +497,6 @@ export function useAppState() {
       } catch (e) {
         console.error("Auth check failed", e);
       } finally {
-        if (showDelay) {
-          const elapsed = Date.now() - start;
-          if (elapsed < 2000) await delay(2000 - elapsed);
-        }
         setAuthLoading(false);
         setIsInitializing(false);
       }

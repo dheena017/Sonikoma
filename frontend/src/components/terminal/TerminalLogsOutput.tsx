@@ -487,12 +487,30 @@ function renderParsedLog(log: string) {
   return log;
 }
 
+const LogRow = React.memo(({ log, index, total }: { log: string, index: number, total: number }) => {
+  const logColor = getLogColor(log);
+  const borderColor = getLogBorderColor(log);
+
+  return (
+    <div
+      className={`leading-relaxed border-l-2 pl-2 hover:bg-neutral-900/30 rounded-r transition-colors ${logColor} ${borderColor}`}
+    >
+      <span className="text-neutral-600 mr-2 select-none">
+        {String(total - index).padStart(3, "0")}
+      </span>
+      {renderParsedLog(log)}
+    </div>
+  );
+});
+
 export function TerminalLogsOutput({
   scrollRef,
   filteredLogs,
   searchQuery,
   activeFilter,
 }: TerminalLogsOutputProps) {
+  const reversedLogs = React.useMemo(() => [...filteredLogs].reverse(), [filteredLogs]);
+
   return (
     <div
       ref={scrollRef}
@@ -513,22 +531,14 @@ export function TerminalLogsOutput({
           </p>
         </div>
       ) : (
-        [...filteredLogs].reverse().map((log, index) => {
-          const logColor = getLogColor(log);
-          const borderColor = getLogBorderColor(log);
-
-          return (
-            <div
-              key={index}
-              className={`leading-relaxed border-l-2 pl-2 hover:bg-neutral-900/30 rounded-r transition-colors ${logColor} ${borderColor}`}
-            >
-              <span className="text-neutral-600 mr-2 select-none">
-                {String(filteredLogs.length - index).padStart(3, "0")}
-              </span>
-              {renderParsedLog(log)}
-            </div>
-          );
-        })
+        reversedLogs.map((log, index) => (
+          <LogRow
+            key={`${log}-${filteredLogs.length - index}`}
+            log={log}
+            index={index}
+            total={filteredLogs.length}
+          />
+        ))
       )}
     </div>
   );

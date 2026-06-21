@@ -74,9 +74,11 @@ export default function LiveScraperDeck({
         const lo = Math.min(lastSelectedIndex, idx);
         const hi = Math.max(lastSelectedIndex, idx);
         const rangeUrls = scrapedImages.slice(lo, hi + 1);
-        setSelectedScraped((prev) =>
-          Array.from(new Set([...prev, ...rangeUrls]))
-        );
+        setSelectedScraped((prev) => {
+          const next = new Set(prev);
+          rangeUrls.forEach((u) => next.add(u));
+          return Array.from(next);
+        });
         // Do NOT update lastSelectedIndex on shift-click — anchor stays put
       } else {
         setSelectedScraped((prev) =>
@@ -404,36 +406,39 @@ export default function LiveScraperDeck({
 
             {/* Grid list of extracted cards */}
             <div className="flex gap-4 overflow-x-auto pb-8 pt-1.5 scrollbar-thin">
-              {scrapedImages.map((imgUrl, idx) => {
-                const isSelected = selectedScraped.includes(imgUrl);
-                return (
-                  <PanelCard
-                    key={`${imgUrl}-${idx}`}
-                    imgUrl={imgUrl}
-                    idx={idx}
-                    isSelected={isSelected}
-                    isBatchCropping={isBatchCropping}
-                    croppingImgUrl={croppingImgUrl}
-                    bubbleCroppingImgUrl={bubbleCroppingImgUrl}
-                    scrapedImages={scrapedImages}
-                    mergingIndices={mergingIndices}
-                    handleMergeWithNext={handleMergeWithNext}
-                    setEditingImageIdx={setEditingImageIdx}
-                    openEditingImageIdx={openEditingImageIdx}
-                    setEditCropTop={setEditCropTop}
-                    setEditCropBottom={setEditCropBottom}
-                    setEditCropLeft={setEditCropLeft}
-                    setEditCropRight={setEditCropRight}
-                    setEditAutoTrim={setEditAutoTrim}
-                    setScrapedImages={setScrapedImages}
-                    setSelectedScraped={setSelectedScraped}
-                    setConsoleLogs={setConsoleLogs}
-                    addPanelsToStoryboard={addPanelsToStoryboard}
-                    addNotification={addNotification}
-                    onCardClick={handleCardClick}
-                  />
-                );
-              })}
+              {(() => {
+                const selectedSet = new Set(selectedScraped);
+                return scrapedImages.map((imgUrl, idx) => {
+                  const isSelected = selectedSet.has(imgUrl);
+                  return (
+                    <PanelCard
+                      key={`${imgUrl}-${idx}`}
+                      imgUrl={imgUrl}
+                      idx={idx}
+                      isSelected={isSelected}
+                      isBatchCropping={isBatchCropping}
+                      croppingImgUrl={croppingImgUrl}
+                      bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+                      scrapedImages={scrapedImages}
+                      mergingIndices={mergingIndices}
+                      handleMergeWithNext={handleMergeWithNext}
+                      setEditingImageIdx={setEditingImageIdx}
+                      openEditingImageIdx={openEditingImageIdx}
+                      setEditCropTop={setEditCropTop}
+                      setEditCropBottom={setEditCropBottom}
+                      setEditCropLeft={setEditCropLeft}
+                      setEditCropRight={setEditCropRight}
+                      setEditAutoTrim={setEditAutoTrim}
+                      setScrapedImages={setScrapedImages}
+                      setSelectedScraped={setSelectedScraped}
+                      setConsoleLogs={setConsoleLogs}
+                      addPanelsToStoryboard={addPanelsToStoryboard}
+                      addNotification={addNotification}
+                      onCardClick={handleCardClick}
+                    />
+                  );
+                });
+              })()}
             </div>
           </div>
         )}
