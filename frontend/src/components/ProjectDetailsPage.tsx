@@ -484,11 +484,15 @@ export default function ProjectDetailsPage({
   const handleLoadToWorkspace = async () => {
     if (!project) return;
     try {
-      navigateTo(
-        `/dashboard?id=${project.project_id}&url=${encodeURIComponent(
-          project.url
-        )}&model=gemini-2.5-flash&source=custom`
-      );
+      if (project.series_slug && project.chapter_slug) {
+        navigateTo(`/series/${project.series_slug}/chapters/${project.chapter_slug}`);
+      } else {
+        navigateTo(
+          `/dashboard?id=${project.project_id}&url=${encodeURIComponent(
+            project.url
+          )}&model=gemini-2.5-flash&source=custom`
+        );
+      }
       setTimeout(() => {
         window.location.reload();
       }, 100);

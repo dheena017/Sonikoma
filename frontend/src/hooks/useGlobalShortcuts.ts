@@ -134,7 +134,8 @@ export function useGlobalShortcuts({
       event.preventDefault();
 
       const path = window.location.pathname;
-      const isDashboard = path === "/dashboard";
+      const chapterPathMatch = path.match(/\/series\/[^\/]+\/chapters\/([^\/]+)/);
+      const isDashboard = path === "/dashboard" || (chapterPathMatch !== null && !path.endsWith("/details"));
       const isEditor = path.startsWith("/editor");
 
       switch (matchedAction) {

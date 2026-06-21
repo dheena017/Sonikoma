@@ -33,6 +33,9 @@ interface UseAppRouterProps {
   aspectRatio: "9:16" | "16:9";
   frameRate: number;
   isDirty?: boolean;
+  projectId: string | null;
+  seriesSlug: string | null;
+  chapterSlug: string | null;
 }
 
 export function useAppRouter({
@@ -58,6 +61,9 @@ export function useAppRouter({
   aspectRatio,
   frameRate,
   isDirty = false,
+  projectId,
+  seriesSlug,
+  chapterSlug,
 }: UseAppRouterProps) {
   const [currentPath, setCurrentPath] = React.useState(
     window.location.pathname
@@ -172,8 +178,19 @@ export function useAppRouter({
             path === "/login" ||
             path === "/register"
           ) {
-            window.history.replaceState({}, "", "/dashboard");
-            setCurrentPath("/dashboard");
+            const activeProjId = localStorage.getItem("active_project_id") || projectId;
+            const activeSeriesSlug = localStorage.getItem("active_series_slug") || seriesSlug;
+            const activeChapterSlug = localStorage.getItem("active_chapter_slug") || chapterSlug;
+            let target = "/dashboard";
+            if (activeProjId) {
+              if (activeSeriesSlug && activeChapterSlug) {
+                target = `/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
+              } else {
+                target = `/dashboard?id=${activeProjId}`;
+              }
+            }
+            window.history.replaceState({}, "", target);
+            setCurrentPath(target);
             return;
           }
         }
@@ -279,7 +296,18 @@ export function useAppRouter({
         isAuthenticated &&
         (path === "/" || path === "" || path === "/index.html")
       ) {
-        targetPath = "/dashboard";
+        const activeProjId = localStorage.getItem("active_project_id") || projectId;
+        const activeSeriesSlug = localStorage.getItem("active_series_slug") || seriesSlug;
+        const activeChapterSlug = localStorage.getItem("active_chapter_slug") || chapterSlug;
+        if (activeProjId) {
+          if (activeSeriesSlug && activeChapterSlug) {
+            targetPath = `/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
+          } else {
+            targetPath = `/dashboard?id=${activeProjId}`;
+          }
+        } else {
+          targetPath = "/dashboard";
+        }
       }
 
       if (window.location.pathname === targetPath) {
@@ -302,7 +330,7 @@ export function useAppRouter({
       window.history.pushState({}, "", targetPath);
       window.dispatchEvent(new Event("popstate"));
     },
-    [isAuthenticated, isDirty]
+    [isAuthenticated, isDirty, projectId, seriesSlug, chapterSlug]
   );
 
   React.useEffect(() => {

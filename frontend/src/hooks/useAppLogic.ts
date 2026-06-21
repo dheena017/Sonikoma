@@ -580,6 +580,14 @@ export function useAppLogic() {
       setPlaybackTime,
       setStoryboardPlaying,
       state.setIsScraping,
+      state.smartSlice,
+      state.seriesTitle,
+      state.chapterNumber,
+      state.chapterTitle,
+      state.scrapedGenre,
+      state.seriesAuthor,
+      state.seriesCoverImage,
+      state.seriesSynopsis,
     ]
   );
 

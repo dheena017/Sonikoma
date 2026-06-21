@@ -820,6 +820,20 @@ def generate_missing_slugs(conn: sqlite3.Connection) -> None:
 
 # ─── Query Helpers ────────────────────────────────────────────────────────────
 
+def unwrap_proxy_url(url_str: str) -> str:
+    if not url_str:
+        return ""
+    import urllib.parse
+    current = url_str.strip()
+    while "/api/proxy-image" in current:
+        parsed = urllib.parse.urlparse(current)
+        query = urllib.parse.parse_qs(parsed.query)
+        if "url" in query:
+            current = query["url"][0]
+        else:
+            break
+    return current
+
 def insert_project(data: Dict[str, Any]) -> None:
     """
     Inserts a project by mapping it to the Series/Chapters relational structure.
@@ -830,7 +844,7 @@ def insert_project(data: Dict[str, Any]) -> None:
         title = data.get('title') or 'Untitled Webtoon'
         genre = data.get('genre') or 'general'
         author = data.get('author') or 'Unknown Author'
-        cover_image = data.get('cover_image')
+        cover_image = unwrap_proxy_url(data.get('cover_image'))
         synopsis = data.get('synopsis')
         
         # First, check if a Series matching this title and user already exists.
@@ -860,7 +874,7 @@ def insert_project(data: Dict[str, Any]) -> None:
         # Now, insert the Chapter (which represents the flat Project)
         chapter_id = data['project_id']
         episode_number = data.get('episode') or 'Chapter 1'
-        original_url = data.get('url')
+        original_url = unwrap_proxy_url(data.get('url'))
         status = data.get('status') or 'pending'
         panels_count = data.get('panels_count') or 0
         video_url = data.get('video_url')
@@ -1028,8 +1042,11 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
             series_params = []
             for key in ('title', 'author', 'cover_image', 'genre', 'synopsis'):
                 if key in updates:
+                    val = updates[key]
+                    if key == 'cover_image':
+                        val = unwrap_proxy_url(val)
                     series_set_parts.append(f"{key} = ?")
-                    series_params.append(updates[key])
+                    series_params.append(val)
 
                     if key == 'title':
                         new_series_slug = generate_unique_slug(updates['title'], 'series', conn)
@@ -1061,8 +1078,8 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                     """, (
                         project_id,
                         i,
-                        p.get('image_url') or "",
-                        p.get('original_image_url') or p.get('original_url', None),
+                        unwrap_proxy_url(p.get('image_url') or ""),
+                        unwrap_proxy_url(p.get('original_image_url') or p.get('original_url', None)),
                         speech_text,
                         p.get('sfx') or "",
                         p.get('duration') if p.get('duration') is not None else 4.5,
@@ -1124,8 +1141,8 @@ def insert_panels(project_id: str, panels: List[Dict[str, Any]]) -> None:
                 """, (
                     project_id,
                     i,
-                    p.get('image_url') or "",
-                    p.get('original_image_url') or p.get('original_url', None),
+                    unwrap_proxy_url(p.get('image_url') or ""),
+                    unwrap_proxy_url(p.get('original_image_url') or p.get('original_url', None)),
                     speech_text,
                     p.get('sfx') or "",
                     p.get('duration') if p.get('duration') is not None else 4.5,

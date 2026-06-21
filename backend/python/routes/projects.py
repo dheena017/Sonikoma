@@ -68,6 +68,29 @@ class ProjectUpdateRequest(BaseModel):
 
 
 
+def unwrap_proxy_url(url_str: str) -> str:
+    if not url_str:
+        return ""
+    from urllib.parse import urlparse, parse_qs
+    current = url_str.strip()
+    while "/api/proxy-image" in current:
+        parsed = urlparse(current)
+        query = parse_qs(parsed.query)
+        if "url" in query:
+            current = query["url"][0]
+        else:
+            break
+    return current
+
+def wrap_proxy_url(url_str: str) -> str:
+    cleaned = unwrap_proxy_url(url_str)
+    if not cleaned:
+        return ""
+    if cleaned.startswith("http") and "/api/" not in cleaned:
+        from urllib.parse import quote
+        return f"/api/proxy-image?url={quote(cleaned)}"
+    return cleaned
+
 # ─── Routes ───────────────────────────────────────────────────────────────────
 
 @router.get("", summary="Get all projects")
@@ -77,10 +100,9 @@ async def get_projects(current_user: dict = Depends(get_current_user)):
         projects = db.get_all_projects(user_id=current_user['user_id'])
         
         # Ensure all project cover images are proxied if external
-        from urllib.parse import quote
         for proj in projects:
-            if proj.get("cover_image") and proj["cover_image"].startswith("http") and "/api/" not in proj["cover_image"]:
-                proj["cover_image"] = f"/api/proxy-image?url={quote(proj['cover_image'])}"
+            if proj.get("cover_image"):
+                proj["cover_image"] = wrap_proxy_url(proj["cover_image"])
                 
         logger.info(f"[Database] Retrieved {len(projects)} projects.")
         return {"success": True, "projects": projects}
@@ -112,17 +134,15 @@ async def get_single_project(
 
         project_id = project["project_id"]
 
-        from urllib.parse import quote
         # Ensure project cover image is proxied
-        if project.get("cover_image") and project["cover_image"].startswith("http") and "/api/" not in project["cover_image"]:
-            project["cover_image"] = f"/api/proxy-image?url={quote(project['cover_image'])}"
+        if project.get("cover_image"):
+            project["cover_image"] = wrap_proxy_url(project["cover_image"])
 
         panels = db.get_panels(project_id)
         # Ensure all panel images are proxied
         for p in panels:
-            img = p.get("image_url")
-            if img and img.startswith("http") and "/api/" not in img:
-                p["image_url"] = f"/api/proxy-image?url={quote(img)}"
+            if p.get("image_url"):
+                p["image_url"] = wrap_proxy_url(p["image_url"])
 
         logger.info(f"[Database] Project {project_id_or_slug} found with {len(panels)} panels.")
         return {"success": True, "project": project, "panels": panels}
@@ -145,7 +165,7 @@ async def create_project(body: ProjectCreateRequest, current_user: dict = Depend
             
         db.insert_project({
             "project_id": body.project_id,
-            "url": body.url,
+            "url": unwrap_proxy_url(body.url),
             "title": body.title,
             "genre": body.genre,
             "episode": body.episode,
@@ -154,7 +174,7 @@ async def create_project(body: ProjectCreateRequest, current_user: dict = Depend
             "video_url": body.video_url,
             "user_id": current_user["user_id"],
             "author": body.author,
-            "cover_image": body.cover_image,
+            "cover_image": unwrap_proxy_url(body.cover_image),
             "synopsis": body.synopsis
         })
         logger.info(f"[Database] Created project {body.project_id} successfully: '{body.title}'")
@@ -195,8 +215,8 @@ async def save_project_panels(
             # Ensure alias resolves original_image_url
             orig_url = p.original_image_url
             db_panels.append({
-                "image_url": p.image_url,
-                "original_url": orig_url,
+                "image_url": unwrap_proxy_url(p.image_url),
+                "original_url": unwrap_proxy_url(orig_url),
                 "speech_text": p.speech_text,
                 "sfx": p.sfx,
                 "duration": p.duration,
@@ -277,7 +297,7 @@ async def update_project_details(
         if body.author is not None:
             updates['author'] = body.author
         if body.cover_image is not None:
-            updates['cover_image'] = body.cover_image
+            updates['cover_image'] = unwrap_proxy_url(body.cover_image)
         if body.synopsis is not None:
             updates['synopsis'] = body.synopsis
 
@@ -286,8 +306,8 @@ async def update_project_details(
             db_panels = []
             for p in body.panels:
                 db_panels.append({
-                    "image_url": p.image_url,
-                    "original_image_url": p.original_image_url,
+                    "image_url": unwrap_proxy_url(p.image_url),
+                    "original_image_url": unwrap_proxy_url(p.original_image_url),
                     "speech_text": p.speech_text,
                     "sfx": p.sfx,
                     "duration": p.duration,

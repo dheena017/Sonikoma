@@ -17,6 +17,8 @@ export function useAppState() {
 
   const [panels, setPanels] = useState<GeneratedPanel[]>([]);
   const [projectId, setProjectId] = useState<string | null>(null);
+  const [seriesSlugState, setSeriesSlugState] = useState<string | null>(null);
+  const [chapterSlugState, setChapterSlugState] = useState<string | null>(null);
   const [consoleLogs, setRawConsoleLogs] = useState<string[]>([]);
 
   const [scrapedImages, setScrapedImages] = useState<string[]>([]);
@@ -585,6 +587,11 @@ export function useAppState() {
         // If we cleared the state (navigated to clean /dashboard), reset workspace
         if (path === "/dashboard") {
           setProjectId(null);
+          setSeriesSlugState(null);
+          setChapterSlugState(null);
+          localStorage.removeItem("active_project_id");
+          localStorage.removeItem("active_series_slug");
+          localStorage.removeItem("active_chapter_slug");
           setPanels([]);
           setScrapedImages([]);
           setTargetUrl("");
@@ -593,7 +600,7 @@ export function useAppState() {
       }
 
       const lookupId = urlProjectId || chapterSlug;
-      if (lookupId === projectId) return;
+      if (lookupId === projectId || lookupId === chapterSlugState) return;
 
       loadProject(lookupId);
     };
@@ -610,8 +617,22 @@ export function useAppState() {
           const data = await res.json();
           if (data.success && data.project) {
             setProjectId(data.project.project_id);
+            setSeriesSlugState(data.project.series_slug || null);
+            setChapterSlugState(data.project.chapter_slug || null);
+            localStorage.setItem("active_project_id", data.project.project_id);
+            if (data.project.series_slug) {
+              localStorage.setItem("active_series_slug", data.project.series_slug);
+            } else {
+              localStorage.removeItem("active_series_slug");
+            }
+            if (data.project.chapter_slug) {
+              localStorage.setItem("active_chapter_slug", data.project.chapter_slug);
+            } else {
+              localStorage.removeItem("active_chapter_slug");
+            }
             if (data.project.series_slug && data.project.chapter_slug) {
-              const newPath = `/series/${data.project.series_slug}/chapters/${data.project.chapter_slug}`;
+              const suffix = window.location.pathname.endsWith("/details") ? "/details" : "";
+              const newPath = `/series/${data.project.series_slug}/chapters/${data.project.chapter_slug}${suffix}`;
               if (window.location.pathname !== newPath) {
                 window.history.replaceState(null, "", newPath);
               }
@@ -689,7 +710,7 @@ export function useAppState() {
     window.addEventListener("popstate", handlePopState);
     handlePopState();
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [isAuthenticated, addNotification, getToken, projectId]);
+  }, [isAuthenticated, addNotification, getToken, projectId, chapterSlugState]);
 
   useEffect(() => {
     localStorage.setItem(
@@ -876,6 +897,10 @@ export function useAppState() {
     setSeriesSynopsis,
     projectId,
     setProjectId,
+    seriesSlugState,
+    setSeriesSlugState,
+    chapterSlugState,
+    setChapterSlugState,
     smartSlice,
     setSmartSlice,
     clearAllNotifications: () => {

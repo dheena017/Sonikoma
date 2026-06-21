@@ -168,6 +168,10 @@ export default function App() {
     setPanels,
     projectId,
     setProjectId,
+    seriesSlugState,
+    setSeriesSlugState,
+    chapterSlugState,
+    setChapterSlugState,
     consoleLogs,
     setConsoleLogs,
     scrapedImages,
@@ -435,7 +439,22 @@ export default function App() {
     authLoading,
     isInitializing,
     isDirty: isWorkspaceDirty,
+    projectId,
+    seriesSlug: seriesSlugState,
+    chapterSlug: chapterSlugState,
   });
+
+  const handleNavigateHome = React.useCallback(() => {
+    if (projectId) {
+      if (seriesSlugState && chapterSlugState) {
+        navigateTo(`/series/${seriesSlugState}/chapters/${chapterSlugState}`);
+      } else {
+        navigateTo(`/dashboard?id=${projectId}`);
+      }
+    } else {
+      navigateTo("/dashboard");
+    }
+  }, [navigateTo, projectId, seriesSlugState, chapterSlugState]);
 
   // --- Global Keyboard Shortcuts Hook ---
   const { shortcuts, setShortcuts } = useGlobalShortcuts({
@@ -614,6 +633,8 @@ export default function App() {
         isDirty={isWorkspaceDirty}
         navigateTo={navigateTo}
         notifications={notifications}
+        seriesSlug={seriesSlugState}
+        chapterSlug={chapterSlugState}
       />
 
       {/* --- Main Contents Controller & Router --- */}
@@ -860,7 +881,7 @@ export default function App() {
                 </p>
               </div>
               <button
-                onClick={() => navigateTo("/")}
+                onClick={handleNavigateHome}
                 className="px-4 py-2 bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-xl text-xs font-mono transition-all hover:bg-neutral-800/80 cursor-pointer"
               >
                 ← Dashboard
@@ -892,7 +913,7 @@ export default function App() {
             <LogsPage
               consoleLogs={consoleLogs}
               setConsoleLogs={setConsoleLogs}
-              onNavigateHome={() => navigateTo("/")}
+              onNavigateHome={handleNavigateHome}
             />
           </div>
 
@@ -902,7 +923,7 @@ export default function App() {
             style={{ display: isStatusPath ? "flex" : "none" }}
           >
             <StatusPage
-              onNavigateHome={() => navigateTo("/")}
+              onNavigateHome={handleNavigateHome}
               fetchWithInterceptor={fetchWithInterceptor}
             />
           </div>
@@ -916,7 +937,7 @@ export default function App() {
               shortcuts={shortcuts}
               setShortcuts={setShortcuts}
               defaultShortcuts={DEFAULT_SHORTCUTS}
-              onNavigateHome={() => navigateTo("/")}
+              onNavigateHome={handleNavigateHome}
               addNotification={addNotification}
             />
           </div>
@@ -925,7 +946,7 @@ export default function App() {
           {isOptimizerPath && (
             <AIOptimizerPage
               panels={panels}
-              onNavigateHome={() => navigateTo("/")}
+              onNavigateHome={handleNavigateHome}
               addNotification={addNotification}
               scrapedTitle={scrapedTitle}
               scrapedGenre={scrapedGenre}
@@ -938,7 +959,7 @@ export default function App() {
             <PanelAssistantPage
               panels={panels}
               setPanels={setPanels}
-              onNavigateHome={() => navigateTo("/")}
+              onNavigateHome={handleNavigateHome}
               addNotification={addNotification}
             />
           )}
@@ -947,7 +968,7 @@ export default function App() {
           {isCharacterPath && (
             <CharacterProfilePage
               panels={panels}
-              onNavigateHome={() => navigateTo("/")}
+              onNavigateHome={handleNavigateHome}
               addNotification={addNotification}
             />
           )}
@@ -957,7 +978,7 @@ export default function App() {
             <TranslationStudioPage
               panels={panels}
               setPanels={setPanels}
-              onNavigateHome={() => navigateTo("/")}
+              onNavigateHome={handleNavigateHome}
               addNotification={addNotification}
             />
           )}
@@ -967,7 +988,7 @@ export default function App() {
             <AudioLabPage
               panels={panels}
               setMusicTheme={setMusicTheme}
-              onNavigateHome={() => navigateTo("/")}
+              onNavigateHome={handleNavigateHome}
               addNotification={addNotification}
             />
           )}
@@ -976,7 +997,7 @@ export default function App() {
           {isThumbnailPath && (
             <ThumbnailStudioPage
               panels={panels}
-              onNavigateHome={() => navigateTo("/")}
+              onNavigateHome={handleNavigateHome}
               addNotification={addNotification}
               scrapedTitle={scrapedTitle}
               scrapedGenre={scrapedGenre}
@@ -986,7 +1007,7 @@ export default function App() {
           {/* PAGE VIEW 12: AI Community Engagement Studio */}
           {isEngagementPath && (
             <EngagementPage
-              onNavigateHome={() => navigateTo("/")}
+              onNavigateHome={handleNavigateHome}
               scrapedTitle={scrapedTitle}
             />
           )}
@@ -996,7 +1017,7 @@ export default function App() {
             <VoiceStudioPage
               panels={panels}
               setPanels={setPanels}
-              onNavigateHome={() => navigateTo("/")}
+              onNavigateHome={handleNavigateHome}
               addNotification={addNotification}
               scrapedGenre={scrapedGenre}
             />
@@ -1005,7 +1026,7 @@ export default function App() {
           {/* PAGE VIEW 14: AI CTR Performance & Analytics */}
           {isAnalyticsPath && (
             <CTRAnalyticsPage
-              onNavigateHome={() => navigateTo("/")}
+              onNavigateHome={handleNavigateHome}
               addNotification={addNotification}
               scrapedTitle={scrapedTitle}
               panels={panels}
@@ -1018,7 +1039,7 @@ export default function App() {
               user={user}
               projects={[]} // In a real app, fetch these
               onLogout={logout}
-              onNavigateHome={() => navigateTo("/")}
+              onNavigateHome={handleNavigateHome}
               onRefreshUser={checkAuth}
             />
           )}
@@ -1027,7 +1048,7 @@ export default function App() {
           {isNotificationsPath && (
             <NotificationsPage
               notifications={notifications}
-              onNavigateHome={() => navigateTo("/")}
+              onNavigateHome={handleNavigateHome}
               onMarkAsRead={markNotificationAsRead}
               onMarkAllAsRead={markAllNotificationsAsRead}
               onDelete={deleteNotification}
@@ -1040,7 +1061,7 @@ export default function App() {
           {/* PAGE VIEW 17: Project Details Dashboard */}
           {isChapterDetailsPath && (
             <ProjectDetailsPage
-              onNavigateHome={() => navigateTo("/")}
+              onNavigateHome={handleNavigateHome}
               navigateTo={navigateTo}
               setGlobalDirty={setProjectDetailsDirty}
               setGlobalSaveStatus={setProjectDetailsSaveStatus}
@@ -1053,7 +1074,7 @@ export default function App() {
           {/* PAGE VIEW 17.5: Series Landing Page */}
           {isSeriesDetailsPath && (
             <SeriesDetailsPage
-              onNavigateHome={() => navigateTo("/")}
+              onNavigateHome={handleNavigateHome}
               navigateTo={navigateTo}
             />
           )}
@@ -1062,7 +1083,7 @@ export default function App() {
           {isAutoCropPath && (
             <AutoCropModal
               isPage={true}
-              onClose={() => navigateTo("/")}
+              onClose={handleNavigateHome}
               onApply={() => {
                 console.log(
                   "App: Applying AutoCrop configuration parameter changes"
@@ -1119,7 +1140,7 @@ export default function App() {
           {isBubbleCleanerPath && (
             <BubbleCleanerModal
               isPage={true}
-              onClose={() => navigateTo("/")}
+              onClose={handleNavigateHome}
               onApply={() => {
                 console.log(
                   "App: Applying BubbleCleaner configuration parameter changes"
@@ -1128,7 +1149,7 @@ export default function App() {
                   "Speech bubble cleanup configurations applied successfully!",
                   "success"
                 );
-                navigateTo("/");
+                handleNavigateHome();
               }}
               detectionStyle={bubbleDetectionStyle}
               setDetectionStyle={setBubbleDetectionStyle}
