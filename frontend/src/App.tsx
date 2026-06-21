@@ -42,6 +42,7 @@ import ForgotPasswordPage from "./components/auth/ForgotPasswordPage.js";
 import ProfilePage from "./components/ProfilePage.js";
 import LoadingPage from "./components/LoadingPage.js";
 import ProjectDetailsPage from "./components/ProjectDetailsPage.js";
+import SeriesDetailsPage from "./components/SeriesDetailsPage.js";
 
 // --- AI Creator & Engagement Suite Views ---
 import AIOptimizerPage from "./components/optimizer/AIOptimizerPage.js";
@@ -456,7 +457,20 @@ export default function App() {
   });
 
   const urlParams = new URLSearchParams(window.location.search);
-  const detailsProjectId = urlParams.get("id") || urlParams.get("project_id");
+  const detailsProjectId = (() => {
+    const id = urlParams.get("id") || urlParams.get("project_id");
+    if (id) return id;
+
+    // Check if we are on a slug-based path: /series/:seriesSlug/chapters/:chapterSlug
+    const match = currentPath.match(/\/series\/[^\/]+\/chapters\/([^\/]+)/);
+    if (match) return match[1];
+
+    // Or just /series/:seriesSlug
+    const seriesMatch = currentPath.match(/\/series\/([^\/]+)$/);
+    if (seriesMatch) return seriesMatch[1];
+
+    return null;
+  })();
 
   // --------------------------------------------------------------------------
   // SUB-SECTION 2.2: ROUTING / NAVIGATION PATH CHECKS
@@ -481,7 +495,12 @@ export default function App() {
   const isAnalyticsPath = currentPath === "/ai-analytics";
   const isProfilePath = currentPath === "/profile";
   const isNotificationsPath = currentPath === "/notifications";
-  const isProjectDetailsPath = currentPath === "/project-details";
+  const isChapterDetailsPath =
+    currentPath === "/project-details" ||
+    currentPath.match(/\/series\/[^\/]+\/chapters\/([^\/]+)/) !== null;
+  const isSeriesDetailsPath =
+    !isChapterDetailsPath && currentPath.match(/\/series\/([^\/]+)$/) !== null;
+
   const isLandingPath =
     currentPath === "/" ||
     currentPath === "/landing" ||
@@ -491,12 +510,12 @@ export default function App() {
   const isRegisterPath = currentPath === "/register";
   const isForgotPasswordPath = currentPath === "/forgot-password";
 
-  const headerProjectId = isProjectDetailsPath ? detailsProjectId : projectId;
-  const headerIsDirty = isProjectDetailsPath ? projectDetailsDirty : isDirty;
-  const headerSaveStatus = isProjectDetailsPath
+  const headerProjectId = isChapterDetailsPath ? detailsProjectId : projectId;
+  const headerIsDirty = isChapterDetailsPath ? projectDetailsDirty : isDirty;
+  const headerSaveStatus = isChapterDetailsPath
     ? projectDetailsSaveStatus
     : saveStatus;
-  const headerOnSave = isProjectDetailsPath
+  const headerOnSave = isChapterDetailsPath
     ? () => {
         projectDetailsSaveRef.current?.();
       }
@@ -1016,7 +1035,7 @@ export default function App() {
           )}
 
           {/* PAGE VIEW 17: Project Details Dashboard */}
-          {isProjectDetailsPath && (
+          {isChapterDetailsPath && (
             <ProjectDetailsPage
               onNavigateHome={() => navigateTo("/")}
               navigateTo={navigateTo}
@@ -1025,6 +1044,14 @@ export default function App() {
               registerSaveHandler={(handler) => {
                 projectDetailsSaveRef.current = handler;
               }}
+            />
+          )}
+
+          {/* PAGE VIEW 17.5: Series Landing Page */}
+          {isSeriesDetailsPath && (
+            <SeriesDetailsPage
+              onNavigateHome={() => navigateTo("/")}
+              navigateTo={navigateTo}
             />
           )}
 
@@ -1151,7 +1178,8 @@ export default function App() {
             !isAnalyticsPath &&
             !isProfilePath &&
             !isNotificationsPath &&
-            !isProjectDetailsPath && (
+            !isChapterDetailsPath &&
+            !isSeriesDetailsPath && (
               <PageNotFound onNavigateHome={() => navigateTo("/")} />
             )}
         </div>

@@ -589,6 +589,12 @@ export function useAppState() {
           const data = await res.json();
           if (data.success && data.project) {
             setProjectId(data.project.project_id);
+            if (data.project.series_slug && data.project.chapter_slug) {
+              const newPath = `/series/${data.project.series_slug}/chapters/${data.project.chapter_slug}`;
+              if (window.location.pathname !== newPath) {
+                window.history.replaceState(null, "", newPath);
+              }
+            }
             setTargetUrl(data.project.url || "");
             setVideoUrl(data.project.video_url || null);
 

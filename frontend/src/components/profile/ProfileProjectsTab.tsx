@@ -324,8 +324,14 @@ export default function ProfileProjectsTab({
     reader.readAsText(file);
   };
 
-  const handleViewDetails = (projectId: string) => {
-    (window as any).navigateTo?.(`/project-details?id=${projectId}`);
+  const handleViewDetails = (project: any) => {
+    if (project.series_slug && project.chapter_slug) {
+      (window as any).navigateTo?.(`/series/${project.series_slug}/chapters/${project.chapter_slug}`);
+    } else if (project.chapter_slug) {
+      (window as any).navigateTo?.(`/series/unknown/chapters/${project.chapter_slug}`);
+    } else {
+      (window as any).navigateTo?.(`/project-details?id=${project.project_id}`);
+    }
   };
 
   // Calculate statistics
@@ -738,7 +744,7 @@ export default function ProfileProjectsTab({
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
                             <button
-                              onClick={() => handleViewDetails(pId)}
+                              onClick={() => handleViewDetails(chapter)}
                               className="px-3.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 border border-white/5 text-purple-400 hover:text-purple-300 rounded-xl text-[10px] font-extrabold transition-all cursor-pointer flex items-center gap-1 active:scale-95"
                             >
                               <Eye className="w-3.5 h-3.5" />
@@ -895,7 +901,7 @@ export default function ProfileProjectsTab({
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
                               <button
-                                onClick={() => handleViewDetails(pId)}
+                                onClick={() => handleViewDetails(chapter)}
                                 className="p-1 bg-neutral-900 hover:bg-neutral-800 border border-white/5 rounded-lg text-purple-400 hover:text-purple-300 transition-all cursor-pointer"
                                 title="View details"
                               >

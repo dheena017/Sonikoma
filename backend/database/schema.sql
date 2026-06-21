@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS series (
   id              TEXT    PRIMARY KEY,              -- UUID format, e.g. "ser_8b2c4e1f"
   user_id         TEXT    NOT NULL,
   title           TEXT    NOT NULL,
+  slug            TEXT    UNIQUE,                   -- SEO-friendly URL slug
   author          TEXT    NOT NULL,
   cover_image     TEXT,                             -- URL to the thumbnail/cover image
   genre           TEXT    NOT NULL DEFAULT 'general',
@@ -47,6 +48,7 @@ CREATE TABLE IF NOT EXISTS chapters (
   id              TEXT    PRIMARY KEY,              -- UUID format, e.g. "chap_9c3d5f2g"
   series_id       TEXT    NOT NULL,
   episode_number  TEXT    NOT NULL,                 -- Text or Float, e.g. "Chapter 15"
+  slug            TEXT    UNIQUE,                   -- SEO-friendly URL slug
   original_url    TEXT,                             -- Scraped source URL
   status          TEXT    NOT NULL DEFAULT 'pending', -- pending | processing | completed | failed
   panels_count    INTEGER NOT NULL DEFAULT 0,
@@ -155,4 +157,6 @@ CREATE INDEX IF NOT EXISTS idx_user_audit_logs_user ON user_audit_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_invoices_user ON user_invoices(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_api_keys_user ON user_api_keys(user_id);
 CREATE INDEX IF NOT EXISTS idx_series_user_id ON series(user_id);
+CREATE INDEX IF NOT EXISTS idx_series_slug ON series(slug);
 CREATE INDEX IF NOT EXISTS idx_chapters_series_id ON chapters(series_id);
+CREATE INDEX IF NOT EXISTS idx_chapters_slug ON chapters(slug);

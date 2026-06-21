@@ -89,36 +89,42 @@ async def get_projects(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=500, detail=f"Failed to fetch projects: {e}")
 
 
-@router.get("/{projectId}", summary="Get a project and its panels")
+@router.get("/{project_id_or_slug}", summary="Get a project and its panels")
 async def get_single_project(
-    projectId: str = Path(..., description="Project ID"),
+    project_id_or_slug: str = Path(..., description="Project ID or Slug"),
     current_user: dict = Depends(get_current_user)
 ):
     try:
-        logger.info(f"[Database] Querying project details and panels for: {projectId}")
-        project = db.get_project(projectId)
+        logger.info(f"[Database] Querying project details and panels for: {project_id_or_slug}")
+        # Try finding by ID first, then by slug
+        project = db.get_project(project_id_or_slug)
         if not project:
-            logger.warning(f"[Database] Project {projectId} not found.")
+            project = db.get_project_by_slug(project_id_or_slug)
+
+        if not project:
+            logger.warning(f"[Database] Project {project_id_or_slug} not found.")
             raise HTTPException(status_code=404, detail="Project not found.")
         
         # Verify ownership
         if project.get("user_id") != current_user["user_id"]:
-            logger.warning(f"[Database] Access denied for user {current_user['user_id']} to project {projectId}")
+            logger.warning(f"[Database] Access denied for user {current_user['user_id']} to project {project_id_or_slug}")
             raise HTTPException(status_code=403, detail="Access denied.")
+
+        project_id = project["project_id"]
 
         from urllib.parse import quote
         # Ensure project cover image is proxied
         if project.get("cover_image") and project["cover_image"].startswith("http") and "/api/" not in project["cover_image"]:
             project["cover_image"] = f"/api/proxy-image?url={quote(project['cover_image'])}"
 
-        panels = db.get_panels(projectId)
+        panels = db.get_panels(project_id)
         # Ensure all panel images are proxied
         for p in panels:
             img = p.get("image_url")
             if img and img.startswith("http") and "/api/" not in img:
                 p["image_url"] = f"/api/proxy-image?url={quote(img)}"
 
-        logger.info(f"[Database] Project {projectId} found with {len(panels)} panels.")
+        logger.info(f"[Database] Project {project_id_or_slug} found with {len(panels)} panels.")
         return {"success": True, "project": project, "panels": panels}
     except HTTPException:
         raise
@@ -169,6 +175,11 @@ async def save_project_panels(
         logger.info(f"[Database] Saving {len(body.panels)} panels for project: {projectId}")
         # Check if project exists
         project = db.get_project(projectId)
+        if not project:
+            project = db.get_project_by_slug(projectId)
+            if project:
+                projectId = project['project_id']
+
         if not project:
             logger.warning(f"[Database] Cannot save panels, project {projectId} not found.")
             raise HTTPException(status_code=404, detail="Project not found.")
@@ -228,6 +239,11 @@ async def update_project_details(
     try:
         logger.info(f"[Database] Updating project details and/or panels for: {projectId}")
         project = db.get_project(projectId)
+        if not project:
+            project = db.get_project_by_slug(projectId)
+            if project:
+                projectId = project['project_id']
+
         if not project:
             logger.info(f"[Database] Project {projectId} not found. Creating new project row on demand.")
             db.insert_project({
@@ -305,6 +321,11 @@ async def delete_single_project(projectId: str = Path(...), current_user: dict =
         logger.info(f"[Database] Deleting project and panels for: {projectId}")
         project = db.get_project(projectId)
         if not project:
+            project = db.get_project_by_slug(projectId)
+            if project:
+                projectId = project['project_id']
+
+        if not project:
             logger.warning(f"[Database] Project {projectId} not found for deletion.")
             raise HTTPException(status_code=404, detail="Project not found.")
 
@@ -322,6 +343,31 @@ async def delete_single_project(projectId: str = Path(...), current_user: dict =
         logger.error(f"Failed to delete project: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to delete project: {e}")
 
+
+@router.get("/series/{series_id_or_slug}", summary="Get a series details")
+async def get_series_route(series_id_or_slug: str = Path(...), current_user: dict = Depends(get_current_user)):
+    try:
+        # Try by ID
+        conn = db.get_db_connection()
+        row = conn.execute("SELECT * FROM series WHERE id = ?", (series_id_or_slug,)).fetchone()
+        if not row:
+            # Try by slug
+            row = conn.execute("SELECT * FROM series WHERE slug = ?", (series_id_or_slug,)).fetchone()
+        conn.close()
+
+        if not row:
+            raise HTTPException(status_code=404, detail="Series not found.")
+
+        series = dict(row)
+        if series['user_id'] != current_user['user_id']:
+            raise HTTPException(status_code=403, detail="Access denied.")
+
+        return {"success": True, "series": series}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to fetch series: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete("/series/{seriesId}", summary="Delete a series and all its chapters")
 async def delete_series_route(seriesId: str = Path(...), current_user: dict = Depends(get_current_user)):

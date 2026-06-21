@@ -155,6 +155,7 @@ export function useAppRouter({
             path === "/auto-crop" ||
             path === "/bubble-cleaner" ||
             path === "/project-details" ||
+            path.startsWith("/series/") ||
             path.startsWith("/editor");
 
           if (isProtectedRoute) {
@@ -194,7 +195,8 @@ export function useAppRouter({
         path === "/ai-analytics" ||
         path === "/profile" ||
         path === "/notifications" ||
-        path === "/project-details"
+        path === "/project-details" ||
+        path.startsWith("/series/")
       ) {
         setShowAutoCropModal(false);
         setShowBubbleModal(false);

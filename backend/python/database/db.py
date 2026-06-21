@@ -75,8 +75,33 @@ def init_db() -> None:
             conn.commit()
             logger.info("[Database] Successfully ran migration: added 'synopsis' column to 'series' table.")
         except Exception:
-            # Column already exists
             pass
+
+        # Slug Migration Check
+        try:
+            cursor.execute("ALTER TABLE series ADD COLUMN slug TEXT")
+            conn.commit()
+            logger.info("[Database] Migration: added 'slug' column to 'series' table.")
+        except Exception:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE chapters ADD COLUMN slug TEXT")
+            conn.commit()
+            logger.info("[Database] Migration: added 'slug' column to 'chapters' table.")
+        except Exception:
+            pass
+
+        # Create missing indexes for slugs
+        try:
+            cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_series_slug ON series(slug)")
+            cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_chapters_slug ON chapters(slug)")
+            conn.commit()
+        except Exception:
+            pass
+
+        # Run one-time slug generation for existing data
+        generate_missing_slugs(conn)
             
         conn.commit()
     except Exception as e:
@@ -727,6 +752,72 @@ def datetime_now_date() -> str:
     import datetime
     return datetime.datetime.now().strftime("%Y-%m-%d")
 
+def create_slug(title: str) -> str:
+    """
+    Converts a title into a URL-friendly slug. Supports Unicode characters.
+    """
+    import re
+    if not title:
+        return ""
+
+    # Lowercase and remove punctuation except dashes and whitespace
+    slug = title.lower()
+    # \w matches alphanumeric characters plus underscore. We use Unicode flag by default in Py3.
+    # We want to keep alphanumeric, spaces and dashes.
+    slug = re.sub(r'[^\w\s-]', '', slug)
+    # Replace spaces and underscores with dashes
+    slug = re.sub(r'[\s_]+', '-', slug)
+    # Collapse multiple dashes
+    slug = re.sub(r'-+', '-', slug)
+    return slug.strip('-')
+
+def generate_unique_slug(title: str, table: str, conn: sqlite3.Connection) -> str:
+    """
+    Generates a unique slug by appending a counter if the slug already exists.
+    """
+    base_slug = create_slug(title)
+    if not base_slug:
+        import uuid
+        base_slug = f"untitled-{uuid.uuid4().hex[:6]}"
+
+    slug = base_slug
+    counter = 1
+
+    while True:
+        row = conn.execute(f"SELECT id FROM {table} WHERE slug = ? LIMIT 1", (slug,)).fetchone()
+        if not row:
+            return slug
+        slug = f"{base_slug}-{counter}"
+        counter += 1
+
+def generate_missing_slugs(conn: sqlite3.Connection) -> None:
+    """
+    Loops through existing series and chapters to generate missing slugs.
+    """
+    try:
+        # Generate for series
+        rows = conn.execute("SELECT id, title FROM series WHERE slug IS NULL").fetchall()
+        for r in rows:
+            unique_slug = generate_unique_slug(r['title'], 'series', conn)
+            conn.execute("UPDATE series SET slug = ? WHERE id = ?", (unique_slug, r['id']))
+
+        # Generate for chapters
+        rows = conn.execute("""
+            SELECT c.id, c.episode_number, s.title as series_title
+            FROM chapters c
+            JOIN series s ON c.series_id = s.id
+            WHERE c.slug IS NULL
+        """).fetchall()
+        for r in rows:
+            # For chapters, use "Series Title - Episode Number" as base for slug
+            base_title = f"{r['series_title']} {r['episode_number']}"
+            unique_slug = generate_unique_slug(base_title, 'chapters', conn)
+            conn.execute("UPDATE chapters SET slug = ? WHERE id = ?", (unique_slug, r['id']))
+
+        conn.commit()
+    except Exception as e:
+        logger.error(f"[Database] Error generating missing slugs: {e}")
+
 # ─── Query Helpers ────────────────────────────────────────────────────────────
 
 def insert_project(data: Dict[str, Any]) -> None:
@@ -760,10 +851,11 @@ def insert_project(data: Dict[str, Any]) -> None:
         else:
             # Create a new Series
             series_id = f"ser_{uuid_hex()}"
+            series_slug = generate_unique_slug(title, 'series', conn)
             conn.execute("""
-                INSERT INTO series (id, user_id, title, author, cover_image, genre, synopsis)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, (series_id, user_id, title, author, cover_image, genre, synopsis))
+                INSERT INTO series (id, user_id, title, slug, author, cover_image, genre, synopsis)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (series_id, user_id, title, series_slug, author, cover_image, genre, synopsis))
         
         # Now, insert the Chapter (which represents the flat Project)
         chapter_id = data['project_id']
@@ -781,10 +873,12 @@ def insert_project(data: Dict[str, Any]) -> None:
                 WHERE id = ?
             """, (episode_number, original_url, status, panels_count, video_url, chapter_id))
         else:
+            # Generate slug for chapter
+            chapter_slug = generate_unique_slug(f"{title} {episode_number}", 'chapters', conn)
             conn.execute("""
-                INSERT INTO chapters (id, series_id, episode_number, original_url, status, panels_count, video_url)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, (chapter_id, series_id, episode_number, original_url, status, panels_count, video_url))
+                INSERT INTO chapters (id, series_id, episode_number, slug, original_url, status, panels_count, video_url)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (chapter_id, series_id, episode_number, chapter_slug, original_url, status, panels_count, video_url))
         conn.commit()
     finally:
         conn.close()
@@ -797,7 +891,8 @@ def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
             rows = conn.execute("""
                 SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                        c.episode_number AS episode, c.status, c.panels_count, c.video_url, 
-                       c.created_at, c.updated_at, s.user_id, s.id AS series_id
+                       c.created_at, c.updated_at, s.user_id, s.id AS series_id,
+                       s.slug AS series_slug, c.slug AS chapter_slug
                 FROM chapters c
                 JOIN series s ON c.series_id = s.id
                 WHERE s.user_id = ?
@@ -807,7 +902,8 @@ def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
             rows = conn.execute("""
                 SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                        c.episode_number AS episode, c.status, c.panels_count, c.video_url, 
-                       c.created_at, c.updated_at, s.user_id, s.id AS series_id
+                       c.created_at, c.updated_at, s.user_id, s.id AS series_id,
+                       s.slug AS series_slug, c.slug AS chapter_slug
                 FROM chapters c
                 JOIN series s ON c.series_id = s.id
                 ORDER BY c.created_at DESC
@@ -823,11 +919,40 @@ def get_project(project_id: str) -> Optional[Dict[str, Any]]:
         row = conn.execute("""
             SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                    c.episode_number AS episode, c.status, c.panels_count, c.video_url, 
-                   c.created_at, c.updated_at, s.user_id, s.id AS series_id
+                   c.created_at, c.updated_at, s.user_id, s.id AS series_id,
+                   s.slug AS series_slug, c.slug AS chapter_slug
             FROM chapters c
             JOIN series s ON c.series_id = s.id
             WHERE c.id = ?
         """, (project_id,)).fetchone()
+        return dict(row) if row else None
+    finally:
+        conn.close()
+
+def get_project_by_slug(chapter_slug: str) -> Optional[Dict[str, Any]]:
+    """Get a single project by its chapter_slug."""
+    conn = get_db_connection()
+    try:
+        row = conn.execute("""
+            SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
+                   c.episode_number AS episode, c.status, c.panels_count, c.video_url,
+                   c.created_at, c.updated_at, s.user_id, s.id AS series_id,
+                   s.slug AS series_slug, c.slug AS chapter_slug
+            FROM chapters c
+            JOIN series s ON c.series_id = s.id
+            WHERE c.slug = ?
+        """, (chapter_slug,)).fetchone()
+        return dict(row) if row else None
+    finally:
+        conn.close()
+
+def get_series_by_slug(series_slug: str) -> Optional[Dict[str, Any]]:
+    """Get a series by its slug."""
+    conn = get_db_connection()
+    try:
+        row = conn.execute("""
+            SELECT * FROM series WHERE slug = ?
+        """, (series_slug,)).fetchone()
         return dict(row) if row else None
     finally:
         conn.close()
@@ -856,11 +981,19 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
     conn = get_db_connection()
     try:
         with conn:
-            # 1. Fetch series_id for this project/chapter
-            row = conn.execute("SELECT series_id FROM chapters WHERE id = ? LIMIT 1", (project_id,)).fetchone()
+            # 1. Fetch series_id and title for this project/chapter
+            row = conn.execute("""
+                SELECT c.series_id, s.title, c.episode_number
+                FROM chapters c
+                JOIN series s ON c.series_id = s.id
+                WHERE c.id = ?
+                LIMIT 1
+            """, (project_id,)).fetchone()
             if not row:
                 raise ValueError(f"Project/Chapter {project_id} not found")
             series_id = row['series_id']
+            current_title = row['title']
+            current_episode = row['episode_number']
             
             # 2. Update chapters table fields
             chapter_set_parts = []
@@ -868,6 +1001,12 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
             if 'episode' in updates:
                 chapter_set_parts.append("episode_number = ?")
                 chapter_params.append(updates['episode'])
+                # If episode changes, we might want to update the chapter slug too
+                # though usually slugs remain stable. Let's regenerate for now to match the user's manual preference.
+                new_slug = generate_unique_slug(f"{updates.get('title', current_title)} {updates['episode']}", 'chapters', conn)
+                chapter_set_parts.append("slug = ?")
+                chapter_params.append(new_slug)
+
             if 'status' in updates:
                 chapter_set_parts.append("status = ?")
                 chapter_params.append(updates['status'])
@@ -891,6 +1030,12 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                 if key in updates:
                     series_set_parts.append(f"{key} = ?")
                     series_params.append(updates[key])
+
+                    if key == 'title':
+                        new_series_slug = generate_unique_slug(updates['title'], 'series', conn)
+                        series_set_parts.append("slug = ?")
+                        series_params.append(new_series_slug)
+
             if series_set_parts:
                 series_params.append(series_id)
                 query = f"UPDATE series SET {', '.join(series_set_parts)} WHERE id = ?"

@@ -348,11 +348,28 @@ export default function ProjectDetailsPage({
     return serializeState(project, panels) !== initialProjectRef.current;
   }, [project, panels, serializeState]);
 
-  // Extract projectId from query string
+  // Extract projectId or Slug from query string or URL path
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id") || params.get("project_id");
-    setProjectId(id);
+    if (id) {
+      setProjectId(id);
+      return;
+    }
+
+    const path = window.location.pathname;
+    // Check if we are on a slug-based path: /series/:seriesSlug/chapters/:chapterSlug
+    const match = path.match(/\/series\/[^\/]+\/chapters\/([^\/]+)/);
+    if (match) {
+      setProjectId(match[1]);
+      return;
+    }
+
+    // Or just /series/:seriesSlug
+    const seriesMatch = path.match(/\/series\/([^\/]+)$/);
+    if (seriesMatch) {
+      setProjectId(seriesMatch[1]);
+    }
   }, []);
 
   // Fetch project details

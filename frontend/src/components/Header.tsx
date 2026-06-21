@@ -14,6 +14,7 @@ import {
   Activity,
   Check,
   ChevronDown,
+  Loader2,
   Sparkles,
   Sliders,
   Paintbrush,
@@ -999,6 +1000,43 @@ export default function Header({
             </div>
           )}
         </div>
+
+        {/* Save Status & Global Trigger */}
+        {projectId && (
+          <div className="flex items-center gap-2 mr-1">
+            {isDirty && (
+              <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse" title="Unsaved changes" />
+            )}
+            <button
+              onClick={onSave}
+              disabled={saveStatus === "saving" || !isDirty}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer shadow-sm ${
+                saveStatus === "saving"
+                  ? "bg-neutral-800 border-neutral-700 text-neutral-500"
+                  : isDirty
+                  ? "bg-purple-600 hover:bg-purple-500 border-purple-500 text-white shadow-[0_0_15px_-5px_rgba(168,85,247,0.5)]"
+                  : "bg-neutral-900 border-neutral-850 text-neutral-500 hover:text-neutral-300"
+              }`}
+            >
+              {saveStatus === "saving" ? (
+                <>
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Saving...
+                </>
+              ) : saveStatus === "saved" ? (
+                <>
+                  <Check className="w-3 h-3 text-emerald-400" />
+                  Saved
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3 h-3" />
+                  Save Changes
+                </>
+              )}
+            </button>
+          </div>
+        )}
 
         {/* User Profile */}
         <button
