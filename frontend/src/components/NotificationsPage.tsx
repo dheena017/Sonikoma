@@ -98,10 +98,17 @@ export default function NotificationsPage({
                     ? "bg-rose-950/20 border-rose-900/30 text-rose-455 hover:bg-rose-900/40"
                     : "bg-neutral-900 border-neutral-850 text-neutral-300 hover:text-white hover:border-neutral-750"
                 }`}
-                title={notificationsMuted ? "Unmute notification sounds" : "Mute notification sounds"}
+                title={
+                  notificationsMuted
+                    ? "Unmute notification sounds"
+                    : "Mute notification sounds"
+                }
               >
                 {notificationsMuted ? (
-                  <BellOff className="h-4 w-4 animate-bounce" style={{ animationDuration: "2s" }} />
+                  <BellOff
+                    className="h-4 w-4 animate-bounce"
+                    style={{ animationDuration: "2s" }}
+                  />
                 ) : (
                   <Bell className="h-4 w-4 text-purple-400" />
                 )}

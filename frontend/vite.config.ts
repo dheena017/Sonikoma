@@ -38,7 +38,9 @@ export default defineConfig(({ mode }) => {
               const filePath = path.resolve(__dirname, "public", url.slice(1));
               if (fs.existsSync(filePath)) {
                 res.writeHead(200, {
-                  "Content-Type": url.endsWith(".svg") ? "image/svg+xml" : "image/x-icon",
+                  "Content-Type": url.endsWith(".svg")
+                    ? "image/svg+xml"
+                    : "image/x-icon",
                 });
                 res.end(fs.readFileSync(filePath));
                 return;

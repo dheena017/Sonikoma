@@ -18,7 +18,7 @@ import {
   Sliders,
   Paintbrush,
   HelpCircle,
-  FileText
+  FileText,
 } from "lucide-react";
 import { GeneratedPanel } from "../types";
 import NotificationDropdown from "./NotificationDropdown";
@@ -124,7 +124,10 @@ export default function Header({
         event.preventDefault();
         searchInputRef.current?.focus();
         setShowSearchDropdown(true);
-      } else if (event.key === "/" && document.activeElement !== searchInputRef.current) {
+      } else if (
+        event.key === "/" &&
+        document.activeElement !== searchInputRef.current
+      ) {
         if (
           document.activeElement?.tagName !== "INPUT" &&
           document.activeElement?.tagName !== "TEXTAREA"
@@ -143,7 +146,10 @@ export default function Header({
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as Node;
-      if (notificationsRef.current && !notificationsRef.current.contains(target)) {
+      if (
+        notificationsRef.current &&
+        !notificationsRef.current.contains(target)
+      ) {
         setShowNotifications(false);
       }
       if (settingsRef.current && !settingsRef.current.contains(target)) {
@@ -173,7 +179,7 @@ export default function Header({
       styleEl.id = "dynamic-theme-style";
       document.head.appendChild(styleEl);
     }
-    
+
     const themeColors: Record<string, string> = {
       purple: ``, // Reset theme variables
       emerald: `
@@ -235,7 +241,7 @@ export default function Header({
           --color-indigo-600: var(--color-zinc-600, #52525b);
           --color-indigo-700: var(--color-zinc-700, #3f3f46);
         }
-      `
+      `,
     };
 
     styleEl.innerHTML = themeColors[accentColor] || "";
@@ -278,37 +284,93 @@ export default function Header({
   };
 
   // Metrics details calculations
-  const totalWithSpeech = panels.filter(p => p.speech_text && p.speech_text.trim()).length;
-  const totalWithAudio = panels.filter(p => p.audio_url).length;
-  const progressPercent = panels.length > 0 
-    ? Math.round(((totalWithSpeech + totalWithAudio) / (panels.length * 2)) * 100) 
-    : 0;
+  const totalWithSpeech = panels.filter(
+    (p) => p.speech_text && p.speech_text.trim()
+  ).length;
+  const totalWithAudio = panels.filter((p) => p.audio_url).length;
+  const progressPercent =
+    panels.length > 0
+      ? Math.round(
+          ((totalWithSpeech + totalWithAudio) / (panels.length * 2)) * 100
+        )
+      : 0;
 
   // Search Navigation options
   const navigationItems = [
-    { name: "Main Dashboard", path: "/dashboard", desc: "Go to series workspace and panel upload" },
-    { name: "Storyboard Editor", path: "/editor", desc: "Refine timelines, motion settings, and synthesis" },
-    { name: "Auto-Crop Panel Slicer", path: "/auto-crop", desc: "Slice webtoon sheets into individual images" },
-    { name: "Clean-Bubbles Editor", path: "/bubble-cleaner", desc: "AI-based text bubble erasing and inpainting" },
-    { name: "Audio Design Lab", path: "/ai-audio-lab", desc: "Overlay SFX, composition themes, and voice actors" },
-    { name: "Voice Studio", path: "/ai-voice", desc: "Configure TTS and preview voice characters" },
-    { name: "CTR Analytics & Title Predictor", path: "/ai-analytics", desc: "A/B validate thumbnails, CTR, and retention" },
-    { name: "System Log Viewer", path: "/logs", desc: "Real-time backend worker processes and logs" },
-    { name: "Server Status Dashboard", path: "/status", desc: "Server connection latency and engine states" },
-    { name: "Keyboard Shortcuts", path: "/shortcuts", desc: "Quick keys for navigation and timelines" },
-    { name: "User Account Profile", path: "/profile", desc: "User statistics, account detail settings" }
+    {
+      name: "Main Dashboard",
+      path: "/dashboard",
+      desc: "Go to series workspace and panel upload",
+    },
+    {
+      name: "Storyboard Editor",
+      path: "/editor",
+      desc: "Refine timelines, motion settings, and synthesis",
+    },
+    {
+      name: "Auto-Crop Panel Slicer",
+      path: "/auto-crop",
+      desc: "Slice webtoon sheets into individual images",
+    },
+    {
+      name: "Clean-Bubbles Editor",
+      path: "/bubble-cleaner",
+      desc: "AI-based text bubble erasing and inpainting",
+    },
+    {
+      name: "Audio Design Lab",
+      path: "/ai-audio-lab",
+      desc: "Overlay SFX, composition themes, and voice actors",
+    },
+    {
+      name: "Voice Studio",
+      path: "/ai-voice",
+      desc: "Configure TTS and preview voice characters",
+    },
+    {
+      name: "CTR Analytics & Title Predictor",
+      path: "/ai-analytics",
+      desc: "A/B validate thumbnails, CTR, and retention",
+    },
+    {
+      name: "System Log Viewer",
+      path: "/logs",
+      desc: "Real-time backend worker processes and logs",
+    },
+    {
+      name: "Server Status Dashboard",
+      path: "/status",
+      desc: "Server connection latency and engine states",
+    },
+    {
+      name: "Keyboard Shortcuts",
+      path: "/shortcuts",
+      desc: "Quick keys for navigation and timelines",
+    },
+    {
+      name: "User Account Profile",
+      path: "/profile",
+      desc: "User statistics, account detail settings",
+    },
   ];
 
-  const filteredNavItems = navigationItems.filter(item =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.desc.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredNavItems = navigationItems.filter(
+    (item) =>
+      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.desc.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const matchedPanels = searchQuery.trim() 
-    ? panels.filter(panel => 
-        String(panel.id).includes(searchQuery) ||
-        (panel.speech_text && panel.speech_text.toLowerCase().includes(searchQuery.toLowerCase()))
-      ).slice(0, 5)
+  const matchedPanels = searchQuery.trim()
+    ? panels
+        .filter(
+          (panel) =>
+            String(panel.id).includes(searchQuery) ||
+            (panel.speech_text &&
+              panel.speech_text
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase()))
+        )
+        .slice(0, 5)
     : [];
 
   return (
@@ -401,7 +463,10 @@ export default function Header({
       </div>
 
       {/* Center Side: Quick Search / Command Bar */}
-      <div className="hidden md:flex flex-1 max-w-sm lg:max-w-md relative" ref={searchRef}>
+      <div
+        className="hidden md:flex flex-1 max-w-sm lg:max-w-md relative"
+        ref={searchRef}
+      >
         <div className="relative w-full">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Search className="h-4 w-4 text-neutral-500" />
@@ -426,106 +491,111 @@ export default function Header({
         </div>
 
         {/* Command Palette Results Dropdown */}
-        {showSearchDropdown && (searchQuery.trim() !== "" || filteredNavItems.length > 0) && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[360px] overflow-y-auto scrollbar-thin">
-            {/* Pages Section */}
-            <div className="p-2 border-b border-neutral-850/60">
-              <span className="px-3 py-1.5 text-[9px] font-extrabold font-sans text-purple-400 tracking-wider uppercase block">
-                Jump To Page
-              </span>
-              <div className="space-y-0.5">
-                {filteredNavItems.slice(0, 6).map((item) => (
-                  <button
-                    key={item.path}
-                    onClick={() => {
-                      navigateTo(item.path);
-                      setShowSearchDropdown(false);
-                      setSearchQuery("");
-                    }}
-                    className="w-full text-left px-3 py-2 rounded-xl hover:bg-neutral-800/80 flex items-center justify-between group transition-colors cursor-pointer"
-                  >
-                    <div>
-                      <p className="text-xs font-semibold text-neutral-200 group-hover:text-white">
-                        {item.name}
-                      </p>
-                      <p className="text-[10px] text-neutral-500 truncate max-w-[280px]">
-                        {item.desc}
+        {showSearchDropdown &&
+          (searchQuery.trim() !== "" || filteredNavItems.length > 0) && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[360px] overflow-y-auto scrollbar-thin">
+              {/* Pages Section */}
+              <div className="p-2 border-b border-neutral-850/60">
+                <span className="px-3 py-1.5 text-[9px] font-extrabold font-sans text-purple-400 tracking-wider uppercase block">
+                  Jump To Page
+                </span>
+                <div className="space-y-0.5">
+                  {filteredNavItems.slice(0, 6).map((item) => (
+                    <button
+                      key={item.path}
+                      onClick={() => {
+                        navigateTo(item.path);
+                        setShowSearchDropdown(false);
+                        setSearchQuery("");
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-xl hover:bg-neutral-800/80 flex items-center justify-between group transition-colors cursor-pointer"
+                    >
+                      <div>
+                        <p className="text-xs font-semibold text-neutral-200 group-hover:text-white">
+                          {item.name}
+                        </p>
+                        <p className="text-[10px] text-neutral-500 truncate max-w-[280px]">
+                          {item.desc}
+                        </p>
+                      </div>
+                      <ChevronDown className="-rotate-90 h-3 w-3 text-neutral-600 group-hover:text-purple-400 transition-colors" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Panels Section */}
+              {panels.length > 0 && (
+                <div className="p-2">
+                  <span className="px-3 py-1.5 text-[9px] font-extrabold font-sans text-purple-400 tracking-wider uppercase block">
+                    Panel Scripts & Transcripts
+                  </span>
+                  {matchedPanels.length > 0 ? (
+                    <div className="space-y-0.5">
+                      {matchedPanels.map((panel) => {
+                        const panelIdx = panels.findIndex(
+                          (p) => p.id === panel.id
+                        );
+                        return (
+                          <button
+                            key={panel.id}
+                            onClick={() => {
+                              navigateTo(`/editor/adjust?idx=${panelIdx}`);
+                              setShowSearchDropdown(false);
+                              setSearchQuery("");
+                            }}
+                            className="w-full text-left px-3 py-2 rounded-xl hover:bg-neutral-800/80 flex items-start gap-3 transition-colors cursor-pointer group"
+                          >
+                            <div className="w-10 h-7 rounded bg-neutral-950 border border-neutral-850 overflow-hidden shrink-0 flex items-center justify-center">
+                              {panel.image_url ? (
+                                <img
+                                  src={panel.image_url}
+                                  alt={`P${panel.id}`}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <span className="text-[8px] font-mono text-neutral-500">
+                                  P{panel.id}
+                                </span>
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex justify-between items-center">
+                                <span className="text-[10px] font-bold text-neutral-300 font-mono">
+                                  Panel #{panel.id}
+                                </span>
+                                <span className="text-[9px] text-neutral-500 group-hover:text-purple-400 font-mono">
+                                  {formatDuration(panel.duration)}
+                                </span>
+                              </div>
+                              <p className="text-[10px] text-neutral-500 truncate">
+                                {panel.speech_text ||
+                                  "No speech script generated"}
+                              </p>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : searchQuery.trim() !== "" ? (
+                    <p className="text-center py-4 text-[10px] text-neutral-500 italic">
+                      No matching panels found
+                    </p>
+                  ) : (
+                    <div className="px-3 py-2 bg-neutral-950/40 border border-neutral-850/60 rounded-xl">
+                      <p className="text-[10px] text-neutral-400 font-mono text-center">
+                        Type script keywords to search storyboards
                       </p>
                     </div>
-                    <ChevronDown className="-rotate-90 h-3 w-3 text-neutral-600 group-hover:text-purple-400 transition-colors" />
-                  </button>
-                ))}
-              </div>
+                  )}
+                </div>
+              )}
             </div>
-
-            {/* Panels Section */}
-            {panels.length > 0 && (
-              <div className="p-2">
-                <span className="px-3 py-1.5 text-[9px] font-extrabold font-sans text-purple-400 tracking-wider uppercase block">
-                  Panel Scripts & Transcripts
-                </span>
-                {matchedPanels.length > 0 ? (
-                  <div className="space-y-0.5">
-                    {matchedPanels.map((panel) => {
-                      const panelIdx = panels.findIndex((p) => p.id === panel.id);
-                      return (
-                        <button
-                          key={panel.id}
-                          onClick={() => {
-                            navigateTo(`/editor/adjust?idx=${panelIdx}`);
-                            setShowSearchDropdown(false);
-                            setSearchQuery("");
-                          }}
-                          className="w-full text-left px-3 py-2 rounded-xl hover:bg-neutral-800/80 flex items-start gap-3 transition-colors cursor-pointer group"
-                        >
-                          <div className="w-10 h-7 rounded bg-neutral-950 border border-neutral-850 overflow-hidden shrink-0 flex items-center justify-center">
-                            {panel.image_url ? (
-                              <img
-                                src={panel.image_url}
-                                alt={`P${panel.id}`}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <span className="text-[8px] font-mono text-neutral-500">P{panel.id}</span>
-                            )}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex justify-between items-center">
-                              <span className="text-[10px] font-bold text-neutral-300 font-mono">
-                                Panel #{panel.id}
-                              </span>
-                              <span className="text-[9px] text-neutral-500 group-hover:text-purple-400 font-mono">
-                                {formatDuration(panel.duration)}
-                              </span>
-                            </div>
-                            <p className="text-[10px] text-neutral-500 truncate">
-                              {panel.speech_text || "No speech script generated"}
-                            </p>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                ) : searchQuery.trim() !== "" ? (
-                  <p className="text-center py-4 text-[10px] text-neutral-500 italic">
-                    No matching panels found
-                  </p>
-                ) : (
-                  <div className="px-3 py-2 bg-neutral-950/40 border border-neutral-850/60 rounded-xl">
-                    <p className="text-[10px] text-neutral-400 font-mono text-center">
-                      Type script keywords to search storyboards
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+          )}
       </div>
 
       {/* Right side: Volume, Notifications, Settings, Stats, Profile */}
       <div className="flex items-center gap-2 lg:gap-3 shrink-0">
-        
         {/* Playback Volume Widget */}
         <div className="flex items-center gap-1.5 bg-neutral-900 border border-neutral-850 px-2.5 py-1.5 rounded-xl hover:border-neutral-750 transition-all select-none group h-[34px]">
           <button
@@ -599,7 +669,10 @@ export default function Header({
                 navigateTo("/notifications");
               }}
               notificationsMuted={notificationsMuted}
-              onToggleMute={() => setNotificationsMuted && setNotificationsMuted(!notificationsMuted)}
+              onToggleMute={() =>
+                setNotificationsMuted &&
+                setNotificationsMuted(!notificationsMuted)
+              }
             />
           )}
         </div>
@@ -627,7 +700,7 @@ export default function Header({
               <h3 className="text-xs font-black uppercase tracking-wider text-purple-400 mb-3 flex items-center gap-1.5">
                 <Activity className="h-4 w-4" /> Storyboard Analytics
               </h3>
-              
+
               <div className="space-y-3">
                 {/* Completion Dial Widget */}
                 <div className="bg-neutral-955/40 border border-neutral-850 p-3 rounded-xl flex items-center gap-3">
@@ -649,7 +722,9 @@ export default function Header({
                         strokeWidth="3.5"
                         fill="transparent"
                         strokeDasharray={2 * Math.PI * 20}
-                        strokeDashoffset={2 * Math.PI * 20 * (1 - progressPercent / 100)}
+                        strokeDashoffset={
+                          2 * Math.PI * 20 * (1 - progressPercent / 100)
+                        }
                         className="transition-all duration-500"
                       />
                     </svg>
@@ -690,7 +765,10 @@ export default function Header({
                       Narrated
                     </p>
                     <p className="text-xs font-bold text-neutral-300 font-mono mt-0.5">
-                      {totalWithSpeech} <span className="text-[9px] text-neutral-500">panels</span>
+                      {totalWithSpeech}{" "}
+                      <span className="text-[9px] text-neutral-500">
+                        panels
+                      </span>
                     </p>
                   </div>
                   <div className="bg-neutral-950/30 border border-neutral-850/60 p-2 rounded-lg">
@@ -698,7 +776,10 @@ export default function Header({
                       Audio Rendered
                     </p>
                     <p className="text-xs font-bold text-neutral-300 font-mono mt-0.5">
-                      {totalWithAudio} <span className="text-[9px] text-neutral-500">tracks</span>
+                      {totalWithAudio}{" "}
+                      <span className="text-[9px] text-neutral-500">
+                        tracks
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -709,16 +790,28 @@ export default function Header({
                     Predicted Quality Scores
                   </span>
                   <div className="flex justify-between items-center text-[10px]">
-                    <span className="text-neutral-500 font-mono">Est. Audience Retention:</span>
-                    <span className="font-bold text-emerald-400 font-mono">87.5% (High)</span>
+                    <span className="text-neutral-500 font-mono">
+                      Est. Audience Retention:
+                    </span>
+                    <span className="font-bold text-emerald-400 font-mono">
+                      87.5% (High)
+                    </span>
                   </div>
                   <div className="flex justify-between items-center text-[10px]">
-                    <span className="text-neutral-500 font-mono">A/B Title CTR Expectation:</span>
-                    <span className="font-bold text-purple-400 font-mono">9.4/10</span>
+                    <span className="text-neutral-500 font-mono">
+                      A/B Title CTR Expectation:
+                    </span>
+                    <span className="font-bold text-purple-400 font-mono">
+                      9.4/10
+                    </span>
                   </div>
                   <div className="flex justify-between items-center text-[10px]">
-                    <span className="text-neutral-500 font-mono">Cliffhanger Ending Index:</span>
-                    <span className="font-bold text-amber-400 font-mono">Strong</span>
+                    <span className="text-neutral-500 font-mono">
+                      Cliffhanger Ending Index:
+                    </span>
+                    <span className="font-bold text-amber-400 font-mono">
+                      Strong
+                    </span>
                   </div>
                 </div>
               </div>
@@ -762,11 +855,17 @@ export default function Header({
                 </label>
                 <select
                   value={selectedModel}
-                  onChange={(e) => setSelectedModel && setSelectedModel(e.target.value)}
+                  onChange={(e) =>
+                    setSelectedModel && setSelectedModel(e.target.value)
+                  }
                   className="w-full bg-neutral-950 border border-neutral-850 text-neutral-200 text-xs px-2.5 py-1.5 rounded-xl focus:border-purple-500/50 outline-none cursor-pointer font-sans"
                 >
-                  <option value="gemini-2.5-flash">Gemini 2.5 Flash (Default)</option>
-                  <option value="gemini-2.5-pro">Gemini 2.5 Pro (High Quality)</option>
+                  <option value="gemini-2.5-flash">
+                    Gemini 2.5 Flash (Default)
+                  </option>
+                  <option value="gemini-2.5-pro">
+                    Gemini 2.5 Pro (High Quality)
+                  </option>
                   <option value="claude-3.5-sonnet">Claude 3.5 Sonnet</option>
                   <option value="llama-3.3-70b">Llama 3.3 70B (Fast)</option>
                 </select>
@@ -777,13 +876,19 @@ export default function Header({
                 {/* Narration style select inside settings */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] font-bold text-neutral-300">Narration Script Length</p>
-                    <p className="text-[9px] text-neutral-500 font-mono">Long Storyteller vs Snappy Subtitles</p>
+                    <p className="text-[10px] font-bold text-neutral-300">
+                      Narration Script Length
+                    </p>
+                    <p className="text-[9px] text-neutral-500 font-mono">
+                      Long Storyteller vs Snappy Subtitles
+                    </p>
                   </div>
                   <button
                     onClick={() => {
                       if (setNarrationStyle) {
-                        setNarrationStyle(narrationStyle === "long" ? "short" : "long");
+                        setNarrationStyle(
+                          narrationStyle === "long" ? "short" : "long"
+                        );
                       }
                     }}
                     className={`px-2 py-1 rounded text-[9px] font-bold font-mono tracking-wider transition-colors cursor-pointer border border-neutral-800 ${
@@ -799,8 +904,12 @@ export default function Header({
                 {/* Auto Play Audio Checkbox */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] font-bold text-neutral-300">Auto-play TTS Audios</p>
-                    <p className="text-[9px] text-neutral-500 font-mono">Play voice on selection</p>
+                    <p className="text-[10px] font-bold text-neutral-300">
+                      Auto-play TTS Audios
+                    </p>
+                    <p className="text-[9px] text-neutral-500 font-mono">
+                      Play voice on selection
+                    </p>
                   </div>
                   <input
                     type="checkbox"
@@ -813,8 +922,12 @@ export default function Header({
                 {/* Auto-save changes */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] font-bold text-neutral-300">Auto-save Modifications</p>
-                    <p className="text-[9px] text-neutral-500 font-mono">Commit changes automatically</p>
+                    <p className="text-[10px] font-bold text-neutral-300">
+                      Auto-save Modifications
+                    </p>
+                    <p className="text-[9px] text-neutral-500 font-mono">
+                      Commit changes automatically
+                    </p>
                   </div>
                   <input
                     type="checkbox"
@@ -832,19 +945,51 @@ export default function Header({
                 </span>
                 <div className="flex gap-2.5 items-center bg-neutral-950/30 border border-neutral-850 p-2 rounded-xl justify-center">
                   {[
-                    { id: "purple", color: "bg-purple-600", border: "border-purple-400", label: "Classic Purple" },
-                    { id: "emerald", color: "bg-emerald-600", border: "border-emerald-400", label: "Neon Emerald" },
-                    { id: "rose", color: "bg-rose-600", border: "border-rose-450", label: "Vibrant Rose" },
-                    { id: "amber", color: "bg-amber-600", border: "border-amber-400", label: "Retro Amber" },
-                    { id: "cyan", color: "bg-cyan-600", border: "border-cyan-400", label: "Ocean Cyan" },
-                    { id: "slate", color: "bg-neutral-400", border: "border-neutral-200", label: "Monochrome Slate" }
+                    {
+                      id: "purple",
+                      color: "bg-purple-600",
+                      border: "border-purple-400",
+                      label: "Classic Purple",
+                    },
+                    {
+                      id: "emerald",
+                      color: "bg-emerald-600",
+                      border: "border-emerald-400",
+                      label: "Neon Emerald",
+                    },
+                    {
+                      id: "rose",
+                      color: "bg-rose-600",
+                      border: "border-rose-450",
+                      label: "Vibrant Rose",
+                    },
+                    {
+                      id: "amber",
+                      color: "bg-amber-600",
+                      border: "border-amber-400",
+                      label: "Retro Amber",
+                    },
+                    {
+                      id: "cyan",
+                      color: "bg-cyan-600",
+                      border: "border-cyan-400",
+                      label: "Ocean Cyan",
+                    },
+                    {
+                      id: "slate",
+                      color: "bg-neutral-400",
+                      border: "border-neutral-200",
+                      label: "Monochrome Slate",
+                    },
                   ].map((theme) => (
                     <button
                       key={theme.id}
                       onClick={() => setAccentColor(theme.id)}
-                      className={`w-5 h-5 rounded-full ${theme.color} cursor-pointer transition-all border-2 relative flex items-center justify-center ${
-                        accentColor === theme.id 
-                          ? `${theme.border} scale-110 shadow-lg` 
+                      className={`w-5 h-5 rounded-full ${
+                        theme.color
+                      } cursor-pointer transition-all border-2 relative flex items-center justify-center ${
+                        accentColor === theme.id
+                          ? `${theme.border} scale-110 shadow-lg`
                           : "border-transparent opacity-60 hover:opacity-100 hover:scale-105"
                       }`}
                       title={theme.label}

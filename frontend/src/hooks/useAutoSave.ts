@@ -162,7 +162,9 @@ export function useAutoSave(state: AutoSaveState) {
         return "";
       })();
 
-      const token = localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token");
+      const token =
+        localStorage.getItem("anivox_token") ||
+        sessionStorage.getItem("anivox_token");
       const headers: HeadersInit = { "Content-Type": "application/json" };
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
@@ -239,15 +241,17 @@ export function useAutoSave(state: AutoSaveState) {
         const detailMsg = [
           `Project ID: ${state.projectId}`,
           `Series Title: ${state.seriesTitle || "Untitled"}`,
-          `Chapter: ${state.chapterNumber ? `Chapter ${state.chapterNumber}` : "N/A"}${state.chapterTitle ? ` - ${state.chapterTitle}` : ""}`,
+          `Chapter: ${
+            state.chapterNumber ? `Chapter ${state.chapterNumber}` : "N/A"
+          }${state.chapterTitle ? ` - ${state.chapterTitle}` : ""}`,
           `Storyboard Panels: ${state.panels.length} panels`,
-          `Scraped Source Images: ${state.scrapedImages.length} images`
+          `Scraped Source Images: ${state.scrapedImages.length} images`,
         ].join("\n");
         state.addNotification?.(
           "Project changes saved successfully!",
           "success",
           {
-            details: detailMsg
+            details: detailMsg,
           }
         );
         return true;
@@ -261,7 +265,7 @@ export function useAutoSave(state: AutoSaveState) {
         err.message || "Failed to save project changes.",
         "error",
         {
-          details: err.stack || String(err)
+          details: err.stack || String(err),
         }
       );
       return false;

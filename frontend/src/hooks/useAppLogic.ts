@@ -371,13 +371,13 @@ export function useAppLogic() {
               `Consolidated Image URL: ${data.images?.[0] || "N/A"}`,
               `Source URL: ${normalizedTargetUrl}`,
               `Smart Slice Mode: Enabled`,
-              `Scraped Genre: ${state.scrapedGenre || "General"}`
+              `Scraped Genre: ${state.scrapedGenre || "General"}`,
             ].join("\n");
             state.addNotification(
               `Successfully extracted and consolidated ${data.debug.original_count} panels into one image!`,
               "success",
               {
-                details: detailMsg
+                details: detailMsg,
               }
             );
           } else {
@@ -386,13 +386,13 @@ export function useAppLogic() {
               `Source URL: ${normalizedTargetUrl}`,
               `AI Vision Model: ${selectedModel}`,
               `Target Domain: ${currentHost}`,
-              `Smart Slice Mode: Disabled`
+              `Smart Slice Mode: Disabled`,
             ].join("\n");
             state.addNotification(
               `Successfully extracted ${data.total_images} panel frame from the Webtoon page!`,
               "success",
               {
-                details: detailMsg
+                details: detailMsg,
               }
             );
           }
@@ -422,7 +422,7 @@ export function useAppLogic() {
             `Failed to find comic panels: ${errMsg} Please check the URL and try again.`,
             "error",
             {
-              details: `Error Response Message: ${errMsg}\nTarget URL: ${normalizedTargetUrl}\nSelected Source Portal: ${selectedSource}\nHost: ${currentHost}`
+              details: `Error Response Message: ${errMsg}\nTarget URL: ${normalizedTargetUrl}\nSelected Source Portal: ${selectedSource}\nHost: ${currentHost}`,
             }
           );
           state.setConsoleLogs((prev) => [
@@ -446,7 +446,11 @@ export function useAppLogic() {
             `Service unable to access target site. Check the URL or refresh the page. (${errMsg})`,
             "error",
             {
-              details: `Error Details: ${err.message || String(err)}\nStack Trace: ${err.stack || "N/A"}\nTarget URL: ${normalizedTargetUrl}\nSelected Source Portal: ${selectedSource}`
+              details: `Error Details: ${
+                err.message || String(err)
+              }\nStack Trace: ${
+                err.stack || "N/A"
+              }\nTarget URL: ${normalizedTargetUrl}\nSelected Source Portal: ${selectedSource}`,
             }
           );
         }

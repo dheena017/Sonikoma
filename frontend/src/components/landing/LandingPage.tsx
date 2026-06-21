@@ -33,18 +33,24 @@ export default function LandingPage({
   onLogin,
 }: LandingPageProps) {
   // State for interactive demo
-  const [demoTab, setDemoTab] = React.useState<"slicing" | "bubbles" | "translation" | "render">("slicing");
+  const [demoTab, setDemoTab] = React.useState<
+    "slicing" | "bubbles" | "translation" | "render"
+  >("slicing");
   const [sliderPos, setSliderPos] = React.useState<number>(50);
 
   // State for pricing billing cycle (monthly vs annual)
-  const [billingCycle, setBillingCycle] = React.useState<"monthly" | "yearly">("monthly");
+  const [billingCycle, setBillingCycle] = React.useState<"monthly" | "yearly">(
+    "monthly"
+  );
 
   // State for FAQ accordion (tracks open indices)
   const [openFaq, setOpenFaq] = React.useState<number | null>(null);
 
   // State for newsletter signup form
   const [email, setEmail] = React.useState("");
-  const [newsState, setNewsState] = React.useState<"idle" | "loading" | "success" | "error">("idle");
+  const [newsState, setNewsState] = React.useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
@@ -230,7 +236,10 @@ export default function LandingPage({
       </section>
 
       {/* INTERACTIVE DEMO (TRANSFORMATION LIVE) */}
-      <section id="transformation-demo" className="py-32 px-6 relative overflow-hidden">
+      <section
+        id="transformation-demo"
+        className="py-32 px-6 relative overflow-hidden"
+      >
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-purple-600/5 blur-[120px] rounded-full pointer-events-none" />
         <div className="max-w-7xl mx-auto space-y-12">
           <div className="text-center space-y-4">
@@ -238,17 +247,34 @@ export default function LandingPage({
               See the Transformation Live
             </h2>
             <p className="text-neutral-500 max-w-xl mx-auto">
-              Drag the interactive slider to watch static comic pages transform into dynamic assets ready for video output.
+              Drag the interactive slider to watch static comic pages transform
+              into dynamic assets ready for video output.
             </p>
           </div>
 
           {/* Tabs Control */}
           <div className="flex flex-wrap items-center justify-center gap-3">
             {[
-              { id: "slicing", label: "Auto-Slicing", icon: <Scissors className="w-4 h-4" /> },
-              { id: "bubbles", label: "Speech Bubble Eraser", icon: <Layers className="w-4 h-4" /> },
-              { id: "translation", label: "AI Translation", icon: <Languages className="w-4 h-4" /> },
-              { id: "render", label: "Cinematic Rendering", icon: <Tv className="w-4 h-4" /> },
+              {
+                id: "slicing",
+                label: "Auto-Slicing",
+                icon: <Scissors className="w-4 h-4" />,
+              },
+              {
+                id: "bubbles",
+                label: "Speech Bubble Eraser",
+                icon: <Layers className="w-4 h-4" />,
+              },
+              {
+                id: "translation",
+                label: "AI Translation",
+                icon: <Languages className="w-4 h-4" />,
+              },
+              {
+                id: "render",
+                label: "Cinematic Rendering",
+                icon: <Tv className="w-4 h-4" />,
+              },
             ].map((t) => (
               <button
                 key={t.id}
@@ -285,7 +311,14 @@ export default function LandingPage({
                     className="absolute inset-y-0 left-0 border-r border-purple-500 z-10 overflow-hidden transition-all duration-75"
                     style={{ width: `${sliderPos}%` }}
                   >
-                    <div className="absolute inset-0 w-full h-full" style={{ width: "100%", minWidth: "100%", height: "100%" }}>
+                    <div
+                      className="absolute inset-0 w-full h-full"
+                      style={{
+                        width: "100%",
+                        minWidth: "100%",
+                        height: "100%",
+                      }}
+                    >
                       {demoTab === "slicing" && <SlicingBefore />}
                       {demoTab === "bubbles" && <BubblesBefore />}
                       {demoTab === "translation" && <TranslationBefore />}
@@ -379,18 +412,31 @@ export default function LandingPage({
       <section className="py-32 px-6 bg-white/[0.01] border-y border-white/5">
         <div className="max-w-7xl mx-auto space-y-16">
           <div className="text-center space-y-4">
-            <h2 className="text-4xl font-bold tracking-tight">Flexible Plans for Every Creator</h2>
+            <h2 className="text-4xl font-bold tracking-tight">
+              Flexible Plans for Every Creator
+            </h2>
             <p className="text-neutral-500 max-w-xl mx-auto">
-              Start for free and scale as you grow. Save 20% on all plans with annual billing.
+              Start for free and scale as you grow. Save 20% on all plans with
+              annual billing.
             </p>
 
             {/* Monthly / Yearly Toggle */}
             <div className="flex items-center justify-center gap-3 pt-4">
-              <span className={`text-sm ${billingCycle === "monthly" ? "text-white font-bold" : "text-neutral-500"}`}>
+              <span
+                className={`text-sm ${
+                  billingCycle === "monthly"
+                    ? "text-white font-bold"
+                    : "text-neutral-500"
+                }`}
+              >
                 Monthly
               </span>
               <button
-                onClick={() => setBillingCycle(billingCycle === "monthly" ? "yearly" : "monthly")}
+                onClick={() =>
+                  setBillingCycle(
+                    billingCycle === "monthly" ? "yearly" : "monthly"
+                  )
+                }
                 className="w-12 h-6 rounded-full bg-neutral-800 p-1 flex items-center transition-all relative border border-white/5 cursor-pointer"
               >
                 <div
@@ -399,7 +445,13 @@ export default function LandingPage({
                   }`}
                 />
               </button>
-              <span className={`text-sm flex items-center gap-1.5 ${billingCycle === "yearly" ? "text-white font-bold" : "text-neutral-500"}`}>
+              <span
+                className={`text-sm flex items-center gap-1.5 ${
+                  billingCycle === "yearly"
+                    ? "text-white font-bold"
+                    : "text-neutral-500"
+                }`}
+              >
                 Yearly
                 <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase">
                   Save 20%
@@ -475,9 +527,12 @@ export default function LandingPage({
       <section className="py-32 px-6">
         <div className="max-w-7xl mx-auto space-y-16">
           <div className="text-center space-y-4">
-            <h2 className="text-4xl font-bold tracking-tight">Loved by Webtoon Creators</h2>
+            <h2 className="text-4xl font-bold tracking-tight">
+              Loved by Webtoon Creators
+            </h2>
             <p className="text-neutral-500 max-w-xl mx-auto">
-              See how animators, content creators, and comic artists are leveraging Anivox to scale their production.
+              See how animators, content creators, and comic artists are
+              leveraging Anivox to scale their production.
             </p>
           </div>
 
@@ -514,7 +569,9 @@ export default function LandingPage({
       <section className="py-32 px-6 bg-white/[0.01] border-t border-white/5">
         <div className="max-w-4xl mx-auto space-y-16">
           <div className="text-center space-y-4">
-            <h2 className="text-4xl font-bold tracking-tight">Frequently Asked Questions</h2>
+            <h2 className="text-4xl font-bold tracking-tight">
+              Frequently Asked Questions
+            </h2>
             <p className="text-neutral-500">
               Got questions? We've got answers.
             </p>
@@ -524,24 +581,24 @@ export default function LandingPage({
             {[
               {
                 q: "How does the scraper work?",
-                a: "Simply paste the URL of a comic or webtoon chapter. Anivox fetches the high-resolution strip images and parses metadata automatically from major hosting platforms."
+                a: "Simply paste the URL of a comic or webtoon chapter. Anivox fetches the high-resolution strip images and parses metadata automatically from major hosting platforms.",
               },
               {
                 q: "Who owns the rights to the exported videos?",
-                a: "You retain full ownership of the transformed outputs. However, ensure you have the necessary permissions from the original content creators or publishers if you plan to monetize copyright-restricted comics."
+                a: "You retain full ownership of the transformed outputs. However, ensure you have the necessary permissions from the original content creators or publishers if you plan to monetize copyright-restricted comics.",
               },
               {
                 q: "Can I use my own voice clones for narration?",
-                a: "Yes! Creator Pro and Studio plans allow you to upload audio samples to clone your own voice or train custom character voices for immersive narrative experiences."
+                a: "Yes! Creator Pro and Studio plans allow you to upload audio samples to clone your own voice or train custom character voices for immersive narrative experiences.",
               },
               {
                 q: "What platforms are supported by the scraper?",
-                a: "We support major public webtoon hubs (Line Webtoon, Tapas, and major community archives). You can also upload your own local image folders (JPEG/PNG) directly to crop."
+                a: "We support major public webtoon hubs (Line Webtoon, Tapas, and major community archives). You can also upload your own local image folders (JPEG/PNG) directly to crop.",
               },
               {
                 q: "What export formats and aspect ratios are available?",
-                a: "We support standard MP4 and WebM file exports. You can choose from multiple aspect ratios: 9:16 Vertical (ideal for YouTube Shorts, TikTok, Instagram Reels) and 16:9 Landscape (standard YouTube format)."
-              }
+                a: "We support standard MP4 and WebM file exports. You can choose from multiple aspect ratios: 9:16 Vertical (ideal for YouTube Shorts, TikTok, Instagram Reels) and 16:9 Landscape (standard YouTube format).",
+              },
             ].map((faq, idx) => (
               <div
                 key={idx}
@@ -560,7 +617,9 @@ export default function LandingPage({
                 </button>
                 <div
                   className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                    openFaq === idx ? "max-h-40 border-t border-white/5 opacity-100" : "max-h-0 opacity-0"
+                    openFaq === idx
+                      ? "max-h-40 border-t border-white/5 opacity-100"
+                      : "max-h-0 opacity-0"
                   }`}
                 >
                   <p className="p-6 text-sm text-neutral-400 leading-relaxed bg-neutral-900/30">
@@ -581,12 +640,18 @@ export default function LandingPage({
             <Mail className="w-6 h-6" />
           </div>
           <div className="space-y-2">
-            <h3 className="text-2xl md:text-3xl font-black tracking-tight">Stay Ahead of the Curve</h3>
+            <h3 className="text-2xl md:text-3xl font-black tracking-tight">
+              Stay Ahead of the Curve
+            </h3>
             <p className="text-neutral-400 text-sm max-w-md mx-auto">
-              Get product updates, advanced animation tips, and the latest news on AI comic translation.
+              Get product updates, advanced animation tips, and the latest news
+              on AI comic translation.
             </p>
           </div>
-          <form onSubmit={handleSubscribe} className="max-w-md mx-auto flex flex-col sm:flex-row items-center gap-3">
+          <form
+            onSubmit={handleSubscribe}
+            className="max-w-md mx-auto flex flex-col sm:flex-row items-center gap-3"
+          >
             <input
               type="email"
               placeholder="Enter your email address"
@@ -603,7 +668,9 @@ export default function LandingPage({
               disabled={newsState === "loading" || newsState === "success"}
               className="w-full sm:w-auto px-6 py-3.5 bg-purple-650 hover:bg-purple-600 disabled:bg-neutral-850 text-white font-bold rounded-xl text-sm transition-all whitespace-nowrap flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed group active:scale-95 animate-pulse-slow"
             >
-              {newsState === "loading" && <Loader2 className="w-4 h-4 animate-spin" />}
+              {newsState === "loading" && (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              )}
               {newsState === "success" && <Check className="w-4 h-4" />}
               {newsState === "idle" && (
                 <>
@@ -736,7 +803,9 @@ function PricingCard({
       <div className="space-y-6">
         <div>
           <h3 className="text-xl font-bold">{title}</h3>
-          <p className="text-neutral-500 text-xs mt-2 leading-relaxed">{desc}</p>
+          <p className="text-neutral-500 text-xs mt-2 leading-relaxed">
+            {desc}
+          </p>
         </div>
         <div className="flex items-baseline gap-1">
           <span className="text-4xl font-black">${price}</span>
@@ -745,14 +814,22 @@ function PricingCard({
         <div className="border-t border-white/5 pt-6 space-y-4">
           <ul className="space-y-3">
             {features.map((f, i) => (
-              <li key={i} className="flex items-start gap-3 text-sm text-neutral-300">
+              <li
+                key={i}
+                className="flex items-start gap-3 text-sm text-neutral-300"
+              >
                 <Check className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
                 <span>{f}</span>
               </li>
             ))}
             {excludedFeatures.map((f, i) => (
-              <li key={i} className="flex items-start gap-3 text-sm text-neutral-600">
-                <span className="w-4 h-4 flex items-center justify-center font-bold text-xs shrink-0 select-none">-</span>
+              <li
+                key={i}
+                className="flex items-start gap-3 text-sm text-neutral-600"
+              >
+                <span className="w-4 h-4 flex items-center justify-center font-bold text-xs shrink-0 select-none">
+                  -
+                </span>
                 <span className="line-through">{f}</span>
               </li>
             ))}
@@ -804,7 +881,10 @@ function TestimonialCard({
             <span className="font-bold text-sm text-white">{author}</span>
             <div className="flex items-center gap-0.5 text-amber-400">
               {Array.from({ length: rating }).map((_, i) => (
-                <Sparkles key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
+                <Sparkles
+                  key={i}
+                  className="w-3 h-3 fill-amber-400 text-amber-400"
+                />
               ))}
             </div>
           </div>
@@ -889,7 +969,7 @@ function BubblesBefore() {
         <div className="absolute top-6 left-6 w-20 h-20 rounded-full bg-orange-400/80 blur-md" />
         <div className="absolute bottom-0 right-0 w-32 h-44 bg-neutral-800 rounded-t-[50px] border border-white/5" />
         <div className="absolute bottom-36 right-8 w-16 h-16 rounded-full bg-neutral-700" />
-        
+
         {/* Big speech bubble */}
         <div className="absolute top-8 right-6 bg-white text-black p-4 rounded-[20px] rounded-tr-none shadow-2xl max-w-[150px] border-2 border-black flex flex-col justify-center items-center">
           <p className="text-[10px] font-bold leading-tight text-center font-mono">
@@ -928,7 +1008,7 @@ function TranslationBefore() {
         {/* Simple drawing representation */}
         <div className="absolute bottom-0 left-0 w-36 h-36 bg-neutral-800 rounded-tr-[50px] border border-white/5" />
         <div className="absolute bottom-32 left-10 w-16 h-16 rounded-full bg-neutral-700" />
-        
+
         {/* Korean bubble */}
         <div className="absolute top-10 right-6 bg-white text-black p-4 rounded-[20px] rounded-tl-none shadow-2xl max-w-[150px] border-2 border-black">
           <p className="text-xs font-black leading-tight text-center">
@@ -948,7 +1028,7 @@ function TranslationAfter() {
         {/* Simple drawing representation */}
         <div className="absolute bottom-0 left-0 w-36 h-36 bg-neutral-800 rounded-tr-[50px] border border-white/5" />
         <div className="absolute bottom-32 left-10 w-16 h-16 rounded-full bg-neutral-700" />
-        
+
         {/* English typeset bubble */}
         <div className="absolute top-10 right-6 bg-white text-black p-4 rounded-[20px] rounded-tl-none shadow-2xl max-w-[150px] border-2 border-black">
           <p className="text-[10px] font-black leading-none text-center font-sans tracking-tight">
@@ -979,7 +1059,9 @@ function CinematicRenderDemo({ onGetStarted }: { onGetStarted: () => void }) {
           <div className="w-3 h-3 rounded-full bg-rose-550" />
           <div className="w-3 h-3 rounded-full bg-amber-500" />
           <div className="w-3 h-3 rounded-full bg-emerald-500" />
-          <span className="text-xs font-mono text-neutral-400 ml-2">Cinematic Render Studio</span>
+          <span className="text-xs font-mono text-neutral-400 ml-2">
+            Cinematic Render Studio
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <span className="px-2 py-0.5 bg-neutral-900 border border-white/5 rounded text-[10px] font-mono text-neutral-400">
@@ -997,7 +1079,9 @@ function CinematicRenderDemo({ onGetStarted }: { onGetStarted: () => void }) {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Left Column: Storyboard Panel Queue */}
         <div className="lg:col-span-1 space-y-3">
-          <h4 className="text-[10px] font-mono uppercase text-neutral-500 tracking-wider">Storyboard Panels</h4>
+          <h4 className="text-[10px] font-mono uppercase text-neutral-500 tracking-wider">
+            Storyboard Panels
+          </h4>
           <div className="space-y-2 max-h-[220px] overflow-y-auto scrollbar-thin pr-1">
             {[
               { id: 1, duration: "3.5s", active: true, title: "Panel 01" },
@@ -1013,10 +1097,16 @@ function CinematicRenderDemo({ onGetStarted }: { onGetStarted: () => void }) {
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${p.active ? "bg-purple-500 animate-ping" : "bg-neutral-600"}`} />
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      p.active ? "bg-purple-500 animate-ping" : "bg-neutral-600"
+                    }`}
+                  />
                   <span className="text-xs font-bold font-mono">{p.title}</span>
                 </div>
-                <span className="text-[10px] font-mono text-neutral-500">{p.duration}</span>
+                <span className="text-[10px] font-mono text-neutral-500">
+                  {p.duration}
+                </span>
               </div>
             ))}
           </div>
@@ -1024,12 +1114,16 @@ function CinematicRenderDemo({ onGetStarted }: { onGetStarted: () => void }) {
 
         {/* Center: Live Video Player Canvas */}
         <div className="lg:col-span-2 space-y-3">
-          <h4 className="text-[10px] font-mono uppercase text-neutral-500 tracking-wider">Viewport Canvas</h4>
+          <h4 className="text-[10px] font-mono uppercase text-neutral-500 tracking-wider">
+            Viewport Canvas
+          </h4>
           <div className="relative aspect-video w-full rounded-2xl border border-white/5 bg-neutral-900 overflow-hidden flex items-center justify-center group">
             {/* Simulated Pan-and-Zoom Image */}
             <div
               className={`absolute inset-0 bg-cover bg-center transition-all duration-1000 ${
-                isPlaying ? "scale-110 translate-x-1 translate-y-1 animate-pulse" : "scale-100"
+                isPlaying
+                  ? "scale-110 translate-x-1 translate-y-1 animate-pulse"
+                  : "scale-100"
               }`}
               style={{
                 backgroundImage: `url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop')`,
@@ -1060,10 +1154,14 @@ function CinematicRenderDemo({ onGetStarted }: { onGetStarted: () => void }) {
 
         {/* Right Column: Audio & Render Settings */}
         <div className="lg:col-span-1 space-y-4">
-          <h4 className="text-[10px] font-mono uppercase text-neutral-500 tracking-wider">Audio & Render Settings</h4>
+          <h4 className="text-[10px] font-mono uppercase text-neutral-500 tracking-wider">
+            Audio & Render Settings
+          </h4>
           <div className="space-y-3 bg-neutral-900/60 p-4 rounded-2xl border border-white/5">
             <div className="space-y-1">
-              <label className="text-[10px] text-neutral-500 font-mono">Narrator Voice</label>
+              <label className="text-[10px] text-neutral-500 font-mono">
+                Narrator Voice
+              </label>
               <select
                 value={audioStyle}
                 onChange={(e) => setAudioStyle(e.target.value)}
@@ -1076,7 +1174,9 @@ function CinematicRenderDemo({ onGetStarted }: { onGetStarted: () => void }) {
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px] text-neutral-500 font-mono">Music Track</label>
+              <label className="text-[10px] text-neutral-500 font-mono">
+                Music Track
+              </label>
               <select
                 value={musicTheme}
                 onChange={(e) => setMusicTheme(e.target.value)}
@@ -1089,7 +1189,9 @@ function CinematicRenderDemo({ onGetStarted }: { onGetStarted: () => void }) {
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px] text-neutral-500 font-mono">Aspect Ratio</label>
+              <label className="text-[10px] text-neutral-500 font-mono">
+                Aspect Ratio
+              </label>
               <select
                 value={aspect}
                 onChange={(e) => setAspect(e.target.value)}
@@ -1110,13 +1212,17 @@ function CinematicRenderDemo({ onGetStarted }: { onGetStarted: () => void }) {
           <Volume2 className="w-5 h-5 text-purple-400 shrink-0" />
           <div className="space-y-0.5">
             <div className="text-xs font-bold text-white">TTS Sync Wave</div>
-            <div className="text-[9px] font-mono text-neutral-500">Audio track synchronized with Panel #1</div>
+            <div className="text-[9px] font-mono text-neutral-500">
+              Audio track synchronized with Panel #1
+            </div>
           </div>
         </div>
-        
+
         {/* Animated wave bars */}
         <div className="flex items-center gap-1 h-6 shrink-0">
-          {[8, 14, 20, 12, 6, 16, 24, 18, 10, 4, 12, 22, 14, 8, 16, 20, 10, 6].map((h, i) => (
+          {[
+            8, 14, 20, 12, 6, 16, 24, 18, 10, 4, 12, 22, 14, 8, 16, 20, 10, 6,
+          ].map((h, i) => (
             <div
               key={i}
               className={`w-[3px] rounded-full bg-purple-550 transition-all duration-300 ${

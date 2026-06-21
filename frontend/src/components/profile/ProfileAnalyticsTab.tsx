@@ -8,7 +8,7 @@ import {
   TrendingUp,
   Volume2,
   Tv,
-  MessageSquare
+  MessageSquare,
 } from "lucide-react";
 
 export default function ProfileAnalyticsTab() {
@@ -21,7 +21,7 @@ export default function ProfileAnalyticsTab() {
         const base = dIdx === 0 || dIdx === 6 ? 0 : 2;
         const rand = Math.floor(Math.random() * 5);
         const count = Math.max(0, base + rand - 2);
-        
+
         let level = 0;
         if (count > 0 && count <= 2) level = 1;
         else if (count > 2 && count <= 4) level = 2;
@@ -31,7 +31,7 @@ export default function ProfileAnalyticsTab() {
           day: days[dIdx],
           week: wIdx,
           count,
-          level
+          level,
         };
       });
     });
@@ -44,18 +44,18 @@ export default function ProfileAnalyticsTab() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 text-left">
-      
       {/* Overview Analytics Banner */}
       <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-6 relative overflow-hidden shadow-2xl">
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
-        
+
         <div className="space-y-1">
           <span className="text-[9px] font-extrabold text-purple-400 uppercase tracking-widest bg-purple-500/10 border border-purple-500/20 px-2.5 py-0.5 rounded-full">
             Performance Insights
           </span>
           <h3 className="text-xl font-black text-white">Creator Analytics</h3>
           <p className="text-xs text-neutral-500 font-semibold leading-relaxed">
-            Monitor compilation rendering loads, AI synthesis distribution, and weekly content pipelines.
+            Monitor compilation rendering loads, AI synthesis distribution, and
+            weekly content pipelines.
           </p>
         </div>
       </div>
@@ -65,7 +65,8 @@ export default function ProfileAnalyticsTab() {
         <div className="flex justify-between items-center pb-3 border-b border-white/5">
           <div className="space-y-0.5">
             <h4 className="text-sm font-extrabold text-white flex items-center gap-1.5">
-              <TrendingUp className="w-4.5 h-4.5 text-purple-400" /> Rendering Activity
+              <TrendingUp className="w-4.5 h-4.5 text-purple-400" /> Rendering
+              Activity
             </h4>
             <p className="text-[10px] text-neutral-500 font-semibold">
               Daily pipeline operations completed over the last 12 weeks
@@ -111,7 +112,9 @@ export default function ProfileAnalyticsTab() {
                           ? "bg-purple-600/50 border border-purple-500/20 hover:bg-purple-500/60"
                           : "bg-purple-500 border border-purple-400/30 hover:bg-purple-400"
                       }`}
-                      title={`${cell.count} operation(s) on ${cell.day} (Week ${wIdx + 1})`}
+                      title={`${cell.count} operation(s) on ${cell.day} (Week ${
+                        wIdx + 1
+                      })`}
                     />
                   ))}
                 </div>
@@ -133,7 +136,6 @@ export default function ProfileAnalyticsTab() {
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        
         {/* Videos Completed */}
         <div className="bg-neutral-900/30 border border-white/5 rounded-2xl p-4 flex gap-3.5 items-center">
           <div className="p-3 bg-purple-500/10 text-purple-400 rounded-xl">
@@ -143,7 +145,9 @@ export default function ProfileAnalyticsTab() {
             <span className="text-[8px] text-neutral-500 block uppercase font-mono tracking-wider">
               Videos Completed
             </span>
-            <span className="text-base font-black text-white font-mono">12 releases</span>
+            <span className="text-base font-black text-white font-mono">
+              12 releases
+            </span>
           </div>
         </div>
 
@@ -156,7 +160,9 @@ export default function ProfileAnalyticsTab() {
             <span className="text-[8px] text-neutral-500 block uppercase font-mono tracking-wider">
               Render Duration
             </span>
-            <span className="text-base font-black text-white font-mono">48m 15s</span>
+            <span className="text-base font-black text-white font-mono">
+              48m 15s
+            </span>
           </div>
         </div>
 
@@ -169,7 +175,9 @@ export default function ProfileAnalyticsTab() {
             <span className="text-[8px] text-neutral-500 block uppercase font-mono tracking-wider">
               Average Latency
             </span>
-            <span className="text-base font-black text-white font-mono">1.8s/frame</span>
+            <span className="text-base font-black text-white font-mono">
+              1.8s/frame
+            </span>
           </div>
         </div>
 
@@ -182,15 +190,15 @@ export default function ProfileAnalyticsTab() {
             <span className="text-[8px] text-neutral-500 block uppercase font-mono tracking-wider">
               Credits Optimized
             </span>
-            <span className="text-base font-black text-white font-mono">32% saved</span>
+            <span className="text-base font-black text-white font-mono">
+              32% saved
+            </span>
           </div>
         </div>
-
       </div>
 
       {/* Usage breakdowns */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
         {/* Aspect Ratio Breakdown */}
         <div className="bg-[#0f0f13]/30 border border-white/5 rounded-3xl p-5 space-y-4 shadow-xl">
           <h5 className="text-[10px] font-black uppercase text-neutral-400 tracking-wider flex items-center gap-1.5">
@@ -203,7 +211,10 @@ export default function ProfileAnalyticsTab() {
                 <span className="text-white font-bold">75%</span>
               </div>
               <div className="h-1.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
-                <div className="h-full bg-purple-500 rounded-full" style={{ width: "75%" }} />
+                <div
+                  className="h-full bg-purple-500 rounded-full"
+                  style={{ width: "75%" }}
+                />
               </div>
             </div>
             <div className="space-y-1">
@@ -212,7 +223,10 @@ export default function ProfileAnalyticsTab() {
                 <span className="text-white font-bold">25%</span>
               </div>
               <div className="h-1.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
-                <div className="h-full bg-indigo-500 rounded-full" style={{ width: "25%" }} />
+                <div
+                  className="h-full bg-indigo-500 rounded-full"
+                  style={{ width: "25%" }}
+                />
               </div>
             </div>
           </div>
@@ -230,7 +244,10 @@ export default function ProfileAnalyticsTab() {
                 <span className="text-white font-bold">60%</span>
               </div>
               <div className="h-1.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
-                <div className="h-full bg-purple-500 rounded-full" style={{ width: "60%" }} />
+                <div
+                  className="h-full bg-purple-500 rounded-full"
+                  style={{ width: "60%" }}
+                />
               </div>
             </div>
             <div className="space-y-1">
@@ -239,7 +256,10 @@ export default function ProfileAnalyticsTab() {
                 <span className="text-white font-bold">30%</span>
               </div>
               <div className="h-1.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
-                <div className="h-full bg-indigo-500 rounded-full" style={{ width: "30%" }} />
+                <div
+                  className="h-full bg-indigo-500 rounded-full"
+                  style={{ width: "30%" }}
+                />
               </div>
             </div>
             <div className="space-y-1">
@@ -248,7 +268,10 @@ export default function ProfileAnalyticsTab() {
                 <span className="text-white font-bold">10%</span>
               </div>
               <div className="h-1.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
-                <div className="h-full bg-purple-900/60 rounded-full" style={{ width: "10%" }} />
+                <div
+                  className="h-full bg-purple-900/60 rounded-full"
+                  style={{ width: "10%" }}
+                />
               </div>
             </div>
           </div>
@@ -266,7 +289,10 @@ export default function ProfileAnalyticsTab() {
                 <span className="text-white font-bold">85%</span>
               </div>
               <div className="h-1.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
-                <div className="h-full bg-purple-500 rounded-full" style={{ width: "85%" }} />
+                <div
+                  className="h-full bg-purple-500 rounded-full"
+                  style={{ width: "85%" }}
+                />
               </div>
             </div>
             <div className="space-y-1">
@@ -275,33 +301,56 @@ export default function ProfileAnalyticsTab() {
                 <span className="text-white font-bold">15%</span>
               </div>
               <div className="h-1.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
-                <div className="h-full bg-indigo-500 rounded-full" style={{ width: "15%" }} />
+                <div
+                  className="h-full bg-indigo-500 rounded-full"
+                  style={{ width: "15%" }}
+                />
               </div>
             </div>
           </div>
         </div>
-
       </div>
 
       {/* Recent Activity Timeline Feed */}
       <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-6 shadow-2xl relative space-y-4">
         <h4 className="text-sm font-extrabold text-white flex items-center gap-1.5 pb-3 border-b border-white/5">
-          <Activity className="w-4.5 h-4.5 text-purple-400" /> Recent Activity Feed
+          <Activity className="w-4.5 h-4.5 text-purple-400" /> Recent Activity
+          Feed
         </h4>
-        
+
         <div className="relative pl-4 space-y-6 before:absolute before:left-1 before:top-1.5 before:bottom-1.5 before:w-0.5 before:bg-neutral-800">
           {[
-            { title: "Synthesized Chapter 2 Outro", desc: "Generated vertical MP4 video with dramatic composition style", time: "2 hours ago" },
-            { title: "Cleaned bubble on Panel 4", desc: "Erased speech bubbles in Chapter 2 panel using Canny model auto-detection", time: "1 day ago" },
-            { title: "Generated speech synthesis", desc: "Rendered audio files for Chapter 1 storyboard panels", time: "3 days ago" },
-            { title: "Scraped series cover assets", desc: "Extracted panel strips and synopsis data from target Webtoon link", time: "4 days ago" }
+            {
+              title: "Synthesized Chapter 2 Outro",
+              desc: "Generated vertical MP4 video with dramatic composition style",
+              time: "2 hours ago",
+            },
+            {
+              title: "Cleaned bubble on Panel 4",
+              desc: "Erased speech bubbles in Chapter 2 panel using Canny model auto-detection",
+              time: "1 day ago",
+            },
+            {
+              title: "Generated speech synthesis",
+              desc: "Rendered audio files for Chapter 1 storyboard panels",
+              time: "3 days ago",
+            },
+            {
+              title: "Scraped series cover assets",
+              desc: "Extracted panel strips and synopsis data from target Webtoon link",
+              time: "4 days ago",
+            },
           ].map((act, idx) => (
             <div key={idx} className="relative space-y-1 text-left">
               {/* Bullet point */}
               <div className="absolute -left-[17px] top-1.5 w-2 h-2 rounded-full bg-purple-500 ring-4 ring-neutral-950" />
               <div className="flex justify-between items-baseline">
-                <h6 className="text-xs font-bold text-neutral-200">{act.title}</h6>
-                <span className="text-[9px] text-neutral-500 font-mono">{act.time}</span>
+                <h6 className="text-xs font-bold text-neutral-200">
+                  {act.title}
+                </h6>
+                <span className="text-[9px] text-neutral-500 font-mono">
+                  {act.time}
+                </span>
               </div>
               <p className="text-[10px] text-neutral-500 font-medium leading-relaxed">
                 {act.desc}
@@ -310,7 +359,6 @@ export default function ProfileAnalyticsTab() {
           ))}
         </div>
       </div>
-
     </div>
   );
 }

@@ -24,7 +24,7 @@ export default function ProfileBillingTab({
   invoices,
 }: ProfileBillingTabProps) {
   const [currency, setCurrency] = React.useState<"USD" | "KRW" | "JPY">("USD");
-  
+
   // Local state for daily streak claiming tracker
   const [streakDays, setStreakDays] = React.useState<number>(() => {
     return parseInt(localStorage.getItem("app-claim-streak") || "1");
@@ -145,14 +145,18 @@ export default function ProfileBillingTab({
                 Daily Claim Streak Tracker
               </div>
               <p className="text-xs text-neutral-400 font-semibold font-sans">
-                Claim consecutive daily credits to unlock the Mega Claim Bonus on Day 7 (+150 credits!).
+                Claim consecutive daily credits to unlock the Mega Claim Bonus
+                on Day 7 (+150 credits!).
               </p>
             </div>
 
             <div className="bg-neutral-900/80 border border-white/5 px-4 py-2 rounded-2xl flex items-center gap-2 shrink-0">
-              <span className="text-[9px] text-neutral-500 font-mono uppercase block">Streak</span>
+              <span className="text-[9px] text-neutral-500 font-mono uppercase block">
+                Streak
+              </span>
               <span className="text-xs font-black text-amber-400 font-mono">
-                {hasClaimedToday ? streakDays - 1 : streakDays - 1} {streakDays - 1 === 1 ? "Day" : "Days"}
+                {hasClaimedToday ? streakDays - 1 : streakDays - 1}{" "}
+                {streakDays - 1 === 1 ? "Day" : "Days"}
               </span>
             </div>
           </div>
@@ -166,11 +170,12 @@ export default function ProfileBillingTab({
               { day: 4, reward: 90, label: "+90 Credits" },
               { day: 5, reward: 110, label: "+110 Credits" },
               { day: 6, reward: 130, label: "+130 Credits" },
-              { day: 7, reward: 150, label: "+150 Mega", special: true }
+              { day: 7, reward: 150, label: "+150 Mega", special: true },
             ].map((d) => {
               const isClaimed = d.day < streakDays;
               const isActive = d.day === streakDays && !hasClaimedToday;
-              const isLocked = d.day > streakDays || (d.day === streakDays && hasClaimedToday);
+              const isLocked =
+                d.day > streakDays || (d.day === streakDays && hasClaimedToday);
 
               return (
                 <button
@@ -194,9 +199,19 @@ export default function ProfileBillingTab({
                     {isClaimed ? (
                       <CheckCircle2 className="w-5.5 h-5.5 text-emerald-400" />
                     ) : d.special ? (
-                      <Ticket className={`w-6 h-6 ${isActive ? "text-amber-400 animate-bounce" : "text-neutral-650"}`} />
+                      <Ticket
+                        className={`w-6 h-6 ${
+                          isActive
+                            ? "text-amber-400 animate-bounce"
+                            : "text-neutral-650"
+                        }`}
+                      />
                     ) : (
-                      <Gift className={`w-5 h-5 ${isActive ? "text-amber-400" : "text-neutral-700"}`} />
+                      <Gift
+                        className={`w-5 h-5 ${
+                          isActive ? "text-amber-400" : "text-neutral-700"
+                        }`}
+                      />
                     )}
                   </div>
 
@@ -226,7 +241,9 @@ export default function ProfileBillingTab({
               }`}
             >
               <Gift className="w-4 h-4" />
-              {hasClaimedToday ? "Claimed for today" : `Claim Day ${streakDays} Reward`}
+              {hasClaimedToday
+                ? "Claimed for today"
+                : `Claim Day ${streakDays} Reward`}
             </button>
           </div>
         </div>

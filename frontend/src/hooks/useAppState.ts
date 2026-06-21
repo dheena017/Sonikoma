@@ -19,7 +19,6 @@ export function useAppState() {
   const [projectId, setProjectId] = useState<string | null>(null);
   const [consoleLogs, setRawConsoleLogs] = useState<string[]>([]);
 
-
   const [scrapedImages, setScrapedImages] = useState<string[]>([]);
   const [selectedScraped, setSelectedScraped] = useState<string[]>([]);
   const [activePreviewTab, setActivePreviewTab] = useState<
@@ -119,8 +118,6 @@ export function useAppState() {
     return localStorage.getItem("ai_comic_notifications_muted") === "true";
   });
   const [errorPopup, setErrorPopup] = useState<ErrorPopupDetail | null>(null);
-
-
 
   // Settings — all useState MUST come before any useCallback/useEffect
   const [targetUrl, setTargetUrl] = useState<string>(
@@ -292,7 +289,10 @@ export function useAppState() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("ai_comic_notifications_muted", String(notificationsMuted));
+    localStorage.setItem(
+      "ai_comic_notifications_muted",
+      String(notificationsMuted)
+    );
   }, [notificationsMuted]);
 
   const removeNotification = useCallback((id: number) => {
@@ -329,13 +329,19 @@ export function useAppState() {
       });
 
       // Play soft chime sound if not muted
-      const isNotificationMuted = localStorage.getItem("ai_comic_notifications_muted") === "true";
+      const isNotificationMuted =
+        localStorage.getItem("ai_comic_notifications_muted") === "true";
       if (!isNotificationMuted) {
         try {
-          const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+          const AudioContextClass =
+            window.AudioContext || (window as any).webkitAudioContext;
           if (AudioContextClass) {
             const ctx = new AudioContextClass();
-            const playTone = (freq: number, start: number, duration: number) => {
+            const playTone = (
+              freq: number,
+              start: number,
+              duration: number
+            ) => {
               const osc = ctx.createOscillator();
               const gain = ctx.createGain();
               osc.type = "sine";
@@ -350,7 +356,7 @@ export function useAppState() {
             };
             const now = ctx.currentTime;
             playTone(587.33, now, 0.25); // D5
-            playTone(880.00, now + 0.08, 0.35); // A5
+            playTone(880.0, now + 0.08, 0.35); // A5
           }
         } catch (err) {
           console.warn("Failed to play notification sound:", err);
@@ -381,7 +387,10 @@ export function useAppState() {
   );
 
   const getToken = useCallback(() => {
-    return localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token");
+    return (
+      localStorage.getItem("anivox_token") ||
+      sessionStorage.getItem("anivox_token")
+    );
   }, []);
 
   // --- Auth Actions ---
@@ -404,7 +413,9 @@ export function useAppState() {
         setUser(data.user);
         setIsAuthenticated(true);
         addNotification("Logged in successfully!", "success", {
-          details: `User ID: ${data.user.id}\nEmail: ${data.user.email}\nWelcome back, ${data.user.name || data.user.email}!`
+          details: `User ID: ${data.user.id}\nEmail: ${
+            data.user.email
+          }\nWelcome back, ${data.user.name || data.user.email}!`,
         });
       } else {
         throw new Error(data.detail || "Login failed");
@@ -428,7 +439,9 @@ export function useAppState() {
         setUser(data.user);
         setIsAuthenticated(true);
         addNotification("Account created successfully!", "success", {
-          details: `User ID: ${data.user.id}\nEmail: ${data.user.email}\nWelcome to WebtoonToVideo, ${data.user.name || data.user.email}!`
+          details: `User ID: ${data.user.id}\nEmail: ${
+            data.user.email
+          }\nWelcome to WebtoonToVideo, ${data.user.name || data.user.email}!`,
         });
       } else {
         throw new Error(data.detail || "Registration failed");
@@ -443,54 +456,57 @@ export function useAppState() {
     setUser(null);
     setIsAuthenticated(false);
     addNotification("Logged out successfully.", "info", {
-      details: `Your session token has been cleared. You have been securely logged out.`
+      details: `Your session token has been cleared. You have been securely logged out.`,
     });
     (window as any).navigateTo?.("/landing");
   }, [addNotification]);
 
-  const checkAuth = useCallback(async (showDelay: boolean = true) => {
-    const token = getToken();
+  const checkAuth = useCallback(
+    async (showDelay: boolean = true) => {
+      const token = getToken();
 
-    // Artificial delay to show the fancy loading screen
-    const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
-    const start = Date.now();
+      // Artificial delay to show the fancy loading screen
+      const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+      const start = Date.now();
 
-    if (!token) {
-      if (showDelay) {
-        const elapsed = Date.now() - start;
-        if (elapsed < 1500) await delay(1500 - elapsed);
-      }
-      setAuthLoading(false);
-      setIsInitializing(false);
-      return;
-    }
-    try {
-      const res = await fetch("/api/auth/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setUser(data);
-        setIsAuthenticated(true);
-      } else {
-        // Only clear token on 401 Unauthorized or 403 Forbidden.
-        // Server offline or gateway errors (500, 502, 503, 504) should not clear the token.
-        if (res.status === 401 || res.status === 403) {
-          localStorage.removeItem("anivox_token");
-          sessionStorage.removeItem("anivox_token");
+      if (!token) {
+        if (showDelay) {
+          const elapsed = Date.now() - start;
+          if (elapsed < 1500) await delay(1500 - elapsed);
         }
+        setAuthLoading(false);
+        setIsInitializing(false);
+        return;
       }
-    } catch (e) {
-      console.error("Auth check failed", e);
-    } finally {
-      if (showDelay) {
-        const elapsed = Date.now() - start;
-        if (elapsed < 2000) await delay(2000 - elapsed);
+      try {
+        const res = await fetch("/api/auth/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data);
+          setIsAuthenticated(true);
+        } else {
+          // Only clear token on 401 Unauthorized or 403 Forbidden.
+          // Server offline or gateway errors (500, 502, 503, 504) should not clear the token.
+          if (res.status === 401 || res.status === 403) {
+            localStorage.removeItem("anivox_token");
+            sessionStorage.removeItem("anivox_token");
+          }
+        }
+      } catch (e) {
+        console.error("Auth check failed", e);
+      } finally {
+        if (showDelay) {
+          const elapsed = Date.now() - start;
+          if (elapsed < 2000) await delay(2000 - elapsed);
+        }
+        setAuthLoading(false);
+        setIsInitializing(false);
       }
-      setAuthLoading(false);
-      setIsInitializing(false);
-    }
-  }, [getToken]);
+    },
+    [getToken]
+  );
 
   const forgotPassword = useCallback(
     async (email: string) => {
@@ -514,17 +530,30 @@ export function useAppState() {
     const handleMessage = (event: MessageEvent) => {
       const data = event.data;
       if (data && data.type === "showRuleLimitsAlert") {
-        console.log("[tsweb.assistant-listener] Handling showRuleLimitsAlert event:", data);
-        const title = data.title || data.data?.title || "Assistant Rule Limits Enforced";
-        const message = data.message || data.data?.message || "You have reached the system rule or usage limits for this active session.";
-        const technicalDetails = data.technicalDetails || data.data?.technicalDetails || "";
-        const suggestion = data.suggestion || data.data?.suggestion || "Please review the RULES.md guidelines, optimize your files/tokens, or adjust model configurations.";
+        console.log(
+          "[tsweb.assistant-listener] Handling showRuleLimitsAlert event:",
+          data
+        );
+        const title =
+          data.title || data.data?.title || "Assistant Rule Limits Enforced";
+        const message =
+          data.message ||
+          data.data?.message ||
+          "You have reached the system rule or usage limits for this active session.";
+        const technicalDetails =
+          data.technicalDetails || data.data?.technicalDetails || "";
+        const suggestion =
+          data.suggestion ||
+          data.data?.suggestion ||
+          "Please review the RULES.md guidelines, optimize your files/tokens, or adjust model configurations.";
 
         setErrorPopup({
           title,
           message,
           type: "warning",
-          technicalDetails: technicalDetails || `Source: tsweb.assistant-listener\nTimestamp: ${new Date().toISOString()}`,
+          technicalDetails:
+            technicalDetails ||
+            `Source: tsweb.assistant-listener\nTimestamp: ${new Date().toISOString()}`,
           suggestion,
         });
 
@@ -611,10 +640,16 @@ export function useAppState() {
               setScrapedImages(panelImages);
             }
             addNotification(
-              `Loaded project "${data.project.title || "Untitled"}" into active workspace!`,
+              `Loaded project "${
+                data.project.title || "Untitled"
+              }" into active workspace!`,
               "success",
               {
-                details: `Project ID: ${data.project.project_id}\nTitle: ${data.project.title || "Untitled"}\nAuthor: ${data.project.author || "Unknown"}\nGenre: ${data.project.genre || "General"}\nTotal Panels Loaded: ${data.panels?.length || 0}`
+                details: `Project ID: ${data.project.project_id}\nTitle: ${
+                  data.project.title || "Untitled"
+                }\nAuthor: ${data.project.author || "Unknown"}\nGenre: ${
+                  data.project.genre || "General"
+                }\nTotal Panels Loaded: ${data.panels?.length || 0}`,
               }
             );
           }

@@ -29,7 +29,7 @@ import {
   Pause,
   Download,
   Image as ImageIcon,
-  X
+  X,
 } from "lucide-react";
 import { getSourceName, getPanelFilterStyle } from "../utils";
 
@@ -65,12 +65,16 @@ export default function ProjectDetailsPage({
   const initialPanelsRef = React.useRef<any[]>([]);
 
   // New tab navigation state
-  const [activeTab, setActiveTab] = React.useState<"extraction" | "storyboard" | "video">("extraction");
-  
+  const [activeTab, setActiveTab] = React.useState<
+    "extraction" | "storyboard" | "video"
+  >("extraction");
+
   // Scraped scratch images
   const [scrapedImages, setScrapedImages] = React.useState<string[]>([]);
   const [loadingScraped, setLoadingScraped] = React.useState(false);
-  const [activeScrapedZoom, setActiveScrapedZoom] = React.useState<string | null>(null);
+  const [activeScrapedZoom, setActiveScrapedZoom] = React.useState<
+    string | null
+  >(null);
 
   // Fallback Slideshow states
   const [isSlideshowPlaying, setIsSlideshowPlaying] = React.useState(false);
@@ -93,21 +97,28 @@ export default function ProjectDetailsPage({
     const temp = updated[index];
     updated[index] = updated[newIndex];
     updated[newIndex] = temp;
-    
+
     // Re-adjust panel_index
     const remapped = updated.map((p, idx) => ({ ...p, panel_index: idx }));
     setPanels(remapped);
 
-    if (activePanelPreview && (activePanelPreview.id === temp.id || activePanelPreview.id === remapped[index].id)) {
+    if (
+      activePanelPreview &&
+      (activePanelPreview.id === temp.id ||
+        activePanelPreview.id === remapped[index].id)
+    ) {
       setActivePanelPreview(remapped[newIndex]);
     }
   };
 
   // Optimize speech dialogue with AI
-  const handleAIOptimizeSpeech = async (panelId: string | number, currentText: string) => {
+  const handleAIOptimizeSpeech = async (
+    panelId: string | number,
+    currentText: string
+  ) => {
     setIsOptimizingSpeech(true);
     await new Promise((resolve) => setTimeout(resolve, 1500));
-    const optimized = currentText 
+    const optimized = currentText
       ? `${currentText.trim()} (AI-enhanced dialog transcript).`
       : "Wait... did you hear that?! The gate is opening!";
     handlePanelFieldChange(panelId, "speech_text", optimized);
@@ -115,7 +126,10 @@ export default function ProjectDetailsPage({
   };
 
   // Enhance visual description with AI
-  const handleAIEnhanceVisual = async (panelId: string | number, currentVisual: string) => {
+  const handleAIEnhanceVisual = async (
+    panelId: string | number,
+    currentVisual: string
+  ) => {
     setIsOptimizingVisual(true);
     await new Promise((resolve) => setTimeout(resolve, 1500));
     const enhanced = currentVisual
@@ -230,7 +244,9 @@ export default function ProjectDetailsPage({
       setLoading(true);
       setError(null);
       try {
-        const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
+        const token =
+          localStorage.getItem("anivox_token") ||
+          sessionStorage.getItem("anivox_token");
         const headers: HeadersInit = {};
         if (token) {
           headers["Authorization"] = `Bearer ${token}`;
@@ -276,7 +292,9 @@ export default function ProjectDetailsPage({
     const fetchScraped = async () => {
       setLoadingScraped(true);
       try {
-        const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
+        const token =
+          localStorage.getItem("anivox_token") ||
+          sessionStorage.getItem("anivox_token");
         const response = await fetch("/api/scrape-images", {
           method: "POST",
           headers: {
@@ -349,7 +367,9 @@ export default function ProjectDetailsPage({
     if (!confirmDelete) return;
     setDeleting(true);
     try {
-      const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
+      const token =
+        localStorage.getItem("anivox_token") ||
+        sessionStorage.getItem("anivox_token");
       const headers: HeadersInit = { "Content-Type": "application/json" };
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
@@ -403,7 +423,9 @@ export default function ProjectDetailsPage({
     if (!projectId || !project) return;
     setSaveStatus("saving");
     try {
-      const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
+      const token =
+        localStorage.getItem("anivox_token") ||
+        sessionStorage.getItem("anivox_token");
       const headers: HeadersInit = {
         "Content-Type": "application/json",
       };
@@ -645,7 +667,6 @@ export default function ProjectDetailsPage({
 
         {/* MAIN SPLIT VIEW */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* LEFT COLUMN: GLOBAL METADATA FIELDS (PERMANENT) */}
           <div className="lg:col-span-1 flex flex-col gap-6">
             <div className="bg-[#0c0c10]/80 border border-white/5 rounded-3xl p-6 space-y-6 shadow-xl backdrop-blur-xl w-full relative">
@@ -727,14 +748,18 @@ export default function ProjectDetailsPage({
                 </div>
 
                 <div className="flex items-center justify-between py-1.5 border-b border-white/5">
-                  <span className="text-neutral-500 font-bold">Source Website</span>
+                  <span className="text-neutral-500 font-bold">
+                    Source Website
+                  </span>
                   <span className="text-neutral-300 font-bold font-mono">
                     {getSourceName(project.url)}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between py-1.5 border-b border-white/5">
-                  <span className="text-neutral-500 font-bold">Status Profile</span>
+                  <span className="text-neutral-500 font-bold">
+                    Status Profile
+                  </span>
                   <span
                     className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${
                       isCompleted
@@ -747,24 +772,32 @@ export default function ProjectDetailsPage({
                 </div>
 
                 <div className="flex items-center justify-between py-1.5 border-b border-white/5">
-                  <span className="text-neutral-500 font-bold">Total Panels</span>
+                  <span className="text-neutral-500 font-bold">
+                    Total Panels
+                  </span>
                   <span className="text-neutral-300 font-bold font-mono">
                     {panels.length} frames
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between py-1.5 border-b border-white/5">
-                  <span className="text-neutral-500 font-bold">Video Length</span>
+                  <span className="text-neutral-500 font-bold">
+                    Video Length
+                  </span>
                   <span className="text-neutral-300 font-bold font-mono">
                     {totalDuration.toFixed(1)}s
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between py-1.5">
-                  <span className="text-neutral-500 font-bold">Date Seeded</span>
+                  <span className="text-neutral-500 font-bold">
+                    Date Seeded
+                  </span>
                   <span className="text-neutral-400 font-semibold flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5 text-neutral-600" />
-                    {project.created_at ? project.created_at.split(" ")[0] : "N/A"}
+                    {project.created_at
+                      ? project.created_at.split(" ")[0]
+                      : "N/A"}
                   </span>
                 </div>
               </div>
@@ -806,13 +839,14 @@ export default function ProjectDetailsPage({
 
           {/* RIGHT COLUMN: SWITCHABLE PIPELINE TABS (2/3 width) */}
           <div className="lg:col-span-2 space-y-6">
-            
             {/* Tab buttons */}
             <div className="flex border-b border-white/5 gap-6 text-xs font-extrabold uppercase tracking-wide select-none font-sans">
               <button
                 onClick={() => setActiveTab("extraction")}
                 className={`pb-3 relative cursor-pointer flex items-center gap-1.5 transition-colors ${
-                  activeTab === "extraction" ? "text-purple-400" : "text-neutral-500 hover:text-white"
+                  activeTab === "extraction"
+                    ? "text-purple-400"
+                    : "text-neutral-500 hover:text-white"
                 }`}
               >
                 <ImageIcon className="w-4 h-4" />
@@ -824,7 +858,9 @@ export default function ProjectDetailsPage({
               <button
                 onClick={() => setActiveTab("storyboard")}
                 className={`pb-3 relative cursor-pointer flex items-center gap-1.5 transition-colors ${
-                  activeTab === "storyboard" ? "text-purple-400" : "text-neutral-500 hover:text-white"
+                  activeTab === "storyboard"
+                    ? "text-purple-400"
+                    : "text-neutral-500 hover:text-white"
                 }`}
               >
                 <LayoutGrid className="w-4 h-4" />
@@ -836,7 +872,9 @@ export default function ProjectDetailsPage({
               <button
                 onClick={() => setActiveTab("video")}
                 className={`pb-3 relative cursor-pointer flex items-center gap-1.5 transition-colors ${
-                  activeTab === "video" ? "text-purple-400" : "text-neutral-500 hover:text-white"
+                  activeTab === "video"
+                    ? "text-purple-400"
+                    : "text-neutral-500 hover:text-white"
                 }`}
               >
                 <Video className="w-4 h-4" />
@@ -863,7 +901,9 @@ export default function ProjectDetailsPage({
                 {loadingScraped ? (
                   <div className="py-12 flex flex-col items-center justify-center space-y-3">
                     <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
-                    <p className="text-xs text-neutral-500 font-mono">Querying database scrape cache...</p>
+                    <p className="text-xs text-neutral-500 font-mono">
+                      Querying database scrape cache...
+                    </p>
                   </div>
                 ) : scrapedImages.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -891,9 +931,12 @@ export default function ProjectDetailsPage({
                 ) : (
                   <div className="py-12 text-center bg-[#0d0d10]/20 border border-white/5 rounded-3xl space-y-2">
                     <ImageIcon className="w-8 h-8 text-neutral-600 mx-auto" />
-                    <h5 className="text-xs font-bold text-neutral-400">No Scraped Sheets Found</h5>
+                    <h5 className="text-xs font-bold text-neutral-400">
+                      No Scraped Sheets Found
+                    </h5>
                     <p className="text-[10px] text-neutral-550 max-w-xs mx-auto leading-relaxed font-semibold">
-                      The original source URL could not be parsed or cache has expired. Reload in active workspace.
+                      The original source URL could not be parsed or cache has
+                      expired. Reload in active workspace.
                     </p>
                   </div>
                 )}
@@ -915,7 +958,9 @@ export default function ProjectDetailsPage({
                           src={activePanelPreview.image_url}
                           alt={`Panel ${activePanelPreview.panel_index + 1}`}
                           className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
-                          style={{ filter: getPanelFilterStyle(activePanelPreview) }}
+                          style={{
+                            filter: getPanelFilterStyle(activePanelPreview),
+                          }}
                         />
                         <div className="absolute bottom-3 left-3 bg-black/75 backdrop-blur-md px-3 py-1 rounded-xl text-[9px] font-black uppercase text-purple-400 border border-purple-500/20 font-mono shadow-md">
                           Frame #{activePanelPreview.panel_index + 1}
@@ -934,10 +979,19 @@ export default function ProjectDetailsPage({
                                 <button
                                   type="button"
                                   disabled={isOptimizingSpeech}
-                                  onClick={() => handleAIOptimizeSpeech(activePanelPreview.id, activePanelPreview.speech_text)}
+                                  onClick={() =>
+                                    handleAIOptimizeSpeech(
+                                      activePanelPreview.id,
+                                      activePanelPreview.speech_text
+                                    )
+                                  }
                                   className="px-2 py-0.5 bg-purple-600 hover:bg-purple-500 text-white rounded text-[9px] font-bold flex items-center gap-1 transition-all cursor-pointer disabled:opacity-50"
                                 >
-                                  {isOptimizingSpeech ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Wand2 className="w-2.5 h-2.5 text-purple-300" />}
+                                  {isOptimizingSpeech ? (
+                                    <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                                  ) : (
+                                    <Wand2 className="w-2.5 h-2.5 text-purple-300" />
+                                  )}
                                   AI Optimize
                                 </button>
                               </div>
@@ -964,15 +1018,26 @@ export default function ProjectDetailsPage({
                                 <button
                                   type="button"
                                   disabled={isOptimizingVisual}
-                                  onClick={() => handleAIEnhanceVisual(activePanelPreview.id, activePanelPreview.visual_description)}
+                                  onClick={() =>
+                                    handleAIEnhanceVisual(
+                                      activePanelPreview.id,
+                                      activePanelPreview.visual_description
+                                    )
+                                  }
                                   className="px-2 py-0.5 bg-purple-600 hover:bg-purple-500 text-white rounded text-[9px] font-bold flex items-center gap-1 transition-all cursor-pointer disabled:opacity-50"
                                 >
-                                  {isOptimizingVisual ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Wand2 className="w-2.5 h-2.5 text-purple-300" />}
+                                  {isOptimizingVisual ? (
+                                    <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                                  ) : (
+                                    <Wand2 className="w-2.5 h-2.5 text-purple-300" />
+                                  )}
                                   AI Enhance
                                 </button>
                               </div>
                               <textarea
-                                value={activePanelPreview.visual_description || ""}
+                                value={
+                                  activePanelPreview.visual_description || ""
+                                }
                                 onChange={(e) =>
                                   handlePanelFieldChange(
                                     activePanelPreview.id,
@@ -1010,10 +1075,20 @@ export default function ProjectDetailsPage({
                         {/* Dynamics / Controls */}
                         <div className="border-t border-white/5 pt-3 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                           <div>
-                            <span className="block text-neutral-500 font-bold mb-1">Motion Path</span>
+                            <span className="block text-neutral-500 font-bold mb-1">
+                              Motion Path
+                            </span>
                             <select
-                              value={activePanelPreview.motion_type || "zoom_in"}
-                              onChange={(e) => handlePanelFieldChange(activePanelPreview.id, "motion_type", e.target.value)}
+                              value={
+                                activePanelPreview.motion_type || "zoom_in"
+                              }
+                              onChange={(e) =>
+                                handlePanelFieldChange(
+                                  activePanelPreview.id,
+                                  "motion_type",
+                                  e.target.value
+                                )
+                              }
                               className="bg-neutral-900 border border-white/5 focus:border-purple-500/50 rounded-xl p-1.5 text-[10px] font-bold text-neutral-250 w-full"
                             >
                               <option value="zoom_in">Zoom In</option>
@@ -1027,22 +1102,38 @@ export default function ProjectDetailsPage({
                           </div>
 
                           <div>
-                            <span className="block text-neutral-500 font-bold mb-1">Duration</span>
+                            <span className="block text-neutral-500 font-bold mb-1">
+                              Duration
+                            </span>
                             <input
                               type="number"
                               step={0.1}
                               min={0.5}
                               value={activePanelPreview.duration || 4.5}
-                              onChange={(e) => handlePanelFieldChange(activePanelPreview.id, "duration", parseFloat(e.target.value) || 4.5)}
+                              onChange={(e) =>
+                                handlePanelFieldChange(
+                                  activePanelPreview.id,
+                                  "duration",
+                                  parseFloat(e.target.value) || 4.5
+                                )
+                              }
                               className="bg-neutral-900 border border-white/5 focus:border-purple-500/50 rounded-xl p-1.5 text-[10px] font-bold text-neutral-250 w-full font-mono"
                             />
                           </div>
 
                           <div>
-                            <span className="block text-neutral-500 font-bold mb-1">Color Preset</span>
+                            <span className="block text-neutral-500 font-bold mb-1">
+                              Color Preset
+                            </span>
                             <select
                               value={activePanelPreview.filter_preset || ""}
-                              onChange={(e) => handlePanelFieldChange(activePanelPreview.id, "filter_preset", e.target.value || null)}
+                              onChange={(e) =>
+                                handlePanelFieldChange(
+                                  activePanelPreview.id,
+                                  "filter_preset",
+                                  e.target.value || null
+                                )
+                              }
                               className="bg-neutral-900 border border-white/5 focus:border-purple-500/50 rounded-xl p-1.5 text-[10px] font-bold text-neutral-250 w-full"
                             >
                               <option value="">None</option>
@@ -1055,15 +1146,25 @@ export default function ProjectDetailsPage({
                           </div>
 
                           <div>
-                            <span className="block text-neutral-500 font-bold mb-1">Grayscale</span>
+                            <span className="block text-neutral-500 font-bold mb-1">
+                              Grayscale
+                            </span>
                             <label className="flex items-center gap-2 mt-2 cursor-pointer select-none">
                               <input
                                 type="checkbox"
                                 checked={!!activePanelPreview.grayscale}
-                                onChange={(e) => handlePanelFieldChange(activePanelPreview.id, "grayscale", e.target.checked)}
+                                onChange={(e) =>
+                                  handlePanelFieldChange(
+                                    activePanelPreview.id,
+                                    "grayscale",
+                                    e.target.checked
+                                  )
+                                }
                                 className="w-3.5 h-3.5 text-purple-600 rounded bg-neutral-900 accent-purple-500"
                               />
-                              <span className="text-[10px] font-semibold text-neutral-300">Grayscale</span>
+                              <span className="text-[10px] font-semibold text-neutral-300">
+                                Grayscale
+                              </span>
                             </label>
                           </div>
                         </div>
@@ -1086,7 +1187,9 @@ export default function ProjectDetailsPage({
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                     {panels.map((panel, idx) => {
-                      const isActive = activePanelPreview && activePanelPreview.id === panel.id;
+                      const isActive =
+                        activePanelPreview &&
+                        activePanelPreview.id === panel.id;
                       return (
                         <div
                           key={panel.id || idx}
@@ -1131,16 +1234,25 @@ export default function ProjectDetailsPage({
                               type="button"
                               onClick={async (e) => {
                                 e.stopPropagation();
-                                const confirm = (window as any).confirmAsync || window.confirm;
+                                const confirm =
+                                  (window as any).confirmAsync ||
+                                  window.confirm;
                                 const confirmed = await confirm(
-                                  `Remove panel #${idx + 1} from storyboard sequence?`,
+                                  `Remove panel #${
+                                    idx + 1
+                                  } from storyboard sequence?`,
                                   "Remove Panel",
                                   "red"
                                 );
                                 if (confirmed) {
-                                  const updated = panels.filter((_, pIdx) => pIdx !== idx);
+                                  const updated = panels.filter(
+                                    (_, pIdx) => pIdx !== idx
+                                  );
                                   setPanels(updated);
-                                  if (activePanelPreview && activePanelPreview.id === panel.id) {
+                                  if (
+                                    activePanelPreview &&
+                                    activePanelPreview.id === panel.id
+                                  ) {
                                     setActivePanelPreview(updated[0] || null);
                                   }
                                 }
@@ -1164,7 +1276,9 @@ export default function ProjectDetailsPage({
 
                           <div className="mt-2 space-y-1">
                             <p className="text-[10px] text-neutral-300 font-bold truncate">
-                              {panel.speech_text ? `"${panel.speech_text}"` : "(No Speech)"}
+                              {panel.speech_text
+                                ? `"${panel.speech_text}"`
+                                : "(No Speech)"}
                             </p>
                             <div className="flex items-center justify-between text-[8px] text-neutral-500 font-mono">
                               <span>{panel.duration || 4.5}s</span>
@@ -1185,7 +1299,6 @@ export default function ProjectDetailsPage({
             {activeTab === "video" && (
               <div className="space-y-6 animate-in fade-in duration-200">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  
                   {/* Video/Slideshow box */}
                   <div className="md:col-span-2 bg-[#0c0c10]/80 border border-white/5 rounded-3xl p-5 shadow-xl relative backdrop-blur-xl min-h-[300px]">
                     {project.video_url ? (
@@ -1215,10 +1328,16 @@ export default function ProjectDetailsPage({
                           <div className="flex items-center gap-2 shrink-0">
                             <button
                               type="button"
-                              onClick={() => setIsSlideshowPlaying(!isSlideshowPlaying)}
+                              onClick={() =>
+                                setIsSlideshowPlaying(!isSlideshowPlaying)
+                              }
                               className="px-2.5 py-1 bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold rounded-lg flex items-center gap-1 transition-all cursor-pointer"
                             >
-                              {isSlideshowPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                              {isSlideshowPlaying ? (
+                                <Pause className="w-3.5 h-3.5" />
+                              ) : (
+                                <Play className="w-3.5 h-3.5" />
+                              )}
                               {isSlideshowPlaying ? "Pause" : "Play"}
                             </button>
                             <span className="text-[10px] text-neutral-500 font-mono font-bold">
@@ -1234,16 +1353,20 @@ export default function ProjectDetailsPage({
                                 src={panels[slideshowIdx].image_url}
                                 alt={`Slide ${slideshowIdx + 1}`}
                                 className="w-full h-full object-contain"
-                                style={{ filter: getPanelFilterStyle(panels[slideshowIdx]) }}
+                                style={{
+                                  filter: getPanelFilterStyle(
+                                    panels[slideshowIdx]
+                                  ),
+                                }}
                               />
-                              
+
                               {/* Subtitle Caption */}
                               {panels[slideshowIdx].speech_text && (
                                 <div className="absolute bottom-4 inset-x-4 bg-black/85 backdrop-blur-md border border-white/5 p-3 rounded-2xl text-center text-xs font-semibold text-neutral-250 font-sans shadow-lg leading-relaxed">
                                   {panels[slideshowIdx].speech_text}
                                 </div>
                               )}
-                              
+
                               {/* SFX cue */}
                               {panels[slideshowIdx].sfx && (
                                 <div className="absolute top-4 left-4 bg-purple-600 text-neutral-950 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase border border-purple-500/20 tracking-wider font-mono shadow-md animate-pulse">
@@ -1253,19 +1376,26 @@ export default function ProjectDetailsPage({
 
                               {/* Progress bar loader */}
                               <div className="absolute bottom-0 left-0 right-0 h-1 bg-neutral-900 overflow-hidden">
-                                <div 
+                                <div
                                   className="h-full bg-purple-500 transition-all"
                                   style={{
                                     width: isSlideshowPlaying ? "100%" : "0%",
-                                    transitionDuration: isSlideshowPlaying ? `${(panels[slideshowIdx].duration || 4.5) * 1000}ms` : "0ms",
-                                    transitionTimingFunction: "linear"
+                                    transitionDuration: isSlideshowPlaying
+                                      ? `${
+                                          (panels[slideshowIdx].duration ||
+                                            4.5) * 1000
+                                        }ms`
+                                      : "0ms",
+                                    transitionTimingFunction: "linear",
                                   }}
                                   key={`${slideshowIdx}-${isSlideshowPlaying}`}
                                 />
                               </div>
                             </>
                           ) : (
-                            <span className="text-xs text-neutral-550 italic">No storyboard panels found</span>
+                            <span className="text-xs text-neutral-550 italic">
+                              No storyboard panels found
+                            </span>
                           )}
                         </div>
                       </div>
@@ -1275,7 +1405,7 @@ export default function ProjectDetailsPage({
                   {/* ADVANCED EXPORT ACTIONS CARD */}
                   <div className="bg-[#0c0c10]/80 border border-white/5 rounded-3xl p-5 shadow-xl relative backdrop-blur-xl md:col-span-1 space-y-4">
                     <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
-                    
+
                     <h3 className="text-xs font-black uppercase text-neutral-400 tracking-wider flex items-center gap-2 border-b border-white/5 pb-3">
                       <FileDown className="w-4 h-4 text-purple-400" />
                       Storyboard Exports
@@ -1288,7 +1418,8 @@ export default function ProjectDetailsPage({
                         className="w-full bg-neutral-900 border border-white/5 hover:border-purple-500/30 text-left py-2.5 px-4 rounded-xl text-xs font-bold text-neutral-250 hover:text-white transition-all cursor-pointer flex items-center justify-between group disabled:opacity-50"
                       >
                         <span className="flex items-center gap-2">
-                          <FileText className="w-4 h-4 text-purple-400" /> Export PDF Storyboard
+                          <FileText className="w-4 h-4 text-purple-400" />{" "}
+                          Export PDF Storyboard
                         </span>
                         <ChevronRight className="w-4 h-4 text-neutral-600 group-hover:text-purple-400" />
                       </button>
@@ -1299,7 +1430,8 @@ export default function ProjectDetailsPage({
                         className="w-full bg-neutral-900 border border-white/5 hover:border-purple-500/30 text-left py-2.5 px-4 rounded-xl text-xs font-bold text-neutral-250 hover:text-white transition-all cursor-pointer flex items-center justify-between group disabled:opacity-50"
                       >
                         <span className="flex items-center gap-2">
-                          <Sliders className="w-4 h-4 text-purple-400" /> Export Script Data (JSON)
+                          <Sliders className="w-4 h-4 text-purple-400" /> Export
+                          Script Data (JSON)
                         </span>
                         <ChevronRight className="w-4 h-4 text-neutral-600 group-hover:text-purple-400" />
                       </button>
@@ -1310,7 +1442,8 @@ export default function ProjectDetailsPage({
                         className="w-full bg-neutral-900 border border-white/5 hover:border-purple-500/30 text-left py-2.5 px-4 rounded-xl text-xs font-bold text-neutral-250 hover:text-white transition-all cursor-pointer flex items-center justify-between group disabled:opacity-50"
                       >
                         <span className="flex items-center gap-2">
-                          <Download className="w-4 h-4 text-purple-400" /> Download Panels Package (ZIP)
+                          <Download className="w-4 h-4 text-purple-400" />{" "}
+                          Download Panels Package (ZIP)
                         </span>
                         <ChevronRight className="w-4 h-4 text-neutral-600 group-hover:text-purple-400" />
                       </button>
@@ -1322,21 +1455,20 @@ export default function ProjectDetailsPage({
                       </div>
                     )}
                   </div>
-
                 </div>
               </div>
             )}
-
           </div>
-
         </div>
-
       </div>
 
       {/* Scraped Image Zoom Modal */}
       {activeScrapedZoom && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="absolute inset-0 cursor-pointer" onClick={() => setActiveScrapedZoom(null)} />
+          <div
+            className="absolute inset-0 cursor-pointer"
+            onClick={() => setActiveScrapedZoom(null)}
+          />
           <div className="relative max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-neutral-900 border border-neutral-800 p-2 z-10 animate-in zoom-in-95 duration-200 scrollbar-thin">
             <button
               onClick={() => setActiveScrapedZoom(null)}
@@ -1352,7 +1484,6 @@ export default function ProjectDetailsPage({
           </div>
         </div>
       )}
-
     </div>
   );
 }

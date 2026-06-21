@@ -362,7 +362,7 @@ export default function Sidebar({
                       "/panel-assistant",
                       "/ai-translation",
                       "/ai-audio-lab",
-                      "/ai-voice"
+                      "/ai-voice",
                     ].includes(subItem.path);
                     const isLocked = requiresPanels && panels.length === 0;
 
@@ -377,7 +377,11 @@ export default function Sidebar({
                             ? "text-neutral-500 hover:text-neutral-350"
                             : "text-neutral-400"
                         }`}
-                        title={isLocked ? "Requires storyboard panels (Click to view details)" : undefined}
+                        title={
+                          isLocked
+                            ? "Requires storyboard panels (Click to view details)"
+                            : undefined
+                        }
                       >
                         <span>✦ {subItem.label}</span>
                         {isLocked && (
@@ -440,7 +444,9 @@ export default function Sidebar({
       {/* Sidebar drawer container (visible on both mobile and desktop, slides in/out) */}
       <aside
         className={`fixed inset-y-0 left-0 w-72 bg-neutral-950/95 border-r border-neutral-900 h-full z-50 transition-transform duration-300 ease-out transform ${
-          isOpen ? "translate-x-0 shadow-2xl shadow-black/60" : "-translate-x-full"
+          isOpen
+            ? "translate-x-0 shadow-2xl shadow-black/60"
+            : "-translate-x-full"
         }`}
       >
         {sidebarContent}

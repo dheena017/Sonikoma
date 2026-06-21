@@ -65,7 +65,9 @@ export default function ProfilePage({
   const handleConfirmAvatarUpdate = async () => {
     if (!tempAvatarUrl) return;
 
-    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
+    const token =
+      localStorage.getItem("anivox_token") ||
+      sessionStorage.getItem("anivox_token");
     if (!token) return;
 
     try {
@@ -242,7 +244,9 @@ export default function ProfilePage({
 
   // Load profile assets dynamically on mount
   React.useEffect(() => {
-    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
+    const token =
+      localStorage.getItem("anivox_token") ||
+      sessionStorage.getItem("anivox_token");
     if (!token) return;
 
     fetch("/api/auth/me", {
@@ -398,7 +402,9 @@ export default function ProfilePage({
 
   const handleProfileSave = (e: React.FormEvent) => {
     e.preventDefault();
-    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
+    const token =
+      localStorage.getItem("anivox_token") ||
+      sessionStorage.getItem("anivox_token");
     if (!token) return;
 
     fetch("/api/auth/profile", {
@@ -454,7 +460,9 @@ export default function ProfilePage({
       return;
     }
 
-    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
+    const token =
+      localStorage.getItem("anivox_token") ||
+      sessionStorage.getItem("anivox_token");
     if (!token) return;
 
     fetch("/api/auth/password", {
@@ -486,7 +494,9 @@ export default function ProfilePage({
   };
 
   const handleTerminateSession = async (id: string) => {
-    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
+    const token =
+      localStorage.getItem("anivox_token") ||
+      sessionStorage.getItem("anivox_token");
     if (!token) return;
 
     const confirm = (window as any).confirmAsync || window.confirm;
@@ -512,7 +522,9 @@ export default function ProfilePage({
 
   const handleClaimCredits = () => {
     if (hasClaimedToday) return;
-    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
+    const token =
+      localStorage.getItem("anivox_token") ||
+      sessionStorage.getItem("anivox_token");
     if (!token) return;
 
     fetch("/api/auth/claim-credits", {
@@ -543,7 +555,9 @@ export default function ProfilePage({
     e.preventDefault();
     if (!newTokenName.trim()) return;
 
-    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
+    const token =
+      localStorage.getItem("anivox_token") ||
+      sessionStorage.getItem("anivox_token");
     if (!token) return;
 
     fetch("/api/auth/api-keys", {
@@ -587,7 +601,9 @@ export default function ProfilePage({
   };
 
   const handleDeleteToken = async (id: string) => {
-    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
+    const token =
+      localStorage.getItem("anivox_token") ||
+      sessionStorage.getItem("anivox_token");
     if (!token) return;
 
     const confirm = (window as any).confirmAsync || window.confirm;
@@ -612,7 +628,9 @@ export default function ProfilePage({
   };
 
   const handleToggleMfa = async (enabled: boolean): Promise<boolean> => {
-    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
+    const token =
+      localStorage.getItem("anivox_token") ||
+      sessionStorage.getItem("anivox_token");
     if (!token) return false;
 
     try {
@@ -643,7 +661,9 @@ export default function ProfilePage({
     type: string,
     value: string
   ): Promise<boolean> => {
-    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
+    const token =
+      localStorage.getItem("anivox_token") ||
+      sessionStorage.getItem("anivox_token");
     if (!token) return false;
 
     try {
@@ -678,7 +698,9 @@ export default function ProfilePage({
   };
 
   const handleBatchDeleteProjects = (ids: string[]) => {
-    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
+    const token =
+      localStorage.getItem("anivox_token") ||
+      sessionStorage.getItem("anivox_token");
     if (!token) return;
 
     fetch("/api/projects/batch-delete", {
@@ -709,7 +731,9 @@ export default function ProfilePage({
   };
 
   const handleDeleteChapter = (id: string) => {
-    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
+    const token =
+      localStorage.getItem("anivox_token") ||
+      sessionStorage.getItem("anivox_token");
     if (!token) return;
 
     fetch(`/api/projects/${id}`, {
@@ -734,7 +758,9 @@ export default function ProfilePage({
   };
 
   const handleDeleteSeries = (seriesId: string) => {
-    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
+    const token =
+      localStorage.getItem("anivox_token") ||
+      sessionStorage.getItem("anivox_token");
     if (!token) return;
 
     fetch(`/api/projects/series/${seriesId}`, {
@@ -1054,9 +1080,7 @@ export default function ProfilePage({
           {/* RIGHT COLUMN: Tab content panel switcher */}
           <div className="lg:col-span-3 space-y-6">
             {/* TAB 0: CREATOR PERFORMANCE ANALYTICS */}
-            {activeTab === "analytics" && (
-              <ProfileAnalyticsTab />
-            )}
+            {activeTab === "analytics" && <ProfileAnalyticsTab />}
 
             {/* TAB 1: RECENT PROJECTS */}
             {activeTab === "projects" && (

@@ -263,7 +263,9 @@ export function AppWorkspace({
 
       addNotification("Initializing project entry...", "info");
 
-      const token = localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token");
+      const token =
+        localStorage.getItem("anivox_token") ||
+        sessionStorage.getItem("anivox_token");
       const headers: HeadersInit = { "Content-Type": "application/json" };
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;

@@ -61,7 +61,9 @@ export default function ProfileSecurityTab({
   const [totalLogsCount, setTotalLogsCount] = React.useState(0);
 
   React.useEffect(() => {
-    const token = (localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token"));
+    const token =
+      localStorage.getItem("anivox_token") ||
+      sessionStorage.getItem("anivox_token");
     if (!token) return;
 
     fetch(
@@ -182,7 +184,9 @@ export default function ProfileSecurityTab({
 
   const handleDisable2FA = async () => {
     const confirm = (window as any).confirmAsync || window.confirm;
-    const confirmed = await confirm("Are you sure you want to disable Two-Factor Authentication?");
+    const confirmed = await confirm(
+      "Are you sure you want to disable Two-Factor Authentication?"
+    );
     if (confirmed) {
       const ok = await handleToggleMfa(false);
       if (!ok) {

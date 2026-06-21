@@ -481,7 +481,8 @@ export default function ProfileProjectsTab({
                       <button
                         onClick={async (e) => {
                           e.stopPropagation();
-                          const confirm = (window as any).confirmAsync || window.confirm;
+                          const confirm =
+                            (window as any).confirmAsync || window.confirm;
                           const confirmed = await confirm(
                             `Are you sure you want to delete the entire series "${group.title}" and all its chapters?`
                           );
@@ -575,7 +576,9 @@ export default function ProfileProjectsTab({
                             </span>
                             <button
                               onClick={async () => {
-                                const confirm = (window as any).confirmAsync || window.confirm;
+                                const confirm =
+                                  (window as any).confirmAsync ||
+                                  window.confirm;
                                 const confirmed = await confirm(
                                   `Are you sure you want to delete ${numberStr}?`
                                 );
@@ -626,7 +629,8 @@ export default function ProfileProjectsTab({
                       {group.series_id && (
                         <button
                           onClick={async () => {
-                            const confirm = (window as any).confirmAsync || window.confirm;
+                            const confirm =
+                              (window as any).confirmAsync || window.confirm;
                             const confirmed = await confirm(
                               `Are you sure you want to delete the entire series "${group.title}" and all its chapters?`
                             );
@@ -729,7 +733,9 @@ export default function ProfileProjectsTab({
                             <div className="flex items-center gap-1.5">
                               <button
                                 onClick={async () => {
-                                  const confirm = (window as any).confirmAsync || window.confirm;
+                                  const confirm =
+                                    (window as any).confirmAsync ||
+                                    window.confirm;
                                   const confirmed = await confirm(
                                     `Are you sure you want to delete ${numberStr}?`
                                   );

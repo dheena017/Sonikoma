@@ -26,13 +26,19 @@ export default function VoiceStudioPage({
           <Sparkles className="h-8 w-8 text-white animate-pulse" />
         </div>
         <div className="space-y-2">
-          <h3 className="text-xl font-bold text-white tracking-tight">AI Voice Studio Locked</h3>
+          <h3 className="text-xl font-bold text-white tracking-tight">
+            AI Voice Studio Locked
+          </h3>
           <p className="text-xs text-neutral-400 font-mono leading-relaxed max-w-sm">
-            This module generates TTS transcripts, matches audio dramatization guidelines, and casts matching voices for active storyboard dialogue scripts.
+            This module generates TTS transcripts, matches audio dramatization
+            guidelines, and casts matching voices for active storyboard dialogue
+            scripts.
           </p>
         </div>
         <div className="bg-neutral-950/80 p-4 rounded-xl border border-neutral-900 text-left text-[11px] text-neutral-500 font-mono space-y-1.5 w-full">
-          <div className="text-neutral-400 font-bold mb-1">💡 How to unlock:</div>
+          <div className="text-neutral-400 font-bold mb-1">
+            💡 How to unlock:
+          </div>
           <div>1. Go to the main Dashboard workspace</div>
           <div>2. Enter a Webtoon URL to scrape image strips</div>
           <div>3. Slice the strips into storyboard panels</div>

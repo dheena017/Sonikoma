@@ -137,13 +137,13 @@ export function useAppRouter({
         `Music Theme: ${musicTheme}`,
         `Aspect Ratio: ${aspectRatio}`,
         `Frame Rate: ${frameRate} FPS`,
-        `Theme Mode: ${activeTheme}`
+        `Theme Mode: ${activeTheme}`,
       ].join("\n");
       addNotification(
         "System configurations auto-saved successfully!",
         "success",
         {
-          details: detailMsg
+          details: detailMsg,
         }
       );
     }, 400);

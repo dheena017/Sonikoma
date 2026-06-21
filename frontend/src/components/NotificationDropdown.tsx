@@ -73,10 +73,17 @@ export default function NotificationDropdown({
                 ? "text-rose-500 hover:text-rose-450 hover:bg-neutral-800"
                 : "text-neutral-400 hover:text-white hover:bg-neutral-800"
             }`}
-            title={notificationsMuted ? "Unmute notification sounds" : "Mute notification sounds"}
+            title={
+              notificationsMuted
+                ? "Unmute notification sounds"
+                : "Mute notification sounds"
+            }
           >
             {notificationsMuted ? (
-              <BellOff className="h-4 w-4 animate-bounce" style={{ animationDuration: "1.5s" }} />
+              <BellOff
+                className="h-4 w-4 animate-bounce"
+                style={{ animationDuration: "1.5s" }}
+              />
             ) : (
               <Bell className="h-4 w-4" />
             )}
