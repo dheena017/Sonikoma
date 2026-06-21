@@ -251,7 +251,7 @@ export default function ProjectConfirmModal({
           </button>
           <button
             type="button"
-            onClick={() => handleConfirm(true)}
+            onClick={() => handleConfirm(false)}
             disabled={!seriesTitle.trim() || !chapterNumber.trim()}
             className="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 text-white font-bold rounded-xl text-xs tracking-wide transition-all shadow-[0_0_20px_-5px_rgba(147,51,234,0.5)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 flex items-center gap-1.5 cursor-pointer"
           >
