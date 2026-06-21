@@ -36,9 +36,9 @@ export default function CharacterProfilePage({
   const handleDetected = (newChars: CharacterBio[]) => {
     // Deduplicate and append
     setCharacters((prev) => {
-      const existing = new Set(prev.map((c) => c.name.toLowerCase()));
+      const existing = new Set(prev.map((c) => (c.name || "").toLowerCase()));
       const filtered = newChars.filter(
-        (c) => !existing.has(c.name.toLowerCase())
+        (c) => c.name && !existing.has(c.name.toLowerCase())
       );
       if (filtered.length > 0) {
         if (addNotification)

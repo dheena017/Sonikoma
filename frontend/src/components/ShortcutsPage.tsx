@@ -77,6 +77,7 @@ export default function ShortcutsPage({
       const conflictEntry = Object.entries(shortcuts).find(
         ([id, val]) =>
           id !== recordingActionId &&
+          typeof val === "string" &&
           val.toLowerCase() === combination.toLowerCase()
       );
 

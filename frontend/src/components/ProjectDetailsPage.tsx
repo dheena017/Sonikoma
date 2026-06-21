@@ -30,6 +30,7 @@ import {
   Download,
   Image as ImageIcon,
   X,
+  Search,
 } from "lucide-react";
 import { getSourceName, getPanelFilterStyle } from "../utils";
 
@@ -88,6 +89,19 @@ export default function ProjectDetailsPage({
   const [isExporting, setIsExporting] = React.useState(false);
   const [exportStatus, setExportStatus] = React.useState<string | null>(null);
 
+  // Search filter inside storyboard tab
+  const [searchQuery, setSearchQuery] = React.useState("");
+
+  const filteredPanels = React.useMemo(() => {
+    if (!searchQuery.trim()) return panels;
+    const query = searchQuery.toLowerCase();
+    return panels.filter(
+      (p) =>
+        (p.speech_text || "").toLowerCase().includes(query) ||
+        (p.visual_description || "").toLowerCase().includes(query)
+    );
+  }, [panels, searchQuery]);
+
   // Move panels left/right
   const handleMovePanel = (index: number, direction: "left" | "right") => {
     const newIndex = direction === "left" ? index - 1 : index + 1;
@@ -139,15 +153,120 @@ export default function ProjectDetailsPage({
     setIsOptimizingVisual(false);
   };
 
-  // Mock export triggers
-  const triggerMockExport = async (format: string) => {
+  // Real export trigger
+  const triggerExport = async (format: string) => {
+    if (format === "pdf") {
+      window.print();
+      return;
+    }
+
     setIsExporting(true);
-    setExportStatus(`Compiling assets to download ${format.toUpperCase()}...`);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsExporting(false);
-    setExportStatus(`Downloaded: project_storyboard.${format}`);
-    setTimeout(() => setExportStatus(null), 3000);
-    alert(`Downloaded storyboard document in ${format.toUpperCase()} format!`);
+    if (format === "json") {
+      setExportStatus("Generating JSON backup...");
+      try {
+        const dataToExport = {
+          project: {
+            project_id: project.project_id,
+            url: project.url,
+            title: project.title,
+            genre: project.genre,
+            episode: project.episode,
+            panels_count: panels.length,
+            video_url: project.video_url,
+            author: project.author,
+            cover_image: project.cover_image,
+            synopsis: project.synopsis,
+          },
+          panels: panels.map((p) => ({
+            image_url: p.image_url,
+            original_url: p.original_url || p.image_url,
+            speech_text: p.speech_text || "",
+            sfx: p.sfx || "",
+            duration: p.duration || 4.5,
+            motion_type: p.motion_type || "zoom_in",
+            visual_description: p.visual_description || null,
+            brightness: p.brightness ?? null,
+            contrast: p.contrast ?? null,
+            saturation: p.saturation ?? null,
+            grayscale: p.grayscale ? 1 : 0,
+            filter_preset: p.filter_preset || null,
+            bubble_method: p.bubble_method || null,
+            bubble_sensitivity: p.bubble_sensitivity ?? null,
+            bubble_dilation: p.bubble_dilation ?? null,
+            inpaint_radius: p.inpaint_radius ?? null,
+            detection_style: p.detection_style || null,
+          })),
+        };
+
+        const dataStr =
+          "data:text/json;charset=utf-8," +
+          encodeURIComponent(JSON.stringify(dataToExport, null, 2));
+        const downloadAnchor = document.createElement("a");
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute(
+          "download",
+          `${(project.title || "storyboard").replace(/\s+/g, "_")}_backup_${new Date()
+            .toISOString()
+            .slice(0, 10)}.json`
+        );
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+        setExportStatus("JSON downloaded successfully!");
+      } catch (err: any) {
+        console.error("JSON export failed:", err);
+        alert(err.message || "Failed to export JSON.");
+        setExportStatus("JSON export failed.");
+      } finally {
+        setIsExporting(false);
+        setTimeout(() => setExportStatus(null), 3000);
+      }
+    } else if (format === "zip") {
+      if (panels.length === 0) {
+        alert("No panels to export.");
+        setIsExporting(false);
+        return;
+      }
+      setExportStatus("Generating ZIP panels package...");
+      try {
+        const token =
+          localStorage.getItem("anivox_token") ||
+          sessionStorage.getItem("anivox_token");
+        const headers: HeadersInit = { "Content-Type": "application/json" };
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+        
+        const urls = panels.map((p) => p.image_url);
+        const res = await fetch("/api/download-zip", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ urls, url: project.url || null }),
+        });
+        if (!res.ok) {
+          throw new Error(`ZIP generation failed (HTTP ${res.status})`);
+        }
+        const data = await res.json();
+        if (data.success && data.downloadUrl) {
+          const link = document.createElement("a");
+          link.href = data.downloadUrl;
+          link.download = data.filename || `${(project.title || "storyboard").replace(/\s+/g, "_")}_panels.zip`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          setExportStatus("ZIP downloaded successfully!");
+        } else {
+          throw new Error(data.error || "Failed to package ZIP archive.");
+        }
+      } catch (err: any) {
+        console.error("ZIP download failed:", err);
+        alert(err.message || "Failed to compile ZIP archive.");
+        setExportStatus("ZIP download failed.");
+      } finally {
+        setIsExporting(false);
+        setTimeout(() => setExportStatus(null), 3000);
+      }
+    }
   };
 
   const isPanelNew = React.useCallback((panel: any) => {
@@ -232,7 +351,7 @@ export default function ProjectDetailsPage({
   // Extract projectId from query string
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const id = params.get("id");
+    const id = params.get("id") || params.get("project_id");
     setProjectId(id);
   }, []);
 
@@ -549,12 +668,13 @@ export default function ProjectDetailsPage({
   const totalDuration = panels.reduce((sum, p) => sum + (p.duration || 0), 0);
 
   return (
-    <div className="min-h-screen bg-[#070709] text-white py-10 px-4 sm:px-6 lg:px-8 relative overflow-hidden flex-1 w-full text-left">
-      {/* Visual Ambient Glows */}
-      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-purple-600/5 blur-[130px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] rounded-full bg-indigo-600/5 blur-[130px] pointer-events-none" />
+    <div className="min-h-screen bg-[#070709] text-white py-10 px-4 sm:px-6 lg:px-8 relative overflow-hidden flex-1 w-full text-left print:bg-white print:text-black print:py-0 print:px-0">
+      <div className="print:hidden">
+        {/* Visual Ambient Glows */}
+        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-purple-600/5 blur-[130px] pointer-events-none" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] rounded-full bg-indigo-600/5 blur-[130px] pointer-events-none" />
 
-      <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 relative z-10">
+        <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 relative z-10">
         {/* TOP BAR / NAVIGATION */}
         <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-white/5 pb-6 gap-4">
           <div className="flex items-center gap-3">
@@ -917,11 +1037,11 @@ export default function ProjectDetailsPage({
                           <span>PAGE #{idx + 1}</span>
                           <ZoomIn className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 text-purple-400 transition-opacity" />
                         </div>
-                        <div className="aspect-[2/3] max-h-[220px] overflow-hidden rounded-xl bg-black/60 border border-white/5 flex items-start justify-center relative">
+                        <div className="aspect-[2/3] max-h-[220px] overflow-hidden rounded-xl bg-black/60 border border-white/5 flex items-center justify-center relative">
                           <img
                             src={img}
                             alt={`Scraped Page ${idx + 1}`}
-                            className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-102"
+                            className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-102"
                             loading="lazy"
                           />
                         </div>
@@ -1171,126 +1291,147 @@ export default function ProjectDetailsPage({
                       </div>
                     </div>
                   </div>
-                )}
-
-                {/* STORYBOARD GRID LIST */}
+                  )}
+                            {/* STORYBOARD GRID LIST */}
                 <div className="space-y-4">
-                  <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                  <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-white/5 pb-3 gap-3">
                     <h3 className="text-xs font-black uppercase text-neutral-300 tracking-wider flex items-center gap-1.5">
                       <LayoutGrid className="w-4 h-4 text-purple-450" />
-                      Dynamic Storyboard Grid ({panels.length})
+                      Dynamic Storyboard Grid ({filteredPanels.length})
                     </h3>
-                    <span className="text-[9px] text-neutral-500 font-bold">
-                      Use arrows on hover to re-order sequence
-                    </span>
+                    
+                    {/* Panel Search Input */}
+                    <div className="relative w-full sm:w-64">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-500" />
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search dialogue or scenes..."
+                        className="w-full bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-1.5 pl-9 pr-4 text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-purple-600/20 transition-all placeholder:text-neutral-600"
+                      />
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {panels.map((panel, idx) => {
-                      const isActive =
-                        activePanelPreview &&
-                        activePanelPreview.id === panel.id;
-                      return (
-                        <div
-                          key={panel.id || idx}
-                          onClick={() => setActivePanelPreview(panel)}
-                          className={`group border p-2.5 rounded-2xl transition-all cursor-pointer relative select-none text-left ${
-                            isActive
-                              ? "bg-purple-950/15 border-purple-500/40 ring-1 ring-purple-500/20"
-                              : "bg-[#0d0d10]/40 hover:bg-[#121217]/50 border-white/5 hover:border-white/10"
-                          }`}
-                        >
-                          <span className="absolute top-2 left-2 z-20 bg-black/85 backdrop-blur-md text-[8px] font-black font-mono text-neutral-300 py-0.5 px-2 rounded-lg border border-white/10 shadow-sm">
-                            #{idx + 1}
-                          </span>
+                  {filteredPanels.length === 0 ? (
+                    <div className="py-12 text-center bg-[#0d0d10]/20 border border-white/5 rounded-3xl space-y-2">
+                      <Search className="w-8 h-8 text-neutral-600 mx-auto" />
+                      <h5 className="text-xs font-bold text-neutral-400">
+                        No matching panels found
+                      </h5>
+                      <p className="text-[10px] text-neutral-550 max-w-xs mx-auto leading-relaxed font-semibold">
+                        Try searching for different dialogue keywords or visual descriptions.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                      {filteredPanels.map((panel) => {
+                        const originalIdx = panels.findIndex((p) => p.id === panel.id);
+                        const isActive =
+                          activePanelPreview &&
+                          activePanelPreview.id === panel.id;
+                        return (
+                          <div
+                            key={panel.id || originalIdx}
+                            onClick={() => setActivePanelPreview(panel)}
+                            className={`group border p-2.5 rounded-2xl transition-all cursor-pointer relative select-none text-left ${
+                              isActive
+                                ? "bg-purple-950/15 border-purple-500/40 ring-1 ring-purple-500/20"
+                                : "bg-[#0d0d10]/40 hover:bg-[#121217]/50 border-white/5 hover:border-white/10"
+                            }`}
+                          >
+                            <span className="absolute top-2 left-2 z-20 bg-black/85 backdrop-blur-md text-[8px] font-black font-mono text-neutral-300 py-0.5 px-2 rounded-lg border border-white/10 shadow-sm">
+                              #{originalIdx + 1}
+                            </span>
 
-                          {/* Re-order & Delete buttons */}
-                          <div className="absolute top-2 right-2 z-20 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              type="button"
-                              disabled={idx === 0}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleMovePanel(idx, "left");
-                              }}
-                              className="p-1 bg-black/85 hover:bg-purple-600 text-neutral-400 hover:text-white rounded-md border border-white/10 disabled:opacity-40"
-                              title="Move Left"
-                            >
-                              <ChevronLeft className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              disabled={idx === panels.length - 1}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleMovePanel(idx, "right");
-                              }}
-                              className="p-1 bg-black/85 hover:bg-purple-600 text-neutral-400 hover:text-white rounded-md border border-white/10 disabled:opacity-40"
-                              title="Move Right"
-                            >
-                              <ChevronRight className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={async (e) => {
-                                e.stopPropagation();
-                                const confirm =
-                                  (window as any).confirmAsync ||
-                                  window.confirm;
-                                const confirmed = await confirm(
-                                  `Remove panel #${
-                                    idx + 1
-                                  } from storyboard sequence?`,
-                                  "Remove Panel",
-                                  "red"
-                                );
-                                if (confirmed) {
-                                  const updated = panels.filter(
-                                    (_, pIdx) => pIdx !== idx
+                            {/* Re-order & Delete buttons */}
+                            <div className="absolute top-2 right-2 z-20 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                type="button"
+                                disabled={originalIdx === 0}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleMovePanel(originalIdx, "left");
+                                }}
+                                className="p-1 bg-black/85 hover:bg-purple-600 text-neutral-400 hover:text-white rounded-md border border-white/10 disabled:opacity-40"
+                                title="Move Left"
+                              >
+                                <ChevronLeft className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                disabled={originalIdx === panels.length - 1}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleMovePanel(originalIdx, "right");
+                                }}
+                                className="p-1 bg-black/85 hover:bg-purple-600 text-neutral-400 hover:text-white rounded-md border border-white/10 disabled:opacity-40"
+                                title="Move Right"
+                              >
+                                <ChevronRight className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  const confirm =
+                                    (window as any).confirmAsync ||
+                                    window.confirm;
+                                  const confirmed = await confirm(
+                                    `Remove panel #${
+                                      originalIdx + 1
+                                    } from storyboard sequence?`,
+                                    "Remove Panel",
+                                    "red"
                                   );
-                                  setPanels(updated);
-                                  if (
-                                    activePanelPreview &&
-                                    activePanelPreview.id === panel.id
-                                  ) {
-                                    setActivePanelPreview(updated[0] || null);
+                                  if (confirmed) {
+                                    const updated = panels.filter(
+                                      (_, pIdx) => pIdx !== originalIdx
+                                    );
+                                    setPanels(updated);
+                                    if (
+                                      activePanelPreview &&
+                                      activePanelPreview.id === panel.id
+                                    ) {
+                                      setActivePanelPreview(updated[0] || null);
+                                    }
                                   }
-                                }
-                              }}
-                              className="p-1 bg-black/85 hover:bg-rose-600 text-neutral-450 hover:text-white rounded-md border border-white/10"
-                              title="Remove panel"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
+                                }}
+                                className="p-1 bg-black/85 hover:bg-rose-600 text-neutral-455 hover:text-white rounded-md border border-white/10"
+                                title="Remove panel"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
 
-                          {/* Thumbnail */}
-                          <div className="aspect-square w-full rounded-xl overflow-hidden border border-white/5 bg-black/60 flex items-center justify-center shadow-inner relative">
-                            <img
-                              src={panel.image_url}
-                              alt={`P${idx + 1}`}
-                              className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-103"
-                              loading="lazy"
-                            />
-                          </div>
+                            {/* Thumbnail */}
+                            <div className="aspect-square w-full rounded-xl overflow-hidden border border-white/5 bg-black/60 flex items-center justify-center shadow-inner relative">
+                              <img
+                                src={panel.image_url}
+                                alt={`P${originalIdx + 1}`}
+                                className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-103"
+                                loading="lazy"
+                              />
+                            </div>
 
-                          <div className="mt-2 space-y-1">
-                            <p className="text-[10px] text-neutral-300 font-bold truncate">
-                              {panel.speech_text
-                                ? `"${panel.speech_text}"`
-                                : "(No Speech)"}
-                            </p>
-                            <div className="flex items-center justify-between text-[8px] text-neutral-500 font-mono">
-                              <span>{panel.duration || 4.5}s</span>
-                              <span className="uppercase text-purple-400 font-bold">
-                                {panel.motion_type || "zoom_in"}
-                              </span>
+                            <div className="mt-2 space-y-1">
+                              <p className="text-[10px] text-neutral-300 font-bold truncate">
+                                {panel.speech_text
+                                  ? `"${panel.speech_text}"`
+                                  : "(No Speech)"}
+                              </p>
+                              <div className="flex items-center justify-between text-[8px] text-neutral-500 font-mono">
+                                <span>{panel.duration || 4.5}s</span>
+                                <span className="uppercase text-purple-400 font-bold">
+                                  {panel.motion_type || "zoom_in"}
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -1411,9 +1552,9 @@ export default function ProjectDetailsPage({
                       Storyboard Exports
                     </h3>
 
-                    <div className="space-y-2.5 pt-1">
+                    <div className="space-y-2.5">
                       <button
-                        onClick={() => triggerMockExport("pdf")}
+                        onClick={() => triggerExport("pdf")}
                         disabled={isExporting}
                         className="w-full bg-neutral-900 border border-white/5 hover:border-purple-500/30 text-left py-2.5 px-4 rounded-xl text-xs font-bold text-neutral-250 hover:text-white transition-all cursor-pointer flex items-center justify-between group disabled:opacity-50"
                       >
@@ -1425,24 +1566,24 @@ export default function ProjectDetailsPage({
                       </button>
 
                       <button
-                        onClick={() => triggerMockExport("json")}
+                        onClick={() => triggerExport("json")}
                         disabled={isExporting}
                         className="w-full bg-neutral-900 border border-white/5 hover:border-purple-500/30 text-left py-2.5 px-4 rounded-xl text-xs font-bold text-neutral-250 hover:text-white transition-all cursor-pointer flex items-center justify-between group disabled:opacity-50"
                       >
                         <span className="flex items-center gap-2">
-                          <Sliders className="w-4 h-4 text-purple-400" /> Export
+                          <Sliders className="w-4 h-4 text-purple-450" /> Export
                           Script Data (JSON)
                         </span>
                         <ChevronRight className="w-4 h-4 text-neutral-600 group-hover:text-purple-400" />
                       </button>
 
                       <button
-                        onClick={() => triggerMockExport("zip")}
+                        onClick={() => triggerExport("zip")}
                         disabled={isExporting}
                         className="w-full bg-neutral-900 border border-white/5 hover:border-purple-500/30 text-left py-2.5 px-4 rounded-xl text-xs font-bold text-neutral-250 hover:text-white transition-all cursor-pointer flex items-center justify-between group disabled:opacity-50"
                       >
                         <span className="flex items-center gap-2">
-                          <Download className="w-4 h-4 text-purple-400" />{" "}
+                          <Download className="w-4 h-4 text-purple-450" />{" "}
                           Download Panels Package (ZIP)
                         </span>
                         <ChevronRight className="w-4 h-4 text-neutral-600 group-hover:text-purple-400" />
@@ -1484,6 +1625,103 @@ export default function ProjectDetailsPage({
           </div>
         </div>
       )}
+    </div>
+
+    {/* PRINT-ONLY STORYBOARD CONTAINER */}
+    <div className="hidden print:block w-full text-black bg-white p-6 font-sans">
+        <div className="border-b-2 border-black pb-4 mb-6">
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-extrabold uppercase tracking-tight">
+                {(project.title || "Untitled Project").replace(
+                  /\s+[a-fA-F0-9]{8}$/,
+                  ""
+                )}
+              </h1>
+              {project.author && (
+                <p className="text-sm font-semibold text-gray-700 mt-1">
+                  Author: {project.author}
+                </p>
+              )}
+              {project.genre && (
+                <p className="text-xs text-gray-550 font-mono mt-0.5">
+                  Genre: {project.genre}
+                </p>
+              )}
+            </div>
+            <div className="text-right">
+              <span className="text-lg font-bold block bg-black text-white px-3 py-1 rounded">
+                {project.episode || "Chapter 1"}
+              </span>
+              <p className="text-xs text-gray-500 mt-1">
+                Total Duration: {totalDuration.toFixed(1)}s | Panels: {panels.length}
+              </p>
+            </div>
+          </div>
+          {project.synopsis && (
+            <div className="mt-4 p-3 bg-gray-50 rounded border border-gray-200">
+              <h3 className="text-xs font-bold uppercase text-gray-500 tracking-wider">Synopsis</h3>
+              <p className="text-sm mt-1 text-gray-800 leading-relaxed">{project.synopsis}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Panels Listing */}
+        <div className="space-y-6">
+          {panels.map((panel, idx) => (
+            <div
+              key={panel.id || idx}
+              className="flex gap-6 p-4 border border-gray-300 rounded-xl bg-white"
+              style={{ breakInside: "avoid", pageBreakInside: "avoid" }}
+            >
+              {/* Left Column: Image */}
+              <div className="w-1/3 max-w-[200px] shrink-0 border border-gray-200 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center aspect-square">
+                <img
+                  src={panel.image_url}
+                  alt={`Panel ${idx + 1}`}
+                  className="w-full h-full object-contain"
+                  style={{
+                    filter: getPanelFilterStyle(panel),
+                  }}
+                />
+              </div>
+
+              {/* Right Column: Panel details */}
+              <div className="flex-1 space-y-3 text-left">
+                <div className="flex justify-between items-center border-b border-gray-200 pb-1.5">
+                  <span className="text-sm font-black uppercase text-purple-700">
+                    Panel #{idx + 1}
+                  </span>
+                  <span className="text-[10px] text-gray-500 font-mono font-bold">
+                    Duration: {panel.duration || 4.5}s | Motion: {panel.motion_type || "zoom_in"}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h5 className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Dialogue Transcript</h5>
+                    <p className="text-xs text-gray-800 font-semibold mt-1 italic">
+                      {panel.speech_text ? `"${panel.speech_text}"` : "(No Dialogue)"}
+                    </p>
+                  </div>
+                  <div>
+                    <h5 className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Scene Description</h5>
+                    <p className="text-xs text-gray-700 mt-1">
+                      {panel.visual_description || "(No description)"}
+                    </p>
+                  </div>
+                </div>
+
+                {panel.sfx && (
+                  <div className="text-[10px] font-mono font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded inline-block">
+                    SFX: {panel.sfx}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

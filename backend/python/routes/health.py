@@ -23,7 +23,7 @@ class CustomLogPayload(BaseModel):
 
 import database.db as db
 from utils.log_interceptor import get_logs, add_log_listener, remove_log_listener
-from utils.cache import get_all_cache_stats
+from utils.cache import get_all_cache_stats, get_total_storage_size_bytes
 
 logger = logging.getLogger("anivox.routes.health")
 router = APIRouter()
@@ -206,6 +206,10 @@ async def server_metrics():
             "systemTotalMB": mem_total,
             "systemUsedPct": mem_pct,
         },
-        "cache": get_all_cache_stats()
+        "cache": get_all_cache_stats(),
+        "storage": {
+            "usedBytes": get_total_storage_size_bytes(),
+            "limitBytes": 5 * 1024 * 1024 * 1024 # 5 GB
+        }
     }
 

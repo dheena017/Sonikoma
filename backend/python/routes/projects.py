@@ -7,7 +7,7 @@ Project History and Panel management routes.
 
 import logging
 from typing import List, Optional, Any, Dict
-from fastapi import APIRouter, HTTPException, Path, Body, Depends
+from fastapi import APIRouter, HTTPException, Path, Body, Depends, Request
 from pydantic import BaseModel, Field
 from routes.auth_routes import get_current_user
 
@@ -57,6 +57,7 @@ class PanelsSaveRequest(BaseModel):
 
 
 class ProjectUpdateRequest(BaseModel):
+    url: Optional[str] = Field(None, description="Original Webtoon episode URL")
     title: Optional[str] = Field(None, description="Series Title")
     genre: Optional[str] = Field(None, description="Series Genre")
     episode: Optional[str] = Field(None, description="Chapter/Episode Number")
@@ -159,6 +160,7 @@ async def create_project(body: ProjectCreateRequest, current_user: dict = Depend
 
 @router.post("/{projectId}/panels", summary="Save storyboard panels for a project")
 async def save_project_panels(
+    request: Request,
     projectId: str = Path(...),
     body: PanelsSaveRequest = Body(...),
     current_user: dict = Depends(get_current_user)
@@ -203,6 +205,11 @@ async def save_project_panels(
             
         db.insert_panels(projectId, db_panels)
         db.update_project(projectId, {"panels_count": len(body.panels)})
+        
+        # Write to audit log
+        ip_addr = request.client.host if request.client else "127.0.0.1"
+        db.write_audit_log(current_user["user_id"], "Saved Storyboard Panels", ip_addr, "Success")
+        
         logger.info(f"[Database] Saved {len(body.panels)} panels and updated count for project: {projectId}")
         return {"success": True, "saved": len(body.panels)}
     except HTTPException:
@@ -222,8 +229,22 @@ async def update_project_details(
         logger.info(f"[Database] Updating project details and/or panels for: {projectId}")
         project = db.get_project(projectId)
         if not project:
-            logger.warning(f"[Database] Project {projectId} not found.")
-            raise HTTPException(status_code=404, detail="Project not found.")
+            logger.info(f"[Database] Project {projectId} not found. Creating new project row on demand.")
+            db.insert_project({
+                "project_id": projectId,
+                "url": body.url or "",
+                "title": body.title or "Untitled Project",
+                "genre": body.genre or "general",
+                "episode": body.episode or "",
+                "status": "pending",
+                "panels_count": len(body.panels) if body.panels else 0,
+                "video_url": None,
+                "user_id": current_user["user_id"],
+                "author": body.author or "",
+                "cover_image": body.cover_image or "",
+                "synopsis": body.synopsis or "",
+            })
+            project = {"user_id": current_user["user_id"]}
 
         # Verify ownership
         if project.get("user_id") != current_user["user_id"]:

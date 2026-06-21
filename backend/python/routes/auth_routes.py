@@ -21,7 +21,8 @@ from database.db import (
     create_user_session, get_user_sessions, terminate_user_session,
     write_audit_log, get_audit_logs, get_user_invoices,
     seed_default_invoices_if_empty, get_user_api_keys,
-    create_user_api_key, delete_user_api_key
+    create_user_api_key, delete_user_api_key, get_creator_analytics,
+    get_user_by_api_key, create_user_invoice, get_user_achievements_and_points
 )
 
 logger = logging.getLogger("anivox.auth")
@@ -91,6 +92,14 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    
+    # Authenticate via Developer API key if token starts with av_live_
+    if token.startswith("av_live_"):
+        user = get_user_by_api_key(token)
+        if user is None:
+            raise credentials_exception
+        return user
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: str = payload.get("sub")
@@ -215,9 +224,30 @@ async def get_me(current_user: dict = Depends(get_current_user)):
     except Exception:
         unlocked_rewards = []
 
+    pref_str = current_user.get("preferences") or "{}"
+    try:
+        prefs = json.loads(pref_str)
+    except Exception:
+        prefs = {}
+
+    streak = prefs.get("claim_streak", 1)
+    if not isinstance(streak, int) or streak < 1 or streak > 7:
+        streak = 1
+
     import datetime
-    today_str = datetime.datetime.now().strftime("%Y-%m-%d")
+    today = datetime.datetime.now()
+    today_str = today.strftime("%Y-%m-%d")
+    yesterday_str = (today - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+    
     has_claimed_today = current_user.get("last_claimed_date") == today_str
+    
+    last_claimed = current_user.get("last_claimed_date")
+    if last_claimed and last_claimed != today_str and last_claimed != yesterday_str:
+        streak = 1
+        prefs["claim_streak"] = 1
+        update_user(current_user["user_id"], {"preferences": json.dumps(prefs)})
+
+    ach_data = get_user_achievements_and_points(current_user["user_id"])
 
     return {
         "user_id": current_user["user_id"],
@@ -233,7 +263,12 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         "unlocked_rewards": unlocked_rewards,
         "mfa_enabled": bool(current_user.get("mfa_enabled")),
         "social_connections": social_connections,
-        "has_claimed_today": has_claimed_today
+        "has_claimed_today": has_claimed_today,
+        "streak_days": streak,
+        "subscription_tier": prefs.get("subscription_tier", "free"),
+        "preferences": prefs,
+        "unlocked_achievements": ach_data["unlocked_achievements"],
+        "achievement_points": ach_data["achievement_points"]
     }
 
 
@@ -309,22 +344,53 @@ async def delete_session(session_id: str, request: Request, current_user: dict =
 @router.post("/claim-credits")
 async def claim_credits(request: Request, current_user: dict = Depends(get_current_user)):
     import datetime
+    import json
     ip_addr = request.client.host if request.client else "127.0.0.1"
-    today_str = datetime.datetime.now().strftime("%Y-%m-%d")
+    today = datetime.datetime.now()
+    today_str = today.strftime("%Y-%m-%d")
+    yesterday_str = (today - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
     
     if current_user.get("last_claimed_date") == today_str:
         raise HTTPException(status_code=400, detail="Daily credits already claimed for today.")
         
+    pref_str = current_user.get("preferences") or "{}"
+    try:
+        prefs = json.loads(pref_str)
+    except Exception:
+        prefs = {}
+        
+    streak = prefs.get("claim_streak", 1)
+    if not isinstance(streak, int) or streak < 1 or streak > 7:
+        streak = 1
+        
+    last_claimed = current_user.get("last_claimed_date")
+    if last_claimed == yesterday_str:
+        current_streak_day = streak
+    else:
+        current_streak_day = 1
+        
+    REWARDS = {1: 50, 2: 60, 3: 75, 4: 90, 5: 110, 6: 130, 7: 150}
+    reward = REWARDS.get(current_streak_day, 50)
+    
     current_credits = current_user.get("credits") if current_user.get("credits") is not None else 840
-    new_credits = min(5000, current_credits + 50)
+    new_credits = min(5000, current_credits + reward)
+    
+    next_streak_day = (current_streak_day % 7) + 1
+    prefs["claim_streak"] = next_streak_day
     
     update_user(current_user["user_id"], {
         "credits": new_credits,
-        "last_claimed_date": today_str
+        "last_claimed_date": today_str,
+        "preferences": json.dumps(prefs)
     })
     
-    write_audit_log(current_user["user_id"], "Claimed Daily Bonus Credits (+50)", ip_addr, "Success")
-    return {"success": True, "credits": new_credits, "message": "Successfully claimed daily credits bonus."}
+    write_audit_log(current_user["user_id"], f"Claimed Daily Bonus Credits (+{reward})", ip_addr, "Success")
+    return {
+        "success": True, 
+        "credits": new_credits, 
+        "streak_days": next_streak_day,
+        "message": f"Successfully claimed Day {current_streak_day} reward (+{reward} credits)!"
+    }
 
 class RedeemPointsRequest(BaseModel):
     points: int
@@ -340,7 +406,20 @@ async def redeem_points(body: RedeemPointsRequest, request: Request, current_use
         credits_to_add = int(body.reward_value)
         current_credits = current_user.get("credits") if current_user.get("credits") is not None else 840
         new_credits = min(5000, current_credits + credits_to_add)
-        update_user(current_user["user_id"], {"credits": new_credits})
+        
+        try:
+            rewards = json.loads(current_user.get("unlocked_rewards") or "[]")
+        except Exception:
+            rewards = []
+            
+        reward_name = f"+{credits_to_add} AI Credits"
+        if reward_name not in rewards:
+            rewards.append(reward_name)
+            
+        update_user(current_user["user_id"], {
+            "credits": new_credits,
+            "unlocked_rewards": json.dumps(rewards)
+        })
         write_audit_log(current_user["user_id"], f"Exchanged points for +{credits_to_add} compute credits", ip_addr, "Success")
         return {"success": True, "credits": new_credits, "message": f"Successfully exchanged points for +{credits_to_add} credits!"}
     
@@ -400,7 +479,7 @@ async def generate_key(body: ApiKeyCreate, request: Request, current_user: dict 
     raw_key = f"av_live_{hex_str}"
     masked_key = f"av_live_{hex_str[:4]}...{hex_str[-4:]}"
     
-    new_key = create_user_api_key(current_user["user_id"], body.name, masked_key)
+    new_key = create_user_api_key(current_user["user_id"], body.name, raw_key)
     write_audit_log(current_user["user_id"], f"Generated Developer API Key: {body.name}", ip_addr, "Success")
     
     return {
@@ -426,3 +505,91 @@ async def get_invoices(current_user: dict = Depends(get_current_user)):
     seed_default_invoices_if_empty(current_user["user_id"])
     invoices = get_user_invoices(current_user["user_id"])
     return {"success": True, "invoices": invoices}
+
+@router.get("/analytics")
+async def get_analytics(current_user: dict = Depends(get_current_user)):
+    data = get_creator_analytics(current_user["user_id"])
+    return {"success": True, "analytics": data}
+
+class SaveCardRequest(BaseModel):
+    cardHolder: str
+    cardNo: str
+    cardExpiry: str
+    cardCvv: str
+
+@router.post("/save-card")
+async def save_card(body: SaveCardRequest, request: Request, current_user: dict = Depends(get_current_user)):
+    import json
+    ip_addr = request.client.host if request.client else "127.0.0.1"
+    pref_str = current_user.get("preferences") or "{}"
+    try:
+        prefs = json.loads(pref_str)
+    except Exception:
+        prefs = {}
+        
+    prefs["card_info"] = {
+        "cardHolder": body.cardHolder,
+        "cardNo": body.cardNo,
+        "cardExpiry": body.cardExpiry,
+        "cardCvv": body.cardCvv,
+        "isCardSaved": True
+    }
+    
+    update_user(current_user["user_id"], {"preferences": json.dumps(prefs)})
+    write_audit_log(current_user["user_id"], "Saved payment method", ip_addr, "Success")
+    return {"success": True, "message": "Card details saved successfully."}
+
+@router.post("/upgrade-plan")
+async def upgrade_plan(request: Request, current_user: dict = Depends(get_current_user)):
+    import json
+    ip_addr = request.client.host if request.client else "127.0.0.1"
+    
+    pref_str = current_user.get("preferences") or "{}"
+    try:
+        prefs = json.loads(pref_str)
+    except Exception:
+        prefs = {}
+        
+    if prefs.get("subscription_tier") == "pro":
+        raise HTTPException(status_code=400, detail="Account is already upgraded to Studio Pro.")
+        
+    prefs["subscription_tier"] = "pro"
+    
+    current_credits = current_user.get("credits") if current_user.get("credits") is not None else 840
+    new_credits = min(5000, current_credits + 1000)
+    
+    update_user(current_user["user_id"], {
+        "creator_role": "pro",
+        "credits": new_credits,
+        "preferences": json.dumps(prefs)
+    })
+    
+    create_user_invoice(current_user["user_id"], 19.00, "Paid")
+    
+    write_audit_log(current_user["user_id"], "Upgraded subscription to Studio Pro", ip_addr, "Success")
+    return {"success": True, "message": "Successfully upgraded to Studio Pro."}
+
+class PurchaseCreditsRequest(BaseModel):
+    credits: int
+    amount: float
+
+@router.post("/purchase-credits")
+async def purchase_credits(body: PurchaseCreditsRequest, request: Request, current_user: dict = Depends(get_current_user)):
+    import json
+    ip_addr = request.client.host if request.client else "127.0.0.1"
+    
+    current_credits = current_user.get("credits") if current_user.get("credits") is not None else 840
+    new_credits = min(5000, current_credits + body.credits)
+    
+    update_user(current_user["user_id"], {
+        "credits": new_credits
+    })
+    
+    create_user_invoice(current_user["user_id"], body.amount, "Paid")
+    
+    write_audit_log(current_user["user_id"], f"Purchased {body.credits} compute credits", ip_addr, "Success")
+    return {
+        "success": True, 
+        "credits": new_credits, 
+        "message": f"Successfully purchased {body.credits} credits."
+    }

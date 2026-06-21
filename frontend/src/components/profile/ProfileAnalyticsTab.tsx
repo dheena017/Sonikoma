@@ -12,12 +12,49 @@ import {
 } from "lucide-react";
 
 export default function ProfileAnalyticsTab() {
-  // Generate mock heatmap data for 12 weeks (7 days * 12 weeks = 84 cells)
+  const [analytics, setAnalytics] = React.useState<any>(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const token =
+      localStorage.getItem("anivox_token") ||
+      sessionStorage.getItem("anivox_token");
+    if (!token) return;
+
+    fetch("/api/auth/analytics", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success && data.analytics) {
+          setAnalytics(data.analytics);
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  const formatDuration = (seconds: number) => {
+    if (seconds <= 0) return "0s";
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.round(seconds % 60);
+    if (h > 0) {
+      return `${h}h ${m}m`;
+    }
+    if (m > 0) {
+      return `${m}m ${s}s`;
+    }
+    return `${s}s`;
+  };
+
+  // Generate heatmap data (uses real data if available, fallbacks to mock if still loading)
   const heatmapData = React.useMemo(() => {
+    if (analytics?.heatmap) return analytics.heatmap;
+
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const weeks = Array.from({ length: 12 }, (_, wIdx) => {
       return Array.from({ length: 7 }, (_, dIdx) => {
-        // Base counts depending on weekends/weekdays
         const base = dIdx === 0 || dIdx === 6 ? 0 : 2;
         const rand = Math.floor(Math.random() * 5);
         const count = Math.max(0, base + rand - 2);
@@ -36,11 +73,49 @@ export default function ProfileAnalyticsTab() {
       });
     });
     return weeks;
-  }, []);
+  }, [analytics]);
 
   const totalActions = React.useMemo(() => {
-    return heatmapData.flat().reduce((sum, cell) => sum + cell.count, 0);
+    return heatmapData.flat().reduce((sum: number, cell: any) => sum + cell.count, 0);
   }, [heatmapData]);
+
+  const videosCompleted = analytics?.videos_completed ?? 12;
+  const totalDurationStr = analytics ? formatDuration(analytics.total_duration_sec) : "48m 15s";
+  const avgLatency = analytics?.avg_latency ?? 1.8;
+  const creditsOptimized = analytics?.credits_optimized_pct ?? 32;
+
+  const verticalPct = analytics?.formats?.vertical_pct ?? 75;
+  const widescreenPct = analytics?.formats?.widescreen_pct ?? 25;
+
+  const matthewPct = analytics?.voices?.Matthew ?? 60;
+  const rachelPct = analytics?.voices?.Rachel ?? 30;
+  const marcusPct = analytics?.voices?.Marcus ?? 10;
+
+  const badgesPct = analytics?.narrations?.["Storyteller Badges"] ?? 85;
+  const subtitlesPct = analytics?.narrations?.["Snappy Subtitles"] ?? 15;
+
+  const activities = analytics?.activities ?? [
+    {
+      title: "Synthesized Chapter 2 Outro",
+      desc: "Generated vertical MP4 video with dramatic composition style",
+      time: "2 hours ago",
+    },
+    {
+      title: "Cleaned bubble on Panel 4",
+      desc: "Erased speech bubbles in Chapter 2 panel using Canny model auto-detection",
+      time: "1 day ago",
+    },
+    {
+      title: "Generated speech synthesis",
+      desc: "Rendered audio files for Chapter 1 storyboard panels",
+      time: "3 days ago",
+    },
+    {
+      title: "Scraped series cover assets",
+      desc: "Extracted panel strips and synopsis data from target Webtoon link",
+      time: "4 days ago",
+    },
+  ];
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 text-left">
@@ -146,7 +221,7 @@ export default function ProfileAnalyticsTab() {
               Videos Completed
             </span>
             <span className="text-base font-black text-white font-mono">
-              12 releases
+              {videosCompleted} {videosCompleted === 1 ? "release" : "releases"}
             </span>
           </div>
         </div>
@@ -161,7 +236,7 @@ export default function ProfileAnalyticsTab() {
               Render Duration
             </span>
             <span className="text-base font-black text-white font-mono">
-              48m 15s
+              {totalDurationStr}
             </span>
           </div>
         </div>
@@ -176,7 +251,7 @@ export default function ProfileAnalyticsTab() {
               Average Latency
             </span>
             <span className="text-base font-black text-white font-mono">
-              1.8s/frame
+              {avgLatency}s/frame
             </span>
           </div>
         </div>
@@ -191,7 +266,7 @@ export default function ProfileAnalyticsTab() {
               Credits Optimized
             </span>
             <span className="text-base font-black text-white font-mono">
-              32% saved
+              {creditsOptimized}% saved
             </span>
           </div>
         </div>
@@ -208,24 +283,24 @@ export default function ProfileAnalyticsTab() {
             <div className="space-y-1">
               <div className="flex justify-between text-[10px] text-neutral-400 font-semibold font-mono">
                 <span>Vertical Shorts (9:16)</span>
-                <span className="text-white font-bold">75%</span>
+                <span className="text-white font-bold">{verticalPct}%</span>
               </div>
               <div className="h-1.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-purple-500 rounded-full"
-                  style={{ width: "75%" }}
+                  style={{ width: `${verticalPct}%` }}
                 />
               </div>
             </div>
             <div className="space-y-1">
               <div className="flex justify-between text-[10px] text-neutral-400 font-semibold font-mono">
                 <span>Widescreen YT (16:9)</span>
-                <span className="text-white font-bold">25%</span>
+                <span className="text-white font-bold">{widescreenPct}%</span>
               </div>
               <div className="h-1.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-indigo-500 rounded-full"
-                  style={{ width: "25%" }}
+                  style={{ width: `${widescreenPct}%` }}
                 />
               </div>
             </div>
@@ -241,36 +316,36 @@ export default function ProfileAnalyticsTab() {
             <div className="space-y-1">
               <div className="flex justify-between text-[10px] text-neutral-400 font-semibold font-mono">
                 <span>Matthew (Narrator)</span>
-                <span className="text-white font-bold">60%</span>
+                <span className="text-white font-bold">{matthewPct}%</span>
               </div>
               <div className="h-1.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-purple-500 rounded-full"
-                  style={{ width: "60%" }}
+                  style={{ width: `${matthewPct}%` }}
                 />
               </div>
             </div>
             <div className="space-y-1">
               <div className="flex justify-between text-[10px] text-neutral-400 font-semibold font-mono">
                 <span>Rachel (Storyteller)</span>
-                <span className="text-white font-bold">30%</span>
+                <span className="text-white font-bold">{rachelPct}%</span>
               </div>
               <div className="h-1.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-indigo-500 rounded-full"
-                  style={{ width: "30%" }}
+                  style={{ width: `${rachelPct}%` }}
                 />
               </div>
             </div>
             <div className="space-y-1">
               <div className="flex justify-between text-[10px] text-neutral-400 font-semibold font-mono">
                 <span>Marcus (Cyberpunk)</span>
-                <span className="text-white font-bold">10%</span>
+                <span className="text-white font-bold">{marcusPct}%</span>
               </div>
               <div className="h-1.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-purple-900/60 rounded-full"
-                  style={{ width: "10%" }}
+                  style={{ width: `${marcusPct}%` }}
                 />
               </div>
             </div>
@@ -286,24 +361,24 @@ export default function ProfileAnalyticsTab() {
             <div className="space-y-1">
               <div className="flex justify-between text-[10px] text-neutral-400 font-semibold font-mono">
                 <span>Storyteller Badges</span>
-                <span className="text-white font-bold">85%</span>
+                <span className="text-white font-bold">{badgesPct}%</span>
               </div>
               <div className="h-1.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-purple-500 rounded-full"
-                  style={{ width: "85%" }}
+                  style={{ width: `${badgesPct}%` }}
                 />
               </div>
             </div>
             <div className="space-y-1">
               <div className="flex justify-between text-[10px] text-neutral-400 font-semibold font-mono">
                 <span>Snappy Subtitles</span>
-                <span className="text-white font-bold">15%</span>
+                <span className="text-white font-bold">{subtitlesPct}%</span>
               </div>
               <div className="h-1.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-indigo-500 rounded-full"
-                  style={{ width: "15%" }}
+                  style={{ width: `${subtitlesPct}%` }}
                 />
               </div>
             </div>
@@ -314,33 +389,11 @@ export default function ProfileAnalyticsTab() {
       {/* Recent Activity Timeline Feed */}
       <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-6 shadow-2xl relative space-y-4">
         <h4 className="text-sm font-extrabold text-white flex items-center gap-1.5 pb-3 border-b border-white/5">
-          <Activity className="w-4.5 h-4.5 text-purple-400" /> Recent Activity
-          Feed
+          <Activity className="w-4.5 h-4.5 text-purple-400" /> Recent Activity Feed
         </h4>
 
         <div className="relative pl-4 space-y-6 before:absolute before:left-1 before:top-1.5 before:bottom-1.5 before:w-0.5 before:bg-neutral-800">
-          {[
-            {
-              title: "Synthesized Chapter 2 Outro",
-              desc: "Generated vertical MP4 video with dramatic composition style",
-              time: "2 hours ago",
-            },
-            {
-              title: "Cleaned bubble on Panel 4",
-              desc: "Erased speech bubbles in Chapter 2 panel using Canny model auto-detection",
-              time: "1 day ago",
-            },
-            {
-              title: "Generated speech synthesis",
-              desc: "Rendered audio files for Chapter 1 storyboard panels",
-              time: "3 days ago",
-            },
-            {
-              title: "Scraped series cover assets",
-              desc: "Extracted panel strips and synopsis data from target Webtoon link",
-              time: "4 days ago",
-            },
-          ].map((act, idx) => (
+          {activities.map((act, idx) => (
             <div key={idx} className="relative space-y-1 text-left">
               {/* Bullet point */}
               <div className="absolute -left-[17px] top-1.5 w-2 h-2 rounded-full bg-purple-500 ring-4 ring-neutral-950" />

@@ -500,12 +500,24 @@ async def lifespan(app: FastAPI):
     else:
         logger.warning("GEMINI_API_KEY not set - AI panel analysis disabled")
 
-    # Perform concurrent AI model connection tests
+    # AI model connection tests disabled — run manually via:
+    #   python backend/python/utils/ai_test.py
+    # try:
+    #     from utils.ai_test import run_ai_connection_tests
+    #     await run_ai_connection_tests()
+    # except Exception as e:
+    #     logger.error(f"Failed to execute startup AI connection tests: {e}")
+
+    # Warm up the persistent image cache — loads all previously scraped panel images
+    # from disk back into memory so they survive server restarts without 404s.
     try:
-        from utils.ai_test import run_ai_connection_tests
-        await run_ai_connection_tests()
+        from utils.cache import stitched_cache, edit_history
+        n_stitched = stitched_cache.warm_up()
+        n_history = edit_history.warm_up()
+        if n_stitched > 0 or n_history > 0:
+            logger.info(f"[Cache] Warm-up complete — loaded {n_stitched} panel images, {n_history} edit history entries from disk")
     except Exception as e:
-        logger.error(f"Failed to execute startup AI connection tests: {e}")
+        logger.warning(f"[Cache] Warm-up failed (non-critical): {e}")
 
     logger.success("Server ready - waiting for requests")
 

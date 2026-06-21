@@ -43,6 +43,7 @@ interface ProfileAccountTabProps {
   setAchievementPoints: React.Dispatch<React.SetStateAction<number>>;
   unlockedRewards: string[];
   setUnlockedRewards: React.Dispatch<React.SetStateAction<string[]>>;
+  unlockedAchievements: string[];
   portfolios: { id: string; site: string; url: string }[];
   setPortfolios: React.Dispatch<
     React.SetStateAction<{ id: string; site: string; url: string }[]>
@@ -97,6 +98,7 @@ export default function ProfileAccountTab({
   setAchievementPoints,
   unlockedRewards,
   setUnlockedRewards,
+  unlockedAchievements,
   portfolios,
   setPortfolios,
   onRedeemReward,
@@ -105,6 +107,13 @@ export default function ProfileAccountTab({
   const [rewardsToast, setRewardsToast] = React.useState<string | null>(null);
   const [newPortfolioUrl, setNewPortfolioUrl] = React.useState("");
   const [newPortfolioSite, setNewPortfolioSite] = React.useState("Webtoons");
+
+  const dynamicAchievements = React.useMemo(() => {
+    return ACHIEVEMENTS.map((ach) => ({
+      ...ach,
+      unlocked: (unlockedAchievements || []).includes(ach.title),
+    }));
+  }, [unlockedAchievements]);
 
   // Profile completion score calculation
   const completionItems = React.useMemo(() => {
@@ -589,7 +598,7 @@ export default function ProfileAccountTab({
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {ACHIEVEMENTS.map((ach) => (
+          {dynamicAchievements.map((ach) => (
             <div
               key={ach.id}
               className={`p-4 rounded-2xl border flex flex-col justify-between transition-all ${

@@ -64,6 +64,19 @@ class ScrapeImagesRequest(BaseModel):
     cover_image: Optional[str] = None
     synopsis: Optional[str] = None
     project_id: Optional[str] = None
+    scrape_only: Optional[bool] = False
+
+class GenerateStoryboardOnlyRequest(BaseModel):
+    url: str
+    project_id: str
+    model: Optional[str] = "gemini-2.5-flash"
+    narrationStyle: Optional[str] = "long"
+    title: Optional[str] = None
+    episode: Optional[str] = None
+    genre: Optional[str] = None
+    author: Optional[str] = None
+    cover_image: Optional[str] = None
+    synopsis: Optional[str] = None
 
 class GenerateStoryboardRequest(BaseModel):
     url: str
@@ -132,215 +145,181 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
         final_images = proxied_urls
         cache_hit = False
 
-        # Check cache for an existing stitched strip for this exact URL
-        cache_key = f"stitched_full_{normalized_url}"
-        if not body.bypass_cache:
-            cached_url = stitched_cache.get(cache_key)
-            if cached_url and isinstance(cached_url, str):
-                logger.info(f"[Scraper] Cache HIT: Returning existing stitched strip for {normalized_url}")
-                final_images = [cached_url]
-                cache_hit = True
+        if not getattr(body, "scrape_only", False):
+            # Check cache for an existing stitched strip for this exact URL
+            cache_key = f"stitched_full_{normalized_url}"
+            if not body.bypass_cache:
+                cached_url = stitched_cache.get(cache_key)
+                if cached_url and isinstance(cached_url, str):
+                    logger.info(f"[Scraper] Cache HIT: Returning existing stitched strip for {normalized_url}")
+                    final_images = [cached_url]
+                    cache_hit = True
 
-        # Fetch image buffers in parallel if not a cache hit and we need layout processing (stitch or smart_slice)
-        resolved_buffers_data = []
-        if not cache_hit and len(proxied_urls) > 0:
-            logger.info(f"[Scraper] Fetching {len(proxied_urls)} image buffers in parallel for layout processing...")
-            t_fetch_start = time.time()
-            try:
-                async with httpx.AsyncClient(follow_redirects=True, timeout=60.0, limits=httpx.Limits(max_connections=50)) as client:
-                    sem = asyncio.Semaphore(15)
-                    
-                    async def fetch_with_sem(url):
-                        async with sem:
-                            return await img_utils.resolve_image_to_buffer(url, client=client)
-                            
-                    fetch_tasks = [fetch_with_sem(url) for url in proxied_urls]
-                    resolved_results = await asyncio.gather(*fetch_tasks, return_exceptions=True)
-
-                for idx, res in enumerate(resolved_results):
-                    if isinstance(res, Exception):
-                        logger.warning(f"[Scraper] Failed to resolve image {idx}: {res}")
-                        continue
-                    resolved_buffers_data.append({
-                        "url": proxied_urls[idx],
-                        "data": res["data"],
-                        "content_type": res["contentType"]
-                    })
-                logger.info(f"[Scraper] Parallel fetch completed in {round((time.time() - t_fetch_start)*1000, 2)}ms. Fetched {len(resolved_buffers_data)} of {len(proxied_urls)} images.")
-            except Exception as fetch_err:
-                logger.error(f"[Scraper] Failed to download images in parallel: {fetch_err}")
-
-        # Automatically stitch multiple images into a single full strip if not a cache hit
-        if not cache_hit and len(resolved_buffers_data) > 1 and not body.smart_slice:
-            logger.info(f"[Scraper] Consolidating {len(resolved_buffers_data)} panels into a single unified strip asset...")
-            t_stitch_start = time.time()
-            try:
-                stitched_bytes = await asyncio.to_thread(
-                    img_utils.stitch_images_together,
-                    image_buffers=[item["data"] for item in resolved_buffers_data],
-                    layout="vertical",
-                    spacing=0,
-                    spacing_color="white",
-                    scale_to_fit=True,
-                    align_mode="center",
-                    padding=0
-                )
-
-                # Cache the result
-                unique_id = f"stitched_{int(time.time() * 1000)}_full"
-                stitched_url = f"/api/merge-images/cached/{unique_id}"
-
-                stitched_cache.set(unique_id, {"data": stitched_bytes, "content_type": "image/png"})
-                stitched_cache.set(cache_key, stitched_url)
-                edit_history.set(stitched_url, proxied_urls[0])
-
-                final_images = [stitched_url]
-                elapsed = round((time.time() - t_stitch_start) * 1000, 2)
-                logger.info(f"[Scraper] Consolidated strip created successfully in {elapsed}ms: {stitched_url}")
-            except Exception as stitch_err:
-                logger.warning(f"[Scraper] Automatic stitching failed, falling back to separate images: {stitch_err}")
-                final_images = proxied_urls
-
-        # Automatically run smart slice (panel slicing/detection) on separate vertical strip images if smart_slice is active
-        elif not cache_hit and body.smart_slice and len(resolved_buffers_data) > 0:
-            logger.info(f"[Scraper] Slicing/cropping comic images into panels...")
-            t_slice_start = time.time()
-            final_images = []
-            
-            for idx, item in enumerate(resolved_buffers_data):
-                img_url = item["url"]
-                image_buffer = item["data"]
-                content_type = item["content_type"]
-                
+            # Fetch image buffers in parallel if not a cache hit and we need layout processing (stitch or smart_slice)
+            resolved_buffers_data = []
+            if not cache_hit and len(proxied_urls) > 0:
+                logger.info(f"[Scraper] Fetching {len(proxied_urls)} image buffers in parallel for layout processing...")
+                t_fetch_start = time.time()
                 try:
-                    img = Image.open(io.BytesIO(image_buffer))
-                    w, h = img.size
+                    async with httpx.AsyncClient(follow_redirects=True, timeout=60.0, limits=httpx.Limits(max_connections=50)) as client:
+                        sem = asyncio.Semaphore(15)
+                        
+                        async def fetch_with_sem(url):
+                            async with sem:
+                                return await img_utils.resolve_image_to_buffer(url, client=client)
+                                
+                        fetch_tasks = [fetch_with_sem(url) for url in proxied_urls]
+                        resolved_results = await asyncio.gather(*fetch_tasks, return_exceptions=True)
+
+                    for idx, res in enumerate(resolved_results):
+                        if isinstance(res, Exception):
+                            logger.warning(f"[Scraper] Failed to resolve image {idx}: {res}")
+                            continue
+                        resolved_buffers_data.append({
+                            "url": proxied_urls[idx],
+                            "data": res["data"],
+                            "content_type": res["contentType"]
+                        })
+                    logger.info(f"[Scraper] Parallel fetch completed in {round((time.time() - t_fetch_start)*1000, 2)}ms. Fetched {len(resolved_buffers_data)} of {len(proxied_urls)} images.")
+                except Exception as fetch_err:
+                    logger.error(f"[Scraper] Failed to download images in parallel: {fetch_err}")
+
+            # Automatically stitch multiple images into a single full strip if not a cache hit
+            if not cache_hit and len(resolved_buffers_data) > 1 and not body.smart_slice:
+                logger.info(f"[Scraper] Consolidating {len(resolved_buffers_data)} panels into a single unified strip asset...")
+                t_stitch_start = time.time()
+                try:
+                    stitched_bytes = await asyncio.to_thread(
+                        img_utils.stitch_images_together,
+                        image_buffers=[item["data"] for item in resolved_buffers_data],
+                        layout="vertical",
+                        spacing=0,
+                        spacing_color="white",
+                        scale_to_fit=True,
+                        align_mode="center",
+                        padding=0
+                    )
+
+                    # Cache the result
+                    unique_id = f"stitched_{int(time.time() * 1000)}_full"
+                    stitched_url = f"/api/merge-images/cached/{unique_id}"
+
+                    stitched_cache.set(unique_id, {"data": stitched_bytes, "content_type": "image/png"})
+                    stitched_cache.set(cache_key, stitched_url)
+                    edit_history.set(stitched_url, proxied_urls[0])
+
+                    final_images = [stitched_url]
+                    elapsed = round((time.time() - t_stitch_start) * 1000, 2)
+                    logger.info(f"[Scraper] Consolidated strip created successfully in {elapsed}ms: {stitched_url}")
+                except Exception as stitch_err:
+                    logger.warning(f"[Scraper] Automatic stitching failed, falling back to separate images: {stitch_err}")
+                    final_images = proxied_urls
+
+            # Automatically run smart slice (panel slicing/detection) on separate vertical strip images if smart_slice is active
+            elif not cache_hit and body.smart_slice and len(resolved_buffers_data) > 0:
+                logger.info(f"[Scraper] Slicing/cropping comic images into panels...")
+                t_slice_start = time.time()
+                final_images = []
+                
+                for idx, item in enumerate(resolved_buffers_data):
+                    img_url = item["url"]
+                    image_buffer = item["data"]
+                    content_type = item["content_type"]
                     
-                    # Only slice if it's a vertical strip (height/width > 1.2)
-                    if h / w > 1.2:
-                        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_in:
-                            tmp_in.write(image_buffer)
-                            temp_in_path = tmp_in.name
-                            
-                        try:
-                            # Run local CV panel detection with defaults
-                            coord_panels = await asyncio.to_thread(
-                                run_cv_detection,
-                                image_path=temp_in_path,
-                                sensitivity=30.0,
-                                bg_mode="auto",
-                                min_width_pct=0.15,
-                                min_height_px=60,
-                                merge_threshold=20,
-                                aspect_ratio_str="free",
-                                canny_low=20,
-                                canny_high=100,
-                                close_kernel_size=15,
-                                auto_split=True
-                            )
-                        finally:
-                            if os.path.exists(temp_in_path):
-                                os.remove(temp_in_path)
+                    try:
+                        img = Image.open(io.BytesIO(image_buffer))
+                        w, h = img.size
+                        
+                        # Only slice if it's a vertical strip (height/width > 1.2)
+                        if h / w > 1.2:
+                            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_in:
+                                tmp_in.write(image_buffer)
+                                temp_in_path = tmp_in.name
                                 
-                        if coord_panels and len(coord_panels) > 1:
-                            logger.info(f"[Scraper] Slicing strip {idx + 1} into {len(coord_panels)} panels")
-                            for p_idx, box in enumerate(coord_panels):
-                                p_top = max(0.0, min(100.0, float(box.get("cropTop", 0))))
-                                p_bottom = max(0.0, min(100.0, float(box.get("cropBottom", 0))))
-                                p_left = max(0.0, min(100.0, float(box.get("cropLeft", 0))))
-                                p_right = max(0.0, min(100.0, float(box.get("cropRight", 0))))
-
-                                top_px = int(round((p_top / 100.0) * h))
-                                bot_px = int(round((p_bottom / 100.0) * h))
-                                left_px = int(round((p_left / 100.0) * w))
-                                right_px = int(round((p_right / 100.0) * w))
-
-                                crop_w = w - left_px - right_px
-                                crop_h = h - top_px - bot_px
-                                
-                                if crop_w > 10 and crop_h > 10:
-                                    cropped_img = img.crop((left_px, top_px, left_px + crop_w, top_px + crop_h))
-                                    out = io.BytesIO()
-                                    save_format = img.format or "JPEG"
-                                    cropped_img.save(out, format=save_format)
-                                    cropped_buffer = out.getvalue()
+                            try:
+                                # Run local CV panel detection with defaults
+                                coord_panels = await asyncio.to_thread(
+                                    run_cv_detection,
+                                    image_path=temp_in_path,
+                                    sensitivity=30.0,
+                                    bg_mode="auto",
+                                    min_width_pct=0.15,
+                                    min_height_px=60,
+                                    merge_threshold=20,
+                                    aspect_ratio_str="free",
+                                    canny_low=20,
+                                    canny_high=100,
+                                    close_kernel_size=15,
+                                    auto_split=True
+                                )
+                            finally:
+                                if os.path.exists(temp_in_path):
+                                    os.remove(temp_in_path)
                                     
-                                    unique_id = f"merged_{int(time.time() * 1000)}_smartcrop_{idx}_{p_idx}_{random.randint(0, 1000)}"
-                                    cached_url = f"/api/merge-images/cached/{unique_id}"
+                            if coord_panels and len(coord_panels) > 1:
+                                logger.info(f"[Scraper] Slicing strip {idx + 1} into {len(coord_panels)} panels")
+                                for p_idx, box in enumerate(coord_panels):
+                                    p_top = max(0.0, min(100.0, float(box.get("cropTop", 0))))
+                                    p_bottom = max(0.0, min(100.0, float(box.get("cropBottom", 0))))
+                                    p_left = max(0.0, min(100.0, float(box.get("cropLeft", 0))))
+                                    p_right = max(0.0, min(100.0, float(box.get("cropRight", 0))))
+
+                                    top_px = int(round((p_top / 100.0) * h))
+                                    bot_px = int(round((p_bottom / 100.0) * h))
+                                    left_px = int(round((p_left / 100.0) * w))
+                                    right_px = int(round((p_right / 100.0) * w))
+
+                                    crop_w = w - left_px - right_px
+                                    crop_h = h - top_px - bot_px
                                     
-                                    stitched_cache.set(unique_id, {"data": cropped_buffer, "content_type": content_type})
-                                    edit_history.set(cached_url, img_url)
-                                    final_images.append(cached_url)
+                                    if crop_w > 10 and crop_h > 10:
+                                        cropped_img = img.crop((left_px, top_px, left_px + crop_w, top_px + crop_h))
+                                        out = io.BytesIO()
+                                        save_format = img.format or "JPEG"
+                                        cropped_img.save(out, format=save_format)
+                                        cropped_buffer = out.getvalue()
+                                        
+                                        unique_id = f"merged_{int(time.time() * 1000)}_smartcrop_{idx}_{p_idx}_{random.randint(0, 1000)}"
+                                        cached_url = f"/api/merge-images/cached/{unique_id}"
+                                        
+                                        stitched_cache.set(unique_id, {"data": cropped_buffer, "content_type": content_type})
+                                        edit_history.set(cached_url, img_url)
+                                        final_images.append(cached_url)
+                            else:
+                                final_images.append(img_url)
                         else:
                             final_images.append(img_url)
-                    else:
+                    except Exception as slice_err:
+                        logger.warning(f"[Scraper] Failed to slice image {idx}: {slice_err}")
                         final_images.append(img_url)
-                except Exception as slice_err:
-                    logger.warning(f"[Scraper] Failed to slice image {idx}: {slice_err}")
-                    final_images.append(img_url)
-                    
-            elapsed = round((time.time() - t_slice_start) * 1000, 2)
-            logger.info(f"[Scraper] Auto-sliced panels generated successfully in {elapsed}ms. Total sliced: {len(final_images)} panels from {len(resolved_buffers_data)} strips.")
+                        
+                elapsed = round((time.time() - t_slice_start) * 1000, 2)
+                logger.info(f"[Scraper] Auto-sliced panels generated successfully in {elapsed}ms. Total sliced: {len(final_images)} panels from {len(resolved_buffers_data)} strips.")
 
-        # Automatically generate default panels in SQLite if authenticated
+        # Automatically generate project details in SQLite if authenticated (0 panels, project entry only)
         project_id = body.project_id or generate_project_id()
-        db_panels = []
-        for i, img_url in enumerate(final_images):
-            db_panels.append({
-                "image_url": img_url,
-                "original_url": img_url,
-                "speech_text": "",
-                "sfx": "",
-                "duration": 4.5,
-                "motion_type": "zoom_in",
-                "visual_description": None,
-                "brightness": None,
-                "contrast": None,
-                "saturation": None,
-                "grayscale": False,
-                "filter_preset": None,
-                "bubble_method": None,
-                "bubble_sensitivity": None,
-                "bubble_dilation": None,
-                "inpaint_radius": None,
-                "detection_style": None
-            })
 
-        if user_id:
+        # Persist scrape session images in SQLite cache
+        if final_images and not project_id.startswith("temp_"):
             try:
-                db.insert_project({
-                    "project_id": project_id,
-                    "url": body.url,
-                    "title": parsed["title"],
-                    "genre": parsed["genre"],
-                    "episode": parsed["episode"],
-                    "author": parsed.get("author"),
-                    "cover_image": parsed.get("cover_image"),
-                    "synopsis": parsed.get("synopsis"),
-                    "status": "pending",
-                    "panels_count": len(db_panels),
-                    "video_url": None,
-                    "user_id": user_id
-                })
-                db.insert_panels(project_id, db_panels)
-                logger.info(f"[Database] Automatically created project {project_id} during scrape for user {user_id}")
-            except Exception as db_err:
-                logger.error(f"[Database] Failed to automatically create project on scrape: {db_err}", exc_info=True)
+                db.save_scrape_session(normalized_url, final_images)
+            except Exception as se_err:
+                logger.warning(f"[Scraper] Failed to automatically save scrape session: {se_err}")
+
+        # Do not automatically insert project row into DB during scrape anymore.
+        # Projects will be created in the database when the user clicks 'Save Changes' in the UI.
 
         return_panels = []
-        for i, p in enumerate(db_panels):
-            return_panels.append({
-                "id": i,
-                "project_id": project_id,
-                "panel_index": i,
-                "image_url": p["image_url"],
-                "original_url": p["original_url"],
-                "speech_text": p["speech_text"],
-                "sfx": p["sfx"],
-                "duration": p["duration"],
-                "motion_type": p["motion_type"],
-                "grayscale": p["grayscale"]
-            })
+
+        # Build a map of final_image_url → original_source_url for recovery
+        # This lets the frontend persist original_url on each panel in the DB
+        image_origins: dict = {}
+        for final_url in final_images:
+            origin = edit_history.get(final_url)
+            if origin:
+                image_origins[final_url] = origin
+            elif final_url in proxied_urls:
+                image_origins[final_url] = final_url
 
         return {
             "success": True,
@@ -354,6 +333,7 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
             "total_images": len(final_images),
             "images": final_images,
             "raw_images": proxied_urls,
+            "image_origins": image_origins,
             "panels": return_panels,
             "debug": {
                 "normalized_url": normalized_url,
@@ -432,7 +412,7 @@ async def generate_storyboard(request: Request, body: GenerateStoryboardRequest)
 
             logger.info(f"[Model] Resolved {len(resolved_panels)} panels with client-provided data.")
             
-            if user_id:
+            if user_id and not project_id.startswith("temp_"):
                 try:
                     db.insert_project({
                         "project_id": project_id,
@@ -491,7 +471,7 @@ async def generate_storyboard(request: Request, body: GenerateStoryboardRequest)
         if not response_panels:
             raise ValueError("Model failed to generate valid storyboard panels.")
 
-        if user_id:
+        if user_id and not project_id.startswith("temp_"):
             try:
                 db.insert_project({
                     "project_id": project_id,
@@ -547,6 +527,118 @@ async def generate_storyboard(request: Request, body: GenerateStoryboardRequest)
         }
     except Exception as e:
         logger.error(f"[API Generate Error] {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/generate-storyboard", summary="Generate storyboard and narrative scripts only (no video compilation)")
+async def generate_storyboard_only(request: Request, body: GenerateStoryboardOnlyRequest):
+    try:
+        parsed = parse_webtoon_url(body.url)
+        if body.title:
+            parsed["title"] = body.title
+        if body.episode:
+            parsed["episode"] = body.episode
+        if body.genre:
+            parsed["genre"] = body.genre
+        if body.author:
+            parsed["author"] = body.author
+        if body.cover_image:
+            parsed["cover_image"] = body.cover_image
+        if body.synopsis:
+            parsed["synopsis"] = body.synopsis
+        
+        project_id = body.project_id
+        logger.info(f"[Model] Generating storyboard only for url: \"{body.url}\", project: {project_id}")
+
+        # Fetch scraped images from cache/session
+        scraped_urls = await scrape_images_from_url(body.url, bypass_cache=False)
+        if not scraped_urls:
+            # Try to get from db
+            session = db.get_latest_scrape_session(body.url)
+            if session and session.get("image_urls"):
+                try:
+                    scraped_urls = session["image_urls"]
+                except:
+                    scraped_urls = []
+
+        if not scraped_urls:
+            raise HTTPException(status_code=400, detail="No scraped images found for this URL. Please scrape assets first.")
+
+        user_id = get_optional_user_id(request)
+
+        # Generate panels using AI
+        logger.info(f"[Model] Dispatching panels generation via AI model: {body.model}...")
+        response_panels = await generate_dynamic_panels(
+            parsed["title"], parsed["genre"], parsed["episode"], scraped_urls, body.model,
+            narration_style=body.narrationStyle or "long"
+        )
+        logger.info(f"[Model] Successfully generated {len(response_panels)} storyboard panels.")
+
+        if not response_panels:
+            raise ValueError("Model failed to generate valid storyboard panels.")
+
+        # Re-map so they contain required keys
+        final_panels = []
+        for idx, p in enumerate(response_panels):
+            final_panels.append({
+                "id": p.get("id") or (idx + 1),
+                "project_id": project_id,
+                "panel_index": idx,
+                "image_url": p.get("image_url") or "",
+                "original_url": p.get("original_image_url") or p.get("original_url") or p.get("image_url") or "",
+                "speech_text": p.get("speech_text") or "",
+                "sfx": p.get("sfx") or "",
+                "duration": p.get("duration") if p.get("duration") is not None else 4.5,
+                "motion_type": p.get("motion_type") or "zoom_in",
+                "grayscale": p.get("grayscale", False)
+            })
+
+        if user_id and not project_id.startswith("temp_"):
+            try:
+                db.insert_project({
+                    "project_id": project_id,
+                    "url": body.url,
+                    "title": parsed["title"],
+                    "genre": parsed["genre"],
+                    "episode": parsed["episode"],
+                    "author": parsed.get("author"),
+                    "cover_image": parsed.get("cover_image"),
+                    "synopsis": parsed.get("synopsis"),
+                    "status": "pending",
+                    "panels_count": len(final_panels),
+                    "video_url": None,
+                    "user_id": user_id
+                })
+                db.insert_panels(project_id, [{
+                    "image_url": p["image_url"],
+                    "original_url": p["original_url"],
+                    "speech_text": p["speech_text"],
+                    "sfx": p["sfx"],
+                    "duration": p["duration"],
+                    "motion_type": p["motion_type"],
+                    "visual_description": p.get("visual_description"),
+                    "brightness": p.get("brightness"),
+                    "contrast": p.get("contrast"),
+                    "saturation": p.get("saturation"),
+                    "grayscale": p["grayscale"],
+                    "filter_preset": p.get("filter_preset"),
+                    "bubble_method": p.get("bubble_method"),
+                    "bubble_sensitivity": p.get("bubble_sensitivity"),
+                    "bubble_dilation": p.get("bubble_dilation"),
+                    "inpaint_radius": p.get("inpaint_radius"),
+                    "detection_style": p.get("detection_style")
+                } for p in final_panels])
+                logger.info(f"[Database] Automatically saved AI-generated storyboard for project {project_id}")
+            except Exception as db_err:
+                logger.error(f"[Database] Failed to automatically save AI storyboard: {db_err}", exc_info=True)
+
+        return {
+            "success": True,
+            "project_id": project_id,
+            "panels": final_panels
+        }
+    except Exception as e:
+        logger.error(f"[API Generate Storyboard Error] {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 

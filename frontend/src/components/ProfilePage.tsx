@@ -172,6 +172,9 @@ export default function ProfilePage({
   );
   const [hasClaimedToday, setHasClaimedToday] = React.useState(false);
   const [claimNotification, setClaimNotification] = React.useState(false);
+  const [streakDays, setStreakDays] = React.useState(1);
+  const [subscriptionTier, setSubscriptionTier] = React.useState("free");
+  const [cardInfo, setCardInfo] = React.useState<any>(null);
 
   // API token creator state
   const [apiTokens, setApiTokens] = React.useState<
@@ -189,9 +192,21 @@ export default function ProfilePage({
     github: false,
     discord: false,
   });
-  const [achievementPoints, setAchievementPoints] = React.useState(300);
+  const [achievementPoints, setAchievementPoints] = React.useState(380);
   const [unlockedRewards, setUnlockedRewards] = React.useState<string[]>([]);
+  const [unlockedAchievements, setUnlockedAchievements] = React.useState<string[]>([]);
   const [portfolios, setPortfolios] = React.useState<any[]>([]);
+  const [cacheUsed, setCacheUsed] = React.useState<number>(134637568); // 128.4 MB fallback
+  const [cacheLimit, setCacheLimit] = React.useState<number>(5368709120); // 5 GB fallback
+
+  const formatBytes = (bytes: number) => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const dm = 1;
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+  };
 
   // Local state for project list
   const [localProjects, setLocalProjects] = React.useState<any[]>(projects);
@@ -242,6 +257,24 @@ export default function ProfilePage({
   );
   const isDirty = currentProfileStr !== lastSavedProfileRef.current;
 
+  const fetchProjects = React.useCallback(() => {
+    const token =
+      localStorage.getItem("anivox_token") ||
+      sessionStorage.getItem("anivox_token");
+    if (!token) return;
+
+    fetch("/api/projects", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.success) {
+          setLocalProjects(res.projects || []);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
   // Load profile assets dynamically on mount
   React.useEffect(() => {
     const token =
@@ -265,21 +298,22 @@ export default function ProfilePage({
           };
           setConnections(loadedConnections);
 
-          // Calculate achievement points based on unlocked rewards count
-          setAchievementPoints(
-            300 - (data.unlocked_rewards?.length || 0) * 100
-          );
+          setUnlockedAchievements(data.unlocked_achievements || []);
+          setAchievementPoints(data.achievement_points !== undefined ? data.achievement_points : 380);
 
           const loadedPortfolios = (data.portfolio_links || []).map(
-            (url: string, idx: number) => ({
-              id: idx.toString(),
-              site: url.includes("webtoons")
-                ? "Webtoons"
-                : url.includes("tapas")
-                ? "Tapas"
-                : "ArtStation",
-              url: url,
-            })
+            (url: string, idx: number) => {
+              const lower = url.toLowerCase();
+              let site = "Webtoons";
+              if (lower.includes("tapas")) site = "Tapas";
+              else if (lower.includes("artstation")) site = "ArtStation";
+              else if (lower.includes("behance")) site = "Behance";
+              return {
+                id: idx.toString(),
+                site: site,
+                url: url,
+              };
+            }
           );
           setPortfolios(loadedPortfolios);
 
@@ -298,6 +332,9 @@ export default function ProfilePage({
 
           setIs2faEnabled(!!data.mfa_enabled);
           setHasClaimedToday(!!data.has_claimed_today);
+          setStreakDays(data.streak_days || 1);
+          setSubscriptionTier(data.subscription_tier || "free");
+          setCardInfo(data.preferences?.card_info || null);
 
           // Update last saved ref with loaded data
           lastSavedProfileRef.current = getSerializedProfile(
@@ -309,16 +346,7 @@ export default function ProfilePage({
       })
       .catch(console.error);
 
-    fetch("/api/projects", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((r) => r.json())
-      .then((res) => {
-        if (res.success) {
-          setLocalProjects(res.projects || []);
-        }
-      })
-      .catch(console.error);
+    fetchProjects();
 
     fetch("/api/auth/sessions", {
       headers: { Authorization: `Bearer ${token}` },
@@ -371,6 +399,16 @@ export default function ProfilePage({
               status: inv.status,
             }))
           );
+        }
+      })
+      .catch(console.error);
+
+    fetch("/api/metrics")
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.storage) {
+          setCacheUsed(res.storage.usedBytes);
+          setCacheLimit(res.storage.limitBytes);
         }
       })
       .catch(console.error);
@@ -541,14 +579,129 @@ export default function ProfilePage({
       .then((res) => {
         if (res.success) {
           setCredits(res.credits);
+          setStreakDays(res.streak_days);
           setHasClaimedToday(true);
           setClaimNotification(true);
           setTimeout(() => setClaimNotification(false), 4000);
+          if (onRefreshUser) {
+            onRefreshUser(false);
+          }
         }
       })
       .catch((err) => {
         alert(err.message || "Could not claim daily credits");
       });
+  };
+
+  const handleUpgradePlan = async () => {
+    const token =
+      localStorage.getItem("anivox_token") ||
+      sessionStorage.getItem("anivox_token");
+    if (!token) return;
+    try {
+      const r = await fetch("/api/auth/upgrade-plan", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const res = await r.json();
+      if (!r.ok) {
+        throw new Error(res.detail || "Failed to upgrade plan");
+      }
+      if (res.success) {
+        setSubscriptionTier("pro");
+        const invRes = await fetch("/api/auth/invoices", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const invData = await invRes.json();
+        if (invData.success) {
+          setInvoices(
+            invData.invoices.map((inv: any) => ({
+              id: inv.invoice_id,
+              date: inv.created_at.split(" ")[0],
+              amount: inv.amount,
+              status: inv.status,
+            }))
+          );
+        }
+        if (onRefreshUser) {
+          await onRefreshUser(false);
+        }
+        alert("Successfully upgraded to Studio Pro!");
+      }
+    } catch (err: any) {
+      alert(err.message || "Failed to upgrade plan");
+    }
+  };
+
+  const handleSaveCard = async (card: { cardHolder: string; cardNo: string; cardExpiry: string; cardCvv: string }) => {
+    const token =
+      localStorage.getItem("anivox_token") ||
+      sessionStorage.getItem("anivox_token");
+    if (!token) return;
+    try {
+      const r = await fetch("/api/auth/save-card", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(card),
+      });
+      const res = await r.json();
+      if (!r.ok) {
+        throw new Error(res.detail || "Failed to save card");
+      }
+      if (res.success) {
+        setCardInfo(card);
+        alert("Payment method saved successfully!");
+      }
+    } catch (err: any) {
+      alert(err.message || "Failed to save card");
+    }
+  };
+
+  const handlePurchaseCredits = async (amountOfCredits: number, priceUSD: number) => {
+    const token =
+      localStorage.getItem("anivox_token") ||
+      sessionStorage.getItem("anivox_token");
+    if (!token) return;
+    try {
+      const r = await fetch("/api/auth/purchase-credits", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ credits: amountOfCredits, amount: priceUSD }),
+      });
+      const res = await r.json();
+      if (!r.ok) {
+        throw new Error(res.detail || "Failed to purchase package");
+      }
+      if (res.success) {
+        setCredits(res.credits);
+        const invRes = await fetch("/api/auth/invoices", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const invData = await invRes.json();
+        if (invData.success) {
+          setInvoices(
+            invData.invoices.map((inv: any) => ({
+              id: inv.invoice_id,
+              date: inv.created_at.split(" ")[0],
+              amount: inv.amount,
+              status: inv.status,
+            }))
+          );
+        }
+        if (onRefreshUser) {
+          await onRefreshUser(false);
+        }
+        alert(`Successfully purchased ${amountOfCredits} credits!`);
+      }
+    } catch (err: any) {
+      alert(err.message || "Failed to purchase package");
+    }
   };
 
   const handleGenerateToken = (e: React.FormEvent) => {
@@ -1047,13 +1200,13 @@ export default function ProfilePage({
                   <div className="flex items-center justify-between text-[10px] text-neutral-400 font-semibold">
                     <span>AI Engine Credits</span>
                     <span className="text-white font-bold">
-                      {credits} / 1000
+                      {credits} / {Math.max(1000, Math.min(5000, Math.ceil(credits / 1000) * 1000))}
                     </span>
                   </div>
                   <div className="h-1.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-purple-500 rounded-full"
-                      style={{ width: `${(credits / 1000) * 100}%` }}
+                      style={{ width: `${Math.min(100, (credits / Math.max(1000, Math.min(5000, Math.ceil(credits / 1000) * 1000))) * 100)}%` }}
                     />
                   </div>
                 </div>
@@ -1063,13 +1216,13 @@ export default function ProfilePage({
                   <div className="flex items-center justify-between text-[10px] text-neutral-400 font-semibold">
                     <span>Cache Storage</span>
                     <span className="text-white font-bold">
-                      128.4 MB / 5 GB
+                      {formatBytes(cacheUsed)} / {formatBytes(cacheLimit)}
                     </span>
                   </div>
                   <div className="h-1.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-indigo-500 rounded-full"
-                      style={{ width: "2.5%" }}
+                      style={{ width: `${Math.min(100, (cacheUsed / cacheLimit) * 100)}%` }}
                     />
                   </div>
                 </div>
@@ -1090,6 +1243,7 @@ export default function ProfilePage({
                 onBatchDelete={handleBatchDeleteProjects}
                 onDeleteChapter={handleDeleteChapter}
                 onDeleteSeries={handleDeleteSeries}
+                onRefreshProjects={fetchProjects}
               />
             )}
 
@@ -1107,6 +1261,7 @@ export default function ProfilePage({
                 setAchievementPoints={setAchievementPoints}
                 unlockedRewards={unlockedRewards}
                 setUnlockedRewards={setUnlockedRewards}
+                unlockedAchievements={unlockedAchievements}
                 portfolios={portfolios}
                 setPortfolios={setPortfolios}
                 onRedeemReward={onRedeemReward}
@@ -1137,6 +1292,12 @@ export default function ProfilePage({
                 handleClaimCredits={handleClaimCredits}
                 claimNotification={claimNotification}
                 invoices={invoices}
+                streakDays={streakDays}
+                subscriptionTier={subscriptionTier}
+                cardInfo={cardInfo}
+                onUpdateCard={handleSaveCard}
+                onUpgradePlan={handleUpgradePlan}
+                onPurchaseCredits={handlePurchaseCredits}
               />
             )}
 

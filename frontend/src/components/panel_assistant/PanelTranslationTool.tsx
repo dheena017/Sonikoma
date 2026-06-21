@@ -30,9 +30,14 @@ export default function PanelTranslationTool({
   const handleTranslate = async () => {
     setTranslating(true);
     try {
+      const token = localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token");
+      const headers: HeadersInit = { "Content-Type": "application/json" };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
       const res = await fetch("/api/skills/translate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           text: panel.speech_text,
           target_lang: lang,

@@ -64,7 +64,7 @@ export default function Sidebar({
   const isProjectDetails = currentPath === "/project-details";
 
   const params = new URLSearchParams(window.location.search);
-  const activeProjectId = params.get("id") || projectId;
+  const activeProjectId = params.get("id") || params.get("project_id") || projectId;
 
   const isAiSuiteActive =
     currentPath.startsWith("/ai-") || currentPath === "/panel-assistant";

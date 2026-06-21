@@ -1,4 +1,5 @@
 import React from "react";
+import { CheckCircle2 } from "lucide-react";
 import UrlInputPanel from "./scraper/UrlInputPanel.js";
 import LiveScraperDeck from "./scraper/LiveScraperDeck.js";
 import PipelineStatusCard from "./pipeline/PipelineStatusCard.js";
@@ -11,8 +12,11 @@ import ProjectConfirmModal from "./scraper/ProjectConfirmModal.js";
 
 interface AppWorkspaceProps {
   isDashboardOnly?: boolean;
+  projectId: string | null;
   panels: any[];
   setPanels: any;
+  isGeneratingStoryboard?: boolean;
+  handleGenerateStoryboardAI?: () => Promise<void>;
   consoleLogs: string[];
   setConsoleLogs: any;
   scrapedImages: string[];
@@ -124,6 +128,7 @@ interface AppWorkspaceProps {
 
 export function AppWorkspace({
   isDashboardOnly = true,
+  projectId,
   panels,
   setPanels,
   consoleLogs,
@@ -226,16 +231,21 @@ export function AppWorkspace({
   showScrapeConfirmModal,
   setShowScrapeConfirmModal,
   saveProject,
+  isGeneratingStoryboard = false,
+  handleGenerateStoryboardAI,
 }: AppWorkspaceProps) {
-  const handleConfirmProjectAndScrape = async (details: {
-    seriesTitle: string;
-    chapterNumber: string;
-    chapterTitle: string;
-    scrapedGenre: string;
-    seriesAuthor: string;
-    seriesCoverImage: string;
-    seriesSynopsis: string;
-  }) => {
+  const handleConfirmProjectAndScrape = async (
+    details: {
+      seriesTitle: string;
+      chapterNumber: string;
+      chapterTitle: string;
+      scrapedGenre: string;
+      seriesAuthor: string;
+      seriesCoverImage: string;
+      seriesSynopsis: string;
+    },
+    isTemporary?: boolean
+  ) => {
     setShowScrapeConfirmModal(false);
 
     // Update parent states
@@ -249,7 +259,10 @@ export function AppWorkspace({
 
     // Generate project_id
     const generatedProjectId =
-      "proj_" + Date.now() + "_" + Math.random().toString(36).substring(2, 10);
+      (isTemporary ? "temp_" : "proj_") +
+      Date.now() +
+      "_" +
+      Math.random().toString(36).substring(2, 10);
 
     try {
       const formattedEpisode = (() => {
@@ -261,48 +274,24 @@ export function AppWorkspace({
         return "";
       })();
 
-      addNotification("Initializing project entry...", "info");
+      const logMsg = isTemporary
+        ? "Initializing temporary preview session (no data will be saved)..."
+        : `Initializing workspace for "${details.seriesTitle}"...`;
+      addNotification(logMsg, "info");
 
-      const token =
-        localStorage.getItem("anivox_token") ||
-        sessionStorage.getItem("anivox_token");
-      const headers: HeadersInit = { "Content-Type": "application/json" };
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
+      if (!isTemporary) {
+        // Update projectId in query parameters so workspace loads it on reload
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.delete("project_id");
+        urlParams.delete("url"); // Delete the raw pasted manhwa URL parameter!
+        urlParams.set("id", generatedProjectId);
+        const newSearch = urlParams.toString();
+        window.history.pushState(
+          null,
+          "",
+          window.location.pathname + (newSearch ? "?" + newSearch : "")
+        );
       }
-
-      const res = await fetch("/api/projects", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          project_id: generatedProjectId,
-          url: targetUrl,
-          title: details.seriesTitle,
-          genre: details.scrapedGenre,
-          episode: formattedEpisode,
-          panels_count: 0,
-          video_url: null,
-          author: details.seriesAuthor,
-          cover_image: details.seriesCoverImage,
-          synopsis: details.seriesSynopsis,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || "Failed to create project entry");
-      }
-
-      addNotification(
-        `Project "${details.seriesTitle}" created successfully!`,
-        "success"
-      );
-
-      // Update projectId in query parameters so workspace loads it on reload
-      const urlParams = new URLSearchParams(window.location.search);
-      urlParams.set("project_id", generatedProjectId);
-      urlParams.set("id", generatedProjectId);
-      window.history.pushState(null, "", "?" + urlParams.toString());
 
       // Start the actual scrape
       await scrapeImages(targetUrl, generatedProjectId);
@@ -359,6 +348,207 @@ export function AppWorkspace({
           smartSlice={smartSlice}
           setSmartSlice={setSmartSlice}
         />
+
+        {/* PROJECT PRODUCTION CHECKLIST */}
+        {projectId && (
+          <div className="bg-neutral-900/40 rounded-3xl border border-neutral-800/80 p-6 backdrop-blur-md shadow-sm space-y-5">
+            <div className="flex items-center justify-between border-b border-white/5 pb-3">
+              <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest font-mono flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-purple-500 animate-pulse" />
+                Project Production Pipeline
+              </span>
+              <span className="text-[9px] text-neutral-500 font-bold font-mono">
+                Pipeline Checklist
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Step 1: Create Project & Metadata */}
+              <div className="flex items-start justify-between p-4 bg-neutral-950/40 border border-neutral-850 rounded-2xl gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5">
+                    <CheckCircle2 className="h-4.5 w-4.5 text-emerald-500" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <h4 className="text-xs font-bold text-neutral-200">
+                      Step 1: Create Project
+                    </h4>
+                    <p className="text-[10px] text-neutral-500 font-medium leading-normal">
+                      Initialize project entry and metadata in SQLite database.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (saveProject) {
+                      await saveProject();
+                    }
+                  }}
+                  className="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 text-white text-[10px] font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer shrink-0"
+                >
+                  Save Meta
+                </button>
+              </div>
+
+              {/* Step 2: Live Asset Extraction */}
+              <div className="flex items-start justify-between p-4 bg-neutral-950/40 border border-neutral-850 rounded-2xl gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5">
+                    {scrapedImages.length > 0 ? (
+                      <CheckCircle2 className="h-4.5 w-4.5 text-emerald-500" />
+                    ) : (
+                      <div className="h-4.5 w-4.5 rounded-full border-2 border-neutral-700 mt-0.5" />
+                    )}
+                  </div>
+                  <div className="space-y-0.5">
+                    <h4 className="text-xs font-bold text-neutral-200">
+                      Step 2: Live Asset Extraction
+                    </h4>
+                    <p className="text-[10px] text-neutral-500 font-medium leading-normal">
+                      Extract and download vertical comic/webtoon strip image assets.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await scrapeImages(targetUrl, projectId);
+                    }}
+                    disabled={isScraping}
+                    className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-750 text-neutral-200 text-[10px] font-bold rounded-xl transition-all border border-neutral-700/50 cursor-pointer disabled:opacity-50"
+                  >
+                    {isScraping ? "Scraping..." : "Scrape"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (projectId?.startsWith("temp_")) {
+                        addNotification("Temporary Session: Saving assets is disabled.", "warning");
+                        return;
+                      }
+                      const token =
+                        localStorage.getItem("anivox_token") ||
+                        sessionStorage.getItem("anivox_token");
+                      const headers: HeadersInit = { "Content-Type": "application/json" };
+                      if (token) {
+                        headers["Authorization"] = `Bearer ${token}`;
+                      }
+                      try {
+                        const scrapeRes = await fetch("/api/save-scraped-images", {
+                          method: "PUT",
+                          headers,
+                          body: JSON.stringify({
+                            url: targetUrl,
+                            images: scrapedImages,
+                          }),
+                        });
+                        if (scrapeRes.ok) {
+                          addNotification("Raw assets saved successfully!", "success");
+                        } else {
+                          throw new Error("Failed to save raw assets");
+                        }
+                      } catch (err: any) {
+                        addNotification(`Failed to save raw assets: ${err.message}`, "error");
+                      }
+                    }}
+                    disabled={scrapedImages.length === 0}
+                    className="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 text-white text-[10px] font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
+                  >
+                    Save Assets
+                  </button>
+                </div>
+              </div>
+
+              {/* Step 3: Storyboard & OCR Transcription */}
+              <div className="flex items-start justify-between p-4 bg-neutral-950/40 border border-neutral-850 rounded-2xl gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5">
+                    {panels.length > 0 ? (
+                      <CheckCircle2 className="h-4.5 w-4.5 text-emerald-500" />
+                    ) : (
+                      <div className="h-4.5 w-4.5 rounded-full border-2 border-neutral-700 mt-0.5" />
+                    )}
+                  </div>
+                  <div className="space-y-0.5">
+                    <h4 className="text-xs font-bold text-neutral-200">
+                      Step 3: Storyboard &amp; OCR
+                    </h4>
+                    <p className="text-[10px] text-neutral-500 font-medium leading-normal">
+                      Slice comic strips into panels and generate scripts, dialogue, &amp; camera moves.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={handleGenerateStoryboardAI}
+                    disabled={isGeneratingStoryboard || scrapedImages.length === 0}
+                    className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-750 text-neutral-200 text-[10px] font-bold rounded-xl transition-all border border-neutral-700/50 cursor-pointer disabled:opacity-50"
+                  >
+                    {isGeneratingStoryboard ? "Generating..." : "Generate AI"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (saveProject) {
+                        await saveProject(panels);
+                      }
+                    }}
+                    disabled={panels.length === 0}
+                    className="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 text-white text-[10px] font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
+                  >
+                    Save Storyboard
+                  </button>
+                </div>
+              </div>
+
+              {/* Step 4: Final Video Compilation */}
+              <div className="flex items-start justify-between p-4 bg-neutral-950/40 border border-neutral-850 rounded-2xl gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5">
+                    {videoUrl ? (
+                      <CheckCircle2 className="h-4.5 w-4.5 text-emerald-500" />
+                    ) : (
+                      <div className="h-4.5 w-4.5 rounded-full border-2 border-neutral-700 mt-0.5" />
+                    )}
+                  </div>
+                  <div className="space-y-0.5">
+                    <h4 className="text-xs font-bold text-neutral-200">
+                      Step 4: Final Video Render
+                    </h4>
+                    <p className="text-[10px] text-neutral-500 font-medium leading-normal">
+                      Compile panels, synthesized voice narration, and background music into MP4.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={handleGenerateVideo}
+                    disabled={isProcessing || panels.length === 0}
+                    className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-750 text-neutral-200 text-[10px] font-bold rounded-xl transition-all border border-neutral-700/50 cursor-pointer disabled:opacity-50"
+                  >
+                    {isProcessing ? "Compiling..." : "Compile Video"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (saveProject) {
+                        await saveProject();
+                      }
+                    }}
+                    disabled={!videoUrl}
+                    className="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 text-white text-[10px] font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
+                  >
+                    Save Video
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* SEPARATED IMAGE STRIPS GALLERY */}
         <LiveScraperDeck

@@ -14,9 +14,11 @@ import os
 import tempfile
 from urllib.parse import urlparse, parse_qs
 from typing import List, Optional, Literal, Dict, Any
-from fastapi import APIRouter, HTTPException, Body
+from fastapi import APIRouter, HTTPException, Body, Depends, Request
 from pydantic import BaseModel, Field
 from PIL import Image
+from routes.auth_routes import get_current_user
+from database.db import write_audit_log
 
 import utils.image_utils as img_utils
 from utils.cache import stitched_cache, edit_history
@@ -984,7 +986,13 @@ async def get_thumbnail_concept(body: ThumbnailRequest):
     return await run_md_skill("thumbnail_concept", body.model, title=body.title, genre=body.genre, plot_point=body.plot_point)
 
 @router.post("/skills/translate")
-async def translate_script(body: TranslationRequest):
+async def translate_script(
+    body: TranslationRequest,
+    request: Request,
+    current_user: dict = Depends(get_current_user)
+):
+    ip_addr = request.client.host if request.client else "127.0.0.1"
+    write_audit_log(current_user["user_id"], "Used AI Dialogue Translation Studio", ip_addr, "Success")
     return await run_md_skill("translation", body.model, text=body.text, target_lang=body.target_lang)
 
 @router.post("/skills/seo")

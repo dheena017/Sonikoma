@@ -124,38 +124,7 @@ export function useAppRouter({
     }
   }, []);
 
-  // Settings change micro-toasts (skip first render)
-  const isFirstRender = React.useRef(true);
-  React.useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    const timer = setTimeout(() => {
-      const detailMsg = [
-        `Voice Actor: ${voiceActor}`,
-        `Music Theme: ${musicTheme}`,
-        `Aspect Ratio: ${aspectRatio}`,
-        `Frame Rate: ${frameRate} FPS`,
-        `Theme Mode: ${activeTheme}`,
-      ].join("\n");
-      addNotification(
-        "System configurations auto-saved successfully!",
-        "success",
-        {
-          details: detailMsg,
-        }
-      );
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [
-    voiceActor,
-    musicTheme,
-    aspectRatio,
-    frameRate,
-    activeTheme,
-    addNotification,
-  ]);
+
 
   // Core router change listener with equality guards
   React.useEffect(() => {

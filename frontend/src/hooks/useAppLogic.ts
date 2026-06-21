@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
 import { useAppState } from "./useAppState.js";
 import { usePlaybackEngine } from "./usePlaybackEngine.js";
 import { usePipelineActions } from "./usePipelineActions.js";
@@ -11,6 +11,97 @@ export function useAppLogic() {
   const videoPlayerRef = useRef<HTMLVideoElement | null>(null);
   const sourceMismatchNotified = useRef(false);
   const lastScrapedUrlRef = useRef<string>("");
+
+  const [isGeneratingStoryboard, setIsGeneratingStoryboard] = useState<boolean>(false);
+
+  const handleGenerateStoryboardAI = useCallback(async () => {
+    const activeUrl = targetUrl;
+    const projId = state.projectId;
+    if (!activeUrl || !activeUrl.trim() || !projId) {
+      state.addNotification("Please ensure target URL is pasted and project is created.", "error");
+      return;
+    }
+    setIsGeneratingStoryboard(true);
+    state.addNotification("Starting storyboard AI generation...", "info");
+    state.setConsoleLogs((prev) => [
+      `[AI Storyboard] Triggering AI generation for project: ${projId}...`,
+      `[AI Storyboard] Running OCR Transcription & Panel Slicing...`,
+      ...prev,
+    ]);
+    try {
+      const formattedEpisode = (() => {
+        const num = state.chapterNumber.trim();
+        const name = state.chapterTitle.trim();
+        if (num && name) return `Chapter ${num} - ${name}`;
+        if (num) return `Chapter ${num}`;
+        if (name) return name;
+        return "";
+      })();
+
+      const res = await state.fetchWithInterceptor("/api/generate-storyboard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: extractWebtoonUrl(activeUrl),
+          project_id: projId,
+          model: selectedModel,
+          narrationStyle: state.narrationStyle,
+          title: state.seriesTitle ? state.seriesTitle.trim() : undefined,
+          episode: formattedEpisode || undefined,
+          genre: state.scrapedGenre ? state.scrapedGenre.trim() : undefined,
+          author: state.seriesAuthor ? state.seriesAuthor.trim() : undefined,
+          cover_image: state.seriesCoverImage ? state.seriesCoverImage.trim() : undefined,
+          synopsis: state.seriesSynopsis ? state.seriesSynopsis.trim() : undefined,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to generate storyboard (HTTP ${res.status})`);
+      }
+
+      const data = await res.json();
+      if (data.success && data.panels) {
+        const mappedPanels = data.panels.map((p: any, idx: number) => ({
+          ...p,
+          id: p.id || (idx + 1),
+          grayscale: p.grayscale === 1 || p.grayscale === true,
+        }));
+        state.setPanels(mappedPanels);
+        state.setConsoleLogs((prev) => [
+          `[AI Storyboard] [SUCCESS] Storyboard generated successfully with ${mappedPanels.length} panels!`,
+          ...prev,
+        ]);
+        state.addNotification(`Storyboard generated successfully with ${mappedPanels.length} panels!`, "success");
+      } else {
+        throw new Error(data.message || "Invalid response from AI Model Analysis");
+      }
+    } catch (err: any) {
+      console.error("[AI Storyboard] Generation failed:", err);
+      state.setConsoleLogs((prev) => [
+        `[AI Storyboard] [ERROR] Generation failed: ${err.message || String(err)}`,
+        ...prev,
+      ]);
+      state.addNotification(`Storyboard generation failed: ${err.message || String(err)}`, "error");
+    } finally {
+      setIsGeneratingStoryboard(false);
+    }
+  }, [
+    targetUrl,
+    state.projectId,
+    selectedModel,
+    state.narrationStyle,
+    state.seriesTitle,
+    state.chapterNumber,
+    state.chapterTitle,
+    state.scrapedGenre,
+    state.seriesAuthor,
+    state.seriesCoverImage,
+    state.seriesSynopsis,
+    state.fetchWithInterceptor,
+    state.setPanels,
+    state.setConsoleLogs,
+    state.addNotification,
+  ]);
 
   const {
     currentPanelIndex,
@@ -313,6 +404,7 @@ export function useAppLogic() {
               ? state.seriesSynopsis.trim()
               : undefined,
             project_id: overrideProjectId || undefined,
+            scrape_only: true,
           }),
         });
         const data = await res.json();
@@ -325,13 +417,26 @@ export function useAppLogic() {
               : img
           );
 
+          // Store image_origins so panels created from these images get original_url saved
+          // in the DB, enabling cache-miss recovery after server restarts
+          const origins: Record<string, string> = data.image_origins || {};
+          (window as any).__scrapeImageOrigins = origins;
+
           state.setScrapedImages(finalImages);
           if (data.project_id) {
             state.setProjectId(data.project_id);
-            const urlParams = new URLSearchParams(window.location.search);
-            urlParams.set("project_id", data.project_id);
-            urlParams.set("id", data.project_id);
-            window.history.pushState(null, "", "?" + urlParams.toString());
+            if (!data.project_id.startsWith("temp_")) {
+              const urlParams = new URLSearchParams(window.location.search);
+              urlParams.delete("project_id");
+              urlParams.delete("url"); // Delete the raw pasted manhwa URL parameter!
+              urlParams.set("id", data.project_id);
+              const newSearch = urlParams.toString();
+              window.history.pushState(
+                null,
+                "",
+                window.location.pathname + (newSearch ? "?" + newSearch : "")
+              );
+            }
           }
           if (data.panels && data.panels.length > 0) {
             const mappedPanels = data.panels.map((p: any) => ({
@@ -544,6 +649,8 @@ export function useAppLogic() {
     batchProgress,
     croppingImgUrl,
     scrapeImages,
+    isGeneratingStoryboard,
+    handleGenerateStoryboardAI,
     clearAllNotifications: state.clearAllNotifications,
     markAllNotificationsAsRead: state.markAllNotificationsAsRead,
     markNotificationAsRead: state.markNotificationAsRead,

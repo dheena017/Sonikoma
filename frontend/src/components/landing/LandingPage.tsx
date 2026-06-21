@@ -81,6 +81,26 @@ export default function LandingPage({
               Anivox
             </span>
           </div>
+          <div className="hidden md:flex items-center gap-8">
+            {[
+              { label: "Features", target: "features" },
+              { label: "Demo", target: "transformation-demo" },
+              { label: "Pricing", target: "pricing" },
+              { label: "FAQ", target: "faq" },
+            ].map((link) => (
+              <button
+                key={link.target}
+                onClick={() => {
+                  const element = document.getElementById(link.target);
+                  element?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                className="text-sm font-semibold text-neutral-400 hover:text-white transition-all cursor-pointer relative py-2 group bg-transparent border-0"
+              >
+                {link.label}
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 transition-all duration-300 group-hover:w-full" />
+              </button>
+            ))}
+          </div>
           <div className="flex items-center gap-4">
             <button
               onClick={onLogin}
@@ -182,7 +202,7 @@ export default function LandingPage({
       </section>
 
       {/* FEATURES GRID */}
-      <section className="py-32 px-6 bg-white/[0.02]">
+      <section id="features" className="py-32 px-6 bg-white/[0.02] scroll-mt-24">
         <div className="max-w-7xl mx-auto space-y-20">
           <div className="text-center space-y-4">
             <h2 className="text-4xl font-bold tracking-tight">
@@ -238,7 +258,7 @@ export default function LandingPage({
       {/* INTERACTIVE DEMO (TRANSFORMATION LIVE) */}
       <section
         id="transformation-demo"
-        className="py-32 px-6 relative overflow-hidden"
+        className="py-32 px-6 relative overflow-hidden scroll-mt-24"
       >
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-purple-600/5 blur-[120px] rounded-full pointer-events-none" />
         <div className="max-w-7xl mx-auto space-y-12">
@@ -409,7 +429,7 @@ export default function LandingPage({
       </section>
 
       {/* PRICING PLANS */}
-      <section className="py-32 px-6 bg-white/[0.01] border-y border-white/5">
+      <section id="pricing" className="py-32 px-6 bg-white/[0.01] border-y border-white/5 scroll-mt-24">
         <div className="max-w-7xl mx-auto space-y-16">
           <div className="text-center space-y-4">
             <h2 className="text-4xl font-bold tracking-tight">
@@ -566,7 +586,7 @@ export default function LandingPage({
       </section>
 
       {/* FAQ SECTION */}
-      <section className="py-32 px-6 bg-white/[0.01] border-t border-white/5">
+      <section id="faq" className="py-32 px-6 bg-white/[0.01] border-t border-white/5 scroll-mt-24">
         <div className="max-w-4xl mx-auto space-y-16">
           <div className="text-center space-y-4">
             <h2 className="text-4xl font-bold tracking-tight">

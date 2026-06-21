@@ -257,13 +257,44 @@ async def merge_images(body: StitchImagesRequest):
 @router.get("/stitch-images/cached/{cache_id}")
 async def get_cached_stitch(cache_id: str = Path(...)):
     cached = stitched_cache.get(cache_id)
-    if not cached:
-        raise HTTPException(status_code=404, detail="Stitched resource expired or not found.")
-    return Response(
-        content=cached["data"],
-        media_type=cached["content_type"],
-        headers={"Cache-Control": "public, max-age=86400"} # Cache 1 day
-    )
+    if cached:
+        return Response(
+            content=cached["data"],
+            media_type=cached["content_type"],
+            headers={"Cache-Control": "public, max-age=86400"}
+        )
+
+    cached_url_key = f"/api/merge-images/cached/{cache_id}"
+
+    # Fallback 1: edit_history in-memory/disk cache (maps cached_url → original_url)
+    original_url = edit_history.get(cached_url_key)
+
+    # Fallback 2: SQLite panels table — look up the original_url stored alongside image_url
+    if not original_url:
+        try:
+            import database.db as db
+            original_url = db.get_panel_original_url(cached_url_key)
+        except Exception:
+            pass
+
+    if original_url and isinstance(original_url, str):
+        try:
+            logger.info(f"[Cache] Miss for {cache_id} — re-fetching from original: {original_url[:80]}")
+            resolved = await img_utils.resolve_image_to_buffer(original_url)
+            img_bytes = resolved["data"]
+            content_type = resolved.get("contentType", "image/jpeg")
+            # Re-populate both caches so subsequent requests are instant
+            stitched_cache.set(cache_id, {"data": img_bytes, "content_type": content_type})
+            edit_history.set(cached_url_key, original_url)
+            return Response(
+                content=img_bytes,
+                media_type=content_type,
+                headers={"Cache-Control": "public, max-age=86400"}
+            )
+        except Exception as refetch_err:
+            logger.warning(f"[Cache] Re-fetch failed for {cache_id}: {refetch_err}")
+
+    raise HTTPException(status_code=404, detail="Stitched resource expired or not found.")
 
 
 # ─── Image Splitting Route ─────────────────────────────────────────────────────

@@ -166,6 +166,7 @@ export default function App() {
     panels,
     setPanels,
     projectId,
+    setProjectId,
     consoleLogs,
     setConsoleLogs,
     scrapedImages,
@@ -311,6 +312,8 @@ export default function App() {
     totalCalculatedDuration,
     scrapeImages,
     handleGenerateVideo,
+    isGeneratingStoryboard,
+    handleGenerateStoryboardAI,
     handleSaveEditedImage,
     handleSaveMultipleCuts,
     handleStitchWithNext,
@@ -352,9 +355,27 @@ export default function App() {
     setTargetUrl,
   } = appLogic;
 
+  // --- Effect: Fade out and remove static HTML splash screen once React app is ready ---
+  React.useEffect(() => {
+    if (!isInitializing && !authLoading) {
+      const splash = document.getElementById("splash-screen-root");
+      if (splash) {
+        splash.style.transition = "opacity 0.6s ease, transform 0.6s ease";
+        splash.style.opacity = "0";
+        splash.style.transform = "scale(1.05)";
+        splash.style.pointerEvents = "none";
+        const timer = setTimeout(() => {
+          splash.remove();
+        }, 600);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [isInitializing, authLoading]);
+
   // --- Auto Save Hook ---
   const { saveStatus, saveProject, isDirty } = useAutoSave({
     projectId,
+    setProjectId,
     seriesTitle,
     chapterNumber,
     chapterTitle,
@@ -435,7 +456,7 @@ export default function App() {
   });
 
   const urlParams = new URLSearchParams(window.location.search);
-  const detailsProjectId = urlParams.get("id");
+  const detailsProjectId = urlParams.get("id") || urlParams.get("project_id");
 
   // --------------------------------------------------------------------------
   // SUB-SECTION 2.2: ROUTING / NAVIGATION PATH CHECKS
@@ -487,7 +508,7 @@ export default function App() {
 
   // --- Guard: Session Initialization loading state ---
   if (isInitializing || authLoading) {
-    return <LoadingPage status="Authenticating Session..." />;
+    return null;
   }
 
   // --- Guard: Public Landing Page ---
@@ -693,6 +714,9 @@ export default function App() {
           >
             <AppWorkspace
               isDashboardOnly={isDashboardOnly}
+              projectId={projectId}
+              isGeneratingStoryboard={isGeneratingStoryboard}
+              handleGenerateStoryboardAI={handleGenerateStoryboardAI}
               panels={panels}
               setPanels={setPanels}
               saveProject={saveProject}

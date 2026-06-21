@@ -77,7 +77,14 @@ export function useGlobalShortcuts({
       try {
         const stored = localStorage.getItem("ai_comic_shortcuts");
         if (stored) {
-          return { ...DEFAULT_SHORTCUTS, ...JSON.parse(stored) };
+          const parsed = JSON.parse(stored);
+          // Sanitize: only keep entries where the value is a non-empty string
+          const sanitized = Object.fromEntries(
+            Object.entries(parsed).filter(
+              ([, v]) => typeof v === "string" && (v as string).trim() !== ""
+            )
+          ) as Record<string, string>;
+          return { ...DEFAULT_SHORTCUTS, ...sanitized };
         }
       } catch (e) {}
       return DEFAULT_SHORTCUTS;
@@ -117,9 +124,9 @@ export function useGlobalShortcuts({
 
       const combination = parts.join("+").toLowerCase();
 
-      // Find matched keybind action
+      // Find matched keybind action — guard against undefined/null shortcut values
       const matchedAction = Object.entries(shortcuts).find(
-        ([_, val]) => val.toLowerCase() === combination
+        ([_, val]) => typeof val === "string" && val.toLowerCase() === combination
       )?.[0];
 
       if (!matchedAction) return;

@@ -14,6 +14,12 @@ interface ProfileBillingTabProps {
   handleClaimCredits: () => void;
   claimNotification: boolean;
   invoices: { id: string; date: string; amount: number; status: string }[];
+  streakDays: number;
+  subscriptionTier: string;
+  cardInfo: any;
+  onUpdateCard: (card: { cardHolder: string; cardNo: string; cardExpiry: string; cardCvv: string }) => Promise<void>;
+  onUpgradePlan: () => Promise<void>;
+  onPurchaseCredits: (credits: number, priceUSD: number) => Promise<void>;
 }
 
 export default function ProfileBillingTab({
@@ -22,19 +28,17 @@ export default function ProfileBillingTab({
   handleClaimCredits,
   claimNotification,
   invoices,
+  streakDays,
+  subscriptionTier,
+  cardInfo,
+  onUpdateCard,
+  onUpgradePlan,
+  onPurchaseCredits,
 }: ProfileBillingTabProps) {
   const [currency, setCurrency] = React.useState<"USD" | "KRW" | "JPY">("USD");
 
-  // Local state for daily streak claiming tracker
-  const [streakDays, setStreakDays] = React.useState<number>(() => {
-    return parseInt(localStorage.getItem("app-claim-streak") || "1");
-  });
-
   const onClaimClick = () => {
     handleClaimCredits();
-    const nextStreak = streakDays >= 7 ? 1 : streakDays + 1;
-    localStorage.setItem("app-claim-streak", String(nextStreak));
-    setStreakDays(nextStreak);
   };
 
   const [couponCode, setCouponCode] = React.useState("");
@@ -50,6 +54,16 @@ export default function ProfileBillingTab({
   const [cardExpiry, setCardExpiry] = React.useState("");
   const [cardCvv, setCardCvv] = React.useState("");
   const [isCardSaved, setIsCardSaved] = React.useState(false);
+
+  React.useEffect(() => {
+    if (cardInfo) {
+      setCardNo(cardInfo.cardNo || "");
+      setCardHolder(cardInfo.cardHolder || "");
+      setCardExpiry(cardInfo.cardExpiry || "");
+      setCardCvv(cardInfo.cardCvv || "");
+      setIsCardSaved(true);
+    }
+  }, [cardInfo]);
 
   // Currency converter formatting helper
   const formatPrice = (baseUSD: number) => {
@@ -101,10 +115,12 @@ export default function ProfileBillingTab({
               Subscription Plan
             </span>
             <h3 className="text-2xl font-black text-white">
-              Creator Studio Free Tier
+              {subscriptionTier === "pro" ? "Creator Studio Pro Tier" : "Creator Studio Free Tier"}
             </h3>
             <p className="text-xs text-neutral-500 font-semibold">
-              Includes 1000 rendering credits per month with core scraping tools
+              {subscriptionTier === "pro"
+                ? "Includes unlimited vertical compilations, 1080p/4K HD outputs, and advanced OCR tools"
+                : "Includes 1000 rendering credits per month with core scraping tools"}
             </p>
           </div>
 
@@ -126,13 +142,19 @@ export default function ProfileBillingTab({
               ))}
             </div>
 
-            <button
-              onClick={() => alert("Premium upgrade payment modal triggered!")}
-              className="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-md shadow-purple-900/30 text-xs flex items-center gap-1.5 cursor-pointer active:scale-95 duration-300"
-            >
-              <Plus className="w-4 h-4" />
-              Upgrade to Studio Pro
-            </button>
+            {subscriptionTier === "pro" ? (
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2.5 rounded-xl font-mono">
+                ✓ Current Plan
+              </span>
+            ) : (
+              <button
+                onClick={onUpgradePlan}
+                className="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-md shadow-purple-900/30 text-xs flex items-center gap-1.5 cursor-pointer active:scale-95 duration-300"
+              >
+                <Plus className="w-4 h-4" />
+                Upgrade to Studio Pro
+              </button>
+            )}
           </div>
         </div>
 
@@ -263,9 +285,15 @@ export default function ProfileBillingTab({
             <span className="text-[10px] font-bold tracking-wider uppercase text-neutral-500">
               Free Tier
             </span>
-            <span className="text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 rounded-full font-bold">
-              Active
-            </span>
+            {subscriptionTier !== "pro" ? (
+              <span className="text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 rounded-full font-bold">
+                Active
+              </span>
+            ) : (
+              <span className="text-[10px] text-neutral-550 font-bold">
+                Legacy
+              </span>
+            )}
           </div>
           <div className="text-2xl font-black text-white">{formatPrice(0)}</div>
           <ul className="text-[11px] text-neutral-400 space-y-2 list-disc pl-4 leading-relaxed font-semibold">
@@ -283,9 +311,15 @@ export default function ProfileBillingTab({
             <span className="text-[10px] font-bold tracking-wider uppercase text-purple-400">
               Studio Pro
             </span>
-            <span className="text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 rounded-full font-bold">
-              Recommended
-            </span>
+            {subscriptionTier === "pro" ? (
+              <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 rounded-full font-bold">
+                Active
+              </span>
+            ) : (
+              <span className="text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 rounded-full font-bold">
+                Recommended
+              </span>
+            )}
           </div>
           <div className="text-2xl font-black text-white">
             {formatPrice(19)}
@@ -379,11 +413,11 @@ export default function ProfileBillingTab({
         </div>
 
         <button
-          onClick={() =>
-            alert(
-              `Simulated purchase of ${customCredits} credits for ${getCustomPrice()} triggered!`
-            )
-          }
+          onClick={() => {
+            const baseUSD = customCredits * 0.02;
+            const discountedPriceUSD = baseUSD * (1 - discount / 100);
+            onPurchaseCredits(customCredits, discountedPriceUSD);
+          }}
           className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs transition-all cursor-pointer active:scale-95 shadow-md shadow-purple-900/10"
         >
           Purchase Package ({getCustomPrice()})
@@ -483,12 +517,11 @@ export default function ProfileBillingTab({
           <button
             type="button"
             onClick={() => {
-              if (!cardNo || !cardHolder) {
-                alert("Please fill card details first!");
+              if (!cardNo || !cardHolder || !cardExpiry || !cardCvv) {
+                alert("Please fill in all card details!");
                 return;
               }
-              setIsCardSaved(true);
-              alert("Payment method saved successfully!");
+              onUpdateCard({ cardHolder, cardNo, cardExpiry, cardCvv });
             }}
             className="w-full bg-purple-600 hover:bg-purple-500 py-2.5 rounded-xl text-xs font-bold transition-all text-white cursor-pointer"
           >

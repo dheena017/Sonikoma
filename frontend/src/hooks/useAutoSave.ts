@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { GeneratedPanel } from "../types";
 
 export type SaveStatus = "idle" | "saving" | "saved" | "error";
 
 interface AutoSaveState {
   projectId: string | null;
+  setProjectId?: (id: string | null) => void;
   seriesTitle: string;
   chapterNumber: string;
   chapterTitle: string;
@@ -33,8 +34,8 @@ export function useAutoSave(state: AutoSaveState) {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const lastSavedStateRef = useRef<string>("");
 
-  // Helper to serialize all editable aspects of the project
-  const getSerializedState = () => {
+  // Memoize the serialized representation of the editable workspace to prevent heavy JSON.stringify on every single render.
+  const serializedState = useMemo(() => {
     return JSON.stringify({
       title: state.seriesTitle.trim(),
       genre: state.scrapedGenre.trim(),
@@ -64,11 +65,24 @@ export function useAutoSave(state: AutoSaveState) {
         detection_style: p.detection_style || null,
       })),
     });
-  };
+  }, [
+    state.seriesTitle,
+    state.scrapedGenre,
+    state.chapterNumber,
+    state.chapterTitle,
+    state.seriesAuthor,
+    state.seriesCoverImage,
+    state.seriesSynopsis,
+    state.scrapedImages,
+    state.panels,
+  ]);
+
+  // Helper to serialize all editable aspects of the project
+  const getSerializedState = () => serializedState;
 
   // Compute dirty state on every render based on serializations
-  const isDirty = state.projectId
-    ? getSerializedState() !== lastSavedStateRef.current
+  const isDirty = state.projectId && !state.projectId.startsWith("temp_")
+    ? serializedState !== lastSavedStateRef.current
     : false;
 
   const prevProjectIdRef = useRef<string | null>(null);
@@ -112,10 +126,21 @@ export function useAutoSave(state: AutoSaveState) {
   const saveProject = async (customPanels?: GeneratedPanel[]) => {
     if (!state.projectId) return false;
 
+    let targetProjectId = state.projectId;
+    let isConvertingTemp = false;
+    if (state.projectId.startsWith("temp_")) {
+      targetProjectId =
+        "proj_" +
+        Date.now() +
+        "_" +
+        Math.random().toString(36).substring(2, 10);
+      isConvertingTemp = true;
+    }
+
     setSaveStatus("saving");
     try {
       console.log(
-        `[Save Hook] Saving modifications for project: ${state.projectId}...`
+        `[Save Hook] Saving modifications for project: ${targetProjectId}...`
       );
       const targetPanels = customPanels || state.panels;
 
@@ -170,10 +195,11 @@ export function useAutoSave(state: AutoSaveState) {
         headers["Authorization"] = `Bearer ${token}`;
       }
 
-      const res = await fetch(`/api/projects/${state.projectId}`, {
+      const res = await fetch(`/api/projects/${targetProjectId}`, {
         method: "PUT",
         headers,
         body: JSON.stringify({
+          url: state.targetUrl || "",
           title: state.seriesTitle.trim() || "Untitled Project",
           genre: state.scrapedGenre.trim() || "general",
           episode: formattedEpisode || "Chapter 1",
@@ -208,6 +234,15 @@ export function useAutoSave(state: AutoSaveState) {
 
       const data = await res.json();
       if (data.success) {
+        if (isConvertingTemp) {
+          state.setProjectId?.(targetProjectId);
+          const urlParams = new URLSearchParams(window.location.search);
+          urlParams.delete("project_id");
+          urlParams.delete("url");
+          urlParams.set("id", targetProjectId);
+          window.history.pushState(null, "", "?" + urlParams.toString());
+        }
+
         // Save raw scraped images cache list in database
         if (state.targetUrl) {
           try {
@@ -239,7 +274,7 @@ export function useAutoSave(state: AutoSaveState) {
         lastSavedStateRef.current = currentStateStr;
         setSaveStatus("saved");
         const detailMsg = [
-          `Project ID: ${state.projectId}`,
+          `Project ID: ${targetProjectId}`,
           `Series Title: ${state.seriesTitle || "Untitled"}`,
           `Chapter: ${
             state.chapterNumber ? `Chapter ${state.chapterNumber}` : "N/A"

@@ -126,9 +126,16 @@ export function useAutoAnalysis({
         panels.length > 0 ? Math.max(...panels.map((p) => p.id)) + 1 : 1;
 
       const newPanelsToAdd = imgUrls.map((imgUrl, loopIdx) => {
+        // Resolve original_url from the scrape origins map so the DB can recover
+        // this image if the in-memory cache is lost after a server restart
+        const origins: Record<string, string> =
+          (window as any).__scrapeImageOrigins || {};
+        const originalUrl = origins[imgUrl] || null;
+
         return {
           id: baseId + loopIdx,
           image_url: imgUrl,
+          original_url: originalUrl,
           speech_text: "",
           sfx: "",
           duration: 4.5,

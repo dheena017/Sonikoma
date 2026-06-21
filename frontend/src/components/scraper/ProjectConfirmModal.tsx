@@ -16,15 +16,18 @@ import {
 interface ProjectConfirmModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (details: {
-    seriesTitle: string;
-    chapterNumber: string;
-    chapterTitle: string;
-    scrapedGenre: string;
-    seriesAuthor: string;
-    seriesCoverImage: string;
-    seriesSynopsis: string;
-  }) => void;
+  onConfirm: (
+    details: {
+      seriesTitle: string;
+      chapterNumber: string;
+      chapterTitle: string;
+      scrapedGenre: string;
+      seriesAuthor: string;
+      seriesCoverImage: string;
+      seriesSynopsis: string;
+    },
+    isTemporary: boolean
+  ) => void;
   initialDetails: {
     seriesTitle: string;
     chapterNumber: string;
@@ -65,16 +68,19 @@ export default function ProjectConfirmModal({
 
   if (!isOpen) return null;
 
-  const handleConfirm = () => {
-    onConfirm({
-      seriesTitle: seriesTitle.trim(),
-      chapterNumber: chapterNumber.trim(),
-      chapterTitle: chapterTitle.trim(),
-      scrapedGenre: scrapedGenre.trim(),
-      seriesAuthor: seriesAuthor.trim(),
-      seriesCoverImage: seriesCoverImage.trim(),
-      seriesSynopsis: seriesSynopsis.trim(),
-    });
+  const handleConfirm = (isTemporary: boolean = false) => {
+    onConfirm(
+      {
+        seriesTitle: seriesTitle.trim(),
+        chapterNumber: chapterNumber.trim(),
+        chapterTitle: chapterTitle.trim(),
+        scrapedGenre: scrapedGenre.trim(),
+        seriesAuthor: seriesAuthor.trim(),
+        seriesCoverImage: seriesCoverImage.trim(),
+        seriesSynopsis: seriesSynopsis.trim(),
+      },
+      isTemporary
+    );
   };
 
   return createPortal(
@@ -243,7 +249,15 @@ export default function ProjectConfirmModal({
             Cancel
           </button>
           <button
-            onClick={handleConfirm}
+            onClick={() => handleConfirm(true)}
+            disabled={!seriesTitle.trim() || !chapterNumber.trim()}
+            className="px-5 py-2.5 bg-neutral-800/80 hover:bg-neutral-750 text-neutral-300 hover:text-white border border-neutral-700/60 hover:border-neutral-600 rounded-xl text-xs font-bold tracking-wide transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 flex items-center gap-1.5"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-purple-400" />
+            <span>Try Temporarily (No Save)</span>
+          </button>
+          <button
+            onClick={() => handleConfirm(false)}
             disabled={!seriesTitle.trim() || !chapterNumber.trim()}
             className="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 text-white font-bold rounded-xl text-xs tracking-wide transition-all shadow-[0_0_20px_-5px_rgba(147,51,234,0.5)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 flex items-center gap-1.5"
           >

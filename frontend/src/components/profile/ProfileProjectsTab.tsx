@@ -44,6 +44,7 @@ interface ProfileProjectsTabProps {
   onBatchDelete: (ids: string[]) => void;
   onDeleteChapter: (id: string) => void;
   onDeleteSeries: (seriesId: string) => void;
+  onRefreshProjects?: () => void;
 }
 
 export default function ProfileProjectsTab({
@@ -52,7 +53,9 @@ export default function ProfileProjectsTab({
   onBatchDelete,
   onDeleteChapter,
   onDeleteSeries,
+  onRefreshProjects,
 }: ProfileProjectsTabProps) {
+  const importInputRef = React.useRef<HTMLInputElement | null>(null);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<
     "all" | "Completed" | "Processing"
@@ -194,6 +197,131 @@ export default function ProfileProjectsTab({
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
+  };
+
+  const handleImportJSON = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const text = evt.target?.result;
+        if (typeof text !== "string") return;
+        const parsed = JSON.parse(text);
+
+        const token =
+          localStorage.getItem("anivox_token") ||
+          sessionStorage.getItem("anivox_token");
+        const headers: HeadersInit = {
+          "Content-Type": "application/json",
+        };
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+
+        let imports: any[] = [];
+        if (Array.isArray(parsed)) {
+          imports = parsed;
+        } else if (parsed && typeof parsed === "object") {
+          if (parsed.project) {
+            imports = [parsed];
+          } else {
+            imports = [{ project: parsed, panels: [] }];
+          }
+        } else {
+          throw new Error("Invalid backup JSON structure.");
+        }
+
+        let successCount = 0;
+        for (const item of imports) {
+          const proj = item.project || item;
+          const panelsList = item.panels || [];
+
+          if (!proj.project_id || !proj.url) {
+            console.warn("Skipping invalid project entry:", item);
+            continue;
+          }
+
+          const createBody = {
+            project_id: proj.project_id,
+            url: proj.url,
+            title: proj.title || "Untitled Webtoon",
+            genre: proj.genre || "general",
+            episode: proj.episode || "",
+            panels_count: panelsList.length || proj.panels_count || 0,
+            video_url: proj.video_url || null,
+            author: proj.author || null,
+            cover_image: proj.cover_image || null,
+            synopsis: proj.synopsis || null,
+          };
+
+          const createRes = await fetch("/api/projects", {
+            method: "POST",
+            headers,
+            body: JSON.stringify(createBody),
+          });
+
+          if (!createRes.ok) {
+            console.error(`Failed to create project ${proj.project_id}`);
+            continue;
+          }
+
+          if (panelsList.length > 0) {
+            const panelsBody = {
+              panels: panelsList.map((p: any) => ({
+                image_url: p.image_url || "",
+                original_url: p.original_url || p.image_url || null,
+                speech_text: p.speech_text || "",
+                sfx: p.sfx || "",
+                duration: p.duration || 0,
+                motion_type: p.motion_type || "",
+                visual_description: p.visual_description || null,
+                brightness: p.brightness ?? null,
+                contrast: p.contrast ?? null,
+                saturation: p.saturation ?? null,
+                grayscale: !!p.grayscale,
+                filter_preset: p.filter_preset || null,
+                bubble_method: p.bubble_method || null,
+                bubble_sensitivity: p.bubble_sensitivity ?? null,
+                bubble_dilation: p.bubble_dilation ?? null,
+                inpaint_radius: p.inpaint_radius ?? null,
+                detection_style: p.detection_style || null,
+              })),
+            };
+
+            const panelsRes = await fetch(`/api/projects/${proj.project_id}/panels`, {
+              method: "POST",
+              headers,
+              body: JSON.stringify(panelsBody),
+            });
+
+            if (!panelsRes.ok) {
+              console.error(`Failed to save panels for project ${proj.project_id}`);
+            }
+          }
+
+          successCount++;
+        }
+
+        if (successCount > 0) {
+          alert(`Successfully imported ${successCount} project(s)!`);
+          if (onRefreshProjects) {
+            onRefreshProjects();
+          }
+        } else {
+          alert("No projects were successfully imported.");
+        }
+      } catch (err: any) {
+        console.error("Failed to parse or import JSON:", err);
+        alert(err.message || "Failed to import JSON.");
+      } finally {
+        if (e.target) {
+          e.target.value = "";
+        }
+      }
+    };
+    reader.readAsText(file);
   };
 
   const handleViewDetails = (projectId: string) => {
@@ -380,6 +508,24 @@ export default function ProfileProjectsTab({
           </div>
 
           {/* Export to JSON */}
+          {/* Import JSON Input */}
+          <input
+            type="file"
+            ref={importInputRef}
+            onChange={handleImportJSON}
+            accept=".json"
+            className="hidden"
+          />
+
+          <button
+            onClick={() => importInputRef.current?.click()}
+            className="flex items-center gap-1.5 py-1.5 px-4 bg-[#0d0d12]/75 hover:bg-[#121217]/50 border border-purple-500/30 text-purple-300 hover:text-purple-200 rounded-xl text-[10px] font-extrabold transition-all duration-300 cursor-pointer shadow-md active:scale-95"
+            title="Import project data from JSON file"
+          >
+            <Download className="w-3.5 h-3.5 text-purple-400 rotate-180" />
+            <span>Import JSON</span>
+          </button>
+
           <button
             onClick={handleExportJSON}
             className="flex items-center gap-1.5 py-1.5 px-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border border-purple-500/30 hover:border-purple-400/50 rounded-xl text-[10px] font-extrabold transition-all duration-300 cursor-pointer shadow-md shadow-purple-950/20 active:scale-95"

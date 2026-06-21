@@ -383,9 +383,9 @@ def seed_data():
         # 12. Seed Developer API Keys Table
         logger.info("Seeding API key credentials...")
         api_keys = [
-            ("key_test123", "user_testuser1", "Local Dev Sandbox", "av_live_68fa...7e2a", "2026-06-18 10:15:00"),
-            ("key_pro456", "user_creator_pro", "Production Deployment App", "av_live_21c8...a891", "2026-06-19 14:30:00"),
-            ("key_pro789", "user_creator_pro", "CI/CD Deployment pipeline", "av_live_df84...f239", "2026-06-19 14:35:00")
+            ("key_test123", "user_testuser1", "Local Dev Sandbox", "av_live_68fa9180b73c2ea891047820a891047820a8910478207e2a", "2026-06-18 10:15:00"),
+            ("key_pro456", "user_creator_pro", "Production Deployment App", "av_live_21c81c81c81c81c81c81c81c81c81c81c81c81c81c81a891", "2026-06-19 14:30:00"),
+            ("key_pro789", "user_creator_pro", "CI/CD Deployment pipeline", "av_live_df84f84f84f84f84f84f84f84f84f84f84f84f84f84ff239", "2026-06-19 14:35:00")
         ]
         cursor.executemany("""
             INSERT INTO user_api_keys (key_id, user_id, name, api_key, created_at)

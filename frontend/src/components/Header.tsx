@@ -105,7 +105,6 @@ export default function Header({
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showStats, setShowStats] = useState(false);
-  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
 
   // Search & Navigation Palette states
   const [searchQuery, setSearchQuery] = useState("");
@@ -255,13 +254,7 @@ export default function Header({
     localStorage.setItem("app-autoplay-audio", String(autoPlayAudio));
   }, [autoPlayAudio]);
 
-  // Auto-save setting local storage
-  const [autoSaveEnabled, setAutoSaveEnabled] = useState(() => {
-    return localStorage.getItem("app-autosave-enabled") !== "false";
-  });
-  useEffect(() => {
-    localStorage.setItem("app-autosave-enabled", String(autoSaveEnabled));
-  }, [autoSaveEnabled]);
+
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
@@ -294,6 +287,59 @@ export default function Header({
           ((totalWithSpeech + totalWithAudio) / (panels.length * 2)) * 100
         )
       : 0;
+
+  // Dynamically computed quality scores — derived from real panel properties
+  // Est. Audience Retention: based on composition completeness (speech + audio coverage)
+  const audienceRetentionPct =
+    panels.length === 0
+      ? 0
+      : Math.min(
+          100,
+          Math.round(40 + progressPercent * 0.55 + (totalWithAudio > 0 ? 5 : 0))
+        );
+  const audienceRetentionLabel =
+    audienceRetentionPct >= 75
+      ? "High"
+      : audienceRetentionPct >= 50
+      ? "Medium"
+      : audienceRetentionPct > 0
+      ? "Low"
+      : "—";
+
+  // A/B Title CTR: based on narration richness (avg words per narrated panel)
+  const avgWordsPerPanel =
+    totalWithSpeech > 0
+      ? panels.reduce((sum, p) => {
+          const words = p.speech_text ? p.speech_text.trim().split(/\s+/).length : 0;
+          return sum + words;
+        }, 0) / totalWithSpeech
+      : 0;
+  const ctrScore =
+    panels.length === 0
+      ? 0
+      : Math.min(10, parseFloat((3 + Math.min(avgWordsPerPanel / 8, 1) * 5 + (progressPercent / 100) * 2).toFixed(1)));
+
+  // Cliffhanger Ending Index: based on last panel's speech, sfx, and motion dynamism
+  const lastPanel = panels.length > 0 ? panels[panels.length - 1] : null;
+  const cliffhangerScore = (() => {
+    if (!lastPanel) return "—";
+    const hasText = lastPanel.speech_text && lastPanel.speech_text.trim().length > 10;
+    const hasSfx = lastPanel.sfx && lastPanel.sfx.trim().length > 0;
+    const dynamicMotion = ["zoom_in", "zoom_out", "pan_left", "pan_right"].includes(lastPanel.motion_type);
+    const score = (hasText ? 1 : 0) + (hasSfx ? 1 : 0) + (dynamicMotion ? 1 : 0);
+    if (score === 3) return "Strong";
+    if (score === 2) return "Moderate";
+    if (score === 1) return "Weak";
+    return panels.length > 0 ? "Weak" : "—";
+  })();
+  const cliffhangerColor =
+    cliffhangerScore === "Strong"
+      ? "text-emerald-400"
+      : cliffhangerScore === "Moderate"
+      ? "text-amber-400"
+      : cliffhangerScore === "—"
+      ? "text-neutral-500"
+      : "text-rose-400";
 
   // Search Navigation options
   const navigationItems = [
@@ -378,7 +424,7 @@ export default function Header({
       id="header_pane"
       className="border-b border-neutral-900 bg-neutral-950/80 backdrop-blur-md sticky top-0 z-40 px-4 py-3 flex items-center justify-between gap-4"
     >
-      {/* Left side: Hamburger, Brand and Save Button */}
+      {/* Left side: Hamburger and Brand */}
       <div className="flex items-center gap-3 shrink-0">
         <button
           onClick={onToggleSidebar}
@@ -403,63 +449,6 @@ export default function Header({
             Webtoon<span className="text-purple-400">To</span>Video
           </span>
         </div>
-
-        {/* Manual Save Button */}
-        {projectId && (
-          <>
-            {saveStatus === "saving" ? (
-              <button
-                disabled
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-500/40 bg-amber-950/30 text-amber-300 text-[10px] font-bold font-mono tracking-wider select-none shadow-[0_0_10px_-2px_rgba(245,158,11,0.2)] cursor-not-allowed"
-              >
-                <svg
-                  className="animate-spin h-3.5 w-3.5 text-amber-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  />
-                </svg>
-                <span>SAVING...</span>
-              </button>
-            ) : saveStatus === "error" ? (
-              <button
-                onClick={onSave}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-500/40 bg-rose-950/35 hover:bg-rose-900/40 text-rose-300 hover:text-rose-200 text-[10px] font-bold font-mono tracking-wider cursor-pointer transition-all active:scale-95 shadow-[0_0_10px_-2px_rgba(239,68,68,0.25)]"
-              >
-                <span className="text-rose-450">⚠️</span>
-                <span>RETRY SAVE</span>
-              </button>
-            ) : isDirty ? (
-              <button
-                onClick={() => setShowSaveConfirm(true)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-purple-500/30 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-white text-[10px] font-black font-sans uppercase tracking-wider cursor-pointer transition-all active:scale-95 shadow-md shadow-purple-950/30 hover:shadow-purple-900/40 animate-pulse"
-              >
-                <span>✦</span>
-                <span>SAVE CHANGES</span>
-              </button>
-            ) : (
-              <button
-                disabled
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-500/40 bg-emerald-950/30 text-emerald-300 text-[10px] font-bold font-mono tracking-wider select-none shadow-[0_0_10px_-2px_rgba(52,211,153,0.2)]"
-              >
-                <span className="text-emerald-400">✓</span>
-                <span>SAVED</span>
-              </button>
-            )}
-          </>
-        )}
       </div>
 
       {/* Center Side: Quick Search / Command Bar */}
@@ -793,24 +782,46 @@ export default function Header({
                     <span className="text-neutral-500 font-mono">
                       Est. Audience Retention:
                     </span>
-                    <span className="font-bold text-emerald-400 font-mono">
-                      87.5% (High)
+                    <span
+                      className={`font-bold font-mono ${
+                        panels.length === 0
+                          ? "text-neutral-500"
+                          : audienceRetentionPct >= 75
+                          ? "text-emerald-400"
+                          : audienceRetentionPct >= 50
+                          ? "text-amber-400"
+                          : "text-rose-400"
+                      }`}
+                    >
+                      {panels.length === 0
+                        ? "—"
+                        : `${audienceRetentionPct}% (${audienceRetentionLabel})`}
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-[10px]">
                     <span className="text-neutral-500 font-mono">
                       A/B Title CTR Expectation:
                     </span>
-                    <span className="font-bold text-purple-400 font-mono">
-                      9.4/10
+                    <span
+                      className={`font-bold font-mono ${
+                        panels.length === 0
+                          ? "text-neutral-500"
+                          : ctrScore >= 7
+                          ? "text-purple-400"
+                          : ctrScore >= 5
+                          ? "text-amber-400"
+                          : "text-rose-400"
+                      }`}
+                    >
+                      {panels.length === 0 ? "—" : `${ctrScore}/10`}
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-[10px]">
                     <span className="text-neutral-500 font-mono">
                       Cliffhanger Ending Index:
                     </span>
-                    <span className="font-bold text-amber-400 font-mono">
-                      Strong
+                    <span className={`font-bold font-mono ${cliffhangerColor}`}>
+                      {cliffhangerScore}
                     </span>
                   </div>
                 </div>
@@ -919,23 +930,7 @@ export default function Header({
                   />
                 </div>
 
-                {/* Auto-save changes */}
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] font-bold text-neutral-300">
-                      Auto-save Modifications
-                    </p>
-                    <p className="text-[9px] text-neutral-500 font-mono">
-                      Commit changes automatically
-                    </p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={autoSaveEnabled}
-                    onChange={(e) => setAutoSaveEnabled(e.target.checked)}
-                    className="w-4 h-4 rounded bg-neutral-950 border border-neutral-850 accent-purple-500 cursor-pointer"
-                  />
-                </div>
+
               </div>
 
               {/* Color Theme Selector */}
@@ -1034,90 +1029,6 @@ export default function Header({
           </span>
         </button>
       </div>
-
-      {/* Save Changes Confirmation Modal */}
-      {showSaveConfirm &&
-        createPortal(
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            {/* Backdrop */}
-            <div
-              className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
-              onClick={() => setShowSaveConfirm(false)}
-            />
-
-            {/* Modal Container */}
-            <div className="relative w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-3xl shadow-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-200 flex flex-col">
-              {/* Glow Accent */}
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500 blur-[1px]" />
-
-              {/* Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-850 shrink-0 bg-neutral-900/50">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 bg-purple-500/10 rounded-xl text-purple-400">
-                    <Film className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h2 className="text-base font-bold text-white tracking-tight">
-                      Save Changes?
-                    </h2>
-                    <p className="text-[10px] text-neutral-400 font-mono">
-                      Confirm saving your current storyboard modifications
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowSaveConfirm(false)}
-                  className="text-neutral-400 hover:text-white bg-neutral-950/40 hover:bg-neutral-950 p-2 rounded-full transition-all cursor-pointer"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-
-              {/* Body */}
-              <div className="p-6 space-y-4">
-                <p className="text-xs text-neutral-300 leading-relaxed font-sans">
-                  You are about to commit all recent changes to the database.
-                  This will update the panels, narration scripts, and timings
-                  for your current project.
-                </p>
-
-                {projectId && (
-                  <div className="bg-neutral-950/50 border border-neutral-850 rounded-2xl p-4 flex gap-3 items-center">
-                    <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[11px] font-bold text-neutral-300 font-mono truncate">
-                        Project ID: {projectId}
-                      </p>
-                      <p className="text-[10px] text-neutral-500 font-mono">
-                        Estimated panels: {panels.length}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Footer */}
-              <div className="px-6 py-4 bg-neutral-950/40 border-t border-neutral-850 flex items-center justify-end gap-3 shrink-0">
-                <button
-                  onClick={() => setShowSaveConfirm(false)}
-                  className="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-750 text-neutral-200 hover:text-white rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border border-neutral-750/30"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => {
-                    setShowSaveConfirm(false);
-                    if (onSave) onSave();
-                  }}
-                  className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 border border-purple-500/30 text-white font-bold rounded-xl text-xs tracking-wide transition-all shadow-[0_0_20px_-5px_rgba(147,51,234,0.5)] active:scale-95 flex items-center gap-1.5 cursor-pointer"
-                >
-                  <span>Confirm & Save</span>
-                </button>
-              </div>
-            </div>
-          </div>,
-          document.body
-        )}
     </header>
   );
 }

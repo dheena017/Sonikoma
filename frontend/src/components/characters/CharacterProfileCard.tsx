@@ -16,8 +16,8 @@ interface CharacterProfileCardProps {
 export default function CharacterProfileCard({
   char,
 }: CharacterProfileCardProps) {
-  const isProtagonist = char.active_role.toLowerCase().includes("pro");
-  const isRival = char.active_role.toLowerCase().includes("riv");
+  const isProtagonist = (char.active_role || "").toLowerCase().includes("pro");
+  const isRival = (char.active_role || "").toLowerCase().includes("riv");
 
   return (
     <div className="bg-neutral-900/50 border border-neutral-800 rounded-2xl p-4.5 space-y-3 shadow-lg hover:border-purple-600/40 transition-all">
