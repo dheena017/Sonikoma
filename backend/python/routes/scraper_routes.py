@@ -198,7 +198,7 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
                             img_bytes = out.getvalue()
 
                             uid = f"norm_{int(time.time() * 1000)}_{idx}_{random.randint(0, 9999)}"
-                            cached_url = f"/api/merge-images/cached/{uid}"
+                            cached_url = f"/api/image/cached/{uid}"
                             stitched_cache.set(uid, {"data": img_bytes, "content_type": res.get("contentType", "image/jpeg")})
                             edit_history.set(cached_url, url)
                             normalised_urls.append(cached_url)
@@ -272,7 +272,7 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
 
                     # Cache the result
                     unique_id = f"stitched_{int(time.time() * 1000)}_full"
-                    stitched_url = f"/api/merge-images/cached/{unique_id}"
+                    stitched_url = f"/api/image/cached/{unique_id}"
 
                     stitched_cache.set(unique_id, {"data": stitched_bytes, "content_type": "image/png"})
                     stitched_cache.set(cache_key, stitched_url)
@@ -430,7 +430,7 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
                                     cropped_buffer = out.getvalue()
 
                                     unique_id = f"merged_{int(time.time() * 1000)}_smartcrop_{p_idx}_{random.randint(0, 1000)}"
-                                    cached_url = f"/api/merge-images/cached/{unique_id}"
+                                    cached_url = f"/api/image/cached/{unique_id}"
 
                                     stitched_cache.set(unique_id, {"data": cropped_buffer, "content_type": f"image/{save_format.lower()}"})
                                     edit_history.set(cached_url, proxied_urls[0])

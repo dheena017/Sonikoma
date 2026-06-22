@@ -1183,7 +1183,7 @@ def delete_panels(project_id: str) -> None:
 
 def get_panel_original_url(image_url: str) -> Optional[str]:
     """
-    Given an image_url (e.g. /api/merge-images/cached/merged_...), return
+    Given an image_url (e.g. /api/image/cached/merged_...), return
     the original_url stored in the panels table, or None if not found.
     Used as a last-resort fallback to recover images after server restarts.
     """

@@ -641,7 +641,7 @@ async def analyze_image(body: AnalyzeImageRequest):
                 import uuid
                 unique_audio_id = f"audio_{uuid.uuid4().hex[:8]}"
                 stitched_cache.set(unique_audio_id, {"data": audio_bytes, "content_type": "audio/mpeg"})
-                audio_url = f"/api/merge-images/cached/{unique_audio_id}"
+                audio_url = f"/api/image/cached/{unique_audio_id}"
                 logger.info(f"[analyze_image] Successfully pre-generated panel audio. Cached as: {audio_url}")
             
             if os.path.exists(temp_audio_path):
@@ -915,7 +915,7 @@ async def ai_smart_crop(body: SmartCropRequest):
                 cropped_buffer = image_buffer
 
             unique_id = f"merged_{int(time.time() * 1000)}_smartcrop_{i}"
-            cached_url = f"/api/merge-images/cached/{unique_id}"
+            cached_url = f"/api/image/cached/{unique_id}"
             
             stitched_cache.set(unique_id, {"data": cropped_buffer, "content_type": content_type})
             edit_history.set(cached_url, body.url)

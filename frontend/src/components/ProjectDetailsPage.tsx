@@ -238,7 +238,7 @@ export default function ProjectDetailsPage({
         }
         
         const urls = panels.map((p) => p.image_url);
-        const res = await fetch("/api/download-zip", {
+        const res = await fetch("/api/image/download-zip", {
           method: "POST",
           headers,
           body: JSON.stringify({ urls, url: project.url || null }),
@@ -484,18 +484,7 @@ export default function ProjectDetailsPage({
   const handleLoadToWorkspace = async () => {
     if (!project) return;
     try {
-      if (project.series_slug && project.chapter_slug) {
-        navigateTo(`/series/${project.series_slug}/chapters/${project.chapter_slug}`);
-      } else {
-        navigateTo(
-          `/dashboard?id=${project.project_id}&url=${encodeURIComponent(
-            project.url
-          )}&model=gemini-2.5-flash&source=custom`
-        );
-      }
-      setTimeout(() => {
-        window.location.reload();
-      }, 100);
+      window.location.href = `/project-editor?id=${project.project_id}`;
     } catch (e) {
       console.error(e);
     }

@@ -73,7 +73,7 @@ export function useImageTransform({
     );
     setIsTransforming(true);
     try {
-      const response = await activeFetch("/api/transform-image", {
+      const response = await activeFetch("/api/image/transform", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: currentUrl, type, value }),
@@ -143,7 +143,7 @@ export function useImageTransform({
     );
     setIsMerging(true);
     try {
-      const response = await activeFetch("/api/stitch-images", {
+      const response = await activeFetch("/api/image/merge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -194,7 +194,7 @@ export function useImageTransform({
     );
     setIsCleaning(true);
     try {
-      const response = await activeFetch("/api/remove-speech-bubbles", {
+      const response = await activeFetch("/api/image/remove-speech-bubbles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -259,7 +259,7 @@ export function useImageTransform({
 
     setIsCroppingSlice(slice.id);
     try {
-      const response = await activeFetch("/api/edit-image", {
+      const response = await activeFetch("/api/image/edit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -255,7 +255,7 @@ export default function LiveScraperDeck({
     ]);
 
     try {
-      const response = await activeFetch("/api/stitch-images", {
+      const response = await activeFetch("/api/image/merge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

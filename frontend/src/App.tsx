@@ -42,6 +42,7 @@ import ForgotPasswordPage from "./components/auth/ForgotPasswordPage.js";
 import ProfilePage from "./components/ProfilePage.js";
 import LoadingPage from "./components/LoadingPage.js";
 import ProjectDetailsPage from "./components/ProjectDetailsPage.js";
+import ProjectEditorPage from "./components/ProjectEditorPage.js";
 import SeriesDetailsPage from "./components/SeriesDetailsPage.js";
 
 // --- AI Creator & Engagement Suite Views ---
@@ -518,6 +519,7 @@ export default function App() {
   const isChapterDetailsPath =
     currentPath === "/project-details" ||
     (chapterPathMatch !== null && isDetailsMode);
+  const isProjectEditorPath = currentPath === "/project-editor";
   const isSeriesDetailsPath =
     !chapterPathMatch && currentPath.match(/\/series\/([^\/]+)$/) !== null;
 
@@ -1171,10 +1173,33 @@ export default function App() {
 
           {/* PAGE VIEW 20: Advanced Crop & Trim Editor Page */}
           {isEditorPath && !isPipMode && editingImageIdx !== null && (
-            <CropEditorModal
-              isPage={true}
-              appLogic={{ ...appLogic, isPipMode, setIsPipMode }}
-            />
+            scrapedImages.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center min-h-[500px] text-neutral-400">
+                <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4" />
+                <p className="text-sm font-semibold font-mono text-purple-300">Loading project storyboard panels...</p>
+              </div>
+            ) : (
+              <CropEditorModal
+                isPage={true}
+                appLogic={{ ...appLogic, isPipMode, setIsPipMode }}
+              />
+            )
+          )}
+
+          {/* PAGE VIEW 21: Dedicated Project Workspace Editor Page */}
+          {isProjectEditorPath && (
+            scrapedImages.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center min-h-[500px] text-neutral-400">
+                <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4" />
+                <p className="text-sm font-semibold font-mono text-purple-300">Loading project editor workspace...</p>
+              </div>
+            ) : (
+              <ProjectEditorPage
+                appLogic={appLogic}
+                onNavigateHome={handleNavigateHome}
+                navigateTo={navigateTo}
+              />
+            )
           )}
 
           {/* FALLBACK VIEW: 404 Route Not Found */}
@@ -1183,6 +1208,7 @@ export default function App() {
             !isAutoCropPath &&
             !isBubbleCleanerPath &&
             !isEditorPath &&
+            !isProjectEditorPath &&
             !isLogsPath &&
             !isStatusPath &&
             !isShortcutsPath &&

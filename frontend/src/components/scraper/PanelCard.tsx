@@ -77,7 +77,7 @@ function PanelCard({
       ...prev,
     ]);
     try {
-      const response = await fetch("/api/edit-image", {
+      const response = await fetch("/api/image/edit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -119,7 +119,7 @@ function PanelCard({
       ...prev,
     ]);
     try {
-      const response = await fetch("/api/edit-image", {
+      const response = await fetch("/api/image/edit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -161,7 +161,7 @@ function PanelCard({
       ...prev,
     ]);
     try {
-      const response = await fetch("/api/undo-crop", {
+      const response = await fetch("/api/image/undo-crop", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: imgUrl }),

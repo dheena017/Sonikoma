@@ -238,7 +238,8 @@ export function useAutoSave(state: AutoSaveState) {
           state.setProjectId?.(targetProjectId);
           if (data.series_slug && data.chapter_slug) {
             const newPath = `/series/${data.series_slug}/chapters/${data.chapter_slug}`;
-            if (window.location.pathname !== newPath) {
+            const isEditor = window.location.pathname.startsWith("/editor") || window.location.pathname === "/project-editor";
+            if (window.location.pathname !== newPath && !isEditor) {
               window.history.pushState(null, "", newPath);
             }
           } else {
