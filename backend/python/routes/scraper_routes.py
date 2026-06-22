@@ -46,6 +46,8 @@ import utils.image_utils as img_utils
 from config.clients import DYNAMIC_BACKGROUND_VIDEOS
 from services.scraper import scrape_images_from_url, scraped_metadata_cache
 from services.storyboard_ai import generate_dynamic_panels
+from services.video import compile_video_from_panels
+import os
 
 logger = logging.getLogger("anivox.routes.scraper_routes")
 router = APIRouter()
@@ -552,21 +554,8 @@ async def generate_storyboard(request: Request, body: GenerateStoryboardRequest)
         
         logger.info(f"[Model] Processing storyboard request for url: \"{body.url}\". Parsed Title: \"{parsed['title']}\", Genre: \"{parsed['genre']}\"")
 
-        # Select background video based on genre
-        logger.info(f"[Model] Selecting background video for genre: {parsed['genre']}")
-        video_url = DYNAMIC_BACKGROUND_VIDEOS["general"]
-        genre_lower = parsed["genre"].lower()
-        
-        if body.custom_background_video:
-            video_url = body.custom_background_video
-        elif any(x in genre_lower for x in ['action', 'martial', 'hero', 'solo']):
-            video_url = DYNAMIC_BACKGROUND_VIDEOS["action"]
-        elif any(x in genre_lower for x in ['romance', 'love', 'slice', 'drama', 'olympus']):
-            video_url = DYNAMIC_BACKGROUND_VIDEOS["romance"]
-        elif any(x in genre_lower for x in ['fantasy', 'magic', 'tower', 'god']):
-            video_url = DYNAMIC_BACKGROUND_VIDEOS["fantasy"]
-        elif any(x in genre_lower for x in ['cyber', 'sci', 'thriller', 'tech']):
-            video_url = DYNAMIC_BACKGROUND_VIDEOS["cyberpunk"]
+        # Video will be compiled after storyboard is ready.
+        video_url = None
 
         scraped_urls = await scrape_images_from_url(body.url, bypass_cache=body.bypass_cache)
 
@@ -628,12 +617,33 @@ async def generate_storyboard(request: Request, body: GenerateStoryboardRequest)
                 except Exception as db_err:
                     logger.error(f"[Database] Failed to automatically save client panels: {db_err}", exc_info=True)
 
+            logger.info("[Video Compiler] Initiating moviepy compilation for resolved panels...")
+            try:
+                videos_dir = os.path.join(os.getcwd(), "public", "videos")
+                compiled_filename = await compile_video_from_panels(
+                    project_id=project_id,
+                    panels=resolved_panels,
+                    output_dir=videos_dir
+                )
+                video_url = f"/videos/{compiled_filename}"
+            except Exception as ve:
+                logger.error(f"[Video Compiler] Compilation failed: {ve}")
+                # Fallback to general video if generation fails to not break frontend
+                video_url = DYNAMIC_BACKGROUND_VIDEOS["general"]
+
+            # Update the DB with the final video URL
+            if user_id and not project_id.startswith("temp_"):
+                try:
+                    db.update_project(project_id, {"video_url": video_url})
+                except Exception as e:
+                    logger.warning(f"Failed to update video_url in DB: {e}")
+
             return {
                 "project_id": project_id,
                 "status": "success",
                 "video_url": video_url,
                 "panels_processed": len(resolved_panels),
-                "message": "Webtoon storyboard adjusted and resolved successfully.",
+                "message": "Webtoon storyboard adjusted and video compiled successfully.",
                 "panels": resolved_panels
             }
 
@@ -686,6 +696,26 @@ async def generate_storyboard(request: Request, body: GenerateStoryboardRequest)
                 logger.info(f"[Database] Automatically saved AI-generated storyboard for project {project_id} and user {user_id}")
             except Exception as db_err:
                 logger.error(f"[Database] Failed to automatically save AI storyboard: {db_err}", exc_info=True)
+
+        logger.info("[Video Compiler] Initiating moviepy compilation for AI-generated panels...")
+        try:
+            videos_dir = os.path.join(os.getcwd(), "public", "videos")
+            compiled_filename = await compile_video_from_panels(
+                project_id=project_id,
+                panels=response_panels,
+                output_dir=videos_dir
+            )
+            video_url = f"/videos/{compiled_filename}"
+        except Exception as ve:
+            logger.error(f"[Video Compiler] Compilation failed: {ve}")
+            video_url = DYNAMIC_BACKGROUND_VIDEOS["general"]
+
+        # Update the DB with the final video URL
+        if user_id and not project_id.startswith("temp_"):
+            try:
+                db.update_project(project_id, {"video_url": video_url})
+            except Exception as e:
+                logger.warning(f"Failed to update video_url in DB: {e}")
 
         from skills.registry import registry
         storyboard_skill = registry.get("storyboard_narrative")

@@ -1073,8 +1073,8 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                             chapter_id, panel_index, image_url, original_url, speech_text, sfx,
                             duration, motion_type, visual_description, brightness, contrast, saturation,
                             grayscale, filter_preset, bubble_method, bubble_sensitivity, bubble_dilation,
-                            inpaint_radius, detection_style
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            inpaint_radius, detection_style, audio_url, smart_crop, crop_padding, is_sanitized
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """, (
                         project_id,
                         i,
@@ -1094,7 +1094,11 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                         p.get('bubble_sensitivity'),
                         p.get('bubble_dilation'),
                         p.get('inpaint_radius'),
-                        p.get('detection_style')
+                        p.get('detection_style'),
+                        p.get('audio_url'),
+                        1 if p.get('smart_crop') else 0,
+                        p.get('crop_padding'),
+                        1 if p.get('is_sanitized') else 0
                     ))
                 
                 # Sync panel count

@@ -112,13 +112,16 @@ async def proxy_image(
     
     start_time = time.time()
     
-    # Unwrap any double-proxied URLs
     fetch_url = url
     if "/api/proxy-image" in fetch_url:
         parsed = urlparse(fetch_url)
         query = parse_qs(parsed.query)
         if "url" in query:
             fetch_url = query["url"][0]
+
+    tighter = request.query_params.get("tighter") == "true"
+    crop_padding_str = request.query_params.get("crop_padding")
+    crop_padding = int(crop_padding_str) if crop_padding_str is not None and crop_padding_str.isdigit() else None
 
     # Validate URL format and handle local/internal URLs by redirecting directly
     try:
@@ -147,7 +150,8 @@ async def proxy_image(
         raise HTTPException(status_code=400, detail=f"Invalid URL format: {e}")
 
     # Cache lookup
-    cache_key = hashlib.md5(fetch_url.encode('utf-8')).hexdigest()
+    cache_key_str = f"{fetch_url}_{tighter}_{crop_padding}"
+    cache_key = hashlib.md5(cache_key_str.encode('utf-8')).hexdigest()
     cached = proxy_cache.get(cache_key)
 
     if cached:
@@ -211,6 +215,12 @@ async def proxy_image(
                 status_code=413,
                 detail=f"Image exceeds maximum proxy size of {MAX_PROXY_SIZE_MB}MB"
             )
+
+        if tighter or crop_padding is not None:
+            from utils.image_utils import crop_auto_borders
+            crop_res = crop_auto_borders(buffer, tighter=tighter, crop_padding=crop_padding)
+            buffer = crop_res["data"]
+            content_type = crop_res["content_type"]
 
         etag = make_etag(buffer)
         clean_content_type = content_type.split(";")[0].strip()

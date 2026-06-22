@@ -23,7 +23,7 @@ from database.db import write_audit_log
 import utils.image_utils as img_utils
 from utils.cache import stitched_cache, edit_history
 from config.clients import ai_initialized, call_gemini_with_retry, genai_client
-from services.detect_panels import run_cv_detection
+from services.detect_panels import run_cv_detection, adjust_to_aspect_ratio
 from services.audio import generate_panel_audio
 
 
@@ -924,11 +924,7 @@ async def ai_smart_crop(body: SmartCropRequest):
             crop_h = h - top_px - bot_px
 
             if body.aspectRatio and body.aspectRatio != "free":
-                adjusted = adjust_to_aspect_ratio(left_px, top_px, crop_w, crop_h, w, h, body.aspectRatio)
-                left_px = adjusted["x"]
-                top_px = adjusted["y"]
-                crop_w = adjusted["w"]
-                crop_h = adjusted["h"]
+                left_px, top_px, crop_w, crop_h = adjust_to_aspect_ratio(left_px, top_px, crop_w, crop_h, w, h, body.aspectRatio)
                 p_left = (left_px / w) * 100.0
                 p_top = (top_px / h) * 100.0
                 p_right = ((w - (left_px + crop_w)) / w) * 100.0

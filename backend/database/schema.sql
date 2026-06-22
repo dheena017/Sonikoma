@@ -80,6 +80,10 @@ CREATE TABLE IF NOT EXISTS panels (
   bubble_dilation  REAL,
   inpaint_radius   INTEGER,
   detection_style  TEXT,
+  audio_url        TEXT,
+  smart_crop       INTEGER NOT NULL DEFAULT 0,
+  crop_padding     INTEGER,
+  is_sanitized     INTEGER NOT NULL DEFAULT 0,
   created_at       TEXT    NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (chapter_id) REFERENCES chapters(id) ON DELETE CASCADE
 );

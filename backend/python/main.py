@@ -638,6 +638,11 @@ app.get("/api/stitch-images/cached/{cache_id}", tags=["Legacy Image Routing"], i
 app.include_router(health_router,         prefix="/api/py", tags=["Health & System (Legacy)"])
 app.include_router(audio_router,          prefix="/api/py/audio", tags=["Audio Synthesis (Legacy)"])
 
+# 3. Serve generated videos
+videos_path = os.path.join(os.getcwd(), "public", "videos")
+os.makedirs(videos_path, exist_ok=True)
+app.mount("/videos", StaticFiles(directory=videos_path), name="videos")
+
 # ─────────────────────────────────────────────────────────────────────────────
 # STATIC FRONTEND SERVING (Production Only)
 # ─────────────────────────────────────────────────────────────────────────────
