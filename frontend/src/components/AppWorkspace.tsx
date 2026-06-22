@@ -299,6 +299,7 @@ export function AppWorkspace({
 
   const handleSaveMeta = async () => {
     if (saveProject) {
+      addNotification("Saving metadata...", "info");
       await saveProject();
     }
   };
@@ -318,6 +319,7 @@ export function AppWorkspace({
       headers["Authorization"] = `Bearer ${token}`;
     }
     try {
+      addNotification("Saving raw assets...", "info");
       const scrapeRes = await fetch("/api/save-scraped-images", {
         method: "PUT",
         headers,
@@ -338,12 +340,14 @@ export function AppWorkspace({
 
   const handleSaveStoryboard = async () => {
     if (saveProject) {
+      addNotification("Saving storyboard...", "info");
       await saveProject(panels);
     }
   };
 
   const handleSaveVideo = async () => {
     if (saveProject) {
+      addNotification("Saving video compilation...", "info");
       await saveProject();
     }
   };
