@@ -283,7 +283,7 @@ export function AppWorkspace({
 
       if (!isTemporary) {
         // Clear query parameters when moving into a managed project
-        window.history.pushState(null, "", "/dashboard");
+        window.history.pushState(null, "", "/workspace");
       }
 
       // Start the actual scrape
@@ -294,6 +294,57 @@ export function AppWorkspace({
         `Failed to create project: ${err.message || "Unknown error"}`,
         "error"
       );
+    }
+  };
+
+  const handleSaveMeta = async () => {
+    if (saveProject) {
+      await saveProject();
+    }
+  };
+
+  const handleSaveAssets = async () => {
+    if (projectId?.startsWith("temp_")) {
+      addNotification("Temporary Session: Saving assets is disabled.", "warning");
+      return;
+    }
+    const token =
+      localStorage.getItem("anivox_token") ||
+      sessionStorage.getItem("anivox_token");
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+    };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    try {
+      const scrapeRes = await fetch("/api/save-scraped-images", {
+        method: "PUT",
+        headers,
+        body: JSON.stringify({
+          url: targetUrl,
+          images: scrapedImages,
+        }),
+      });
+      if (scrapeRes.ok) {
+        addNotification("Raw assets saved successfully!", "success");
+      } else {
+        throw new Error("Failed to save raw assets");
+      }
+    } catch (err: any) {
+      addNotification(`Failed to save raw assets: ${err.message}`, "error");
+    }
+  };
+
+  const handleSaveStoryboard = async () => {
+    if (saveProject) {
+      await saveProject(panels);
+    }
+  };
+
+  const handleSaveVideo = async () => {
+    if (saveProject) {
+      await saveProject();
     }
   };
 
@@ -341,6 +392,7 @@ export function AppWorkspace({
           smartSlice={smartSlice}
           setSmartSlice={setSmartSlice}
           resetWorkspace={resetWorkspace}
+          handleSaveMeta={handleSaveMeta}
         />
 
         {/* PROJECT PRODUCTION CHECKLIST */}
@@ -349,7 +401,7 @@ export function AppWorkspace({
             <div className="flex items-center justify-between border-b border-white/5 pb-3">
               <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest font-mono flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-purple-500 animate-pulse" />
-                Project Production Pipeline
+                Series Production Pipeline
               </span>
               <span className="text-[9px] text-neutral-500 font-bold font-mono">
                 Pipeline Checklist
@@ -357,7 +409,7 @@ export function AppWorkspace({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Step 1: Create Project & Metadata */}
+              {/* Step 1: Create Series & Metadata */}
               <div className="flex items-start justify-between p-4 bg-neutral-950/40 border border-neutral-850 rounded-2xl gap-3">
                 <div className="flex items-start gap-3">
                   <div className="mt-0.5">
@@ -365,20 +417,16 @@ export function AppWorkspace({
                   </div>
                   <div className="space-y-0.5">
                     <h4 className="text-xs font-bold text-neutral-200">
-                      Step 1: Create Project
+                      Step 1: Create Series
                     </h4>
                     <p className="text-[10px] text-neutral-500 font-medium leading-normal">
-                      Initialize project entry and metadata in SQLite database.
+                      Initialize series entry and metadata in SQLite database.
                     </p>
                   </div>
                 </div>
                 <button
                   type="button"
-                  onClick={async () => {
-                    if (saveProject) {
-                      await saveProject();
-                    }
-                  }}
+                  onClick={handleSaveMeta}
                   className="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 text-white text-[10px] font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer shrink-0"
                 >
                   Save Meta
@@ -418,50 +466,7 @@ export function AppWorkspace({
                   </button>
                   <button
                     type="button"
-                    onClick={async () => {
-                      if (projectId?.startsWith("temp_")) {
-                        addNotification(
-                          "Temporary Session: Saving assets is disabled.",
-                          "warning"
-                        );
-                        return;
-                      }
-                      const token =
-                        localStorage.getItem("anivox_token") ||
-                        sessionStorage.getItem("anivox_token");
-                      const headers: HeadersInit = {
-                        "Content-Type": "application/json",
-                      };
-                      if (token) {
-                        headers["Authorization"] = `Bearer ${token}`;
-                      }
-                      try {
-                        const scrapeRes = await fetch(
-                          "/api/save-scraped-images",
-                          {
-                            method: "PUT",
-                            headers,
-                            body: JSON.stringify({
-                              url: targetUrl,
-                              images: scrapedImages,
-                            }),
-                          }
-                        );
-                        if (scrapeRes.ok) {
-                          addNotification(
-                            "Raw assets saved successfully!",
-                            "success"
-                          );
-                        } else {
-                          throw new Error("Failed to save raw assets");
-                        }
-                      } catch (err: any) {
-                        addNotification(
-                          `Failed to save raw assets: ${err.message}`,
-                          "error"
-                        );
-                      }
-                    }}
+                    onClick={handleSaveAssets}
                     disabled={scrapedImages.length === 0}
                     className="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 text-white text-[10px] font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
                   >
@@ -503,11 +508,7 @@ export function AppWorkspace({
                   </button>
                   <button
                     type="button"
-                    onClick={async () => {
-                      if (saveProject) {
-                        await saveProject(panels);
-                      }
-                    }}
+                    onClick={handleSaveStoryboard}
                     disabled={panels.length === 0}
                     className="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 text-white text-[10px] font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
                   >
@@ -547,11 +548,7 @@ export function AppWorkspace({
                   </button>
                   <button
                     type="button"
-                    onClick={async () => {
-                      if (saveProject) {
-                        await saveProject();
-                      }
-                    }}
+                    onClick={handleSaveVideo}
                     disabled={!videoUrl}
                     className="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 text-white text-[10px] font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
                   >
@@ -605,6 +602,7 @@ export function AppWorkspace({
           chapterTitle={chapterTitle}
           targetUrl={targetUrl}
           selectedSource={selectedSource}
+          handleSaveAssets={handleSaveAssets}
         />
 
         {/* ACTIVE QUEUE / LIVE PIPELINE PROGRESS */}
@@ -656,6 +654,7 @@ export function AppWorkspace({
               cropCannyHigh={cropCannyHigh}
               cropCloseKernelSize={cropCloseKernelSize}
               autoSplitTallStrips={autoSplitTallStrips}
+              handleSaveStoryboard={handleSaveStoryboard}
             />
           </div>
         )}
@@ -704,6 +703,7 @@ export function AppWorkspace({
             videoUrl={videoUrl}
             musicTheme={musicTheme}
             voiceActor={voiceActor}
+            handleSaveVideo={handleSaveVideo}
           />
         </div>
       )}

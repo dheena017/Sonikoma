@@ -104,7 +104,7 @@ export default function ProjectConfirmModal({
             </div>
             <div>
               <h2 className="text-base font-bold text-white tracking-tight">
-                Confirm Project Details
+                Confirm Series Details
               </h2>
               <p className="text-[10px] text-neutral-400 font-mono">
                 Verify meta properties before initial sync and asset download
@@ -124,7 +124,7 @@ export default function ProjectConfirmModal({
           <div className="bg-purple-950/10 border border-purple-800/20 rounded-2xl p-4 flex gap-3 items-start">
             <span className="text-lg leading-none mt-0.5">ℹ️</span>
             <p className="text-xs text-purple-200/90 leading-relaxed font-sans">
-              Creating a project stores the chapter metadata and downloaded
+              Creating a series stores the chapter metadata and downloaded
               panel assets in your workspace. You can refine narration scripts
               and manage storyboard frames below.
             </p>
@@ -277,7 +277,7 @@ export default function ProjectConfirmModal({
             className="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 text-white font-bold rounded-xl text-xs tracking-wide transition-all shadow-[0_0_20px_-5px_rgba(147,51,234,0.5)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 flex items-center gap-1.5 cursor-pointer"
           >
             <CheckCircle className="h-4 w-4" />
-            <span>Confirm & Create Project</span>
+            <span>Confirm & Create Series</span>
           </button>
         </div>
       </div>

@@ -10,6 +10,7 @@ interface TimelineHeaderProps {
   handleDownloadZip?: () => void;
   isAnalyzingAll?: boolean;
   handleAnalyzeAllPanels?: () => void;
+  handleSaveStoryboard?: () => void;
 }
 
 export default function TimelineHeader({
@@ -20,6 +21,7 @@ export default function TimelineHeader({
   handleDownloadZip,
   isAnalyzingAll,
   handleAnalyzeAllPanels,
+  handleSaveStoryboard,
 }: TimelineHeaderProps) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-neutral-800 pb-4">
@@ -37,7 +39,16 @@ export default function TimelineHeader({
       </div>
 
       <div className="flex items-center gap-2 flex-wrap">
-        {/* Buttons removed as requested */}
+        {handleSaveStoryboard && panelsLength > 0 && (
+          <button
+            type="button"
+            onClick={handleSaveStoryboard}
+            className="text-[10px] font-bold border border-purple-500/50 bg-purple-600 hover:bg-purple-500 text-white rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors shadow-md active:scale-95 cursor-pointer"
+          >
+            Save Storyboard
+          </button>
+        )}
+        {/* Bulk Operations and Download Buttons can be added here if needed */}
       </div>
     </div>
   );

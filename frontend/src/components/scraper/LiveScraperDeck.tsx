@@ -58,6 +58,7 @@ export default function LiveScraperDeck({
   chapterTitle = "",
   targetUrl = "",
   selectedSource = "",
+  handleSaveAssets,
 }: LiveScraperDeckProps) {
   const [isZipping, setIsZipping] = useState(false);
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(
@@ -350,6 +351,15 @@ export default function LiveScraperDeck({
                 fetchWithInterceptor={fetchWithInterceptor}
                 onLastSelectedReset={() => setLastSelectedIndex(null)}
               />
+            )}
+            {handleSaveAssets && scrapedImages.length > 0 && (
+              <button
+                type="button"
+                onClick={handleSaveAssets}
+                className="text-[10px] font-bold border border-purple-500/50 bg-purple-600 hover:bg-purple-500 text-white rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors shadow-md active:scale-95 cursor-pointer"
+              >
+                Save Assets
+              </button>
             )}
             <button
               type="button"

@@ -1234,6 +1234,7 @@ export default function App() {
 
           {/* FALLBACK VIEW: 404 Route Not Found */}
           {!isWorkspacePath &&
+            !isDashboardOverviewPath &&
             !isSettingsPath &&
             !isAutoCropPath &&
             !isBubbleCleanerPath &&

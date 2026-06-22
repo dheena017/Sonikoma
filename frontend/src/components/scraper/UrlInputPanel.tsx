@@ -122,6 +122,7 @@ interface UrlInputPanelProps {
   smartSlice?: boolean;
   setSmartSlice?: (v: boolean) => void;
   resetWorkspace?: () => void;
+  handleSaveMeta?: () => void;
 }
 
 export default function UrlInputPanel(props: UrlInputPanelProps) {
@@ -156,6 +157,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
     smartSlice = true,
     setSmartSlice,
     resetWorkspace,
+    handleSaveMeta,
   } = props;
 
   // Metadata card is hidden until the user clicks Scrape Assets
@@ -579,6 +581,18 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                         className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-neutral-200 outline-none transition-colors resize-none font-sans"
                       />
                     </div>
+                    
+                    {handleSaveMeta && (
+                      <div className="md:col-span-12 flex justify-end mt-1">
+                        <button
+                          type="button"
+                          onClick={handleSaveMeta}
+                          className="px-4 py-2 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 text-white text-[10px] font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
+                        >
+                          Save Meta
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
