@@ -1,0 +1,42 @@
+# Stage 1: Build Frontend
+FROM node:20-slim AS frontend-builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+# Copy the entire project to build the frontend correctly
+COPY . .
+RUN npm run build:frontend
+
+# Stage 2: Build Backend and Final Image
+FROM python:3.11-slim
+WORKDIR /app
+
+# Install system dependencies for OpenCV, EasyOCR, and MoviePy
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy backend source
+COPY backend/ ./backend/
+COPY scripts/ ./scripts/
+
+# Copy built frontend from Stage 1
+COPY --from=frontend-builder /app/dist ./dist
+
+# Set environment variables for production
+ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+# PORT is typically provided by the PaaS, but default to 5173
+ENV PORT=5173 
+
+EXPOSE $PORT
+
+# Start the unified FastAPI application
+WORKDIR /app/backend/python
+CMD ["python", "main.py"]
