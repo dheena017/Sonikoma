@@ -1091,6 +1091,7 @@ export default function App() {
               registerSaveHandler={(handler) => {
                 projectDetailsSaveRef.current = handler;
               }}
+              addNotification={addNotification}
             />
           )}
 

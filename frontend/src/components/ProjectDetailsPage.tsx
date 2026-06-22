@@ -40,6 +40,11 @@ interface ProjectDetailsPageProps {
   setGlobalDirty?: (dirty: boolean) => void;
   setGlobalSaveStatus?: (status: "idle" | "saving" | "saved" | "error") => void;
   registerSaveHandler?: (handler: (() => Promise<void>) | null) => void;
+  addNotification?: (
+    message: string,
+    type: "info" | "success" | "warning" | "error",
+    options?: { details?: string }
+  ) => void;
 }
 
 export default function ProjectDetailsPage({
@@ -48,6 +53,7 @@ export default function ProjectDetailsPage({
   setGlobalDirty,
   setGlobalSaveStatus,
   registerSaveHandler,
+  addNotification,
 }: ProjectDetailsPageProps) {
   const [projectId, setProjectId] = React.useState<string | null>(null);
   const [project, setProject] = React.useState<any | null>(null);
@@ -563,6 +569,7 @@ export default function ProjectDetailsPage({
   const handleSaveChanges = React.useCallback(async () => {
     if (!projectId || !project) return;
     setSaveStatus("saving");
+    addNotification?.("Saving project changes...", "info");
     try {
       const token =
         localStorage.getItem("anivox_token") ||
@@ -630,15 +637,20 @@ export default function ProjectDetailsPage({
         }
 
         setSaveStatus("saved");
+        addNotification?.("Project changes saved successfully!", "success");
         setTimeout(() => setSaveStatus("idle"), 3000);
       } else {
         throw new Error(data.message || "Failed to save project.");
       }
     } catch (e: any) {
       setSaveStatus("error");
-      alert(e.message || "Error saving changes.");
+      addNotification?.(
+        e.message || "Error saving changes.",
+        "error",
+        { details: e.stack || String(e) }
+      );
     }
-  }, [projectId, project, panels, serializeState]);
+  }, [projectId, project, panels, serializeState, addNotification]);
 
   React.useEffect(() => {
     if (setGlobalDirty) {
