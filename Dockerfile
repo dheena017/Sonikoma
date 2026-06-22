@@ -27,7 +27,7 @@ COPY backend/ ./backend/
 COPY scripts/ ./scripts/
 
 # Copy built frontend from Stage 1
-COPY --from=frontend-builder /app/dist ./dist
+COPY --from=frontend-builder /app/frontend/dist ./dist
 
 # Set environment variables for production
 ENV NODE_ENV=production
