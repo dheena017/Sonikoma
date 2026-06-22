@@ -186,6 +186,7 @@ export default function StoryboardTimeline({
       "info"
     );
     if (saveProject) {
+      addNotification?.("Saving storyboard changes...", "info");
       await saveProject(remainingPanels);
     }
   };

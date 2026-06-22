@@ -178,6 +178,7 @@ export default function ProjectEditorPage({
           <button
             onClick={async () => {
               if (saveProject) {
+                appLogic.addNotification?.("Saving progress...", "info");
                 await saveProject(panels);
               }
             }}
