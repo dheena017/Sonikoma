@@ -130,8 +130,6 @@ export function useAppRouter({
     }
   }, []);
 
-
-
   // Core router change listener with equality guards
   React.useEffect(() => {
     const handleLocationChange = () => {
@@ -143,6 +141,7 @@ export function useAppRouter({
         if (!isAuthenticated) {
           const isProtectedRoute =
             path === "/dashboard" ||
+            path === "/workspace" ||
             path === "/settings" ||
             path === "/logs" ||
             path === "/status" ||
@@ -179,15 +178,18 @@ export function useAppRouter({
             path === "/login" ||
             path === "/register"
           ) {
-            const activeProjId = localStorage.getItem("active_project_id") || projectId;
-            const activeSeriesSlug = localStorage.getItem("active_series_slug") || seriesSlug;
-            const activeChapterSlug = localStorage.getItem("active_chapter_slug") || chapterSlug;
+            const activeProjId =
+              localStorage.getItem("active_project_id") || projectId;
+            const activeSeriesSlug =
+              localStorage.getItem("active_series_slug") || seriesSlug;
+            const activeChapterSlug =
+              localStorage.getItem("active_chapter_slug") || chapterSlug;
             let target = "/dashboard";
             if (activeProjId) {
               if (activeSeriesSlug && activeChapterSlug) {
                 target = `/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
               } else {
-                target = `/dashboard?id=${activeProjId}`;
+                target = `/workspace?id=${activeProjId}`;
               }
             }
             window.history.replaceState({}, "", target);
@@ -199,7 +201,8 @@ export function useAppRouter({
 
       const isSeriesPath = path.startsWith("/series/");
       const isChapterDetails = isSeriesPath && path.endsWith("/details");
-      const isWorkspacePath = path === "/dashboard" || (isSeriesPath && !isChapterDetails);
+      const isWorkspacePath =
+        path === "/workspace" || (isSeriesPath && !isChapterDetails);
 
       if (
         path === "/settings" ||
@@ -218,6 +221,8 @@ export function useAppRouter({
         path === "/profile" ||
         path === "/notifications" ||
         path === "/project-details" ||
+        path === "/dashboard" ||
+        path.startsWith("/display") ||
         isChapterDetails
       ) {
         setShowAutoCropModal(false);
@@ -309,14 +314,17 @@ export function useAppRouter({
         isAuthenticated &&
         (path === "/" || path === "" || path === "/index.html")
       ) {
-        const activeProjId = localStorage.getItem("active_project_id") || projectId;
-        const activeSeriesSlug = localStorage.getItem("active_series_slug") || seriesSlug;
-        const activeChapterSlug = localStorage.getItem("active_chapter_slug") || chapterSlug;
+        const activeProjId =
+          localStorage.getItem("active_project_id") || projectId;
+        const activeSeriesSlug =
+          localStorage.getItem("active_series_slug") || seriesSlug;
+        const activeChapterSlug =
+          localStorage.getItem("active_chapter_slug") || chapterSlug;
         if (activeProjId) {
           if (activeSeriesSlug && activeChapterSlug) {
             targetPath = `/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
           } else {
-            targetPath = `/dashboard?id=${activeProjId}`;
+            targetPath = `/workspace?id=${activeProjId}`;
           }
         } else {
           targetPath = "/dashboard";

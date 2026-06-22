@@ -194,7 +194,9 @@ export default function ProfilePage({
   });
   const [achievementPoints, setAchievementPoints] = React.useState(380);
   const [unlockedRewards, setUnlockedRewards] = React.useState<string[]>([]);
-  const [unlockedAchievements, setUnlockedAchievements] = React.useState<string[]>([]);
+  const [unlockedAchievements, setUnlockedAchievements] = React.useState<
+    string[]
+  >([]);
   const [portfolios, setPortfolios] = React.useState<any[]>([]);
   const [cacheUsed, setCacheUsed] = React.useState<number>(134637568); // 128.4 MB fallback
   const [cacheLimit, setCacheLimit] = React.useState<number>(5368709120); // 5 GB fallback
@@ -299,7 +301,11 @@ export default function ProfilePage({
           setConnections(loadedConnections);
 
           setUnlockedAchievements(data.unlocked_achievements || []);
-          setAchievementPoints(data.achievement_points !== undefined ? data.achievement_points : 380);
+          setAchievementPoints(
+            data.achievement_points !== undefined
+              ? data.achievement_points
+              : 380
+          );
 
           const loadedPortfolios = (data.portfolio_links || []).map(
             (url: string, idx: number) => {
@@ -633,7 +639,12 @@ export default function ProfilePage({
     }
   };
 
-  const handleSaveCard = async (card: { cardHolder: string; cardNo: string; cardExpiry: string; cardCvv: string }) => {
+  const handleSaveCard = async (card: {
+    cardHolder: string;
+    cardNo: string;
+    cardExpiry: string;
+    cardCvv: string;
+  }) => {
     const token =
       localStorage.getItem("anivox_token") ||
       sessionStorage.getItem("anivox_token");
@@ -660,7 +671,10 @@ export default function ProfilePage({
     }
   };
 
-  const handlePurchaseCredits = async (amountOfCredits: number, priceUSD: number) => {
+  const handlePurchaseCredits = async (
+    amountOfCredits: number,
+    priceUSD: number
+  ) => {
     const token =
       localStorage.getItem("anivox_token") ||
       sessionStorage.getItem("anivox_token");
@@ -1200,13 +1214,27 @@ export default function ProfilePage({
                   <div className="flex items-center justify-between text-[10px] text-neutral-400 font-semibold">
                     <span>AI Engine Credits</span>
                     <span className="text-white font-bold">
-                      {credits} / {Math.max(1000, Math.min(5000, Math.ceil(credits / 1000) * 1000))}
+                      {credits} /{" "}
+                      {Math.max(
+                        1000,
+                        Math.min(5000, Math.ceil(credits / 1000) * 1000)
+                      )}
                     </span>
                   </div>
                   <div className="h-1.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-purple-500 rounded-full"
-                      style={{ width: `${Math.min(100, (credits / Math.max(1000, Math.min(5000, Math.ceil(credits / 1000) * 1000))) * 100)}%` }}
+                      style={{
+                        width: `${Math.min(
+                          100,
+                          (credits /
+                            Math.max(
+                              1000,
+                              Math.min(5000, Math.ceil(credits / 1000) * 1000)
+                            )) *
+                            100
+                        )}%`,
+                      }}
                     />
                   </div>
                 </div>
@@ -1222,7 +1250,12 @@ export default function ProfilePage({
                   <div className="h-1.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-indigo-500 rounded-full"
-                      style={{ width: `${Math.min(100, (cacheUsed / cacheLimit) * 100)}%` }}
+                      style={{
+                        width: `${Math.min(
+                          100,
+                          (cacheUsed / cacheLimit) * 100
+                        )}%`,
+                      }}
                     />
                   </div>
                 </div>

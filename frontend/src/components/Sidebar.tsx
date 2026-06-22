@@ -10,6 +10,7 @@ import {
   Sparkles,
   X,
   LayoutDashboard,
+  Layout,
   ChevronDown,
   ChevronUp,
   FileText,
@@ -57,8 +58,13 @@ export default function Sidebar({
   seriesSlug = null,
   chapterSlug = null,
 }: SidebarProps) {
-  const chapterPathMatch = currentPath.match(/\/series\/[^\/]+\/chapters\/([^\/]+)/);
-  const isDashboard = currentPath === "/dashboard" || (chapterPathMatch !== null && !currentPath.endsWith("/details"));
+  const chapterPathMatch = currentPath.match(
+    /\/series\/[^\/]+\/chapters\/([^\/]+)/
+  );
+  const isWorkspace =
+    currentPath === "/workspace" ||
+    (chapterPathMatch !== null && !currentPath.endsWith("/details"));
+  const isDashboardOverview = currentPath === "/dashboard";
   const isSettings = currentPath === "/settings";
   const isAutoCrop = currentPath === "/auto-crop";
   const isBubbleCleaner = currentPath === "/bubble-cleaner";
@@ -69,7 +75,8 @@ export default function Sidebar({
   const isProjectDetails = currentPath === "/project-details";
 
   const params = new URLSearchParams(window.location.search);
-  const activeProjectId = params.get("id") || params.get("project_id") || projectId;
+  const activeProjectId =
+    params.get("id") || params.get("project_id") || projectId;
 
   const isAiSuiteActive =
     currentPath.startsWith("/ai-") || currentPath === "/panel-assistant";
@@ -101,22 +108,31 @@ export default function Sidebar({
     onClose(); // Close mobile drawer when navigating
   };
 
-  const handleNavigateToDashboard = () => {
+  const handleNavigateToWorkspace = () => {
     const activeProjId = activeProjectId || projectId;
-    const activeSeriesSlug = localStorage.getItem("active_series_slug") || seriesSlug;
-    const activeChapterSlug = localStorage.getItem("active_chapter_slug") || chapterSlug;
+    const activeSeriesSlug =
+      localStorage.getItem("active_series_slug") || seriesSlug;
+    const activeChapterSlug =
+      localStorage.getItem("active_chapter_slug") || chapterSlug;
 
-    if (currentPath.startsWith("/series/") && !currentPath.endsWith("/details")) {
+    if (
+      currentPath.startsWith("/series/") &&
+      !currentPath.endsWith("/details")
+    ) {
       navigateTo(currentPath);
     } else if (activeProjId) {
       if (activeSeriesSlug && activeChapterSlug) {
         navigateTo(`/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`);
       } else {
-        navigateTo(`/dashboard?id=${activeProjId}`);
+        navigateTo(`/workspace?id=${activeProjId}`);
       }
     } else {
-      navigateTo("/dashboard");
+      navigateTo("/workspace");
     }
+  };
+
+  const handleNavigateToDashboardOverview = () => {
+    navigateTo("/dashboard");
   };
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
@@ -128,8 +144,15 @@ export default function Sidebar({
         {
           label: "Dashboard",
           icon: LayoutDashboard,
-          active: isDashboard,
-          onClick: handleNavigateToDashboard,
+          active: isDashboardOverview,
+          onClick: handleNavigateToDashboardOverview,
+          enabled: true,
+        },
+        {
+          label: "Workspace",
+          icon: Layout,
+          active: isWorkspace,
+          onClick: handleNavigateToWorkspace,
           enabled: true,
         },
         ...(activeProjectId
@@ -139,15 +162,15 @@ export default function Sidebar({
                 icon: FileText,
                 active: isProjectDetails,
                 onClick: () => {
-                   if (window.location.pathname.startsWith("/series/")) {
-                     if (window.location.pathname.endsWith("/details")) {
-                       navigateTo(window.location.pathname);
-                     } else {
-                       navigateTo(`${window.location.pathname}/details`);
-                     }
-                   } else {
-                     navigateTo(`/project-details?id=${activeProjectId}`);
-                   }
+                  if (window.location.pathname.startsWith("/series/")) {
+                    if (window.location.pathname.endsWith("/details")) {
+                      navigateTo(window.location.pathname);
+                    } else {
+                      navigateTo(`${window.location.pathname}/details`);
+                    }
+                  } else {
+                    navigateTo(`/project-details?id=${activeProjectId}`);
+                  }
                 },
                 enabled: true,
               },
@@ -267,7 +290,7 @@ export default function Sidebar({
         <div className="flex items-center justify-between">
           <div
             className="flex items-center gap-3 cursor-pointer select-none hover:opacity-90 transition-opacity"
-            onClick={handleNavigateToDashboard}
+            onClick={handleNavigateToDashboardOverview}
           >
             <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-900/40 shrink-0">
               <Film className="h-5 w-5 text-white animate-pulse" />

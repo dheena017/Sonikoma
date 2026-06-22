@@ -121,6 +121,7 @@ interface UrlInputPanelProps {
   setSeriesSynopsis?: (synopsis: string) => void;
   smartSlice?: boolean;
   setSmartSlice?: (v: boolean) => void;
+  resetWorkspace?: () => void;
 }
 
 export default function UrlInputPanel(props: UrlInputPanelProps) {
@@ -154,18 +155,19 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
     setSeriesSynopsis,
     smartSlice = true,
     setSmartSlice,
+    resetWorkspace,
   } = props;
 
-  // Metadata card is hidden until a scrape populates the fields
+  // Metadata card is hidden until the user clicks Scrape Assets
   const [metadataRevealed, setMetadataRevealed] = React.useState(false);
-  const [metadataCollapsed, setMetadataCollapsed] = React.useState(false);
+  const [metadataCollapsed, setMetadataCollapsed] = React.useState(true);
 
-  // Reveal the card as soon as scraping starts or any field gets filled
+  // Reveal the card as soon as scraping starts
   React.useEffect(() => {
-    if (isScraping || seriesTitle || chapterNumber || scrapedGenre || seriesAuthor || seriesCoverImage || seriesSynopsis) {
+    if (isScraping) {
       setMetadataRevealed(true);
     }
-  }, [isScraping, seriesTitle, chapterNumber, scrapedGenre, seriesAuthor, seriesCoverImage, seriesSynopsis]);
+  }, [isScraping]);
 
   const source = selectedSource || "webtoons";
 
@@ -207,6 +209,11 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
     if (url) {
       const normalized = extractWebtoonUrl(url);
       console.log("Pasted URL:", url, "Normalized URL:", normalized);
+
+      if (normalized !== targetUrl && resetWorkspace) {
+        resetWorkspace();
+      }
+
       setTargetUrl(normalized);
       if (normalized !== url) {
         addNotification(
@@ -316,7 +323,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
         <div className="space-y-4">
           <div className="space-y-2">
             <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-purple-500 animate-ping" />
+              <span className="h-1.5 w-1.5 rounded-full bg-purple-500" />
               Choose source website
             </label>
             <div className="relative">
@@ -399,7 +406,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
             <div className="space-y-2.5 p-4 bg-purple-950/20 border border-purple-800/40 rounded-2xl animate-[fadeIn_0.22s_ease-out] shadow-xl">
               <div className="flex justify-between items-center text-[10px] font-mono text-purple-350 font-bold uppercase tracking-wider">
                 <span className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-purple-500 animate-ping" />
+                  <span className="h-2 w-2 rounded-full bg-purple-500" />
                   Extracting Webtoon assets
                 </span>
                 <span>Est. Wait Time: 15-45s</span>
@@ -415,13 +422,18 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
               </p>
             </div>
           )}
+
           {/* Series & Chapter Metadata Override Card — revealed after scrape */}
           {metadataRevealed && (
             <div
               className="border rounded-2xl overflow-hidden transition-all duration-500"
               style={{
-                borderColor: isScraping ? "rgba(139,92,246,0.5)" : "rgba(63,63,70,0.8)",
-                background: isScraping ? "rgba(88,28,135,0.08)" : "rgba(0,0,0,0.4)",
+                borderColor: isScraping
+                  ? "rgba(139,92,246,0.5)"
+                  : "rgba(63,63,70,0.8)",
+                background: isScraping
+                  ? "rgba(88,28,135,0.08)"
+                  : "rgba(0,0,0,0.4)",
                 animation: "slideDown 0.4s cubic-bezier(0.16,1,0.3,1)",
               }}
             >
@@ -434,12 +446,12 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                 <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-1.5">
                   <span
                     className={`h-1.5 w-1.5 rounded-full ${
-                      isScraping ? "bg-purple-400 animate-ping" : "bg-emerald-500"
+                      isScraping ? "bg-purple-400" : "bg-emerald-500"
                     }`}
                   />
                   Comic Series &amp; Chapter Metadata
                   {isScraping ? (
-                    <span className="ml-1.5 text-[9px] text-purple-400 font-mono animate-pulse">
+                    <span className="ml-1.5 text-[9px] text-purple-400 font-mono">
                       Auto-filling...
                     </span>
                   ) : (
@@ -454,7 +466,12 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                   </span>
                   <span
                     className="text-neutral-500 text-[10px] transition-transform duration-300"
-                    style={{ display: "inline-block", transform: metadataCollapsed ? "rotate(-90deg)" : "rotate(0deg)" }}
+                    style={{
+                      display: "inline-block",
+                      transform: metadataCollapsed
+                        ? "rotate(-90deg)"
+                        : "rotate(0deg)",
+                    }}
                   >
                     ▾
                   </span>
@@ -567,7 +584,6 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
               )}
             </div>
           )}
-
           {isSourceMismatch && (
             <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-[11px] text-amber-100 font-mono leading-5 mt-3">
               <strong className="block text-amber-200 mb-1">
@@ -586,9 +602,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
             <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
               <span
                 className={`h-1.5 w-1.5 rounded-full ${
-                  narrationStyle === "long"
-                    ? "bg-purple-500 animate-ping"
-                    : "bg-emerald-500 animate-ping"
+                  narrationStyle === "long" ? "bg-purple-500" : "bg-emerald-500"
                 }`}
               />
               AI Narration Style
@@ -644,9 +658,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
             <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
               <span
                 className={`h-1.5 w-1.5 rounded-full ${
-                  smartSlice
-                    ? "bg-indigo-500 animate-ping"
-                    : "bg-amber-500 animate-ping"
+                  smartSlice ? "bg-indigo-500" : "bg-amber-500"
                 }`}
               />
               Scrape Layout Mode
@@ -697,13 +709,13 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
           </div>
 
           <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-purple-500 animate-ping"></span>
+            <span className="h-1.5 w-1.5 rounded-full bg-purple-500"></span>
             Active AI Model Engine (Free Models Recommended)
           </label>
           {modelDropdown}
 
           {selectedModel.includes("pro") && (
-            <p className="text-[10.5px] text-amber-500/90 font-mono flex items-center gap-1.5 animate-pulse">
+            <p className="text-[10.5px] text-amber-500/90 font-mono flex items-center gap-1.5">
               <span>⚠️</span> Note: Pro models may require billing/credits.
               Flash models (Free) are highly recommended.
             </p>

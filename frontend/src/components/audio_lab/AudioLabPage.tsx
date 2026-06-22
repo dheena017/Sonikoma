@@ -37,7 +37,7 @@ export default function AudioLabPage({
           <div className="text-neutral-400 font-bold mb-1">
             💡 How to unlock:
           </div>
-          <div>1. Go to the main Dashboard workspace</div>
+          <div>1. Go to the main Workspace</div>
           <div>2. Enter a Webtoon URL to scrape image strips</div>
           <div>3. Slice the strips into storyboard panels</div>
         </div>
@@ -45,7 +45,7 @@ export default function AudioLabPage({
           onClick={onNavigateHome}
           className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-mono font-bold shadow-lg shadow-purple-900/40 transition-all cursor-pointer"
         >
-          Go to Dashboard
+          Go to Workspace
         </button>
       </div>
     );

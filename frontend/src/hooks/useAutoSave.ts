@@ -81,9 +81,10 @@ export function useAutoSave(state: AutoSaveState) {
   const getSerializedState = () => serializedState;
 
   // Compute dirty state on every render based on serializations
-  const isDirty = state.projectId && !state.projectId.startsWith("temp_")
-    ? serializedState !== lastSavedStateRef.current
-    : false;
+  const isDirty =
+    state.projectId && !state.projectId.startsWith("temp_")
+      ? serializedState !== lastSavedStateRef.current
+      : false;
 
   const prevProjectIdRef = useRef<string | null>(null);
   const wasScrapedImagesLoadedRef = useRef<boolean>(false);
@@ -238,7 +239,9 @@ export function useAutoSave(state: AutoSaveState) {
           state.setProjectId?.(targetProjectId);
           if (data.series_slug && data.chapter_slug) {
             const newPath = `/series/${data.series_slug}/chapters/${data.chapter_slug}`;
-            const isEditor = window.location.pathname.startsWith("/editor") || window.location.pathname === "/project-editor";
+            const isEditor =
+              window.location.pathname.startsWith("/editor") ||
+              window.location.pathname === "/project-editor";
             if (window.location.pathname !== newPath && !isEditor) {
               window.history.pushState(null, "", newPath);
             }
@@ -247,7 +250,11 @@ export function useAutoSave(state: AutoSaveState) {
             urlParams.delete("project_id");
             urlParams.delete("url");
             urlParams.set("id", targetProjectId);
-            window.history.pushState(null, "", window.location.pathname + "?" + urlParams.toString());
+            window.history.pushState(
+              null,
+              "",
+              window.location.pathname + "?" + urlParams.toString()
+            );
           }
         }
 

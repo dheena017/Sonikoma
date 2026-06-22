@@ -92,7 +92,10 @@ export default function LandingPage({
                 key={link.target}
                 onClick={() => {
                   const element = document.getElementById(link.target);
-                  element?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  element?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  });
                 }}
                 className="text-sm font-semibold text-neutral-400 hover:text-white transition-all cursor-pointer relative py-2 group bg-transparent border-0"
               >
@@ -202,7 +205,10 @@ export default function LandingPage({
       </section>
 
       {/* FEATURES GRID */}
-      <section id="features" className="py-32 px-6 bg-white/[0.02] scroll-mt-24">
+      <section
+        id="features"
+        className="py-32 px-6 bg-white/[0.02] scroll-mt-24"
+      >
         <div className="max-w-7xl mx-auto space-y-20">
           <div className="text-center space-y-4">
             <h2 className="text-4xl font-bold tracking-tight">
@@ -429,7 +435,10 @@ export default function LandingPage({
       </section>
 
       {/* PRICING PLANS */}
-      <section id="pricing" className="py-32 px-6 bg-white/[0.01] border-y border-white/5 scroll-mt-24">
+      <section
+        id="pricing"
+        className="py-32 px-6 bg-white/[0.01] border-y border-white/5 scroll-mt-24"
+      >
         <div className="max-w-7xl mx-auto space-y-16">
           <div className="text-center space-y-4">
             <h2 className="text-4xl font-bold tracking-tight">
@@ -586,7 +595,10 @@ export default function LandingPage({
       </section>
 
       {/* FAQ SECTION */}
-      <section id="faq" className="py-32 px-6 bg-white/[0.01] border-t border-white/5 scroll-mt-24">
+      <section
+        id="faq"
+        className="py-32 px-6 bg-white/[0.01] border-t border-white/5 scroll-mt-24"
+      >
         <div className="max-w-4xl mx-auto space-y-16">
           <div className="text-center space-y-4">
             <h2 className="text-4xl font-bold tracking-tight">

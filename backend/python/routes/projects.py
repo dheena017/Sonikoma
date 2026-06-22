@@ -445,3 +445,36 @@ async def batch_delete_projects(body: BatchDeleteRequest, current_user: dict = D
     except Exception as e:
         logger.error(f"Failed to batch delete projects: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to batch delete projects: {e}")
+
+
+@router.get("/public/{project_id}", summary="Get a project and its panels publicly (no auth)")
+async def get_public_project(project_id: str = Path(..., description="Project ID")):
+    try:
+        logger.info(f"[Database] Public query for project details and panels: {project_id}")
+        project = db.get_project(project_id)
+        if not project:
+            # Fallback to slug
+            project = db.get_project_by_slug(project_id)
+
+        if not project:
+            logger.warning(f"[Database] Public project {project_id} not found.")
+            raise HTTPException(status_code=404, detail="Project not found.")
+
+        # Ensure cover image is proxied
+        if project.get("cover_image"):
+            project["cover_image"] = wrap_proxy_url(project["cover_image"])
+
+        # Fetch panels
+        panels = db.get_panels(project["project_id"])
+        # Ensure all panel images are proxied
+        for p in panels:
+            if p.get("image_url"):
+                p["image_url"] = wrap_proxy_url(p["image_url"])
+
+        logger.info(f"[Database] Public project {project_id} found with {len(panels)} panels.")
+        return {"success": True, "project": project, "panels": panels}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to fetch public project: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to fetch public project: {e}")

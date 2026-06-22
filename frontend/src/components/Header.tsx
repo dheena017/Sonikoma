@@ -255,8 +255,6 @@ export default function Header({
     localStorage.setItem("app-autoplay-audio", String(autoPlayAudio));
   }, [autoPlayAudio]);
 
-
-
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const navigateTo = async (path: string) => {
@@ -311,23 +309,41 @@ export default function Header({
   const avgWordsPerPanel =
     totalWithSpeech > 0
       ? panels.reduce((sum, p) => {
-          const words = p.speech_text ? p.speech_text.trim().split(/\s+/).length : 0;
+          const words = p.speech_text
+            ? p.speech_text.trim().split(/\s+/).length
+            : 0;
           return sum + words;
         }, 0) / totalWithSpeech
       : 0;
   const ctrScore =
     panels.length === 0
       ? 0
-      : Math.min(10, parseFloat((3 + Math.min(avgWordsPerPanel / 8, 1) * 5 + (progressPercent / 100) * 2).toFixed(1)));
+      : Math.min(
+          10,
+          parseFloat(
+            (
+              3 +
+              Math.min(avgWordsPerPanel / 8, 1) * 5 +
+              (progressPercent / 100) * 2
+            ).toFixed(1)
+          )
+        );
 
   // Cliffhanger Ending Index: based on last panel's speech, sfx, and motion dynamism
   const lastPanel = panels.length > 0 ? panels[panels.length - 1] : null;
   const cliffhangerScore = (() => {
     if (!lastPanel) return "—";
-    const hasText = lastPanel.speech_text && lastPanel.speech_text.trim().length > 10;
+    const hasText =
+      lastPanel.speech_text && lastPanel.speech_text.trim().length > 10;
     const hasSfx = lastPanel.sfx && lastPanel.sfx.trim().length > 0;
-    const dynamicMotion = ["zoom_in", "zoom_out", "pan_left", "pan_right"].includes(lastPanel.motion_type);
-    const score = (hasText ? 1 : 0) + (hasSfx ? 1 : 0) + (dynamicMotion ? 1 : 0);
+    const dynamicMotion = [
+      "zoom_in",
+      "zoom_out",
+      "pan_left",
+      "pan_right",
+    ].includes(lastPanel.motion_type);
+    const score =
+      (hasText ? 1 : 0) + (hasSfx ? 1 : 0) + (dynamicMotion ? 1 : 0);
     if (score === 3) return "Strong";
     if (score === 2) return "Moderate";
     if (score === 1) return "Weak";
@@ -930,8 +946,6 @@ export default function Header({
                     className="w-4 h-4 rounded bg-neutral-950 border border-neutral-850 accent-purple-500 cursor-pointer"
                   />
                 </div>
-
-
               </div>
 
               {/* Color Theme Selector */}
@@ -1005,7 +1019,10 @@ export default function Header({
         {projectId && (
           <div className="flex items-center gap-2 mr-1">
             {isDirty && (
-              <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse" title="Unsaved changes" />
+              <span
+                className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse"
+                title="Unsaved changes"
+              />
             )}
             <button
               onClick={onSave}

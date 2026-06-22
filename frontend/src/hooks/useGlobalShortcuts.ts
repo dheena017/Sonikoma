@@ -126,7 +126,8 @@ export function useGlobalShortcuts({
 
       // Find matched keybind action — guard against undefined/null shortcut values
       const matchedAction = Object.entries(shortcuts).find(
-        ([_, val]) => typeof val === "string" && val.toLowerCase() === combination
+        ([_, val]) =>
+          typeof val === "string" && val.toLowerCase() === combination
       )?.[0];
 
       if (!matchedAction) return;
@@ -134,8 +135,12 @@ export function useGlobalShortcuts({
       event.preventDefault();
 
       const path = window.location.pathname;
-      const chapterPathMatch = path.match(/\/series\/[^\/]+\/chapters\/([^\/]+)/);
-      const isDashboard = path === "/dashboard" || (chapterPathMatch !== null && !path.endsWith("/details"));
+      const chapterPathMatch = path.match(
+        /\/series\/[^\/]+\/chapters\/([^\/]+)/
+      );
+      const isDashboard =
+        path === "/dashboard" ||
+        (chapterPathMatch !== null && !path.endsWith("/details"));
       const isEditor = path.startsWith("/editor");
 
       switch (matchedAction) {

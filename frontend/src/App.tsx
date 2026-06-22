@@ -44,6 +44,8 @@ import LoadingPage from "./components/LoadingPage.js";
 import ProjectDetailsPage from "./components/ProjectDetailsPage.js";
 import ProjectEditorPage from "./components/ProjectEditorPage.js";
 import SeriesDetailsPage from "./components/SeriesDetailsPage.js";
+import DisplayPage from "./components/DisplayPage.js";
+import DashboardPage from "./components/DashboardPage.js";
 
 // --- AI Creator & Engagement Suite Views ---
 import AIOptimizerPage from "./components/optimizer/AIOptimizerPage.js";
@@ -359,6 +361,7 @@ export default function App() {
     fetchWithInterceptor,
     targetUrl,
     setTargetUrl,
+    resetWorkspace,
   } = appLogic;
 
   // --- Effect: Fade out and remove static HTML splash screen once React app is ready ---
@@ -448,7 +451,7 @@ export default function App() {
       if (seriesSlugState && chapterSlugState) {
         navigateTo(`/series/${seriesSlugState}/chapters/${chapterSlugState}`);
       } else {
-        navigateTo(`/dashboard?id=${projectId}`);
+        navigateTo(`/workspace?id=${projectId}`);
       }
     } else {
       navigateTo("/dashboard");
@@ -493,11 +496,16 @@ export default function App() {
   // --------------------------------------------------------------------------
   // SUB-SECTION 2.2: ROUTING / NAVIGATION PATH CHECKS
   // --------------------------------------------------------------------------
-  const chapterPathMatch = currentPath.match(/\/series\/[^\/]+\/chapters\/([^\/]+)/);
+  const chapterPathMatch = currentPath.match(
+    /\/series\/[^\/]+\/chapters\/([^\/]+)/
+  );
   const isDetailsMode = currentPath.endsWith("/details");
 
-  const isDashboardPath = currentPath === "/dashboard" || (chapterPathMatch !== null && !isDetailsMode);
-  const isDashboardOnly = isDashboardPath;
+  const isWorkspacePath =
+    currentPath === "/workspace" ||
+    (chapterPathMatch !== null && !isDetailsMode);
+  const isWorkspaceOnly = isWorkspacePath;
+  const isDashboardOverviewPath = currentPath === "/dashboard";
   const isSettingsPath = currentPath === "/settings";
   const isAutoCropPath = currentPath === "/auto-crop";
   const isBubbleCleanerPath = currentPath === "/bubble-cleaner";
@@ -531,6 +539,7 @@ export default function App() {
   const isLoginPath = currentPath === "/login";
   const isRegisterPath = currentPath === "/register";
   const isForgotPasswordPath = currentPath === "/forgot-password";
+  const isDisplayPath = currentPath.startsWith("/display/");
 
   const headerProjectId = isChapterDetailsPath ? detailsProjectId : projectId;
   const headerIsDirty = isChapterDetailsPath ? projectDetailsDirty : isDirty;
@@ -549,7 +558,9 @@ export default function App() {
 
   // --- Guard: Session Initialization loading state ---
   if (isInitializing || authLoading) {
-    const loadingStatus = isInitializing ? "Initializing App..." : "Checking Authentication...";
+    const loadingStatus = isInitializing
+      ? "Initializing App..."
+      : "Checking Authentication...";
     return <LoadingPage status={loadingStatus} />;
   }
 
@@ -597,13 +608,20 @@ export default function App() {
     );
   }
 
+  // --- Guard: Public Display Page ---
+  if (isDisplayPath) {
+    const displayProjectId = currentPath.split("/")[2] || "";
+    return <DisplayPage projectId={displayProjectId} />;
+  }
+
   // --- Guard: Protected Route Redirect ---
   if (
     !isAuthenticated &&
     !isLandingPath &&
     !isLoginPath &&
     !isRegisterPath &&
-    !isForgotPasswordPath
+    !isForgotPasswordPath &&
+    !isDisplayPath
   ) {
     setTimeout(() => navigateTo("/"), 0);
     return null;
@@ -751,13 +769,13 @@ export default function App() {
             setNotificationsMuted={setNotificationsMuted}
           />
 
-          {/* PAGE VIEW 1: Main Dashboard Workspace */}
+          {/* PAGE VIEW 1: Main Editor Workspace */}
           <div
             className="page-transition w-full flex-1 flex flex-col animate-[fadeIn_0.2s_ease-out]"
-            style={{ display: isDashboardPath ? "flex" : "none" }}
+            style={{ display: isWorkspacePath ? "flex" : "none" }}
           >
             <AppWorkspace
-              isDashboardOnly={isDashboardOnly}
+              isDashboardOnly={isWorkspaceOnly}
               projectId={projectId}
               isGeneratingStoryboard={isGeneratingStoryboard}
               handleGenerateStoryboardAI={handleGenerateStoryboardAI}
@@ -789,6 +807,7 @@ export default function App() {
               isBatchCropping={isBatchCropping}
               batchProgress={batchProgress}
               croppingImgUrl={croppingImgUrl}
+              resetWorkspace={resetWorkspace}
               handleAutoCropSelected={handleAutoCropSelected}
               handleCleanBubblesSelected={handleCleanBubblesSelected}
               scrapeImages={scrapeImages}
@@ -865,6 +884,13 @@ export default function App() {
               setShowScrapeConfirmModal={setShowScrapeConfirmModal}
             />
           </div>
+
+          {/* PAGE VIEW 1.5: Dashboard Overview */}
+          {isDashboardOverviewPath && (
+            <div className="page-transition w-full flex-1 flex flex-col animate-[fadeIn_0.2s_ease-out] overflow-y-auto">
+              <DashboardPage />
+            </div>
+          )}
 
           {/* PAGE VIEW 2: Advanced System Configuration Settings */}
           {isSettingsPath && (
@@ -1172,26 +1198,31 @@ export default function App() {
           )}
 
           {/* PAGE VIEW 20: Advanced Crop & Trim Editor Page */}
-          {isEditorPath && !isPipMode && editingImageIdx !== null && (
-            scrapedImages.length === 0 ? (
+          {isEditorPath &&
+            !isPipMode &&
+            editingImageIdx !== null &&
+            (scrapedImages.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center min-h-[500px] text-neutral-400">
                 <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4" />
-                <p className="text-sm font-semibold font-mono text-purple-300">Loading project storyboard panels...</p>
+                <p className="text-sm font-semibold font-mono text-purple-300">
+                  Loading project storyboard panels...
+                </p>
               </div>
             ) : (
               <CropEditorModal
                 isPage={true}
                 appLogic={{ ...appLogic, isPipMode, setIsPipMode }}
               />
-            )
-          )}
+            ))}
 
           {/* PAGE VIEW 21: Dedicated Project Workspace Editor Page */}
-          {isProjectEditorPath && (
-            scrapedImages.length === 0 ? (
+          {isProjectEditorPath &&
+            (scrapedImages.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center min-h-[500px] text-neutral-400">
                 <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4" />
-                <p className="text-sm font-semibold font-mono text-purple-300">Loading project editor workspace...</p>
+                <p className="text-sm font-semibold font-mono text-purple-300">
+                  Loading project editor workspace...
+                </p>
               </div>
             ) : (
               <ProjectEditorPage
@@ -1199,11 +1230,10 @@ export default function App() {
                 onNavigateHome={handleNavigateHome}
                 navigateTo={navigateTo}
               />
-            )
-          )}
+            ))}
 
           {/* FALLBACK VIEW: 404 Route Not Found */}
-          {!isDashboardPath &&
+          {!isWorkspacePath &&
             !isSettingsPath &&
             !isAutoCropPath &&
             !isBubbleCleanerPath &&
@@ -1253,7 +1283,7 @@ export default function App() {
       />
 
       {/* Dashboard Modal: Batch Panel Auto Crop */}
-      {isDashboardPath && showAutoCropModal && (
+      {isWorkspacePath && showAutoCropModal && (
         <AutoCropModal
           isPage={false}
           onClose={() => setShowAutoCropModal(false)}
@@ -1310,7 +1340,7 @@ export default function App() {
       )}
 
       {/* Dashboard Modal: Batch Speech Bubble Cleaner */}
-      {isDashboardPath && showBubbleModal && (
+      {isWorkspacePath && showBubbleModal && (
         <BubbleCleanerModal
           isPage={false}
           onClose={() => setShowBubbleModal(false)}
@@ -1348,7 +1378,7 @@ export default function App() {
       )}
 
       {/* Dashboard Modal: Advanced Crop & Trim Editor */}
-      {isDashboardPath && !isPipMode && editingImageIdx !== null && (
+      {isWorkspacePath && !isPipMode && editingImageIdx !== null && (
         <CropEditorModal
           isPage={false}
           appLogic={{ ...appLogic, isPipMode, setIsPipMode }}

@@ -155,7 +155,7 @@ export default function ShortcutsPage({
       id.startsWith("deck_") ||
       id.startsWith("volume_")
     )
-      scope = "Dashboard Only";
+      scope = "Workspace Only";
 
     return { label: formattedId, scope };
   };
@@ -180,7 +180,7 @@ export default function ShortcutsPage({
               className="hover:text-purple-400 cursor-pointer"
               onClick={onNavigateHome}
             >
-              Dashboard
+              Workspace
             </span>
             <span>&gt;</span>
             <span className="text-purple-400">Key Bindings</span>
@@ -207,7 +207,7 @@ export default function ShortcutsPage({
             className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg shadow-purple-950/30"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            Dashboard
+            Workspace
           </button>
         </div>
       </div>

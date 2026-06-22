@@ -11,10 +11,13 @@ const LOADING_TIPS = [
   "Select from multiple AI Voice Actors to narrate your webtoon.",
   "Enable Smart Slice for automatic webtoon strip division.",
   "Check the System Diagnostics page to view GPU utilization.",
-  "Stitch adjacent panels to create wide landscape scenes."
+  "Stitch adjacent panels to create wide landscape scenes.",
 ];
 
-export default function LoadingPage({ status = "Initializing", progress }: LoadingPageProps) {
+export default function LoadingPage({
+  status = "Initializing",
+  progress,
+}: LoadingPageProps) {
   const [tipIndex, setTipIndex] = useState(0);
   const [fadeState, setFadeState] = useState<"in" | "out">("in");
 
@@ -30,7 +33,9 @@ export default function LoadingPage({ status = "Initializing", progress }: Loadi
   }, []);
 
   const hasProgress = progress !== undefined && progress >= 0;
-  const clampedProgress = hasProgress ? Math.min(100, Math.max(0, progress)) : 0;
+  const clampedProgress = hasProgress
+    ? Math.min(100, Math.max(0, progress))
+    : 0;
 
   return (
     <div
@@ -128,7 +133,13 @@ export default function LoadingPage({ status = "Initializing", progress }: Loadi
               boxShadow: "0 8px 24px rgba(168,85,247,0.4)",
             }}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" width={40} height={40}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 32 32"
+              fill="none"
+              width={40}
+              height={40}
+            >
               <path d="M8 8h16v10H14l-4 4v-4H8z" fill="#ffffff" />
               <polygon points="13,11 19,13 13,15" fill="url(#lg)" />
               <defs>
@@ -246,8 +257,19 @@ export default function LoadingPage({ status = "Initializing", progress }: Loadi
                 animation: "lp-spin 1s linear infinite",
               }}
             >
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity={0.15} />
-              <path fill="currentColor" opacity={0.85} d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="3"
+                opacity={0.15}
+              />
+              <path
+                fill="currentColor"
+                opacity={0.85}
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
             </svg>
           )}
         </div>
@@ -272,7 +294,7 @@ export default function LoadingPage({ status = "Initializing", progress }: Loadi
               lineHeight: "1.4",
               margin: 0,
               opacity: fadeState === "in" ? 1 : 0,
-              transform: `translateY(${fadeState === 'in' ? '0' : '4px'})`,
+              transform: `translateY(${fadeState === "in" ? "0" : "4px"})`,
               transition: "opacity 0.5s ease, transform 0.5s ease",
             }}
           >
@@ -302,4 +324,3 @@ export default function LoadingPage({ status = "Initializing", progress }: Loadi
     </div>
   );
 }
-

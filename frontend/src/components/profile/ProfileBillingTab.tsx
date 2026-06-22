@@ -17,7 +17,12 @@ interface ProfileBillingTabProps {
   streakDays: number;
   subscriptionTier: string;
   cardInfo: any;
-  onUpdateCard: (card: { cardHolder: string; cardNo: string; cardExpiry: string; cardCvv: string }) => Promise<void>;
+  onUpdateCard: (card: {
+    cardHolder: string;
+    cardNo: string;
+    cardExpiry: string;
+    cardCvv: string;
+  }) => Promise<void>;
   onUpgradePlan: () => Promise<void>;
   onPurchaseCredits: (credits: number, priceUSD: number) => Promise<void>;
 }
@@ -115,7 +120,9 @@ export default function ProfileBillingTab({
               Subscription Plan
             </span>
             <h3 className="text-2xl font-black text-white">
-              {subscriptionTier === "pro" ? "Creator Studio Pro Tier" : "Creator Studio Free Tier"}
+              {subscriptionTier === "pro"
+                ? "Creator Studio Pro Tier"
+                : "Creator Studio Free Tier"}
             </h3>
             <p className="text-xs text-neutral-500 font-semibold">
               {subscriptionTier === "pro"
