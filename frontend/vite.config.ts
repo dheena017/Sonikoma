@@ -269,10 +269,18 @@ export default defineConfig(({ mode }) => {
         process.env.DISABLE_HMR === "true"
           ? null
           : {
+              // Only watch frontend source files — backend/DB/script changes must NOT trigger a reload
+              include: [
+                path.resolve(__dirname, "src/**"),
+                path.resolve(__dirname, "index.html"),
+                path.resolve(__dirname, "public/**"),
+              ],
               ignored: [
-                "**/database/**",
                 "**/.venv/**",
                 "**/backend/**",
+                "**/scripts/**",
+                "**/data/**",
+                "**/database/**",
                 "**/*.db",
                 "**/*.db-journal",
                 "**/*.db-wal",
