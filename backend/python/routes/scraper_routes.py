@@ -290,81 +290,162 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
                 logger.info(f"[Scraper] Slicing/cropping comic images into panels...")
                 t_slice_start = time.time()
                 final_images = []
-                
-                for idx, item in enumerate(resolved_buffers_data):
-                    img_url = item["url"]
-                    image_buffer = item["data"]
-                    content_type = item["content_type"]
-                    
+
+                # Step 1: Stitch all pages into 1 tall master image
+                logger.info(f"[Scraper] [smart_slice] Step 1: Stitching {len(resolved_buffers_data)} pages into 1 tall master image...")
+                try:
+                    stitched_bytes = await asyncio.to_thread(
+                        img_utils.stitch_images_together,
+                        image_buffers=[item["data"] for item in resolved_buffers_data],
+                        layout="vertical",
+                        spacing=0,
+                        spacing_color="white",
+                        scale_to_fit=True,
+                        align_mode="center",
+                        padding=0
+                    )
+                except Exception as stitch_err:
+                    logger.error(f"[Scraper] Stitching failed for smart_slice: {stitch_err}")
+                    stitched_bytes = resolved_buffers_data[0]["data"]
+
+                # Step 2: Run local CV panel detection on the tall master image
+                logger.info("[Scraper] [smart_slice] Step 2: Running CV panel detection on the tall master image...")
+                coord_panels = []
+                with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_in:
+                    tmp_in.write(stitched_bytes)
+                    temp_in_path = tmp_in.name
+
+                try:
+                    coord_panels = await asyncio.to_thread(
+                        run_cv_detection,
+                        image_path=temp_in_path,
+                        sensitivity=30.0,
+                        bg_mode="auto",
+                        min_width_pct=0.15,
+                        min_height_px=60,
+                        merge_threshold=20,
+                        aspect_ratio_str="free",
+                        canny_low=20,
+                        canny_high=100,
+                        close_kernel_size=15,
+                        auto_split=True
+                    )
+                except Exception as cv_err:
+                    logger.error(f"[Scraper] CV panel detection failed: {cv_err}")
+                finally:
+                    if os.path.exists(temp_in_path):
+                        os.remove(temp_in_path)
+
+                # Step 3: AI will analyze each CV-detected strip/panel and crop it
+                if coord_panels:
+                    logger.info(f"[Scraper] [smart_slice] Step 3: Running AI analysis and cropping on {len(coord_panels)} CV-detected panels...")
                     try:
-                        img = Image.open(io.BytesIO(image_buffer))
-                        w, h = img.size
-                        
-                        # Only slice if it's a vertical strip (height/width > 1.2)
-                        if h / w > 1.2:
-                            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_in:
-                                tmp_in.write(image_buffer)
-                                temp_in_path = tmp_in.name
-                                
+                        stitched_img = Image.open(io.BytesIO(stitched_bytes))
+                        sw, sh = stitched_img.size
+
+                        from config.clients import ai_initialized
+                        from skills.registry import registry
+                        import json
+
+                        for p_idx, box in enumerate(coord_panels):
                             try:
-                                # Run local CV panel detection with defaults
-                                coord_panels = await asyncio.to_thread(
-                                    run_cv_detection,
-                                    image_path=temp_in_path,
-                                    sensitivity=30.0,
-                                    bg_mode="auto",
-                                    min_width_pct=0.15,
-                                    min_height_px=60,
-                                    merge_threshold=20,
-                                    aspect_ratio_str="free",
-                                    canny_low=20,
-                                    canny_high=100,
-                                    close_kernel_size=15,
-                                    auto_split=True
-                                )
-                            finally:
-                                if os.path.exists(temp_in_path):
-                                    os.remove(temp_in_path)
-                                    
-                            if coord_panels and len(coord_panels) > 1:
-                                logger.info(f"[Scraper] Slicing strip {idx + 1} into {len(coord_panels)} panels")
-                                for p_idx, box in enumerate(coord_panels):
-                                    p_top = max(0.0, min(100.0, float(box.get("cropTop", 0))))
-                                    p_bottom = max(0.0, min(100.0, float(box.get("cropBottom", 0))))
-                                    p_left = max(0.0, min(100.0, float(box.get("cropLeft", 0))))
-                                    p_right = max(0.0, min(100.0, float(box.get("cropRight", 0))))
+                                p_top = max(0.0, min(100.0, float(box.get("cropTop", 0))))
+                                p_bottom = max(0.0, min(100.0, float(box.get("cropBottom", 0))))
+                                p_left = max(0.0, min(100.0, float(box.get("cropLeft", 0))))
+                                p_right = max(0.0, min(100.0, float(box.get("cropRight", 0))))
 
-                                    top_px = int(round((p_top / 100.0) * h))
-                                    bot_px = int(round((p_bottom / 100.0) * h))
-                                    left_px = int(round((p_left / 100.0) * w))
-                                    right_px = int(round((p_right / 100.0) * w))
+                                top_px = int(round((p_top / 100.0) * sh))
+                                bot_px = int(round((p_bottom / 100.0) * sh))
+                                left_px = int(round((p_left / 100.0) * sw))
+                                right_px = int(round((p_right / 100.0) * sw))
 
-                                    crop_w = w - left_px - right_px
-                                    crop_h = h - top_px - bot_px
-                                    
-                                    if crop_w > 10 and crop_h > 10:
-                                        cropped_img = img.crop((left_px, top_px, left_px + crop_w, top_px + crop_h))
-                                        out = io.BytesIO()
-                                        save_format = img.format or "JPEG"
-                                        cropped_img.save(out, format=save_format)
-                                        cropped_buffer = out.getvalue()
-                                        
-                                        unique_id = f"merged_{int(time.time() * 1000)}_smartcrop_{idx}_{p_idx}_{random.randint(0, 1000)}"
-                                        cached_url = f"/api/merge-images/cached/{unique_id}"
-                                        
-                                        stitched_cache.set(unique_id, {"data": cropped_buffer, "content_type": content_type})
-                                        edit_history.set(cached_url, img_url)
-                                        final_images.append(cached_url)
-                            else:
-                                final_images.append(img_url)
-                        else:
-                            final_images.append(img_url)
-                    except Exception as slice_err:
-                        logger.warning(f"[Scraper] Failed to slice image {idx}: {slice_err}")
-                        final_images.append(img_url)
-                        
+                                crop_w = sw - left_px - right_px
+                                crop_h = sh - top_px - bot_px
+
+                                if crop_w > 10 and crop_h > 10:
+                                    cropped_candidate = stitched_img.crop((left_px, top_px, left_px + crop_w, top_px + crop_h))
+
+                                    # Convert candidate to bytes
+                                    candidate_out = io.BytesIO()
+                                    cropped_candidate.save(candidate_out, format="JPEG")
+                                    candidate_bytes = candidate_out.getvalue()
+
+                                    refined_crop = None
+                                    if ai_initialized:
+                                        try:
+                                            smart_crop_skill = registry.get("smart_crop")
+                                            if smart_crop_skill:
+                                                logger.info(f"[Scraper] Calling Gemini smart_crop for panel {p_idx + 1}/{len(coord_panels)}...")
+                                                raw_text = await smart_crop_skill.execute(
+                                                    model="gemini-2.5-flash",
+                                                    image_bytes=candidate_bytes,
+                                                    guidance_instructions="Identify the primary comic box/artwork within this CV-isolated crop. Crop tightly to remove any extra solid margin colors or empty padding."
+                                                )
+                                                data = json.loads(raw_text)
+                                                raw_panels = data.get("panels", [])
+                                                if raw_panels:
+                                                    box_ai = raw_panels[0]
+                                                    y1 = max(0.0, min(100.0, float(box_ai.get("cropTop", 0))))
+                                                    y2 = max(0.0, min(100.0, float(box_ai.get("cropBottom", 0))))
+                                                    x1 = max(0.0, min(100.0, float(box_ai.get("cropLeft", 0))))
+                                                    x2 = max(0.0, min(100.0, float(box_ai.get("cropRight", 0))))
+
+                                                    if y1 > y2: y1, y2 = y2, y1
+                                                    if x1 > x2: x1, x2 = x2, x1
+
+                                                    refined_crop = {
+                                                        "cropTop": y1,
+                                                        "cropBottom": 100.0 - y2,
+                                                        "cropLeft": x1,
+                                                        "cropRight": 100.0 - x2
+                                                    }
+                                        except Exception as ai_err:
+                                            logger.warning(f"[Scraper] Gemini smart crop failed on panel {p_idx}: {ai_err}. Using CV crop.")
+
+                                    final_cropped_img = cropped_candidate
+                                    if refined_crop:
+                                        cw, ch = cropped_candidate.size
+                                        r_top = max(0.0, min(100.0, refined_crop["cropTop"]))
+                                        r_bottom = max(0.0, min(100.0, refined_crop["cropBottom"]))
+                                        r_left = max(0.0, min(100.0, refined_crop["cropLeft"]))
+                                        r_right = max(0.0, min(100.0, refined_crop["cropRight"]))
+
+                                        r_top_px = int(round((r_top / 100.0) * ch))
+                                        r_bot_px = int(round((r_bottom / 100.0) * ch))
+                                        r_left_px = int(round((r_left / 100.0) * cw))
+                                        r_right_px = int(round((r_right / 100.0) * cw))
+
+                                        ref_w = cw - r_left_px - r_right_px
+                                        ref_h = ch - r_top_px - r_bot_px
+
+                                        if ref_w > 10 and ref_h > 10:
+                                            final_cropped_img = cropped_candidate.crop((r_left_px, r_top_px, r_left_px + ref_w, r_top_px + ref_h))
+                                            logger.info(f"[Scraper] Panel {p_idx + 1} refined by Gemini AI.")
+
+                                    out = io.BytesIO()
+                                    save_format = stitched_img.format or "JPEG"
+                                    if save_format not in ["JPEG", "PNG"]:
+                                        save_format = "JPEG"
+                                    final_cropped_img.save(out, format=save_format)
+                                    cropped_buffer = out.getvalue()
+
+                                    unique_id = f"merged_{int(time.time() * 1000)}_smartcrop_{p_idx}_{random.randint(0, 1000)}"
+                                    cached_url = f"/api/merge-images/cached/{unique_id}"
+
+                                    stitched_cache.set(unique_id, {"data": cropped_buffer, "content_type": f"image/{save_format.lower()}"})
+                                    edit_history.set(cached_url, proxied_urls[0])
+                                    final_images.append(cached_url)
+                            except Exception as panel_err:
+                                logger.warning(f"[Scraper] Failed to process panel {p_idx}: {panel_err}")
+                    except Exception as img_err:
+                        logger.error(f"[Scraper] Image opening failed for cropping: {img_err}")
+                        final_images = proxied_urls
+                else:
+                    logger.info("[Scraper] No panels detected on stitched image. Falling back to original pages.")
+                    final_images = proxied_urls
+
                 elapsed = round((time.time() - t_slice_start) * 1000, 2)
-                logger.info(f"[Scraper] Auto-sliced panels generated successfully in {elapsed}ms. Total sliced: {len(final_images)} panels from {len(resolved_buffers_data)} strips.")
+                logger.info(f"[Scraper] Auto-sliced panels generated successfully in {elapsed}ms. Total sliced: {len(final_images)} panels from stitched master.")
 
         # Automatically generate project details in SQLite if authenticated (0 panels, project entry only)
         project_id = body.project_id or generate_project_id()
