@@ -145,6 +145,76 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
         final_images = proxied_urls
         cache_hit = False
 
+        # ── Width-normalisation pass (scrape_only / Separate Panel Images mode) ──
+        # Resize every image to the same width as the first image, preserving
+        # each image's own height proportionally, so all panels render at the
+        # same width in the storyboard grid.
+        if getattr(body, "scrape_only", False) and len(proxied_urls) > 1:
+            try:
+                logger.info(f"[Scraper] Starting width-normalisation for {len(proxied_urls)} images...")
+                t_norm_start = time.time()
+
+                async with httpx.AsyncClient(follow_redirects=True, timeout=60.0,
+                                              limits=httpx.Limits(max_connections=30)) as client:
+                    sem = asyncio.Semaphore(10)
+
+                    async def fetch_norm(url):
+                        async with sem:
+                            return await img_utils.resolve_image_to_buffer(url, client=client)
+
+                    results = await asyncio.gather(
+                        *[fetch_norm(u) for u in proxied_urls],
+                        return_exceptions=True
+                    )
+
+                # Determine canonical width from first successfully fetched image
+                canonical_w = None
+                for res in results:
+                    if not isinstance(res, Exception):
+                        try:
+                            img_probe = Image.open(io.BytesIO(res["data"]))
+                            canonical_w = img_probe.size[0]
+                            break
+                        except Exception:
+                            continue
+
+                if canonical_w:
+                    normalised_urls = []
+                    for idx, (url, res) in enumerate(zip(proxied_urls, results)):
+                        if isinstance(res, Exception):
+                            normalised_urls.append(url)
+                            continue
+                        try:
+                            img = Image.open(io.BytesIO(res["data"]))
+                            w, h = img.size
+                            if w != canonical_w:
+                                new_h = max(1, int(round(h * (canonical_w / w))))
+                                img = img.resize((canonical_w, new_h), Image.Resampling.LANCZOS)
+                            out = io.BytesIO()
+                            fmt = img.format or "JPEG"
+                            if img.mode == "RGBA" and fmt == "JPEG":
+                                img = img.convert("RGB")
+                            img.save(out, format=fmt, quality=90)
+                            img_bytes = out.getvalue()
+
+                            uid = f"norm_{int(time.time() * 1000)}_{idx}_{random.randint(0, 9999)}"
+                            cached_url = f"/api/merge-images/cached/{uid}"
+                            stitched_cache.set(uid, {"data": img_bytes, "content_type": res.get("contentType", "image/jpeg")})
+                            edit_history.set(cached_url, url)
+                            normalised_urls.append(cached_url)
+                        except Exception as norm_err:
+                            logger.warning(f"[Scraper] Width-norm failed for image {idx}: {norm_err}")
+                            normalised_urls.append(url)
+
+                    final_images = normalised_urls
+                    elapsed = round((time.time() - t_norm_start) * 1000, 2)
+                    logger.info(f"[Scraper] Width-normalisation done in {elapsed}ms. Canonical width: {canonical_w}px")
+                else:
+                    logger.warning("[Scraper] Could not determine canonical width — skipping normalisation")
+            except Exception as norm_ex:
+                logger.warning(f"[Scraper] Width-normalisation pass failed: {norm_ex}")
+
+
         if not getattr(body, "scrape_only", False):
             # Check cache for an existing stitched strip for this exact URL
             cache_key = f"stitched_full_{normalized_url}"
