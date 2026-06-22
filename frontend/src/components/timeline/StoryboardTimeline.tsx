@@ -238,7 +238,7 @@ export default function StoryboardTimeline({
 
       for (const panel of targetPanels) {
         try {
-          const res = await activeFetch("/api/remove-speech-bubbles", {
+          const res = await activeFetch("/api/image/remove-speech-bubbles", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -358,7 +358,7 @@ export default function StoryboardTimeline({
               let croppedUrl = box.croppedUrl;
 
               if (!croppedUrl) {
-                const cropRes = await activeFetch("/api/edit-image", {
+                const cropRes = await activeFetch("/api/image/edit", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
@@ -433,7 +433,7 @@ export default function StoryboardTimeline({
     const activeFetch = fetchWithInterceptor || fetch;
 
     try {
-      const response = await activeFetch("/api/stitch-images", {
+      const response = await activeFetch("/api/image/merge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

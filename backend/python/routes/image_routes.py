@@ -83,7 +83,7 @@ class RemoveBubblesRequest(BaseModel):
 
 # ─── Image Editing & Transform Routes ──────────────────────────────────────────
 
-@router.post("/edit-image", summary="Crop, rotate, and auto-trim an image panel")
+@router.post("/edit", summary="Crop, rotate, and auto-trim an image panel")
 async def edit_image(body: EditImageRequest):
     logger.info(f"[Image Edit] Request received for URL: {body.url[:60]}...")
     try:
@@ -148,7 +148,7 @@ async def edit_image(body: EditImageRequest):
 
         # Cache in memory
         unique_id = f"merged_{int(time.time() * 1000)}_cropped"
-        new_url = f"/api/merge-images/cached/{unique_id}"
+        new_url = f"/api/image/cached/{unique_id}"
         
         stitched_cache.set(unique_id, {"data": img_buffer, "content_type": content_type})
         edit_history.set(new_url, body.url)
@@ -168,7 +168,7 @@ async def undo_crop(body: UndoCropRequest):
     return {"success": True, "previous_url": prev}
 
 
-@router.post("/transform-image", summary="Rotate or flip image frame")
+@router.post("/transform", summary="Rotate or flip image frame")
 async def transform_image(body: TransformImageRequest):
     logger.info(f"[Transform] Request: {body.type} {body.value} for {body.url[:60]}...")
     try:
@@ -193,7 +193,7 @@ async def transform_image(body: TransformImageRequest):
         out_bytes = out.getvalue()
 
         unique_id = f"transform_{int(time.time() * 1000)}"
-        proxy_url = f"/api/merge-images/cached/{unique_id}"
+        proxy_url = f"/api/image/cached/{unique_id}"
 
         stitched_cache.set(unique_id, {"data": out_bytes, "content_type": "image/jpeg"})
         edit_history.set(proxy_url, body.url)
@@ -209,8 +209,7 @@ async def transform_image(body: TransformImageRequest):
 
 # ─── Image Merging & Stacking Routes ───────────────────────────────────────────
 
-@router.post("/merge-images", summary="Stitch multiple panels vertically/horizontally")
-@router.post("/stitch-images")
+@router.post("/merge", summary="Stitch multiple panels vertically/horizontally")
 async def merge_images(body: StitchImagesRequest):
     logger.info(f"[Merge] Request received for {len(body.urls) if body.urls else 2} images.")
     try:
@@ -241,7 +240,7 @@ async def merge_images(body: StitchImagesRequest):
         )
 
         unique_id = f"merged_{int(time.time() * 1000)}_merged"
-        new_url = f"/api/merge-images/cached/{unique_id}"
+        new_url = f"/api/image/cached/{unique_id}"
 
         stitched_cache.set(unique_id, {"data": merged_bytes, "content_type": "image/png"})
         edit_history.set(new_url, urls[0])
@@ -253,8 +252,7 @@ async def merge_images(body: StitchImagesRequest):
         raise HTTPException(status_code=500, detail=f"Image merging failed: {e}")
 
 
-@router.get("/merge-images/cached/{cache_id}", summary="Retrieve stitched cached panel image")
-@router.get("/stitch-images/cached/{cache_id}")
+@router.get("/cached/{cache_id}", summary="Retrieve stitched cached panel image")
 async def get_cached_stitch(cache_id: str = Path(...)):
     cached = stitched_cache.get(cache_id)
     if cached:
@@ -264,7 +262,7 @@ async def get_cached_stitch(cache_id: str = Path(...)):
             headers={"Cache-Control": "public, max-age=86400"}
         )
 
-    cached_url_key = f"/api/merge-images/cached/{cache_id}"
+    cached_url_key = f"/api/image/cached/{cache_id}"
 
     # Fallback 1: edit_history in-memory/disk cache (maps cached_url → original_url)
     original_url = edit_history.get(cached_url_key)
@@ -299,40 +297,35 @@ async def get_cached_stitch(cache_id: str = Path(...)):
 
 # ─── Image Splitting Route ─────────────────────────────────────────────────────
 
-@router.post("/execute-splits", summary="Split strip image into separate panels")
+@router.post("/split", summary="Split strip image into separate panels")
 async def execute_splits(body: SplitImagesRequest):
-    logger.info(f"[Split] Request received for URL: {body.url[:60]}... with {len(body.splitLines)} split lines.")
+    logger.info(f"[Split] Request received for {body.url[:60]}...")
     try:
         resolved = await img_utils.resolve_image_to_buffer(body.url)
-        img = Image.open(io.BytesIO(resolved["data"]))
-        w, h = img.size
-
-        if w <= 0 or h <= 0:
-            raise HTTPException(status_code=400, detail="Unable to read image dimensions.")
-
-        ys = [max(0.0, min(100.0, float(n))) for n in body.splitLines]
-        # Include edges, sort, and remove duplicates
-        boundaries = sorted(list(set([0.0] + ys + [100.0])))
-
-        min_segment_height_px = 20
-        urls = []
-
+        image_buffer = resolved["data"]
+        
         def split_sync():
+            img = Image.open(io.BytesIO(image_buffer))
+            w, h = img.size
+            
+            # Map percentage lines to absolute pixel y-coords
+            y_coords = sorted([int(round((pct / 100.0) * h)) for pct in body.splitLines])
+            # Add boundary edges
+            if 0 not in y_coords:
+                y_coords.insert(0, 0)
+            if h not in y_coords:
+                y_coords.append(h)
+                
             res_urls = []
-            for i in range(len(boundaries) - 1):
-                top_pct = boundaries[i]
-                bot_pct = boundaries[i + 1]
-
-                seg_top_px = int(round((top_pct / 100.0) * h))
-                seg_bot_px = int(round((bot_pct / 100.0) * h))
-                seg_h_px = seg_bot_px - seg_top_px
-
-                if seg_h_px < min_segment_height_px:
-                    continue
-
-                seg_img = img.crop((0, seg_top_px, w, seg_top_px + seg_h_px))
+            for i in range(len(y_coords) - 1):
+                y_top = y_coords[i]
+                y_bottom = y_coords[i+1]
+                if (y_bottom - y_top) <= 5:
+                    continue # Skip micro-slices
+                    
+                seg = img.crop((0, y_top, w, y_bottom))
                 out = io.BytesIO()
-                seg_img.save(out, format="JPEG", quality=90)
+                seg.save(out, format="JPEG", quality=92)
                 seg_bytes = out.getvalue()
 
                 # Trim margins conservatively
@@ -352,7 +345,7 @@ async def execute_splits(body: SplitImagesRequest):
                     pass
 
                 cache_id = f"split_{int(time.time() * 1000)}_{i}"
-                new_url = f"/api/merge-images/cached/{cache_id}"
+                new_url = f"/api/image/cached/{cache_id}"
 
                 stitched_cache.set(cache_id, {"data": seg_bytes, "content_type": "image/jpeg"})
                 res_urls.append(new_url)
@@ -438,7 +431,7 @@ async def download_zip(body: DownloadZipRequest):
         zip_cache.set(zip_id, {"data": zip_bytes, "filename": zip_filename})
 
         logger.info(f"[ZIP API] Successfully generated ZIP archive with ID: {zip_id}, filename: {zip_filename}")
-        return {"success": True, "downloadUrl": f"/api/download-zip/get/{zip_id}", "filename": zip_filename}
+        return {"success": True, "downloadUrl": f"/api/image/download-zip/get/{zip_id}", "filename": zip_filename}
     except Exception as e:
         logger.error(f"[ZIP API Error] Generation failed: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"ZIP packaging failed: {e}")
@@ -501,7 +494,7 @@ async def bubble_cleaning(body: RemoveBubblesRequest):
                 cleaned_bytes = f.read()
                 
             cache_id = f"merged_{int(time.time() * 1000)}_cleaned"
-            new_url = f"/api/merge-images/cached/{cache_id}"
+            new_url = f"/api/image/cached/{cache_id}"
             
             stitched_cache.set(cache_id, {"data": cleaned_bytes, "content_type": content_type})
             edit_history.set(new_url, body.url)

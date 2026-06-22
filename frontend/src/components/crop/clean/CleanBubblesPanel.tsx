@@ -175,7 +175,7 @@ export default function CleanBubblesPanel({
       ]);
     }
     try {
-      const response = await activeFetch("/api/remove-speech-bubbles", {
+      const response = await activeFetch("/api/image/remove-speech-bubbles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

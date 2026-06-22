@@ -129,7 +129,7 @@ export function useBatchImageActions({
         setBubbleCroppingImgUrl(url);
         try {
           const response = await fetchWithInterceptor(
-            "/api/remove-speech-bubbles",
+            "/api/image/remove-speech-bubbles",
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -295,7 +295,7 @@ export function useBatchImageActions({
                   croppedUrls.push(box.croppedUrl);
                 } else {
                   const cropResponse = await fetchWithInterceptor(
-                    "/api/edit-image",
+                    "/api/image/edit",
                     {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },

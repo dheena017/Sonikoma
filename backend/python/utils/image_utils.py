@@ -100,8 +100,8 @@ async def resolve_image_to_buffer(url_str: str, client: Optional[httpx.AsyncClie
     working_url = url_str.strip()
 
     # 1. Check in-memory merged/stitch cache first (zero-cost retrieval)
-    if '/api/merge-images/cached/' in working_url or '/api/stitch-images/cached/' in working_url:
-        match = re.search(r'/(?:merge|stitch)-images/cached/([^/?&]+)', working_url)
+    if '/api/image/cached/' in working_url or '/api/merge-images/cached/' in working_url or '/api/stitch-images/cached/' in working_url:
+        match = re.search(r'/(?:image|merge|stitch)-images?/cached/([^/?&]+)', working_url)
         if match:
             cache_id = match.group(1)
             cached = stitched_cache.get(cache_id)
@@ -456,7 +456,7 @@ def stitch_images_together(
     # First pass resizing
     prepared_images = []
     if layout == "horizontal":
-        canonical_h = imgs[0].size[1]
+        canonical_h = max(img.size[1] for img in imgs)
         for img in imgs:
             w, h = img.size
             if scale_to_fit and h != canonical_h:
@@ -468,7 +468,7 @@ def stitch_images_together(
                 prepared_images.append(img)
     else:
         # vertical
-        canonical_w = imgs[0].size[0]
+        canonical_w = max(img.size[0] for img in imgs)
         for img in imgs:
             w, h = img.size
             if scale_to_fit and w != canonical_w:

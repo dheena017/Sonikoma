@@ -46,11 +46,11 @@ export function useCompileActions({
     try {
       const urls = panels.map((p) => p.image_url);
       console.log(
-        "[API] POST /api/download-zip with",
+        "[API] POST /api/image/download-zip with",
         urls.length,
         "image URLs"
       );
-      const res = await activeFetch("/api/download-zip", {
+      const res = await activeFetch("/api/image/download-zip", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ urls, url: targetUrl }),

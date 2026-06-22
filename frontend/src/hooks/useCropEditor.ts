@@ -403,7 +403,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
     appLogic.setIsSavingEdit(true);
 
     try {
-      const response = await activeFetch("/api/execute-splits", {
+      const response = await activeFetch("/api/image/split", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: currentUrl, splitLines: state.splitLines }),

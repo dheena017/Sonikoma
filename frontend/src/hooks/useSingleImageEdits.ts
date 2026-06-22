@@ -53,7 +53,7 @@ export function useSingleImageEdits({
     ]);
 
     try {
-      const response = await fetchWithInterceptor("/api/edit-image", {
+      const response = await fetchWithInterceptor("/api/image/edit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -144,7 +144,7 @@ export function useSingleImageEdits({
           `[Image Editor] Starting Crop Cut #${index + 1}/${cuts.length}...`,
           ...prev,
         ]);
-        const response = await fetchWithInterceptor("/api/edit-image", {
+        const response = await fetchWithInterceptor("/api/image/edit", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -214,7 +214,7 @@ export function useSingleImageEdits({
       const img1 = scrapedImages[idx];
       const img2 = scrapedImages[idx + 1];
 
-      const response = await fetchWithInterceptor("/api/stitch-images", {
+      const response = await fetchWithInterceptor("/api/image/merge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ urls: [img1, img2] }),

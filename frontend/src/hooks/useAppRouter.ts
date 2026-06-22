@@ -161,6 +161,7 @@ export function useAppRouter({
             path === "/auto-crop" ||
             path === "/bubble-cleaner" ||
             path === "/project-details" ||
+            path === "/project-editor" ||
             path.startsWith("/series/") ||
             path.startsWith("/editor");
 
@@ -222,6 +223,17 @@ export function useAppRouter({
         setShowAutoCropModal(false);
         setShowBubbleModal(false);
         setEditingImageIdx(null);
+      } else if (path === "/project-editor") {
+        const params = new URLSearchParams(window.location.search);
+        const hasProjId = params.has("id") || params.has("project_id");
+        if (scrapedImages.length === 0 && panels.length === 0 && !hasProjId) {
+          window.history.replaceState({}, "", "/dashboard");
+          setCurrentPath("/dashboard");
+          return;
+        }
+        setShowAutoCropModal(false);
+        setShowBubbleModal(false);
+        setEditingImageIdx(null);
       } else if (path === "/auto-crop") {
         setShowAutoCropModal(true);
         setShowBubbleModal(false);
@@ -231,7 +243,9 @@ export function useAppRouter({
         setShowBubbleModal(true);
         setEditingImageIdx(null);
       } else if (path.startsWith("/editor")) {
-        if (scrapedImages.length === 0 && panels.length === 0) {
+        const params = new URLSearchParams(window.location.search);
+        const hasProjId = params.has("id") || params.has("project_id");
+        if (scrapedImages.length === 0 && panels.length === 0 && !hasProjId) {
           window.history.replaceState({}, "", "/dashboard");
           setCurrentPath("/dashboard");
           return;
@@ -242,7 +256,6 @@ export function useAppRouter({
         setShowBubbleModal(false);
 
         // Parse idx query parameter
-        const params = new URLSearchParams(window.location.search);
         const idxVal = params.get("idx");
         const idx = idxVal !== null ? parseInt(idxVal) : 0;
         const validatedIdx = isNaN(idx) ? 0 : idx;

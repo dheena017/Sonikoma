@@ -615,7 +615,7 @@ from routes.health  import router as health_router
 from routes.projects import router as projects_router
 from routes.auth_routes import router as auth_router
 from routes.proxy import router as proxy_router
-from routes.image_routes import router as image_routes_router
+from routes.image_routes import router as image_routes_router, get_cached_stitch
 from routes.scraper_routes import router as scraper_routes_router
 from routes.ai_routes import router as ai_routes_router
 from routes.audio import router as audio_router
@@ -625,10 +625,14 @@ app.include_router(health_router,         prefix="/api", tags=["Health & System"
 app.include_router(auth_router,           prefix="/api/auth", tags=["Authentication"])
 app.include_router(projects_router,       prefix="/api/projects", tags=["Projects"])
 app.include_router(proxy_router,          prefix="/api", tags=["Proxy"])
-app.include_router(image_routes_router,   prefix="/api", tags=["Image Editing"])
+app.include_router(image_routes_router,   prefix="/api/image", tags=["Image Editing"])
 app.include_router(scraper_routes_router, prefix="/api", tags=["Scraper"])
 app.include_router(ai_routes_router,      prefix="/api", tags=["AI Processing"])
 app.include_router(audio_router,          prefix="/api/audio", tags=["Audio Synthesis"])
+
+# Legacy cached image endpoints compatibility
+app.get("/api/merge-images/cached/{cache_id}", tags=["Legacy Image Routing"], include_in_schema=False)(get_cached_stitch)
+app.get("/api/stitch-images/cached/{cache_id}", tags=["Legacy Image Routing"], include_in_schema=False)(get_cached_stitch)
 
 # 2. Maintain /api/py endpoints for backward compatibility (optional/fallback)
 app.include_router(health_router,         prefix="/api/py", tags=["Health & System (Legacy)"])
