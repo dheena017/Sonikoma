@@ -1,5 +1,14 @@
 import React from "react";
-import { ArrowLeft, Film, Scissors, Sparkles, Sliders, CheckCircle2, ChevronRight, Settings } from "lucide-react";
+import {
+  ArrowLeft,
+  Film,
+  Scissors,
+  Sparkles,
+  Sliders,
+  CheckCircle2,
+  ChevronRight,
+  Settings,
+} from "lucide-react";
 import StoryboardTimeline from "./timeline/StoryboardTimeline.js";
 import VideoMonitor from "./video/VideoMonitor.js";
 import VolumeAndProgressPanel from "./video/VolumeAndProgressPanel.js";
@@ -109,7 +118,10 @@ export default function ProjectEditorPage({
   } = appLogic;
 
   // Compute stats
-  const totalDuration = panels.reduce((acc: number, curr: any) => acc + (curr.duration || 4), 0);
+  const totalDuration = panels.reduce(
+    (acc: number, curr: any) => acc + (curr.duration || 4),
+    0
+  );
 
   return (
     <div className="flex-1 w-full min-h-screen bg-[#060608] text-neutral-100 flex flex-col font-sans">
@@ -124,7 +136,7 @@ export default function ProjectEditorPage({
           >
             <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
           </button>
-          
+
           <div className="min-w-0 space-y-0.5">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="inline-flex items-center rounded-full border border-purple-500/20 bg-purple-500/10 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-purple-300">
@@ -135,10 +147,11 @@ export default function ProjectEditorPage({
               </span>
             </div>
             <h1 className="text-lg font-black text-white leading-tight truncate max-w-md md:max-w-xl">
-              {seriesTitle || "Untitled Project"} 
+              {seriesTitle || "Untitled Project"}
               {(chapterNumber || chapterTitle) && (
                 <span className="text-neutral-400 font-semibold ml-2">
-                  — Chapter {chapterNumber || "?"} {chapterTitle && `(${chapterTitle})`}
+                  — Chapter {chapterNumber || "?"}{" "}
+                  {chapterTitle && `(${chapterTitle})`}
                 </span>
               )}
             </h1>
@@ -149,11 +162,15 @@ export default function ProjectEditorPage({
         <div className="flex items-center gap-3.5 flex-wrap">
           <div className="hidden lg:flex items-center gap-3 px-3 py-1.5 rounded-xl bg-neutral-900/40 border border-white/5 text-[10px] font-mono text-neutral-400">
             <div>
-              Panels: <span className="text-purple-300 font-bold">{panels.length}</span>
+              Panels:{" "}
+              <span className="text-purple-300 font-bold">{panels.length}</span>
             </div>
             <div className="w-px h-3 bg-white/10" />
             <div>
-              Est. Length: <span className="text-purple-300 font-bold">{totalDuration}s</span>
+              Est. Length:{" "}
+              <span className="text-purple-300 font-bold">
+                {totalDuration}s
+              </span>
             </div>
           </div>
 
@@ -185,7 +202,6 @@ export default function ProjectEditorPage({
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* LEFT COLUMN: EDITING TOOLS & Storyboard Timeline (col-span-7) */}
         <div className="lg:col-span-7 flex flex-col gap-8 min-w-0">
-          
           {/* QUICK EDITOR CONFIG CARD */}
           <div className="bg-neutral-900/40 rounded-3xl border border-white/5 p-6 backdrop-blur-md shadow-sm space-y-6">
             <div className="flex items-center justify-between border-b border-white/5 pb-3">
@@ -207,7 +223,8 @@ export default function ProjectEditorPage({
                     1. Auto-Crop Storyboard
                   </h4>
                   <p className="text-[10px] text-neutral-500 font-medium leading-normal">
-                    Detect panel boundaries automatically or fine-tune sensitivity &amp; padding parameters.
+                    Detect panel boundaries automatically or fine-tune
+                    sensitivity &amp; padding parameters.
                   </p>
                 </div>
                 <div className="flex items-center gap-2 mt-2">
@@ -235,7 +252,8 @@ export default function ProjectEditorPage({
                     2. Clean Speech Bubbles
                   </h4>
                   <p className="text-[10px] text-neutral-500 font-medium leading-normal">
-                    AI-powered speech bubble detection and inpainting to remove text from comic panels.
+                    AI-powered speech bubble detection and inpainting to remove
+                    text from comic panels.
                   </p>
                 </div>
                 <div className="flex items-center gap-2 mt-2">
@@ -268,7 +286,7 @@ export default function ProjectEditorPage({
                   Step 3: Storyboard Editing
                 </span>
               </div>
-              
+
               <StoryboardTimeline
                 panels={panels}
                 setPanels={setPanels}
@@ -358,9 +376,10 @@ export default function ProjectEditorPage({
                 Stitch &amp; Merge Panel Deck
               </h3>
               <p className="text-[10px] text-neutral-500 font-mono">
-                Directly edit crop bounds or stitch consecutive panel strips together.
+                Directly edit crop bounds or stitch consecutive panel strips
+                together.
               </p>
-              
+
               <div className="grid grid-cols-2 gap-3.5">
                 <button
                   onClick={() => {

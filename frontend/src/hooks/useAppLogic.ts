@@ -12,13 +12,17 @@ export function useAppLogic() {
   const sourceMismatchNotified = useRef(false);
   const lastScrapedUrlRef = useRef<string>("");
 
-  const [isGeneratingStoryboard, setIsGeneratingStoryboard] = useState<boolean>(false);
+  const [isGeneratingStoryboard, setIsGeneratingStoryboard] =
+    useState<boolean>(false);
 
   const handleGenerateStoryboardAI = useCallback(async () => {
     const activeUrl = targetUrl;
     const projId = state.projectId;
     if (!activeUrl || !activeUrl.trim() || !projId) {
-      state.addNotification("Please ensure target URL is pasted and project is created.", "error");
+      state.addNotification(
+        "Please ensure target URL is pasted and project is created.",
+        "error"
+      );
       return;
     }
     setIsGeneratingStoryboard(true);
@@ -50,8 +54,12 @@ export function useAppLogic() {
           episode: formattedEpisode || undefined,
           genre: state.scrapedGenre ? state.scrapedGenre.trim() : undefined,
           author: state.seriesAuthor ? state.seriesAuthor.trim() : undefined,
-          cover_image: state.seriesCoverImage ? state.seriesCoverImage.trim() : undefined,
-          synopsis: state.seriesSynopsis ? state.seriesSynopsis.trim() : undefined,
+          cover_image: state.seriesCoverImage
+            ? state.seriesCoverImage.trim()
+            : undefined,
+          synopsis: state.seriesSynopsis
+            ? state.seriesSynopsis.trim()
+            : undefined,
         }),
       });
 
@@ -63,7 +71,7 @@ export function useAppLogic() {
       if (data.success && data.panels) {
         const mappedPanels = data.panels.map((p: any, idx: number) => ({
           ...p,
-          id: p.id || (idx + 1),
+          id: p.id || idx + 1,
           grayscale: p.grayscale === 1 || p.grayscale === true,
         }));
         state.setPanels(mappedPanels);
@@ -71,17 +79,27 @@ export function useAppLogic() {
           `[AI Storyboard] [SUCCESS] Storyboard generated successfully with ${mappedPanels.length} panels!`,
           ...prev,
         ]);
-        state.addNotification(`Storyboard generated successfully with ${mappedPanels.length} panels!`, "success");
+        state.addNotification(
+          `Storyboard generated successfully with ${mappedPanels.length} panels!`,
+          "success"
+        );
       } else {
-        throw new Error(data.message || "Invalid response from AI Model Analysis");
+        throw new Error(
+          data.message || "Invalid response from AI Model Analysis"
+        );
       }
     } catch (err: any) {
       console.error("[AI Storyboard] Generation failed:", err);
       state.setConsoleLogs((prev) => [
-        `[AI Storyboard] [ERROR] Generation failed: ${err.message || String(err)}`,
+        `[AI Storyboard] [ERROR] Generation failed: ${
+          err.message || String(err)
+        }`,
         ...prev,
       ]);
-      state.addNotification(`Storyboard generation failed: ${err.message || String(err)}`, "error");
+      state.addNotification(
+        `Storyboard generation failed: ${err.message || String(err)}`,
+        "error"
+      );
     } finally {
       setIsGeneratingStoryboard(false);
     }
@@ -472,7 +490,9 @@ export function useAppLogic() {
           }
           // Parse "Chapter 9 - Archmage Uihyeok Jeong" → chapterNumber + chapterTitle
           if (data.episode) {
-            const epMatch = data.episode.match(/^Chapter\s+(\d+)(?:\s+-\s+(.+))?$/i);
+            const epMatch = data.episode.match(
+              /^Chapter\s+(\d+)(?:\s+-\s+(.+))?$/i
+            );
             if (epMatch) {
               state.setChapterNumber(epMatch[1]);
               state.setChapterTitle(epMatch[2] || "");
@@ -678,5 +698,6 @@ export function useAppLogic() {
     deleteNotification: state.deleteNotification,
     scrapedTitle: state.scrapedTitle,
     scrapedGenre: state.scrapedGenre,
+    resetWorkspace: state.resetWorkspace,
   };
 }

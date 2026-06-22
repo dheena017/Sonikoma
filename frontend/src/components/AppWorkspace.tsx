@@ -124,6 +124,7 @@ interface AppWorkspaceProps {
   showScrapeConfirmModal: boolean;
   setShowScrapeConfirmModal: (v: boolean) => void;
   saveProject?: (customPanels?: any[]) => Promise<boolean>;
+  resetWorkspace?: () => void;
 }
 
 export function AppWorkspace({
@@ -233,6 +234,7 @@ export function AppWorkspace({
   saveProject,
   isGeneratingStoryboard = false,
   handleGenerateStoryboardAI,
+  resetWorkspace,
 }: AppWorkspaceProps) {
   const handleConfirmProjectAndScrape = async (
     details: {
@@ -338,6 +340,7 @@ export function AppWorkspace({
           setSeriesSynopsis={setSeriesSynopsis}
           smartSlice={smartSlice}
           setSmartSlice={setSmartSlice}
+          resetWorkspace={resetWorkspace}
         />
 
         {/* PROJECT PRODUCTION CHECKLIST */}
@@ -397,7 +400,8 @@ export function AppWorkspace({
                       Step 2: Live Asset Extraction
                     </h4>
                     <p className="text-[10px] text-neutral-500 font-medium leading-normal">
-                      Extract and download vertical comic/webtoon strip image assets.
+                      Extract and download vertical comic/webtoon strip image
+                      assets.
                     </p>
                   </div>
                 </div>
@@ -416,32 +420,46 @@ export function AppWorkspace({
                     type="button"
                     onClick={async () => {
                       if (projectId?.startsWith("temp_")) {
-                        addNotification("Temporary Session: Saving assets is disabled.", "warning");
+                        addNotification(
+                          "Temporary Session: Saving assets is disabled.",
+                          "warning"
+                        );
                         return;
                       }
                       const token =
                         localStorage.getItem("anivox_token") ||
                         sessionStorage.getItem("anivox_token");
-                      const headers: HeadersInit = { "Content-Type": "application/json" };
+                      const headers: HeadersInit = {
+                        "Content-Type": "application/json",
+                      };
                       if (token) {
                         headers["Authorization"] = `Bearer ${token}`;
                       }
                       try {
-                        const scrapeRes = await fetch("/api/save-scraped-images", {
-                          method: "PUT",
-                          headers,
-                          body: JSON.stringify({
-                            url: targetUrl,
-                            images: scrapedImages,
-                          }),
-                        });
+                        const scrapeRes = await fetch(
+                          "/api/save-scraped-images",
+                          {
+                            method: "PUT",
+                            headers,
+                            body: JSON.stringify({
+                              url: targetUrl,
+                              images: scrapedImages,
+                            }),
+                          }
+                        );
                         if (scrapeRes.ok) {
-                          addNotification("Raw assets saved successfully!", "success");
+                          addNotification(
+                            "Raw assets saved successfully!",
+                            "success"
+                          );
                         } else {
                           throw new Error("Failed to save raw assets");
                         }
                       } catch (err: any) {
-                        addNotification(`Failed to save raw assets: ${err.message}`, "error");
+                        addNotification(
+                          `Failed to save raw assets: ${err.message}`,
+                          "error"
+                        );
                       }
                     }}
                     disabled={scrapedImages.length === 0}
@@ -467,7 +485,8 @@ export function AppWorkspace({
                       Step 3: Storyboard &amp; OCR
                     </h4>
                     <p className="text-[10px] text-neutral-500 font-medium leading-normal">
-                      Slice comic strips into panels and generate scripts, dialogue, &amp; camera moves.
+                      Slice comic strips into panels and generate scripts,
+                      dialogue, &amp; camera moves.
                     </p>
                   </div>
                 </div>
@@ -475,7 +494,9 @@ export function AppWorkspace({
                   <button
                     type="button"
                     onClick={handleGenerateStoryboardAI}
-                    disabled={isGeneratingStoryboard || scrapedImages.length === 0}
+                    disabled={
+                      isGeneratingStoryboard || scrapedImages.length === 0
+                    }
                     className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-750 text-neutral-200 text-[10px] font-bold rounded-xl transition-all border border-neutral-700/50 cursor-pointer disabled:opacity-50"
                   >
                     {isGeneratingStoryboard ? "Generating..." : "Generate AI"}
@@ -510,7 +531,8 @@ export function AppWorkspace({
                       Step 4: Final Video Render
                     </h4>
                     <p className="text-[10px] text-neutral-500 font-medium leading-normal">
-                      Compile panels, synthesized voice narration, and background music into MP4.
+                      Compile panels, synthesized voice narration, and
+                      background music into MP4.
                     </p>
                   </div>
                 </div>

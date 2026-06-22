@@ -125,10 +125,13 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 0 32px rgba(168,85,247,0.35);
+        box-shadow: 0 0 32px rgba(168, 85, 247, 0.35);
         margin-bottom: 4px;
       }
-      .sp-logo svg { width: 36px; height: 36px; }
+      .sp-logo svg {
+        width: 36px;
+        height: 36px;
+      }
       .sp-name {
         font-size: 1.1rem;
         font-weight: 700;
@@ -164,37 +167,59 @@
         animation: sp-shimmer 1.4s infinite ease-in-out;
       }
       @keyframes sp-spin {
-        from { transform: rotate(0deg); }
-        to   { transform: rotate(360deg); }
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
       }
       @keyframes sp-shimmer {
-        0%   { margin-left: -40%; }
-        100% { margin-left: 100%; }
+        0% {
+          margin-left: -40%;
+        }
+        100% {
+          margin-left: 100%;
+        }
       }
     </style>
     <div id="splash-screen-root">
       <div class="sp-logo">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-          <path d="M8 8h16v10H14l-4 4v-4H8z" fill="#ffffff"/>
-          <polygon points="13,11 19,13 13,15" fill="url(#g)"/>
+          <path d="M8 8h16v10H14l-4 4v-4H8z" fill="#ffffff" />
+          <polygon points="13,11 19,13 13,15" fill="url(#g)" />
           <defs>
             <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#a855f7"/>
-              <stop offset="100%" stop-color="#06b6d4"/>
+              <stop offset="0%" stop-color="#a855f7" />
+              <stop offset="100%" stop-color="#06b6d4" />
             </linearGradient>
           </defs>
         </svg>
       </div>
       <div class="sp-name">Webtoon Studio</div>
       <div class="sp-tag">Initializing</div>
-      <svg class="sp-spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity="0.2"/>
-        <path fill="currentColor" opacity="0.8" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+      <svg
+        class="sp-spinner"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="3"
+          opacity="0.2"
+        />
+        <path
+          fill="currentColor"
+          opacity="0.8"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+        />
       </svg>
       <div class="sp-bar"><div class="sp-bar-fill"></div></div>
     </div>
-
-
 
     <script type="module" src="/src/main.tsx"></script>
   </body>

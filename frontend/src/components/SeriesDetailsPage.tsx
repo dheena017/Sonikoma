@@ -62,7 +62,9 @@ export default function SeriesDetailsPage({
         if (token) {
           headers["Authorization"] = `Bearer ${token}`;
         }
-        const res = await fetch(`/api/projects/series/${seriesSlug}`, { headers });
+        const res = await fetch(`/api/projects/series/${seriesSlug}`, {
+          headers,
+        });
         if (!res.ok) {
           throw new Error(`Failed to load series (HTTP ${res.status})`);
         }
@@ -74,8 +76,10 @@ export default function SeriesDetailsPage({
           const chaptersRes = await fetch(`/api/projects`, { headers });
           const chaptersData = await chaptersRes.json();
           if (chaptersData.success) {
-             const seriesChapters = chaptersData.projects.filter((p: any) => p.series_id === data.series.id);
-             setChapters(seriesChapters);
+            const seriesChapters = chaptersData.projects.filter(
+              (p: any) => p.series_id === data.series.id
+            );
+            setChapters(seriesChapters);
           }
         } else {
           throw new Error(data.message || "Failed to load series details");
@@ -94,23 +98,32 @@ export default function SeriesDetailsPage({
     return chapters.reduce((sum, ch) => sum + (ch.panels_count || 0), 0);
   }, [chapters]);
 
-  const handleDeleteChapter = async (e: React.MouseEvent, projectId: string) => {
+  const handleDeleteChapter = async (
+    e: React.MouseEvent,
+    projectId: string
+  ) => {
     e.stopPropagation();
-    if (!window.confirm("Are you sure you want to delete this chapter? This action cannot be undone.")) {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this chapter? This action cannot be undone."
+      )
+    ) {
       return;
     }
 
     setIsDeleting(projectId);
     try {
-      const token = localStorage.getItem("anivox_token") || sessionStorage.getItem("anivox_token");
+      const token =
+        localStorage.getItem("anivox_token") ||
+        sessionStorage.getItem("anivox_token");
       const res = await fetch(`/api/projects/${projectId}`, {
         method: "DELETE",
         headers: {
-          "Authorization": `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
       if (res.ok) {
-        setChapters(prev => prev.filter(ch => ch.project_id !== projectId));
+        setChapters((prev) => prev.filter((ch) => ch.project_id !== projectId));
       }
     } catch (err) {
       console.error("Failed to delete chapter:", err);
@@ -119,7 +132,10 @@ export default function SeriesDetailsPage({
     }
   };
 
-  const handleDownloadVideo = (e: React.MouseEvent, videoUrl: string | null) => {
+  const handleDownloadVideo = (
+    e: React.MouseEvent,
+    videoUrl: string | null
+  ) => {
     e.stopPropagation();
     if (!videoUrl) return;
     const link = document.createElement("a");
@@ -206,22 +222,38 @@ export default function SeriesDetailsPage({
               )}
               <div className="space-y-4">
                 <div className="flex items-center justify-between py-2 border-b border-white/5">
-                  <span className="text-neutral-500 text-xs font-bold uppercase">Genre</span>
-                  <span className="text-purple-400 text-xs font-black uppercase">{series.genre}</span>
+                  <span className="text-neutral-500 text-xs font-bold uppercase">
+                    Genre
+                  </span>
+                  <span className="text-purple-400 text-xs font-black uppercase">
+                    {series.genre}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-white/5">
-                  <span className="text-neutral-500 text-xs font-bold uppercase">Chapters</span>
-                  <span className="text-white text-xs font-bold font-mono">{chapters.length}</span>
+                  <span className="text-neutral-500 text-xs font-bold uppercase">
+                    Chapters
+                  </span>
+                  <span className="text-white text-xs font-bold font-mono">
+                    {chapters.length}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-white/5">
-                  <span className="text-neutral-500 text-xs font-bold uppercase">Total Panels</span>
-                  <span className="text-white text-xs font-bold font-mono">{totalPanels}</span>
+                  <span className="text-neutral-500 text-xs font-bold uppercase">
+                    Total Panels
+                  </span>
+                  <span className="text-white text-xs font-bold font-mono">
+                    {totalPanels}
+                  </span>
                 </div>
               </div>
               {series.synopsis && (
                 <div className="space-y-2">
-                  <h3 className="text-[10px] font-black uppercase text-neutral-500 tracking-widest">Synopsis</h3>
-                  <p className="text-xs text-neutral-400 leading-relaxed">{series.synopsis}</p>
+                  <h3 className="text-[10px] font-black uppercase text-neutral-500 tracking-widest">
+                    Synopsis
+                  </h3>
+                  <p className="text-xs text-neutral-400 leading-relaxed">
+                    {series.synopsis}
+                  </p>
                 </div>
               )}
             </div>
@@ -240,7 +272,11 @@ export default function SeriesDetailsPage({
                   <div
                     key={chapter.project_id}
                     className="bg-[#0b0b0e]/60 border border-white/5 hover:border-purple-500/20 rounded-2xl p-4 flex items-center justify-between transition-all cursor-pointer group"
-                    onClick={() => navigateTo(`/series/${series.slug}/chapters/${chapter.chapter_slug}`)}
+                    onClick={() =>
+                      navigateTo(
+                        `/series/${series.slug}/chapters/${chapter.chapter_slug}`
+                      )
+                    }
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center">
@@ -251,18 +287,21 @@ export default function SeriesDetailsPage({
                           <h4 className="text-sm font-bold text-white group-hover:text-purple-300 transition-colors">
                             {chapter.episode}
                           </h4>
-                          <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider ${
-                            chapter.status === 'completed'
-                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                              : chapter.status === 'processing'
-                              ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                              : 'bg-neutral-800 text-neutral-400 border border-white/5'
-                          }`}>
-                            {chapter.status || 'Draft'}
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider ${
+                              chapter.status === "completed"
+                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                : chapter.status === "processing"
+                                ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                : "bg-neutral-800 text-neutral-400 border border-white/5"
+                            }`}
+                          >
+                            {chapter.status || "Draft"}
                           </span>
                         </div>
                         <p className="text-[10px] text-neutral-500 font-mono">
-                          {chapter.panels_count} Panels • Last edited {new Date(chapter.updated_at).toLocaleDateString()}
+                          {chapter.panels_count} Panels • Last edited{" "}
+                          {new Date(chapter.updated_at).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
@@ -270,7 +309,9 @@ export default function SeriesDetailsPage({
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       {chapter.video_url && (
                         <button
-                          onClick={(e) => handleDownloadVideo(e, chapter.video_url)}
+                          onClick={(e) =>
+                            handleDownloadVideo(e, chapter.video_url)
+                          }
                           className="p-2 hover:bg-neutral-800 text-neutral-400 hover:text-emerald-400 rounded-lg transition-colors"
                           title="Download Video"
                         >
@@ -278,7 +319,9 @@ export default function SeriesDetailsPage({
                         </button>
                       )}
                       <button
-                        onClick={(e) => handleDeleteChapter(e, chapter.project_id)}
+                        onClick={(e) =>
+                          handleDeleteChapter(e, chapter.project_id)
+                        }
                         disabled={isDeleting === chapter.project_id}
                         className="p-2 hover:bg-neutral-800 text-neutral-400 hover:text-rose-400 rounded-lg transition-colors disabled:opacity-50"
                         title="Delete Chapter"
@@ -296,7 +339,9 @@ export default function SeriesDetailsPage({
                 ))
               ) : (
                 <div className="py-12 text-center bg-neutral-900/20 border border-white/5 rounded-3xl">
-                  <p className="text-sm text-neutral-500 font-bold">No chapters published yet.</p>
+                  <p className="text-sm text-neutral-500 font-bold">
+                    No chapters published yet.
+                  </p>
                 </div>
               )}
             </div>

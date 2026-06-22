@@ -57,7 +57,7 @@ export default function PanelAssistantPage({
           onClick={onNavigateHome}
           className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-xl text-xs font-mono font-bold cursor-pointer"
         >
-          Go to Dashboard
+          Go to Workspace
         </button>
       </div>
     );

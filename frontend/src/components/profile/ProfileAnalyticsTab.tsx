@@ -76,11 +76,15 @@ export default function ProfileAnalyticsTab() {
   }, [analytics]);
 
   const totalActions = React.useMemo(() => {
-    return heatmapData.flat().reduce((sum: number, cell: any) => sum + cell.count, 0);
+    return heatmapData
+      .flat()
+      .reduce((sum: number, cell: any) => sum + cell.count, 0);
   }, [heatmapData]);
 
   const videosCompleted = analytics?.videos_completed ?? 12;
-  const totalDurationStr = analytics ? formatDuration(analytics.total_duration_sec) : "48m 15s";
+  const totalDurationStr = analytics
+    ? formatDuration(analytics.total_duration_sec)
+    : "48m 15s";
   const avgLatency = analytics?.avg_latency ?? 1.8;
   const creditsOptimized = analytics?.credits_optimized_pct ?? 32;
 
@@ -389,7 +393,8 @@ export default function ProfileAnalyticsTab() {
       {/* Recent Activity Timeline Feed */}
       <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-6 shadow-2xl relative space-y-4">
         <h4 className="text-sm font-extrabold text-white flex items-center gap-1.5 pb-3 border-b border-white/5">
-          <Activity className="w-4.5 h-4.5 text-purple-400" /> Recent Activity Feed
+          <Activity className="w-4.5 h-4.5 text-purple-400" /> Recent Activity
+          Feed
         </h4>
 
         <div className="relative pl-4 space-y-6 before:absolute before:left-1 before:top-1.5 before:bottom-1.5 before:w-0.5 before:bg-neutral-800">

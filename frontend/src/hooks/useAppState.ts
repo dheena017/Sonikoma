@@ -583,8 +583,8 @@ export function useAppState() {
       const chapterSlug = match ? match[1] : null;
 
       if (!urlProjectId && !chapterSlug) {
-        // If we cleared the state (navigated to clean /dashboard), reset workspace
-        if (path === "/dashboard") {
+        // If we cleared the state (navigated to clean /workspace), reset workspace
+        if (path === "/workspace") {
           setProjectId(null);
           setSeriesSlugState(null);
           setChapterSlugState(null);
@@ -599,7 +599,11 @@ export function useAppState() {
       }
 
       const lookupId = urlProjectId || chapterSlug;
-      if (lookupId === projectId || lookupId === chapterSlugState) return;
+      if (
+        lookupId === projectIdRef.current ||
+        lookupId === chapterSlugStateRef.current
+      )
+        return;
 
       loadProject(lookupId);
     };
@@ -620,25 +624,35 @@ export function useAppState() {
             setChapterSlugState(data.project.chapter_slug || null);
             localStorage.setItem("active_project_id", data.project.project_id);
             if (data.project.series_slug) {
-              localStorage.setItem("active_series_slug", data.project.series_slug);
+              localStorage.setItem(
+                "active_series_slug",
+                data.project.series_slug
+              );
             } else {
               localStorage.removeItem("active_series_slug");
             }
             if (data.project.chapter_slug) {
-              localStorage.setItem("active_chapter_slug", data.project.chapter_slug);
+              localStorage.setItem(
+                "active_chapter_slug",
+                data.project.chapter_slug
+              );
             } else {
               localStorage.removeItem("active_chapter_slug");
             }
-              if (data.project.series_slug && data.project.chapter_slug) {
-                const suffix = window.location.pathname.endsWith("/details") ? "/details" : "";
-                const isEditor = window.location.pathname.startsWith("/editor") || window.location.pathname === "/project-editor";
-                if (!isEditor) {
-                  const newPath = `/series/${data.project.series_slug}/chapters/${data.project.chapter_slug}${suffix}`;
-                  if (window.location.pathname !== newPath) {
-                    window.history.replaceState(null, "", newPath);
-                  }
+            if (data.project.series_slug && data.project.chapter_slug) {
+              const suffix = window.location.pathname.endsWith("/details")
+                ? "/details"
+                : "";
+              const isEditor =
+                window.location.pathname.startsWith("/editor") ||
+                window.location.pathname === "/project-editor";
+              if (!isEditor) {
+                const newPath = `/series/${data.project.series_slug}/chapters/${data.project.chapter_slug}${suffix}`;
+                if (window.location.pathname !== newPath) {
+                  window.history.replaceState(null, "", newPath);
                 }
               }
+            }
             setTargetUrl(data.project.url || "");
             setVideoUrl(data.project.video_url || null);
 
@@ -747,6 +761,28 @@ export function useAppState() {
     smartSlice,
   ]);
 
+  const resetWorkspace = useCallback(() => {
+    setProjectId(null);
+    setSeriesSlugState(null);
+    setChapterSlugState(null);
+    localStorage.removeItem("active_project_id");
+    localStorage.removeItem("active_series_slug");
+    localStorage.removeItem("active_chapter_slug");
+    setPanels([]);
+    setScrapedImages([]);
+    setVideoUrl(null);
+    setSeriesTitle("");
+    setChapterNumber("");
+    setChapterTitle("");
+    setScrapedGenre("Fantasy Action");
+    setSeriesAuthor("");
+    setSeriesCoverImage("");
+    setSeriesSynopsis("");
+    setRawConsoleLogs(["[System] Workspace initialized for new project."]);
+    // Optionally remove project_id from URL
+    window.history.pushState(null, "", "/workspace");
+  }, []);
+
   return {
     user,
     setUser,
@@ -846,6 +882,7 @@ export function useAppState() {
     setCropFocusMode,
     showScrapeConfirmModal,
     setShowScrapeConfirmModal,
+    resetWorkspace,
     notifications,
     notificationsMuted,
     setNotificationsMuted,

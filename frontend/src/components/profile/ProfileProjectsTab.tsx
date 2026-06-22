@@ -290,14 +290,19 @@ export default function ProfileProjectsTab({
               })),
             };
 
-            const panelsRes = await fetch(`/api/projects/${proj.project_id}/panels`, {
-              method: "POST",
-              headers,
-              body: JSON.stringify(panelsBody),
-            });
+            const panelsRes = await fetch(
+              `/api/projects/${proj.project_id}/panels`,
+              {
+                method: "POST",
+                headers,
+                body: JSON.stringify(panelsBody),
+              }
+            );
 
             if (!panelsRes.ok) {
-              console.error(`Failed to save panels for project ${proj.project_id}`);
+              console.error(
+                `Failed to save panels for project ${proj.project_id}`
+              );
             }
           }
 
@@ -326,9 +331,13 @@ export default function ProfileProjectsTab({
 
   const handleViewDetails = (project: any) => {
     if (project.series_slug && project.chapter_slug) {
-      (window as any).navigateTo?.(`/series/${project.series_slug}/chapters/${project.chapter_slug}/details`);
+      (window as any).navigateTo?.(
+        `/series/${project.series_slug}/chapters/${project.chapter_slug}/details`
+      );
     } else if (project.chapter_slug) {
-      (window as any).navigateTo?.(`/series/unknown/chapters/${project.chapter_slug}/details`);
+      (window as any).navigateTo?.(
+        `/series/unknown/chapters/${project.chapter_slug}/details`
+      );
     } else {
       (window as any).navigateTo?.(`/project-details?id=${project.project_id}`);
     }
