@@ -414,7 +414,7 @@ logger = logging.getLogger("anivox.api")
 # CONFIGURATION
 # ─────────────────────────────────────────────────────────────────────────────
 FRONTEND_PORT = os.getenv("FRONTEND_PORT", "3000")
-BACKEND_PORT  = int(os.getenv("BACKEND_PORT", "5173"))
+BACKEND_PORT  = int(os.getenv("PORT", os.getenv("BACKEND_PORT", "5173")))
 API_VERSION  = os.getenv("API_VERSION", "1.0.0")
 SERVER_START = time.time()
 IS_PRODUCTION = os.getenv("NODE_ENV") == "production"
@@ -893,7 +893,7 @@ if __name__ == "__main__":
 
     run_args = {
         "app": "main:app",
-        "host": "127.0.0.1",
+        "host": os.getenv("HOST", "127.0.0.1"),
         "port": BACKEND_PORT,
         "log_level": "info",
         "log_config": custom_log_config,
