@@ -341,9 +341,44 @@ def extract_metadata(html: str, url: str) -> Dict[str, str]:
 
         author_tag = soup.find('meta', attrs={'name': 'author'}) or soup.find('meta', attrs={'property': 'og:creator'})
         metadata["author"] = author_tag['content'] if author_tag and author_tag.has_attr('content') else ""
-        
+
+        # Fallback: DOM-based author selectors for sites that don't expose meta author
+        if not metadata["author"]:
+            author_selectors = [
+                '.author-content a', '.author-content', '.creator', '.artist-content a',
+                '[class*=author] a', '[class*=creator] a', '[class*=artist] a',
+                '[itemprop=author]', '[itemprop=creator]',
+                '.series-author', '.comic-author', '.manga-author',
+                'span.author', 'p.author', '.info-author',
+                'dt:-soup-contains("Author") + dd', 'dt:-soup-contains("Artist") + dd',
+                '.wp-author', '.post-author a',
+            ]
+            for sel in author_selectors:
+                try:
+                    el = soup.select_one(sel)
+                    if el and el.get_text(strip=True):
+                        metadata["author"] = el.get_text(separator=', ', strip=True)
+                        break
+                except Exception:
+                    continue
+
         genre_tag = soup.find('meta', attrs={'property': 'og:genre'}) or soup.find('meta', attrs={'property': 'comic:genre'})
         metadata["genre"] = genre_tag['content'] if genre_tag and genre_tag.has_attr('content') else ""
+
+        # Fallback: DOM-based genre selectors
+        if not metadata["genre"]:
+            genre_selectors = [
+                '.genres-content a', '.genre-content a', '[class*=genre] a',
+                '.tags a', '.category a', '.tag-item',
+            ]
+            for sel in genre_selectors:
+                try:
+                    els = soup.select(sel)
+                    if els:
+                        metadata["genre"] = ', '.join(e.get_text(strip=True) for e in els[:3])
+                        break
+                except Exception:
+                    continue
         
         for k in metadata:
             if isinstance(metadata[k], str):
@@ -733,11 +768,11 @@ async def scrape_images_from_url(
         
     # Metadata extraction
     meta = extract_metadata(html, fetch_url)
-    if meta and meta.get("title"):
-        logger.info(f"[Scraper] Extracted Meta Title: '{meta['title']}' | Creator: '{meta['author']}'")
+    if meta:
+        logger.info(f"[Scraper] Extracted Meta — Title: '{meta.get('title','')}' | Author: '{meta.get('author','')}' | Cover: {'yes' if meta.get('cover_image') else 'no'}")
         scraped_metadata_cache[fetch_url] = meta
     else:
-        logger.warning(f"[Scraper] Metadata extraction failed or missing title for: {fetch_url}")
+        logger.warning(f"[Scraper] Metadata extraction failed for: {fetch_url}")
         
     image_dict = {}
     

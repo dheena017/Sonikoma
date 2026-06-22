@@ -362,20 +362,18 @@ export default function App() {
 
   // --- Effect: Fade out and remove static HTML splash screen once React app is ready ---
   React.useEffect(() => {
-    if (!isInitializing && !authLoading) {
-      const splash = document.getElementById("splash-screen-root");
-      if (splash) {
-        splash.style.transition = "opacity 0.6s ease, transform 0.6s ease";
-        splash.style.opacity = "0";
-        splash.style.transform = "scale(1.05)";
-        splash.style.pointerEvents = "none";
-        const timer = setTimeout(() => {
-          splash.remove();
-        }, 600);
-        return () => clearTimeout(timer);
-      }
+    const splash = document.getElementById("splash-screen-root");
+    if (splash) {
+      splash.style.transition = "opacity 0.6s ease, transform 0.6s ease";
+      splash.style.opacity = "0";
+      splash.style.transform = "scale(1.05)";
+      splash.style.pointerEvents = "none";
+      const timer = setTimeout(() => {
+        splash.remove();
+      }, 600);
+      return () => clearTimeout(timer);
     }
-  }, [isInitializing, authLoading]);
+  }, []);
 
   // --- Auto Save Hook ---
   const { saveStatus, saveProject, isDirty } = useAutoSave({
@@ -549,7 +547,8 @@ export default function App() {
 
   // --- Guard: Session Initialization loading state ---
   if (isInitializing || authLoading) {
-    return null;
+    const loadingStatus = isInitializing ? "Initializing App..." : "Checking Authentication...";
+    return <LoadingPage status={loadingStatus} />;
   }
 
   // --- Guard: Public Landing Page ---
@@ -605,7 +604,7 @@ export default function App() {
     !isForgotPasswordPath
   ) {
     setTimeout(() => navigateTo("/"), 0);
-    return <LoadingPage status="Redirecting to Landing..." />;
+    return null;
   }
 
   // --------------------------------------------------------------------------
@@ -866,81 +865,77 @@ export default function App() {
           </div>
 
           {/* PAGE VIEW 2: Advanced System Configuration Settings */}
-          <div
-            className="page-transition w-full flex-1 flex flex-col max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6"
-            style={{ display: isSettingsPath ? "flex" : "none" }}
-          >
-            <div className="flex items-center justify-between border-b border-neutral-800 pb-4">
-              <div>
-                <h2 className="text-2xl font-bold text-white tracking-tight">
-                  System Configuration Settings
-                </h2>
-                <p className="text-xs text-neutral-400 font-mono">
-                  Manage voice synthesis, music composition, and output
-                  rendering profiles
-                </p>
+          {isSettingsPath && (
+            <div className="page-transition w-full flex-1 flex flex-col max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6">
+              <div className="flex items-center justify-between border-b border-neutral-800 pb-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-white tracking-tight">
+                    System Configuration Settings
+                  </h2>
+                  <p className="text-xs text-neutral-400 font-mono">
+                    Manage voice synthesis, music composition, and output
+                    rendering profiles
+                  </p>
+                </div>
+                <button
+                  onClick={handleNavigateHome}
+                  className="px-4 py-2 bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-xl text-xs font-mono transition-all hover:bg-neutral-800/80 cursor-pointer"
+                >
+                  ← Dashboard
+                </button>
               </div>
-              <button
-                onClick={handleNavigateHome}
-                className="px-4 py-2 bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-xl text-xs font-mono transition-all hover:bg-neutral-800/80 cursor-pointer"
-              >
-                ← Dashboard
-              </button>
+              <AdvancedSettings
+                voiceActor={voiceActor}
+                setVoiceActor={setVoiceActor}
+                musicTheme={musicTheme}
+                setMusicTheme={setMusicTheme}
+                aspectRatio={aspectRatio}
+                setAspectRatio={setAspectRatio}
+                frameRate={frameRate}
+                setFrameRate={setFrameRate}
+                activeTheme={activeTheme}
+                setActiveTheme={setActiveTheme}
+                targetUrl={targetUrl}
+                selectedModel={selectedModel}
+                selectedSource={selectedSource}
+                addNotification={addNotification}
+              />
             </div>
-            <AdvancedSettings
-              voiceActor={voiceActor}
-              setVoiceActor={setVoiceActor}
-              musicTheme={musicTheme}
-              setMusicTheme={setMusicTheme}
-              aspectRatio={aspectRatio}
-              setAspectRatio={setAspectRatio}
-              frameRate={frameRate}
-              setFrameRate={setFrameRate}
-              activeTheme={activeTheme}
-              setActiveTheme={setActiveTheme}
-              targetUrl={targetUrl}
-              selectedModel={selectedModel}
-              selectedSource={selectedSource}
-              addNotification={addNotification}
-            />
-          </div>
+          )}
 
           {/* PAGE VIEW 3: Real-Time Engine Logs Console */}
-          <div
-            className="page-transition w-full flex-1 flex flex-col"
-            style={{ display: isLogsPath ? "flex" : "none" }}
-          >
-            <LogsPage
-              consoleLogs={consoleLogs}
-              setConsoleLogs={setConsoleLogs}
-              onNavigateHome={handleNavigateHome}
-            />
-          </div>
+          {isLogsPath && (
+            <div className="page-transition w-full flex-1 flex flex-col">
+              <LogsPage
+                consoleLogs={consoleLogs}
+                setConsoleLogs={setConsoleLogs}
+                onNavigateHome={handleNavigateHome}
+              />
+            </div>
+          )}
 
           {/* PAGE VIEW 4: Computational Diagnostics Status */}
-          <div
-            className="page-transition w-full flex-1 flex flex-col"
-            style={{ display: isStatusPath ? "flex" : "none" }}
-          >
-            <StatusPage
-              onNavigateHome={handleNavigateHome}
-              fetchWithInterceptor={fetchWithInterceptor}
-            />
-          </div>
+          {isStatusPath && (
+            <div className="page-transition w-full flex-1 flex flex-col">
+              <StatusPage
+                onNavigateHome={handleNavigateHome}
+                fetchWithInterceptor={fetchWithInterceptor}
+              />
+            </div>
+          )}
 
           {/* PAGE VIEW 5: Global Shortcuts Configuration */}
-          <div
-            className="page-transition w-full flex-1 flex flex-col"
-            style={{ display: isShortcutsPath ? "flex" : "none" }}
-          >
-            <ShortcutsPage
-              shortcuts={shortcuts}
-              setShortcuts={setShortcuts}
-              defaultShortcuts={DEFAULT_SHORTCUTS}
-              onNavigateHome={handleNavigateHome}
-              addNotification={addNotification}
-            />
-          </div>
+          {isShortcutsPath && (
+            <div className="page-transition w-full flex-1 flex flex-col">
+              <ShortcutsPage
+                shortcuts={shortcuts}
+                setShortcuts={setShortcuts}
+                defaultShortcuts={DEFAULT_SHORTCUTS}
+                onNavigateHome={handleNavigateHome}
+                addNotification={addNotification}
+              />
+            </div>
+          )}
 
           {/* PAGE VIEW 6: AI Video Optimizer */}
           {isOptimizerPath && (

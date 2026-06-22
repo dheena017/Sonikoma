@@ -221,3 +221,14 @@ body {
 .animate-shimmer-sweep {
   animation: shimmer-sweep 2.5s cubic-bezier(0.25, 1, 0.5, 1) infinite;
 }
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

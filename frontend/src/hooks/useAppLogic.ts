@@ -404,7 +404,7 @@ export function useAppLogic() {
               ? state.seriesSynopsis.trim()
               : undefined,
             project_id: overrideProjectId || undefined,
-            scrape_only: true,
+            scrape_only: state.smartSlice, // true = fast separate images; false = trigger stitch pipeline
           }),
         });
         const data = await res.json();
@@ -469,6 +469,14 @@ export function useAppLogic() {
           }
           if (data.genre) {
             state.setScrapedGenre(data.genre);
+          }
+          // Parse "Chapter 9 - Archmage Uihyeok Jeong" → chapterNumber + chapterTitle
+          if (data.episode) {
+            const epMatch = data.episode.match(/^Chapter\s+(\d+)(?:\s+-\s+(.+))?$/i);
+            if (epMatch) {
+              state.setChapterNumber(epMatch[1]);
+              state.setChapterTitle(epMatch[2] || "");
+            }
           }
 
           setCurrentPanelIndex(0);
