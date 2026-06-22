@@ -139,6 +139,7 @@ export function useAutoSave(state: AutoSaveState) {
     }
 
     setSaveStatus("saving");
+    state.addNotification?.("Saving project changes...", "info");
     try {
       console.log(
         `[Save Hook] Saving modifications for project: ${targetProjectId}...`
