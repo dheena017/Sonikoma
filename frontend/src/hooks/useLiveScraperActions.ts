@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
+import { processWithConcurrency } from "../utils/batchUtils";
 
 interface UseLiveScraperActionsProps {
   scrapedImages: string[];
@@ -52,9 +53,8 @@ export function useLiveScraperActions({
         return;
       }
 
-      for (let i = 0; i < toDownload.length; i++) {
+      await processWithConcurrency(toDownload, 8, async (url, i) => {
         try {
-          const url = toDownload[i];
           const res = await activeFetch(url);
           const blob = await res.blob();
           const filename = `webtoon_frame_${String(i + 1).padStart(
@@ -63,9 +63,9 @@ export function useLiveScraperActions({
           )}.png`;
           folder.file(filename, blob);
         } catch (err) {
-          console.error("Download failed for:", toDownload[i], err);
+          console.error("Download failed for:", url, err);
         }
-      }
+      });
 
       const blobContent = await zip.generateAsync({ type: "blob" });
       saveAs(blobContent, "webtoon_frames.zip");

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AlertTriangle, ShieldCheck, Settings, Shield } from "lucide-react";
 import { GeneratedPanel } from "../../types";
+import { processWithConcurrency, chunkArray } from "../../utils/batchUtils";
 
 interface BulkScrubberControlProps {
   panels: GeneratedPanel[];
@@ -31,57 +32,67 @@ export default function BulkScrubberControl({
         `[Compliance Scrubber] Running audit. Mode: ${scanMode}, Focus: ${scanFocus}, Panels count: ${targetPanels.length}`
       );
 
-      // Process panels concurrently to avoid sequential fetch delays
-      const scanTasks = targetPanels.map(async (p) => {
-        if (!p.speech_text || !p.speech_text.trim()) return null;
+      const chunks = chunkArray(targetPanels, 8);
+
+      // Process panels concurrently to avoid sequential fetch delays or overloading API
+      const results = await processWithConcurrency(chunks, 4, async (chunkPanels) => {
+        const panelsToScrub = chunkPanels.filter(p => p.speech_text && p.speech_text.trim());
+        if (panelsToScrub.length === 0) return [];
+        
         try {
-          const res = await fetch("/api/skills/copyright-scrub", {
+          const res = await fetch("/api/skills/copyright-scrub-batch", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              text: p.speech_text,
+              texts: panelsToScrub.map(p => p.speech_text),
               model: "gemini-2.5-flash",
             }),
           });
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const json = await res.json();
-          if (json.success && json.result) {
-            // Apply different simulated policy filters on the client if other focuses are active
-            let isViolating = json.result.contains_violation;
-            let sanitizedText = json.result.sanitized_text;
+          if (json.success && json.results) {
+            const mappedResults = [];
+            for (let i = 0; i < panelsToScrub.length; i++) {
+              const p = panelsToScrub[i];
+              const r = json.results.find((result: any) => result.text === p.speech_text);
+              if (r && r.success && r.data && r.data.result) {
+                let isViolating = r.data.result.contains_violation;
+                let sanitizedText = r.data.result.sanitized_text;
 
-            if (
-              scanFocus === "monetization" &&
-              p.speech_text.toLowerCase().includes("kill")
-            ) {
-              isViolating = true;
-              sanitizedText = p.speech_text.replace(/kill/gi, "defeat");
-            } else if (
-              scanFocus === "family" &&
-              p.speech_text.toLowerCase().includes("damn")
-            ) {
-              isViolating = true;
-              sanitizedText = p.speech_text.replace(/damn/gi, "darn");
-            }
+                if (
+                  scanFocus === "monetization" &&
+                  p.speech_text.toLowerCase().includes("kill")
+                ) {
+                  isViolating = true;
+                  sanitizedText = p.speech_text.replace(/kill/gi, "defeat");
+                } else if (
+                  scanFocus === "family" &&
+                  p.speech_text.toLowerCase().includes("damn")
+                ) {
+                  isViolating = true;
+                  sanitizedText = p.speech_text.replace(/damn/gi, "darn");
+                }
 
-            if (isViolating) {
-              return { id: p.id, sanitized: sanitizedText };
+                if (isViolating) {
+                  mappedResults.push({ id: p.id, sanitized: sanitizedText });
+                }
+              }
             }
+            return mappedResults;
           }
         } catch (err) {
           console.warn(
-            `[Compliance Scrubber] Failed scanning panel #${p.id}:`,
+            `[Compliance Scrubber] Failed scanning chunk:`,
             err
           );
         }
-        return null;
+        return [];
       });
 
-      const results = await Promise.all(scanTasks);
-
+      const flattenedResults = results.flat();
       const cleanMappings: Record<number, string> = {};
       let flags = 0;
-      for (const r of results) {
+      for (const r of flattenedResults) {
         if (r) {
           flags += 1;
           cleanMappings[r.id] = r.sanitized;

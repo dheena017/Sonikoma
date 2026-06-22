@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { NotificationType } from "../components/NotificationStack";
+import { processWithConcurrency } from "../utils/batchUtils";
 
 interface UseSingleImageEditsProps {
   editingImageIdx: number | null;
@@ -139,7 +140,7 @@ export function useSingleImageEdits({
     ]);
 
     try {
-      const cutPromises = cuts.map(async (cut, index) => {
+      const croppedUrls = await processWithConcurrency(cuts, 8, async (cut, index) => {
         setConsoleLogs((prev) => [
           `[Image Editor] Starting Crop Cut #${index + 1}/${cuts.length}...`,
           ...prev,
@@ -163,8 +164,6 @@ export function useSingleImageEdits({
         ]);
         return data.url;
       });
-
-      const croppedUrls = await Promise.all(cutPromises);
 
       // Add all cropped urls directly to Storyboard
       addPanelsToStoryboard(croppedUrls);

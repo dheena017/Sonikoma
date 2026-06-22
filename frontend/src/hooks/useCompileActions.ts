@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { GeneratedPanel } from "../types";
+import { processWithConcurrency, chunkArray } from "../utils/batchUtils";
 
 interface UseCompileActionsProps {
   panels: GeneratedPanel[];
@@ -211,41 +212,80 @@ export function useCompileActions({
         "info"
       );
     }
-    console.log(
-      "[useCompileActions] Analyzing selected panels in parallel:",
-      selectedIds
-    );
+    
+    // Set all selected panels to analyzing state
+    setPanels(prev => prev.map(p => selectedIds.includes(p.id) ? { ...p, isAnalyzing: true } : p));
+    
     try {
-      // Execute all analysis requests concurrently in batches of 2 to avoid triggering the 429 rate limit
-      let index = 0;
-      const concurrencyLimit = 2;
-      const workers = Array(Math.min(concurrencyLimit, selectedIds.length))
-        .fill(null)
-        .map(async (_, workerIdx) => {
-          // Stagger the launch of each worker slightly (300ms) to prevent initial API collision
-          if (workerIdx > 0) {
-            await new Promise((resolve) =>
-              setTimeout(resolve, workerIdx * 300)
-            );
-          }
-
-          while (index < selectedIds.length) {
-            const currentIdx = index++;
-            if (currentIdx >= selectedIds.length) break;
-            const id = selectedIds[currentIdx];
-            const panel = panels.find((p) => p.id === id);
-            if (!panel) continue;
-            try {
-              await handleAnalyzePanel(panel.id, panel.image_url);
-            } catch (err) {
-              console.error(
-                `[useCompileActions] Failed to analyze selected panel ID ${panel.id}:`,
-                err
-              );
+      const activeModel = selectedModel || "gemini-2.5-flash";
+      const targetPanels = panels.filter(p => selectedIds.includes(p.id));
+      const chunks = chunkArray(targetPanels, 8);
+      
+      await processWithConcurrency(chunks, 4, async (chunkPanels) => {
+        try {
+          const res = await activeFetch("/api/analyze-batch", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              urls: chunkPanels.map(p => p.image_url),
+              model: activeModel,
+              narrationStyle,
+              voice: voiceActor,
+            }),
+          });
+          
+          if (!res.ok) throw new Error("Image analysis batch failed");
+          const data = await res.json();
+          
+          if (data.success && data.results) {
+            setPanels(prev => prev.map(p => {
+              if (!selectedIds.includes(p.id)) return p;
+              
+              const result = data.results.find((r: any) => r.url === p.image_url);
+              if (result && result.analysis) {
+                const aiDuration = Number(result.analysis.duration);
+                const aiMotion = String(result.analysis.motion_type || "").trim();
+                return {
+                  ...p,
+                  speech_text: result.analysis.speech_text || p.speech_text,
+                  sfx: result.analysis.sfx || p.sfx,
+                  duration: aiDuration > 0 ? aiDuration : p.duration,
+                  motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
+                  visual_description: result.analysis.visual_description || p.visual_description,
+                  audio_url: result.audio_url || p.audio_url,
+                  isAnalyzing: false,
+                };
+              }
+              return p;
+            }));
+            
+            if (setConsoleLogs) {
+              setConsoleLogs(prev => [
+                `[AI Auto-Analysis] [SUCCESS] Processed batch of ${chunkPanels.length} panels`,
+                ...prev
+              ]);
             }
+          } else {
+            throw new Error(data.error || "Batch analysis returned unsuccessful status");
           }
-        });
-      await Promise.all(workers);
+        } catch (err: any) {
+          console.error("[useCompileActions] Batch analysis failed:", err);
+          if (setConsoleLogs) {
+            setConsoleLogs(prev => [
+              `[AI Auto-Analysis] [ERROR] Batch analysis failed: ${err.message}`,
+              ...prev
+            ]);
+          }
+        } finally {
+          setPanels(prev => prev.map(p => {
+            if (chunkPanels.some(cp => cp.id === p.id)) {
+              return { ...p, isAnalyzing: false };
+            }
+            return p;
+          }));
+        }
+      });
+
       if (addNotification) {
         addNotification(
           `AI analysis completed for ${selectedIds.length} selected panel(s)!`,
@@ -260,6 +300,7 @@ export function useCompileActions({
           "error"
         );
       }
+      setPanels(prev => prev.map(p => selectedIds.includes(p.id) ? { ...p, isAnalyzing: false } : p));
     } finally {
       setIsAnalyzingAll(false);
     }
@@ -270,35 +311,66 @@ export function useCompileActions({
     setIsAnalyzingAll(true);
     if (addNotification) {
       addNotification(
-        "Starting sequential AI analysis for all panels...",
+        "Starting batch AI analysis for all panels...",
         "info"
       );
     }
-    console.log(
-      "[useCompileActions] Initiating sequential AI analysis for all panels:",
-      panels.length
-    );
+    
+    // Set all panels to analyzing state
+    setPanels(prev => prev.map(p => ({ ...p, isAnalyzing: true })));
+    
     try {
-      // Loop sequentially to prevent API rate limiting (429/503 errors)
-      for (let i = 0; i < panels.length; i++) {
-        const panel = panels[i];
-        console.log(
-          `[useCompileActions] Analyzing panel ${i + 1}/${panels.length} (ID: ${
-            panel.id
-          })`
-        );
+      const activeModel = selectedModel || "gemini-2.5-flash";
+      const chunks = chunkArray(panels, 8);
+      
+      await processWithConcurrency(chunks, 4, async (chunkPanels) => {
         try {
-          await handleAnalyzePanel(panel.id, panel.image_url);
-        } catch (panelErr) {
-          console.error(
-            `[useCompileActions] Failed to analyze panel ID ${panel.id}:`,
-            panelErr
-          );
-          // Continue to next panel in case one fails
+          const res = await activeFetch("/api/analyze-batch", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              urls: chunkPanels.map(p => p.image_url),
+              model: activeModel,
+              narrationStyle,
+              voice: voiceActor,
+            }),
+          });
+          
+          if (!res.ok) throw new Error("Image analysis batch failed");
+          const data = await res.json();
+          
+          if (data.success && data.results) {
+            setPanels(prev => prev.map(p => {
+              const result = data.results.find((r: any) => r.url === p.image_url);
+              if (result && result.analysis) {
+                const aiDuration = Number(result.analysis.duration);
+                const aiMotion = String(result.analysis.motion_type || "").trim();
+                return {
+                  ...p,
+                  speech_text: result.analysis.speech_text || p.speech_text,
+                  sfx: result.analysis.sfx || p.sfx,
+                  duration: aiDuration > 0 ? aiDuration : p.duration,
+                  motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
+                  visual_description: result.analysis.visual_description || p.visual_description,
+                  audio_url: result.audio_url || p.audio_url,
+                  isAnalyzing: false,
+                };
+              }
+              return p;
+            }));
+          }
+        } catch (err: any) {
+          console.error("[useCompileActions] Batch analysis failed:", err);
+        } finally {
+          setPanels(prev => prev.map(p => {
+            if (chunkPanels.some(cp => cp.id === p.id)) {
+              return { ...p, isAnalyzing: false };
+            }
+            return p;
+          }));
         }
-        // Small delay between calls to be safe with rate limits
-        await new Promise((resolve) => setTimeout(resolve, 300));
-      }
+      });
+      
       if (addNotification) {
         addNotification("AI analysis completed for all panels!", "success");
       }
@@ -310,6 +382,7 @@ export function useCompileActions({
           "error"
         );
       }
+      setPanels(prev => prev.map(p => ({ ...p, isAnalyzing: false })));
     } finally {
       setIsAnalyzingAll(false);
     }

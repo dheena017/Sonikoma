@@ -31,7 +31,7 @@ interface TimelineCardProps {
   isDragOver?: boolean;
 }
 
-export default function TimelineCard({
+const TimelineCard = ({
   panel,
   idx,
   currentPanelIndex,
@@ -57,7 +57,7 @@ export default function TimelineCard({
   onDrop,
   isDragging,
   isDragOver,
-}: TimelineCardProps) {
+}: TimelineCardProps) => {
   const isCurrent =
     idx === currentPanelIndex && activePreviewTab === "storyboard";
 
@@ -376,4 +376,18 @@ export default function TimelineCard({
       </div>
     </div>
   );
-}
+};
+
+export default React.memo(TimelineCard, (prevProps, nextProps) => {
+  return (
+    prevProps.panel === nextProps.panel &&
+    prevProps.idx === nextProps.idx &&
+    prevProps.currentPanelIndex === nextProps.currentPanelIndex &&
+    prevProps.activePreviewTab === nextProps.activePreviewTab &&
+    prevProps.analyzingPanelId === nextProps.analyzingPanelId &&
+    prevProps.isSelected === nextProps.isSelected &&
+    prevProps.isDragging === nextProps.isDragging &&
+    prevProps.isDragOver === nextProps.isDragOver &&
+    prevProps.panelsLength === nextProps.panelsLength
+  );
+});

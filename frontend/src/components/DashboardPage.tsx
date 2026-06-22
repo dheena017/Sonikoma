@@ -28,6 +28,8 @@ interface Project {
   created_at: string;
   status: string;
   panels_count: number;
+  series_slug?: string;
+  chapter_slug?: string;
 }
 
 export default function DashboardPage() {
@@ -76,8 +78,14 @@ export default function DashboardPage() {
     (window as any).navigateTo?.("/workspace");
   };
 
-  const handleOpenProject = (id: string) => {
-    (window as any).navigateTo?.(`/project-details?id=${id}`);
+  const handleOpenProject = (project: Project) => {
+    if (project.series_slug && project.chapter_slug) {
+      // Navigate using slug-based URL → opens the chapter details page
+      (window as any).navigateTo?.(`/series/${project.series_slug}/chapters/${project.chapter_slug}/details`);
+    } else {
+      // Fallback: open in workspace editor by project ID
+      (window as any).navigateTo?.(`/workspace?id=${project.project_id}`);
+    }
   };
 
   const completedCount = projects.filter(
@@ -210,7 +218,7 @@ export default function DashboardPage() {
                 {projects.slice(0, 6).map((project) => (
                   <div
                     key={project.project_id}
-                    onClick={() => handleOpenProject(project.project_id)}
+                    onClick={() => handleOpenProject(project)}
                     className="bg-[#0b0b0e]/80 border border-white/5 hover:border-purple-500/30 rounded-2xl p-5 cursor-pointer transition-all hover:bg-neutral-900/80 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-900/10 group"
                   >
                     <div className="flex justify-between items-start mb-4">

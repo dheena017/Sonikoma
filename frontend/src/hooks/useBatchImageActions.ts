@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { GeneratedPanel } from "../types";
 import { NotificationType } from "../components/NotificationStack";
+import { processWithConcurrency } from "../utils/batchUtils";
 
 interface UseBatchImageActionsProps {
   selectedScraped: string[];
@@ -125,7 +126,7 @@ export function useBatchImageActions({
     const errors: string[] = [];
 
     try {
-      for (const url of targetImages) {
+      await processWithConcurrency(targetImages, 8, async (url) => {
         setBubbleCroppingImgUrl(url);
         try {
           const response = await fetchWithInterceptor(
@@ -175,7 +176,7 @@ export function useBatchImageActions({
             total: targetImages.length,
           });
         }
-      }
+      });
     } catch (outerErr: any) {
       errors.push(
         `Critical error in batch bubble cleaning: ${outerErr.message}`
@@ -235,7 +236,7 @@ export function useBatchImageActions({
     const newSlicedUrlsMap: Record<string, string[]> = {};
 
     try {
-      for (const url of targetImages) {
+      await processWithConcurrency(targetImages, 8, async (url) => {
         setCroppingImgUrl(url);
         try {
           const response = await fetchWithInterceptor("/api/detect-panels", {
@@ -346,7 +347,7 @@ export function useBatchImageActions({
             total: targetImages.length,
           });
         }
-      }
+      });
     } catch (outerErr: any) {
       errors.push(`Critical error in batch auto-crop: ${outerErr.message}`);
     } finally {

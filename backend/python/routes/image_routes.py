@@ -80,6 +80,14 @@ class RemoveBubblesRequest(BaseModel):
     inpaint_radius: Optional[int] = 3
     detection_style: Optional[str] = "all"
 
+class RemoveBubblesBatchRequest(BaseModel):
+    urls: List[str]
+    method: Optional[str] = "auto"
+    sensitivity: Optional[float] = 50.0
+    dilation: Optional[int] = -1
+    inpaint_radius: Optional[int] = 3
+    detection_style: Optional[str] = "all"
+
 
 # ─── Image Editing & Transform Routes ──────────────────────────────────────────
 
@@ -512,3 +520,63 @@ async def bubble_cleaning(body: RemoveBubblesRequest):
     except Exception as e:
         logger.error(f"[Bubble Cleaner API Error] failed: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Speech bubble cleaning failed: {e}")
+
+@router.post("/remove-speech-bubbles-batch", summary="Inpaint speech bubbles out of multiple panel images")
+async def bubble_cleaning_batch(body: RemoveBubblesBatchRequest):
+    logger.info(f"[Bubble Cleaner Batch] Request received for {len(body.urls)} URLs.")
+    
+    if not body.urls:
+        raise HTTPException(status_code=400, detail="Field 'urls' must be a non-empty list.")
+    
+    results = []
+    semaphore = asyncio.Semaphore(4)
+
+    async def process_one(url: str):
+        async with semaphore:
+            try:
+                resolved = await img_utils.resolve_image_to_buffer(url)
+                content_type = resolved["contentType"]
+                
+                with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_in:
+                    tmp_in.write(resolved["data"])
+                    tmp_in_path = tmp_in.name
+                    
+                tmp_out_path = tmp_in_path.replace(".png", "_out.png")
+                
+                try:
+                    detected = await asyncio.to_thread(
+                        remove_speech_bubbles,
+                        image_path=tmp_in_path,
+                        output_path=tmp_out_path,
+                        method=body.method,
+                        sensitivity=body.sensitivity,
+                        dilation=body.dilation,
+                        inpaint_radius=body.inpaint_radius,
+                        detection_style=body.detection_style
+                    )
+                    
+                    with open(tmp_out_path, "rb") as f:
+                        cleaned_bytes = f.read()
+                        
+                    cache_id = f"merged_{int(time.time() * 1000)}_cleaned_{hash(url) % 10000}"
+                    new_url = f"/api/image/cached/{cache_id}"
+                    
+                    stitched_cache.set(cache_id, {"data": cleaned_bytes, "content_type": content_type})
+                    edit_history.set(new_url, url)
+                    
+                    results.append({"url": url, "new_url": new_url, "success": True})
+                finally:
+                    for p in (tmp_in_path, tmp_out_path):
+                        try:
+                            if os.path.exists(p):
+                                os.remove(p)
+                        except OSError:
+                            pass
+            except Exception as e:
+                logger.warning(f"[Bubble Cleaner Batch] Failed for URL {url[:50]}: {e}")
+                results.append({"url": url, "success": False, "error": str(e)})
+
+    tasks = [process_one(url) for url in body.urls]
+    await asyncio.gather(*tasks)
+    
+    return {"success": True, "results": results}

@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { X, Trash2 } from "lucide-react";
 import { GeneratedPanel } from "../../types";
 import { useStoryboardOperations } from "../../hooks/useStoryboardOperations";
+import { processWithConcurrency, chunkArray } from "../../utils/batchUtils";
 
 import TimelineEmptyState from "./TimelineEmptyState";
 import TimelineHeader from "./TimelineHeader";
@@ -236,16 +237,16 @@ export default function StoryboardTimeline({
     const activeFetch = fetchWithInterceptor || fetch;
 
     try {
-      let updatedPanels = [...panels];
+      const chunks = chunkArray(targetPanels, 8);
       let completed = 0;
 
-      for (const panel of targetPanels) {
+      await processWithConcurrency(chunks, 4, async (chunkPanels) => {
         try {
-          const res = await activeFetch("/api/image/remove-speech-bubbles", {
+          const res = await activeFetch("/api/image/remove-speech-bubbles-batch", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              url: panel.image_url,
+              urls: chunkPanels.map(p => p.image_url),
               method: bubbleEraseMethod,
               sensitivity: bubbleSensitivity,
               detection_style: bubbleDetectionStyle,
@@ -256,24 +257,29 @@ export default function StoryboardTimeline({
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
 
-          if (data.success && data.url) {
-            updatedPanels = updatedPanels.map((p) =>
-              p.id === panel.id ? { ...p, image_url: data.url } : p
+          if (data.success && data.results) {
+            setPanels((prev) =>
+              prev.map((p) => {
+                const updatedResult = data.results.find((r: any) => r.url === p.image_url);
+                if (updatedResult && updatedResult.success && updatedResult.new_url) {
+                  return { ...p, image_url: updatedResult.new_url };
+                }
+                return p;
+              })
             );
-            successCount++;
+            successCount += data.results.filter((r: any) => r.success).length;
+            errorCount += data.results.filter((r: any) => !r.success).length;
           } else {
             throw new Error(data.message || "Removal failed");
           }
         } catch (err: any) {
-          console.error(`[Speech Bubbles] Error for panel #${panel.id}:`, err);
-          errorCount++;
+          console.error(`[Speech Bubbles] Error for chunk:`, err);
+          errorCount += chunkPanels.length;
         } finally {
-          completed++;
+          completed += chunkPanels.length;
           setCleanProgress({ current: completed, total: targetPanels.length });
         }
-      }
-
-      setPanels(updatedPanels);
+      });
 
       if (successCount > 0) {
         addNotification?.(
@@ -315,22 +321,19 @@ export default function StoryboardTimeline({
     let nextId = Math.max(...panels.map((p) => p.id), 0) + 1;
 
     try {
-      let updatedPanels: GeneratedPanel[] = [];
       let successCount = 0;
       let completed = 0;
 
-      for (const p of panels) {
-        if (!selectedPanelIds.has(p.id)) {
-          updatedPanels.push(p);
-          continue;
-        }
+      const chunks = chunkArray(targetPanels, 8);
 
+      const results = await processWithConcurrency(chunks, 4, async (chunkPanels) => {
+        const chunkMap = new Map<number, GeneratedPanel[]>();
         try {
-          const res = await activeFetch("/api/detect-panels", {
+          const res = await activeFetch("/api/detect-panels-batch", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              url: p.image_url,
+              urls: chunkPanels.map(p => p.image_url),
               sensitivity: cropSensitivity,
               backgroundColorMode: cropBackgroundMode,
               aspectRatio: aspectRatioLock,
@@ -349,56 +352,72 @@ export default function StoryboardTimeline({
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
 
-          if (
-            data.success &&
-            Array.isArray(data.panels) &&
-            data.panels.length > 0
-          ) {
-            const newSubPanels: GeneratedPanel[] = [];
+          if (data.success && data.results) {
+            for (const result of data.results) {
+              const originalPanel = chunkPanels.find(p => p.image_url === result.url);
+              if (!originalPanel) continue;
+              
+              const newSubPanels: GeneratedPanel[] = [];
+              if (result.success && Array.isArray(result.data?.panels) && result.data.panels.length > 0) {
+                for (let i = 0; i < result.data.panels.length; i++) {
+                  const box = result.data.panels[i];
+                  let croppedUrl = box.croppedUrl;
 
-            for (let i = 0; i < data.panels.length; i++) {
-              const box = data.panels[i];
-              let croppedUrl = box.croppedUrl;
+                  if (!croppedUrl) {
+                    const cropRes = await activeFetch("/api/image/edit", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        url: originalPanel.image_url,
+                        cropTop: box.cropTop,
+                        cropBottom: box.cropBottom,
+                        cropLeft: box.cropLeft,
+                        cropRight: box.cropRight,
+                        autoTrim: true,
+                        padding: 10,
+                      }),
+                    });
+                    if (!cropRes.ok) throw new Error(`Crop HTTP ${cropRes.status}`);
+                    const cropData = await cropRes.json();
+                    croppedUrl = cropData.url;
+                  }
 
-              if (!croppedUrl) {
-                const cropRes = await activeFetch("/api/image/edit", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    url: p.image_url,
-                    cropTop: box.cropTop,
-                    cropBottom: box.cropBottom,
-                    cropLeft: box.cropLeft,
-                    cropRight: box.cropRight,
-                    autoTrim: true,
-                    padding: 10,
-                  }),
-                });
-                if (!cropRes.ok) throw new Error(`Crop HTTP ${cropRes.status}`);
-                const cropData = await cropRes.json();
-                croppedUrl = cropData.url;
+                  newSubPanels.push({
+                    ...originalPanel,
+                    id: nextId++,
+                    image_url: croppedUrl,
+                  });
+                }
+                successCount++;
+              } else {
+                newSubPanels.push(originalPanel);
               }
-
-              newSubPanels.push({
-                ...p,
-                id: nextId++,
-                image_url: croppedUrl,
-              });
+              chunkMap.set(originalPanel.id, newSubPanels);
             }
-
-            updatedPanels.push(...newSubPanels);
-            successCount++;
           } else {
-            updatedPanels.push(p);
+            chunkPanels.forEach(p => chunkMap.set(p.id, [p]));
           }
         } catch (err: any) {
-          console.error(`[Auto Cropper] Failed for panel #${p.id}:`, err);
-          updatedPanels.push(p);
+          console.error(`[Auto Cropper] Failed for chunk:`, err);
+          chunkPanels.forEach(p => chunkMap.set(p.id, [p]));
         } finally {
-          completed++;
+          completed += chunkPanels.length;
           setCropProgress({ current: completed, total: targetPanels.length });
         }
+        return chunkMap;
+      });
+
+      const updatedPanelsMap = new Map<number, GeneratedPanel[]>();
+      for (const chunkMap of results) {
+        for (const [id, newPanelsList] of chunkMap.entries()) {
+          updatedPanelsMap.set(id, newPanelsList);
+        }
       }
+
+      const updatedPanels = panels.flatMap(p => {
+        if (!selectedPanelIds.has(p.id)) return [p];
+        return updatedPanelsMap.get(p.id) || [p];
+      });
 
       setPanels(updatedPanels);
       addNotification?.(`Auto-cropped selected storyboard panels!`, "success");

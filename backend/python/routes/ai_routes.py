@@ -60,6 +60,7 @@ class AnalyzeBatchRequest(BaseModel):
     urls: List[str]
     model: Optional[str] = "gemini-2.5-flash"
     narrationStyle: Optional[str] = "long"  # 'long' = detailed YouTube recap, 'short' = quick subtitles
+    voice: Optional[str] = "en-US-GuyNeural"
 
 class ListModelsRequest(BaseModel):
     apiKey: Optional[str] = None
@@ -73,6 +74,25 @@ class TestModelLatencyRequest(BaseModel):
 
 class SmartCropRequest(BaseModel):
     url: str
+    model: Optional[str] = "gemini-2.5-flash"
+    strategy: Optional[str] = "ai"
+    sensitivity: Optional[float] = 30.0
+    backgroundColorMode: Optional[str] = "auto"
+    aspectRatio: Optional[str] = "free"
+    minAreaPct: Optional[float] = 0.15
+    mergeThreshold: Optional[int] = 20
+    cannyLow: Optional[int] = 20
+    cannyHigh: Optional[int] = 100
+    closeKernelSize: Optional[int] = 15
+    minHeightPx: Optional[int] = 60
+    autoSplit: Optional[bool] = True
+    targetWidth: Optional[int] = None
+    targetHeight: Optional[int] = None
+    guidanceInstructions: Optional[str] = None
+    focusMode: Optional[str] = None
+
+class SmartCropBatchRequest(BaseModel):
+    urls: List[str]
     model: Optional[str] = "gemini-2.5-flash"
     strategy: Optional[str] = "ai"
     sensitivity: Optional[float] = 30.0
@@ -226,6 +246,10 @@ class OutroCTARequest(BaseModel):
 
 class CopyrightScrubRequest(BaseModel):
     text: str
+    model: Optional[str] = "gemini-2.5-flash"
+
+class CopyrightScrubBatchRequest(BaseModel):
+    texts: List[str]
     model: Optional[str] = "gemini-2.5-flash"
 
 
@@ -721,9 +745,36 @@ async def analyze_batch(body: AnalyzeBatchRequest):
                 raw_text = await skill.execute(model=target_model, image_bytes=img_buffer, tone_hint=tone_hint, narrative_length_hint=narrative_length_hint)
                 analysis = validate_analysis(json.loads(raw_text))
                 
+                audio_url = None
+                try:
+                    with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_audio:
+                        temp_audio_path = tmp_audio.name
+                    
+                    voice_code = body.voice or "en-US-GuyNeural"
+                    await generate_panel_audio(
+                        dialogue_list=[analysis["speech_text"]],
+                        target_duration=analysis["duration"],
+                        output_path=temp_audio_path,
+                        voice=voice_code
+                    )
+                    
+                    if os.path.exists(temp_audio_path) and os.path.getsize(temp_audio_path) > 0:
+                        with open(temp_audio_path, "rb") as f:
+                            audio_bytes = f.read()
+                        import uuid
+                        unique_audio_id = f"audio_{uuid.uuid4().hex[:8]}"
+                        stitched_cache.set(unique_audio_id, {"data": audio_bytes, "content_type": "audio/mpeg"})
+                        audio_url = f"/api/image/cached/{unique_audio_id}"
+                    
+                    if os.path.exists(temp_audio_path):
+                        os.remove(temp_audio_path)
+                except Exception as audio_err:
+                    logger.error(f"[analyze_batch] Failed to pre-generate audio for {url[:50]}: {audio_err}")
+
                 results.append({
                     "url": url,
                     "analysis": analysis,
+                    "audio_url": audio_url,
                     "inputTokens": getattr(skill, "last_input_tokens", 0),
                     "outputTokens": getattr(skill, "last_output_tokens", 0)
                 })
@@ -955,6 +1006,50 @@ async def ai_smart_crop(body: SmartCropRequest):
         logger.error(f"[AI Smart Crop API] Error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"AI Smart Crop failed: {e}")
 
+@router.post("/ai-smart-crop-batch", summary="Batch crop panels automatically using local CV or Gemini")
+@router.post("/detect-panels-batch")
+async def ai_smart_crop_batch(body: SmartCropBatchRequest):
+    logger.info(f"[AI Smart Crop Batch] Request received for {len(body.urls)} URLs.")
+    if not body.urls:
+        raise HTTPException(status_code=400, detail="Field 'urls' must be a non-empty list.")
+    
+    results = []
+    semaphore = asyncio.Semaphore(4)
+    
+    # We can just reuse the existing endpoint logic by calling its function manually
+    async def process_one(url: str):
+        async with semaphore:
+            try:
+                single_request = SmartCropRequest(
+                    url=url,
+                    model=body.model,
+                    strategy=body.strategy,
+                    sensitivity=body.sensitivity,
+                    backgroundColorMode=body.backgroundColorMode,
+                    aspectRatio=body.aspectRatio,
+                    minAreaPct=body.minAreaPct,
+                    mergeThreshold=body.mergeThreshold,
+                    cannyLow=body.cannyLow,
+                    cannyHigh=body.cannyHigh,
+                    closeKernelSize=body.closeKernelSize,
+                    minHeightPx=body.minHeightPx,
+                    autoSplit=body.autoSplit,
+                    targetWidth=body.targetWidth,
+                    targetHeight=body.targetHeight,
+                    guidanceInstructions=body.guidanceInstructions,
+                    focusMode=body.focusMode
+                )
+                res = await ai_smart_crop(single_request)
+                results.append({"url": url, "success": True, "data": res})
+            except Exception as e:
+                logger.warning(f"[Smart Crop Batch] Failed for URL {url[:50]}: {e}")
+                results.append({"url": url, "success": False, "error": str(e)})
+
+    tasks = [process_one(url) for url in body.urls]
+    await asyncio.gather(*tasks)
+    
+    return {"success": True, "results": results}
+
 
 # ─── New Dynamic AI Skills Endpoints ──────────────────────────────────────────
 
@@ -1086,6 +1181,29 @@ async def get_outro_cta(body: OutroCTARequest):
 @router.post("/skills/copyright-scrub")
 async def get_copyright_scrub(body: CopyrightScrubRequest):
     return await run_md_skill("copyright_scrubber", body.model, text=body.text)
+
+@router.post("/skills/copyright-scrub-batch")
+async def get_copyright_scrub_batch(body: CopyrightScrubBatchRequest):
+    logger.info(f"[Copyright Scrub Batch] Request received for {len(body.texts)} items.")
+    if not body.texts:
+        raise HTTPException(status_code=400, detail="Field 'texts' must be a non-empty list.")
+    
+    results = []
+    semaphore = asyncio.Semaphore(4)
+    
+    async def process_one(text: str):
+        async with semaphore:
+            try:
+                res = await run_md_skill("copyright_scrubber", body.model, text=text)
+                results.append({"text": text, "success": True, "data": res})
+            except Exception as e:
+                logger.warning(f"[Copyright Scrub Batch] Failed for text: {text[:50]}... Error: {e}")
+                results.append({"text": text, "success": False, "error": str(e)})
+
+    tasks = [process_one(t) for t in body.texts]
+    await asyncio.gather(*tasks)
+    
+    return {"success": True, "results": results}
 
 @router.post("/test-model-latency", summary="Test latency and quota for any model of any provider")
 async def test_model_latency(body: TestModelLatencyRequest):
