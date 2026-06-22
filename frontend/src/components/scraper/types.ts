@@ -50,6 +50,7 @@ export interface ScraperDeckProps {
   chapterTitle?: string;
   targetUrl?: string;
   selectedSource?: string;
+  handleSaveAssets?: () => void;
 }
 
 export type LiveScraperDeckProps = ScraperDeckProps;

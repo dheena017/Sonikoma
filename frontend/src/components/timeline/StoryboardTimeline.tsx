@@ -47,6 +47,7 @@ interface StoryboardTimelineProps {
   autoSplitTallStrips?: boolean;
   playStoryboardAudio?: (idx: number) => void;
   saveProject?: (customPanels?: GeneratedPanel[]) => Promise<boolean>;
+  handleSaveStoryboard?: () => void;
 }
 
 export default function StoryboardTimeline({
@@ -86,6 +87,7 @@ export default function StoryboardTimeline({
   autoSplitTallStrips = true,
   playStoryboardAudio,
   saveProject,
+  handleSaveStoryboard,
 }: StoryboardTimelineProps) {
   // ── Panel selection state ────────────────────────────────────────────────
   const [selectedPanelIds, setSelectedPanelIds] = useState<Set<number>>(
@@ -574,6 +576,7 @@ export default function StoryboardTimeline({
         handleDownloadZip={handleDownloadZip}
         isAnalyzingAll={isAnalyzingAll}
         handleAnalyzeAllPanels={handleAnalyzeAllPanels}
+        handleSaveStoryboard={handleSaveStoryboard}
       />
 
       {/* Bulk Operations Menu */}

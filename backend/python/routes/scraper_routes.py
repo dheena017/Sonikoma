@@ -457,8 +457,27 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
             except Exception as se_err:
                 logger.warning(f"[Scraper] Failed to automatically save scrape session: {se_err}")
 
-        # Do not automatically insert project row into DB during scrape anymore.
-        # Projects will be created in the database when the user clicks 'Save Changes' in the UI.
+        # Automatically insert project row into DB during scrape so slugs are generated immediately
+        if project_id and not project_id.startswith("temp_"):
+            try:
+                existing_project = db.get_project(project_id)
+                if not existing_project:
+                    db.insert_project({
+                        "project_id": project_id,
+                        "url": normalized_url,
+                        "title": parsed.get("title") or "Untitled Project",
+                        "genre": parsed.get("genre") or "general",
+                        "episode": parsed.get("episode") or "Chapter 1",
+                        "status": "pending",
+                        "panels_count": 0,
+                        "video_url": None,
+                        "user_id": user_id or "system_default",
+                        "author": parsed.get("author") or "Unknown Author",
+                        "cover_image": parsed.get("cover_image") or "",
+                        "synopsis": parsed.get("synopsis") or "",
+                    })
+            except Exception as db_err:
+                logger.warning(f"[Scraper] Failed to automatically insert project row: {db_err}")
 
         return_panels = []
 

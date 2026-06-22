@@ -5,12 +5,14 @@ interface OutputMetadataPanelProps {
   musicTheme: string;
   voiceActor: string;
   videoUrl: string | null;
+  handleSaveVideo?: () => void;
 }
 
 export default function OutputMetadataPanel({
   musicTheme,
   voiceActor,
   videoUrl,
+  handleSaveVideo,
 }: OutputMetadataPanelProps) {
   return (
     <div
@@ -53,7 +55,15 @@ export default function OutputMetadataPanel({
 
       {/* Download MP4 Button */}
       {videoUrl && (
-        <div className="pt-2">
+        <div className="pt-2 flex flex-col gap-2">
+          {handleSaveVideo && (
+            <button
+              onClick={handleSaveVideo}
+              className="w-full bg-purple-600 hover:bg-purple-500 text-white font-medium text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer select-none shadow-lg shadow-purple-900/30 font-sans active:scale-95 border border-purple-500/50"
+            >
+              <span>Save Final Video</span>
+            </button>
+          )}
           <a
             href={videoUrl}
             download={`webtoon_cinemamaster_${Math.random()
@@ -61,7 +71,7 @@ export default function OutputMetadataPanel({
               .substring(2, 6)}.mp4`}
             target="_blank"
             rel="noreferrer"
-            className="w-full bg-purple-600 hover:bg-purple-500 text-white font-medium text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer select-none shadow-lg shadow-purple-900/30 font-sans"
+            className="w-full bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-medium text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer select-none border border-neutral-700 font-sans"
           >
             <Download className="h-4 w-4" />
             <span>Download Master MP4 File</span>
