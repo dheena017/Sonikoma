@@ -245,9 +245,30 @@ export default function ProjectConfirmModal({
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-850 text-neutral-400 hover:text-neutral-200 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border border-neutral-800"
+            className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-850 text-neutral-400 hover:text-white rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border border-neutral-800"
           >
             Cancel
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              onConfirm(
+                {
+                  seriesTitle: seriesTitle.trim() || "Temporary Preview",
+                  chapterNumber: chapterNumber.trim() || "1",
+                  chapterTitle: chapterTitle.trim(),
+                  scrapedGenre: scrapedGenre.trim(),
+                  seriesAuthor: seriesAuthor.trim(),
+                  seriesCoverImage: seriesCoverImage.trim(),
+                  seriesSynopsis: seriesSynopsis.trim(),
+                },
+                true // isTemporary
+              );
+            }}
+            className="px-5 py-2.5 bg-neutral-800/80 hover:bg-neutral-750 text-neutral-300 hover:text-white border border-neutral-700/60 hover:border-neutral-600 rounded-xl text-xs font-bold tracking-wide transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-purple-400" />
+            <span>Try Temporarily (No Save)</span>
           </button>
           <button
             type="button"

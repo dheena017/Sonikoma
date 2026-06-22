@@ -156,6 +156,17 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
     setSmartSlice,
   } = props;
 
+  // Metadata card is hidden until a scrape populates the fields
+  const [metadataRevealed, setMetadataRevealed] = React.useState(false);
+  const [metadataCollapsed, setMetadataCollapsed] = React.useState(false);
+
+  // Reveal the card as soon as scraping starts or any field gets filled
+  React.useEffect(() => {
+    if (isScraping || seriesTitle || chapterNumber || scrapedGenre || seriesAuthor || seriesCoverImage || seriesSynopsis) {
+      setMetadataRevealed(true);
+    }
+  }, [isScraping, seriesTitle, chapterNumber, scrapedGenre, seriesAuthor, seriesCoverImage, seriesSynopsis]);
+
   const source = selectedSource || "webtoons";
 
   React.useEffect(() => {
@@ -404,119 +415,158 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
               </p>
             </div>
           )}
+          {/* Series & Chapter Metadata Override Card — revealed after scrape */}
+          {metadataRevealed && (
+            <div
+              className="border rounded-2xl overflow-hidden transition-all duration-500"
+              style={{
+                borderColor: isScraping ? "rgba(139,92,246,0.5)" : "rgba(63,63,70,0.8)",
+                background: isScraping ? "rgba(88,28,135,0.08)" : "rgba(0,0,0,0.4)",
+                animation: "slideDown 0.4s cubic-bezier(0.16,1,0.3,1)",
+              }}
+            >
+              {/* Card Header */}
+              <div
+                className="flex items-center justify-between px-4 py-2.5 border-b cursor-pointer select-none"
+                style={{ borderColor: "rgba(255,255,255,0.05)" }}
+                onClick={() => setMetadataCollapsed((v) => !v)}
+              >
+                <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-1.5">
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${
+                      isScraping ? "bg-purple-400 animate-ping" : "bg-emerald-500"
+                    }`}
+                  />
+                  Comic Series &amp; Chapter Metadata
+                  {isScraping ? (
+                    <span className="ml-1.5 text-[9px] text-purple-400 font-mono animate-pulse">
+                      Auto-filling...
+                    </span>
+                  ) : (
+                    <span className="ml-1.5 text-[9px] text-emerald-400 font-mono">
+                      ✓ Scraped
+                    </span>
+                  )}
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] text-neutral-500 font-bold font-mono">
+                    Editable Overrides
+                  </span>
+                  <span
+                    className="text-neutral-500 text-[10px] transition-transform duration-300"
+                    style={{ display: "inline-block", transform: metadataCollapsed ? "rotate(-90deg)" : "rotate(0deg)" }}
+                  >
+                    ▾
+                  </span>
+                </div>
+              </div>
 
-          {/* Series & Chapter Metadata Override Card */}
-          <div className="p-4 bg-black/40 border border-neutral-800/80 rounded-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-white/5 pb-2">
-              <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
-                Comic Series & Chapter Metadata
-              </span>
-              <span className="text-[9px] text-neutral-500 font-bold font-mono">
-                Editable Overrides
-              </span>
+              {/* Collapsible Fields */}
+              {!metadataCollapsed && (
+                <div className="p-4 space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+                    {/* Series Name */}
+                    <div className="md:col-span-6 space-y-1">
+                      <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                        Comic/Manhwa Series Title
+                      </label>
+                      <input
+                        type="text"
+                        value={seriesTitle}
+                        onChange={(e) => setSeriesTitle?.(e.target.value)}
+                        placeholder="e.g. Boundless Necromancer"
+                        className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-neutral-200 outline-none transition-colors"
+                      />
+                    </div>
+
+                    {/* Genre */}
+                    <div className="md:col-span-6 space-y-1">
+                      <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                        Genre / Category
+                      </label>
+                      <input
+                        type="text"
+                        value={scrapedGenre}
+                        onChange={(e) => setScrapedGenre?.(e.target.value)}
+                        placeholder="e.g. Fantasy Action"
+                        className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-neutral-200 outline-none transition-colors"
+                      />
+                    </div>
+
+                    {/* Chapter Number */}
+                    <div className="md:col-span-4 space-y-1">
+                      <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                        Chapter / Episode Number
+                      </label>
+                      <input
+                        type="text"
+                        value={chapterNumber}
+                        onChange={(e) => setChapterNumber?.(e.target.value)}
+                        placeholder="e.g. 72"
+                        className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-neutral-200 outline-none transition-colors font-mono"
+                      />
+                    </div>
+
+                    {/* Chapter Title */}
+                    <div className="md:col-span-8 space-y-1">
+                      <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                        Chapter Title / Name (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={chapterTitle}
+                        onChange={(e) => setChapterTitle?.(e.target.value)}
+                        placeholder="e.g. The S-Rank Awakens"
+                        className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-neutral-200 outline-none transition-colors"
+                      />
+                    </div>
+
+                    {/* Author / Illustrator */}
+                    <div className="md:col-span-6 space-y-1">
+                      <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                        Author / Illustrator
+                      </label>
+                      <input
+                        type="text"
+                        value={seriesAuthor}
+                        onChange={(e) => setSeriesAuthor?.(e.target.value)}
+                        placeholder="e.g. Chugong, DUBU"
+                        className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-neutral-200 outline-none transition-colors"
+                      />
+                    </div>
+
+                    {/* Cover Image URL */}
+                    <div className="md:col-span-6 space-y-1">
+                      <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                        Series Cover Image URL (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={seriesCoverImage}
+                        onChange={(e) => setSeriesCoverImage?.(e.target.value)}
+                        placeholder="e.g. https://example.com/cover.jpg"
+                        className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-neutral-200 outline-none transition-colors"
+                      />
+                    </div>
+
+                    {/* Synopsis / Description */}
+                    <div className="md:col-span-12 space-y-1">
+                      <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                        Series Synopsis / Description (Optional)
+                      </label>
+                      <textarea
+                        value={seriesSynopsis}
+                        onChange={(e) => setSeriesSynopsis?.(e.target.value)}
+                        placeholder="Describe the series storyline..."
+                        rows={2}
+                        className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-neutral-200 outline-none transition-colors resize-none font-sans"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-              {/* Series Name */}
-              <div className="md:col-span-6 space-y-1">
-                <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
-                  Comic/Manhwa Series Title
-                </label>
-                <input
-                  type="text"
-                  value={seriesTitle}
-                  onChange={(e) => setSeriesTitle?.(e.target.value)}
-                  placeholder="e.g. Boundless Necromancer"
-                  className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-neutral-200 outline-none transition-colors"
-                />
-              </div>
-
-              {/* Genre */}
-              <div className="md:col-span-6 space-y-1">
-                <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
-                  Genre / Category
-                </label>
-                <input
-                  type="text"
-                  value={scrapedGenre}
-                  onChange={(e) => setScrapedGenre?.(e.target.value)}
-                  placeholder="e.g. Fantasy Action"
-                  className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-neutral-200 outline-none transition-colors"
-                />
-              </div>
-
-              {/* Chapter Number */}
-              <div className="md:col-span-4 space-y-1">
-                <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
-                  Chapter / Episode Number
-                </label>
-                <input
-                  type="text"
-                  value={chapterNumber}
-                  onChange={(e) => setChapterNumber?.(e.target.value)}
-                  placeholder="e.g. 72"
-                  className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-neutral-200 outline-none transition-colors font-mono"
-                />
-              </div>
-
-              {/* Chapter Title */}
-              <div className="md:col-span-8 space-y-1">
-                <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
-                  Chapter Title / Name (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={chapterTitle}
-                  onChange={(e) => setChapterTitle?.(e.target.value)}
-                  placeholder="e.g. The S-Rank Awakens"
-                  className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-neutral-200 outline-none transition-colors"
-                />
-              </div>
-
-              {/* Author / Illustrator */}
-              <div className="md:col-span-6 space-y-1">
-                <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
-                  Author / Illustrator
-                </label>
-                <input
-                  type="text"
-                  value={seriesAuthor}
-                  onChange={(e) => setSeriesAuthor?.(e.target.value)}
-                  placeholder="e.g. Chugong, DUBU"
-                  className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-neutral-200 outline-none transition-colors"
-                />
-              </div>
-
-              {/* Cover Image URL */}
-              <div className="md:col-span-6 space-y-1">
-                <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
-                  Series Cover Image URL (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={seriesCoverImage}
-                  onChange={(e) => setSeriesCoverImage?.(e.target.value)}
-                  placeholder="e.g. https://example.com/cover.jpg"
-                  className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-neutral-200 outline-none transition-colors"
-                />
-              </div>
-
-              {/* Synopsis / Description */}
-              <div className="md:col-span-12 space-y-1">
-                <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
-                  Series Synopsis / Description (Optional)
-                </label>
-                <textarea
-                  value={seriesSynopsis}
-                  onChange={(e) => setSeriesSynopsis?.(e.target.value)}
-                  placeholder="Describe the series storyline..."
-                  rows={2}
-                  className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-neutral-200 outline-none transition-colors resize-none font-sans"
-                />
-              </div>
-            </div>
-          </div>
+          )}
 
           {isSourceMismatch && (
             <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-[11px] text-amber-100 font-mono leading-5 mt-3">

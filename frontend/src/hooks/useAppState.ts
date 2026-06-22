@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { GeneratedPanel } from "../types";
 import { AI_MODELS } from "../models";
 import { createFetchWithInterceptor } from "../api/fetchWithInterceptor";
@@ -20,6 +20,12 @@ export function useAppState() {
   const [seriesSlugState, setSeriesSlugState] = useState<string | null>(null);
   const [chapterSlugState, setChapterSlugState] = useState<string | null>(null);
   const [consoleLogs, setRawConsoleLogs] = useState<string[]>([]);
+
+  const projectIdRef = useRef(projectId);
+  projectIdRef.current = projectId;
+
+  const chapterSlugStateRef = useRef(chapterSlugState);
+  chapterSlugStateRef.current = chapterSlugState;
 
   const [scrapedImages, setScrapedImages] = useState<string[]>([]);
   const [selectedScraped, setSelectedScraped] = useState<string[]>([]);
@@ -203,7 +209,8 @@ export function useAppState() {
   const setConsoleLogs = useCallback((val: React.SetStateAction<string[]>) => {
     setRawConsoleLogs((prev) => {
       const resolved = typeof val === "function" ? val(prev) : val;
-      return resolved.map((log) => {
+      const capped = resolved.slice(-250);
+      return capped.map((log) => {
         // Match standard format: HH:MM:SS [TAG]
         const hasStandardFormat = /^\d{2}:\d{2}:\d{2} \[[A-Z_0-9]+\]/.test(log);
         if (hasStandardFormat) {
@@ -472,10 +479,6 @@ export function useAppState() {
       const start = Date.now();
 
       if (!token) {
-        if (showDelay) {
-          const elapsed = Date.now() - start;
-          if (elapsed < 1500) await delay(1500 - elapsed);
-        }
         setAuthLoading(false);
         setIsInitializing(false);
         return;
@@ -499,10 +502,6 @@ export function useAppState() {
       } catch (e) {
         console.error("Auth check failed", e);
       } finally {
-        if (showDelay) {
-          const elapsed = Date.now() - start;
-          if (elapsed < 2000) await delay(2000 - elapsed);
-        }
         setAuthLoading(false);
         setIsInitializing(false);
       }
@@ -710,7 +709,7 @@ export function useAppState() {
     window.addEventListener("popstate", handlePopState);
     handlePopState();
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [isAuthenticated, addNotification, getToken, projectId, chapterSlugState]);
+  }, [isAuthenticated, addNotification, getToken]);
 
   useEffect(() => {
     localStorage.setItem(
