@@ -171,47 +171,61 @@ export function useAppLogic() {
   // --- System Logs Engine ---
   useEffect(() => {
     let eventSource: EventSource | null = null;
-    let pollInterval: any = null;
+    let pollTimeout: any = null;
     let isPolling = false;
+    let isCurrent = true;
+    let pollIntervalMs = 5000; // Start with 5s
     const lastLogIdRef = { current: 0 };
+
+    const doPoll = async () => {
+      if (!isCurrent) return;
+      try {
+        const res = await fetch(
+          `/api/system-logs?since=${lastLogIdRef.current}`
+        );
+        if (!res.ok) {
+          if (res.status === 429) {
+            pollIntervalMs = Math.min(pollIntervalMs * 2, 60000); // Exponential backoff up to 60s
+          }
+          throw new Error(`HTTP ${res.status}`);
+        }
+        pollIntervalMs = 5000; // Reset on success
+        const data = await res.json();
+        if (data.success && Array.isArray(data.logs)) {
+          const newLogs = data.logs.filter(
+            (log: any) => log.id > lastLogIdRef.current
+          );
+          if (newLogs.length > 0) {
+            newLogs.forEach((log: any) => {
+              if (log.id > lastLogIdRef.current) {
+                lastLogIdRef.current = log.id;
+              }
+            });
+            state.setConsoleLogs((prev) => [
+              ...prev,
+              ...newLogs.map((log: any) => log.message),
+            ]);
+          }
+        }
+      } catch (err) {
+        // Silent catch
+      } finally {
+        if (isCurrent) {
+          pollTimeout = setTimeout(doPoll, pollIntervalMs);
+        }
+      }
+    };
 
     const startPolling = () => {
       if (isPolling) return;
       isPolling = true;
-
-      pollInterval = setInterval(async () => {
-        try {
-          const res = await fetch(
-            `/api/system-logs?since=${lastLogIdRef.current}`
-          );
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const data = await res.json();
-          if (data.success && Array.isArray(data.logs)) {
-            const newLogs = data.logs.filter(
-              (log: any) => log.id > lastLogIdRef.current
-            );
-            if (newLogs.length > 0) {
-              newLogs.forEach((log: any) => {
-                if (log.id > lastLogIdRef.current) {
-                  lastLogIdRef.current = log.id;
-                }
-              });
-              state.setConsoleLogs((prev) => [
-                ...prev,
-                ...newLogs.map((log: any) => log.message),
-              ]);
-            }
-          }
-        } catch (err) {
-          // Silent catch
-        }
-      }, 1500);
+      pollTimeout = setTimeout(doPoll, pollIntervalMs);
     };
 
     const stopPolling = () => {
-      if (pollInterval) {
-        clearInterval(pollInterval);
-        pollInterval = null;
+      if (pollTimeout) {
+        clearTimeout(pollTimeout);
+        pollTimeout = null;
       }
       isPolling = false;
     };
@@ -246,7 +260,6 @@ export function useAppLogic() {
       }
     };
 
-    let isCurrent = true;
     connectSSE();
 
     return () => {
