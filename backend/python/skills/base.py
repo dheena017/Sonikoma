@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field
 from config.clients import ai_initialized, call_gemini_with_retry, genai_client
 from google.genai import types
 
-logger = logging.getLogger("anivox.skills.base")
+logger = logging.getLogger("sonikoma.skills.base")
 
 # ─── Structured Response Pydantic Models ──────────────────────────────────────
 
@@ -340,7 +340,7 @@ class FallbackCoordinator:
 class SkillLogger:
     """Helper to stream structured terminal logs compatible with frontend outputs."""
     def __init__(self):
-        self.logger = logging.getLogger("anivox.skills.execution")
+        self.logger = logging.getLogger("sonikoma.skills.execution")
 
     def log_execution(self, skill_name: str, latency_ms: int, success: bool, inputs: dict, outputs: dict, prompt_tokens: int = 0, candidates_tokens: int = 0):
         status = "success" if success else "failed"

@@ -386,8 +386,8 @@ export function useAppState() {
       addNotification,
       setErrorPopup,
       onUnauthorized: () => {
-        localStorage.removeItem("anivox_token");
-        sessionStorage.removeItem("anivox_token");
+        localStorage.removeItem("sonikoma_token");
+        sessionStorage.removeItem("sonikoma_token");
         setUser(null);
         setIsAuthenticated(false);
       },
@@ -397,8 +397,8 @@ export function useAppState() {
 
   const getToken = useCallback(() => {
     return (
-      localStorage.getItem("anivox_token") ||
-      sessionStorage.getItem("anivox_token")
+      localStorage.getItem("sonikoma_token") ||
+      sessionStorage.getItem("sonikoma_token")
     );
   }, []);
 
@@ -413,11 +413,11 @@ export function useAppState() {
       const data = await res.json();
       if (data.access_token) {
         if (credentials.rememberMe) {
-          localStorage.setItem("anivox_token", data.access_token);
-          sessionStorage.removeItem("anivox_token");
+          localStorage.setItem("sonikoma_token", data.access_token);
+          sessionStorage.removeItem("sonikoma_token");
         } else {
-          sessionStorage.setItem("anivox_token", data.access_token);
-          localStorage.removeItem("anivox_token");
+          sessionStorage.setItem("sonikoma_token", data.access_token);
+          localStorage.removeItem("sonikoma_token");
         }
         setUser(data.user);
         setIsAuthenticated(true);
@@ -443,14 +443,14 @@ export function useAppState() {
       const data = await res.json();
       if (data.access_token) {
         // Default to localStorage for registration/new accounts
-        localStorage.setItem("anivox_token", data.access_token);
-        sessionStorage.removeItem("anivox_token");
+        localStorage.setItem("sonikoma_token", data.access_token);
+        sessionStorage.removeItem("sonikoma_token");
         setUser(data.user);
         setIsAuthenticated(true);
         addNotification("Account created successfully!", "success", {
           details: `User ID: ${data.user.id}\nEmail: ${
             data.user.email
-          }\nWelcome to Anivox, ${data.user.name || data.user.email}!`,
+          }\nWelcome to Sonikoma, ${data.user.name || data.user.email}!`,
         });
       } else {
         throw new Error(data.detail || "Registration failed");
@@ -460,8 +460,8 @@ export function useAppState() {
   );
 
   const logout = useCallback(() => {
-    localStorage.removeItem("anivox_token");
-    sessionStorage.removeItem("anivox_token");
+    localStorage.removeItem("sonikoma_token");
+    sessionStorage.removeItem("sonikoma_token");
     setUser(null);
     setIsAuthenticated(false);
     addNotification("Logged out successfully.", "info", {
@@ -495,8 +495,8 @@ export function useAppState() {
           // Only clear token on 401 Unauthorized or 403 Forbidden.
           // Server offline or gateway errors (500, 502, 503, 504) should not clear the token.
           if (res.status === 401 || res.status === 403) {
-            localStorage.removeItem("anivox_token");
-            sessionStorage.removeItem("anivox_token");
+            localStorage.removeItem("sonikoma_token");
+            sessionStorage.removeItem("sonikoma_token");
           }
         }
       } catch (e) {

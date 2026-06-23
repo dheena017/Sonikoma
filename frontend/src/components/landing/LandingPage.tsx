@@ -78,7 +78,7 @@ export default function LandingPage({
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <span className="text-xl font-black tracking-tighter text-white uppercase">
-              Anivox
+              Sonikoma
             </span>
           </div>
           <div className="hidden md:flex items-center gap-8">
@@ -139,7 +139,7 @@ export default function LandingPage({
             </span>
           </h1>
           <p className="text-neutral-400 text-lg md:text-xl max-w-2xl mx-auto font-medium leading-relaxed">
-            Anivox uses advanced AI to scrape, slice, and compile your favorite
+            Sonikoma uses advanced AI to scrape, slice, and compile your favorite
             Webtoons into immersive videos with dynamic motion, TTS, and
             professional editing.
           </p>
@@ -494,7 +494,7 @@ export default function LandingPage({
             <PricingCard
               title="Hobbyist"
               price={0}
-              desc="Perfect for trying out Anivox and exploring comic animation."
+              desc="Perfect for trying out Sonikoma and exploring comic animation."
               features={[
                 "5 video exports per month",
                 "Standard rendering queue",
@@ -561,13 +561,13 @@ export default function LandingPage({
             </h2>
             <p className="text-neutral-500 max-w-xl mx-auto">
               See how animators, content creators, and comic artists are
-              leveraging Anivox to scale their production.
+              leveraging Sonikoma to scale their production.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <TestimonialCard
-              quote="Anivox cut my YouTube Shorts creation time from 6 hours to 15 minutes. The panel auto-slicer is magic, and bubble removal is insanely clean!"
+              quote="Sonikoma cut my YouTube Shorts creation time from 6 hours to 15 minutes. The panel auto-slicer is magic, and bubble removal is insanely clean!"
               author="Alex Rivers"
               handle="@ComicReversed"
               rating={5}
@@ -613,7 +613,7 @@ export default function LandingPage({
             {[
               {
                 q: "How does the scraper work?",
-                a: "Simply paste the URL of a comic or webtoon chapter. Anivox fetches the high-resolution strip images and parses metadata automatically from major hosting platforms.",
+                a: "Simply paste the URL of a comic or webtoon chapter. Sonikoma fetches the high-resolution strip images and parses metadata automatically from major hosting platforms.",
               },
               {
                 q: "Who owns the rights to the exported videos?",
@@ -734,7 +734,7 @@ export default function LandingPage({
             Ready to bring your <br /> stories to life?
           </h2>
           <p className="text-purple-100 text-lg md:text-xl font-medium max-w-xl mx-auto opacity-80">
-            Join thousands of creators using Anivox to automate their
+            Join thousands of creators using Sonikoma to automate their
             comic-to-video production pipeline.
           </p>
           <div className="pt-4">
@@ -1282,7 +1282,7 @@ export function LandingFooter() {
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <span className="text-lg font-black tracking-tighter uppercase">
-              Anivox
+              Sonikoma
             </span>
           </div>
           <p className="text-neutral-500 text-sm max-w-sm leading-relaxed">
@@ -1354,7 +1354,7 @@ export function LandingFooter() {
       </div>
       <div className="max-w-7xl mx-auto pt-20 flex flex-col md:flex-row items-center justify-between gap-6">
         <p className="text-neutral-600 text-xs font-mono">
-          &copy; 2026 Anivox Technologies. All rights reserved.
+          &copy; 2026 Sonikoma Technologies. All rights reserved.
         </p>
         <p className="text-neutral-700 text-[10px] uppercase font-black tracking-widest">
           Built for the future of comics

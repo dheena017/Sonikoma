@@ -1,6 +1,6 @@
 # 🧩 Key Codebase Patterns
 
-This document details the standard coding patterns used throughout the Anivox codebase. Always reuse these patterns when adding new features or components.
+This document details the standard coding patterns used throughout the Sonikoma codebase. Always reuse these patterns when adding new features or components.
 
 ---
 
@@ -97,7 +97,7 @@ In Python services and routes, use modular namespace loggers. The logging middle
 
 ```python
 import logging
-logger = logging.getLogger("anivox.routes.my_feature")
+logger = logging.getLogger("sonikoma.routes.my_feature")
 
 # Standard Info Log (outputs: HH:MM:SS [BACKEND] [INFO] [file.py] Message)
 logger.info("Initializing relational database cache")

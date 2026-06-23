@@ -13,7 +13,7 @@ from routes.auth_routes import get_current_user
 
 import database.db as db
 
-logger = logging.getLogger("anivox.routes.projects")
+logger = logging.getLogger("sonikoma.routes.projects")
 router = APIRouter()
 
 # ─── Schemas ──────────────────────────────────────────────────────────────────

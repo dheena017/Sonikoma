@@ -22,7 +22,7 @@ try:
 except Exception:
     pass
 
-logger = logging.getLogger("anivox.utils.ai_test")
+logger = logging.getLogger("sonikoma.utils.ai_test")
 
 def visual_len(s: str) -> int:
     """Returns the visual length of a string, ignoring ANSI escape codes."""

@@ -1,7 +1,7 @@
 """
 backend/python/main.py
 ─────────────────────────────────────────────────────────────────────────────
-Anivox Webtoon-to-Video Compiler — FastAPI Computational Engine & API Server
+Sonikoma Webtoon-to-Video Compiler — FastAPI Computational Engine & API Server
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -408,7 +408,7 @@ for handler in root_logger.handlers[:]:
 # Add the colored console handler and ensure INFO level on root
 root_logger.addHandler(console_handler)
 root_logger.setLevel(logging.INFO)
-logger = logging.getLogger("anivox.api")
+logger = logging.getLogger("sonikoma.api")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CONFIGURATION
@@ -475,7 +475,7 @@ async def lifespan(app: FastAPI):
 
     # Emit structured startup logs so the frontend terminal shows them on connect.
     # (banner uses print() which bypasses the handler; these go through the buffer)
-    logger.info(f"Anivox Compute Engine v{API_VERSION} started on port {BACKEND_PORT}")
+    logger.info(f"Sonikoma Compute Engine v{API_VERSION} started on port {BACKEND_PORT}")
     logger.info(f"Python {sys.version.split(' ')[0]} | {platform.system()} {platform.machine()}")
     logger.info(f"Swagger docs available at http://localhost:{BACKEND_PORT}/api/docs")
 
@@ -530,7 +530,7 @@ async def lifespan(app: FastAPI):
 # APP INSTANCE
 # ─────────────────────────────────────────────────────────────────────────────
 app = FastAPI(
-    title="Anivox API Engine",
+    title="Sonikoma API Engine",
     description="Unified computational and API backend for Webtoon-to-Video compiler.",
     version=API_VERSION,
     docs_url="/api/docs",
@@ -769,7 +769,7 @@ def _print_startup_banner():
         pad = " " * (70 - width)
         return f"{CLR_BORDER}║{CLR_RESET}{content}{pad}{CLR_BORDER}║{CLR_RESET}"
 
-    line_title    = _format_line(f"  🐍  {CLR_TITLE}ANIVOX COMPUTE ENGINE{CLR_RESET}  —  {CLR_HEADER}FastAPI v{API_VERSION}{CLR_RESET}")
+    line_title    = _format_line(f"  🐍  {CLR_TITLE}SONIKOMA COMPUTE ENGINE{CLR_RESET}  —  {CLR_HEADER}FastAPI v{API_VERSION}{CLR_RESET}")
     line_py       = _format_line(f"  {CLR_LABEL}Python:{CLR_RESET}      {py_ver}")
     line_plat     = _format_line(f"  {CLR_LABEL}Platform:{CLR_RESET}    {plat}")
     line_hw       = _format_line(f"  {CLR_LABEL}Hardware:{CLR_RESET}    {cpu_cores} CPUs | {ram_total}")
@@ -824,7 +824,7 @@ def _print_startup_banner():
         gemini_status_ascii = "Set" if os.getenv("GEMINI_API_KEY") else "Not set"
         prod_mode_ascii = "Production" if IS_PRODUCTION else "Development"
         
-        line_title_ascii = _format_ascii(f"  ANIVOX UNIFIED PYTHON BACKEND  -  FastAPI v{API_VERSION}")
+        line_title_ascii = _format_ascii(f"  SONIKOMA UNIFIED PYTHON BACKEND  -  FastAPI v{API_VERSION}")
         line_py_ascii    = _format_ascii(f"  Python:    {py_ver}")
         line_plat_ascii  = _format_ascii(f"  Platform:  {plat}")
         line_port_ascii  = _format_ascii(f"  Port:      {port}")

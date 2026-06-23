@@ -10,7 +10,7 @@ try:
 except ImportError:
     has_easyocr = False
 
-logger = logging.getLogger("anivox.services.ocr")
+logger = logging.getLogger("sonikoma.services.ocr")
 
 # Global reader instance to avoid reloading models on every call
 _reader = None

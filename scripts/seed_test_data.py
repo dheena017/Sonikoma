@@ -61,10 +61,10 @@ def seed_data():
         users = [
             # Main Test User (Matches LoginPage.tsx Quick Fill)
             (
-                "user_testuser1", "testuser1", "creator@anivox.com", password_hash,
+                "user_testuser1", "testuser1", "creator@sonikoma.com", password_hash,
                 '{"theme": "dark", "autoSave": true, "volume": 0.8}', 
                 "https://api.dicebear.com/7.x/avataaars/svg?seed=testuser1", 
-                "Test User One", "creator", "Casual webtoon compiler and creator testing the Anivox suite.", 
+                "Test User One", "creator", "Casual webtoon compiler and creator testing the Sonikoma suite.", 
                 1, "en", "[]", 1250, None, "[]", 0, 
                 '{"google":true,"github":false,"discord":false}',
                 "2026-06-18 10:00:00", "2026-06-18 10:00:00"

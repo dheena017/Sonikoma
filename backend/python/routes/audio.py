@@ -25,7 +25,7 @@ from pydantic import BaseModel, Field
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from services.audio import generate_panel_audio
 
-logger = logging.getLogger("anivox.routes.audio")
+logger = logging.getLogger("sonikoma.routes.audio")
 router = APIRouter()
 
 

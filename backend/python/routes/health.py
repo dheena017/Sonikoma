@@ -25,7 +25,7 @@ import database.db as db
 from utils.log_interceptor import get_logs, add_log_listener, remove_log_listener
 from utils.cache import get_all_cache_stats, get_total_storage_size_bytes
 
-logger = logging.getLogger("anivox.routes.health")
+logger = logging.getLogger("sonikoma.routes.health")
 router = APIRouter()
 
 # Keep track of startup time globally
@@ -61,7 +61,7 @@ async def health():
         content={
             "success": True,
             "status": "ok",
-            "service": "Anivox Computational Backend",
+            "service": "Sonikoma Computational Backend",
             "version": os.getenv("API_VERSION", "1.0.0"),
             "uptime": f"{h}h {m}m {s}s",
             "uptimeSeconds": uptime_sec,
@@ -104,7 +104,7 @@ async def system_logs(since: int = Query(0, description="Fetch logs generated af
 @router.post("/system-logs/log", summary="Post a custom log entry to system logs")
 async def add_custom_log(payload: CustomLogPayload):
     try:
-        vite_logger = logging.getLogger("anivox.vite")
+        vite_logger = logging.getLogger("sonikoma.vite")
         lvl = payload.level.upper()
         if lvl == "ERROR":
             vite_logger.error(payload.message)

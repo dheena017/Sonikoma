@@ -6,7 +6,7 @@ import numpy as np
 import logging
 from PIL import Image
 
-logger = logging.getLogger("anivox.services.detect_panels")
+logger = logging.getLogger("sonikoma.services.detect_panels")
 
 def adjust_to_aspect_ratio(x, y, w_box, h_box, w_img, h_img, aspect_ratio_str):
     if not aspect_ratio_str or aspect_ratio_str == "free":

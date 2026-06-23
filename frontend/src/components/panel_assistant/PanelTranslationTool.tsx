@@ -31,8 +31,8 @@ export default function PanelTranslationTool({
     setTranslating(true);
     try {
       const token =
-        localStorage.getItem("anivox_token") ||
-        sessionStorage.getItem("anivox_token");
+        localStorage.getItem("sonikoma_token") ||
+        sessionStorage.getItem("sonikoma_token");
       const headers: HeadersInit = { "Content-Type": "application/json" };
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;

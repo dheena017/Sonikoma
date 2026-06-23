@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎬 Anivox — Webtoon to Video
+# 🎬 Sonikoma — Webtoon to Video
 
 **Transform webtoon & manhwa comics into cinematic MP4 videos with AI-powered speech bubble removal, TTS voiceovers, and pan/zoom animations.**
 
@@ -34,7 +34,7 @@
 
 For a visual flowchart and detailed descriptions of each directory (including frontend component groupings, backend routers, services, and script boundaries), please see the dedicated reference:
 
-👉 **[Anivox Project Structure & Folder Guidelines](./docs/architecture/project_structure.md)**
+👉 **[Sonikoma Project Structure & Folder Guidelines](./docs/architecture/project_structure.md)**
 
 ---
 
@@ -58,7 +58,7 @@ For a visual flowchart and detailed descriptions of each directory (including fr
 
 ```bash
 git clone <your-repo-url>
-cd webtoon-to-video-backend
+cd sonikoma
 npm install
 ```
 
@@ -101,7 +101,7 @@ The frontend app opens at **http://localhost:3000** while the backend API listen
 
 The server exposes detailed endpoints for authentication, metrics, image transformations, speech bubble removal, and MoviePy audio/video compile routines. View the complete API reference in:
 
-👉 **[Anivox API Reference & Routes](./docs/architecture/api_reference.md)**
+👉 **[Sonikoma API Reference & Routes](./docs/architecture/api_reference.md)**
 
 ---
 

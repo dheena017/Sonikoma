@@ -48,7 +48,7 @@ const logger = {
 
 // Overwrite npm startup lines with formatted logs
 process.stdout.write("\x1b[A\x1b[2K\x1b[A\x1b[2K\x1b[A\x1b[2K\r");
-logger.info("webtoon-to-video-backend@0.0.0 start");
+logger.info("sonikoma@0.0.0 start");
 logger.info("node scripts/run-frontend.js");
 
 // Read BACKEND_PORT from .env in parent folder

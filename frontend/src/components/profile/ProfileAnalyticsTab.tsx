@@ -17,8 +17,8 @@ export default function ProfileAnalyticsTab() {
 
   React.useEffect(() => {
     const token =
-      localStorage.getItem("anivox_token") ||
-      sessionStorage.getItem("anivox_token");
+      localStorage.getItem("sonikoma_token") ||
+      sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
     fetch("/api/auth/analytics", {

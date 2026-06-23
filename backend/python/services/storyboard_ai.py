@@ -15,7 +15,7 @@ from config.clients import ai_initialized, hf_client, call_gemini_with_retry, ge
 from skills.registry import registry
 from skills.base import StoryboardModel
 
-logger = logging.getLogger("anivox.services.storyboard_ai")
+logger = logging.getLogger("sonikoma.services.storyboard_ai")
 
 def get_programmatic_panels(title: str, genre: str, episode: str, img_urls: List[str], count: int) -> List[Dict[str, Any]]:
     """Programmatic fallback generator when AI calls fail."""

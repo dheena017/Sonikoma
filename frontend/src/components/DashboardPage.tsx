@@ -43,8 +43,8 @@ export default function DashboardPage() {
         const res = await fetch("/api/projects", {
           headers: {
             Authorization: `Bearer ${
-              localStorage.getItem("anivox_token") ||
-              sessionStorage.getItem("anivox_token") ||
+              localStorage.getItem("sonikoma_token") ||
+              sessionStorage.getItem("sonikoma_token") ||
               ""
             }`,
           },

@@ -57,14 +57,14 @@ function getLogColor(log: string): string {
     log.includes("[Proxy]") ||
     log.includes("[Proxy-image]") ||
     log.includes("proxy-image") ||
-    log.includes("anivox.routes.proxy")
+    log.includes("sonikoma.routes.proxy")
   )
     return "text-sky-300 font-medium";
   if (
     log.includes("[API]") ||
     log.includes("[Network]") ||
     log.includes("[HTTP]") ||
-    log.includes("anivox.api")
+    log.includes("sonikoma.api")
   )
     return "text-sky-400";
   if (log.includes("[Vite]")) return "text-fuchsia-400 font-medium";
@@ -162,14 +162,14 @@ function getLogBorderColor(log: string): string {
     log.includes("[Proxy]") ||
     log.includes("[Proxy-image]") ||
     log.includes("proxy-image") ||
-    log.includes("anivox.routes.proxy")
+    log.includes("sonikoma.routes.proxy")
   )
     return "border-sky-500/40";
   if (
     log.includes("[API]") ||
     log.includes("[Network]") ||
     log.includes("[HTTP]") ||
-    log.includes("anivox.api")
+    log.includes("sonikoma.api")
   )
     return "border-sky-500/40";
   if (log.includes("[Vite]")) return "border-fuchsia-500/50";

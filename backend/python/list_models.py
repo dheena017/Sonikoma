@@ -1,7 +1,7 @@
 """
 backend/python/list_models.py
 ─────────────────────────────────────────────────────────────────────────────
-Anivox Multi-Provider AI Model & Token Capacity Inspector Toolkit
+Sonikoma Multi-Provider AI Model & Token Capacity Inspector Toolkit
 An interactive console utility to query, filter, inspect, and test Gemini,
 Hugging Face, OpenAI, and Anthropic models, count tokens, stream chats,
 run benchmarks, and export diagnostic reports for any provided API key.

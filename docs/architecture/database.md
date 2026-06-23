@@ -1,14 +1,14 @@
 # 🗃️ Local Database Architecture (SQLite)
 
-Anivox uses a localized file-based **SQLite** database. This eliminates complex external database setups and enables running the workspace completely locally.
+Sonikoma uses a localized file-based **SQLite** database. This eliminates complex external database setups and enables running the workspace completely locally.
 
 ---
 
 ## 📂 Database Components
 
-- **Database Path:** [webtoon_local.db](file:///c:/Users/dheen/Downloads/webtoon-to-video-backend/backend/database/webtoon_local.db) (git-ignored, created on first boot)
-- **Schema Bootstrap File:** [schema.sql](file:///c:/Users/dheen/Downloads/webtoon-to-video-backend/backend/database/schema.sql)
-- **Singleton Connection File:** [db.ts](file:///c:/Users/dheen/Downloads/webtoon-to-video-backend/backend/database/db.ts)
+- **Database Path:** [webtoon_local.db](file:///c:/Users/dheen/Downloads/sonikoma/backend/database/webtoon_local.db) (git-ignored, created on first boot)
+- **Schema Bootstrap File:** [schema.sql](file:///c:/Users/dheen/Downloads/sonikoma/backend/database/schema.sql)
+- **Singleton Connection File:** [db.ts](file:///c:/Users/dheen/Downloads/sonikoma/backend/database/db.ts)
 
 ---
 

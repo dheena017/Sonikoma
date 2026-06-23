@@ -18,7 +18,7 @@ from fastapi import APIRouter, Request, Response, Query, HTTPException
 
 from utils.cache import proxy_cache
 
-logger = logging.getLogger("anivox.routes.proxy")
+logger = logging.getLogger("sonikoma.routes.proxy")
 router = APIRouter()
 
 # ─── Config ──────────────────────────────────────────────────────────────────

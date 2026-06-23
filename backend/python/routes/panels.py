@@ -25,7 +25,7 @@ from pydantic import BaseModel, Field
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from services.detect_panels import run_cv_detection
 
-logger = logging.getLogger("anivox.routes.panels")
+logger = logging.getLogger("sonikoma.routes.panels")
 router = APIRouter()
 
 

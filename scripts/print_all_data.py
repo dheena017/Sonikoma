@@ -50,7 +50,7 @@ def print_table_data(title, query, params=(), is_json_fields=None):
 
 def main():
     logger.info("================================================================================")
-    logger.info("🔍 PRINTING ALL ANIVOX DATABASE DATA")
+    logger.info("🔍 PRINTING ALL SONIKOMA DATABASE DATA")
     logger.info("================================================================================")
     
     print_table_data(

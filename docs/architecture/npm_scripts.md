@@ -1,6 +1,6 @@
 # 🚀 NPM Scripts Reference
 
-This document maps all the configured scripts in `package.json` for running, bundling, linting, and provisioning dependencies in the Anivox repository.
+This document maps all the configured scripts in `package.json` for running, bundling, linting, and provisioning dependencies in the Sonikoma repository.
 
 ---
 

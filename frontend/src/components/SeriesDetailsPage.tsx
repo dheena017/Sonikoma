@@ -56,8 +56,8 @@ export default function SeriesDetailsPage({
       setError(null);
       try {
         const token =
-          localStorage.getItem("anivox_token") ||
-          sessionStorage.getItem("anivox_token");
+          localStorage.getItem("sonikoma_token") ||
+          sessionStorage.getItem("sonikoma_token");
         const headers: HeadersInit = {};
         if (token) {
           headers["Authorization"] = `Bearer ${token}`;
@@ -114,8 +114,8 @@ export default function SeriesDetailsPage({
     setIsDeleting(projectId);
     try {
       const token =
-        localStorage.getItem("anivox_token") ||
-        sessionStorage.getItem("anivox_token");
+        localStorage.getItem("sonikoma_token") ||
+        sessionStorage.getItem("sonikoma_token");
       const res = await fetch(`/api/projects/${projectId}`, {
         method: "DELETE",
         headers: {

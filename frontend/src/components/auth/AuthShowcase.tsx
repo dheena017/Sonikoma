@@ -358,7 +358,7 @@ export default function AuthShowcase({
           </div>
           <div>
             <span className="text-xl font-bold tracking-tight text-white">
-              Anivox
+              Sonikoma
             </span>
             <span
               className={`ml-1.5 text-[9px] font-semibold tracking-wider ${currentTheme.accentText} uppercase ${currentTheme.accentBg} px-1.5 py-0.5 rounded-full border ${currentTheme.accentBorder} transition-all duration-500`}
@@ -500,7 +500,7 @@ export default function AuthShowcase({
           </div>
         </div>
         <p className="text-xs text-neutral-600 font-medium font-mono">
-          © {new Date().getFullYear()} Anivox AI Corp. All rights reserved.
+          © {new Date().getFullYear()} Sonikoma AI Corp. All rights reserved.
         </p>
       </div>
 
@@ -582,7 +582,7 @@ export default function AuthShowcase({
               </div>
               <div className="flex items-center justify-between text-[9px] font-bold text-neutral-500 font-mono">
                 <span>0:0{Math.floor(playerProgress / 10)} / 0:10</span>
-                <span>Anivox Showcase Renderer v1.0</span>
+                <span>Sonikoma Showcase Renderer v1.0</span>
               </div>
             </div>
 

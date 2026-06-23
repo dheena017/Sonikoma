@@ -25,13 +25,13 @@ from database.db import (
     get_user_by_api_key, create_user_invoice, get_user_achievements_and_points
 )
 
-logger = logging.getLogger("anivox.auth")
+logger = logging.getLogger("sonikoma.auth")
 
 router = APIRouter()
 
 # ─── Configuration ────────────────────────────────────────────────────────────
 
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "anivox_super_secret_key_change_me")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "sonikoma_super_secret_key_change_me")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 365  # 1 year default
 

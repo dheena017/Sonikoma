@@ -5,7 +5,7 @@ import logging
 import numpy as np
 from PIL import Image, ImageFilter
 
-logger = logging.getLogger("anivox.services.cleaner")
+logger = logging.getLogger("sonikoma.services.cleaner")
 
 try:
     import cv2

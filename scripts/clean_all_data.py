@@ -80,8 +80,8 @@ def clean_scraped_html():
 
 def clean_temp_directories():
     temp_dirs = [
-        os.path.join(tempfile.gettempdir(), "anivox_disk_cache"),
-        os.path.join(tempfile.gettempdir(), "anivox_renders"),
+        os.path.join(tempfile.gettempdir(), "sonikoma_disk_cache"),
+        os.path.join(tempfile.gettempdir(), "sonikoma_renders"),
         os.path.join(tempfile.gettempdir(), "webtoon_workspace")
     ]
     
@@ -97,7 +97,7 @@ def clean_temp_directories():
             logger.info(f"Directory {temp_dir} does not exist.")
 
 if __name__ == "__main__":
-    logger.info("=== Anivox Webtoon-to-Video Complete Data Cleanup Started ===")
+    logger.info("=== Sonikoma Webtoon-to-Video Complete Data Cleanup Started ===")
     clean_database()
     clean_scraped_html()
     clean_temp_directories()

@@ -29,7 +29,7 @@ export function GlobalScraperConfigTool({
       a.setAttribute("href", dataStr);
       a.setAttribute(
         "download",
-        `anivox_scraper_config_${new Date().getTime()}.json`
+        `sonikoma_scraper_config_${new Date().getTime()}.json`
       );
       document.body.appendChild(a);
       a.click();
