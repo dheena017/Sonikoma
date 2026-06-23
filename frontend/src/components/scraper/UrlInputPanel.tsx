@@ -164,7 +164,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
           console.log(
             `[UrlInputPanel] Model changed to: ${e.target.value} (${selectedName})`
           );
-          addNotification(`Model configured to ${selectedName}`, "info");
+          addNotification(`Models configured to ${selectedName}`, "info");
         }}
         className="relative w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-neutral-200 outline-none appearance-none focus:border-purple-500 transition-colors cursor-pointer"
       >
@@ -477,7 +477,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
             >
               ▸
             </span>
-            Advanced Settings (Model, Layout, Narration)
+            Advanced Settings (Models, Layout, Narration)
           </button>
         </div>
 
@@ -586,7 +586,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
           </div>
 
           <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
-            Active Model (Free Models Recommended)
+            Models (Free Models Recommended)
           </label>
           {modelDropdown}
 

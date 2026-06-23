@@ -868,10 +868,10 @@ export default function Header({
                 </p>
               </div>
 
-              {/* AI Model Settings */}
+              {/* Models Settings */}
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-neutral-300 font-sans block">
-                  Select Engine
+                  Models
                 </label>
                 <select
                   value={selectedModel}

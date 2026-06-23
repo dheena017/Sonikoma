@@ -377,7 +377,7 @@ export default function DashboardPage() {
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-[11px] font-mono">
-                    <span className="text-neutral-400">Speech OCR Model</span>
+                    <span className="text-neutral-400">Speech OCR Models</span>
                     <span className="text-purple-400 bg-purple-950/20 px-2 py-0.5 rounded border border-purple-900/30 font-bold text-[9px] uppercase">
                       Connected
                     </span>
@@ -427,7 +427,7 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-white">Pipeline Settings</h4>
-                    <p className="text-[10px] text-neutral-500 font-sans mt-0.5">Configure OCR & voice model engines</p>
+                    <p className="text-[10px] text-neutral-500 font-sans mt-0.5">Configure OCR & voice models</p>
                   </div>
                 </div>
                 <ChevronRight className="h-4 w-4 text-neutral-500 group-hover:text-indigo-400 transition-colors shrink-0" />

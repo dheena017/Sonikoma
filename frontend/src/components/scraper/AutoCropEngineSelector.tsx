@@ -599,7 +599,7 @@ export function AutoCropEngineSelector({
           {/* Dynamic Model Grid Cards */}
           <div className="space-y-2">
             <label className="text-[9px] font-bold text-neutral-500 uppercase font-mono block tracking-wider">
-              Scanner Model Selection
+              Scanner Models
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {modelCards.map((model) => {
