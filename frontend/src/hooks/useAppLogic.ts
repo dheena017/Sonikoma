@@ -178,14 +178,16 @@ export function useAppLogic() {
     const lastLogIdRef = { current: 0 };
 
     const doPoll = async () => {
-      if (!isCurrent) return;
+      if (!isCurrent || !isPolling) return;
       try {
         const res = await fetch(
           `/api/system-logs?since=${lastLogIdRef.current}`
         );
         if (!res.ok) {
           if (res.status === 429) {
-            pollIntervalMs = Math.min(pollIntervalMs * 2, 60000); // Exponential backoff up to 60s
+            console.warn("[System Logs] Rate limited. Stopping logs polling to preserve API quota.");
+            stopPolling();
+            return;
           }
           throw new Error(`HTTP ${res.status}`);
         }
@@ -210,7 +212,7 @@ export function useAppLogic() {
       } catch (err) {
         // Silent catch
       } finally {
-        if (isCurrent) {
+        if (isCurrent && isPolling) {
           pollTimeout = setTimeout(doPoll, pollIntervalMs);
         }
       }
