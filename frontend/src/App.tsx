@@ -546,8 +546,8 @@ export default function App() {
     : saveStatus;
   const headerOnSave = isChapterDetailsPath
     ? () => {
-        projectDetailsSaveRef.current?.();
-      }
+      projectDetailsSaveRef.current?.();
+    }
     : saveProject;
 
   // --------------------------------------------------------------------------
@@ -677,11 +677,10 @@ export default function App() {
                   <button
                     onClick={startBackend}
                     disabled={isStartingBackend}
-                    className={`px-3 py-1 text-[10px] rounded-lg font-mono uppercase tracking-wider font-bold transition-all border shadow-sm cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                      isStartingBackend
+                    className={`px-3 py-1 text-[10px] rounded-lg font-mono uppercase tracking-wider font-bold transition-all border shadow-sm cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${isStartingBackend
                         ? "bg-amber-950/60 border-amber-700/40 text-amber-200 cursor-not-allowed"
                         : "bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-200 border-emerald-700/40"
-                    }`}
+                      }`}
                   >
                     {isStartingBackend ? (
                       <>

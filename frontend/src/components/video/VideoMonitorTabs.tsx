@@ -43,7 +43,7 @@ export function VideoMonitorTabs({
               : "bg-neutral-900 text-neutral-300 hover:text-white"
           }`}
         >
-          Storyboard Preview
+          Timeline Preview
         </button>
       </div>
 

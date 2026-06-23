@@ -91,7 +91,7 @@ export default function VolumeAndProgressPanel({
         <div className="flex items-center justify-between text-xs font-mono text-neutral-400">
           <span className="flex items-center gap-1.5 font-bold">
             <span className="h-1.5 w-1.5 rounded-full bg-purple-500 animate-ping" />
-            Storyboard Sync Progress
+            Timeline Sync Progress
           </span>
           {activeStoryboardPanel && (
             <span className="font-bold text-neutral-350">
@@ -123,7 +123,7 @@ export default function VolumeAndProgressPanel({
               toggleStoryboardPlayback();
             }}
             className="bg-purple-650 hover:bg-purple-550 text-white p-3 rounded-full cursor-pointer hover:scale-105 active:scale-95 transition-all shadow-md shadow-purple-950/40"
-            title={storyboardPlaying ? "Pause Playback" : "Play Storyboard"}
+            title={storyboardPlaying ? "Pause Playback" : "Play Timeline"}
           >
             {storyboardPlaying ? (
               <Pause className="h-4.5 w-4.5" />
@@ -187,7 +187,7 @@ export default function VolumeAndProgressPanel({
             }`}
           >
             <span className="flex items-center gap-1.5">
-              <Sliders className="h-3.5 w-3.5 text-purple-400" />✦ Quick Scene
+              <Sliders className="h-3.5 w-3.5 text-purple-400" />Quick Scene
               Customizer
             </span>
             {showCustomizer ? (
@@ -391,7 +391,7 @@ export default function VolumeAndProgressPanel({
                         }
                         className="w-full bg-neutral-955 border border-neutral-850 text-[11px] rounded-xl p-2.5 text-neutral-300 outline-none focus:border-purple-650 transition-all font-mono cursor-pointer"
                       >
-                        <option value="">AI Will Decide</option>
+                        <option value="">Auto-Detect</option>
                         <option value="zoom_in">Zoom In</option>
                         <option value="zoom_out">Zoom Out</option>
                         <option value="pan_right">Pan Right</option>

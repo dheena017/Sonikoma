@@ -240,7 +240,7 @@ export default function ProjectEditorPage({
                     disabled={isBatchCropping || scrapedImages.length === 0}
                     className="py-1.5 px-3 bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
                   >
-                    {isBatchCropping ? "Cropping..." : "Run AI"}
+                    {isBatchCropping ? "Cropping..." : "Run Crop"}
                   </button>
                 </div>
               </div>
@@ -253,7 +253,7 @@ export default function ProjectEditorPage({
                     2. Clean Speech Bubbles
                   </h4>
                   <p className="text-[10px] text-neutral-500 font-medium leading-normal">
-                    AI-powered speech bubble detection and inpainting to remove
+                    Speech bubble detection and clearing to remove
                     text from comic panels.
                   </p>
                 </div>
@@ -269,7 +269,7 @@ export default function ProjectEditorPage({
                     disabled={isCleaningBubbles || scrapedImages.length === 0}
                     className="py-1.5 px-3 bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
                   >
-                    {isCleaningBubbles ? "Cleaning..." : "Run AI"}
+                    {isCleaningBubbles ? "Cleaning..." : "Run Clean"}
                   </button>
                 </div>
               </div>

@@ -151,7 +151,7 @@ const TimelineCard = ({
             onToggleSelect();
           }}
           className="absolute top-2 left-2 h-5 w-5 rounded flex items-center justify-center z-20 transition-all"
-          title={isSelected ? "Deselect panel" : "Select panel for AI analysis"}
+          title={isSelected ? "Deselect panel" : "Select panel for analysis"}
         >
           {isSelected ? (
             <span className="h-4 w-4 rounded bg-purple-500 border border-purple-400 flex items-center justify-center text-white text-[9px] font-bold shadow-lg">
@@ -198,15 +198,13 @@ const TimelineCard = ({
         </div>
 
         {/* Motion overlay text */}
-        <div
-          className={`absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 text-[9px] font-mono uppercase tracking-wider ${
-            !panel.motion_type
-              ? "text-purple-400 animate-pulse"
-              : "text-neutral-300"
-          }`}
-        >
-          {panel.motion_type || "✦ AI"}
-        </div>
+        {panel.motion_type && (
+          <div
+            className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 text-[9px] font-mono uppercase tracking-wider text-neutral-300"
+          >
+            {panel.motion_type}
+          </div>
+        )}
       </div>
 
       {/* Dialogue/Subtitle Text OCR Editable Input */}
@@ -226,7 +224,7 @@ const TimelineCard = ({
           disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
           value={panel.speech_text}
           onChange={(e) => handleModifySpeechText(panel.id, e.target.value)}
-          placeholder="✦ Auto-generate"
+          placeholder=""
           className={`w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all no-drag ${
             panel.isAnalyzing || analyzingPanelId === panel.id
               ? "opacity-60 cursor-not-allowed border-purple-900/40 text-purple-300"
@@ -245,7 +243,7 @@ const TimelineCard = ({
           disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
           value={panel.sfx || ""}
           onChange={(e) => handleModifySFX(panel.id, e.target.value)}
-          placeholder="✦ Auto-generate"
+          placeholder=""
           className={`w-full bg-neutral-900 border border-neutral-800 text-[10px] rounded-lg px-2.5 py-1.5 text-neutral-100 outline-none focus:border-purple-500 font-mono transition-all no-drag ${
             panel.isAnalyzing || analyzingPanelId === panel.id
               ? "opacity-60 cursor-not-allowed text-purple-300 border-purple-900/40"
@@ -266,7 +264,7 @@ const TimelineCard = ({
           onChange={(e) =>
             handleModifyVisualDescription(panel.id, e.target.value)
           }
-          placeholder="✦ Auto-generate"
+          placeholder=""
           className={`w-full bg-neutral-900 border border-neutral-800 text-[10px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all resize-none no-drag ${
             panel.isAnalyzing || analyzingPanelId === panel.id
               ? "opacity-60 cursor-not-allowed text-purple-300 border-purple-900/40"
@@ -286,7 +284,7 @@ const TimelineCard = ({
             onChange={(e) => handleModifyMotion(panel.id, e.target.value)}
             className="bg-neutral-900 text-[11px] text-neutral-300 rounded border border-neutral-800 p-1 w-full outline-none no-drag"
           >
-            <option value="">Auto-generate</option>
+            <option value="">None</option>
             <option value="zoom_in">Zoom In</option>
             <option value="zoom_out">Zoom Out</option>
             <option value="pan_right">Pan Right</option>
@@ -299,30 +297,27 @@ const TimelineCard = ({
           <span className="text-[9px] font-mono text-neutral-500 uppercase block">
             Timing (sec)
           </span>
-          {panel.duration === 0 ? (
-            <div className="bg-neutral-900 border border-purple-800/50 text-[10px] rounded p-1 w-full text-center font-mono text-purple-400 animate-pulse">
-              ✦ Auto-generate
-            </div>
-          ) : (
-            <input
-              type="number"
-              min={0.5}
-              step={0.5}
-              value={panel.duration}
-              onChange={(e) => {
-                const num = parseFloat(e.target.value);
-                if (!isNaN(num) && num >= 0) {
-                  handleModifyDuration(panel.id, num);
-                }
-              }}
-              onBlur={(e) => {
-                if (e.target.value === "" || parseFloat(e.target.value) <= 0) {
-                  handleModifyDuration(panel.id, 0);
-                }
-              }}
-              className="bg-neutral-900 text-[11px] text-neutral-300 rounded border border-neutral-800 p-1 w-full outline-none text-center font-mono no-drag"
-            />
-          )}
+          <input
+            type="number"
+            min={0.5}
+            step={0.5}
+            value={panel.duration === 0 ? "" : panel.duration}
+            onChange={(e) => {
+              const num = parseFloat(e.target.value);
+              if (!isNaN(num) && num >= 0) {
+                handleModifyDuration(panel.id, num);
+              } else if (e.target.value === "") {
+                handleModifyDuration(panel.id, 0);
+              }
+            }}
+            onBlur={(e) => {
+              if (e.target.value === "" || parseFloat(e.target.value) <= 0) {
+                handleModifyDuration(panel.id, 0);
+              }
+            }}
+            placeholder="0.0"
+            className="bg-neutral-900 text-[11px] text-neutral-300 rounded border border-neutral-800 p-1 w-full outline-none text-center font-mono no-drag"
+          />
         </div>
       </div>
 

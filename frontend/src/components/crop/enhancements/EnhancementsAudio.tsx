@@ -36,7 +36,7 @@ export function EnhancementsAudio({
             handleModifySpeechText(activeStoryboardPanel.id, e.target.value)
           }
           className="w-full h-16 bg-black/40 border border-white/8 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] focus:border-purple-500/50 focus:outline-none transition-colors hover:border-white/15 disabled:opacity-40 disabled:cursor-not-allowed resize-none"
-          placeholder="✦ AI Will Decide"
+          placeholder=""
         />
       </div>
 
@@ -55,7 +55,7 @@ export function EnhancementsAudio({
               handleModifySfx(activeStoryboardPanel.id, e.target.value)
             }
             className="w-full bg-black/40 border border-white/8 text-neutral-300 rounded-xl pl-7 pr-2.5 py-1.5 text-[10px] font-mono focus:border-purple-500/50 focus:outline-none transition-colors hover:border-white/15 disabled:opacity-40 disabled:cursor-not-allowed"
-            placeholder="✦ AI Will Decide"
+            placeholder=""
           />
           <Volume2 className="absolute left-2.5 h-3 w-3 text-neutral-500 pointer-events-none" />
         </div>
