@@ -553,7 +553,7 @@ export default function ProfileAccountTab({
             <div className="flex items-center gap-1.5">
               <button
                 type="button"
-                onClick={() => handleClaimReward(150, "+100 AI Credits")}
+                onClick={() => handleClaimReward(150, "+100 Smart Credits")}
                 className="bg-purple-600 hover:bg-purple-500 text-white py-1 px-3 rounded-lg text-[9px] font-bold transition-all cursor-pointer"
                 title="Exchange 150 pts for 100 bonus trial credits"
               >

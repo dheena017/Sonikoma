@@ -133,7 +133,7 @@ export default function ProfileAnalyticsTab() {
           </span>
           <h3 className="text-xl font-black text-white">Creator Analytics</h3>
           <p className="text-xs text-neutral-500 font-semibold leading-relaxed">
-            Monitor compilation rendering loads, AI synthesis distribution, and
+            Monitor compilation rendering loads, Smart synthesis distribution, and
             weekly content pipelines.
           </p>
         </div>
@@ -314,7 +314,7 @@ export default function ProfileAnalyticsTab() {
         {/* Voice Actor Preferences */}
         <div className="bg-[#0f0f13]/30 border border-white/5 rounded-3xl p-5 space-y-4 shadow-xl">
           <h5 className="text-[10px] font-black uppercase text-neutral-400 tracking-wider flex items-center gap-1.5">
-            <Volume2 className="w-4 h-4 text-purple-400" /> AI Voices Preference
+            <Volume2 className="w-4 h-4 text-purple-400" /> Smart Voices Preference
           </h5>
           <div className="space-y-3">
             <div className="space-y-1">

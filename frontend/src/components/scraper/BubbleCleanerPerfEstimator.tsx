@@ -9,13 +9,13 @@ export function BubbleCleanerPerfEstimator({ eraseMethod }: Props) {
     {
       auto: {
         speed: "Fast",
-        quality: "High (AI-Dispatch)",
+        quality: "High (Smart-Dispatch)",
         desc: "Analyzes region size and chooses TELEA or Blur dynamically.",
       },
       inpaint: {
         speed: "Moderate (~300ms/panel)",
         quality: "Premium",
-        desc: "Reconstructs pixel backgrounds using TELEA inpaint matrix.",
+        desc: "Reconstructs pixel backgrounds using TELEA clear matrix.",
       },
       blur: {
         speed: "Very Fast (~50ms/panel)",

@@ -11,7 +11,7 @@ export function BubbleCleanerQuickPresets({ activeSlot, applyPreset }: Props) {
   const presets = [
     {
       id: "preset_auto",
-      label: "✨ Standard Auto (AI)",
+      label: "✨ Standard Auto",
       sub: "All types · Auto Dispatch · 50% sens",
       config: {
         detectionStyle: "all",

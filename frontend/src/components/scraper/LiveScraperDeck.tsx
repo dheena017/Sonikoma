@@ -471,7 +471,7 @@ export default function LiveScraperDeck({
         />
       )}
 
-      {/* Delete Scraped Frames Confirmation Modal */}
+      {/* Delete Imported Frames Confirmation Modal */}
       {showDeleteConfirm &&
         createPortal(
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
