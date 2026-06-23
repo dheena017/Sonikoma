@@ -1,5 +1,6 @@
 import React from "react";
 import { ChevronDown } from "lucide-react";
+import { AI_MODELS } from "@/models";
 
 interface AutoSlicerSettingsProps {
   backgroundMode: string;
@@ -93,28 +94,8 @@ export default function AutoSlicerSettings({
               }}
               className="w-full bg-neutral-900 border border-neutral-800 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] font-mono focus:border-indigo-500/50 focus:outline-none cursor-pointer appearance-none transition-colors hover:border-neutral-700"
             >
-              <option value="gemini-2.0-flash-lite">
-                Gemini 2.0 Flash Lite (Lite/Fast) [Free]
-              </option>
-              <option value="gemini-1.5-flash">
-                Gemini 1.5 Flash (Legacy Fast) [Free]
-              </option>
-              <option value="gemini-2.0-flash">
-                Gemini 2.0 Flash (Balanced) [Free]
-              </option>
-              <option value="gemini-3.5-flash">
-                Gemini 3.5 Flash (Fast) [Free]
-              </option>
-              <option value="gemini-2.5-flash">
-                Gemini 2.5 Flash (Fast) [Free]
-              </option>
-              <option value="gemini-3.5-pro">
-                Gemini 3.5 Pro (Deep Visual)
-              </option>
-              <option value="gemini-2.5-pro">
-                Gemini 2.5 Pro (Deep Visual)
-              </option>
-            </select>
+{AI_MODELS.map((m) => (<option key={m.id} value={m.id}>{m.name}</option>))}
+</select>
             <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-500 pointer-events-none" />
           </div>
         </div>

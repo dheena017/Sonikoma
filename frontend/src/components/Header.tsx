@@ -24,6 +24,7 @@ import {
 import { GeneratedPanel } from "../types";
 import NotificationDropdown from "./NotificationDropdown";
 import { Notification } from "./NotificationStack";
+import { AI_MODELS } from "@/models";
 
 interface HeaderProps {
   isProcessing: boolean;
@@ -880,15 +881,8 @@ export default function Header({
                   }
                   className="w-full bg-neutral-950 border border-neutral-850 text-neutral-200 text-xs px-2.5 py-1.5 rounded-xl focus:border-purple-500/50 outline-none cursor-pointer font-sans"
                 >
-                  <option value="gemini-2.5-flash">
-                    Gemini 2.5 Flash (Default)
-                  </option>
-                  <option value="gemini-2.5-pro">
-                    Gemini 2.5 Pro (High Quality)
-                  </option>
-                  <option value="claude-3.5-sonnet">Claude 3.5 Sonnet</option>
-                  <option value="llama-3.3-70b">Llama 3.3 70B (Fast)</option>
-                </select>
+{AI_MODELS.map((m) => (<option key={m.id} value={m.id}>{m.name}</option>))}
+</select>
               </div>
 
               {/* Toggles */}
