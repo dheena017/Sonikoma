@@ -450,7 +450,7 @@ export function useAppState() {
         addNotification("Account created successfully!", "success", {
           details: `User ID: ${data.user.id}\nEmail: ${
             data.user.email
-          }\nWelcome to WebtoonToVideo, ${data.user.name || data.user.email}!`,
+          }\nWelcome to Anivox, ${data.user.name || data.user.email}!`,
         });
       } else {
         throw new Error(data.detail || "Registration failed");

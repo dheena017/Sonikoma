@@ -1,14 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#a855f7" />
       <stop offset="100%" stop-color="#06b6d4" />
     </linearGradient>
   </defs>
-  <!-- Background Rounded Rect -->
-  <rect width="32" height="32" rx="8" fill="url(#grad)" />
-  <!-- Comic / Webtoon speech bubble -->
-  <path d="M8 8h16v10H14l-4 4v-4H8z" fill="#ffffff" />
-  <!-- Play icon inside bubble -->
-  <polygon points="13,11 19,13 13,15" fill="url(#grad)" />
+  <rect width="32" height="32" rx="8" fill="url(#bg)" />
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M16 6 L8 26 L12.5 26 L14 22 L18 22 L19.5 26 L24 26 Z M13.5 12 L13.5 19.5 L19 15.75 Z" fill="#ffffff" />
 </svg>
