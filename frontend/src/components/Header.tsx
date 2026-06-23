@@ -366,9 +366,9 @@ export default function Header({
       desc: "Go to series workspace and panel upload",
     },
     {
-      name: "Storyboard Editor",
+      name: "Timeline Editor",
       path: "/editor",
-      desc: "Refine timelines, motion settings, and synthesis",
+      desc: "Refine timelines, motion settings, and generation",
     },
     {
       name: "Auto-Crop Panel Slicer",
@@ -588,7 +588,7 @@ export default function Header({
                   ) : (
                     <div className="px-3 py-2 bg-neutral-950/40 border border-neutral-850/60 rounded-xl">
                       <p className="text-[10px] text-neutral-400 font-mono text-center">
-                        Type script keywords to search storyboards
+                        Type script keywords to search timelines
                       </p>
                     </div>
                   )}
@@ -694,7 +694,7 @@ export default function Header({
                 ? "bg-purple-600 border-purple-500 text-white"
                 : "bg-neutral-900 border-neutral-850 text-neutral-400 hover:text-white hover:border-neutral-750"
             }`}
-            title="Storyboard Analytics & Statistics"
+            title="Timeline Analytics & Statistics"
           >
             <Activity className="h-4 w-4" />
           </button>
@@ -702,7 +702,7 @@ export default function Header({
           {showStats && (
             <div className="fixed left-1/2 -translate-x-1/2 top-16 sm:absolute sm:left-auto sm:translate-x-0 sm:right-0 sm:top-auto sm:mt-2 w-[calc(100vw-1rem)] sm:w-72 max-w-[360px] bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 p-4 origin-top sm:origin-top-right">
               <h3 className="text-xs font-black uppercase tracking-wider text-purple-400 mb-3 flex items-center gap-1.5">
-                <Activity className="h-4 w-4" /> Storyboard Analytics
+                <Activity className="h-4 w-4" /> Timeline Analytics
               </h3>
 
               <div className="space-y-3">
@@ -877,7 +877,7 @@ export default function Header({
               {/* AI Model Settings */}
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-neutral-300 font-sans block">
-                  Select AI LLM Engine
+                  Select Engine
                 </label>
                 <select
                   value={selectedModel}
