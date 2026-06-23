@@ -250,7 +250,7 @@ export function AppWorkspace({
       if (!token) {
         const usedFree = localStorage.getItem("sonikoma_free_scrape_used");
         if (usedFree === "true") {
-          addNotification("You've used your free try. Please sign in to scrape more URLs!", "warning");
+          addNotification("You've used your free try. Please sign in to import more links!", "warning");
           if (typeof (window as any).navigateTo === "function") {
             (window as any).navigateTo("/login");
           } else {
@@ -339,7 +339,7 @@ export function AppWorkspace({
 
   const handleSaveAssets = async () => {
     if (projectId?.startsWith("temp_")) {
-      addNotification("Temporary Session: Saving assets is disabled.", "warning");
+      addNotification("Temporary Session: Saving images is disabled.", "warning");
       return;
     }
     const token =
