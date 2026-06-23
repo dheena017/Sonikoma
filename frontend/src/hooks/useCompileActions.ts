@@ -5,7 +5,7 @@ import { processWithConcurrency, chunkArray } from "../utils/batchUtils";
 interface UseCompileActionsProps {
   panels: GeneratedPanel[];
   setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
-  setActivePreviewTab: (tab: "video" | "storyboard") => void;
+  setActivePreviewTab: (tab: "video" | "timeline") => void;
   setVideoUrl?: React.Dispatch<React.SetStateAction<string>>;
   addNotification?: (message: string, type: unknown) => void;
   targetUrl?: string;
@@ -40,7 +40,7 @@ export function useCompileActions({
     if (panels.length === 0) return;
     setIsZipping(true);
     console.log(
-      "[StoryboardTimeline] Starting ZIP download for",
+      "[Timeline] Starting ZIP download for",
       panels.length,
       "panels"
     );
@@ -68,7 +68,7 @@ export function useCompileActions({
         link.click();
         document.body.removeChild(link);
         console.log(
-          "[StoryboardTimeline] ZIP archive download triggered successfully"
+          "[Timeline] ZIP archive download triggered successfully"
         );
         if (addNotification) {
           addNotification("ZIP archive downloaded successfully!", "success");
@@ -77,7 +77,7 @@ export function useCompileActions({
         throw new Error(data.error || "Failed to package ZIP archive.");
       }
     } catch (err: any) {
-      console.error("[StoryboardTimeline] ZIP download failed:", err);
+      console.error("[Timeline] ZIP download failed:", err);
       if (addNotification) {
         addNotification(
           err.message || "Failed to compile ZIP archive.",
@@ -86,7 +86,7 @@ export function useCompileActions({
       }
     } finally {
       setIsZipping(false);
-      console.log("[StoryboardTimeline] ZIP download operation completed");
+      console.log("[Timeline] ZIP download operation completed");
     }
   };
 
@@ -100,7 +100,7 @@ export function useCompileActions({
     const originalText = originalPanel ? originalPanel.speech_text : "";
     const originalMotion = originalPanel ? originalPanel.motion_type : "";
 
-    console.log("[StoryboardTimeline] Starting AI analysis for panel", panelId);
+    console.log("[Timeline] Starting Smart Scanner analysis for panel", panelId);
     console.log(`  - Model used: ${activeModel}`);
     console.log(`  - Sent Image: ${imageUrl.substring(0, 60)}...`);
     console.log(`  - Sent Original Dialogue: "${originalText}"`);
@@ -108,8 +108,8 @@ export function useCompileActions({
 
     if (setConsoleLogs) {
       setConsoleLogs((prev) => [
-        `[AI Auto-Analysis] Initiated image analysis on Panel #${panelId} using model: ${activeModel}`,
-        `[AI Auto-Analysis]   - Sent (Original Dialogue): "${originalText}"`,
+        `[Smart Auto-Analysis] Initiated image analysis on Panel #${panelId} using model: ${activeModel}`,
+        `[Smart Auto-Analysis]   - Sent (Original Dialogue): "${originalText}"`,
         ...prev,
       ]);
     }
@@ -138,9 +138,9 @@ export function useCompileActions({
                   ...p,
                   speech_text: data.analysis.speech_text || p.speech_text,
                   sfx: data.analysis.sfx || p.sfx,
-                  // Always use AI duration if it's a valid positive number
+                  // Always use System duration if it's a valid positive number
                   duration: aiDuration > 0 ? aiDuration : p.duration,
-                  // Always use AI motion if it returned a valid value
+                  // Always use System motion if it returned a valid value
                   motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
                   visual_description:
                     data.analysis.visual_description || p.visual_description,
@@ -152,36 +152,36 @@ export function useCompileActions({
         );
 
         console.log(
-          "[StoryboardTimeline] AI analysis completed successfully for panel",
+          "[Timeline] Smart Scanner analysis completed successfully for panel",
           panelId
         );
 
         if (setConsoleLogs) {
           setConsoleLogs((prev) => [
-            `[AI Auto-Analysis] [SUCCESS] Panel #${panelId} analysis completed by ${activeModel}!`,
-            `[AI Auto-Analysis]   - AI Set Dialogue: "${data.analysis.speech_text}"`,
-            `[AI Auto-Analysis]   - AI Set Motion: "${aiMotion}" | AI Set Duration: ${aiDuration}s`,
-            `[AI Auto-Analysis]   - AI Set SFX: "${data.analysis.sfx}"`,
+            `[Smart Auto-Analysis] [SUCCESS] Panel #${panelId} analysis completed by ${activeModel}!`,
+            `[Smart Auto-Analysis]   - System Set Dialogue: "${data.analysis.speech_text}"`,
+            `[Smart Auto-Analysis]   - System Set Motion: "${aiMotion}" | System Set Duration: ${aiDuration}s`,
+            `[Smart Auto-Analysis]   - System Set SFX: "${data.analysis.sfx}"`,
             ...prev,
           ]);
         }
 
         if (addNotification) {
           addNotification(
-            `AI analysis completed for Panel #${panelId}!`,
+            `Smart Scanner analysis completed for Panel #${panelId}!`,
             "success"
           );
         }
       } else {
         throw new Error(
-          data.error || "AI Model Analysis returned unsuccessful status"
+          data.error || "System Model Analysis returned unsuccessful status"
         );
       }
     } catch (err: any) {
-      console.error("[StoryboardTimeline] Panel analysis failed:", err);
+      console.error("[Timeline] Panel analysis failed:", err);
       if (setConsoleLogs) {
         setConsoleLogs((prev) => [
-          `[AI Auto-Analysis] [ERROR] Analysis failed for Panel #${panelId}: ${
+          `[Smart Auto-Analysis] [ERROR] Analysis failed for Panel #${panelId}: ${
             err.message || "Unknown error"
           }`,
           ...prev,
@@ -189,7 +189,7 @@ export function useCompileActions({
       }
       if (addNotification) {
         addNotification(
-          `AI analysis failed for Panel #${panelId}: ${
+          `Smart Scanner analysis failed for Panel #${panelId}: ${
             err.message || "Please try again."
           }`,
           "error"
@@ -208,7 +208,7 @@ export function useCompileActions({
     setIsAnalyzingAll(true);
     if (addNotification) {
       addNotification(
-        `Starting AI analysis for ${selectedIds.length} selected panel(s) in parallel...`,
+        `Starting Smart Scanner analysis for ${selectedIds.length} selected panel(s) in parallel...`,
         "info"
       );
     }
@@ -261,7 +261,7 @@ export function useCompileActions({
             
             if (setConsoleLogs) {
               setConsoleLogs(prev => [
-                `[AI Auto-Analysis] [SUCCESS] Processed batch of ${chunkPanels.length} panels`,
+                `[Smart Auto-Analysis] [SUCCESS] Processed batch of ${chunkPanels.length} panels`,
                 ...prev
               ]);
             }
@@ -272,7 +272,7 @@ export function useCompileActions({
           console.error("[useCompileActions] Batch analysis failed:", err);
           if (setConsoleLogs) {
             setConsoleLogs(prev => [
-              `[AI Auto-Analysis] [ERROR] Batch analysis failed: ${err.message}`,
+              `[Smart Auto-Analysis] [ERROR] Batch analysis failed: ${err.message}`,
               ...prev
             ]);
           }
@@ -288,7 +288,7 @@ export function useCompileActions({
 
       if (addNotification) {
         addNotification(
-          `AI analysis completed for ${selectedIds.length} selected panel(s)!`,
+          `Smart Scanner analysis completed for ${selectedIds.length} selected panel(s)!`,
           "success"
         );
       }
@@ -296,7 +296,7 @@ export function useCompileActions({
       console.error("[useCompileActions] Selected panel analysis failed:", err);
       if (addNotification) {
         addNotification(
-          "AI analysis of selected panels encountered an error.",
+          "Smart Scanner analysis of selected panels encountered an error.",
           "error"
         );
       }
@@ -311,7 +311,7 @@ export function useCompileActions({
     setIsAnalyzingAll(true);
     if (addNotification) {
       addNotification(
-        "Starting batch AI analysis for all panels...",
+        "Starting batch Smart Scanner analysis for all panels...",
         "info"
       );
     }
@@ -372,13 +372,13 @@ export function useCompileActions({
       });
       
       if (addNotification) {
-        addNotification("AI analysis completed for all panels!", "success");
+        addNotification("Smart Scanner analysis completed for all panels!", "success");
       }
     } catch (err: any) {
       console.error("[useCompileActions] Sequential analysis failed:", err);
       if (addNotification) {
         addNotification(
-          "AI Storyboard analysis encountered an error.",
+          "Smart Timeline analysis encountered an error.",
           "error"
         );
       }

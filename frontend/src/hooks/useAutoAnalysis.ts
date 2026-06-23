@@ -10,7 +10,7 @@ interface UseAutoAnalysisProps {
   setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>>;
   addNotification: (message: string, type: NotificationType) => void;
   fetchWithInterceptor: any;
-  setActivePreviewTab: (tab: "video" | "storyboard") => void;
+  setActivePreviewTab: (tab: "video" | "timeline") => void;
   narrationStyle?: string;
 }
 
@@ -27,7 +27,7 @@ export function useAutoAnalysis({
 }: UseAutoAnalysisProps) {
   const runBackgroundAnalysis = useCallback(
     async (panelId: number, imageUrl: string) => {
-      console.log(`[AI Auto-Analysis] Starting analysis for panel #${panelId}`);
+      console.log(`[Smart Auto-Analysis] Starting analysis for panel #${panelId}`);
       try {
         const res = await fetchWithInterceptor("/api/analyze-image", {
           method: "POST",
@@ -41,7 +41,7 @@ export function useAutoAnalysis({
         if (!res.ok)
           throw new Error(`Analysis failed with status ${res.status}`);
         const data = await res.json();
-        console.log(`[AI Auto-Analysis] Response for panel #${panelId}:`, data);
+        console.log(`[Smart Auto-Analysis] Response for panel #${panelId}:`, data);
         if (data.success && data.analysis) {
           setPanels((prev) =>
             prev.map((p) =>
@@ -60,7 +60,7 @@ export function useAutoAnalysis({
             )
           );
           setConsoleLogs((prev) => [
-            `[AI Auto-Analysis] AI transcribed and fully mapped cinematic properties for Panel #${panelId}!`,
+            `[Smart Auto-Analysis] System transcribed and fully mapped cinematic properties for Panel #${panelId}!`,
             ...prev,
           ]);
           addNotification(
@@ -69,16 +69,16 @@ export function useAutoAnalysis({
           );
         } else {
           throw new Error(
-            data.error || "Invalid response keys from AI Model Analysis"
+            data.error || "Invalid response keys from System Model Analysis"
           );
         }
       } catch (err: any) {
         console.error(
-          `[AI Auto-Analysis] Analysis failed for panel #${panelId}:`,
+          `[Smart Auto-Analysis] Analysis failed for panel #${panelId}:`,
           err
         );
         addNotification(
-          `Panel #${panelId} AI analysis failed: ${err.message || err}`,
+          `Panel #${panelId} Smart Scanner analysis failed: ${err.message || err}`,
           "error"
         );
         setPanels((prev) =>
@@ -114,10 +114,10 @@ export function useAutoAnalysis({
       if (imgUrls.length === 0) return;
 
       if (shouldScroll) {
-        setActivePreviewTab("storyboard");
+        setActivePreviewTab("timeline");
         setTimeout(() => {
           document
-            .getElementById("storyboard_timeline_section")
+            .getElementById("timeline_section")
             ?.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 100);
       }
@@ -147,17 +147,17 @@ export function useAutoAnalysis({
       setPanels((prev) => [...prev, ...newPanelsToAdd]);
 
       setConsoleLogs((prev) => [
-        `[GUI] Added ${imgUrls.length} frame(s) to storyboard.`,
+        `[GUI] Added ${imgUrls.length} frame(s) to timeline.`,
         ...prev,
       ]);
       addNotification(
-        `Added ${imgUrls.length} panel(s) to storyboard.`,
+        `Added ${imgUrls.length} panel(s) to timeline.`,
         "info"
       );
 
       // Developer console visibility
       console.log(
-        `[GUI] Added ${imgUrls.length} frame(s) to storyboard`,
+        `[GUI] Added ${imgUrls.length} frame(s) to timeline`,
         newPanelsToAdd
       );
     },

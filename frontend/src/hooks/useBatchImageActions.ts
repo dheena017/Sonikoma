@@ -274,14 +274,14 @@ export function useBatchImageActions({
           const data = await response.json();
           if (data.fallback) {
             setConsoleLogs((prev) => [
-              `[Auto Cropper Fallback] AI detection failed on ${url.substring(
+              `[Smart Cropper Fallback] Smart Scanner detection failed on ${url.substring(
                 0,
                 40
               )}..., fell back to local CV: ${data.message}`,
               ...prev,
             ]);
             addNotification(
-              `Gemini AI failed (quota/connection). Fell back to local CV detection.`,
+              `System failed (quota/connection). Fell back to local CV detection.`,
               "info"
             );
           }
