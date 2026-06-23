@@ -352,7 +352,7 @@ export function AppWorkspace({
       headers["Authorization"] = `Bearer ${token}`;
     }
     try {
-      addNotification("Saving raw assets...", "info");
+      addNotification("Saving images...", "info");
       const scrapeRes = await fetch("/api/save-scraped-images", {
         method: "PUT",
         headers,
@@ -362,21 +362,21 @@ export function AppWorkspace({
         }),
       });
       if (scrapeRes.ok) {
-        addNotification("Raw assets saved successfully!", "success");
+        addNotification("Images saved successfully!", "success");
       } else {
-        throw new Error("Failed to save raw assets");
+        throw new Error("Failed to save images");
       }
     } catch (err: any) {
-      addNotification(`Failed to save raw assets: ${err.message}`, "error");
+      addNotification(`Failed to save images: ${err.message}`, "error");
     }
   };
 
   const handleSaveStoryboard = async () => {
     if (saveProject) {
       await saveProject(panels, {
-        savingMessage: "Saving storyboard...",
-        successMessage: "Storyboard saved successfully!",
-        errorMessage: "Failed to save storyboard."
+        savingMessage: "Saving timeline...",
+        successMessage: "Timeline saved successfully!",
+        errorMessage: "Failed to save timeline."
       });
     }
   };
@@ -384,9 +384,9 @@ export function AppWorkspace({
   const handleSaveVideo = async () => {
     if (saveProject) {
       await saveProject(undefined, {
-        savingMessage: "Saving video compilation...",
-        successMessage: "Video compilation saved successfully!",
-        errorMessage: "Failed to save video compilation."
+        savingMessage: "Saving video...",
+        successMessage: "Video saved successfully!",
+        errorMessage: "Failed to save video."
       });
     }
   };
@@ -421,7 +421,7 @@ export function AppWorkspace({
             if (!token) {
               const usedFree = localStorage.getItem("sonikoma_free_scrape_used");
               if (usedFree === "true") {
-                addNotification("You've used your free try. Please sign in to scrape more URLs!", "warning");
+                addNotification("You've used your free try. Please sign in to import more links!", "warning");
                 if (typeof (window as any).navigateTo === "function") {
                   (window as any).navigateTo("/login");
                 } else {
