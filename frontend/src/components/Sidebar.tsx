@@ -214,7 +214,7 @@ export default function Sidebar({
               : panels.length > 0
               ? `Total: ${panels.length}`
               : undefined,
-          disabledTip: "Requires scraped images or storyboard panels",
+          disabledTip: "Requires imported images or timeline panels",
         },
       ],
     },
@@ -280,7 +280,7 @@ export default function Sidebar({
     },
   ];
 
-  const aiSuiteItems = [
+  const creativeSuiteItems = [
     { label: "Video Optimizer", path: "/ai-optimizer" },
     { label: "Panel Assistant", path: "/panel-assistant" },
     { label: "Character DB", path: "/ai-characters" },
@@ -383,7 +383,7 @@ export default function Sidebar({
             </div>
           ))}
 
-          {/* AI Creative Suite Dropdown/Accordion */}
+          {/* Creative Suite Dropdown/Accordion */}
           <div className="space-y-2">
             <h4 className="text-[9px] font-bold text-neutral-500 uppercase tracking-widest font-mono pl-2">
               Creative Tools
@@ -396,7 +396,7 @@ export default function Sidebar({
                     ? "text-purple-300 bg-purple-950/10 border-purple-900/40"
                     : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 border-transparent"
                 }`}
-                title="AI Creative Suite"
+                title="Creative Suite"
               >
                 <div className="flex items-center gap-2.5">
                   <Sparkles
@@ -406,7 +406,7 @@ export default function Sidebar({
                         : "text-neutral-500"
                     }`}
                   />
-                  <span>AI Suite</span>
+                  <span>Creative Suite</span>
                 </div>
                 {aiSuiteExpanded ? (
                   <ChevronUp className="h-3.5 w-3.5 text-neutral-500" />
@@ -417,7 +417,7 @@ export default function Sidebar({
 
               {aiSuiteExpanded && (
                 <div className="pl-4 pr-1 py-1.5 space-y-1 bg-neutral-950/40 rounded-xl border border-neutral-900/40 mt-1">
-                  {aiSuiteItems.map((subItem) => {
+                  {creativeSuiteItems.map((subItem) => {
                     const isSubActive = currentPath === subItem.path;
                     const requiresPanels = [
                       "/ai-optimizer",
@@ -441,7 +441,7 @@ export default function Sidebar({
                         }`}
                         title={
                           isLocked
-                            ? "Requires storyboard panels (Click to view details)"
+                            ? "Requires timeline panels (Click to view details)"
                             : undefined
                         }
                       >
@@ -472,7 +472,7 @@ export default function Sidebar({
               }`}
             />
             <span className="text-[10px] text-neutral-300 font-bold">
-              {isProcessing ? "PROCESSING" : "ENGINE READY"}
+              {isProcessing ? "PROCESSING" : "SYSTEM READY"}
             </span>
           </div>
           <span className="text-[9px] px-1.5 py-0.5 rounded tracking-wider bg-purple-950 text-purple-400 border border-purple-900/60">

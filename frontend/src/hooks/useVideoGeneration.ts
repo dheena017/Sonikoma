@@ -169,19 +169,19 @@ export function useVideoGeneration({
       "info"
     );
     setConsoleLogs([
-      `[Control] Initiating dynamic production pipeline request...`,
-      `[Control] Webtoon Destination target: ${targetUrl}`,
-      `[Control] Cinematic parameters applied -> FPS: ${frameRate} | Actor: ${voiceActor} | Audio: ${musicTheme}`,
-      `[Model] Active AI Engine: ${selectedModel}`,
-      `[Model] Sending request to AI model for OCR transcription & scene analysis...`,
-      `[Pipeline] Storyboard contains ${panels.length} panel(s) queued for compilation`,
+      `[Control] Initiating video creation request...`,
+      `[Control] Link target: ${targetUrl}`,
+      `[Control] Video parameters applied -> FPS: ${frameRate} | Voice: ${voiceActor} | Audio: ${musicTheme}`,
+      `[Engine] Active Voice: ${selectedModel}`,
+      `[Engine] Requesting text and scene processing...`,
+      `[Pipeline] Timeline contains ${panels.length} panel(s) queued for compilation`,
     ]);
 
     try {
-      setProgressStatus("Scraping Webtoon strips & downloading frames...");
+      setProgressStatus("Downloading images...");
       setConsoleLogs((prev) => [
         ...prev,
-        `[Scraper] Spawned crawler tasks to fetch strip images...`,
+        `[Downloader] Started fetching images...`,
       ]);
 
       const formattedEpisode = (() => {
@@ -226,12 +226,12 @@ export function useVideoGeneration({
 
       setConsoleLogs((prev) => [
         ...prev,
-        `[Scraper] Retrieved vertical strip elements successfully.`,
-        `[Vision OCR] Isolated ${responseData.panels_processed} panels dynamically.`,
-        `[Model] AI engine ${selectedModel} completed OCR + scene analysis`,
-        `[MoviePy] Compiling timeline with Pan/Zoom animations...`,
-        `[MoviePy] Encoded output video: ${responseData.video_url}`,
-        `[Pipeline] [SUCCESS] Video generation pipeline completed successfully!`,
+        `[Downloader] Downloaded images successfully.`,
+        `[Text Processing] Found ${responseData.panels_processed} panels.`,
+        `[Engine] Voice engine ${selectedModel} completed text processing`,
+        `[Video] Building timeline...`,
+        `[Video] Final video generated: ${responseData.video_url}`,
+        `[Pipeline] [SUCCESS] Video generation completed successfully!`,
       ]);
 
       setPanels(responseData.panels || []);
@@ -278,7 +278,7 @@ export function useVideoGeneration({
     const activePadding =
       activePanel.crop_padding !== undefined ? activePanel.crop_padding : 4;
     setConsoleLogs((prev) => [
-      `[OCR/CV Engine] Recalculating tighter cropping margins (padding: ${activePadding}%) & OCR vectors for Scene #${panelId}...`,
+      `[Image Editor] Updating cropping margins (padding: ${activePadding}%) for Panel #${panelId}...`,
       ...prev,
     ]);
 
@@ -299,7 +299,7 @@ export function useVideoGeneration({
         currentUrl = urlObj.pathname + urlObj.search;
       }
 
-      console.log(`[OCR/CV Engine] Reprocessing panel #${panelId}...`);
+      console.log(`[Image Editor] Updating panel #${panelId}...`);
       await new Promise((resolve) => setTimeout(resolve, 900));
 
       setPanels((prev) =>
@@ -309,7 +309,7 @@ export function useVideoGeneration({
       );
 
       setConsoleLogs((prev) => [
-        `[OCR/CV Engine] [SUCCESS] Scene #${panelId} output canvas successfully re-parsed into tighter boundaries with margin padding ${activePadding}%!`,
+        `[Image Editor] [SUCCESS] Panel #${panelId} successfully updated with padding ${activePadding}%!`,
         ...prev,
       ]);
       addNotification(
@@ -318,7 +318,7 @@ export function useVideoGeneration({
       );
     } catch (err: any) {
       setConsoleLogs((prev) => [
-        `[OCR/CV Engine] [ERROR] Reprocessing failed for Scene #${panelId}: ${
+        `[Image Editor] [ERROR] Update failed for Panel #${panelId}: ${
           (err as any).message || "Unknown error"
         }`,
         ...prev,

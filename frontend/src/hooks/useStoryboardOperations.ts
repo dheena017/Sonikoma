@@ -90,13 +90,13 @@ export function useStoryboardOperations({
   const handleClearTimeline = async () => {
     const confirm = (window as any).confirmAsync || window.confirm;
     const confirmClear = await confirm(
-      "Are you sure you want to clear the entire storyboard timeline?",
-      "Clear Storyboard",
+      "Are you sure you want to clear the entire timeline?",
+      "Clear Timeline",
       "red"
     );
     if (confirmClear) {
       setPanels([]);
-      addNotification?.("Storyboard cleared", "info");
+      addNotification?.("Timeline cleared", "info");
     }
   };
 
