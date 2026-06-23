@@ -71,6 +71,43 @@
     <!-- Performance Optimization: Resource Hints -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Google Search Structured Data (JSON-LD) for Rich Results -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Sonikoma",
+        "alternateName": "Super Sonico SoniKoma Video Compiler",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Web",
+        "description": "Transform static 4koma manga and webtoons into cinematic videos with AI voice narration, panel cropping, and automated editing.",
+        "url": "https://sonikoma.vercel.app",
+        "image": "https://sonikoma.vercel.app/logo.png",
+        "author": {
+          "@type": "Organization",
+          "name": "Antigravity Studio"
+        },
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Sonikoma",
+        "url": "https://sonikoma.vercel.app",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://sonikoma.vercel.app/dashboard?search={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
   </head>
   <body>
     <!-- Fallback message for disabled Javascript -->
