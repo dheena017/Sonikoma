@@ -459,7 +459,7 @@ export default function Header({
           }`}
           onClick={() => navigateTo("/dashboard")}
         >
-          <img src="/logo.png" className="h-8 w-8 rounded-lg shadow-lg shadow-purple-900/40 shrink-0 object-cover" alt="Sonikoma Logo" />
+          <img src="/logo.png" className="h-8 w-8 rounded-full bg-black shadow-lg shadow-purple-900/40 shrink-0 object-cover" alt="Sonikoma Logo" />
           <span className="font-bold text-sm tracking-tight text-white font-sans hidden sm:inline">
             Webtoon<span className="text-purple-400">To</span>Video
           </span>

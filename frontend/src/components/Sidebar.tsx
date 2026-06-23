@@ -292,7 +292,7 @@ export default function Sidebar({
             className="flex items-center gap-3 cursor-pointer select-none hover:opacity-90 transition-opacity"
             onClick={handleNavigateToDashboardOverview}
           >
-            <img src="/logo.png" className="h-10 w-10 rounded-xl shadow-lg shadow-purple-900/40 shrink-0 object-cover" alt="Sonikoma Logo" />
+            <img src="/logo.png" className="h-10 w-10 rounded-full bg-black shadow-lg shadow-purple-900/40 shrink-0 object-cover" alt="Sonikoma Logo" />
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-bold text-base tracking-tight text-white font-sans">
