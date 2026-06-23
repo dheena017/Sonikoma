@@ -54,23 +54,32 @@ body {
   scrollbar-width: none;
 }
 
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+/* Scrollbar that only appears on hover */
+.custom-scrollbar {
+  scrollbar-width: none; /* Firefox */
 }
-
-::-webkit-scrollbar-track {
-  background: #050505;
+.custom-scrollbar:hover {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #3f3f46 transparent;
 }
-
-::-webkit-scrollbar-thumb {
-  background: #18181b;
-  border-radius: 5px;
-  border: 2px solid #050505;
+.custom-scrollbar::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+  background: transparent;
 }
-
-::-webkit-scrollbar-thumb:hover {
-  background: #27272a;
+.custom-scrollbar:not(:hover)::-webkit-scrollbar-thumb,
+.custom-scrollbar:not(:hover)::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
 }
 
 @keyframes pulse-glow {
