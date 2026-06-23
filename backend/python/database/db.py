@@ -58,9 +58,13 @@ def init_db() -> None:
                 users_table_exists = False
         
         if not users_table_exists:
-            if os.path.exists(SCHEMA_PATH):
-                logger.info("[Database] Re-initializing relational schema from schema.sql...")
-                with open(SCHEMA_PATH, 'r', encoding='utf-8') as f:
+            schema_file = SCHEMA_PATH if os.path.exists(SCHEMA_PATH) else '/app/schema.sql'
+            if not os.path.exists(schema_file):
+                schema_file = os.path.join(os.path.dirname(__file__), '..', '..', 'database', 'schema.sql')
+
+            if os.path.exists(schema_file):
+                logger.info(f"[Database] Re-initializing relational schema from {schema_file}...")
+                with open(schema_file, 'r', encoding='utf-8') as f:
                     schema = f.read()
                 conn.executescript(schema)
                 logger.info("[Database] Relational schema applied successfully.")
