@@ -902,7 +902,7 @@ if __name__ == "__main__":
     # Reload is disabled because reloading is managed externally by the Node runner
     run_args["reload"] = False
     if IS_PRODUCTION:
-        run_args["workers"] = 2
+        run_args["workers"] = 1
 
     uvicorn.run(**run_args)
     # Trigger auto-reload for database re-seeding config v3
