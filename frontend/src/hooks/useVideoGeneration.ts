@@ -15,7 +15,7 @@ interface UseVideoGenerationProps {
   voiceActor: string;
   musicTheme: string;
   setVideoUrl: (url: string | null) => void;
-  setActivePreviewTab: (tab: "video" | "storyboard") => void;
+  setActivePreviewTab: (tab: "video" | "timeline") => void;
   narrationStyle?: string;
   seriesTitle: string;
   chapterNumber: string;
@@ -258,7 +258,7 @@ export function useVideoGeneration({
           (err as any).message || "An unexpected connection error occurred.";
         if (errMessage.includes("429") || errMessage.includes("quota")) {
           errMessage =
-            "You've exceeded your daily/request quota for the Gemini API. Please wait a short while for the quota to reset, or check your billing plan in Google AI Studio to increase your limits.";
+            "You've exceeded your daily/request quota for the System API. Please wait a short while for the quota to reset, or check your billing plan in Google Cloud to increase your limits.";
         }
         addNotification(
           `Pipeline failed: ${errMessage}. Please try refreshing the page or try again.`,

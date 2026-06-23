@@ -109,11 +109,11 @@ export function useLiveScraperActions({
 
   const handleAddToStoryboard = () => {
     if (selectedScraped.length === 0) {
-      addNotification?.("No images selected to add to storyboard.", "warning");
+      addNotification?.("No images selected to add to timeline.", "warning");
       return;
     }
     console.log(
-      `[GUI] Adding ${selectedScraped.length} image(s) to storyboard`
+      `[GUI] Adding ${selectedScraped.length} image(s) to timeline`
     );
     addPanelsToStoryboard(selectedScraped);
     setSelectedScraped([]);

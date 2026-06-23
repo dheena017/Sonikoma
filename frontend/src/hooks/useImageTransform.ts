@@ -287,13 +287,13 @@ export function useImageTransform({
         setConsoleLogs((prev) => [
           `[Image Editor] Extracted cut from Frame #${
             editingImageIdx + 1
-          } and added to Storyboard`,
+          } and added to Timeline`,
           ...prev,
         ]);
       }
 
       handleDeleteSlice(slice.id, e);
-      addNotification("Extracted Cut and added to Storyboard!", "success");
+      addNotification("Extracted Cut and added to Timeline!", "success");
     } catch (err: any) {
       console.error(`[Image Editor] Single slice crop failed:`, err);
       addNotification(`Failed to crop: ${err.message}`, "error");

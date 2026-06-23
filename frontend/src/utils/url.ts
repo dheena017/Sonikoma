@@ -174,7 +174,7 @@ export function parseWebtoonUrl(urlStr: string) {
   } catch {
     return {
       genre: "general",
-      title: "Custom Storyboard",
+      title: "Custom Timeline",
       chapterNumber: "1",
       chapterTitle: "",
       episode: "Chapter 1",

@@ -69,7 +69,7 @@ export default function PanelAssistantPage({
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-purple-400" />
-            AI Panel Assistant & Editor
+            Smart Panel Assistant & Editor
           </h2>
           <p className="text-xs text-neutral-400 font-mono mt-0.5">
             Optimize, translate, and style scripts for individual comic

@@ -8,7 +8,7 @@ interface UseStoryboardOperationsProps {
   panels: GeneratedPanel[];
   setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
   setCurrentPanelIndex: (idx: number) => void;
-  setActivePreviewTab: (tab: "video" | "storyboard") => void;
+  setActivePreviewTab: (tab: "video" | "timeline") => void;
   setVideoUrl?: React.Dispatch<React.SetStateAction<string>>;
   addNotification?: (message: string, type: unknown) => void;
   targetUrl?: string;

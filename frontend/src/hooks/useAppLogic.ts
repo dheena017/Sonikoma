@@ -26,10 +26,10 @@ export function useAppLogic() {
       return;
     }
     setIsGeneratingStoryboard(true);
-    state.addNotification("Starting storyboard AI generation...", "info");
+    state.addNotification("Starting timeline generation...", "info");
     state.setConsoleLogs((prev) => [
-      `[AI Storyboard] Triggering AI generation for project: ${projId}...`,
-      `[AI Storyboard] Running OCR Transcription & Panel Slicing...`,
+      `[Smart Timeline] Triggering timeline generation for project: ${projId}...`,
+      `[Smart Timeline] Running OCR Transcription & Panel Slicing...`,
       ...prev,
     ]);
     try {
@@ -64,7 +64,7 @@ export function useAppLogic() {
       });
 
       if (!res.ok) {
-        throw new Error(`Failed to generate storyboard (HTTP ${res.status})`);
+        throw new Error(`Failed to generate timeline (HTTP ${res.status})`);
       }
 
       const data = await res.json();
@@ -76,28 +76,28 @@ export function useAppLogic() {
         }));
         state.setPanels(mappedPanels);
         state.setConsoleLogs((prev) => [
-          `[AI Storyboard] [SUCCESS] Storyboard generated successfully with ${mappedPanels.length} panels!`,
+          `[Smart Timeline] [SUCCESS] Timeline generated successfully with ${mappedPanels.length} panels!`,
           ...prev,
         ]);
         state.addNotification(
-          `Storyboard generated successfully with ${mappedPanels.length} panels!`,
+          `Timeline generated successfully with ${mappedPanels.length} panels!`,
           "success"
         );
       } else {
         throw new Error(
-          data.message || "Invalid response from AI Model Analysis"
+          data.message || "Invalid response from System Model Analysis"
         );
       }
     } catch (err: any) {
-      console.error("[AI Storyboard] Generation failed:", err);
+      console.error("[Smart Timeline] Generation failed:", err);
       state.setConsoleLogs((prev) => [
-        `[AI Storyboard] [ERROR] Generation failed: ${
+        `[Smart Timeline] [ERROR] Generation failed: ${
           err.message || String(err)
         }`,
         ...prev,
       ]);
       state.addNotification(
-        `Storyboard generation failed: ${err.message || String(err)}`,
+        `Timeline generation failed: ${err.message || String(err)}`,
         "error"
       );
     } finally {
@@ -399,10 +399,10 @@ export function useAppLogic() {
             !log.startsWith("[Preloader]") && !log.startsWith("[Scraper]")
         );
         return [
-          `[Scraper] Spawned live scraping task to separate strip images from: ${normalizedTargetUrl}`,
-          `[Model] Using AI engine: ${selectedModel} for panel analysis`,
-          `[Scraper] Selected source website: ${selectedSource}`,
-          `[Scraper] Parsed URL → Genre: ${genre} | Title: ${title} | Episode: ${episode}`,
+          `[Import] Spawned live import task to separate strip images from: ${normalizedTargetUrl}`,
+          `[Model] Using System engine: ${selectedModel} for panel analysis`,
+          `[Import] Selected source website: ${selectedSource}`,
+          `[Import] Parsed URL → Genre: ${genre} | Title: ${title} | Episode: ${episode}`,
           ...baseLogs,
         ];
       });
@@ -537,7 +537,7 @@ export function useAppLogic() {
             const detailMsg = [
               `Total Frames Extracted: ${data.total_images}`,
               `Source URL: ${normalizedTargetUrl}`,
-              `AI Vision Model: ${selectedModel}`,
+              `System Vision Model: ${selectedModel}`,
               `Target Domain: ${currentHost}`,
               `Smart Slice Mode: Disabled`,
             ].join("\n");
