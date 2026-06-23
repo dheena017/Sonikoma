@@ -893,7 +893,7 @@ if __name__ == "__main__":
 
     run_args = {
         "app": "main:app",
-        "host": os.getenv("HOST", "127.0.0.1"),
+        "host": os.getenv("HOST", "0.0.0.0"),
         "port": BACKEND_PORT,
         "log_level": "info",
         "log_config": custom_log_config,
