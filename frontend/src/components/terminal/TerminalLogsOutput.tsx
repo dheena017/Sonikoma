@@ -76,21 +76,20 @@ function getLogColor(log: string): string {
     return "text-purple-400 font-light";
   }
 
-  if (
-    log.includes("[AI Auto-Analysis]") ||
-    log.includes("[AI Model]") ||
+    log.includes("[Auto-Analysis]") ||
+    log.includes("[Engine]") ||
+    log.includes("[Voice Engine]") ||
     log.includes("[Gemini]")
-  )
     return "text-purple-300 font-medium";
-  if (log.includes("[AI Smart Crop]")) return "text-violet-400 font-medium";
+  if (log.includes("[Smart Crop]")) return "text-violet-400 font-medium";
   if (
-    log.includes("[OCR/CV Engine]") ||
+    log.includes("[Text Processing]") ||
     log.includes("[Vision OCR]") ||
     log.includes("[CV")
   )
     return "text-purple-300";
-  if (log.includes("[Helper Scraper]")) return "text-cyan-300 font-medium";
-  if (log.includes("[Scraper]")) return "text-cyan-400";
+  if (log.includes("[Downloader Helper]")) return "text-cyan-300 font-medium";
+  if (log.includes("[Downloader]")) return "text-cyan-400";
   if (log.includes("[Server]")) return "text-cyan-300 font-medium";
   if (
     log.includes("HUGGINGFACE") ||
@@ -182,8 +181,8 @@ function getLogBorderColor(log: string): string {
   }
   if (log.includes("[AI") || log.includes("[Gemini]"))
     return "border-purple-500/50";
-  if (log.includes("[Helper Scraper]")) return "border-cyan-400/40";
-  if (log.includes("[Scraper]")) return "border-cyan-500/40";
+  if (log.includes("[Downloader Helper]")) return "border-cyan-400/40";
+  if (log.includes("[Downloader]")) return "border-cyan-500/40";
   if (log.includes("[Server]")) return "border-cyan-500/40";
   if (
     log.includes("HUGGINGFACE") ||
@@ -504,7 +503,7 @@ export function TerminalLogsOutput({
           <p className="text-[11px] font-mono">
             {searchQuery || activeFilter !== "all"
               ? "No search results match query filters"
-              : "Waiting for pipeline activity..."}
+              : "Waiting for activity..."}
           </p>
           <p className="text-[9px] text-neutral-700">
             {searchQuery || activeFilter !== "all"
