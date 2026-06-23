@@ -32,7 +32,6 @@ COPY --from=frontend-builder /app/frontend/dist ./dist
 # Set environment variables for production
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
-# We do not hardcode ENV PORT or EXPOSE here so Railway can dynamically assign and route the PORT.
 
 # Start the unified FastAPI application
 WORKDIR /app/backend/python
