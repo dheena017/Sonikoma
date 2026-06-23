@@ -32,6 +32,8 @@ COPY --from=frontend-builder /app/frontend/dist ./dist
 # Set environment variables for production
 ENV NODE_ENV=production
 ENV HOST=::
+ENV PORT=8080
+EXPOSE 8080
 
 # Start the unified FastAPI application
 WORKDIR /app/backend/python
