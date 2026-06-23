@@ -79,7 +79,7 @@ export function FloatingSelectionBar({
                 {selectedCount} panel{selectedCount !== 1 ? "s" : ""} selected
               </p>
               <p className="text-[9px] text-purple-400 font-mono leading-tight whitespace-nowrap">
-                of {totalCount} frames
+                of {totalCount} images
               </p>
             </div>
           </div>
@@ -230,11 +230,11 @@ export function FloatingSelectionBar({
                 handleAddToStoryboard();
               }}
               disabled={isAnyBusy}
-              title="Add selected panels to storyboard"
+              title="Add selected panels to timeline"
               className="px-3 sm:px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-purple-600 border-purple-500 hover:bg-purple-500 text-white shadow-md hover:shadow-purple-500/20 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Plus className="h-4 w-4 text-white" />
-              Add to Storyboard
+              Add to Timeline
             </button>
 
             {/* Delete */}

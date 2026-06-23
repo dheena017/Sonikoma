@@ -60,7 +60,7 @@ export default function ScraperControls({
     } else {
       setSelectedScraped([...scrapedImages]);
       setConsoleLogs((prev) => [
-        "[GUI] Selected all extracted frames",
+        "[GUI] Selected all images",
         ...prev,
       ]);
     }
@@ -94,10 +94,10 @@ export default function ScraperControls({
     setScrapedImages((prev) => [...prev].reverse());
     onLastSelectedReset?.();
     setConsoleLogs((prev) => [
-      "[GUI] Reversed extracted frame sequence order in deck",
+      "[GUI] Reversed image order",
       ...prev,
     ]);
-    addNotification("Reversed sequence order of the scraped deck!", "info");
+    addNotification("Reversed image order!", "info");
   };
 
   // ── Advanced Count & Range Filters ───────────────────────────────────────
