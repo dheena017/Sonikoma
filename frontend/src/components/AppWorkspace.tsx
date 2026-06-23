@@ -123,7 +123,7 @@ interface AppWorkspaceProps {
   setSmartSlice?: (v: boolean) => void;
   showScrapeConfirmModal: boolean;
   setShowScrapeConfirmModal: (v: boolean) => void;
-  saveProject?: (customPanels?: any[]) => Promise<boolean>;
+  saveProject?: (customPanels?: any[], options?: any) => Promise<boolean>;
   resetWorkspace?: () => void;
 }
 
@@ -329,8 +329,11 @@ export function AppWorkspace({
 
   const handleSaveMeta = async () => {
     if (saveProject) {
-      addNotification("Saving metadata...", "info");
-      await saveProject();
+      await saveProject(undefined, {
+        savingMessage: "Saving metadata...",
+        successMessage: "Metadata saved successfully!",
+        errorMessage: "Failed to save metadata."
+      });
     }
   };
 
@@ -370,15 +373,21 @@ export function AppWorkspace({
 
   const handleSaveStoryboard = async () => {
     if (saveProject) {
-      addNotification("Saving storyboard...", "info");
-      await saveProject(panels);
+      await saveProject(panels, {
+        savingMessage: "Saving storyboard...",
+        successMessage: "Storyboard saved successfully!",
+        errorMessage: "Failed to save storyboard."
+      });
     }
   };
 
   const handleSaveVideo = async () => {
     if (saveProject) {
-      addNotification("Saving video compilation...", "info");
-      await saveProject();
+      await saveProject(undefined, {
+        savingMessage: "Saving video compilation...",
+        successMessage: "Video compilation saved successfully!",
+        errorMessage: "Failed to save video compilation."
+      });
     }
   };
 
