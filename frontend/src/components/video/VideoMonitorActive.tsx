@@ -101,7 +101,7 @@ export function VideoMonitorActive({
             </p>
             <p className="text-[11px] text-neutral-500 max-w-[240px] leading-relaxed">
               Paste your target webtoon viewer URL on the left and click
-              "Generate Video" to execute the scraper compiler.
+              "Generate Video" to create your final video.
             </p>
           </div>
         </div>
@@ -149,7 +149,7 @@ export function VideoMonitorActive({
         </div>
       )}
 
-      {/* TAB 2: INTERACTIVE STORYBOARD PREVIEW SIMULATOR */}
+      {/* TAB 2: INTERACTIVE TIMELINE PREVIEW */}
       {panels.length > 0 &&
         activePreviewTab === "storyboard" &&
         activeStoryboardPanel && (
@@ -192,10 +192,10 @@ export function VideoMonitorActive({
               <div className="absolute inset-0 bg-black/85 backdrop-blur-sm flex flex-col items-center justify-center space-y-3 z-30">
                 <RefreshCw className="h-8 w-8 text-purple-400 animate-spin" />
                 <p className="text-xs font-mono text-purple-300 font-semibold tracking-wider">
-                  Recalculating CV Margins...
+                  Recalculating Crop Area...
                 </p>
                 <p className="text-[10px] text-neutral-500 font-mono">
-                  Re-slicing boundaries live
+                  Updating boundaries live
                 </p>
               </div>
             )}
@@ -210,7 +210,7 @@ export function VideoMonitorActive({
                 FRAME #{activeStoryboardPanel.id}
               </span>
               <span className="bg-purple-950/85 text-purple-400 px-2 py-0.5 rounded border border-purple-800/40">
-                STORYBOARD PREVIEW
+                TIMELINE PREVIEW
               </span>
             </div>
 
