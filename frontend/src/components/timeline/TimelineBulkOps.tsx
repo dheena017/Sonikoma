@@ -126,7 +126,7 @@ export default function TimelineBulkOps({
           }}
           className="w-full bg-red-950/40 hover:bg-red-950/60 border border-red-900/40 text-red-400 text-[10px] font-bold py-1.5 rounded transition-colors cursor-pointer"
         >
-          Clear Storyboard Timeline
+          Clear Timeline
         </button>
       </div>
     </div>
