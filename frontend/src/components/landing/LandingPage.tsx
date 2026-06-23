@@ -135,18 +135,16 @@ export default function LandingPage({
         <div className="max-w-7xl mx-auto text-center space-y-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold uppercase tracking-widest">
             <Sparkles className="w-3.5 h-3.5" />
-            AI-Powered Webtoon Transformation
+            Make Your Comics Move
           </div>
           <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9] max-w-4xl mx-auto">
-            Turn Comics into <br />
+            Turn Comics Into <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-400 to-emerald-400">
-              Cinematic Masterpieces
+              Awesome Videos
             </span>
           </h1>
           <p className="text-neutral-400 text-lg md:text-xl max-w-2xl mx-auto font-medium leading-relaxed">
-            Sonikoma uses advanced AI to scrape, slice, and compile your favorite
-            Webtoons into immersive videos with dynamic motion, TTS, and
-            professional editing.
+            Just paste a link, and we'll turn your favorite webtoons into fully voiced, animated videos that are ready to share with the world.
           </p>
           <div className="pt-8 max-w-4xl mx-auto w-full text-left">
             <div
@@ -156,14 +154,14 @@ export default function LandingPage({
                 <div className="flex items-center gap-2 text-purple-400">
                   <Sparkles className="h-4 w-4 shrink-0" />
                   <span className="text-[10px] sm:text-xs font-semibold tracking-wider uppercase font-mono">
-                    Dynamic Comic Scraper
+                    Quick Link Importer
                   </span>
                 </div>
                 <h2 className="text-base sm:text-lg font-bold text-white tracking-tight leading-tight">
-                  Generate Video from Comic URL
+                  Turn a Link into a Video
                 </h2>
                 <p className="text-[10px] sm:text-xs text-neutral-400 font-sans leading-relaxed">
-                  Paste a comic or manga URL to dynamically scrape panels and generate a video.
+                  Paste a link to any comic or manga chapter to get started.
                 </p>
               </div>
 
@@ -277,49 +275,48 @@ export default function LandingPage({
         <div className="max-w-7xl mx-auto space-y-20">
           <div className="text-center space-y-4">
             <h2 className="text-4xl font-bold tracking-tight">
-              Supercharged Workflow
+              Built for Creators
             </h2>
             <p className="text-neutral-500 max-w-xl mx-auto">
-              Everything you need to automate your content creation pipeline
-              from start to finish.
+              We handle the boring, repetitive tasks so you can focus on making great content.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <FeatureCard
               icon={<Globe className="w-8 h-8" />}
-              title="Smart Scraper"
-              description="Instantly fetch entire chapters from any major Webtoon platform with one click."
+              title="Easy Link Importing"
+              description="Grab all the images from a chapter with just one click."
               color="text-blue-400"
             />
             <FeatureCard
               icon={<Scissors className="w-8 h-8" />}
-              title="AI Auto-Slicer"
-              description="Intelligent panel detection automatically cuts vertical strips into individual high-res frames."
+              title="Auto Panel Cropping"
+              description="We automatically find and cut out each comic panel for you."
               color="text-purple-400"
             />
             <FeatureCard
               icon={<Zap className="w-8 h-8" />}
-              title="Bubble Removal"
-              description="Clear away speech bubbles using computer vision to prepare clean assets for animation."
+              title="Clean Up Text Bubbles"
+              description="Erase speech bubbles instantly so your panels look completely clean."
               color="text-emerald-400"
             />
             <FeatureCard
               icon={<Layers className="w-8 h-8" />}
-              title="Narrative AI"
-              description="Generate rich scripts, character profiles, and translations using Gemini 2.0 Flash."
+              title="Smart Scripting"
+              description="Easily translate stories or create character voices with our built-in helpers."
               color="text-orange-400"
             />
             <FeatureCard
               icon={<Sparkles className="w-8 h-8" />}
-              title="Cinematic Motion"
-              description="Apply professional camera pans, zooms, and transitions to static comic panels."
+              title="Add Cool Animations"
+              description="Bring your panels to life with smooth camera pans and zooms."
               color="text-rose-400"
             />
             <FeatureCard
               icon={<Video className="w-8 h-8" />}
-              title="1-Click Export"
-              description="Compile your storyboard into high-quality MP4 videos ready for YouTube and TikTok."
+              title="Ready to Share"
+              description="Save your final video and post it straight to TikTok or YouTube."
               color="text-indigo-400"
             />
           </div>
@@ -335,11 +332,10 @@ export default function LandingPage({
         <div className="max-w-7xl mx-auto space-y-12">
           <div className="text-center space-y-4">
             <h2 className="text-4xl font-bold tracking-tight">
-              See the Transformation Live
+              See the Magic Happen
             </h2>
             <p className="text-neutral-500 max-w-xl mx-auto">
-              Drag the interactive slider to watch static comic pages transform
-              into dynamic assets ready for video output.
+              Slide back and forth to see how we turn plain comic pages into clean, video-ready panels.
             </p>
           </div>
 
@@ -463,24 +459,24 @@ export default function LandingPage({
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
           <div className="space-y-10">
             <h2 className="text-5xl font-black tracking-tighter">
-              Simple 3-Step Process
+              How It Works
             </h2>
 
             <div className="space-y-8">
               <Step
                 num="01"
-                title="Paste your URL"
-                desc="Copy the link to your favorite Webtoon chapter and let our engine handle the rest."
+                title="Paste your link"
+                desc="Just give us the link to your favorite webtoon chapter and we'll handle the rest."
               />
               <Step
                 num="02"
-                title="AI Enhancement"
-                desc="Our AI detects panels, extracts text, generates TTS, and applies cinematic motion automatically."
+                title="We Do the Heavy Lifting"
+                desc="We automatically separate the panels, add character voices, and bring the comic to life."
               />
               <Step
                 num="03"
-                title="Export & Share"
-                desc="Preview your creation in real-time and export a high-quality video for your audience."
+                title="Watch & Share"
+                desc="Preview your video and save it to share with the world."
               />
             </div>
           </div>
@@ -738,11 +734,11 @@ export default function LandingPage({
           </div>
           <div className="space-y-2">
             <h3 className="text-2xl md:text-3xl font-black tracking-tight">
-              Stay Ahead of the Curve
+              Join the Newsletter
             </h3>
             <p className="text-neutral-400 text-sm max-w-md mx-auto">
-              Get product updates, advanced animation tips, and the latest news
-              on AI comic translation.
+              Get product updates, video making tips, and the latest news
+              from our team.
             </p>
           </div>
           <form
@@ -799,8 +795,8 @@ export default function LandingPage({
             Ready to bring your <br /> stories to life?
           </h2>
           <p className="text-purple-100 text-lg md:text-xl font-medium max-w-xl mx-auto opacity-80">
-            Join thousands of creators using Sonikoma to automate their
-            comic-to-video production pipeline.
+            Join thousands of creators using Sonikoma to make comic videos
+            faster and easier than ever.
           </p>
           <div className="pt-4">
             <button
