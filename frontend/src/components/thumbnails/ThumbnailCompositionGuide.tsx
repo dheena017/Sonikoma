@@ -47,7 +47,7 @@ export default function ThumbnailCompositionGuide({
         <div className="flex items-center gap-2">
           <Grid className="h-4.5 w-4.5 text-purple-400" />
           <h4 className="text-xs font-mono font-bold text-white uppercase">
-            AI Canvas Splits & Borders Guide
+            Canvas Splits & Borders Guide
           </h4>
         </div>
         <button

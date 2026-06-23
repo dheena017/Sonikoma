@@ -85,7 +85,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
     handleSaveMeta,
   } = props;
 
-  // Metadata card is hidden until the user clicks Scrape Assets
+  // Metadata card is hidden until the user clicks Import Assets
   const [metadataRevealed, setMetadataRevealed] = React.useState(false);
   const [metadataCollapsed, setMetadataCollapsed] = React.useState(true);
   const [advancedSettingsOpen, setAdvancedSettingsOpen] = React.useState(false);
@@ -224,7 +224,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !isProcessing && targetUrl.trim()) {
                     console.log(
-                      "[UrlInputPanel] Enter key pressed. Triggering asset scraper."
+                      "[UrlInputPanel] Enter key pressed. Triggering asset import."
                     );
                     if (isSourceMismatch) {
                       addNotification(
@@ -285,7 +285,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
             </div>
           )}
 
-          {/* Series & Chapter Metadata Override Card — revealed after scrape */}
+          {/* Series & Chapter Metadata Override Card — revealed after import */}
           {metadataRevealed && (
             <div
               className="border rounded-2xl overflow-hidden transition-all duration-500"
@@ -318,7 +318,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                     </span>
                   ) : (
                     <span className="ml-1.5 text-[9px] text-emerald-400 font-mono">
-                      ✓ Scraped
+                      ✓ Imported
                     </span>
                   )}
                 </span>
@@ -487,7 +487,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
             {/* Narration Style Selector */}
           <div className="space-y-2">
             <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
-              AI Narration Style
+              Narration Style
             </label>
             <div className="relative">
               <select
@@ -535,7 +535,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
             </p>
           </div>
 
-          {/* Scrape Layout Mode Selector */}
+          {/* Import Layout Mode Selector */}
           <div className="space-y-2">
             <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
               Import Layout Mode

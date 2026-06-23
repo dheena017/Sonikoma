@@ -16,8 +16,8 @@ interface StoryboardTimelineProps {
   setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
   currentPanelIndex: number;
   setCurrentPanelIndex: (idx: number) => void;
-  activePreviewTab: "video" | "storyboard";
-  setActivePreviewTab: (tab: "video" | "storyboard") => void;
+  activePreviewTab: "video" | "timeline";
+  setActivePreviewTab: (tab: "video" | "timeline") => void;
   setPlaybackTime: (time: number) => void;
   hasScrapedImages?: boolean;
   setVideoUrl?: React.Dispatch<React.SetStateAction<string>>;

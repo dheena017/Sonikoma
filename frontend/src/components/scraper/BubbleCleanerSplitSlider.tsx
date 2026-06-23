@@ -27,7 +27,7 @@ export function BubbleCleanerSplitSlider({
         <span className="text-neutral-500 font-bold uppercase">
           Split-Compare Slider
         </span>
-        <span className="text-purple-400 font-bold">TELEA Inpaint vs Text</span>
+        <span className="text-purple-400 font-bold">TELEA Clear vs Text</span>
       </div>
       <div
         ref={splitContainerRef}
@@ -98,7 +98,7 @@ export function BubbleCleanerSplitSlider({
         </div>
       </div>
       <p className="text-[8px] text-neutral-600 font-sans text-center">
-        Drag the divider bar to verify the inpainting restoration.
+        Drag the divider bar to verify the clearing restoration.
       </p>
     </div>
   );

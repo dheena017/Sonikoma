@@ -60,7 +60,7 @@ export default function ThumbnailGenerator({
     <div className="bg-neutral-900/40 border border-neutral-800 rounded-2xl p-5 space-y-4">
       <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
         <h4 className="text-xs font-mono font-bold text-white uppercase">
-          AI Thumbnail Concept Designer
+          Thumbnail Concept Designer
         </h4>
         <button
           onClick={handleGenerate}
