@@ -367,21 +367,23 @@ export default function CropEditorModal({
       />
 
       {/* Main Content Pane */}
-      <div className="flex flex-1 min-h-0 overflow-hidden select-none items-stretch p-4 sm:p-5 gap-4 sm:gap-5">
-        {/* Left Vertical Collapsible Preview Ribbon */}
+      <div className="flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden select-none items-stretch p-4 sm:p-5 gap-4 sm:gap-5">
+        {/* Collapsible Preview Ribbon */}
         {scrapedImages.length > 0 && (
           <div
             className={[
-              "flex flex-col border border-white/5 bg-neutral-950/40 rounded-2xl shrink-0 transition-all duration-300 ease-in-out overflow-hidden select-none",
-              isDeckExpanded ? "w-36 sm:w-44" : "w-11 sm:w-12",
+              "flex border border-white/5 bg-neutral-950/40 rounded-2xl shrink-0 transition-all duration-300 ease-in-out overflow-hidden select-none",
+              isDeckExpanded 
+                ? "flex-col lg:flex-col w-full lg:w-36 xl:w-44 h-32 lg:h-auto" 
+                : "flex-row lg:flex-col h-11 lg:h-auto w-full lg:w-11 sm:lg:w-12",
             ].join(" ")}
           >
             {/* Header / Toggle button */}
             <div
               onClick={() => setIsDeckExpanded(!isDeckExpanded)}
               className={[
-                "flex items-center justify-between p-2 border-b border-white/5 cursor-pointer bg-neutral-900/40 hover:bg-neutral-900 transition-colors duration-150 select-none",
-                !isDeckExpanded && "flex-col gap-3 py-3",
+                "flex items-center justify-between p-2 lg:border-b lg:border-r-0 border-r border-white/5 cursor-pointer bg-neutral-900/40 hover:bg-neutral-900 transition-colors duration-150 select-none",
+                !isDeckExpanded && "lg:flex-col gap-3 py-2 px-3 lg:py-3 lg:px-2",
               ].join(" ")}
               title={isDeckExpanded ? "Collapse Deck" : "Expand Deck"}
             >
@@ -391,21 +393,26 @@ export default function CropEditorModal({
                     Deck ({scrapedImages.length})
                   </span>
                   <div className="p-1 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors duration-150">
-                    <ChevronLeft className="h-4.5 w-4.5" />
+                    <ChevronLeft className="h-4.5 w-4.5 hidden lg:block" />
+                    <ChevronLeft className="h-4.5 w-4.5 block lg:hidden rotate-90" />
                   </div>
                 </>
               ) : (
                 <>
-                  <div className="p-1 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors duration-150">
-                    <ChevronRight className="h-4.5 w-4.5" />
+                  <div className="p-1 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors duration-150 shrink-0">
+                    <ChevronRight className="h-4.5 w-4.5 hidden lg:block" />
+                    <ChevronRight className="h-4.5 w-4.5 block lg:hidden -rotate-90" />
                   </div>
                   <span
-                    className="text-[9px] font-mono font-bold text-neutral-500 uppercase tracking-widest select-none origin-center"
+                    className="text-[9px] font-mono font-bold text-neutral-500 uppercase tracking-widest select-none origin-center hidden lg:block"
                     style={{
                       writingMode: "vertical-rl",
                       textOrientation: "mixed",
                     }}
                   >
+                    PANELS ({scrapedImages.length})
+                  </span>
+                  <span className="text-[9px] font-mono font-bold text-neutral-500 uppercase tracking-widest select-none lg:hidden pl-1">
                     PANELS ({scrapedImages.length})
                   </span>
                 </>
@@ -414,7 +421,7 @@ export default function CropEditorModal({
 
             {/* Scrollable List of thumbnails */}
             {isDeckExpanded && (
-              <div className="flex-1 overflow-y-auto p-2.5 flex flex-col gap-3 scrollbar-thin">
+              <div className="flex-1 overflow-x-auto lg:overflow-x-hidden lg:overflow-y-auto p-2.5 flex flex-row lg:flex-col gap-3 scrollbar-thin">
                 {scrapedImages.map((imgUrl, idx) => {
                   const isCurrent = idx === editingImageIdx;
                   const isStitching = mergingIndices?.includes(idx) || false;
@@ -435,7 +442,7 @@ export default function CropEditorModal({
                           window.dispatchEvent(new Event("popstate"));
                         }}
                         className={[
-                          "relative w-full aspect-square rounded-xl overflow-hidden bg-neutral-900 border shrink-0 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105",
+                          "relative h-full lg:w-full aspect-square rounded-xl overflow-hidden bg-neutral-900 border shrink-0 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105",
                           isCurrent
                             ? "border-purple-500/80 shadow-[0_0_12px_rgba(168,85,247,0.3)] ring-1 ring-purple-500/30"
                             : "border-neutral-800 hover:border-neutral-700",
@@ -516,7 +523,7 @@ export default function CropEditorModal({
         )}
 
         {/* Center Canvas & Right Sidebar Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 flex-1 min-h-0 items-stretch">
+        <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4 sm:gap-5 flex-1 min-h-0 items-stretch">
           <CropEditorCanvasContainer
             key={imageUrl || undefined}
             handleAiCrop={handleAiCrop}

@@ -496,7 +496,7 @@ export function TerminalLogsOutput({
   return (
     <div
       ref={scrollRef}
-      className="bg-neutral-950 rounded-xl p-4 border border-transparent h-72 md:h-56 overflow-y-auto font-mono text-[10px] space-y-1.5 scrollbar-thin shadow-inner"
+      className="bg-neutral-950 rounded-xl p-4 border border-transparent h-72 md:h-56 overflow-auto font-mono text-[10px] space-y-1.5 scrollbar-thin shadow-inner"
     >
       {filteredLogs.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-full text-neutral-600 space-y-2">

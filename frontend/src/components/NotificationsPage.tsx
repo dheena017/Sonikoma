@@ -65,35 +65,35 @@ export default function NotificationsPage({
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-[#070709] animate-in fade-in duration-300">
       {/* Header Area */}
-      <div className="sticky top-0 z-30 bg-neutral-950/80 backdrop-blur-xl border-b border-neutral-900 px-4 py-4 sm:px-8 sm:py-6">
+      <div className="sticky top-[59px] z-30 bg-neutral-950/80 backdrop-blur-xl border-b border-neutral-900 px-4 py-4 sm:px-8 sm:py-6">
         <div className="max-w-5xl mx-auto w-full">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row justify-between gap-4 sm:gap-6">
+            <div className="flex items-start gap-3 sm:gap-4">
               <button
                 onClick={onNavigateHome}
-                className="p-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all cursor-pointer"
+                className="p-2 sm:p-2.5 mt-0.5 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all cursor-pointer shrink-0"
               >
-                <ArrowLeft className="h-5 w-5" />
+                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+                <h1 className="text-lg sm:text-2xl font-bold text-white tracking-tight flex flex-wrap items-center gap-2">
                   Notification Hub
                   {notifications.filter((n) => !n.isRead).length > 0 && (
-                    <span className="bg-purple-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
+                    <span className="bg-purple-600 text-white text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm shadow-purple-900/50 mt-0.5 sm:mt-0">
                       {notifications.filter((n) => !n.isRead).length} UNREAD
                     </span>
                   )}
                 </h1>
-                <p className="text-xs text-neutral-500 font-mono mt-0.5">
+                <p className="text-[10px] sm:text-xs text-neutral-500 font-mono mt-1 sm:mt-0.5 leading-snug max-w-sm">
                   Track system activity, AI processing updates, and error logs
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto pt-1 sm:pt-0 border-t sm:border-t-0 border-neutral-800/50 sm:border-transparent">
               <button
                 onClick={onToggleMute}
-                className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-[11px] font-bold uppercase tracking-widest transition-all cursor-pointer ${
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-[10px] sm:text-[11px] font-bold uppercase tracking-widest transition-all cursor-pointer ${
                   notificationsMuted
                     ? "bg-rose-950/20 border-rose-900/30 text-rose-455 hover:bg-rose-900/40"
                     : "bg-neutral-900 border-neutral-850 text-neutral-300 hover:text-white hover:border-neutral-750"
@@ -105,33 +105,35 @@ export default function NotificationsPage({
                 }
               >
                 {notificationsMuted ? (
-                  <BellOff
-                    className="h-4 w-4 animate-bounce"
-                    style={{ animationDuration: "2s" }}
-                  />
+                  <BellOff className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 ) : (
-                  <Bell className="h-4 w-4 text-purple-400" />
+                  <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-400" />
                 )}
                 <span>{notificationsMuted ? "Muted" : "Mute Sound"}</span>
               </button>
-              {notifications.length > 0 && (
-                <>
-                  <button
-                    onClick={onMarkAllAsRead}
-                    className="flex items-center gap-2 px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-emerald-400 hover:border-emerald-900/50 text-[11px] font-bold uppercase tracking-widest transition-all cursor-pointer"
-                  >
-                    <Check className="h-4 w-4" />
-                    <span className="hidden sm:inline">Mark all read</span>
-                  </button>
-                  <button
-                    onClick={onClearAll}
-                    className="flex items-center gap-2 px-3 py-2 rounded-xl bg-rose-950/20 border border-rose-900/30 text-rose-450 hover:bg-rose-900/40 text-[11px] font-bold uppercase tracking-widest transition-all cursor-pointer"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    <span className="hidden sm:inline">Clear history</span>
-                  </button>
-                </>
-              )}
+              
+              <div className="flex items-center gap-2">
+                {notifications.length > 0 && (
+                  <>
+                    <button
+                      onClick={onMarkAllAsRead}
+                      className="flex items-center gap-2 px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-emerald-400 hover:border-emerald-900/50 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest transition-all cursor-pointer"
+                      title="Mark all as read"
+                    >
+                      <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      <span className="hidden sm:inline">Mark all read</span>
+                    </button>
+                    <button
+                      onClick={onClearAll}
+                      className="flex items-center gap-2 px-3 py-2 rounded-xl bg-rose-950/20 border border-rose-900/30 text-rose-450 hover:bg-rose-900/40 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest transition-all cursor-pointer"
+                      title="Clear history"
+                    >
+                      <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      <span className="hidden sm:inline">Clear history</span>
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 

@@ -68,17 +68,17 @@ export function FloatingSelectionBar({
     >
       {/* Container with neutral border and standard dark shadow (no glow) */}
       <div className="bg-neutral-950/90 backdrop-blur-2xl border-t border-neutral-800/80 px-4 py-3 shadow-2xl shadow-black/50">
-        <div className="max-w-7xl mx-auto flex items-center gap-3 flex-wrap sm:flex-nowrap">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 overflow-x-auto custom-scrollbar pb-1 sm:pb-0">
           {/* Selection Count Badge */}
           <div className="flex items-center gap-2 bg-purple-950/60 border border-purple-700/50 rounded-xl px-3 py-2 shrink-0">
             <div className="h-5 w-5 rounded bg-purple-500 flex items-center justify-center text-white text-[9px] font-bold font-mono">
               {selectedCount > 99 ? "99+" : selectedCount}
             </div>
             <div>
-              <p className="text-xs font-bold text-white leading-tight">
+              <p className="text-xs font-bold text-white leading-tight whitespace-nowrap">
                 {selectedCount} panel{selectedCount !== 1 ? "s" : ""} selected
               </p>
-              <p className="text-[9px] text-purple-400 font-mono leading-tight">
+              <p className="text-[9px] text-purple-400 font-mono leading-tight whitespace-nowrap">
                 of {totalCount} frames
               </p>
             </div>
@@ -89,7 +89,7 @@ export function FloatingSelectionBar({
             <div className="flex flex-col gap-1.5 px-3.5 py-2.5 rounded-xl bg-purple-950/25 border border-purple-800/40 text-purple-300 text-xs font-mono shrink-0 min-w-[170px]">
               <div className="flex items-center gap-2">
                 <RefreshCw className="h-3.5 w-3.5 animate-spin text-purple-400" />
-                <span className="font-bold tracking-tight">
+                <span className="font-bold tracking-tight whitespace-nowrap">
                   {isBatchCropping && batchProgress
                     ? `Cropping ${batchProgress.current}/${batchProgress.total}`
                     : isCleaningBubbles && cleanProgress
@@ -130,7 +130,7 @@ export function FloatingSelectionBar({
           <div className="h-6 w-px bg-neutral-800 shrink-0 hidden sm:block" />
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-2 flex-wrap flex-1">
+          <div className="flex items-center gap-2 flex-nowrap shrink-0 ml-auto">
             {/* Select All / Deselect All */}
             <button
               type="button"
@@ -262,10 +262,9 @@ export function FloatingSelectionBar({
             type="button"
             onClick={handleClearAll}
             title="Deselect all panels"
-            className="ml-auto px-3 sm:px-4 py-2 text-xs rounded-xl border font-bold flex items-center gap-2 cursor-pointer transition-all bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 shrink-0"
+            className="p-2 ml-auto rounded-full font-bold flex items-center justify-center cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 shrink-0"
           >
             <X className="h-4 w-4" />
-            Clear
           </button>
         </div>
       </div>

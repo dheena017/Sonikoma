@@ -439,7 +439,7 @@ export default function Header({
   return (
     <header
       id="header_pane"
-      className="border-b border-neutral-900 bg-neutral-950/80 backdrop-blur-md sticky top-0 z-40 px-4 py-3 flex items-center justify-between gap-4"
+      className="border-b border-neutral-900 bg-neutral-950/80 backdrop-blur-md sticky top-0 z-40 pl-4 pr-6 md:pr-8 py-3 flex items-center justify-between gap-4"
     >
       {/* Left side: Hamburger and Brand */}
       <div className="flex items-center gap-3 shrink-0">
@@ -649,7 +649,7 @@ export default function Header({
             title="Notifications"
           >
             {notificationsMuted ? (
-              <BellOff className="h-4 w-4 text-rose-455 animate-pulse" />
+              <BellOff className="h-4 w-4 text-rose-455" />
             ) : (
               <Bell className="h-4 w-4" />
             )}
@@ -700,7 +700,7 @@ export default function Header({
           </button>
 
           {showStats && (
-            <div className="absolute right-0 mt-2 w-72 bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 p-4">
+            <div className="fixed left-1/2 -translate-x-1/2 top-16 sm:absolute sm:left-auto sm:translate-x-0 sm:right-0 sm:top-auto sm:mt-2 w-[calc(100vw-1rem)] sm:w-72 max-w-[360px] bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 p-4 origin-top sm:origin-top-right">
               <h3 className="text-xs font-black uppercase tracking-wider text-purple-400 mb-3 flex items-center gap-1.5">
                 <Activity className="h-4 w-4" /> Storyboard Analytics
               </h3>
@@ -864,7 +864,7 @@ export default function Header({
           </button>
 
           {showSettings && (
-            <div className="absolute right-0 mt-2 w-72 bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 p-4 space-y-4">
+            <div className="fixed left-1/2 -translate-x-1/2 top-16 sm:absolute sm:left-auto sm:translate-x-0 sm:right-0 sm:top-auto sm:mt-2 w-[calc(100vw-1rem)] sm:w-72 max-w-[360px] bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 p-4 space-y-4 origin-top sm:origin-top-right">
               <div>
                 <h3 className="text-xs font-black uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
                   <Sliders className="h-4 w-4" /> Quick Settings

@@ -1079,8 +1079,8 @@ export default function ProfilePage({
         </div>
 
         {/* Premium overall stats counters row */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-neutral-900/40 border border-white/5 rounded-3xl p-5 text-left relative overflow-hidden shadow-xl">
+        <div className="flex overflow-x-auto sm:grid sm:grid-cols-3 gap-4 pb-4 sm:pb-0 scrollbar-none snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div className="min-w-[260px] sm:min-w-0 snap-center shrink-0 sm:shrink bg-neutral-900/40 border border-white/5 rounded-3xl p-5 text-left relative overflow-hidden shadow-xl">
             <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
               Total Compilation Queue
             </div>
@@ -1091,7 +1091,7 @@ export default function ProfilePage({
               <Sparkles className="w-3.5 h-3.5" /> {queueSubtext}
             </div>
           </div>
-          <div className="bg-neutral-900/40 border border-white/5 rounded-3xl p-5 text-left relative overflow-hidden shadow-xl">
+          <div className="min-w-[260px] sm:min-w-0 snap-center shrink-0 sm:shrink bg-neutral-900/40 border border-white/5 rounded-3xl p-5 text-left relative overflow-hidden shadow-xl">
             <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
               Average Panels per Strip
             </div>
@@ -1102,7 +1102,7 @@ export default function ProfilePage({
               {avgPanelsSubtext}
             </div>
           </div>
-          <div className="bg-neutral-900/40 border border-white/5 rounded-3xl p-5 text-left relative overflow-hidden shadow-xl">
+          <div className="min-w-[260px] sm:min-w-0 snap-center shrink-0 sm:shrink bg-neutral-900/40 border border-white/5 rounded-3xl p-5 text-left relative overflow-hidden shadow-xl">
             <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
               AI Sync Success Rate
             </div>

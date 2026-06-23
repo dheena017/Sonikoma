@@ -236,6 +236,36 @@ export function AppWorkspace({
   handleGenerateStoryboardAI,
   resetWorkspace,
 }: AppWorkspaceProps) {
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("autoScrape") === "true" && targetUrl) {
+      // Remove autoScrape so it doesn't loop on refresh
+      params.delete("autoScrape");
+      window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+      
+      const token =
+        localStorage.getItem("sonikoma_token") ||
+        sessionStorage.getItem("sonikoma_token");
+      
+      if (!token) {
+        const usedFree = localStorage.getItem("sonikoma_free_scrape_used");
+        if (usedFree === "true") {
+          addNotification("You've used your free try. Please sign in to scrape more URLs!", "warning");
+          if (typeof (window as any).navigateTo === "function") {
+            (window as any).navigateTo("/login");
+          } else {
+            window.history.pushState({}, "", "/login");
+            window.dispatchEvent(new Event("popstate"));
+          }
+          return;
+        } else {
+          localStorage.setItem("sonikoma_free_scrape_used", "true");
+        }
+      }
+      setShowScrapeConfirmModal(true);
+    }
+  }, [targetUrl]);
+
   const handleConfirmProjectAndScrape = async (
     details: {
       seriesTitle: string;
@@ -360,7 +390,7 @@ export function AppWorkspace({
       {/* LEFT COLUMN: SOURCE INTEGRATION */}
       <div
         id="controls_column"
-        className={`order-1 lg:order-1 flex flex-col gap-6 md:gap-8 ${
+        className={`order-1 lg:order-1 flex flex-col gap-6 md:gap-8 min-w-0 ${
           panels.length > 0 ? "lg:col-span-7" : "lg:col-span-12"
         }`}
       >
@@ -375,7 +405,27 @@ export function AppWorkspace({
           isProcessing={isProcessing}
           isScraping={isScraping}
           handleGenerateVideo={handleGenerateVideo}
-          handleScrape={() => setShowScrapeConfirmModal(true)}
+          handleScrape={() => {
+            const token =
+              localStorage.getItem("sonikoma_token") ||
+              sessionStorage.getItem("sonikoma_token");
+            if (!token) {
+              const usedFree = localStorage.getItem("sonikoma_free_scrape_used");
+              if (usedFree === "true") {
+                addNotification("You've used your free try. Please sign in to scrape more URLs!", "warning");
+                if (typeof (window as any).navigateTo === "function") {
+                  (window as any).navigateTo("/login");
+                } else {
+                  window.history.pushState({}, "", "/login");
+                  window.dispatchEvent(new Event("popstate"));
+                }
+                return;
+              } else {
+                localStorage.setItem("sonikoma_free_scrape_used", "true");
+              }
+            }
+            setShowScrapeConfirmModal(true);
+          }}
           addNotification={addNotification}
           narrationStyle={narrationStyle}
           setNarrationStyle={setNarrationStyle}
@@ -505,7 +555,7 @@ export function AppWorkspace({
       {panels.length > 0 && (
         <div
           id="cinema_column"
-          className="order-2 lg:order-2 lg:col-span-5 flex flex-col gap-6 lg:sticky lg:top-24"
+          className="order-2 lg:order-2 lg:col-span-5 flex flex-col gap-6 lg:sticky lg:top-24 min-w-0"
         >
           <VideoMonitor
             activePreviewTab={activePreviewTab}

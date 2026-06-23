@@ -255,7 +255,7 @@ function CropEditorSidebar({
   );
 
   return (
-    <div className="lg:col-span-5 flex flex-col space-y-3 h-full min-h-0 overflow-hidden pr-0 sm:pr-1.5 scrollbar-thin overscroll-contain">
+    <div className="lg:col-span-5 flex flex-col space-y-3 lg:h-full lg:min-h-0 overflow-hidden pr-0 sm:pr-1.5 scrollbar-thin overscroll-contain shrink-0 max-h-[45vh] lg:max-h-none pb-4 lg:pb-0">
       {/* Sidebar Navigation Tabs */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-black/50 backdrop-blur-sm p-2 rounded-3xl border border-white/10 shadow-[inset_0_0_20px_rgba(0,0,0,0.35)] md:flex md:items-center md:gap-1">
         {(

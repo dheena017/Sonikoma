@@ -88,6 +88,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
   // Metadata card is hidden until the user clicks Scrape Assets
   const [metadataRevealed, setMetadataRevealed] = React.useState(false);
   const [metadataCollapsed, setMetadataCollapsed] = React.useState(true);
+  const [advancedSettingsOpen, setAdvancedSettingsOpen] = React.useState(false);
 
   // Reveal the card as soon as scraping starts
   React.useEffect(() => {
@@ -189,22 +190,20 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
   return (
     <div
       id="dynamic_input_box"
-      className="bg-neutral-900/40 rounded-3xl border border-neutral-800/80 p-5 sm:p-6 lg:p-8 backdrop-blur-md shadow-sm space-y-5 sm:space-y-6"
+      className="bg-neutral-900/40 rounded-3xl border border-neutral-800/80 p-5 sm:p-6 lg:p-8 backdrop-blur-md shadow-sm space-y-5 sm:space-y-6 min-w-0 w-full overflow-hidden"
     >
       <div className="space-y-1">
         <div className="flex items-center gap-2 text-purple-400">
-          <Sparkles className="h-4 w-4" />
-          <span className="text-xs font-semibold tracking-wider uppercase font-mono">
+          <Sparkles className="h-4 w-4 shrink-0" />
+          <span className="text-[10px] sm:text-xs font-semibold tracking-wider uppercase font-mono">
             Dynamic Comic Scraper
           </span>
         </div>
-        <h2 className="text-lg font-bold text-white tracking-tight">
-          Generate Video from Live Incident URL
+        <h2 className="text-base sm:text-lg font-bold text-white tracking-tight leading-tight">
+          Generate Video from Comic URL
         </h2>
-        <p className="hidden sm:block text-xs text-neutral-400 font-sans">
-          Enter any comic or manga viewer URL page. The backend engine will
-          scrape the live media assets, isolate panels, run OCR transcriptions,
-          and compile the cinematic rendering dynamically.
+        <p className="text-[10px] sm:text-xs text-neutral-400 font-sans leading-relaxed">
+          Paste a comic or manga URL to dynamically scrape panels and generate a video.
         </p>
       </div>
 
@@ -463,15 +462,32 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
 
         </div>
 
-        <div className="space-y-3 pt-1">
-          {/* Narration Style Selector */}
+        {/* ADVANCED SETTINGS TOGGLE */}
+        <div className="pt-2">
+          <button
+            type="button"
+            onClick={() => setAdvancedSettingsOpen(!advancedSettingsOpen)}
+            className="flex items-center gap-2 text-xs font-bold text-neutral-500 hover:text-white transition-colors"
+          >
+            <span
+              className="transition-transform duration-300"
+              style={{
+                display: "inline-block",
+                transform: advancedSettingsOpen ? "rotate(90deg)" : "rotate(0deg)",
+              }}
+            >
+              ▸
+            </span>
+            Advanced Settings (Model, Layout, Narration)
+          </button>
+        </div>
+
+        {/* ADVANCED SETTINGS CONTENT */}
+        {advancedSettingsOpen && (
+          <div className="space-y-4 pt-3 border-t border-neutral-800/50 animate-in fade-in slide-in-from-top-2">
+            {/* Narration Style Selector */}
           <div className="space-y-2">
             <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
-              <span
-                className={`h-1.5 w-1.5 rounded-full ${
-                  narrationStyle === "long" ? "bg-neutral-500" : "bg-emerald-500"
-                }`}
-              />
               AI Narration Style
             </label>
             <div className="relative">
@@ -523,11 +539,6 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
           {/* Scrape Layout Mode Selector */}
           <div className="space-y-2">
             <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
-              <span
-                className={`h-1.5 w-1.5 rounded-full ${
-                  smartSlice ? "bg-indigo-500" : "bg-amber-500"
-                }`}
-              />
               Scrape Layout Mode
             </label>
             <div className="relative">
@@ -576,7 +587,6 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
           </div>
 
           <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-purple-500"></span>
             Active AI Model Engine (Free Models Recommended)
           </label>
           {modelDropdown}
@@ -587,7 +597,8 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
               Flash models (Free) are highly recommended.
             </p>
           )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

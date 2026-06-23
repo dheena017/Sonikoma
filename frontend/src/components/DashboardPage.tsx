@@ -129,7 +129,7 @@ export default function DashboardPage() {
       </div>
 
       {/* QUICK STATS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-12">
         <div className="bg-[#0b0b0e]/80 border border-white/5 rounded-3xl p-6 shadow-xl relative overflow-hidden group">
           <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
             <Film className="h-32 w-32" />

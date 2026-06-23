@@ -180,13 +180,7 @@ export default function LoginPage({
   const [isTourOpen, setIsTourOpen] = React.useState(false);
   const [tourStep, setTourStep] = React.useState(0);
 
-  // Slide verification captcha states
-  const [showCaptcha, setShowCaptcha] = React.useState(false);
-  const [captchaSliderPos, setCaptchaSliderPos] = React.useState(10);
-  const [captchaTargetPos, setCaptchaTargetPos] = React.useState(
-    () => Math.floor(Math.random() * 40) + 45
-  ); // 45 to 85
-  const [isCaptchaVerified, setIsCaptchaVerified] = React.useState(false);
+
 
   // QR Code expiration timer tick
   React.useEffect(() => {
@@ -209,10 +203,6 @@ export default function LoginPage({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isLoading) return;
-    if (!isCaptchaVerified) {
-      setShowCaptcha(true);
-      return;
-    }
     setIsLoading(true);
     setError(null);
     try {
@@ -307,7 +297,7 @@ export default function LoginPage({
         {/* Top Controls Toolbar */}
         <div className="relative z-10 flex items-center justify-between mb-6">
           {/* Header branding & Back Button */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 lg:gap-3">
             {onNavigateHome && (
               <button
                 onClick={onNavigateHome}
@@ -318,23 +308,30 @@ export default function LoginPage({
               </button>
             )}
 
-            <div className="flex lg:hidden items-center gap-2">
+            <div className="flex lg:hidden items-center gap-1.5">
               <div
-                className={`flex items-center justify-center w-8 h-8 rounded-lg ${currentTheme.accentBg} border ${currentTheme.accentBorder}`}
+                className={`flex items-center justify-center w-8 h-8 rounded-lg ${currentTheme.accentBg} border ${currentTheme.accentBorder} overflow-hidden`}
               >
-                <LogIn className={`w-4 h-4 ${currentTheme.accentText}`} />
+                <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain drop-shadow-md" />
               </div>
-              <span className="text-lg font-bold text-white tracking-tight">
+              <span className="text-lg font-bold text-white tracking-tight mr-0.5">
                 Sonikoma
               </span>
+              <button
+                onClick={() => setIsShortcutsOpen(true)}
+                className="p-1.5 bg-neutral-900/60 border border-white/5 rounded-xl hover:bg-neutral-800 text-neutral-400 hover:text-white transition-all cursor-pointer"
+                title="Keyboard Shortcuts Guide"
+              >
+                <Keyboard className="w-4 h-4" />
+              </button>
             </div>
           </div>
           {/* Theme Selector & Tour Button */}
-          <div className="flex items-center gap-4">
-            {/* Keyboard Shortcuts Trigger Button */}
+          <div className="flex items-center gap-2 lg:gap-4">
+            {/* Keyboard Shortcuts Trigger Button (Desktop) */}
             <button
               onClick={() => setIsShortcutsOpen(true)}
-              className="p-1.5 bg-neutral-900/60 border border-white/5 rounded-xl hover:bg-neutral-800 text-neutral-400 hover:text-white transition-all cursor-pointer"
+              className="hidden lg:flex p-1.5 bg-neutral-900/60 border border-white/5 rounded-xl hover:bg-neutral-800 text-neutral-400 hover:text-white transition-all cursor-pointer"
               title="Keyboard Shortcuts Guide"
             >
               <Keyboard className="w-4 h-4" />
@@ -361,7 +358,7 @@ export default function LoginPage({
             </div>
 
             {/* Minimal Palette Theme Switcher */}
-            <div className="flex items-center gap-1.5 bg-neutral-900/60 border border-white/5 p-1 rounded-full backdrop-blur-md">
+            <div className="hidden sm:flex items-center gap-1.5 bg-neutral-900/60 border border-white/5 p-1 rounded-full backdrop-blur-md">
               {(Object.keys(THEMES) as ThemeKey[]).map((theme) => {
                 const colors = {
                   purple: "bg-purple-500",
@@ -389,7 +386,7 @@ export default function LoginPage({
 
             <button
               onClick={() => setIsTourOpen(true)}
-              className={`flex items-center gap-1 text-xs ${currentTheme.accentText} ${currentTheme.accentBg} border ${currentTheme.accentBorder} px-3 py-1.5 rounded-full cursor-pointer hover:bg-white/5 transition-all`}
+              className={`hidden sm:flex items-center gap-1 text-xs ${currentTheme.accentText} ${currentTheme.accentBg} border ${currentTheme.accentBorder} px-3 py-1.5 rounded-full cursor-pointer hover:bg-white/5 transition-all`}
             >
               <HelpCircle className="w-3.5 h-3.5" />
               {t.tour}
@@ -898,95 +895,7 @@ export default function LoginPage({
         </div>
       )}
 
-      {showCaptcha && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-300">
-          <div className="relative w-full max-w-sm bg-gradient-to-b from-[#101018] to-[#070709] border border-white/10 rounded-3xl p-6 shadow-2xl flex flex-col gap-4 text-left animate-in zoom-in-95 duration-300">
-            <button
-              onClick={() => setShowCaptcha(false)}
-              className="absolute top-4 right-4 text-neutral-500 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full cursor-pointer transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
 
-            <div className="space-y-1">
-              <h3 className="text-sm font-black text-white uppercase tracking-wider">
-                Security Panel Verification
-              </h3>
-              <p className="text-[10px] text-neutral-500">
-                Drag the speech balloon to match the panel bubble outline
-              </p>
-            </div>
-
-            {/* Captcha Track Area */}
-            <div className="relative h-24 bg-black/40 border border-white/5 rounded-2xl overflow-hidden flex items-center p-2">
-              {/* Target Outline (Fixed at target position) */}
-              <div
-                className="absolute w-12 h-12 border-2 border-dashed border-purple-500 rounded-xl bg-purple-500/10 flex items-center justify-center"
-                style={{
-                  left: `${captchaTargetPos}%`,
-                  transform: "translateX(-50%)",
-                }}
-              >
-                <div className="w-6 h-6 border-b-2 border-r-2 border-purple-400 rotate-45 transform origin-bottom-right opacity-30" />
-              </div>
-
-              {/* Slidable element (Controlled by slider) */}
-              <div
-                className="absolute w-12 h-12 bg-purple-600 border border-purple-500 rounded-xl shadow-lg flex items-center justify-center cursor-ew-resize transition-all"
-                style={{
-                  left: `${captchaSliderPos}%`,
-                  transform: "translateX(-50%)",
-                }}
-              >
-                <span className="text-[9px] font-black text-white uppercase tracking-tighter">
-                  *POW*
-                </span>
-              </div>
-            </div>
-
-            {/* Slider track input */}
-            <div className="space-y-1.5">
-              <input
-                type="range"
-                min="10"
-                max="90"
-                value={captchaSliderPos}
-                onChange={(e) => {
-                  const val = parseInt(e.target.value);
-                  setCaptchaSliderPos(val);
-                  if (Math.abs(val - captchaTargetPos) < 4) {
-                    setIsCaptchaVerified(true);
-                    setTimeout(() => {
-                      setShowCaptcha(false);
-                      setIsLoading(true);
-                      setError(null);
-                      onLogin({ email, password, rememberMe })
-                        .then(() => {
-                          (window as any).navigateTo?.("/dashboard");
-                        })
-                        .catch((err: any) => {
-                          setError(
-                            err.message ||
-                              "Invalid credentials. Please try again."
-                          );
-                          setIsLoading(false);
-                        });
-                    }, 500);
-                  }
-                }}
-                className="w-full h-2 bg-white/5 rounded-lg appearance-none cursor-ew-resize accent-purple-500"
-              />
-              <div className="flex justify-between text-[8px] font-mono text-neutral-500 font-bold uppercase tracking-wider">
-                <span>Start</span>
-                <span className={isCaptchaVerified ? "text-emerald-400" : ""}>
-                  {isCaptchaVerified ? "VERIFIED MATCH!" : "Slide to align"}
-                </span>
-                <span>End</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       <style
         dangerouslySetInnerHTML={{

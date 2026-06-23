@@ -324,7 +324,7 @@ export default function Sidebar({
         </div>
 
         {/* NAVIGATION MENUS */}
-        <div className="space-y-6 overflow-y-auto max-h-[calc(100vh-220px)] scrollbar-none pr-1">
+        <div className="space-y-6 overflow-y-auto max-h-[calc(100vh-220px)] scrollbar-thin pr-1">
           {menuItems.map((group) => (
             <div key={group.group} className="space-y-2">
               <h4 className="text-[9px] font-bold text-neutral-500 uppercase tracking-widest font-mono pl-2">
@@ -505,7 +505,7 @@ export default function Sidebar({
 
       {/* Sidebar drawer container (visible on both mobile and desktop, slides in/out) */}
       <aside
-        className={`fixed inset-y-0 left-0 w-72 bg-neutral-950/95 border-r border-neutral-900 h-full z-50 transition-transform duration-300 ease-out transform ${
+        className={`fixed inset-y-0 left-0 w-72 shrink-0 bg-neutral-950/95 border-r border-neutral-900 h-full z-50 transition-transform duration-300 ease-out transform ${
           isOpen
             ? "translate-x-0 shadow-2xl shadow-black/60"
             : "-translate-x-full"

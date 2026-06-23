@@ -160,7 +160,7 @@ export default function RegisterPage({
 
         {/* Header branding & Theme Selector */}
         <div className="flex items-center justify-between mb-8 relative z-10">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 lg:gap-3">
             {onNavigateHome && (
               <button
                 onClick={onNavigateHome}
@@ -171,18 +171,18 @@ export default function RegisterPage({
               </button>
             )}
 
-            <div className="flex lg:hidden items-center gap-2">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-purple-600/20 border border-purple-500/30">
-                <UserPlus className="w-4 h-4 text-purple-400" />
+            <div className="flex lg:hidden items-center gap-1.5">
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-purple-600/20 border border-purple-500/30 overflow-hidden">
+                <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain drop-shadow-md" />
               </div>
-              <span className="text-lg font-bold text-white tracking-tight">
+              <span className="text-lg font-bold text-white tracking-tight mr-0.5">
                 Sonikoma
               </span>
             </div>
           </div>
 
           {/* Minimal Palette Switcher */}
-          <div className="flex items-center gap-1.5 bg-neutral-900/60 border border-white/5 p-1 rounded-full backdrop-blur-md">
+          <div className="hidden sm:flex items-center gap-1.5 bg-neutral-900/60 border border-white/5 p-1 rounded-full backdrop-blur-md">
             {(Object.keys(THEMES) as ThemeKey[]).map((theme) => {
               const colors = {
                 purple: "bg-purple-500",

@@ -241,11 +241,11 @@ export default function ProjectConfirmModal({
         </div>
 
         {/* Footer controls */}
-        <div className="px-6 py-4 bg-neutral-950/40 border-t border-neutral-850 flex items-center justify-end gap-3 shrink-0">
+        <div className="px-4 sm:px-6 py-4 bg-neutral-950/40 border-t border-neutral-850 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-850 text-neutral-400 hover:text-white rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border border-neutral-800"
+            className="px-5 py-3 sm:py-2.5 bg-neutral-900 hover:bg-neutral-850 text-neutral-400 hover:text-white rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border border-neutral-800 text-center"
           >
             Cancel
           </button>
@@ -265,7 +265,7 @@ export default function ProjectConfirmModal({
                 true // isTemporary
               );
             }}
-            className="px-5 py-2.5 bg-neutral-800/80 hover:bg-neutral-750 text-neutral-300 hover:text-white border border-neutral-700/60 hover:border-neutral-600 rounded-xl text-xs font-bold tracking-wide transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
+            className="px-5 py-3 sm:py-2.5 bg-neutral-800/80 hover:bg-neutral-750 text-neutral-300 hover:text-white border border-neutral-700/60 hover:border-neutral-600 rounded-xl text-xs font-bold tracking-wide transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <Sparkles className="h-3.5 w-3.5 text-purple-400" />
             <span>Try Temporarily (No Save)</span>
@@ -274,7 +274,7 @@ export default function ProjectConfirmModal({
             type="button"
             onClick={() => handleConfirm(false)}
             disabled={!seriesTitle.trim() || !chapterNumber.trim()}
-            className="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 text-white font-bold rounded-xl text-xs tracking-wide transition-all shadow-[0_0_20px_-5px_rgba(147,51,234,0.5)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 flex items-center gap-1.5 cursor-pointer"
+            className="px-6 py-3 sm:py-2.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 text-white font-bold rounded-xl text-xs tracking-wide transition-all shadow-[0_0_20px_-5px_rgba(147,51,234,0.5)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <CheckCircle className="h-4 w-4" />
             <span>Confirm & Create Series</span>

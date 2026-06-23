@@ -59,7 +59,7 @@ export function TerminalLogsHeader({
       </div>
 
       {/* Global Toolbar */}
-      <div className="flex flex-nowrap items-center gap-2 justify-end overflow-x-auto">
+      <div className="flex flex-nowrap items-center gap-2 justify-end overflow-x-auto custom-scrollbar pb-1">
         <button
           onClick={() => setAutoScroll(!autoScroll)}
           className={`h-9 min-w-[72px] rounded-2xl border px-3 text-[10px] font-mono font-semibold transition duration-200 flex items-center justify-center gap-2 ${

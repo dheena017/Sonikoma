@@ -61,13 +61,13 @@ export function ScraperSelectionToolbar({
   };
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex flex-wrap items-center gap-2">
       {/* Dropdown Container */}
-      <div className="relative inline-block text-left" ref={dropdownRef}>
+      <div className="relative inline-block text-left shrink-0" ref={dropdownRef}>
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 px-3.5 py-1.5 bg-neutral-900/60 border border-neutral-800/80 hover:border-neutral-700 rounded-xl text-[10px] font-bold text-neutral-300 hover:text-white transition-all duration-150 shadow-md font-mono select-none cursor-pointer"
+          className="flex items-center gap-2 px-3.5 py-1.5 bg-neutral-900/60 border border-neutral-800/80 hover:border-neutral-700 rounded-xl text-[10px] font-bold text-neutral-300 hover:text-white transition-all duration-150 shadow-md font-mono select-none cursor-pointer shrink-0 whitespace-nowrap"
         >
           <ListFilter className="h-3 w-3 text-indigo-400" />
           <span>Selection Filter</span>
@@ -281,9 +281,9 @@ export function ScraperSelectionToolbar({
       {selectedScraped.length > 0 && (
         <button
           onClick={handleClearAll}
-          className="text-[10px] font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-xl border border-red-950/40 bg-red-950/15 hover:bg-red-900/25 text-red-400 hover:text-red-300 hover:shadow-[0_0_10px_rgba(239,68,68,0.15)] transition-all duration-150 flex items-center gap-1.5 cursor-pointer ml-auto font-mono select-none"
+          className="text-[10px] font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-xl border border-red-950/40 bg-red-950/15 hover:bg-red-900/25 text-red-400 hover:text-red-300 hover:shadow-[0_0_10px_rgba(239,68,68,0.15)] transition-all duration-150 flex items-center gap-1.5 cursor-pointer ml-auto font-mono select-none shrink-0 whitespace-nowrap"
         >
-          <Trash2 className="h-3 w-3" />
+          <Trash2 className="h-3 w-3 shrink-0" />
           <span>Clear Selection ({selectedScraped.length})</span>
         </button>
       )}

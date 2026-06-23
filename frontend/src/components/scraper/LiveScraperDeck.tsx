@@ -310,14 +310,14 @@ export default function LiveScraperDeck({
     <>
       <div
         id="scraped_strips_deck"
-        className="bg-neutral-900/40 rounded-2xl border border-neutral-800/80 p-4 sm:p-5 lg:p-6 backdrop-blur-md space-y-4 shadow-sm"
+        className="bg-neutral-900/40 rounded-2xl border border-neutral-800/80 p-4 sm:p-5 lg:p-6 backdrop-blur-md space-y-4 shadow-sm min-w-0 w-full overflow-hidden"
       >
-        <div className="flex flex-row items-center justify-between gap-3 border-b border-neutral-800/60 pb-3">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-neutral-800/60 pb-3">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-purple-500/10 border border-purple-500/15 text-purple-400">
+            <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-purple-500/10 border border-purple-500/15 text-purple-400 shrink-0">
               <ImageIcon className="h-5 w-5" />
             </div>
-            <div className="ml-2 flex items-center gap-2 min-w-0">
+            <div className="flex flex-wrap items-center gap-2 min-w-0">
               <h3 className="font-bold text-sm text-white truncate">
                 Live Asset Extraction
               </h3>
@@ -329,7 +329,7 @@ export default function LiveScraperDeck({
             </div>
           </div>
 
-          <div className="flex flex-nowrap items-center gap-2 overflow-x-auto self-end lg:self-auto ml-auto lg:ml-0">
+          <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2 self-start sm:self-end lg:self-auto w-full lg:w-auto mt-2 lg:mt-0">
             {scrapedImages.length > 0 && (
               <ScraperControls
                 scrapedImages={scrapedImages}
@@ -356,7 +356,7 @@ export default function LiveScraperDeck({
               <button
                 type="button"
                 onClick={handleSaveAssets}
-                className="text-[10px] font-bold border border-purple-500/50 bg-purple-600 hover:bg-purple-500 text-white rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors shadow-md active:scale-95 cursor-pointer"
+                className="text-[10px] font-bold border border-purple-500/50 bg-purple-600 hover:bg-purple-500 text-white rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors shadow-md active:scale-95 cursor-pointer shrink-0 whitespace-nowrap"
               >
                 Save Assets
               </button>
@@ -365,9 +365,9 @@ export default function LiveScraperDeck({
               type="button"
               onClick={handleDownloadZip}
               disabled={scrapedImages.length === 0 || isZipping}
-              className="text-[10px] font-mono border border-neutral-800/70 bg-neutral-950/60 hover:bg-neutral-900 text-neutral-300 hover:text-white rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="text-[10px] font-mono border border-neutral-800/70 bg-neutral-950/60 hover:bg-neutral-900 text-neutral-300 hover:text-white rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0 whitespace-nowrap"
             >
-              <Download className="h-3.5 w-3.5" />
+              <Download className="h-3.5 w-3.5 shrink-0" />
               <span>{isZipping ? "Downloading..." : "Download ZIP"}</span>
             </button>
           </div>
