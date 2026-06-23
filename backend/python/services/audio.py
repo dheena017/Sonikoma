@@ -8,6 +8,13 @@ from pydub.effects import speedup
 
 logger = logging.getLogger("sonikoma.services.audio")
 
+VOICE_MAP = {
+    "Standard Comic Narrator (Male)": "en-US-GuyNeural",
+    "Sultry Narrative Tone (Female)": "en-US-JennyNeural",
+    "Shonen Protagonist (Energetic Male)": "en-US-JasonNeural",
+    "Dark Anti-Hero voice (Raspy Deep)": "en-US-TonyNeural"
+}
+
 async def generate_panel_audio(
     dialogue_list: List[str],
     target_duration: float,
@@ -23,7 +30,7 @@ async def generate_panel_audio(
         dialogue_list (List[str]): Extracted dialog items to encode.
         target_duration (float): Exact target duration of the audio in seconds.
         output_path (str): File path to save the completed MP3/WAV segment.
-        voice (Optional[str]): Standard edge-tts voice code.
+        voice (Optional[str]): Standard edge-tts voice code or friendly UI name.
 
     Returns:
         str: Absolute destination where the master timeline panel audio has been encoded.
@@ -41,6 +48,8 @@ async def generate_panel_audio(
     temp_dir = tempfile.gettempdir()
     temp_files = []
 
+    actual_voice = VOICE_MAP.get(voice, voice) if voice else "en-US-GuyNeural"
+
     try:
         # Phase 1: Generate individual audio strips asynchronously
         for idx, text in enumerate(dialogue_list):
@@ -51,8 +60,8 @@ async def generate_panel_audio(
             temp_file_path = os.path.join(temp_dir, f"dialog_segment_{uuid_hex()}_{idx}.mp3")
             temp_files.append(temp_file_path)
 
-            logger.info(f"[Narration/TTS] Generating segment {idx+1}/{len(dialogue_list)}: '{text[:40]}...'")
-            communicate = edge_tts.Communicate(text, voice or "en-US-GuyNeural")
+            logger.info(f"[Narration/TTS] Generating segment {idx+1}/{len(dialogue_list)}: '{text[:40]}...' using voice: {actual_voice}")
+            communicate = edge_tts.Communicate(text, actual_voice)
             await communicate.save(temp_file_path)
 
         import asyncio
