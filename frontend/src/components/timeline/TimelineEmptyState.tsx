@@ -18,7 +18,7 @@ export default function TimelineEmptyState({
         </div>
         <div className="space-y-1">
           <p className="text-sm font-bold text-neutral-200 font-sans">
-            No Scenes in Storyboard Yet
+            No Scenes in Timeline Yet
           </p>
           <p className="text-xs text-neutral-400 max-w-md mx-auto leading-relaxed">
             Images are loaded in the deck below! Select frame items and click{" "}
@@ -27,10 +27,10 @@ export default function TimelineEmptyState({
             </span>
             , or click{" "}
             <span className="text-purple-300 font-semibold font-mono font-sans">
-              + Insert to Storyboard
+              + Add to Timeline
             </span>{" "}
             on any individual panel card in the deck to build your video
-            storyboard.
+            timeline.
           </p>
         </div>
       </div>
@@ -47,11 +47,11 @@ export default function TimelineEmptyState({
       </div>
       <div className="space-y-1">
         <p className="text-sm font-bold text-neutral-300 font-sans">
-          Storyboard Deck Awaiting URL
+          Timeline Deck Awaiting Link
         </p>
         <p className="text-xs text-neutral-500 max-w-sm mx-auto leading-relaxed">
           Once a valid Webtoon viewer URL is pasted, the continuous canvas strip
-          will automatically scrape. You can then insert, partition, and map
+          will automatically import images. You can then insert, order, and edit
           them into editable scenes here.
         </p>
       </div>
