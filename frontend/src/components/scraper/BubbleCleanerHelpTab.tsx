@@ -59,11 +59,11 @@ export function BubbleCleanerHelpTab({
                 },
                 {
                   title: "🧱 Mask Dilation",
-                  body: "Extends boundaries slightly outwards. Prevents dark border ghosts from smudging backgrounds in the inpainter output.",
+                  body: "Extends boundaries slightly outwards. Prevents dark border ghosts from smudging backgrounds in the clearing output.",
                 },
                 {
-                  title: "🌫️ Gaussian blur vs inpaint",
-                  body: "Gaussian blur completely hides text inside colored blocks while preserving gradient colors. TELEA inpainting reconstructs drawing textures beneath clean white bubbles.",
+                  title: "🌫️ Gaussian blur vs clear",
+                  body: "Gaussian blur completely hides text inside colored blocks while preserving gradient colors. TELEA clearing reconstructs drawing textures beneath clean white bubbles.",
                 },
                 {
                   title: "🎨 Custom Color filters",
@@ -161,7 +161,7 @@ export function BubbleCleanerHelpTab({
               <div className="absolute bottom-2 left-2 right-2 flex justify-between text-[7px] font-mono text-neutral-600 bg-neutral-900/60 p-1.5 rounded-lg border border-neutral-900">
                 <span className="text-purple-400">Core</span>
                 <span className="text-pink-400">Dilation</span>
-                <span className="text-indigo-400">Inpaint Radius</span>
+                <span className="text-indigo-400">Clear Radius</span>
               </div>
             </div>
             <span className="text-[8px] text-neutral-600 font-mono text-center">

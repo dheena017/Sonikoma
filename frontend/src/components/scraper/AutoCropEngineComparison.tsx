@@ -240,7 +240,7 @@ export function AutoCropEngineComparison({
                   : "text-neutral-500"
               }`}
             >
-              Gemini AI
+              Smart Scanner
             </button>
           </div>
         </div>
@@ -348,7 +348,7 @@ export function AutoCropEngineComparison({
           <ArrowRight className="h-3 w-3 mt-0.5 text-indigo-400 shrink-0" />
           {activeEngine === "opencv"
             ? "OpenCV uses pixel-contrast gradients to find hard lines. Effective for standard manga pages."
-            : "Gemini AI understands scene context, allowing it to segment panels even in complex webtoons with overlaps."}
+            : "Smart Scanner understands scene context, allowing it to segment panels even in complex webtoons with overlaps."}
         </p>
       </div>
     </div>

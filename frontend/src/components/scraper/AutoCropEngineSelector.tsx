@@ -218,7 +218,7 @@ export function AutoCropEngineSelector({
     {
       id: "gemini-3.5-pro",
       name: "Gemini 3.5 Pro",
-      badge: "🧠 Deep Visual AI",
+      badge: "🧠 Deep Visual",
       desc: "Deep visual comprehension. Best for complex overlapping panels, dark background panels, and artwork-only separation.",
     },
   ];
@@ -291,7 +291,7 @@ export function AutoCropEngineSelector({
                   : "text-neutral-400"
               }`}
             >
-              GEMINI VISION AI
+              SMART SCANNER
             </span>
             <span
               className={`h-3.5 w-3.5 rounded-full border flex items-center justify-center transition-all ${
@@ -568,7 +568,7 @@ export function AutoCropEngineSelector({
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-indigo-400 animate-pulse" />
               <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider">
-                Gemini Vision AI Engine
+                Smart Scanner Engine
               </h4>
             </div>
 
@@ -599,7 +599,7 @@ export function AutoCropEngineSelector({
           {/* Dynamic Model Grid Cards */}
           <div className="space-y-2">
             <label className="text-[9px] font-bold text-neutral-500 uppercase font-mono block tracking-wider">
-              Gemini Vision AI Model Selection
+              Scanner Model Selection
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {modelCards.map((model) => {
@@ -725,7 +725,7 @@ export function AutoCropEngineSelector({
                 Custom Prompt Guidance instructions
               </label>
               <span className="text-[8px] font-mono text-indigo-400/80 bg-indigo-950/50 px-2 py-0.5 rounded border border-indigo-900/30 uppercase select-none">
-                AI Directives Prompt
+                Directives Prompt
               </span>
             </div>
             <textarea
@@ -769,7 +769,7 @@ export function AutoCropEngineSelector({
           <div className="p-3.5 bg-indigo-950/10 border border-indigo-900/30 text-[9.5px] font-mono text-indigo-400 rounded-2xl leading-relaxed flex items-start gap-2 select-none">
             <Compass className="h-4 w-4 shrink-0 text-indigo-400/80 mt-0.5 animate-pulse" />
             <p>
-              <strong>OpenCV Auto-Fallback Enabled:</strong> If Gemini Vision AI
+              <strong>OpenCV Auto-Fallback Enabled:</strong> If the Smart Scanner
               hits resource quotas, network timeouts, or lacks environment keys,
               the slicer engine falls back to local OpenCV contours seamlessly
               so that cropping is completed successfully.

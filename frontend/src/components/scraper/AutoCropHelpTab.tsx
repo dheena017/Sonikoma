@@ -7,8 +7,8 @@ import { HelpCircle, Info } from "lucide-react";
 export function AutoCropHelpTab() {
   const cards = [
     {
-      title: "🔮 Gemini AI vs Local OpenCV",
-      body: "Use Gemini AI for complex layouts where character drawings burst out of panels or cross gutters. Use Local CV for standard manga grids or clean webtoon vertical spacing (runs instantly on your system).",
+      title: "🔮 Smart Scanner vs Local OpenCV",
+      body: "Use the Smart Scanner for complex layouts where character drawings burst out of panels or cross gutters. Use Local CV for standard manga grids or clean webtoon vertical spacing (runs instantly on your system).",
     },
     {
       title: "⚡ Edge Sensitivity",

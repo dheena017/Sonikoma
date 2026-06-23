@@ -28,7 +28,7 @@ export const DETECTION_OPTIONS: DetectionOption[] = [
     badge: "Default",
     badgeColor: "bg-purple-500/20 text-purple-300 border-purple-500/30",
     dot: "bg-purple-500",
-    hint: "Fires Gemini AI first, then OpenCV fallback. Catches every bubble type: white speech bubbles, colored narration boxes, and floating borderless text.",
+    hint: "Fires Smart Scanner first, then OpenCV fallback. Catches every bubble type: white speech bubbles, colored narration boxes, and floating borderless text.",
   },
   {
     value: "white_only",
@@ -51,17 +51,17 @@ export const DETECTION_OPTIONS: DetectionOption[] = [
 export const ERASE_OPTIONS: EraseOption[] = [
   {
     value: "auto",
-    label: "Auto (AI-Dispatch)",
+    label: "Auto (Smart-Dispatch)",
     icon: "🤖",
     badge: "Recommended",
-    hint: "AI classifies each detected region (white bubble / narration box / SFX) then automatically selects the best eraser for it.",
+    hint: "System classifies each detected region (white bubble / narration box / SFX) then automatically selects the best eraser for it.",
   },
   {
     value: "inpaint",
     label: "Inpaint TELEA",
     icon: "🎨",
     badge: "Best Quality",
-    hint: "Reconstructs background pixels using the TELEA inpainting algorithm. Highest visual quality for white speech bubbles.",
+    hint: "Reconstructs background pixels using the TELEA clearing algorithm. Highest visual quality for white speech bubbles.",
   },
   {
     value: "blur",
