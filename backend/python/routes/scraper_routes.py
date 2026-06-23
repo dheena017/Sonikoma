@@ -16,7 +16,7 @@ import os
 import jwt
 import database.db as db
 
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "anivox_super_secret_key_change_me")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "sonikoma_super_secret_key_change_me")
 ALGORITHM = "HS256"
 
 def get_optional_user_id(request: Request) -> Optional[str]:
@@ -49,7 +49,7 @@ from services.storyboard_ai import generate_dynamic_panels
 from services.video import compile_video_from_panels
 import os
 
-logger = logging.getLogger("anivox.routes.scraper_routes")
+logger = logging.getLogger("sonikoma.routes.scraper_routes")
 router = APIRouter()
 
 # ─── Schemas ──────────────────────────────────────────────────────────────────

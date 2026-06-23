@@ -21,7 +21,7 @@ from urllib.parse import urlparse, parse_qs
 # Import stitched_cache safely (we resolve circular import by keeping it clean)
 from utils.cache import stitched_cache
 
-logger = logging.getLogger("anivox.utils.image_utils")
+logger = logging.getLogger("sonikoma.utils.image_utils")
 
 class ImageMeta:
     def __init__(self, width: int, height: int, format_str: str, channels: int, has_alpha: bool, size_bytes: int):
@@ -597,7 +597,7 @@ def apply_filters(
     return out.getvalue()
 
 
-def add_watermark(image_bytes: bytes, text: str = 'Anivox') -> bytes:
+def add_watermark(image_bytes: bytes, text: str = 'Sonikoma') -> bytes:
     """Adds a stylish semi-transparent watermark badge to the bottom-right of the image."""
     img = Image.open(io.BytesIO(image_bytes)).convert("RGBA")
     w, h = img.size

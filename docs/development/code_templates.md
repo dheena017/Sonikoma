@@ -265,7 +265,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 # Setup modular namespace logging
-logger = logging.getLogger("anivox.routes.my_feature")
+logger = logging.getLogger("sonikoma.routes.my_feature")
 router = APIRouter()
 
 # =============================================================================

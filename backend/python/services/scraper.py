@@ -51,7 +51,7 @@ except ImportError:
 
 from utils.url_utils import extract_webtoon_url
 
-logger = logging.getLogger("anivox.services.scraper")
+logger = logging.getLogger("sonikoma.services.scraper")
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 
@@ -905,7 +905,7 @@ async def scrape_images_from_url(
 if __name__ == "__main__":
     import argparse
     
-    parser = argparse.ArgumentParser(description="Anivox Webtoon Scraper CLI tool")
+    parser = argparse.ArgumentParser(description="Sonikoma Webtoon Scraper CLI tool")
     parser.add_argument("--url", required=True, help="URL or local ZIP/CBZ path to scrape panels from")
     parser.add_argument("--source", default=None, help="Referer source identifier override (e.g. webcomicsapp)")
     parser.add_argument("--limit", type=int, default=None, help="Limit maximum extracted panels count")

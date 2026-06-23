@@ -25,7 +25,7 @@ class UIStreamLogHandler(logging.Handler):
         global log_seq
         try:
             timestamp = time.strftime("%H:%M:%S", time.localtime(record.created))
-            if record.name == "anivox.vite":
+            if record.name == "sonikoma.vite":
                 clean_msg = record.getMessage()
                 formatted_msg = f"{timestamp} [FRONTEND] [INFO] [Vite] {clean_msg}"
             else:

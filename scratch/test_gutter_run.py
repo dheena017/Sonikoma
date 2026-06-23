@@ -4,7 +4,7 @@ import os
 import sys
 
 # Find the latest bin file in stitchedCache
-cache_dir = os.path.expandvars(r'%TEMP%\anivox_disk_cache\stitchedCache')
+cache_dir = os.path.expandvars(r'%TEMP%\sonikoma_disk_cache\stitchedCache')
 files = [f for f in os.listdir(cache_dir) if f.startswith('stitched_') and f.endswith('_full.bin')]
 if not files:
     print("No stitched full images found in temp cache directory!")

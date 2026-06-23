@@ -26,7 +26,7 @@ from pydantic import BaseModel, Field
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from services.cleaner import remove_speech_bubbles
 
-logger = logging.getLogger("anivox.routes.cleaner")
+logger = logging.getLogger("sonikoma.routes.cleaner")
 router = APIRouter()
 
 

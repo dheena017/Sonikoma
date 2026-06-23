@@ -33,4 +33,4 @@ All configuration variables are defined in the workspace `.env` file (copied fro
    Never log raw API keys, not even partial portions. Standardize logging to redact or conceal auth credentials.
 
 3. **Template Sync:**
-   If any new environment variable is introduced, update the [.env.example](file:///c:/Users/dheen/Downloads/webtoon-to-video-backend/.env.example) template file immediately.
+   If any new environment variable is introduced, update the [.env.example](file:///c:/Users/dheen/Downloads/sonikoma/.env.example) template file immediately.

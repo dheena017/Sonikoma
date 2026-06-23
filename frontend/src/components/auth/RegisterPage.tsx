@@ -176,7 +176,7 @@ export default function RegisterPage({
                 <UserPlus className="w-4 h-4 text-purple-400" />
               </div>
               <span className="text-lg font-bold text-white tracking-tight">
-                Anivox
+                Sonikoma
               </span>
             </div>
           </div>
@@ -511,7 +511,7 @@ export default function RegisterPage({
                     </div>
                   </div>
                   <span className="text-xs text-neutral-400 group-hover:text-neutral-300 transition-colors font-medium leading-relaxed">
-                    I accept Anivox's{" "}
+                    I accept Sonikoma's{" "}
                     <button
                       type="button"
                       className="text-purple-400 hover:text-purple-300 underline font-semibold"
@@ -591,7 +591,7 @@ export default function RegisterPage({
 
         {/* Footer for mobile only */}
         <div className="flex lg:hidden text-center justify-center mt-8 text-[10px] text-neutral-600 font-semibold">
-          © {new Date().getFullYear()} Anivox AI Corp. All rights reserved.
+          © {new Date().getFullYear()} Sonikoma AI Corp. All rights reserved.
         </div>
       </div>
     </div>

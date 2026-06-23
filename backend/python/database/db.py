@@ -15,7 +15,7 @@ DB_PATH = os.path.join(DB_DIR, 'webtoon_local.db')
 SCHEMA_PATH = os.path.join(DB_DIR, 'schema.sql')
 
 import logging
-logger = logging.getLogger("anivox.database")
+logger = logging.getLogger("sonikoma.database")
 
 _db_initialized = False
 

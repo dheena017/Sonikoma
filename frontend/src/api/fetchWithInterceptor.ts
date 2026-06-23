@@ -27,7 +27,7 @@ export function createFetchWithInterceptor({
     return new Promise<Response>((resolve, reject) => {
       const executeFetch = async () => {
         try {
-          const token = localStorage.getItem("anivox_token");
+          const token = localStorage.getItem("sonikoma_token");
           const headers = new Headers(init?.headers);
           if (token && !headers.has("Authorization")) {
             headers.set("Authorization", `Bearer ${token}`);

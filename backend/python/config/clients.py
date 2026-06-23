@@ -13,7 +13,7 @@ import re
 from typing import Callable, Any
 from dotenv import load_dotenv
 
-logger = logging.getLogger("anivox.config.clients")
+logger = logging.getLogger("sonikoma.config.clients")
 
 # Ensure environment variables are loaded robustly if imported in isolation or test files
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))

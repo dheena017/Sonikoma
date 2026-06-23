@@ -41,7 +41,7 @@ class CacheStore(Generic[T]):
         if persistent:
             self.disk_dir = os.path.join(PERSISTENT_CACHE_DIR, name)
         else:
-            self.disk_dir = os.path.join(tempfile.gettempdir(), "anivox_disk_cache", name)
+            self.disk_dir = os.path.join(tempfile.gettempdir(), "sonikoma_disk_cache", name)
 
     def _write_to_disk(self, key: str, value: Any) -> None:
         try:
@@ -262,7 +262,7 @@ def get_total_storage_size_bytes() -> int:
                     except OSError:
                         pass
     # Count temp cache dir (zip/proxy)
-    temp_cache_dir = os.path.join(tempfile.gettempdir(), "anivox_disk_cache")
+    temp_cache_dir = os.path.join(tempfile.gettempdir(), "sonikoma_disk_cache")
     if os.path.exists(temp_cache_dir):
         for dirpath, _, filenames in os.walk(temp_cache_dir):
             for f in filenames:
@@ -282,7 +282,7 @@ def get_total_storage_size_bytes() -> int:
 
 
 import logging
-logger = logging.getLogger("anivox.utils.cache")
+logger = logging.getLogger("sonikoma.utils.cache")
 
 
 def purge_all_expired() -> None:

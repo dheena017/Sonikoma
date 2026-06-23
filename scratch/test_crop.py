@@ -7,7 +7,7 @@ import cv2
 sys.path.append(os.path.join(os.getcwd(), 'backend', 'python'))
 from services.detect_panels import run_cv_detection
 
-image_path = os.path.expandvars(r'%TEMP%\anivox_disk_cache\stitchedCache\stitched_1781778287335_full.bin')
+image_path = os.path.expandvars(r'%TEMP%\sonikoma_disk_cache\stitchedCache\stitched_1781778287335_full.bin')
 
 # Read image
 img = cv2.imread(image_path)

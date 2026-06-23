@@ -1,5 +1,5 @@
 {
-  "name": "webtoon-to-video-backend",
+  "name": "sonikoma",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -21,8 +21,8 @@
     "start:server": "npm run start:prod",
     "install:python": ".venv\\Scripts\\python.exe -m pip install -r requirements.txt",
     "clean": "rimraf dist",
-    "docker:build": "docker build -t webtoon-to-video-backend .",
-    "docker:run": "docker run -p 3000:3000 webtoon-to-video-backend",
+    "docker:build": "docker build -t sonikoma .",
+    "docker:run": "docker run -p 3000:3000 sonikoma",
     "lint": "tsc --noEmit --project frontend/tsconfig.json"
   },
   "dependencies": {

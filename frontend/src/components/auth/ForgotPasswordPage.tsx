@@ -248,7 +248,7 @@ export default function ForgotPasswordPage({
                 <KeyRound className={`w-4 h-4 ${currentTheme.accentText}`} />
               </div>
               <span className="text-lg font-bold text-white tracking-tight">
-                Anivox
+                Sonikoma
               </span>
             </div>
           </div>
@@ -307,7 +307,7 @@ export default function ForgotPasswordPage({
             </h2>
             <p className="text-neutral-400 text-sm font-medium leading-relaxed">
               {isCompleted
-                ? "Your credentials have been successfully updated! You can now log into your Anivox account."
+                ? "Your credentials have been successfully updated! You can now log into your Sonikoma account."
                 : isResetReady
                 ? "Input your new secure password profile below. Ensure matching values."
                 : isSent
@@ -838,7 +838,7 @@ export default function ForgotPasswordPage({
         <div className="relative z-10 w-full max-w-md mx-auto mt-4 p-4 bg-neutral-900/20 border border-white/5 rounded-2xl flex gap-3 text-[10px] text-neutral-500 leading-relaxed font-semibold">
           <ShieldAlert className="w-6 h-6 text-amber-500/60 shrink-0" />
           <span>
-            <strong>Security Alert:</strong> Anivox will never request your
+            <strong>Security Alert:</strong> Sonikoma will never request your
             dashboard password or credentials via email, SMS, or support chat
             channels. Keep your recovery methods private.
           </span>
@@ -846,7 +846,7 @@ export default function ForgotPasswordPage({
 
         {/* Footer for mobile only */}
         <div className="flex lg:hidden text-center justify-center mt-8 text-[10px] text-neutral-600 font-semibold">
-          © {new Date().getFullYear()} Anivox AI Corp. All rights reserved.
+          © {new Date().getFullYear()} Sonikoma AI Corp. All rights reserved.
         </div>
       </div>
     </div>

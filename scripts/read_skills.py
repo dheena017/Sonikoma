@@ -1,10 +1,10 @@
 import os
 import glob
 
-skills_dir = r"c:\Users\dheen\Downloads\webtoon-to-video-backend\backend\python\skills"
+skills_dir = r"c:\Users\dheen\Downloads\sonikoma\backend\python\skills"
 md_files = glob.glob(os.path.join(skills_dir, "*.md"))
 
-output_file = r"c:\Users\dheen\Downloads\webtoon-to-video-backend\scripts\skills_dump.txt"
+output_file = r"c:\Users\dheen\Downloads\sonikoma\scripts\skills_dump.txt"
 
 with open(output_file, "w", encoding="utf-8") as out_f:
     out_f.write(f"Found {len(md_files)} skill files:\n")

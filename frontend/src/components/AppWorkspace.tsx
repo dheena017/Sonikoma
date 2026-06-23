@@ -310,8 +310,8 @@ export function AppWorkspace({
       return;
     }
     const token =
-      localStorage.getItem("anivox_token") ||
-      sessionStorage.getItem("anivox_token");
+      localStorage.getItem("sonikoma_token") ||
+      sessionStorage.getItem("sonikoma_token");
     const headers: HeadersInit = {
       "Content-Type": "application/json",
     };

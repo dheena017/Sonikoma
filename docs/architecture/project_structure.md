@@ -1,13 +1,13 @@
 # 📁 Project Structure & Folder Guidelines
 
-This document details the folder hierarchy of the **Anivox — Webtoon-to-Video** codebase. It outlines the responsibilities of each directory and defines strict boundaries of where specific types of files must be placed.
+This document details the folder hierarchy of the **Sonikoma — Webtoon-to-Video** codebase. It outlines the responsibilities of each directory and defines strict boundaries of where specific types of files must be placed.
 
 ---
 
 ## 🏗️ Visual Directory Tree
 
 ```
-webtoon-to-video-backend/
+sonikoma/
 │
 ├── frontend/                         ← React 19 + TypeScript + Vite + Tailwind UI
 │   ├── public/                       ← Static assets (favicons, etc.)

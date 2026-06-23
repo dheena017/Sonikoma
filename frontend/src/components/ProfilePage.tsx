@@ -66,8 +66,8 @@ export default function ProfilePage({
     if (!tempAvatarUrl) return;
 
     const token =
-      localStorage.getItem("anivox_token") ||
-      sessionStorage.getItem("anivox_token");
+      localStorage.getItem("sonikoma_token") ||
+      sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
     try {
@@ -141,8 +141,8 @@ export default function ProfilePage({
 
   // Local state for profile values
   const [profileUser, setProfileUser] = React.useState({
-    fullName: user?.full_name || "Anivox Creator",
-    email: user?.email || "creator@anivox.com",
+    fullName: user?.full_name || "Sonikoma Creator",
+    email: user?.email || "creator@sonikoma.com",
     avatarUrl: user?.avatar_url || "",
     role: user?.creator_role || "creator",
     bio:
@@ -261,8 +261,8 @@ export default function ProfilePage({
 
   const fetchProjects = React.useCallback(() => {
     const token =
-      localStorage.getItem("anivox_token") ||
-      sessionStorage.getItem("anivox_token");
+      localStorage.getItem("sonikoma_token") ||
+      sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
     fetch("/api/projects", {
@@ -280,8 +280,8 @@ export default function ProfilePage({
   // Load profile assets dynamically on mount
   React.useEffect(() => {
     const token =
-      localStorage.getItem("anivox_token") ||
-      sessionStorage.getItem("anivox_token");
+      localStorage.getItem("sonikoma_token") ||
+      sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
     fetch("/api/auth/me", {
@@ -324,8 +324,8 @@ export default function ProfilePage({
           setPortfolios(loadedPortfolios);
 
           const loadedUser = {
-            fullName: data.full_name || "Anivox Creator",
-            email: data.email || "creator@anivox.com",
+            fullName: data.full_name || "Sonikoma Creator",
+            email: data.email || "creator@sonikoma.com",
             avatarUrl: data.avatar_url || "",
             role: data.creator_role || "creator",
             bio:
@@ -447,8 +447,8 @@ export default function ProfilePage({
   const handleProfileSave = (e: React.FormEvent) => {
     e.preventDefault();
     const token =
-      localStorage.getItem("anivox_token") ||
-      sessionStorage.getItem("anivox_token");
+      localStorage.getItem("sonikoma_token") ||
+      sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
     fetch("/api/auth/profile", {
@@ -505,8 +505,8 @@ export default function ProfilePage({
     }
 
     const token =
-      localStorage.getItem("anivox_token") ||
-      sessionStorage.getItem("anivox_token");
+      localStorage.getItem("sonikoma_token") ||
+      sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
     fetch("/api/auth/password", {
@@ -539,8 +539,8 @@ export default function ProfilePage({
 
   const handleTerminateSession = async (id: string) => {
     const token =
-      localStorage.getItem("anivox_token") ||
-      sessionStorage.getItem("anivox_token");
+      localStorage.getItem("sonikoma_token") ||
+      sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
     const confirm = (window as any).confirmAsync || window.confirm;
@@ -567,8 +567,8 @@ export default function ProfilePage({
   const handleClaimCredits = () => {
     if (hasClaimedToday) return;
     const token =
-      localStorage.getItem("anivox_token") ||
-      sessionStorage.getItem("anivox_token");
+      localStorage.getItem("sonikoma_token") ||
+      sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
     fetch("/api/auth/claim-credits", {
@@ -601,8 +601,8 @@ export default function ProfilePage({
 
   const handleUpgradePlan = async () => {
     const token =
-      localStorage.getItem("anivox_token") ||
-      sessionStorage.getItem("anivox_token");
+      localStorage.getItem("sonikoma_token") ||
+      sessionStorage.getItem("sonikoma_token");
     if (!token) return;
     try {
       const r = await fetch("/api/auth/upgrade-plan", {
@@ -646,8 +646,8 @@ export default function ProfilePage({
     cardCvv: string;
   }) => {
     const token =
-      localStorage.getItem("anivox_token") ||
-      sessionStorage.getItem("anivox_token");
+      localStorage.getItem("sonikoma_token") ||
+      sessionStorage.getItem("sonikoma_token");
     if (!token) return;
     try {
       const r = await fetch("/api/auth/save-card", {
@@ -676,8 +676,8 @@ export default function ProfilePage({
     priceUSD: number
   ) => {
     const token =
-      localStorage.getItem("anivox_token") ||
-      sessionStorage.getItem("anivox_token");
+      localStorage.getItem("sonikoma_token") ||
+      sessionStorage.getItem("sonikoma_token");
     if (!token) return;
     try {
       const r = await fetch("/api/auth/purchase-credits", {
@@ -723,8 +723,8 @@ export default function ProfilePage({
     if (!newTokenName.trim()) return;
 
     const token =
-      localStorage.getItem("anivox_token") ||
-      sessionStorage.getItem("anivox_token");
+      localStorage.getItem("sonikoma_token") ||
+      sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
     fetch("/api/auth/api-keys", {
@@ -769,8 +769,8 @@ export default function ProfilePage({
 
   const handleDeleteToken = async (id: string) => {
     const token =
-      localStorage.getItem("anivox_token") ||
-      sessionStorage.getItem("anivox_token");
+      localStorage.getItem("sonikoma_token") ||
+      sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
     const confirm = (window as any).confirmAsync || window.confirm;
@@ -796,8 +796,8 @@ export default function ProfilePage({
 
   const handleToggleMfa = async (enabled: boolean): Promise<boolean> => {
     const token =
-      localStorage.getItem("anivox_token") ||
-      sessionStorage.getItem("anivox_token");
+      localStorage.getItem("sonikoma_token") ||
+      sessionStorage.getItem("sonikoma_token");
     if (!token) return false;
 
     try {
@@ -829,8 +829,8 @@ export default function ProfilePage({
     value: string
   ): Promise<boolean> => {
     const token =
-      localStorage.getItem("anivox_token") ||
-      sessionStorage.getItem("anivox_token");
+      localStorage.getItem("sonikoma_token") ||
+      sessionStorage.getItem("sonikoma_token");
     if (!token) return false;
 
     try {
@@ -866,8 +866,8 @@ export default function ProfilePage({
 
   const handleBatchDeleteProjects = (ids: string[]) => {
     const token =
-      localStorage.getItem("anivox_token") ||
-      sessionStorage.getItem("anivox_token");
+      localStorage.getItem("sonikoma_token") ||
+      sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
     fetch("/api/projects/batch-delete", {
@@ -899,8 +899,8 @@ export default function ProfilePage({
 
   const handleDeleteChapter = (id: string) => {
     const token =
-      localStorage.getItem("anivox_token") ||
-      sessionStorage.getItem("anivox_token");
+      localStorage.getItem("sonikoma_token") ||
+      sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
     fetch(`/api/projects/${id}`, {
@@ -926,8 +926,8 @@ export default function ProfilePage({
 
   const handleDeleteSeries = (seriesId: string) => {
     const token =
-      localStorage.getItem("anivox_token") ||
-      sessionStorage.getItem("anivox_token");
+      localStorage.getItem("sonikoma_token") ||
+      sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
     fetch(`/api/projects/series/${seriesId}`, {

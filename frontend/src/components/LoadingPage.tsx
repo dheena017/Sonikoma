@@ -158,7 +158,7 @@ export default function LoadingPage({
             WebkitTextFillColor: "transparent",
           }}
         >
-          Anivox
+          Sonikoma
         </div>
 
         {/* Tagline / status */}

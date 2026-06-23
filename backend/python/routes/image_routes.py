@@ -22,7 +22,7 @@ import utils.image_utils as img_utils
 from utils.cache import stitched_cache, edit_history, zip_cache
 from services.cleaner import remove_speech_bubbles
 
-logger = logging.getLogger("anivox.routes.image_routes")
+logger = logging.getLogger("sonikoma.routes.image_routes")
 router = APIRouter()
 
 # ─── Schemas ──────────────────────────────────────────────────────────────────

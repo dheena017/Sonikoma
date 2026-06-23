@@ -11,7 +11,7 @@ import logging
 from typing import Dict
 from .base import BaseAISkill
 
-logger = logging.getLogger("anivox.skills.registry")
+logger = logging.getLogger("sonikoma.skills.registry")
 
 class SkillRegistry:
     def __init__(self):

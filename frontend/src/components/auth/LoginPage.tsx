@@ -86,7 +86,7 @@ const TRANSLATIONS: Record<Language, any> = {
     passkeyBtn: "Sign in with Passkey",
     capsLock: "Warning: Caps Lock is ON",
     qrTitle: "Sign in with QR Code",
-    qrDesc: "Scan code with Anivox Mobile to log in instantly",
+    qrDesc: "Scan code with Sonikoma Mobile to log in instantly",
     qrToggle: "Sign In via Mobile QR",
     qrFormToggle: "Back to Email Login",
     qrSimulate: "Simulate mobile scan success",
@@ -233,7 +233,7 @@ export default function LoginPage({
   };
 
   const handleQuickFill = () => {
-    setEmail("creator@anivox.com");
+    setEmail("creator@sonikoma.com");
     setPassword("password123");
     setRememberMe(true);
     if (error) setError(null);
@@ -247,7 +247,7 @@ export default function LoginPage({
       setTimeout(() => {
         setIsPasskeyLoading(false);
         setPasskeyStatus(null);
-        setEmail("passkey_creator@anivox.com");
+        setEmail("passkey_creator@sonikoma.com");
         setPassword("passkey_secret_2026");
         setRememberMe(true);
         setError(null);
@@ -258,7 +258,7 @@ export default function LoginPage({
   const handleQrSimulateSuccess = () => {
     setIsLoading(true);
     setTimeout(() => {
-      setEmail("qr_direct_creator@anivox.com");
+      setEmail("qr_direct_creator@sonikoma.com");
       setPassword("qr_token_verified_99");
       setRememberMe(true);
       setIsLoading(false);
@@ -325,7 +325,7 @@ export default function LoginPage({
                 <LogIn className={`w-4 h-4 ${currentTheme.accentText}`} />
               </div>
               <span className="text-lg font-bold text-white tracking-tight">
-                Anivox
+                Sonikoma
               </span>
             </div>
           </div>
@@ -732,7 +732,7 @@ export default function LoginPage({
 
         {/* Footer for mobile only */}
         <div className="flex lg:hidden text-center justify-center mt-8 text-[10px] text-neutral-600 font-semibold">
-          © {new Date().getFullYear()} Anivox AI Corp. All rights reserved.
+          © {new Date().getFullYear()} Sonikoma AI Corp. All rights reserved.
         </div>
       </div>
 
@@ -841,7 +841,7 @@ export default function LoginPage({
             <div className="w-full md:w-3/5 flex flex-col justify-between py-2 text-left">
               <div className="space-y-4">
                 <span className="text-xs font-bold text-neutral-500 uppercase tracking-widest">
-                  Anivox Studio Tour
+                  Sonikoma Studio Tour
                 </span>
                 <h3 className="text-2xl font-bold text-white tracking-tight leading-tight">
                   {TOUR_STEPS[tourStep].title}

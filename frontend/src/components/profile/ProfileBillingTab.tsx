@@ -543,7 +543,7 @@ export default function ProfileBillingTab({
 
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-black uppercase tracking-widest text-purple-200">
-                Anivox Premium Pay
+                Sonikoma Premium Pay
               </span>
               <CreditCard className="w-5 h-5 text-white/80" />
             </div>
@@ -562,7 +562,7 @@ export default function ProfileBillingTab({
                   Card Holder
                 </span>
                 <span className="font-bold truncate max-w-[150px] block">
-                  {cardHolder || "ANIVOX CREATOR"}
+                  {cardHolder || "SONIKOMA CREATOR"}
                 </span>
               </div>
               <div className="space-y-0.5 text-right">

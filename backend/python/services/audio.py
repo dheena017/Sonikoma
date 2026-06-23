@@ -6,7 +6,7 @@ import edge_tts
 from pydub import AudioSegment
 from pydub.effects import speedup
 
-logger = logging.getLogger("anivox.services.audio")
+logger = logging.getLogger("sonikoma.services.audio")
 
 async def generate_panel_audio(
     dialogue_list: List[str],
@@ -146,7 +146,7 @@ if __name__ == "__main__":
     import json
     import asyncio
 
-    parser = argparse.ArgumentParser(description="Anivox TTS Audio Engine CLI")
+    parser = argparse.ArgumentParser(description="Sonikoma TTS Audio Engine CLI")
     parser.add_argument("--dialogue_list", required=True, help="JSON list of dialogue strings")
     parser.add_argument("--target_duration", type=float, required=True, help="Target duration in seconds")
     parser.add_argument("--output_path", required=True, help="Path to save output MP3")

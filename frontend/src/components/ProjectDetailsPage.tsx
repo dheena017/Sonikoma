@@ -237,8 +237,8 @@ export default function ProjectDetailsPage({
       setExportStatus("Generating ZIP panels package...");
       try {
         const token =
-          localStorage.getItem("anivox_token") ||
-          sessionStorage.getItem("anivox_token");
+          localStorage.getItem("sonikoma_token") ||
+          sessionStorage.getItem("sonikoma_token");
         const headers: HeadersInit = { "Content-Type": "application/json" };
         if (token) {
           headers["Authorization"] = `Bearer ${token}`;
@@ -399,8 +399,8 @@ export default function ProjectDetailsPage({
       setError(null);
       try {
         const token =
-          localStorage.getItem("anivox_token") ||
-          sessionStorage.getItem("anivox_token");
+          localStorage.getItem("sonikoma_token") ||
+          sessionStorage.getItem("sonikoma_token");
         const headers: HeadersInit = {};
         if (token) {
           headers["Authorization"] = `Bearer ${token}`;
@@ -447,8 +447,8 @@ export default function ProjectDetailsPage({
       setLoadingScraped(true);
       try {
         const token =
-          localStorage.getItem("anivox_token") ||
-          sessionStorage.getItem("anivox_token");
+          localStorage.getItem("sonikoma_token") ||
+          sessionStorage.getItem("sonikoma_token");
         const response = await fetch("/api/scrape-images", {
           method: "POST",
           headers: {
@@ -515,8 +515,8 @@ export default function ProjectDetailsPage({
     setDeleting(true);
     try {
       const token =
-        localStorage.getItem("anivox_token") ||
-        sessionStorage.getItem("anivox_token");
+        localStorage.getItem("sonikoma_token") ||
+        sessionStorage.getItem("sonikoma_token");
       const headers: HeadersInit = { "Content-Type": "application/json" };
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
@@ -572,8 +572,8 @@ export default function ProjectDetailsPage({
     addNotification?.("Saving project changes...", "info");
     try {
       const token =
-        localStorage.getItem("anivox_token") ||
-        sessionStorage.getItem("anivox_token");
+        localStorage.getItem("sonikoma_token") ||
+        sessionStorage.getItem("sonikoma_token");
       const headers: HeadersInit = {
         "Content-Type": "application/json",
       };

@@ -14,7 +14,7 @@ except ImportError:
 from services.audio import generate_panel_audio
 from utils.image_utils import resolve_image_to_buffer
 
-logger = logging.getLogger("anivox.services.video")
+logger = logging.getLogger("sonikoma.services.video")
 
 async def compile_video_from_panels(
     project_id: str,

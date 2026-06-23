@@ -31,7 +31,7 @@ from services.audio import generate_panel_audio
 from skills.registry import registry
 from skills.base import GeminiAnalysisModel, CropBox, CropList
 
-logger = logging.getLogger("anivox.routes.ai_routes")
+logger = logging.getLogger("sonikoma.routes.ai_routes")
 router = APIRouter()
 
 # ─── Constants ───────────────────────────────────────────────────────────────
