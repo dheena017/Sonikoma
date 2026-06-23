@@ -31,7 +31,7 @@ COPY --from=frontend-builder /app/frontend/dist ./dist
 
 # Set environment variables for production
 ENV NODE_ENV=production
-ENV HOST=::
+ENV HOST=[IP_ADDRESS]
 
 # Start the unified FastAPI application
 WORKDIR /app/backend/python
