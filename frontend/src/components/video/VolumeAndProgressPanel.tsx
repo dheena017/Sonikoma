@@ -187,8 +187,8 @@ export default function VolumeAndProgressPanel({
             }`}
           >
             <span className="flex items-center gap-1.5">
-              <Sliders className="h-3.5 w-3.5 text-purple-400" />Quick Scene
-              Customizer
+              <Sliders className="h-3.5 w-3.5 text-purple-400" />
+              Quick Scene Customizer
             </span>
             {showCustomizer ? (
               <ChevronUp className="h-3.5 w-3.5" />

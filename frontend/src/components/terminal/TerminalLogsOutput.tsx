@@ -76,11 +76,11 @@ function getLogColor(log: string): string {
     return "text-purple-400 font-light";
   }
 
-    log.includes("[Auto-Analysis]") ||
+  log.includes("[Auto-Analysis]") ||
     log.includes("[Engine]") ||
     log.includes("[Voice Engine]") ||
-    log.includes("[Gemini]")
-    return "text-purple-300 font-medium";
+    log.includes("[Gemini]");
+  return "text-purple-300 font-medium";
   if (log.includes("[Smart Crop]")) return "text-violet-400 font-medium";
   if (
     log.includes("[Text Processing]") ||

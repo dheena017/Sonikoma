@@ -111,7 +111,7 @@ export default function NotificationsPage({
                 )}
                 <span>{notificationsMuted ? "Muted" : "Mute Sound"}</span>
               </button>
-              
+
               <div className="flex items-center gap-2">
                 {notifications.length > 0 && (
                   <>

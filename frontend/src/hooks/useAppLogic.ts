@@ -185,7 +185,9 @@ export function useAppLogic() {
         );
         if (!res.ok) {
           if (res.status === 429) {
-            console.warn("[System Logs] Rate limited. Stopping logs polling to preserve API quota.");
+            console.warn(
+              "[System Logs] Rate limited. Stopping logs polling to preserve API quota."
+            );
             stopPolling();
             return;
           }

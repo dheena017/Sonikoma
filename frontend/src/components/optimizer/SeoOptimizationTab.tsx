@@ -58,7 +58,7 @@ export default function SeoOptimizationTab({
           genre: genre || "Action",
           storyboard_summary:
             storyboardSummary || "The story summary details go here.",
-          model: "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
         }),
       });
       const json = await res.json();

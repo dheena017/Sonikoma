@@ -199,9 +199,7 @@ const TimelineCard = ({
 
         {/* Motion overlay text */}
         {panel.motion_type && (
-          <div
-            className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 text-[9px] font-mono uppercase tracking-wider text-neutral-300"
-          >
+          <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 text-[9px] font-mono uppercase tracking-wider text-neutral-300">
             {panel.motion_type}
           </div>
         )}

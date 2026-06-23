@@ -45,7 +45,7 @@ export default function PanelPacingTool({ panel }: PanelPacingToolProps) {
             panel.visual_description || "Detailed drawing panel",
           speech_text: panel.speech_text || "",
           sfx: panel.sfx || "",
-          model: "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
         }),
       });
       const json = await res.json();
@@ -69,7 +69,7 @@ export default function PanelPacingTool({ panel }: PanelPacingToolProps) {
           visual_description:
             panel.visual_description || "Detailed drawing panel",
           speech_text: panel.speech_text || "",
-          model: "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
         }),
       });
       const json = await res.json();
@@ -93,7 +93,7 @@ export default function PanelPacingTool({ panel }: PanelPacingToolProps) {
           visual_description:
             panel.visual_description || "Action close-up illustration",
           sfx: panel.sfx || "[Impact]",
-          model: "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
         }),
       });
       const json = await res.json();

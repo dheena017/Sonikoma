@@ -72,7 +72,7 @@ export default function TitleABValidator({
         body: JSON.stringify({
           title,
           key_climax_event: event,
-          model: "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
         }),
       });
       const json = await res.json();

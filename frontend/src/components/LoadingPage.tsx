@@ -141,7 +141,12 @@ export default function LoadingPage({
               width={40}
               height={40}
             >
-              <path fillRule="evenodd" clipRule="evenodd" d="M16 6 L8 26 L12.5 26 L14 22 L18 22 L19.5 26 L24 26 Z M13.5 12 L13.5 19.5 L19 15.75 Z" fill="#ffffff" />
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M16 6 L8 26 L12.5 26 L14 22 L18 22 L19.5 26 L24 26 Z M13.5 12 L13.5 19.5 L19 15.75 Z"
+                fill="#ffffff"
+              />
             </svg>
           </div>
         </div>

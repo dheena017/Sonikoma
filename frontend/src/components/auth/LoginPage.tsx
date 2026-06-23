@@ -180,8 +180,6 @@ export default function LoginPage({
   const [isTourOpen, setIsTourOpen] = React.useState(false);
   const [tourStep, setTourStep] = React.useState(0);
 
-
-
   // QR Code expiration timer tick
   React.useEffect(() => {
     if (!isQrLogin || qrTimer <= 0) return;
@@ -312,7 +310,11 @@ export default function LoginPage({
               <div
                 className={`flex items-center justify-center w-8 h-8 rounded-lg ${currentTheme.accentBg} border ${currentTheme.accentBorder} overflow-hidden`}
               >
-                <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain drop-shadow-md" />
+                <img
+                  src="/logo.png"
+                  alt="Logo"
+                  className="w-6 h-6 object-contain drop-shadow-md"
+                />
               </div>
               <span className="text-lg font-bold text-white tracking-tight mr-0.5">
                 Sonikoma
@@ -894,8 +896,6 @@ export default function LoginPage({
           </div>
         </div>
       )}
-
-
 
       <style
         dangerouslySetInnerHTML={{

@@ -181,7 +181,7 @@ export default function ProjectEditorPage({
                 await saveProject(panels, {
                   savingMessage: "Saving progress...",
                   successMessage: "Progress saved successfully!",
-                  errorMessage: "Failed to save progress."
+                  errorMessage: "Failed to save progress.",
                 });
               }
             }}
@@ -256,8 +256,8 @@ export default function ProjectEditorPage({
                     2. Clean Speech Bubbles
                   </h4>
                   <p className="text-[10px] text-neutral-500 font-medium leading-normal">
-                    Speech bubble detection and clearing to remove
-                    text from comic panels.
+                    Speech bubble detection and clearing to remove text from
+                    comic panels.
                   </p>
                 </div>
                 <div className="flex items-center gap-2 mt-2">

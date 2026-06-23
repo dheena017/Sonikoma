@@ -4,9 +4,7 @@ import { AI_MODELS } from "../../models";
 import { NotificationType } from "../NotificationStack";
 import { extractWebtoonUrl } from "../../utils/url";
 
-const SOURCE_OPTIONS = [
-  { id: "custom", name: "Direct Image / Custom URL" },
-];
+const SOURCE_OPTIONS = [{ id: "custom", name: "Direct Image / Custom URL" }];
 
 const SOURCE_EXAMPLES: Record<string, string> = {
   custom: "example.com/comic/chapter-1",
@@ -210,8 +208,6 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
       {/* URL Inputs + Model Selection */}
       <div className="space-y-5">
         <div className="space-y-4">
-
-
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative group flex-grow">
               <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 opacity-20 blur group-focus-within:opacity-40 transition-opacity duration-300" />
@@ -227,10 +223,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                       "[UrlInputPanel] Enter key pressed. Triggering asset import."
                     );
                     if (isSourceMismatch) {
-                      addNotification(
-                        `Invalid URL host.`,
-                        "error"
-                      );
+                      addNotification(`Invalid URL host.`, "error");
                       return;
                     }
                     handleScrape?.();
@@ -293,9 +286,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                 borderColor: isScraping
                   ? "rgba(63,63,70,0.8)"
                   : "rgba(63,63,70,0.8)",
-                background: isScraping
-                  ? "rgba(0,0,0,0.4)"
-                  : "rgba(0,0,0,0.4)",
+                background: isScraping ? "rgba(0,0,0,0.4)" : "rgba(0,0,0,0.4)",
                 animation: "slideDown 0.4s cubic-bezier(0.16,1,0.3,1)",
               }}
             >
@@ -441,7 +432,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                         className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-neutral-200 outline-none transition-colors resize-none font-sans"
                       />
                     </div>
-                    
+
                     {handleSaveMeta && (
                       <div className="md:col-span-12 flex justify-end mt-1">
                         <button
@@ -458,7 +449,6 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
               )}
             </div>
           )}
-
         </div>
 
         {/* ADVANCED SETTINGS TOGGLE */}
@@ -472,7 +462,9 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
               className="transition-transform duration-300"
               style={{
                 display: "inline-block",
-                transform: advancedSettingsOpen ? "rotate(90deg)" : "rotate(0deg)",
+                transform: advancedSettingsOpen
+                  ? "rotate(90deg)"
+                  : "rotate(0deg)",
               }}
             >
               ▸
@@ -485,117 +477,117 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
         {advancedSettingsOpen && (
           <div className="space-y-4 pt-3 border-t border-neutral-800/50 animate-in fade-in slide-in-from-top-2">
             {/* Narration Style Selector */}
-          <div className="space-y-2">
-            <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
-              Narration Style
-            </label>
-            <div className="relative">
-              <select
-                id="narration_style_select"
-                value={narrationStyle}
-                onChange={(e) => {
-                  setNarrationStyle?.(e.target.value);
-                  const label =
-                    e.target.value === "long"
-                      ? "Detailed Recap Narrator"
-                      : "Short Subtitle Dialogue";
-                  addNotification(`Narration mode set to: ${label}`, "info");
-                }}
-                className="relative w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-neutral-200 outline-none appearance-none focus:border-purple-500 transition-colors cursor-pointer"
-              >
-                <option
-                  value="long"
-                  className="bg-neutral-950 text-neutral-100"
+            <div className="space-y-2">
+              <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
+                Narration Style
+              </label>
+              <div className="relative">
+                <select
+                  id="narration_style_select"
+                  value={narrationStyle}
+                  onChange={(e) => {
+                    setNarrationStyle?.(e.target.value);
+                    const label =
+                      e.target.value === "long"
+                        ? "Detailed Recap Narrator"
+                        : "Short Subtitle Dialogue";
+                    addNotification(`Narration mode set to: ${label}`, "info");
+                  }}
+                  className="relative w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-neutral-200 outline-none appearance-none focus:border-purple-500 transition-colors cursor-pointer"
                 >
-                  Detailed Recap Narrator (35-70 words/panel · 15+ Min YouTube
-                  Videos)
-                </option>
-                <option
-                  value="short"
-                  className="bg-neutral-950 text-neutral-100"
-                >
-                  Short Subtitle Dialogue (under 25 words/panel · Shorts /
-                  Quick Recaps)
-                </option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-neutral-500 select-none">
-                ▾
+                  <option
+                    value="long"
+                    className="bg-neutral-950 text-neutral-100"
+                  >
+                    Detailed Recap Narrator (35-70 words/panel · 15+ Min YouTube
+                    Videos)
+                  </option>
+                  <option
+                    value="short"
+                    className="bg-neutral-950 text-neutral-100"
+                  >
+                    Short Subtitle Dialogue (under 25 words/panel · Shorts /
+                    Quick Recaps)
+                  </option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-neutral-500 select-none">
+                  ▾
+                </div>
               </div>
-            </div>
-            <p
-              className={`text-[10.5px] font-mono ${
-                narrationStyle === "long"
-                  ? "text-purple-400/70"
-                  : "text-emerald-400/70"
-              }`}
-            >
-              {narrationStyle === "long"
-                ? "DETAILED RECAP — Generates detailed recap scripts suitable for 10-20 min videos"
-                : "SHORT RECAP — Generates shorter dialog lines ideal for shorts and fast pacing"}
-            </p>
-          </div>
-
-          {/* Import Layout Mode Selector */}
-          <div className="space-y-2">
-            <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
-              Import Layout Mode
-            </label>
-            <div className="relative">
-              <select
-                id="scrape_layout_mode_select"
-                value={smartSlice ? "separate" : "stitched"}
-                onChange={(e) => {
-                  const val = e.target.value === "separate";
-                  setSmartSlice?.(val);
-                  const label = val
-                    ? "Separate Panel Images (Fast Import)"
-                    : "Single Stitched Strip";
-                  addNotification(
-                    `Import layout mode set to: ${label}`,
-                    "info"
-                  );
-                }}
-                className="relative w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-neutral-200 outline-none appearance-none focus:border-purple-500 transition-colors cursor-pointer"
+              <p
+                className={`text-[10.5px] font-mono ${
+                  narrationStyle === "long"
+                    ? "text-purple-400/70"
+                    : "text-emerald-400/70"
+                }`}
               >
-                <option
-                  value="separate"
-                  className="bg-neutral-950 text-neutral-100"
-                >
-                  Separate Panel Images (Fast Import · Under 2s)
-                </option>
-                <option
-                  value="stitched"
-                  className="bg-neutral-950 text-neutral-100"
-                >
-                  Single Stitched Strip (Takes 15-45s)
-                </option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-neutral-500 select-none">
-                ▾
-              </div>
+                {narrationStyle === "long"
+                  ? "DETAILED RECAP — Generates detailed recap scripts suitable for 10-20 min videos"
+                  : "SHORT RECAP — Generates shorter dialog lines ideal for shorts and fast pacing"}
+              </p>
             </div>
-            <p
-              className={`text-[10.5px] font-mono ${
-                smartSlice ? "text-indigo-400/70" : "text-amber-400/70"
-              }`}
-            >
-              {smartSlice
-                ? "SEPARATE IMAGES — Imports chapter pages instantly as individual panel cards in the timeline"
-                : "SINGLE STITCHED — Stitches all chapter pages together on the backend into a single image"}
-            </p>
-          </div>
 
-          <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
-            Models (Free Models Recommended)
-          </label>
-          {modelDropdown}
+            {/* Import Layout Mode Selector */}
+            <div className="space-y-2">
+              <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
+                Import Layout Mode
+              </label>
+              <div className="relative">
+                <select
+                  id="scrape_layout_mode_select"
+                  value={smartSlice ? "separate" : "stitched"}
+                  onChange={(e) => {
+                    const val = e.target.value === "separate";
+                    setSmartSlice?.(val);
+                    const label = val
+                      ? "Separate Panel Images (Fast Import)"
+                      : "Single Stitched Strip";
+                    addNotification(
+                      `Import layout mode set to: ${label}`,
+                      "info"
+                    );
+                  }}
+                  className="relative w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-neutral-200 outline-none appearance-none focus:border-purple-500 transition-colors cursor-pointer"
+                >
+                  <option
+                    value="separate"
+                    className="bg-neutral-950 text-neutral-100"
+                  >
+                    Separate Panel Images (Fast Import · Under 2s)
+                  </option>
+                  <option
+                    value="stitched"
+                    className="bg-neutral-950 text-neutral-100"
+                  >
+                    Single Stitched Strip (Takes 15-45s)
+                  </option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-neutral-500 select-none">
+                  ▾
+                </div>
+              </div>
+              <p
+                className={`text-[10.5px] font-mono ${
+                  smartSlice ? "text-indigo-400/70" : "text-amber-400/70"
+                }`}
+              >
+                {smartSlice
+                  ? "SEPARATE IMAGES — Imports chapter pages instantly as individual panel cards in the timeline"
+                  : "SINGLE STITCHED — Stitches all chapter pages together on the backend into a single image"}
+              </p>
+            </div>
 
-          {selectedModel.includes("pro") && (
-            <p className="text-[10.5px] text-amber-500/90 font-mono flex items-center gap-1.5">
-              <span>⚠️</span> Note: Pro models may require billing/credits.
-              Flash models (Free) are highly recommended.
-            </p>
-          )}
+            <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
+              Models (Free Models Recommended)
+            </label>
+            {modelDropdown}
+
+            {selectedModel.includes("pro") && (
+              <p className="text-[10.5px] text-amber-500/90 font-mono flex items-center gap-1.5">
+                <span>⚠️</span> Note: Pro models may require billing/credits.
+                Flash models (Free) are highly recommended.
+              </p>
+            )}
           </div>
         )}
       </div>

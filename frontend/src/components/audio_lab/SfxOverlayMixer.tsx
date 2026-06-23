@@ -31,7 +31,7 @@ export default function SfxOverlayMixer({ panels }: SfxOverlayMixerProps) {
             visual_description: p.visual_description || "Action segment",
             speech_text: p.speech_text || "",
             sfx: p.sfx || "[Drums]",
-            model: "gemini-2.5-flash",
+            model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
           }),
         });
         const json = await res.json();

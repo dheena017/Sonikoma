@@ -241,16 +241,23 @@ export function AppWorkspace({
     if (params.get("autoScrape") === "true" && targetUrl) {
       // Remove autoScrape so it doesn't loop on refresh
       params.delete("autoScrape");
-      window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
-      
+      window.history.replaceState(
+        {},
+        "",
+        `${window.location.pathname}?${params.toString()}`
+      );
+
       const token =
         localStorage.getItem("sonikoma_token") ||
         sessionStorage.getItem("sonikoma_token");
-      
+
       if (!token) {
         const usedFree = localStorage.getItem("sonikoma_free_scrape_used");
         if (usedFree === "true") {
-          addNotification("You've used your free try. Please sign in to import more links!", "warning");
+          addNotification(
+            "You've used your free try. Please sign in to import more links!",
+            "warning"
+          );
           if (typeof (window as any).navigateTo === "function") {
             (window as any).navigateTo("/login");
           } else {
@@ -332,14 +339,17 @@ export function AppWorkspace({
       await saveProject(undefined, {
         savingMessage: "Saving metadata...",
         successMessage: "Metadata saved successfully!",
-        errorMessage: "Failed to save metadata."
+        errorMessage: "Failed to save metadata.",
       });
     }
   };
 
   const handleSaveAssets = async () => {
     if (projectId?.startsWith("temp_")) {
-      addNotification("Temporary Session: Saving images is disabled.", "warning");
+      addNotification(
+        "Temporary Session: Saving images is disabled.",
+        "warning"
+      );
       return;
     }
     const token =
@@ -376,7 +386,7 @@ export function AppWorkspace({
       await saveProject(panels, {
         savingMessage: "Saving timeline...",
         successMessage: "Timeline saved successfully!",
-        errorMessage: "Failed to save timeline."
+        errorMessage: "Failed to save timeline.",
       });
     }
   };
@@ -386,7 +396,7 @@ export function AppWorkspace({
       await saveProject(undefined, {
         savingMessage: "Saving video...",
         successMessage: "Video saved successfully!",
-        errorMessage: "Failed to save video."
+        errorMessage: "Failed to save video.",
       });
     }
   };
@@ -419,9 +429,14 @@ export function AppWorkspace({
               localStorage.getItem("sonikoma_token") ||
               sessionStorage.getItem("sonikoma_token");
             if (!token) {
-              const usedFree = localStorage.getItem("sonikoma_free_scrape_used");
+              const usedFree = localStorage.getItem(
+                "sonikoma_free_scrape_used"
+              );
               if (usedFree === "true") {
-                addNotification("You've used your free try. Please sign in to import more links!", "warning");
+                addNotification(
+                  "You've used your free try. Please sign in to import more links!",
+                  "warning"
+                );
                 if (typeof (window as any).navigateTo === "function") {
                   (window as any).navigateTo("/login");
                 } else {
@@ -457,8 +472,6 @@ export function AppWorkspace({
           resetWorkspace={resetWorkspace}
           handleSaveMeta={handleSaveMeta}
         />
-
-
 
         {/* SEPARATED IMAGE STRIPS GALLERY */}
         <LiveScraperDeck

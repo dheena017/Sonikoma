@@ -15,6 +15,7 @@ import {
   Clock,
 } from "lucide-react";
 import SectionTitle from "../crop/SectionTitle";
+import { AI_MODELS } from "@/models";
 
 interface Props {
   useLocalCV: boolean;
@@ -159,9 +160,7 @@ export function AutoCropEngineSelector({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           provider: "gemini",
-          model: cropModel.includes("pro")
-            ? "gemini-2.5-pro"
-            : "gemini-2.5-flash",
+          model: cropModel,
         }),
       });
       const data = await response.json();
@@ -208,20 +207,14 @@ export function AutoCropEngineSelector({
   };
 
   // Model grid details
-  const modelCards = [
-    {
-      id: "gemini-3.5-flash",
-      name: "Gemini 3.5 Flash",
-      badge: "⚡ Fast & Light",
-      desc: "Ideal for standard panel boundaries. Rapid processing times. Free tier friendly.",
-    },
-    {
-      id: "gemini-3.5-pro",
-      name: "Gemini 3.5 Pro",
-      badge: "🧠 Deep Visual",
-      desc: "Deep visual comprehension. Best for complex overlapping panels, dark background panels, and artwork-only separation.",
-    },
-  ];
+  const modelCards = AI_MODELS.filter(m => m.provider === "Google" && m.id.includes("gemini")).map(model => ({
+    id: model.id,
+    name: model.name,
+    badge: model.type === 'free' ? "⚡ Fast & Light" : "🧠 Deep Visual",
+    desc: model.type === 'free' 
+      ? "Ideal for standard panel boundaries. Rapid processing times. Free tier friendly."
+      : "Deep visual comprehension. Best for complex overlapping panels, dark background panels, and artwork-only separation."
+  }));
 
   return (
     <div className="space-y-4">
@@ -603,7 +596,7 @@ export function AutoCropEngineSelector({
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {modelCards.map((model) => {
-                const isSelected = cropModel.includes(model.id.split("-")[2]); // maps flash vs pro
+                const isSelected = cropModel === model.id;
                 return (
                   <button
                     key={model.id}
@@ -769,10 +762,10 @@ export function AutoCropEngineSelector({
           <div className="p-3.5 bg-indigo-950/10 border border-indigo-900/30 text-[9.5px] font-mono text-indigo-400 rounded-2xl leading-relaxed flex items-start gap-2 select-none">
             <Compass className="h-4 w-4 shrink-0 text-indigo-400/80 mt-0.5 animate-pulse" />
             <p>
-              <strong>OpenCV Auto-Fallback Enabled:</strong> If the Smart Scanner
-              hits resource quotas, network timeouts, or lacks environment keys,
-              the slicer engine falls back to local OpenCV contours seamlessly
-              so that cropping is completed successfully.
+              <strong>OpenCV Auto-Fallback Enabled:</strong> If the Smart
+              Scanner hits resource quotas, network timeouts, or lacks
+              environment keys, the slicer engine falls back to local OpenCV
+              contours seamlessly so that cropping is completed successfully.
             </p>
           </div>
         </div>

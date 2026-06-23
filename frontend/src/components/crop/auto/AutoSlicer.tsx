@@ -152,8 +152,8 @@ export default function AutoSlicer({
             spacing gutters.
           </p>
           <p>
-            <strong>Smart Scanner:</strong> Vision-based
-            segmentation that extracts panel boundaries based on page context.
+            <strong>Smart Scanner:</strong> Vision-based segmentation that
+            extracts panel boundaries based on page context.
           </p>
           <p>
             <strong>Dry Run:</strong> Highlights contours visually without

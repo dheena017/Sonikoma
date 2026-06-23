@@ -62,9 +62,9 @@ export function useBackendHealth() {
 
     const poll = async () => {
       if (!isMounted) return;
-      
+
       const shouldContinueNormalPolling = await checkHealth();
-      
+
       if (!isMounted) return;
 
       // If we got a 429, wait 60s for penalty box to clear, otherwise 30s

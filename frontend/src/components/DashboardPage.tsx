@@ -17,7 +17,7 @@ import {
   BookOpen,
   Settings,
   HelpCircle,
-  FileText
+  FileText,
 } from "lucide-react";
 import { getSourceName } from "../utils.js";
 
@@ -81,7 +81,9 @@ export default function DashboardPage() {
   const handleOpenProject = (project: Project) => {
     if (project.series_slug && project.chapter_slug) {
       // Navigate using slug-based URL → opens the chapter details page
-      (window as any).navigateTo?.(`/series/${project.series_slug}/chapters/${project.chapter_slug}/details`);
+      (window as any).navigateTo?.(
+        `/series/${project.series_slug}/chapters/${project.chapter_slug}/details`
+      );
     } else {
       // Fallback: open in workspace editor by project ID
       (window as any).navigateTo?.(`/workspace?id=${project.project_id}`);
@@ -177,10 +179,8 @@ export default function DashboardPage() {
 
       {/* TWO COLUMN CONTENT LAYOUT */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
         {/* Left Column: Recent Series & Pipeline Capabilities */}
         <div className="lg:col-span-8 space-y-10">
-          
           {/* RECENT SERIES */}
           <div>
             <div className="flex items-center justify-between mb-6">
@@ -203,8 +203,8 @@ export default function DashboardPage() {
                   No series yet
                 </h3>
                 <p className="text-sm text-neutral-400 max-w-sm mb-6 font-mono">
-                  You haven't created any storyboard series yet. Start by scraping
-                  a webtoon URL!
+                  You haven't created any storyboard series yet. Start by
+                  scraping a webtoon URL!
                 </p>
                 <button
                   onClick={handleNewSeries}
@@ -271,10 +271,13 @@ export default function DashboardPage() {
           <div className="bg-[#0b0b0e]/50 border border-white/5 rounded-3xl p-6 md:p-8">
             <div className="flex items-center gap-2 mb-4">
               <Sparkles className="h-5 w-5 text-purple-400" />
-              <h3 className="text-lg font-bold text-white">AI Processing Pipeline</h3>
+              <h3 className="text-lg font-bold text-white">
+                AI Processing Pipeline
+              </h3>
             </div>
             <p className="text-xs text-neutral-400 font-mono mb-6 leading-relaxed">
-              AniVox orchestrates multiple specialized models to synthesize static webtoon series strips into full cinematic animated videos.
+              AniVox orchestrates multiple specialized models to synthesize
+              static webtoon series strips into full cinematic animated videos.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -283,9 +286,13 @@ export default function DashboardPage() {
                   <Scissors className="h-5 w-5" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-white mb-1">1. Smart Panel Slicer</h4>
+                  <h4 className="text-sm font-bold text-white mb-1">
+                    1. Smart Panel Slicer
+                  </h4>
                   <p className="text-xs text-neutral-400 leading-relaxed font-sans">
-                    Runs Canny Edge detection algorithms on backend workers to detect gutters, isolate layout frames, and slice strips cleanly.
+                    Runs Canny Edge detection algorithms on backend workers to
+                    detect gutters, isolate layout frames, and slice strips
+                    cleanly.
                   </p>
                 </div>
               </div>
@@ -295,9 +302,13 @@ export default function DashboardPage() {
                   <Sliders className="h-5 w-5" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-white mb-1">2. Speech Bubble OCR & Clean</h4>
+                  <h4 className="text-sm font-bold text-white mb-1">
+                    2. Speech Bubble OCR & Clean
+                  </h4>
                   <p className="text-xs text-neutral-400 leading-relaxed font-sans">
-                    Locates text boundaries in comics, erases speech bubbles using clearing methods, and OCR transcribes dialog into transcription nodes.
+                    Locates text boundaries in comics, erases speech bubbles
+                    using clearing methods, and OCR transcribes dialog into
+                    transcription nodes.
                   </p>
                 </div>
               </div>
@@ -307,9 +318,13 @@ export default function DashboardPage() {
                   <Volume2 className="h-5 w-5" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-white mb-1">3. Dialog Voice Synthesis</h4>
+                  <h4 className="text-sm font-bold text-white mb-1">
+                    3. Dialog Voice Synthesis
+                  </h4>
                   <p className="text-xs text-neutral-400 leading-relaxed font-sans">
-                    Streams script lines into advanced voice generation engines (e.g. Bark, Coqui, ElevenLabs) to assign custom voices to different characters.
+                    Streams script lines into advanced voice generation engines
+                    (e.g. Bark, Coqui, ElevenLabs) to assign custom voices to
+                    different characters.
                   </p>
                 </div>
               </div>
@@ -319,20 +334,22 @@ export default function DashboardPage() {
                   <Cpu className="h-5 w-5" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-white mb-1">4. FFmpeg Video Compositor</h4>
+                  <h4 className="text-sm font-bold text-white mb-1">
+                    4. FFmpeg Video Compositor
+                  </h4>
                   <p className="text-xs text-neutral-400 leading-relaxed font-sans">
-                    Binds sliced visuals with generated audios, overlays ambient soundscapes, and compiles MP4 render outputs using smooth camera paths.
+                    Binds sliced visuals with generated audios, overlays ambient
+                    soundscapes, and compiles MP4 render outputs using smooth
+                    camera paths.
                   </p>
                 </div>
               </div>
             </div>
           </div>
-
         </div>
 
         {/* Right Column: Sidebar (Status & Quick Links) */}
         <div className="lg:col-span-4 space-y-6">
-          
           {/* SYSTEM HEALTH / METRICS */}
           <div className="bg-[#0b0b0e]/80 border border-white/5 rounded-3xl p-6 shadow-xl">
             <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-wider font-mono flex items-center gap-2">
@@ -362,7 +379,7 @@ export default function DashboardPage() {
                 <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 font-mono block">
                   Active Worker Pipelines
                 </span>
-                
+
                 <div className="space-y-2.5 mt-1">
                   <div className="flex items-center justify-between text-[11px] font-mono">
                     <span className="text-neutral-400">Browser Scraping</span>
@@ -410,8 +427,12 @@ export default function DashboardPage() {
                     <Sliders className="h-4 w-4" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-white">Keyboard Shortcuts</h4>
-                    <p className="text-[10px] text-neutral-500 font-sans mt-0.5">Quickly edit storyboards & camera sweeps</p>
+                    <h4 className="text-xs font-bold text-white">
+                      Keyboard Shortcuts
+                    </h4>
+                    <p className="text-[10px] text-neutral-500 font-sans mt-0.5">
+                      Quickly edit storyboards & camera sweeps
+                    </p>
                   </div>
                 </div>
                 <ChevronRight className="h-4 w-4 text-neutral-500 group-hover:text-purple-400 transition-colors shrink-0" />
@@ -426,8 +447,12 @@ export default function DashboardPage() {
                     <Settings className="h-4 w-4" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-white">Pipeline Settings</h4>
-                    <p className="text-[10px] text-neutral-500 font-sans mt-0.5">Configure OCR & voice models</p>
+                    <h4 className="text-xs font-bold text-white">
+                      Pipeline Settings
+                    </h4>
+                    <p className="text-[10px] text-neutral-500 font-sans mt-0.5">
+                      Configure OCR & voice models
+                    </p>
                   </div>
                 </div>
                 <ChevronRight className="h-4 w-4 text-neutral-500 group-hover:text-indigo-400 transition-colors shrink-0" />
@@ -442,15 +467,18 @@ export default function DashboardPage() {
                     <FileText className="h-4 w-4" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-white">System Output Logs</h4>
-                    <p className="text-[10px] text-neutral-500 font-sans mt-0.5">Examine processing execution in real-time</p>
+                    <h4 className="text-xs font-bold text-white">
+                      System Output Logs
+                    </h4>
+                    <p className="text-[10px] text-neutral-500 font-sans mt-0.5">
+                      Examine processing execution in real-time
+                    </p>
                   </div>
                 </div>
                 <ChevronRight className="h-4 w-4 text-neutral-500 group-hover:text-cyan-400 transition-colors shrink-0" />
               </button>
             </div>
           </div>
-
         </div>
       </div>
     </div>

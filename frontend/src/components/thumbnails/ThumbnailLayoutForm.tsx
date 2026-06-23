@@ -29,7 +29,7 @@ export default function ThumbnailLayoutForm({
           thumbnail_concept:
             conceptPrompt || "Tense combat close-up illustration",
           main_character: character,
-          model: "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
         }),
       });
       const json = await res.json();

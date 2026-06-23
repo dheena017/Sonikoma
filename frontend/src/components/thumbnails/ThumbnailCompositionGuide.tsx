@@ -27,7 +27,7 @@ export default function ThumbnailCompositionGuide({
         body: JSON.stringify({
           thumbnail_concept:
             conceptPrompt || "Tense combat close-up illustration",
-          model: "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
         }),
       });
       const json = await res.json();

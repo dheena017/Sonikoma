@@ -85,7 +85,7 @@ export default function EngagementTab({
           story_outline:
             storyboardSummary ||
             "The protagonist faces an unbeatable dungeon boss.",
-          model: "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
         }),
       });
       const json = await res.json();
@@ -127,7 +127,7 @@ export default function EngagementTab({
         body: JSON.stringify({
           title: title || "This Webtoon",
           ending_cliffhanger: climaxHook,
-          model: "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
         }),
       });
       const json = await res.json();
@@ -169,7 +169,7 @@ export default function EngagementTab({
         body: JSON.stringify({
           user_comment: userComment,
           video_title: title || "This Webtoon Recap",
-          model: "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
         }),
       });
       const json = await res.json();

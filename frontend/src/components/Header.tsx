@@ -284,8 +284,8 @@ export default function Header({
   const progressPercent =
     panels.length > 0
       ? Math.round(
-        ((totalWithSpeech + totalWithAudio) / (panels.length * 2)) * 100
-      )
+          ((totalWithSpeech + totalWithAudio) / (panels.length * 2)) * 100
+        )
       : 0;
 
   // Dynamically computed quality scores — derived from real panel properties
@@ -294,41 +294,41 @@ export default function Header({
     panels.length === 0
       ? 0
       : Math.min(
-        100,
-        Math.round(40 + progressPercent * 0.55 + (totalWithAudio > 0 ? 5 : 0))
-      );
+          100,
+          Math.round(40 + progressPercent * 0.55 + (totalWithAudio > 0 ? 5 : 0))
+        );
   const audienceRetentionLabel =
     audienceRetentionPct >= 75
       ? "High"
       : audienceRetentionPct >= 50
-        ? "Medium"
-        : audienceRetentionPct > 0
-          ? "Low"
-          : "—";
+      ? "Medium"
+      : audienceRetentionPct > 0
+      ? "Low"
+      : "—";
 
   // A/B Title CTR: based on narration richness (avg words per narrated panel)
   const avgWordsPerPanel =
     totalWithSpeech > 0
       ? panels.reduce((sum, p) => {
-        const words = p.speech_text
-          ? p.speech_text.trim().split(/\s+/).length
-          : 0;
-        return sum + words;
-      }, 0) / totalWithSpeech
+          const words = p.speech_text
+            ? p.speech_text.trim().split(/\s+/).length
+            : 0;
+          return sum + words;
+        }, 0) / totalWithSpeech
       : 0;
   const ctrScore =
     panels.length === 0
       ? 0
       : Math.min(
-        10,
-        parseFloat(
-          (
-            3 +
-            Math.min(avgWordsPerPanel / 8, 1) * 5 +
-            (progressPercent / 100) * 2
-          ).toFixed(1)
-        )
-      );
+          10,
+          parseFloat(
+            (
+              3 +
+              Math.min(avgWordsPerPanel / 8, 1) * 5 +
+              (progressPercent / 100) * 2
+            ).toFixed(1)
+          )
+        );
 
   // Cliffhanger Ending Index: based on last panel's speech, sfx, and motion dynamism
   const lastPanel = panels.length > 0 ? panels[panels.length - 1] : null;
@@ -354,10 +354,10 @@ export default function Header({
     cliffhangerScore === "Strong"
       ? "text-emerald-400"
       : cliffhangerScore === "Moderate"
-        ? "text-amber-400"
-        : cliffhangerScore === "—"
-          ? "text-neutral-500"
-          : "text-rose-400";
+      ? "text-amber-400"
+      : cliffhangerScore === "—"
+      ? "text-neutral-500"
+      : "text-rose-400";
 
   // Search Navigation options
   const navigationItems = [
@@ -426,15 +426,15 @@ export default function Header({
 
   const matchedPanels = searchQuery.trim()
     ? panels
-      .filter(
-        (panel) =>
-          String(panel.id).includes(searchQuery) ||
-          (panel.speech_text &&
-            panel.speech_text
-              .toLowerCase()
-              .includes(searchQuery.toLowerCase()))
-      )
-      .slice(0, 5)
+        .filter(
+          (panel) =>
+            String(panel.id).includes(searchQuery) ||
+            (panel.speech_text &&
+              panel.speech_text
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase()))
+        )
+        .slice(0, 5)
     : [];
 
   return (
@@ -453,13 +453,18 @@ export default function Header({
         </button>
 
         <div
-          className={`flex items-center gap-2 cursor-pointer select-none transition-all duration-300 ${isSidebarOpen
+          className={`flex items-center gap-2 cursor-pointer select-none transition-all duration-300 ${
+            isSidebarOpen
               ? "lg:opacity-0 lg:pointer-events-none"
               : "lg:opacity-100"
-            }`}
+          }`}
           onClick={() => navigateTo("/dashboard")}
         >
-          <img src="/logo.png" className="h-8 w-8 rounded-full bg-black shadow-lg shadow-purple-900/40 shrink-0 object-cover" alt="Sonikoma Logo" />
+          <img
+            src="/logo.png"
+            className="h-8 w-8 rounded-full bg-black shadow-lg shadow-purple-900/40 shrink-0 object-cover"
+            alt="Sonikoma Logo"
+          />
           <span className="font-bold text-sm tracking-tight text-white font-sans hidden sm:inline">
             Webtoon<span className="text-purple-400">To</span>Video
           </span>
@@ -641,10 +646,11 @@ export default function Header({
               setShowSettings(false);
               setShowStats(false);
             }}
-            className={`p-1.5 rounded-xl border transition-all cursor-pointer relative h-[34px] w-[34px] flex items-center justify-center ${showNotifications
+            className={`p-1.5 rounded-xl border transition-all cursor-pointer relative h-[34px] w-[34px] flex items-center justify-center ${
+              showNotifications
                 ? "bg-purple-600 border-purple-500 text-white"
                 : "bg-neutral-900 border-neutral-850 text-neutral-400 hover:text-white hover:border-neutral-750"
-              }`}
+            }`}
             title="Notifications"
           >
             {notificationsMuted ? (
@@ -688,10 +694,11 @@ export default function Header({
               setShowSettings(false);
               setShowNotifications(false);
             }}
-            className={`p-1.5 rounded-xl border transition-all cursor-pointer relative h-[34px] w-[34px] flex items-center justify-center ${showStats
+            className={`p-1.5 rounded-xl border transition-all cursor-pointer relative h-[34px] w-[34px] flex items-center justify-center ${
+              showStats
                 ? "bg-purple-600 border-purple-500 text-white"
                 : "bg-neutral-900 border-neutral-850 text-neutral-400 hover:text-white hover:border-neutral-750"
-              }`}
+            }`}
             title="Timeline Analytics & Statistics"
           >
             <Activity className="h-4 w-4" />
@@ -796,14 +803,15 @@ export default function Header({
                       Est. Audience Retention:
                     </span>
                     <span
-                      className={`font-bold font-mono ${panels.length === 0
+                      className={`font-bold font-mono ${
+                        panels.length === 0
                           ? "text-neutral-500"
                           : audienceRetentionPct >= 75
-                            ? "text-emerald-400"
-                            : audienceRetentionPct >= 50
-                              ? "text-amber-400"
-                              : "text-rose-400"
-                        }`}
+                          ? "text-emerald-400"
+                          : audienceRetentionPct >= 50
+                          ? "text-amber-400"
+                          : "text-rose-400"
+                      }`}
                     >
                       {panels.length === 0
                         ? "—"
@@ -815,14 +823,15 @@ export default function Header({
                       A/B Title CTR Expectation:
                     </span>
                     <span
-                      className={`font-bold font-mono ${panels.length === 0
+                      className={`font-bold font-mono ${
+                        panels.length === 0
                           ? "text-neutral-500"
                           : ctrScore >= 7
-                            ? "text-purple-400"
-                            : ctrScore >= 5
-                              ? "text-amber-400"
-                              : "text-rose-400"
-                        }`}
+                          ? "text-purple-400"
+                          : ctrScore >= 5
+                          ? "text-amber-400"
+                          : "text-rose-400"
+                      }`}
                     >
                       {panels.length === 0 ? "—" : `${ctrScore}/10`}
                     </span>
@@ -849,10 +858,11 @@ export default function Header({
               setShowStats(false);
               setShowNotifications(false);
             }}
-            className={`p-1.5 rounded-xl border transition-all cursor-pointer relative h-[34px] w-[34px] flex items-center justify-center ${showSettings
+            className={`p-1.5 rounded-xl border transition-all cursor-pointer relative h-[34px] w-[34px] flex items-center justify-center ${
+              showSettings
                 ? "bg-purple-600 border-purple-500 text-white"
                 : "bg-neutral-900 border-neutral-850 text-neutral-400 hover:text-white hover:border-neutral-750"
-              }`}
+            }`}
             title="Quick Settings & Preferences"
           >
             <Settings className="h-4 w-4" />
@@ -881,8 +891,12 @@ export default function Header({
                   }
                   className="w-full bg-neutral-950 border border-neutral-850 text-neutral-200 text-xs px-2.5 py-1.5 rounded-xl focus:border-purple-500/50 outline-none cursor-pointer font-sans"
                 >
-{AI_MODELS.map((m) => (<option key={m.id} value={m.id}>{m.name}</option>))}
-</select>
+                  {AI_MODELS.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Toggles */}
@@ -905,10 +919,11 @@ export default function Header({
                         );
                       }
                     }}
-                    className={`px-2 py-1 rounded text-[9px] font-bold font-mono tracking-wider transition-colors cursor-pointer border border-neutral-800 ${narrationStyle === "long"
+                    className={`px-2 py-1 rounded text-[9px] font-bold font-mono tracking-wider transition-colors cursor-pointer border border-neutral-800 ${
+                      narrationStyle === "long"
                         ? "border-purple-500/40 bg-purple-950/30 text-purple-300"
                         : "border-emerald-500/40 bg-emerald-950/30 text-emerald-300"
-                      }`}
+                    }`}
                   >
                     {narrationStyle === "long" ? "STORYTELLER" : "SUBTITLES"}
                   </button>
@@ -980,11 +995,13 @@ export default function Header({
                     <button
                       key={theme.id}
                       onClick={() => setAccentColor(theme.id)}
-                      className={`w-5 h-5 rounded-full ${theme.color
-                        } cursor-pointer transition-all border-2 relative flex items-center justify-center ${accentColor === theme.id
+                      className={`w-5 h-5 rounded-full ${
+                        theme.color
+                      } cursor-pointer transition-all border-2 relative flex items-center justify-center ${
+                        accentColor === theme.id
                           ? `${theme.border} scale-110 shadow-lg`
                           : "border-transparent opacity-60 hover:opacity-100 hover:scale-105"
-                        }`}
+                      }`}
                       title={theme.label}
                     >
                       {accentColor === theme.id && (
@@ -997,8 +1014,6 @@ export default function Header({
             </div>
           )}
         </div>
-
-
 
         {/* User Profile */}
         <button

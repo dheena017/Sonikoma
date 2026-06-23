@@ -63,7 +63,10 @@ export function ScraperSelectionToolbar({
   return (
     <div className="flex flex-wrap items-center gap-2">
       {/* Dropdown Container */}
-      <div className="relative inline-block text-left shrink-0" ref={dropdownRef}>
+      <div
+        className="relative inline-block text-left shrink-0"
+        ref={dropdownRef}
+      >
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}

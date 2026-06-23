@@ -46,10 +46,7 @@ export function PanelCardActions({
       ...prev,
     ]);
     console.log(`[GUI] Deleted image #${idx + 1} from deck.`);
-    addNotification(
-      `Deleted image #${idx + 1} from deck.`,
-      "success"
-    );
+    addNotification(`Deleted image #${idx + 1} from deck.`, "success");
     setShowDeleteConfirm(false);
   };
 
