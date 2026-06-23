@@ -48,8 +48,9 @@ export default function TimelineSelectionBar({
   batchProgress,
   cleanProgress,
 }: TimelineSelectionBarProps) {
-  // Visible whenever there are panels in the storyboard
-  const isVisible = totalCount > 0;
+  // Visible whenever there are panels selected or an operation is running
+  const isProcessing = isBatchCropping || isCleaningBubbles || isBatchMerging;
+  const isVisible = selectedCount > 0 || isProcessing;
 
   // Safeguard: Ensure we are in a browser environment before using the DOM
   if (typeof document === "undefined") return null;
@@ -68,7 +69,7 @@ export default function TimelineSelectionBar({
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 overflow-x-auto custom-scrollbar pb-1 sm:pb-0">
           {/* LEFT SECTION: Selection Actions or General Timeline Status */}
           <div className="flex items-center gap-3 shrink-0">
-            {selectedCount > 0 ? (
+            {isVisible ? (
               <>
                 {/* Selection Count Badge */}
                 <div className="flex items-center gap-2 bg-purple-950/60 border border-purple-700/50 rounded-xl px-3 py-2 shrink-0">
@@ -133,134 +134,136 @@ export default function TimelineSelectionBar({
                 )}
 
                 {/* Divider */}
-                <div className="hidden sm:block w-px h-6 bg-neutral-800 shrink-0" />
+                {selectedCount > 0 && <div className="hidden sm:block w-px h-6 bg-neutral-800 shrink-0" />}
 
                 {/* Action Buttons */}
-                <div className="flex items-center gap-2 flex-nowrap shrink-0">
-                  {/* Select All */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      console.log("[TimelineSelectionBar] Select all panels");
-                      selectAllPanels();
-                    }}
-                    className="px-3 sm:px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200"
-                  >
-                    <CheckSquare className="h-4 w-4 text-purple-400" />
-                    Select All
-                  </button>
+                {selectedCount > 0 && (
+                  <div className="flex items-center gap-2 flex-nowrap shrink-0">
+                    {/* Select All */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        console.log("[TimelineSelectionBar] Select all panels");
+                        selectAllPanels();
+                      }}
+                      className="px-3 sm:px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200"
+                    >
+                      <CheckSquare className="h-4 w-4 text-purple-400" />
+                      Select All
+                    </button>
 
-                  {/* AI Analyse Selected */}
-                  <button
-                    type="button"
-                    disabled={isAnalyzingAll}
-                    onClick={() => {
-                      console.log(
-                        `[TimelineSelectionBar] Analyze ${selectedCount} selected panels`
-                      );
-                      handleAnalyzeSelected();
-                    }}
-                    className={`px-3 sm:px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
-                      isAnalyzingAll
-                        ? "bg-purple-900/40 border-purple-500/50 text-purple-200 cursor-wait"
-                        : "bg-purple-600 border-purple-500 hover:bg-purple-500 text-white shadow-md hover:shadow-purple-500/20"
-                    }`}
-                  >
-                    {isAnalyzingAll ? (
-                      <RefreshCw className="h-4 w-4 animate-spin text-white" />
-                    ) : (
-                      <Sparkles className="h-4 w-4 text-white animate-pulse" />
-                    )}
-                    {isAnalyzingAll
-                      ? "Analyzing..."
-                      : `Analyze Selected (${selectedCount})`}
-                  </button>
+                    {/* AI Analyse Selected */}
+                    <button
+                      type="button"
+                      disabled={isAnalyzingAll}
+                      onClick={() => {
+                        console.log(
+                          `[TimelineSelectionBar] Analyze ${selectedCount} selected panels`
+                        );
+                        handleAnalyzeSelected();
+                      }}
+                      className={`px-3 sm:px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
+                        isAnalyzingAll
+                          ? "bg-purple-900/40 border-purple-500/50 text-purple-200 cursor-wait"
+                          : "bg-purple-600 border-purple-500 hover:bg-purple-500 text-white shadow-md hover:shadow-purple-500/20"
+                      }`}
+                    >
+                      {isAnalyzingAll ? (
+                        <RefreshCw className="h-4 w-4 animate-spin text-white" />
+                      ) : (
+                        <Sparkles className="h-4 w-4 text-white animate-pulse" />
+                      )}
+                      {isAnalyzingAll
+                        ? "Analyzing..."
+                        : `Analyze Selected (${selectedCount})`}
+                    </button>
 
-                  {/* Auto-Crop */}
-                  <button
-                    type="button"
-                    disabled={
-                      isBatchCropping || isCleaningBubbles || isBatchMerging
-                    }
-                    onClick={handleAutoCropSelected}
-                    className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl"
-                    title="Auto-Crop selected panels"
-                  >
-                    {isBatchCropping ? (
-                      <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
-                    ) : (
-                      <Scissors className="h-4 w-4 text-purple-400" />
-                    )}
-                    Auto-Crop
-                  </button>
+                    {/* Auto-Crop */}
+                    <button
+                      type="button"
+                      disabled={
+                        isBatchCropping || isCleaningBubbles || isBatchMerging
+                      }
+                      onClick={handleAutoCropSelected}
+                      className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl"
+                      title="Auto-Crop selected panels"
+                    >
+                      {isBatchCropping ? (
+                        <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
+                      ) : (
+                        <Scissors className="h-4 w-4 text-purple-400" />
+                      )}
+                      Auto-Crop
+                    </button>
 
-                  {/* Clean Bubbles */}
-                  <button
-                    type="button"
-                    disabled={
-                      isBatchCropping || isCleaningBubbles || isBatchMerging
-                    }
-                    onClick={handleCleanBubblesSelected}
-                    className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl"
-                    title="Remove speech bubbles from selected panels"
-                  >
-                    {isCleaningBubbles ? (
-                      <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
-                    ) : (
-                      <Sparkles className="h-4 w-4 text-purple-400 animate-pulse" />
-                    )}
-                    Clean Bubbles
-                  </button>
+                    {/* Clean Bubbles */}
+                    <button
+                      type="button"
+                      disabled={
+                        isBatchCropping || isCleaningBubbles || isBatchMerging
+                      }
+                      onClick={handleCleanBubblesSelected}
+                      className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl"
+                      title="Remove speech bubbles from selected panels"
+                    >
+                      {isCleaningBubbles ? (
+                        <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
+                      ) : (
+                        <Sparkles className="h-4 w-4 text-purple-400 animate-pulse" />
+                      )}
+                      Clean Bubbles
+                    </button>
 
-                  {/* Stitch */}
-                  <button
-                    type="button"
-                    disabled={
-                      isBatchCropping ||
-                      isCleaningBubbles ||
-                      isBatchMerging ||
-                      selectedCount < 2
-                    }
-                    onClick={handleBatchMergeSelected}
-                    className="px-3 sm:px-4 py-2 text-xs rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 font-bold flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                    title="Stitch selected panels vertically into one panel"
-                  >
-                    {isBatchMerging ? (
-                      <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
-                    ) : (
-                      <Link2 className="h-4 w-4 text-purple-400" />
-                    )}
-                    Stitch
-                  </button>
+                    {/* Stitch */}
+                    <button
+                      type="button"
+                      disabled={
+                        isBatchCropping ||
+                        isCleaningBubbles ||
+                        isBatchMerging ||
+                        selectedCount < 2
+                      }
+                      onClick={handleBatchMergeSelected}
+                      className="px-3 sm:px-4 py-2 text-xs rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 font-bold flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                      title="Stitch selected panels vertically into one panel"
+                    >
+                      {isBatchMerging ? (
+                        <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
+                      ) : (
+                        <Link2 className="h-4 w-4 text-purple-400" />
+                      )}
+                      Stitch
+                    </button>
 
-                  {/* Delete Selected */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      console.log(
-                        `[TimelineSelectionBar] Delete ${selectedCount} selected panels`
-                      );
-                      handleDeleteSelected();
-                    }}
-                    className="px-3 sm:px-4 py-2 text-xs rounded-xl border border-rose-900/60 bg-rose-950/20 hover:bg-rose-900/40 text-rose-350 hover:text-rose-100 font-bold flex items-center justify-center gap-2 cursor-pointer transition-all"
-                  >
-                    <Trash className="h-3.5 w-3.5 text-rose-400" />
-                    Delete ({selectedCount})
-                  </button>
+                    {/* Delete Selected */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        console.log(
+                          `[TimelineSelectionBar] Delete ${selectedCount} selected panels`
+                        );
+                        handleDeleteSelected();
+                      }}
+                      className="px-3 sm:px-4 py-2 text-xs rounded-xl border border-rose-900/60 bg-rose-950/20 hover:bg-rose-900/40 text-rose-350 hover:text-rose-100 font-bold flex items-center justify-center gap-2 cursor-pointer transition-all"
+                    >
+                      <Trash className="h-3.5 w-3.5 text-rose-400" />
+                      Delete ({selectedCount})
+                    </button>
 
-                  {/* Clear / Dismiss */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      console.log("[TimelineSelectionBar] Clearing selection");
-                      clearSelection();
-                    }}
-                    className="p-2 rounded-full border font-bold flex items-center justify-center cursor-pointer transition-all bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200"
-                    title="Clear Selection"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
+                    {/* Clear / Dismiss */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        console.log("[TimelineSelectionBar] Clearing selection");
+                        clearSelection();
+                      }}
+                      className="p-2 rounded-full border font-bold flex items-center justify-center cursor-pointer transition-all bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200"
+                      title="Clear Selection"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
               </>
             ) : null}
           </div>
