@@ -27,12 +27,10 @@ export default function VoiceStudioPage({
         </div>
         <div className="space-y-2">
           <h3 className="text-xl font-bold text-white tracking-tight">
-            AI Voice Studio Locked
+            Voice Studio Locked
           </h3>
           <p className="text-xs text-neutral-400 font-mono leading-relaxed max-w-sm">
-            This module generates TTS transcripts, matches audio dramatization
-            guidelines, and casts matching voices for active storyboard dialogue
-            scripts.
+            This module generates voice transcripts, matches audio guidelines, and casts voices for active timeline dialogue.
           </p>
         </div>
         <div className="bg-neutral-950/80 p-4 rounded-xl border border-neutral-900 text-left text-[11px] text-neutral-500 font-mono space-y-1.5 w-full">
@@ -40,8 +38,8 @@ export default function VoiceStudioPage({
             💡 How to unlock:
           </div>
           <div>1. Go to the main Workspace</div>
-          <div>2. Enter a Webtoon URL to scrape image strips</div>
-          <div>3. Slice the strips into storyboard panels</div>
+          <div>2. Enter a link to import images</div>
+          <div>3. Add the images to the timeline</div>
         </div>
         <button
           onClick={onNavigateHome}
@@ -60,7 +58,7 @@ export default function VoiceStudioPage({
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
             <Mic className="h-5 w-5 text-purple-400" />
-            AI Voice Casting & Script Studio
+            Voice & Text Studio
           </h2>
           <p className="text-xs text-neutral-400 font-mono mt-0.5">
             Dramatize dialogues and cast the perfect voice actors for your
