@@ -267,18 +267,18 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
 
           {/* Scraping Progress Bar */}
           {isScraping && (
-            <div className="space-y-2.5 p-4 bg-purple-950/20 border border-purple-800/40 rounded-2xl animate-[fadeIn_0.22s_ease-out] shadow-xl">
-              <div className="flex justify-between items-center text-[10px] font-mono text-purple-350 font-bold uppercase tracking-wider">
+            <div className="space-y-2.5 p-4 bg-neutral-900/40 border border-neutral-800 rounded-2xl animate-[fadeIn_0.22s_ease-out] shadow-xl">
+              <div className="flex justify-between items-center text-[10px] font-mono text-neutral-400 font-bold uppercase tracking-wider">
                 <span className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-purple-500" />
+                  <span className="h-2 w-2 rounded-full bg-neutral-500" />
                   Extracting comic assets
                 </span>
                 <span>Est. Wait Time: 15-45s</span>
               </div>
 
-              <div className="relative h-2 w-full bg-black/60 rounded-full overflow-hidden border border-purple-950/50 shadow-inner">
+              <div className="relative h-2 w-full bg-black/60 rounded-full overflow-hidden border border-neutral-800/50 shadow-inner">
                 {/* Indeterminate animated progress fill */}
-                <div className="absolute top-0 bottom-0 bg-gradient-to-r from-purple-600 via-indigo-500 to-cyan-400 rounded-full w-1/3 animate-infinite-scroll" />
+                <div className="absolute top-0 bottom-0 bg-gradient-to-r from-neutral-600 via-neutral-500 to-neutral-400 rounded-full w-1/3 animate-infinite-scroll" />
               </div>
               <p className="text-[9.5px] text-neutral-500 font-mono leading-normal">
                 Launching headless browser worker on the server backend to
@@ -293,10 +293,10 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
               className="border rounded-2xl overflow-hidden transition-all duration-500"
               style={{
                 borderColor: isScraping
-                  ? "rgba(139,92,246,0.5)"
+                  ? "rgba(63,63,70,0.8)"
                   : "rgba(63,63,70,0.8)",
                 background: isScraping
-                  ? "rgba(88,28,135,0.08)"
+                  ? "rgba(0,0,0,0.4)"
                   : "rgba(0,0,0,0.4)",
                 animation: "slideDown 0.4s cubic-bezier(0.16,1,0.3,1)",
               }}
@@ -310,12 +310,12 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                 <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-1.5">
                   <span
                     className={`h-1.5 w-1.5 rounded-full ${
-                      isScraping ? "bg-purple-400" : "bg-emerald-500"
+                      isScraping ? "bg-neutral-400" : "bg-emerald-500"
                     }`}
                   />
                   Comic Series &amp; Chapter Metadata
                   {isScraping ? (
-                    <span className="ml-1.5 text-[9px] text-purple-400 font-mono">
+                    <span className="ml-1.5 text-[9px] text-neutral-400 font-mono">
                       Auto-filling...
                     </span>
                   ) : (
@@ -469,7 +469,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
             <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
               <span
                 className={`h-1.5 w-1.5 rounded-full ${
-                  narrationStyle === "long" ? "bg-purple-500" : "bg-emerald-500"
+                  narrationStyle === "long" ? "bg-neutral-500" : "bg-emerald-500"
                 }`}
               />
               AI Narration Style
