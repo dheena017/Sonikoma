@@ -59,10 +59,7 @@ export default function ScraperControls({
       setConsoleLogs((prev) => ["[GUI] Cleared selections", ...prev]);
     } else {
       setSelectedScraped([...scrapedImages]);
-      setConsoleLogs((prev) => [
-        "[GUI] Selected all images",
-        ...prev,
-      ]);
+      setConsoleLogs((prev) => ["[GUI] Selected all images", ...prev]);
     }
   };
 
@@ -93,10 +90,7 @@ export default function ScraperControls({
     console.log("[ScraperControls] Reversing deck order");
     setScrapedImages((prev) => [...prev].reverse());
     onLastSelectedReset?.();
-    setConsoleLogs((prev) => [
-      "[GUI] Reversed image order",
-      ...prev,
-    ]);
+    setConsoleLogs((prev) => ["[GUI] Reversed image order", ...prev]);
     addNotification("Reversed image order!", "info");
   };
 

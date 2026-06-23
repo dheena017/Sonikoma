@@ -148,7 +148,10 @@ export function useAutoSave(state: AutoSaveState) {
 
     setSaveStatus("saving");
     if (!options?.hideNotifications) {
-      state.addNotification?.(options?.savingMessage || "Saving project changes...", "info");
+      state.addNotification?.(
+        options?.savingMessage || "Saving project changes...",
+        "info"
+      );
     }
     try {
       console.log(
@@ -326,7 +329,9 @@ export function useAutoSave(state: AutoSaveState) {
       setSaveStatus("error");
       if (!options?.hideNotifications) {
         state.addNotification?.(
-          options?.errorMessage || err.message || "Failed to save project changes.",
+          options?.errorMessage ||
+            err.message ||
+            "Failed to save project changes.",
           "error",
           {
             details: err.stack || String(err),

@@ -25,7 +25,7 @@ export default function AmbientSoundPicker({
         body: JSON.stringify({
           narrative_mood: mood,
           action_scale: actionScale,
-          model: "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
         }),
       });
       const json = await res.json();

@@ -35,59 +35,65 @@ export default function BulkScrubberControl({
       const chunks = chunkArray(targetPanels, 8);
 
       // Process panels concurrently to avoid sequential fetch delays or overloading API
-      const results = await processWithConcurrency(chunks, 4, async (chunkPanels) => {
-        const panelsToScrub = chunkPanels.filter(p => p.speech_text && p.speech_text.trim());
-        if (panelsToScrub.length === 0) return [];
-        
-        try {
-          const res = await fetch("/api/skills/copyright-scrub-batch", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              texts: panelsToScrub.map(p => p.speech_text),
-              model: "gemini-2.5-flash",
-            }),
-          });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const json = await res.json();
-          if (json.success && json.results) {
-            const mappedResults = [];
-            for (let i = 0; i < panelsToScrub.length; i++) {
-              const p = panelsToScrub[i];
-              const r = json.results.find((result: any) => result.text === p.speech_text);
-              if (r && r.success && r.data && r.data.result) {
-                let isViolating = r.data.result.contains_violation;
-                let sanitizedText = r.data.result.sanitized_text;
+      const results = await processWithConcurrency(
+        chunks,
+        4,
+        async (chunkPanels) => {
+          const panelsToScrub = chunkPanels.filter(
+            (p) => p.speech_text && p.speech_text.trim()
+          );
+          if (panelsToScrub.length === 0) return [];
 
-                if (
-                  scanFocus === "monetization" &&
-                  p.speech_text.toLowerCase().includes("kill")
-                ) {
-                  isViolating = true;
-                  sanitizedText = p.speech_text.replace(/kill/gi, "defeat");
-                } else if (
-                  scanFocus === "family" &&
-                  p.speech_text.toLowerCase().includes("damn")
-                ) {
-                  isViolating = true;
-                  sanitizedText = p.speech_text.replace(/damn/gi, "darn");
-                }
+          try {
+            const res = await fetch("/api/skills/copyright-scrub-batch", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                texts: panelsToScrub.map((p) => p.speech_text),
+                model:
+                  localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+              }),
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const json = await res.json();
+            if (json.success && json.results) {
+              const mappedResults = [];
+              for (let i = 0; i < panelsToScrub.length; i++) {
+                const p = panelsToScrub[i];
+                const r = json.results.find(
+                  (result: any) => result.text === p.speech_text
+                );
+                if (r && r.success && r.data && r.data.result) {
+                  let isViolating = r.data.result.contains_violation;
+                  let sanitizedText = r.data.result.sanitized_text;
 
-                if (isViolating) {
-                  mappedResults.push({ id: p.id, sanitized: sanitizedText });
+                  if (
+                    scanFocus === "monetization" &&
+                    p.speech_text.toLowerCase().includes("kill")
+                  ) {
+                    isViolating = true;
+                    sanitizedText = p.speech_text.replace(/kill/gi, "defeat");
+                  } else if (
+                    scanFocus === "family" &&
+                    p.speech_text.toLowerCase().includes("damn")
+                  ) {
+                    isViolating = true;
+                    sanitizedText = p.speech_text.replace(/damn/gi, "darn");
+                  }
+
+                  if (isViolating) {
+                    mappedResults.push({ id: p.id, sanitized: sanitizedText });
+                  }
                 }
               }
+              return mappedResults;
             }
-            return mappedResults;
+          } catch (err) {
+            console.warn(`[Compliance Scrubber] Failed scanning chunk:`, err);
           }
-        } catch (err) {
-          console.warn(
-            `[Compliance Scrubber] Failed scanning chunk:`,
-            err
-          );
+          return [];
         }
-        return [];
-      });
+      );
 
       const flattenedResults = results.flat();
       const cleanMappings: Record<number, string> = {};

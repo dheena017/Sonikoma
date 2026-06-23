@@ -59,7 +59,7 @@ export default function ShortsScriptTab({
         body: JSON.stringify({
           storyboard_summary:
             storyboardSummary || "The story summary details go here.",
-          model: "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
         }),
       });
       const scriptJson = await scriptRes.json();
@@ -74,7 +74,7 @@ export default function ShortsScriptTab({
         body: JSON.stringify({
           title: title || "This Webtoon",
           key_event: "absolute overpowered betrayal scene",
-          model: "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
         }),
       });
       const hookJson = await hookRes.json();

@@ -77,10 +77,10 @@ export default function LandingPage({
             className="flex items-center gap-3 group cursor-pointer"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           >
-            <img 
-              src="/logo.png" 
-              className="w-10 h-10 rounded-xl shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform object-cover bg-black" 
-              alt="Sonikoma Logo" 
+            <img
+              src="/logo.png"
+              className="w-10 h-10 rounded-xl shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform object-cover bg-black"
+              alt="Sonikoma Logo"
             />
             <span className="text-xl font-black tracking-tighter text-white uppercase">
               Sonikoma
@@ -144,12 +144,11 @@ export default function LandingPage({
             </span>
           </h1>
           <p className="text-neutral-400 text-lg md:text-xl max-w-2xl mx-auto font-medium leading-relaxed">
-            Just paste a link, and we'll turn your favorite webtoons into fully voiced, animated videos that are ready to share with the world.
+            Just paste a link, and we'll turn your favorite webtoons into fully
+            voiced, animated videos that are ready to share with the world.
           </p>
           <div className="pt-8 max-w-4xl mx-auto w-full text-left">
-            <div
-              className="bg-neutral-900/40 rounded-3xl border border-neutral-800/80 p-5 sm:p-6 lg:p-8 backdrop-blur-md shadow-sm space-y-5 sm:space-y-6 min-w-0 w-full overflow-hidden"
-            >
+            <div className="bg-neutral-900/40 rounded-3xl border border-neutral-800/80 p-5 sm:p-6 lg:p-8 backdrop-blur-md shadow-sm space-y-5 sm:space-y-6 min-w-0 w-full overflow-hidden">
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-purple-400">
                   <Sparkles className="h-4 w-4 shrink-0" />
@@ -175,7 +174,9 @@ export default function LandingPage({
                       onChange={(e) => setLandingUrl(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && landingUrl.trim()) {
-                          window.location.href = `/workspace?url=${encodeURIComponent(landingUrl)}`;
+                          window.location.href = `/workspace?url=${encodeURIComponent(
+                            landingUrl
+                          )}`;
                         }
                       }}
                       placeholder="Paste any comic or manga viewer URL (e.g. example.com/comic/chapter-1)"
@@ -191,14 +192,18 @@ export default function LandingPage({
                           localStorage.getItem("sonikoma_token") ||
                           sessionStorage.getItem("sonikoma_token");
                         if (!token) {
-                          const usedFree = localStorage.getItem("sonikoma_free_scrape_used");
+                          const usedFree = localStorage.getItem(
+                            "sonikoma_free_scrape_used"
+                          );
                           if (usedFree === "true") {
                             // If they already used their free scrape, force them to login
                             window.location.href = "/login";
                             return;
                           }
                         }
-                        window.location.href = `/workspace?url=${encodeURIComponent(landingUrl)}&autoScrape=true`;
+                        window.location.href = `/workspace?url=${encodeURIComponent(
+                          landingUrl
+                        )}&autoScrape=true`;
                       }
                     }}
                     disabled={!landingUrl.trim()}
@@ -211,11 +216,13 @@ export default function LandingPage({
                 </div>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-center gap-4 pt-6">
               <button
                 onClick={() => {
-                  const element = document.getElementById("transformation-demo");
+                  const element = document.getElementById(
+                    "transformation-demo"
+                  );
                   element?.scrollIntoView({ behavior: "smooth" });
                 }}
                 className="px-6 py-3 bg-neutral-900 border border-white/10 hover:bg-neutral-800 text-white font-bold rounded-2xl transition-all flex items-center justify-center gap-3 text-sm cursor-pointer"
@@ -278,7 +285,8 @@ export default function LandingPage({
               Built for Creators
             </h2>
             <p className="text-neutral-500 max-w-xl mx-auto">
-              We handle the boring, repetitive tasks so you can focus on making great content.
+              We handle the boring, repetitive tasks so you can focus on making
+              great content.
             </p>
           </div>
 
@@ -335,7 +343,8 @@ export default function LandingPage({
               See the Magic Happen
             </h2>
             <p className="text-neutral-500 max-w-xl mx-auto">
-              Slide back and forth to see how we turn plain comic pages into clean, video-ready panels.
+              Slide back and forth to see how we turn plain comic pages into
+              clean, video-ready panels.
             </p>
           </div>
 
@@ -737,8 +746,8 @@ export default function LandingPage({
               Join the Newsletter
             </h3>
             <p className="text-neutral-400 text-sm max-w-md mx-auto">
-              Get product updates, video making tips, and the latest news
-              from our team.
+              Get product updates, video making tips, and the latest news from
+              our team.
             </p>
           </div>
           <form

@@ -124,9 +124,9 @@ export default function ProjectConfirmModal({
           <div className="bg-purple-950/10 border border-purple-800/20 rounded-2xl p-4 flex gap-3 items-start">
             <span className="text-lg leading-none mt-0.5">ℹ️</span>
             <p className="text-xs text-purple-200/90 leading-relaxed font-sans">
-              Creating a series stores the chapter metadata and downloaded
-              panel assets in your workspace. You can refine narration scripts
-              and manage storyboard frames below.
+              Creating a series stores the chapter metadata and downloaded panel
+              assets in your workspace. You can refine narration scripts and
+              manage storyboard frames below.
             </p>
           </div>
 

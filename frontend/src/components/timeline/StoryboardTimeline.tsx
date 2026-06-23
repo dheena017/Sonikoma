@@ -242,26 +242,35 @@ export default function StoryboardTimeline({
 
       await processWithConcurrency(chunks, 4, async (chunkPanels) => {
         try {
-          const res = await activeFetch("/api/image/remove-speech-bubbles-batch", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              urls: chunkPanels.map(p => p.image_url),
-              method: bubbleEraseMethod,
-              sensitivity: bubbleSensitivity,
-              detection_style: bubbleDetectionStyle,
-              dilation: bubbleDilation,
-              inpaint_radius: bubbleInpaintRadius,
-            }),
-          });
+          const res = await activeFetch(
+            "/api/image/remove-speech-bubbles-batch",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                urls: chunkPanels.map((p) => p.image_url),
+                method: bubbleEraseMethod,
+                sensitivity: bubbleSensitivity,
+                detection_style: bubbleDetectionStyle,
+                dilation: bubbleDilation,
+                inpaint_radius: bubbleInpaintRadius,
+              }),
+            }
+          );
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
 
           if (data.success && data.results) {
             setPanels((prev) =>
               prev.map((p) => {
-                const updatedResult = data.results.find((r: any) => r.url === p.image_url);
-                if (updatedResult && updatedResult.success && updatedResult.new_url) {
+                const updatedResult = data.results.find(
+                  (r: any) => r.url === p.image_url
+                );
+                if (
+                  updatedResult &&
+                  updatedResult.success &&
+                  updatedResult.new_url
+                ) {
                   return { ...p, image_url: updatedResult.new_url };
                 }
                 return p;
@@ -326,86 +335,97 @@ export default function StoryboardTimeline({
 
       const chunks = chunkArray(targetPanels, 8);
 
-      const results = await processWithConcurrency(chunks, 4, async (chunkPanels) => {
-        const chunkMap = new Map<number, GeneratedPanel[]>();
-        try {
-          const res = await activeFetch("/api/detect-panels-batch", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              urls: chunkPanels.map(p => p.image_url),
-              sensitivity: cropSensitivity,
-              backgroundColorMode: cropBackgroundMode,
-              aspectRatio: aspectRatioLock,
-              minAreaPct: minPanelAreaPct / 100.0,
-              mergeThreshold: overlapMergeThreshold,
-              strategy: useLocalCV ? "local-cv" : "balanced",
-              model: cropModel,
-              cannyLow: cropCannyLow,
-              cannyHigh: cropCannyHigh,
-              closeKernelSize: cropCloseKernelSize,
-              minHeightPx: cropMinHeightPx,
-              autoSplit: autoSplitTallStrips,
-            }),
-          });
+      const results = await processWithConcurrency(
+        chunks,
+        4,
+        async (chunkPanels) => {
+          const chunkMap = new Map<number, GeneratedPanel[]>();
+          try {
+            const res = await activeFetch("/api/detect-panels-batch", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                urls: chunkPanels.map((p) => p.image_url),
+                sensitivity: cropSensitivity,
+                backgroundColorMode: cropBackgroundMode,
+                aspectRatio: aspectRatioLock,
+                minAreaPct: minPanelAreaPct / 100.0,
+                mergeThreshold: overlapMergeThreshold,
+                strategy: useLocalCV ? "local-cv" : "balanced",
+                model: cropModel,
+                cannyLow: cropCannyLow,
+                cannyHigh: cropCannyHigh,
+                closeKernelSize: cropCloseKernelSize,
+                minHeightPx: cropMinHeightPx,
+                autoSplit: autoSplitTallStrips,
+              }),
+            });
 
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const data = await res.json();
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
 
-          if (data.success && data.results) {
-            for (const result of data.results) {
-              const originalPanel = chunkPanels.find(p => p.image_url === result.url);
-              if (!originalPanel) continue;
-              
-              const newSubPanels: GeneratedPanel[] = [];
-              if (result.success && Array.isArray(result.data?.panels) && result.data.panels.length > 0) {
-                for (let i = 0; i < result.data.panels.length; i++) {
-                  const box = result.data.panels[i];
-                  let croppedUrl = box.croppedUrl;
+            if (data.success && data.results) {
+              for (const result of data.results) {
+                const originalPanel = chunkPanels.find(
+                  (p) => p.image_url === result.url
+                );
+                if (!originalPanel) continue;
 
-                  if (!croppedUrl) {
-                    const cropRes = await activeFetch("/api/image/edit", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        url: originalPanel.image_url,
-                        cropTop: box.cropTop,
-                        cropBottom: box.cropBottom,
-                        cropLeft: box.cropLeft,
-                        cropRight: box.cropRight,
-                        autoTrim: true,
-                        padding: 10,
-                      }),
+                const newSubPanels: GeneratedPanel[] = [];
+                if (
+                  result.success &&
+                  Array.isArray(result.data?.panels) &&
+                  result.data.panels.length > 0
+                ) {
+                  for (let i = 0; i < result.data.panels.length; i++) {
+                    const box = result.data.panels[i];
+                    let croppedUrl = box.croppedUrl;
+
+                    if (!croppedUrl) {
+                      const cropRes = await activeFetch("/api/image/edit", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          url: originalPanel.image_url,
+                          cropTop: box.cropTop,
+                          cropBottom: box.cropBottom,
+                          cropLeft: box.cropLeft,
+                          cropRight: box.cropRight,
+                          autoTrim: true,
+                          padding: 10,
+                        }),
+                      });
+                      if (!cropRes.ok)
+                        throw new Error(`Crop HTTP ${cropRes.status}`);
+                      const cropData = await cropRes.json();
+                      croppedUrl = cropData.url;
+                    }
+
+                    newSubPanels.push({
+                      ...originalPanel,
+                      id: nextId++,
+                      image_url: croppedUrl,
                     });
-                    if (!cropRes.ok) throw new Error(`Crop HTTP ${cropRes.status}`);
-                    const cropData = await cropRes.json();
-                    croppedUrl = cropData.url;
                   }
-
-                  newSubPanels.push({
-                    ...originalPanel,
-                    id: nextId++,
-                    image_url: croppedUrl,
-                  });
+                  successCount++;
+                } else {
+                  newSubPanels.push(originalPanel);
                 }
-                successCount++;
-              } else {
-                newSubPanels.push(originalPanel);
+                chunkMap.set(originalPanel.id, newSubPanels);
               }
-              chunkMap.set(originalPanel.id, newSubPanels);
+            } else {
+              chunkPanels.forEach((p) => chunkMap.set(p.id, [p]));
             }
-          } else {
-            chunkPanels.forEach(p => chunkMap.set(p.id, [p]));
+          } catch (err: any) {
+            console.error(`[Auto Cropper] Failed for chunk:`, err);
+            chunkPanels.forEach((p) => chunkMap.set(p.id, [p]));
+          } finally {
+            completed += chunkPanels.length;
+            setCropProgress({ current: completed, total: targetPanels.length });
           }
-        } catch (err: any) {
-          console.error(`[Auto Cropper] Failed for chunk:`, err);
-          chunkPanels.forEach(p => chunkMap.set(p.id, [p]));
-        } finally {
-          completed += chunkPanels.length;
-          setCropProgress({ current: completed, total: targetPanels.length });
+          return chunkMap;
         }
-        return chunkMap;
-      });
+      );
 
       const updatedPanelsMap = new Map<number, GeneratedPanel[]>();
       for (const chunkMap of results) {
@@ -414,7 +434,7 @@ export default function StoryboardTimeline({
         }
       }
 
-      const updatedPanels = panels.flatMap(p => {
+      const updatedPanels = panels.flatMap((p) => {
         if (!selectedPanelIds.has(p.id)) return [p];
         return updatedPanelsMap.get(p.id) || [p];
       });

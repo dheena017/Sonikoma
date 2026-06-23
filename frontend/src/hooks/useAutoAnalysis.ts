@@ -27,7 +27,9 @@ export function useAutoAnalysis({
 }: UseAutoAnalysisProps) {
   const runBackgroundAnalysis = useCallback(
     async (panelId: number, imageUrl: string) => {
-      console.log(`[Smart Auto-Analysis] Starting analysis for panel #${panelId}`);
+      console.log(
+        `[Smart Auto-Analysis] Starting analysis for panel #${panelId}`
+      );
       try {
         const res = await fetchWithInterceptor("/api/analyze-image", {
           method: "POST",
@@ -41,7 +43,10 @@ export function useAutoAnalysis({
         if (!res.ok)
           throw new Error(`Analysis failed with status ${res.status}`);
         const data = await res.json();
-        console.log(`[Smart Auto-Analysis] Response for panel #${panelId}:`, data);
+        console.log(
+          `[Smart Auto-Analysis] Response for panel #${panelId}:`,
+          data
+        );
         if (data.success && data.analysis) {
           setPanels((prev) =>
             prev.map((p) =>
@@ -78,7 +83,9 @@ export function useAutoAnalysis({
           err
         );
         addNotification(
-          `Panel #${panelId} Smart Scanner analysis failed: ${err.message || err}`,
+          `Panel #${panelId} Smart Scanner analysis failed: ${
+            err.message || err
+          }`,
           "error"
         );
         setPanels((prev) =>
@@ -150,10 +157,7 @@ export function useAutoAnalysis({
         `[GUI] Added ${imgUrls.length} frame(s) to timeline.`,
         ...prev,
       ]);
-      addNotification(
-        `Added ${imgUrls.length} panel(s) to timeline.`,
-        "info"
-      );
+      addNotification(`Added ${imgUrls.length} panel(s) to timeline.`, "info");
 
       // Developer console visibility
       console.log(

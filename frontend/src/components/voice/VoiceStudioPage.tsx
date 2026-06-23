@@ -30,7 +30,8 @@ export default function VoiceStudioPage({
             Voice Studio Locked
           </h3>
           <p className="text-xs text-neutral-400 font-mono leading-relaxed max-w-sm">
-            This module generates voice transcripts, matches audio guidelines, and casts voices for active timeline dialogue.
+            This module generates voice transcripts, matches audio guidelines,
+            and casts voices for active timeline dialogue.
           </p>
         </div>
         <div className="bg-neutral-950/80 p-4 rounded-xl border border-neutral-900 text-left text-[11px] text-neutral-500 font-mono space-y-1.5 w-full">

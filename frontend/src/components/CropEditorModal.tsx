@@ -373,8 +373,8 @@ export default function CropEditorModal({
           <div
             className={[
               "flex border border-white/5 bg-neutral-950/40 rounded-2xl shrink-0 transition-all duration-300 ease-in-out overflow-hidden select-none",
-              isDeckExpanded 
-                ? "flex-col lg:flex-col w-full lg:w-36 xl:w-44 h-32 lg:h-auto" 
+              isDeckExpanded
+                ? "flex-col lg:flex-col w-full lg:w-36 xl:w-44 h-32 lg:h-auto"
                 : "flex-row lg:flex-col h-11 lg:h-auto w-full lg:w-11 sm:lg:w-12",
             ].join(" ")}
           >
@@ -383,7 +383,8 @@ export default function CropEditorModal({
               onClick={() => setIsDeckExpanded(!isDeckExpanded)}
               className={[
                 "flex items-center justify-between p-2 lg:border-b lg:border-r-0 border-r border-white/5 cursor-pointer bg-neutral-900/40 hover:bg-neutral-900 transition-colors duration-150 select-none",
-                !isDeckExpanded && "lg:flex-col gap-3 py-2 px-3 lg:py-3 lg:px-2",
+                !isDeckExpanded &&
+                  "lg:flex-col gap-3 py-2 px-3 lg:py-3 lg:px-2",
               ].join(" ")}
               title={isDeckExpanded ? "Collapse Deck" : "Expand Deck"}
             >

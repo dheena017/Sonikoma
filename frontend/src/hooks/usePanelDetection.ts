@@ -81,7 +81,8 @@ export function usePanelDetection({
         // If the backend fell back to local CV, warn the user
         if (data.fallback) {
           addNotification(
-            data.message || "Smart Scanner panel detection failed, fell back to local CV.",
+            data.message ||
+              "Smart Scanner panel detection failed, fell back to local CV.",
             "warning"
           );
           if (setConsoleLogs) {
@@ -229,7 +230,8 @@ export function usePanelDetection({
       if (data.success && Array.isArray(data.panels)) {
         if (data.fallback) {
           addNotification(
-            data.message || "Smart panel detection failed, fell back to local CV.",
+            data.message ||
+              "Smart panel detection failed, fell back to local CV.",
             "warning"
           );
           if (setConsoleLogs) {

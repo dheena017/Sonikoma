@@ -376,8 +376,6 @@ export default function App() {
     resetWorkspace,
   } = appLogic;
 
-
-
   // --- Auto Save Hook ---
   const { saveStatus, saveProject, isDirty } = useAutoSave({
     projectId,
@@ -546,8 +544,8 @@ export default function App() {
     : saveStatus;
   const headerOnSave = isChapterDetailsPath
     ? () => {
-      projectDetailsSaveRef.current?.();
-    }
+        projectDetailsSaveRef.current?.();
+      }
     : saveProject;
 
   // --------------------------------------------------------------------------
@@ -656,7 +654,11 @@ export default function App() {
       />
 
       {/* --- Main Contents Controller & Router --- */}
-      <div className={`flex-grow flex-1 flex flex-col min-h-screen lg:max-h-screen justify-between ${isSidebarOpen ? "overflow-hidden" : "lg:overflow-y-auto"}`}>
+      <div
+        className={`flex-grow flex-1 flex flex-col min-h-screen lg:max-h-screen justify-between ${
+          isSidebarOpen ? "overflow-hidden" : "lg:overflow-y-auto"
+        }`}
+      >
         <div>
           {/* Engine Health Banner */}
           {backendStatus === "offline" && (
@@ -677,10 +679,11 @@ export default function App() {
                   <button
                     onClick={startBackend}
                     disabled={isStartingBackend}
-                    className={`px-3 py-1 text-[10px] rounded-lg font-mono uppercase tracking-wider font-bold transition-all border shadow-sm cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${isStartingBackend
+                    className={`px-3 py-1 text-[10px] rounded-lg font-mono uppercase tracking-wider font-bold transition-all border shadow-sm cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                      isStartingBackend
                         ? "bg-amber-950/60 border-amber-700/40 text-amber-200 cursor-not-allowed"
                         : "bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-200 border-emerald-700/40"
-                      }`}
+                    }`}
                   >
                     {isStartingBackend ? (
                       <>
@@ -1233,8 +1236,8 @@ export default function App() {
 
           {/* PAGE VIEW 22: Admin Dashboard */}
           {isAdminPath && (
-            <AdminPage 
-              navigateTo={navigateTo} 
+            <AdminPage
+              navigateTo={navigateTo}
               isAuthenticated={isAuthenticated}
               fetchWithInterceptor={fetchWithInterceptor}
             />
@@ -1409,8 +1412,6 @@ export default function App() {
           />
         </div>
       )}
-
-
 
       {confirmDialog && confirmDialog.isOpen && (
         <ConfirmModal

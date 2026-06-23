@@ -43,7 +43,7 @@ export default function PanelTranslationTool({
         body: JSON.stringify({
           text: panel.speech_text,
           target_lang: lang,
-          model: "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
         }),
       });
       const json = await res.json();
@@ -65,7 +65,7 @@ export default function PanelTranslationTool({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           text: panel.speech_text,
-          model: "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
         }),
       });
       const json = await res.json();

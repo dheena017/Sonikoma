@@ -51,7 +51,7 @@ export default function ScriptDramatizerForm({
           raw_ocr_text: rawLines,
           genre,
           scene_context: context,
-          model: "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
         }),
       });
       const json = await res.json();

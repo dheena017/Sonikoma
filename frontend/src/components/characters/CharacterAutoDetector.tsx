@@ -31,7 +31,7 @@ export default function CharacterAutoDetector({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             dialogue: dial,
-            model: "gemini-2.5-flash",
+            model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
           }),
         });
         const json = await res.json();

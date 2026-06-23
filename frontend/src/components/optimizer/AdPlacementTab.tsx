@@ -56,7 +56,7 @@ export default function AdPlacementTab({
           compiled_script:
             compiledScript || "Script content representing timeline narration.",
           max_ads: maxAds,
-          model: "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
         }),
       });
       const json = await res.json();

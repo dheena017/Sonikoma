@@ -140,30 +140,34 @@ export function useSingleImageEdits({
     ]);
 
     try {
-      const croppedUrls = await processWithConcurrency(cuts, 8, async (cut, index) => {
-        setConsoleLogs((prev) => [
-          `[Image Editor] Starting Crop Cut #${index + 1}/${cuts.length}...`,
-          ...prev,
-        ]);
-        const response = await fetchWithInterceptor("/api/image/edit", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            url: originalUrl,
-            cropTop: cut.cropTop,
-            cropBottom: cut.cropBottom,
-            cropLeft: cut.cropLeft,
-            cropRight: cut.cropRight,
-            autoTrim: cut.autoTrim,
-          }),
-        });
-        const data = await response.json();
-        setConsoleLogs((prev) => [
-          `[Image Editor] Crop Cut #${index + 1}/${cuts.length} complete.`,
-          ...prev,
-        ]);
-        return data.url;
-      });
+      const croppedUrls = await processWithConcurrency(
+        cuts,
+        8,
+        async (cut, index) => {
+          setConsoleLogs((prev) => [
+            `[Image Editor] Starting Crop Cut #${index + 1}/${cuts.length}...`,
+            ...prev,
+          ]);
+          const response = await fetchWithInterceptor("/api/image/edit", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              url: originalUrl,
+              cropTop: cut.cropTop,
+              cropBottom: cut.cropBottom,
+              cropLeft: cut.cropLeft,
+              cropRight: cut.cropRight,
+              autoTrim: cut.autoTrim,
+            }),
+          });
+          const data = await response.json();
+          setConsoleLogs((prev) => [
+            `[Image Editor] Crop Cut #${index + 1}/${cuts.length} complete.`,
+            ...prev,
+          ]);
+          return data.url;
+        }
+      );
 
       // Add all cropped urls directly to Timeline
       addPanelsToStoryboard(croppedUrls);

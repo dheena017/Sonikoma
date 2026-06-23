@@ -232,10 +232,7 @@ export default function LiveScraperDeck({
       setConsoleLogs((prev) => ["[GUI] Cleared selections", ...prev]);
     } else {
       setSelectedScraped([...scrapedImages]);
-      setConsoleLogs((prev) => [
-        "[GUI] Selected all images",
-        ...prev,
-      ]);
+      setConsoleLogs((prev) => ["[GUI] Selected all images", ...prev]);
     }
   };
 
@@ -377,8 +374,8 @@ export default function LiveScraperDeck({
           <div className="flex flex-col items-center justify-center py-8 space-y-3">
             <RefreshCw className="h-6 w-6 text-purple-500 animate-spin" />
             <p className="text-xs text-neutral-400 font-mono">
-              Downloading images from the link... this may take up to
-              60 seconds.
+              Downloading images from the link... this may take up to 60
+              seconds.
             </p>
           </div>
         ) : (

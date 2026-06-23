@@ -27,7 +27,7 @@ export default function CommentReplier({ title }: CommentReplierProps) {
         body: JSON.stringify({
           user_comment: comment,
           video_title: title || "Solo Leveling Recap",
-          model: "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
         }),
       });
       const json = await res.json();

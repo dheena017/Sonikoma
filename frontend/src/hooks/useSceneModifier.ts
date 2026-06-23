@@ -126,9 +126,7 @@ export function useSceneModifier({
     setPanels((prev) =>
       prev.map((p) => (p.id === panelId ? { ...p, sfx: sfxVal } : p))
     );
-    console.log(
-      `[Timeline] [SFX Edit] Panel #${panelId} SFX revised:`
-    );
+    console.log(`[Timeline] [SFX Edit] Panel #${panelId} SFX revised:`);
     console.log(`  - Sent (Original): "${originalSFX}"`);
     console.log(`  - Revise (Revised): "${sfxVal}"`);
     if (setConsoleLogs) {

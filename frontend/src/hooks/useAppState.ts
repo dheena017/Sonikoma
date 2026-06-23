@@ -718,25 +718,31 @@ export function useAppState() {
             );
           }
         } else if (res.status === 404) {
-          console.warn(`[AppState] Project ${lookupId} not found. Clearing broken workspace state.`);
+          console.warn(
+            `[AppState] Project ${lookupId} not found. Clearing broken workspace state.`
+          );
           setProjectId(null);
           setSeriesSlugState(null);
           setChapterSlugState(null);
           localStorage.removeItem("active_project_id");
           localStorage.removeItem("active_series_slug");
           localStorage.removeItem("active_chapter_slug");
-          
-          if (window.location.search.includes("id=") || window.location.search.includes("project_id=")) {
+
+          if (
+            window.location.search.includes("id=") ||
+            window.location.search.includes("project_id=")
+          ) {
             const urlParams = new URLSearchParams(window.location.search);
             urlParams.delete("id");
             urlParams.delete("project_id");
             const newSearch = urlParams.toString();
-            const newUrl = window.location.pathname + (newSearch ? "?" + newSearch : "");
+            const newUrl =
+              window.location.pathname + (newSearch ? "?" + newSearch : "");
             window.history.replaceState(null, "", newUrl);
           }
-          
+
           addNotification("Project not found or was deleted.", "error", {
-            details: `The requested project ID (${lookupId}) could not be found. Your workspace has been reset to a blank slate.`
+            details: `The requested project ID (${lookupId}) could not be found. Your workspace has been reset to a blank slate.`,
           });
         }
       } catch (err) {

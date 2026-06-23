@@ -35,7 +35,7 @@ export default function PanelAudioTool({ panel }: PanelAudioToolProps) {
         body: JSON.stringify({
           visual_description: panel.visual_description || "Action scene panel",
           sfx_tag: panel.sfx || "[Action]",
-          model: "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
         }),
       });
       const json = await res.json();
@@ -60,7 +60,7 @@ export default function PanelAudioTool({ panel }: PanelAudioToolProps) {
           dialogue_sample: panel.speech_text || "Stop right there!",
           visual_description:
             panel.visual_description || "Action scene character close-up",
-          model: "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
         }),
       });
       const json = await res.json();

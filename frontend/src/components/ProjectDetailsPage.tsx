@@ -644,11 +644,9 @@ export default function ProjectDetailsPage({
       }
     } catch (e: any) {
       setSaveStatus("error");
-      addNotification?.(
-        e.message || "Error saving changes.",
-        "error",
-        { details: e.stack || String(e) }
-      );
+      addNotification?.(e.message || "Error saving changes.", "error", {
+        details: e.stack || String(e),
+      });
     }
   }, [projectId, project, panels, serializeState, addNotification]);
 
@@ -1053,7 +1051,9 @@ export default function ProjectDetailsPage({
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-3 gap-2 sm:gap-0">
                     <h3 className="text-xs font-black uppercase text-neutral-300 tracking-wider flex items-center gap-2">
                       <ImageIcon className="w-4 h-4 text-purple-450 shrink-0" />
-                      <span>Imported Image Sheets ({scrapedImages.length})</span>
+                      <span>
+                        Imported Image Sheets ({scrapedImages.length})
+                      </span>
                     </h3>
                     <span className="text-[10px] text-neutral-500 font-bold mt-1 sm:mt-0">
                       Click sheets to inspect high-resolution strips

@@ -65,7 +65,7 @@ export default function SoundOutroTab({
         body: JSON.stringify({
           story_outline:
             storyboardSummary || "The recap story outline details.",
-          model: "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
         }),
       });
       const cliffJson = await cliffRes.json();
@@ -82,7 +82,7 @@ export default function SoundOutroTab({
         body: JSON.stringify({
           title: title || "This Webtoon",
           ending_cliffhanger: cliffText || "epic resolution reveal",
-          model: "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
         }),
       });
       const outroJson = await outroRes.json();
@@ -97,7 +97,7 @@ export default function SoundOutroTab({
         body: JSON.stringify({
           narrative_mood: "tense antihero action",
           action_scale: "high",
-          model: "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
         }),
       });
       const bgmJson = await bgmRes.json();

@@ -134,7 +134,9 @@ export default function TimelineSelectionBar({
                 )}
 
                 {/* Divider */}
-                {selectedCount > 0 && <div className="hidden sm:block w-px h-6 bg-neutral-800 shrink-0" />}
+                {selectedCount > 0 && (
+                  <div className="hidden sm:block w-px h-6 bg-neutral-800 shrink-0" />
+                )}
 
                 {/* Action Buttons */}
                 {selectedCount > 0 && (
@@ -254,7 +256,9 @@ export default function TimelineSelectionBar({
                     <button
                       type="button"
                       onClick={() => {
-                        console.log("[TimelineSelectionBar] Clearing selection");
+                        console.log(
+                          "[TimelineSelectionBar] Clearing selection"
+                        );
                         clearSelection();
                       }}
                       className="p-2 rounded-full border font-bold flex items-center justify-center cursor-pointer transition-all bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200"

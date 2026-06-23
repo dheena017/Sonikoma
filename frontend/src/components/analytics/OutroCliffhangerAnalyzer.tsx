@@ -58,7 +58,7 @@ export default function OutroCliffhangerAnalyzer({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           story_outline: outline,
-          model: "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
         }),
       });
       const json = await res.json();

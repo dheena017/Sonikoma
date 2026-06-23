@@ -112,9 +112,7 @@ export function useLiveScraperActions({
       addNotification?.("No images selected to add to timeline.", "warning");
       return;
     }
-    console.log(
-      `[GUI] Adding ${selectedScraped.length} image(s) to timeline`
-    );
+    console.log(`[GUI] Adding ${selectedScraped.length} image(s) to timeline`);
     addPanelsToStoryboard(selectedScraped);
     setSelectedScraped([]);
   };

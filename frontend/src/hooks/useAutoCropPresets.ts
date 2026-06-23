@@ -122,11 +122,14 @@ export function useAutoCropPresets(props: AutoCropSharedProps) {
   );
 
   const applyBuiltInPreset = useCallback(
-    (preset: Partial<CustomCropPreset> & { id: string, label?: string }) => {
+    (preset: Partial<CustomCropPreset> & { id: string; label?: string }) => {
       applyState(preset);
       setActiveSlot(preset.id);
       pushToHistory(preset);
-      props.addNotification?.(`Applied preset: ${preset.label || preset.id}`, "info");
+      props.addNotification?.(
+        `Applied preset: ${preset.label || preset.id}`,
+        "info"
+      );
     },
     [applyState, pushToHistory, props.addNotification]
   );

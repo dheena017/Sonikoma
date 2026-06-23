@@ -67,9 +67,7 @@ export function useCompileActions({
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        console.log(
-          "[Timeline] ZIP archive download triggered successfully"
-        );
+        console.log("[Timeline] ZIP archive download triggered successfully");
         if (addNotification) {
           addNotification("ZIP archive downloaded successfully!", "success");
         }
@@ -100,7 +98,10 @@ export function useCompileActions({
     const originalText = originalPanel ? originalPanel.speech_text : "";
     const originalMotion = originalPanel ? originalPanel.motion_type : "";
 
-    console.log("[Timeline] Starting Smart Scanner analysis for panel", panelId);
+    console.log(
+      "[Timeline] Starting Smart Scanner analysis for panel",
+      panelId
+    );
     console.log(`  - Model used: ${activeModel}`);
     console.log(`  - Sent Image: ${imageUrl.substring(0, 60)}...`);
     console.log(`  - Sent Original Dialogue: "${originalText}"`);
@@ -212,77 +213,93 @@ export function useCompileActions({
         "info"
       );
     }
-    
+
     // Set all selected panels to analyzing state
-    setPanels(prev => prev.map(p => selectedIds.includes(p.id) ? { ...p, isAnalyzing: true } : p));
-    
+    setPanels((prev) =>
+      prev.map((p) =>
+        selectedIds.includes(p.id) ? { ...p, isAnalyzing: true } : p
+      )
+    );
+
     try {
       const activeModel = selectedModel || "gemini-2.5-flash";
-      const targetPanels = panels.filter(p => selectedIds.includes(p.id));
+      const targetPanels = panels.filter((p) => selectedIds.includes(p.id));
       const chunks = chunkArray(targetPanels, 8);
-      
+
       await processWithConcurrency(chunks, 4, async (chunkPanels) => {
         try {
           const res = await activeFetch("/api/analyze-batch", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              urls: chunkPanels.map(p => p.image_url),
+              urls: chunkPanels.map((p) => p.image_url),
               model: activeModel,
               narrationStyle,
               voice: voiceActor,
             }),
           });
-          
+
           if (!res.ok) throw new Error("Image analysis batch failed");
           const data = await res.json();
-          
+
           if (data.success && data.results) {
-            setPanels(prev => prev.map(p => {
-              if (!selectedIds.includes(p.id)) return p;
-              
-              const result = data.results.find((r: any) => r.url === p.image_url);
-              if (result && result.analysis) {
-                const aiDuration = Number(result.analysis.duration);
-                const aiMotion = String(result.analysis.motion_type || "").trim();
-                return {
-                  ...p,
-                  speech_text: result.analysis.speech_text || p.speech_text,
-                  sfx: result.analysis.sfx || p.sfx,
-                  duration: aiDuration > 0 ? aiDuration : p.duration,
-                  motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
-                  visual_description: result.analysis.visual_description || p.visual_description,
-                  audio_url: result.audio_url || p.audio_url,
-                  isAnalyzing: false,
-                };
-              }
-              return p;
-            }));
-            
+            setPanels((prev) =>
+              prev.map((p) => {
+                if (!selectedIds.includes(p.id)) return p;
+
+                const result = data.results.find(
+                  (r: any) => r.url === p.image_url
+                );
+                if (result && result.analysis) {
+                  const aiDuration = Number(result.analysis.duration);
+                  const aiMotion = String(
+                    result.analysis.motion_type || ""
+                  ).trim();
+                  return {
+                    ...p,
+                    speech_text: result.analysis.speech_text || p.speech_text,
+                    sfx: result.analysis.sfx || p.sfx,
+                    duration: aiDuration > 0 ? aiDuration : p.duration,
+                    motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
+                    visual_description:
+                      result.analysis.visual_description ||
+                      p.visual_description,
+                    audio_url: result.audio_url || p.audio_url,
+                    isAnalyzing: false,
+                  };
+                }
+                return p;
+              })
+            );
+
             if (setConsoleLogs) {
-              setConsoleLogs(prev => [
+              setConsoleLogs((prev) => [
                 `[Smart Auto-Analysis] [SUCCESS] Processed batch of ${chunkPanels.length} panels`,
-                ...prev
+                ...prev,
               ]);
             }
           } else {
-            throw new Error(data.error || "Batch analysis returned unsuccessful status");
+            throw new Error(
+              data.error || "Batch analysis returned unsuccessful status"
+            );
           }
         } catch (err: any) {
           console.error("[useCompileActions] Batch analysis failed:", err);
           if (setConsoleLogs) {
-            setConsoleLogs(prev => [
+            setConsoleLogs((prev) => [
               `[Smart Auto-Analysis] [ERROR] Batch analysis failed: ${err.message}`,
-              ...prev
+              ...prev,
             ]);
           }
         } finally {
-          setPanels(prev => prev.map(p => {
-            if (chunkPanels.some(cp => cp.id === p.id)) {
-              return { ...p, isAnalyzing: false };
-            }
-            return p;
-          }));
+          setPanels((prev) =>
+            prev.map((p) => {
+              if (chunkPanels.some((cp) => cp.id === p.id)) {
+                return { ...p, isAnalyzing: false };
+              }
+              return p;
+            })
+          );
         }
       });
 
@@ -300,7 +317,11 @@ export function useCompileActions({
           "error"
         );
       }
-      setPanels(prev => prev.map(p => selectedIds.includes(p.id) ? { ...p, isAnalyzing: false } : p));
+      setPanels((prev) =>
+        prev.map((p) =>
+          selectedIds.includes(p.id) ? { ...p, isAnalyzing: false } : p
+        )
+      );
     } finally {
       setIsAnalyzingAll(false);
     }
@@ -315,64 +336,77 @@ export function useCompileActions({
         "info"
       );
     }
-    
+
     // Set all panels to analyzing state
-    setPanels(prev => prev.map(p => ({ ...p, isAnalyzing: true })));
-    
+    setPanels((prev) => prev.map((p) => ({ ...p, isAnalyzing: true })));
+
     try {
       const activeModel = selectedModel || "gemini-2.5-flash";
       const chunks = chunkArray(panels, 8);
-      
+
       await processWithConcurrency(chunks, 4, async (chunkPanels) => {
         try {
           const res = await activeFetch("/api/analyze-batch", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              urls: chunkPanels.map(p => p.image_url),
+              urls: chunkPanels.map((p) => p.image_url),
               model: activeModel,
               narrationStyle,
               voice: voiceActor,
             }),
           });
-          
+
           if (!res.ok) throw new Error("Image analysis batch failed");
           const data = await res.json();
-          
+
           if (data.success && data.results) {
-            setPanels(prev => prev.map(p => {
-              const result = data.results.find((r: any) => r.url === p.image_url);
-              if (result && result.analysis) {
-                const aiDuration = Number(result.analysis.duration);
-                const aiMotion = String(result.analysis.motion_type || "").trim();
-                return {
-                  ...p,
-                  speech_text: result.analysis.speech_text || p.speech_text,
-                  sfx: result.analysis.sfx || p.sfx,
-                  duration: aiDuration > 0 ? aiDuration : p.duration,
-                  motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
-                  visual_description: result.analysis.visual_description || p.visual_description,
-                  audio_url: result.audio_url || p.audio_url,
-                  isAnalyzing: false,
-                };
-              }
-              return p;
-            }));
+            setPanels((prev) =>
+              prev.map((p) => {
+                const result = data.results.find(
+                  (r: any) => r.url === p.image_url
+                );
+                if (result && result.analysis) {
+                  const aiDuration = Number(result.analysis.duration);
+                  const aiMotion = String(
+                    result.analysis.motion_type || ""
+                  ).trim();
+                  return {
+                    ...p,
+                    speech_text: result.analysis.speech_text || p.speech_text,
+                    sfx: result.analysis.sfx || p.sfx,
+                    duration: aiDuration > 0 ? aiDuration : p.duration,
+                    motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
+                    visual_description:
+                      result.analysis.visual_description ||
+                      p.visual_description,
+                    audio_url: result.audio_url || p.audio_url,
+                    isAnalyzing: false,
+                  };
+                }
+                return p;
+              })
+            );
           }
         } catch (err: any) {
           console.error("[useCompileActions] Batch analysis failed:", err);
         } finally {
-          setPanels(prev => prev.map(p => {
-            if (chunkPanels.some(cp => cp.id === p.id)) {
-              return { ...p, isAnalyzing: false };
-            }
-            return p;
-          }));
+          setPanels((prev) =>
+            prev.map((p) => {
+              if (chunkPanels.some((cp) => cp.id === p.id)) {
+                return { ...p, isAnalyzing: false };
+              }
+              return p;
+            })
+          );
         }
       });
-      
+
       if (addNotification) {
-        addNotification("Smart Scanner analysis completed for all panels!", "success");
+        addNotification(
+          "Smart Scanner analysis completed for all panels!",
+          "success"
+        );
       }
     } catch (err: any) {
       console.error("[useCompileActions] Sequential analysis failed:", err);
@@ -382,7 +416,7 @@ export function useCompileActions({
           "error"
         );
       }
-      setPanels(prev => prev.map(p => ({ ...p, isAnalyzing: false })));
+      setPanels((prev) => prev.map((p) => ({ ...p, isAnalyzing: false })));
     } finally {
       setIsAnalyzingAll(false);
     }
