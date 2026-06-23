@@ -233,7 +233,7 @@ export default function LiveScraperDeck({
     } else {
       setSelectedScraped([...scrapedImages]);
       setConsoleLogs((prev) => [
-        "[GUI] Selected all extracted frames",
+        "[GUI] Selected all images",
         ...prev,
       ]);
     }
@@ -319,7 +319,7 @@ export default function LiveScraperDeck({
             </div>
             <div className="flex flex-wrap items-center gap-2 min-w-0">
               <h3 className="font-bold text-sm text-white truncate">
-                Live Asset Extraction
+                Imported Images
               </h3>
               {scrapedImages.length > 0 && (
                 <span className="text-[10px] px-3 py-1 rounded-full bg-purple-950/60 text-purple-300 border border-purple-800/50 shadow-inner font-mono uppercase tracking-wider">
@@ -358,7 +358,7 @@ export default function LiveScraperDeck({
                 onClick={handleSaveAssets}
                 className="text-[10px] font-bold border border-purple-500/50 bg-purple-600 hover:bg-purple-500 text-white rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors shadow-md active:scale-95 cursor-pointer shrink-0 whitespace-nowrap"
               >
-                Save Assets
+                Save Images
               </button>
             )}
             <button
@@ -377,7 +377,7 @@ export default function LiveScraperDeck({
           <div className="flex flex-col items-center justify-center py-8 space-y-3">
             <RefreshCw className="h-6 w-6 text-purple-500 animate-spin" />
             <p className="text-xs text-neutral-400 font-mono">
-              Launching browser to scrape webtoon panels... this may take up to
+              Downloading images from the link... this may take up to
               60 seconds.
             </p>
           </div>
@@ -389,10 +389,10 @@ export default function LiveScraperDeck({
                 <div className="flex items-center gap-2">
                   <RefreshCw className="h-3.5 w-3.5 text-purple-400 animate-spin flex-shrink-0" />
                   <p className="text-xs text-purple-300 font-mono font-bold tracking-tight">
-                    Extracting panels...{" "}
+                    Downloading images...{" "}
                     {scrapedImages.length > 0
                       ? `${scrapedImages.length} loaded so far`
-                      : "launching browser renderer"}
+                      : "preparing to download"}
                   </p>
                 </div>
                 <div className="relative h-1.5 w-full bg-black/60 rounded-full overflow-hidden border border-purple-950/40 shadow-inner">
@@ -491,7 +491,7 @@ export default function LiveScraperDeck({
                   </div>
                   <div>
                     <h2 className="text-base font-bold text-white tracking-tight">
-                      Delete Extracted Frames?
+                      Delete Selected Images?
                     </h2>
                     <p className="text-[10px] text-neutral-450 font-mono">
                       Warning: This action cannot be undone
