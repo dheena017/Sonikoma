@@ -144,7 +144,7 @@ export default function TerminalLogs({
   ).length;
 
   return (
-    <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-3.5">
+    <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-3.5 min-w-0 w-full overflow-hidden">
       <TerminalLogsHeader
         consoleLogs={consoleLogs}
         autoScroll={autoScroll}

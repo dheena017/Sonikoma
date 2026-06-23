@@ -26,9 +26,9 @@ export default function TimelineHeader({
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-neutral-800 pb-4">
       <div>
-        <h3 className="font-bold text-base text-white flex items-center gap-2">
+        <h3 className="font-bold text-base text-white flex flex-wrap items-center gap-2">
           Dynamic Storyboard &amp; OCR Transcription
-          <span className="text-xs bg-neutral-800 text-neutral-400 border border-neutral-750 px-2 py-0.5 rounded-full font-mono">
+          <span className="text-xs bg-neutral-800 text-neutral-400 border border-neutral-750 px-2 py-0.5 rounded-full font-mono shrink-0">
             {panelsLength} {panelsLength === 1 ? "panel" : "panels"}
           </span>
         </h3>

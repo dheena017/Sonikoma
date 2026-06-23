@@ -352,9 +352,9 @@ export default function AuthShowcase({
       <div className="relative z-10 flex items-center justify-between w-full">
         <div className="flex items-center gap-3">
           <div
-            className={`flex items-center justify-center w-10 h-10 rounded-xl ${currentTheme.accentBg} border ${currentTheme.accentBorder} transition-all duration-500`}
+            className={`flex items-center justify-center w-10 h-10 rounded-xl ${currentTheme.accentBg} border ${currentTheme.accentBorder} transition-all duration-500 overflow-hidden`}
           >
-            <BrandIcon />
+            <img src="/logo.png" alt="Logo" className="w-7 h-7 object-contain drop-shadow-md" />
           </div>
           <div>
             <span className="text-xl font-bold tracking-tight text-white">
@@ -421,9 +421,9 @@ export default function AuthShowcase({
               </p>
               <div className="flex items-center gap-3 mt-6">
                 <div
-                  className={`flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br ${slide.color} shadow-lg shadow-purple-500/10`}
+                  className={`flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br ${slide.color} shadow-lg shadow-purple-500/10 overflow-hidden`}
                 >
-                  <IconComponent className="w-6 h-6 text-white" />
+                  <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain drop-shadow-md" />
                 </div>
               </div>
             </div>

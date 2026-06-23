@@ -29,7 +29,7 @@ export function TerminalLogsFilter({
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-neutral-950/40 p-2 rounded-xl border border-transparent shadow-inner shadow-black/10">
       {/* Filter Tabs */}
-      <div className="flex items-center gap-1 overflow-x-auto">
+      <div className="flex items-center gap-1 overflow-x-auto custom-scrollbar pb-1">
         {(
           [
             { id: "all", label: "All", count: consoleLogs.length },
@@ -64,7 +64,7 @@ export function TerminalLogsFilter({
             <button
               key={tab.id}
               onClick={() => setActiveFilter(tab.id)}
-              className={`px-2.5 py-1 rounded-lg font-mono text-[9px] font-bold border transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`shrink-0 whitespace-nowrap px-2.5 py-1 rounded-lg font-mono text-[9px] font-bold border transition-all cursor-pointer flex items-center gap-1.5 ${
                 isActive
                   ? "bg-purple-600 border-purple-500 text-white shadow-sm"
                   : "bg-neutral-900 border-neutral-900/50 text-neutral-300 hover:text-neutral-100"

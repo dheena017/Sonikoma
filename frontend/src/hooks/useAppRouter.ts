@@ -75,28 +75,12 @@ export function useAppRouter({
     () => localStorage.getItem("ai_comic_theme") || "obsidian"
   );
   const [isPipMode, setIsPipMode] = React.useState<boolean>(false);
-  const [pendingNavigationPath, setPendingNavigationPath] = React.useState<
-    string | null
-  >(null);
 
   // Sync visual theme with root html element
   React.useEffect(() => {
     document.documentElement.setAttribute("data-theme", activeTheme);
     localStorage.setItem("ai_comic_theme", activeTheme);
   }, [activeTheme]);
-
-  // Browser refresh/close/unload warning for unsaved changes
-  React.useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (isDirty) {
-        const msg = "You have unsaved changes. Are you sure you want to leave?";
-        e.returnValue = msg;
-        return msg;
-      }
-    };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [isDirty]);
 
   // Sync settings and state URL parameters on load
   React.useEffect(() => {
@@ -335,23 +319,10 @@ export function useAppRouter({
         return;
       }
 
-      const isCurrentlyEditor = window.location.pathname.startsWith("/editor");
-      const isTargetingEditor = targetPath.startsWith("/editor");
-      const isEditorDirty =
-        !isDirty &&
-        isCurrentlyEditor &&
-        !isTargetingEditor &&
-        (window as any).editorHasUnsavedChanges?.();
-
-      if (isDirty || isEditorDirty) {
-        setPendingNavigationPath(targetPath);
-        return;
-      }
-
       window.history.pushState({}, "", targetPath);
       window.dispatchEvent(new Event("popstate"));
     },
-    [isAuthenticated, isDirty, projectId, seriesSlug, chapterSlug]
+    [isAuthenticated, projectId, seriesSlug, chapterSlug]
   );
 
   React.useEffect(() => {
@@ -369,7 +340,5 @@ export function useAppRouter({
     isPipMode,
     setIsPipMode,
     navigateTo,
-    pendingNavigationPath,
-    setPendingNavigationPath,
   };
 }

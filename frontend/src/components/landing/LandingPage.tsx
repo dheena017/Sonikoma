@@ -38,6 +38,9 @@ export default function LandingPage({
   >("slicing");
   const [sliderPos, setSliderPos] = React.useState<number>(50);
 
+  // State for URL Input
+  const [landingUrl, setLandingUrl] = React.useState("");
+
   // State for pricing billing cycle (monthly vs annual)
   const [billingCycle, setBillingCycle] = React.useState<"monthly" | "yearly">(
     "monthly"
@@ -74,9 +77,11 @@ export default function LandingPage({
             className="flex items-center gap-3 group cursor-pointer"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform">
-              <Sparkles className="w-6 h-6 text-white" />
-            </div>
+            <img 
+              src="/logo.png" 
+              className="w-10 h-10 rounded-xl shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform object-cover bg-black" 
+              alt="Sonikoma Logo" 
+            />
             <span className="text-xl font-black tracking-tighter text-white uppercase">
               Sonikoma
             </span>
@@ -128,7 +133,7 @@ export default function LandingPage({
         <div className="absolute top-40 left-1/4 w-[400px] h-[400px] bg-indigo-600/10 blur-[100px] rounded-full -z-10" />
 
         <div className="max-w-7xl mx-auto text-center space-y-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold uppercase tracking-widest animate-bounce">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold uppercase tracking-widest">
             <Sparkles className="w-3.5 h-3.5" />
             AI-Powered Webtoon Transformation
           </div>
@@ -143,24 +148,84 @@ export default function LandingPage({
             Webtoons into immersive videos with dynamic motion, TTS, and
             professional editing.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <button
-              onClick={onGetStarted}
-              className="w-full sm:w-auto px-10 py-5 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-2xl transition-all shadow-2xl shadow-purple-600/30 flex items-center justify-center gap-3 text-lg group cursor-pointer"
+          <div className="pt-8 max-w-4xl mx-auto w-full text-left">
+            <div
+              className="bg-neutral-900/40 rounded-3xl border border-neutral-800/80 p-5 sm:p-6 lg:p-8 backdrop-blur-md shadow-sm space-y-5 sm:space-y-6 min-w-0 w-full overflow-hidden"
             >
-              Start Creating Now
-              <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
-            </button>
-            <button
-              onClick={() => {
-                const element = document.getElementById("transformation-demo");
-                element?.scrollIntoView({ behavior: "smooth" });
-              }}
-              className="w-full sm:w-auto px-10 py-5 bg-neutral-900 border border-white/10 hover:bg-neutral-800 text-white font-bold rounded-2xl transition-all flex items-center justify-center gap-3 text-lg cursor-pointer"
-            >
-              <Play className="w-6 h-6 fill-white" />
-              Watch Demo
-            </button>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-purple-400">
+                  <Sparkles className="h-4 w-4 shrink-0" />
+                  <span className="text-[10px] sm:text-xs font-semibold tracking-wider uppercase font-mono">
+                    Dynamic Comic Scraper
+                  </span>
+                </div>
+                <h2 className="text-base sm:text-lg font-bold text-white tracking-tight leading-tight">
+                  Generate Video from Comic URL
+                </h2>
+                <p className="text-[10px] sm:text-xs text-neutral-400 font-sans leading-relaxed">
+                  Paste a comic or manga URL to dynamically scrape panels and generate a video.
+                </p>
+              </div>
+
+              <div className="space-y-5">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="relative group flex-grow">
+                    <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 opacity-20 blur group-focus-within:opacity-40 transition-opacity duration-300" />
+                    <input
+                      type="url"
+                      value={landingUrl}
+                      onChange={(e) => setLandingUrl(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && landingUrl.trim()) {
+                          window.location.href = `/workspace?url=${encodeURIComponent(landingUrl)}`;
+                        }
+                      }}
+                      placeholder="Paste any comic or manga viewer URL (e.g. example.com/comic/chapter-1)"
+                      className="relative w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-neutral-200 outline-none placeholder:text-neutral-600 focus:border-purple-500 transition-colors"
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (landingUrl.trim()) {
+                        const token =
+                          localStorage.getItem("sonikoma_token") ||
+                          sessionStorage.getItem("sonikoma_token");
+                        if (!token) {
+                          const usedFree = localStorage.getItem("sonikoma_free_scrape_used");
+                          if (usedFree === "true") {
+                            // If they already used their free scrape, force them to login
+                            window.location.href = "/login";
+                            return;
+                          }
+                        }
+                        window.location.href = `/workspace?url=${encodeURIComponent(landingUrl)}&autoScrape=true`;
+                      }
+                    }}
+                    disabled={!landingUrl.trim()}
+                    className="relative px-6 py-3.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 rounded-xl text-sm font-bold text-white transition-all shadow-[0_0_20px_-5px_rgba(147,51,234,0.5)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 group overflow-hidden shrink-0 flex items-center justify-center gap-2"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <Sparkles className="w-4 h-4" />
+                    Scrape Assets
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-center gap-4 pt-6">
+              <button
+                onClick={() => {
+                  const element = document.getElementById("transformation-demo");
+                  element?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="px-6 py-3 bg-neutral-900 border border-white/10 hover:bg-neutral-800 text-white font-bold rounded-2xl transition-all flex items-center justify-center gap-3 text-sm cursor-pointer"
+              >
+                <Play className="w-4 h-4 fill-white" />
+                Watch Demo
+              </button>
+            </div>
           </div>
         </div>
       </section>

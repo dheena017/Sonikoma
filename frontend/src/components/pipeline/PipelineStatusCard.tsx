@@ -12,7 +12,7 @@ export default function PipelineStatusCard({
   return (
     <div
       id="pipeline_status_card"
-      className="bg-neutral-900/80 border border-neutral-800/70 rounded-3xl p-5 sm:p-6 space-y-5 shadow-2xl backdrop-blur-md transition-all duration-300"
+      className="bg-neutral-900/80 border border-neutral-800/70 rounded-3xl p-5 sm:p-6 space-y-5 shadow-2xl backdrop-blur-md transition-all duration-300 min-w-0 w-full overflow-hidden"
     >
       {/* Header telemetry info */}
       <div className="flex items-center justify-between">

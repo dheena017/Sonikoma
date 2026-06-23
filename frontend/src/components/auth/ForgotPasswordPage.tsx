@@ -230,7 +230,7 @@ export default function ForgotPasswordPage({
         {/* Top Controls Toolbar */}
         <div className="relative z-10 flex items-center justify-between mb-6">
           {/* Header branding & Back Button */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 lg:gap-3">
             {onNavigateHome && (
               <button
                 onClick={onNavigateHome}
@@ -241,20 +241,20 @@ export default function ForgotPasswordPage({
               </button>
             )}
 
-            <div className="flex lg:hidden items-center gap-2">
+            <div className="flex lg:hidden items-center gap-1.5">
               <div
-                className={`flex items-center justify-center w-8 h-8 rounded-lg ${currentTheme.accentBg} border ${currentTheme.accentBorder}`}
+                className={`flex items-center justify-center w-8 h-8 rounded-lg ${currentTheme.accentBg} border ${currentTheme.accentBorder} overflow-hidden`}
               >
-                <KeyRound className={`w-4 h-4 ${currentTheme.accentText}`} />
+                <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain drop-shadow-md" />
               </div>
-              <span className="text-lg font-bold text-white tracking-tight">
+              <span className="text-lg font-bold text-white tracking-tight mr-0.5">
                 Sonikoma
               </span>
             </div>
           </div>
           <div className="flex items-center gap-4">
             {/* Color Palette Theme Switcher */}
-            <div className="flex items-center gap-1.5 bg-neutral-900/60 border border-white/5 p-1 rounded-full backdrop-blur-md">
+            <div className="hidden sm:flex items-center gap-1.5 bg-neutral-900/60 border border-white/5 p-1 rounded-full backdrop-blur-md">
               {(Object.keys(THEMES) as ThemeKey[]).map((theme) => {
                 const colors = {
                   purple: "bg-purple-500",

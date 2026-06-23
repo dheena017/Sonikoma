@@ -65,9 +65,9 @@ export default function TimelineSelectionBar({
     >
       {/* Container with neutral border and standard dark shadow */}
       <div className="bg-neutral-950/90 backdrop-blur-2xl border-t border-neutral-800/80 px-4 py-3 shadow-2xl shadow-black/50">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 overflow-x-auto custom-scrollbar pb-1 sm:pb-0">
           {/* LEFT SECTION: Selection Actions or General Timeline Status */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             {selectedCount > 0 ? (
               <>
                 {/* Selection Count Badge */}
@@ -76,11 +76,11 @@ export default function TimelineSelectionBar({
                     {selectedCount > 99 ? "99+" : selectedCount}
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-white leading-tight">
+                    <p className="text-xs font-bold text-white leading-tight whitespace-nowrap">
                       {selectedCount} panel{selectedCount !== 1 ? "s" : ""}{" "}
                       selected
                     </p>
-                    <p className="text-[9px] text-purple-400 font-mono leading-tight">
+                    <p className="text-[9px] text-purple-400 font-mono leading-tight whitespace-nowrap">
                       of {totalCount} in storyboard
                     </p>
                   </div>
@@ -91,7 +91,7 @@ export default function TimelineSelectionBar({
                   <div className="flex flex-col gap-1.5 px-3.5 py-2.5 rounded-xl bg-purple-950/25 border border-purple-800/40 text-purple-300 text-xs font-mono shrink-0 min-w-[170px]">
                     <div className="flex items-center gap-2">
                       <RefreshCw className="h-3.5 w-3.5 animate-spin text-purple-400" />
-                      <span className="font-bold tracking-tight">
+                      <span className="font-bold tracking-tight whitespace-nowrap">
                         {isBatchCropping && batchProgress
                           ? `Cropping ${batchProgress.current}/${batchProgress.total}`
                           : isCleaningBubbles && cleanProgress
@@ -136,7 +136,7 @@ export default function TimelineSelectionBar({
                 <div className="hidden sm:block w-px h-6 bg-neutral-800 shrink-0" />
 
                 {/* Action Buttons */}
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-2 flex-nowrap shrink-0">
                   {/* Select All */}
                   <button
                     type="button"
@@ -255,7 +255,7 @@ export default function TimelineSelectionBar({
                       console.log("[TimelineSelectionBar] Clearing selection");
                       clearSelection();
                     }}
-                    className="p-2 text-xs rounded-xl border font-bold flex items-center justify-center cursor-pointer transition-all bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200"
+                    className="p-2 rounded-full border font-bold flex items-center justify-center cursor-pointer transition-all bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200"
                     title="Clear Selection"
                   >
                     <X className="h-4 w-4" />

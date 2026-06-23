@@ -162,43 +162,44 @@ export default function AutoCropModal({
   ];
 
   const mainCard = (
-    <div className="bg-neutral-900 border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col h-full">
+    <div className="bg-neutral-900 border border-neutral-800 sm:rounded-3xl overflow-hidden shadow-2xl flex flex-col h-full">
       {/* Header */}
-      <div className="px-6 py-5 border-b border-neutral-800 flex items-center justify-between bg-neutral-950/40">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-indigo-950/60 border border-indigo-800/50 flex items-center justify-center shadow-[0_0_14px_rgba(99,102,241,0.15)]">
+      <div className="px-4 py-4 sm:px-6 sm:py-5 border-b border-neutral-800 flex flex-col sm:flex-row sm:items-center justify-between bg-neutral-950/40 gap-4">
+        <div className="flex items-start gap-3">
+          <div className="h-10 w-10 shrink-0 rounded-xl bg-indigo-950/60 border border-indigo-800/50 flex items-center justify-center shadow-[0_0_14px_rgba(99,102,241,0.15)]">
             <Scissors className="h-5 w-5 text-indigo-400" />
           </div>
           <div>
-            <h3 className="font-bold text-sm text-white">
+            <h3 className="font-bold text-[13px] sm:text-sm text-white leading-tight">
               Auto-Crop Settings & Configuration
             </h3>
-            <p className="text-[10px] text-neutral-400 font-mono mt-0.5">
+            <p className="text-[9px] sm:text-[10px] text-neutral-400 font-mono mt-1 sm:mt-0.5 leading-snug">
               Configure OpenCV contour models or Gemini Vision AI prompts for
               segmenting comic strips
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-end gap-2 sm:gap-3">
           <button
             type="button"
             onClick={handleResetAll}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-850 bg-neutral-900/60 hover:bg-neutral-800 text-neutral-450 hover:text-white transition-all text-[10px] font-bold font-mono active:scale-95 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-850 bg-neutral-900/60 hover:bg-neutral-800 text-neutral-450 hover:text-white transition-all text-[10px] font-bold font-mono active:scale-95 cursor-pointer shrink-0"
           >
-            <RotateCcw className="h-3.5 w-3.5 text-neutral-500" />
-            Reset Defaults
+            <RotateCcw className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-neutral-500" />
+            <span className="hidden sm:inline">Reset Defaults</span>
+            <span className="sm:hidden">Reset</span>
           </button>
           <button
             onClick={onClose}
-            className="text-neutral-400 hover:text-white p-1.5 rounded-lg hover:bg-neutral-800 transition-colors cursor-pointer"
+            className="text-neutral-400 hover:text-white p-2 sm:p-1.5 rounded-lg hover:bg-neutral-800 transition-colors cursor-pointer shrink-0 bg-neutral-900 sm:bg-transparent"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4 sm:h-4 sm:w-4" />
           </button>
         </div>
       </div>
 
       {/* Tab Selection Row */}
-      <div className="flex border-b border-neutral-800 bg-neutral-950/20 px-6 shrink-0">
+      <div className="flex overflow-x-auto scrollbar-none border-b border-neutral-800 bg-neutral-950/20 px-2 sm:px-6 shrink-0 custom-scrollbar pb-1 sm:pb-0">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -207,7 +208,7 @@ export default function AutoCropModal({
               console.log(`[AutoCropModal] Switching to tab: ${tab.id}`);
               setActiveTab(tab.id);
             }}
-            className={`relative flex items-center gap-2 px-5 py-3 text-xs font-bold font-mono transition-all border-b-2 cursor-pointer select-none ${
+            className={`relative flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-3 text-[10px] sm:text-xs font-bold font-mono transition-all border-b-2 cursor-pointer select-none whitespace-nowrap shrink-0 ${
               activeTab === tab.id
                 ? "text-indigo-400 border-indigo-500 bg-indigo-500/5"
                 : "text-neutral-500 border-transparent hover:text-neutral-300 hover:bg-neutral-800/30"

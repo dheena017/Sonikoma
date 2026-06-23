@@ -751,12 +751,12 @@ export default function ProjectDetailsPage({
               </div>
             </div>
 
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
               {/* Dynamic Save changes button */}
               {saveStatus === "saving" ? (
                 <button
                   disabled
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-amber-500/40 bg-amber-950/30 text-amber-300 text-xs font-bold font-mono tracking-wider select-none shadow-[0_0_10px_-2px_rgba(245,158,11,0.2)] cursor-not-allowed"
+                  className="flex justify-center items-center gap-1.5 px-4 py-2.5 rounded-xl border border-amber-500/40 bg-amber-950/30 text-amber-300 text-xs font-bold font-mono tracking-wider select-none shadow-[0_0_10px_-2px_rgba(245,158,11,0.2)] cursor-not-allowed w-full sm:w-auto"
                 >
                   <svg
                     className="animate-spin h-3.5 w-3.5 text-amber-400"
@@ -782,7 +782,7 @@ export default function ProjectDetailsPage({
               ) : saveStatus === "error" ? (
                 <button
                   onClick={handleSaveChanges}
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-rose-500/40 bg-rose-950/35 hover:bg-rose-900/40 text-rose-300 hover:text-rose-200 text-xs font-bold font-mono tracking-wider cursor-pointer transition-all active:scale-95 shadow-[0_0_10px_-2px_rgba(239,68,68,0.25)]"
+                  className="flex justify-center items-center gap-1.5 px-4 py-2.5 rounded-xl border border-rose-500/40 bg-rose-950/35 hover:bg-rose-900/40 text-rose-300 hover:text-rose-200 text-xs font-bold font-mono tracking-wider cursor-pointer transition-all active:scale-95 shadow-[0_0_10px_-2px_rgba(239,68,68,0.25)] w-full sm:w-auto"
                 >
                   <span className="text-rose-400">⚠️</span>
                   <span>RETRY SAVE</span>
@@ -790,7 +790,7 @@ export default function ProjectDetailsPage({
               ) : isDirty ? (
                 <button
                   onClick={handleSaveChanges}
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-purple-500/30 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-white text-xs font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95 shadow-md shadow-purple-950/30 hover:shadow-purple-900/40 animate-pulse"
+                  className="flex justify-center items-center gap-1.5 px-4 py-2.5 rounded-xl border border-purple-500/30 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-white text-xs font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95 shadow-md shadow-purple-950/30 hover:shadow-purple-900/40 animate-pulse w-full sm:w-auto"
                 >
                   <span>✦</span>
                   <span>SAVE CHANGES</span>
@@ -798,7 +798,7 @@ export default function ProjectDetailsPage({
               ) : (
                 <button
                   disabled
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-emerald-500/40 bg-emerald-950/30 text-emerald-300 text-xs font-bold font-mono tracking-wider select-none shadow-[0_0_10px_-2px_rgba(52,211,153,0.2)]"
+                  className="flex justify-center items-center gap-1.5 px-4 py-2.5 rounded-xl border border-emerald-500/40 bg-emerald-950/30 text-emerald-300 text-xs font-bold font-mono tracking-wider select-none shadow-[0_0_10px_-2px_rgba(52,211,153,0.2)] w-full sm:w-auto"
                 >
                   <span className="text-emerald-400">✓</span>
                   <span>SAVED</span>
@@ -807,7 +807,7 @@ export default function ProjectDetailsPage({
 
               <button
                 onClick={handleLoadToWorkspace}
-                className="px-4 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 border border-purple-500/30 hover:border-purple-400/50 rounded-xl text-xs font-bold transition-all active:scale-95 cursor-pointer flex items-center gap-2 shadow-md shadow-purple-950/20"
+                className="px-4 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 border border-purple-500/30 hover:border-purple-400/50 rounded-xl text-xs font-bold transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2 shadow-md shadow-purple-950/20 w-full sm:w-auto"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 Load to Active Workspace
@@ -815,7 +815,7 @@ export default function ProjectDetailsPage({
               <button
                 onClick={handleDelete}
                 disabled={deleting}
-                className="p-2.5 bg-rose-600/10 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/20 hover:border-rose-400/30 rounded-xl transition-all cursor-pointer active:scale-95 flex items-center gap-1.5 text-xs font-bold"
+                className="p-2.5 bg-rose-600/10 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/20 hover:border-rose-400/30 rounded-xl transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1.5 text-xs font-bold w-full sm:w-auto"
               >
                 {deleting ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -1002,7 +1002,7 @@ export default function ProjectDetailsPage({
             {/* RIGHT COLUMN: SWITCHABLE PIPELINE TABS (2/3 width) */}
             <div className="lg:col-span-2 space-y-6">
               {/* Tab buttons */}
-              <div className="flex border-b border-white/5 gap-6 text-xs font-extrabold uppercase tracking-wide select-none font-sans">
+              <div className="flex border-b border-white/5 gap-6 text-xs font-extrabold uppercase tracking-wide select-none font-sans overflow-x-auto custom-scrollbar pb-1.5 whitespace-nowrap">
                 <button
                   onClick={() => setActiveTab("extraction")}
                   className={`pb-3 relative cursor-pointer flex items-center gap-1.5 transition-colors ${
@@ -1050,12 +1050,12 @@ export default function ProjectDetailsPage({
               {/* TAB 1 CONTENT: LIVE ASSET EXTRACTION */}
               {activeTab === "extraction" && (
                 <div className="space-y-4 animate-in fade-in duration-200">
-                  <div className="flex justify-between items-center border-b border-white/5 pb-3">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-3 gap-2 sm:gap-0">
                     <h3 className="text-xs font-black uppercase text-neutral-300 tracking-wider flex items-center gap-2">
-                      <ImageIcon className="w-4 h-4 text-purple-450" />
-                      Scraped Webtoon Scratch Sheets ({scrapedImages.length})
+                      <ImageIcon className="w-4 h-4 text-purple-450 shrink-0" />
+                      <span>Scraped Webtoon Scratch Sheets ({scrapedImages.length})</span>
                     </h3>
-                    <span className="text-[10px] text-neutral-500 font-bold">
+                    <span className="text-[10px] text-neutral-500 font-bold mt-1 sm:mt-0">
                       Click sheets to inspect high-resolution strips
                     </span>
                   </div>
@@ -1336,10 +1336,10 @@ export default function ProjectDetailsPage({
                   )}
                   {/* STORYBOARD GRID LIST */}
                   <div className="space-y-4">
-                    <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-white/5 pb-3 gap-3">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-3 gap-3">
                       <h3 className="text-xs font-black uppercase text-neutral-300 tracking-wider flex items-center gap-1.5">
-                        <LayoutGrid className="w-4 h-4 text-purple-450" />
-                        Dynamic Storyboard Grid ({filteredPanels.length})
+                        <LayoutGrid className="w-4 h-4 text-purple-450 shrink-0" />
+                        <span>Dynamic Storyboard Grid ({filteredPanels.length})</span>
                       </h3>
 
                       {/* Panel Search Input */}

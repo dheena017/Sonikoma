@@ -50,11 +50,11 @@ export default function NotificationDropdown({
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   return (
-    <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+    <div className="fixed left-1/2 -translate-x-1/2 top-16 sm:absolute sm:left-auto sm:translate-x-0 sm:right-0 sm:top-auto sm:mt-2 w-[calc(100vw-1rem)] sm:w-96 max-w-[400px] bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top sm:origin-top-right">
       <div className="px-4 py-3 border-b border-neutral-800 flex items-center justify-between bg-neutral-900/50 backdrop-blur-md">
         <div className="flex items-center gap-2">
           {notificationsMuted ? (
-            <BellOff className="h-4 w-4 text-rose-500 animate-pulse" />
+            <BellOff className="h-4 w-4 text-rose-500" />
           ) : (
             <Bell className="h-4 w-4 text-purple-400" />
           )}
@@ -80,10 +80,7 @@ export default function NotificationDropdown({
             }
           >
             {notificationsMuted ? (
-              <BellOff
-                className="h-4 w-4 animate-bounce"
-                style={{ animationDuration: "1.5s" }}
-              />
+              <BellOff className="h-4 w-4" />
             ) : (
               <Bell className="h-4 w-4" />
             )}
