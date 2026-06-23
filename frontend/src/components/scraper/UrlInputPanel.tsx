@@ -507,14 +507,14 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                   value="long"
                   className="bg-neutral-950 text-neutral-100"
                 >
-                  ✦ Detailed Recap Narrator (35-70 words/panel · 15+ Min YouTube
+                  Detailed Recap Narrator (35-70 words/panel · 15+ Min YouTube
                   Videos)
                 </option>
                 <option
                   value="short"
                   className="bg-neutral-950 text-neutral-100"
                 >
-                  ✦ Short Subtitle Dialogue (under 25 words/panel · Shorts /
+                  Short Subtitle Dialogue (under 25 words/panel · Shorts /
                   Quick Recaps)
                 </option>
               </select>
@@ -530,15 +530,15 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
               }`}
             >
               {narrationStyle === "long"
-                ? "✦ DETAILED RECAP — Generates detailed recap scripts suitable for 10-20 min videos"
-                : "✦ SHORT RECAP — Generates shorter dialog lines ideal for shorts and fast pacing"}
+                ? "DETAILED RECAP — Generates detailed recap scripts suitable for 10-20 min videos"
+                : "SHORT RECAP — Generates shorter dialog lines ideal for shorts and fast pacing"}
             </p>
           </div>
 
           {/* Scrape Layout Mode Selector */}
           <div className="space-y-2">
             <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
-              Scrape Layout Mode
+              Import Layout Mode
             </label>
             <div className="relative">
               <select
@@ -548,10 +548,10 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                   const val = e.target.value === "separate";
                   setSmartSlice?.(val);
                   const label = val
-                    ? "Separate Panel Images (Fast Scrape)"
+                    ? "Separate Panel Images (Fast Import)"
                     : "Single Stitched Strip";
                   addNotification(
-                    `Scrape layout mode set to: ${label}`,
+                    `Import layout mode set to: ${label}`,
                     "info"
                   );
                 }}
@@ -561,13 +561,13 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                   value="separate"
                   className="bg-neutral-950 text-neutral-100"
                 >
-                  ✦ Separate Panel Images (Fast Scrape · Under 2s)
+                  Separate Panel Images (Fast Import · Under 2s)
                 </option>
                 <option
                   value="stitched"
                   className="bg-neutral-950 text-neutral-100"
                 >
-                  ✦ Single Stitched Strip (Takes 15-45s)
+                  Single Stitched Strip (Takes 15-45s)
                 </option>
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-neutral-500 select-none">
@@ -580,13 +580,13 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
               }`}
             >
               {smartSlice
-                ? "✦ SEPARATE IMAGES — Scrapes chapter pages instantly as individual panel cards in storyboard"
-                : "✦ SINGLE STITCHED — Stitches all chapter pages together on the backend into a single image"}
+                ? "SEPARATE IMAGES — Imports chapter pages instantly as individual panel cards in the timeline"
+                : "SINGLE STITCHED — Stitches all chapter pages together on the backend into a single image"}
             </p>
           </div>
 
           <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest font-mono flex items-center gap-2">
-            Active AI Model Engine (Free Models Recommended)
+            Active Model (Free Models Recommended)
           </label>
           {modelDropdown}
 

@@ -47,7 +47,7 @@ export function TerminalLogsFilter({
             },
             {
               id: "ai",
-              label: "AI & Gemini",
+              label: "System",
               count: aiCount,
               color: "text-purple-400 bg-purple-950/20 border-purple-900/30",
             },

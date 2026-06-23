@@ -25,7 +25,7 @@ export default function ProcessBar({ progressStatus }: ProcessBarProps) {
       icon: <Globe className="w-3.5 h-3.5" />,
     },
     {
-      label: "AI Analyze",
+      label: "Analyze",
       desc: "OCR & Prompts",
       icon: <Sparkles className="w-3.5 h-3.5" />,
     },

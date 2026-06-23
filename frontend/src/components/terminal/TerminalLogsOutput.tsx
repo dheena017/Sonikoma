@@ -179,7 +179,7 @@ function getLogBorderColor(log: string): string {
     if (log.includes("DELETE")) return "border-red-500/40";
     return "border-purple-500/40";
   }
-  if (log.includes("[AI") || log.includes("[Gemini]"))
+  if (log.includes("[System") || log.includes("[Gemini]"))
     return "border-purple-500/50";
   if (log.includes("[Downloader Helper]")) return "border-cyan-400/40";
   if (log.includes("[Downloader]")) return "border-cyan-500/40";
