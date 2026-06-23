@@ -226,7 +226,7 @@ const TimelineCard = ({
           disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
           value={panel.speech_text}
           onChange={(e) => handleModifySpeechText(panel.id, e.target.value)}
-          placeholder="✦ AI Will Decide"
+          placeholder="✦ Auto-generate"
           className={`w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all no-drag ${
             panel.isAnalyzing || analyzingPanelId === panel.id
               ? "opacity-60 cursor-not-allowed border-purple-900/40 text-purple-300"
@@ -245,7 +245,7 @@ const TimelineCard = ({
           disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
           value={panel.sfx || ""}
           onChange={(e) => handleModifySFX(panel.id, e.target.value)}
-          placeholder="✦ AI Will Decide"
+          placeholder="✦ Auto-generate"
           className={`w-full bg-neutral-900 border border-neutral-800 text-[10px] rounded-lg px-2.5 py-1.5 text-neutral-100 outline-none focus:border-purple-500 font-mono transition-all no-drag ${
             panel.isAnalyzing || analyzingPanelId === panel.id
               ? "opacity-60 cursor-not-allowed text-purple-300 border-purple-900/40"
@@ -266,7 +266,7 @@ const TimelineCard = ({
           onChange={(e) =>
             handleModifyVisualDescription(panel.id, e.target.value)
           }
-          placeholder="✦ AI Will Decide"
+          placeholder="✦ Auto-generate"
           className={`w-full bg-neutral-900 border border-neutral-800 text-[10px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all resize-none no-drag ${
             panel.isAnalyzing || analyzingPanelId === panel.id
               ? "opacity-60 cursor-not-allowed text-purple-300 border-purple-900/40"
@@ -286,7 +286,7 @@ const TimelineCard = ({
             onChange={(e) => handleModifyMotion(panel.id, e.target.value)}
             className="bg-neutral-900 text-[11px] text-neutral-300 rounded border border-neutral-800 p-1 w-full outline-none no-drag"
           >
-            <option value="">AI Will Decide</option>
+            <option value="">Auto-generate</option>
             <option value="zoom_in">Zoom In</option>
             <option value="zoom_out">Zoom Out</option>
             <option value="pan_right">Pan Right</option>
@@ -301,7 +301,7 @@ const TimelineCard = ({
           </span>
           {panel.duration === 0 ? (
             <div className="bg-neutral-900 border border-purple-800/50 text-[10px] rounded p-1 w-full text-center font-mono text-purple-400 animate-pulse">
-              ✦ AI Will Decide
+              ✦ Auto-generate
             </div>
           ) : (
             <input
@@ -350,7 +350,7 @@ const TimelineCard = ({
           <span className="hidden sm:inline">
             {analyzingPanelId === panel.id
               ? "Analyzing Panel..."
-              : "AI Image Analyse"}
+              : "Analyze Image"}
           </span>
         </button>
       </div>
@@ -365,7 +365,7 @@ const TimelineCard = ({
           className="w-full py-1.5 rounded-lg border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-purple-600/50 text-neutral-350 hover:text-purple-300 text-[10px] font-mono font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all"
         >
           <Sparkles className="h-3 w-3 text-purple-400" />
-          <span>AI Panel Assistant</span>
+          <span>Panel Assistant</span>
         </button>
       </div>
 
