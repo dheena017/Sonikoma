@@ -127,6 +127,17 @@ export default function App() {
   // --- Mobile Sidebar Toggle State ---
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
+  React.useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isSidebarOpen]);
+
   // --- Global Custom Confirm State ---
   const [confirmDialog, setConfirmDialog] = React.useState<{
     isOpen: boolean;
@@ -365,20 +376,7 @@ export default function App() {
     resetWorkspace,
   } = appLogic;
 
-  // --- Effect: Fade out and remove static HTML splash screen once React app is ready ---
-  React.useEffect(() => {
-    const splash = document.getElementById("splash-screen-root");
-    if (splash) {
-      splash.style.transition = "opacity 0.6s ease, transform 0.6s ease";
-      splash.style.opacity = "0";
-      splash.style.transform = "scale(1.05)";
-      splash.style.pointerEvents = "none";
-      const timer = setTimeout(() => {
-        splash.remove();
-      }, 600);
-      return () => clearTimeout(timer);
-    }
-  }, []);
+
 
   // --- Auto Save Hook ---
   const { saveStatus, saveProject, isDirty } = useAutoSave({
@@ -417,8 +415,6 @@ export default function App() {
     isPipMode,
     setIsPipMode,
     navigateTo,
-    pendingNavigationPath,
-    setPendingNavigationPath,
   } = useAppRouter({
     scrapedImages,
     panels,
@@ -623,7 +619,8 @@ export default function App() {
     !isLoginPath &&
     !isRegisterPath &&
     !isForgotPasswordPath &&
-    !isDisplayPath
+    !isDisplayPath &&
+    currentPath !== "/workspace"
   ) {
     setTimeout(() => navigateTo("/"), 0);
     return null;
@@ -659,7 +656,7 @@ export default function App() {
       />
 
       {/* --- Main Contents Controller & Router --- */}
-      <div className="flex-grow flex-1 flex flex-col min-h-screen lg:max-h-screen lg:overflow-y-auto justify-between">
+      <div className={`flex-grow flex-1 flex flex-col min-h-screen lg:max-h-screen justify-between ${isSidebarOpen ? "overflow-hidden" : "lg:overflow-y-auto"}`}>
         <div>
           {/* Engine Health Banner */}
           {backendStatus === "offline" && (
@@ -1404,85 +1401,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Navigation Confirmation Modal */}
-      {pendingNavigationPath &&
-        createPortal(
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            {/* Backdrop */}
-            <div
-              className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
-              onClick={() => setPendingNavigationPath(null)}
-            />
 
-            {/* Modal Container */}
-            <div className="relative w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-3xl shadow-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-200 flex flex-col">
-              {/* Glow Accent */}
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-red-500 via-amber-500 to-rose-500 blur-[1px]" />
-
-              {/* Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-850 shrink-0 bg-neutral-900/50">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 bg-rose-500/10 rounded-xl text-rose-450 animate-pulse">
-                    <AlertTriangle className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h2 className="text-base font-bold text-white tracking-tight">
-                      Unsaved Changes
-                    </h2>
-                    <p className="text-[10px] text-neutral-450 font-mono">
-                      Warning: Navigation will lose current edits
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setPendingNavigationPath(null)}
-                  className="text-neutral-450 hover:text-white bg-neutral-950/40 hover:bg-neutral-950 p-2 rounded-full transition-all cursor-pointer"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-
-              {/* Body */}
-              <div className="p-6 space-y-4">
-                <p className="text-xs text-neutral-300 leading-relaxed font-sans">
-                  You have unsaved changes. Are you sure you want to navigate
-                  away? Your changes will be lost.
-                </p>
-
-                <div className="bg-rose-950/15 border border-rose-950/30 rounded-2xl p-4 flex gap-3 items-center">
-                  <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-bold text-rose-300 font-mono truncate">
-                      Destination: {pendingNavigationPath}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div className="px-6 py-4 bg-neutral-950/40 border-t border-neutral-850 flex items-center justify-end gap-3 shrink-0">
-                <button
-                  onClick={() => setPendingNavigationPath(null)}
-                  className="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-750 text-neutral-200 hover:text-white rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border border-neutral-750/30"
-                >
-                  Stay on Page
-                </button>
-                <button
-                  onClick={() => {
-                    const target = pendingNavigationPath;
-                    setPendingNavigationPath(null);
-                    window.history.pushState({}, "", target);
-                    window.dispatchEvent(new Event("popstate"));
-                  }}
-                  className="px-6 py-2.5 bg-gradient-to-r from-red-650 to-rose-650 hover:from-red-550 hover:to-rose-550 border border-red-550/30 text-white font-bold rounded-xl text-xs tracking-wide transition-all shadow-[0_0_20px_-5px_rgba(239,68,68,0.5)] active:scale-95 flex items-center gap-1.5 cursor-pointer"
-                >
-                  <span>Leave Anyway</span>
-                </button>
-              </div>
-            </div>
-          </div>,
-          document.body
-        )}
 
       {confirmDialog && confirmDialog.isOpen && (
         <ConfirmModal
