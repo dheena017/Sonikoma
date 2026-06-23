@@ -98,7 +98,7 @@ export default function ScriptDramatizerForm({
 
     if (addNotification) {
       addNotification(
-        "Successfully applied enhanced script to the storyboard timeline!",
+        "Successfully applied enhanced text to the timeline!",
         "success"
       );
     }
@@ -116,7 +116,7 @@ export default function ScriptDramatizerForm({
         <div className="flex items-center gap-2">
           <Wand2 className="h-4.5 w-4.5 text-purple-400" />
           <h4 className="text-xs font-mono font-bold text-white uppercase">
-            AI Dialogue Script Dramatizer
+            Text Enhancer
           </h4>
         </div>
         <button
@@ -220,7 +220,7 @@ export default function ScriptDramatizerForm({
                 className="mt-4 w-full py-2.5 bg-gradient-to-r from-purple-650 to-indigo-600 hover:from-purple-550 hover:to-indigo-500 text-white rounded-xl text-xs font-mono font-bold transition-all shadow-lg flex items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.01] active:scale-95"
               >
                 <Check className="h-4 w-4" />
-                Apply to Storyboard Cards
+                Apply to Timeline Cards
               </button>
             )}
           </div>
