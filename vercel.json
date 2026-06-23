@@ -3,15 +3,15 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://YOUR-RAILWAY-URL.up.railway.app/api/$1"
+      "destination": "https://webtoon-to-video-backend-production.up.railway.app/api/$1"
     },
     {
       "source": "/media/(.*)",
-      "destination": "https://YOUR-RAILWAY-URL.up.railway.app/media/$1"
+      "destination": "https://webtoon-to-video-backend-production.up.railway.app/media/$1"
     },
     {
       "source": "/videos/(.*)",
-      "destination": "https://YOUR-RAILWAY-URL.up.railway.app/videos/$1"
+      "destination": "https://webtoon-to-video-backend-production.up.railway.app/videos/$1"
     },
     {
       "source": "/(.*)",
