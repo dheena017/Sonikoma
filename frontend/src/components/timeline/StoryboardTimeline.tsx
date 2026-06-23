@@ -228,7 +228,7 @@ export default function StoryboardTimeline({
     setIsCleaningBubbles(true);
     setCleanProgress({ current: 0, total: targetPanels.length });
     setConsoleLogs?.((prev) => [
-      `[Speech Bubbles] Starting clean bubbles on ${selectedIds.length} storyboard panels...`,
+      `[Speech Bubbles] Starting clean bubbles on ${selectedIds.length} timeline panels...`,
       ...prev,
     ]);
 
@@ -313,7 +313,7 @@ export default function StoryboardTimeline({
     setIsBatchCropping(true);
     setCropProgress({ current: 0, total: targetPanels.length });
     setConsoleLogs?.((prev) => [
-      `[Auto Cropper] Starting auto-crop on ${selectedIds.length} storyboard panels...`,
+      `[Auto Cropper] Starting auto-crop on ${selectedIds.length} timeline panels...`,
       ...prev,
     ]);
 
@@ -420,7 +420,7 @@ export default function StoryboardTimeline({
       });
 
       setPanels(updatedPanels);
-      addNotification?.(`Auto-cropped selected storyboard panels!`, "success");
+      addNotification?.(`Auto-cropped selected timeline panels!`, "success");
       setConsoleLogs?.((prev) => [
         `[Auto Cropper] Finished auto-cropping panels. Slices replaced.`,
         ...prev,
@@ -448,7 +448,7 @@ export default function StoryboardTimeline({
 
     setIsBatchMerging(true);
     setConsoleLogs?.((prev) => [
-      `[Stitch Generator] Merging ${urls.length} storyboard panels vertically...`,
+      `[Stitch Generator] Merging ${urls.length} timeline panels vertically...`,
       ...prev,
     ]);
 
@@ -508,11 +508,11 @@ export default function StoryboardTimeline({
         });
 
         setConsoleLogs?.((prev) => [
-          `[Stitch Generator] ✓ Storyboard stitching completed! URL: ${data.url}`,
+          `[Stitch Generator] ✓ Timeline stitching completed! URL: ${data.url}`,
           ...prev,
         ]);
         addNotification?.(
-          "Stitched selected storyboard panels successfully!",
+          "Stitched selected timeline panels successfully!",
           "success"
         );
       }
@@ -715,7 +715,7 @@ export default function StoryboardTimeline({
                 <p className="text-xs text-neutral-300 leading-relaxed font-sans">
                   Are you sure you want to delete the{" "}
                   <strong>{selectedPanelIds.size}</strong> selected panel(s)
-                  from your storyboard timeline?
+                  from your timeline?
                 </p>
               </div>
 
