@@ -124,7 +124,15 @@ export function useAutoSave(state: AutoSaveState) {
   }, [state.scrapedImages, state.projectId]);
 
   // Manual save trigger function
-  const saveProject = async (customPanels?: GeneratedPanel[]) => {
+  const saveProject = async (
+    customPanels?: GeneratedPanel[],
+    options?: {
+      savingMessage?: string;
+      successMessage?: string;
+      errorMessage?: string;
+      hideNotifications?: boolean;
+    }
+  ) => {
     if (!state.projectId) return false;
 
     let targetProjectId = state.projectId;
@@ -139,7 +147,9 @@ export function useAutoSave(state: AutoSaveState) {
     }
 
     setSaveStatus("saving");
-    state.addNotification?.("Saving project changes...", "info");
+    if (!options?.hideNotifications) {
+      state.addNotification?.(options?.savingMessage || "Saving project changes...", "info");
+    }
     try {
       console.log(
         `[Save Hook] Saving modifications for project: ${targetProjectId}...`
@@ -298,13 +308,15 @@ export function useAutoSave(state: AutoSaveState) {
           `Storyboard Panels: ${state.panels.length} panels`,
           `Scraped Source Images: ${state.scrapedImages.length} images`,
         ].join("\n");
-        state.addNotification?.(
-          "Project changes saved successfully!",
-          "success",
-          {
-            details: detailMsg,
-          }
-        );
+        if (!options?.hideNotifications) {
+          state.addNotification?.(
+            options?.successMessage || "Project changes saved successfully!",
+            "success",
+            {
+              details: detailMsg,
+            }
+          );
+        }
         return true;
       } else {
         throw new Error(data.message || "Failed to save project.");
@@ -312,13 +324,15 @@ export function useAutoSave(state: AutoSaveState) {
     } catch (err: any) {
       console.error("[Save Hook] Error during save:", err);
       setSaveStatus("error");
-      state.addNotification?.(
-        err.message || "Failed to save project changes.",
-        "error",
-        {
-          details: err.stack || String(err),
-        }
-      );
+      if (!options?.hideNotifications) {
+        state.addNotification?.(
+          options?.errorMessage || err.message || "Failed to save project changes.",
+          "error",
+          {
+            details: err.stack || String(err),
+          }
+        );
+      }
       return false;
     }
   };
