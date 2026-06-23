@@ -507,7 +507,7 @@ export default function ProjectDetailsPage({
     if (!projectId) return;
     const confirm = (window as any).confirmAsync || window.confirm;
     const confirmDelete = await confirm(
-      "Are you sure you want to delete this project and all its storyboard panels permanently? This cannot be undone.",
+      "Are you sure you want to delete this project and all its timeline panels permanently? This cannot be undone.",
       "Delete Project",
       "red"
     );
@@ -1012,7 +1012,7 @@ export default function ProjectDetailsPage({
                   }`}
                 >
                   <ImageIcon className="w-4 h-4" />
-                  Live Asset Extraction
+                  Imported Images
                   {activeTab === "extraction" && (
                     <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-500 rounded-full" />
                   )}
@@ -1026,7 +1026,7 @@ export default function ProjectDetailsPage({
                   }`}
                 >
                   <LayoutGrid className="w-4 h-4" />
-                  Storyboard &amp; OCR
+                  Timeline &amp; Text
                   {activeTab === "storyboard" && (
                     <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-500 rounded-full" />
                   )}
@@ -1053,7 +1053,7 @@ export default function ProjectDetailsPage({
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-3 gap-2 sm:gap-0">
                     <h3 className="text-xs font-black uppercase text-neutral-300 tracking-wider flex items-center gap-2">
                       <ImageIcon className="w-4 h-4 text-purple-450 shrink-0" />
-                      <span>Scraped Webtoon Scratch Sheets ({scrapedImages.length})</span>
+                      <span>Imported Image Sheets ({scrapedImages.length})</span>
                     </h3>
                     <span className="text-[10px] text-neutral-500 font-bold mt-1 sm:mt-0">
                       Click sheets to inspect high-resolution strips
@@ -1064,7 +1064,7 @@ export default function ProjectDetailsPage({
                     <div className="py-12 flex flex-col items-center justify-center space-y-3">
                       <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
                       <p className="text-xs text-neutral-500 font-mono">
-                        Querying database scrape cache...
+                        Fetching imported images...
                       </p>
                     </div>
                   ) : scrapedImages.length > 0 ? (
@@ -1094,7 +1094,7 @@ export default function ProjectDetailsPage({
                     <div className="py-12 text-center bg-[#0d0d10]/20 border border-white/5 rounded-3xl space-y-2">
                       <ImageIcon className="w-8 h-8 text-neutral-600 mx-auto" />
                       <h5 className="text-xs font-bold text-neutral-400">
-                        No Scraped Sheets Found
+                        No Imported Sheets Found
                       </h5>
                       <p className="text-[10px] text-neutral-550 max-w-xs mx-auto leading-relaxed font-semibold">
                         The original source URL could not be parsed or cache has
@@ -1154,7 +1154,7 @@ export default function ProjectDetailsPage({
                                     ) : (
                                       <Wand2 className="w-2.5 h-2.5 text-purple-300" />
                                     )}
-                                    AI Optimize
+                                    Optimize
                                   </button>
                                 </div>
                                 <textarea
@@ -1193,7 +1193,7 @@ export default function ProjectDetailsPage({
                                     ) : (
                                       <Wand2 className="w-2.5 h-2.5 text-purple-300" />
                                     )}
-                                    AI Enhance
+                                    Enhance
                                   </button>
                                 </div>
                                 <textarea
@@ -1339,7 +1339,7 @@ export default function ProjectDetailsPage({
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-3 gap-3">
                       <h3 className="text-xs font-black uppercase text-neutral-300 tracking-wider flex items-center gap-1.5">
                         <LayoutGrid className="w-4 h-4 text-purple-450 shrink-0" />
-                        <span>Dynamic Storyboard Grid ({filteredPanels.length})</span>
+                        <span>Timeline Grid ({filteredPanels.length})</span>
                       </h3>
 
                       {/* Panel Search Input */}
@@ -1425,7 +1425,7 @@ export default function ProjectDetailsPage({
                                     const confirmed = await confirm(
                                       `Remove panel #${
                                         originalIdx + 1
-                                      } from storyboard sequence?`,
+                                      } from timeline?`,
                                       "Remove Panel",
                                       "red"
                                     );
@@ -1511,7 +1511,7 @@ export default function ProjectDetailsPage({
                           <div className="flex items-center justify-between border-b border-white/5 pb-3">
                             <h3 className="text-xs font-black uppercase text-neutral-400 tracking-wider flex items-center gap-2">
                               <Play className="w-4 h-4 text-purple-450 animate-pulse" />
-                              Fallback Storyboard Slideshow
+                              Fallback Slideshow
                             </h3>
                             <div className="flex items-center gap-2 shrink-0">
                               <button
