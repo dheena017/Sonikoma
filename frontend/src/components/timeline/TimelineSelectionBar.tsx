@@ -81,7 +81,7 @@ export default function TimelineSelectionBar({
                       selected
                     </p>
                     <p className="text-[9px] text-purple-400 font-mono leading-tight whitespace-nowrap">
-                      of {totalCount} in storyboard
+                      of {totalCount} in timeline
                     </p>
                   </div>
                 </div>
@@ -173,7 +173,7 @@ export default function TimelineSelectionBar({
                     )}
                     {isAnalyzingAll
                       ? "Analyzing..."
-                      : `AI Analyse Selected (${selectedCount})`}
+                      : `Analyze Selected (${selectedCount})`}
                   </button>
 
                   {/* Auto-Crop */}
@@ -184,7 +184,7 @@ export default function TimelineSelectionBar({
                     }
                     onClick={handleAutoCropSelected}
                     className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl"
-                    title="Auto-Crop selected storyboard panels"
+                    title="Auto-Crop selected panels"
                   >
                     {isBatchCropping ? (
                       <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
@@ -202,7 +202,7 @@ export default function TimelineSelectionBar({
                     }
                     onClick={handleCleanBubblesSelected}
                     className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl"
-                    title="Remove speech bubbles from selected storyboard panels"
+                    title="Remove speech bubbles from selected panels"
                   >
                     {isCleaningBubbles ? (
                       <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
@@ -223,7 +223,7 @@ export default function TimelineSelectionBar({
                     }
                     onClick={handleBatchMergeSelected}
                     className="px-3 sm:px-4 py-2 text-xs rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 font-bold flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                    title="Stitch selected storyboard panels vertically into one panel"
+                    title="Stitch selected panels vertically into one panel"
                   >
                     {isBatchMerging ? (
                       <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
