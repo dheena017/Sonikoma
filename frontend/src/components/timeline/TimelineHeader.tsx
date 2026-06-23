@@ -27,7 +27,7 @@ export default function TimelineHeader({
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-neutral-800 pb-4">
       <div>
         <h3 className="font-bold text-base text-white flex flex-wrap items-center gap-2">
-          Dynamic Storyboard &amp; OCR Transcription
+          Timeline &amp; Text
           <span className="text-xs bg-neutral-800 text-neutral-400 border border-neutral-750 px-2 py-0.5 rounded-full font-mono shrink-0">
             {panelsLength} {panelsLength === 1 ? "panel" : "panels"}
           </span>
@@ -45,7 +45,7 @@ export default function TimelineHeader({
             onClick={handleSaveStoryboard}
             className="text-[10px] font-bold border border-purple-500/50 bg-purple-600 hover:bg-purple-500 text-white rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors shadow-md active:scale-95 cursor-pointer"
           >
-            Save Storyboard
+            Save Timeline
           </button>
         )}
         {/* Bulk Operations and Download Buttons can be added here if needed */}
