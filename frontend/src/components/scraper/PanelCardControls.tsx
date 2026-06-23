@@ -31,14 +31,14 @@ export function PanelCardControls({
       <button
         onClick={() => {
           console.log(
-            `[PanelCardControls] Adding image #${idx + 1} to storyboard`
+            `[PanelCardControls] Adding image #${idx + 1} to timeline`
           );
           addPanelsToStoryboard([imgUrl]);
         }}
         className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-purple-700 to-violet-600 hover:from-purple-600 hover:to-violet-500 active:from-purple-800 active:to-violet-700 text-white text-[9px] py-1.5 rounded-lg font-mono font-semibold tracking-wide transition-all duration-150 shadow-sm hover:shadow-[0_0_10px_rgba(168,85,247,0.35)] cursor-pointer border border-purple-500/20"
       >
         <PlusCircle className="h-3 w-3 shrink-0" />
-        <span>Insert to Storyboard</span>
+        <span>Add to Timeline</span>
       </button>
 
       {/* Merge with next */}
