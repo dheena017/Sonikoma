@@ -15,7 +15,7 @@ export function useBackendHealth() {
     lastChecked: null,
   });
 
-  const checkHealth = useCallback(async () => {
+  const checkHealth = useCallback(async (): Promise<boolean> => {
     const start = performance.now();
     try {
       // Mock ping to the backend API
@@ -32,7 +32,17 @@ export function useBackendHealth() {
           lastChecked: new Date(),
           version: data.version || "1.0.0",
         });
+        return true;
       } else {
+        if (response && response.status === 429) {
+          setHealth({
+            status: "offline",
+            latency: null,
+            lastChecked: new Date(),
+            error: "Rate limited (429)",
+          });
+          return false; // Return false to indicate 429 rate limit
+        }
         throw new Error("Backend unreachable");
       }
     } catch (err: any) {
@@ -42,13 +52,32 @@ export function useBackendHealth() {
         lastChecked: new Date(),
         error: err.message,
       });
+      return true; // Return true to keep normal polling on other errors
     }
   }, []);
 
   useEffect(() => {
-    checkHealth();
-    const interval = setInterval(checkHealth, 30000); // Check every 30s
-    return () => clearInterval(interval);
+    let timeout: any;
+    let isMounted = true;
+
+    const poll = async () => {
+      if (!isMounted) return;
+      
+      const shouldContinueNormalPolling = await checkHealth();
+      
+      if (!isMounted) return;
+
+      // If we got a 429, wait 60s for penalty box to clear, otherwise 30s
+      const delay = shouldContinueNormalPolling ? 30000 : 60000;
+      timeout = setTimeout(poll, delay);
+    };
+
+    poll();
+
+    return () => {
+      isMounted = false;
+      if (timeout) clearTimeout(timeout);
+    };
   }, [checkHealth]);
 
   return { ...health, checkHealth };
