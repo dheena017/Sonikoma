@@ -31,7 +31,7 @@ COPY --from=frontend-builder /app/frontend/dist ./dist
 
 # Set environment variables for production
 ENV NODE_ENV=production
-ENV HOST=::
+ENV HOST=0.0.0.0
 ENV PORT=8080
 EXPOSE 8080
 
