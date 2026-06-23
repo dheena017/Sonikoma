@@ -1233,7 +1233,11 @@ export default function App() {
 
           {/* PAGE VIEW 22: Admin Dashboard */}
           {isAdminPath && (
-            <AdminPage navigateTo={navigateTo} />
+            <AdminPage 
+              navigateTo={navigateTo} 
+              isAuthenticated={isAuthenticated}
+              fetchWithInterceptor={fetchWithInterceptor}
+            />
           )}
 
           {/* FALLBACK VIEW: 404 Route Not Found */}

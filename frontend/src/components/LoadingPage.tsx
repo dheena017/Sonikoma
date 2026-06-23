@@ -8,10 +8,11 @@ interface LoadingPageProps {
 const LOADING_TIPS = [
   "Double-click a panel to manually adjust crop boundaries.",
   "Use the Speech Bubble Cleaner to erase text for translation.",
-  "Select from multiple AI Voice Actors to narrate your webtoon.",
-  "Enable Smart Slice for automatic webtoon strip division.",
+  "Select from multiple Voice Actors to narrate your webtoon.",
+  "Enable Smart Scanner for automatic webtoon strip division.",
   "Check the System Diagnostics page to view GPU utilization.",
   "Stitch adjacent panels to create wide landscape scenes.",
+  "The first URL import is free. Sign in to import more!",
 ];
 
 export default function LoadingPage({

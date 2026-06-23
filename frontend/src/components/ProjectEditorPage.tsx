@@ -178,8 +178,11 @@ export default function ProjectEditorPage({
           <button
             onClick={async () => {
               if (saveProject) {
-                appLogic.addNotification?.("Saving progress...", "info");
-                await saveProject(panels);
+                await saveProject(panels, {
+                  savingMessage: "Saving progress...",
+                  successMessage: "Progress saved successfully!",
+                  errorMessage: "Failed to save progress."
+                });
               }
             }}
             className="px-4 py-2 border border-purple-500/30 bg-purple-950/20 hover:bg-purple-900/30 text-purple-300 text-xs font-bold rounded-xl transition-all cursor-pointer active:scale-95"
@@ -262,7 +265,7 @@ export default function ProjectEditorPage({
                     onClick={() => setShowBubbleModal(true)}
                     className="flex-1 py-1.5 bg-neutral-800 hover:bg-neutral-750 text-neutral-200 text-[10px] font-bold rounded-xl transition-all border border-white/5 cursor-pointer text-center"
                   >
-                    Configure Inpainting
+                    Configure Clearing
                   </button>
                   <button
                     onClick={handleCleanBubblesSelected}
@@ -371,7 +374,7 @@ export default function ProjectEditorPage({
               voiceActor={voiceActor}
             />
 
-            {/* Scraped Panels Quick Edit Deck */}
+            {/* Imported Images Quick Edit Deck */}
             <div className="bg-neutral-900/40 rounded-3xl border border-white/5 p-6 backdrop-blur-md shadow-sm space-y-4">
               <h3 className="text-xs font-bold text-neutral-300 font-mono uppercase tracking-wider">
                 Stitch &amp; Merge Panel Deck

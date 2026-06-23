@@ -1104,7 +1104,7 @@ export default function ProfilePage({
           </div>
           <div className="min-w-[260px] sm:min-w-0 snap-center shrink-0 sm:shrink bg-neutral-900/40 border border-white/5 rounded-3xl p-5 text-left relative overflow-hidden shadow-xl">
             <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
-              AI Sync Success Rate
+              Smart Sync Success Rate
             </div>
             <div className="text-2xl font-black text-white mt-1">
               {successRate}%
@@ -1212,7 +1212,7 @@ export default function ProfilePage({
                 {/* Credit usage */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-[10px] text-neutral-400 font-semibold">
-                    <span>AI Engine Credits</span>
+                    <span>Smart Engine Credits</span>
                     <span className="text-white font-bold">
                       {credits} /{" "}
                       {Math.max(

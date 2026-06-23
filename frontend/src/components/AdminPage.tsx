@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Users, Shield, Clock, Mail, Coins, ShieldAlert } from "lucide-react";
-import { useAppLogic } from "../hooks/useAppLogic";
 
 export default function AdminPage({
   navigateTo,
+  isAuthenticated,
+  fetchWithInterceptor,
 }: {
   navigateTo: (path: string) => void;
+  isAuthenticated: boolean;
+  fetchWithInterceptor: (url: string, options?: RequestInit) => Promise<Response>;
 }) {
-  const { fetchWithInterceptor, isAuthenticated } = useAppLogic();
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 

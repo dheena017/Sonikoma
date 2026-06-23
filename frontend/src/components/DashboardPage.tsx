@@ -297,7 +297,7 @@ export default function DashboardPage() {
                 <div>
                   <h4 className="text-sm font-bold text-white mb-1">2. Speech Bubble OCR & Clean</h4>
                   <p className="text-xs text-neutral-400 leading-relaxed font-sans">
-                    Locates text boundaries in comics, erases speech bubbles using inpainting methods, and OCR transcribes dialog into transcription nodes.
+                    Locates text boundaries in comics, erases speech bubbles using clearing methods, and OCR transcribes dialog into transcription nodes.
                   </p>
                 </div>
               </div>

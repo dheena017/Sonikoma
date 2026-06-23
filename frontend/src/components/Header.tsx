@@ -378,7 +378,7 @@ export default function Header({
     {
       name: "Clean-Bubbles Editor",
       path: "/bubble-cleaner",
-      desc: "AI-based text bubble erasing and inpainting",
+      desc: "Smart text bubble erasing and clearing",
     },
     {
       name: "Audio Design Lab",

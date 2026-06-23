@@ -23,8 +23,8 @@ interface AppWorkspaceProps {
   setScrapedImages: any;
   selectedScraped: string[];
   setSelectedScraped: any;
-  activePreviewTab: "video" | "storyboard";
-  setActivePreviewTab: (tab: "video" | "storyboard") => void;
+  activePreviewTab: "video" | "timeline";
+  setActivePreviewTab: (tab: "video" | "timeline") => void;
   setEditingImageIdx: (idx: number | null) => void;
   setEditCropTop: (v: number) => void;
   setEditCropBottom: (v: number) => void;
@@ -578,8 +578,8 @@ export function AppWorkspace({
             reprocessingPanelId={reprocessingPanelId}
           />
 
-          {/* PLAYBACK CONTROLLER ACCESSORIES FOR STORYBOARD PREVIEW */}
-          {activePreviewTab === "storyboard" && panels.length > 0 && (
+          {/* PLAYBACK CONTROLLER ACCESSORIES FOR TIMELINE PREVIEW */}
+          {activePreviewTab === "timeline" && panels.length > 0 && (
             <VolumeAndProgressPanel
               panels={panels}
               setPanels={setPanels}
