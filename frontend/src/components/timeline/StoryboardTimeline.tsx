@@ -141,7 +141,7 @@ export default function StoryboardTimeline({
       setCurrentPanelIndex(currentPanelIndex + 1);
     }
 
-    addNotification?.("Reordered storyboard cards successfully!", "success");
+    addNotification?.("Reordered timeline cards successfully!", "success");
     setDraggedIndex(null);
     setDragOverIndex(null);
   };
@@ -187,7 +187,7 @@ export default function StoryboardTimeline({
       "info"
     );
     if (saveProject) {
-      addNotification?.("Saving storyboard changes...", "info");
+      addNotification?.("Saving timeline changes...", "info");
       await saveProject(remainingPanels);
     }
   };

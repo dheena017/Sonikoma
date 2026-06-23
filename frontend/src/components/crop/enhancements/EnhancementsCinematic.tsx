@@ -41,7 +41,7 @@ export function EnhancementsCinematic({
             }
             className="w-full bg-black/40 border border-white/8 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] font-mono focus:border-purple-500/50 focus:outline-none cursor-pointer appearance-none transition-colors hover:border-white/15 disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <option value="">AI Will Decide</option>
+            <option value="">None</option>
             <option value="static">Static (No Motion)</option>
             <option value="zoom_in">Zoom In Animation</option>
             <option value="zoom_out">Zoom Out Animation</option>

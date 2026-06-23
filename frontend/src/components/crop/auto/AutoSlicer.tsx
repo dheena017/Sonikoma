@@ -152,7 +152,7 @@ export default function AutoSlicer({
             spacing gutters.
           </p>
           <p>
-            <strong>Gemini AI Smart Scanner:</strong> Vision-based LLM
+            <strong>Smart Scanner:</strong> Vision-based
             segmentation that extracts panel boundaries based on page context.
           </p>
           <p>
@@ -183,7 +183,7 @@ export default function AutoSlicer({
               : "bg-black/20 border-white/5 text-neutral-500 hover:text-neutral-300"
           }`}
         >
-          Gemini AI
+          Smart Scanner
         </button>
       </div>
 

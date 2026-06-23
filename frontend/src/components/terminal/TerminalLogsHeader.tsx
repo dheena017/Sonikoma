@@ -53,7 +53,7 @@ export function TerminalLogsHeader({
             )}
           </div>
           <p className="text-[11px] text-neutral-400 font-mono">
-            Live parser and AI status
+            Live parser and system status
           </p>
         </div>
       </div>
