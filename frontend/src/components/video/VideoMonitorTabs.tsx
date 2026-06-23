@@ -2,8 +2,8 @@ import React from "react";
 import { GeneratedPanel } from "../../types";
 
 interface VideoMonitorTabsProps {
-  activePreviewTab: "video" | "storyboard";
-  setActivePreviewTab: (tab: "video" | "storyboard") => void;
+  activePreviewTab: "video" | "timeline";
+  setActivePreviewTab: (tab: "video" | "timeline") => void;
   videoUrl: string | null;
   panels: GeneratedPanel[];
   aspectRatio: "9:16" | "16:9";
@@ -33,12 +33,12 @@ export function VideoMonitorTabs({
           Output MP4 Player
         </button>
         <button
-          onClick={() => setActivePreviewTab("storyboard")}
+          onClick={() => setActivePreviewTab("timeline")}
           disabled={panels.length === 0}
           className={`px-3 py-1 text-xs rounded-lg transition-all ${
             panels.length === 0
               ? "opacity-40 cursor-not-allowed"
-              : activePreviewTab === "storyboard"
+              : activePreviewTab === "timeline"
               ? "bg-purple-600 text-white font-bold"
               : "bg-neutral-900 text-neutral-300 hover:text-white"
           }`}

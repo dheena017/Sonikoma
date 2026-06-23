@@ -305,8 +305,8 @@ export function useAutoSave(state: AutoSaveState) {
           `Chapter: ${
             state.chapterNumber ? `Chapter ${state.chapterNumber}` : "N/A"
           }${state.chapterTitle ? ` - ${state.chapterTitle}` : ""}`,
-          `Storyboard Panels: ${state.panels.length} panels`,
-          `Scraped Source Images: ${state.scrapedImages.length} images`,
+          `Timeline Panels: ${state.panels.length} panels`,
+          `Imported Source Images: ${state.scrapedImages.length} images`,
         ].join("\n");
         if (!options?.hideNotifications) {
           state.addNotification?.(

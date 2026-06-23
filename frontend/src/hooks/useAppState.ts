@@ -30,7 +30,7 @@ export function useAppState() {
   const [scrapedImages, setScrapedImages] = useState<string[]>([]);
   const [selectedScraped, setSelectedScraped] = useState<string[]>([]);
   const [activePreviewTab, setActivePreviewTab] = useState<
-    "video" | "storyboard"
+    "video" | "timeline"
   >("video");
 
   // Image editing/cropping states
@@ -236,8 +236,8 @@ export function useAppState() {
           log.toLowerCase().includes("successfully")
         ) {
           level = "SUCCESS";
-        } else if (log.includes("[AI") || log.includes("[Gemini]")) {
-          level = "AI";
+        } else if (log.includes("[Smart") || log.includes("[System]")) {
+          level = "Smart Scanner";
         } else if (log.includes("[Database]") || log.includes("[DB]")) {
           level = "DATABASE";
         } else if (log.includes("[API]") || log.includes("[HTTP]")) {
