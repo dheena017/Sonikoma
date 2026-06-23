@@ -80,7 +80,7 @@ export default function AutoSlicerSettings({
       {strategy === "ai" ? (
         <div className="space-y-1.5">
           <label className="text-[9px] font-bold text-neutral-500 uppercase font-mono block tracking-wider">
-            Gemini Model
+            Scanner Model
           </label>
           <div className="relative">
             <select

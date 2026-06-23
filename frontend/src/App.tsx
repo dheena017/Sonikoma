@@ -1231,6 +1231,11 @@ export default function App() {
               />
             ))}
 
+          {/* PAGE VIEW 22: Admin Dashboard */}
+          {isAdminPath && (
+            <AdminPage navigateTo={navigateTo} />
+          )}
+
           {/* FALLBACK VIEW: 404 Route Not Found */}
           {!isWorkspacePath &&
             !isDashboardOverviewPath &&
@@ -1253,6 +1258,7 @@ export default function App() {
             !isAnalyticsPath &&
             !isProfilePath &&
             !isNotificationsPath &&
+            !isAdminPath &&
             !isChapterDetailsPath &&
             !isSeriesDetailsPath && (
               <PageNotFound onNavigateHome={() => navigateTo("/")} />
