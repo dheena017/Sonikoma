@@ -44,7 +44,7 @@ export default function NotificationStack({
   const activeToasts = notifications.filter((n) => !n.toastDismissed);
 
   return (
-    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none w-full max-w-sm sm:max-w-md">
+    <div className="fixed bottom-4 right-4 z-50 flex flex-col-reverse justify-end gap-2 pointer-events-none w-full max-w-sm sm:max-w-md">
       {activeToasts.map((note) => (
         <IndividualNotification
           key={note.id}
