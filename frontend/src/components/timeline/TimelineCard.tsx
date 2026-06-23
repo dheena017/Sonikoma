@@ -7,9 +7,9 @@ interface TimelineCardProps {
   panel: GeneratedPanel;
   idx: number;
   currentPanelIndex: number;
-  activePreviewTab: "video" | "storyboard";
+  activePreviewTab: "video" | "timeline";
   setCurrentPanelIndex: (idx: number) => void;
-  setActivePreviewTab: (tab: "video" | "storyboard") => void;
+  setActivePreviewTab: (tab: "video" | "timeline") => void;
   setPlaybackTime: (time: number) => void;
   analyzingPanelId: number | null;
   handleShiftPanel: (idx: number, dir: "left" | "right") => void;
@@ -59,7 +59,7 @@ const TimelineCard = ({
   isDragOver,
 }: TimelineCardProps) => {
   const isCurrent =
-    idx === currentPanelIndex && activePreviewTab === "storyboard";
+    idx === currentPanelIndex && activePreviewTab === "timeline";
 
   const handleDragStartLocal = (e: React.DragEvent) => {
     const target = e.target as HTMLElement;
@@ -106,7 +106,7 @@ const TimelineCard = ({
             `[TimelineCard] Selecting panel #${panel.id} at index ${idx}`
           );
           setCurrentPanelIndex(idx);
-          setActivePreviewTab("storyboard");
+          setActivePreviewTab("timeline");
           setPlaybackTime(0);
           onToggleSelect();
           if (playStoryboardAudio) {

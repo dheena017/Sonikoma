@@ -131,7 +131,7 @@ export default function BubbleCleanerModal({
               Speech Bubble Cleaner Settings
             </h3>
             <p className="text-[10px] text-neutral-400 font-mono mt-0.5">
-              Advanced OpenCV inpainting & text boundary cleanup parameters
+              Advanced OpenCV clearing & text boundary cleanup parameters
             </p>
           </div>
         </div>
@@ -433,7 +433,7 @@ export default function BubbleCleanerModal({
               Speech Bubble Cleaner Settings
             </h2>
             <p className="text-xs text-neutral-400 font-mono mt-0.5">
-              Configure parameters for OpenCV inpainting, text boundary cleanup
+              Configure parameters for OpenCV clearing, text boundary cleanup
               and dilation offsets
             </p>
           </div>

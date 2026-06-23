@@ -4,8 +4,8 @@ import { VideoMonitorTabs } from "./VideoMonitorTabs.js";
 import { VideoMonitorActive } from "./VideoMonitorActive.js";
 
 interface VideoMonitorProps {
-  activePreviewTab: "video" | "storyboard";
-  setActivePreviewTab: (tab: "video" | "storyboard") => void;
+  activePreviewTab: "video" | "timeline";
+  setActivePreviewTab: (tab: "video" | "timeline") => void;
   videoUrl: string | null;
   panels: GeneratedPanel[];
   aspectRatio: "9:16" | "16:9";
