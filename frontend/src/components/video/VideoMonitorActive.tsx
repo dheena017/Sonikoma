@@ -4,7 +4,7 @@ import { GeneratedPanel } from "../../types";
 import { getPanelFilterStyle } from "../../utils";
 
 interface VideoMonitorActiveProps {
-  activePreviewTab: "video" | "storyboard";
+  activePreviewTab: "video" | "timeline";
   videoUrl: string | null;
   panels: GeneratedPanel[];
   aspectRatio: "9:16" | "16:9";
@@ -151,7 +151,7 @@ export function VideoMonitorActive({
 
       {/* TAB 2: INTERACTIVE TIMELINE PREVIEW */}
       {panels.length > 0 &&
-        activePreviewTab === "storyboard" &&
+        activePreviewTab === "timeline" &&
         activeStoryboardPanel && (
           <div
             className="relative bg-neutral-950 border border-neutral-800/80 overflow-hidden rounded-xl flex flex-col justify-between transition-all duration-300 shadow w-full text-center"

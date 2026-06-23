@@ -87,7 +87,7 @@ export default function ShortcutsPage({
           .replace("trigger_", "Trigger ")
           .replace("playback_", "Playback ")
           .replace("editor_", "Editor ")
-          .replace("deck_", "Scraper Deck ")
+          .replace("deck_", "Import Deck ")
           .replace(/_/g, " ");
         setConflictMsg(
           `Conflict: "${combination}" is already assigned to "${friendlyName}".`
@@ -145,7 +145,7 @@ export default function ShortcutsPage({
       .replace("playback_", "Preview: ")
       .replace("editor_tab_", "Editor Tab: ")
       .replace("editor_", "Editor: ")
-      .replace("deck_", "Scraper Gallery: ")
+      .replace("deck_", "Import Gallery: ")
       .replace(/_/g, " ");
 
     let scope = "Global";

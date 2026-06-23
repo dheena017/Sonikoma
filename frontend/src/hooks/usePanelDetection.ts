@@ -51,7 +51,7 @@ export function usePanelDetection({
     if (editingImageIdx === null) return;
     const currentUrl = scrapedImages[editingImageIdx];
     console.log(
-      `[AI Smart Crop] Requesting AI detection for image #${
+      `[Smart Crop] Requesting Smart Scanner detection for image #${
         editingImageIdx + 1
       }`
     );
@@ -63,7 +63,7 @@ export function usePanelDetection({
         body: JSON.stringify({ url: currentUrl }),
       });
       if (!response.ok) {
-        let errMsg = "AI analysis failed";
+        let errMsg = "Smart Scanner analysis failed";
         try {
           const errorData = await response.json();
           if (errorData?.detail) {
@@ -81,12 +81,12 @@ export function usePanelDetection({
         // If the backend fell back to local CV, warn the user
         if (data.fallback) {
           addNotification(
-            data.message || "AI panel detection failed, fell back to local CV.",
+            data.message || "Smart Scanner panel detection failed, fell back to local CV.",
             "warning"
           );
           if (setConsoleLogs) {
             setConsoleLogs((prev) => [
-              `[AI Smart Crop Fallback] ${
+              `[Smart Crop Fallback] ${
                 data.message || "Fell back to local CV detection."
               }`,
               ...prev,
@@ -104,16 +104,16 @@ export function usePanelDetection({
 
           if (setConsoleLogs) {
             setConsoleLogs((prev) => [
-              `[AI Smart Crop] Segmented original image into ${croppedUrls.length} pre-cropped panels and added to Storyboard...`,
+              `[Smart Crop] Segmented original image into ${croppedUrls.length} pre-cropped panels and added to Timeline...`,
               ...prev,
             ]);
           }
 
-          // Add directly to Storyboard only
+          // Add directly to Timeline only
           addPanelsToStoryboard(croppedUrls);
 
           addNotification(
-            `AI Smart Crop automatically added ${croppedUrls.length} panels to Storyboard!`,
+            `Smart Crop automatically added ${croppedUrls.length} panels to Timeline!`,
             "success"
           );
 
@@ -145,27 +145,27 @@ export function usePanelDetection({
         setEditCropBottom(firstNew.cropBottom);
 
         addNotification(
-          `AI Smart Crop successfully isolated ${newSlices.length} panels!`,
+          `Smart Crop successfully isolated ${newSlices.length} panels!`,
           "success"
         );
       } else {
         if (data.fallback) {
           addNotification(
             data.message ||
-              "AI failed to detect panels, and fallback found no panels.",
+              "Smart Scanner failed to detect panels, and fallback found no panels.",
             "warning"
           );
         } else {
           addNotification(
-            "AI could not detect any panels. Please draw your crops manually.",
+            "Smart Scanner could not detect any panels. Please draw your crops manually.",
             "warning"
           );
         }
       }
     } catch (err: any) {
-      console.error("AI crop detection failed:", err);
+      console.error("Smart crop detection failed:", err);
       addNotification(
-        err.message || "AI crop detection failed. Please try again.",
+        err.message || "Smart crop detection failed. Please try again.",
         "error"
       );
     } finally {
@@ -229,7 +229,7 @@ export function usePanelDetection({
       if (data.success && Array.isArray(data.panels)) {
         if (data.fallback) {
           addNotification(
-            data.message || "AI panel detection failed, fell back to local CV.",
+            data.message || "Smart panel detection failed, fell back to local CV.",
             "warning"
           );
           if (setConsoleLogs) {
@@ -274,16 +274,16 @@ export function usePanelDetection({
           setEditCropBottom(first.cropBottom);
         } else {
           addNotification(
-            "No panels detected. Triggering AI-based fallback...",
+            "No panels detected. Triggering Smart Scanner fallback...",
             "info"
           );
           await handleAiCrop();
         }
       }
     } catch (err: any) {
-      console.error("Detect panels failed, trying AI fallback:", err);
+      console.error("Detect panels failed, trying Smart fallback:", err);
       addNotification(
-        "Panel detection failed, trying AI-based detection...",
+        "Panel detection failed, trying Smart Scanner detection...",
         "info"
       );
       await handleAiCrop();

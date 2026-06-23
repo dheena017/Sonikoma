@@ -50,7 +50,7 @@ export function useSceneModifier({
     );
 
     console.log(
-      `[StoryboardTimeline] [Text Edit] Panel #${panelId} dialogue revised. Duration: ${newDuration}s (Auto-adjusted: ${autoAdjusted}):`
+      `[Timeline] [Text Edit] Panel #${panelId} dialogue revised. Duration: ${newDuration}s (Auto-adjusted: ${autoAdjusted}):`
     );
     console.log(`  - Sent (Original): "${originalText}"`);
     console.log(`  - Revise (Revised): "${text}"`);
@@ -78,7 +78,7 @@ export function useSceneModifier({
       prev.map((p) => (p.id === panelId ? { ...p, motion_type: motionVal } : p))
     );
     console.log(
-      `[StoryboardTimeline] [Motion Edit] Panel #${panelId} camera motion changed:`
+      `[Timeline] [Motion Edit] Panel #${panelId} camera motion changed:`
     );
     console.log(`  - Sent (Original): "${originalMotion}"`);
     console.log(`  - Revise (Revised): "${motionVal}"`);
@@ -105,7 +105,7 @@ export function useSceneModifier({
       )
     );
     console.log(
-      `[StoryboardTimeline] [Duration Edit] Panel #${panelId} duration changed:`
+      `[Timeline] [Duration Edit] Panel #${panelId} duration changed:`
     );
     console.log(`  - Sent (Original): ${originalDuration}s`);
     console.log(`  - Revise (Revised): ${durVal}s`);
@@ -127,7 +127,7 @@ export function useSceneModifier({
       prev.map((p) => (p.id === panelId ? { ...p, sfx: sfxVal } : p))
     );
     console.log(
-      `[StoryboardTimeline] [SFX Edit] Panel #${panelId} SFX revised:`
+      `[Timeline] [SFX Edit] Panel #${panelId} SFX revised:`
     );
     console.log(`  - Sent (Original): "${originalSFX}"`);
     console.log(`  - Revise (Revised): "${sfxVal}"`);
@@ -150,7 +150,7 @@ export function useSceneModifier({
       )
     );
     console.log(
-      `[StoryboardTimeline] [Visual Edit] Panel #${panelId} visual description revised:`
+      `[Timeline] [Visual Edit] Panel #${panelId} visual description revised:`
     );
     console.log(`  - Sent (Original): "${originalDesc}"`);
     console.log(`  - Revise (Revised): "${descVal}"`);

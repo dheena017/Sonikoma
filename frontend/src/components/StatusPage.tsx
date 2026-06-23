@@ -498,7 +498,7 @@ export default function StatusPage({
               </div>
 
               <p className="text-[9px] text-neutral-500 leading-3.5">
-                Note: A missing Gemini API Key disables AI storyboard
+                Note: A missing Gemini API Key disables the smart timeline
                 generation. Missing Hugging Face, OpenAI, or Anthropic keys
                 disable optional models and benchmarks for those providers.
               </p>
@@ -584,7 +584,7 @@ export default function StatusPage({
                       : selectedProvider === "openai"
                       ? "OpenAI"
                       : "Anthropic"}{" "}
-                    configurations to explore supported AI models.
+                    configurations to explore supported models.
                   </p>
                   <button
                     onClick={() => fetchModels(selectedProvider)}

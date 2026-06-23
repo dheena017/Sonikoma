@@ -70,13 +70,13 @@ export function useSingleImageEdits({
       const data = await response.json();
       const croppedUrl = data.url;
 
-      // Add directly to Storyboard only
+      // Add directly to Timeline only
       addPanelsToStoryboard([croppedUrl]);
 
       setConsoleLogs((prev) => [
         `[Image Editor] [SUCCESS] Successfully cropped Frame #${
           editingImageIdx + 1
-        } and added to Storyboard!`,
+        } and added to Timeline!`,
         `[Image Editor]   - Sent (Original): ${originalUrl.substring(
           0,
           60
@@ -90,13 +90,13 @@ export function useSingleImageEdits({
       console.log(
         `[Image Editor] Cropped Frame #${
           editingImageIdx + 1
-        } and added to Storyboard:`,
+        } and added to Timeline:`,
         { original: originalUrl, cropped: croppedUrl }
       );
       addNotification(
         `Frame #${
           editingImageIdx + 1
-        } cropped and added to Storyboard successfully!`,
+        } cropped and added to Timeline successfully!`,
         "success"
       );
     } catch (err: any) {
@@ -165,21 +165,21 @@ export function useSingleImageEdits({
         return data.url;
       });
 
-      // Add all cropped urls directly to Storyboard
+      // Add all cropped urls directly to Timeline
       addPanelsToStoryboard(croppedUrls);
 
       setConsoleLogs((prev) => [
-        `[Image Editor] Successfully added ${cuts.length} cropped/trimmed frames to Storyboard!`,
+        `[Image Editor] Successfully added ${cuts.length} cropped/trimmed frames to Timeline!`,
         ...prev,
       ]);
       console.log(
         `[Image Editor] Generated ${cuts.length} cuts from Frame #${
           editingImageIdx + 1
-        } and added to Storyboard:`,
+        } and added to Timeline:`,
         croppedUrls
       );
       addNotification(
-        `Generated ${cuts.length} separate cuts added to Storyboard!`,
+        `Generated ${cuts.length} separate cuts added to Timeline!`,
         "success"
       );
     } catch (err: any) {

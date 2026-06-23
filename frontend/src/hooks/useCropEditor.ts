@@ -413,7 +413,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
       if (data.success && Array.isArray(data.urls) && data.urls.length > 0) {
         addPanelsToStoryboard(data.urls);
         addNotification(
-          `Successfully split panel into ${data.urls.length} images and added to Storyboard!`,
+          `Successfully split panel into ${data.urls.length} images and added to Timeline!`,
           "success"
         );
         setEditingImageIdx(null);
