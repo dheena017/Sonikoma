@@ -32,7 +32,7 @@ export default function ThumbnailStudioPage({
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
             <Image className="h-5 w-5 text-purple-400" />
-            AI Clickbait Thumbnail Studio
+            Clickbait Thumbnail Studio
           </h2>
           <p className="text-xs text-neutral-400 font-mono mt-0.5">
             Optimize thumbnail clickbait text overlays, split screens, and
