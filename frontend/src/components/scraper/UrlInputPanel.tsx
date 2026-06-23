@@ -169,7 +169,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
         className="relative w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-neutral-200 outline-none appearance-none focus:border-purple-500 transition-colors cursor-pointer"
       >
         <option value="" disabled>
-          Select AI Model Engine...
+          Select Voice Engine...
         </option>
         {AI_MODELS.map((modelItem) => (
           <option
@@ -196,14 +196,14 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
         <div className="flex items-center gap-2 text-purple-400">
           <Sparkles className="h-4 w-4 shrink-0" />
           <span className="text-[10px] sm:text-xs font-semibold tracking-wider uppercase font-mono">
-            Dynamic Comic Scraper
+            Quick Link Importer
           </span>
         </div>
         <h2 className="text-base sm:text-lg font-bold text-white tracking-tight leading-tight">
-          Generate Video from Comic URL
+          Turn a Link into a Video
         </h2>
         <p className="text-[10px] sm:text-xs text-neutral-400 font-sans leading-relaxed">
-          Paste a comic or manga URL to dynamically scrape panels and generate a video.
+          Paste a link to any comic or manga chapter to get started.
         </p>
       </div>
 
@@ -252,12 +252,12 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                 {isScraping ? (
                   <>
                     <div className="h-3.5 w-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                    <span>Scraping...</span>
+                    <span>Importing...</span>
                   </>
                 ) : (
                   <>
                     <ImageIcon className="h-3.5 w-3.5" />
-                    <span>Scrape Assets</span>
+                    <span>Import Images</span>
                   </>
                 )}
               </span>
@@ -270,7 +270,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
               <div className="flex justify-between items-center text-[10px] font-mono text-neutral-400 font-bold uppercase tracking-wider">
                 <span className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-neutral-500" />
-                  Extracting comic assets
+                  Getting images from the link
                 </span>
                 <span>Est. Wait Time: 15-45s</span>
               </div>
@@ -280,8 +280,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
                 <div className="absolute top-0 bottom-0 bg-gradient-to-r from-neutral-600 via-neutral-500 to-neutral-400 rounded-full w-1/3 animate-infinite-scroll" />
               </div>
               <p className="text-[9.5px] text-neutral-500 font-mono leading-normal">
-                Launching headless browser worker on the server backend to
-                extract layout strips.
+                We are downloading the images so you can turn them into a video.
               </p>
             </div>
           )}
