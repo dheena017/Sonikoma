@@ -42,12 +42,12 @@ export function PanelCardActions({
     setScrapedImages((prev) => prev.filter((_, i) => i !== idx));
     setSelectedScraped((prev) => prev.filter((img) => img !== imgUrl));
     setConsoleLogs((prev) => [
-      `[GUI] Deleted extracted frame #${idx + 1} from deck.`,
+      `[GUI] Deleted image #${idx + 1} from deck.`,
       ...prev,
     ]);
-    console.log(`[GUI] Deleted extracted frame #${idx + 1} from deck.`);
+    console.log(`[GUI] Deleted image #${idx + 1} from deck.`);
     addNotification(
-      `Deleted extracted frame #${idx + 1} from deck.`,
+      `Deleted image #${idx + 1} from deck.`,
       "success"
     );
     setShowDeleteConfirm(false);
@@ -101,7 +101,7 @@ export function PanelCardActions({
                   </div>
                   <div>
                     <h2 className="text-base font-bold text-white tracking-tight">
-                      Delete Extracted Frame?
+                      Delete Image?
                     </h2>
                     <p className="text-[10px] text-neutral-450 font-mono">
                       Warning: This action cannot be undone
@@ -120,8 +120,8 @@ export function PanelCardActions({
               {/* Body */}
               <div className="p-6 space-y-4 text-left">
                 <p className="text-xs text-neutral-355 leading-relaxed font-sans">
-                  Are you sure you want to delete extracted frame{" "}
-                  <strong>#{idx + 1}</strong> from your deck?
+                  Are you sure you want to delete image{" "}
+                  <strong>#{idx + 1}</strong>? This action cannot be undone.
                 </p>
               </div>
 
