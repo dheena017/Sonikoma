@@ -58,7 +58,7 @@ def init_db() -> None:
                 users_table_exists = False
         
         if not users_table_exists:
-            schema_file = SCHEMA_PATH if os.path.exists(SCHEMA_PATH) else '/app/schema.sql'
+            schema_file = SCHEMA_PATH if os.path.exists(SCHEMA_PATH) else '/app/schema_backup.sql'
             if not os.path.exists(schema_file):
                 schema_file = os.path.join(os.path.dirname(__file__), '..', '..', 'database', 'schema.sql')
 
