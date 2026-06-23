@@ -298,7 +298,7 @@ export default function Sidebar({
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-bold text-base tracking-tight text-white font-sans">
-                  Webtoon<span className="text-purple-400">To</span>Video
+                  Ani<span className="text-purple-400">vox</span>
                 </span>
               </div>
               <p className="text-[10px] text-neutral-400 font-mono">

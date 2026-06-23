@@ -140,14 +140,7 @@ export default function LoadingPage({
               width={40}
               height={40}
             >
-              <path d="M8 8h16v10H14l-4 4v-4H8z" fill="#ffffff" />
-              <polygon points="13,11 19,13 13,15" fill="url(#lg)" />
-              <defs>
-                <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#a855f7" />
-                  <stop offset="100%" stopColor="#06b6d4" />
-                </linearGradient>
-              </defs>
+              <path fillRule="evenodd" clipRule="evenodd" d="M16 6 L8 26 L12.5 26 L14 22 L18 22 L19.5 26 L24 26 Z M13.5 12 L13.5 19.5 L19 15.75 Z" fill="#ffffff" />
             </svg>
           </div>
         </div>
@@ -165,7 +158,7 @@ export default function LoadingPage({
             WebkitTextFillColor: "transparent",
           }}
         >
-          Webtoon Studio
+          Anivox
         </div>
 
         {/* Tagline / status */}
