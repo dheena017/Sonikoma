@@ -22,7 +22,8 @@ from database.db import (
     write_audit_log, get_audit_logs, get_user_invoices,
     seed_default_invoices_if_empty, get_user_api_keys,
     create_user_api_key, delete_user_api_key, get_creator_analytics,
-    get_user_by_api_key, create_user_invoice, get_user_achievements_and_points
+    get_user_by_api_key, create_user_invoice, get_user_achievements_and_points,
+    get_all_users
 )
 
 logger = logging.getLogger("sonikoma.auth")
@@ -271,6 +272,11 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         "achievement_points": ach_data["achievement_points"]
     }
 
+@router.get("/admin/users")
+async def get_admin_users(current_user: dict = Depends(get_current_user)):
+    # For now, allow any authenticated user or specific admins
+    users = get_all_users()
+    return {"success": True, "users": users}
 
 class ProfileUpdate(BaseModel):
     full_name: Optional[str] = None

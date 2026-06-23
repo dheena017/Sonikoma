@@ -58,6 +58,7 @@ import EngagementPage from "./components/engagement/EngagementPage.js";
 import VoiceStudioPage from "./components/voice/VoiceStudioPage.js";
 import CTRAnalyticsPage from "./components/analytics/CTRAnalyticsPage.js";
 import NotificationsPage from "./components/NotificationsPage.js";
+import AdminPage from "./components/AdminPage.js";
 
 // ============================================================================
 // SECTION 2: MAIN APP COMPONENT
@@ -524,6 +525,7 @@ export default function App() {
   const isAnalyticsPath = currentPath === "/ai-analytics";
   const isProfilePath = currentPath === "/profile";
   const isNotificationsPath = currentPath === "/notifications";
+  const isAdminPath = currentPath === "/admin";
   const isChapterDetailsPath =
     currentPath === "/project-details" ||
     (chapterPathMatch !== null && isDetailsMode);

@@ -15,6 +15,7 @@ import {
   ChevronUp,
   FileText,
   Bell,
+  Shield,
 } from "lucide-react";
 import { GeneratedPanel } from "../types";
 import { Notification } from "./NotificationStack";
@@ -65,6 +66,7 @@ export default function Sidebar({
     currentPath === "/workspace" ||
     (chapterPathMatch !== null && !currentPath.endsWith("/details"));
   const isDashboardOverview = currentPath === "/dashboard";
+  const isAdminPath = currentPath === "/admin";
   const isSettings = currentPath === "/settings";
   const isAutoCrop = currentPath === "/auto-crop";
   const isBubbleCleaner = currentPath === "/bubble-cleaner";
@@ -265,6 +267,13 @@ export default function Sidebar({
           icon: Sparkles,
           active: currentPath === "/profile",
           onClick: () => navigateTo("/profile"),
+          enabled: true,
+        },
+        {
+          label: "Admin Dashboard",
+          icon: Shield,
+          active: isAdminPath,
+          onClick: () => navigateTo("/admin"),
           enabled: true,
         },
       ],

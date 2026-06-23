@@ -8,31 +8,130 @@ Local SQLite database connection and CRUD helpers for Webtoon-to-Video.
 import os
 import json
 import sqlite3
+import logging
 from typing import List, Dict, Any, Optional
+
+try:
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+except ImportError:
+    psycopg2 = None
 
 DB_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'database'))
 DB_PATH = os.path.join(DB_DIR, 'webtoon_local.db')
 SCHEMA_PATH = os.path.join(DB_DIR, 'schema.sql')
+SCHEMA_PG_PATH = os.path.join(DB_DIR, 'schema_postgres.sql')
 
-import logging
 logger = logging.getLogger("sonikoma.database")
+
+DATABASE_URL = os.environ.get("DATABASE_URL")
+_is_postgres = bool(DATABASE_URL and (DATABASE_URL.startswith("postgresql://") or DATABASE_URL.startswith("postgres://")))
 
 _db_initialized = False
 
-def get_db_connection() -> sqlite3.Connection:
+class PostgresCursorWrapper:
+    def __init__(self, cursor):
+        self.cursor = cursor
+
+    def _translate_query(self, query):
+        # Convert SQLite placeholders to Postgres format
+        query = query.replace("?", "%s")
+        # Convert SQLite datetime to Postgres
+        query = query.replace("datetime('now')", "NOW()")
+        return query
+
+    def execute(self, query, params=None):
+        translated = self._translate_query(query)
+        self.cursor.execute(translated, params or ())
+        return self
+
+    def fetchone(self):
+        try:
+            row = self.cursor.fetchone()
+            return dict(row) if row else None
+        except Exception:
+            return None
+
+    def fetchall(self):
+        try:
+            rows = self.cursor.fetchall()
+            return [dict(r) for r in rows]
+        except Exception:
+            return []
+
+    def close(self):
+        self.cursor.close()
+
+class PostgresConnectionWrapper:
+    def __init__(self, conn):
+        self.conn = conn
+
+    def cursor(self):
+        return PostgresCursorWrapper(self.conn.cursor())
+
+    def execute(self, query, params=None):
+        cursor = self.cursor()
+        return cursor.execute(query, params)
+
+    def executescript(self, script):
+        cursor = self.cursor()
+        cursor.execute(script)
+
+    def commit(self):
+        self.conn.commit()
+
+    def close(self):
+        self.conn.close()
+
+def get_db_connection():
     if not _db_initialized:
         init_db()
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    conn.execute('PRAGMA journal_mode = WAL')
-    conn.execute('PRAGMA foreign_keys = ON')
-    return conn
+        
+    if _is_postgres:
+        if not psycopg2:
+            raise RuntimeError("psycopg2-binary is required for PostgreSQL support. Please install it.")
+        conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+        # Postgres connections must be committed or set to autocommit. Let's use the wrapper.
+        return PostgresConnectionWrapper(conn)
+    else:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        conn.execute('PRAGMA journal_mode = WAL')
+        conn.execute('PRAGMA foreign_keys = ON')
+        return conn
 
 def init_db() -> None:
     global _db_initialized
     if _db_initialized:
         return
     _db_initialized = True
+
+    if _is_postgres:
+        logger.info(f"[Database] Connecting to PostgreSQL (Supabase)...")
+        conn = get_db_connection()
+        try:
+            # Check if tables exist
+            row = conn.execute("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'users') as exists").fetchone()
+            if not row or not row.get('exists'):
+                logger.info("[Database] Initializing PostgreSQL schema...")
+                schema_file = SCHEMA_PG_PATH
+                if os.path.exists(schema_file):
+                    with open(schema_file, 'r', encoding='utf-8') as f:
+                        schema = f.read()
+                    conn.executescript(schema)
+                    conn.commit()
+                    logger.info("[Database] PostgreSQL schema applied successfully.")
+                else:
+                    logger.warning("[Database] schema_postgres.sql not found.")
+            else:
+                logger.info("[Database] Relational database schema is already initialized.")
+        except Exception as e:
+            logger.error(f"[Database] Error checking PostgreSQL schema: {e}")
+        finally:
+            conn.close()
+        logger.info("[Database] PostgreSQL ready [OK]")
+        return
+
     logger.info(f"[Database] Opening local SQLite database at: {DB_PATH}")
     os.makedirs(DB_DIR, exist_ok=True)
     conn = get_db_connection()
@@ -179,6 +278,17 @@ def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
             res['user_id'] = res.get('id')
             return res
         return None
+    finally:
+        conn.close()
+
+def get_all_users() -> List[Dict[str, Any]]:
+    """
+    Get all registered users safely.
+    """
+    conn = get_db_connection()
+    try:
+        rows = conn.execute('SELECT id, email, full_name, avatar_url, creator_role, credits, created_at FROM users ORDER BY created_at DESC').fetchall()
+        return [dict(r) for r in rows]
     finally:
         conn.close()
 
