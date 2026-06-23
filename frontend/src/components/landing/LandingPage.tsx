@@ -206,7 +206,7 @@ export default function LandingPage({
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     <Sparkles className="w-4 h-4" />
-                    Scrape Assets
+                    Import Images
                   </button>
                 </div>
               </div>
@@ -354,7 +354,7 @@ export default function LandingPage({
               },
               {
                 id: "translation",
-                label: "AI Translation",
+                label: "Auto Translation",
                 icon: <Languages className="w-4 h-4" />,
               },
               {
@@ -440,7 +440,7 @@ export default function LandingPage({
                     Before (Raw Webtoon)
                   </div>
                   <div className="absolute bottom-4 right-4 z-20 px-3 py-1 bg-purple-950/80 backdrop-blur-md rounded-lg text-[10px] font-mono text-purple-200 border border-purple-500/20">
-                    After (AI Enhanced)
+                    After (Enhanced)
                   </div>
                 </div>
                 <p className="text-center text-xs text-neutral-500 font-mono">
@@ -559,14 +559,14 @@ export default function LandingPage({
               features={[
                 "5 video exports per month",
                 "Standard rendering queue",
-                "Standard voice synthesis",
+                "Standard voice generation",
                 "Watermarked video files",
                 "Basic panel auto-slicing",
               ]}
               excludedFeatures={[
                 "Custom voice cloning",
                 "HD/4K export",
-                "Speech bubble inpainting",
+                "Speech bubble clearing",
                 "API access",
               ]}
               btnText="Get Started Free"
@@ -636,7 +636,7 @@ export default function LandingPage({
               avatar="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces"
             />
             <TestimonialCard
-              quote="The TTS voices sound incredibly natural. Combining voice acting with AI translation allowed me to localize my Korean webtoon into English instantly."
+              quote="The generated voices sound incredibly natural. Combining voice acting with auto translation allowed me to localize my Korean webtoon into English instantly."
               author="Sujin Park"
               handle="@sujin_draws"
               rating={5}
@@ -673,7 +673,7 @@ export default function LandingPage({
           <div className="space-y-4">
             {[
               {
-                q: "How does the scraper work?",
+                q: "How does the image importer work?",
                 a: "Simply paste the URL of a comic or webtoon chapter. Sonikoma fetches the high-resolution strip images and parses metadata automatically from major hosting platforms.",
               },
               {
@@ -685,7 +685,7 @@ export default function LandingPage({
                 a: "Yes! Creator Pro and Studio plans allow you to upload audio samples to clone your own voice or train custom character voices for immersive narrative experiences.",
               },
               {
-                q: "What platforms are supported by the scraper?",
+                q: "What platforms are supported by the importer?",
                 a: "We support major public webtoon hubs (Line Webtoon, Tapas, and major community archives). You can also upload your own local image folders (JPEG/PNG) directly to crop.",
               },
               {
@@ -1017,7 +1017,7 @@ function SlicingAfter() {
   return (
     <div className="w-full h-full flex flex-col items-center justify-start p-6 space-y-6 bg-[#070709] overflow-y-auto scrollbar-thin">
       <div className="text-[10px] font-mono text-purple-400 uppercase tracking-widest mb-2 border-b border-purple-500/10 w-full pb-2 text-center">
-        AI Detected Bounding Boxes
+        Detected Bounding Boxes
       </div>
       <div className="w-48 h-32 rounded-xl bg-gradient-to-br from-indigo-950 to-blue-900 flex items-center justify-center border border-purple-500 relative overflow-hidden shrink-0 shadow-lg shadow-purple-500/10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.2),transparent_70%)]" />
@@ -1084,10 +1084,10 @@ function BubblesAfter() {
         <div className="absolute top-6 left-6 w-20 h-20 rounded-full bg-orange-400/80 blur-md animate-pulse" />
         <div className="absolute bottom-0 right-0 w-32 h-44 bg-neutral-800 rounded-t-[50px] border border-white/5" />
         <div className="absolute bottom-36 right-8 w-16 h-16 rounded-full bg-neutral-700" />
-        {/* Speech bubble erased! Text and container replaced by inpainted texture */}
+        {/* Speech bubble erased! */}
         <div className="absolute top-8 right-6 w-16 h-16 bg-purple-700/10 blur-xl rounded-full" />
         <div className="absolute top-4 right-10 px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-400 text-emerald-400 text-[8px] font-mono font-bold">
-          Speech Bubble Erased & Inpainted
+          Speech Bubble Cleared
         </div>
       </div>
     </div>
@@ -1173,7 +1173,7 @@ function CinematicRenderDemo({ onGetStarted }: { onGetStarted: () => void }) {
         {/* Left Column: Storyboard Panel Queue */}
         <div className="lg:col-span-1 space-y-3">
           <h4 className="text-[10px] font-mono uppercase text-neutral-500 tracking-wider">
-            Storyboard Panels
+            Timeline Panels
           </h4>
           <div className="space-y-2 max-h-[220px] overflow-y-auto scrollbar-thin pr-1">
             {[
