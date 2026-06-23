@@ -174,7 +174,7 @@ export default function AutoCropModal({
               Auto-Crop Settings & Configuration
             </h3>
             <p className="text-[9px] sm:text-[10px] text-neutral-400 font-mono mt-1 sm:mt-0.5 leading-snug">
-              Configure OpenCV contour models or Gemini Vision AI prompts for
+              Configure OpenCV contour models or Smart Scanner prompts for
               segmenting comic strips
             </p>
           </div>
@@ -389,7 +389,7 @@ export default function AutoCropModal({
             </span>
           ) : (
             <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-lg bg-indigo-950/85 text-indigo-400 border border-indigo-800/40">
-              GEMINI AI ACTIVE
+              SMART SCANNER ACTIVE
             </span>
           )}
           {aspectRatioLock !== "free" && (
@@ -443,7 +443,7 @@ export default function AutoCropModal({
             </h2>
             <p className="text-xs text-neutral-400 font-mono mt-0.5">
               Configure parameters for Canny thresholds, model sizes, overlap
-              filters or Gemini AI custom prompts
+              filters or Smart Scanner custom prompts
             </p>
           </div>
           <button

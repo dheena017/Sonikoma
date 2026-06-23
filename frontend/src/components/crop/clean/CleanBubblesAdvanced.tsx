@@ -299,9 +299,9 @@ export default function CleanBubblesAdvanced({
               <div className="flex justify-between items-center">
                 <span
                   className="text-[9px] font-bold text-neutral-400 uppercase font-mono tracking-wider"
-                  title="Pixel radius neighborhood for image inpainting."
+                  title="Pixel radius neighborhood for image clearing."
                 >
-                  Inpainting Neighborhood Radius
+                  Clearing Neighborhood Radius
                 </span>
                 <span className="text-[10px] font-mono font-bold text-purple-400">
                   {inpaintRadius}px

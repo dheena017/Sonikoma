@@ -103,7 +103,7 @@ export function BubbleCleanerDiagnosticDashboard({
         type="button"
         onClick={() =>
           addNotification?.(
-            "API Exception Simulator: Gemini AI went offline. Speech bubble cleaning fell back to local OpenCV threshold filters.",
+            "API Exception Simulator: System went offline. Speech bubble cleaning fell back to local OpenCV threshold filters.",
             "error"
           )
         }

@@ -20,7 +20,7 @@ export const ERASE_OPTIONS = [
   {
     value: "auto",
     label: "Auto (AI)",
-    description: "Smart AI classifier inpainting",
+    description: "Smart classifier clearing",
   },
   {
     value: "inpaint",

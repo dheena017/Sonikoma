@@ -423,7 +423,7 @@ export default function ProfileProjectsTab({
             {stats.processing}
           </div>
           <div className="text-[9px] text-amber-500/80 font-semibold mt-1">
-            Active AI jobs
+            Active Smart jobs
           </div>
         </div>
 

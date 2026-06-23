@@ -55,7 +55,7 @@ export function BubbleCleanerMaskControls({
       <div className={card}>
         <div className={row}>
           <span className="text-neutral-500 uppercase tracking-wider font-bold">
-            Inpaint radius (TELEA blending)
+            Clear radius (TELEA blending)
           </span>
           <span className="text-purple-400 font-bold">
             {bubbleInpaintRadius}px
