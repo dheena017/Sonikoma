@@ -620,6 +620,7 @@ from routes.scraper_routes import router as scraper_routes_router
 from routes.ai_routes import router as ai_routes_router
 from routes.audio import router as audio_router
 from routes.video import router as video_router
+from routes.export import router as export_router
 
 # 1. Mount original Express routes under /api
 app.include_router(health_router,         prefix="/api", tags=["Health & System"])
@@ -631,6 +632,7 @@ app.include_router(scraper_routes_router, prefix="/api", tags=["Scraper"])
 app.include_router(ai_routes_router,      prefix="/api", tags=["AI Processing"])
 app.include_router(audio_router,          prefix="/api/audio", tags=["Audio Synthesis"])
 app.include_router(video_router,          prefix="/api/video", tags=["Video Rendering"])
+app.include_router(export_router,         prefix="/api/export", tags=["Export"])
 
 # Legacy cached image endpoints compatibility
 app.get("/api/merge-images/cached/{cache_id}", tags=["Legacy Image Routing"], include_in_schema=False)(get_cached_stitch)
