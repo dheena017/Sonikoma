@@ -8,6 +8,8 @@ import {
   Key,
   Copy,
   X,
+  AlertTriangle,
+  Download,
 } from "lucide-react";
 
 interface ProfileSecurityTabProps {
@@ -36,6 +38,8 @@ interface ProfileSecurityTabProps {
   handleTerminateSession: (id: string) => void;
   is2faEnabled: boolean;
   handleToggleMfa: (enabled: boolean) => Promise<boolean>;
+  onExportData?: () => void;
+  onDeleteAccount?: () => void;
 }
 
 export default function ProfileSecurityTab({
@@ -48,6 +52,8 @@ export default function ProfileSecurityTab({
   handleTerminateSession,
   is2faEnabled,
   handleToggleMfa,
+  onExportData,
+  onDeleteAccount,
 }: ProfileSecurityTabProps) {
   // 2FA state simulations
   const [show2faSetup, setShow2faSetup] = React.useState(false);
@@ -715,6 +721,64 @@ export default function ProfileSecurityTab({
             </div>
           </div>
         )}
+      </div>
+
+      {/* DANGER ZONE: Account deletion & Data Export */}
+      <div className="bg-rose-950/20 border border-rose-500/20 rounded-3xl p-8 shadow-2xl relative space-y-6 mt-8 overflow-hidden">
+        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-rose-500/30 to-transparent" />
+
+        <div className="space-y-1">
+          <h3 className="text-base font-bold text-rose-400 flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5" />
+            Danger Zone
+          </h3>
+          <p className="text-xs text-neutral-400 font-semibold">
+            Irreversible actions regarding your data and account access.
+          </p>
+        </div>
+
+        <div className="space-y-4 pt-2">
+          {/* Export Data */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-black/40 rounded-2xl border border-rose-500/10">
+            <div>
+              <h4 className="text-xs font-bold text-white">
+                Export Account Data
+              </h4>
+              <p className="text-[10px] text-neutral-500 font-semibold mt-1">
+                Download a JSON copy of all your profile settings, preferences,
+                and activity history.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onExportData}
+              className="shrink-0 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 border border-white/10 rounded-xl text-xs font-bold text-white transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+            >
+              <Download className="w-4 h-4 text-neutral-400" />
+              Request Export
+            </button>
+          </div>
+
+          {/* Delete Account */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-black/40 rounded-2xl border border-rose-500/10">
+            <div>
+              <h4 className="text-xs font-bold text-rose-400">
+                Permanently Delete Account
+              </h4>
+              <p className="text-[10px] text-neutral-500 font-semibold mt-1">
+                Once deleted, all projects, generated videos, and billing
+                history are erased forever.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onDeleteAccount}
+              className="shrink-0 px-4 py-2 bg-rose-600/10 hover:bg-rose-600 border border-rose-500/20 text-rose-400 hover:text-white rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
+            >
+              Delete Account
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
