@@ -336,37 +336,58 @@ export function useVideoGeneration({
 
   const handleRenderFinalVideo = async () => {
     setIsRendering(true);
-    setRenderProgress(0);
+    setRenderProgress(5);
 
     try {
-      const progressInterval = setInterval(() => {
-        setRenderProgress((prev) => Math.min(prev + 5, 90));
-      }, 500);
-
       const response = await fetchWithInterceptor("/api/video/render", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ panels }),
       });
 
-      clearInterval(progressInterval);
-
       const data = await response.json();
-      setRenderProgress(100);
-
-      if (data.success && data.video_url) {
-        setVideoUrl(data.video_url);
-        setActivePreviewTab("video");
-        addNotification("Final video rendered successfully!", "success");
-      } else {
-        throw new Error(data.error || "Failed to render video");
+      if (!data.success || !data.job_id) {
+        throw new Error(data.detail || data.error || "Failed to start render job");
       }
+
+      const jobId = data.job_id;
+
+      // Start polling
+      const pollInterval = setInterval(async () => {
+        try {
+          const statusRes = await fetchWithInterceptor(`/api/video/status/${jobId}`);
+          const statusData = await statusRes.json();
+
+          if (statusData.progress) {
+            setRenderProgress(statusData.progress);
+          }
+
+          if (statusData.status === "completed") {
+            clearInterval(pollInterval);
+            setRenderProgress(100);
+            setVideoUrl(statusData.url);
+            setActivePreviewTab("video");
+            addNotification("Final video rendered successfully!", "success");
+            setIsRendering(false);
+            setTimeout(() => setRenderProgress(0), 2000);
+          } else if (statusData.status === "failed") {
+            clearInterval(pollInterval);
+            throw new Error(statusData.error || "Render failed");
+          }
+        } catch (pollErr: any) {
+          clearInterval(pollInterval);
+          console.error("Polling error:", pollErr);
+          addNotification(`Render failed: ${pollErr.message}`, "error");
+          setIsRendering(false);
+          setRenderProgress(0);
+        }
+      }, 2000);
+
     } catch (error: any) {
-      console.error("Error rendering final video:", error);
+      console.error("Error starting render:", error);
       addNotification(`Render failed: ${error.message}`, "error");
-    } finally {
       setIsRendering(false);
-      setTimeout(() => setRenderProgress(0), 2000);
+      setRenderProgress(0);
     }
   };
 

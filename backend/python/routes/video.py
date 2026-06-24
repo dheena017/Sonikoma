@@ -115,10 +115,14 @@ def render_pipeline_sync(panels_data, output_path, work_dir):
     from moviepy.editor import CompositeVideoClip
 
     clips = []
+    sfx_clips = []
+    current_global_time = 0.0
+    
     for i, p in enumerate(panels_data):
         img_path = p["local_img"]
         audio_path = p.get("local_audio")
         duration = p["duration"]
+        sfx_name = p.get("sfx")
 
         if not os.path.exists(img_path):
             continue
@@ -132,10 +136,22 @@ def render_pipeline_sync(panels_data, output_path, work_dir):
             except Exception as e:
                 logger.error(f"Failed to attach audio {audio_path}: {e}")
 
+        # Step 12: Schedule SFX
+        safe_duration = max(duration, 0.1)
+        if sfx_name and sfx_name.strip():
+            sfx_path = os.path.join(os.getcwd(), "public", "audio", "sfx", f"{sfx_name.strip()}.mp3")
+            if os.path.exists(sfx_path):
+                try:
+                    from moviepy.editor import AudioFileClip
+                    sfx_clip = AudioFileClip(sfx_path).volumex(0.4)
+                    sfx_clip = sfx_clip.set_start(current_global_time)
+                    sfx_clips.append(sfx_clip)
+                except Exception as e:
+                    logger.error(f"Failed to load SFX {sfx_path}: {e}")
+
         # Dynamic Camera Motion (Ken Burns Effect)
         motion_type = p.get("motion_type")
         w, h = clip.size
-        safe_duration = max(duration, 0.1)
 
         if motion_type == "zoom_in":
             clip = clip.resize(lambda t: 1 + 0.08 * (t / safe_duration))
@@ -168,6 +184,10 @@ def render_pipeline_sync(panels_data, output_path, work_dir):
             clip = clip.crossfadein(0.5)
 
         clips.append(clip)
+        
+        # Calculate start time for the next panel (accounting for -0.5s padding overlap)
+        current_global_time += safe_duration
+        current_global_time -= 0.5
 
     if not clips:
         raise Exception("No valid clips were generated.")
@@ -175,9 +195,13 @@ def render_pipeline_sync(panels_data, output_path, work_dir):
     # Stitch them together with a -0.5s overlap to enable the crossfade
     final_clip = concatenate_videoclips(clips, padding=-0.5, method="compose")
     
-    # Step 10: Multi-Track Audio Mixing (BGM + SFX placeholder)
+    # Step 10 & 12: Multi-Track Audio Mixing (BGM + SFX)
     from moviepy.editor import AudioFileClip, CompositeAudioClip
     import moviepy.audio.fx.all as afx
+    
+    audio_tracks = []
+    if final_clip.audio is not None:
+        audio_tracks.append(final_clip.audio)
     
     bgm_path = os.path.join(os.getcwd(), "public", "audio", "bgm", "theme.mp3")
     if os.path.exists(bgm_path):
@@ -185,15 +209,19 @@ def render_pipeline_sync(panels_data, output_path, work_dir):
             # Load BGM, lower volume to 10%, and loop to match total video duration
             bgm_clip = AudioFileClip(bgm_path).volumex(0.1)
             bgm_clip = afx.audio_loop(bgm_clip, duration=final_clip.duration)
-            
-            # Merge existing audio (TTS) with BGM
-            if final_clip.audio is not None:
-                final_audio = CompositeAudioClip([final_clip.audio, bgm_clip])
-                final_clip = final_clip.set_audio(final_audio)
-            else:
-                final_clip = final_clip.set_audio(bgm_clip)
+            audio_tracks.append(bgm_clip)
         except Exception as e:
-            logger.error(f"Failed to mix BGM audio: {e}")
+            logger.error(f"Failed to load BGM audio: {e}")
+            
+    # Add scheduled SFX tracks
+    audio_tracks.extend(sfx_clips)
+    
+    if audio_tracks:
+        try:
+            final_audio = CompositeAudioClip(audio_tracks)
+            final_clip = final_clip.set_audio(final_audio)
+        except Exception as e:
+            logger.error(f"Failed to mix final audio: {e}")
             
     # Write to file
     final_clip.write_videofile(
@@ -235,7 +263,8 @@ async def process_render_job(video_id: str, panels: List[PanelData]):
                 "local_img": img_path,
                 "local_audio": None,
                 "speech_text": panel.speech_text,
-                "motion_type": panel.motion_type
+                "motion_type": panel.motion_type,
+                "sfx": panel.sfx
             }
             
             download_tasks.append(download_asset(panel.image_url, img_path))
