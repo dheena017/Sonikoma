@@ -1,5 +1,5 @@
-import React from "react";
-import { Download } from "lucide-react";
+import React, { useState } from "react";
+import { Download, Youtube, Loader2, ExternalLink } from "lucide-react";
 
 interface OutputMetadataPanelProps {
   musicTheme: string;
@@ -14,6 +14,38 @@ export default function OutputMetadataPanel({
   videoUrl,
   handleSaveVideo,
 }: OutputMetadataPanelProps) {
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [youtubeUrl, setYoutubeUrl] = useState<string | null>(null);
+  const [publishMessage, setPublishMessage] = useState<string | null>(null);
+
+  const handlePublishYouTube = async () => {
+    if (!videoUrl) return;
+    setIsPublishing(true);
+    setPublishMessage(null);
+    try {
+      const res = await fetch("/api/export/youtube", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          video_url: videoUrl,
+          title: `Webtoon Comic Video - ${musicTheme}`,
+          synopsis: `Cinematic Webtoon Video featuring ${voiceActor} and ${musicTheme}.`
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setYoutubeUrl(data.youtube_url);
+        setPublishMessage(data.message);
+      } else {
+        setPublishMessage(`Error: ${data.detail || "Failed to publish."}`);
+      }
+    } catch (err: any) {
+      setPublishMessage(`Network Error: ${err.message}`);
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
   return (
     <div
       id="video_metadata_panel"
@@ -76,6 +108,48 @@ export default function OutputMetadataPanel({
             <Download className="h-4 w-4" />
             <span>Download Master MP4 File</span>
           </a>
+
+          {/* YouTube Publish Section */}
+          <div className="pt-2 border-t border-neutral-800/50 mt-2">
+            {!youtubeUrl ? (
+              <button
+                onClick={handlePublishYouTube}
+                disabled={isPublishing}
+                className={`w-full text-white font-medium text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition-all select-none border font-sans ${
+                  isPublishing 
+                    ? "bg-neutral-800 border-neutral-700 cursor-not-allowed opacity-70" 
+                    : "bg-[#FF0000] hover:bg-[#CC0000] border-[#FF0000]/50 shadow-lg shadow-red-900/20 cursor-pointer active:scale-95"
+                }`}
+              >
+                {isPublishing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Publishing to YouTube...</span>
+                  </>
+                ) : (
+                  <>
+                    <Youtube className="h-4 w-4" />
+                    <span>🚀 Publish to YouTube</span>
+                  </>
+                )}
+              </button>
+            ) : (
+              <a
+                href={youtubeUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="w-full bg-green-600 hover:bg-green-500 text-white font-medium text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer select-none border border-green-500/50 shadow-lg shadow-green-900/20 font-sans active:scale-95"
+              >
+                <ExternalLink className="h-4 w-4" />
+                <span>View on YouTube</span>
+              </a>
+            )}
+            {publishMessage && (
+              <div className="mt-2 text-[10px] text-center font-mono text-neutral-400">
+                {publishMessage}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
