@@ -334,6 +334,7 @@ export default function StoryboardTimeline({
     try {
       let successCount = 0;
       let completed = 0;
+      const errors: string[] = [];
 
       const chunks = chunkArray(targetPanels, 8);
 
@@ -421,6 +422,7 @@ export default function StoryboardTimeline({
           } catch (err: any) {
             console.error(`[Auto Cropper] Failed for chunk:`, err);
             chunkPanels.forEach((p) => chunkMap.set(p.id, [p]));
+            errors.push(err.message || "Failed to process chunk");
           } finally {
             completed += chunkPanels.length;
             setCropProgress({ current: completed, total: targetPanels.length });
@@ -442,13 +444,23 @@ export default function StoryboardTimeline({
       });
 
       setPanels(updatedPanels);
-      addNotification?.(`Auto-cropped selected timeline panels!`, "success");
-      setConsoleLogs?.((prev) => [
-        `[Auto Cropper] Finished auto-cropping panels. Slices replaced.`,
-        ...prev,
-      ]);
+      
+      if (errors.length > 0) {
+        addNotification?.(`Auto-crop completed with ${errors.length} error(s). Check console.`, "error");
+        setConsoleLogs?.((prev) => [
+          `[Auto Cropper] Finished auto-cropping with errors.`,
+          ...prev,
+        ]);
+      } else {
+        addNotification?.(`Auto-cropped selected timeline panels!`, "success");
+        setConsoleLogs?.((prev) => [
+          `[Auto Cropper] Finished auto-cropping panels. Slices replaced.`,
+          ...prev,
+        ]);
+      }
     } catch (err: any) {
       console.error("[Auto Cropper] Critical error:", err);
+      addNotification?.(`Critical error during auto-crop: ${err.message}`, "error");
     } finally {
       setIsBatchCropping(false);
       setCropProgress(null);
