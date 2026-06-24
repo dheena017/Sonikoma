@@ -46,6 +46,7 @@ import ProjectEditorPage from "./components/ProjectEditorPage.js";
 import SeriesDetailsPage from "./components/SeriesDetailsPage.js";
 import DisplayPage from "./components/DisplayPage.js";
 import DashboardPage from "./components/DashboardPage.js";
+import ProjectsPage from "./components/ProjectsPage.js";
 
 // --- AI Creator & Engagement Suite Views ---
 import AIOptimizerPage from "./components/optimizer/AIOptimizerPage.js";
@@ -501,6 +502,7 @@ export default function App() {
     (chapterPathMatch !== null && !isDetailsMode);
   const isWorkspaceOnly = isWorkspacePath;
   const isDashboardOverviewPath = currentPath === "/dashboard";
+  const isProjectsPath = currentPath === "/projects";
   const isSettingsPath = currentPath === "/settings";
   const isAutoCropPath = currentPath === "/auto-crop";
   const isBubbleCleanerPath = currentPath === "/bubble-cleaner";
