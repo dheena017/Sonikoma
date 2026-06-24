@@ -13,7 +13,7 @@ from typing import List, Dict, Any, Optional
 
 try:
     import psycopg2
-    from psycopg2.extras import RealDictCursor
+    from psycopg2.extras import DictCursor
 except ImportError:
     psycopg2 = None
 
@@ -47,8 +47,7 @@ class PostgresCursorWrapper:
 
     def fetchone(self):
         try:
-            row = self.cursor.fetchone()
-            return dict(row) if row else None
+            return self.cursor.fetchone()
         except Exception:
             return None
 
@@ -90,7 +89,7 @@ def get_db_connection():
     if _is_postgres:
         if not psycopg2:
             raise RuntimeError("psycopg2-binary is required for PostgreSQL support. Please install it.")
-        conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+        conn = psycopg2.connect(DATABASE_URL, cursor_factory=DictCursor)
         # Postgres connections must be committed or set to autocommit. Let's use the wrapper.
         return PostgresConnectionWrapper(conn)
     else:
