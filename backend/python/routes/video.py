@@ -323,6 +323,16 @@ async def process_render_job(video_id: str, panels: List[PanelData]):
         logger.error(f"Render failed: {e}", exc_info=True)
         RENDER_JOBS[video_id]["status"] = "failed"
         RENDER_JOBS[video_id]["error"] = str(e)
+    finally:
+        import shutil
+        try:
+            if os.path.exists(work_dir):
+                shutil.rmtree(work_dir)
+            if os.path.exists(output_path):
+                os.remove(output_path)
+            logger.info(f"Cleaned up temporary files for job {video_id}")
+        except Exception as cleanup_err:
+            logger.error(f"Failed to clean up files for job {video_id}: {cleanup_err}")
 
 
 @router.post("/render")
