@@ -12,6 +12,7 @@ interface UseAutoAnalysisProps {
   fetchWithInterceptor: any;
   setActivePreviewTab: (tab: "video" | "timeline") => void;
   narrationStyle?: string;
+  setAccumulatedTokens?: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export function useAutoAnalysis({
@@ -24,6 +25,7 @@ export function useAutoAnalysis({
   fetchWithInterceptor,
   setActivePreviewTab,
   narrationStyle = "long",
+  setAccumulatedTokens,
 }: UseAutoAnalysisProps) {
   const runBackgroundAnalysis = useCallback(
     async (panelId: number, imageUrl: string) => {
@@ -72,6 +74,11 @@ export function useAutoAnalysis({
             `Panel #${panelId} analysis completed successfully!`,
             "success"
           );
+          if (setAccumulatedTokens && (data.inputTokens || data.outputTokens)) {
+            const addedTokens = (data.inputTokens || 0) + (data.outputTokens || 0);
+            setAccumulatedTokens((prev) => prev + addedTokens);
+            console.log(`[Smart Auto-Analysis] Tracked ${addedTokens} tokens (Total accumulating...)`);
+          }
         } else {
           throw new Error(
             data.error || "Invalid response keys from System Model Analysis"
@@ -166,6 +173,12 @@ export function useAutoAnalysis({
             ...prev,
           ]);
           addNotification(`Sequence analysis completed successfully!`, "success");
+          
+          if (setAccumulatedTokens && (data.inputTokens || data.outputTokens)) {
+            const addedTokens = (data.inputTokens || 0) + (data.outputTokens || 0);
+            setAccumulatedTokens((prev) => prev + addedTokens);
+            console.log(`[Sequence Analysis] Tracked ${addedTokens} tokens (Total accumulating...)`);
+          }
         } else {
           throw new Error(data.error || "Invalid response from sequence analysis");
         }

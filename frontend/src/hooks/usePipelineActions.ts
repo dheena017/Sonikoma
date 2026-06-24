@@ -82,6 +82,8 @@ export function usePipelineActions({
     setVideoUrl,
     isScraping,
     narrationStyle,
+    accumulatedTokens,
+    setAccumulatedTokens,
   } = state;
 
   const { runBackgroundAnalysis, addPanelsToStoryboard } = useAutoAnalysis({
@@ -94,6 +96,7 @@ export function usePipelineActions({
     fetchWithInterceptor,
     setActivePreviewTab,
     narrationStyle,
+    setAccumulatedTokens,
   });
 
   const {
@@ -104,6 +107,7 @@ export function usePipelineActions({
     handleTriggerReprocess,
     isRendering,
     renderProgress,
+    renderEtaSeconds,
     handleRenderFinalVideo,
   } = useVideoGeneration({
     panels,
@@ -219,6 +223,7 @@ export function usePipelineActions({
     handleTriggerReprocess,
     isRendering,
     renderProgress,
+    renderEtaSeconds,
     handleRenderFinalVideo,
     addPanelsToStoryboard,
     handleCleanBubblesSelected,

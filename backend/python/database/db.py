@@ -195,6 +195,13 @@ def init_db() -> None:
         except Exception:
             pass
 
+        try:
+            cursor.execute("ALTER TABLE chapters ADD COLUMN total_tokens_used INTEGER NOT NULL DEFAULT 0")
+            conn.commit()
+            logger.info("[Database] Migration: added 'total_tokens_used' column to 'chapters' table.")
+        except Exception:
+            pass
+
         # Create missing indexes for slugs
         try:
             cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_series_slug ON series(slug)")
@@ -993,20 +1000,25 @@ def insert_project(data: Dict[str, Any]) -> None:
         panels_count = data.get('panels_count') or 0
         video_url = data.get('video_url')
         
-        row_ch = conn.execute("SELECT id FROM chapters WHERE id = ? LIMIT 1", (chapter_id,)).fetchone()
+        row_ch = conn.execute("SELECT id, total_tokens_used FROM chapters WHERE id = ? LIMIT 1", (chapter_id,)).fetchone()
         if row_ch:
+            # Accumulate tokens if they are passed
+            tokens_to_add = data.get('total_tokens_used', 0)
+            new_token_total = (row_ch['total_tokens_used'] or 0) + tokens_to_add if tokens_to_add else row_ch['total_tokens_used']
+            
             conn.execute("""
                 UPDATE chapters 
-                SET episode_number = ?, original_url = ?, status = ?, panels_count = ?, video_url = ?
+                SET episode_number = ?, original_url = ?, status = ?, panels_count = ?, video_url = ?, total_tokens_used = ?
                 WHERE id = ?
-            """, (episode_number, original_url, status, panels_count, video_url, chapter_id))
+            """, (episode_number, original_url, status, panels_count, video_url, new_token_total, chapter_id))
         else:
             # Generate slug for chapter
             chapter_slug = generate_unique_slug(f"{title} {episode_number}", 'chapters', conn)
+            initial_tokens = data.get('total_tokens_used', 0)
             conn.execute("""
-                INSERT INTO chapters (id, series_id, episode_number, slug, original_url, status, panels_count, video_url)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, (chapter_id, series_id, episode_number, chapter_slug, original_url, status, panels_count, video_url))
+                INSERT INTO chapters (id, series_id, episode_number, slug, original_url, status, panels_count, video_url, total_tokens_used)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (chapter_id, series_id, episode_number, chapter_slug, original_url, status, panels_count, video_url, initial_tokens))
         conn.commit()
     finally:
         conn.close()
@@ -1086,12 +1098,12 @@ def get_series_by_slug(series_slug: str) -> Optional[Dict[str, Any]]:
         conn.close()
 
 def update_project(project_id: str, updates: Dict[str, Any]) -> None:
-    """Update a project's status, panels_count, and/or video_url."""
+    """Update a project's status, panels_count, video_url, and total_tokens_used."""
     conn = get_db_connection()
     try:
         set_parts = []
         params = []
-        for key in ('status', 'panels_count', 'video_url'):
+        for key in ('status', 'panels_count', 'video_url', 'total_tokens_used'):
             if key in updates:
                 set_parts.append(f"{key} = ?")
                 params.append(updates[key])
@@ -1101,6 +1113,20 @@ def update_project(project_id: str, updates: Dict[str, Any]) -> None:
             query = f"UPDATE chapters SET {', '.join(set_parts)} WHERE id = ?"
             conn.execute(query, tuple(params))
             conn.commit()
+    finally:
+        conn.close()
+
+def increment_project_tokens(project_id: str, tokens: int) -> None:
+    """Accumulate total_tokens_used for a given project."""
+    conn = get_db_connection()
+    try:
+        conn.execute("""
+            UPDATE chapters 
+            SET total_tokens_used = total_tokens_used + ?,
+                updated_at = datetime('now')
+            WHERE id = ?
+        """, (tokens, project_id))
+        conn.commit()
     finally:
         conn.close()
 

@@ -12,6 +12,7 @@ import json
 import asyncio
 import platform
 import logging
+import subprocess
 from typing import Optional
 from fastapi import APIRouter, Request, Query, HTTPException
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -213,3 +214,28 @@ async def server_metrics():
         }
     }
 
+
+@router.get("/health/ffmpeg", summary="Verify FFmpeg is accessible")
+async def health_ffmpeg():
+    try:
+        result = subprocess.run(
+            ["ffmpeg", "-version"], 
+            capture_output=True, 
+            text=True, 
+            timeout=5
+        )
+        if result.returncode == 0:
+            version_line = result.stdout.split('\n')[0]
+            return {"success": True, "status": "ok", "version": version_line}
+        else:
+            logger.error(f"FFmpeg check failed with code {result.returncode}: {result.stderr}")
+            raise HTTPException(status_code=503, detail="FFmpeg is installed but returned an error.")
+    except FileNotFoundError:
+        logger.error("FFmpeg binary not found on system PATH.")
+        raise HTTPException(status_code=503, detail="FFmpeg is not accessible on the system path.")
+    except subprocess.TimeoutExpired:
+        logger.error("FFmpeg check timed out.")
+        raise HTTPException(status_code=503, detail="FFmpeg check timed out.")
+    except Exception as e:
+        logger.error(f"Unexpected error checking FFmpeg: {e}")
+        raise HTTPException(status_code=503, detail=f"Unexpected error checking FFmpeg: {str(e)}")

@@ -95,6 +95,7 @@ export function useAppState() {
   const [cropFocusMode, setCropFocusMode] = useState<string>("standard");
   const [showScrapeConfirmModal, setShowScrapeConfirmModal] =
     useState<boolean>(false);
+  const [accumulatedTokens, setAccumulatedTokens] = useState<number>(0);
 
   // Notifications
   const [notifications, setNotifications] = useState<Notification[]>(() => {
@@ -972,6 +973,8 @@ export function useAppState() {
     setChapterSlugState,
     smartSlice,
     setSmartSlice,
+    accumulatedTokens,
+    setAccumulatedTokens,
     clearAllNotifications: () => {
       setNotifications([]);
     },

@@ -378,6 +378,8 @@ export default function App() {
     targetUrl,
     setTargetUrl,
     resetWorkspace,
+    accumulatedTokens,
+    setAccumulatedTokens,
   } = appLogic;
 
   // --- Auto Save Hook ---
@@ -396,6 +398,8 @@ export default function App() {
     targetUrl,
     fetchWithInterceptor,
     addNotification,
+    accumulatedTokens,
+    setAccumulatedTokens,
   });
 
   // --- Project Details Page Save Sync State ---

@@ -28,6 +28,8 @@ interface AutoSaveState {
       link?: string;
     }
   ) => void;
+  accumulatedTokens?: number;
+  setAccumulatedTokens?: (val: React.SetStateAction<number>) => void;
 }
 
 export function useAutoSave(state: AutoSaveState) {
@@ -302,6 +304,21 @@ export function useAutoSave(state: AutoSaveState) {
         console.log("[Save Hook] Project saved successfully.");
         lastSavedStateRef.current = currentStateStr;
         setSaveStatus("saved");
+
+        // Sync accumulated tokens if any exist
+        if (state.accumulatedTokens && state.accumulatedTokens > 0) {
+          try {
+            await state.fetchWithInterceptor(`/api/projects/${data.project_id || targetProjectId}/tokens`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ tokens: state.accumulatedTokens }),
+            });
+            state.setAccumulatedTokens?.(0);
+            console.log(`[Save Hook] Synced ${state.accumulatedTokens} tokens to project.`);
+          } catch (tokenErr) {
+            console.error("[Save Hook] Failed to sync accumulated tokens:", tokenErr);
+          }
+        }
         const detailMsg = [
           `Project ID: ${targetProjectId}`,
           `Series Title: ${state.seriesTitle || "Untitled"}`,

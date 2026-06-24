@@ -56,6 +56,23 @@ export function useVideoGeneration({
   );
   const [isRendering, setIsRendering] = useState<boolean>(false);
   const [renderProgress, setRenderProgress] = useState<number>(0);
+  const [renderEtaSeconds, setRenderEtaSeconds] = useState<number | null>(null);
+  const [renderStartTime, setRenderStartTime] = useState<number | null>(null);
+
+  React.useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isRendering) {
+      interval = setInterval(() => {
+        setRenderEtaSeconds((prev) => {
+          if (prev === null) return null;
+          return prev > 0 ? prev - 1 : 0;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRendering]);
 
   const handleGenerateVideo = async () => {
     if (!targetUrl.trim()) {
@@ -337,6 +354,9 @@ export function useVideoGeneration({
   const handleRenderFinalVideo = async () => {
     setIsRendering(true);
     setRenderProgress(5);
+    setRenderEtaSeconds(null);
+    const startTime = Date.now();
+    setRenderStartTime(startTime);
 
     try {
       const response = await fetchWithInterceptor("/api/video/render", {
@@ -360,11 +380,17 @@ export function useVideoGeneration({
 
           if (statusData.progress) {
             setRenderProgress(statusData.progress);
+            const elapsed = (Date.now() - startTime) / 1000;
+            if (statusData.progress > 5) {
+              const totalEstimated = (elapsed / statusData.progress) * 100;
+              setRenderEtaSeconds(Math.max(0, Math.floor(totalEstimated - elapsed)));
+            }
           }
 
           if (statusData.status === "completed") {
             clearInterval(pollInterval);
             setRenderProgress(100);
+            setRenderEtaSeconds(0);
             setVideoUrl(statusData.url);
             setActivePreviewTab("video");
             addNotification("Final video rendered successfully!", "success");
@@ -388,6 +414,7 @@ export function useVideoGeneration({
       addNotification(`Render failed: ${error.message}`, "error");
       setIsRendering(false);
       setRenderProgress(0);
+      setRenderEtaSeconds(null);
     }
   };
 
@@ -399,6 +426,7 @@ export function useVideoGeneration({
     handleTriggerReprocess,
     isRendering,
     renderProgress,
+    renderEtaSeconds,
     handleRenderFinalVideo,
   };
 }

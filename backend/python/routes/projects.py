@@ -66,6 +66,9 @@ class ProjectUpdateRequest(BaseModel):
     synopsis: Optional[str] = Field(None, description="Series Synopsis")
     panels: Optional[List[PanelSaveItem]] = Field(None, description="Storyboard panels list")
 
+class TokenIncrementRequest(BaseModel):
+    tokens: int = Field(..., description="Number of tokens to add")
+
 
 
 def unwrap_proxy_url(url_str: str) -> str:
@@ -249,6 +252,38 @@ async def save_project_panels(
         logger.error(f"Failed to save panels: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to save panels: {e}")
 
+
+@router.post("/{projectId}/tokens", summary="Increment project token usage")
+async def increment_project_tokens(
+    projectId: str = Path(...),
+    body: TokenIncrementRequest = Body(...),
+    current_user: dict = Depends(get_current_user)
+):
+    try:
+        logger.info(f"[Database] Incrementing {body.tokens} tokens for project: {projectId}")
+        project = db.get_project(projectId)
+        if not project:
+            project = db.get_project_by_slug(projectId)
+            if project:
+                projectId = project['project_id']
+                
+        if not project:
+            logger.warning(f"[Database] Cannot increment tokens, project {projectId} not found.")
+            raise HTTPException(status_code=404, detail="Project not found.")
+
+        # Verify ownership
+        if project.get("user_id") != current_user["user_id"]:
+            logger.warning(f"[Database] Access denied for user {current_user['user_id']} to modify project {projectId}")
+            raise HTTPException(status_code=403, detail="Access denied.")
+
+        db.increment_project_tokens(projectId, body.tokens)
+        logger.info(f"[Database] Added {body.tokens} tokens to project {projectId}.")
+        return {"success": True, "added": body.tokens}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to increment tokens: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to increment tokens: {e}")
 
 @router.put("/{projectId}", summary="Update project metadata and panels")
 async def update_project_details(

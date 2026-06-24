@@ -128,6 +128,7 @@ interface AppWorkspaceProps {
   resetWorkspace?: () => void;
   isRendering?: boolean;
   renderProgress?: number;
+  renderEtaSeconds?: number | null;
   handleRenderFinalVideo?: () => void;
 }
 
@@ -242,6 +243,7 @@ export function AppWorkspace({
   resetWorkspace,
   isRendering = false,
   renderProgress = 0,
+  renderEtaSeconds = null,
   handleRenderFinalVideo,
 }: AppWorkspaceProps) {
   React.useEffect(() => {
@@ -657,7 +659,13 @@ export function AppWorkspace({
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     />
                   </svg>
-                  Rendering {Math.round(renderProgress)}%...
+                  Rendering {Math.round(renderProgress)}%
+                  {renderEtaSeconds !== null && renderEtaSeconds > 0 && (
+                    <span className="text-xs opacity-75 font-normal ml-1">
+                      (~{Math.floor(renderEtaSeconds / 60)}:{(renderEtaSeconds % 60).toString().padStart(2, "0")})
+                    </span>
+                  )}
+                  ...
                 </>
               ) : (
                 <>
