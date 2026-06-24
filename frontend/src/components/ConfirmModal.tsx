@@ -19,6 +19,16 @@ export default function ConfirmModal({
 }: ConfirmModalProps) {
   const isRed = accentColor === "red";
 
+  React.useEffect(() => {
+    document.body.style.overflow = "hidden";
+    const container = document.getElementById("main-scroll-container");
+    if (container) container.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "unset";
+      if (container) container.style.overflow = "unset";
+    };
+  }, []);
+
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       {/* Backdrop */}

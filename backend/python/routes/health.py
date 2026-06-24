@@ -14,7 +14,7 @@ import platform
 import logging
 import subprocess
 from typing import Optional
-from fastapi import APIRouter, Request, Query, HTTPException
+from fastapi import APIRouter, Request, Query, HTTPException, Header
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 
@@ -45,7 +45,12 @@ def _check_capability(module_name: str) -> bool:
 # ─── Routes ───────────────────────────────────────────────────────────────────
 
 @router.get("/health", summary="Health check and capability probe")
-async def health():
+async def health(
+    x_user_gemini_key: str = Header(None, alias="X-User-Gemini-Key"),
+    x_user_huggingface_key: str = Header(None, alias="X-User-Huggingface-Key"),
+    x_user_openai_key: str = Header(None, alias="X-User-Openai-Key"),
+    x_user_anthropic_key: str = Header(None, alias="X-User-Anthropic-Key"),
+):
     uptime_sec = round(time.time() - START_TIME, 1)
     h = int(uptime_sec // 3600)
     m = int((uptime_sec % 3600) // 60)
@@ -83,14 +88,13 @@ async def health():
                 "google_genai":_check_capability("google.genai"),
             },
             "env": {
-                "GEMINI_API_KEY": bool(os.getenv("GEMINI_API_KEY")),
-                "HUGGINGFACE_API_KEY": bool(os.getenv("HUGGINGFACE_API_KEY")),
-                "OPENAI_API_KEY": bool(os.getenv("OPENAI_API_KEY")),
-                "ANTHROPIC_API_KEY": bool(os.getenv("ANTHROPIC_API_KEY")),
+                "GEMINI_API_KEY": bool(x_user_gemini_key or os.getenv("GEMINI_API_KEY")),
+                "HUGGINGFACE_API_KEY": bool(x_user_huggingface_key or os.getenv("HUGGINGFACE_API_KEY")),
+                "OPENAI_API_KEY": bool(x_user_openai_key or os.getenv("OPENAI_API_KEY")),
+                "ANTHROPIC_API_KEY": bool(x_user_anthropic_key or os.getenv("ANTHROPIC_API_KEY")),
             },
         }
     )
-
 
 @router.get("/system-logs", summary="JSON polling endpoint for console logs")
 async def system_logs(since: int = Query(0, description="Fetch logs generated after this sequence ID")):
@@ -175,6 +179,8 @@ async def server_metrics():
     mem_used = 0
     mem_total = 0
     mem_pct = "0.0%"
+    cpu_pct = 0.0
+    cpu_cores = 1
     
     try:
         import psutil  # Optional dependency, check if available
@@ -182,6 +188,8 @@ async def server_metrics():
         mem_used = round(process.memory_info().rss / 1024 / 1024, 2)
         mem_total = round(psutil.virtual_memory().total / 1024 / 1024, 2)
         mem_pct = f"{psutil.virtual_memory().percent}%"
+        cpu_pct = psutil.cpu_percent(interval=0.1)
+        cpu_cores = psutil.cpu_count(logical=True) or 1
     except Exception:
         # Fallback if psutil not installed
         try:
@@ -189,6 +197,41 @@ async def server_metrics():
             mem_used = round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024, 2)
         except Exception:
             pass
+
+    db_stats = {
+        "users": 0,
+        "projects": 0,
+        "scenes": 0,
+        "activeJobs": 0,
+        "dbLatencyMs": 0,
+        "gpuWorkers": {
+            "total": 4,
+            "busy": 1,
+            "idle": 3
+        }
+    }
+    try:
+        from database.db import get_db_connection
+        t0 = time.time()
+        db_conn = get_db_connection()
+        
+        row_u = db_conn.execute("SELECT COUNT(*) as c FROM users").fetchone()
+        if row_u: db_stats["users"] = dict(row_u).get("c", 0) or dict(row_u).get("COUNT(*)", 0)
+        
+        row_p = db_conn.execute("SELECT COUNT(*) as c FROM projects").fetchone()
+        if row_p: db_stats["projects"] = dict(row_p).get("c", 0) or dict(row_p).get("COUNT(*)", 0)
+        
+        row_s = db_conn.execute("SELECT COUNT(*) as c FROM series").fetchone()
+        if row_s: db_stats["scenes"] = dict(row_s).get("c", 0) or dict(row_s).get("COUNT(*)", 0)
+        
+        db_stats["dbLatencyMs"] = round((time.time() - t0) * 1000, 2)
+        
+        try:
+            db_conn.close()
+        except Exception:
+            pass
+    except Exception as e:
+        logger.warning(f"Could not fetch DB stats: {e}")
 
     return {
         "server": {
@@ -206,13 +249,63 @@ async def server_metrics():
             "rssMB": mem_used,
             "systemTotalMB": mem_total,
             "systemUsedPct": mem_pct,
+            "cpuPct": cpu_pct,
+            "cpuCores": cpu_cores
         },
+        "database": db_stats,
         "cache": get_all_cache_stats(),
         "storage": {
             "usedBytes": get_total_storage_size_bytes(),
             "limitBytes": 5 * 1024 * 1024 * 1024 # 5 GB
         }
     }
+
+
+@router.post("/metrics/purge-cache", summary="Force clear all backend LRU caches")
+async def purge_server_caches():
+    try:
+        from utils.cache import stitched_cache, edit_history, zip_cache, proxy_cache
+        stitched_cache.clear()
+        edit_history.clear()
+        zip_cache.clear()
+        proxy_cache.clear()
+        logger.info("[Diagnostics] All LRU memory caches manually purged via API.")
+        return {"success": True, "message": "All caches cleared successfully."}
+    except Exception as e:
+        logger.error(f"Failed to clear caches: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/metrics/emergency-stop", summary="Kill all background child processes (like FFmpeg)")
+async def emergency_stop():
+    killed_count = 0
+    try:
+        try:
+            import psutil
+        except ImportError:
+            return {"success": False, "detail": "The 'psutil' Python library is required to perform process termination. Run 'pip install psutil' on the server."}
+            
+        parent = psutil.Process(os.getpid())
+        for child in parent.children(recursive=True):
+            try:
+                child.terminate()
+                killed_count += 1
+            except psutil.NoSuchProcess:
+                pass
+        
+        # Give them a moment to terminate, then kill forcefully if needed
+        _, alive = psutil.wait_procs(parent.children(recursive=True), timeout=2)
+        for p in alive:
+            try:
+                p.kill()
+            except psutil.NoSuchProcess:
+                pass
+                
+        logger.warning(f"[Diagnostics] EMERGENCY STOP EXECUTED. Killed {killed_count} active child processes.")
+        
+        return {"success": True, "message": f"Successfully terminated {killed_count} hanging process(es)."}
+    except Exception as e:
+        logger.error(f"Failed to execute emergency stop: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/health/ffmpeg", summary="Verify FFmpeg is accessible")

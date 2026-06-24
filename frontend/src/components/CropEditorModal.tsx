@@ -70,11 +70,17 @@ export default function CropEditorModal({
     }
     const originalBodyOverflow = document.body.style.overflow;
     const originalHtmlOverflow = document.documentElement.style.overflow;
+    
     document.body.style.overflow = "hidden";
     document.documentElement.style.overflow = "hidden";
+    const container = document.getElementById("main-scroll-container");
+    const originalContainerOverflow = container ? container.style.overflow : "";
+    if (container) container.style.overflow = "hidden";
+
     return () => {
       document.body.style.overflow = originalBodyOverflow;
       document.documentElement.style.overflow = originalHtmlOverflow;
+      if (container) container.style.overflow = originalContainerOverflow;
     };
   }, [isPipMode, isPage]);
 

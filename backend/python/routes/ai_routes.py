@@ -490,6 +490,20 @@ async def api_list_models(body: Optional[ListModelsRequest] = None, user_keys: d
                 for m in models:
                     raw_name = m.name or ""
                     clean_name = raw_name.replace("models/", "")
+                    lower_name = clean_name.lower()
+                    
+                    supported_actions = getattr(m, "supported_actions", [])
+                    if "generateContent" not in supported_actions:
+                        continue
+                        
+                    # Filter out old, experimental, preview, or specialized clutter
+                    junk_keywords = [
+                        "embedding", "aqa", "learnlm", "bison", "gecko", 
+                        "-001", "-002", "latest", "preview", "-exp", "tts", 
+                        "vision", "a4b", "nano", "8b", "test"
+                    ]
+                    if any(junk in lower_name for junk in junk_keywords):
+                        continue
                     
                     result_list.append({
                         "name": clean_name,
@@ -949,7 +963,7 @@ async def analyze_sequence(body: AnalyzeSequenceRequest, user_api_key: str = Dep
 @router.post("/ai-smart-crop", summary="Crop panels automatically using local CV or Gemini")
 @router.post("/detect-panels")
 @router.post("/ai-detect-panels")
-async def ai_smart_crop(body: SmartCropRequest):
+async def ai_smart_crop(body: SmartCropRequest, user_api_key: str = Depends(get_user_gemini_key)):
     logger.info(f"[AI Smart Crop] Request received. Strategy: {body.strategy}, Model: {body.model}")
     try:
         resolved = await img_utils.resolve_image_to_buffer(body.url)
@@ -995,6 +1009,7 @@ async def ai_smart_crop(body: SmartCropRequest):
                     raw_text = await skill.execute(
                         model=target_model,
                         image_bytes=image_buffer,
+                        api_key=user_api_key,
                         guidance_instructions=final_guidance
                     )
                     data = json.loads(raw_text)
@@ -1156,7 +1171,7 @@ async def ai_smart_crop(body: SmartCropRequest):
 
 @router.post("/ai-smart-crop-batch", summary="Batch crop panels automatically using local CV or Gemini")
 @router.post("/detect-panels-batch")
-async def ai_smart_crop_batch(body: SmartCropBatchRequest):
+async def ai_smart_crop_batch(body: SmartCropBatchRequest, user_api_key: str = Depends(get_user_gemini_key)):
     logger.info(f"[AI Smart Crop Batch] Request received for {len(body.urls)} URLs.")
     if not body.urls:
         raise HTTPException(status_code=400, detail="Field 'urls' must be a non-empty list.")
@@ -1187,7 +1202,7 @@ async def ai_smart_crop_batch(body: SmartCropBatchRequest):
                     guidanceInstructions=body.guidanceInstructions,
                     focusMode=body.focusMode
                 )
-                res = await ai_smart_crop(single_request)
+                res = await ai_smart_crop(single_request, user_api_key)
                 results.append({"url": url, "success": True, "data": res})
             except Exception as e:
                 logger.warning(f"[Smart Crop Batch] Failed for URL {url[:50]}: {e}")
