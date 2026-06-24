@@ -575,6 +575,7 @@ export default function StoryboardTimeline({
     handleAnalyzeAllPanels,
     handleAnalyzeSelectedPanels,
     isAnalyzingAll,
+    handleCancelAnalysis,
   } = useStoryboardOperations({
     panels,
     setPanels,
@@ -605,10 +606,6 @@ export default function StoryboardTimeline({
 
   const selectedCount = selectedPanelIds.size;
 
-  function handleCancelAnalysis(): void {
-    throw new Error("Function not implemented.");
-  }
-
   return (
     <div
       id="panels_timeline_section"
@@ -623,6 +620,10 @@ export default function StoryboardTimeline({
         isAnalyzingAll={isAnalyzingAll}
         handleAnalyzeAllPanels={handleAnalyzeAllPanels}
         handleSaveStoryboard={handleSaveStoryboard}
+        isBatchCropping={isBatchCropping}
+        isCleaningBubbles={isCleaningBubbles}
+        handleCancelBatch={handleCancelBatch}
+        handleCancelAnalysis={handleCancelAnalysis}
       />
 
       {/* Bulk Operations Menu */}

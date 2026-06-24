@@ -1,4 +1,5 @@
 import React from "react";
+import { Sparkles } from "lucide-react";
 
 interface TimelineHeaderProps {
   panelsLength: number;
@@ -11,6 +12,10 @@ interface TimelineHeaderProps {
   isAnalyzingAll?: boolean;
   handleAnalyzeAllPanels?: () => void;
   handleSaveStoryboard?: () => void;
+  isBatchCropping?: boolean;
+  isCleaningBubbles?: boolean;
+  handleCancelBatch?: () => void;
+  handleCancelAnalysis?: () => void;
 }
 
 export default function TimelineHeader({
@@ -22,6 +27,10 @@ export default function TimelineHeader({
   isAnalyzingAll,
   handleAnalyzeAllPanels,
   handleSaveStoryboard,
+  isBatchCropping,
+  isCleaningBubbles,
+  handleCancelBatch,
+  handleCancelAnalysis,
 }: TimelineHeaderProps) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-neutral-800 pb-4">
@@ -39,6 +48,28 @@ export default function TimelineHeader({
       </div>
 
       <div className="flex items-center gap-2 flex-wrap">
+        {(isAnalyzingAll || isBatchCropping || isCleaningBubbles) && (
+          <button
+            type="button"
+            onClick={() => {
+              if (isAnalyzingAll && handleCancelAnalysis) handleCancelAnalysis();
+              if ((isBatchCropping || isCleaningBubbles) && handleCancelBatch) handleCancelBatch();
+            }}
+            className="text-[10px] font-bold border border-red-500/50 bg-red-600 hover:bg-red-500 text-white rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors shadow-md active:scale-95 cursor-pointer"
+          >
+            Stop {isAnalyzingAll ? "Analyzing" : isBatchCropping ? "Cropping" : "Cleaning"}
+          </button>
+        )}
+        {!isAnalyzingAll && !isBatchCropping && !isCleaningBubbles && handleAnalyzeAllPanels && panelsLength > 0 && (
+          <button
+            type="button"
+            onClick={handleAnalyzeAllPanels}
+            className="text-[10px] font-bold border border-indigo-500/50 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors shadow-md active:scale-95 cursor-pointer"
+          >
+            <Sparkles className="w-3 h-3" />
+            Analyze Full Sequence
+          </button>
+        )}
         {handleSaveStoryboard && panelsLength > 0 && (
           <button
             type="button"

@@ -217,7 +217,7 @@ export function useCompileActions({
     setIsAnalyzingAll(true);
     if (addNotification) {
       addNotification(
-        `Starting Smart Scanner analysis for ${selectedIds.length} selected panel(s) in parallel...`,
+        `Starting global Sequence Analysis for ${selectedIds.length} selected panel(s)...`,
         "info"
       );
     }
@@ -233,89 +233,65 @@ export function useCompileActions({
       const activeModel = selectedModel || "gemini-2.5-flash";
       const targetPanels = panels.filter((p) => selectedIds.includes(p.id));
       abortSignalRef.current.aborted = false;
-      const chunks = chunkArray(targetPanels, 8);
 
-      await processWithConcurrency(chunks, 4, async (chunkPanels) => {
-        if (abortSignalRef.current.aborted) throw new Error("Cancelled by user");
-        try {
-          const res = await activeFetch("/api/analyze-batch", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              urls: chunkPanels.map((p) => p.image_url),
-              model: activeModel,
-              narrationStyle,
-              voice: voiceActor,
-            }),
-          });
+      const imageUrls = targetPanels.map((p) => p.image_url);
 
-          if (!res.ok) throw new Error("Image analysis batch failed");
-          const data = await res.json();
+      const res = await activeFetch("/api/analyze-sequence", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          urls: imageUrls,
+          model: activeModel,
+          narrationStyle,
+          voice: voiceActor,
+        }),
+      });
 
-          if (data.success && data.results) {
-            setPanels((prev) =>
-              prev.map((p) => {
-                if (!selectedIds.includes(p.id)) return p;
+      if (!res.ok) throw new Error("Sequence analysis failed");
+      const data = await res.json();
 
-                const result = data.results.find(
-                  (r: any) => r.url === p.image_url
-                );
-                if (result && result.analysis) {
-                  const aiDuration = Number(result.analysis.duration);
-                  const aiMotion = String(
-                    result.analysis.motion_type || ""
-                  ).trim();
-                  return {
-                    ...p,
-                    speech_text: result.analysis.speech_text || p.speech_text,
-                    sfx: result.analysis.sfx || p.sfx,
-                    duration: aiDuration > 0 ? aiDuration : p.duration,
-                    motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
-                    visual_description:
-                      result.analysis.visual_description ||
-                      p.visual_description,
-                    audio_url: result.audio_url || p.audio_url,
-                    isAnalyzing: false,
-                  };
-                }
-                return p;
-              })
+      if (data.success && data.results) {
+        setPanels((prev) =>
+          prev.map((p) => {
+            if (!selectedIds.includes(p.id)) return p;
+
+            const result = data.results.find(
+              (r: any) => r.url === p.image_url
             );
-
-            if (setConsoleLogs) {
-              setConsoleLogs((prev) => [
-                `[Smart Auto-Analysis] [SUCCESS] Processed batch of ${chunkPanels.length} panels`,
-                ...prev,
-              ]);
+            if (result && result.analysis) {
+              const aiDuration = Number(result.analysis.duration);
+              const aiMotion = String(result.analysis.motion_type || "").trim();
+              return {
+                ...p,
+                speech_text: result.analysis.speech_text || p.speech_text,
+                sfx: result.analysis.sfx || p.sfx,
+                duration: aiDuration > 0 ? aiDuration : p.duration,
+                motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
+                visual_description:
+                  result.analysis.visual_description || p.visual_description,
+                audio_url: result.audio_url || p.audio_url,
+                isAnalyzing: false,
+              };
             }
-          } else {
-            throw new Error(
-              data.error || "Batch analysis returned unsuccessful status"
-            );
-          }
-        } catch (err: any) {
-          console.error("[useCompileActions] Batch analysis failed:", err);
-          if (setConsoleLogs) {
-            setConsoleLogs((prev) => [
-              `[Smart Auto-Analysis] [ERROR] Batch analysis failed: ${err.message}`,
-              ...prev,
-            ]);
-          }
-        } finally {
-          setPanels((prev) =>
-            prev.map((p) => {
-              if (chunkPanels.some((cp) => cp.id === p.id)) {
-                return { ...p, isAnalyzing: false };
-              }
-              return p;
-            })
-          );
+            return { ...p, isAnalyzing: false };
+          })
+        );
+
+        if (setConsoleLogs) {
+          setConsoleLogs((prev) => [
+            `[Sequence Analysis] Context-aware storyboard script generated for ${imageUrls.length} frames!`,
+            ...prev,
+          ]);
         }
-      }, abortSignalRef.current);
+      } else {
+        throw new Error(
+          data.error || "Sequence analysis returned unsuccessful status"
+        );
+      }
 
       if (!abortSignalRef.current.aborted && addNotification) {
         addNotification(
-          `Smart Scanner analysis completed for ${selectedIds.length} selected panel(s)!`,
+          `Smart Sequence Analysis completed for ${selectedIds.length} selected panel(s)!`,
           "success"
         );
       }
@@ -323,7 +299,7 @@ export function useCompileActions({
       console.error("[useCompileActions] Selected panel analysis failed:", err);
       if (addNotification) {
         addNotification(
-          "Smart Scanner analysis of selected panels encountered an error.",
+          "Sequence analysis of selected panels encountered an error.",
           "error"
         );
       }
@@ -342,7 +318,7 @@ export function useCompileActions({
     setIsAnalyzingAll(true);
     if (addNotification) {
       addNotification(
-        "Starting batch Smart Scanner analysis for all panels...",
+        "Starting global Sequence Analysis for all panels...",
         "info"
       );
     }
@@ -353,70 +329,58 @@ export function useCompileActions({
     try {
       const activeModel = selectedModel || "gemini-2.5-flash";
       abortSignalRef.current.aborted = false;
-      const chunks = chunkArray(panels, 8);
 
-      await processWithConcurrency(chunks, 4, async (chunkPanels) => {
-        if (abortSignalRef.current.aborted) throw new Error("Cancelled by user");
-        try {
-          const res = await activeFetch("/api/analyze-batch", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              urls: chunkPanels.map((p) => p.image_url),
-              model: activeModel,
-              narrationStyle,
-              voice: voiceActor,
-            }),
-          });
+      const imageUrls = panels.map((p) => p.image_url);
 
-          if (!res.ok) throw new Error("Image analysis batch failed");
-          const data = await res.json();
+      const res = await activeFetch("/api/analyze-sequence", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          urls: imageUrls,
+          model: activeModel,
+          narrationStyle,
+          voice: voiceActor,
+        }),
+      });
 
-          if (data.success && data.results) {
-            setPanels((prev) =>
-              prev.map((p) => {
-                const result = data.results.find(
-                  (r: any) => r.url === p.image_url
-                );
-                if (result && result.analysis) {
-                  const aiDuration = Number(result.analysis.duration);
-                  const aiMotion = String(
-                    result.analysis.motion_type || ""
-                  ).trim();
-                  return {
-                    ...p,
-                    speech_text: result.analysis.speech_text || p.speech_text,
-                    sfx: result.analysis.sfx || p.sfx,
-                    duration: aiDuration > 0 ? aiDuration : p.duration,
-                    motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
-                    visual_description:
-                      result.analysis.visual_description ||
-                      p.visual_description,
-                    audio_url: result.audio_url || p.audio_url,
-                    isAnalyzing: false,
-                  };
-                }
-                return p;
-              })
-            );
-          }
-        } catch (err: any) {
-          console.error("[useCompileActions] Batch analysis failed:", err);
-        } finally {
-          setPanels((prev) =>
-            prev.map((p) => {
-              if (chunkPanels.some((cp) => cp.id === p.id)) {
-                return { ...p, isAnalyzing: false };
-              }
-              return p;
-            })
-          );
+      if (!res.ok) throw new Error("Sequence analysis failed");
+      const data = await res.json();
+
+      if (data.success && data.results) {
+        setPanels((prev) =>
+          prev.map((p) => {
+            const result = data.results.find((r: any) => r.url === p.image_url);
+            if (result && result.analysis) {
+              const aiDuration = Number(result.analysis.duration);
+              const aiMotion = String(result.analysis.motion_type || "").trim();
+              return {
+                ...p,
+                speech_text: result.analysis.speech_text || p.speech_text,
+                sfx: result.analysis.sfx || p.sfx,
+                duration: aiDuration > 0 ? aiDuration : p.duration,
+                motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
+                visual_description:
+                  result.analysis.visual_description || p.visual_description,
+                audio_url: result.audio_url || p.audio_url,
+                isAnalyzing: false,
+              };
+            }
+            return { ...p, isAnalyzing: false };
+          })
+        );
+        if (setConsoleLogs) {
+          setConsoleLogs((prev) => [
+            `[Sequence Analysis] Context-aware storyboard script generated for ${imageUrls.length} frames!`,
+            ...prev,
+          ]);
         }
-      }, abortSignalRef.current);
+      } else {
+        throw new Error(data.error || "Sequence analysis returned unsuccessful status");
+      }
 
       if (!abortSignalRef.current.aborted && addNotification) {
         addNotification(
-          "Smart Scanner analysis completed for all panels!",
+          "Smart Sequence Analysis completed for all panels!",
           "success"
         );
       }
