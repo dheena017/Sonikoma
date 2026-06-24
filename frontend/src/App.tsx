@@ -339,6 +339,9 @@ export default function App() {
     handleSaveMultipleCuts,
     handleStitchWithNext,
     handleTriggerReprocess,
+    isRendering,
+    renderProgress,
+    handleRenderFinalVideo,
     addPanelsToStoryboard,
     handleCleanBubblesSelected,
     handleAutoCropSelected,
@@ -798,6 +801,9 @@ export default function App() {
               setEditCropBottom={setEditCropBottom}
               setEditCropLeft={setEditCropLeft}
               setEditCropRight={setEditCropRight}
+              isRendering={isRendering}
+              renderProgress={renderProgress}
+              handleRenderFinalVideo={handleRenderFinalVideo}
               setEditAutoTrim={setEditAutoTrim}
               showBubbleModal={showBubbleModal}
               setShowBubbleModal={setShowBubbleModal}

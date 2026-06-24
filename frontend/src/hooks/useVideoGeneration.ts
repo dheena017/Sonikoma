@@ -54,6 +54,8 @@ export function useVideoGeneration({
   const [reprocessingPanelId, setReprocessingPanelId] = useState<number | null>(
     null
   );
+  const [isRendering, setIsRendering] = useState<boolean>(false);
+  const [renderProgress, setRenderProgress] = useState<number>(0);
 
   const handleGenerateVideo = async () => {
     if (!targetUrl.trim()) {
@@ -332,11 +334,50 @@ export function useVideoGeneration({
     }
   };
 
+  const handleRenderFinalVideo = async () => {
+    setIsRendering(true);
+    setRenderProgress(0);
+
+    try {
+      const progressInterval = setInterval(() => {
+        setRenderProgress((prev) => Math.min(prev + 5, 90));
+      }, 500);
+
+      const response = await fetchWithInterceptor("/api/video/render", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ panels }),
+      });
+
+      clearInterval(progressInterval);
+
+      const data = await response.json();
+      setRenderProgress(100);
+
+      if (data.success && data.video_url) {
+        setVideoUrl(data.video_url);
+        setActivePreviewTab("video");
+        addNotification("Final video rendered successfully!", "success");
+      } else {
+        throw new Error(data.error || "Failed to render video");
+      }
+    } catch (error: any) {
+      console.error("Error rendering final video:", error);
+      addNotification(`Render failed: ${error.message}`, "error");
+    } finally {
+      setIsRendering(false);
+      setTimeout(() => setRenderProgress(0), 2000);
+    }
+  };
+
   return {
     isProcessing,
     progressStatus,
     reprocessingPanelId,
     handleGenerateVideo,
     handleTriggerReprocess,
+    isRendering,
+    renderProgress,
+    handleRenderFinalVideo,
   };
 }
