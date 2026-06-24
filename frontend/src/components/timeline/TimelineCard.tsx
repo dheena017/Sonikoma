@@ -334,7 +334,9 @@ const TimelineCard = ({
         ) : (
           <button
             type="button"
-            disabled={analyzingPanelId !== null && analyzingPanelId !== panel.id}
+            disabled={
+              analyzingPanelId !== null && analyzingPanelId !== panel.id
+            }
             onClick={() => {
               console.log(
                 `[TimelineCard] Manual AI analysis triggered for panel #${panel.id}`
@@ -342,7 +344,9 @@ const TimelineCard = ({
               handleAnalyzePanel(panel.id, panel.image_url);
             }}
             className={`w-full py-1.5 rounded-lg border text-[10px] font-mono font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-purple-950/40 border-purple-800/40 hover:bg-purple-900/60 text-purple-300 hover:border-purple-600 ${
-              analyzingPanelId !== null && analyzingPanelId !== panel.id ? "opacity-50 cursor-not-allowed" : ""
+              analyzingPanelId !== null && analyzingPanelId !== panel.id
+                ? "opacity-50 cursor-not-allowed"
+                : ""
             }`}
           >
             <Sparkles className="h-3 w-3 text-purple-400 animate-pulse" />

@@ -231,7 +231,9 @@ function CropEditorSidebar({
   handleExecuteSave,
 }: CropEditorSidebarProps) {
   const handleTabClick = useCallback(
-    (tab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw") => {
+    (
+      tab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw"
+    ) => {
       console.log(`[CropEditorSidebar] Switching to tab: ${tab}`);
       setActiveTab(tab);
 
@@ -275,7 +277,14 @@ function CropEditorSidebar({
             { key: "crop", label: `Crop (${slices.length})`, emoji: "🎯" },
             { key: "merge", label: "Merge", emoji: "🔗" },
           ] as {
-            key: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw";
+            key:
+              | "adjust"
+              | "edit"
+              | "eraser"
+              | "slice"
+              | "crop"
+              | "merge"
+              | "draw";
             label: string;
             emoji: string;
           }[]

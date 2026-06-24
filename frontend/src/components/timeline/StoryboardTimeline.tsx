@@ -459,9 +459,12 @@ export default function StoryboardTimeline({
       });
 
       setPanels(updatedPanels);
-      
+
       if (errors.length > 0) {
-        addNotification?.(`Auto-crop completed with ${errors.length} error(s). Check console.`, "error");
+        addNotification?.(
+          `Auto-crop completed with ${errors.length} error(s). Check console.`,
+          "error"
+        );
         setConsoleLogs?.((prev) => [
           `[Auto Cropper] Finished auto-cropping with errors.`,
           ...prev,
@@ -475,7 +478,10 @@ export default function StoryboardTimeline({
       }
     } catch (err: any) {
       console.error("[Auto Cropper] Critical error:", err);
-      addNotification?.(`Critical error during auto-crop: ${err.message}`, "error");
+      addNotification?.(
+        `Critical error during auto-crop: ${err.message}`,
+        "error"
+      );
     } finally {
       setIsBatchCropping(false);
       setCropProgress(null);

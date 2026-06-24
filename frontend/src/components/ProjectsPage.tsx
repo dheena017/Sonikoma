@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Film,
-  FolderOpen,
-  Loader2,
-  ArrowRight,
-  Plus,
-} from "lucide-react";
+import { Film, FolderOpen, Loader2, ArrowRight, Plus } from "lucide-react";
 import { getSourceName } from "../utils.js";
 
 interface Project {
@@ -75,7 +69,8 @@ export default function ProjectsPage() {
             Projects
           </h1>
           <p className="text-neutral-400 text-sm font-mono max-w-xl">
-            Browse and manage all of your Webtoon-to-Video series and storyboard projects.
+            Browse and manage all of your Webtoon-to-Video series and storyboard
+            projects.
           </p>
         </div>
 
@@ -105,8 +100,8 @@ export default function ProjectsPage() {
               No projects yet
             </h3>
             <p className="text-sm text-neutral-400 max-w-sm mb-6 font-mono">
-              You haven't created any storyboard series yet. Start by
-              scraping a webtoon URL!
+              You haven't created any storyboard series yet. Start by scraping a
+              webtoon URL!
             </p>
             <button
               onClick={handleNewSeries}
@@ -149,7 +144,9 @@ export default function ProjectsPage() {
                       {new Date(project.created_at).toLocaleDateString()}
                     </span>
                     <span className="hidden sm:inline">•</span>
-                    <span className="truncate">{getSourceName(project.url)}</span>
+                    <span className="truncate">
+                      {getSourceName(project.url)}
+                    </span>
                   </p>
                 </div>
 

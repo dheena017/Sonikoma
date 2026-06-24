@@ -662,15 +662,14 @@ export function AppWorkspace({
                   Rendering {Math.round(renderProgress)}%
                   {renderEtaSeconds !== null && renderEtaSeconds > 0 && (
                     <span className="text-xs opacity-75 font-normal ml-1">
-                      (~{Math.floor(renderEtaSeconds / 60)}:{(renderEtaSeconds % 60).toString().padStart(2, "0")})
+                      (~{Math.floor(renderEtaSeconds / 60)}:
+                      {(renderEtaSeconds % 60).toString().padStart(2, "0")})
                     </span>
                   )}
                   ...
                 </>
               ) : (
-                <>
-                  🎬 Render Final Video
-                </>
+                <>🎬 Render Final Video</>
               )}
             </button>
           </div>

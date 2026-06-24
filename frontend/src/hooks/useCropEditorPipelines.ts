@@ -58,26 +58,27 @@ interface UseCropEditorPipelinesProps {
 }
 
 export function useCropEditorPipelines(props: UseCropEditorPipelinesProps) {
-  const { handleAiCrop, handleDetectPanels, handleCancelDetect } = usePanelDetection({
-    activeFetch: props.activeFetch,
-    editingImageIdx: props.editingImageIdx,
-    scrapedImages: props.scrapedImages,
-    setIsDetecting: props.setIsDetecting,
-    setIsAiDetecting: props.setIsAiDetecting,
-    setDetectedBoxes: props.setDetectedBoxes,
-    setSlices: props.setSlices,
-    setSelectedSliceId: props.setSelectedSliceId,
-    setEditCropLeft: props.setEditCropLeft,
-    setEditCropRight: props.setEditCropRight,
-    setEditCropTop: props.setEditCropTop,
-    setEditCropBottom: props.setEditCropBottom,
-    addNotification: props.addNotification,
-    setScrapedImages: props.setScrapedImages,
-    setConsoleLogs: props.setConsoleLogs,
-    editAutoTrim: props.editAutoTrim,
-    addPanelsToStoryboard: props.addPanelsToStoryboard,
-    setEditingImageIdx: props.setEditingImageIdx,
-  });
+  const { handleAiCrop, handleDetectPanels, handleCancelDetect } =
+    usePanelDetection({
+      activeFetch: props.activeFetch,
+      editingImageIdx: props.editingImageIdx,
+      scrapedImages: props.scrapedImages,
+      setIsDetecting: props.setIsDetecting,
+      setIsAiDetecting: props.setIsAiDetecting,
+      setDetectedBoxes: props.setDetectedBoxes,
+      setSlices: props.setSlices,
+      setSelectedSliceId: props.setSelectedSliceId,
+      setEditCropLeft: props.setEditCropLeft,
+      setEditCropRight: props.setEditCropRight,
+      setEditCropTop: props.setEditCropTop,
+      setEditCropBottom: props.setEditCropBottom,
+      addNotification: props.addNotification,
+      setScrapedImages: props.setScrapedImages,
+      setConsoleLogs: props.setConsoleLogs,
+      editAutoTrim: props.editAutoTrim,
+      addPanelsToStoryboard: props.addPanelsToStoryboard,
+      setEditingImageIdx: props.setEditingImageIdx,
+    });
 
   const {
     handleTransform,

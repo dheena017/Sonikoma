@@ -181,7 +181,7 @@ export function usePanelDetection({
         }
       }
     } catch (err: any) {
-      if (err.name === 'AbortError') {
+      if (err.name === "AbortError") {
         console.log("Smart crop detection cancelled by user");
         return;
       }
@@ -306,7 +306,7 @@ export function usePanelDetection({
         }
       }
     } catch (err: any) {
-      if (err.name === 'AbortError') {
+      if (err.name === "AbortError") {
         console.log("Panel detection cancelled by user");
         return;
       }

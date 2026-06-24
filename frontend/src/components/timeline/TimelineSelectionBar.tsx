@@ -162,7 +162,9 @@ export default function TimelineSelectionBar({
                     {isAnalyzingAll ? (
                       <button
                         type="button"
-                        onClick={() => handleCancelAnalysis && handleCancelAnalysis()}
+                        onClick={() =>
+                          handleCancelAnalysis && handleCancelAnalysis()
+                        }
                         className="px-3 sm:px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-rose-600 border-rose-500 hover:bg-rose-500 text-white shadow-md hover:shadow-rose-500/20"
                       >
                         <X className="h-4 w-4 text-white" />

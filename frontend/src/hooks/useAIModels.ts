@@ -6,7 +6,9 @@ let isFetching = false;
 let fetchPromise: Promise<AIModel[]> | null = null;
 
 export function useAIModels() {
-  const [models, setModels] = useState<AIModel[]>(cachedModels || FALLBACK_MODELS);
+  const [models, setModels] = useState<AIModel[]>(
+    cachedModels || FALLBACK_MODELS
+  );
   const [loading, setLoading] = useState<boolean>(!cachedModels);
 
   useEffect(() => {
@@ -58,22 +60,24 @@ export function useAIModels() {
               const res = await fetch("/api/list-models", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ provider })
+                body: JSON.stringify({ provider }),
               });
               if (res.ok) {
                 const data = await res.json();
                 if (data.success && data.models) {
                   // Map provider to friendly name
                   let providerFriendly = "Google";
-                  if (provider === "huggingface") providerFriendly = "Hugging Face";
+                  if (provider === "huggingface")
+                    providerFriendly = "Hugging Face";
                   else if (provider === "openai") providerFriendly = "OpenAI";
-                  else if (provider === "anthropic") providerFriendly = "Anthropic";
+                  else if (provider === "anthropic")
+                    providerFriendly = "Anthropic";
 
                   const mapped = data.models.map((m: any) => ({
                     id: m.name,
                     name: m.displayName || m.name,
                     type: provider === "huggingface" ? "open-source" : "paid",
-                    provider: providerFriendly
+                    provider: providerFriendly,
                   }));
                   aggregatedModels = [...aggregatedModels, ...mapped];
                 }
@@ -111,7 +115,7 @@ export function useAIModels() {
     cachedModels = null;
     setLoading(true);
     // Setting state to fallback temporarily isn't strictly necessary, but triggers re-render
-    setModels(FALLBACK_MODELS); 
+    setModels(FALLBACK_MODELS);
     // Effect will not automatically run here because deps are [], so we call fetch directly
     // but wait, we can just clear cache and force a new fetch manually here:
     // ... actually, simpler to just reset the cache and let the user click "refresh".

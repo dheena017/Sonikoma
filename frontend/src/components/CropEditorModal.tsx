@@ -70,7 +70,7 @@ export default function CropEditorModal({
     }
     const originalBodyOverflow = document.body.style.overflow;
     const originalHtmlOverflow = document.documentElement.style.overflow;
-    
+
     document.body.style.overflow = "hidden";
     document.documentElement.style.overflow = "hidden";
     const container = document.getElementById("main-scroll-container");
@@ -88,10 +88,10 @@ export default function CropEditorModal({
     const handleFabricSave = (e: any) => {
       const { dataUrl } = e.detail;
       if (appLogic.editingImageIdx !== null && appLogic.setScrapedImages) {
-        appLogic.setScrapedImages(prev => {
-           const nw = [...prev];
-           nw[appLogic.editingImageIdx!] = dataUrl;
-           return nw;
+        appLogic.setScrapedImages((prev) => {
+          const nw = [...prev];
+          nw[appLogic.editingImageIdx!] = dataUrl;
+          return nw;
         });
         if (appLogic.addNotification) {
           appLogic.addNotification("Drawing saved successfully", "success");
@@ -99,8 +99,13 @@ export default function CropEditorModal({
       }
     };
     window.addEventListener("FABRIC_SAVE_COMPLETE", handleFabricSave);
-    return () => window.removeEventListener("FABRIC_SAVE_COMPLETE", handleFabricSave);
-  }, [appLogic.editingImageIdx, appLogic.setScrapedImages, appLogic.addNotification]);
+    return () =>
+      window.removeEventListener("FABRIC_SAVE_COMPLETE", handleFabricSave);
+  }, [
+    appLogic.editingImageIdx,
+    appLogic.setScrapedImages,
+    appLogic.addNotification,
+  ]);
 
   const {
     containerRef,
@@ -354,8 +359,8 @@ export default function CropEditorModal({
           setEditCropRight={setEditCropRight}
           setSelectedSliceId={setSelectedSliceId}
           activeTab={activeTab}
-          aspectRatio={aspectRatio} 
-          fillColor={""}        
+          aspectRatio={aspectRatio}
+          fillColor={""}
           textBgColor={textBgColor}
         />
       </div>

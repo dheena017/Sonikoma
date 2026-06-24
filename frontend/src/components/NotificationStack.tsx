@@ -226,14 +226,18 @@ function IndividualNotification({
       )}
 
       {/* Progress bar for auto-dismissible toasts */}
-      {countdown !== null && note.errorCode !== 429 && initialCountdownRef.current && (
-        <div className="absolute bottom-0 left-0 w-full h-1 bg-black/20 overflow-hidden">
-          <div
-            className={`h-full bg-white/40 transition-all duration-1000 ease-linear`}
-            style={{ width: `${(countdown / initialCountdownRef.current) * 100}%` }}
-          />
-        </div>
-      )}
+      {countdown !== null &&
+        note.errorCode !== 429 &&
+        initialCountdownRef.current && (
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-black/20 overflow-hidden">
+            <div
+              className={`h-full bg-white/40 transition-all duration-1000 ease-linear`}
+              style={{
+                width: `${(countdown / initialCountdownRef.current) * 100}%`,
+              }}
+            />
+          </div>
+        )}
     </div>
   );
 }

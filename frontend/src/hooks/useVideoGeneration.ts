@@ -367,7 +367,9 @@ export function useVideoGeneration({
 
       const data = await response.json();
       if (!data.success || !data.job_id) {
-        throw new Error(data.detail || data.error || "Failed to start render job");
+        throw new Error(
+          data.detail || data.error || "Failed to start render job"
+        );
       }
 
       const jobId = data.job_id;
@@ -375,7 +377,9 @@ export function useVideoGeneration({
       // Start polling
       const pollInterval = setInterval(async () => {
         try {
-          const statusRes = await fetchWithInterceptor(`/api/video/status/${jobId}`);
+          const statusRes = await fetchWithInterceptor(
+            `/api/video/status/${jobId}`
+          );
           const statusData = await statusRes.json();
 
           if (statusData.progress) {
@@ -383,7 +387,9 @@ export function useVideoGeneration({
             const elapsed = (Date.now() - startTime) / 1000;
             if (statusData.progress > 5) {
               const totalEstimated = (elapsed / statusData.progress) * 100;
-              setRenderEtaSeconds(Math.max(0, Math.floor(totalEstimated - elapsed)));
+              setRenderEtaSeconds(
+                Math.max(0, Math.floor(totalEstimated - elapsed))
+              );
             }
           }
 
@@ -408,7 +414,6 @@ export function useVideoGeneration({
           setRenderProgress(0);
         }
       }, 2000);
-
     } catch (error: any) {
       console.error("Error starting render:", error);
       addNotification(`Render failed: ${error.message}`, "error");

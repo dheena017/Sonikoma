@@ -34,14 +34,17 @@ export function createFetchWithInterceptor({
           if (token && !headers.has("Authorization")) {
             headers.set("Authorization", `Bearer ${token}`);
           }
-          
+
           const keys = [
             { storage: "user_gemini_key", header: "X-User-Gemini-Key" },
             { storage: "user_openai_key", header: "X-User-OpenAI-Key" },
             { storage: "user_anthropic_key", header: "X-User-Anthropic-Key" },
-            { storage: "user_huggingface_key", header: "X-User-HuggingFace-Key" },
+            {
+              storage: "user_huggingface_key",
+              header: "X-User-HuggingFace-Key",
+            },
           ];
-          
+
           for (const { storage, header } of keys) {
             const val = localStorage.getItem(storage);
             if (val && !headers.has(header)) {
@@ -76,9 +79,17 @@ export function createFetchWithInterceptor({
             let handled = false;
 
             if (response.status === 401 || response.status === 403) {
-              const errorData = await response.clone().json().catch(() => ({}));
-              if (errorData.detail === "MISSING_API_KEY" || errorData.detail === "Your API key is invalid.") {
-                alert("AI features require a valid API Key from the target provider. Please add it in your Profile Settings.");
+              const errorData = await response
+                .clone()
+                .json()
+                .catch(() => ({}));
+              if (
+                errorData.detail === "MISSING_API_KEY" ||
+                errorData.detail === "Your API key is invalid."
+              ) {
+                alert(
+                  "AI features require a valid API Key from the target provider. Please add it in your Profile Settings."
+                );
                 window.location.href = "/profile?tab=api";
                 const err = new Error(errorData.detail);
                 (err as any).intercepted = true;

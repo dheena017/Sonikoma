@@ -19,7 +19,9 @@ export default function CTRAnalyticsPage({
   scrapedTitle,
   panels,
 }: CTRAnalyticsPageProps) {
-  const [activeTab, setActiveTab] = useState<"titles" | "outros" | "tokens">("titles");
+  const [activeTab, setActiveTab] = useState<"titles" | "outros" | "tokens">(
+    "titles"
+  );
 
   return (
     <div className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in">
@@ -92,9 +94,7 @@ export default function CTRAnalyticsPage({
           />
         )}
         {activeTab === "tokens" && (
-          <TokenUsageDashboard
-            addNotification={addNotification}
-          />
+          <TokenUsageDashboard addNotification={addNotification} />
         )}
       </div>
     </div>

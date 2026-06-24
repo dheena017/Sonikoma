@@ -16,7 +16,9 @@ interface TokenUsageDashboardProps {
   addNotification?: (msg: string, type: any) => void;
 }
 
-export default function TokenUsageDashboard({ addNotification }: TokenUsageDashboardProps) {
+export default function TokenUsageDashboard({
+  addNotification,
+}: TokenUsageDashboardProps) {
   const [logs, setLogs] = useState<TokenLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,9 +31,11 @@ export default function TokenUsageDashboard({ addNotification }: TokenUsageDashb
     try {
       setIsLoading(true);
       setError(null);
-      const token = localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token");
+      const token =
+        localStorage.getItem("sonikoma_token") ||
+        sessionStorage.getItem("sonikoma_token");
       const res = await fetch("/api/projects/analytics/tokens", {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!res.ok) {
         throw new Error("Failed to fetch token analytics");
@@ -68,8 +72,10 @@ export default function TokenUsageDashboard({ addNotification }: TokenUsageDashb
     return acc;
   }, {} as Record<string, { title: string; total_tokens: number; cost: number }>);
 
-  const chartData = Object.values(projectAggregates).sort((a, b) => b.total_tokens - a.total_tokens);
-  const maxTokens = Math.max(...chartData.map(d => d.total_tokens), 1);
+  const chartData = Object.values(projectAggregates).sort(
+    (a, b) => b.total_tokens - a.total_tokens
+  );
+  const maxTokens = Math.max(...chartData.map((d) => d.total_tokens), 1);
 
   return (
     <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-5 space-y-6">
@@ -107,13 +113,17 @@ export default function TokenUsageDashboard({ addNotification }: TokenUsageDashb
           {/* Summary Cards */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-neutral-950 border border-neutral-850 p-4 rounded-lg">
-              <p className="text-[10px] uppercase text-neutral-500 font-bold mb-1">Total Tokens Used</p>
+              <p className="text-[10px] uppercase text-neutral-500 font-bold mb-1">
+                Total Tokens Used
+              </p>
               <p className="text-2xl font-black text-indigo-400 font-mono">
                 {totalTokens.toLocaleString()}
               </p>
             </div>
             <div className="bg-neutral-950 border border-neutral-850 p-4 rounded-lg">
-              <p className="text-[10px] uppercase text-neutral-500 font-bold mb-1">Estimated API Cost</p>
+              <p className="text-[10px] uppercase text-neutral-500 font-bold mb-1">
+                Estimated API Cost
+              </p>
               <p className="text-2xl font-black text-emerald-400 font-mono">
                 ${totalCost.toFixed(4)}
               </p>
@@ -129,13 +139,20 @@ export default function TokenUsageDashboard({ addNotification }: TokenUsageDashb
               {chartData.map((d, i) => (
                 <div key={i} className="space-y-1">
                   <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-neutral-300 truncate max-w-[200px]">{d.title}</span>
-                    <span className="text-neutral-500">{d.total_tokens.toLocaleString()} tokens (${d.cost.toFixed(4)})</span>
+                    <span className="text-neutral-300 truncate max-w-[200px]">
+                      {d.title}
+                    </span>
+                    <span className="text-neutral-500">
+                      {d.total_tokens.toLocaleString()} tokens ($
+                      {d.cost.toFixed(4)})
+                    </span>
                   </div>
                   <div className="w-full bg-neutral-950 rounded-full h-2 overflow-hidden border border-neutral-850">
-                    <div 
+                    <div
                       className="bg-indigo-500 h-full rounded-full transition-all duration-1000"
-                      style={{ width: `${(d.total_tokens / maxTokens) * 100}%` }}
+                      style={{
+                        width: `${(d.total_tokens / maxTokens) * 100}%`,
+                      }}
                     />
                   </div>
                 </div>
@@ -163,14 +180,24 @@ export default function TokenUsageDashboard({ addNotification }: TokenUsageDashb
                   {logs.slice(0, 10).map((log, i) => (
                     <tr key={i} className="hover:bg-neutral-900/50">
                       <td className="p-2 text-neutral-400">
-                        {new Date(log.created_at).toLocaleDateString()} {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {new Date(log.created_at).toLocaleDateString()}{" "}
+                        {new Date(log.created_at).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </td>
                       <td className="p-2 text-neutral-300 truncate max-w-[100px]">
                         {log.title || log.project_id.substring(0, 8)}
                       </td>
-                      <td className="p-2 text-right text-indigo-300">{log.input_tokens.toLocaleString()}</td>
-                      <td className="p-2 text-right text-purple-300">{log.output_tokens.toLocaleString()}</td>
-                      <td className="p-2 text-right text-emerald-400">${log.estimated_cost_usd.toFixed(4)}</td>
+                      <td className="p-2 text-right text-indigo-300">
+                        {log.input_tokens.toLocaleString()}
+                      </td>
+                      <td className="p-2 text-right text-purple-300">
+                        {log.output_tokens.toLocaleString()}
+                      </td>
+                      <td className="p-2 text-right text-emerald-400">
+                        ${log.estimated_cost_usd.toFixed(4)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

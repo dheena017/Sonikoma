@@ -60,7 +60,9 @@ export default function FreehandPanel({
                 : "bg-neutral-900 text-neutral-400 border border-neutral-800 hover:bg-neutral-800"
             }`}
           >
-            <span className="font-serif font-black text-xs leading-none">T</span>
+            <span className="font-serif font-black text-xs leading-none">
+              T
+            </span>
             Text
           </button>
         </div>
@@ -98,7 +100,7 @@ export default function FreehandPanel({
                 />
               </div>
             </div>
-            
+
             {brushAction === "text" && setTextBgColor && (
               <div className="flex-1">
                 <label className="text-[9px] font-mono text-neutral-500 uppercase font-bold tracking-wider block mb-1">
@@ -121,7 +123,9 @@ export default function FreehandPanel({
       {/* Actions */}
       <div className="pt-4 border-t border-white/10 flex gap-2">
         <button
-          onClick={() => window.dispatchEvent(new Event("FABRIC_CLEAR_REQUEST"))}
+          onClick={() =>
+            window.dispatchEvent(new Event("FABRIC_CLEAR_REQUEST"))
+          }
           className="flex-1 py-2 bg-neutral-900 hover:bg-red-950/40 text-neutral-400 hover:text-red-400 border border-neutral-800 hover:border-red-900/50 rounded-xl flex items-center justify-center gap-1.5 text-[10px] font-mono font-bold transition-all cursor-pointer"
         >
           <Trash2 className="h-3.5 w-3.5" />

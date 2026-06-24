@@ -75,9 +75,12 @@ export function useAutoAnalysis({
             "success"
           );
           if (setAccumulatedTokens && (data.inputTokens || data.outputTokens)) {
-            const addedTokens = (data.inputTokens || 0) + (data.outputTokens || 0);
+            const addedTokens =
+              (data.inputTokens || 0) + (data.outputTokens || 0);
             setAccumulatedTokens((prev) => prev + addedTokens);
-            console.log(`[Smart Auto-Analysis] Tracked ${addedTokens} tokens (Total accumulating...)`);
+            console.log(
+              `[Smart Auto-Analysis] Tracked ${addedTokens} tokens (Total accumulating...)`
+            );
           }
         } else {
           throw new Error(
@@ -122,8 +125,10 @@ export function useAutoAnalysis({
   const runSequenceAnalysis = useCallback(
     async (panelIds: number[], imageUrls: string[]) => {
       if (panelIds.length === 0) return;
-      console.log(`[Smart Sequence Analysis] Starting for ${imageUrls.length} panels`);
-      
+      console.log(
+        `[Smart Sequence Analysis] Starting for ${imageUrls.length} panels`
+      );
+
       // Set loading state for all selected panels
       setPanels((prev) =>
         prev.map((p) =>
@@ -142,10 +147,11 @@ export function useAutoAnalysis({
           }),
         });
 
-        if (!res.ok) throw new Error(`Sequence Analysis failed with status ${res.status}`);
-        
+        if (!res.ok)
+          throw new Error(`Sequence Analysis failed with status ${res.status}`);
+
         const data = await res.json();
-        
+
         if (data.success && data.results) {
           // Map results back to the respective panels
           setPanels((prev) =>
@@ -159,7 +165,8 @@ export function useAutoAnalysis({
                   sfx: result.analysis.sfx || p.sfx,
                   duration: Number(result.analysis.duration) || p.duration,
                   motion_type: result.analysis.motion_type || p.motion_type,
-                  visual_description: result.analysis.visual_description || p.visual_description,
+                  visual_description:
+                    result.analysis.visual_description || p.visual_description,
                   audio_url: result.audio_url || p.audio_url, // Bind the generated audio!
                   isAnalyzing: false,
                 };
@@ -167,25 +174,36 @@ export function useAutoAnalysis({
               return p;
             })
           );
-          
+
           setConsoleLogs((prev) => [
             `[Sequence Analysis] Context-aware storyboard script generated for ${imageUrls.length} frames!`,
             ...prev,
           ]);
-          addNotification(`Sequence analysis completed successfully!`, "success");
-          
+          addNotification(
+            `Sequence analysis completed successfully!`,
+            "success"
+          );
+
           if (setAccumulatedTokens && (data.inputTokens || data.outputTokens)) {
-            const addedTokens = (data.inputTokens || 0) + (data.outputTokens || 0);
+            const addedTokens =
+              (data.inputTokens || 0) + (data.outputTokens || 0);
             setAccumulatedTokens((prev) => prev + addedTokens);
-            console.log(`[Sequence Analysis] Tracked ${addedTokens} tokens (Total accumulating...)`);
+            console.log(
+              `[Sequence Analysis] Tracked ${addedTokens} tokens (Total accumulating...)`
+            );
           }
         } else {
-          throw new Error(data.error || "Invalid response from sequence analysis");
+          throw new Error(
+            data.error || "Invalid response from sequence analysis"
+          );
         }
       } catch (err: any) {
         console.error(`[Sequence Analysis] Failed:`, err);
-        addNotification(`Sequence analysis failed: ${err.message || err}`, "error");
-        
+        addNotification(
+          `Sequence analysis failed: ${err.message || err}`,
+          "error"
+        );
+
         // Reset analyzing state on failure
         setPanels((prev) =>
           prev.map((p) =>
@@ -194,7 +212,14 @@ export function useAutoAnalysis({
         );
       }
     },
-    [fetchWithInterceptor, addNotification, setPanels, setConsoleLogs, selectedModel, narrationStyle]
+    [
+      fetchWithInterceptor,
+      addNotification,
+      setPanels,
+      setConsoleLogs,
+      selectedModel,
+      narrationStyle,
+    ]
   );
 
   const addPanelsToStoryboard = useCallback(

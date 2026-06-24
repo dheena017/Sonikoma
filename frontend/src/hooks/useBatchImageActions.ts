@@ -137,64 +137,70 @@ export function useBatchImageActions({
 
     try {
       abortBatchRef.current.aborted = false;
-      await processWithConcurrency(targetImages, 8, async (url) => {
-        if (abortBatchRef.current.aborted) throw new Error("Cancelled by user");
-        setBubbleCroppingImgUrl(url);
-        try {
-          abortControllerRef.current = new AbortController();
-          const response = await fetchWithInterceptor(
-            "/api/image/remove-speech-bubbles",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                url: url,
-                method: bubbleEraseMethod,
-                sensitivity: bubbleSensitivity,
-                detection_style: bubbleDetectionStyle,
-                dilation: bubbleDilation,
-                inpaint_radius: bubbleInpaintRadius,
-              }),
-              signal: abortControllerRef.current.signal,
-            }
-          );
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          const data = await response.json();
+      await processWithConcurrency(
+        targetImages,
+        8,
+        async (url) => {
+          if (abortBatchRef.current.aborted)
+            throw new Error("Cancelled by user");
+          setBubbleCroppingImgUrl(url);
+          try {
+            abortControllerRef.current = new AbortController();
+            const response = await fetchWithInterceptor(
+              "/api/image/remove-speech-bubbles",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  url: url,
+                  method: bubbleEraseMethod,
+                  sensitivity: bubbleSensitivity,
+                  detection_style: bubbleDetectionStyle,
+                  dilation: bubbleDilation,
+                  inpaint_radius: bubbleInpaintRadius,
+                }),
+                signal: abortControllerRef.current.signal,
+              }
+            );
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
 
-          if (data.success && data.url) {
-            setScrapedImages((prev) =>
-              prev.map((img) => (img === url ? data.url : img))
+            if (data.success && data.url) {
+              setScrapedImages((prev) =>
+                prev.map((img) => (img === url ? data.url : img))
+              );
+              setSelectedScraped((prev) =>
+                prev.map((img) => (img === url ? data.url : img))
+              );
+              setPanels((prev) =>
+                prev.map((p) =>
+                  p.image_url === url ? { ...p, image_url: data.url } : p
+                )
+              );
+            } else {
+              const errMsg =
+                data.message || "Failed to clean speech bubbles on this image.";
+              throw new Error(errMsg);
+            }
+          } catch (err: any) {
+            if (err.name === "AbortError") {
+              console.log(`[Speech Bubbles] Image cleaning ${url} cancelled.`);
+              return;
+            }
+            console.error(`[Speech Bubbles] Error cleaning image ${url}:`, err);
+            errors.push(
+              `Image: ${url.substring(0, 40)}... - Error: ${err.message}`
             );
-            setSelectedScraped((prev) =>
-              prev.map((img) => (img === url ? data.url : img))
-            );
-            setPanels((prev) =>
-              prev.map((p) =>
-                p.image_url === url ? { ...p, image_url: data.url } : p
-              )
-            );
-          } else {
-            const errMsg =
-              data.message || "Failed to clean speech bubbles on this image.";
-            throw new Error(errMsg);
+          } finally {
+            completedCount++;
+            setCleanProgress({
+              current: completedCount,
+              total: targetImages.length,
+            });
           }
-        } catch (err: any) {
-          if (err.name === 'AbortError') {
-             console.log(`[Speech Bubbles] Image cleaning ${url} cancelled.`);
-             return;
-          }
-          console.error(`[Speech Bubbles] Error cleaning image ${url}:`, err);
-          errors.push(
-            `Image: ${url.substring(0, 40)}... - Error: ${err.message}`
-          );
-        } finally {
-          completedCount++;
-          setCleanProgress({
-            current: completedCount,
-            total: targetImages.length,
-          });
-        }
-      }, abortBatchRef.current);
+        },
+        abortBatchRef.current
+      );
     } catch (outerErr: any) {
       errors.push(
         `Critical error in batch bubble cleaning: ${outerErr.message}`
@@ -261,126 +267,132 @@ export function useBatchImageActions({
 
     try {
       abortBatchRef.current.aborted = false;
-      await processWithConcurrency(targetImages, 8, async (url) => {
-        if (abortBatchRef.current.aborted) throw new Error("Cancelled by user");
-        setCroppingImgUrl(url);
-        try {
-          abortControllerRef.current = new AbortController();
-          const response = await fetchWithInterceptor("/api/detect-panels", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              url: url,
-              sensitivity: cropSensitivity,
-              backgroundColorMode: cropBackgroundMode,
-              aspectRatio: aspectRatioLock,
-              minAreaPct: minPanelAreaPct / 100.0,
-              mergeThreshold: overlapMergeThreshold,
-              strategy: useLocalCV ? "local-cv" : "balanced",
-              model: cropModel,
-              cannyLow: cropCannyLow,
-              cannyHigh: cropCannyHigh,
-              closeKernelSize: cropCloseKernelSize,
-              minHeightPx: cropMinHeightPx,
-              autoSplit: autoSplitTallStrips,
-              guidanceInstructions: cropGuidance,
-              focusMode: cropFocusMode,
-            }),
-            signal: abortControllerRef.current.signal,
-          });
+      await processWithConcurrency(
+        targetImages,
+        8,
+        async (url) => {
+          if (abortBatchRef.current.aborted)
+            throw new Error("Cancelled by user");
+          setCroppingImgUrl(url);
+          try {
+            abortControllerRef.current = new AbortController();
+            const response = await fetchWithInterceptor("/api/detect-panels", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                url: url,
+                sensitivity: cropSensitivity,
+                backgroundColorMode: cropBackgroundMode,
+                aspectRatio: aspectRatioLock,
+                minAreaPct: minPanelAreaPct / 100.0,
+                mergeThreshold: overlapMergeThreshold,
+                strategy: useLocalCV ? "local-cv" : "balanced",
+                model: cropModel,
+                cannyLow: cropCannyLow,
+                cannyHigh: cropCannyHigh,
+                closeKernelSize: cropCloseKernelSize,
+                minHeightPx: cropMinHeightPx,
+                autoSplit: autoSplitTallStrips,
+                guidanceInstructions: cropGuidance,
+                focusMode: cropFocusMode,
+              }),
+              signal: abortControllerRef.current.signal,
+            });
 
-          if (!response.ok) {
-            let errMsg = `HTTP ${response.status}`;
-            try {
-              const errorData = await response.json();
-              if (errorData?.detail) {
-                errMsg = errorData.detail;
-              }
-            } catch (_) {}
-            throw new Error(errMsg);
-          }
-          const data = await response.json();
-          if (data.fallback) {
-            setConsoleLogs((prev) => [
-              `[Smart Cropper Fallback] Smart Scanner detection failed on ${url.substring(
-                0,
-                40
-              )}..., fell back to local CV: ${data.message}`,
-              ...prev,
-            ]);
-            addNotification(
-              `System failed (quota/connection). Fell back to local CV detection.`,
-              "info"
-            );
-          }
-
-          if (data.success && Array.isArray(data.panels)) {
-            if (data.panels.length > 0) {
-              const croppedUrls: string[] = [];
-              for (let i = 0; i < data.panels.length; i++) {
-                const box = data.panels[i];
-
-                if (box.croppedUrl) {
-                  croppedUrls.push(box.croppedUrl);
-                } else {
-                  const cropResponse = await fetchWithInterceptor(
-                    "/api/image/edit",
-                    {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        url: url,
-                        cropTop: box.cropTop,
-                        cropBottom: box.cropBottom,
-                        cropLeft: box.cropLeft,
-                        cropRight: box.cropRight,
-                        autoTrim: true,
-                        padding: cropPaddingPx,
-                      }),
-                    }
-                  );
-                  if (!cropResponse.ok)
-                    throw new Error(`Edit-image HTTP ${cropResponse.status}`);
-                  const cropData = await cropResponse.json();
-                  croppedUrls.push(cropData.url);
+            if (!response.ok) {
+              let errMsg = `HTTP ${response.status}`;
+              try {
+                const errorData = await response.json();
+                if (errorData?.detail) {
+                  errMsg = errorData.detail;
                 }
-              }
-              newSlicedUrlsMap[url] = croppedUrls;
-            } else {
-              newSlicedUrlsMap[url] = [url];
+              } catch (_) {}
+              throw new Error(errMsg);
+            }
+            const data = await response.json();
+            if (data.fallback) {
               setConsoleLogs((prev) => [
-                `[Auto Cropper Warning] No panels detected for ${url.substring(
+                `[Smart Cropper Fallback] Smart Scanner detection failed on ${url.substring(
                   0,
                   40
-                )}... - keeping original image as a single panel.`,
+                )}..., fell back to local CV: ${data.message}`,
                 ...prev,
               ]);
+              addNotification(
+                `System failed (quota/connection). Fell back to local CV detection.`,
+                "info"
+              );
             }
-          } else {
-            const errMsg =
-              data.message ||
-              "No panels detected or backend service unavailable.";
-            throw new Error(errMsg);
-          }
-        } catch (err: any) {
-          if (err.name === 'AbortError') {
-            console.log(`[Auto Cropper] Image crop ${url} cancelled.`);
+
+            if (data.success && Array.isArray(data.panels)) {
+              if (data.panels.length > 0) {
+                const croppedUrls: string[] = [];
+                for (let i = 0; i < data.panels.length; i++) {
+                  const box = data.panels[i];
+
+                  if (box.croppedUrl) {
+                    croppedUrls.push(box.croppedUrl);
+                  } else {
+                    const cropResponse = await fetchWithInterceptor(
+                      "/api/image/edit",
+                      {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          url: url,
+                          cropTop: box.cropTop,
+                          cropBottom: box.cropBottom,
+                          cropLeft: box.cropLeft,
+                          cropRight: box.cropRight,
+                          autoTrim: true,
+                          padding: cropPaddingPx,
+                        }),
+                      }
+                    );
+                    if (!cropResponse.ok)
+                      throw new Error(`Edit-image HTTP ${cropResponse.status}`);
+                    const cropData = await cropResponse.json();
+                    croppedUrls.push(cropData.url);
+                  }
+                }
+                newSlicedUrlsMap[url] = croppedUrls;
+              } else {
+                newSlicedUrlsMap[url] = [url];
+                setConsoleLogs((prev) => [
+                  `[Auto Cropper Warning] No panels detected for ${url.substring(
+                    0,
+                    40
+                  )}... - keeping original image as a single panel.`,
+                  ...prev,
+                ]);
+              }
+            } else {
+              const errMsg =
+                data.message ||
+                "No panels detected or backend service unavailable.";
+              throw new Error(errMsg);
+            }
+          } catch (err: any) {
+            if (err.name === "AbortError") {
+              console.log(`[Auto Cropper] Image crop ${url} cancelled.`);
+              newSlicedUrlsMap[url] = [url];
+              return;
+            }
+            console.error(`[Auto Cropper] Error cropping image ${url}:`, err);
+            errors.push(
+              `Image: ${url.substring(0, 40)}... - Error: ${err.message}`
+            );
             newSlicedUrlsMap[url] = [url];
-            return;
+          } finally {
+            completedCount++;
+            setBatchProgress({
+              current: completedCount,
+              total: targetImages.length,
+            });
           }
-          console.error(`[Auto Cropper] Error cropping image ${url}:`, err);
-          errors.push(
-            `Image: ${url.substring(0, 40)}... - Error: ${err.message}`
-          );
-          newSlicedUrlsMap[url] = [url];
-        } finally {
-          completedCount++;
-          setBatchProgress({
-            current: completedCount,
-            total: targetImages.length,
-          });
-        }
-      }, abortBatchRef.current);
+        },
+        abortBatchRef.current
+      );
     } catch (outerErr: any) {
       errors.push(`Critical error in batch auto-crop: ${outerErr.message}`);
     } finally {

@@ -29,8 +29,8 @@ export default function OutputMetadataPanel({
         body: JSON.stringify({
           video_url: videoUrl,
           title: `Webtoon Comic Video - ${musicTheme}`,
-          synopsis: `Cinematic Webtoon Video featuring ${voiceActor} and ${musicTheme}.`
-        })
+          synopsis: `Cinematic Webtoon Video featuring ${voiceActor} and ${musicTheme}.`,
+        }),
       });
       const data = await res.json();
       if (data.success) {
@@ -116,8 +116,8 @@ export default function OutputMetadataPanel({
                 onClick={handlePublishYouTube}
                 disabled={isPublishing}
                 className={`w-full text-white font-medium text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition-all select-none border font-sans ${
-                  isPublishing 
-                    ? "bg-neutral-800 border-neutral-700 cursor-not-allowed opacity-70" 
+                  isPublishing
+                    ? "bg-neutral-800 border-neutral-700 cursor-not-allowed opacity-70"
                     : "bg-[#FF0000] hover:bg-[#CC0000] border-[#FF0000]/50 shadow-lg shadow-red-900/20 cursor-pointer active:scale-95"
                 }`}
               >

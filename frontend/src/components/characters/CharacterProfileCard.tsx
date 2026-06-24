@@ -43,7 +43,9 @@ export default function CharacterProfileCard({
         <div className="absolute inset-0 bg-neutral-950/95 rounded-2xl z-20 flex flex-col items-center justify-center p-4 animate-fade-in text-center border border-red-900/30">
           <Trash2 className="w-6 h-6 text-red-500 mb-2" />
           <p className="text-sm font-bold text-white mb-1">Delete Character?</p>
-          <p className="text-[10px] text-neutral-400 mb-4">This cannot be undone.</p>
+          <p className="text-[10px] text-neutral-400 mb-4">
+            This cannot be undone.
+          </p>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowConfirm(false)}
@@ -64,8 +66,8 @@ export default function CharacterProfileCard({
       <div className="flex justify-between items-start border-b border-neutral-800 pb-3 pr-16">
         <div className="flex items-center gap-3">
           {char.avatar_url ? (
-            <img 
-              src={char.avatar_url} 
+            <img
+              src={char.avatar_url}
               alt={char.name}
               className="h-9 w-9 rounded-xl object-cover border border-purple-800/40 shadow-sm"
             />

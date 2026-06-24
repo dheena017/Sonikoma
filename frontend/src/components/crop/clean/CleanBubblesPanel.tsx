@@ -251,7 +251,7 @@ export default function CleanBubblesPanel({
         );
       }
     } catch (err: any) {
-      if (err.name === 'AbortError') {
+      if (err.name === "AbortError") {
         console.log("Bubble clean cancelled by user");
         return;
       }

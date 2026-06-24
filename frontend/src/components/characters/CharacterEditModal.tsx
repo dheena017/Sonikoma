@@ -71,7 +71,9 @@ export default function CharacterEditModal({
             <input
               required
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500/50 transition-colors"
               placeholder="e.g. Sung Jin-Woo"
             />
@@ -84,7 +86,9 @@ export default function CharacterEditModal({
               </label>
               <input
                 value={formData.active_role}
-                onChange={(e) => setFormData({ ...formData, active_role: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, active_role: e.target.value })
+                }
                 className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500/50 transition-colors"
                 placeholder="e.g. Protagonist"
               />
@@ -95,7 +99,9 @@ export default function CharacterEditModal({
               </label>
               <input
                 value={formData.estimated_age}
-                onChange={(e) => setFormData({ ...formData, estimated_age: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, estimated_age: e.target.value })
+                }
                 className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500/50 transition-colors"
                 placeholder="e.g. Late Teens"
               />
@@ -110,7 +116,9 @@ export default function CharacterEditModal({
               <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-500" />
               <input
                 value={formData.avatar_url || ""}
-                onChange={(e) => setFormData({ ...formData, avatar_url: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, avatar_url: e.target.value })
+                }
                 className="w-full bg-neutral-950 border border-neutral-800 rounded-lg pl-9 pr-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500/50 transition-colors"
                 placeholder="https://example.com/image.jpg"
               />
@@ -123,7 +131,9 @@ export default function CharacterEditModal({
             </label>
             <input
               value={formData.clothing_color}
-              onChange={(e) => setFormData({ ...formData, clothing_color: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, clothing_color: e.target.value })
+              }
               className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500/50 transition-colors"
               placeholder="e.g. Dark cloak"
             />
@@ -136,7 +146,9 @@ export default function CharacterEditModal({
             <textarea
               rows={3}
               value={formData.power_description}
-              onChange={(e) => setFormData({ ...formData, power_description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, power_description: e.target.value })
+              }
               className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500/50 transition-colors resize-none"
               placeholder="Describe their abilities..."
             />

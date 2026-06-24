@@ -49,10 +49,12 @@ export default function CharacterProfilePage({
       const newChars = [...prev];
       if (editingCharIdx !== null) {
         newChars[editingCharIdx] = char;
-        if (addNotification) addNotification(`Updated profile for ${char.name}`, "success");
+        if (addNotification)
+          addNotification(`Updated profile for ${char.name}`, "success");
       } else {
         newChars.push(char);
-        if (addNotification) addNotification(`Added new character ${char.name}`, "success");
+        if (addNotification)
+          addNotification(`Added new character ${char.name}`, "success");
       }
       return newChars;
     });
@@ -115,17 +117,20 @@ export default function CharacterProfilePage({
       {characters.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 px-4 border border-dashed border-neutral-800 rounded-2xl bg-neutral-900/20">
           <UserCheck className="h-10 w-10 text-neutral-600 mb-3" />
-          <h3 className="text-neutral-400 font-mono text-sm font-semibold mb-1">No characters detected</h3>
+          <h3 className="text-neutral-400 font-mono text-sm font-semibold mb-1">
+            No characters detected
+          </h3>
           <p className="text-neutral-500 text-xs text-center max-w-sm">
-            Click the "Scan dialogues" button above to automatically scan the current storyboard and build profiles for each character.
+            Click the "Scan dialogues" button above to automatically scan the
+            current storyboard and build profiles for each character.
           </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
           {characters.map((char, idx) => (
-            <CharacterProfileCard 
-              key={idx} 
-              char={char} 
+            <CharacterProfileCard
+              key={idx}
+              char={char}
               onEdit={() => openEditModal(idx)}
               onDelete={() => handleDeleteCharacter(idx)}
             />
@@ -133,11 +138,13 @@ export default function CharacterProfilePage({
         </div>
       )}
 
-      <CharacterEditModal 
+      <CharacterEditModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveCharacter}
-        initialData={editingCharIdx !== null ? characters[editingCharIdx] : undefined}
+        initialData={
+          editingCharIdx !== null ? characters[editingCharIdx] : undefined
+        }
       />
     </div>
   );

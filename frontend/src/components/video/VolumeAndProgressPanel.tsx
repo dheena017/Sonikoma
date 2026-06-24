@@ -86,11 +86,15 @@ export default function VolumeAndProgressPanel({
   const wavesurferRef = useRef<WaveSurfer | null>(null);
 
   useEffect(() => {
-    if (activeTab === "timeline" && activeStoryboardPanel?.audio_url && waveformRef.current) {
+    if (
+      activeTab === "timeline" &&
+      activeStoryboardPanel?.audio_url &&
+      waveformRef.current
+    ) {
       if (wavesurferRef.current) {
         wavesurferRef.current.destroy();
       }
-      
+
       wavesurferRef.current = WaveSurfer.create({
         container: waveformRef.current,
         waveColor: "#a78bfa", // text-purple-400
@@ -418,7 +422,7 @@ export default function VolumeAndProgressPanel({
                       {activeStoryboardPanel.audio_url ? (
                         <>
                           <div ref={waveformRef} className="w-full h-full" />
-                          <button 
+                          <button
                             onClick={(e) => {
                               e.preventDefault();
                               wavesurferRef.current?.playPause();
@@ -429,7 +433,9 @@ export default function VolumeAndProgressPanel({
                           </button>
                         </>
                       ) : (
-                        <span className="text-[10px] text-neutral-500 font-mono">No audio generated yet</span>
+                        <span className="text-[10px] text-neutral-500 font-mono">
+                          No audio generated yet
+                        </span>
                       )}
                     </div>
                   </div>

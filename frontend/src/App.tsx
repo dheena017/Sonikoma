@@ -678,10 +678,14 @@ export default function App() {
           {localStorage.getItem("sonikoma_admin_token") && (
             <div className="bg-rose-600 text-white text-center py-2 px-4 text-sm font-bold flex justify-center items-center gap-4 z-[100] relative shadow-md">
               <AlertTriangle className="w-4 h-4" />
-              <span>You are currently impersonating {user?.email || "a user"}.</span>
+              <span>
+                You are currently impersonating {user?.email || "a user"}.
+              </span>
               <button
                 onClick={() => {
-                  const adminToken = localStorage.getItem("sonikoma_admin_token");
+                  const adminToken = localStorage.getItem(
+                    "sonikoma_admin_token"
+                  );
                   if (adminToken) {
                     localStorage.setItem("sonikoma_token", adminToken);
                     localStorage.removeItem("sonikoma_admin_token");

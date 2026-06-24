@@ -193,7 +193,7 @@ export function useCompileActions({
         );
       }
     } catch (err: any) {
-      if (err.name === 'AbortError') {
+      if (err.name === "AbortError") {
         console.log("[Timeline] Panel analysis was cancelled.");
         if (addNotification) {
           addNotification("Panel analysis was cancelled.", "info");
@@ -269,9 +269,7 @@ export function useCompileActions({
           prev.map((p) => {
             if (!selectedIds.includes(p.id)) return p;
 
-            const result = data.results.find(
-              (r: any) => r.url === p.image_url
-            );
+            const result = data.results.find((r: any) => r.url === p.image_url);
             if (result && result.analysis) {
               const aiDuration = Number(result.analysis.duration);
               const aiMotion = String(result.analysis.motion_type || "").trim();
@@ -310,13 +308,16 @@ export function useCompileActions({
         );
       }
     } catch (err: any) {
-      if (err.name === 'AbortError') {
+      if (err.name === "AbortError") {
         console.log("[useCompileActions] Sequence analysis cancelled.");
         if (addNotification) {
           addNotification("Sequence analysis was cancelled.", "info");
         }
       } else {
-        console.error("[useCompileActions] Selected panel analysis failed:", err);
+        console.error(
+          "[useCompileActions] Selected panel analysis failed:",
+          err
+        );
         if (addNotification) {
           addNotification(
             "Sequence analysis of selected panels encountered an error.",
@@ -397,7 +398,9 @@ export function useCompileActions({
           ]);
         }
       } else {
-        throw new Error(data.error || "Sequence analysis returned unsuccessful status");
+        throw new Error(
+          data.error || "Sequence analysis returned unsuccessful status"
+        );
       }
 
       if (!abortSignalRef.current.aborted && addNotification) {
@@ -407,7 +410,7 @@ export function useCompileActions({
         );
       }
     } catch (err: any) {
-      if (err.name === 'AbortError') {
+      if (err.name === "AbortError") {
         console.log("[useCompileActions] Full sequence analysis cancelled.");
         if (addNotification) {
           addNotification("Full sequence analysis was cancelled.", "info");

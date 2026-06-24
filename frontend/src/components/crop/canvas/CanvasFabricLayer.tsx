@@ -45,22 +45,25 @@ export default function CanvasFabricLayer({
         backgroundColor: "transparent",
       });
 
-      fabric.Image.fromURL(imgUrl, { crossOrigin: "anonymous" }).then((fabImg) => {
-        fCanvas.backgroundImage = fabImg;
-        fCanvas.renderAll();
-      });
+      fabric.Image.fromURL(imgUrl, { crossOrigin: "anonymous" }).then(
+        (fabImg) => {
+          fCanvas.backgroundImage = fabImg;
+          fCanvas.renderAll();
+        }
+      );
 
       fabricCanvas.current = fCanvas;
 
       fCanvas.freeDrawingBrush = new fabric.PencilBrush(fCanvas);
       fCanvas.freeDrawingBrush.width = brushSize;
-      fCanvas.freeDrawingBrush.color = brushAction === "erase" ? "rgba(255,255,255,1)" : fillColor;
-      
+      fCanvas.freeDrawingBrush.color =
+        brushAction === "erase" ? "rgba(255,255,255,1)" : fillColor;
+
       fCanvas.on("mouse:down", (options) => {
         if (fCanvas.isDrawingMode) return;
         // Text mode
         if (options.target && options.target.type === "textbox") return; // clicked on existing text
-        
+
         const pointer = fCanvas.getScenePoint(options.e);
         const text = new fabric.Textbox("Type here", {
           left: pointer.x,
@@ -94,18 +97,18 @@ export default function CanvasFabricLayer({
       fabricCanvas.current.isDrawingMode = brushAction !== "text";
       fabricCanvas.current.freeDrawingBrush.width = brushSize;
       if (brushAction === "erase") {
-         fabricCanvas.current.freeDrawingBrush.color = "white";
+        fabricCanvas.current.freeDrawingBrush.color = "white";
       } else if (brushAction === "paint") {
-         fabricCanvas.current.freeDrawingBrush.color = fillColor;
+        fabricCanvas.current.freeDrawingBrush.color = fillColor;
       }
-      
+
       // Update selected textbox if active
       const activeObj = fabricCanvas.current.getActiveObject();
       if (activeObj && activeObj.type === "textbox") {
-         (activeObj as fabric.Textbox).set("fontSize", brushSize);
-         (activeObj as fabric.Textbox).set("fill", fillColor);
-         (activeObj as fabric.Textbox).set("backgroundColor", textBgColor);
-         fabricCanvas.current.renderAll();
+        (activeObj as fabric.Textbox).set("fontSize", brushSize);
+        (activeObj as fabric.Textbox).set("fill", fillColor);
+        (activeObj as fabric.Textbox).set("backgroundColor", textBgColor);
+        fabricCanvas.current.renderAll();
       }
     }
   }, [brushSize, brushAction, fillColor, textBgColor, isActive]);
@@ -123,16 +126,18 @@ export default function CanvasFabricLayer({
         );
       }
     };
-    
+
     const handleClearRequest = () => {
       if (fabricCanvas.current) {
         fabricCanvas.current.clear();
-        fabric.Image.fromURL(imgUrl, { crossOrigin: "anonymous" }).then((fabImg) => {
-          if (fabricCanvas.current) {
-            fabricCanvas.current.backgroundImage = fabImg;
-            fabricCanvas.current.renderAll();
+        fabric.Image.fromURL(imgUrl, { crossOrigin: "anonymous" }).then(
+          (fabImg) => {
+            if (fabricCanvas.current) {
+              fabricCanvas.current.backgroundImage = fabImg;
+              fabricCanvas.current.renderAll();
+            }
           }
-        });
+        );
       }
     };
 
