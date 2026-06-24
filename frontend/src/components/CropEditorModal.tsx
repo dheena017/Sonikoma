@@ -76,6 +76,24 @@ export default function CropEditorModal({
     };
   }, [isPipMode, isPage]);
 
+  useEffect(() => {
+    const handleFabricSave = (e: any) => {
+      const { dataUrl } = e.detail;
+      if (appLogic.editingImageIdx !== null && appLogic.setScrapedImages) {
+        appLogic.setScrapedImages(prev => {
+           const nw = [...prev];
+           nw[appLogic.editingImageIdx!] = dataUrl;
+           return nw;
+        });
+        if (appLogic.addNotification) {
+          appLogic.addNotification("Drawing saved successfully", "success");
+        }
+      }
+    };
+    window.addEventListener("FABRIC_SAVE_COMPLETE", handleFabricSave);
+    return () => window.removeEventListener("FABRIC_SAVE_COMPLETE", handleFabricSave);
+  }, [appLogic.editingImageIdx, appLogic.setScrapedImages, appLogic.addNotification]);
+
   const {
     containerRef,
     dragType,
@@ -328,8 +346,7 @@ export default function CropEditorModal({
           setEditCropRight={setEditCropRight}
           setSelectedSliceId={setSelectedSliceId}
           activeTab={activeTab}
-          aspectRatio={aspectRatio}
-        />
+          aspectRatio={aspectRatio} fillColor={""}        />
       </div>
     );
   }
@@ -569,6 +586,7 @@ export default function CropEditorModal({
             setSelectedSliceId={setSelectedSliceId}
             activeTab={activeTab}
             aspectRatio={aspectRatio}
+            fillColor={fillColor}
           />
 
           <CropEditorSidebar

@@ -7,9 +7,10 @@ import CleanBubblesPanel from "../clean/CleanBubblesPanel";
 import HorizontalSplitter from "../horizontal/HorizontalSplitter";
 import CutsRegistry from "../cuts/CutsRegistry";
 import AutoSlicer from "../auto/AutoSlicer";
+import FreehandPanel from "./FreehandPanel";
 
 interface CropEditorSidebarProps {
-  activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge";
+  activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw";
   setActiveTab: (tab: any) => void;
   slices: any[];
   setSlices: any;
@@ -226,7 +227,7 @@ function CropEditorSidebar({
   handleExecuteSave,
 }: CropEditorSidebarProps) {
   const handleTabClick = useCallback(
-    (tab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge") => {
+    (tab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw") => {
       console.log(`[CropEditorSidebar] Switching to tab: ${tab}`);
       setActiveTab(tab);
 
@@ -264,12 +265,13 @@ function CropEditorSidebar({
           [
             { key: "adjust", label: "Adjust", emoji: "✨" },
             { key: "edit", label: "Edit", emoji: "✏️" },
+            { key: "draw", label: "Draw", emoji: "🖌️" },
             { key: "eraser", label: "Erase", emoji: "🧼" },
             { key: "slice", label: "Cut", emoji: "✂️" },
             { key: "crop", label: `Crop (${slices.length})`, emoji: "🎯" },
             { key: "merge", label: "Merge", emoji: "🔗" },
           ] as {
-            key: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge";
+            key: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw";
             label: string;
             emoji: string;
           }[]
@@ -299,6 +301,19 @@ function CropEditorSidebar({
               scrapedImages={scrapedImages}
               isMerging={isMerging}
               onMerge={handleMergeWithNext}
+            />
+          </div>
+        )}
+
+        {activeTab === "draw" && (
+          <div className="rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
+            <FreehandPanel
+              brushSize={brushSize}
+              setBrushSize={setBrushSize}
+              brushAction={brushAction}
+              setBrushAction={setBrushAction}
+              fillColor={fillColor}
+              setFillColor={setFillColor}
             />
           </div>
         )}
