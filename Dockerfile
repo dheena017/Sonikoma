@@ -2,7 +2,7 @@
 FROM node:22-slim AS frontend-builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 # Copy the entire project to build the frontend correctly
 COPY . .
 RUN npm run build:frontend
