@@ -61,7 +61,7 @@ def render_pipeline_sync(panels_data, output_path, work_dir):
         raise Exception("moviepy is not installed. Run pip install moviepy.")
 
     clips = []
-    for p in panels_data:
+    for i, p in enumerate(panels_data):
         img_path = p["local_img"]
         audio_path = p.get("local_audio")
         duration = p["duration"]
@@ -78,14 +78,17 @@ def render_pipeline_sync(panels_data, output_path, work_dir):
             except Exception as e:
                 logger.error(f"Failed to attach audio {audio_path}: {e}")
 
-        # Basic Crossfade (1 second) if needed, simplified for placeholder
+        # Basic Crossfade (0.5 second) between image sequences
+        if i > 0:
+            clip = clip.crossfadein(0.5)
+
         clips.append(clip)
 
     if not clips:
         raise Exception("No valid clips were generated.")
 
-    # Stitch them together
-    final_clip = concatenate_videoclips(clips, method="compose")
+    # Stitch them together with a -0.5s overlap to enable the crossfade
+    final_clip = concatenate_videoclips(clips, padding=-0.5, method="compose")
     
     # Write to file
     final_clip.write_videofile(
