@@ -52,8 +52,9 @@ interface CropCanvasProps {
   selectedBubbleIdx?: number | null;
   setSelectedBubbleIdx?: (idx: number | null) => void;
   brushSize?: number;
-  brushAction?: "paint" | "erase";
+  brushAction?: "paint" | "erase" | "text";
   fillColor?: string;
+  textBgColor?: string;
   canvasMaskRef?: React.RefObject<HTMLCanvasElement | null>;
   onCleanSingleBubble?: (
     ymin: number,
@@ -109,7 +110,8 @@ export default function CropCanvas({
   setSelectedBubbleIdx,
   brushSize = 20,
   brushAction = "paint",
-  fillColor = "#ff0000ff",
+  fillColor = "#ff0000",
+  textBgColor = "#ffffff",
   canvasMaskRef,
   onCleanSingleBubble,
   typesetText = "",
@@ -429,6 +431,7 @@ export default function CropCanvas({
             brushSize={brushSize}
             brushAction={brushAction}
             fillColor={fillColor}
+            textBgColor={textBgColor}
           />
 
           {/* Bubble Layers */}

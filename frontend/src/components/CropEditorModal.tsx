@@ -60,6 +60,8 @@ export default function CropEditorModal({
     handleStitchWithNext,
   } = appLogic;
 
+  const [textBgColor, setTextBgColor] = React.useState("#ffffff");
+
   useEffect(() => {
     if (isPipMode || isPage) {
       document.body.style.overflow = "";
@@ -346,7 +348,10 @@ export default function CropEditorModal({
           setEditCropRight={setEditCropRight}
           setSelectedSliceId={setSelectedSliceId}
           activeTab={activeTab}
-          aspectRatio={aspectRatio} fillColor={""}        />
+          aspectRatio={aspectRatio} 
+          fillColor={""}        
+          textBgColor={textBgColor}
+        />
       </div>
     );
   }
@@ -587,6 +592,7 @@ export default function CropEditorModal({
             activeTab={activeTab}
             aspectRatio={aspectRatio}
             fillColor={fillColor}
+            textBgColor={textBgColor}
           />
 
           <CropEditorSidebar
@@ -650,6 +656,8 @@ export default function CropEditorModal({
             setDebugMode={setDebugMode}
             fillColor={fillColor}
             setFillColor={setFillColor}
+            textBgColor={textBgColor}
+            setTextBgColor={setTextBgColor}
             ocrLang={ocrLang}
             setOcrLang={setOcrLang}
             gpu={gpu}

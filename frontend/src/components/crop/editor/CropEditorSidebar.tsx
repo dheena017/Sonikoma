@@ -68,6 +68,8 @@ interface CropEditorSidebarProps {
   setDebugMode: any;
   fillColor: string;
   setFillColor: any;
+  textBgColor?: string;
+  setTextBgColor?: any;
   ocrLang: string;
   setOcrLang: any;
   gpu: boolean;
@@ -177,6 +179,8 @@ function CropEditorSidebar({
   setDebugMode,
   fillColor,
   setFillColor,
+  textBgColor,
+  setTextBgColor,
   ocrLang,
   setOcrLang,
   gpu,
@@ -314,6 +318,8 @@ function CropEditorSidebar({
               setBrushAction={setBrushAction}
               fillColor={fillColor}
               setFillColor={setFillColor}
+              textBgColor={textBgColor || "#ffffff"}
+              setTextBgColor={setTextBgColor || (() => {})}
             />
           </div>
         )}

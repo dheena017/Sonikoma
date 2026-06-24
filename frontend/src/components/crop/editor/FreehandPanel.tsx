@@ -4,10 +4,12 @@ import { Pen, Eraser, Trash2, Save } from "lucide-react";
 interface FreehandPanelProps {
   brushSize: number;
   setBrushSize: (size: number) => void;
-  brushAction: "paint" | "erase";
-  setBrushAction: (action: "paint" | "erase") => void;
+  brushAction: "paint" | "erase" | "text";
+  setBrushAction: (action: "paint" | "erase" | "text") => void;
   fillColor: string;
   setFillColor: (color: string) => void;
+  textBgColor?: string;
+  setTextBgColor?: (color: string) => void;
 }
 
 export default function FreehandPanel({
@@ -17,6 +19,8 @@ export default function FreehandPanel({
   setBrushAction,
   fillColor,
   setFillColor,
+  textBgColor,
+  setTextBgColor,
 }: FreehandPanelProps) {
   return (
     <div className="space-y-4">
@@ -48,14 +52,25 @@ export default function FreehandPanel({
             <Eraser className="h-3.5 w-3.5" />
             Erase
           </button>
+          <button
+            onClick={() => setBrushAction("text")}
+            className={`flex-1 py-2 rounded-xl flex items-center justify-center gap-2 text-[10px] font-mono font-bold transition-all cursor-pointer ${
+              brushAction === "text"
+                ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
+                : "bg-neutral-900 text-neutral-400 border border-neutral-800 hover:bg-neutral-800"
+            }`}
+          >
+            <span className="font-serif font-black text-xs leading-none">T</span>
+            Text
+          </button>
         </div>
       </div>
 
-      {/* Brush Settings */}
+      {/* Settings */}
       <div className="space-y-3 pt-2">
         <div className="space-y-1">
           <div className="flex justify-between items-center text-[9px] font-mono text-neutral-500 uppercase font-bold tracking-wider">
-            <span>Brush Size</span>
+            <span>{brushAction === "text" ? "Font Size" : "Brush Size"}</span>
             <span className="text-purple-400">{brushSize}px</span>
           </div>
           <input
@@ -68,22 +83,37 @@ export default function FreehandPanel({
           />
         </div>
 
-        {brushAction === "paint" && (
-          <div className="space-y-1 pt-1">
-            <label className="text-[9px] font-mono text-neutral-500 uppercase font-bold tracking-wider block">
-              Brush Color
-            </label>
-            <div className="flex items-center gap-3">
-              <input
-                type="color"
-                value={fillColor}
-                onChange={(e) => setFillColor(e.target.value)}
-                className="h-8 w-14 rounded cursor-pointer bg-transparent border-0 p-0"
-              />
-              <span className="text-xs font-mono text-neutral-400">
-                {fillColor.toUpperCase()}
-              </span>
+        {(brushAction === "paint" || brushAction === "text") && (
+          <div className="space-y-1 pt-1 flex gap-4">
+            <div className="flex-1">
+              <label className="text-[9px] font-mono text-neutral-500 uppercase font-bold tracking-wider block mb-1">
+                {brushAction === "text" ? "Text Color" : "Brush Color"}
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  value={fillColor}
+                  onChange={(e) => setFillColor(e.target.value)}
+                  className="h-8 w-14 rounded cursor-pointer bg-transparent border-0 p-0"
+                />
+              </div>
             </div>
+            
+            {brushAction === "text" && setTextBgColor && (
+              <div className="flex-1">
+                <label className="text-[9px] font-mono text-neutral-500 uppercase font-bold tracking-wider block mb-1">
+                  Background
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={textBgColor}
+                    onChange={(e) => setTextBgColor(e.target.value)}
+                    className="h-8 w-14 rounded cursor-pointer bg-transparent border-0 p-0"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

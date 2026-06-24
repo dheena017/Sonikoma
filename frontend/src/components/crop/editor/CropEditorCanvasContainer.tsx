@@ -39,6 +39,7 @@ interface CropEditorCanvasContainerProps {
   brushSize: number;
   brushAction: any;
   fillColor: string;
+  textBgColor?: string;
   canvasMaskRef: React.RefObject<HTMLCanvasElement | null>;
   setSplitPosition: React.Dispatch<React.SetStateAction<number>>;
   setShowSplitPosition: (v: boolean) => void;
@@ -84,6 +85,7 @@ export default function CropEditorCanvasContainer({
   brushSize,
   brushAction,
   fillColor,
+  textBgColor,
   canvasMaskRef,
   setSplitPosition,
   setShowSplitPosition,
@@ -179,6 +181,7 @@ export default function CropEditorCanvasContainer({
         brushSize={brushSize}
         brushAction={brushAction}
         fillColor={fillColor}
+        textBgColor={textBgColor}
         canvasMaskRef={canvasMaskRef}
         setSplitPosition={setSplitPosition}
         setShowSplitPosition={setShowSplitPosition}

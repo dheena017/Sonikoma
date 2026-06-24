@@ -5,8 +5,9 @@ interface CanvasFabricLayerProps {
   imgUrl: string;
   isActive: boolean;
   brushSize: number;
-  brushAction: "paint" | "erase";
+  brushAction: "paint" | "erase" | "text";
   fillColor: string;
+  textBgColor?: string;
 }
 
 export default function CanvasFabricLayer({
@@ -15,6 +16,7 @@ export default function CanvasFabricLayer({
   brushSize,
   brushAction,
   fillColor,
+  textBgColor,
 }: CanvasFabricLayerProps) {
   const canvasEl = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -37,7 +39,7 @@ export default function CanvasFabricLayer({
       }
 
       const fCanvas = new fabric.Canvas(canvasEl.current, {
-        isDrawingMode: true,
+        isDrawingMode: brushAction !== "text",
         width: img.width,
         height: img.height,
         backgroundColor: "transparent",
@@ -53,10 +55,29 @@ export default function CanvasFabricLayer({
       fCanvas.freeDrawingBrush = new fabric.PencilBrush(fCanvas);
       fCanvas.freeDrawingBrush.width = brushSize;
       fCanvas.freeDrawingBrush.color = brushAction === "erase" ? "rgba(255,255,255,1)" : fillColor;
-
-      if (brushAction === "erase") {
-        (fCanvas.freeDrawingBrush as any).color = "white"; 
-      }
+      
+      fCanvas.on("mouse:down", (options) => {
+        if (fCanvas.isDrawingMode) return;
+        // Text mode
+        if (options.target && options.target.type === "textbox") return; // clicked on existing text
+        
+        const pointer = fCanvas.getScenePoint(options.e);
+        const text = new fabric.Textbox("Type here", {
+          left: pointer.x,
+          top: pointer.y,
+          fontSize: brushSize,
+          fill: fillColor,
+          backgroundColor: textBgColor || "#ffffff",
+          editable: true,
+          padding: 8,
+          cornerStyle: "circle",
+          transparentCorners: false,
+        });
+        fCanvas.add(text);
+        fCanvas.setActiveObject(text);
+        text.enterEditing();
+        text.selectAll();
+      });
     };
     img.src = imgUrl;
 
@@ -70,14 +91,24 @@ export default function CanvasFabricLayer({
 
   useEffect(() => {
     if (fabricCanvas.current && isActive) {
+      fabricCanvas.current.isDrawingMode = brushAction !== "text";
       fabricCanvas.current.freeDrawingBrush.width = brushSize;
       if (brushAction === "erase") {
          fabricCanvas.current.freeDrawingBrush.color = "white";
-      } else {
+      } else if (brushAction === "paint") {
          fabricCanvas.current.freeDrawingBrush.color = fillColor;
       }
+      
+      // Update selected textbox if active
+      const activeObj = fabricCanvas.current.getActiveObject();
+      if (activeObj && activeObj.type === "textbox") {
+         (activeObj as fabric.Textbox).set("fontSize", brushSize);
+         (activeObj as fabric.Textbox).set("fill", fillColor);
+         (activeObj as fabric.Textbox).set("backgroundColor", textBgColor);
+         fabricCanvas.current.renderAll();
+      }
     }
-  }, [brushSize, brushAction, fillColor, isActive]);
+  }, [brushSize, brushAction, fillColor, textBgColor, isActive]);
 
   useEffect(() => {
     const handleSaveRequest = () => {
