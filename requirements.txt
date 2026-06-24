@@ -3,6 +3,7 @@
 # =============================================================================
 # Install with: pip3 install -r requirements.txt
 # =============================================================================
+--extra-index-url https://download.pytorch.org/whl/cpu
 
 # ── Web Framework (FastAPI server + routing) ──────────────────────────────────
 fastapi>=0.111.0
