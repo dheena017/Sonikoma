@@ -992,6 +992,8 @@ export default function App() {
           {isCharacterPath && (
             <CharacterProfilePage
               panels={panels}
+              characters={appLogic.characters}
+              setCharacters={appLogic.setCharacters}
               onNavigateHome={handleNavigateHome}
               addNotification={addNotification}
             />

@@ -22,3 +22,12 @@ export interface GeneratedPanel {
   bubble_method?: string;
   audio_url?: string;
 }
+
+export interface CharacterBio {
+  name: string;
+  estimated_age: string;
+  power_description: string;
+  clothing_color: string;
+  active_role: string;
+  avatar_url?: string;
+}
