@@ -741,3 +741,17 @@ async def admin_delete_project(project_id: str, request: Request, current_user: 
         logger.error(f'Failed to delete project: {e}')
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@router.delete('/me')
+async def delete_my_account(request: Request, current_user: dict = Depends(get_current_user)):
+    ip_addr = request.client.host if request.client else '127.0.0.1'
+    user_id = current_user['user_id']
+    try:
+        write_audit_log(user_id, 'Self-deleted account', ip_addr, 'Success')
+        delete_user(user_id)
+        return {'success': True, 'message': 'Account deleted successfully'}
+    except Exception as e:
+        logger.error(f'Failed to delete account: {e}')
+        write_audit_log(user_id, 'Self-delete account failed', ip_addr, 'Failure')
+        raise HTTPException(status_code=500, detail=str(e))
+

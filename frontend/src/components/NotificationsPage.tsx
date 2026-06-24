@@ -436,7 +436,53 @@ export default function NotificationsPage({
                                       </div>
                                       <div className="p-4 rounded-xl bg-black border border-neutral-800 font-mono text-xs text-neutral-400 leading-relaxed overflow-x-auto whitespace-pre-wrap">
                                         {note.details ||
-                                          "No technical details provided for this event."}
+                                          JSON.stringify(
+                                            {
+                                              event: {
+                                                id: note.id,
+                                                type: note.type,
+                                                timestamp: new Date(
+                                                  note.timestamp
+                                                ).toISOString(),
+                                                status: note.isRead
+                                                  ? "read"
+                                                  : "unread",
+                                                toast_dismissed:
+                                                  note.toastDismissed || false,
+                                              },
+                                              payload: {
+                                                message: note.message,
+                                                error_code:
+                                                  note.errorCode || null,
+                                                retry_delay_seconds:
+                                                  note.retryDelay || null,
+                                                action_link: note.link || null,
+                                                has_retry_handler:
+                                                  !!note.onRetry,
+                                              },
+                                              context: {
+                                                environment:
+                                                  typeof process !== "undefined"
+                                                    ? process.env.NODE_ENV
+                                                    : (import.meta as any).env
+                                                        ?.MODE || "development",
+                                                browser:
+                                                  typeof window !== "undefined"
+                                                    ? navigator.userAgent
+                                                    : "unknown",
+                                                url:
+                                                  typeof window !== "undefined"
+                                                    ? window.location.href
+                                                    : "unknown",
+                                                resolution:
+                                                  typeof window !== "undefined"
+                                                    ? `${window.innerWidth}x${window.innerHeight}`
+                                                    : "unknown",
+                                              },
+                                            },
+                                            null,
+                                            2
+                                          )}
                                       </div>
                                     </div>
                                   </div>

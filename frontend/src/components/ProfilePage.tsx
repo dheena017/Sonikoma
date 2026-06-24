@@ -13,6 +13,7 @@ import {
   Globe,
   Sparkles,
   BarChart3,
+  Activity,
 } from "lucide-react";
 
 // Sub-components
@@ -22,6 +23,7 @@ import ProfileSecurityTab from "./profile/ProfileSecurityTab.js";
 import ProfileBillingTab from "./profile/ProfileBillingTab.js";
 import ProfileApiTab from "./profile/ProfileApiTab.js";
 import ProfileAnalyticsTab from "./profile/ProfileAnalyticsTab.js";
+import ProfilePreferencesTab from "./profile/ProfilePreferencesTab.js";
 
 interface ProfilePageProps {
   user: any;
@@ -136,7 +138,7 @@ export default function ProfilePage({
   };
   // Navigation tabs
   const [activeTab, setActiveTab] = React.useState<
-    "projects" | "account" | "security" | "billing" | "api" | "analytics"
+    "projects" | "account" | "security" | "billing" | "api" | "analytics" | "preferences" | "stats"
   >("projects");
 
   // Local state for profile values
@@ -153,6 +155,37 @@ export default function ProfilePage({
   });
 
   const [saveSuccess, setSaveSuccess] = React.useState(false);
+
+  // Preferences State
+  const [notificationPrefs, setNotificationPrefs] = React.useState({
+    newsletter: true,
+    productUpdates: true,
+    securityAlerts: true,
+    billingReceipts: true,
+    pushNotifications: false,
+  });
+  const [workspacePrefs, setWorkspacePrefs] = React.useState({
+    hardwareAcceleration: true,
+    compactMode: false,
+    autoSaveInterval: "5m"
+  });
+  const [privacyPrefs, setPrivacyPrefs] = React.useState({
+    analyticsTelemetry: true,
+    publicProfile: false
+  });
+  const [aiPrefs, setAiPrefs] = React.useState({
+    defaultModel: "gemini-1.5-flash",
+    defaultVoice: "google-tts-en-US-Standard-D",
+    autoCropSensitivity: "medium"
+  });
+  const [exportPrefs, setExportPrefs] = React.useState({
+    resolution: "1080p",
+    framerate: "30fps",
+    audioFormat: "mp3"
+  });
+  const [themePrefs, setThemePrefs] = React.useState("dark");
+  const [accentColor, setAccentColor] = React.useState("purple");
+  const [prefsSaveSuccess, setPrefsSaveSuccess] = React.useState(false);
 
   // Password Update Fields
   const [passwordState, setPasswordState] = React.useState({
@@ -419,6 +452,40 @@ export default function ProfilePage({
       })
       .catch(console.error);
   }, [user]);
+
+  // Real-time polling for Workspace Stats
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      fetch("/api/metrics")
+        .then((r) => r.json())
+        .then((res) => {
+          if (res.storage) {
+            setCacheUsed(res.storage.usedBytes);
+            setCacheLimit(res.storage.limitBytes);
+          }
+        })
+        .catch(() => {});
+
+      const token =
+        localStorage.getItem("sonikoma_token") ||
+        sessionStorage.getItem("sonikoma_token");
+      if (token) {
+        fetch("/api/auth/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+          .then((r) => r.json())
+          .then((res) => {
+            if (res.credits !== undefined) {
+              setCredits(res.credits);
+            }
+          })
+          .catch(() => {});
+      }
+    }, 5000); // 5 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
 
   // Render initials or background gradients for avatar
   const renderAvatarContent = (url: string, name: string) => {
@@ -953,6 +1020,73 @@ export default function ProfilePage({
       });
   };
 
+  const handleSavePreferences = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPrefsSaveSuccess(true);
+    setTimeout(() => setPrefsSaveSuccess(false), 3000);
+  };
+
+  const handleExportData = () => {
+    const data = {
+      profile: profileUser,
+      projects: localProjects,
+      connections: connections,
+      apiTokens: apiTokens,
+      invoices: invoices,
+      preferences: {
+        notifications: notificationPrefs,
+        workspace: workspacePrefs,
+        privacy: privacyPrefs,
+        ai: aiPrefs,
+        export: exportPrefs,
+        theme: themePrefs,
+        accentColor: accentColor
+      }
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `sonikoma_account_export_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirm = (window as any).confirmAsync || window.confirm;
+    const confirmed = await confirm(
+      "CRITICAL: Are you absolutely sure you want to permanently delete your account? All projects, assets, and data will be lost forever. This action cannot be undone.",
+      "Permanently Delete Account",
+      "red"
+    );
+    if (!confirmed) return;
+
+    const token = localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token");
+    if (!token) {
+      onLogout();
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/auth/me", {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (response.ok) {
+        alert("Account deleted successfully.");
+        onLogout();
+      } else {
+        const res = await response.json();
+        alert(res.detail || "Failed to delete account");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete account.");
+    }
+  };
+
   // Dynamic calculations for overall stats using real data from localProjects
   const queueProjects = localProjects.filter(
     (p) => p.status === "pending" || p.status === "processing"
@@ -1014,7 +1148,7 @@ export default function ProfilePage({
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-600/5 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-600/5 blur-[120px] pointer-events-none" />
 
-      <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 relative z-10">
+      <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 relative z-10">
         {/* HEADER SECTION */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-white/5">
           <div className="flex items-center gap-6">
@@ -1114,157 +1248,170 @@ export default function ProfilePage({
             </div>
           </div>
         </div>
+        {/* PROFILE WORKSPACE HORIZONTAL TABS */}
+        <div className="space-y-6">
+          {/* HORIZONTAL TAB BAR */}
+          <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-none snap-x snap-mandatory">
+            <button
+              onClick={() => setActiveTab("projects")}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
+                activeTab === "projects"
+                  ? "bg-purple-600/10 border border-purple-500/20 text-purple-400"
+                  : "bg-neutral-900/40 border border-white/5 text-neutral-400 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              <LayoutGrid className="w-4 h-4" />
+              Recent Projects
+              <span className="text-[10px] bg-neutral-900 border border-white/5 px-2 py-0.5 rounded-full font-mono ml-1">
+                {localProjects.length}
+              </span>
+            </button>
+            <button
+              onClick={() => setActiveTab("analytics")}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
+                activeTab === "analytics"
+                  ? "bg-purple-600/10 border border-purple-500/20 text-purple-400"
+                  : "bg-neutral-900/40 border border-white/5 text-neutral-400 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              <BarChart3 className="w-4 h-4" />
+              Creator Analytics
+            </button>
+            <button
+              onClick={() => setActiveTab("account")}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
+                activeTab === "account"
+                  ? "bg-purple-600/10 border border-purple-500/20 text-purple-400"
+                  : "bg-neutral-900/40 border border-white/5 text-neutral-400 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              <User className="w-4 h-4" />
+              Account Settings
+            </button>
+            <button
+              onClick={() => setActiveTab("security")}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
+                activeTab === "security"
+                  ? "bg-purple-600/10 border border-purple-500/20 text-purple-400"
+                  : "bg-neutral-900/40 border border-white/5 text-neutral-400 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              <Shield className="w-4 h-4" />
+              Security & Sessions
+            </button>
+            <button
+              onClick={() => setActiveTab("preferences")}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
+                activeTab === "preferences"
+                  ? "bg-purple-600/10 border border-purple-500/20 text-purple-400"
+                  : "bg-neutral-900/40 border border-white/5 text-neutral-400 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              <Settings className="w-4 h-4" />
+              Preferences & Theme
+            </button>
+            <button
+              onClick={() => setActiveTab("billing")}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
+                activeTab === "billing"
+                  ? "bg-purple-600/10 border border-purple-500/20 text-purple-400"
+                  : "bg-neutral-900/40 border border-white/5 text-neutral-400 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              <CreditCard className="w-4 h-4" />
+              Billing & Credits
+              <span className="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full font-bold font-sans ml-1">
+                Active
+              </span>
+            </button>
+            <button
+              onClick={() => setActiveTab("api")}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
+                activeTab === "api"
+                  ? "bg-purple-600/10 border border-purple-500/20 text-purple-400"
+                  : "bg-neutral-900/40 border border-white/5 text-neutral-400 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              <Key className="w-4 h-4" />
+              Developer APIs
+            </button>
+            <button
+              onClick={() => setActiveTab("stats")}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
+                activeTab === "stats"
+                  ? "bg-purple-600/10 border border-purple-500/20 text-purple-400"
+                  : "bg-neutral-900/40 border border-white/5 text-neutral-400 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              <Activity className="w-4 h-4" />
+              Workspace Stats
+            </button>
+          </div>
 
-        {/* PROFILE WORKSPACE LAYOUT */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* LEFT COLUMN: Sidebar menu list */}
-          <div className="lg:col-span-1 space-y-4">
-            <div className="bg-[#0c0c0e]/60 border border-white/5 rounded-3xl p-4 flex flex-col gap-1.5 shadow-xl">
-              <button
-                onClick={() => setActiveTab("projects")}
-                className={`w-full py-2.5 px-4 rounded-xl text-left text-xs font-bold transition-all cursor-pointer flex items-center justify-between ${
-                  activeTab === "projects"
-                    ? "bg-purple-600/10 border border-purple-500/20 text-purple-400"
-                    : "text-neutral-400 hover:text-white hover:bg-white/5"
-                }`}
-              >
-                <span className="flex items-center gap-2">
-                  <LayoutGrid className="w-4 h-4" />
-                  Recent Projects
-                </span>
-                <span className="text-[10px] bg-neutral-900 border border-white/5 px-2 py-0.5 rounded-full font-mono">
-                  {localProjects.length}
-                </span>
-              </button>
+          {/* TAB CONTENT PANEL SWITCHER */}
+          <div className="space-y-6">
 
-              <button
-                onClick={() => setActiveTab("analytics")}
-                className={`w-full py-2.5 px-4 rounded-xl text-left text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
-                  activeTab === "analytics"
-                    ? "bg-purple-600/10 border border-purple-500/20 text-purple-400"
-                    : "text-neutral-400 hover:text-white hover:bg-white/5"
-                }`}
-              >
-                <BarChart3 className="w-4 h-4" />
-                Creator Analytics
-              </button>
-
-              <button
-                onClick={() => setActiveTab("account")}
-                className={`w-full py-2.5 px-4 rounded-xl text-left text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
-                  activeTab === "account"
-                    ? "bg-purple-600/10 border border-purple-500/20 text-purple-400"
-                    : "text-neutral-400 hover:text-white hover:bg-white/5"
-                }`}
-              >
-                <User className="w-4 h-4" />
-                Account Settings
-              </button>
-
-              <button
-                onClick={() => setActiveTab("security")}
-                className={`w-full py-2.5 px-4 rounded-xl text-left text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
-                  activeTab === "security"
-                    ? "bg-purple-600/10 border border-purple-500/20 text-purple-400"
-                    : "text-neutral-400 hover:text-white hover:bg-white/5"
-                }`}
-              >
-                <Shield className="w-4 h-4" />
-                Security & Sessions
-              </button>
-
-              <button
-                onClick={() => setActiveTab("billing")}
-                className={`w-full py-2.5 px-4 rounded-xl text-left text-xs font-bold transition-all cursor-pointer flex items-center justify-between ${
-                  activeTab === "billing"
-                    ? "bg-purple-600/10 border border-purple-500/20 text-purple-400"
-                    : "text-neutral-400 hover:text-white hover:bg-white/5"
-                }`}
-              >
-                <span className="flex items-center gap-2">
-                  <CreditCard className="w-4 h-4" />
-                  Billing & Credits
-                </span>
-                <span className="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full font-bold font-sans">
-                  Active
-                </span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("api")}
-                className={`w-full py-2.5 px-4 rounded-xl text-left text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
-                  activeTab === "api"
-                    ? "bg-purple-600/10 border border-purple-500/20 text-purple-400"
-                    : "text-neutral-400 hover:text-white hover:bg-white/5"
-                }`}
-              >
-                <Key className="w-4 h-4" />
-                Developer APIs
-              </button>
-            </div>
-
-            {/* Quick System usage card */}
-            <div className="bg-[#0c0c0e]/30 border border-white/5 rounded-3xl p-5 space-y-4 text-left">
-              <h4 className="text-[10px] font-black uppercase text-neutral-500 tracking-widest">
-                Workspace Stats
-              </h4>
-              <div className="space-y-3">
-                {/* Credit usage */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-[10px] text-neutral-400 font-semibold">
-                    <span>Smart Engine Credits</span>
-                    <span className="text-white font-bold">
-                      {credits} /{" "}
-                      {Math.max(
-                        1000,
-                        Math.min(5000, Math.ceil(credits / 1000) * 1000)
-                      )}
-                    </span>
+            {/* TAB: WORKSPACE STATS */}
+            {activeTab === "stats" && (
+              <div className="bg-[#0c0c0e]/30 border border-white/5 rounded-3xl p-6 space-y-6 text-left shadow-xl animate-in fade-in zoom-in-95 duration-300">
+                <h4 className="text-xs font-black uppercase text-neutral-500 tracking-widest flex items-center gap-2">
+                  <Activity className="w-4 h-4" /> Workspace System Stats
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Credit usage */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs text-neutral-400 font-semibold">
+                      <span>Smart Engine Credits</span>
+                      <span className="text-white font-bold">
+                        {credits} /{" "}
+                        {Math.max(
+                          1000,
+                          Math.min(5000, Math.ceil(credits / 1000) * 1000)
+                        )}
+                      </span>
+                    </div>
+                    <div className="h-2.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-purple-500 rounded-full"
+                        style={{
+                          width: `${Math.min(
+                            100,
+                            (credits /
+                              Math.max(
+                                1000,
+                                Math.min(5000, Math.ceil(credits / 1000) * 1000)
+                              )) *
+                              100
+                          )}%`,
+                        }}
+                      />
+                    </div>
                   </div>
-                  <div className="h-1.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-purple-500 rounded-full"
-                      style={{
-                        width: `${Math.min(
-                          100,
-                          (credits /
-                            Math.max(
-                              1000,
-                              Math.min(5000, Math.ceil(credits / 1000) * 1000)
-                            )) *
-                            100
-                        )}%`,
-                      }}
-                    />
-                  </div>
-                </div>
 
-                {/* Storage usage */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-[10px] text-neutral-400 font-semibold">
-                    <span>Cache Storage</span>
-                    <span className="text-white font-bold">
-                      {formatBytes(cacheUsed)} / {formatBytes(cacheLimit)}
-                    </span>
-                  </div>
-                  <div className="h-1.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-indigo-500 rounded-full"
-                      style={{
-                        width: `${Math.min(
-                          100,
-                          (cacheUsed / cacheLimit) * 100
-                        )}%`,
-                      }}
-                    />
+                  {/* Storage usage */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs text-neutral-400 font-semibold">
+                      <span>Cache Storage</span>
+                      <span className="text-white font-bold">
+                        {formatBytes(cacheUsed)} / {formatBytes(cacheLimit)}
+                      </span>
+                    </div>
+                    <div className="h-2.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-indigo-500 rounded-full"
+                        style={{
+                          width: `${Math.min(
+                            100,
+                            (cacheUsed / cacheLimit) * 100
+                          )}%`,
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
+            )}
 
-          {/* RIGHT COLUMN: Tab content panel switcher */}
-          <div className="lg:col-span-3 space-y-6">
             {/* TAB 0: CREATOR PERFORMANCE ANALYTICS */}
             {activeTab === "analytics" && <ProfileAnalyticsTab />}
 
@@ -1314,6 +1461,8 @@ export default function ProfilePage({
                 handleTerminateSession={handleTerminateSession}
                 is2faEnabled={is2faEnabled}
                 handleToggleMfa={handleToggleMfa}
+                onExportData={handleExportData}
+                onDeleteAccount={handleDeleteAccount}
               />
             )}
 
@@ -1344,6 +1493,28 @@ export default function ProfilePage({
                 tokenToast={tokenToast}
                 handleCopyToastKey={handleCopyToastKey}
                 handleDeleteToken={handleDeleteToken}
+              />
+            )}
+
+            {/* TAB 6: PREFERENCES & NOTIFICATIONS */}
+            {activeTab === "preferences" && (
+              <ProfilePreferencesTab
+                notifications={notificationPrefs}
+                setNotifications={setNotificationPrefs}
+                workspace={workspacePrefs}
+                setWorkspace={setWorkspacePrefs}
+                privacy={privacyPrefs}
+                setPrivacy={setPrivacyPrefs}
+                ai={aiPrefs}
+                setAi={setAiPrefs}
+                exportSettings={exportPrefs}
+                setExportSettings={setExportPrefs}
+                theme={themePrefs}
+                setTheme={setThemePrefs}
+                accentColor={accentColor}
+                setAccentColor={setAccentColor}
+                onSave={handleSavePreferences}
+                saveSuccess={prefsSaveSuccess}
               />
             )}
           </div>
