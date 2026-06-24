@@ -1,5 +1,5 @@
 import React from "react";
-import { Sparkles, RefreshCw } from "lucide-react";
+import { Sparkles, RefreshCw, X } from "lucide-react";
 import { GeneratedPanel } from "../../types";
 import { getPanelFilterStyle } from "../../utils";
 
@@ -20,6 +20,7 @@ interface TimelineCardProps {
   handleModifySFX: (id: number, val: string) => void;
   handleModifyVisualDescription: (id: number, val: string) => void;
   handleAnalyzePanel: (id: number, url: string) => void;
+  handleCancelAnalysis?: () => void;
   isSelected: boolean;
   onToggleSelect: () => void;
   playStoryboardAudio?: (idx: number) => void;
@@ -48,6 +49,7 @@ const TimelineCard = ({
   handleModifySFX,
   handleModifyVisualDescription,
   handleAnalyzePanel,
+  handleCancelAnalysis,
   isSelected,
   onToggleSelect,
   playStoryboardAudio,
@@ -320,32 +322,33 @@ const TimelineCard = ({
       </div>
 
       <div className="pt-2">
-        <button
-          type="button"
-          disabled={analyzingPanelId === panel.id}
-          onClick={() => {
-            console.log(
-              `[TimelineCard] Manual AI analysis triggered for panel #${panel.id}`
-            );
-            handleAnalyzePanel(panel.id, panel.image_url);
-          }}
-          className={`w-full py-1.5 rounded-lg border text-[10px] font-mono font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
-            analyzingPanelId === panel.id
-              ? "bg-purple-900/40 border-purple-500/50 text-purple-200"
-              : "bg-purple-950/40 border-purple-800/40 hover:bg-purple-900/60 text-purple-300 hover:border-purple-600"
-          }`}
-        >
-          {analyzingPanelId === panel.id ? (
-            <RefreshCw className="h-3 w-3 animate-spin text-purple-400" />
-          ) : (
+        {analyzingPanelId === panel.id ? (
+          <button
+            type="button"
+            onClick={() => handleCancelAnalysis && handleCancelAnalysis()}
+            className="w-full py-1.5 rounded-lg border text-[10px] font-mono font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-rose-600/20 border-rose-500/50 hover:bg-rose-600/40 text-rose-300 hover:border-rose-400 shadow-[0_0_10px_rgba(225,29,72,0.15)]"
+          >
+            <X className="h-3 w-3 text-rose-400" />
+            <span className="hidden sm:inline">Stop Analyzing</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            disabled={analyzingPanelId !== null && analyzingPanelId !== panel.id}
+            onClick={() => {
+              console.log(
+                `[TimelineCard] Manual AI analysis triggered for panel #${panel.id}`
+              );
+              handleAnalyzePanel(panel.id, panel.image_url);
+            }}
+            className={`w-full py-1.5 rounded-lg border text-[10px] font-mono font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-purple-950/40 border-purple-800/40 hover:bg-purple-900/60 text-purple-300 hover:border-purple-600 ${
+              analyzingPanelId !== null && analyzingPanelId !== panel.id ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+          >
             <Sparkles className="h-3 w-3 text-purple-400 animate-pulse" />
-          )}
-          <span className="hidden sm:inline">
-            {analyzingPanelId === panel.id
-              ? "Analyzing Panel..."
-              : "Analyze Image"}
-          </span>
-        </button>
+            <span className="hidden sm:inline">Analyze Image</span>
+          </button>
+        )}
       </div>
 
       <div className="pt-1.5">

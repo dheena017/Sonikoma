@@ -667,6 +667,7 @@ export default function StoryboardTimeline({
             handleModifySFX={handleModifySFX}
             handleModifyVisualDescription={handleModifyVisualDescription}
             handleAnalyzePanel={handleAnalyzePanel}
+            handleCancelAnalysis={handleCancelAnalysis}
             isSelected={selectedPanelIds.has(panel.id)}
             onToggleSelect={() => togglePanelSelection(panel.id)}
             playStoryboardAudio={playStoryboardAudio}

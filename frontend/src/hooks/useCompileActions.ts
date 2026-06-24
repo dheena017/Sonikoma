@@ -36,9 +36,13 @@ export function useCompileActions({
   const [isAnalyzingAll, setIsAnalyzingAll] = useState<boolean>(false);
   const [isZipping, setIsZipping] = useState<boolean>(false);
   const abortSignalRef = React.useRef({ aborted: false });
+  const abortControllerRef = React.useRef<AbortController | null>(null);
 
   const handleCancelAnalysis = () => {
     abortSignalRef.current.aborted = true;
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
     if (addNotification) {
       addNotification("Cancelling analysis...", "info");
     }
@@ -124,6 +128,7 @@ export function useCompileActions({
     }
 
     try {
+      abortControllerRef.current = new AbortController();
       console.log("[API] POST /api/analyze-image for panel", panelId);
       const res = await activeFetch("/api/analyze-image", {
         method: "POST",
@@ -134,6 +139,7 @@ export function useCompileActions({
           narrationStyle,
           voice: voiceActor,
         }),
+        signal: abortControllerRef.current.signal,
       });
       if (!res.ok) throw new Error("Image analysis failed");
       const data = await res.json();
@@ -187,6 +193,13 @@ export function useCompileActions({
         );
       }
     } catch (err: any) {
+      if (err.name === 'AbortError') {
+        console.log("[Timeline] Panel analysis was cancelled.");
+        if (addNotification) {
+          addNotification("Panel analysis was cancelled.", "info");
+        }
+        return;
+      }
       console.error("[Timeline] Panel analysis failed:", err);
       if (setConsoleLogs) {
         setConsoleLogs((prev) => [
@@ -232,7 +245,7 @@ export function useCompileActions({
     try {
       const activeModel = selectedModel || "gemini-2.5-flash";
       const targetPanels = panels.filter((p) => selectedIds.includes(p.id));
-      abortSignalRef.current.aborted = false;
+      abortControllerRef.current = new AbortController();
 
       const imageUrls = targetPanels.map((p) => p.image_url);
 
@@ -245,6 +258,7 @@ export function useCompileActions({
           narrationStyle,
           voice: voiceActor,
         }),
+        signal: abortControllerRef.current.signal,
       });
 
       if (!res.ok) throw new Error("Sequence analysis failed");
@@ -296,12 +310,19 @@ export function useCompileActions({
         );
       }
     } catch (err: any) {
-      console.error("[useCompileActions] Selected panel analysis failed:", err);
-      if (addNotification) {
-        addNotification(
-          "Sequence analysis of selected panels encountered an error.",
-          "error"
-        );
+      if (err.name === 'AbortError') {
+        console.log("[useCompileActions] Sequence analysis cancelled.");
+        if (addNotification) {
+          addNotification("Sequence analysis was cancelled.", "info");
+        }
+      } else {
+        console.error("[useCompileActions] Selected panel analysis failed:", err);
+        if (addNotification) {
+          addNotification(
+            "Sequence analysis of selected panels encountered an error.",
+            "error"
+          );
+        }
       }
       setPanels((prev) =>
         prev.map((p) =>
@@ -328,7 +349,7 @@ export function useCompileActions({
 
     try {
       const activeModel = selectedModel || "gemini-2.5-flash";
-      abortSignalRef.current.aborted = false;
+      abortControllerRef.current = new AbortController();
 
       const imageUrls = panels.map((p) => p.image_url);
 
@@ -341,6 +362,7 @@ export function useCompileActions({
           narrationStyle,
           voice: voiceActor,
         }),
+        signal: abortControllerRef.current.signal,
       });
 
       if (!res.ok) throw new Error("Sequence analysis failed");
@@ -385,12 +407,19 @@ export function useCompileActions({
         );
       }
     } catch (err: any) {
-      console.error("[useCompileActions] Sequential analysis failed:", err);
-      if (addNotification) {
-        addNotification(
-          "Smart Timeline analysis encountered an error.",
-          "error"
-        );
+      if (err.name === 'AbortError') {
+        console.log("[useCompileActions] Full sequence analysis cancelled.");
+        if (addNotification) {
+          addNotification("Full sequence analysis was cancelled.", "info");
+        }
+      } else {
+        console.error("[useCompileActions] Sequential analysis failed:", err);
+        if (addNotification) {
+          addNotification(
+            "Smart Timeline analysis encountered an error.",
+            "error"
+          );
+        }
       }
       setPanels((prev) => prev.map((p) => ({ ...p, isAnalyzing: false })));
     } finally {
