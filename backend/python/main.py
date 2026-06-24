@@ -445,13 +445,12 @@ def _clean_temp_workspace():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Step 15: Environment Security Validation
+    # Step 15: Environment Security Validation (Warn Only)
     required_envs = ["SUPABASE_URL", "GEMINI_API_KEY"]
     missing_envs = [env for env in required_envs if not os.getenv(env)]
     if missing_envs:
-        print(f"\n\x1b[1;31m[CRITICAL ERROR] Missing Required Environment Variables: {', '.join(missing_envs)}\x1b[0m")
-        print("\x1b[1;31mThe Sonikoma backend cannot start without these configured. Please update your .env file.\x1b[0m\n")
-        sys.exit(1)
+        print(f"\n\x1b[1;33m[WARNING] Missing Optional Environment Variables: {', '.join(missing_envs)}\x1b[0m")
+        print("\x1b[1;33mSome AI and cloud features may be disabled. Local SQLite will be used if DATABASE_URL is unset.\x1b[0m\n")
 
     # Filter out noisy system-logs polling/SSE stream logs
     for logger_name in ("uvicorn.access", "uvicorn.error", "uvicorn"):
