@@ -62,6 +62,13 @@ class AnalyzeBatchRequest(BaseModel):
     narrationStyle: Optional[str] = "long"  # 'long' = detailed YouTube recap, 'short' = quick subtitles
     voice: Optional[str] = "en-US-GuyNeural"
 
+class AnalyzeSequenceRequest(BaseModel):
+    urls: List[str]
+    model: Optional[str] = "gemini-2.5-flash"
+    narrationStyle: Optional[str] = "long"
+    voice: Optional[str] = "en-US-GuyNeural"
+
+
 class ListModelsRequest(BaseModel):
     apiKey: Optional[str] = None
     provider: Optional[str] = "gemini"
@@ -794,6 +801,119 @@ async def analyze_batch(body: AnalyzeBatchRequest):
         "latencyMs": elapsed,
         "avgMs": elapsed // len(results) if len(results) > 0 else 0
     }
+
+@router.post("/analyze-sequence", summary="Analyze multiple panels together for context-aware narrative")
+async def analyze_sequence(body: AnalyzeSequenceRequest):
+    start_time = time.time()
+    logger.info(f"[Sequence] Received sequence analysis for {len(body.urls)} panels.")
+    
+    if not body.urls:
+        raise HTTPException(status_code=400, detail="Urls list cannot be empty")
+        
+    target_model = body.model or MODEL_FALLBACKS[0]
+    
+    # 1. Resolve all images into memory
+    image_parts = []
+    for url in body.urls:
+        try:
+            res = await img_utils.resolve_image_to_buffer(url)
+            image_parts.append({
+                "mime_type": res.get("contentType", "image/jpeg"),
+                "data": res["data"]
+            })
+        except Exception as e:
+            logger.warning(f"[Sequence] Failed to load image {url}: {e}")
+            raise HTTPException(status_code=400, detail=f"Failed to load image: {url}")
+
+    # 2. Ask Gemini to look at ALL images together
+    try:
+        from google import genai
+        from google.genai import types
+        
+        # Use existing configured API key
+        api_key = os.getenv("GEMINI_API_KEY")
+        client = genai.Client(api_key=api_key)
+        
+        style_hint = "max 25 words per panel, impactful" if body.narrationStyle == "short" else "detailed YouTube story narration describing actions and dialogue"
+        
+        system_instruction = f"""
+        You are an expert manga/comic storyboard narrator. You are receiving a sequence of {len(image_parts)} consecutive images from a single scene.
+        Analyze them TOGETHER to understand the story flow, context, and character actions.
+        
+        Provide cohesive dialogue, SFX, and visual descriptions. The style should be: {style_hint}.
+        
+        You MUST return ONLY a JSON array of objects, with exactly {len(image_parts)} items (one for each image in order).
+        Each object must have:
+        - "speech_text" (string)
+        - "sfx" (string)
+        - "duration" (float, estimated reading time in seconds)
+        - "motion_type" (string, one of: zoom_in, zoom_out, pan_left, pan_right, pan_up, pan_down)
+        - "visual_description" (string)
+        """
+        
+        contents = [system_instruction]
+        for img in image_parts:
+            contents.append(types.Part.from_bytes(data=img["data"], mime_type=img["mime_type"]))
+            
+        response = client.models.generate_content(
+            model=target_model,
+            contents=contents,
+            config=types.GenerateContentConfig(response_mime_type="application/json")
+        )
+        
+        sequence_data = json.loads(response.text)
+        
+        if len(sequence_data) != len(body.urls):
+            logger.warning(f"[Sequence] AI returned {len(sequence_data)} items, expected {len(body.urls)}")
+        
+        # 3. Process the context-aware script and generate audio files
+        results = []
+        for i, panel_data in enumerate(sequence_data):
+            if i >= len(body.urls): break
+            
+            analysis = validate_analysis(panel_data)
+            audio_url = None
+            
+            try:
+                with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_audio:
+                    temp_audio_path = tmp_audio.name
+                
+                await generate_panel_audio(
+                    dialogue_list=[analysis["speech_text"]],
+                    target_duration=analysis["duration"],
+                    output_path=temp_audio_path,
+                    voice=body.voice or "en-US-GuyNeural"
+                )
+                
+                if os.path.exists(temp_audio_path) and os.path.getsize(temp_audio_path) > 0:
+                    with open(temp_audio_path, "rb") as f:
+                        audio_bytes = f.read()
+                    import uuid
+                    unique_audio_id = f"audio_{uuid.uuid4().hex[:8]}"
+                    stitched_cache.set(unique_audio_id, {"data": audio_bytes, "content_type": "audio/mpeg"})
+                    audio_url = f"/api/image/cached/{unique_audio_id}"
+                
+                if os.path.exists(temp_audio_path):
+                    os.remove(temp_audio_path)
+            except Exception as audio_err:
+                logger.error(f"[Sequence] Audio gen failed for panel {i}: {audio_err}")
+                
+            results.append({
+                "url": body.urls[i],
+                "analysis": analysis,
+                "audio_url": audio_url
+            })
+            
+        elapsed = int((time.time() - start_time) * 1000)
+        return {
+            "success": True,
+            "results": results,
+            "latencyMs": elapsed
+        }
+
+    except Exception as e:
+        logger.error(f"[Sequence] Analysis failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/ai-smart-crop", summary="Crop panels automatically using local CV or Gemini")

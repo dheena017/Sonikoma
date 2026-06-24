@@ -31,6 +31,7 @@ interface FloatingSelectionBarProps {
   handleSelectAllToggle: () => void;
   setShowAutoCropModal?: (v: boolean) => void;
   setShowBubbleModal?: (v: boolean) => void;
+  handleCancelBatch?: () => void;
 }
 
 export function FloatingSelectionBar({
@@ -50,6 +51,7 @@ export function FloatingSelectionBar({
   handleSelectAllToggle,
   setShowAutoCropModal,
   setShowBubbleModal,
+  handleCancelBatch,
 }: FloatingSelectionBarProps) {
   const isAllSelected = totalCount > 0 && selectedCount === totalCount;
   const isAnyBusy = isBatchCropping || isCleaningBubbles || isBatchMerging;
@@ -150,50 +152,64 @@ export function FloatingSelectionBar({
             </button>
 
             {/* Auto-Crop */}
-            <button
-              type="button"
-              onClick={() => {
-                console.log(
-                  "[FloatingSelectionBar] Triggering auto-crop on",
-                  selectedCount,
-                  "panels"
-                );
-                handleAutoCropSelected();
-              }}
-              disabled={isAnyBusy}
-              title="Auto-Crop selected panels"
-              className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl"
-            >
-              {isBatchCropping ? (
-                <Loader2 className="h-4 w-4 animate-spin text-purple-400" />
-              ) : (
+            {isBatchCropping ? (
+              <button
+                type="button"
+                onClick={() => handleCancelBatch && handleCancelBatch()}
+                className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-rose-900/40 border border-rose-500 hover:bg-rose-900 text-white rounded-xl"
+              >
+                <X className="h-4 w-4" />
+                Stop Auto-Crop
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  console.log(
+                    "[FloatingSelectionBar] Triggering auto-crop on",
+                    selectedCount,
+                    "panels"
+                  );
+                  handleAutoCropSelected();
+                }}
+                disabled={isAnyBusy}
+                title="Auto-Crop selected panels"
+                className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl"
+              >
                 <Scissors className="h-4 w-4 text-purple-400" />
-              )}
-              Auto-Crop
-            </button>
+                Auto-Crop
+              </button>
+            )}
 
             {/* Clean Bubbles */}
-            <button
-              type="button"
-              onClick={() => {
-                console.log(
-                  "[FloatingSelectionBar] Triggering clean bubbles on",
-                  selectedCount,
-                  "panels"
-                );
-                handleCleanBubblesSelected();
-              }}
-              disabled={isAnyBusy}
-              title="Clean speech bubbles from selected panels"
-              className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl"
-            >
-              {isCleaningBubbles ? (
-                <Loader2 className="h-4 w-4 animate-spin text-purple-400" />
-              ) : (
+            {isCleaningBubbles ? (
+              <button
+                type="button"
+                onClick={() => handleCancelBatch && handleCancelBatch()}
+                className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-rose-900/40 border border-rose-500 hover:bg-rose-900 text-white rounded-xl"
+              >
+                <X className="h-4 w-4" />
+                Stop Clean
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  console.log(
+                    "[FloatingSelectionBar] Triggering clean bubbles on",
+                    selectedCount,
+                    "panels"
+                  );
+                  handleCleanBubblesSelected();
+                }}
+                disabled={isAnyBusy}
+                title="Clean speech bubbles from selected panels"
+                className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl"
+              >
                 <Sparkles className="h-4 w-4 text-purple-400" />
-              )}
-              Clean Bubbles
-            </button>
+                Clean Bubbles
+              </button>
+            )}
 
             {/* Stitch */}
             <button

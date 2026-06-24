@@ -44,6 +44,7 @@ export interface ScraperDeckProps {
   croppingImgUrl: string | null;
   handleAutoCropSelected: () => void;
   handleCleanBubblesSelected: () => void;
+  handleCancelBatch?: () => void;
   isDashboardOnly?: boolean;
   seriesTitle?: string;
   chapterNumber?: string;

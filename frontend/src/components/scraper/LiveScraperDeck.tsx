@@ -59,6 +59,7 @@ export default function LiveScraperDeck({
   targetUrl = "",
   selectedSource = "",
   handleSaveAssets,
+  handleCancelBatch,
 }: LiveScraperDeckProps) {
   const [isZipping, setIsZipping] = useState(false);
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(
@@ -465,6 +466,7 @@ export default function LiveScraperDeck({
           handleSelectAllToggle={handleSelectAllToggle}
           setShowAutoCropModal={setShowAutoCropModal}
           setShowBubbleModal={setShowBubbleModal}
+          handleCancelBatch={handleCancelBatch}
         />
       )}
 

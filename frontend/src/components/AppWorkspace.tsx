@@ -44,6 +44,7 @@ interface AppWorkspaceProps {
   croppingImgUrl: string | null;
   handleAutoCropSelected: () => void;
   handleCleanBubblesSelected: () => void;
+  handleCancelBatch?: () => void;
   videoPlayerRef: React.RefObject<HTMLVideoElement | null>;
   addNotification: any;
   setErrorPopup: any;
@@ -159,6 +160,7 @@ export function AppWorkspace({
   croppingImgUrl,
   handleAutoCropSelected,
   handleCleanBubblesSelected,
+  handleCancelBatch,
   videoPlayerRef,
   addNotification,
   setErrorPopup,
@@ -509,6 +511,7 @@ export function AppWorkspace({
           croppingImgUrl={croppingImgUrl}
           handleAutoCropSelected={handleAutoCropSelected}
           handleCleanBubblesSelected={handleCleanBubblesSelected}
+          handleCancelBatch={handleCancelBatch}
           addPanelsToStoryboard={addPanelsToStoryboard}
           seriesTitle={seriesTitle}
           chapterNumber={chapterNumber}
@@ -568,6 +571,7 @@ export function AppWorkspace({
               cropCloseKernelSize={cropCloseKernelSize}
               autoSplitTallStrips={autoSplitTallStrips}
               handleSaveStoryboard={handleSaveStoryboard}
+              handleCancelBatch={handleCancelBatch}
             />
           </div>
         )}

@@ -238,13 +238,25 @@ export default function ProjectEditorPage({
                   >
                     Configure Auto-Crop
                   </button>
-                  <button
-                    onClick={handleAutoCropSelected}
-                    disabled={isBatchCropping || scrapedImages.length === 0}
-                    className="py-1.5 px-3 bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
-                  >
-                    {isBatchCropping ? "Cropping..." : "Run Crop"}
-                  </button>
+                  {isBatchCropping ? (
+                    <button
+                      onClick={() =>
+                        appLogic.handleCancelBatch &&
+                        appLogic.handleCancelBatch()
+                      }
+                      className="py-1.5 px-3 bg-rose-600 hover:bg-rose-500 text-white text-[10px] font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
+                    >
+                      Stop Cropping
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleAutoCropSelected}
+                      disabled={scrapedImages.length === 0}
+                      className="py-1.5 px-3 bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
+                    >
+                      Run Crop
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -267,13 +279,25 @@ export default function ProjectEditorPage({
                   >
                     Configure Clearing
                   </button>
-                  <button
-                    onClick={handleCleanBubblesSelected}
-                    disabled={isCleaningBubbles || scrapedImages.length === 0}
-                    className="py-1.5 px-3 bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
-                  >
-                    {isCleaningBubbles ? "Cleaning..." : "Run Clean"}
-                  </button>
+                  {isCleaningBubbles ? (
+                    <button
+                      onClick={() =>
+                        appLogic.handleCancelBatch &&
+                        appLogic.handleCancelBatch()
+                      }
+                      className="py-1.5 px-3 bg-rose-600 hover:bg-rose-500 text-white text-[10px] font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
+                    >
+                      Stop Clean
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleCleanBubblesSelected}
+                      disabled={scrapedImages.length === 0}
+                      className="py-1.5 px-3 bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
+                    >
+                      Run Clean
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

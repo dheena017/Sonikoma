@@ -29,6 +29,8 @@ interface TimelineSelectionBarProps {
   handleBatchMergeSelected: () => void;
   batchProgress?: { current: number; total: number } | null;
   cleanProgress?: { current: number; total: number } | null;
+  handleCancelAnalysis?: () => void;
+  handleCancelBatch?: () => void;
 }
 
 export default function TimelineSelectionBar({
@@ -47,6 +49,8 @@ export default function TimelineSelectionBar({
   handleBatchMergeSelected,
   batchProgress,
   cleanProgress,
+  handleCancelAnalysis,
+  handleCancelBatch,
 }: TimelineSelectionBarProps) {
   // Visible whenever there are panels selected or an operation is running
   const isProcessing = isBatchCropping || isCleaningBubbles || isBatchMerging;
@@ -155,66 +159,81 @@ export default function TimelineSelectionBar({
                     </button>
 
                     {/* AI Analyse Selected */}
-                    <button
-                      type="button"
-                      disabled={isAnalyzingAll}
-                      onClick={() => {
-                        console.log(
-                          `[TimelineSelectionBar] Analyze ${selectedCount} selected panels`
-                        );
-                        handleAnalyzeSelected();
-                      }}
-                      className={`px-3 sm:px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
-                        isAnalyzingAll
-                          ? "bg-purple-900/40 border-purple-500/50 text-purple-200 cursor-wait"
-                          : "bg-purple-600 border-purple-500 hover:bg-purple-500 text-white shadow-md hover:shadow-purple-500/20"
-                      }`}
-                    >
-                      {isAnalyzingAll ? (
-                        <RefreshCw className="h-4 w-4 animate-spin text-white" />
-                      ) : (
+                    {isAnalyzingAll ? (
+                      <button
+                        type="button"
+                        onClick={() => handleCancelAnalysis && handleCancelAnalysis()}
+                        className="px-3 sm:px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-rose-600 border-rose-500 hover:bg-rose-500 text-white shadow-md hover:shadow-rose-500/20"
+                      >
+                        <X className="h-4 w-4 text-white" />
+                        Stop Analyzing
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={isAnalyzingAll}
+                        onClick={() => {
+                          console.log(
+                            `[TimelineSelectionBar] Analyze ${selectedCount} selected panels`
+                          );
+                          handleAnalyzeSelected();
+                        }}
+                        className={`px-3 sm:px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-purple-600 border-purple-500 hover:bg-purple-500 text-white shadow-md hover:shadow-purple-500/20`}
+                      >
                         <Sparkles className="h-4 w-4 text-white animate-pulse" />
-                      )}
-                      {isAnalyzingAll
-                        ? "Analyzing..."
-                        : `Analyze Selected (${selectedCount})`}
-                    </button>
+                        `Analyze Selected (${selectedCount})`
+                      </button>
+                    )}
 
                     {/* Auto-Crop */}
-                    <button
-                      type="button"
-                      disabled={
-                        isBatchCropping || isCleaningBubbles || isBatchMerging
-                      }
-                      onClick={handleAutoCropSelected}
-                      className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl"
-                      title="Auto-Crop selected panels"
-                    >
-                      {isBatchCropping ? (
-                        <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
-                      ) : (
+                    {isBatchCropping ? (
+                      <button
+                        type="button"
+                        onClick={() => handleCancelBatch && handleCancelBatch()}
+                        className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-rose-900/40 border border-rose-500 hover:bg-rose-900 text-white rounded-xl"
+                      >
+                        <X className="h-4 w-4" />
+                        Stop Auto-Crop
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={
+                          isBatchCropping || isCleaningBubbles || isBatchMerging
+                        }
+                        onClick={handleAutoCropSelected}
+                        className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl"
+                        title="Auto-Crop selected panels"
+                      >
                         <Scissors className="h-4 w-4 text-purple-400" />
-                      )}
-                      Auto-Crop
-                    </button>
+                        Auto-Crop
+                      </button>
+                    )}
 
                     {/* Clean Bubbles */}
-                    <button
-                      type="button"
-                      disabled={
-                        isBatchCropping || isCleaningBubbles || isBatchMerging
-                      }
-                      onClick={handleCleanBubblesSelected}
-                      className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl"
-                      title="Remove speech bubbles from selected panels"
-                    >
-                      {isCleaningBubbles ? (
-                        <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
-                      ) : (
+                    {isCleaningBubbles ? (
+                      <button
+                        type="button"
+                        onClick={() => handleCancelBatch && handleCancelBatch()}
+                        className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-rose-900/40 border border-rose-500 hover:bg-rose-900 text-white rounded-xl"
+                      >
+                        <X className="h-4 w-4" />
+                        Stop Clean
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={
+                          isBatchCropping || isCleaningBubbles || isBatchMerging
+                        }
+                        onClick={handleCleanBubblesSelected}
+                        className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl"
+                        title="Remove speech bubbles from selected panels"
+                      >
                         <Sparkles className="h-4 w-4 text-purple-400 animate-pulse" />
-                      )}
-                      Clean Bubbles
-                    </button>
+                        Clean Bubbles
+                      </button>
+                    )}
 
                     {/* Stitch */}
                     <button

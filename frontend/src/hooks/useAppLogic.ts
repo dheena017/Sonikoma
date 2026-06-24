@@ -160,6 +160,7 @@ export function useAppLogic() {
     isBatchCropping,
     batchProgress,
     croppingImgUrl,
+    handleCancelBatch,
   } = usePipelineActions({
     state,
     setCurrentPanelIndex,
@@ -706,6 +707,7 @@ export function useAppLogic() {
     isBatchCropping,
     batchProgress,
     croppingImgUrl,
+    handleCancelBatch,
     scrapeImages,
     isGeneratingStoryboard,
     handleGenerateStoryboardAI,

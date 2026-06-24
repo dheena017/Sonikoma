@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Sparkles } from "lucide-react";
-import { GeneratedPanel } from "../../types";
-import { CharacterBio } from "./CharacterProfileCard";
+import { CharacterBio, GeneratedPanel } from "../../types";
 
 interface CharacterAutoDetectorProps {
   panels: GeneratedPanel[];

@@ -112,6 +112,78 @@ export function useAutoAnalysis({
     ]
   );
 
+  const runSequenceAnalysis = useCallback(
+    async (panelIds: number[], imageUrls: string[]) => {
+      if (panelIds.length === 0) return;
+      console.log(`[Smart Sequence Analysis] Starting for ${imageUrls.length} panels`);
+      
+      // Set loading state for all selected panels
+      setPanels((prev) =>
+        prev.map((p) =>
+          panelIds.includes(p.id) ? { ...p, isAnalyzing: true } : p
+        )
+      );
+
+      try {
+        const res = await fetchWithInterceptor("/api/analyze-sequence", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            urls: imageUrls,
+            model: selectedModel,
+            narrationStyle,
+          }),
+        });
+
+        if (!res.ok) throw new Error(`Sequence Analysis failed with status ${res.status}`);
+        
+        const data = await res.json();
+        
+        if (data.success && data.results) {
+          // Map results back to the respective panels
+          setPanels((prev) =>
+            prev.map((p) => {
+              const idx = panelIds.indexOf(p.id);
+              if (idx !== -1 && data.results[idx]) {
+                const result = data.results[idx];
+                return {
+                  ...p,
+                  speech_text: result.analysis.speech_text || p.speech_text,
+                  sfx: result.analysis.sfx || p.sfx,
+                  duration: Number(result.analysis.duration) || p.duration,
+                  motion_type: result.analysis.motion_type || p.motion_type,
+                  visual_description: result.analysis.visual_description || p.visual_description,
+                  audio_url: result.audio_url || p.audio_url, // Bind the generated audio!
+                  isAnalyzing: false,
+                };
+              }
+              return p;
+            })
+          );
+          
+          setConsoleLogs((prev) => [
+            `[Sequence Analysis] Context-aware storyboard script generated for ${imageUrls.length} frames!`,
+            ...prev,
+          ]);
+          addNotification(`Sequence analysis completed successfully!`, "success");
+        } else {
+          throw new Error(data.error || "Invalid response from sequence analysis");
+        }
+      } catch (err: any) {
+        console.error(`[Sequence Analysis] Failed:`, err);
+        addNotification(`Sequence analysis failed: ${err.message || err}`, "error");
+        
+        // Reset analyzing state on failure
+        setPanels((prev) =>
+          prev.map((p) =>
+            panelIds.includes(p.id) ? { ...p, isAnalyzing: false } : p
+          )
+        );
+      }
+    },
+    [fetchWithInterceptor, addNotification, setPanels, setConsoleLogs, selectedModel, narrationStyle]
+  );
+
   const addPanelsToStoryboard = useCallback(
     (
       imgUrls: string[],
@@ -170,6 +242,7 @@ export function useAutoAnalysis({
 
   return {
     runBackgroundAnalysis,
+    runSequenceAnalysis,
     addPanelsToStoryboard,
   };
 }

@@ -49,6 +49,7 @@ interface StoryboardTimelineProps {
   playStoryboardAudio?: (idx: number) => void;
   saveProject?: (customPanels?: GeneratedPanel[]) => Promise<boolean>;
   handleSaveStoryboard?: () => void;
+  handleCancelBatch?: () => void;
 }
 
 export default function StoryboardTimeline({
@@ -89,6 +90,7 @@ export default function StoryboardTimeline({
   playStoryboardAudio,
   saveProject,
   handleSaveStoryboard,
+  handleCancelBatch,
 }: StoryboardTimelineProps) {
   // ── Panel selection state ────────────────────────────────────────────────
   const [selectedPanelIds, setSelectedPanelIds] = useState<Set<number>>(
@@ -603,6 +605,10 @@ export default function StoryboardTimeline({
 
   const selectedCount = selectedPanelIds.size;
 
+  function handleCancelAnalysis(): void {
+    throw new Error("Function not implemented.");
+  }
+
   return (
     <div
       id="panels_timeline_section"
@@ -693,6 +699,8 @@ export default function StoryboardTimeline({
         handleBatchMergeSelected={handleBatchMergeSelected}
         batchProgress={cropProgress}
         cleanProgress={cleanProgress}
+        handleCancelAnalysis={handleCancelAnalysis}
+        handleCancelBatch={handleCancelBatch}
       />
 
       {/* Delete Panels Confirmation Modal */}

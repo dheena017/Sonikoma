@@ -135,6 +135,7 @@ export function usePipelineActions({
     croppingImgUrl: _croppingImgUrl,
     handleCleanBubblesSelected,
     handleAutoCropSelected,
+    handleCancelBatch,
   } = useBatchImageActions({
     selectedScraped,
     setSelectedScraped,
@@ -222,5 +223,6 @@ export function usePipelineActions({
     isBatchCropping,
     batchProgress,
     croppingImgUrl,
+    handleCancelBatch,
   };
 }
