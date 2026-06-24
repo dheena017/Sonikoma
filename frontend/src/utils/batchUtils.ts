@@ -1,7 +1,8 @@
 export async function processWithConcurrency<T, R>(
   items: T[],
   limit: number,
-  fn: (item: T, index: number) => Promise<R>
+  fn: (item: T, index: number) => Promise<R>,
+  abortSignal?: { aborted: boolean }
 ): Promise<R[]> {
   const results: R[] = new Array(items.length);
   let index = 0;
@@ -10,6 +11,9 @@ export async function processWithConcurrency<T, R>(
     .fill(null)
     .map(async () => {
       while (index < items.length) {
+        if (abortSignal?.aborted) {
+          break;
+        }
         const currentIdx = index++;
         if (currentIdx >= items.length) break;
         try {

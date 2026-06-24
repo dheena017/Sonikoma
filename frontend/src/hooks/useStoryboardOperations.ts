@@ -72,6 +72,7 @@ export function useStoryboardOperations({
     handleAnalyzePanel,
     handleAnalyzeAllPanels,
     handleAnalyzeSelectedPanels,
+    handleCancelAnalysis,
   } = useCompileActions({
     panels,
     setPanels,
@@ -126,5 +127,6 @@ export function useStoryboardOperations({
     handleAnalyzeAllPanels,
     handleAnalyzeSelectedPanels,
     isAnalyzingAll,
+    handleCancelAnalysis,
   };
 }

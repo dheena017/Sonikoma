@@ -35,6 +35,14 @@ export function useCompileActions({
   const [analyzingPanelId, setAnalyzingPanelId] = useState<number | null>(null);
   const [isAnalyzingAll, setIsAnalyzingAll] = useState<boolean>(false);
   const [isZipping, setIsZipping] = useState<boolean>(false);
+  const abortSignalRef = React.useRef({ aborted: false });
+
+  const handleCancelAnalysis = () => {
+    abortSignalRef.current.aborted = true;
+    if (addNotification) {
+      addNotification("Cancelling analysis...", "info");
+    }
+  };
 
   const handleDownloadZip = async () => {
     if (panels.length === 0) return;
@@ -224,9 +232,11 @@ export function useCompileActions({
     try {
       const activeModel = selectedModel || "gemini-2.5-flash";
       const targetPanels = panels.filter((p) => selectedIds.includes(p.id));
+      abortSignalRef.current.aborted = false;
       const chunks = chunkArray(targetPanels, 8);
 
       await processWithConcurrency(chunks, 4, async (chunkPanels) => {
+        if (abortSignalRef.current.aborted) throw new Error("Cancelled by user");
         try {
           const res = await activeFetch("/api/analyze-batch", {
             method: "POST",
@@ -301,9 +311,9 @@ export function useCompileActions({
             })
           );
         }
-      });
+      }, abortSignalRef.current);
 
-      if (addNotification) {
+      if (!abortSignalRef.current.aborted && addNotification) {
         addNotification(
           `Smart Scanner analysis completed for ${selectedIds.length} selected panel(s)!`,
           "success"
@@ -342,9 +352,11 @@ export function useCompileActions({
 
     try {
       const activeModel = selectedModel || "gemini-2.5-flash";
+      abortSignalRef.current.aborted = false;
       const chunks = chunkArray(panels, 8);
 
       await processWithConcurrency(chunks, 4, async (chunkPanels) => {
+        if (abortSignalRef.current.aborted) throw new Error("Cancelled by user");
         try {
           const res = await activeFetch("/api/analyze-batch", {
             method: "POST",
@@ -400,9 +412,9 @@ export function useCompileActions({
             })
           );
         }
-      });
+      }, abortSignalRef.current);
 
-      if (addNotification) {
+      if (!abortSignalRef.current.aborted && addNotification) {
         addNotification(
           "Smart Scanner analysis completed for all panels!",
           "success"
@@ -430,5 +442,6 @@ export function useCompileActions({
     handleAnalyzePanel,
     handleAnalyzeAllPanels,
     handleAnalyzeSelectedPanels,
+    handleCancelAnalysis,
   };
 }
