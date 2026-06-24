@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Ticket,
 } from "lucide-react";
+import TokenUsageDashboard from "../analytics/TokenUsageDashboard.js";
 
 interface ProfileBillingTabProps {
   credits: number;
@@ -576,59 +577,9 @@ export default function ProfileBillingTab({
         </div>
       </div>
 
-      {/* Invoice receipt history table */}
-      <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-6 space-y-4">
-        <h4 className="text-xs font-black uppercase text-neutral-400 tracking-wider flex items-center gap-1.5 border-b border-white/5 pb-2">
-          <CreditCard className="w-4 h-4 text-purple-400" />
-          Billing Invoice History
-        </h4>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs text-left">
-            <thead>
-              <tr className="border-b border-white/5 text-[10px] font-bold uppercase tracking-wider text-neutral-500">
-                <th className="py-2.5 px-3">Invoice ID</th>
-                <th className="py-2.5 px-3">Billing Date</th>
-                <th className="py-2.5 px-3">Total Cost</th>
-                <th className="py-2.5 px-3">Status</th>
-                <th className="py-2.5 px-3 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoices.map((inv) => (
-                <tr
-                  key={inv.id}
-                  className="border-b border-white/5 text-neutral-300 hover:bg-white/5 transition-colors"
-                >
-                  <td className="py-3 px-3 font-mono font-bold text-white">
-                    {inv.id}
-                  </td>
-                  <td className="py-3 px-3 font-medium">{inv.date}</td>
-                  <td className="py-3 px-3 font-semibold">
-                    ${inv.amount.toFixed(2)}
-                  </td>
-                  <td className="py-3 px-3">
-                    <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-bold text-[9px] uppercase">
-                      {inv.status}
-                    </span>
-                  </td>
-                  <td className="py-3 px-3 text-right">
-                    <button
-                      onClick={() =>
-                        alert(
-                          `Simulated PDF receipt download for invoice ${inv.id}`
-                        )
-                      }
-                      className="text-[10px] font-bold text-purple-400 hover:text-purple-300 hover:underline cursor-pointer"
-                    >
-                      Download PDF
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      {/* Real API Token Usage Ledger */}
+      <div className="w-full">
+        <TokenUsageDashboard />
       </div>
     </div>
   );

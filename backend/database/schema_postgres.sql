@@ -161,3 +161,17 @@ CREATE INDEX IF NOT EXISTS idx_series_user_id ON series(user_id);
 CREATE INDEX IF NOT EXISTS idx_series_slug ON series(slug);
 CREATE INDEX IF NOT EXISTS idx_chapters_series_id ON chapters(series_id);
 CREATE INDEX IF NOT EXISTS idx_chapters_slug ON chapters(slug);
+
+-- 11. Token Usage Logs (Time-Series)
+CREATE TABLE IF NOT EXISTS token_usage_logs (
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id          TEXT NOT NULL,
+  input_tokens        INTEGER NOT NULL DEFAULT 0,
+  output_tokens       INTEGER NOT NULL DEFAULT 0,
+  total_tokens        INTEGER NOT NULL DEFAULT 0,
+  estimated_cost_usd  NUMERIC(10, 6) NOT NULL,
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_token_logs_project_id ON token_usage_logs(project_id);
+CREATE INDEX IF NOT EXISTS idx_token_logs_created_at ON token_usage_logs(created_at DESC);
