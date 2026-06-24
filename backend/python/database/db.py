@@ -230,11 +230,27 @@ def init_db() -> None:
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_token_logs_created_at ON token_usage_logs(created_at)")
             conn.commit()
             logger.info("[Database] Migration: verified token_usage_logs table.")
-        except Exception as e:
-            logger.error(f"[Database] Migration error on token_usage_logs: {e}")
+        except:
+            logger.error(f"[Database] Schema file not found: {schema_file}")
+
+        # Ensure platform settings table exists
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS platform_settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        
+        # Populate default settings if empty
+        cursor.execute("SELECT COUNT(*) FROM platform_settings")
+        if cursor.fetchone()[0] == 0:
+            cursor.execute("INSERT INTO platform_settings (key, value) VALUES ('maintenance_mode', 'false')")
+            cursor.execute("INSERT INTO platform_settings (key, value) VALUES ('disable_signups', 'false')")
+            cursor.execute("INSERT INTO platform_settings (key, value) VALUES ('global_banner', '')")
             
         conn.commit()
-    except Exception as e:
+    except sqlite3.Error as e:
         logger.error(f"[Database] Error checking or applying schema: {e}")
     finally:
         conn.close()
@@ -347,6 +363,34 @@ def update_user(user_id: str, updates: Dict[str, Any]) -> None:
             query = f"UPDATE users SET {', '.join(set_parts)} WHERE id = ?"
             conn.execute(query, tuple(params))
             conn.commit()
+    finally:
+        conn.close()
+
+def delete_user(user_id: str) -> None:
+    """
+    Permanently delete a user and all of their associated records from the SQLite database.
+    """
+    conn = get_db_connection()
+    try:
+        with conn:
+            # Delete chapters and panels by finding all series owned by the user
+            series_rows = conn.execute("SELECT id FROM series WHERE user_id = ?", (user_id,)).fetchall()
+            for s in series_rows:
+                series_id = s["id"]
+                conn.execute("DELETE FROM panels WHERE chapter_id IN (SELECT id FROM chapters WHERE series_id = ?)", (series_id,))
+                conn.execute("DELETE FROM chapters WHERE series_id = ?", (series_id,))
+            
+            # Delete series
+            conn.execute("DELETE FROM series WHERE user_id = ?", (user_id,))
+            
+            # Delete secondary data
+            conn.execute("DELETE FROM user_sessions WHERE user_id = ?", (user_id,))
+            conn.execute("DELETE FROM user_api_keys WHERE user_id = ?", (user_id,))
+            conn.execute("DELETE FROM user_audit_logs WHERE user_id = ?", (user_id,))
+            conn.execute("DELETE FROM user_invoices WHERE user_id = ?", (user_id,))
+            
+            # Finally, delete the user
+            conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
     finally:
         conn.close()
 
@@ -1559,3 +1603,36 @@ def get_token_logs(user_id: str) -> List[Dict[str, Any]]:
             return []
     finally:
         conn.close()
+
+# --- Platform Settings ---------------------------------------------------
+
+def get_platform_settings() -> Dict[str, str]:
+    conn = get_db_connection()
+    try:
+        rows = conn.execute('SELECT key, value FROM platform_settings').fetchall()
+        return {r['key']: r['value'] for r in rows}
+    finally:
+        conn.close()
+
+def update_platform_settings(settings: Dict[str, str]) -> None:
+    conn = get_db_connection()
+    try:
+        for k, v in settings.items():
+            conn.execute('INSERT INTO platform_settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=CURRENT_TIMESTAMP', (k, v))
+        conn.commit()
+    finally:
+        conn.close()
+
+def get_global_audit_logs(limit: int = 50) -> List[Dict[str, Any]]:
+    conn = get_db_connection()
+    try:
+        rows = conn.execute('''
+            SELECT a.id, a.user_id, u.email, a.action, a.ip_address, a.status, a.created_at
+            FROM user_audit_logs a
+            LEFT JOIN users u ON a.user_id = u.id
+            ORDER BY a.created_at DESC LIMIT ?
+        ''', (limit,)).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+

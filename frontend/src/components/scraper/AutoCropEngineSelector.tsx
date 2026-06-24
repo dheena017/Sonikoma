@@ -15,7 +15,7 @@ import {
   Clock,
 } from "lucide-react";
 import SectionTitle from "../crop/SectionTitle";
-import { AI_MODELS } from "@/models";
+import { useAIModels } from "@/hooks/useAIModels";
 
 interface Props {
   useLocalCV: boolean;
@@ -74,6 +74,7 @@ export function AutoCropEngineSelector({
   cropFocusMode,
   setCropFocusMode,
 }: Props) {
+  const { models: aiModels } = useAIModels();
   const [showAdvancedCV, setShowAdvancedCV] = useState(false);
   const [testingConnection, setTestingConnection] = useState(false);
   const [testResult, setTestResult] = useState<{
@@ -207,7 +208,7 @@ export function AutoCropEngineSelector({
   };
 
   // Model grid details
-  const modelCards = AI_MODELS.filter(m => m.provider === "Google" && m.id.includes("gemini")).map(model => ({
+  const modelCards = aiModels.filter(m => m.provider === "Google" && m.id.includes("gemini")).map(model => ({
     id: model.id,
     name: model.name,
     badge: model.type === 'free' ? "⚡ Fast & Light" : "🧠 Deep Visual",

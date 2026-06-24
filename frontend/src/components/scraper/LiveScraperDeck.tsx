@@ -187,6 +187,21 @@ export default function LiveScraperDeck({
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  React.useEffect(() => {
+    const container = document.getElementById("main-scroll-container");
+    if (showDeleteConfirm) {
+      document.body.style.overflow = "hidden";
+      if (container) container.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+      if (container) container.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+      if (container) container.style.overflow = "unset";
+    };
+  }, [showDeleteConfirm]);
+
   const executeDeleteSelected = () => {
     setScrapedImages((prev) =>
       prev.filter((img) => !selectedScraped.includes(img))

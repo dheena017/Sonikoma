@@ -136,17 +136,35 @@ export default function LoadingPage({
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 32 32"
-              fill="none"
-              width={40}
-              height={40}
+              viewBox="0 0 100 100"
+              style={{ width: "100%", height: "100%", padding: "4px" }}
             >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M16 6 L8 26 L12.5 26 L14 22 L18 22 L19.5 26 L24 26 Z M13.5 12 L13.5 19.5 L19 15.75 Z"
-                fill="#ffffff"
-              />
+              <defs>
+                <filter id="glass-blur" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="6" stdDeviation="6" floodColor="#000000" floodOpacity="0.25" />
+                </filter>
+                <linearGradient id="panel-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
+                  <stop offset="100%" stopColor="#ffffff" stopOpacity="0.4" />
+                </linearGradient>
+                <linearGradient id="play-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#a855f7" />
+                  <stop offset="100%" stopColor="#06b6d4" />
+                </linearGradient>
+              </defs>
+
+              {/* Main Comic Strip Container */}
+              <rect x="18" y="18" width="64" height="64" rx="14" fill="url(#panel-gradient)" filter="url(#glass-blur)" />
+              <rect x="22" y="22" width="56" height="56" rx="10" fill="#ffffff" fillOpacity="0.2" />
+              
+              {/* Inner Manga Panels (4-koma style) */}
+              <rect x="28" y="28" width="20" height="20" rx="4" fill="#ffffff" fillOpacity="0.9" />
+              <rect x="52" y="28" width="20" height="20" rx="4" fill="#ffffff" fillOpacity="0.9" />
+              <rect x="28" y="52" width="20" height="20" rx="4" fill="#ffffff" fillOpacity="0.9" />
+
+              {/* Play Button overlapping the 4th panel */}
+              <circle cx="62" cy="62" r="22" fill="#ffffff" filter="url(#glass-blur)" />
+              <polygon points="56,52 73,62 56,72" fill="url(#play-gradient)" />
             </svg>
           </div>
         </div>

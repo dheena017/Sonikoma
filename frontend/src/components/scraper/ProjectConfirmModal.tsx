@@ -55,6 +55,7 @@ export default function ProjectConfirmModal({
 
   // Sync when initialDetails updates or modal opens
   useEffect(() => {
+    const container = document.getElementById("main-scroll-container");
     if (isOpen) {
       setSeriesTitle(initialDetails.seriesTitle || "");
       setChapterNumber(initialDetails.chapterNumber || "");
@@ -63,7 +64,16 @@ export default function ProjectConfirmModal({
       setSeriesAuthor(initialDetails.seriesAuthor || "");
       setSeriesCoverImage(initialDetails.seriesCoverImage || "");
       setSeriesSynopsis(initialDetails.seriesSynopsis || "");
+      document.body.style.overflow = "hidden";
+      if (container) container.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+      if (container) container.style.overflow = "unset";
     }
+    return () => {
+      document.body.style.overflow = "unset";
+      if (container) container.style.overflow = "unset";
+    };
   }, [isOpen, initialDetails]);
 
   if (!isOpen) return null;

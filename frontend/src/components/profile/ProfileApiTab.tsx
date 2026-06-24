@@ -16,6 +16,8 @@ interface ProfileApiTabProps {
   handleDeleteToken: (id: string) => void;
 }
 
+import AIProviderKeysConfig from "../AIProviderKeysConfig";
+
 export default function ProfileApiTab({
   apiTokens,
   newTokenName,
@@ -25,100 +27,9 @@ export default function ProfileApiTab({
   handleCopyToastKey,
   handleDeleteToken,
 }: ProfileApiTabProps) {
-  const [geminiKey, setGeminiKey] = useState("");
-  const [openAiKey, setOpenAiKey] = useState("");
-  const [anthropicKey, setAnthropicKey] = useState("");
-  const [huggingFaceKey, setHuggingFaceKey] = useState("");
-
-  useEffect(() => {
-    setGeminiKey(localStorage.getItem("user_gemini_key") || "");
-    setOpenAiKey(localStorage.getItem("user_openai_key") || "");
-    setAnthropicKey(localStorage.getItem("user_anthropic_key") || "");
-    setHuggingFaceKey(localStorage.getItem("user_huggingface_key") || "");
-  }, []);
-
-  const handleSaveKeys = () => {
-    const keys = {
-      user_gemini_key: geminiKey,
-      user_openai_key: openAiKey,
-      user_anthropic_key: anthropicKey,
-      user_huggingface_key: huggingFaceKey,
-    };
-
-    let savedCount = 0;
-    for (const [keyName, value] of Object.entries(keys)) {
-      if (value.trim() === "") {
-        localStorage.removeItem(keyName);
-      } else {
-        localStorage.setItem(keyName, value.trim());
-        savedCount++;
-      }
-    }
-    alert(`Successfully updated! ${savedCount} API keys saved securely to your browser.`);
-  };
-
   return (
     <div className="space-y-6 animate-in fade-in duration-300 text-left">
-      {/* AI Key Storage Widget */}
-      <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-8 shadow-2xl relative">
-        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
-        <h2 className="text-xl font-bold text-white mb-2">AI Provider API Configurations</h2>
-        <p className="text-neutral-400 text-sm mb-6">
-          To use different AI models for generation features, please enter your respective API Keys. 
-          These keys are never saved to our database; they are stored locally in your browser.
-        </p>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mb-4">
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-white">Google Gemini API Key</label>
-            <input 
-              type="password" 
-              value={geminiKey}
-              onChange={(e) => setGeminiKey(e.target.value)}
-              placeholder="AIzaSy..."
-              className="px-4 py-3 bg-black/40 border border-white/5 rounded-xl text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-blue-600/20 transition-all placeholder:text-neutral-700"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-white">OpenAI API Key</label>
-            <input 
-              type="password" 
-              value={openAiKey}
-              onChange={(e) => setOpenAiKey(e.target.value)}
-              placeholder="sk-proj-..."
-              className="px-4 py-3 bg-black/40 border border-white/5 rounded-xl text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-blue-600/20 transition-all placeholder:text-neutral-700"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-white">Anthropic API Key</label>
-            <input 
-              type="password" 
-              value={anthropicKey}
-              onChange={(e) => setAnthropicKey(e.target.value)}
-              placeholder="sk-ant-..."
-              className="px-4 py-3 bg-black/40 border border-white/5 rounded-xl text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-blue-600/20 transition-all placeholder:text-neutral-700"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-white">Hugging Face Token</label>
-            <input 
-              type="password" 
-              value={huggingFaceKey}
-              onChange={(e) => setHuggingFaceKey(e.target.value)}
-              placeholder="hf_..."
-              className="px-4 py-3 bg-black/40 border border-white/5 rounded-xl text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-blue-600/20 transition-all placeholder:text-neutral-700"
-            />
-          </div>
-        </div>
-        
-        <button 
-          onClick={handleSaveKeys}
-          className="mt-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-md shadow-blue-900/30 text-sm w-fit"
-        >
-          Save Keys Locally
-        </button>
-      </div>
-
+      <AIProviderKeysConfig />
       {/* Generate token widget */}
       <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-8 shadow-2xl relative">
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />

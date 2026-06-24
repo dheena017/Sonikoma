@@ -1,6 +1,6 @@
 import React from "react";
 import { ChevronDown } from "lucide-react";
-import { AI_MODELS } from "@/models";
+import { useAIModels } from "@/hooks/useAIModels";
 
 interface AutoSlicerSettingsProps {
   backgroundMode: string;
@@ -35,6 +35,7 @@ export default function AutoSlicerSettings({
   dryRun,
   setDryRun,
 }: AutoSlicerSettingsProps) {
+  const { models: aiModels } = useAIModels();
   return (
     <div className="pt-3.5 border-t border-white/5 space-y-3.5 animate-fadeIn">
       {/* General config */}
@@ -94,7 +95,7 @@ export default function AutoSlicerSettings({
               }}
               className="w-full bg-neutral-900 border border-neutral-800 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] font-mono focus:border-indigo-500/50 focus:outline-none cursor-pointer appearance-none transition-colors hover:border-neutral-700"
             >
-              {AI_MODELS.map((m) => (
+              {aiModels.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.name}
                 </option>

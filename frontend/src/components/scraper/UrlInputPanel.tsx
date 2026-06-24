@@ -1,6 +1,7 @@
 import React from "react";
 import { Sparkles, Image as ImageIcon } from "lucide-react";
-import { AI_MODELS } from "../../models";
+import { motion } from "framer-motion";
+import { useAIModels } from "@/hooks/useAIModels";
 import { NotificationType } from "../NotificationStack";
 import { extractWebtoonUrl } from "../../utils/url";
 
@@ -49,6 +50,7 @@ interface UrlInputPanelProps {
 }
 
 export default function UrlInputPanel(props: UrlInputPanelProps) {
+  const { models: aiModels } = useAIModels();
   const {
     targetUrl,
     setTargetUrl,
@@ -158,7 +160,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
         onChange={(e) => {
           setSelectedModel(e.target.value);
           const selectedName =
-            AI_MODELS.find((m) => m.id === e.target.value)?.name ||
+            aiModels.find((m) => m.id === e.target.value)?.name ||
             e.target.value;
           console.log(
             `[UrlInputPanel] Model changed to: ${e.target.value} (${selectedName})`
@@ -170,7 +172,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
         <option value="" disabled>
           Select Voice Engine...
         </option>
-        {AI_MODELS.map((modelItem) => (
+        {aiModels.map((modelItem) => (
           <option
             key={modelItem.id}
             value={modelItem.id}

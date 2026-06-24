@@ -129,13 +129,17 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
   React.useEffect(() => {
+    const container = document.getElementById("main-scroll-container");
     if (isSidebarOpen) {
       document.body.style.overflow = "hidden";
+      if (container) container.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
+      if (container) container.style.overflow = "";
     }
     return () => {
       document.body.style.overflow = "";
+      if (container) container.style.overflow = "";
     };
   }, [isSidebarOpen]);
 
@@ -664,11 +668,34 @@ export default function App() {
 
       {/* --- Main Contents Controller & Router --- */}
       <div
+        id="main-scroll-container"
         className={`flex-grow flex-1 flex flex-col min-h-screen lg:max-h-screen justify-between ${
           isSidebarOpen ? "overflow-hidden" : "lg:overflow-y-auto"
         }`}
       >
         <div>
+          {/* Impersonation Banner */}
+          {localStorage.getItem("sonikoma_admin_token") && (
+            <div className="bg-rose-600 text-white text-center py-2 px-4 text-sm font-bold flex justify-center items-center gap-4 z-[100] relative shadow-md">
+              <AlertTriangle className="w-4 h-4" />
+              <span>You are currently impersonating {user?.email || "a user"}.</span>
+              <button
+                onClick={() => {
+                  const adminToken = localStorage.getItem("sonikoma_admin_token");
+                  if (adminToken) {
+                    localStorage.setItem("sonikoma_token", adminToken);
+                    localStorage.removeItem("sonikoma_admin_token");
+                    sessionStorage.removeItem("sonikoma_token");
+                    window.location.href = "/admin";
+                  }
+                }}
+                className="bg-black/20 hover:bg-black/40 px-3 py-1 rounded transition-colors"
+              >
+                Return to Admin
+              </button>
+            </div>
+          )}
+
           {/* Engine Health Banner */}
           {backendStatus === "offline" && (
             <div className="flex flex-col w-full z-50 animate-slide-down">
