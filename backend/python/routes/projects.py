@@ -94,6 +94,57 @@ def wrap_proxy_url(url_str: str) -> str:
         return f"/api/proxy-image?url={quote(cleaned)}"
     return cleaned
 
+def calculate_and_save_token_usage(project_id: str, panels: List[dict], price_per_million: float = 0.50) -> dict:
+    """
+    Sums the total token usage across all panels in a project,
+    calculates estimated cost, and saves to Supabase and local DB.
+    """
+    import uuid
+    input_tokens = sum(panel.get("inputTokens", 0) for panel in panels)
+    output_tokens = sum(panel.get("outputTokens", 0) for panel in panels)
+    total_tokens = input_tokens + output_tokens
+    
+    # Calculate estimated cost based on variable price per 1M tokens
+    cost = round((total_tokens / 1_000_000.0) * price_per_million, 6)
+    
+    usage_metrics = {
+        "inputTokens": input_tokens,
+        "outputTokens": output_tokens,
+        "totalTokens": total_tokens,
+        "estimatedCostUSD": cost
+    }
+    
+    log_id = str(uuid.uuid4())
+    
+    # Save to local SQLite time-series table
+    try:
+        db.insert_token_log(log_id, project_id, input_tokens, output_tokens, total_tokens, cost)
+    except Exception as e:
+        logger.error(f"Failed to insert local token usage log: {e}")
+    
+    # Save to Supabase
+    try:
+        from db import supabase
+        if supabase:
+            # Update the existing project row with the new usage_metrics JSONB column (snapshot)
+            supabase.table("projects").update({"usage_metrics": usage_metrics}).eq("id", project_id).execute()
+            
+            # Insert into append-only time-series table
+            supabase.table("token_usage_logs").insert({
+                "id": log_id,
+                "project_id": project_id,
+                "input_tokens": input_tokens,
+                "output_tokens": output_tokens,
+                "total_tokens": total_tokens,
+                "estimated_cost_usd": cost
+            }).execute()
+            
+            logger.info(f"Saved usage metrics for project {project_id}: {usage_metrics}")
+    except Exception as e:
+        logger.error(f"Failed to save token usage metrics to Supabase: {e}")
+        
+    return usage_metrics
+
 # ─── Routes ───────────────────────────────────────────────────────────────────
 
 @router.get("", summary="Get all projects")
@@ -535,3 +586,13 @@ async def get_public_project(project_id: str = Path(..., description="Project ID
     except Exception as e:
         logger.error(f"Failed to fetch public project: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to fetch public project: {e}")
+
+@router.get("/analytics/tokens", summary="Get token usage history for user's projects")
+async def get_token_analytics(current_user: dict = Depends(get_current_user)):
+    try:
+        logger.info(f"Fetching token analytics for user: {current_user['user_id']}")
+        logs = db.get_token_logs(current_user['user_id'])
+        return {"success": True, "token_logs": logs}
+    except Exception as e:
+        logger.error(f"Failed to fetch token analytics: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to fetch token analytics")

@@ -213,6 +213,26 @@ def init_db() -> None:
         # Run one-time slug generation for existing data
         generate_missing_slugs(conn)
             
+        # Ensure token_usage_logs exists
+        try:
+            cursor.execute("""
+            CREATE TABLE IF NOT EXISTS token_usage_logs (
+              id                  TEXT PRIMARY KEY,
+              project_id          TEXT NOT NULL,
+              input_tokens        INTEGER NOT NULL DEFAULT 0,
+              output_tokens       INTEGER NOT NULL DEFAULT 0,
+              total_tokens        INTEGER NOT NULL DEFAULT 0,
+              estimated_cost_usd  REAL NOT NULL,
+              created_at          TEXT NOT NULL DEFAULT (datetime('now'))
+            )
+            """)
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_token_logs_project_id ON token_usage_logs(project_id)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_token_logs_created_at ON token_usage_logs(created_at)")
+            conn.commit()
+            logger.info("[Database] Migration: verified token_usage_logs table.")
+        except Exception as e:
+            logger.error(f"[Database] Migration error on token_usage_logs: {e}")
+            
         conn.commit()
     except Exception as e:
         logger.error(f"[Database] Error checking or applying schema: {e}")
@@ -1494,5 +1514,52 @@ def get_chapters_for_series(series_id: str) -> List[Dict[str, Any]]:
     try:
         rows = conn.execute("SELECT * FROM chapters WHERE series_id = ? ORDER BY created_at ASC", (series_id,)).fetchall()
         return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+def insert_token_log(log_id: str, project_id: str, input_tokens: int, output_tokens: int, total_tokens: int, estimated_cost_usd: float) -> None:
+    """
+    Inserts a new token usage log entry.
+    """
+    conn = get_db_connection()
+    try:
+        conn.execute("""
+            INSERT INTO token_usage_logs (id, project_id, input_tokens, output_tokens, total_tokens, estimated_cost_usd)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (log_id, project_id, input_tokens, output_tokens, total_tokens, estimated_cost_usd))
+        conn.commit()
+    except Exception as e:
+        logger.error(f"Failed to insert token usage log: {e}")
+    finally:
+        conn.close()
+
+def get_token_logs(user_id: str) -> List[Dict[str, Any]]:
+    """
+    Retrieves token usage logs for all projects owned by the user.
+    """
+    conn = get_db_connection()
+    try:
+        rows = conn.execute("""
+            SELECT l.*, p.title 
+            FROM token_usage_logs l
+            JOIN projects p ON l.project_id = p.project_id
+            WHERE p.user_id = ?
+            ORDER BY l.created_at DESC
+        """, (user_id,)).fetchall()
+        return [dict(r) for r in rows]
+    except Exception:
+        try:
+            rows = conn.execute("""
+                SELECT l.*, c.episode_number, s.title 
+                FROM token_usage_logs l
+                JOIN chapters c ON l.project_id = c.id
+                JOIN series s ON c.series_id = s.id
+                WHERE s.user_id = ?
+                ORDER BY l.created_at DESC
+            """, (user_id,)).fetchall()
+            return [dict(r) for r in rows]
+        except Exception as e:
+            logger.error(f"Failed to fetch token logs: {e}")
+            return []
     finally:
         conn.close()

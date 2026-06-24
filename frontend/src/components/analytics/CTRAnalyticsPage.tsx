@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { AreaChart, ArrowLeft } from "lucide-react";
 import TitleABValidator from "./TitleABValidator.js";
 import OutroCliffhangerAnalyzer from "./OutroCliffhangerAnalyzer.js";
+import TokenUsageDashboard from "./TokenUsageDashboard.js";
 
 import { GeneratedPanel } from "../../types";
 
@@ -18,7 +19,7 @@ export default function CTRAnalyticsPage({
   scrapedTitle,
   panels,
 }: CTRAnalyticsPageProps) {
-  const [activeTab, setActiveTab] = useState<"titles" | "outros">("titles");
+  const [activeTab, setActiveTab] = useState<"titles" | "outros" | "tokens">("titles");
 
   return (
     <div className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in">
@@ -63,6 +64,16 @@ export default function CTRAnalyticsPage({
         >
           ✦ Outro Cliffhanger Scores
         </button>
+        <button
+          onClick={() => setActiveTab("tokens")}
+          className={`px-4 py-2 text-xs font-bold transition-all border-b-2 cursor-pointer whitespace-nowrap ${
+            activeTab === "tokens"
+              ? "border-purple-500 text-white"
+              : "border-transparent text-neutral-400 hover:text-neutral-250"
+          }`}
+        >
+          ✦ API Token Usage
+        </button>
       </div>
 
       {/* ACTIVE VIEW */}
@@ -78,6 +89,11 @@ export default function CTRAnalyticsPage({
           <OutroCliffhangerAnalyzer
             addNotification={addNotification}
             panels={panels}
+          />
+        )}
+        {activeTab === "tokens" && (
+          <TokenUsageDashboard
+            addNotification={addNotification}
           />
         )}
       </div>
