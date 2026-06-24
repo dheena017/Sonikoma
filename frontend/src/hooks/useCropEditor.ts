@@ -83,6 +83,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
     handleCropSingleSlice,
     handleAiCrop,
     handleDetectPanels,
+    handleCancelDetect,
   } = useCropEditorPipelines({
     activeFetch,
     editingImageIdx,
@@ -557,6 +558,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
       addNotification("Preview cleared", "info");
     },
     handleDetectPanels,
+    handleCancelDetect,
     isPointInsideSelection,
     onResizeStart,
     handleSelectAndDragSlice,

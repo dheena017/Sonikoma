@@ -164,6 +164,7 @@ export default function CropEditorModal({
     handleCommitDetectedBoxes,
     handleClearDetectedBoxes,
     handleDetectPanels,
+    handleCancelDetect,
     isPointInsideSelection,
     onResizeStart,
     handleSelectAndDragSlice,
@@ -673,6 +674,7 @@ export default function CropEditorModal({
             handleCropSingleSlice={handleCropSingleSlice}
             isCroppingSlice={isCroppingSlice}
             handleDetectPanels={handleDetectPanels}
+            handleCancelDetect={handleCancelDetect}
             isDetecting={isDetecting}
             handleCommitDetectedBoxes={handleCommitDetectedBoxes}
             detectedBoxes={detectedBoxes}

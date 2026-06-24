@@ -348,6 +348,7 @@ export default function LiveScraperDeck({
                 handleCleanBubblesSelected={handleCleanBubblesSelected}
                 fetchWithInterceptor={fetchWithInterceptor}
                 onLastSelectedReset={() => setLastSelectedIndex(null)}
+                handleCancelBatch={handleCancelBatch}
               />
             )}
             {handleSaveAssets && scrapedImages.length > 0 && (

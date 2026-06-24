@@ -7,6 +7,7 @@ import {
   Sparkles,
   Settings2,
   Link2,
+  X,
 } from "lucide-react";
 
 interface ScraperActionButtonsProps {
@@ -23,6 +24,7 @@ interface ScraperActionButtonsProps {
   handleCleanBubblesSelected: () => void;
   handleBatchMergeSelected: () => void;
   isBatchMerging: boolean;
+  handleCancelBatch?: () => void;
 }
 
 export function ScraperActionButtons({
@@ -39,6 +41,7 @@ export function ScraperActionButtons({
   handleCleanBubblesSelected,
   handleBatchMergeSelected,
   isBatchMerging,
+  handleCancelBatch,
 }: ScraperActionButtonsProps) {
   const isAllSelected =
     selectedScraped.length === scrapedImages.length && scrapedImages.length > 0;
@@ -66,28 +69,32 @@ export function ScraperActionButtons({
 
       {/* Auto-Crop Segmented Button Group */}
       <div className="flex items-center">
-        <button
-          onClick={() => {
-            console.log(
-              "[ScraperActionButtons] Triggering auto-crop on",
-              selectedScraped.length,
-              "panels"
-            );
-            handleAutoCropSelected();
-          }}
-          disabled={isBatchCropping || selectedScraped.length === 0}
-          title="Auto-crop selected panels"
-          className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-l-xl border-r-0"
-        >
-          {isBatchCropping ? (
-            <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
-          ) : (
+        {isBatchCropping ? (
+          <button
+            onClick={() => handleCancelBatch && handleCancelBatch()}
+            className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-rose-900/40 border border-rose-500 hover:bg-rose-900 text-white rounded-l-xl border-r-0"
+          >
+            <X className="h-4 w-4" />
+            Stop Auto-Crop
+          </button>
+        ) : (
+          <button
+            onClick={() => {
+              console.log(
+                "[ScraperActionButtons] Triggering auto-crop on",
+                selectedScraped.length,
+                "panels"
+              );
+              handleAutoCropSelected();
+            }}
+            disabled={selectedScraped.length === 0}
+            title="Auto-crop selected panels"
+            className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-l-xl border-r-0"
+          >
             <Scissors className="h-4 w-4 text-purple-400" />
-          )}
-          {isBatchCropping && batchProgress
-            ? `Cropping (${batchProgress.current}/${batchProgress.total})`
-            : "Auto-Crop"}
-        </button>
+            Auto-Crop
+          </button>
+        )}
         <button
           onClick={() => setShowAutoCropModal(true)}
           title="Auto-crop settings"
@@ -99,28 +106,32 @@ export function ScraperActionButtons({
 
       {/* Clean Bubbles Button Group */}
       <div className="flex items-center">
-        <button
-          onClick={() => {
-            console.log(
-              "[ScraperActionButtons] Triggering clean bubbles on",
-              selectedScraped.length,
-              "panels"
-            );
-            handleCleanBubblesSelected();
-          }}
-          disabled={isCleaningBubbles || selectedScraped.length === 0}
-          title="Clean speech bubbles on selected panels"
-          className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-l-xl border-r-0"
-        >
-          {isCleaningBubbles ? (
-            <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
-          ) : (
+        {isCleaningBubbles ? (
+          <button
+            onClick={() => handleCancelBatch && handleCancelBatch()}
+            className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-rose-900/40 border border-rose-500 hover:bg-rose-900 text-white rounded-l-xl border-r-0"
+          >
+            <X className="h-4 w-4" />
+            Stop Clean
+          </button>
+        ) : (
+          <button
+            onClick={() => {
+              console.log(
+                "[ScraperActionButtons] Triggering clean bubbles on",
+                selectedScraped.length,
+                "panels"
+              );
+              handleCleanBubblesSelected();
+            }}
+            disabled={selectedScraped.length === 0}
+            title="Clean speech bubbles on selected panels"
+            className="px-3 sm:px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-l-xl border-r-0"
+          >
             <Sparkles className="h-4 w-4 text-purple-400" />
-          )}
-          {isCleaningBubbles && cleanProgress
-            ? `Cleaning (${cleanProgress.current}/${cleanProgress.total})`
-            : "Clean Bubbles"}
-        </button>
+            Clean Bubbles
+          </button>
+        )}
         <button
           onClick={() => setShowBubbleModal(true)}
           title="Bubble cleaner settings"

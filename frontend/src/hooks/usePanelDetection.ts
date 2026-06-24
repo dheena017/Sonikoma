@@ -27,6 +27,12 @@ interface UsePanelDetectionProps {
   setEditingImageIdx: (idx: number | null) => void;
 }
 
+export interface UsePanelDetectionReturn {
+  handleAiCrop: () => Promise<void>;
+  handleDetectPanels: (settings?: any) => Promise<void>;
+  handleCancelDetect: () => void;
+}
+
 export function usePanelDetection({
   activeFetch,
   editingImageIdx,
@@ -46,7 +52,16 @@ export function usePanelDetection({
   editAutoTrim,
   addPanelsToStoryboard,
   setEditingImageIdx,
-}: UsePanelDetectionProps) {
+}: UsePanelDetectionProps): UsePanelDetectionReturn {
+  const abortControllerRef = React.useRef<AbortController | null>(null);
+
+  const handleCancelDetect = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      addNotification("Detection cancelled.", "info");
+    }
+  };
+
   const handleAiCrop = async () => {
     if (editingImageIdx === null) return;
     const currentUrl = scrapedImages[editingImageIdx];
@@ -57,10 +72,12 @@ export function usePanelDetection({
     );
     setIsAiDetecting(true);
     try {
+      abortControllerRef.current = new AbortController();
       const response = await activeFetch("/api/ai-detect-panels", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: currentUrl }),
+        signal: abortControllerRef.current.signal,
       });
       if (!response.ok) {
         let errMsg = "Smart Scanner analysis failed";
@@ -164,6 +181,10 @@ export function usePanelDetection({
         }
       }
     } catch (err: any) {
+      if (err.name === 'AbortError') {
+        console.log("Smart crop detection cancelled by user");
+        return;
+      }
       console.error("Smart crop detection failed:", err);
       addNotification(
         err.message || "Smart crop detection failed. Please try again.",
@@ -198,6 +219,7 @@ export function usePanelDetection({
     );
     setIsDetecting(true);
     try {
+      abortControllerRef.current = new AbortController();
       const response = await activeFetch("/api/detect-panels", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -215,6 +237,7 @@ export function usePanelDetection({
           closeKernelSize: settings?.closeKernelSize ?? 15,
           minHeightPx: settings?.minHeightPx ?? 60,
         }),
+        signal: abortControllerRef.current.signal,
       });
       if (!response.ok) {
         let errMsg = "Failed to detect panels";
@@ -283,6 +306,10 @@ export function usePanelDetection({
         }
       }
     } catch (err: any) {
+      if (err.name === 'AbortError') {
+        console.log("Panel detection cancelled by user");
+        return;
+      }
       console.error("Detect panels failed, trying Smart fallback:", err);
       addNotification(
         "Panel detection failed, trying Smart Scanner detection...",
@@ -297,5 +324,6 @@ export function usePanelDetection({
   return {
     handleAiCrop,
     handleDetectPanels,
+    handleCancelDetect,
   };
 }

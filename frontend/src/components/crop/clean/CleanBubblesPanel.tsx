@@ -159,6 +159,15 @@ export default function CleanBubblesPanel({
     addNotification(`Applied '${p.name}' preset configuration`, "info");
   };
 
+  const abortControllerRef = React.useRef<AbortController | null>(null);
+
+  const handleCancelClean = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      addNotification("Bubble clean cancelled.", "info");
+    }
+  };
+
   const handleCleanCurrentBubble = async () => {
     console.log(
       `[CleanBubblesPanel] Executing bubble clean on image #${
@@ -175,6 +184,7 @@ export default function CleanBubblesPanel({
       ]);
     }
     try {
+      abortControllerRef.current = new AbortController();
       const response = await activeFetch("/api/image/remove-speech-bubbles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -194,6 +204,7 @@ export default function CleanBubblesPanel({
           custom_color_target: useCustomColorTarget ? customColorTarget : "",
           custom_color_tolerance: customColorTolerance,
         }),
+        signal: abortControllerRef.current.signal,
       });
 
       if (!response.ok) {
@@ -240,6 +251,10 @@ export default function CleanBubblesPanel({
         );
       }
     } catch (err: any) {
+      if (err.name === 'AbortError') {
+        console.log("Bubble clean cancelled by user");
+        return;
+      }
       console.error("[Crop Editor Bubble Cleaner] Failed:", err);
       addNotification(
         err.message || "Failed to clean speech bubbles.",
@@ -469,29 +484,31 @@ export default function CleanBubblesPanel({
 
       {/* Action execution button */}
       <div className="flex items-center h-9 w-full">
-        <button
-          type="button"
-          onClick={handleCleanCurrentBubble}
-          disabled={isCleaning}
-          className={`flex-1 h-full px-3.5 border text-purple-300 hover:text-purple-200 rounded-l-xl border-r-0 flex items-center justify-center gap-1.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed text-[11px] uppercase tracking-wider font-bold cursor-pointer active:scale-95 shadow-sm ${
-            debugMode
-              ? "bg-cyan-950/30 hover:bg-cyan-900/30 border-cyan-800/40 text-cyan-300"
-              : "bg-purple-900/20 hover:bg-purple-800/30 border-purple-800/40"
-          }`}
-        >
-          {isCleaning ? (
-            <RefreshCw className="h-3.5 w-3.5 animate-spin text-purple-400" />
-          ) : (
+        {isCleaning ? (
+          <button
+            type="button"
+            onClick={handleCancelClean}
+            className="flex-1 h-full px-3.5 border text-red-300 hover:text-red-200 rounded-l-xl border-r-0 flex items-center justify-center gap-1.5 transition-all text-[11px] uppercase tracking-wider font-bold cursor-pointer active:scale-95 shadow-sm bg-red-950/30 hover:bg-red-900/40 border-red-800/40"
+          >
+            <RefreshCw className="h-3.5 w-3.5 animate-spin text-red-400" />
+            <span>Stop Cleaner</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleCleanCurrentBubble}
+            className={`flex-1 h-full px-3.5 border text-purple-300 hover:text-purple-200 rounded-l-xl border-r-0 flex items-center justify-center gap-1.5 transition-all text-[11px] uppercase tracking-wider font-bold cursor-pointer active:scale-95 shadow-sm ${
+              debugMode
+                ? "bg-cyan-950/30 hover:bg-cyan-900/30 border-cyan-800/40 text-cyan-300"
+                : "bg-purple-900/20 hover:bg-purple-800/30 border-purple-800/40"
+            }`}
+          >
             <Brain className="h-3.5 w-3.5 text-purple-400" />
-          )}
-          <span>
-            {isCleaning
-              ? "Running Cleaner..."
-              : debugMode
-              ? "Generate Debug Boxes"
-              : "Execute Bubble Clean"}
-          </span>
-        </button>
+            <span>
+              {debugMode ? "Generate Debug Boxes" : "Execute Bubble Clean"}
+            </span>
+          </button>
+        )}
         <button
           type="button"
           onClick={() => setShowSettings(!showSettings)}

@@ -109,6 +109,7 @@ interface CropEditorSidebarProps {
   handleCropSingleSlice: any;
   isCroppingSlice: string | null;
   handleDetectPanels: any;
+  handleCancelDetect: () => void;
   isDetecting: boolean;
   handleCommitDetectedBoxes: any;
   detectedBoxes: any[];
@@ -217,6 +218,7 @@ function CropEditorSidebar({
   handleCropSingleSlice,
   isCroppingSlice,
   handleDetectPanels,
+  handleCancelDetect,
   isDetecting,
   handleCommitDetectedBoxes,
   detectedBoxes,
@@ -446,6 +448,7 @@ function CropEditorSidebar({
             />
             <AutoSlicer
               handleDetectPanels={handleDetectPanels}
+              handleCancelDetect={handleCancelDetect}
               isDetecting={isDetecting}
               onCommitCuts={handleCommitDetectedBoxes}
               hasDetectedBoxes={detectedBoxes && detectedBoxes.length > 0}

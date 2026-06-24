@@ -1,6 +1,7 @@
 import React from "react";
 import { ScraperDeckProps } from "./types.js";
 import { ScraperSelectionToolbar } from "./ScraperSelectionToolbar.js";
+import { ScraperActionButtons } from "./ScraperActionButtons.js";
 
 interface ScraperControlsProps
   extends Pick<
@@ -29,6 +30,7 @@ interface ScraperControlsProps
   fetchWithInterceptor?: any;
   /** Called when a filter action resets selection — so parent can clear lastSelectedIndex anchor */
   onLastSelectedReset?: () => void;
+  handleCancelBatch?: () => void;
 }
 
 export default function ScraperControls({
@@ -48,6 +50,7 @@ export default function ScraperControls({
   handleAutoCropSelected,
   handleCleanBubblesSelected,
   onLastSelectedReset,
+  handleCancelBatch,
 }: ScraperControlsProps) {
   // ── Quick Selection Filters ──────────────────────────────────────────────
 
@@ -147,6 +150,22 @@ export default function ScraperControls({
         handleSelectRange={handleSelectRange}
         handleClearAll={handleClearAll}
         setSelectedScraped={setSelectedScraped}
+      />
+      <ScraperActionButtons
+        scrapedImages={scrapedImages}
+        selectedScraped={selectedScraped}
+        handleSelectAllToggle={handleSelectAllToggle}
+        setShowAutoCropModal={setShowAutoCropModal}
+        isBatchCropping={isBatchCropping}
+        batchProgress={batchProgress}
+        handleAutoCropSelected={handleAutoCropSelected}
+        setShowBubbleModal={setShowBubbleModal}
+        isCleaningBubbles={isCleaningBubbles}
+        cleanProgress={cleanProgress}
+        handleCleanBubblesSelected={handleCleanBubblesSelected}
+        handleBatchMergeSelected={() => {}} // Not implemented at header level yet or pass from props
+        isBatchMerging={false}
+        handleCancelBatch={handleCancelBatch}
       />
     </>
   );

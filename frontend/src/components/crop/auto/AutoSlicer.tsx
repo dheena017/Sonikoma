@@ -25,6 +25,7 @@ interface AutoSlicerProps {
     minHeightPx?: number;
     dryRun?: boolean;
   }) => Promise<void>;
+  handleCancelDetect: () => void;
   isDetecting: boolean;
   onCommitCuts?: () => void;
   hasDetectedBoxes?: boolean;
@@ -34,6 +35,7 @@ interface AutoSlicerProps {
 
 export default function AutoSlicer({
   handleDetectPanels,
+  handleCancelDetect,
   isDetecting,
   onCommitCuts,
   hasDetectedBoxes = false,
@@ -189,25 +191,25 @@ export default function AutoSlicer({
 
       {/* Primary Action Button Row */}
       <div className="flex items-center h-9 w-full">
-        <button
-          type="button"
-          onClick={handleScan}
-          disabled={isDetecting}
-          className="flex-1 h-full px-3.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-300 hover:text-indigo-200 rounded-l-xl border-r-0 flex items-center justify-center gap-1.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed text-[11px] uppercase tracking-wider font-bold cursor-pointer active:scale-95 shadow-sm"
-        >
-          {isDetecting ? (
+        {isDetecting ? (
+          <button
+            type="button"
+            onClick={handleCancelDetect}
+            className="flex-1 h-full px-3.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-300 hover:text-red-200 rounded-l-xl border-r-0 flex items-center justify-center gap-1.5 transition-all text-[11px] uppercase tracking-wider font-bold cursor-pointer active:scale-95 shadow-sm"
+          >
             <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-          ) : (
+            <span>Stop Scanning</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleScan}
+            className="flex-1 h-full px-3.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-300 hover:text-indigo-200 rounded-l-xl border-r-0 flex items-center justify-center gap-1.5 transition-all text-[11px] uppercase tracking-wider font-bold cursor-pointer active:scale-95 shadow-sm"
+          >
             <Scissors className="h-3.5 w-3.5" />
-          )}
-          <span>
-            {isDetecting
-              ? "Scanning..."
-              : dryRun
-              ? "Dry Run Preview"
-              : "Slice Panel Cuts"}
-          </span>
-        </button>
+            <span>{dryRun ? "Dry Run Preview" : "Slice Panel Cuts"}</span>
+          </button>
+        )}
         <button
           type="button"
           onClick={() => setShowSettings(!showSettings)}

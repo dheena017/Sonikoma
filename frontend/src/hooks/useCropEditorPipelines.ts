@@ -58,7 +58,7 @@ interface UseCropEditorPipelinesProps {
 }
 
 export function useCropEditorPipelines(props: UseCropEditorPipelinesProps) {
-  const { handleAiCrop, handleDetectPanels } = usePanelDetection({
+  const { handleAiCrop, handleDetectPanels, handleCancelDetect } = usePanelDetection({
     activeFetch: props.activeFetch,
     editingImageIdx: props.editingImageIdx,
     scrapedImages: props.scrapedImages,
@@ -122,5 +122,6 @@ export function useCropEditorPipelines(props: UseCropEditorPipelinesProps) {
     handleCropSingleSlice,
     handleAiCrop,
     handleDetectPanels,
+    handleCancelDetect,
   };
 }

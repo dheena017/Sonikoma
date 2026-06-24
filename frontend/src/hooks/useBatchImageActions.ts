@@ -103,9 +103,13 @@ export function useBatchImageActions({
   setCroppingImgUrl,
 }: UseBatchImageActionsProps) {
   const abortBatchRef = React.useRef({ aborted: false });
+  const abortControllerRef = React.useRef<AbortController | null>(null);
 
   const handleCancelBatch = () => {
     abortBatchRef.current.aborted = true;
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
     addNotification("Cancelling batch operation...", "info");
   };
   const handleCleanBubblesSelected = async () => {
@@ -137,6 +141,7 @@ export function useBatchImageActions({
         if (abortBatchRef.current.aborted) throw new Error("Cancelled by user");
         setBubbleCroppingImgUrl(url);
         try {
+          abortControllerRef.current = new AbortController();
           const response = await fetchWithInterceptor(
             "/api/image/remove-speech-bubbles",
             {
@@ -150,6 +155,7 @@ export function useBatchImageActions({
                 dilation: bubbleDilation,
                 inpaint_radius: bubbleInpaintRadius,
               }),
+              signal: abortControllerRef.current.signal,
             }
           );
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -173,6 +179,10 @@ export function useBatchImageActions({
             throw new Error(errMsg);
           }
         } catch (err: any) {
+          if (err.name === 'AbortError') {
+             console.log(`[Speech Bubbles] Image cleaning ${url} cancelled.`);
+             return;
+          }
           console.error(`[Speech Bubbles] Error cleaning image ${url}:`, err);
           errors.push(
             `Image: ${url.substring(0, 40)}... - Error: ${err.message}`
@@ -255,6 +265,7 @@ export function useBatchImageActions({
         if (abortBatchRef.current.aborted) throw new Error("Cancelled by user");
         setCroppingImgUrl(url);
         try {
+          abortControllerRef.current = new AbortController();
           const response = await fetchWithInterceptor("/api/detect-panels", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -275,6 +286,7 @@ export function useBatchImageActions({
               guidanceInstructions: cropGuidance,
               focusMode: cropFocusMode,
             }),
+            signal: abortControllerRef.current.signal,
           });
 
           if (!response.ok) {
@@ -351,6 +363,11 @@ export function useBatchImageActions({
             throw new Error(errMsg);
           }
         } catch (err: any) {
+          if (err.name === 'AbortError') {
+            console.log(`[Auto Cropper] Image crop ${url} cancelled.`);
+            newSlicedUrlsMap[url] = [url];
+            return;
+          }
           console.error(`[Auto Cropper] Error cropping image ${url}:`, err);
           errors.push(
             `Image: ${url.substring(0, 40)}... - Error: ${err.message}`
