@@ -290,9 +290,34 @@ async def process_render_job(video_id: str, panels: List[PanelData]):
 
         logger.info(f"Render completed: {output_path}")
         
+        # Step 13: Supabase Storage Integration
+        final_video_url = f"/videos/{output_filename}"
+        try:
+            from supabase import create_client, Client
+            url = os.environ.get("SUPABASE_URL", "")
+            key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", os.environ.get("SUPABASE_ANON_KEY", ""))
+            
+            if url and key:
+                supabase: Client = create_client(url, key)
+                with open(output_path, "rb") as f:
+                    # Upload to 'videos' bucket
+                    supabase.storage.from_("videos").upload(
+                        file=f, 
+                        path=output_filename, 
+                        file_options={"content-type": "video/mp4", "upsert": "true"}
+                    )
+                
+                # Get public URL
+                final_video_url = supabase.storage.from_("videos").get_public_url(output_filename)
+                logger.info(f"Uploaded to Supabase Storage: {final_video_url}")
+            else:
+                logger.warning("Supabase credentials not found. Falling back to local URL.")
+        except Exception as e:
+            logger.error(f"Supabase upload failed, falling back to local: {e}")
+        
         RENDER_JOBS[video_id]["progress"] = 100
         RENDER_JOBS[video_id]["status"] = "completed"
-        RENDER_JOBS[video_id]["url"] = f"/videos/{output_filename}"
+        RENDER_JOBS[video_id]["url"] = final_video_url
 
     except Exception as e:
         logger.error(f"Render failed: {e}", exc_info=True)

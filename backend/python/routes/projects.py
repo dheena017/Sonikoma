@@ -258,6 +258,28 @@ async def update_project_details(
 ):
     try:
         logger.info(f"[Database] Updating project details and/or panels for: {projectId}")
+        
+        # Step 14: Database Project Persistence (Supabase PostgreSQL)
+        try:
+            from db import supabase
+            if supabase:
+                supabase_data = {
+                    "id": projectId, # Assuming id is the primary key in Supabase
+                    "title": body.title or "Untitled Project",
+                    "genre": body.genre or "general",
+                    "episode": body.episode or "",
+                    "author": body.author or "",
+                    "cover_image": body.cover_image or "",
+                    "synopsis": body.synopsis or "",
+                    "panels": [p.dict(exclude_none=True) for p in body.panels] if body.panels else [],
+                    "user_id": current_user["user_id"]
+                }
+                # Save the entire Project JSON to Supabase 'projects' table
+                supabase.table("projects").upsert(supabase_data).execute()
+                logger.info(f"Successfully saved project JSON to Supabase for {projectId}")
+        except Exception as e:
+            logger.error(f"Failed to sync project JSON to Supabase: {e}")
+
         project = db.get_project(projectId)
         if not project:
             project = db.get_project_by_slug(projectId)
