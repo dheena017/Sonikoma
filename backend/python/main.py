@@ -393,6 +393,7 @@ class ColoredFormatter(logging.Formatter):
             
         return result
 
+IS_PRODUCTION = os.getenv("NODE_ENV") == "production"
 console_handler = logging.StreamHandler(sys.stdout)
 console_handler.setFormatter(ColoredFormatter(use_colors=not IS_PRODUCTION))
 
@@ -417,7 +418,6 @@ FRONTEND_PORT = os.getenv("FRONTEND_PORT", "3000")
 BACKEND_PORT  = int(os.getenv("PORT", os.getenv("BACKEND_PORT", "5173")))
 API_VERSION  = os.getenv("API_VERSION", "1.0.0")
 SERVER_START = time.time()
-IS_PRODUCTION = os.getenv("NODE_ENV") == "production"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # APP LIFECYCLE
