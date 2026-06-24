@@ -105,6 +105,7 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
   }, [targetUrl, source, setSelectedSource]);
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
     const pasted = e.clipboardData?.getData("text") || "";
     const url = pasted.trim();
     if (url) {

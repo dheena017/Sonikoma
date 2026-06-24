@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { GeneratedPanel } from "../types";
+import { GeneratedPanel, CharacterBio } from "../types";
 import { AI_MODELS } from "../models";
 import { createFetchWithInterceptor } from "../api/fetchWithInterceptor";
 import {
@@ -20,6 +20,7 @@ export function useAppState() {
   const [seriesSlugState, setSeriesSlugState] = useState<string | null>(null);
   const [chapterSlugState, setChapterSlugState] = useState<string | null>(null);
   const [consoleLogs, setRawConsoleLogs] = useState<string[]>([]);
+  const [characters, setCharacters] = useState<CharacterBio[]>([]);
 
   const projectIdRef = useRef(projectId);
   projectIdRef.current = projectId;
@@ -907,6 +908,8 @@ export function useAppState() {
     setCropGuidance,
     cropFocusMode,
     setCropFocusMode,
+    characters,
+    setCharacters,
     showScrapeConfirmModal,
     setShowScrapeConfirmModal,
     resetWorkspace,
