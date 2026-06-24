@@ -102,6 +102,12 @@ export function useBatchImageActions({
   croppingImgUrl,
   setCroppingImgUrl,
 }: UseBatchImageActionsProps) {
+  const abortBatchRef = React.useRef({ aborted: false });
+
+  const handleCancelBatch = () => {
+    abortBatchRef.current.aborted = true;
+    addNotification("Cancelling batch operation...", "info");
+  };
   const handleCleanBubblesSelected = async () => {
     const targetImages = selectedScraped;
     if (targetImages.length === 0) {
@@ -126,7 +132,9 @@ export function useBatchImageActions({
     const errors: string[] = [];
 
     try {
+      abortBatchRef.current.aborted = false;
       await processWithConcurrency(targetImages, 8, async (url) => {
+        if (abortBatchRef.current.aborted) throw new Error("Cancelled by user");
         setBubbleCroppingImgUrl(url);
         try {
           const response = await fetchWithInterceptor(
@@ -176,7 +184,7 @@ export function useBatchImageActions({
             total: targetImages.length,
           });
         }
-      });
+      }, abortBatchRef.current);
     } catch (outerErr: any) {
       errors.push(
         `Critical error in batch bubble cleaning: ${outerErr.message}`
@@ -187,7 +195,13 @@ export function useBatchImageActions({
       setBubbleCroppingImgUrl(null);
     }
 
-    if (errors.length > 0) {
+    if (abortBatchRef.current.aborted) {
+      addNotification("Batch bubble cleaning was cancelled.", "info");
+      setConsoleLogs((prev) => [
+        `[Speech Bubbles] Batch cleaning cancelled by user.`,
+        ...prev,
+      ]);
+    } else if (errors.length > 0) {
       addNotification(
         `Batch cleaning speech bubbles completed with ${errors.length} errors.`,
         "error"
@@ -236,7 +250,9 @@ export function useBatchImageActions({
     const newSlicedUrlsMap: Record<string, string[]> = {};
 
     try {
+      abortBatchRef.current.aborted = false;
       await processWithConcurrency(targetImages, 8, async (url) => {
+        if (abortBatchRef.current.aborted) throw new Error("Cancelled by user");
         setCroppingImgUrl(url);
         try {
           const response = await fetchWithInterceptor("/api/detect-panels", {
@@ -347,7 +363,7 @@ export function useBatchImageActions({
             total: targetImages.length,
           });
         }
-      });
+      }, abortBatchRef.current);
     } catch (outerErr: any) {
       errors.push(`Critical error in batch auto-crop: ${outerErr.message}`);
     } finally {
@@ -368,7 +384,13 @@ export function useBatchImageActions({
       return copy;
     });
 
-    if (errors.length > 0) {
+    if (abortBatchRef.current.aborted) {
+      addNotification("Batch auto crop was cancelled.", "info");
+      setConsoleLogs((prev) => [
+        `[Auto Cropper] Batch auto crop cancelled by user.`,
+        ...prev,
+      ]);
+    } else if (errors.length > 0) {
       addNotification(
         `Batch auto crop completed with ${errors.length} errors.`,
         "error"
@@ -398,5 +420,6 @@ export function useBatchImageActions({
     croppingImgUrl,
     handleCleanBubblesSelected,
     handleAutoCropSelected,
+    handleCancelBatch,
   };
 }
