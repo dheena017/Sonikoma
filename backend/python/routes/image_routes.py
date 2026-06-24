@@ -17,10 +17,12 @@ from typing import List, Optional, Literal, Dict, Any
 from fastapi import APIRouter, HTTPException, Response, Query, Body, Path
 from pydantic import BaseModel, Field
 from PIL import Image
+import uuid
 
 import utils.image_utils as img_utils
 from utils.cache import stitched_cache, edit_history, zip_cache
 from services.cleaner import remove_speech_bubbles
+from utils.supabase_storage import upload_to_supabase_bucket
 
 logger = logging.getLogger("sonikoma.routes.image_routes")
 router = APIRouter()
@@ -154,14 +156,26 @@ async def edit_image(body: EditImageRequest):
 
         img_buffer, content_type = await asyncio.to_thread(edit_sync)
 
-        # Cache in memory
+        img_buffer, content_type = await asyncio.to_thread(edit_sync)
+
+        # Attempt to upload to Supabase
+        filename = f"edited_{uuid.uuid4().hex[:8]}.jpeg" if "jpeg" in content_type or "jpg" in content_type else f"edited_{uuid.uuid4().hex[:8]}.png"
+        supabase_url = await asyncio.to_thread(
+            upload_to_supabase_bucket, 
+            img_buffer, 
+            "panels", 
+            filename, 
+            content_type
+        )
+
         unique_id = f"merged_{int(time.time() * 1000)}_cropped"
-        new_url = f"/api/image/cached/{unique_id}"
+        new_url = supabase_url if supabase_url else f"/api/image/cached/{unique_id}"
         
+        # Always cache locally as a fallback or fast-access path
         stitched_cache.set(unique_id, {"data": img_buffer, "content_type": content_type})
         edit_history.set(new_url, body.url)
 
-        logger.info(f"[Image Edit] Successfully edited image. Cached as: {new_url}")
+        logger.info(f"[Image Edit] Successfully edited image. URL: {new_url}")
         return {"success": True, "url": new_url}
     except Exception as e:
         logger.error(f"[Edit API] Error editing image frame: {e}", exc_info=True)
@@ -200,13 +214,22 @@ async def transform_image(body: TransformImageRequest):
         img.save(out, format="JPEG", quality=92)
         out_bytes = out.getvalue()
 
+        filename = f"transform_{uuid.uuid4().hex[:8]}.jpeg"
+        supabase_url = await asyncio.to_thread(
+            upload_to_supabase_bucket, 
+            out_bytes, 
+            "panels", 
+            filename, 
+            "image/jpeg"
+        )
+
         unique_id = f"transform_{int(time.time() * 1000)}"
-        proxy_url = f"/api/image/cached/{unique_id}"
+        proxy_url = supabase_url if supabase_url else f"/api/image/cached/{unique_id}"
 
         stitched_cache.set(unique_id, {"data": out_bytes, "content_type": "image/jpeg"})
         edit_history.set(proxy_url, body.url)
 
-        logger.info(f"[Transform] Successfully transformed image. Cached as: {proxy_url}")
+        logger.info(f"[Transform] Successfully transformed image. URL: {proxy_url}")
         return {"success": True, "url": proxy_url}
     except HTTPException:
         raise
@@ -235,7 +258,6 @@ async def merge_images(body: StitchImagesRequest):
         # Resolve image buffers
         resolved = [await img_utils.resolve_image_to_buffer(u) for u in urls]
 
-        # Use our centralized stitching utility
         merged_bytes = await asyncio.to_thread(
             img_utils.stitch_images_together,
             image_buffers=[r["data"] for r in resolved],
@@ -247,13 +269,22 @@ async def merge_images(body: StitchImagesRequest):
             padding=body.padding
         )
 
+        filename = f"merged_{uuid.uuid4().hex[:8]}.png"
+        supabase_url = await asyncio.to_thread(
+            upload_to_supabase_bucket, 
+            merged_bytes, 
+            "panels", 
+            filename, 
+            "image/png"
+        )
+
         unique_id = f"merged_{int(time.time() * 1000)}_merged"
-        new_url = f"/api/image/cached/{unique_id}"
+        new_url = supabase_url if supabase_url else f"/api/image/cached/{unique_id}"
 
         stitched_cache.set(unique_id, {"data": merged_bytes, "content_type": "image/png"})
         edit_history.set(new_url, urls[0])
 
-        logger.info(f"[Merge] Successfully stitched images. Cached as: {new_url}")
+        logger.info(f"[Merge] Successfully stitched images. URL: {new_url}")
         return {"success": True, "url": new_url}
     except Exception as e:
         logger.error(f"[Merge API] Error stitching images: {e}", exc_info=True)
@@ -352,8 +383,17 @@ async def execute_splits(body: SplitImagesRequest):
                 except Exception:
                     pass
 
+                filename = f"split_{uuid.uuid4().hex[:8]}_{i}.jpeg"
+                # Since split_sync runs in a thread, we use upload_to_supabase_bucket directly
+                supabase_url = upload_to_supabase_bucket(
+                    seg_bytes, 
+                    "panels", 
+                    filename, 
+                    "image/jpeg"
+                )
+
                 cache_id = f"split_{int(time.time() * 1000)}_{i}"
-                new_url = f"/api/image/cached/{cache_id}"
+                new_url = supabase_url if supabase_url else f"/api/image/cached/{cache_id}"
 
                 stitched_cache.set(cache_id, {"data": seg_bytes, "content_type": "image/jpeg"})
                 res_urls.append(new_url)
@@ -501,13 +541,22 @@ async def bubble_cleaning(body: RemoveBubblesRequest):
             with open(tmp_out_path, "rb") as f:
                 cleaned_bytes = f.read()
                 
+            filename = f"cleaned_{uuid.uuid4().hex[:8]}.png"
+            supabase_url = await asyncio.to_thread(
+                upload_to_supabase_bucket, 
+                cleaned_bytes, 
+                "panels", 
+                filename, 
+                content_type
+            )
+
             cache_id = f"merged_{int(time.time() * 1000)}_cleaned"
-            new_url = f"/api/image/cached/{cache_id}"
+            new_url = supabase_url if supabase_url else f"/api/image/cached/{cache_id}"
             
             stitched_cache.set(cache_id, {"data": cleaned_bytes, "content_type": content_type})
             edit_history.set(new_url, body.url)
             
-            logger.info(f"[Bubble Cleaner] Successfully cleaned bubbles. Cached as: {new_url}")
+            logger.info(f"[Bubble Cleaner] Successfully cleaned bubbles. URL: {new_url}")
             return {"success": True, "url": new_url}
         finally:
             # Cleanup temp files
@@ -558,8 +607,17 @@ async def bubble_cleaning_batch(body: RemoveBubblesBatchRequest):
                     with open(tmp_out_path, "rb") as f:
                         cleaned_bytes = f.read()
                         
+                    filename = f"cleaned_{uuid.uuid4().hex[:8]}.png"
+                    supabase_url = await asyncio.to_thread(
+                        upload_to_supabase_bucket, 
+                        cleaned_bytes, 
+                        "panels", 
+                        filename, 
+                        content_type
+                    )
+
                     cache_id = f"merged_{int(time.time() * 1000)}_cleaned_{hash(url) % 10000}"
-                    new_url = f"/api/image/cached/{cache_id}"
+                    new_url = supabase_url if supabase_url else f"/api/image/cached/{cache_id}"
                     
                     stitched_cache.set(cache_id, {"data": cleaned_bytes, "content_type": content_type})
                     edit_history.set(new_url, url)
@@ -580,3 +638,50 @@ async def bubble_cleaning_batch(body: RemoveBubblesBatchRequest):
     await asyncio.gather(*tasks)
     
     return {"success": True, "results": results}
+
+from fastapi import UploadFile, File
+import mimetypes
+
+@router.post("/upload", summary="Upload an image manually (e.g. drawn panel) directly to Supabase")
+async def upload_image(file: UploadFile = File(...)):
+    logger.info(f"[Image Upload] Manual upload received: {file.filename}")
+    try:
+        file_bytes = await file.read()
+        content_type = file.content_type or "application/octet-stream"
+        
+        # If no explicit content type but filename provided, try to guess
+        if content_type == "application/octet-stream" and file.filename:
+            guessed_type, _ = mimetypes.guess_type(file.filename)
+            if guessed_type:
+                content_type = guessed_type
+
+        ext = "png"
+        if "jpeg" in content_type or "jpg" in content_type:
+            ext = "jpeg"
+        elif "webp" in content_type:
+            ext = "webp"
+        elif "gif" in content_type:
+            ext = "gif"
+            
+        filename = f"upload_{uuid.uuid4().hex[:8]}.{ext}"
+        
+        supabase_url = await asyncio.to_thread(
+            upload_to_supabase_bucket, 
+            file_bytes, 
+            "panels", 
+            filename, 
+            content_type
+        )
+        
+        if supabase_url:
+            new_url = supabase_url
+        else:
+            # Fallback to local stitched_cache if Supabase not configured
+            cache_id = f"upload_{int(time.time() * 1000)}"
+            stitched_cache.set(cache_id, {"data": file_bytes, "content_type": content_type})
+            new_url = f"/api/image/cached/{cache_id}"
+            
+        return {"success": True, "url": new_url}
+    except Exception as e:
+        logger.error(f"[Image Upload] Failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
