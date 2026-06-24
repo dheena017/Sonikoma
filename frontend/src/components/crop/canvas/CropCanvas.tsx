@@ -5,6 +5,7 @@ import CanvasBrushLayer from "./CanvasBrushLayer";
 import CanvasBubbleBoxes from "./CanvasBubbleBoxes";
 import CanvasSplitLines from "./CanvasSplitLines";
 import CanvasCropSelection from "./CanvasCropSelection";
+import CanvasFabricLayer from "./CanvasFabricLayer";
 
 interface CropCanvasProps {
   imgUrl: string;
@@ -39,7 +40,7 @@ interface CropCanvasProps {
     clientY: number
   ) => void;
   zoom?: number;
-  activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge";
+  activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw";
 
   // Phase 4 Props
   editMode?: "crop" | "clean_auto" | "clean_manual" | "typeset" | "slices";
@@ -52,6 +53,7 @@ interface CropCanvasProps {
   setSelectedBubbleIdx?: (idx: number | null) => void;
   brushSize?: number;
   brushAction?: "paint" | "erase";
+  fillColor?: string;
   canvasMaskRef?: React.RefObject<HTMLCanvasElement | null>;
   onCleanSingleBubble?: (
     ymin: number,
@@ -107,6 +109,7 @@ export default function CropCanvas({
   setSelectedBubbleIdx,
   brushSize = 20,
   brushAction = "paint",
+  fillColor = "#ff0000ff",
   canvasMaskRef,
   onCleanSingleBubble,
   typesetText = "",
@@ -418,6 +421,15 @@ export default function CropCanvas({
               handleCanvasMouseUp={handleCanvasMouseUp}
             />
           )}
+
+          {/* Fabric Draw Layer */}
+          <CanvasFabricLayer
+            imgUrl={imgUrl}
+            isActive={activeTab === "draw"}
+            brushSize={brushSize}
+            brushAction={brushAction}
+            fillColor={fillColor}
+          />
 
           {/* Bubble Layers */}
           {(editMode === "clean_auto" || editMode === "typeset") && (

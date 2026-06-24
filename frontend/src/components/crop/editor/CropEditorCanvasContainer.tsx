@@ -38,6 +38,7 @@ interface CropEditorCanvasContainerProps {
   setSelectedBubbleIdx: (idx: number | null) => void;
   brushSize: number;
   brushAction: any;
+  fillColor: string;
   canvasMaskRef: React.RefObject<HTMLCanvasElement | null>;
   setSplitPosition: React.Dispatch<React.SetStateAction<number>>;
   setShowSplitPosition: (v: boolean) => void;
@@ -46,7 +47,7 @@ interface CropEditorCanvasContainerProps {
   setEditCropLeft: (val: number) => void;
   setEditCropRight: (val: number) => void;
   setSelectedSliceId: (id: string | null) => void;
-  activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge";
+  activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw";
   aspectRatio?: any;
 }
 
@@ -82,6 +83,7 @@ export default function CropEditorCanvasContainer({
   setSelectedBubbleIdx,
   brushSize,
   brushAction,
+  fillColor,
   canvasMaskRef,
   setSplitPosition,
   setShowSplitPosition,
@@ -176,6 +178,7 @@ export default function CropEditorCanvasContainer({
         setSelectedBubbleIdx={setSelectedBubbleIdx}
         brushSize={brushSize}
         brushAction={brushAction}
+        fillColor={fillColor}
         canvasMaskRef={canvasMaskRef}
         setSplitPosition={setSplitPosition}
         setShowSplitPosition={setShowSplitPosition}
