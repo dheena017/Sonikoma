@@ -8,7 +8,14 @@ import {
   ArrowLeft,
   ShieldCheck,
   ShieldAlert,
+  HardDrive,
+  Video,
+  Zap,
+  Terminal,
+  Trash2,
+  Download,
 } from "lucide-react";
+import AIProviderKeysConfig from "./AIProviderKeysConfig";
 
 interface StatusPageProps {
   onNavigateHome: () => void;
@@ -22,6 +29,7 @@ export default function StatusPage({
   const [loading, setLoading] = useState(false);
   const [healthData, setHealthData] = useState<any>(null);
   const [metricsData, setMetricsData] = useState<any>(null);
+  const [ffmpegData, setFfmpegData] = useState<any>(null);
   const [online, setOnline] = useState<boolean | null>(null);
   const [lastChecked, setLastChecked] = useState<string | null>(null);
 
@@ -40,6 +48,32 @@ export default function StatusPage({
   const [testingModelId, setTestingModelId] = useState<string | null>(null);
   const [testResult, setTestResult] = useState<any | null>(null);
   const [showFreeOnly, setShowFreeOnly] = useState(false);
+  
+  const [isPurging, setIsPurging] = useState(false);
+  const [showPurgeModal, setShowPurgeModal] = useState(false);
+  const [purgeResult, setPurgeResult] = useState<{success: boolean, message: string} | null>(null);
+
+  const [isStopping, setIsStopping] = useState(false);
+  const [showStopModal, setShowStopModal] = useState(false);
+  const [stopResult, setStopResult] = useState<{success: boolean, message: string} | null>(null);
+
+  // Live Logs state
+  const [logs, setLogs] = useState<any[]>([]);
+
+  useEffect(() => {
+    const container = document.getElementById("main-scroll-container");
+    if (showPurgeModal || showStopModal) {
+      document.body.style.overflow = "hidden";
+      if (container) container.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+      if (container) container.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+      if (container) container.style.overflow = "unset";
+    };
+  }, [showPurgeModal, showStopModal]);
 
   const activeFetch = fetchWithInterceptor || fetch;
 
@@ -135,6 +169,66 @@ export default function StatusPage({
     }
   };
 
+  const executePurgeCache = async () => {
+    setIsPurging(true);
+    setPurgeResult(null);
+    try {
+      const res = await activeFetch("/api/metrics/purge-cache", { method: "POST" });
+      if (res.ok) {
+        setPurgeResult({ success: true, message: "LRU Caches successfully purged!" });
+        fetchDiagnostics(); // Refresh metrics
+      } else {
+        setPurgeResult({ success: false, message: "Failed to purge caches." });
+      }
+    } catch (err) {
+      console.error(err);
+      setPurgeResult({ success: false, message: "Error purging cache." });
+    } finally {
+      setIsPurging(false);
+    }
+  };
+
+  const handlePurgeCacheClick = () => {
+    setShowPurgeModal(true);
+    setPurgeResult(null);
+  };
+
+  const executeEmergencyStop = async () => {
+    setIsStopping(true);
+    setStopResult(null);
+    try {
+      const res = await activeFetch("/api/metrics/emergency-stop", { method: "POST" });
+      const data = await res.json();
+      if (res.ok && data.success !== false) {
+        setStopResult({ success: true, message: data.message || "Background processes terminated." });
+      } else {
+        setStopResult({ success: false, message: data.detail || data.error || "Failed to execute emergency stop." });
+      }
+    } catch (err) {
+      console.error(err);
+      setStopResult({ success: false, message: "Error communicating with backend." });
+    } finally {
+      setIsStopping(false);
+    }
+  };
+
+  const handleEmergencyStopClick = () => {
+    setShowStopModal(true);
+    setStopResult(null);
+  };
+
+  const handleDownloadLogs = () => {
+    if (logs.length === 0) return;
+    const text = logs.map(l => `[${new Date(l.timestamp * 1000).toISOString()}] [${l.level?.toUpperCase() || "INFO"}] ${l.message}`).join("\n");
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `sonikoma-syslogs-${Date.now()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const fetchDiagnostics = useCallback(async () => {
     setLoading(true);
     try {
@@ -146,9 +240,21 @@ export default function StatusPage({
       const metricsRes = await activeFetch("/api/metrics");
       const metricsJson = await metricsRes.json();
 
+      // 3. Fetch FFmpeg Diagnostics
+      let ffmpegJson = null;
+      try {
+        const ffmpegRes = await activeFetch("/api/health/ffmpeg");
+        if (ffmpegRes.ok) {
+          ffmpegJson = await ffmpegRes.json();
+        }
+      } catch (e) {
+        console.warn("FFmpeg check failed", e);
+      }
+
       if (healthJson && metricsJson) {
         setHealthData(healthJson);
         setMetricsData(metricsJson);
+        setFfmpegData(ffmpegJson);
         setOnline(true);
       } else {
         setOnline(false);
@@ -168,6 +274,38 @@ export default function StatusPage({
     const interval = setInterval(fetchDiagnostics, 15000);
     return () => clearInterval(interval);
   }, [fetchDiagnostics]);
+
+  // Live Logs SSE Connection
+  useEffect(() => {
+    let eventSource: EventSource | null = null;
+    
+    if (typeof window !== "undefined" && "EventSource" in window) {
+      eventSource = new EventSource("/api/system-logs/stream");
+
+      eventSource.onmessage = (event) => {
+        try {
+          const newLog = JSON.parse(event.data);
+          setLogs((prev) => {
+            // Keep the latest 50 logs
+            const updated = [...prev, newLog];
+            return updated.slice(Math.max(updated.length - 50, 0));
+          });
+        } catch (e) {
+          // ignore parsing errors
+        }
+      };
+
+      eventSource.onerror = () => {
+        eventSource?.close();
+      };
+    }
+
+    return () => {
+      if (eventSource) {
+        eventSource.close();
+      }
+    };
+  }, []);
 
   return (
     <div className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10 flex flex-col space-y-6 animate-[fadeIn_0.22s_ease-out]">
@@ -219,8 +357,10 @@ export default function StatusPage({
 
       {/* Main Grid: Server Status & Core Specs */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column: Live Status, Memory, DB */}
+        {/* Left Column: Live Status, Memory, DB, API Keys */}
         <div className="lg:col-span-7 space-y-6">
+          <AIProviderKeysConfig />
+
           {/* Uptime and Server Connection Card */}
           <div
             className={`p-6 rounded-3xl border shadow-xl transition-all duration-300 ${
@@ -339,6 +479,93 @@ export default function StatusPage({
                     Usage: {metricsData?.memory?.systemUsedPct ?? "—"}
                   </span>
                 </div>
+
+                <div className="flex items-center justify-between p-3 bg-neutral-900 rounded-xl border border-neutral-800">
+                  <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                    CPU Load
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-cyan-400 font-mono font-bold">
+                      {metricsData?.memory?.cpuPct ?? 0}%
+                    </span>
+                    <span className="text-[9px] text-neutral-500">
+                      ({metricsData?.memory?.cpuCores || 1} Cores)
+                    </span>
+                  </div>
+                </div>
+
+                {metricsData?.database && (
+                  <div className="flex flex-col gap-2 p-3 bg-neutral-900 rounded-xl border border-neutral-800">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-1.5">
+                        <Database className="h-3 w-3" /> Database Stats
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      <div className="flex flex-col">
+                        <span className="text-[9px] text-neutral-500">Users</span>
+                        <span className="text-xs text-emerald-400 font-mono font-bold">{metricsData.database.users || 0}</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[9px] text-neutral-500">Projects</span>
+                        <span className="text-xs text-blue-400 font-mono font-bold">{metricsData.database.projects || 0}</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[9px] text-neutral-500">Scenes</span>
+                        <span className="text-xs text-purple-400 font-mono font-bold">{metricsData.database.scenes || 0}</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[9px] text-neutral-500">Active Jobs</span>
+                        <span className="text-xs text-amber-400 font-mono font-bold">{metricsData.database.activeJobs || 0}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* System Storage capacity Widget */}
+          <div className="bg-neutral-950/40 border border-neutral-850 p-6 rounded-3xl space-y-4">
+            <h3 className="text-sm font-bold text-white flex items-center gap-2 border-b border-neutral-800 pb-3">
+              <HardDrive className="h-4 w-4 text-purple-400" />
+              File System Storage
+            </h3>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs font-mono">
+                <span className="text-neutral-400">Cache Storage Used</span>
+                <span className="text-white font-semibold">
+                  {metricsData?.storage?.usedBytes !== undefined
+                    ? `${(metricsData.storage.usedBytes / 1024 / 1024).toFixed(2)} MB`
+                    : "—"}
+                </span>
+              </div>
+              <div className="h-2.5 bg-neutral-900 border border-neutral-800 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-blue-600 to-cyan-500 transition-all duration-500"
+                  style={{
+                    width:
+                      metricsData?.storage?.usedBytes && metricsData?.storage?.limitBytes
+                        ? `${Math.min(
+                            100,
+                            (metricsData.storage.usedBytes / metricsData.storage.limitBytes) * 100
+                          )}%`
+                        : "0%",
+                  }}
+                />
+              </div>
+              <div className="flex items-center justify-between text-[10px] font-mono text-neutral-500">
+                <span>
+                  Quota Limit:{" "}
+                  {metricsData?.storage?.limitBytes
+                    ? `${(metricsData.storage.limitBytes / 1024 / 1024 / 1024).toFixed(2)} GB`
+                    : "—"}
+                </span>
+                <span>
+                  {metricsData?.storage?.usedBytes && metricsData?.storage?.limitBytes
+                    ? `${((metricsData.storage.usedBytes / metricsData.storage.limitBytes) * 100).toFixed(1)}%`
+                    : "—"}
+                </span>
               </div>
             </div>
           </div>
@@ -396,6 +623,67 @@ export default function StatusPage({
               </div>
             )}
           </div>
+
+          {/* Server Cache Efficiency */}
+          <div className="bg-neutral-950/40 border border-neutral-850 p-6 rounded-3xl space-y-4">
+            <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <Zap className="h-4 w-4 text-purple-400" />
+                LRU Response Cache Metrics
+              </h3>
+              <div className="flex items-center gap-2">
+                  <button
+                    onClick={handlePurgeCacheClick}
+                    disabled={isPurging}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-500/10 hover:bg-neutral-500/20 text-neutral-400 border border-neutral-500/20 rounded-xl text-[10px] font-mono font-bold transition-all disabled:opacity-50 cursor-pointer"
+                    title="Force purge all disk and memory caches"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    Purge
+                  </button>
+                  <button
+                    onClick={handleEmergencyStopClick}
+                    disabled={isStopping}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 rounded-xl text-[10px] font-mono font-bold transition-all disabled:opacity-50 cursor-pointer"
+                    title="Kill all background renders and image processing"
+                  >
+                    <ShieldAlert className="h-3 w-3" />
+                    EMERGENCY STOP
+                  </button>
+                </div>
+            </div>
+            {metricsData?.cache && Object.keys(metricsData.cache).length > 0 ? (
+              <div className="grid grid-cols-2 gap-3 text-xs font-mono">
+                {Object.entries(metricsData.cache).map(([cacheName, stats]: any) => {
+                  const total = stats.hits + stats.misses;
+                  const hitRate = total > 0 ? ((stats.hits / total) * 100).toFixed(1) : 0;
+                  return (
+                    <div key={cacheName} className="bg-neutral-900/40 p-3 rounded-xl border border-neutral-850">
+                      <span className="text-[10px] text-neutral-500 uppercase block mb-2 truncate" title={cacheName}>
+                        {cacheName.split(".").pop()}
+                      </span>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-neutral-400">Hits</span>
+                        <span className="text-emerald-400 font-bold">{stats.hits}</span>
+                      </div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-neutral-400">Misses</span>
+                        <span className="text-rose-400 font-bold">{stats.misses}</span>
+                      </div>
+                      <div className="flex justify-between items-center pt-2 border-t border-neutral-800 mt-2">
+                        <span className="text-[9px] text-neutral-500 uppercase">Size</span>
+                        <span className="text-cyan-400 font-bold">{stats.size}/{stats.maxSize || "∞"}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-4 text-xs text-neutral-500 font-mono">
+                No active caches detected.
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Right Column: Capabilities & Security keys */}
@@ -434,6 +722,35 @@ export default function StatusPage({
                 </div>
               )}
             </div>
+          </div>
+
+          {/* FFmpeg Video Engine Status */}
+          <div className="bg-neutral-950/40 border border-neutral-850 p-6 rounded-3xl space-y-4">
+            <h3 className="text-sm font-bold text-white flex items-center gap-2 border-b border-neutral-800 pb-3">
+              <Video className="h-4 w-4 text-purple-400" />
+              Rendering Engine (FFmpeg)
+            </h3>
+            
+            {ffmpegData ? (
+              <div className="space-y-3 font-mono text-xs">
+                <div className="flex items-center justify-between p-3 bg-neutral-900/40 border border-neutral-850 rounded-xl">
+                  <span className="text-neutral-400">CLI Access</span>
+                  <span className="flex items-center gap-1 text-emerald-450 font-bold text-[10px]">
+                    <ShieldCheck className="h-3.5 w-3.5" /> READY
+                  </span>
+                </div>
+                <div className="p-3 bg-neutral-900/40 border border-neutral-850 rounded-xl">
+                  <span className="text-neutral-500 text-[9px] uppercase block mb-1">Version Header</span>
+                  <span className="text-cyan-400 font-bold break-all">
+                    {ffmpegData.version || "Unknown"}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="p-4 rounded-xl border border-rose-500/10 bg-rose-950/10 text-rose-350 text-xs font-mono text-center">
+                FFmpeg executable not found or errored. Video rendering will fail!
+              </div>
+            )}
           </div>
 
           {/* API Credentials Check */}
@@ -955,7 +1272,196 @@ export default function StatusPage({
             </div>
           )}
         </div>
+
+        {/* Bottom Full-Width: Live Terminal Widget */}
+        <div className="lg:col-span-12 mt-6">
+          <div className="bg-[#0f0f13] border border-white/5 rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-2">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <Terminal className="h-4 w-4 text-emerald-400" />
+                Live Backend Console
+                <span className="ml-2 text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider animate-pulse">
+                  Live Stream
+                </span>
+              </h3>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setLogs([])}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white rounded-xl text-[10px] font-mono transition-all cursor-pointer"
+                >
+                  <Trash2 className="h-3 w-3" /> Clear
+                </button>
+                <button
+                  onClick={handleDownloadLogs}
+                  disabled={logs.length === 0}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white rounded-xl text-[10px] font-mono font-bold transition-all cursor-pointer shadow-lg shadow-purple-950/30"
+                >
+                  <Download className="h-3 w-3" /> Export Logs
+                </button>
+              </div>
+            </div>
+            
+            <div className="bg-black border border-neutral-800 rounded-xl p-4 h-[300px] overflow-y-auto font-mono text-[10px] sm:text-xs">
+              {logs.length === 0 ? (
+                <div className="text-neutral-600 flex items-center justify-center h-full animate-pulse">
+                  Waiting for backend output...
+                </div>
+              ) : (
+                <div className="space-y-1.5 flex flex-col justify-end min-h-full">
+                  {logs.map((log, idx) => {
+                    const isErr = log.level?.toUpperCase() === "ERROR";
+                    const isWarn = log.level?.toUpperCase() === "WARNING";
+                    
+                    return (
+                      <div key={idx} className="flex gap-3 hover:bg-white/5 p-1 -mx-1 rounded">
+                        <span className="text-neutral-600 shrink-0 select-none">
+                          {new Date(log.timestamp * 1000).toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                        </span>
+                        <span className={`shrink-0 font-bold w-12 ${
+                          isErr ? "text-rose-500" : isWarn ? "text-amber-400" : "text-emerald-500"
+                        }`}>
+                          {log.level?.toUpperCase() || "INFO"}
+                        </span>
+                        <span className={`break-all ${
+                          isErr ? "text-rose-200" : isWarn ? "text-amber-200" : "text-neutral-300"
+                        }`}>
+                          {log.message}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
+
+      {showPurgeModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl shadow-rose-950/20 relative overflow-hidden">
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-rose-500 via-orange-500 to-rose-500"></div>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-rose-500/10 rounded-xl">
+                <Trash2 className="h-6 w-6 text-rose-500" />
+              </div>
+              <h3 className="text-lg font-bold text-white tracking-tight">Purge System Caches?</h3>
+            </div>
+            
+            {!purgeResult ? (
+              <>
+                <p className="text-sm text-neutral-400 mb-6 leading-relaxed">
+                  Are you sure you want to forcibly clear all memory and disk caches? This will free up space but may slow down initial re-renders.
+                </p>
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => setShowPurgeModal(false)}
+                    className="px-4 py-2 text-sm font-bold text-neutral-300 hover:text-white hover:bg-neutral-800 rounded-xl transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={executePurgeCache}
+                    disabled={isPurging}
+                    className="px-4 py-2 text-sm font-bold bg-rose-600 hover:bg-rose-500 text-white rounded-xl transition-colors flex items-center gap-2"
+                  >
+                    {isPurging ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                    {isPurging ? "Purging..." : "Confirm Purge"}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex flex-col items-center justify-center py-4">
+                  {purgeResult.success ? (
+                    <div className="h-12 w-12 rounded-full bg-emerald-500/20 flex items-center justify-center mb-3">
+                      <ShieldCheck className="h-6 w-6 text-emerald-400" />
+                    </div>
+                  ) : (
+                    <div className="h-12 w-12 rounded-full bg-rose-500/20 flex items-center justify-center mb-3">
+                      <ShieldAlert className="h-6 w-6 text-rose-400" />
+                    </div>
+                  )}
+                  <p className={`text-sm font-bold text-center mb-6 ${purgeResult.success ? "text-emerald-400" : "text-rose-400"}`}>
+                    {purgeResult.message}
+                  </p>
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => setShowPurgeModal(false)}
+                    className="px-4 py-2 w-full text-sm font-bold bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {showStopModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl shadow-rose-950/20 relative overflow-hidden">
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-red-600 via-rose-500 to-red-600 animate-pulse"></div>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-red-500/20 rounded-xl">
+                <ShieldAlert className="h-6 w-6 text-red-500" />
+              </div>
+              <h3 className="text-lg font-bold text-white tracking-tight">EMERGENCY STOP</h3>
+            </div>
+            
+            {!stopResult ? (
+              <>
+                <p className="text-sm text-neutral-400 mb-6 leading-relaxed">
+                  Are you sure you want to forcibly terminate all running background renders, FFmpeg processes, and AI operations? Any in-progress jobs will be marked as failed.
+                </p>
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => setShowStopModal(false)}
+                    className="px-4 py-2 text-sm font-bold text-neutral-300 hover:text-white hover:bg-neutral-800 rounded-xl transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={executeEmergencyStop}
+                    disabled={isStopping}
+                    className="px-4 py-2 text-sm font-bold bg-red-600 hover:bg-red-500 text-white rounded-xl transition-colors flex items-center gap-2 shadow-lg shadow-red-900/50"
+                  >
+                    {isStopping ? <RefreshCw className="h-4 w-4 animate-spin" /> : <ShieldAlert className="h-4 w-4" />}
+                    {isStopping ? "Terminating..." : "KILL PROCESSES"}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex flex-col items-center justify-center py-4">
+                  {stopResult.success ? (
+                    <div className="h-12 w-12 rounded-full bg-emerald-500/20 flex items-center justify-center mb-3">
+                      <ShieldCheck className="h-6 w-6 text-emerald-400" />
+                    </div>
+                  ) : (
+                    <div className="h-12 w-12 rounded-full bg-rose-500/20 flex items-center justify-center mb-3">
+                      <ShieldAlert className="h-6 w-6 text-rose-400" />
+                    </div>
+                  )}
+                  <p className={`text-sm font-bold text-center mb-6 ${stopResult.success ? "text-emerald-400" : "text-rose-400"}`}>
+                    {stopResult.message}
+                  </p>
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => setShowStopModal(false)}
+                    className="px-4 py-2 w-full text-sm font-bold bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

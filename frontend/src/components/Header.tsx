@@ -24,7 +24,7 @@ import {
 import { GeneratedPanel } from "../types";
 import NotificationDropdown from "./NotificationDropdown";
 import { Notification } from "./NotificationStack";
-import { AI_MODELS } from "@/models";
+import { useAIModels } from "@/hooks/useAIModels";
 
 interface HeaderProps {
   isProcessing: boolean;
@@ -107,6 +107,7 @@ export default function Header({
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  const { models: aiModels } = useAIModels();
 
   // Search & Navigation Palette states
   const [searchQuery, setSearchQuery] = useState("");
@@ -886,12 +887,10 @@ export default function Header({
                 </label>
                 <select
                   value={selectedModel}
-                  onChange={(e) =>
-                    setSelectedModel && setSelectedModel(e.target.value)
-                  }
-                  className="w-full bg-neutral-950 border border-neutral-850 text-neutral-200 text-xs px-2.5 py-1.5 rounded-xl focus:border-purple-500/50 outline-none cursor-pointer font-sans"
+                  onChange={(e) => setSelectedModel?.(e.target.value)}
+                  className="w-full bg-neutral-900 border border-neutral-850 text-white rounded-lg px-3 py-2 text-xs focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 font-mono"
                 >
-                  {AI_MODELS.map((m) => (
+                  {aiModels.map((m) => (
                     <option key={m.id} value={m.id}>
                       {m.name}
                     </option>

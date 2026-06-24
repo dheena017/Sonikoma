@@ -23,7 +23,8 @@ from database.db import (
     seed_default_invoices_if_empty, get_user_api_keys,
     create_user_api_key, delete_user_api_key, get_creator_analytics,
     get_user_by_api_key, create_user_invoice, get_user_achievements_and_points,
-    get_all_users
+    get_all_users, delete_user,
+    get_platform_settings, update_platform_settings, get_global_audit_logs
 )
 
 logger = logging.getLogger("sonikoma.auth")
@@ -277,6 +278,78 @@ async def get_admin_users(current_user: dict = Depends(get_current_user)):
     # For now, allow any authenticated user or specific admins
     users = get_all_users()
     return {"success": True, "users": users}
+
+class AdminUpdateUser(BaseModel):
+    creator_role: Optional[str] = None
+    credits: Optional[int] = None
+
+@router.put("/admin/users/{user_id}")
+async def admin_update_user(user_id: str, body: AdminUpdateUser, request: Request, current_user: dict = Depends(get_current_user)):
+    ip_addr = request.client.host if request.client else "127.0.0.1"
+    
+    updates = {}
+    if body.creator_role is not None:
+        updates["creator_role"] = body.creator_role
+    if body.credits is not None:
+        updates["credits"] = body.credits
+        
+    if updates:
+        update_user(user_id, updates)
+        write_audit_log(current_user["user_id"], f"Admin updated user {user_id} settings", ip_addr, "Success")
+        
+    return {"success": True, "message": "User updated successfully."}
+
+@router.delete("/admin/users/{user_id}")
+async def admin_delete_user(user_id: str, request: Request, current_user: dict = Depends(get_current_user)):
+    ip_addr = request.client.host if request.client else "127.0.0.1"
+    
+    delete_user(user_id)
+    write_audit_log(current_user["user_id"], f"Admin deleted user {user_id}", ip_addr, "Success")
+    
+    return {"success": True, "message": "User deleted successfully."}
+
+@router.get("/admin/users/{user_id}/logs")
+async def admin_get_user_logs(user_id: str, query: str = "", page: int = 1, limit: int = 20, current_user: dict = Depends(get_current_user)):
+    offset = (page - 1) * limit
+    logs, total = get_audit_logs(user_id, query=query, limit=limit, offset=offset)
+    return {
+        "success": True, 
+        "logs": logs, 
+        "total": total, 
+        "page": page, 
+        "limit": limit
+    }
+
+class AdminBulkAction(BaseModel):
+    user_ids: list[str]
+    action: str  # 'add_credits', 'set_role', 'delete'
+    value: Optional[str] = None
+
+@router.post("/admin/users/bulk")
+async def admin_bulk_action(body: AdminBulkAction, request: Request, current_user: dict = Depends(get_current_user)):
+    ip_addr = request.client.host if request.client else "127.0.0.1"
+    
+    success_count = 0
+    for uid in body.user_ids:
+        if body.action == "delete":
+            delete_user(uid)
+            success_count += 1
+        elif body.action == "set_role" and body.value:
+            update_user(uid, {"creator_role": body.value})
+            success_count += 1
+        elif body.action == "add_credits" and body.value:
+            try:
+                u = get_user_by_id(uid)
+                if u:
+                    current_credits = u.get("credits") if u.get("credits") is not None else 840
+                    added = int(body.value)
+                    update_user(uid, {"credits": current_credits + added})
+                    success_count += 1
+            except Exception as e:
+                logger.error(f"Failed to add credits to {uid}: {e}")
+
+    write_audit_log(current_user["user_id"], f"Admin performed bulk '{body.action}' on {success_count} users", ip_addr, "Success")
+    return {"success": True, "message": f"Successfully applied {body.action} to {success_count} users."}
 
 class ProfileUpdate(BaseModel):
     full_name: Optional[str] = None
@@ -599,3 +672,40 @@ async def purchase_credits(body: PurchaseCreditsRequest, request: Request, curre
         "credits": new_credits, 
         "message": f"Successfully purchased {body.credits} credits."
     }
+
+# --- Ultimate Admin Features -----------------------------------------------
+
+@router.get('/admin/settings')
+async def admin_get_settings(current_user: dict = Depends(get_current_user)):
+    return {'success': True, 'settings': get_platform_settings()}
+
+class AdminUpdateSettings(BaseModel):
+    settings: dict[str, str]
+
+@router.put('/admin/settings')
+async def admin_update_settings(body: AdminUpdateSettings, request: Request, current_user: dict = Depends(get_current_user)):
+    ip_addr = request.client.host if request.client else '127.0.0.1'
+    update_platform_settings(body.settings)
+    write_audit_log(current_user['user_id'], 'Admin updated global platform settings', ip_addr, 'Success')
+    return {'success': True, 'message': 'Settings updated successfully.'}
+
+@router.get('/admin/audit-logs')
+async def admin_get_global_audit_logs(limit: int = 50, current_user: dict = Depends(get_current_user)):
+    return {'success': True, 'logs': get_global_audit_logs(limit)}
+
+@router.post('/admin/impersonate/{user_id}')
+async def admin_impersonate_user(user_id: str, request: Request, current_user: dict = Depends(get_current_user)):
+    ip_addr = request.client.host if request.client else '127.0.0.1'
+    target_user = get_user_by_id(user_id)
+    if not target_user:
+        raise HTTPException(status_code=404, detail='User not found')
+        
+    # Generate an access token for the target user
+    access_token_expires = timedelta(minutes=int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES', '1440')))
+    expire = datetime.utcnow() + access_token_expires
+    to_encode = {'sub': target_user['email'], 'user_id': target_user['id'], 'exp': expire, 'is_impersonation': True}
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm='HS256')
+    
+    write_audit_log(current_user['user_id'], f'Admin impersonated user {user_id}', ip_addr, 'Success')
+    return {'success': True, 'access_token': encoded_jwt, 'token_type': 'bearer', 'impersonated_user': target_user}
+

@@ -180,6 +180,21 @@ export default function StoryboardTimeline({
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  React.useEffect(() => {
+    const container = document.getElementById("main-scroll-container");
+    if (showDeleteConfirm) {
+      document.body.style.overflow = "hidden";
+      if (container) container.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+      if (container) container.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+      if (container) container.style.overflow = "unset";
+    };
+  }, [showDeleteConfirm]);
+
   const executeDeleteSelected = async () => {
     const remainingPanels = panels.filter((p) => !selectedPanelIds.has(p.id));
     setPanels(remainingPanels);
