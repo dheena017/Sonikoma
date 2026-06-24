@@ -19,6 +19,9 @@ except ImportError:
 router = APIRouter()
 logger = logging.getLogger("sonikoma.api.video")
 
+# Step 11: In-memory job tracking
+RENDER_JOBS = {}
+
 class PanelData(BaseModel):
     id: int
     image_url: str
@@ -172,6 +175,26 @@ def render_pipeline_sync(panels_data, output_path, work_dir):
     # Stitch them together with a -0.5s overlap to enable the crossfade
     final_clip = concatenate_videoclips(clips, padding=-0.5, method="compose")
     
+    # Step 10: Multi-Track Audio Mixing (BGM + SFX placeholder)
+    from moviepy.editor import AudioFileClip, CompositeAudioClip
+    import moviepy.audio.fx.all as afx
+    
+    bgm_path = os.path.join(os.getcwd(), "public", "audio", "bgm", "theme.mp3")
+    if os.path.exists(bgm_path):
+        try:
+            # Load BGM, lower volume to 10%, and loop to match total video duration
+            bgm_clip = AudioFileClip(bgm_path).volumex(0.1)
+            bgm_clip = afx.audio_loop(bgm_clip, duration=final_clip.duration)
+            
+            # Merge existing audio (TTS) with BGM
+            if final_clip.audio is not None:
+                final_audio = CompositeAudioClip([final_clip.audio, bgm_clip])
+                final_clip = final_clip.set_audio(final_audio)
+            else:
+                final_clip = final_clip.set_audio(bgm_clip)
+        except Exception as e:
+            logger.error(f"Failed to mix BGM audio: {e}")
+            
     # Write to file
     final_clip.write_videofile(
         output_path, 
@@ -186,18 +209,7 @@ def render_pipeline_sync(panels_data, output_path, work_dir):
         c.close()
     final_clip.close()
 
-@router.post("/render")
-async def render_video(request: RenderRequest):
-    logger.info(f"Received render request for {len(request.panels)} panels.")
-    
-    if not HAS_MOVIEPY:
-        logger.error("moviepy is not installed.")
-        raise HTTPException(status_code=500, detail="moviepy is not installed on the backend.")
-
-    if not request.panels:
-        raise HTTPException(status_code=400, detail="No panels provided for rendering.")
-
-    video_id = str(uuid.uuid4())[:8]
+async def process_render_job(video_id: str, panels: List[PanelData]):
     work_dir = os.path.join(os.getcwd(), "temp", f"render_{video_id}")
     os.makedirs(work_dir, exist_ok=True)
     
@@ -211,7 +223,8 @@ async def render_video(request: RenderRequest):
         download_tasks = []
 
         # 1. Download all assets
-        for idx, panel in enumerate(request.panels):
+        RENDER_JOBS[video_id]["progress"] = 15
+        for idx, panel in enumerate(panels):
             img_ext = panel.image_url.split(".")[-1].split("?")[0] if "." in panel.image_url else "jpg"
             if len(img_ext) > 4: img_ext = "jpg"
             img_path = os.path.join(work_dir, f"panel_{idx}.{img_ext}")
@@ -221,10 +234,10 @@ async def render_video(request: RenderRequest):
                 "duration": panel.duration if panel.duration > 0 else 3.0,
                 "local_img": img_path,
                 "local_audio": None,
+                "speech_text": panel.speech_text,
                 "motion_type": panel.motion_type
             }
             
-            # Queue image download
             download_tasks.append(download_asset(panel.image_url, img_path))
             
             if panel.audio_url:
@@ -235,11 +248,12 @@ async def render_video(request: RenderRequest):
                 
             panels_data.append(p_data)
 
-        # Wait for all downloads
         logger.info(f"Downloading {len(download_tasks)} assets...")
         results = await asyncio.gather(*download_tasks)
         if not any(results):
-             raise HTTPException(status_code=500, detail="Failed to download video assets.")
+             raise Exception("Failed to download video assets.")
+
+        RENDER_JOBS[video_id]["progress"] = 40
 
         # 2. Stitch using MoviePy in a thread
         logger.info("Starting video compilation using MoviePy...")
@@ -247,11 +261,48 @@ async def render_video(request: RenderRequest):
 
         logger.info(f"Render completed: {output_path}")
         
-        return {
-            "success": True,
-            "video_url": f"/videos/{output_filename}"
-        }
+        RENDER_JOBS[video_id]["progress"] = 100
+        RENDER_JOBS[video_id]["status"] = "completed"
+        RENDER_JOBS[video_id]["url"] = f"/videos/{output_filename}"
 
     except Exception as e:
         logger.error(f"Render failed: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
+        RENDER_JOBS[video_id]["status"] = "failed"
+        RENDER_JOBS[video_id]["error"] = str(e)
+
+
+@router.post("/render")
+async def render_video(request: RenderRequest, background_tasks: BackgroundTasks):
+    logger.info(f"Received render request for {len(request.panels)} panels.")
+    
+    if not HAS_MOVIEPY:
+        logger.error("moviepy is not installed.")
+        raise HTTPException(status_code=500, detail="moviepy is not installed on the backend.")
+
+    if not request.panels:
+        raise HTTPException(status_code=400, detail="No panels provided for rendering.")
+
+    video_id = str(uuid.uuid4())[:8]
+    
+    # Initialize job tracking
+    RENDER_JOBS[video_id] = {
+        "status": "processing",
+        "progress": 0,
+        "url": None
+    }
+    
+    # Delegate to background task
+    background_tasks.add_task(process_render_job, video_id, request.panels)
+    
+    return {
+        "success": True,
+        "job_id": video_id,
+        "message": "Render job started in the background."
+    }
+
+@router.get("/status/{job_id}")
+async def get_render_status(job_id: str):
+    job = RENDER_JOBS.get(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return job
