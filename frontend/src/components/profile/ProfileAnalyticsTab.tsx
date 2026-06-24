@@ -48,31 +48,9 @@ export default function ProfileAnalyticsTab() {
     return `${s}s`;
   };
 
-  // Generate heatmap data (uses real data if available, fallbacks to mock if still loading)
   const heatmapData = React.useMemo(() => {
     if (analytics?.heatmap) return analytics.heatmap;
-
-    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const weeks = Array.from({ length: 12 }, (_, wIdx) => {
-      return Array.from({ length: 7 }, (_, dIdx) => {
-        const base = dIdx === 0 || dIdx === 6 ? 0 : 2;
-        const rand = Math.floor(Math.random() * 5);
-        const count = Math.max(0, base + rand - 2);
-
-        let level = 0;
-        if (count > 0 && count <= 2) level = 1;
-        else if (count > 2 && count <= 4) level = 2;
-        else if (count > 4) level = 3;
-
-        return {
-          day: days[dIdx],
-          week: wIdx,
-          count,
-          level,
-        };
-      });
-    });
-    return weeks;
+    return [];
   }, [analytics]);
 
   const totalActions = React.useMemo(() => {
@@ -81,45 +59,22 @@ export default function ProfileAnalyticsTab() {
       .reduce((sum: number, cell: any) => sum + cell.count, 0);
   }, [heatmapData]);
 
-  const videosCompleted = analytics?.videos_completed ?? 12;
-  const totalDurationStr = analytics
-    ? formatDuration(analytics.total_duration_sec)
-    : "48m 15s";
-  const avgLatency = analytics?.avg_latency ?? 1.8;
-  const creditsOptimized = analytics?.credits_optimized_pct ?? 32;
+  const videosCompleted = analytics?.videos_completed ?? 0;
+  const totalDurationStr = formatDuration(analytics?.total_duration_sec ?? 0);
+  const avgLatency = analytics?.avg_latency ?? 0;
+  const creditsOptimized = analytics?.credits_optimized_pct ?? 0;
 
-  const verticalPct = analytics?.formats?.vertical_pct ?? 75;
-  const widescreenPct = analytics?.formats?.widescreen_pct ?? 25;
+  const verticalPct = analytics?.formats?.vertical_pct ?? 0;
+  const widescreenPct = analytics?.formats?.widescreen_pct ?? 0;
 
-  const matthewPct = analytics?.voices?.Matthew ?? 60;
-  const rachelPct = analytics?.voices?.Rachel ?? 30;
-  const marcusPct = analytics?.voices?.Marcus ?? 10;
+  const matthewPct = analytics?.voices?.Matthew ?? 0;
+  const rachelPct = analytics?.voices?.Rachel ?? 0;
+  const marcusPct = analytics?.voices?.Marcus ?? 0;
 
-  const badgesPct = analytics?.narrations?.["Storyteller Badges"] ?? 85;
-  const subtitlesPct = analytics?.narrations?.["Snappy Subtitles"] ?? 15;
+  const badgesPct = analytics?.narrations?.["Storyteller Badges"] ?? 0;
+  const subtitlesPct = analytics?.narrations?.["Snappy Subtitles"] ?? 0;
 
-  const activities = analytics?.activities ?? [
-    {
-      title: "Synthesized Chapter 2 Outro",
-      desc: "Generated vertical MP4 video with dramatic composition style",
-      time: "2 hours ago",
-    },
-    {
-      title: "Cleaned bubble on Panel 4",
-      desc: "Erased speech bubbles in Chapter 2 panel using Canny model auto-detection",
-      time: "1 day ago",
-    },
-    {
-      title: "Generated speech synthesis",
-      desc: "Rendered audio files for Chapter 1 storyboard panels",
-      time: "3 days ago",
-    },
-    {
-      title: "Scraped series cover assets",
-      desc: "Extracted panel strips and synopsis data from target Webtoon link",
-      time: "4 days ago",
-    },
-  ];
+  const activities = analytics?.activities ?? [];
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 text-left">

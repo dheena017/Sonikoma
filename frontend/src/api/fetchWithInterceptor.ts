@@ -34,6 +34,21 @@ export function createFetchWithInterceptor({
           if (token && !headers.has("Authorization")) {
             headers.set("Authorization", `Bearer ${token}`);
           }
+          
+          const keys = [
+            { storage: "user_gemini_key", header: "X-User-Gemini-Key" },
+            { storage: "user_openai_key", header: "X-User-OpenAI-Key" },
+            { storage: "user_anthropic_key", header: "X-User-Anthropic-Key" },
+            { storage: "user_huggingface_key", header: "X-User-HuggingFace-Key" },
+          ];
+          
+          for (const { storage, header } of keys) {
+            const val = localStorage.getItem(storage);
+            if (val && !headers.has(header)) {
+              headers.set(header, val);
+            }
+          }
+
           const response = await fetch(input, {
             ...init,
             headers,
@@ -60,20 +75,32 @@ export function createFetchWithInterceptor({
             let errMsg = `Server returned HTTP ${response.status}`;
             let handled = false;
 
-            if (response.status === 401) {
-              errMsg =
-                "Action Unauthorized (401): You do not have valid authentication or server credentials.";
-              addNotification(errMsg, "error");
-              setErrorPopup({
-                title: "Authentication Required (401)",
-                message: errMsg,
-                type: "error",
-                technicalDetails: `HTTP 401 Unauthorized\nRequested API Path: ${input}`,
-                suggestion:
-                  "This action is protected. Please check that any API keys, credentials, or secrets are correctly declared in your container environment.",
-              });
-              onUnauthorized?.();
-              handled = true;
+            if (response.status === 401 || response.status === 403) {
+              const errorData = await response.clone().json().catch(() => ({}));
+              if (errorData.detail === "MISSING_API_KEY" || errorData.detail === "Your API key is invalid.") {
+                alert("AI features require a valid API Key from the target provider. Please add it in your Profile Settings.");
+                window.location.href = "/profile?tab=api";
+                const err = new Error(errorData.detail);
+                (err as any).intercepted = true;
+                reject(err);
+                return;
+              }
+
+              if (response.status === 401) {
+                errMsg =
+                  "Action Unauthorized (401): You do not have valid authentication or server credentials.";
+                addNotification(errMsg, "error");
+                setErrorPopup({
+                  title: "Authentication Required (401)",
+                  message: errMsg,
+                  type: "error",
+                  technicalDetails: `HTTP 401 Unauthorized\nRequested API Path: ${input}`,
+                  suggestion:
+                    "This action is protected. Please check that any API keys, credentials, or secrets are correctly declared in your container environment.",
+                });
+                onUnauthorized?.();
+                handled = true;
+              }
             } else if (response.status === 429) {
               errMsg =
                 "Quota Exhausted (429): You've exceeded your request rate limit or daily API quota. Retrying automatically...";

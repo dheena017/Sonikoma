@@ -32,7 +32,7 @@ export default function OutroCliffhangerAnalyzer({
         return parts.slice(-3).join(". ");
       }
     }
-    return "The party enters the hidden demon vault and opens the main chest, only to trigger an ominous shadow portal that sucks their healer inside.";
+    return "";
   };
 
   const [outline, setOutline] = useState(getDeducedOutline());

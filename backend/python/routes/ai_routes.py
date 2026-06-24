@@ -14,7 +14,7 @@ import os
 import tempfile
 from urllib.parse import urlparse, parse_qs
 from typing import List, Optional, Literal, Dict, Any
-from fastapi import APIRouter, HTTPException, Body, Depends, Request
+from fastapi import APIRouter, Header, HTTPException, HTTPException, Body, Depends, Request
 from pydantic import BaseModel, Field
 from PIL import Image
 from routes.auth_routes import get_current_user
@@ -32,6 +32,27 @@ from skills.registry import registry
 from skills.base import GeminiAnalysisModel, CropBox, CropList
 
 logger = logging.getLogger("sonikoma.routes.ai_routes")
+def get_all_user_keys(
+    x_user_gemini_key: str = Header(None),
+    x_user_openai_key: str = Header(None),
+    x_user_anthropic_key: str = Header(None),
+    x_user_huggingface_key: str = Header(None),
+):
+    return {
+        "gemini": x_user_gemini_key,
+        "openai": x_user_openai_key,
+        "anthropic": x_user_anthropic_key,
+        "huggingface": x_user_huggingface_key,
+    }
+
+def get_user_gemini_key(x_user_gemini_key: str = Header(None)):
+    if not x_user_gemini_key:
+        raise HTTPException(
+            status_code=401, 
+            detail="MISSING_API_KEY"
+        )
+    return x_user_gemini_key
+
 router = APIRouter()
 
 # ─── Constants ───────────────────────────────────────────────────────────────
@@ -416,7 +437,7 @@ def resize_and_pad_pil(img: Image.Image, target_w: int, target_h: int) -> Image.
 
 @router.post("/list-models", summary="List available Gemini/HuggingFace models and token limits for any API key")
 @router.get("/list-models", summary="List available Gemini/HuggingFace models and token limits using server config key")
-async def api_list_models(body: Optional[ListModelsRequest] = None):
+async def api_list_models(body: Optional[ListModelsRequest] = None, user_keys: dict = Depends(get_all_user_keys)):
     try:
         api_key = None
         provider = "gemini"
@@ -438,15 +459,19 @@ async def api_list_models(body: Optional[ListModelsRequest] = None):
             elif api_key.startswith("sk-"):
                 provider = "openai"
         else:
+            # Fallback to headers
+            api_key = user_keys.get(provider)
             # Fallback to server config keys
-            if provider == "huggingface":
-                api_key = os.getenv("HUGGINGFACE_API_KEY")
-            elif provider == "openai":
-                api_key = os.getenv("OPENAI_API_KEY")
-            elif provider == "anthropic":
-                api_key = os.getenv("ANTHROPIC_API_KEY")
-            else:
-                api_key = os.getenv("GEMINI_API_KEY")
+            if not api_key:
+                if provider == "huggingface":
+                    api_key = os.getenv("HUGGINGFACE_API_KEY")
+                elif provider == "openai":
+                    api_key = os.getenv("OPENAI_API_KEY")
+                elif provider == "anthropic":
+                    api_key = os.getenv("ANTHROPIC_API_KEY")
+                else:
+                    api_key = os.getenv("GEMINI_API_KEY")
+
                 
         if not api_key:
             return {
@@ -589,6 +614,8 @@ async def api_list_models(body: Optional[ListModelsRequest] = None):
             }
             
     except Exception as e:
+        if "API_KEY_INVALID" in str(e).upper() or "API KEY NOT VALID" in str(e).upper():
+            raise HTTPException(status_code=401, detail="Your API key is invalid.")
         logger.error(f"[ListModels] API call failed: {e}")
         return {
             "success": False,
@@ -596,7 +623,7 @@ async def api_list_models(body: Optional[ListModelsRequest] = None):
         }
 
 @router.post("/analyze-image", summary="Generate narration script and SFX for a single panel")
-async def analyze_image(body: AnalyzeImageRequest):
+async def analyze_image(body: AnalyzeImageRequest, user_api_key: str = Depends(get_user_gemini_key)):
     start_time = time.time()
     logger.info(f"[Model] Received analysis request for model: {body.model}")
     
@@ -644,7 +671,7 @@ async def analyze_image(body: AnalyzeImageRequest):
         # Execute using panel_analysis skill
         skill = registry.get("panel_analysis")
         logger.info(f"[Model] Executing 'panel_analysis' skill using {target_model} (narration_style={narration_style})...")
-        raw_text = await skill.execute(model=target_model, image_bytes=img_buffer, tone_hint=tone_hint, narrative_length_hint=narrative_length_hint)
+        raw_text = await skill.execute(model=target_model, image_bytes=img_buffer, api_key=user_api_key, tone_hint=tone_hint, narrative_length_hint=narrative_length_hint)
         
         analysis = validate_analysis(json.loads(raw_text))
         logger.info(f"[Model] Analysis completed for panel.")
@@ -694,13 +721,15 @@ async def analyze_image(body: AnalyzeImageRequest):
         }
 
     except Exception as e:
+        if "API_KEY_INVALID" in str(e).upper() or "API KEY NOT VALID" in str(e).upper():
+            raise HTTPException(status_code=401, detail="Your API key is invalid.")
         elapsed = int((time.time() - start_time) * 1000)
         logger.error(f"[Analyze] AI generate failed: {e} ({elapsed}ms). Using fallback.")
         return {"success": False, "error": f"AI generation failed: {e}", "analysis": DEFAULT_ANALYSIS, "source": "fallback:ai_error"}
 
 
 @router.post("/analyze-batch", summary="Batch analysis of multiple storyboard panels (max 20)")
-async def analyze_batch(body: AnalyzeBatchRequest):
+async def analyze_batch(body: AnalyzeBatchRequest, user_api_key: str = Depends(get_user_gemini_key)):
     start_time = time.time()
     
     if not body.urls:
@@ -749,7 +778,7 @@ async def analyze_batch(body: AnalyzeBatchRequest):
                     narrative_length_hint = "30-65 words, highly engaging and detailed for YouTube story narration, describing what the characters do, think, or speak."
 
                 skill = registry.get("panel_analysis")
-                raw_text = await skill.execute(model=target_model, image_bytes=img_buffer, tone_hint=tone_hint, narrative_length_hint=narrative_length_hint)
+                raw_text = await skill.execute(model=target_model, image_bytes=img_buffer, api_key=user_api_key, tone_hint=tone_hint, narrative_length_hint=narrative_length_hint)
                 analysis = validate_analysis(json.loads(raw_text))
                 
                 audio_url = None
@@ -803,7 +832,7 @@ async def analyze_batch(body: AnalyzeBatchRequest):
     }
 
 @router.post("/analyze-sequence", summary="Analyze multiple panels together for context-aware narrative")
-async def analyze_sequence(body: AnalyzeSequenceRequest):
+async def analyze_sequence(body: AnalyzeSequenceRequest, user_api_key: str = Depends(get_user_gemini_key)):
     start_time = time.time()
     logger.info(f"[Sequence] Received sequence analysis for {len(body.urls)} panels.")
     
@@ -831,8 +860,7 @@ async def analyze_sequence(body: AnalyzeSequenceRequest):
         from google.genai import types
         
         # Use existing configured API key
-        api_key = os.getenv("GEMINI_API_KEY")
-        client = genai.Client(api_key=api_key)
+        client = genai.Client(api_key=user_api_key)
         
         style_hint = "max 25 words per panel, impactful" if body.narrationStyle == "short" else "detailed YouTube story narration describing actions and dialogue"
         
@@ -912,6 +940,8 @@ async def analyze_sequence(body: AnalyzeSequenceRequest):
         }
 
     except Exception as e:
+        if "API_KEY_INVALID" in str(e).upper() or "API KEY NOT VALID" in str(e).upper():
+            raise HTTPException(status_code=401, detail="Your API key is invalid.")
         logger.error(f"[Sequence] Analysis failed: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -1119,6 +1149,8 @@ async def ai_smart_crop(body: SmartCropRequest):
             "message": f"AI smart crop failed: {ai_error_msg}. Fell back to local CV." if ai_failed else ""
         }
     except Exception as e:
+        if "API_KEY_INVALID" in str(e).upper() or "API KEY NOT VALID" in str(e).upper():
+            raise HTTPException(status_code=401, detail="Your API key is invalid.")
         logger.error(f"[AI Smart Crop API] Error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"AI Smart Crop failed: {e}")
 
@@ -1169,10 +1201,10 @@ async def ai_smart_crop_batch(body: SmartCropBatchRequest):
 
 # ─── New Dynamic AI Skills Endpoints ──────────────────────────────────────────
 
-async def run_md_skill(skill_name: str, model: str, **kwargs) -> Dict[str, Any]:
+async def run_md_skill(skill_name: str, model: str, api_key: str = None, **kwargs) -> Dict[str, Any]:
     try:
         skill = registry.get(skill_name)
-        raw_text = await skill.execute(model=model, **kwargs)
+        raw_text = await skill.execute(model=model, api_key=api_key, **kwargs)
         return {
             "success": True,
             "result": json.loads(raw_text),
@@ -1180,126 +1212,132 @@ async def run_md_skill(skill_name: str, model: str, **kwargs) -> Dict[str, Any]:
             "outputTokens": getattr(skill, "last_output_tokens", 0)
         }
     except Exception as e:
+        if "API_KEY_INVALID" in str(e).upper() or "API KEY NOT VALID" in str(e).upper():
+            raise HTTPException(status_code=401, detail="Your API key is invalid.")
         logger.error(f"Endpoint skill execution failed for '{skill_name}': {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/skills/dramatize")
-async def dramatize_script(body: DramatizeRequest):
-    return await run_md_skill("script_dramatization", body.model, raw_ocr_text=body.raw_ocr_text, genre=body.genre, scene_context=body.scene_context)
+async def dramatize_script(body: DramatizeRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("script_dramatization", body.model, api_key=user_api_key, raw_ocr_text=body.raw_ocr_text, genre=body.genre, scene_context=body.scene_context)
 
 @router.post("/skills/sfx-audio")
-async def get_sfx_audio(body: SFXAudioRequest):
-    return await run_md_skill("sfx_audio_prompt", body.model, visual_description=body.visual_description, sfx_tag=body.sfx_tag)
+async def get_sfx_audio(body: SFXAudioRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("sfx_audio_prompt", body.model, api_key=user_api_key, visual_description=body.visual_description, sfx_tag=body.sfx_tag)
 
 @router.post("/skills/thumbnail")
-async def get_thumbnail_concept(body: ThumbnailRequest):
-    return await run_md_skill("thumbnail_concept", body.model, title=body.title, genre=body.genre, plot_point=body.plot_point)
+async def get_thumbnail_concept(body: ThumbnailRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("thumbnail_concept", body.model, api_key=user_api_key, title=body.title, genre=body.genre, plot_point=body.plot_point)
 
 @router.post("/skills/translate")
 async def translate_script(
     body: TranslationRequest,
     request: Request,
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user),
+    user_api_key: str = Depends(get_user_gemini_key)
 ):
     ip_addr = request.client.host if request.client else "127.0.0.1"
     write_audit_log(current_user["user_id"], "Used AI Dialogue Translation Studio", ip_addr, "Success")
-    return await run_md_skill("translation", body.model, text=body.text, target_lang=body.target_lang)
+    return await run_md_skill("translation", body.model, api_key=user_api_key, text=body.text, target_lang=body.target_lang)
 
 @router.post("/skills/seo")
-async def get_seo_metadata(body: SEORequest):
-    return await run_md_skill("video_seo_metadata", body.model, title=body.title, genre=body.genre, storyboard_summary=body.storyboard_summary)
+async def get_seo_metadata(body: SEORequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("video_seo_metadata", body.model, api_key=user_api_key, title=body.title, genre=body.genre, storyboard_summary=body.storyboard_summary)
 
 @router.post("/skills/voice-cast")
-async def get_voice_cast(body: VoiceCastingRequest):
-    return await run_md_skill("voice_casting", body.model, character_name=body.character_name, dialogue_sample=body.dialogue_sample, visual_description=body.visual_description)
+async def get_voice_cast(body: VoiceCastingRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("voice_casting", body.model, api_key=user_api_key, character_name=body.character_name, dialogue_sample=body.dialogue_sample, visual_description=body.visual_description)
 
 @router.post("/skills/thumbnail-layout")
-async def get_thumbnail_layout(body: ThumbnailLayoutRequest):
-    return await run_md_skill("thumbnail_layout", body.model, thumbnail_concept=body.thumbnail_concept, main_character=body.main_character)
+async def get_thumbnail_layout(body: ThumbnailLayoutRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("thumbnail_layout", body.model, api_key=user_api_key, thumbnail_concept=body.thumbnail_concept, main_character=body.main_character)
 
 @router.post("/skills/intro-hook")
-async def get_intro_hook(body: SeriesIntroHookRequest):
-    return await run_md_skill("series_intro_hook", body.model, title=body.title, premise_summary=body.premise_summary, genre=body.genre)
+async def get_intro_hook(body: SeriesIntroHookRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("series_intro_hook", body.model, api_key=user_api_key, title=body.title, premise_summary=body.premise_summary, genre=body.genre)
 
 @router.post("/skills/character-bio")
-async def get_character_bio(body: CharacterBioRequest):
-    return await run_md_skill("character_bio_profiler", body.model, dialogue=body.dialogue)
+async def get_character_bio(body: CharacterBioRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("character_bio_profiler", body.model, api_key=user_api_key, dialogue=body.dialogue)
 
 @router.post("/skills/pacing")
-async def get_pacing(body: NarrativePacingRequest):
-    return await run_md_skill("narrative_pace_controller", body.model, visual_description=body.visual_description, speech_text=body.speech_text, sfx=body.sfx)
+async def get_pacing(body: NarrativePacingRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("narrative_pace_controller", body.model, api_key=user_api_key, visual_description=body.visual_description, speech_text=body.speech_text, sfx=body.sfx)
 
 @router.post("/skills/comment-reply")
-async def get_comment_reply(body: CommentReplyRequest):
-    return await run_md_skill("youtube_comment_coach", body.model, user_comment=body.user_comment, video_title=body.video_title)
+async def get_comment_reply(body: CommentReplyRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("youtube_comment_coach", body.model, api_key=user_api_key, user_comment=body.user_comment, video_title=body.video_title)
 
 @router.post("/skills/bgm-vibe")
-async def get_bgm_vibe(body: BGMVibeRequest):
-    return await run_md_skill("bgm_vibe_selector", body.model, narrative_mood=body.narrative_mood, action_scale=body.action_scale)
+async def get_bgm_vibe(body: BGMVibeRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("bgm_vibe_selector", body.model, api_key=user_api_key, narrative_mood=body.narrative_mood, action_scale=body.action_scale)
 
 @router.post("/skills/shorts-script")
-async def get_shorts_script(body: ShortsScriptRequest):
-    return await run_md_skill("shorts_script_adapter", body.model, storyboard_summary=body.storyboard_summary)
+async def get_shorts_script(body: ShortsScriptRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("shorts_script_adapter", body.model, api_key=user_api_key, storyboard_summary=body.storyboard_summary)
 
 @router.post("/skills/cliffhanger")
-async def get_cliffhanger(body: CliffhangerRequest):
-    return await run_md_skill("cliffhanger_generator", body.model, story_outline=body.story_outline)
+async def get_cliffhanger(body: CliffhangerRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("cliffhanger_generator", body.model, api_key=user_api_key, story_outline=body.story_outline)
 
 @router.post("/skills/title-ab")
-async def get_title_ab(body: TitleABRequest):
-    return await run_md_skill("title_ab_tester", body.model, title=body.title, key_climax_event=body.key_climax_event)
+async def get_title_ab(body: TitleABRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("title_ab_tester", body.model, api_key=user_api_key, title=body.title, key_climax_event=body.key_climax_event)
 
 @router.post("/skills/sfx-mix")
-async def get_sfx_mix(body: SFXOverlayRequest):
-    return await run_md_skill("sfx_overlay_scheduler", body.model, visual_description=body.visual_description, speech_text=body.speech_text, sfx=body.sfx)
+async def get_sfx_mix(body: SFXOverlayRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("sfx_overlay_scheduler", body.model, api_key=user_api_key, visual_description=body.visual_description, speech_text=body.speech_text, sfx=body.sfx)
 
 @router.post("/skills/camera-shake")
-async def get_camera_shake(body: CameraShakeRequest):
-    return await run_md_skill("camera_shake_dynamics", body.model, visual_description=body.visual_description, sfx=body.sfx)
+async def get_camera_shake(body: CameraShakeRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("camera_shake_dynamics", body.model, api_key=user_api_key, visual_description=body.visual_description, sfx=body.sfx)
 
 @router.post("/skills/scene-composition")
-async def get_scene_composition(body: SceneCompositionRequest):
-    return await run_md_skill("scene_composition_desc", body.model, visual_description=body.visual_description, speech_text=body.speech_text)
+async def get_scene_composition(body: SceneCompositionRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("scene_composition_desc", body.model, api_key=user_api_key, visual_description=body.visual_description, speech_text=body.speech_text)
 
 @router.post("/skills/subtitle-styler")
-async def get_subtitle_styler(body: SubtitleStylerRequest):
-    return await run_md_skill("subtitle_styler", body.model, visual_description=body.visual_description, speech_text=body.speech_text)
+async def get_subtitle_styler(body: SubtitleStylerRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("subtitle_styler", body.model, api_key=user_api_key, visual_description=body.visual_description, speech_text=body.speech_text)
 
 @router.post("/skills/chapters")
-async def get_chapters(body: YouTubeChapterRequest):
-    return await run_md_skill("youtube_chapter_gen", body.model, compiled_script=body.compiled_script)
+async def get_chapters(body: YouTubeChapterRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("youtube_chapter_gen", body.model, api_key=user_api_key, compiled_script=body.compiled_script)
 
 @router.post("/skills/midrolls")
-async def get_midrolls(body: MidrollPlacementRequest):
-    return await run_md_skill("midroll_placement_ref", body.model, compiled_script=body.compiled_script, max_ads=body.max_ads)
+async def get_midrolls(body: MidrollPlacementRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("midroll_placement_ref", body.model, api_key=user_api_key, compiled_script=body.compiled_script, max_ads=body.max_ads)
 
 @router.post("/skills/shorts-hook")
-async def get_shorts_hook(body: ShortsHookRequest):
-    return await run_md_skill("shorts_retention_hook", body.model, title=body.title, key_event=body.key_event)
+async def get_shorts_hook(body: ShortsHookRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("shorts_retention_hook", body.model, api_key=user_api_key, title=body.title, key_event=body.key_event)
 
 @router.post("/skills/emotion")
-async def get_emotion(body: CharacterEmotionRequest):
-    return await run_md_skill("character_emotion_class", body.model, visual_description=body.visual_description, speech_text=body.speech_text)
+async def get_emotion(body: CharacterEmotionRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("character_emotion_class", body.model, api_key=user_api_key, visual_description=body.visual_description, speech_text=body.speech_text)
 
 @router.post("/skills/transition-speed")
-async def get_transition_speed(body: TransitionSpeedRequest):
-    return await run_md_skill("transition_speed_tuner", body.model, visual_description=body.visual_description, speech_text=body.speech_text)
+async def get_transition_speed(body: TransitionSpeedRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("transition_speed_tuner", body.model, api_key=user_api_key, visual_description=body.visual_description, speech_text=body.speech_text)
 
 @router.post("/skills/thumbnail-visual")
-async def get_thumbnail_visual(body: ThumbnailVisualRequest):
-    return await run_md_skill("thumbnail_visual_comp", body.model, thumbnail_concept=body.thumbnail_concept)
+async def get_thumbnail_visual(body: ThumbnailVisualRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("thumbnail_visual_comp", body.model, api_key=user_api_key, thumbnail_concept=body.thumbnail_concept)
 
 @router.post("/skills/outro-cta")
-async def get_outro_cta(body: OutroCTARequest):
-    return await run_md_skill("outro_cta_generator", body.model, title=body.title, ending_cliffhanger=body.ending_cliffhanger)
+async def get_outro_cta(body: OutroCTARequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("outro_cta_generator", body.model, api_key=user_api_key, title=body.title, ending_cliffhanger=body.ending_cliffhanger)
 
 @router.post("/skills/copyright-scrub")
-async def get_copyright_scrub(body: CopyrightScrubRequest):
-    return await run_md_skill("copyright_scrubber", body.model, text=body.text)
+async def get_copyright_scrub(body: CopyrightScrubRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    return await run_md_skill("copyright_scrubber", body.model, api_key=user_api_key, text=body.text)
 
 @router.post("/skills/copyright-scrub-batch")
-async def get_copyright_scrub_batch(body: CopyrightScrubBatchRequest):
+async def get_copyright_scrub_batch(
+    body: CopyrightScrubBatchRequest,
+    user_api_key: str = Depends(get_user_gemini_key)
+):
     logger.info(f"[Copyright Scrub Batch] Request received for {len(body.texts)} items.")
     if not body.texts:
         raise HTTPException(status_code=400, detail="Field 'texts' must be a non-empty list.")
@@ -1310,9 +1348,11 @@ async def get_copyright_scrub_batch(body: CopyrightScrubBatchRequest):
     async def process_one(text: str):
         async with semaphore:
             try:
-                res = await run_md_skill("copyright_scrubber", body.model, text=text)
+                res = await run_md_skill("copyright_scrubber", body.model, api_key=user_api_key, text=text)
                 results.append({"text": text, "success": True, "data": res})
             except Exception as e:
+                if "API_KEY_INVALID" in str(e).upper() or "API KEY NOT VALID" in str(e).upper():
+                    raise HTTPException(status_code=401, detail="Your API key is invalid.")
                 logger.warning(f"[Copyright Scrub Batch] Failed for text: {text[:50]}... Error: {e}")
                 results.append({"text": text, "success": False, "error": str(e)})
 
@@ -1322,7 +1362,7 @@ async def get_copyright_scrub_batch(body: CopyrightScrubBatchRequest):
     return {"success": True, "results": results}
 
 @router.post("/test-model-latency", summary="Test latency and quota for any model of any provider")
-async def test_model_latency(body: TestModelLatencyRequest):
+async def test_model_latency(body: TestModelLatencyRequest, user_keys: dict = Depends(get_all_user_keys)):
     import time
     import requests
     
@@ -1336,15 +1376,19 @@ async def test_model_latency(body: TestModelLatencyRequest):
         import re
         api_key = re.sub(r'^[\s\'"()\[\]{}]+|[\s\'"()\[\]{}]+$', '', api_key)
     else:
+        # Fallback to headers
+        api_key = user_keys.get(provider)
         # Fallback to env
-        if provider == "huggingface":
-            api_key = os.getenv("HUGGINGFACE_API_KEY")
-        elif provider == "openai":
-            api_key = os.getenv("OPENAI_API_KEY")
-        elif provider == "anthropic":
-            api_key = os.getenv("ANTHROPIC_API_KEY")
-        else:
-            api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            if provider == "huggingface":
+                api_key = os.getenv("HUGGINGFACE_API_KEY")
+            elif provider == "openai":
+                api_key = os.getenv("OPENAI_API_KEY")
+            elif provider == "anthropic":
+                api_key = os.getenv("ANTHROPIC_API_KEY")
+            else:
+                api_key = os.getenv("GEMINI_API_KEY")
+
             
     if not api_key:
         return {

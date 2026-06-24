@@ -409,7 +409,7 @@ class BaseAISkill:
             logger.error(f"Failed to compile prompt template for '{self.name}': {e}")
             return safe_template
 
-    async def execute(self, model: Optional[str] = None, image_bytes: Optional[bytes] = None, **kwargs) -> Any:
+    async def execute(self, model: Optional[str] = None, image_bytes: Optional[bytes] = None, api_key: Optional[str] = None, **kwargs) -> Any:
         """Invokes the Gemini GenAI model resiliently with schema outputs and retry parameters."""
         start_time = time.monotonic()
         target_model = model or self.default_model
@@ -424,7 +424,7 @@ class BaseAISkill:
             
         prompt = self.build_prompt(**kwargs)
         
-        if not ai_initialized:
+        if not ai_initialized and not api_key:
             # Route to fallback coordinator
             fallback = FallbackCoordinator.get_programmatic_fallback(self.name, **kwargs)
             self.logger.log_execution(self.name, 0, False, kwargs, fallback)
@@ -464,9 +464,13 @@ class BaseAISkill:
         for current_model in candidates:
             try:
                 logger.info(f"[base.py] Invoking Gemini client with model: {current_model}")
+                # Use local client if api_key provided
+                from google import genai
+                client_to_use = genai.Client(api_key=api_key) if api_key else genai_client
+
                 # Gemini generation using retry helper
                 response = await call_gemini_with_retry(
-                    lambda: genai_client.models.generate_content(
+                    lambda: client_to_use.models.generate_content(
                         model=current_model,
                         contents=contents,
                         config=config

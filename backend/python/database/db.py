@@ -542,24 +542,19 @@ def get_creator_analytics(user_id: str) -> Dict[str, Any]:
             vertical_pct = round((aspect_vertical_count / total_ratio) * 100)
             widescreen_pct = 100 - vertical_pct
         else:
-            vertical_pct = 75
-            widescreen_pct = 25
+            vertical_pct = 0
+            widescreen_pct = 0
             
-        # 6. AI Voices Preference
+                # 6. AI Voices Preference
         voice_pref = prefs.get('voiceActor', 'Matthew')
         voices = {"Matthew": 0, "Rachel": 0, "Marcus": 0}
-        if voice_pref in voices:
-            voices[voice_pref] = 60
-            other_voices = [v for v in voices.keys() if v != voice_pref]
-            voices[other_voices[0]] = 30
-            voices[other_voices[1]] = 10
-        else:
-            voices["Matthew"] = 60
-            voices["Rachel"] = 30
-            voices["Marcus"] = 10
+        if total_chaps > 0 and voice_pref in voices:
+            voices[voice_pref] = 100
             
         # 7. Narration Mode
-        narrations = {"Storyteller Badges": 85, "Snappy Subtitles": 15}
+        narrations = {"Storyteller Badges": 0, "Snappy Subtitles": 0}
+        if total_chaps > 0:
+            narrations["Storyteller Badges"] = 100
         
         # 8. Activity feed (real time events sorted desc)
         activities = []
@@ -598,8 +593,9 @@ def get_creator_analytics(user_id: str) -> Dict[str, Any]:
             
         # Audit logs
         audit_list = conn.execute("""
-            SELECT event, created_at FROM user_audit_logs 
-            WHERE user_id = ? AND event NOT LIKE '%login%'
+            SELECT event, created_at 
+            FROM user_audit_logs 
+            WHERE user_id = ? 
             ORDER BY created_at DESC LIMIT 5
         """, (user_id,)).fetchall()
         for audit in audit_list:

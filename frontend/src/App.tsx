@@ -905,6 +905,13 @@ export default function App() {
             </div>
           )}
 
+          {/* PAGE VIEW 1.75: Projects Overview */}
+          {isProjectsPath && (
+            <div className="page-transition w-full flex-1 flex flex-col overflow-y-auto">
+              <ProjectsPage />
+            </div>
+          )}
+
           {/* PAGE VIEW 2: Advanced System Configuration Settings */}
           {isSettingsPath && (
             <div className="page-transition w-full flex-1 flex flex-col max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6">
@@ -1260,6 +1267,7 @@ export default function App() {
           {/* FALLBACK VIEW: 404 Route Not Found */}
           {!isWorkspacePath &&
             !isDashboardOverviewPath &&
+            !isProjectsPath &&
             !isSettingsPath &&
             !isAutoCropPath &&
             !isBubbleCleanerPath &&

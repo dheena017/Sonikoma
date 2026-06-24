@@ -26,9 +26,7 @@ export default function TitleABValidator({
   panels,
 }: TitleABValidatorProps) {
   const [loading, setLoading] = useState(false);
-  const [title, setTitle] = useState(
-    scrapedTitle || "I Was Reborn As The Overpowered Shadow Sovereign"
-  );
+  const [title, setTitle] = useState(scrapedTitle || "");
 
   const getDeducedEvent = () => {
     if (panels && panels.length > 0) {
@@ -39,7 +37,7 @@ export default function TitleABValidator({
         return parts.slice(-3).join(". ");
       }
     }
-    return "The protagonist summons a giant shadow army to defeat the demonic beast lord.";
+    return "";
   };
 
   const [event, setEvent] = useState(getDeducedEvent());
