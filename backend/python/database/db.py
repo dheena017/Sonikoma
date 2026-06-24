@@ -423,7 +423,7 @@ def create_user_session(user_id: str, session_id: str, browser: str, ip: str, lo
             WHERE user_id = ? AND active = 1 
             ORDER BY created_at DESC
         """, (user_id,)).fetchall()
-        active_sids = [r[0] for r in rows]
+        active_sids = [r['session_id'] for r in rows]
         if len(active_sids) > 5:
             to_remove = active_sids[5:]
             for sid in to_remove:
