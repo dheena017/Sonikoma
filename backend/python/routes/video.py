@@ -22,10 +22,10 @@ logger = logging.getLogger("sonikoma.api.video")
 class PanelData(BaseModel):
     id: int
     image_url: str
-    duration: float
     speech_text: Optional[str] = None
     sfx: Optional[str] = None
     audio_url: Optional[str] = None
+    motion_type: Optional[str] = None
 
 class RenderRequest(BaseModel):
     panels: List[PanelData]
@@ -53,12 +53,63 @@ async def download_asset(url: str, dest_path: str):
         logger.error(f"Error downloading {url}: {e}")
         return False
 
+def create_subtitle_clip(text, w, h, duration):
+    try:
+        from moviepy.editor import TextClip
+        # We try moviepy's TextClip which uses ImageMagick
+        txt_clip = TextClip(text, fontsize=40, color='white', font='Arial-Bold', 
+                            bg_color='rgba(0,0,0,0.6)', 
+                            method='caption', size=(int(w*0.9), None))
+        return txt_clip.set_duration(duration)
+    except Exception as e:
+        logger.warning(f"TextClip failed, using PIL fallback: {e}")
+        from PIL import Image, ImageDraw, ImageFont
+        import numpy as np
+        from moviepy.editor import ImageClip
+        
+        img = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        try:
+            font = ImageFont.truetype("arial.ttf", 40)
+        except:
+            font = ImageFont.load_default()
+            
+        lines = []
+        words = text.split()
+        curr_line = ""
+        for word in words:
+            test_line = curr_line + " " + word if curr_line else word
+            # Using basic textlength for compatibility
+            text_w = draw.textlength(test_line, font=font) if hasattr(draw, 'textlength') else font.getsize(test_line)[0]
+            if text_w > w * 0.9:
+                lines.append(curr_line)
+                curr_line = word
+            else:
+                curr_line = test_line
+        lines.append(curr_line)
+        
+        line_height = 50
+        total_height = len(lines) * line_height
+        start_y = h - total_height - 40
+        
+        draw.rectangle([w*0.05, start_y - 10, w*0.95, start_y + total_height + 10], fill=(0, 0, 0, 160))
+        
+        for i, line in enumerate(lines):
+            text_w = draw.textlength(line, font=font) if hasattr(draw, 'textlength') else font.getsize(line)[0]
+            x = (w - text_w) / 2
+            y = start_y + i * line_height
+            draw.text((x, y), line, font=font, fill=(255, 255, 255, 255))
+            
+        return ImageClip(np.array(img)).set_duration(duration)
+
 def render_pipeline_sync(panels_data, output_path, work_dir):
     """
     Synchronous function to run moviepy operations so we don't block the async loop.
     """
     if not HAS_MOVIEPY:
         raise Exception("moviepy is not installed. Run pip install moviepy.")
+        
+    from moviepy.editor import CompositeVideoClip
 
     clips = []
     for i, p in enumerate(panels_data):
@@ -77,6 +128,37 @@ def render_pipeline_sync(panels_data, output_path, work_dir):
                 clip = clip.set_audio(audio_clip)
             except Exception as e:
                 logger.error(f"Failed to attach audio {audio_path}: {e}")
+
+        # Dynamic Camera Motion (Ken Burns Effect)
+        motion_type = p.get("motion_type")
+        w, h = clip.size
+        safe_duration = max(duration, 0.1)
+
+        if motion_type == "zoom_in":
+            clip = clip.resize(lambda t: 1 + 0.08 * (t / safe_duration))
+        elif motion_type == "pan_left":
+            clip = clip.resize(1.15)
+            clip = clip.crop(x1=lambda t: (clip.w - w) * (1 - t/safe_duration), y1=0, width=w, height=h)
+        elif motion_type == "pan_right":
+            clip = clip.resize(1.15)
+            clip = clip.crop(x1=lambda t: (clip.w - w) * (t/safe_duration), y1=0, width=w, height=h)
+        elif motion_type == "pan_up":
+            clip = clip.resize(1.15)
+            clip = clip.crop(x1=0, y1=lambda t: (clip.h - h) * (1 - t/safe_duration), width=w, height=h)
+        elif motion_type == "pan_down":
+            clip = clip.resize(1.15)
+            clip = clip.crop(x1=0, y1=lambda t: (clip.h - h) * (t/safe_duration), width=w, height=h)
+
+        # Step 9: Burned-in Subtitles
+        speech_text = p.get("speech_text")
+        layers = [clip.set_position(('center', 'center'))]
+        
+        if speech_text and speech_text.strip():
+            txt_clip = create_subtitle_clip(speech_text, w, h, safe_duration)
+            layers.append(txt_clip.set_position(('center', 'bottom')))
+            
+        # Lock everything into a static size container to prevent drift
+        clip = CompositeVideoClip(layers, size=(w, h)).set_duration(safe_duration)
 
         # Basic Crossfade (0.5 second) between image sequences
         if i > 0:
@@ -138,7 +220,8 @@ async def render_video(request: RenderRequest):
                 "id": panel.id,
                 "duration": panel.duration if panel.duration > 0 else 3.0,
                 "local_img": img_path,
-                "local_audio": None
+                "local_audio": None,
+                "motion_type": panel.motion_type
             }
             
             # Queue image download
