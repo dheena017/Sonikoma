@@ -1,5 +1,5 @@
 # Stage 1: Build Frontend
-FROM node:24 AS frontend-builder
+FROM node:22-slim AS frontend-builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
@@ -11,11 +11,16 @@ RUN npm run build:frontend
 FROM python:3.11-slim
 WORKDIR /app
 
+# Prevent Python from writing pyc files and enable unbuffered logging
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
 # Install system dependencies for OpenCV, EasyOCR, and MoviePy
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1 \
     libglib2.0-0 \
     ffmpeg \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PyTorch CPU first to avoid pulling 2.5GB GPU wheels and running out of memory
