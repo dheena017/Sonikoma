@@ -45,6 +45,122 @@ export default function ProfilePage({
   const [showConfirmModal, setShowConfirmModal] = React.useState(false);
   const [tempAvatarUrl, setTempAvatarUrl] = React.useState<string | null>(null);
 
+  // Navigation tabs
+  const [activeTab, setActiveTab] = React.useState<
+    "projects" | "account" | "security" | "billing" | "api" | "analytics" | "preferences" | "stats"
+  >("projects");
+
+  // Local state for profile values
+  const [profileUser, setProfileUser] = React.useState({
+    fullName: user?.full_name || "Sonikoma Creator",
+    email: user?.email || "creator@sonikoma.com",
+    avatarUrl: user?.avatar_url || "",
+    role: user?.creator_role || "creator",
+    bio:
+      user?.bio ||
+      "Comic visual director and anime fan editing high-quality cinematic stories.",
+    newsletter: user?.newsletter !== undefined ? user.newsletter : true,
+    language: user?.language || "en",
+  });
+
+  const [saveSuccess, setSaveSuccess] = React.useState(false);
+
+  // Preferences State
+  const [notificationPrefs, setNotificationPrefs] = React.useState({
+    newsletter: true,
+    productUpdates: true,
+    securityAlerts: true,
+    billingReceipts: true,
+    pushNotifications: false,
+  });
+  const [workspacePrefs, setWorkspacePrefs] = React.useState({
+    hardwareAcceleration: true,
+    compactMode: false,
+    autoSaveInterval: "5m"
+  });
+  const [privacyPrefs, setPrivacyPrefs] = React.useState({
+    analyticsTelemetry: true,
+    publicProfile: false
+  });
+  const [aiPrefs, setAiPrefs] = React.useState({
+    defaultModel: "gemini-1.5-flash",
+    defaultVoice: "google-tts-en-US-Standard-D",
+    autoCropSensitivity: "medium"
+  });
+  const [exportPrefs, setExportPrefs] = React.useState({
+    resolution: "1080p",
+    framerate: "30fps",
+    audioFormat: "mp3"
+  });
+  const [themePrefs, setThemePrefs] = React.useState("dark");
+  const [accentColor, setAccentColor] = React.useState("purple");
+  const [fontScale, setFontScale] = React.useState("medium");
+  const [reduceMotion, setReduceMotion] = React.useState(false);
+  const [cornerRadius, setCornerRadius] = React.useState("rounded");
+  const [prefsSaveSuccess, setPrefsSaveSuccess] = React.useState(false);
+
+  // Password Update Fields
+  const [passwordState, setPasswordState] = React.useState({
+    current: "",
+    new: "",
+    confirm: "",
+  });
+  const [passwordError, setPasswordError] = React.useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = React.useState(false);
+
+  // Active Device sessions state
+  const [sessions, setSessions] = React.useState<any[]>([]);
+
+  // Credit claiming states
+  const [credits, setCredits] = React.useState(
+    user?.credits !== undefined ? user.credits : 840
+  );
+  const [hasClaimedToday, setHasClaimedToday] = React.useState(false);
+  const [claimNotification, setClaimNotification] = React.useState(false);
+  const [streakDays, setStreakDays] = React.useState(1);
+  const [subscriptionTier, setSubscriptionTier] = React.useState("free");
+  const [cardInfo, setCardInfo] = React.useState<any>(null);
+
+  // API token creator state
+  const [apiTokens, setApiTokens] = React.useState<
+    { id: string; name: string; key: string; created: string }[]
+  >([]);
+  const [newTokenName, setNewTokenName] = React.useState("");
+  const [tokenToast, setTokenToast] = React.useState<string | null>(null);
+
+  // Invoices list state
+  const [invoices, setInvoices] = React.useState<any[]>([]);
+
+  // Lifted state from ProfileAccountTab
+  const [connections, setConnections] = React.useState({
+    google: true,
+    github: false,
+    discord: false,
+  });
+  const [achievementPoints, setAchievementPoints] = React.useState(380);
+  const [unlockedRewards, setUnlockedRewards] = React.useState<string[]>([]);
+  const [unlockedAchievements, setUnlockedAchievements] = React.useState<
+    string[]
+  >([]);
+  const [portfolios, setPortfolios] = React.useState<any[]>([]);
+  const [cacheUsed, setCacheUsed] = React.useState<number>(134637568); // 128.4 MB fallback
+  const [cacheLimit, setCacheLimit] = React.useState<number>(5368709120); // 5 GB fallback
+
+  const formatBytes = (bytes: number) => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const dm = 1;
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+  };
+
+  // Local state for project list
+  const [localProjects, setLocalProjects] = React.useState<any[]>(projects);
+
+  // MFA state
+  const [is2faEnabled, setIs2faEnabled] = React.useState(false);
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -136,118 +252,6 @@ export default function ProfilePage({
       fileInputRef.current.value = "";
     }
   };
-  // Navigation tabs
-  const [activeTab, setActiveTab] = React.useState<
-    "projects" | "account" | "security" | "billing" | "api" | "analytics" | "preferences" | "stats"
-  >("projects");
-
-  // Local state for profile values
-  const [profileUser, setProfileUser] = React.useState({
-    fullName: user?.full_name || "Sonikoma Creator",
-    email: user?.email || "creator@sonikoma.com",
-    avatarUrl: user?.avatar_url || "",
-    role: user?.creator_role || "creator",
-    bio:
-      user?.bio ||
-      "Comic visual director and anime fan editing high-quality cinematic stories.",
-    newsletter: user?.newsletter !== undefined ? user.newsletter : true,
-    language: user?.language || "en",
-  });
-
-  const [saveSuccess, setSaveSuccess] = React.useState(false);
-
-  // Preferences State
-  const [notificationPrefs, setNotificationPrefs] = React.useState({
-    newsletter: true,
-    productUpdates: true,
-    securityAlerts: true,
-    billingReceipts: true,
-    pushNotifications: false,
-  });
-  const [workspacePrefs, setWorkspacePrefs] = React.useState({
-    hardwareAcceleration: true,
-    compactMode: false,
-    autoSaveInterval: "5m"
-  });
-  const [privacyPrefs, setPrivacyPrefs] = React.useState({
-    analyticsTelemetry: true,
-    publicProfile: false
-  });
-  const [aiPrefs, setAiPrefs] = React.useState({
-    defaultModel: "gemini-1.5-flash",
-    defaultVoice: "google-tts-en-US-Standard-D",
-    autoCropSensitivity: "medium"
-  });
-  const [exportPrefs, setExportPrefs] = React.useState({
-    resolution: "1080p",
-    framerate: "30fps",
-    audioFormat: "mp3"
-  });
-  const [themePrefs, setThemePrefs] = React.useState("dark");
-  const [accentColor, setAccentColor] = React.useState("purple");
-  const [prefsSaveSuccess, setPrefsSaveSuccess] = React.useState(false);
-
-  // Password Update Fields
-  const [passwordState, setPasswordState] = React.useState({
-    current: "",
-    new: "",
-    confirm: "",
-  });
-  const [passwordError, setPasswordError] = React.useState<string | null>(null);
-  const [passwordSuccess, setPasswordSuccess] = React.useState(false);
-
-  // Active Device sessions state
-  const [sessions, setSessions] = React.useState<any[]>([]);
-
-  // Credit claiming states
-  const [credits, setCredits] = React.useState(
-    user?.credits !== undefined ? user.credits : 840
-  );
-  const [hasClaimedToday, setHasClaimedToday] = React.useState(false);
-  const [claimNotification, setClaimNotification] = React.useState(false);
-  const [streakDays, setStreakDays] = React.useState(1);
-  const [subscriptionTier, setSubscriptionTier] = React.useState("free");
-  const [cardInfo, setCardInfo] = React.useState<any>(null);
-
-  // API token creator state
-  const [apiTokens, setApiTokens] = React.useState<
-    { id: string; name: string; key: string; created: string }[]
-  >([]);
-  const [newTokenName, setNewTokenName] = React.useState("");
-  const [tokenToast, setTokenToast] = React.useState<string | null>(null);
-
-  // Invoices list state
-  const [invoices, setInvoices] = React.useState<any[]>([]);
-
-  // Lifted state from ProfileAccountTab
-  const [connections, setConnections] = React.useState({
-    google: true,
-    github: false,
-    discord: false,
-  });
-  const [achievementPoints, setAchievementPoints] = React.useState(380);
-  const [unlockedRewards, setUnlockedRewards] = React.useState<string[]>([]);
-  const [unlockedAchievements, setUnlockedAchievements] = React.useState<
-    string[]
-  >([]);
-  const [portfolios, setPortfolios] = React.useState<any[]>([]);
-  const [cacheUsed, setCacheUsed] = React.useState<number>(134637568); // 128.4 MB fallback
-  const [cacheLimit, setCacheLimit] = React.useState<number>(5368709120); // 5 GB fallback
-
-  const formatBytes = (bytes: number) => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const dm = 1;
-    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
-  };
-
-  // Local state for project list
-  const [localProjects, setLocalProjects] = React.useState<any[]>(projects);
-
-  // MFA state
-  const [is2faEnabled, setIs2faEnabled] = React.useState(false);
 
   // Serialization helper for dirty state comparison
   const getSerializedProfile = React.useCallback(
@@ -1040,7 +1044,10 @@ export default function ProfilePage({
         ai: aiPrefs,
         export: exportPrefs,
         theme: themePrefs,
-        accentColor: accentColor
+        accentColor: accentColor,
+        fontScale: fontScale,
+        reduceMotion: reduceMotion,
+        cornerRadius: cornerRadius
       }
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
@@ -1513,6 +1520,12 @@ export default function ProfilePage({
                 setTheme={setThemePrefs}
                 accentColor={accentColor}
                 setAccentColor={setAccentColor}
+                fontScale={fontScale}
+                setFontScale={setFontScale}
+                reduceMotion={reduceMotion}
+                setReduceMotion={setReduceMotion}
+                cornerRadius={cornerRadius}
+                setCornerRadius={setCornerRadius}
                 onSave={handleSavePreferences}
                 saveSuccess={prefsSaveSuccess}
               />
@@ -1591,3 +1604,4 @@ export default function ProfilePage({
     </div>
   );
 }
+

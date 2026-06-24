@@ -23,6 +23,9 @@ import {
   Crop,
   Clapperboard,
   Volume2,
+  Type,
+  Square,
+  ZapOff,
 } from "lucide-react";
 
 interface ProfilePreferencesTabProps {
@@ -61,6 +64,12 @@ interface ProfilePreferencesTabProps {
   setTheme: (theme: string) => void;
   accentColor: string;
   setAccentColor: (color: string) => void;
+  fontScale?: string;
+  setFontScale?: (scale: string) => void;
+  reduceMotion?: boolean;
+  setReduceMotion?: (reduce: boolean) => void;
+  cornerRadius?: string;
+  setCornerRadius?: (radius: string) => void;
   onSave: (e: React.FormEvent) => void;
   saveSuccess: boolean;
 }
@@ -80,6 +89,12 @@ export default function ProfilePreferencesTab({
   setTheme,
   accentColor,
   setAccentColor,
+  fontScale,
+  setFontScale,
+  reduceMotion,
+  setReduceMotion,
+  cornerRadius,
+  setCornerRadius,
   onSave,
   saveSuccess,
 }: ProfilePreferencesTabProps) {
@@ -339,6 +354,125 @@ export default function ProfilePreferencesTab({
                 future update.
               </p>
             </div>
+
+            {/* NEW APPEARANCE SETTINGS */}
+            {setFontScale && (
+              <div className="space-y-4 pt-4 border-t border-white/5">
+                <h4 className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
+                  Typography Scale
+                </h4>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setFontScale("small")}
+                    className={`flex-1 py-2.5 rounded-xl border flex items-center justify-center gap-2 text-xs font-bold transition-all ${
+                      fontScale === "small"
+                        ? `bg-purple-500/10 border-purple-500/30 ${tc.text} shadow-[inset_0_0_20px_rgba(168,85,247,0.1)]`
+                        : "bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
+                    }`}
+                  >
+                    Small
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFontScale("medium")}
+                    className={`flex-1 py-2.5 rounded-xl border flex items-center justify-center gap-2 text-sm font-bold transition-all ${
+                      fontScale === "medium"
+                        ? `bg-purple-500/10 border-purple-500/30 ${tc.text} shadow-[inset_0_0_20px_rgba(168,85,247,0.1)]`
+                        : "bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
+                    }`}
+                  >
+                    Medium
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFontScale("large")}
+                    className={`flex-1 py-2.5 rounded-xl border flex items-center justify-center gap-2 text-base font-bold transition-all ${
+                      fontScale === "large"
+                        ? `bg-purple-500/10 border-purple-500/30 ${tc.text} shadow-[inset_0_0_20px_rgba(168,85,247,0.1)]`
+                        : "bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
+                    }`}
+                  >
+                    Large
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {setCornerRadius && (
+              <div className="space-y-4 pt-4 border-t border-white/5">
+                <h4 className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
+                  Corner Radius
+                </h4>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setCornerRadius("sharp")}
+                    className={`flex-1 py-3 border flex items-center justify-center gap-2 text-xs font-bold transition-all rounded-sm ${
+                      cornerRadius === "sharp"
+                        ? `bg-purple-500/10 border-purple-500/30 ${tc.text}`
+                        : "bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
+                    }`}
+                  >
+                    Sharp
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCornerRadius("rounded")}
+                    className={`flex-1 py-3 border flex items-center justify-center gap-2 text-xs font-bold transition-all rounded-xl ${
+                      cornerRadius === "rounded"
+                        ? `bg-purple-500/10 border-purple-500/30 ${tc.text}`
+                        : "bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
+                    }`}
+                  >
+                    Rounded
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCornerRadius("pill")}
+                    className={`flex-1 py-3 border flex items-center justify-center gap-2 text-xs font-bold transition-all rounded-full ${
+                      cornerRadius === "pill"
+                        ? `bg-purple-500/10 border-purple-500/30 ${tc.text}`
+                        : "bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
+                    }`}
+                  >
+                    Soft
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {setReduceMotion && (
+              <div className="pt-4 border-t border-white/5">
+                <div className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
+                  <div className="flex items-start gap-3">
+                    <div className={`mt-0.5 p-2 bg-purple-500/10 rounded-lg ${tc.text}`}>
+                      <ZapOff className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-white">
+                        Reduce Motion
+                      </h4>
+                      <p className="text-[10px] text-neutral-500 font-semibold mt-1">
+                        Disable UI animations and transitions.
+                      </p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={reduceMotion}
+                      onChange={() => setReduceMotion(!reduceMotion)}
+                    />
+                    <div
+                      className={`w-9 h-5 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all ${tc.peerChecked}`}
+                    ></div>
+                  </label>
+                </div>
+              </div>
+            )}
+
           </div>
 
           {/* NOTIFICATION PREFERENCES */}
