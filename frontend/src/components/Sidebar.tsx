@@ -16,6 +16,7 @@ import {
   FileText,
   Bell,
   Shield,
+  FolderOpen,
 } from "lucide-react";
 import { GeneratedPanel } from "../types";
 import { Notification } from "./NotificationStack";
@@ -74,7 +75,7 @@ export default function Sidebar({
   const isLogs = currentPath === "/logs";
   const isStatus = currentPath === "/status";
   const isShortcuts = currentPath === "/shortcuts";
-  const isProjectDetails = currentPath === "/project-details";
+  const isProjects = currentPath === "/projects";
 
   const params = new URLSearchParams(window.location.search);
   const activeProjectId =
@@ -157,27 +158,13 @@ export default function Sidebar({
           onClick: handleNavigateToWorkspace,
           enabled: true,
         },
-        ...(activeProjectId
-          ? [
-              {
-                label: "Project Details",
-                icon: FileText,
-                active: isProjectDetails,
-                onClick: () => {
-                  if (window.location.pathname.startsWith("/series/")) {
-                    if (window.location.pathname.endsWith("/details")) {
-                      navigateTo(window.location.pathname);
-                    } else {
-                      navigateTo(`${window.location.pathname}/details`);
-                    }
-                  } else {
-                    navigateTo(`/project-details?id=${activeProjectId}`);
-                  }
-                },
-                enabled: true,
-              },
-            ]
-          : []),
+        {
+          label: "Projects",
+          icon: FolderOpen,
+          active: isProjects,
+          onClick: () => navigateTo("/projects"),
+          enabled: true,
+        },
         {
           label: "Auto-Crop",
           icon: Scissors,

@@ -143,6 +143,7 @@ export function useAppRouter({
             path === "/notifications" ||
             path === "/auto-crop" ||
             path === "/bubble-cleaner" ||
+            path === "/projects" ||
             path === "/project-details" ||
             path === "/project-editor" ||
             path.startsWith("/series/") ||
@@ -204,6 +205,7 @@ export function useAppRouter({
         path === "/ai-analytics" ||
         path === "/profile" ||
         path === "/notifications" ||
+        path === "/projects" ||
         path === "/project-details" ||
         path === "/dashboard" ||
         path.startsWith("/display") ||
