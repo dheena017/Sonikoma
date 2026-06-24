@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import WaveSurfer from "wavesurfer.js";
 import {
   Play,
   Pause,
@@ -80,6 +81,36 @@ export default function VolumeAndProgressPanel({
       )
     );
   };
+
+  const waveformRef = useRef<HTMLDivElement>(null);
+  const wavesurferRef = useRef<WaveSurfer | null>(null);
+
+  useEffect(() => {
+    if (activeTab === "timeline" && activeStoryboardPanel?.audio_url && waveformRef.current) {
+      if (wavesurferRef.current) {
+        wavesurferRef.current.destroy();
+      }
+      
+      wavesurferRef.current = WaveSurfer.create({
+        container: waveformRef.current,
+        waveColor: "#a78bfa", // text-purple-400
+        progressColor: "#7c3aed", // bg-purple-600
+        height: 48,
+        url: activeStoryboardPanel.audio_url,
+        barWidth: 2,
+        barRadius: 2,
+        cursorWidth: 1,
+        cursorColor: "#c4b5fd", // text-purple-300
+      });
+
+      return () => {
+        if (wavesurferRef.current) {
+          wavesurferRef.current.destroy();
+          wavesurferRef.current = null;
+        }
+      };
+    }
+  }, [activeTab, activeStoryboardPanel?.audio_url]);
 
   return (
     <div
@@ -376,6 +407,31 @@ export default function VolumeAndProgressPanel({
                       placeholder="Type dialogue..."
                       className="w-full bg-neutral-955 border border-neutral-850 text-xs rounded-xl p-2.5 text-neutral-300 outline-none focus:border-purple-650 transition-all font-sans resize-none"
                     />
+                  </div>
+
+                  {/* Audio Waveform Visualization */}
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-mono text-neutral-500 uppercase font-bold tracking-wider block">
+                      Audio Waveform (TTS)
+                    </label>
+                    <div className="w-full bg-neutral-955 border border-neutral-850 rounded-xl p-2 h-16 flex items-center justify-center relative overflow-hidden">
+                      {activeStoryboardPanel.audio_url ? (
+                        <>
+                          <div ref={waveformRef} className="w-full h-full" />
+                          <button 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              wavesurferRef.current?.playPause();
+                            }}
+                            className="absolute z-10 left-3 top-1/2 -translate-y-1/2 bg-purple-600/80 hover:bg-purple-500 text-white rounded-full p-1.5 backdrop-blur shadow-sm cursor-pointer"
+                          >
+                            <Play className="h-3 w-3 ml-0.5" />
+                          </button>
+                        </>
+                      ) : (
+                        <span className="text-[10px] text-neutral-500 font-mono">No audio generated yet</span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3.5">
