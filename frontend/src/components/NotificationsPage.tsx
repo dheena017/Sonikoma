@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Bell,
   BellOff,
@@ -15,6 +15,9 @@ import {
   AlertCircle,
   CheckCircle,
   Info,
+  Copy,
+  Download,
+  Trash,
 } from "lucide-react";
 import { Notification } from "./NotificationStack";
 import { formatDistanceToNow } from "date-fns";
@@ -26,6 +29,7 @@ interface NotificationsPageProps {
   onMarkAllAsRead: () => void;
   onDelete: (id: number) => void;
   onClearAll: () => void;
+  onClearRead?: () => void;
   notificationsMuted?: boolean;
   onToggleMute?: () => void;
 }
@@ -37,23 +41,82 @@ export default function NotificationsPage({
   onMarkAllAsRead,
   onDelete,
   onClearAll,
+  onClearRead,
   notificationsMuted = false,
   onToggleMute,
 }: NotificationsPageProps) {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [filter, setFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
-  const filteredNotifications = notifications.filter((n) => {
-    const matchesSearch =
-      n.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (n.details?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
-    const matchesFilter =
-      filter === "all" ||
-      n.type === filter ||
-      (filter === "unread" && !n.isRead);
-    return matchesSearch && matchesFilter;
-  });
+  const handleClearRead = () => {
+    if (onClearRead) {
+      onClearRead();
+    } else {
+      notifications.filter(n => n.isRead).forEach(n => onDelete(n.id));
+    }
+  };
+
+  const exportLogs = () => {
+    const data = JSON.stringify(filteredNotifications, null, 2);
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `logs-export-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const filteredNotifications = useMemo(() => {
+    return notifications
+      .filter((n) => {
+        const matchesSearch =
+          n.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (n.details?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+        const matchesFilter =
+          filter === "all" ||
+          n.type === filter ||
+          (filter === "unread" && !n.isRead);
+        return matchesSearch && matchesFilter;
+      })
+      .sort((a, b) => {
+        if (sortOrder === "newest") {
+          return b.timestamp - a.timestamp;
+        } else {
+          return a.timestamp - b.timestamp;
+        }
+      });
+  }, [notifications, searchQuery, filter, sortOrder]);
+
+  const groupedNotifications = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const groups: { [key: string]: Notification[] } = {
+      Today: [],
+      Yesterday: [],
+      Older: [],
+    };
+
+    filteredNotifications.forEach((note) => {
+      const noteDate = new Date(note.timestamp);
+      noteDate.setHours(0, 0, 0, 0);
+
+      if (noteDate.getTime() === today.getTime()) {
+        groups.Today.push(note);
+      } else if (noteDate.getTime() === yesterday.getTime()) {
+        groups.Yesterday.push(note);
+      } else {
+        groups.Older.push(note);
+      }
+    });
+
+    return groups;
+  }, [filteredNotifications]);
 
   const toggleExpand = (id: number) => {
     setExpandedId(expandedId === id ? null : id);
@@ -113,6 +176,17 @@ export default function NotificationsPage({
               </button>
 
               <div className="flex items-center gap-2">
+                {filteredNotifications.length > 0 && (
+                  <button
+                    onClick={exportLogs}
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-blue-400 hover:border-blue-900/50 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest transition-all cursor-pointer"
+                    title="Export logs as JSON"
+                  >
+                    <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Export JSON</span>
+                  </button>
+                )}
+                
                 {notifications.length > 0 && (
                   <>
                     <button
@@ -123,13 +197,23 @@ export default function NotificationsPage({
                       <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       <span className="hidden sm:inline">Mark all read</span>
                     </button>
+                    {notifications.some(n => n.isRead) && (
+                      <button
+                        onClick={handleClearRead}
+                        className="flex items-center gap-2 px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-rose-400 hover:border-rose-900/50 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest transition-all cursor-pointer"
+                        title="Clear read notifications"
+                      >
+                        <Trash className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                        <span className="hidden sm:inline">Clear read</span>
+                      </button>
+                    )}
                     <button
                       onClick={onClearAll}
                       className="flex items-center gap-2 px-3 py-2 rounded-xl bg-rose-950/20 border border-rose-900/30 text-rose-450 hover:bg-rose-900/40 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest transition-all cursor-pointer"
                       title="Clear history"
                     >
                       <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                      <span className="hidden sm:inline">Clear history</span>
+                      <span className="hidden sm:inline">Clear all</span>
                     </button>
                   </>
                 )}
@@ -137,7 +221,6 @@ export default function NotificationsPage({
             </div>
           </div>
 
-          {/* Search & Filter Bar */}
           <div className="mt-6 flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative group">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500 group-focus-within:text-purple-400 transition-colors" />
@@ -149,6 +232,15 @@ export default function NotificationsPage({
                 className="w-full bg-neutral-900 border border-neutral-800 rounded-2xl py-2.5 pl-11 pr-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/50 transition-all placeholder:text-neutral-600"
               />
             </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => setSortOrder(prev => prev === "newest" ? "oldest" : "newest")}
+                className="px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap cursor-pointer border bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-800 flex items-center gap-2"
+              >
+                {sortOrder === "newest" ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronUp className="h-3.5 w-3.5" />}
+                {sortOrder === "newest" ? "Newest First" : "Oldest First"}
+              </button>
+            </div>
             <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 custom-scrollbar">
               <Filter className="h-4 w-4 text-neutral-500 mr-2 shrink-0" />
               {[
@@ -157,6 +249,7 @@ export default function NotificationsPage({
                 { id: "error", label: "Errors" },
                 { id: "warning", label: "Warnings" },
                 { id: "success", label: "Success" },
+                { id: "info", label: "Info" },
               ].map((f) => (
                 <button
                   key={f.id}
@@ -203,144 +296,176 @@ export default function NotificationsPage({
               )}
             </div>
           ) : (
-            <div className="space-y-3">
-              {filteredNotifications.map((note) => (
-                <div
-                  key={note.id}
-                  className={`group relative rounded-2xl border transition-all duration-300 overflow-hidden ${
-                    !note.isRead
-                      ? "bg-purple-950/10 border-purple-500/30 ring-1 ring-purple-500/20 shadow-[0_0_20px_rgba(168,85,247,0.05)]"
-                      : "bg-neutral-900/40 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900/60"
-                  }`}
-                >
-                  <div
-                    className="p-5 flex flex-col sm:flex-row gap-5 cursor-pointer"
-                    onClick={() => toggleExpand(note.id)}
-                  >
-                    <div className="flex-1 flex gap-4 min-w-0">
-                      <div className="mt-1 shrink-0">
-                        <NotificationIcon type={note.type} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex flex-wrap items-center gap-3 mb-1.5">
-                          <span
-                            className={`text-[10px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 rounded-md border ${getTypeStyles(
-                              note.type
-                            )}`}
-                          >
-                            {note.type}
-                          </span>
-                          {note.errorCode && (
-                            <span className="text-[10px] font-bold text-rose-500 bg-rose-500/10 px-2 py-0.5 rounded-md border border-rose-500/20 font-mono">
-                              HTTP {note.errorCode}
-                            </span>
-                          )}
-                          <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 font-mono">
-                            <Clock className="h-3 w-3" />
-                            {formatDistanceToNow(note.timestamp, {
-                              addSuffix: true,
-                            })}
-                          </div>
-                        </div>
-                        <h4
-                          className={`text-base leading-snug break-words transition-colors ${
+            <div className="space-y-8">
+              {Object.entries(groupedNotifications).map(([groupName, notes]) => {
+                if (notes.length === 0) return null;
+                return (
+                  <div key={groupName} className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-widest pl-2">
+                        {groupName}
+                      </h3>
+                      {notes.some(n => !n.isRead) && (
+                        <button
+                          onClick={() => notes.filter(n => !n.isRead).forEach(n => onMarkAsRead(n.id))}
+                          className="text-[10px] text-purple-400 hover:text-purple-300 font-bold px-3 py-1 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 cursor-pointer transition-colors border border-purple-500/20 uppercase tracking-widest"
+                        >
+                          Mark Read
+                        </button>
+                      )}
+                    </div>
+                    <div className="space-y-3">
+                      {notes.map((note) => (
+                        <div
+                          key={note.id}
+                          className={`group relative rounded-2xl border transition-all duration-300 overflow-hidden ${
                             !note.isRead
-                              ? "text-white font-bold"
-                              : "text-neutral-300 font-medium group-hover:text-neutral-100"
+                              ? "bg-purple-950/10 border-purple-500/30 ring-1 ring-purple-500/20 shadow-[0_0_20px_rgba(168,85,247,0.05)]"
+                              : "bg-neutral-900/40 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900/60"
                           }`}
                         >
-                          {note.message}
-                        </h4>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-4 shrink-0 sm:pl-4 sm:border-l sm:border-neutral-800/50">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDelete(note.id);
-                          }}
-                          className="p-2.5 rounded-xl bg-neutral-950/50 border border-neutral-800 text-neutral-500 hover:text-rose-400 hover:border-rose-900/50 transition-all"
-                          title="Delete notification"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                        {note.link && (
-                          <a
-                            href={note.link}
-                            onClick={(e) => e.stopPropagation()}
-                            className="p-2.5 rounded-xl bg-purple-600 border border-purple-500 text-white shadow-lg shadow-purple-900/20 hover:bg-purple-500 transition-all"
-                            title="Navigate to target"
+                          <div
+                            className="p-5 flex flex-col sm:flex-row gap-5 cursor-pointer"
+                            onClick={() => toggleExpand(note.id)}
                           >
-                            <ExternalLink className="h-4 w-4" />
-                          </a>
-                        )}
-                      </div>
-                      <div className="text-neutral-600 group-hover:text-neutral-400 transition-colors">
-                        {expandedId === note.id ? (
-                          <ChevronUp className="h-5 w-5" />
-                        ) : (
-                          <ChevronDown className="h-5 w-5" />
-                        )}
-                      </div>
+                            <div className="flex-1 flex gap-4 min-w-0">
+                              <div className="mt-1 shrink-0">
+                                <NotificationIcon type={note.type} />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex flex-wrap items-center gap-3 mb-1.5">
+                                  <span
+                                    className={`text-[10px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 rounded-md border ${getTypeStyles(
+                                      note.type
+                                    )}`}
+                                  >
+                                    {note.type}
+                                  </span>
+                                  {note.errorCode && (
+                                    <span className="text-[10px] font-bold text-rose-500 bg-rose-500/10 px-2 py-0.5 rounded-md border border-rose-500/20 font-mono">
+                                      HTTP {note.errorCode}
+                                    </span>
+                                  )}
+                                  <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 font-mono">
+                                    <Clock className="h-3 w-3" />
+                                    {formatDistanceToNow(note.timestamp, {
+                                      addSuffix: true,
+                                    })}
+                                  </div>
+                                </div>
+                                <h4
+                                  className={`text-base leading-snug break-words transition-colors ${
+                                    !note.isRead
+                                      ? "text-white font-bold"
+                                      : "text-neutral-300 font-medium group-hover:text-neutral-100"
+                                  }`}
+                                >
+                                  {note.message}
+                                </h4>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-4 shrink-0 sm:pl-4 sm:border-l sm:border-neutral-800/50">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDelete(note.id);
+                                  }}
+                                  className="p-2.5 rounded-xl bg-neutral-950/50 border border-neutral-800 text-neutral-500 hover:text-rose-400 hover:border-rose-900/50 transition-all"
+                                  title="Delete notification"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                                {note.link && (
+                                  <a
+                                    href={note.link}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="p-2.5 rounded-xl bg-purple-600 border border-purple-500 text-white shadow-lg shadow-purple-900/20 hover:bg-purple-500 transition-all"
+                                    title="Navigate to target"
+                                  >
+                                    <ExternalLink className="h-4 w-4" />
+                                  </a>
+                                )}
+                              </div>
+                              <div className="text-neutral-600 group-hover:text-neutral-400 transition-colors">
+                                {expandedId === note.id ? (
+                                  <ChevronUp className="h-5 w-5" />
+                                ) : (
+                                  <ChevronDown className="h-5 w-5" />
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {expandedId === note.id && (
+                            <div className="px-5 pb-6 animate-in slide-in-from-top-2 duration-300 border-t border-neutral-800/50 mt-1 pt-5">
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="md:col-span-2 space-y-4">
+                                  <div>
+                                    <div className="flex items-center justify-between mb-2">
+                                      <h5 className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
+                                        Detailed Log Output
+                                      </h5>
+                                      <button
+                                        onClick={() => navigator.clipboard.writeText(note.details || "")}
+                                        className="flex items-center gap-1.5 text-[10px] font-bold text-neutral-400 hover:text-white transition-colors cursor-pointer bg-neutral-900 hover:bg-neutral-800 px-2 py-1 rounded-md border border-neutral-800"
+                                        title="Copy to clipboard"
+                                      >
+                                        <Copy className="h-3 w-3" />
+                                        Copy
+                                      </button>
+                                    </div>
+                                    <div className="p-4 rounded-xl bg-black border border-neutral-800 font-mono text-xs text-neutral-400 leading-relaxed overflow-x-auto whitespace-pre-wrap">
+                                      {note.details ||
+                                        "No technical details provided for this event."}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="space-y-4">
+                                  <div>
+                                    <h5 className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-2">
+                                      Event Meta
+                                    </h5>
+                                    <div className="space-y-2">
+                                      <MetaItem
+                                        label="Notification ID"
+                                        value={`#${note.id.toString().slice(-6)}`}
+                                      />
+                                      <MetaItem
+                                        label="Precise Time"
+                                        value={new Date(
+                                          note.timestamp
+                                        ).toLocaleString()}
+                                      />
+                                      <MetaItem
+                                        label="Source Pipeline"
+                                        value="Main Application Flow"
+                                      />
+                                      <MetaItem
+                                        label="Status"
+                                        value={
+                                          note.isRead
+                                            ? "Resolved / Read"
+                                            : "Pending / Unread"
+                                        }
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {!note.isRead && (
+                            <div className="absolute top-0 left-0 bottom-0 w-1 bg-purple-500" />
+                          )}
+                        </div>
+                      ))}
                     </div>
                   </div>
-
-                  {expandedId === note.id && (
-                    <div className="px-5 pb-6 animate-in slide-in-from-top-2 duration-300 border-t border-neutral-800/50 mt-1 pt-5">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="md:col-span-2 space-y-4">
-                          <div>
-                            <h5 className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-2">
-                              Detailed Log Output
-                            </h5>
-                            <div className="p-4 rounded-xl bg-black border border-neutral-800 font-mono text-xs text-neutral-400 leading-relaxed overflow-x-auto whitespace-pre-wrap">
-                              {note.details ||
-                                "No technical details provided for this event."}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="space-y-4">
-                          <div>
-                            <h5 className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-2">
-                              Event Meta
-                            </h5>
-                            <div className="space-y-2">
-                              <MetaItem
-                                label="Notification ID"
-                                value={`#${note.id.toString().slice(-6)}`}
-                              />
-                              <MetaItem
-                                label="Precise Time"
-                                value={new Date(
-                                  note.timestamp
-                                ).toLocaleString()}
-                              />
-                              <MetaItem
-                                label="Source Pipeline"
-                                value="Main Application Flow"
-                              />
-                              <MetaItem
-                                label="Status"
-                                value={
-                                  note.isRead
-                                    ? "Resolved / Read"
-                                    : "Pending / Unread"
-                                }
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {!note.isRead && (
-                    <div className="absolute top-0 left-0 bottom-0 w-1 bg-purple-500" />
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

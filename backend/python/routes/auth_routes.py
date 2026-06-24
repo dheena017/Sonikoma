@@ -709,3 +709,35 @@ async def admin_impersonate_user(user_id: str, request: Request, current_user: d
     write_audit_log(current_user['user_id'], f'Admin impersonated user {user_id}', ip_addr, 'Success')
     return {'success': True, 'access_token': encoded_jwt, 'token_type': 'bearer', 'impersonated_user': target_user}
 
+
+# --- Ultimate Admin V2 Endpoints ------------------------------------------
+
+from database.db import get_all_projects_admin, get_global_analytics, delete_series_admin
+
+@router.get('/admin/analytics')
+async def admin_get_analytics(current_user: dict = Depends(get_current_user)):
+    try:
+        return {'success': True, 'analytics': get_global_analytics()}
+    except Exception as e:
+        logger.error(f'Failed to fetch analytics: {e}')
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get('/admin/projects')
+async def admin_get_projects(current_user: dict = Depends(get_current_user)):
+    try:
+        return {'success': True, 'projects': get_all_projects_admin()}
+    except Exception as e:
+        logger.error(f'Failed to fetch projects: {e}')
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete('/admin/projects/{project_id}')
+async def admin_delete_project(project_id: str, request: Request, current_user: dict = Depends(get_current_user)):
+    ip_addr = request.client.host if request.client else '127.0.0.1'
+    try:
+        delete_series_admin(project_id)
+        write_audit_log(current_user['user_id'], f'Admin deleted project {project_id}', ip_addr, 'Success')
+        return {'success': True, 'message': 'Project deleted successfully'}
+    except Exception as e:
+        logger.error(f'Failed to delete project: {e}')
+        raise HTTPException(status_code=500, detail=str(e))
+

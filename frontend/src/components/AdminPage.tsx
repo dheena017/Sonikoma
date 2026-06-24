@@ -3,7 +3,8 @@ import {
   Users, Shield, Clock, Mail, Coins, ShieldAlert,
   Search, Edit2, Trash2, LayoutGrid, Film, Activity,
   ChevronDown, ChevronUp, History, CheckSquare, Square,
-  Settings, Server, ActivitySquare, ToggleLeft, ToggleRight, Ghost
+  Settings, Server, ActivitySquare, ToggleLeft, ToggleRight, Ghost,
+  TrendingUp, BarChart3, FolderGit2
 } from "lucide-react";
 
 export default function AdminPage({
@@ -18,7 +19,7 @@ export default function AdminPage({
     options?: RequestInit
   ) => Promise<Response>;
 }) {
-  const [activeTab, setActiveTab] = useState<'users' | 'settings' | 'health' | 'activity'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'settings' | 'health' | 'activity' | 'analytics' | 'content'>('users');
 
   // Tab: Users
   const [users, setUsers] = useState<any[]>([]);
@@ -41,6 +42,14 @@ export default function AdminPage({
   // Tab: Global Activity
   const [globalLogs, setGlobalLogs] = useState<any[]>([]);
   const [loadingGlobalLogs, setLoadingGlobalLogs] = useState(false);
+
+  // Tab: Analytics
+  const [analytics, setAnalytics] = useState<any>(null);
+  const [loadingAnalytics, setLoadingAnalytics] = useState(false);
+
+  // Tab: Content (Projects)
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loadingProjects, setLoadingProjects] = useState(false);
 
   // Modals state
   const [editingUser, setEditingUser] = useState<any | null>(null);
@@ -114,12 +123,44 @@ export default function AdminPage({
     }
   };
 
+  const fetchAnalytics = async () => {
+    setLoadingAnalytics(true);
+    try {
+      const res = await fetchWithInterceptor("/api/auth/admin/analytics");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) setAnalytics(data.analytics);
+      }
+    } catch (err) {
+      console.error("Failed to fetch analytics:", err);
+    } finally {
+      setLoadingAnalytics(false);
+    }
+  };
+
+  const fetchProjects = async () => {
+    setLoadingProjects(true);
+    try {
+      const res = await fetchWithInterceptor("/api/auth/admin/projects");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) setProjects(data.projects);
+      }
+    } catch (err) {
+      console.error("Failed to fetch projects:", err);
+    } finally {
+      setLoadingProjects(false);
+    }
+  };
+
   useEffect(() => {
     if (!isAuthenticated) return;
     if (activeTab === 'users') { fetchUsers(); fetchStats(); }
     if (activeTab === 'health') fetchStats();
     if (activeTab === 'settings') fetchSettings();
     if (activeTab === 'activity') fetchGlobalLogs();
+    if (activeTab === 'analytics') fetchAnalytics();
+    if (activeTab === 'content') fetchProjects();
   }, [isAuthenticated, fetchWithInterceptor, activeTab]);
 
   const handleUpdateUser = async (e: React.FormEvent) => {
@@ -161,6 +202,17 @@ export default function AdminPage({
       }
     } catch (err) {
       console.error("Failed to delete user:", err);
+    }
+  };
+
+  const handleDeleteProject = async (id: string) => {
+    const confirm = window.confirm("Are you sure you want to delete this project? This is irreversible.");
+    if (!confirm) return;
+    try {
+      const res = await fetchWithInterceptor(`/api/auth/admin/projects/${id}`, { method: 'DELETE' });
+      if (res.ok) fetchProjects();
+    } catch (err) {
+      console.error("Failed to delete project:", err);
     }
   };
 
@@ -314,12 +366,18 @@ export default function AdminPage({
               <Shield className="w-8 h-8 text-purple-400" />
               Ultimate Admin Command Center
             </h1>
-            <p className="text-neutral-400 mt-1">Platform management, health, settings, and logs.</p>
+            <p className="text-neutral-400 mt-1">Platform management, analytics, health, and content moderation.</p>
           </div>
           
-          <div className="flex bg-[#111115] border border-neutral-800 rounded-lg p-1">
+          <div className="flex flex-wrap bg-[#111115] border border-neutral-800 rounded-lg p-1">
             <button onClick={() => setActiveTab('users')} className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'users' ? 'bg-purple-600 text-white' : 'text-neutral-400 hover:text-neutral-200'}`}>
               <Users className="w-4 h-4" /> Users
+            </button>
+            <button onClick={() => setActiveTab('analytics')} className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'analytics' ? 'bg-purple-600 text-white' : 'text-neutral-400 hover:text-neutral-200'}`}>
+              <BarChart3 className="w-4 h-4" /> Analytics
+            </button>
+            <button onClick={() => setActiveTab('content')} className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'content' ? 'bg-purple-600 text-white' : 'text-neutral-400 hover:text-neutral-200'}`}>
+              <FolderGit2 className="w-4 h-4" /> Content
             </button>
             <button onClick={() => setActiveTab('settings')} className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'settings' ? 'bg-purple-600 text-white' : 'text-neutral-400 hover:text-neutral-200'}`}>
               <Settings className="w-4 h-4" /> Settings
@@ -328,7 +386,7 @@ export default function AdminPage({
               <Server className="w-4 h-4" /> Health
             </button>
             <button onClick={() => setActiveTab('activity')} className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'activity' ? 'bg-purple-600 text-white' : 'text-neutral-400 hover:text-neutral-200'}`}>
-              <ActivitySquare className="w-4 h-4" /> Activity
+              <ActivitySquare className="w-4 h-4" /> Logs
             </button>
           </div>
         </div>
@@ -453,6 +511,126 @@ export default function AdminPage({
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Tab Content: ANALYTICS */}
+        {activeTab === 'analytics' && (
+          <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">
+            {loadingAnalytics ? (
+              <div className="text-neutral-500 p-8 text-center">Loading platform analytics...</div>
+            ) : analytics ? (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="bg-[#111115] border border-neutral-800 rounded-xl p-6 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110" />
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400"><Users className="w-5 h-5" /></div>
+                      <h3 className="font-semibold text-neutral-400 text-sm uppercase tracking-wider">Total Users</h3>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-3xl font-bold text-white">{analytics.total_users}</span>
+                      <span className="text-xs font-medium text-emerald-400 flex items-center"><TrendingUp className="w-3 h-3 mr-1" /> +{analytics.new_users_today} today</span>
+                    </div>
+                  </div>
+                  <div className="bg-[#111115] border border-neutral-800 rounded-xl p-6 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110" />
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-400"><Coins className="w-5 h-5" /></div>
+                      <h3 className="font-semibold text-neutral-400 text-sm uppercase tracking-wider">Credits Distributed</h3>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-3xl font-bold text-white font-mono">{analytics.total_credits}</span>
+                    </div>
+                  </div>
+                  <div className="bg-[#111115] border border-neutral-800 rounded-xl p-6 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110" />
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="p-2 bg-amber-500/10 rounded-lg text-amber-400"><Film className="w-5 h-5" /></div>
+                      <h3 className="font-semibold text-neutral-400 text-sm uppercase tracking-wider">Rendered Compute</h3>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-3xl font-bold text-white">{Math.round(analytics.total_duration_sec / 60)}</span>
+                      <span className="text-sm font-medium text-neutral-500">minutes</span>
+                    </div>
+                  </div>
+                  <div className="bg-[#111115] border border-neutral-800 rounded-xl p-6 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110" />
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400"><FolderGit2 className="w-5 h-5" /></div>
+                      <h3 className="font-semibold text-neutral-400 text-sm uppercase tracking-wider">Total Content</h3>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <div className="flex justify-between items-center text-sm"><span className="text-neutral-500">Projects:</span> <span className="font-bold text-white">{analytics.total_series}</span></div>
+                      <div className="flex justify-between items-center text-sm"><span className="text-neutral-500">Chapters:</span> <span className="font-bold text-white">{analytics.total_chapters}</span></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-[#111115] border border-neutral-800 rounded-xl p-6">
+                  <h3 className="font-bold text-white mb-4">Growth Metrics (Last 7 Days)</h3>
+                  <div className="h-64 flex items-end gap-2 px-4 pb-8 pt-4 border-b border-l border-neutral-800">
+                    {analytics.signups_chart && analytics.signups_chart.map((d: any, i: number) => {
+                      const maxVal = Math.max(...analytics.signups_chart.map((x: any) => x.count)) || 1;
+                      const heightPct = (d.count / maxVal) * 100;
+                      return (
+                        <div key={i} className="flex-1 flex flex-col items-center justify-end h-full relative group">
+                          <div className="w-full bg-purple-600/80 hover:bg-purple-500 rounded-t-sm transition-all" style={{ height: `${Math.max(heightPct, 2)}%` }} />
+                          <div className="absolute -bottom-6 text-[10px] text-neutral-500 font-mono rotate-45 origin-left whitespace-nowrap">{d.date.substring(5)}</div>
+                          <div className="absolute -top-8 bg-black/80 px-2 py-1 rounded text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity text-white">{d.count}</div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </>
+            ) : null}
+          </div>
+        )}
+
+        {/* Tab Content: CONTENT MODERATION */}
+        {activeTab === 'content' && (
+          <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">
+            <div className="bg-[#111115] border border-neutral-800 rounded-xl overflow-hidden shadow-xl">
+              <div className="p-4 border-b border-neutral-800 flex justify-between items-center bg-[#0b0b0e]">
+                <h2 className="font-bold text-white flex items-center gap-2"><FolderGit2 className="w-4 h-4 text-blue-400"/> Global Project Registry</h2>
+                <button onClick={fetchProjects} className="text-xs text-neutral-400 hover:text-white transition-colors">Refresh</button>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm whitespace-nowrap">
+                  <thead className="bg-[#0b0b0e] text-neutral-400 border-b border-neutral-800 text-xs uppercase font-semibold">
+                    <tr>
+                      <th className="px-6 py-4">Project ID</th>
+                      <th className="px-6 py-4">Title</th>
+                      <th className="px-6 py-4">Creator</th>
+                      <th className="px-6 py-4">Created At</th>
+                      <th className="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-800/50">
+                    {loadingProjects ? (
+                      <tr><td colSpan={5} className="px-6 py-12 text-center text-neutral-500">Loading projects...</td></tr>
+                    ) : projects.length === 0 ? (
+                      <tr><td colSpan={5} className="px-6 py-12 text-center text-neutral-500">No projects found.</td></tr>
+                    ) : (
+                      projects.map((p) => (
+                        <tr key={p.id} className="hover:bg-white/[0.02] transition-colors">
+                          <td className="px-6 py-4 text-neutral-500 font-mono text-xs">{p.id.substring(0, 8)}...</td>
+                          <td className="px-6 py-4 font-medium text-neutral-200">{p.title || "Untitled Project"}</td>
+                          <td className="px-6 py-4 text-neutral-400">{p.user_email || "Unknown User"}</td>
+                          <td className="px-6 py-4 text-neutral-500 font-mono text-xs">{new Date(p.created_at).toLocaleDateString()}</td>
+                          <td className="px-6 py-4 text-right">
+                            <button onClick={() => handleDeleteProject(p.id)} className="p-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 rounded-md border border-rose-500/20 transition-colors" title="Delete Project">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         )}
 

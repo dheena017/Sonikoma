@@ -42,16 +42,28 @@ export default function NotificationStack({
   // Only show notifications that haven't been dismissed from toast stack
   // and were created recently (within last 10 seconds) OR are errors/warnings that haven't been dismissed
   const activeToasts = notifications.filter((n) => !n.toastDismissed);
+  const MAX_TOASTS = 5;
+  // If notifications are added to the end, we want the last MAX_TOASTS
+  // Wait, let's just slice the first MAX_TOASTS if they are newest-first, or last if oldest-first.
+  // We'll take the first MAX_TOASTS from the reversed array or just slice from end.
+  // Assuming the newest are at the end:
+  const visibleToasts = activeToasts.slice(-MAX_TOASTS);
+  const hiddenCount = Math.max(0, activeToasts.length - MAX_TOASTS);
 
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col-reverse justify-end gap-2 pointer-events-none w-full max-w-sm sm:max-w-md">
-      {activeToasts.map((note) => (
+      {visibleToasts.map((note) => (
         <IndividualNotification
           key={note.id}
           note={note}
           onRemove={removeNotification}
         />
       ))}
+      {hiddenCount > 0 && (
+        <div className="bg-neutral-900/90 border border-neutral-800 text-neutral-400 text-[11px] font-bold uppercase tracking-widest px-4 py-2 rounded-xl text-center shadow-lg backdrop-blur-sm animate-in fade-in">
+          + {hiddenCount} more hidden (Check Hub)
+        </div>
+      )}
     </div>
   );
 }
@@ -68,16 +80,21 @@ function IndividualNotification({
     if (note.errorCode === 429 && note.onRetry) {
       return note.retryDelay || 10;
     }
+    if (note.type === "success" || note.type === "info") {
+      return 5;
+    }
     return null;
   });
 
+  const [isHovered, setIsHovered] = useState(false);
+  const initialCountdownRef = useRef<number | null>(countdown);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (countdown === null) return;
+    if (countdown === null || isHovered) return;
 
     if (countdown <= 0) {
-      if (note.onRetry) {
+      if (note.errorCode === 429 && note.onRetry) {
         note.onRetry();
       }
       onRemove(note.id);
@@ -93,7 +110,7 @@ function IndividualNotification({
         clearTimeout(timerRef.current);
       }
     };
-  }, [countdown, note, onRemove]);
+  }, [countdown, note, onRemove, isHovered]);
 
   const handleCancel = () => {
     if (timerRef.current) {
@@ -152,9 +169,11 @@ function IndividualNotification({
 
   return (
     <div
-      className={`pointer-events-auto flex flex-col p-4 rounded-xl shadow-2xl animate-in fade-in slide-in-from-right-4 transition-all duration-300 w-full ${classes}`}
+      className={`pointer-events-auto flex flex-col p-4 rounded-xl shadow-2xl animate-in fade-in slide-in-from-right-4 transition-all duration-300 w-full relative overflow-hidden ${classes}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-3 relative z-10">
         {icon}
         <div className="flex-1 min-w-0">
           <h3 className="text-xs font-bold uppercase tracking-wider font-mono text-neutral-200/90 leading-tight">
@@ -166,15 +185,16 @@ function IndividualNotification({
         </div>
         <button
           onClick={handleCancel}
-          className="hover:bg-black/20 p-1.5 rounded-lg transition-colors shrink-0"
-          title="Dismiss"
+          className="hover:bg-black/20 p-1.5 rounded-lg transition-colors shrink-0 cursor-pointer"
+          title="Dismiss notification"
+          aria-label="Dismiss notification"
         >
           <X className="h-4 w-4 text-neutral-400 hover:text-white" />
         </button>
       </div>
 
-      {countdown !== null && (
-        <div className="mt-3 pt-3 border-t border-amber-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-amber-955/40 p-2.5 rounded-lg">
+      {countdown !== null && note.errorCode === 429 && (
+        <div className="mt-3 pt-3 border-t border-amber-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-amber-955/40 p-2.5 rounded-lg relative z-10">
           <div className="flex items-center gap-2">
             <span className="flex h-2 w-2 relative">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
@@ -202,6 +222,16 @@ function IndividualNotification({
               <span>Retry Now</span>
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Progress bar for auto-dismissible toasts */}
+      {countdown !== null && note.errorCode !== 429 && initialCountdownRef.current && (
+        <div className="absolute bottom-0 left-0 w-full h-1 bg-black/20 overflow-hidden">
+          <div
+            className={`h-full bg-white/40 transition-all duration-1000 ease-linear`}
+            style={{ width: `${(countdown / initialCountdownRef.current) * 100}%` }}
+          />
         </div>
       )}
     </div>
