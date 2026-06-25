@@ -129,6 +129,7 @@ export function useAppRouter({
             path === "/settings" ||
             path === "/logs" ||
             path === "/status" ||
+            path === "/ai-models" ||
             path === "/shortcuts" ||
             path === "/ai-optimizer" ||
             path === "/panel-assistant" ||
@@ -193,6 +194,7 @@ export function useAppRouter({
         path === "/settings" ||
         path === "/logs" ||
         path === "/status" ||
+        path === "/ai-models" ||
         path === "/shortcuts" ||
         path === "/ai-optimizer" ||
         path === "/panel-assistant" ||

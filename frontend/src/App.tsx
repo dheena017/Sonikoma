@@ -26,6 +26,7 @@ import PageNotFound from "./components/PageNotFound.js";
 import AdvancedSettings from "./components/AdvancedSettings.js";
 import LogsPage from "./components/LogsPage.js";
 import StatusPage from "./components/StatusPage.js";
+import AIModelsPage from "./components/AIModelsPage.js";
 import ShortcutsPage from "./components/ShortcutsPage.js";
 
 // --- Processing & Editor Modals ---
@@ -554,6 +555,7 @@ export default function App() {
   const isEditorPath = currentPath.startsWith("/editor");
   const isLogsPath = currentPath === "/logs";
   const isStatusPath = currentPath === "/status";
+  const isAIModelsPath = currentPath === "/ai-models";
   const isShortcutsPath = currentPath === "/shortcuts";
   const isOptimizerPath = currentPath === "/ai-optimizer";
   const isPanelAssistantPath = currentPath.startsWith("/panel-assistant");
@@ -1040,6 +1042,19 @@ export default function App() {
             </div>
           )}
 
+          {/* PAGE VIEW 4.1: Dedicated AI Model Hub & Playground */}
+          {isAIModelsPath && (
+            <div className="page-transition w-full flex-1 flex flex-col">
+              <AIModelsPage
+                onNavigateHome={handleNavigateHome}
+                fetchWithInterceptor={fetchWithInterceptor}
+                selectedModel={selectedModel}
+                setSelectedModel={setSelectedModel}
+                addNotification={addNotification}
+              />
+            </div>
+          )}
+
           {/* PAGE VIEW 5: Global Shortcuts Configuration */}
           {isShortcutsPath && (
             <div className="page-transition w-full flex-1 flex flex-col">
@@ -1345,6 +1360,7 @@ export default function App() {
             !isProjectEditorPath &&
             !isLogsPath &&
             !isStatusPath &&
+            !isAIModelsPath &&
             !isShortcutsPath &&
             !isOptimizerPath &&
             !isPanelAssistantPath &&

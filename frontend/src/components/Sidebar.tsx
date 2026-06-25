@@ -17,6 +17,7 @@ import {
   Bell,
   Shield,
   FolderOpen,
+  Award,
 } from "lucide-react";
 
 import { useThemeMode } from "../hooks/useThemeMode";
@@ -78,6 +79,7 @@ export default function Sidebar({
   const isLogs = currentPath === "/logs";
   const isStatus = currentPath === "/status";
   const isShortcuts = currentPath === "/shortcuts";
+  const isAIModels = currentPath === "/ai-models";
   const isProjects = currentPath === "/projects";
 
   const params = new URLSearchParams(window.location.search);
@@ -223,6 +225,13 @@ export default function Sidebar({
           icon: Activity,
           active: isStatus,
           onClick: () => navigateTo("/status"),
+          enabled: true,
+        },
+        {
+          label: "AI Models",
+          icon: Award,
+          active: isAIModels,
+          onClick: () => navigateTo("/ai-models"),
           enabled: true,
         },
         {

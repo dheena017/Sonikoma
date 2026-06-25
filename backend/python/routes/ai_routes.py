@@ -55,14 +55,18 @@ def get_all_user_keys(
         "huggingface": clean_api_key(x_user_huggingface_key) or clean_api_key(os.getenv("HUGGINGFACE_API_KEY")),
     }
 
-def get_user_gemini_key(x_user_gemini_key: str = Header(None, alias="X-User-Gemini-Key")):
-    key = clean_api_key(x_user_gemini_key) or clean_api_key(os.getenv("GEMINI_API_KEY"))
-    if not key:
-        raise HTTPException(
-            status_code=401, 
-            detail="MISSING_API_KEY"
-        )
-    return key
+def get_user_gemini_key(
+    x_user_gemini_key: str = Header(None, alias="X-User-Gemini-Key"),
+    x_user_openai_key: str = Header(None, alias="X-User-OpenAI-Key"),
+    x_user_anthropic_key: str = Header(None, alias="X-User-Anthropic-Key"),
+    x_user_huggingface_key: str = Header(None, alias="X-User-HuggingFace-Key"),
+):
+    return {
+        "gemini": clean_api_key(x_user_gemini_key) or clean_api_key(os.getenv("GEMINI_API_KEY")),
+        "openai": clean_api_key(x_user_openai_key) or clean_api_key(os.getenv("OPENAI_API_KEY")),
+        "anthropic": clean_api_key(x_user_anthropic_key) or clean_api_key(os.getenv("ANTHROPIC_API_KEY")),
+        "huggingface": clean_api_key(x_user_huggingface_key) or clean_api_key(os.getenv("HUGGINGFACE_API_KEY")),
+    }
 
 router = APIRouter()
 
@@ -669,9 +673,7 @@ async def analyze_image(body: AnalyzeImageRequest, user_api_key: str = Depends(g
 
     # 3. Model mapping
     target_model = body.model or MODEL_FALLBACKS[0]
-    if not target_model.lower().startswith("gemini"):
-        target_model = MODEL_FALLBACKS[0]
-    elif "gemini-3.5" in target_model.lower():
+    if target_model.lower().startswith("gemini") and "gemini-3.5" in target_model.lower():
         if "pro" in target_model.lower():
             target_model = "gemini-2.5-pro"
         else:
@@ -696,7 +698,7 @@ async def analyze_image(body: AnalyzeImageRequest, user_api_key: str = Depends(g
         # Execute using panel_analysis skill
         skill = registry.get("panel_analysis")
         logger.info(f"[Model] Executing 'panel_analysis' skill using {target_model} (narration_style={narration_style})...")
-        raw_text = await skill.execute(model=target_model, image_bytes=img_buffer, api_key=user_api_key, tone_hint=tone_hint, narrative_length_hint=narrative_length_hint)
+        raw_text = await skill.execute(model=target_model, image_bytes=img_buffer, user_keys=user_api_key, tone_hint=tone_hint, narrative_length_hint=narrative_length_hint)
         
         analysis = validate_analysis(json.loads(raw_text))
         logger.info(f"[Model] Analysis completed for panel.")
@@ -765,9 +767,7 @@ async def analyze_batch(body: AnalyzeBatchRequest, user_api_key: str = Depends(g
     logger.info(f"[Batch Analyze] Starting {len(body.urls)} panels. Concurrency=4")
     
     target_model = body.model or MODEL_FALLBACKS[0]
-    if not target_model.lower().startswith("gemini"):
-        target_model = MODEL_FALLBACKS[0]
-    elif "gemini-3.5" in target_model.lower():
+    if target_model.lower().startswith("gemini") and "gemini-3.5" in target_model.lower():
         if "pro" in target_model.lower():
             target_model = "gemini-2.5-pro"
         else:
@@ -803,7 +803,7 @@ async def analyze_batch(body: AnalyzeBatchRequest, user_api_key: str = Depends(g
                     narrative_length_hint = "30-65 words, highly engaging and detailed for YouTube story narration, describing what the characters do, think, or speak."
 
                 skill = registry.get("panel_analysis")
-                raw_text = await skill.execute(model=target_model, image_bytes=img_buffer, api_key=user_api_key, tone_hint=tone_hint, narrative_length_hint=narrative_length_hint)
+                raw_text = await skill.execute(model=target_model, image_bytes=img_buffer, user_keys=user_api_key, tone_hint=tone_hint, narrative_length_hint=narrative_length_hint)
                 analysis = validate_analysis(json.loads(raw_text))
                 
                 audio_url = None
@@ -865,9 +865,7 @@ async def analyze_sequence(body: AnalyzeSequenceRequest, user_api_key: str = Dep
         raise HTTPException(status_code=400, detail="Urls list cannot be empty")
         
     target_model = body.model or MODEL_FALLBACKS[0]
-    if not target_model.lower().startswith("gemini"):
-        target_model = MODEL_FALLBACKS[0]
-    elif "gemini-3.5" in target_model.lower():
+    if target_model.lower().startswith("gemini") and "gemini-3.5" in target_model.lower():
         if "pro" in target_model.lower():
             target_model = "gemini-2.5-pro"
         else:
@@ -887,13 +885,10 @@ async def analyze_sequence(body: AnalyzeSequenceRequest, user_api_key: str = Dep
             logger.warning(f"[Sequence] Failed to load image {url}: {e}")
             raise HTTPException(status_code=400, detail=f"Failed to load image: {url}")
 
-    # 2. Ask Gemini to look at ALL images together
+    # 2. Ask model to look at ALL images together
     try:
-        from google import genai
-        from google.genai import types
-        
-        # Use existing configured API key
-        client = genai.Client(api_key=user_api_key)
+        from skills.base import get_provider_and_model, resolve_api_key
+        provider, clean_model = get_provider_and_model(target_model)
         
         style_hint = "max 25 words per panel, impactful" if body.narrationStyle == "short" else "detailed YouTube story narration describing actions and dialogue"
         
@@ -912,32 +907,126 @@ async def analyze_sequence(body: AnalyzeSequenceRequest, user_api_key: str = Dep
         - "visual_description" (string)
         """
         
-        contents = [system_instruction]
-        for img in image_parts:
-            contents.append(types.Part.from_bytes(data=img["data"], mime_type=img["mime_type"]))
+        if provider == "gemini":
+            from google import genai
+            from google.genai import types
             
-        response = client.models.generate_content(
-            model=target_model,
-            contents=contents,
-            config=types.GenerateContentConfig(response_mime_type="application/json")
-        )
-        
-        raw_text = response.text
+            gemini_key = resolve_api_key("gemini", user_keys=user_api_key)
+            client = genai.Client(api_key=gemini_key)
+            
+            contents = [system_instruction]
+            for img in image_parts:
+                contents.append(types.Part.from_bytes(data=img["data"], mime_type=img["mime_type"]))
+                
+            response = client.models.generate_content(
+                model=clean_model,
+                contents=contents,
+                config=types.GenerateContentConfig(response_mime_type="application/json")
+            )
+            raw_text = response.text
+        elif provider == "openai":
+            import requests
+            import base64
+            openai_key = resolve_api_key("openai", user_keys=user_api_key)
+            if not openai_key:
+                raise RuntimeError("Missing OpenAI API Key.")
+            
+            headers = {
+                "Authorization": f"Bearer {openai_key}",
+                "Content-Type": "application/json"
+            }
+            messages = [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": system_instruction}
+                    ]
+                }
+            ]
+            for img in image_parts:
+                base64_image = base64.b64encode(img["data"]).decode("utf-8")
+                messages[0]["content"].append({
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/jpeg;base64,{base64_image}"
+                    }
+                })
+            
+            payload = {
+                "model": clean_model,
+                "messages": messages,
+                "response_format": {"type": "json_object"}
+            }
+            
+            loop = asyncio.get_running_loop()
+            def make_request():
+                return requests.post("https://api.openai.com/v1/chat/completions", json=payload, headers=headers, timeout=60)
+            
+            response = await loop.run_in_executor(None, make_request)
+            if response.status_code != 200:
+                raise RuntimeError(f"OpenAI API request failed (HTTP {response.status_code}): {response.text}")
+            raw_text = response.json()["choices"][0]["message"]["content"]
+            
+        elif provider == "anthropic":
+            import requests
+            import base64
+            anthropic_key = resolve_api_key("anthropic", user_keys=user_api_key)
+            if not anthropic_key:
+                raise RuntimeError("Missing Anthropic API Key.")
+            
+            headers = {
+                "x-api-key": anthropic_key,
+                "anthropic-version": "2023-06-01",
+                "Content-Type": "application/json"
+            }
+            messages = [
+                {
+                    "role": "user",
+                    "content": []
+                }
+            ]
+            for img in image_parts:
+                base64_image = base64.b64encode(img["data"]).decode("utf-8")
+                messages[0]["content"].append({
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": img["mime_type"],
+                        "data": base64_image
+                    }
+                })
+            messages[0]["content"].append({
+                "type": "text",
+                "text": system_instruction
+            })
+            
+            payload = {
+                "model": clean_model,
+                "max_tokens": 4096,
+                "system": "You MUST return ONLY a valid JSON array of objects representing panel descriptions. No other text.",
+                "messages": messages
+            }
+            
+            loop = asyncio.get_running_loop()
+            def make_request():
+                return requests.post("https://api.anthropic.com/v1/messages", json=payload, headers=headers, timeout=60)
+            
+            response = await loop.run_in_executor(None, make_request)
+            if response.status_code != 200:
+                raise RuntimeError(f"Anthropic API request failed (HTTP {response.status_code}): {response.text}")
+            raw_text = response.json()["content"][0]["text"]
+            
+        else:
+            raise RuntimeError(f"Multimodal sequence analysis not supported for provider: {provider}")
+
         if not raw_text:
-            candidates = getattr(response, 'candidates', [])
-            finish_reason = None
-            safety_ratings = []
-            if candidates:
-                finish_reason = getattr(candidates[0], 'finish_reason', None)
-                safety_ratings = getattr(candidates[0], 'safety_ratings', [])
-            
-            logger.error(f"[Sequence] AI returned an empty response. Finish reason: {finish_reason}, Safety ratings: {safety_ratings}")
             raise HTTPException(
                 status_code=500,
-                detail=f"AI model returned an empty response (possibly blocked by safety filters or prompt size). Finish reason: {finish_reason}"
+                detail="AI model returned an empty response."
             )
             
-        sequence_data = json.loads(raw_text)
+        from skills.base import extract_json
+        sequence_data = json.loads(extract_json(raw_text))
         
         if len(sequence_data) != len(body.urls):
             logger.warning(f"[Sequence] AI returned {len(sequence_data)} items, expected {len(body.urls)}")
@@ -1008,23 +1097,24 @@ async def ai_smart_crop(body: SmartCropRequest, user_api_key: str = Depends(get_
         ai_failed = False
         ai_error_msg = ""
 
-        # Strategy 1: Try Gemini AI crop box model first if not local-cv
+        # Strategy 1: Try AI crop box model first if not local-cv
         if body.strategy != "local-cv" and body.model != "local-cv":
-            if ai_initialized:
-                target_model = body.model or "gemini-2.5-flash"
-                if not target_model.lower().startswith("gemini"):
+            target_model = body.model or "gemini-2.5-flash"
+            from skills.base import get_provider_and_model
+            provider, clean_model = get_provider_and_model(target_model)
+            if provider == "gemini" and "gemini-3.5" in target_model.lower():
+                if "pro" in target_model.lower():
+                    target_model = "gemini-2.5-pro"
+                else:
                     target_model = "gemini-2.5-flash"
-                elif "gemini-3.5" in target_model.lower():
-                    if "pro" in target_model.lower():
-                        target_model = "gemini-2.5-pro"
-                    else:
-                        target_model = "gemini-2.5-flash"
-                    logger.info(f"[ai_smart_crop] Translated gemini-3.5 model selection to: {target_model}")
-                logger.info(f"[AI Smart Crop API] Using Gemini model: {target_model}")
-                
+                logger.info(f"[ai_smart_crop] Translated gemini-3.5 model selection to: {target_model}")
+            logger.info(f"[AI Smart Crop API] Using AI model: {target_model}")
+            
+            # Allow execution if any provider is configured
+            if True:
                 try:
                     skill = registry.get("smart_crop")
-                    logger.info(f"[AI Smart Crop] Executing Gemini-based detection...")
+                    logger.info(f"[AI Smart Crop] Executing AI-based detection...")
 
                     # Prepare focus mode instructions
                     focus_instr = ""
@@ -1045,7 +1135,7 @@ async def ai_smart_crop(body: SmartCropRequest, user_api_key: str = Depends(get_
                     raw_text = await skill.execute(
                         model=target_model,
                         image_bytes=image_buffer,
-                        api_key=user_api_key,
+                        user_keys=user_api_key,
                         guidance_instructions=final_guidance
                     )
                     data = json.loads(raw_text)
@@ -1252,10 +1342,12 @@ async def ai_smart_crop_batch(body: SmartCropBatchRequest, user_api_key: str = D
 
 # ─── New Dynamic AI Skills Endpoints ──────────────────────────────────────────
 
-async def run_md_skill(skill_name: str, model: str, api_key: str = None, **kwargs) -> Dict[str, Any]:
+async def run_md_skill(skill_name: str, model: str, api_key: Any = None, **kwargs) -> Dict[str, Any]:
     try:
         skill = registry.get(skill_name)
-        raw_text = await skill.execute(model=model, api_key=api_key, **kwargs)
+        user_keys = api_key if isinstance(api_key, dict) else None
+        single_key = api_key if isinstance(api_key, str) else None
+        raw_text = await skill.execute(model=model, api_key=single_key, user_keys=user_keys, **kwargs)
         return {
             "success": True,
             "result": json.loads(raw_text),
