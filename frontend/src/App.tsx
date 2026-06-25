@@ -1123,6 +1123,8 @@ export default function App() {
               onLogout={logout}
               onNavigateHome={handleNavigateHome}
               onRefreshUser={checkAuth}
+              themeMode={themeMode}
+              toggleThemeMode={toggleThemeMode}
             />
           )}
 
