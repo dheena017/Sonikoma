@@ -28,186 +28,260 @@ body {
 }
 
 /* =========================================================
-   LIGHT MODE OVERRIDES
-   Applied when: <html data-mode="light">
-   Full coverage: backgrounds, text, borders, inputs,
-   modals, cards, sidebar, header, scrollbars, shadows
+   LIGHT MODE — DEEP COVERAGE
+   Covers every dark pattern found across all components.
+   Applied when <html data-mode="light">.
    ========================================================= */
 :root[data-mode="light"] {
   color-scheme: light;
 }
 
-/* ── Body ─────────────────────────────────────────────── */
+/* ── Global smooth transition ────────────────────────────── */
+[data-mode="light"] *,
+[data-mode="dark"] * {
+  transition-property: background-color, border-color, color, box-shadow, fill, stroke;
+  transition-duration: 200ms;
+  transition-timing-function: ease;
+}
+[data-mode="light"] button,
+[data-mode="dark"] button,
+[data-mode="light"] a,
+[data-mode="dark"] a {
+  transition-property: background-color, border-color, color, opacity, transform, box-shadow;
+  transition-duration: 150ms;
+}
+/* Don't apply transition to animation-heavy elements */
+[data-mode="light"] [class*="animate-"],
+[data-mode="dark"] [class*="animate-"] {
+  transition: none;
+}
+
+/* ── Body & App root ─────────────────────────────────────── */
 [data-mode="light"] body {
   background-color: #f4f4f5;
   color: #18181b;
   color-scheme: light;
 }
-
-/* ── App root ─────────────────────────────────────────── */
 [data-mode="light"] #app_root {
   background-color: #f4f4f5;
   color: #18181b;
 }
+[data-mode="light"] .min-h-screen {
+  background-color: #f4f4f5;
+}
 
-/* ── Header ───────────────────────────────────────────── */
+/* ── Header ──────────────────────────────────────────────── */
 [data-mode="light"] #header_pane {
   background-color: rgba(255, 255, 255, 0.92) !important;
   border-bottom-color: #e4e4e7 !important;
   backdrop-filter: blur(12px);
 }
 
-/* ── Sidebar ──────────────────────────────────────────── */
+/* ── Sidebar / aside ─────────────────────────────────────── */
 [data-mode="light"] #sidebar_pane,
 [data-mode="light"] aside {
   background-color: #ffffff !important;
   border-right-color: #e4e4e7 !important;
 }
 
-/* ── Backgrounds: neutral ─────────────────────────────── */
-[data-mode="light"] .bg-\[\#070709\],
-[data-mode="light"] .bg-\[\#09090b\],
+/* ── Neutral backgrounds (Tailwind scale) ─────────────────── */
 [data-mode="light"] .bg-neutral-950,
 [data-mode="light"] .bg-neutral-925 {
   background-color: #ffffff !important;
 }
-
 [data-mode="light"] .bg-neutral-900 {
   background-color: #f9f9fb !important;
 }
-
 [data-mode="light"] .bg-neutral-850 {
   background-color: #ebebef !important;
 }
-
 [data-mode="light"] .bg-neutral-800 {
   background-color: #e0e0e6 !important;
 }
-
 [data-mode="light"] .bg-neutral-750 {
   background-color: #d4d4d8 !important;
 }
 
+/* ── Neutral background opacity variants ─────────────────── */
 [data-mode="light"] .bg-neutral-955\/40,
+[data-mode="light"] .bg-neutral-950\/95,
 [data-mode="light"] .bg-neutral-950\/80,
+[data-mode="light"] .bg-neutral-950\/75,
+[data-mode="light"] .bg-neutral-950\/60,
 [data-mode="light"] .bg-neutral-950\/40,
 [data-mode="light"] .bg-neutral-950\/30,
-[data-mode="light"] .bg-neutral-950\/20,
-[data-mode="light"] .bg-neutral-950\/60 {
-  background-color: rgba(244, 244, 245, 0.8) !important;
+[data-mode="light"] .bg-neutral-950\/20 {
+  background-color: rgba(244, 244, 245, 0.85) !important;
 }
-
+[data-mode="light"] .bg-neutral-900\/95,
 [data-mode="light"] .bg-neutral-900\/80,
 [data-mode="light"] .bg-neutral-900\/60,
 [data-mode="light"] .bg-neutral-900\/40,
 [data-mode="light"] .bg-neutral-900\/30 {
   background-color: rgba(249, 249, 251, 0.9) !important;
 }
+[data-mode="light"] .bg-neutral-900\/20 {
+  background-color: rgba(249, 249, 251, 0.6) !important;
+}
 
-/* ── Backgrounds: zinc ────────────────────────────────── */
+/* ── Zinc backgrounds ─────────────────────────────────────── */
 [data-mode="light"] .bg-zinc-950,
 [data-mode="light"] .bg-zinc-900 {
   background-color: #f9f9fb !important;
 }
-
 [data-mode="light"] .bg-zinc-800 {
   background-color: #e0e0e6 !important;
 }
-
 [data-mode="light"] .bg-zinc-700 {
   background-color: #d4d4d8 !important;
 }
 
-/* ── Hardcoded hex backgrounds ────────────────────────── */
+/* ── Hardcoded near-black hex backgrounds ─────────────────
+   Every distinct dark hex found across components:          */
+[data-mode="light"] .bg-\[\#070709\],
+[data-mode="light"] .bg-\[\#09090b\],
+[data-mode="light"] .bg-\[\#060608\],
+[data-mode="light"] .bg-\[\#08080c\],
 [data-mode="light"] .bg-\[\#0a0a0b\],
+[data-mode="light"] .bg-\[\#0a0a0f\],
+[data-mode="light"] .bg-\[\#0b0b0e\],
+[data-mode="light"] .bg-\[\#0c0c0e\],
+[data-mode="light"] .bg-\[\#0c0c10\],
 [data-mode="light"] .bg-\[\#0d0d0f\],
+[data-mode="light"] .bg-\[\#0d0d10\],
+[data-mode="light"] .bg-\[\#0e0e13\],
+[data-mode="light"] .bg-\[\#0f0f13\],
 [data-mode="light"] .bg-\[\#111113\],
+[data-mode="light"] .bg-\[\#121217\],
 [data-mode="light"] .bg-\[\#141416\] {
-  background-color: #f4f4f5 !important;
+  background-color: #f9f9fb !important;
 }
 
-/* ── Text: neutral ────────────────────────────────────── */
+/* ── Black / opacity backgrounds ─────────────────────────── */
+[data-mode="light"] .bg-black {
+  background-color: #e8e8ec !important;
+}
+[data-mode="light"] .bg-black\/20 {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+}
+[data-mode="light"] .bg-black\/30 {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+[data-mode="light"] .bg-black\/40 {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+}
+[data-mode="light"] .bg-black\/50,
+[data-mode="light"] .bg-black\/55 {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+[data-mode="light"] .bg-black\/60 {
+  background-color: rgba(0, 0, 0, 0.25) !important;
+}
+[data-mode="light"] .bg-black\/70,
+[data-mode="light"] .bg-black\/80 {
+  background-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+/* ── White opacity backgrounds → surface tints ───────────── */
+[data-mode="light"] .bg-white\/5 {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+[data-mode="light"] .bg-white\/10 {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* ── Text: white & neutral scale ─────────────────────────── */
 [data-mode="light"] .text-white,
 [data-mode="light"] .text-neutral-50,
 [data-mode="light"] .text-neutral-100 {
   color: #18181b !important;
 }
-
 [data-mode="light"] .text-neutral-150,
 [data-mode="light"] .text-neutral-200 {
   color: #27272a !important;
 }
-
 [data-mode="light"] .text-neutral-250,
 [data-mode="light"] .text-neutral-300 {
   color: #3f3f46 !important;
 }
-
 [data-mode="light"] .text-neutral-350,
 [data-mode="light"] .text-neutral-400,
 [data-mode="light"] .text-neutral-450 {
   color: #52525b !important;
 }
-
 [data-mode="light"] .text-neutral-500 {
   color: #71717a !important;
 }
-
 [data-mode="light"] .text-neutral-600 {
   color: #a1a1aa !important;
 }
+/* Hardcoded light-gray text used in terminals/logs */
+[data-mode="light"] .text-\[\#dcdcdc\],
+[data-mode="light"] .text-\[\#ededed\] {
+  color: #3f3f46 !important;
+}
 
-/* ── Borders: neutral ─────────────────────────────────── */
+/* ── Borders: neutral scale ───────────────────────────────── */
 [data-mode="light"] .border-neutral-950 {
   border-color: #e4e4e7 !important;
 }
-
 [data-mode="light"] .border-neutral-900 {
   border-color: #e4e4e7 !important;
 }
-
 [data-mode="light"] .border-neutral-850 {
   border-color: #d4d4d8 !important;
 }
-
 [data-mode="light"] .border-neutral-800 {
   border-color: #c8c8cf !important;
 }
-
 [data-mode="light"] .border-neutral-750 {
   border-color: #b4b4be !important;
 }
-
 [data-mode="light"] .border-neutral-700 {
   border-color: #a1a1aa !important;
 }
 
-/* ── Borders: with opacity modifiers ─────────────────── */
+/* ── Borders: neutral opacity variants ───────────────────── */
 [data-mode="light"] .border-neutral-900\/60,
 [data-mode="light"] .border-neutral-900\/40 {
-  border-color: rgba(228, 228, 231, 0.8) !important;
+  border-color: rgba(228, 228, 231, 0.9) !important;
 }
-
 [data-mode="light"] .border-neutral-850\/60 {
-  border-color: rgba(212, 212, 216, 0.8) !important;
+  border-color: rgba(212, 212, 216, 0.9) !important;
+}
+[data-mode="light"] .border-neutral-800\/60,
+[data-mode="light"] .border-neutral-800\/40 {
+  border-color: rgba(200, 200, 207, 0.9) !important;
 }
 
-/* ── Borders: zinc ────────────────────────────────────── */
+/* ── Borders: white opacity (used heavily in profile/detail pages) */
+[data-mode="light"] .border-white\/5,
+[data-mode="light"] .border-white\/8 {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+[data-mode="light"] .border-white\/10 {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+[data-mode="light"] .border-white\/15,
+[data-mode="light"] .border-white\/20 {
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+/* ── Borders: zinc ────────────────────────────────────────── */
 [data-mode="light"] .border-zinc-800,
 [data-mode="light"] .border-zinc-700 {
   border-color: #d4d4d8 !important;
 }
 
-/* ── Divide ───────────────────────────────────────────── */
+/* ── Divide ───────────────────────────────────────────────── */
 [data-mode="light"] .divide-neutral-900 > * + * {
   border-color: #e4e4e7 !important;
 }
-
 [data-mode="light"] .divide-neutral-800 > * + * {
   border-color: #d4d4d8 !important;
 }
 
-/* ── Inputs / selects / textareas ─────────────────────── */
+/* ── Inputs / selects / textareas ─────────────────────────── */
 [data-mode="light"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
 [data-mode="light"] select,
 [data-mode="light"] textarea {
@@ -215,85 +289,81 @@ body {
   color: #18181b !important;
   border-color: #d4d4d8 !important;
 }
-
 [data-mode="light"] input::placeholder,
 [data-mode="light"] textarea::placeholder {
   color: #a1a1aa !important;
 }
-
-/* ── Dropdowns / popovers / modals ────────────────────── */
-[data-mode="light"] .bg-neutral-900.rounded-2xl,
-[data-mode="light"] .bg-neutral-900.rounded-xl,
-[data-mode="light"] [class*="shadow-2xl"].bg-neutral-900 {
-  background-color: #ffffff !important;
-  border-color: #e4e4e7 !important;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12) !important;
+/* Range / slider track */
+[data-mode="light"] input[type="range"] {
+  background-color: #e0e0e6 !important;
 }
 
-/* ── Cards & panels ───────────────────────────────────── */
-[data-mode="light"] .bg-neutral-950\/30.rounded-lg,
-[data-mode="light"] .bg-neutral-950\/30.rounded-xl {
-  background-color: rgba(244, 244, 245, 0.6) !important;
-}
-
-/* ── Scrollbars ───────────────────────────────────────── */
+/* ── Scrollbars ───────────────────────────────────────────── */
 [data-mode="light"] .scrollbar-thin::-webkit-scrollbar-track,
 [data-mode="light"] .custom-scrollbar::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.05);
 }
-
 [data-mode="light"] .scrollbar-thin::-webkit-scrollbar-thumb,
 [data-mode="light"] .custom-scrollbar::-webkit-scrollbar-thumb {
   background: #c4c4cc;
 }
-
 [data-mode="light"] .scrollbar-thin::-webkit-scrollbar-thumb:hover,
 [data-mode="light"] .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #a1a1aa;
 }
 
-/* ── Shadows ──────────────────────────────────────────── */
-[data-mode="light"] .shadow-black\/60,
-[data-mode="light"] .shadow-black\/45,
-[data-mode="light"] .shadow-black\/30 {
-  --tw-shadow-color: rgba(0, 0, 0, 0.1) !important;
-}
-
+/* ── Shadows ──────────────────────────────────────────────── */
 [data-mode="light"] .shadow-inner {
   box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05) !important;
 }
+[data-mode="light"] .shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1) !important;
+}
+[data-mode="light"] .shadow-xl {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08) !important;
+}
+[data-mode="light"] .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07) !important;
+}
 
-/* ── Ring overrides ───────────────────────────────────── */
+/* ── Rings ────────────────────────────────────────────────── */
 [data-mode="light"] .ring-neutral-900,
 [data-mode="light"] .ring-neutral-800 {
   --tw-ring-color: #e4e4e7 !important;
 }
 
-/* ── Backdrop filter (mobile sidebar overlay) ─────────── */
-[data-mode="light"] .bg-black\/60 {
-  background-color: rgba(0, 0, 0, 0.3) !important;
+/* ── Terminal / log output ────────────────────────────────── */
+[data-mode="light"] .font-mono.text-\[\#dcdcdc\],
+[data-mode="light"] code,
+[data-mode="light"] pre {
+  background-color: #f0f0f4 !important;
+  color: #27272a !important;
 }
 
-/* ── Transition on all major containers ───────────────── */
-[data-mode="light"] *,
-[data-mode="dark"] * {
-  transition-property: background-color, border-color, color, box-shadow;
-  transition-duration: 200ms;
-  transition-timing-function: ease;
+/* ── Backdrop overlays ────────────────────────────────────── */
+[data-mode="light"] .backdrop-blur-md,
+[data-mode="light"] .backdrop-blur-xl {
+  backdrop-filter: blur(12px);
 }
 
-/* ── Preserve transition for interactive elements ─────── */
-[data-mode="light"] button,
-[data-mode="dark"] button,
-[data-mode="light"] a,
-[data-mode="dark"] a {
-  transition-property: background-color, border-color, color, box-shadow, opacity, transform;
-  transition-duration: 150ms;
+/* ── Page-level containers (full-page dark wraps) ─────────── */
+/* Covers min-h-screen wrappers in ProfilePage, ProjectDetailsPage,
+   SeriesDetailsPage, ProjectsPage, DashboardPage, etc. */
+[data-mode="light"] .min-h-screen.bg-\[\#070709\],
+[data-mode="light"] .min-h-screen.bg-neutral-950 {
+  background-color: #f4f4f5 !important;
 }
 
-
+/* ── Card panels with near-black hex backgrounds ──────────── */
+/* These are the main card containers in profile/project pages  */
+[data-mode="light"] [class*="bg-[#0"],
+[data-mode="light"] [class*="bg-[#1"] {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
 
 /* Custom scrollbars */
+
 .scrollbar-thin::-webkit-scrollbar {
   height: 6px;
   width: 6px;
