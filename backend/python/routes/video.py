@@ -8,10 +8,11 @@ from fastapi import APIRouter, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 from typing import List, Optional
 import sys
+from services.audio import generate_panel_audio
 
 # Try importing moviepy; fallback gracefully if not installed
 try:
-    from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
+    from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips, CompositeVideoClip, CompositeAudioClip
     HAS_MOVIEPY = True
 except ImportError:
     HAS_MOVIEPY = False
@@ -33,6 +34,7 @@ class PanelData(BaseModel):
 
 class RenderRequest(BaseModel):
     panels: List[PanelData]
+    voice: Optional[str] = "en-US-GuyNeural"
 
 async def download_asset(url: str, dest_path: str):
     if not url:
@@ -113,8 +115,6 @@ def render_pipeline_sync(panels_data, output_path, work_dir):
     if not HAS_MOVIEPY:
         raise Exception("moviepy is not installed. Run pip install moviepy.")
         
-    from moviepy.editor import CompositeVideoClip
-
     clips = []
     sfx_clips = []
     current_global_time = 0.0
@@ -143,7 +143,6 @@ def render_pipeline_sync(panels_data, output_path, work_dir):
             sfx_path = os.path.join(os.getcwd(), "public", "audio", "sfx", f"{sfx_name.strip()}.mp3")
             if os.path.exists(sfx_path):
                 try:
-                    from moviepy.editor import AudioFileClip
                     sfx_clip = AudioFileClip(sfx_path).volumex(0.4)
                     sfx_clip = sfx_clip.set_start(current_global_time)
                     sfx_clips.append(sfx_clip)
@@ -207,9 +206,6 @@ def render_pipeline_sync(panels_data, output_path, work_dir):
 
     # Stitch them together with a -0.5s overlap to enable the crossfade
     final_clip = concatenate_videoclips(clips, padding=-0.5, method="compose")
-    
-    # Step 10 & 12: Multi-Track Audio Mixing (BGM + SFX)
-    from moviepy.editor import AudioFileClip, CompositeAudioClip
     import moviepy.audio.fx.all as afx
     
     audio_tracks = []
@@ -250,7 +246,7 @@ def render_pipeline_sync(panels_data, output_path, work_dir):
         c.close()
     final_clip.close()
 
-async def process_render_job(video_id: str, panels: List[PanelData]):
+async def process_render_job(video_id: str, panels: List[PanelData], voice: Optional[str] = "en-US-GuyNeural"):
     work_dir = os.path.join(os.getcwd(), "temp", f"render_{video_id}")
     os.makedirs(work_dir, exist_ok=True)
     
@@ -297,6 +293,25 @@ async def process_render_job(video_id: str, panels: List[PanelData]):
         results = await asyncio.gather(*download_tasks)
         if not any(results):
              raise Exception("Failed to download video assets.")
+
+        # 1.5 Generate TTS audio for panels that have speech_text but no audio_url
+        tts_tasks = []
+        for idx, p_data in enumerate(panels_data):
+            panel = panels[idx]
+            if not panel.audio_url and panel.speech_text and panel.speech_text.strip():
+                audio_path = os.path.join(work_dir, f"audio_{idx}.mp3")
+                p_data["local_audio"] = audio_path
+                tts_tasks.append(
+                    generate_panel_audio(
+                        dialogue_list=[panel.speech_text.strip()],
+                        target_duration=p_data["duration"],
+                        output_path=audio_path,
+                        voice=voice
+                    )
+                )
+        if tts_tasks:
+            logger.info(f"Generating TTS audio for {len(tts_tasks)} panels...")
+            await asyncio.gather(*tts_tasks)
 
         # 2. Inspect dimensions and determine standard target layout size
         from PIL import Image
@@ -442,7 +457,7 @@ async def render_video(request: RenderRequest, background_tasks: BackgroundTasks
     }
     
     # Delegate to background task
-    background_tasks.add_task(process_render_job, video_id, request.panels)
+    background_tasks.add_task(process_render_job, video_id, request.panels, request.voice)
     
     return {
         "success": True,

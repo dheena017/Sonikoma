@@ -99,8 +99,20 @@ body {
 [data-mode="light"] .bg-neutral-850 {
   background-color: #ebebef !important;
 }
+[data-mode="light"] .bg-neutral-850\/90,
+[data-mode="light"] .bg-neutral-850\/80,
+[data-mode="light"] .bg-neutral-850\/60,
+[data-mode="light"] .bg-neutral-850\/40 {
+  background-color: rgba(235, 235, 239, 0.95) !important;
+}
 [data-mode="light"] .bg-neutral-800 {
   background-color: #e0e0e6 !important;
+}
+[data-mode="light"] .bg-neutral-800\/90,
+[data-mode="light"] .bg-neutral-800\/80,
+[data-mode="light"] .bg-neutral-800\/60,
+[data-mode="light"] .bg-neutral-800\/40 {
+  background-color: rgba(224, 224, 230, 0.95) !important;
 }
 [data-mode="light"] .bg-neutral-750 {
   background-color: #d4d4d8 !important;
@@ -125,6 +137,7 @@ body {
 [data-mode="light"] .bg-neutral-900\/95,
 [data-mode="light"] .bg-neutral-900\/80,
 [data-mode="light"] .bg-neutral-900\/60,
+[data-mode="light"] .bg-neutral-900\/50,
 [data-mode="light"] .bg-neutral-900\/40,
 [data-mode="light"] .bg-neutral-900\/30 {
   background-color: rgba(249, 249, 251, 0.9) !important;
@@ -245,6 +258,9 @@ body {
 }
 [data-mode="light"] .border-neutral-750 {
   border-color: #b4b4be !important;
+}
+[data-mode="light"] .border-neutral-750\/30 {
+  border-color: rgba(180, 180, 190, 0.5) !important;
 }
 [data-mode="light"] .border-neutral-700 {
   border-color: #a1a1aa !important;
@@ -523,11 +539,20 @@ body {
 }
 
 /* Hover states for neutral-900 action buttons */
+[data-mode="light"] .hover\:bg-neutral-750:hover {
+  background-color: #d4d4d8 !important;
+}
 [data-mode="light"] .hover\:bg-neutral-800:hover {
   background-color: #e8e8ec !important;
 }
 [data-mode="light"] .hover\:bg-neutral-900:hover {
   background-color: #f0f0f4 !important;
+}
+[data-mode="light"] .hover\:bg-neutral-950:hover {
+  background-color: #f9f9fb !important;
+}
+[data-mode="light"] .hover\:bg-neutral-900\/30:hover {
+  background-color: rgba(244, 244, 245, 0.8) !important; /* light grey for log hover */
 }
 
 /* ── bg-neutral-955 (custom very-dark token) ─────────────── */
@@ -609,6 +634,40 @@ body {
 [data-mode="light"] .border-red-500    { border-color: #fca5a5 !important; }
 [data-mode="light"] .text-red-100      { color: #450a0a !important; }
 [data-mode="light"] .text-red-400      { color: #dc2626 !important; }
+
+/* ── Panel Assistant specific overrides (Purple/Rose action buttons) ── */
+[data-mode="light"] .bg-purple-950\/40 {
+  background-color: rgba(243, 232, 255, 0.9) !important; /* purple-100 */
+}
+[data-mode="light"] .border-purple-800\/40 {
+  border-color: #d8b4fe !important;
+}
+[data-mode="light"] .hover\:bg-purple-900\/60:hover {
+  background-color: rgba(233, 213, 255, 0.9) !important;
+}
+[data-mode="light"] .hover\:border-purple-600:hover {
+  border-color: #c084fc !important;
+}
+[data-mode="light"] .text-purple-300 {
+  color: #7e22ce !important; /* purple-700 */
+}
+
+/* Stop analyzing button (rose) */
+[data-mode="light"] .bg-rose-600\/20 {
+  background-color: rgba(255, 228, 230, 0.9) !important; /* rose-100 */
+}
+[data-mode="light"] .border-rose-500\/50 {
+  border-color: #fca5a5 !important;
+}
+[data-mode="light"] .hover\:bg-rose-600\/40:hover {
+  background-color: rgba(254, 205, 211, 0.9) !important;
+}
+[data-mode="light"] .hover\:border-rose-400:hover {
+  border-color: #fb7185 !important;
+}
+[data-mode="light"] .text-rose-300 {
+  color: #be123c !important; /* rose-700 */
+}
 
 /* ── Metadata container inline-style rgba(0,0,0,0.4) override ──
    The UrlInputPanel metadata section uses an inline style for bg.
