@@ -40,6 +40,7 @@ interface ModelPlaygroundAndSkillsProps {
   executeSkill: () => Promise<void>;
   skillOutput: any | null;
   handleEnhancePrompt: () => void;
+  isEnhancingPrompt: boolean;
 }
 
 const SUPPORTED_SKILLS = [
@@ -143,6 +144,7 @@ export default function ModelPlaygroundAndSkills({
   executeSkill,
   skillOutput,
   handleEnhancePrompt,
+  isEnhancingPrompt,
 }: ModelPlaygroundAndSkillsProps) {
   const currentSkillConfig = SUPPORTED_SKILLS.find((s) => s.id === selectedSkill);
 
@@ -270,11 +272,17 @@ export default function ModelPlaygroundAndSkills({
                 <div className="flex justify-end pt-0.5">
                   <button
                     onClick={handleEnhancePrompt}
-                    disabled={!playgroundPrompt.trim()}
+                    disabled={isEnhancingPrompt || !playgroundPrompt.trim()}
                     className="text-[9px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                     type="button"
                   >
-                    ⚡ Enhance Prompt
+                    {isEnhancingPrompt ? (
+                      <span className="flex items-center gap-1">
+                        <RefreshCw className="h-2.5 w-2.5 animate-spin" /> Enhancing...
+                      </span>
+                    ) : (
+                      "⚡ Enhance Prompt"
+                    )}
                   </button>
                 </div>
               </div>
@@ -450,11 +458,17 @@ export default function ModelPlaygroundAndSkills({
                 <div className="flex justify-end pt-0.5">
                   <button
                     onClick={handleEnhancePrompt}
-                    disabled={!playgroundPrompt.trim()}
+                    disabled={isEnhancingPrompt || !playgroundPrompt.trim()}
                     className="text-[9px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                     type="button"
                   >
-                    ⚡ Enhance Prompt
+                    {isEnhancingPrompt ? (
+                      <span className="flex items-center gap-1">
+                        <RefreshCw className="h-2.5 w-2.5 animate-spin" /> Enhancing...
+                      </span>
+                    ) : (
+                      "⚡ Enhance Prompt"
+                    )}
                   </button>
                 </div>
               </div>
