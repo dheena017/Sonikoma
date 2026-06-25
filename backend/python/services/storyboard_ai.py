@@ -68,11 +68,13 @@ async def generate_dynamic_panels(
     episode: str,
     img_urls: List[str],
     model: str,
-    narration_style: str = "long"
+    narration_style: str = "long",
+    user_keys: Optional[Dict[str, str]] = None
 ) -> List[Dict[str, Any]]:
     """
     Generates narration script and storyboard camera moves via AI Markdown Skills.
     """
+    import os
     active_slices_count = min(len(img_urls), 8)
     if active_slices_count == 0:
         logger.warning("[Storyboard AI] No image URLs provided for storyboard generation.")
@@ -93,17 +95,24 @@ async def generate_dynamic_panels(
         "narrative_length_hint": narrative_length_hint
     }
 
+    # Resolve keys prioritizing user keys over environment variables
+    user_keys = user_keys or {}
+    gemini_key = user_keys.get("gemini") or os.getenv("GEMINI_API_KEY")
+    hf_key = user_keys.get("huggingface") or os.getenv("HUGGINGFACE_API_KEY")
+
     # 1. HuggingFace Fallback check
-    if model.startswith('huggingface') and hf_client:
+    if model.startswith('huggingface') and hf_key:
         try:
-            logger.info(f"[HuggingFace] Creating storyboard using Mistral 7B for \"{title}\"")
+            logger.info(f"[HuggingFace] Creating storyboard using Mistral 7B for \"{title}\" (using resolved HF key)")
+            from huggingface_hub import InferenceClient
+            client_to_use = InferenceClient(token=hf_key)
             skill = registry.get("storyboard_narrative")
             prompt = skill.build_prompt(**prompt_args)
             
             loop = asyncio.get_event_loop()
             response = await loop.run_in_executor(
                 None,
-                lambda: hf_client.chat_completion(
+                lambda: client_to_use.chat_completion(
                     model='mistralai/Mistral-7B-Instruct-v0.3',
                     messages=[{"role": "user", "content": prompt}],
                     temperature=0.7,
@@ -137,7 +146,7 @@ async def generate_dynamic_panels(
             logger.warning(f"[HuggingFace] Storyboard generation failed: {e}. Falling back to Gemini.")
 
     # 2. Gemini generation using storyboard_narrative skill
-    if ai_initialized:
+    if gemini_key or ai_initialized:
         try:
             target_model_name = model if model and model.lower().startswith('gemini') else "gemini-2.5-flash"
             if target_model_name and "gemini-3.5" in target_model_name.lower():
@@ -150,7 +159,7 @@ async def generate_dynamic_panels(
             logger.info(f"[Gemini] Storyboard narrative generation using: {target_model_name}")
 
             skill = registry.get("storyboard_narrative")
-            response_text = await skill.execute(model=target_model_name, **prompt_args)
+            response_text = await skill.execute(model=target_model_name, api_key=gemini_key, **prompt_args)
 
             if response_text.strip():
                 parsed = json.loads(response_text)
@@ -180,3 +189,6 @@ async def generate_dynamic_panels(
             raise e
 
     raise RuntimeError("AI Storyboard generation failed: No active providers resolved the storyboard narrative script.")
+
+
+

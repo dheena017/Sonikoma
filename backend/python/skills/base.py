@@ -414,6 +414,10 @@ class BaseAISkill:
         start_time = time.monotonic()
         target_model = model or self.default_model
         
+        # Ensure it is a gemini model for Gemini API execution
+        if not target_model.lower().startswith("gemini"):
+            target_model = self.default_model
+            
         # Translate gemini-3.5 fallbacks if passed from frontend
         if "gemini-3.5" in target_model.lower():
             if "pro" in target_model.lower():

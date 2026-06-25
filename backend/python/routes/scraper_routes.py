@@ -10,7 +10,7 @@ import asyncio
 import time
 import httpx
 from typing import List, Optional, Any, Dict
-from fastapi import APIRouter, HTTPException, Body, Request
+from fastapi import APIRouter, HTTPException, Body, Request, Depends
 from pydantic import BaseModel, Field
 import os
 import jwt
@@ -46,6 +46,7 @@ import utils.image_utils as img_utils
 from config.clients import DYNAMIC_BACKGROUND_VIDEOS
 from services.scraper import scrape_images_from_url, scraped_metadata_cache
 from services.storyboard_ai import generate_dynamic_panels
+from routes.ai_routes import get_all_user_keys
 from services.video import compile_video_from_panels
 import os
 
@@ -535,7 +536,7 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
 
 
 @router.post("/generate", summary="Generate storyboard storyboard and narrative scripts")
-async def generate_storyboard(request: Request, body: GenerateStoryboardRequest):
+async def generate_storyboard(request: Request, body: GenerateStoryboardRequest, user_keys: dict = Depends(get_all_user_keys)):
     try:
         parsed = parse_webtoon_url(body.url)
         if body.title:
@@ -651,7 +652,8 @@ async def generate_storyboard(request: Request, body: GenerateStoryboardRequest)
         logger.info(f"[Model] Dispatching panels generation via AI model: {body.model} (narrationStyle={body.narrationStyle})...")
         response_panels = await generate_dynamic_panels(
             parsed["title"], parsed["genre"], parsed["episode"], scraped_urls, body.model,
-            narration_style=body.narrationStyle or "long"
+            narration_style=body.narrationStyle or "long",
+            user_keys=user_keys
         )
         logger.info(f"[Model] Successfully generated {len(response_panels)} storyboard panels.")
 
@@ -738,7 +740,7 @@ async def generate_storyboard(request: Request, body: GenerateStoryboardRequest)
 
 
 @router.post("/generate-storyboard", summary="Generate storyboard and narrative scripts only (no video compilation)")
-async def generate_storyboard_only(request: Request, body: GenerateStoryboardOnlyRequest):
+async def generate_storyboard_only(request: Request, body: GenerateStoryboardOnlyRequest, user_keys: dict = Depends(get_all_user_keys)):
     try:
         parsed = parse_webtoon_url(body.url)
         if body.title:
@@ -777,7 +779,8 @@ async def generate_storyboard_only(request: Request, body: GenerateStoryboardOnl
         logger.info(f"[Model] Dispatching panels generation via AI model: {body.model}...")
         response_panels = await generate_dynamic_panels(
             parsed["title"], parsed["genre"], parsed["episode"], scraped_urls, body.model,
-            narration_style=body.narrationStyle or "long"
+            narration_style=body.narrationStyle or "long",
+            user_keys=user_keys
         )
         logger.info(f"[Model] Successfully generated {len(response_panels)} storyboard panels.")
 

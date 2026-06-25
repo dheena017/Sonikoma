@@ -32,26 +32,37 @@ from skills.registry import registry
 from skills.base import GeminiAnalysisModel, CropBox, CropList
 
 logger = logging.getLogger("sonikoma.routes.ai_routes")
+def clean_api_key(key: Optional[str]) -> Optional[str]:
+    if not key:
+        return None
+    val = key.strip()
+    import re
+    val = re.sub(r'^[\s\'"()\[\]{}]+|[\s\'"()\[\]{}]+$', '', val)
+    if val in ("", "null", "undefined", "None"):
+        return None
+    return val
+
 def get_all_user_keys(
-    x_user_gemini_key: str = Header(None),
-    x_user_openai_key: str = Header(None),
-    x_user_anthropic_key: str = Header(None),
-    x_user_huggingface_key: str = Header(None),
+    x_user_gemini_key: str = Header(None, alias="X-User-Gemini-Key"),
+    x_user_openai_key: str = Header(None, alias="X-User-OpenAI-Key"),
+    x_user_anthropic_key: str = Header(None, alias="X-User-Anthropic-Key"),
+    x_user_huggingface_key: str = Header(None, alias="X-User-HuggingFace-Key"),
 ):
     return {
-        "gemini": x_user_gemini_key,
-        "openai": x_user_openai_key,
-        "anthropic": x_user_anthropic_key,
-        "huggingface": x_user_huggingface_key,
+        "gemini": clean_api_key(x_user_gemini_key) or clean_api_key(os.getenv("GEMINI_API_KEY")),
+        "openai": clean_api_key(x_user_openai_key) or clean_api_key(os.getenv("OPENAI_API_KEY")),
+        "anthropic": clean_api_key(x_user_anthropic_key) or clean_api_key(os.getenv("ANTHROPIC_API_KEY")),
+        "huggingface": clean_api_key(x_user_huggingface_key) or clean_api_key(os.getenv("HUGGINGFACE_API_KEY")),
     }
 
-def get_user_gemini_key(x_user_gemini_key: str = Header(None)):
-    if not x_user_gemini_key:
+def get_user_gemini_key(x_user_gemini_key: str = Header(None, alias="X-User-Gemini-Key")):
+    key = clean_api_key(x_user_gemini_key) or clean_api_key(os.getenv("GEMINI_API_KEY"))
+    if not key:
         raise HTTPException(
             status_code=401, 
             detail="MISSING_API_KEY"
         )
-    return x_user_gemini_key
+    return key
 
 router = APIRouter()
 
@@ -854,6 +865,14 @@ async def analyze_sequence(body: AnalyzeSequenceRequest, user_api_key: str = Dep
         raise HTTPException(status_code=400, detail="Urls list cannot be empty")
         
     target_model = body.model or MODEL_FALLBACKS[0]
+    if not target_model.lower().startswith("gemini"):
+        target_model = MODEL_FALLBACKS[0]
+    elif "gemini-3.5" in target_model.lower():
+        if "pro" in target_model.lower():
+            target_model = "gemini-2.5-pro"
+        else:
+            target_model = "gemini-2.5-flash"
+        logger.info(f"[Sequence] Translated gemini-3.5 model selection to: {target_model}")
     
     # 1. Resolve all images into memory
     image_parts = []
@@ -903,7 +922,22 @@ async def analyze_sequence(body: AnalyzeSequenceRequest, user_api_key: str = Dep
             config=types.GenerateContentConfig(response_mime_type="application/json")
         )
         
-        sequence_data = json.loads(response.text)
+        raw_text = response.text
+        if not raw_text:
+            candidates = getattr(response, 'candidates', [])
+            finish_reason = None
+            safety_ratings = []
+            if candidates:
+                finish_reason = getattr(candidates[0], 'finish_reason', None)
+                safety_ratings = getattr(candidates[0], 'safety_ratings', [])
+            
+            logger.error(f"[Sequence] AI returned an empty response. Finish reason: {finish_reason}, Safety ratings: {safety_ratings}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"AI model returned an empty response (possibly blocked by safety filters or prompt size). Finish reason: {finish_reason}"
+            )
+            
+        sequence_data = json.loads(raw_text)
         
         if len(sequence_data) != len(body.urls):
             logger.warning(f"[Sequence] AI returned {len(sequence_data)} items, expected {len(body.urls)}")
@@ -978,7 +1012,9 @@ async def ai_smart_crop(body: SmartCropRequest, user_api_key: str = Depends(get_
         if body.strategy != "local-cv" and body.model != "local-cv":
             if ai_initialized:
                 target_model = body.model or "gemini-2.5-flash"
-                if "gemini-3.5" in target_model.lower():
+                if not target_model.lower().startswith("gemini"):
+                    target_model = "gemini-2.5-flash"
+                elif "gemini-3.5" in target_model.lower():
                     if "pro" in target_model.lower():
                         target_model = "gemini-2.5-pro"
                     else:
