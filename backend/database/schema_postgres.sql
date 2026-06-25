@@ -175,3 +175,13 @@ CREATE TABLE IF NOT EXISTS token_usage_logs (
 
 CREATE INDEX IF NOT EXISTS idx_token_logs_project_id ON token_usage_logs(project_id);
 CREATE INDEX IF NOT EXISTS idx_token_logs_created_at ON token_usage_logs(created_at DESC);
+
+-- 12. System Announcements
+CREATE TABLE IF NOT EXISTS system_announcements (
+  id SERIAL PRIMARY KEY,
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  type TEXT NOT NULL DEFAULT 'info',
+  status TEXT NOT NULL DEFAULT 'active',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

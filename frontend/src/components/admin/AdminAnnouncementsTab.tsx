@@ -1,51 +1,69 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Megaphone, Plus, Trash2, Send, Clock, AlertTriangle } from "lucide-react";
 
-export function AdminAnnouncementsTab() {
-  const [announcements, setAnnouncements] = useState([
-    {
-      id: 1,
-      title: "Scheduled Maintenance",
-      message: "The server will be down for 30 minutes on Saturday at 2 AM EST.",
-      type: "warning",
-      status: "active",
-      createdAt: "2026-06-20T10:00:00Z"
-    },
-    {
-      id: 2,
-      title: "New Feature Released!",
-      message: "You can now export projects in 4K resolution. Enjoy!",
-      type: "success",
-      status: "expired",
-      createdAt: "2026-06-15T14:30:00Z"
-    }
-  ]);
+export function AdminAnnouncementsTab({ fetchWithInterceptor }: { fetchWithInterceptor: (url: string, options?: RequestInit) => Promise<Response> }) {
+  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newMessage, setNewMessage] = useState("");
   const [newType, setNewType] = useState("info");
 
-  const handleCreate = (e: React.FormEvent) => {
+  useEffect(() => {
+    fetchAnnouncements();
+  }, []);
+
+  const fetchAnnouncements = async () => {
+    try {
+      setLoading(true);
+      const res = await fetchWithInterceptor("http://localhost:8000/api/auth/admin/announcements");
+      const data = await res.json();
+      if (data.success) {
+        setAnnouncements(data.announcements);
+      }
+    } catch (e) {
+      console.error("Failed to fetch announcements:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle || !newMessage) return;
     
-    setAnnouncements([{
-      id: Date.now(),
-      title: newTitle,
-      message: newMessage,
-      type: newType,
-      status: "active",
-      createdAt: new Date().toISOString()
-    }, ...announcements]);
-    
-    setIsCreating(false);
-    setNewTitle("");
-    setNewMessage("");
-    setNewType("info");
+    try {
+      const res = await fetchWithInterceptor("http://localhost:8000/api/auth/admin/announcements", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: newTitle, message: newMessage, type: newType }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsCreating(false);
+        setNewTitle("");
+        setNewMessage("");
+        setNewType("info");
+        fetchAnnouncements();
+      }
+    } catch (e) {
+      console.error("Failed to create announcement:", e);
+    }
   };
 
-  const handleDelete = (id: number) => {
-    setAnnouncements(announcements.filter(a => a.id !== id));
+  const handleDelete = async (id: number) => {
+    if (!window.confirm("Delete this announcement?")) return;
+    try {
+      const res = await fetchWithInterceptor(`http://localhost:8000/api/auth/admin/announcements/${id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAnnouncements(announcements.filter((a) => a.id !== id));
+      }
+    } catch (e) {
+      console.error("Failed to delete announcement:", e);
+    }
   };
 
   return (
@@ -156,51 +174,59 @@ export function AdminAnnouncementsTab() {
         </form>
       )}
 
-      <div className="grid gap-4">
-        {announcements.length === 0 ? (
-          <div className="text-center py-12 text-neutral-500">
-            No announcements found.
-          </div>
-        ) : (
-          announcements.map(announcement => (
-            <div key={announcement.id} className="bg-[#111115] border border-neutral-800 rounded-xl p-5 flex flex-col sm:flex-row gap-4 items-start">
-              <div className="p-3 rounded-lg flex-shrink-0" style={{
-                backgroundColor: announcement.type === 'warning' ? 'rgba(245, 158, 11, 0.1)' :
-                               announcement.type === 'success' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.1)',
-                color: announcement.type === 'warning' ? '#f59e0b' :
-                       announcement.type === 'success' ? '#10b981' : '#3b82f6',
-              }}>
-                {announcement.type === 'warning' ? <AlertTriangle className="w-6 h-6" /> : <Megaphone className="w-6 h-6" />}
-              </div>
-              
-              <div className="flex-1">
-                <div className="flex justify-between items-start">
-                  <h3 className="text-lg font-semibold text-white">{announcement.title}</h3>
-                  <span className={`px-2 py-1 text-xs font-bold rounded-full ${
-                    announcement.status === 'active' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-neutral-800 text-neutral-500'
+      {loading ? (
+        <div className="flex justify-center py-8">
+          <div className="w-8 h-8 rounded-full border-2 border-purple-500 border-t-transparent animate-spin"></div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {announcements.map((announcement) => (
+            <div key={announcement.id} className="bg-[#111115] border border-neutral-800 rounded-xl p-5 hover:border-purple-500/30 transition-colors">
+              <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-3">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg ${
+                    announcement.type === 'warning' ? 'bg-amber-500/10 text-amber-400' :
+                    announcement.type === 'success' ? 'bg-emerald-500/10 text-emerald-400' :
+                    'bg-purple-500/10 text-purple-400'
                   }`}>
-                    {announcement.status.toUpperCase()}
-                  </span>
+                    {announcement.type === 'warning' ? <AlertTriangle className="w-5 h-5" /> :
+                     announcement.type === 'success' ? <Megaphone className="w-5 h-5" /> :
+                     <Megaphone className="w-5 h-5" />}
+                  </div>
+                  <div>
+                    <h4 className="text-white font-medium">{announcement.title}</h4>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        announcement.status === 'active' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-neutral-800 text-neutral-400'
+                      }`}>
+                        {announcement.status}
+                      </span>
+                      <span className="text-xs text-neutral-500 flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {new Date(announcement.created_at || announcement.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-neutral-400 mt-2">{announcement.message}</p>
-                <div className="flex items-center gap-2 mt-4 text-xs text-neutral-500 font-medium">
-                  <Clock className="w-3 h-3" />
-                  {new Date(announcement.createdAt).toLocaleString()}
-                </div>
-              </div>
-              
-              <div className="flex gap-2">
                 <button 
                   onClick={() => handleDelete(announcement.id)}
-                  className="p-2 text-neutral-500 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors"
+                  className="p-2 text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
                 >
-                  <Trash2 className="w-5 h-5" />
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
+              <p className="text-neutral-300 text-sm pl-12">
+                {announcement.message}
+              </p>
             </div>
-          ))
-        )}
-      </div>
+          ))}
+          {announcements.length === 0 && (
+            <div className="text-center py-12 text-neutral-500">
+              No announcements found.
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
