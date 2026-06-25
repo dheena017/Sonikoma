@@ -110,17 +110,7 @@ export default function LoadingPage({
             animation: "lp-pulse 2s infinite ease-in-out",
           }}
         >
-          {/* Logo glow */}
-          <div
-            style={{
-              position: "absolute",
-              inset: -4,
-              borderRadius: 20,
-              background: "linear-gradient(135deg, #a855f7, #06b6d4)",
-              opacity: 0.5,
-              filter: "blur(8px)",
-            }}
-          />
+
           <div
             style={{
               position: "relative",
