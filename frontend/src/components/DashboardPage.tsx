@@ -191,8 +191,14 @@ export default function DashboardPage() {
             </div>
 
             {loading ? (
-              <div className="flex justify-center items-center py-20 text-neutral-500">
-                <Loader2 className="h-8 w-8 animate-spin" />
+              <div className="flex justify-center items-center py-20">
+                <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center animate-pulse shadow-lg shadow-purple-500/20">
+                  <img
+                    src="/logo-dark.png"
+                    alt="Loading..."
+                    className="w-full h-full rounded-[10px] object-cover p-[2px]"
+                  />
+                </div>
               </div>
             ) : projects.length === 0 ? (
               <div className="border border-white/5 bg-[#0b0b0e]/50 rounded-3xl p-12 text-center flex flex-col items-center justify-center">
