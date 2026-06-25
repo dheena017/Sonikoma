@@ -553,7 +553,7 @@ async def api_list_models(body: Optional[ListModelsRequest] = None, user_keys: d
                     "error": f"Hugging Face Authorization Failed: {auth_res.text}"
                 }
                 
-            params = {"limit": 60, "sort": "downloads", "direction": -1}
+            params = {"limit": 150, "sort": "downloads", "direction": -1}
             models_res = requests.get("https://huggingface.co/api/models", params=params, headers=headers)
             if models_res.status_code != 200:
                 return {
@@ -564,6 +564,9 @@ async def api_list_models(body: Optional[ListModelsRequest] = None, user_keys: d
             models = models_res.json()
             result_list = []
             for m in models:
+                pipeline_tag = m.get("pipeline_tag")
+                if pipeline_tag not in ("text-generation", "text2text-generation", "conversational"):
+                    continue
                 result_list.append({
                     "name": m.get("id", ""),
                     "fullName": m.get("id", ""),
@@ -571,7 +574,7 @@ async def api_list_models(body: Optional[ListModelsRequest] = None, user_keys: d
                     "description": f"Hugging Face repository model. Library: {m.get('library_name','N/A')}. Tags: {', '.join(m.get('tags', [])[:8])}",
                     "inputTokenLimit": None,
                     "outputTokenLimit": None,
-                    "supportedActions": [m.get("pipeline_tag")] if m.get("pipeline_tag") else []
+                    "supportedActions": [pipeline_tag] if pipeline_tag else []
                 })
                 
             return {
@@ -1643,7 +1646,12 @@ async def test_model_latency(body: TestModelLatencyRequest, user_keys: dict = De
                 }
                 
     except Exception as e:
+        err_msg = str(e)
+        if "NameResolutionError" in err_msg or "Failed to resolve" in err_msg or "getaddrinfo failed" in err_msg:
+            err_msg = "Network Connection Issue: Failed to resolve host for AI provider API endpoints. Please check your internet connection or server DNS."
+        elif "ConnectionRefusedError" in err_msg or "Max retries exceeded" in err_msg:
+            err_msg = "Connection Failed: Could not connect to provider API endpoints. The service might be down or blocked."
         return {
             "success": False,
-            "error": str(e)
+            "error": err_msg
         }
