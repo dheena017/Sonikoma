@@ -31,6 +31,8 @@ interface ProfilePageProps {
   onLogout: () => void;
   onNavigateHome: () => void;
   onRefreshUser?: (showDelay?: boolean) => void | Promise<void>;
+  themeMode?: "dark" | "light" | string;
+  toggleThemeMode?: () => void;
 }
 
 export default function ProfilePage({
@@ -39,6 +41,8 @@ export default function ProfilePage({
   onLogout,
   onNavigateHome,
   onRefreshUser,
+  themeMode,
+  toggleThemeMode,
 }: ProfilePageProps) {
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
@@ -1516,8 +1520,8 @@ export default function ProfilePage({
                 setAi={setAiPrefs}
                 exportSettings={exportPrefs}
                 setExportSettings={setExportPrefs}
-                theme={themePrefs}
-                setTheme={setThemePrefs}
+                themeMode={themeMode || themePrefs}
+                toggleThemeMode={toggleThemeMode || (() => setThemePrefs(p => p === "dark" ? "light" : "dark"))}
                 accentColor={accentColor}
                 setAccentColor={setAccentColor}
                 fontScale={fontScale}
