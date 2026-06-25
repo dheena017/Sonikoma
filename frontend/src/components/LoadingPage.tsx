@@ -114,8 +114,8 @@ export default function LoadingPage({
           <div
             style={{
               position: "relative",
-              width: 72,
-              height: 72,
+              width: 96,
+              height: 96,
               borderRadius: 18,
               background: "linear-gradient(135deg, #a855f7, #06b6d4)",
               display: "flex",
@@ -125,7 +125,12 @@ export default function LoadingPage({
             }}
           >
             <img
-              src="/logo-dark.png"
+              src={
+                typeof document !== "undefined" &&
+                document.documentElement.getAttribute("data-mode") === "light"
+                  ? "/logo-light.png"
+                  : "/logo-dark.png"
+              }
               alt="Sonikoma Logo"
               style={{
                 width: "100%",
