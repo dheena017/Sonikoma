@@ -165,7 +165,7 @@ export default function ProfileAccountTab({
     }
   };
 
-  const handleAddPortfolio = (e: React.FormEvent) => {
+  const handleAddPortfolio = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newPortfolioUrl.trim()) return;
 
@@ -173,7 +173,7 @@ export default function ProfileAccountTab({
       !newPortfolioUrl.startsWith("http://") &&
       !newPortfolioUrl.startsWith("https://")
     ) {
-      alert("Portfolio link must start with http:// or https://");
+      await (window as any).alertAsync("Portfolio link must start with http:// or https://");
       return;
     }
 
@@ -191,9 +191,9 @@ export default function ProfileAccountTab({
     setPortfolios((prev) => prev.filter((p) => p.id !== id));
   };
 
-  const handleCopyPortfolio = (url: string) => {
+  const handleCopyPortfolio = async (url: string) => {
     navigator.clipboard.writeText(url);
-    alert("Portfolio URL copied to clipboard!");
+    await (window as any).alertAsync("Portfolio URL copied to clipboard!");
   };
 
   return (

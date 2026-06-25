@@ -68,7 +68,7 @@ export default function LogsPage({
 
   const handleClearLogs = async () => {
     const confirm = (window as any).confirmAsync || window.confirm;
-    const confirmed = await confirm(
+    const confirmed = await (window as any).confirmAsync(
       "Are you sure you want to clear the logs console cache?"
     );
     if (confirmed) {

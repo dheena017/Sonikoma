@@ -27,7 +27,7 @@ export default function AIProviderKeysConfig() {
     checkSaved();
   }, []);
 
-  const handleSaveKeys = () => {
+  const handleSaveKeys = async () => {
     const keys = {
       user_gemini_key: geminiKey,
       user_openai_key: openAiKey,
@@ -45,7 +45,7 @@ export default function AIProviderKeysConfig() {
       }
     }
     checkSaved();
-    alert(
+    await (window as any).alertAsync(
       `Successfully updated! ${savedCount} API keys saved securely to your browser.`
     );
   };
@@ -59,7 +59,7 @@ export default function AIProviderKeysConfig() {
         "red"
       );
     } else {
-      confirmed = confirm(
+      confirmed = await (window as any).confirmAsync(
         "Are you sure you want to delete all saved API keys?"
       );
     }

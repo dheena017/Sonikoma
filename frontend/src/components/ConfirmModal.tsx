@@ -7,7 +7,8 @@ interface ConfirmModalProps {
   message: string;
   accentColor?: string; // "red" | "purple"
   onConfirm: () => void;
-  onCancel: () => void;
+  onCancel?: () => void;
+  isAlert?: boolean;
 }
 
 export default function ConfirmModal({
@@ -16,6 +17,7 @@ export default function ConfirmModal({
   accentColor = "purple",
   onConfirm,
   onCancel,
+  isAlert = false,
 }: ConfirmModalProps) {
   const isRed = accentColor === "red";
 
@@ -34,7 +36,7 @@ export default function ConfirmModal({
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
-        onClick={onCancel}
+        onClick={onCancel || onConfirm}
       />
 
       {/* Modal Container */}
@@ -68,7 +70,7 @@ export default function ConfirmModal({
           </div>
           <button
             type="button"
-            onClick={onCancel}
+            onClick={onCancel || onConfirm}
             className="text-neutral-400 hover:text-white bg-neutral-950/40 hover:bg-neutral-950 p-2 rounded-full transition-all cursor-pointer"
           >
             <X className="h-4 w-4" />
@@ -84,13 +86,15 @@ export default function ConfirmModal({
 
         {/* Footer */}
         <div className="px-6 py-4 bg-neutral-950/40 border-t border-neutral-850 flex items-center justify-end gap-3 shrink-0">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-750 text-neutral-200 hover:text-white rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border border-neutral-750/30"
-          >
-            Cancel
-          </button>
+          {!isAlert && onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-750 text-neutral-200 hover:text-white rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border border-neutral-750/30"
+            >
+              Cancel
+            </button>
+          )}
           <button
             type="button"
             onClick={onConfirm}
@@ -100,7 +104,7 @@ export default function ConfirmModal({
                 : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 border-purple-500/30 shadow-[0_0_20px_-5px_rgba(147,51,234,0.5)]"
             }`}
           >
-            <span>Confirm</span>
+            <span>{isAlert ? "OK" : "Confirm"}</span>
           </button>
         </div>
       </div>

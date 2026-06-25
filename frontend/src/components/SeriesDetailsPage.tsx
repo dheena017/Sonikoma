@@ -104,7 +104,7 @@ export default function SeriesDetailsPage({
   ) => {
     e.stopPropagation();
     if (
-      !window.confirm(
+      !await (window as any).confirmAsync(
         "Are you sure you want to delete this chapter? This action cannot be undone."
       )
     ) {

@@ -165,12 +165,12 @@ export default function ProfilePage({
   // MFA state
   const [is2faEnabled, setIs2faEnabled] = React.useState(false);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (file.size > 2 * 1024 * 1024) {
-      alert("Image is too large. Please choose an image smaller than 2MB.");
+      await (window as any).alertAsync("Image is too large. Please choose an image smaller than 2MB.");
       return;
     }
 
@@ -239,7 +239,7 @@ export default function ProfilePage({
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err: any) {
-      alert(err.message || "Failed to update profile picture");
+      await (window as any).alertAsync(err.message || "Failed to update profile picture");
     } finally {
       setShowConfirmModal(false);
       setTempAvatarUrl(null);
@@ -556,8 +556,8 @@ export default function ProfilePage({
         onRefreshUser?.();
         setTimeout(() => setSaveSuccess(false), 3000);
       })
-      .catch((err) => {
-        alert(err.message || "Failed to save profile changes");
+      .catch(async (err) => {
+        await (window as any).alertAsync(err.message || "Failed to save profile changes");
       });
   };
 
@@ -619,7 +619,7 @@ export default function ProfilePage({
     if (!token) return;
 
     const confirm = (window as any).confirmAsync || window.confirm;
-    const confirmed = await confirm(
+    const confirmed = await (window as any).confirmAsync(
       "Are you sure you want to terminate this session? You will be logged out on that device."
     );
     if (!confirmed) {
@@ -669,8 +669,8 @@ export default function ProfilePage({
           }
         }
       })
-      .catch((err) => {
-        alert(err.message || "Could not claim daily credits");
+      .catch(async (err) => {
+        await (window as any).alertAsync(err.message || "Could not claim daily credits");
       });
   };
 
@@ -707,10 +707,10 @@ export default function ProfilePage({
         if (onRefreshUser) {
           await onRefreshUser(false);
         }
-        alert("Successfully upgraded to Studio Pro!");
+        await (window as any).alertAsync("Successfully upgraded to Studio Pro!");
       }
     } catch (err: any) {
-      alert(err.message || "Failed to upgrade plan");
+      await (window as any).alertAsync(err.message || "Failed to upgrade plan");
     }
   };
 
@@ -739,10 +739,10 @@ export default function ProfilePage({
       }
       if (res.success) {
         setCardInfo(card);
-        alert("Payment method saved successfully!");
+        await (window as any).alertAsync("Payment method saved successfully!");
       }
     } catch (err: any) {
-      alert(err.message || "Failed to save card");
+      await (window as any).alertAsync(err.message || "Failed to save card");
     }
   };
 
@@ -786,10 +786,10 @@ export default function ProfilePage({
         if (onRefreshUser) {
           await onRefreshUser(false);
         }
-        alert(`Successfully purchased ${amountOfCredits} credits!`);
+        await (window as any).alertAsync(`Successfully purchased ${amountOfCredits} credits!`);
       }
     } catch (err: any) {
-      alert(err.message || "Failed to purchase package");
+      await (window as any).alertAsync(err.message || "Failed to purchase package");
     }
   };
 
@@ -832,14 +832,14 @@ export default function ProfilePage({
           setTokenToast(`Generated key: ${res.raw_key}`);
         }
       })
-      .catch((err) => {
-        alert(err.message || "Failed to generate key");
+      .catch(async (err) => {
+        await (window as any).alertAsync(err.message || "Failed to generate key");
       });
   };
 
-  const handleCopyToastKey = (key: string) => {
+  const handleCopyToastKey = async (key: string) => {
     navigator.clipboard.writeText(key);
-    alert("Copied full API key to clipboard!");
+    await (window as any).alertAsync("Copied full API key to clipboard!");
   };
 
   const handleDeleteToken = async (id: string) => {
@@ -849,7 +849,7 @@ export default function ProfilePage({
     if (!token) return;
 
     const confirm = (window as any).confirmAsync || window.confirm;
-    const confirmed = await confirm(
+    const confirmed = await (window as any).confirmAsync(
       "Are you sure you want to delete this API key? Apps using it will immediately lose access."
     );
     if (!confirmed) {
@@ -967,8 +967,8 @@ export default function ProfilePage({
           );
         }
       })
-      .catch((err) => {
-        alert(err.message || "Failed to bulk delete projects");
+      .catch(async (err) => {
+        await (window as any).alertAsync(err.message || "Failed to bulk delete projects");
       });
   };
 
@@ -994,8 +994,8 @@ export default function ProfilePage({
           setLocalProjects((prev) => prev.filter((p) => p.project_id !== id));
         }
       })
-      .catch((err) => {
-        alert(err.message || "Failed to delete chapter");
+      .catch(async (err) => {
+        await (window as any).alertAsync(err.message || "Failed to delete chapter");
       });
   };
 
@@ -1023,8 +1023,8 @@ export default function ProfilePage({
           );
         }
       })
-      .catch((err) => {
-        alert(err.message || "Failed to delete series");
+      .catch(async (err) => {
+        await (window as any).alertAsync(err.message || "Failed to delete series");
       });
   };
 
@@ -1067,7 +1067,7 @@ export default function ProfilePage({
 
   const handleDeleteAccount = async () => {
     const confirm = (window as any).confirmAsync || window.confirm;
-    const confirmed = await confirm(
+    const confirmed = await (window as any).confirmAsync(
       "CRITICAL: Are you absolutely sure you want to permanently delete your account? All projects, assets, and data will be lost forever. This action cannot be undone.",
       "Permanently Delete Account",
       "red"
@@ -1086,15 +1086,15 @@ export default function ProfilePage({
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.ok) {
-        alert("Account deleted successfully.");
+        await (window as any).alertAsync("Account deleted successfully.");
         onLogout();
       } else {
         const res = await response.json();
-        alert(res.detail || "Failed to delete account");
+        await (window as any).alertAsync(res.detail || "Failed to delete account");
       }
     } catch (err) {
       console.error(err);
-      alert("Failed to delete account.");
+      await (window as any).alertAsync("Failed to delete account.");
     }
   };
 
@@ -1206,7 +1206,7 @@ export default function ProfilePage({
             <button
               onClick={async () => {
                 const confirm = (window as any).confirmAsync || window.confirm;
-                const confirmed = await confirm(
+                const confirmed = await (window as any).confirmAsync(
                   "Are you sure you want to sign out? You will need to log back in to access your projects.",
                   "Sign Out",
                   "red"

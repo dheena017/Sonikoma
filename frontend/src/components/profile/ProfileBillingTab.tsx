@@ -524,9 +524,9 @@ export default function ProfileBillingTab({
 
           <button
             type="button"
-            onClick={() => {
+            onClick={async () => {
               if (!cardNo || !cardHolder || !cardExpiry || !cardCvv) {
-                alert("Please fill in all card details!");
+                await (window as any).alertAsync("Please fill in all card details!");
                 return;
               }
               onUpdateCard({ cardHolder, cardNo, cardExpiry, cardCvv });

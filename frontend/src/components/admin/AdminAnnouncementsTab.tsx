@@ -52,7 +52,7 @@ export function AdminAnnouncementsTab({ fetchWithInterceptor }: { fetchWithInter
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm("Delete this announcement?")) return;
+    if (!await (window as any).confirmAsync("Delete this announcement?")) return;
     try {
       const res = await fetchWithInterceptor(`http://localhost:8000/api/auth/admin/announcements/${id}`, {
         method: "DELETE",

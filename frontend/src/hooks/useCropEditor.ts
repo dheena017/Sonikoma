@@ -326,7 +326,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
 
   const handleClearAllSlices = async () => {
     const confirm = (window as any).confirmAsync || window.confirm;
-    const confirmClear = await confirm(
+    const confirmClear = await (window as any).confirmAsync(
       "Are you sure you want to clear all crop tools/slices?",
       "Clear Crop Tools",
       "red"
@@ -456,7 +456,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
   const handleDeleteCurrentImage = async () => {
     if (editingImageIdx === null || !setScrapedImages) return;
     const confirm = (window as any).confirmAsync || window.confirm;
-    const confirmDelete = await confirm(
+    const confirmDelete = await (window as any).confirmAsync(
       `Are you sure you want to delete Panel #${
         editingImageIdx + 1
       } from your deck?`,

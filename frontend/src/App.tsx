@@ -147,6 +147,36 @@ export default function App() {
     };
   }, [isSidebarOpen]);
 
+  // --- Global Custom Alert State ---
+  const [alertDialog, setAlertDialog] = React.useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    accentColor?: string;
+    resolve: () => void;
+  } | null>(null);
+
+  React.useEffect(() => {
+    (window as any).alertAsync = (
+      message: string,
+      title: string = "localhost:3000 says",
+      accentColor: string = "purple"
+    ) => {
+      return new Promise<void>((resolve) => {
+        setAlertDialog({
+          isOpen: true,
+          title,
+          message,
+          accentColor,
+          resolve,
+        });
+      });
+    };
+    return () => {
+      delete (window as any).alertAsync;
+    };
+  }, []);
+
   // --- Global Custom Confirm State ---
   const [confirmDialog, setConfirmDialog] = React.useState<{
     isOpen: boolean;
@@ -159,7 +189,7 @@ export default function App() {
   React.useEffect(() => {
     (window as any).confirmAsync = (
       message: string,
-      title: string = "Confirm Action",
+      title: string = "localhost:3000 says",
       accentColor: string = "purple"
     ) => {
       return new Promise<boolean>((resolve) => {
@@ -1472,6 +1502,23 @@ export default function App() {
             appLogic={{ ...appLogic, isPipMode, setIsPipMode }}
           />
         </div>
+      )}
+
+      {alertDialog && alertDialog.isOpen && (
+        <ConfirmModal
+          title={alertDialog.title}
+          message={alertDialog.message}
+          accentColor={alertDialog.accentColor}
+          isAlert={true}
+          onConfirm={() => {
+            alertDialog.resolve();
+            setAlertDialog(null);
+          }}
+          onCancel={() => {
+            alertDialog.resolve();
+            setAlertDialog(null);
+          }}
+        />
       )}
 
       {confirmDialog && confirmDialog.isOpen && (

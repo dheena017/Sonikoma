@@ -46,7 +46,7 @@ export default function CropEditorHeader({
   const handleCloseClick = async () => {
     if (historyLength > 0 || slices.length > 0) {
       const confirm = (window as any).confirmAsync || window.confirm;
-      const confirmClose = await confirm(
+      const confirmClose = await (window as any).confirmAsync(
         "You have unsaved changes in the editor. Are you sure you want to navigate away?",
         "Unsaved Changes",
         "red"

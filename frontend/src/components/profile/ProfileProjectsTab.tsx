@@ -161,7 +161,7 @@ export default function ProfileProjectsTab({
   const handleBatchDelete = async () => {
     if (selectedIds.length === 0) return;
     const confirm = (window as any).confirmAsync || window.confirm;
-    const confirmed = await confirm(
+    const confirmed = await (window as any).confirmAsync(
       `Are you sure you want to delete the ${selectedIds.length} selected project(s)?`
     );
     if (confirmed) {
@@ -170,7 +170,7 @@ export default function ProfileProjectsTab({
     }
   };
 
-  const handleExportJSON = () => {
+  const handleExportJSON = async () => {
     const dataToExport = projects
       .map((p, idx) => ({
         ...p,
@@ -181,7 +181,7 @@ export default function ProfileProjectsTab({
       );
 
     if (dataToExport.length === 0) {
-      alert("No project data available to export.");
+      await (window as any).alertAsync("No project data available to export.");
       return;
     }
 
@@ -310,16 +310,16 @@ export default function ProfileProjectsTab({
         }
 
         if (successCount > 0) {
-          alert(`Successfully imported ${successCount} project(s)!`);
+          await (window as any).alertAsync(`Successfully imported ${successCount} project(s)!`);
           if (onRefreshProjects) {
             onRefreshProjects();
           }
         } else {
-          alert("No projects were successfully imported.");
+          await (window as any).alertAsync("No projects were successfully imported.");
         }
       } catch (err: any) {
         console.error("Failed to parse or import JSON:", err);
-        alert(err.message || "Failed to import JSON.");
+        await (window as any).alertAsync(err.message || "Failed to import JSON.");
       } finally {
         if (e.target) {
           e.target.value = "";
@@ -644,7 +644,7 @@ export default function ProfileProjectsTab({
                           e.stopPropagation();
                           const confirm =
                             (window as any).confirmAsync || window.confirm;
-                          const confirmed = await confirm(
+                          const confirmed = await (window as any).confirmAsync(
                             `Are you sure you want to delete the entire series "${group.title}" and all its chapters?`
                           );
                           if (confirmed) {
@@ -740,7 +740,7 @@ export default function ProfileProjectsTab({
                                 const confirm =
                                   (window as any).confirmAsync ||
                                   window.confirm;
-                                const confirmed = await confirm(
+                                const confirmed = await (window as any).confirmAsync(
                                   `Are you sure you want to delete ${numberStr}?`
                                 );
                                 if (confirmed) {
@@ -792,7 +792,7 @@ export default function ProfileProjectsTab({
                           onClick={async () => {
                             const confirm =
                               (window as any).confirmAsync || window.confirm;
-                            const confirmed = await confirm(
+                            const confirmed = await (window as any).confirmAsync(
                               `Are you sure you want to delete the entire series "${group.title}" and all its chapters?`
                             );
                             if (confirmed) {
@@ -897,7 +897,7 @@ export default function ProfileProjectsTab({
                                   const confirm =
                                     (window as any).confirmAsync ||
                                     window.confirm;
-                                  const confirmed = await confirm(
+                                  const confirmed = await (window as any).confirmAsync(
                                     `Are you sure you want to delete ${numberStr}?`
                                   );
                                   if (confirmed) {

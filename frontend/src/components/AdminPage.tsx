@@ -265,7 +265,7 @@ export default function AdminPage({
   };
 
   const handleDeleteProject = async (id: string) => {
-    const confirm = window.confirm(
+    const confirm = await (window as any).confirmAsync(
       "Are you sure you want to delete this project? This is irreversible."
     );
     if (!confirm) return;
@@ -301,7 +301,7 @@ export default function AdminPage({
   const handleBulkAction = async (action: string, value?: string) => {
     if (selectedUsers.size === 0) return;
     if (action === "delete") {
-      const confirm = window.confirm(
+      const confirm = await (window as any).confirmAsync(
         `Are you sure you want to permanently delete ${selectedUsers.size} users?`
       );
       if (!confirm) return;
@@ -328,7 +328,7 @@ export default function AdminPage({
   };
 
   const handleImpersonate = async (user_id: string) => {
-    const confirm = window.confirm(
+    const confirm = await (window as any).confirmAsync(
       "Are you sure you want to impersonate this user? You will be logged in as them."
     );
     if (!confirm) return;
@@ -361,7 +361,7 @@ export default function AdminPage({
         body: JSON.stringify({ settings }),
       });
       if (res.ok) {
-        alert("Settings saved successfully.");
+        await (window as any).alertAsync("Settings saved successfully.");
       }
     } catch (err) {
       console.error("Failed to save settings:", err);
@@ -1253,8 +1253,8 @@ export default function AdminPage({
                   </span>
                   <div className="h-4 w-[1px] bg-neutral-700" />
                   <button
-                    onClick={() => {
-                      if(window.confirm('Delete selected projects?')) {
+                    onClick={async () => {
+                      if(await (window as any).confirmAsync('Delete selected projects?')) {
                         setSelectedProjects(new Set());
                       }
                     }}
@@ -1460,18 +1460,33 @@ export default function AdminPage({
                         <div className="text-sm text-neutral-300 font-medium">Enforce 2FA for Admins</div>
                         <div className="text-xs text-neutral-500">Requires all admin accounts to use two-factor authentication.</div>
                       </div>
-                      <button className="p-1 rounded-full text-purple-500"><ToggleRight className="w-8 h-8" /></button>
+                      <button 
+                        onClick={() => setSettings({...settings, enforce_2fa: settings.enforce_2fa === "true" ? "false" : "true"})}
+                        className={`p-1 rounded-full ${settings.enforce_2fa === "true" ? "text-purple-500" : "text-neutral-600"}`}
+                      >
+                        {settings.enforce_2fa === "true" ? <ToggleRight className="w-8 h-8" /> : <ToggleLeft className="w-8 h-8" />}
+                      </button>
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="text-sm text-neutral-300 font-medium">Strict IP Binding</div>
                         <div className="text-xs text-neutral-500">Invalidate sessions if the IP address changes suddenly.</div>
                       </div>
-                      <button className="p-1 rounded-full text-neutral-600"><ToggleLeft className="w-8 h-8" /></button>
+                      <button 
+                        onClick={() => setSettings({...settings, strict_ip_binding: settings.strict_ip_binding === "true" ? "false" : "true"})}
+                        className={`p-1 rounded-full ${settings.strict_ip_binding === "true" ? "text-purple-500" : "text-neutral-600"}`}
+                      >
+                        {settings.strict_ip_binding === "true" ? <ToggleRight className="w-8 h-8" /> : <ToggleLeft className="w-8 h-8" />}
+                      </button>
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-neutral-400 mb-1">Session Timeout (minutes)</label>
-                      <input type="number" defaultValue={120} className="w-full sm:max-w-xs bg-[#111115] border border-neutral-700 text-sm text-white rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500/50" />
+                      <input 
+                        type="number" 
+                        value={settings.session_timeout || "120"} 
+                        onChange={(e) => setSettings({...settings, session_timeout: e.target.value})}
+                        className="w-full sm:max-w-xs bg-[#111115] border border-neutral-700 text-sm text-white rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500/50" 
+                      />
                     </div>
                   </div>
                 </div>

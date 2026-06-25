@@ -101,7 +101,7 @@ export default function Sidebar({
     } else {
       if (isDirty) {
         const confirm = (window as any).confirmAsync || window.confirm;
-        const confirmed = await confirm(
+        const confirmed = await (window as any).confirmAsync(
           "You have unsaved changes. Are you sure you want to navigate away? Your changes will be lost."
         );
         if (!confirmed) {

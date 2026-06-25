@@ -87,7 +87,7 @@ export function createFetchWithInterceptor({
                 errorData.detail === "MISSING_API_KEY" ||
                 errorData.detail === "Your API key is invalid."
               ) {
-                alert(
+                await (window as any).alertAsync(
                   "AI features require a valid API Key from the target provider. Please add it in your Profile Settings."
                 );
                 window.location.href = "/profile?tab=api";

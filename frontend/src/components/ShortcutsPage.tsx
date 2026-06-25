@@ -122,7 +122,7 @@ export default function ShortcutsPage({
 
   const handleResetToDefaults = async () => {
     const confirm = (window as any).confirmAsync || window.confirm;
-    const confirmed = await confirm(
+    const confirmed = await (window as any).confirmAsync(
       "Are you sure you want to restore all keyboard shortcuts to factory defaults?"
     );
     if (confirmed) {

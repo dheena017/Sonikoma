@@ -222,7 +222,7 @@ export default function ProjectDetailsPage({
         setExportStatus("JSON downloaded successfully!");
       } catch (err: any) {
         console.error("JSON export failed:", err);
-        alert(err.message || "Failed to export JSON.");
+        await (window as any).alertAsync(err.message || "Failed to export JSON.");
         setExportStatus("JSON export failed.");
       } finally {
         setIsExporting(false);
@@ -230,7 +230,7 @@ export default function ProjectDetailsPage({
       }
     } else if (format === "zip") {
       if (panels.length === 0) {
-        alert("No panels to export.");
+        await (window as any).alertAsync("No panels to export.");
         setIsExporting(false);
         return;
       }
@@ -272,7 +272,7 @@ export default function ProjectDetailsPage({
         }
       } catch (err: any) {
         console.error("ZIP download failed:", err);
-        alert(err.message || "Failed to compile ZIP archive.");
+        await (window as any).alertAsync(err.message || "Failed to compile ZIP archive.");
         setExportStatus("ZIP download failed.");
       } finally {
         setIsExporting(false);
@@ -506,7 +506,7 @@ export default function ProjectDetailsPage({
   const handleDelete = async () => {
     if (!projectId) return;
     const confirm = (window as any).confirmAsync || window.confirm;
-    const confirmDelete = await confirm(
+    const confirmDelete = await (window as any).confirmAsync(
       "Are you sure you want to delete this project and all its timeline panels permanently? This cannot be undone.",
       "Delete Project",
       "red"
@@ -535,7 +535,7 @@ export default function ProjectDetailsPage({
         throw new Error(data.message || "Failed to delete project");
       }
     } catch (err: any) {
-      alert(err.message || "Error deleting project");
+      await (window as any).alertAsync(err.message || "Error deleting project");
     } finally {
       setDeleting(false);
     }
@@ -1422,7 +1422,7 @@ export default function ProjectDetailsPage({
                                     const confirm =
                                       (window as any).confirmAsync ||
                                       window.confirm;
-                                    const confirmed = await confirm(
+                                    const confirmed = await (window as any).confirmAsync(
                                       `Remove panel #${
                                         originalIdx + 1
                                       } from timeline?`,

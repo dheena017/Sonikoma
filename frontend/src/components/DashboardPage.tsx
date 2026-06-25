@@ -106,6 +106,16 @@ export default function DashboardPage() {
       {/* HEADER SECTION */}
       <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
+          <img
+            src={
+              typeof document !== "undefined" &&
+              document.documentElement.getAttribute("data-mode") === "light"
+                ? "/logo-light.png"
+                : "/logo-dark.png"
+            }
+            alt="Sonikoma Logo"
+            className="h-16 w-16 mb-6 rounded-2xl shadow-lg shadow-purple-900/20 object-cover"
+          />
           <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-3">
             Welcome to{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-500">
