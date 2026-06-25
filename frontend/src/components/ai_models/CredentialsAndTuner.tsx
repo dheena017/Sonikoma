@@ -185,11 +185,12 @@ export default function CredentialsAndTuner({
                   <div className="relative flex gap-2">
                     <div className="relative flex-1 group">
                       <input
-                        type={showKey[prov.id] ? "text" : "password"}
+                        type="text"
                         value={prov.val}
                         onChange={(e) => prov.setter(e.target.value)}
                         placeholder={hasEnv ? "Active via backend configuration (.env)" : prov.placeholder}
-                        className={`w-full pl-3 pr-10 py-2 bg-neutral-950/60 border rounded-xl text-xs text-white focus:outline-none focus:ring-1 transition-all placeholder:text-neutral-600 ${
+                        style={{ WebkitTextSecurity: showKey[prov.id] ? "none" : "disc" } as React.CSSProperties}
+                        className={`w-full pl-3 pr-10 py-2 bg-neutral-955/60 border rounded-xl text-xs text-white focus:outline-none focus:ring-1 transition-all placeholder:text-neutral-600 ${
                           isInvalid
                             ? "border-rose-500/40 focus:border-rose-500 focus:ring-rose-500/20"
                             : "border-neutral-800 focus:border-purple-500 focus:ring-purple-500/20"

@@ -75,6 +75,7 @@ export default function AIModelsPage({
   const [skillOutput, setSkillOutput] = useState<any | null>(null);
 
   const [copiedStatus, setCopiedStatus] = useState<Record<string, boolean>>({});
+  const [isEnhancingPrompt, setIsEnhancingPrompt] = useState(false);
 
   const [runHistory, setRunHistory] = useState<any[]>(() => {
     try {
@@ -622,12 +623,50 @@ export default function AIModelsPage({
   };
 
   // Enhance / Optimize Playground Prompt
-  const handleEnhancePrompt = () => {
+  const handleEnhancePrompt = async () => {
     if (!playgroundPrompt.trim()) {
       addNotification("Please enter a short prompt to enhance.", "warning");
       return;
     }
-    const enhanced = `[ROLE]
+    if (!playgroundModel) {
+      addNotification("Please select a model to run prompt enhancement.", "warning");
+      return;
+    }
+
+    setIsEnhancingPrompt(true);
+    addNotification("Enhancing prompt with AI...", "info");
+
+    const provider = playgroundProvider || "gemini";
+    const model = playgroundModel;
+    const customKey = localStorage.getItem(`user_${provider}_key`) || undefined;
+    
+    const enhancerPrompt = `You are an expert prompt engineer. Refine and enhance the following user instruction to be extremely detailed, structured, clear, and effective for AI model generation. Maintain the core request and original language of the prompt, but wrap it in clear sections, roles, and instructions. Do NOT include any explanations, preambles, introductory text, or markdown code block wrapper (such as \`\`\`). Output ONLY the final enhanced prompt.
+
+Original Prompt to enhance:
+${playgroundPrompt}`;
+
+    try {
+      const res = await activeFetch("/api/test-model-latency", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          provider,
+          model,
+          apiKey: customKey,
+          prompt: enhancerPrompt,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.response) {
+        setPlaygroundPrompt(data.response.trim());
+        addNotification("Successfully enhanced prompt using AI!", "success");
+      } else {
+        throw new Error(data.error || "Model failed to respond.");
+      }
+    } catch (err: any) {
+      console.warn("AI prompt enhancement failed, falling back to template:", err.message);
+      // Fallback to static template
+      const enhanced = `[ROLE]
 You are a developer-grade AI optimization assistant.
 
 [TASK]
@@ -644,8 +683,11 @@ ${playgroundPrompt}
 [CONSTRAINTS]
 - Do not include conversational preambles or meta-commentary.
 - Focus strictly on factual, high-utility details.`;
-    setPlaygroundPrompt(enhanced);
-    addNotification("Enhanced prompt with structure and constraints!", "success");
+      setPlaygroundPrompt(enhanced);
+      addNotification("Enhanced prompt using fallback template.", "info");
+    } finally {
+      setIsEnhancingPrompt(false);
+    }
   };
 
   // Export Run History to JSON
@@ -769,9 +811,9 @@ ${playgroundPrompt}
     outputTokens: number
   ): number => {
     const model = modelName.toLowerCase();
-    // Pricing per 1M tokens
-    let inputPrice = 0;
-    let outputPrice = 0;
+    // Pricing per 1M tokens in USD
+    let inputPrice = 0.075; // default low baseline (e.g. Gemini Flash / Llama-3-8B)
+    let outputPrice = 0.30; // default low baseline
 
     if (provider === "gemini") {
       if (model.includes("pro")) {
@@ -779,13 +821,14 @@ ${playgroundPrompt}
         inputPrice = 1.25;
         outputPrice = 5.0;
       } else {
-        // Flash/Lite free tier models
-        return 0;
+        // Flash/Lite pricing
+        inputPrice = 0.075;
+        outputPrice = 0.30;
       }
     } else if (provider === "openai") {
       if (model.includes("gpt-4o-mini")) {
         inputPrice = 0.15;
-        outputPrice = 0.6;
+        outputPrice = 0.60;
       } else if (model.includes("gpt-4o") || model.includes("gpt-4")) {
         inputPrice = 5.0;
         outputPrice = 15.0;
@@ -798,11 +841,23 @@ ${playgroundPrompt}
         inputPrice = 3.0;
         outputPrice = 15.0;
       } else if (model.includes("haiku")) {
-        inputPrice = 0.8;
-        outputPrice = 4.0;
+        inputPrice = 0.80;
+        outputPrice = 4.00;
       } else if (model.includes("opus")) {
         inputPrice = 15.0;
         outputPrice = 75.0;
+      } else {
+        inputPrice = 0.80;
+        outputPrice = 4.00;
+      }
+    } else if (provider === "huggingface") {
+      // standard open source inference endpoint pricing simulation
+      if (model.includes("llama-3-70b") || model.includes("mixtral")) {
+        inputPrice = 0.70;
+        outputPrice = 0.90;
+      } else {
+        inputPrice = 0.15;
+        outputPrice = 0.15;
       }
     }
 
@@ -927,6 +982,7 @@ ${playgroundPrompt}
           executeSkill={executeSkill}
           skillOutput={skillOutput}
           handleEnhancePrompt={handleEnhancePrompt}
+          isEnhancingPrompt={isEnhancingPrompt}
         />
 
         {/* API Token Ledger & Costs */}
