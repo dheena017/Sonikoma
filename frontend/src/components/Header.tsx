@@ -20,6 +20,8 @@ import {
   Paintbrush,
   HelpCircle,
   FileText,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { GeneratedPanel } from "../types";
 import NotificationDropdown from "./NotificationDropdown";
@@ -59,6 +61,8 @@ interface HeaderProps {
   navigateTo?: (path: string) => void;
   notificationsMuted?: boolean;
   setNotificationsMuted?: (muted: boolean) => void;
+  themeMode?: "dark" | "light";
+  toggleThemeMode?: () => void;
 }
 
 /** Format seconds into a readable "Xm Ys" string */
@@ -103,6 +107,8 @@ export default function Header({
   navigateTo: routerNavigateTo,
   notificationsMuted = false,
   setNotificationsMuted,
+  themeMode = "dark",
+  toggleThemeMode,
 }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -462,8 +468,14 @@ export default function Header({
           onClick={() => navigateTo("/dashboard")}
         >
           <img
-            src="/logo.png"
-            className="h-8 w-8 rounded-full bg-black shadow-lg shadow-purple-900/40 shrink-0 object-cover"
+            key={themeMode}
+            src={themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"}
+            onError={(e) => {
+              // Graceful fallback to shared logo if mode-specific file missing
+              (e.currentTarget as HTMLImageElement).src = "/logo.png";
+            }}
+            className="h-8 w-8 rounded-full shadow-lg shadow-purple-900/40 shrink-0 object-cover transition-all duration-300 animate-[fadeIn_0.3s_ease-out]"
+            style={{ background: themeMode === "light" ? "#ffffff" : "#000000" }}
             alt="Sonikoma Logo"
           />
           <span className="font-bold text-sm tracking-tight text-white font-sans hidden sm:inline">
@@ -944,6 +956,41 @@ export default function Header({
                     onChange={(e) => setAutoPlayAudio(e.target.checked)}
                     className="w-4 h-4 rounded bg-neutral-950 border border-neutral-850 accent-purple-500 cursor-pointer"
                   />
+                </div>
+
+                {/* Dark / Light Mode Toggle */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold text-neutral-300">
+                      Interface Appearance
+                    </p>
+                    <p className="text-[9px] text-neutral-500 font-mono">
+                      {themeMode === "dark" ? "Dark mode active" : "Light mode active"}
+                    </p>
+                  </div>
+                  <button
+                    onClick={toggleThemeMode}
+                    title={themeMode === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                    className={`relative inline-flex items-center w-14 h-7 rounded-full border-2 transition-all duration-300 cursor-pointer focus:outline-none ${
+                      themeMode === "light"
+                        ? "bg-amber-400 border-amber-500 shadow-[0_0_10px_rgba(251,191,36,0.4)]"
+                        : "bg-neutral-800 border-neutral-700"
+                    }`}
+                  >
+                    <span
+                      className={`inline-flex items-center justify-center w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 ${
+                        themeMode === "light"
+                          ? "translate-x-7 bg-white"
+                          : "translate-x-1 bg-neutral-600"
+                      }`}
+                    >
+                      {themeMode === "light" ? (
+                        <Sun className="h-3 w-3 text-amber-500" />
+                      ) : (
+                        <Moon className="h-3 w-3 text-neutral-300" />
+                      )}
+                    </span>
+                  </button>
                 </div>
               </div>
 

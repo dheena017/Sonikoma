@@ -153,17 +153,17 @@ def run_cv_detection(image_path, sensitivity, bg_mode, min_width_pct, min_height
             row_vars = np.var(gray, axis=1)
             row_means = np.mean(gray, axis=1)
 
-            # Gutter row definition: low variance AND mean close to background color (adaptive to white/black/colored transitions)
+            # Gutter row definition: strictly match background color to prevent slicing through dark/light art lines
             if is_white_bg:
-                is_gutter_row = (row_vars < 64) & ((row_means > threshold_val) | (row_vars < 25))
+                is_gutter_row = (row_vars < 64) & (row_means > threshold_val)
             else:
-                is_gutter_row = (row_vars < 64) & ((row_means < threshold_val) | (row_vars < 25))
+                is_gutter_row = (row_vars < 64) & (row_means < threshold_val)
             is_content_row = ~is_gutter_row
 
             # Join small content gaps to avoid splitting inside panels (dynamic threshold based on width)
             smoothed_content = np.copy(is_content_row)
             gap_count = 0
-            gap_thresh = max(2, min(30, int(w * 0.01)))
+            gap_thresh = max(15, min(80, int(w * 0.04)))
             for i in range(len(smoothed_content)):
                 if not smoothed_content[i]:
                     gap_count += 1
@@ -304,15 +304,15 @@ def run_cv_detection(image_path, sensitivity, bg_mode, min_width_pct, min_height
             row_means = np.mean(gray_arr, axis=1)
 
             if is_white_bg:
-                is_gutter_row = (row_vars < 64) & ((row_means > threshold_val) | (row_vars < 25))
+                is_gutter_row = (row_vars < 64) & (row_means > threshold_val)
             else:
-                is_gutter_row = (row_vars < 64) & ((row_means < threshold_val) | (row_vars < 25))
+                is_gutter_row = (row_vars < 64) & (row_means < threshold_val)
             is_content_row = ~is_gutter_row
 
             # Join small content gaps (dynamic threshold based on width)
             smoothed_content = np.copy(is_content_row)
             gap_count = 0
-            gap_thresh = max(2, min(30, int(w * 0.01)))
+            gap_thresh = max(15, min(80, int(w * 0.04)))
             for i in range(len(smoothed_content)):
                 if not smoothed_content[i]:
                     gap_count += 1
