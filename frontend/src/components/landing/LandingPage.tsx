@@ -78,7 +78,7 @@ export default function LandingPage({
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           >
             <img
-              src="/logo.png"
+              src="/logo-dark.png"
               className="w-10 h-10 rounded-xl shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform object-cover bg-black"
               alt="Sonikoma Logo"
             />

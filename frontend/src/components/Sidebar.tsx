@@ -289,7 +289,7 @@ export default function Sidebar({
             onClick={handleNavigateToDashboardOverview}
           >
             <img
-              src="/logo.png"
+              src="/logo-dark.png"
               className="h-10 w-10 rounded-full bg-black shadow-lg shadow-purple-900/40 shrink-0 object-cover"
               alt="Sonikoma Logo"
             />

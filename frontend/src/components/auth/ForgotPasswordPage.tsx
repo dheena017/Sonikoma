@@ -246,7 +246,7 @@ export default function ForgotPasswordPage({
                 className={`flex items-center justify-center w-8 h-8 rounded-lg ${currentTheme.accentBg} border ${currentTheme.accentBorder} overflow-hidden`}
               >
                 <img
-                  src="/logo.png"
+                  src="/logo-dark.png"
                   alt="Logo"
                   className="w-6 h-6 object-contain drop-shadow-md"
                 />

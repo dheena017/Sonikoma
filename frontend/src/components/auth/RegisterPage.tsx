@@ -174,7 +174,7 @@ export default function RegisterPage({
             <div className="flex lg:hidden items-center gap-1.5">
               <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-purple-600/20 border border-purple-500/30 overflow-hidden">
                 <img
-                  src="/logo.png"
+                  src="/logo-dark.png"
                   alt="Logo"
                   className="w-6 h-6 object-contain drop-shadow-md"
                 />

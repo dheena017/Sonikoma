@@ -24,7 +24,7 @@ body {
   font-family: var(--font-sans);
   overflow-x: hidden;
   color-scheme: dark;
-  transition: background-color 0.25s ease, color 0.25s ease;
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* =========================================================
@@ -36,13 +36,17 @@ body {
   color-scheme: light;
 }
 
-/* ── Global smooth transition ────────────────────────────── */
+/* ── Global smooth transition on theme change ────────────── */
+/* Applied to ALL elements in BOTH modes so switching produces a
+   uniform colour crossfade, not just one-directional styling.   */
 [data-mode="light"] *,
 [data-mode="dark"] * {
-  transition-property: background-color, border-color, color, box-shadow, fill, stroke;
-  transition-duration: 200ms;
-  transition-timing-function: ease;
+  transition-property: background-color, border-color, color, box-shadow, fill, stroke, opacity;
+  transition-duration: 300ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* Buttons & links get the full interactive set too */
 [data-mode="light"] button,
 [data-mode="dark"] button,
 [data-mode="light"] a,
@@ -103,15 +107,20 @@ body {
 }
 
 /* ── Neutral background opacity variants ─────────────────── */
+[data-mode="light"] .bg-neutral-950,
 [data-mode="light"] .bg-neutral-955\/40,
 [data-mode="light"] .bg-neutral-950\/95,
+[data-mode="light"] .bg-neutral-950\/90,
+[data-mode="light"] .bg-neutral-950\/85,
 [data-mode="light"] .bg-neutral-950\/80,
 [data-mode="light"] .bg-neutral-950\/75,
 [data-mode="light"] .bg-neutral-950\/60,
+[data-mode="light"] .bg-neutral-950\/50,
 [data-mode="light"] .bg-neutral-950\/40,
 [data-mode="light"] .bg-neutral-950\/30,
-[data-mode="light"] .bg-neutral-950\/20 {
-  background-color: rgba(244, 244, 245, 0.85) !important;
+[data-mode="light"] .bg-neutral-950\/20,
+[data-mode="light"] .bg-neutral-950\/10 {
+  background-color: rgba(248, 248, 250, 0.97) !important;
 }
 [data-mode="light"] .bg-neutral-900\/95,
 [data-mode="light"] .bg-neutral-900\/80,
@@ -249,6 +258,7 @@ body {
 [data-mode="light"] .border-neutral-850\/60 {
   border-color: rgba(212, 212, 216, 0.9) !important;
 }
+[data-mode="light"] .border-neutral-800\/80,
 [data-mode="light"] .border-neutral-800\/60,
 [data-mode="light"] .border-neutral-800\/40 {
   border-color: rgba(200, 200, 207, 0.9) !important;
@@ -346,6 +356,7 @@ body {
   backdrop-filter: blur(12px);
 }
 
+
 /* ── Page-level containers (full-page dark wraps) ─────────── */
 /* Covers min-h-screen wrappers in ProfilePage, ProjectDetailsPage,
    SeriesDetailsPage, ProjectsPage, DashboardPage, etc. */
@@ -354,11 +365,257 @@ body {
   background-color: #f4f4f5 !important;
 }
 
-/* ── Card panels with near-black hex backgrounds ──────────── */
-/* These are the main card containers in profile/project pages  */
-[data-mode="light"] [class*="bg-[#0"],
-[data-mode="light"] [class*="bg-[#1"] {
-  background-color: #ffffff !important;
+/* ── bg-black/* opacity overlays ──────────────────────────── */
+/* These are heavily used in the projects toolbar, sort bar, etc. */
+[data-mode="light"] .bg-black\/5  { background-color: rgba(0,0,0,0.03) !important; }
+[data-mode="light"] .bg-black\/10 { background-color: rgba(0,0,0,0.04) !important; }
+[data-mode="light"] .bg-black\/20 { background-color: rgba(0,0,0,0.04) !important; }
+[data-mode="light"] .bg-black\/30 { background-color: rgba(0,0,0,0.05) !important; }
+[data-mode="light"] .bg-black\/35 { background-color: rgba(0,0,0,0.05) !important; }
+[data-mode="light"] .bg-black\/40 { background-color: rgba(248,248,250,0.95) !important; }
+[data-mode="light"] .bg-black\/50 { background-color: rgba(248,248,250,0.9)  !important; }
+[data-mode="light"] .bg-black\/60 { background-color: rgba(0,0,0,0.3)         !important; }
+
+/* ── bg-white/* used in guide/card buttons ────────────────── */
+[data-mode="light"] .bg-white\/5  { background-color: rgba(0,0,0,0.04) !important; }
+[data-mode="light"] .bg-white\/10 { background-color: rgba(0,0,0,0.06) !important; }
+[data-mode="light"] .hover\:bg-white\/5:hover  { background-color: rgba(0,0,0,0.04) !important; }
+[data-mode="light"] .hover\:bg-white\/10:hover { background-color: rgba(0,0,0,0.06) !important; }
+
+/* ── border-white/* — invisible on white; use light gray instead  */
+[data-mode="light"] .border-white\/5,
+[data-mode="light"] .border-white\/10 {
+  border-color: rgba(0,0,0,0.08) !important;
+}
+[data-mode="light"] .border-white\/20 { border-color: rgba(0,0,0,0.12) !important; }
+[data-mode="light"] .border-white\/30 { border-color: rgba(0,0,0,0.15) !important; }
+[data-mode="light"] .divide-white\/10 > * + * { border-color: rgba(0,0,0,0.08) !important; }
+
+/* ── Sidebar active item: purple-950 family ───────────────── */
+/* Active nav pill uses bg-purple-950/20 which is very dark on white */
+[data-mode="light"] .bg-purple-950\/20 { background-color: rgba(168,85,247,0.08)  !important; }
+[data-mode="light"] .bg-purple-950\/15 { background-color: rgba(168,85,247,0.06)  !important; }
+[data-mode="light"] .bg-purple-950\/10 { background-color: rgba(168,85,247,0.05)  !important; }
+[data-mode="light"] .bg-purple-950\/5  { background-color: rgba(168,85,247,0.03)  !important; }
+[data-mode="light"] .bg-purple-950\/25 { background-color: rgba(168,85,247,0.08)  !important; }
+[data-mode="light"] .bg-purple-950\/30 { background-color: rgba(168,85,247,0.09)  !important; }
+[data-mode="light"] .bg-purple-950\/40 { background-color: rgba(168,85,247,0.10)  !important; }
+[data-mode="light"] .bg-purple-950\/50 { background-color: rgba(168,85,247,0.12)  !important; }
+[data-mode="light"] .bg-purple-950\/60 { background-color: rgba(168,85,247,0.14)  !important; }
+[data-mode="light"] .bg-purple-950\/70 { background-color: rgba(168,85,247,0.16)  !important; }
+[data-mode="light"] .bg-purple-950\/80 { background-color: rgba(168,85,247,0.18)  !important; }
+[data-mode="light"] .bg-purple-950\/85 { background-color: rgba(168,85,247,0.20)  !important; }
+/* Solid purple-950 badge (sidebar tag) → very light purple tint */
+[data-mode="light"] .bg-purple-950     { background-color: rgba(168,85,247,0.10)  !important; }
+
+/* ── Purple borders that match the above tints ────────────── */
+[data-mode="light"] .border-purple-900\/60 { border-color: rgba(168,85,247,0.25) !important; }
+[data-mode="light"] .border-purple-900\/40 { border-color: rgba(168,85,247,0.18) !important; }
+[data-mode="light"] .border-purple-900\/30 { border-color: rgba(168,85,247,0.15) !important; }
+[data-mode="light"] .border-purple-950     { border-color: rgba(168,85,247,0.20) !important; }
+
+/* ── Other dark-family purple text that needs lightening ──── */
+[data-mode="light"] .text-purple-300 { color: #7c3aed !important; }
+[data-mode="light"] .text-purple-400 { color: #9333ea !important; }
+
+/* ── Additional hex families ──────────────────────────────── */
+/* #0d0d12 used by profile projects toolbar */
+[data-mode="light"] .bg-\[\#0d0d12\]       { background-color: #f4f4f5 !important; }
+[data-mode="light"] .bg-\[\#0d0d12\]\/75   { background-color: rgba(248,248,250,0.95) !important; }
+[data-mode="light"] .bg-\[\#0d0d12\]\/50   { background-color: rgba(248,248,250,0.90) !important; }
+[data-mode="light"] .hover\:bg-\[\#121217\]\/50:hover { background-color: rgba(244,244,245,0.9) !important; }
+
+/* ── Explicit hex bg overrides (all opacity variants) ──────
+   CSS attribute selectors can't match Tailwind's escaped
+   bracket classes reliably. Each variant must be explicit.  */
+
+/* #070709 family */
+[data-mode="light"] .bg-\[\#070709\] { background-color: #f4f4f5 !important; }
+
+/* #09090b family */
+[data-mode="light"] .bg-\[\#09090b\] { background-color: #f4f4f5 !important; }
+
+/* #060608 family */
+[data-mode="light"] .bg-\[\#060608\] { background-color: #f4f4f5 !important; }
+
+/* #08080c family */
+[data-mode="light"] .bg-\[\#08080c\] { background-color: #f4f4f5 !important; }
+[data-mode="light"] .bg-\[\#08080c\]\/95 { background-color: rgba(244,244,245,0.95) !important; }
+
+/* #0a0a0b / #0a0a0f family */
+[data-mode="light"] .bg-\[\#0a0a0b\] { background-color: #f4f4f5 !important; }
+[data-mode="light"] .bg-\[\#0a0a0f\] { background-color: #f4f4f5 !important; }
+[data-mode="light"] .bg-\[\#0a0a0f\]\/80 { background-color: rgba(255,255,255,0.9) !important; }
+
+/* #0b0b0e family — most common (DashboardPage, ProjectsPage, SeriesDetailsPage) */
+[data-mode="light"] .bg-\[\#0b0b0e\] { background-color: #ffffff !important; }
+[data-mode="light"] .bg-\[\#0b0b0e\]\/80 { background-color: rgba(255,255,255,0.95) !important; }
+[data-mode="light"] .bg-\[\#0b0b0e\]\/75 { background-color: rgba(255,255,255,0.95) !important; }
+[data-mode="light"] .bg-\[\#0b0b0e\]\/60 { background-color: rgba(249,249,251,0.9) !important; }
+[data-mode="light"] .bg-\[\#0b0b0e\]\/50 { background-color: rgba(249,249,251,0.85) !important; }
+[data-mode="light"] .bg-\[\#0b0b0e\]\/40 { background-color: rgba(249,249,251,0.8) !important; }
+
+/* #0c0c0e family */
+[data-mode="light"] .bg-\[\#0c0c0e\] { background-color: #ffffff !important; }
+[data-mode="light"] .bg-\[\#0c0c0e\]\/40 { background-color: rgba(249,249,251,0.8) !important; }
+[data-mode="light"] .bg-\[\#0c0c0e\]\/30 { background-color: rgba(249,249,251,0.7) !important; }
+
+/* #0c0c10 family — used in ProjectDetailsPage, SeriesDetailsPage */
+[data-mode="light"] .bg-\[\#0c0c10\] { background-color: #ffffff !important; }
+[data-mode="light"] .bg-\[\#0c0c10\]\/80 { background-color: rgba(255,255,255,0.95) !important; }
+
+/* #0d0d0f / #0d0d10 family */
+[data-mode="light"] .bg-\[\#0d0d0f\] { background-color: #f9f9fb !important; }
+[data-mode="light"] .bg-\[\#0d0d10\] { background-color: #f9f9fb !important; }
+[data-mode="light"] .bg-\[\#0d0d10\]\/40 { background-color: rgba(249,249,251,0.8) !important; }
+[data-mode="light"] .bg-\[\#0d0d10\]\/20 { background-color: rgba(249,249,251,0.6) !important; }
+
+/* #0e0e13 family */
+[data-mode="light"] .bg-\[\#0e0e13\] { background-color: #f4f4f5 !important; }
+
+/* #0f0f13 family — used extensively in profile pages */
+[data-mode="light"] .bg-\[\#0f0f13\] { background-color: #ffffff !important; }
+[data-mode="light"] .bg-\[\#0f0f13\]\/40 { background-color: rgba(255,255,255,0.95) !important; }
+[data-mode="light"] .bg-\[\#0f0f13\]\/30 { background-color: rgba(249,249,251,0.9) !important; }
+
+/* #111113 / #121217 / #141416 family */
+[data-mode="light"] .bg-\[\#111113\] { background-color: #f4f4f5 !important; }
+[data-mode="light"] .bg-\[\#121217\] { background-color: #f4f4f5 !important; }
+[data-mode="light"] .bg-\[\#121217\]\/50 { background-color: rgba(244,244,245,0.8) !important; }
+[data-mode="light"] .bg-\[\#141416\] { background-color: #f4f4f5 !important; }
+
+
+/* ── Theme-change overlay (injected by useThemeMode hook) ──── */
+/* The hook creates this element programmatically; these styles
+   ensure it renders beautifully with GPU acceleration.          */
+#theme-transition-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  pointer-events: none;
+  will-change: opacity;
+  transform: translateZ(0); /* force GPU layer */
+}
+
+/* When switching themes, temporarily lock element transitions so
+   the overlay is the ONLY thing animating (cleaner visual).
+   The hook removes this attribute after the overlay fades out.  */
+[data-theme-switching="true"] *,
+[data-theme-switching="true"] *::before,
+[data-theme-switching="true"] *::after {
+  transition-duration: 0ms !important;
+}
+
+/* ── FloatingSelectionBar (portal → document.body) ──────────
+   The bar renders at fixed bottom-0 with bg-neutral-950/90.
+   The portal sits outside the [data-mode] tree so we target
+   the <html> ancestor to ensure light-mode class applies.     */
+[data-mode="light"] .fixed.bottom-0.left-0.right-0 > div {
+  background-color: rgba(255, 255, 255, 0.97) !important;
+  border-top-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ── Modal / dialog surfaces inside portals ──────────────── */
+/* AutoCropModal & BubbleCleanerModal render in a portal;
+   target the modal backdrop and inner card surfaces.          */
+[data-mode="light"] .fixed.inset-0:not(#theme-transition-overlay) {
+  background-color: rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Hover states for neutral-900 action buttons */
+[data-mode="light"] .hover\:bg-neutral-800:hover {
+  background-color: #e8e8ec !important;
+}
+[data-mode="light"] .hover\:bg-neutral-900:hover {
+  background-color: #f0f0f4 !important;
+}
+
+/* ── bg-neutral-955 (custom very-dark token) ─────────────── */
+[data-mode="light"] .bg-neutral-955,
+[data-mode="light"] .bg-neutral-955\/60,
+[data-mode="light"] .bg-neutral-955\/40,
+[data-mode="light"] .bg-neutral-955\/20 {
+  background-color: #f4f4f5 !important;
+}
+[data-mode="light"] .hover\:bg-neutral-955\/60:hover {
+  background-color: #ebebef !important;
+}
+
+/* ── Notification toast colour families ─────────────────────
+   Toasts use bg-{color}-950/90 which is near-black in light mode.
+   Map each to a pale tinted surface so they're still recognisable
+   but readable on a white screen.                              */
+
+/* Info / blue */
+[data-mode="light"] .bg-blue-950,
+[data-mode="light"] .bg-blue-950\/90,
+[data-mode="light"] .bg-blue-950\/80,
+[data-mode="light"] .bg-blue-950\/70,
+[data-mode="light"] .bg-blue-950\/60,
+[data-mode="light"] .bg-blue-950\/40 {
+  background-color: rgba(239, 246, 255, 0.98) !important; /* blue-50 */
+}
+[data-mode="light"] .border-blue-800  { border-color: #93c5fd !important; }
+[data-mode="light"] .text-blue-100    { color: #1e3a5f !important; }
+[data-mode="light"] .text-blue-400    { color: #2563eb !important; }
+
+/* Success / emerald */
+[data-mode="light"] .bg-emerald-950,
+[data-mode="light"] .bg-emerald-950\/90,
+[data-mode="light"] .bg-emerald-950\/80,
+[data-mode="light"] .bg-emerald-950\/70,
+[data-mode="light"] .bg-emerald-950\/60,
+[data-mode="light"] .bg-emerald-950\/40 {
+  background-color: rgba(236, 253, 245, 0.98) !important; /* emerald-50 */
+}
+[data-mode="light"] .border-emerald-800  { border-color: #6ee7b7 !important; }
+[data-mode="light"] .text-emerald-100    { color: #064e3b !important; }
+[data-mode="light"] .text-emerald-400    { color: #059669 !important; }
+
+/* Warning / amber */
+[data-mode="light"] .bg-amber-950,
+[data-mode="light"] .bg-amber-950\/90,
+[data-mode="light"] .bg-amber-950\/95,
+[data-mode="light"] .bg-amber-950\/80,
+[data-mode="light"] .bg-amber-950\/70,
+[data-mode="light"] .bg-amber-950\/60,
+[data-mode="light"] .bg-amber-950\/40 {
+  background-color: rgba(255, 251, 235, 0.98) !important; /* amber-50 */
+}
+[data-mode="light"] .border-amber-800,
+[data-mode="light"] .border-amber-500\/85 { border-color: #fcd34d !important; }
+[data-mode="light"] .text-amber-100       { color: #451a03 !important; }
+[data-mode="light"] .text-amber-200       { color: #6d2800 !important; }
+[data-mode="light"] .text-amber-400       { color: #d97706 !important; }
+
+/* Error / rose */
+[data-mode="light"] .bg-rose-950,
+[data-mode="light"] .bg-rose-950\/90,
+[data-mode="light"] .bg-rose-950\/80,
+[data-mode="light"] .bg-rose-950\/70 {
+  background-color: rgba(255, 241, 242, 0.98) !important; /* rose-50 */
+}
+[data-mode="light"] .border-rose-800   { border-color: #fca5a5 !important; }
+[data-mode="light"] .text-rose-100     { color: #4c0519 !important; }
+[data-mode="light"] .text-rose-400     { color: #e11d48 !important; }
+
+/* Pipeline failure / red */
+[data-mode="light"] .bg-red-950,
+[data-mode="light"] .bg-red-950\/95,
+[data-mode="light"] .bg-red-950\/90,
+[data-mode="light"] .bg-red-950\/80 {
+  background-color: rgba(254, 242, 242, 0.98) !important; /* red-50 */
+}
+[data-mode="light"] .border-red-500    { border-color: #fca5a5 !important; }
+[data-mode="light"] .text-red-100      { color: #450a0a !important; }
+[data-mode="light"] .text-red-400      { color: #dc2626 !important; }
+
+/* ── Metadata container inline-style rgba(0,0,0,0.4) override ──
+   The UrlInputPanel metadata section uses an inline style for bg.
+   We use a direct CSS rule to force the parent container to be    
+   light, relying on specificity.                                 */
+[data-mode="light"] #dynamic_input_box .border.rounded-2xl {
+  background-color: rgba(248, 248, 250, 0.96) !important;
   border-color: rgba(0, 0, 0, 0.08) !important;
 }
 

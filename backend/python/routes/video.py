@@ -268,19 +268,22 @@ async def process_render_job(video_id: str, panels: List[PanelData]):
         for idx, panel in enumerate(panels):
             img_ext = panel.image_url.split(".")[-1].split("?")[0] if "." in panel.image_url else "jpg"
             if len(img_ext) > 4: img_ext = "jpg"
-            img_path = os.path.join(work_dir, f"panel_{idx}.{img_ext}")
+            
+            raw_img_path = os.path.join(work_dir, f"panel_raw_{idx}.{img_ext}")
+            final_img_path = os.path.join(work_dir, f"panel_{idx}.jpg")
             
             p_data = {
                 "id": panel.id,
                 "duration": panel.duration if panel.duration > 0 else 3.0,
-                "local_img": img_path,
+                "local_img": final_img_path,
+                "raw_img": raw_img_path,
                 "local_audio": None,
                 "speech_text": panel.speech_text,
                 "motion_type": panel.motion_type,
                 "sfx": panel.sfx
             }
             
-            download_tasks.append(download_asset(panel.image_url, img_path))
+            download_tasks.append(download_asset(panel.image_url, raw_img_path))
             
             if panel.audio_url:
                 audio_ext = "mp3"
@@ -295,9 +298,73 @@ async def process_render_job(video_id: str, panels: List[PanelData]):
         if not any(results):
              raise Exception("Failed to download video assets.")
 
+        # 2. Inspect dimensions and determine standard target layout size
+        from PIL import Image
+        
+        tall_count = 0
+        wide_count = 0
+        for idx, p_data in enumerate(panels_data):
+            raw_img = p_data["raw_img"]
+            if os.path.exists(raw_img):
+                try:
+                    with Image.open(raw_img) as img:
+                        w, h = img.size
+                        # Throw a friendly error for raw, unsliced webtoon strips
+                        if h > 8000:
+                            raise Exception(f"Panel #{p_data['id']} image is extremely tall ({h}px). It looks like a raw, unsliced webtoon strip. Please slice it into individual panels using the Auto-Crop tool before rendering.")
+                        if h > w:
+                            tall_count += 1
+                        else:
+                            wide_count += 1
+                except Exception as e:
+                    if "unsliced" in str(e):
+                        raise e
+                    logger.warning(f"Failed to inspect dimensions for panel {idx}: {e}")
+                    
+        # Determine standard target dimensions (1080x1920 for portrait, 1920x1080 for landscape)
+        if tall_count >= wide_count:
+            target_width, target_height = 1080, 1920
+        else:
+            target_width, target_height = 1920, 1080
+
+        logger.info(f"Target video dimensions determined: {target_width}x{target_height} (portrait={tall_count >= wide_count})")
+
+        # 3. Resize and pad all images to target size (ensuring even dimensions and uniform sizing)
+        for idx, p_data in enumerate(panels_data):
+            raw_img = p_data["raw_img"]
+            final_img = p_data["local_img"]
+            if os.path.exists(raw_img):
+                try:
+                    with Image.open(raw_img) as img:
+                        img = img.convert("RGB")
+                        img_w, img_h = img.size
+                        
+                        # Scale to fit
+                        scale = min(target_width / img_w, target_height / img_h)
+                        new_w = int(img_w * scale)
+                        new_h = int(img_h * scale)
+                        
+                        # Ensure even dimensions
+                        if new_w % 2 != 0: new_w -= 1
+                        if new_h % 2 != 0: new_h -= 1
+                        new_w = max(2, new_w)
+                        new_h = max(2, new_h)
+                        
+                        resized = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
+                        
+                        # Create black background and paste resized image in the center
+                        bg = Image.new("RGB", (target_width, target_height), (0, 0, 0))
+                        offset_x = (target_width - new_w) // 2
+                        offset_y = (target_height - new_h) // 2
+                        bg.paste(resized, (offset_x, offset_y))
+                        bg.save(final_img, "JPEG")
+                except Exception as e:
+                    logger.error(f"Failed to process and pad image {raw_img}: {e}")
+                    raise Exception(f"Failed to format image assets for video compilation: {e}")
+
         RENDER_JOBS[video_id]["progress"] = 40
 
-        # 2. Stitch using MoviePy in a thread
+        # 4. Stitch using MoviePy in a thread
         logger.info("Starting video compilation using MoviePy...")
         await asyncio.to_thread(render_pipeline_sync, panels_data, output_path, work_dir)
 
@@ -342,8 +409,14 @@ async def process_render_job(video_id: str, panels: List[PanelData]):
             if os.path.exists(work_dir):
                 shutil.rmtree(work_dir)
             if os.path.exists(output_path):
-                os.remove(output_path)
-            logger.info(f"Cleaned up temporary files for job {video_id}")
+                job_info = RENDER_JOBS.get(video_id, {})
+                status = job_info.get("status")
+                url = job_info.get("url")
+                is_remote_url = url and (url.startswith("http://") or url.startswith("https://"))
+                if status == "failed" or is_remote_url:
+                    os.remove(output_path)
+                    logger.info(f"Cleaned up output video file for job {video_id} (cleaned because status is {status} or remote={is_remote_url})")
+            logger.info(f"Cleaned up temporary workspace for job {video_id}")
         except Exception as cleanup_err:
             logger.error(f"Failed to clean up files for job {video_id}: {cleanup_err}")
 
