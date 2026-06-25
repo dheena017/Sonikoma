@@ -1,0 +1,14 @@
+{
+  "name": "Sonikoma - AI Storyboard & Video Production",
+  "short_name": "Sonikoma",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#070709",
+  "background_color": "#070709",
+  "display": "standalone"
+}
