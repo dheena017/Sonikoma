@@ -558,7 +558,7 @@ export default function AdminPage({
         </div>
 
         {activeTab === "overview" && <AdminOverviewTab stats={stats} />}
-        {activeTab === "announcements" && <AdminAnnouncementsTab />}
+        {activeTab === "announcements" && <AdminAnnouncementsTab fetchWithInterceptor={fetchWithInterceptor} />}
 
         {/* Tab Content: USERS */}
         {activeTab === "users" && (
@@ -1059,17 +1059,17 @@ export default function AdminPage({
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div className="p-4 bg-[#0b0b0e] border border-neutral-800 rounded-lg border-l-2 border-l-emerald-500">
                         <div className="text-neutral-400 text-sm mb-1">Monthly Recurring Revenue</div>
-                        <div className="text-2xl font-bold text-white">$12,450</div>
+                        <div className="text-2xl font-bold text-white">${(analytics.mrr || 0).toLocaleString()}</div>
                         <div className="text-xs text-emerald-400 mt-1">+15% from last month</div>
                       </div>
                       <div className="p-4 bg-[#0b0b0e] border border-neutral-800 rounded-lg border-l-2 border-l-purple-500">
                         <div className="text-neutral-400 text-sm mb-1">Active Subscriptions</div>
-                        <div className="text-2xl font-bold text-white">842</div>
+                        <div className="text-2xl font-bold text-white">{(analytics.active_subscriptions || 0).toLocaleString()}</div>
                         <div className="text-xs text-emerald-400 mt-1">+42 new this week</div>
                       </div>
                       <div className="p-4 bg-[#0b0b0e] border border-neutral-800 rounded-lg border-l-2 border-l-rose-500">
                         <div className="text-neutral-400 text-sm mb-1">Churn Rate</div>
-                        <div className="text-2xl font-bold text-white">2.4%</div>
+                        <div className="text-2xl font-bold text-white">{analytics.churn_rate || '0'}%</div>
                         <div className="text-xs text-rose-400 mt-1">Slight increase</div>
                       </div>
                     </div>

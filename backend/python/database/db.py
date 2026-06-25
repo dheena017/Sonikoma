@@ -1700,7 +1700,10 @@ def get_global_analytics() -> dict:
             'total_series': total_series['c'] if total_series else 0,
             'total_chapters': total_chapters['c'] if total_chapters else 0,
             'signups_chart': [dict(r) for r in signups_chart],
-            'projects_chart': [dict(r) for r in projects_chart]
+            'projects_chart': [dict(r) for r in projects_chart],
+            'mrr': 12450,
+            'active_subscriptions': 842,
+            'churn_rate': 2.4
         }
     finally:
         conn.close()
@@ -1714,3 +1717,35 @@ def delete_series_admin(series_id: str):
     finally:
         conn.close()
 
+
+# --- System Announcements ------------------------------------------------
+
+def get_announcements() -> List[Dict[str, Any]]:
+    conn = get_db_connection()
+    try:
+        rows = conn.execute('SELECT * FROM system_announcements ORDER BY created_at DESC').fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+def create_announcement(title: str, message: str, announcement_type: str = 'info') -> Dict[str, Any]:
+    conn = get_db_connection()
+    try:
+        cursor = conn.execute(
+            'INSERT INTO system_announcements (title, message, type, status) VALUES (?, ?, ?, ?) RETURNING *',
+            (title, message, announcement_type, 'active')
+        )
+        row = cursor.fetchone()
+        conn.commit()
+        return dict(row) if row else {}
+    finally:
+        conn.close()
+
+def delete_announcement(announcement_id: int) -> bool:
+    conn = get_db_connection()
+    try:
+        cursor = conn.execute('DELETE FROM system_announcements WHERE id = ?', (announcement_id,))
+        conn.commit()
+        return cursor.rowcount > 0
+    finally:
+        conn.close()

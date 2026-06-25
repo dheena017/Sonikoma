@@ -16,6 +16,24 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
 import bcrypt
 import jwt
+"""
+backend/python/routes/auth_routes.py
+─────────────────────────────────────────────────────────────────────────────
+Authentication routes for User Registration, Login, and Google Auth.
+─────────────────────────────────────────────────────────────────────────────
+"""
+
+import os
+import uuid
+import logging
+from datetime import datetime, timedelta
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from pydantic import BaseModel, EmailStr
+import bcrypt
+import jwt
 from database.db import (
     create_user, get_user_by_email, get_user_by_id, update_user,
     create_user_session, get_user_sessions, terminate_user_session,
@@ -24,7 +42,8 @@ from database.db import (
     create_user_api_key, delete_user_api_key, get_creator_analytics,
     get_user_by_api_key, create_user_invoice, get_user_achievements_and_points,
     get_all_users, delete_user,
-    get_platform_settings, update_platform_settings, get_global_audit_logs
+    get_platform_settings, update_platform_settings, get_global_audit_logs,
+    get_announcements, create_announcement, delete_announcement
 )
 
 logger = logging.getLogger("sonikoma.auth")
@@ -755,3 +774,40 @@ async def delete_my_account(request: Request, current_user: dict = Depends(get_c
         write_audit_log(user_id, 'Self-delete account failed', ip_addr, 'Failure')
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get('/admin/announcements')
+async def admin_get_announcements(current_user: dict = Depends(get_current_user)):
+    try:
+        return {'success': True, 'announcements': get_announcements()}
+    except Exception as e:
+        logger.error(f'Failed to fetch announcements: {e}')
+        raise HTTPException(status_code=500, detail=str(e))
+
+class AnnouncementCreateRequest(BaseModel):
+    title: str
+    message: str
+    type: Optional[str] = 'info'
+
+@router.post('/admin/announcements')
+async def admin_create_announcement(body: AnnouncementCreateRequest, request: Request, current_user: dict = Depends(get_current_user)):
+    ip_addr = request.client.host if request.client else '127.0.0.1'
+    try:
+        announcement = create_announcement(body.title, body.message, body.type)
+        write_audit_log(current_user['user_id'], f'Admin created announcement {body.title}', ip_addr, 'Success')
+        return {'success': True, 'announcement': announcement}
+    except Exception as e:
+        logger.error(f'Failed to create announcement: {e}')
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete('/admin/announcements/{announcement_id}')
+async def admin_delete_announcement(announcement_id: int, request: Request, current_user: dict = Depends(get_current_user)):
+    ip_addr = request.client.host if request.client else '127.0.0.1'
+    try:
+        success = delete_announcement(announcement_id)
+        if success:
+            write_audit_log(current_user['user_id'], f'Admin deleted announcement {announcement_id}', ip_addr, 'Success')
+            return {'success': True, 'message': 'Announcement deleted successfully'}
+        else:
+            raise HTTPException(status_code=404, detail='Announcement not found')
+    except Exception as e:
+        logger.error(f'Failed to delete announcement: {e}')
+        raise HTTPException(status_code=500, detail=str(e))
