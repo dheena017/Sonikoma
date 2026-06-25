@@ -18,7 +18,7 @@ import {
   Shield,
   FolderOpen,
 } from "lucide-react";
-import { useAuth } from "../hooks/useAuth.js";
+
 import { useThemeMode } from "../hooks/useThemeMode.js";
 import { GeneratedPanel } from "../types";
 import { Notification } from "./NotificationStack";
