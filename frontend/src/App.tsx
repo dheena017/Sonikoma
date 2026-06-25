@@ -16,7 +16,7 @@ import {
 } from "./hooks/useGlobalShortcuts.js";
 import { useBackendHealth } from "./hooks/useBackendHealth.js";
 import { useAutoSave } from "./hooks/useAutoSave.js";
-import { useThemeMode } from "./hooks/useThemeMode.js";
+import { useThemeMode } from "./hooks/useThemeMode";
 
 // --- Layout & Main Workspace Components ---
 import Header from "./components/Header.js";

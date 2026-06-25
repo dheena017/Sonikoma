@@ -19,7 +19,7 @@ import {
   FolderOpen,
 } from "lucide-react";
 
-import { useThemeMode } from "../hooks/useThemeMode.js";
+import { useThemeMode } from "../hooks/useThemeMode";
 import { GeneratedPanel } from "../types";
 import { Notification } from "./NotificationStack";
 
