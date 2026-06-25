@@ -60,8 +60,8 @@ interface ProfilePreferencesTabProps {
     audioFormat: string;
   };
   setExportSettings?: React.Dispatch<React.SetStateAction<any>>;
-  theme: string;
-  setTheme: (theme: string) => void;
+  themeMode?: "dark" | "light" | string;
+  toggleThemeMode?: () => void;
   accentColor: string;
   setAccentColor: (color: string) => void;
   fontScale?: string;
@@ -85,8 +85,8 @@ export default function ProfilePreferencesTab({
   setAi,
   exportSettings,
   setExportSettings,
-  theme,
-  setTheme,
+  themeMode,
+  toggleThemeMode,
   accentColor,
   setAccentColor,
   fontScale,
@@ -284,40 +284,43 @@ export default function ProfilePreferencesTab({
               <h4 className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
                 Base Theme
               </h4>
-              <div className="flex gap-3">
+              <div className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
+                <div className="flex items-start gap-3">
+                  <div className={`mt-0.5 p-2 ${themeMode === "light" ? "bg-amber-500/10 text-amber-500" : "bg-purple-500/10 text-purple-400"} rounded-lg`}>
+                    {themeMode === "light" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-white">
+                      Dark / Light Mode
+                    </h4>
+                    <p className="text-[10px] text-neutral-500 font-semibold mt-1">
+                      {themeMode === "dark" ? "Dark mode active" : "Light mode active"}
+                    </p>
+                  </div>
+                </div>
                 <button
                   type="button"
-                  onClick={() => setTheme("dark")}
-                  className={`flex-1 py-3 rounded-xl border flex items-center justify-center gap-2 text-xs font-bold transition-all ${
-                    theme === "dark"
-                      ? "bg-purple-500/10 border-purple-500/30 ${tc.text} shadow-[inset_0_0_20px_rgba(168,85,247,0.1)]"
-                      : "bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
+                  onClick={toggleThemeMode}
+                  title={themeMode === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                  className={`relative inline-flex items-center w-14 h-7 rounded-full border-2 transition-all duration-300 cursor-pointer focus:outline-none ${
+                    themeMode === "light"
+                      ? "bg-amber-400 border-amber-500 shadow-[0_0_10px_rgba(251,191,36,0.4)]"
+                      : "bg-neutral-800 border-neutral-700"
                   }`}
                 >
-                  <Moon className="w-4 h-4" /> Dark Mode
-                </button>
-                <button
-                  type="button"
-                  className={`flex-1 py-3 rounded-xl border flex items-center justify-center gap-2 text-xs font-bold transition-all ${
-                    theme === "light"
-                      ? "bg-purple-500/10 border-purple-500/30 ${tc.text}"
-                      : "bg-neutral-900 border-white/5 text-neutral-400 hover:text-white opacity-50 cursor-not-allowed"
-                  }`}
-                  disabled
-                  title="Light mode is coming soon"
-                >
-                  <Sun className="w-4 h-4" /> Light Mode
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTheme("system")}
-                  className={`flex-1 py-3 rounded-xl border flex items-center justify-center gap-2 text-xs font-bold transition-all ${
-                    theme === "system"
-                      ? "bg-purple-500/10 border-purple-500/30 ${tc.text}"
-                      : "bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
-                  }`}
-                >
-                  <Monitor className="w-4 h-4" /> System UI
+                  <span
+                    className={`inline-flex items-center justify-center w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 ${
+                      themeMode === "light"
+                        ? "translate-x-7 bg-white"
+                        : "translate-x-1 bg-neutral-600"
+                    }`}
+                  >
+                    {themeMode === "light" ? (
+                      <Sun className="h-3 w-3 text-amber-500" />
+                    ) : (
+                      <Moon className="h-3 w-3 text-neutral-300" />
+                    )}
+                  </span>
                 </button>
               </div>
             </div>
