@@ -362,7 +362,7 @@ export function useVideoGeneration({
       const response = await fetchWithInterceptor("/api/video/render", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ panels }),
+        body: JSON.stringify({ panels, voice: voiceActor }),
       });
 
       const data = await response.json();
