@@ -16,6 +16,7 @@ import {
 } from "./hooks/useGlobalShortcuts.js";
 import { useBackendHealth } from "./hooks/useBackendHealth.js";
 import { useAutoSave } from "./hooks/useAutoSave.js";
+import { useThemeMode } from "./hooks/useThemeMode.js";
 
 // --- Layout & Main Workspace Components ---
 import Header from "./components/Header.js";
@@ -73,6 +74,9 @@ export default function App() {
   // --- Backend Engine Diagnostic Hook ---
   const { status: backendStatus, checkHealth: recheckBackend } =
     useBackendHealth();
+
+  // --- Dark / Light Theme Mode ---
+  const { themeMode, toggleThemeMode } = useThemeMode();
 
   // --- Auto-start backend controls ---
   const [isStartingBackend, setIsStartingBackend] = React.useState(false);
@@ -808,6 +812,8 @@ export default function App() {
             navigateTo={navigateTo}
             notificationsMuted={notificationsMuted}
             setNotificationsMuted={setNotificationsMuted}
+            themeMode={themeMode}
+            toggleThemeMode={toggleThemeMode}
           />
 
           {/* PAGE VIEW 1: Main Editor Workspace */}
