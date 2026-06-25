@@ -1035,6 +1035,7 @@ export default function App() {
               <StatusPage
                 onNavigateHome={handleNavigateHome}
                 fetchWithInterceptor={fetchWithInterceptor}
+                setSelectedModel={setSelectedModel}
               />
             </div>
           )}

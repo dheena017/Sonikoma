@@ -20,11 +20,13 @@ import AIProviderKeysConfig from "./AIProviderKeysConfig";
 interface StatusPageProps {
   onNavigateHome: () => void;
   fetchWithInterceptor?: any;
+  setSelectedModel?: (model: string) => void;
 }
 
 export default function StatusPage({
   onNavigateHome,
   fetchWithInterceptor,
+  setSelectedModel: setGlobalSelectedModel,
 }: StatusPageProps) {
   const [loading, setLoading] = useState(false);
   const [healthData, setHealthData] = useState<any>(null);
@@ -42,6 +44,10 @@ export default function StatusPage({
   const [selectedProvider, setSelectedProvider] = useState<
     "gemini" | "huggingface" | "openai" | "anthropic"
   >("gemini");
+
+  const [activeAppModel, setActiveAppModel] = useState<string>(
+    () => localStorage.getItem("ai_comic_model") || "gemini-2.5-flash"
+  );
 
   // Latency & Connection Tester states
   const [testPrompt, setTestPrompt] = useState("Say: Connection Successful!");
@@ -920,6 +926,17 @@ export default function StatusPage({
                 )}
               </h3>
 
+              {/* Active Model Indicator */}
+              <div className="bg-purple-950/15 border border-purple-500/20 p-3.5 rounded-2xl flex items-center justify-between font-mono text-xs shadow-inner">
+                <div>
+                  <span className="text-[9px] text-purple-400 uppercase tracking-wider block font-bold">Currently Active App Model</span>
+                  <span className="text-white font-bold block mt-0.5">{activeAppModel}</span>
+                </div>
+                <span className="bg-emerald-950/40 text-emerald-400 border border-emerald-800/30 text-[8px] font-bold px-2 py-0.5 rounded uppercase flex items-center gap-0.5">
+                  <Zap className="h-2.5 w-2.5 text-emerald-400 fill-emerald-400" /> App Default
+                </span>
+              </div>
+
               {/* Provider Tab Group */}
               <div className="flex bg-neutral-900/60 p-1 rounded-xl border border-neutral-850 text-xs font-mono">
                 {healthData?.env?.GEMINI_API_KEY && (
@@ -1093,6 +1110,11 @@ export default function StatusPage({
                               {m.name}
                             </span>
                             <div className="flex items-center gap-1.5 shrink-0">
+                              {m.name === activeAppModel && (
+                                <span className="text-[8px] bg-emerald-950/40 text-emerald-400 border border-emerald-800/30 px-1.5 py-0.5 rounded font-bold uppercase flex items-center gap-0.5">
+                                  <Zap className="h-2 w-2 text-emerald-450 fill-emerald-450" /> Active
+                                </span>
+                              )}
                               <span
                                 className={`text-[8px] px-1.5 py-0.5 rounded border font-bold uppercase ${
                                   getPricingTag(selectedProvider, m.name)
@@ -1299,6 +1321,36 @@ export default function StatusPage({
                                         Error: {testResult.error}
                                       </div>
                                     )}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Set as active model button */}
+                              <div className="mt-3 pt-3 border-t border-neutral-850">
+                                {activeAppModel !== m.name ? (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      localStorage.setItem("ai_comic_model", m.name);
+                                      setActiveAppModel(m.name);
+                                      if (setGlobalSelectedModel) {
+                                        setGlobalSelectedModel(m.name);
+                                      }
+                                      if (typeof (window as any).alertAsync === "function") {
+                                        (window as any).alertAsync(`Successfully selected ${m.name} as the active model for all AI features.`);
+                                      } else {
+                                        alert(`Successfully selected ${m.name} as the active model for all AI features.`);
+                                      }
+                                    }}
+                                    className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[10px] font-mono font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-950/20"
+                                  >
+                                    <Zap className="h-3.5 w-3.5 fill-current" />
+                                    Set as Active App Model
+                                  </button>
+                                ) : (
+                                  <div className="w-full py-2 bg-emerald-950/15 border border-emerald-500/20 text-emerald-455 rounded-xl text-[10px] font-mono font-bold flex items-center justify-center gap-1.5">
+                                    <ShieldCheck className="h-3.5 w-3.5" />
+                                    Active Application Model
                                   </div>
                                 )}
                               </div>

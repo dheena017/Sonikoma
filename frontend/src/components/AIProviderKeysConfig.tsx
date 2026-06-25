@@ -9,6 +9,12 @@ export default function AIProviderKeysConfig() {
 
   const [showKey, setShowKey] = useState<Record<string, boolean>>({});
   const [savedStatus, setSavedStatus] = useState<Record<string, boolean>>({});
+  const [envKeys, setEnvKeys] = useState<Record<string, boolean>>({
+    gemini: false,
+    openai: false,
+    anthropic: false,
+    huggingface: false,
+  });
 
   const checkSaved = () => {
     setSavedStatus({
@@ -25,6 +31,20 @@ export default function AIProviderKeysConfig() {
     setAnthropicKey(localStorage.getItem("user_anthropic_key") || "");
     setHuggingFaceKey(localStorage.getItem("user_huggingface_key") || "");
     checkSaved();
+
+    fetch("/api/health")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.env) {
+          setEnvKeys({
+            gemini: !!data.env.GEMINI_API_KEY,
+            openai: !!data.env.OPENAI_API_KEY,
+            anthropic: !!data.env.ANTHROPIC_API_KEY,
+            huggingface: !!data.env.HUGGINGFACE_API_KEY,
+          });
+        }
+      })
+      .catch((err) => console.error("Failed to fetch health for env API keys:", err));
   }, []);
 
   const handleSaveKeys = async () => {
@@ -116,18 +136,22 @@ export default function AIProviderKeysConfig() {
             >
               Get Key ↗
             </a>
-            {isSaved && (
+            {isSaved ? (
               <span className="flex items-center gap-1 text-[9px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded uppercase font-bold">
                 <ShieldCheck className="h-3 w-3" /> Stored
               </span>
-            )}
+            ) : envKeys[provider] ? (
+              <span className="flex items-center gap-1 text-[9px] text-purple-400 bg-purple-500/10 border border-purple-500/20 px-1.5 py-0.5 rounded uppercase font-bold">
+                <ShieldCheck className="h-3 w-3" /> Active (Env)
+              </span>
+            ) : null}
           </div>
         </div>
         <div className="relative group">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Key
               className={`h-4 w-4 ${
-                isSaved
+                isSaved || envKeys[provider]
                   ? "text-emerald-500"
                   : isInvalid
                   ? "text-rose-500"
@@ -140,7 +164,7 @@ export default function AIProviderKeysConfig() {
             value={value}
             onChange={(e) => setter(e.target.value)}
             autoComplete="new-password"
-            placeholder={placeholder}
+            placeholder={envKeys[provider] ? "Active via environment (.env)" : placeholder}
             className={`w-full pl-9 pr-10 py-2.5 bg-black/40 border rounded-xl text-xs font-mono text-white focus:outline-none focus:ring-1 transition-all placeholder:text-neutral-500 ${
               isInvalid
                 ? "border-rose-500/50 focus:border-rose-500/80 focus:ring-rose-500/50"
