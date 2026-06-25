@@ -1626,7 +1626,7 @@ def get_global_audit_logs(limit: int = 50) -> List[Dict[str, Any]]:
     conn = get_db_connection()
     try:
         rows = conn.execute('''
-            SELECT a.id, a.user_id, u.email, a.action, a.ip_address, a.status, a.created_at
+            SELECT a.id, a.user_id, u.email, a.event as action, a.ip as ip_address, a.status, a.created_at
             FROM user_audit_logs a
             LEFT JOIN users u ON a.user_id = u.id
             ORDER BY a.created_at DESC LIMIT ?
@@ -1658,7 +1658,7 @@ def get_global_analytics() -> dict:
     try:
         # User Growth
         total_users = conn.execute('SELECT COUNT(*) as c FROM users').fetchone()
-        new_users_today = conn.execute('SELECT COUNT(*) as c FROM users WHERE date(created_at) = date(''now'')').fetchone()
+        new_users_today = conn.execute("SELECT COUNT(*) as c FROM users WHERE date(created_at) = date('now')").fetchone()
         
         # Credit Velocity
         total_credits_assigned = conn.execute('SELECT SUM(credits) as c FROM users').fetchone()
@@ -1667,7 +1667,7 @@ def get_global_analytics() -> dict:
         duration_row = conn.execute('''
             SELECT SUM(p.duration) as d FROM panels p 
             JOIN chapters c ON p.chapter_id = c.id 
-            WHERE c.status = ''completed''
+            WHERE c.status = 'completed'
         ''').fetchone()
         
         # Content Volume
@@ -1678,7 +1678,7 @@ def get_global_analytics() -> dict:
         signups_chart = conn.execute('''
             SELECT date(created_at) as date, COUNT(*) as count 
             FROM users 
-            WHERE created_at >= date(''now'', ''-7 days'')
+            WHERE created_at >= date('now', '-7 days')
             GROUP BY date(created_at)
             ORDER BY date(created_at) ASC
         ''').fetchall()
@@ -1687,7 +1687,7 @@ def get_global_analytics() -> dict:
         projects_chart = conn.execute('''
             SELECT date(created_at) as date, COUNT(*) as count 
             FROM series 
-            WHERE created_at >= date(''now'', ''-7 days'')
+            WHERE created_at >= date('now', '-7 days')
             GROUP BY date(created_at)
             ORDER BY date(created_at) ASC
         ''').fetchall()

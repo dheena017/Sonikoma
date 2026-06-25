@@ -25,6 +25,7 @@ RENDER_JOBS = {}
 class PanelData(BaseModel):
     id: int
     image_url: str
+    duration: float = 3.0
     speech_text: Optional[str] = None
     sfx: Optional[str] = None
     audio_url: Optional[str] = None
@@ -153,20 +154,32 @@ def render_pipeline_sync(panels_data, output_path, work_dir):
         motion_type = p.get("motion_type")
         w, h = clip.size
 
+        def apply_dynamic_crop(c, x1_func, y1_func, cw, ch):
+            def make_frame(get_frame, t):
+                frame = get_frame(t)
+                x = int(max(0, min(x1_func(t), c.w - cw)))
+                y = int(max(0, min(y1_func(t), c.h - ch)))
+                return frame[y:y+ch, x:x+cw]
+            new_c = c.fl(make_frame)
+            new_c.size = (cw, ch)
+            return new_c
+
         if motion_type == "zoom_in":
             clip = clip.resize(lambda t: 1 + 0.08 * (t / safe_duration))
+            # Center crop the zoomed clip to maintain original dimensions
+            clip = apply_dynamic_crop(clip, lambda t: (clip.w - w)/2, lambda t: (clip.h - h)/2, w, h)
         elif motion_type == "pan_left":
             clip = clip.resize(1.15)
-            clip = clip.crop(x1=lambda t: (clip.w - w) * (1 - t/safe_duration), y1=0, width=w, height=h)
+            clip = apply_dynamic_crop(clip, lambda t: (clip.w - w) * (1 - t/safe_duration), lambda t: 0, w, h)
         elif motion_type == "pan_right":
             clip = clip.resize(1.15)
-            clip = clip.crop(x1=lambda t: (clip.w - w) * (t/safe_duration), y1=0, width=w, height=h)
+            clip = apply_dynamic_crop(clip, lambda t: (clip.w - w) * (t/safe_duration), lambda t: 0, w, h)
         elif motion_type == "pan_up":
             clip = clip.resize(1.15)
-            clip = clip.crop(x1=0, y1=lambda t: (clip.h - h) * (1 - t/safe_duration), width=w, height=h)
+            clip = apply_dynamic_crop(clip, lambda t: 0, lambda t: (clip.h - h) * (1 - t/safe_duration), w, h)
         elif motion_type == "pan_down":
             clip = clip.resize(1.15)
-            clip = clip.crop(x1=0, y1=lambda t: (clip.h - h) * (t/safe_duration), width=w, height=h)
+            clip = apply_dynamic_crop(clip, lambda t: 0, lambda t: (clip.h - h) * (t/safe_duration), w, h)
 
         # Step 9: Burned-in Subtitles
         speech_text = p.get("speech_text")

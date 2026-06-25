@@ -24,7 +24,7 @@ pydub>=0.25.1                    # Audio concat, speedup, silence padding (audio
 # Note: pydub requires ffmpeg installed on system (see below)
 
 # ── Video Compilation ─────────────────────────────────────────────────────────
-moviepy>=1.0.3                   # MP4 compilation with pan/zoom + audio ducking (video.py)
+moviepy>=1.0.3,<2.0.0           # MP4 compilation with pan/zoom + audio ducking (video.py)
 # Note: moviepy requires ffmpeg installed on system (see below)
 
 # ── OCR — Text Extraction from Comic Panels ───────────────────────────────────
