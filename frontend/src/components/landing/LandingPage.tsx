@@ -69,9 +69,9 @@ export default function LandingPage({
   };
 
   return (
-    <div className="min-h-screen bg-[#070709] text-white selection:bg-purple-600">
+    <div className="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-purple-600">
       {/* NAVIGATION */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#070709]/80 backdrop-blur-xl border-b border-white/5">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-neutral-950/80 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div
             className="flex items-center gap-3 group cursor-pointer"
@@ -82,7 +82,7 @@ export default function LandingPage({
               className="w-10 h-10 rounded-xl shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform object-cover bg-black"
               alt="Sonikoma Logo"
             />
-            <span className="text-xl font-black tracking-tighter text-white uppercase">
+            <span className="text-xl font-black tracking-tighter text-neutral-100 uppercase">
               Sonikoma
             </span>
           </div>
@@ -112,13 +112,13 @@ export default function LandingPage({
           <div className="flex items-center gap-4">
             <button
               onClick={onLogin}
-              className="px-6 py-2.5 text-sm font-bold text-neutral-400 hover:text-white transition-colors cursor-pointer"
+              className="px-6 py-2.5 text-sm font-bold text-neutral-400 hover:text-neutral-100 transition-colors cursor-pointer"
             >
               Sign In
             </button>
             <button
               onClick={onGetStarted}
-              className="px-6 py-2.5 bg-white text-black text-sm font-black rounded-xl hover:bg-neutral-200 transition-all shadow-lg active:scale-95 cursor-pointer"
+              className="px-6 py-2.5 bg-neutral-100 text-neutral-900 text-sm font-black rounded-xl hover:bg-neutral-300 transition-all shadow-lg active:scale-95 cursor-pointer"
             >
               Get Started
             </button>
@@ -156,7 +156,7 @@ export default function LandingPage({
                     Quick Link Importer
                   </span>
                 </div>
-                <h2 className="text-base sm:text-lg font-bold text-white tracking-tight leading-tight">
+                <h2 className="text-base sm:text-lg font-bold text-neutral-100 tracking-tight leading-tight">
                   Turn a Link into a Video
                 </h2>
                 <p className="text-[10px] sm:text-xs text-neutral-400 font-sans leading-relaxed">
@@ -225,7 +225,7 @@ export default function LandingPage({
                   );
                   element?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className="px-6 py-3 bg-neutral-900 border border-white/10 hover:bg-neutral-800 text-white font-bold rounded-2xl transition-all flex items-center justify-center gap-3 text-sm cursor-pointer"
+                className="px-6 py-3 bg-neutral-900 border border-white/10 hover:bg-neutral-800 text-neutral-100 font-bold rounded-2xl transition-all flex items-center justify-center gap-3 text-sm cursor-pointer"
               >
                 <Play className="w-4 h-4 fill-white" />
                 Watch Demo
@@ -236,7 +236,7 @@ export default function LandingPage({
       </section>
 
       {/* STATS BANNER */}
-      <section className="border-y border-white/5 bg-white/[0.01] py-12 relative overflow-hidden">
+      <section className="border-y border-white/5 bg-neutral-900/10 py-12 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-transparent to-indigo-500/5 pointer-events-none" />
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center relative z-10">
           <div className="space-y-1">
@@ -277,7 +277,7 @@ export default function LandingPage({
       {/* FEATURES GRID */}
       <section
         id="features"
-        className="py-32 px-6 bg-white/[0.02] scroll-mt-24"
+        className="py-32 px-6 bg-neutral-900/20 scroll-mt-24"
       >
         <div className="max-w-7xl mx-auto space-y-20">
           <div className="text-center space-y-4">
@@ -381,7 +381,7 @@ export default function LandingPage({
                 className={`px-5 py-3 rounded-2xl text-sm font-bold flex items-center gap-2 border transition-all cursor-pointer ${
                   demoTab === t.id
                     ? "bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-600/25 scale-105"
-                    : "bg-neutral-900 border-white/5 text-neutral-400 hover:text-white hover:border-white/10"
+                    : "bg-neutral-900 border-white/5 text-neutral-400 hover:text-neutral-100 hover:border-white/10"
                 }`}
               >
                 {t.icon}
@@ -496,7 +496,7 @@ export default function LandingPage({
               <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop')] bg-cover bg-center opacity-40 group-hover:scale-105 transition-transform duration-700" />
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Play className="w-8 h-8 text-white fill-white ml-1" />
+                  <Play className="w-8 h-8 text-neutral-100 fill-white ml-1" />
                 </div>
               </div>
             </div>
@@ -507,7 +507,7 @@ export default function LandingPage({
       {/* PRICING PLANS */}
       <section
         id="pricing"
-        className="py-32 px-6 bg-white/[0.01] border-y border-white/5 scroll-mt-24"
+        className="py-32 px-6 bg-neutral-900/10 border-y border-white/5 scroll-mt-24"
       >
         <div className="max-w-7xl mx-auto space-y-16">
           <div className="text-center space-y-4">
@@ -524,7 +524,7 @@ export default function LandingPage({
               <span
                 className={`text-sm ${
                   billingCycle === "monthly"
-                    ? "text-white font-bold"
+                    ? "text-neutral-100 font-bold"
                     : "text-neutral-500"
                 }`}
               >
@@ -547,7 +547,7 @@ export default function LandingPage({
               <span
                 className={`text-sm flex items-center gap-1.5 ${
                   billingCycle === "yearly"
-                    ? "text-white font-bold"
+                    ? "text-neutral-100 font-bold"
                     : "text-neutral-500"
                 }`}
               >
@@ -667,7 +667,7 @@ export default function LandingPage({
       {/* FAQ SECTION */}
       <section
         id="faq"
-        className="py-32 px-6 bg-white/[0.01] border-t border-white/5 scroll-mt-24"
+        className="py-32 px-6 bg-neutral-900/10 border-t border-white/5 scroll-mt-24"
       >
         <div className="max-w-4xl mx-auto space-y-16">
           <div className="text-center space-y-4">
@@ -708,7 +708,7 @@ export default function LandingPage({
               >
                 <button
                   onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                  className="w-full px-6 py-5 text-left flex items-center justify-between font-semibold text-white cursor-pointer"
+                  className="w-full px-6 py-5 text-left flex items-center justify-between font-semibold text-neutral-100 cursor-pointer"
                 >
                   <span>{faq.q}</span>
                   {openFaq === idx ? (
@@ -763,7 +763,7 @@ export default function LandingPage({
                 if (newsState === "error") setNewsState("idle");
               }}
               disabled={newsState === "loading" || newsState === "success"}
-              className="w-full px-5 py-3.5 bg-neutral-950 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none text-white text-sm transition-all placeholder:text-neutral-600 disabled:opacity-50"
+              className="w-full px-5 py-3.5 bg-neutral-950 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none text-neutral-100 text-sm transition-all placeholder:text-neutral-600 disabled:opacity-50"
             />
             <button
               type="submit"
@@ -980,7 +980,7 @@ function TestimonialCard({
         />
         <div className="space-y-1">
           <div className="flex items-center justify-between">
-            <span className="font-bold text-sm text-white">{author}</span>
+            <span className="font-bold text-sm text-neutral-100">{author}</span>
             <div className="flex items-center gap-0.5 text-amber-400">
               {Array.from({ length: rating }).map((_, i) => (
                 <Sparkles
@@ -1002,7 +1002,7 @@ function TestimonialCard({
 
 function SlicingBefore() {
   return (
-    <div className="w-full h-full flex flex-col items-center justify-start p-6 space-y-6 bg-[#070709] overflow-y-auto scrollbar-thin">
+    <div className="w-full h-full flex flex-col items-center justify-start p-6 space-y-6 bg-neutral-950 overflow-y-auto scrollbar-thin">
       <div className="text-[10px] font-mono text-neutral-500 uppercase tracking-widest mb-2 border-b border-white/5 w-full pb-2 text-center">
         Raw Vertical Strip Layout
       </div>
@@ -1024,7 +1024,7 @@ function SlicingBefore() {
 
 function SlicingAfter() {
   return (
-    <div className="w-full h-full flex flex-col items-center justify-start p-6 space-y-6 bg-[#070709] overflow-y-auto scrollbar-thin">
+    <div className="w-full h-full flex flex-col items-center justify-start p-6 space-y-6 bg-neutral-950 overflow-y-auto scrollbar-thin">
       <div className="text-[10px] font-mono text-purple-400 uppercase tracking-widest mb-2 border-b border-purple-500/10 w-full pb-2 text-center">
         Detected Bounding Boxes
       </div>
@@ -1267,7 +1267,7 @@ function CinematicRenderDemo({ onGetStarted }: { onGetStarted: () => void }) {
               <select
                 value={audioStyle}
                 onChange={(e) => setAudioStyle(e.target.value)}
-                className="w-full bg-neutral-950 border border-white/5 text-xs text-white rounded-lg p-2 focus:outline-none focus:border-purple-500"
+                className="w-full bg-neutral-950 border border-white/5 text-xs text-neutral-100 rounded-lg p-2 focus:outline-none focus:border-purple-500"
               >
                 <option>Aiden - Epic Trailer</option>
                 <option>Lily - Emotional</option>
@@ -1282,7 +1282,7 @@ function CinematicRenderDemo({ onGetStarted }: { onGetStarted: () => void }) {
               <select
                 value={musicTheme}
                 onChange={(e) => setMusicTheme(e.target.value)}
-                className="w-full bg-neutral-950 border border-white/5 text-xs text-white rounded-lg p-2 focus:outline-none focus:border-purple-500"
+                className="w-full bg-neutral-950 border border-white/5 text-xs text-neutral-100 rounded-lg p-2 focus:outline-none focus:border-purple-500"
               >
                 <option>Cyberpunk Synthwave</option>
                 <option>Medieval Orchestral</option>
@@ -1297,7 +1297,7 @@ function CinematicRenderDemo({ onGetStarted }: { onGetStarted: () => void }) {
               <select
                 value={aspect}
                 onChange={(e) => setAspect(e.target.value)}
-                className="w-full bg-neutral-950 border border-white/5 text-xs text-white rounded-lg p-2 focus:outline-none focus:border-purple-500"
+                className="w-full bg-neutral-950 border border-white/5 text-xs text-neutral-100 rounded-lg p-2 focus:outline-none focus:border-purple-500"
               >
                 <option>9:16 Vertical</option>
                 <option>16:9 Landscape</option>
@@ -1313,7 +1313,7 @@ function CinematicRenderDemo({ onGetStarted }: { onGetStarted: () => void }) {
         <div className="flex items-center gap-3">
           <Volume2 className="w-5 h-5 text-purple-400 shrink-0" />
           <div className="space-y-0.5">
-            <div className="text-xs font-bold text-white">TTS Sync Wave</div>
+            <div className="text-xs font-bold text-neutral-100">TTS Sync Wave</div>
             <div className="text-[9px] font-mono text-neutral-500">
               Audio track synchronized with Panel #1
             </div>
