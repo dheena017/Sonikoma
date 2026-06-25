@@ -18,6 +18,8 @@ import {
   Shield,
   FolderOpen,
 } from "lucide-react";
+import { useAuth } from "../hooks/useAuth.js";
+import { useThemeMode } from "../hooks/useThemeMode.js";
 import { GeneratedPanel } from "../types";
 import { Notification } from "./NotificationStack";
 
@@ -60,6 +62,7 @@ export default function Sidebar({
   seriesSlug = null,
   chapterSlug = null,
 }: SidebarProps) {
+  const { themeMode } = useThemeMode();
   const chapterPathMatch = currentPath.match(
     /\/series\/[^\/]+\/chapters\/([^\/]+)/
   );
@@ -289,8 +292,8 @@ export default function Sidebar({
             onClick={handleNavigateToDashboardOverview}
           >
             <img
-              src="/logo-dark.png"
-              className="h-10 w-10 rounded-full bg-black shadow-lg shadow-purple-900/40 shrink-0 object-cover"
+              src={themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"}
+              className="h-14 w-14 rounded-full bg-black shadow-lg shadow-purple-900/40 shrink-0 object-cover"
               alt="Sonikoma Logo"
             />
             <div>
