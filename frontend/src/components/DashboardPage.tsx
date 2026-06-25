@@ -192,9 +192,14 @@ export default function DashboardPage() {
 
             {loading ? (
               <div className="flex justify-center items-center py-20">
-                <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center animate-pulse shadow-lg shadow-purple-500/20">
+                <div className="relative w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center animate-pulse shadow-lg shadow-purple-500/20">
                   <img
-                    src="/logo-dark.png"
+                    src={
+                      typeof document !== "undefined" &&
+                      document.documentElement.getAttribute("data-mode") === "light"
+                        ? "/logo-light.png"
+                        : "/logo-dark.png"
+                    }
                     alt="Loading..."
                     className="w-full h-full rounded-[10px] object-cover p-[2px]"
                   />
