@@ -39,7 +39,8 @@ async def generate_panel_audio(
         # Gracefully generate complete ambient silence if there is no audio transcript specified
         logger.warning(f"Empty dialogue list encountered for output: {output_path}. Defaulting to pure silence card.")
         silence_segment = AudioSegment.silent(duration=int(target_duration * 1000))
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        if os.path.dirname(output_path):
+            os.makedirs(os.path.dirname(output_path), exist_ok=True)
         silence_segment.export(output_path, format="mp3")
         logger.info(f"[Narration/TTS] Successfully generated {target_duration}s of silence.")
         return output_path
@@ -59,6 +60,13 @@ async def generate_panel_audio(
             # Escape or skip empty texts
             temp_file_path = os.path.join(temp_dir, f"dialog_segment_{uuid_hex()}_{idx}.mp3")
             temp_files.append(temp_file_path)
+
+            if not any(c.isalnum() for c in text):
+                logger.info(f"[Narration/TTS] Segment {idx+1}/{len(dialogue_list)}: '{text[:40]}' contains no spoken characters. Generating silence segment.")
+                # Generate 1 second of silence as a placeholder for punctuation pauses
+                silence_seg = AudioSegment.silent(duration=1000)
+                silence_seg.export(temp_file_path, format="mp3")
+                continue
 
             logger.info(f"[Narration/TTS] Generating segment {idx+1}/{len(dialogue_list)}: '{text[:40]}...' using voice: {actual_voice}")
             communicate = edge_tts.Communicate(text, actual_voice)
@@ -118,7 +126,8 @@ async def generate_panel_audio(
             final_audio = final_audio[:target_duration_ms]
 
             # Phase 4: Export finished compilation stream
-            os.makedirs(os.path.dirname(output_path), exist_ok=True)
+            if os.path.dirname(output_path):
+                os.makedirs(os.path.dirname(output_path), exist_ok=True)
             final_audio.export(output_path, format="mp3")
             logger.info(f"Audio compilation saved successfully at: {output_path} with final length {len(final_audio)}ms")
 
@@ -128,7 +137,8 @@ async def generate_panel_audio(
         logger.error(f"Audio Engine pipeline failure: {str(general_err)}", exc_info=True)
         # Fallback safeguard: Output pure silence corresponding to expected duration so as to not break moviepy compiler
         try:
-            os.makedirs(os.path.dirname(output_path), exist_ok=True)
+            if os.path.dirname(output_path):
+                os.makedirs(os.path.dirname(output_path), exist_ok=True)
             fallback_silence = AudioSegment.silent(duration=target_duration_ms)
             fallback_silence.export(output_path, format="mp3")
             logger.info(f"Safeguard silent master audio exported safely to: {output_path}")
