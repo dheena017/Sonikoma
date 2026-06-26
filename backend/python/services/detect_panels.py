@@ -85,11 +85,35 @@ def merge_overlapping_boxes(boxes, w_img, h_img, merge_threshold):
                 box_b = boxes[j]
                 x1_b, y1_b, x2_b, y2_b = box_b["x"], box_b["y"], box_b["x"] + box_b["w"], box_b["y"] + box_b["h"]
                 
-                # Check horizontal overlap and vertical proximity
-                x_overlap = not (x2_a < x1_b or x2_b < x1_a)
+                # Compute width and height of each box
+                w_a, h_a = x2_a - x1_a, y2_a - y1_a
+                w_b, h_b = x2_b - x1_b, y2_b - y1_b
+                
+                # Check horizontal overlap metrics
+                w_min = min(w_a, w_b)
+                x_overlap_val = max(0, min(x2_a, x2_b) - max(x1_a, x1_b))
+                h_overlap_ratio = x_overlap_val / w_min if w_min > 0 else 0
+                
+                # Check vertical overlap metrics
+                y_overlap_val = max(0, min(y2_a, y2_b) - max(y1_a, y1_b))
+                
+                # Check vertical distance
                 y_dist = max(0, y1_b - y2_a) if y1_b >= y2_a else max(0, y1_a - y2_b)
                 
-                if x_overlap and y_dist <= merge_threshold:
+                # Decide whether to merge:
+                # 1. If they overlap vertically (y_overlap_val > 0), they are side-by-side or nested.
+                #    We only merge if they have a very high horizontal overlap (h_overlap_ratio >= 0.5).
+                # 2. If they do not overlap vertically (y_overlap_val == 0), they are stacked.
+                #    We merge if they have any horizontal overlap (h_overlap_ratio > 0) AND y_dist <= merge_threshold.
+                should_merge = False
+                if y_overlap_val > 0:
+                    if h_overlap_ratio >= 0.5:
+                        should_merge = True
+                else:
+                    if h_overlap_ratio > 0 and y_dist <= merge_threshold:
+                        should_merge = True
+                
+                if should_merge:
                     x1_a = min(x1_a, x1_b)
                     y1_a = min(y1_a, y1_b)
                     x2_a = max(x2_a, x2_b)
@@ -135,8 +159,15 @@ def run_cv_detection(image_path, sensitivity, bg_mode, min_width_pct, min_height
         
         # 1. Background color detection
         if bg_mode == "auto":
-            # Sample edges more comprehensively
-            edge_samples = np.concatenate([gray[0, :], gray[-1, :], gray[:, 0], gray[:, -1]])
+            # Sample slightly inside edges (e.g. 2% inset) to avoid outer black/colored border lines
+            inset_y = max(1, int(h * 0.02))
+            inset_x = max(1, int(w * 0.02))
+            edge_samples = np.concatenate([
+                gray[inset_y, :],
+                gray[-inset_y - 1, :],
+                gray[:, inset_x],
+                gray[:, -inset_x - 1]
+            ])
             median_bg = np.median(edge_samples)
             is_white_bg = median_bg > 127
         else:
@@ -149,15 +180,19 @@ def run_cv_detection(image_path, sensitivity, bg_mode, min_width_pct, min_height
         is_tall_strip = h / w > 1.2
         if auto_split and is_tall_strip:
             logger.info("[Panel Detection] Using Webtoon Gutter Slicing strategy for tall strip")
-            # Calculate horizontal variance and mean
-            row_vars = np.var(gray, axis=1)
-            row_means = np.mean(gray, axis=1)
+            # Calculate horizontal background match on the central region to ignore edge borders/noise
+            margin = max(4, min(40, int(w * 0.05)))
+            gray_center = gray[:, margin:-margin] if w > margin * 2 else gray
+            w_center = gray_center.shape[1]
 
-            # Gutter row definition: strictly match background color to prevent slicing through dark/light art lines
+            # Gutter row definition: check if a high percentage of pixels match the background.
+            # This is robust against vertical border lines or side noise.
             if is_white_bg:
-                is_gutter_row = (row_vars < 64) & (row_means > threshold_val)
+                bg_pixel_count = np.sum(gray_center > threshold_val, axis=1)
             else:
-                is_gutter_row = (row_vars < 64) & (row_means < threshold_val)
+                bg_pixel_count = np.sum(gray_center < threshold_val, axis=1)
+
+            is_gutter_row = (bg_pixel_count / w_center) >= 0.95
             is_content_row = ~is_gutter_row
 
             # Join small content gaps to avoid splitting inside panels (dynamic threshold based on width)
@@ -196,37 +231,66 @@ def run_cv_detection(image_path, sensitivity, bg_mode, min_width_pct, min_height
                 col_vars = np.var(panel_slice, axis=0)
                 col_means = np.mean(panel_slice, axis=0)
 
-                slice_mean = np.mean(panel_slice)
-                is_slice_white = slice_mean > 127
-                if is_slice_white:
+                if is_white_bg:
                     is_content_col = (col_vars >= 2) | (col_means < 240)
                 else:
                     is_content_col = (col_vars >= 2) | (col_means > 15)
 
-                content_indices = np.where(is_content_col)[0]
-                if len(content_indices) > 0:
-                    start_x = max(0, int(content_indices[0]) - 8)
-                    end_x = min(w, int(content_indices[-1]) + 8)
-                else:
-                    start_x = 0
+                # Scan for multiple columns (vertical sub-panels) inside this horizontal slice
+                sub_panels = []
+                in_sub = False
+                start_x = 0
+
+                # Smooth the column content mask to avoid splitting inside a panel due to small gaps
+                smoothed_col = np.copy(is_content_col)
+                col_gap_count = 0
+                col_gap_thresh = max(18, min(60, int(w * 0.08)))
+
+                for j in range(len(smoothed_col)):
+                    if not smoothed_col[j]:
+                        col_gap_count += 1
+                    else:
+                        if 0 < col_gap_count < col_gap_thresh:
+                            smoothed_col[j - col_gap_count : j] = True
+                        col_gap_count = 0
+
+                for j in range(w):
+                    if smoothed_col[j] and not in_sub:
+                        in_sub = True
+                        start_x = j
+                    elif not smoothed_col[j] and in_sub:
+                        in_sub = False
+                        end_x = j
+                        if end_x - start_x >= max(10, int(w * min_width_pct * 0.5)):
+                            sub_panels.append((start_x, end_x))
+                if in_sub:
                     end_x = w
+                    if end_x - start_x >= max(10, int(w * min_width_pct * 0.5)):
+                        sub_panels.append((start_x, end_x))
 
-                # Enforce a minimum width by expanding the horizontal bounds, rather than discarding
-                box_w = end_x - start_x
-                min_w = int(w * min_width_pct)
-                if box_w < min_w:
-                    shortage = min_w - box_w
-                    start_x = max(0, start_x - shortage // 2)
-                    end_x = min(w, start_x + min_w)
-                    if end_x - start_x < min_w:
-                        start_x = max(0, end_x - min_w)
+                if not sub_panels:
+                    sub_panels = [(0, w)]
 
-                raw_boxes.append({
-                    "x": start_x,
-                    "y": start_y,
-                    "w": end_x - start_x,
-                    "h": end_y - start_y
-                })
+                for sx, ex in sub_panels:
+                    pad_sx = max(0, sx - 8)
+                    pad_ex = min(w, ex + 8)
+
+                    # Enforce a minimum width by expanding the horizontal bounds, rather than discarding
+                    box_w = pad_ex - pad_sx
+                    min_w = int(w * min_width_pct)
+                    if box_w < min_w:
+                        shortage = min_w - box_w
+                        pad_sx = max(0, pad_sx - shortage // 2)
+                        pad_ex = min(w, pad_sx + min_w)
+                        if pad_ex - pad_sx < min_w:
+                            pad_sx = max(0, pad_ex - min_w)
+
+                    raw_boxes.append({
+                        "x": pad_sx,
+                        "y": start_y,
+                        "w": pad_ex - pad_sx,
+                        "h": end_y - start_y
+                    })
         else:
             # 2. Threshold mask
             if is_white_bg:
@@ -288,8 +352,16 @@ def run_cv_detection(image_path, sensitivity, bg_mode, min_width_pct, min_height
         gray_img_ref = gray_arr
         
         if bg_mode == "auto":
-            corner_samples = [gray_arr[0, 0], gray_arr[0, w-1], gray_arr[h-1, 0], gray_arr[h-1, w-1]]
-            median_bg = np.median(corner_samples)
+            # Sample slightly inside the corners/edges to avoid border lines
+            inset_y = max(1, int(h * 0.02))
+            inset_x = max(1, int(w * 0.02))
+            samples = [
+                gray_arr[inset_y, inset_x],
+                gray_arr[inset_y, w - inset_x - 1],
+                gray_arr[h - inset_y - 1, inset_x],
+                gray_arr[h - inset_y - 1, w - inset_x - 1]
+            ]
+            median_bg = np.median(samples)
             is_white_bg = median_bg > 127
         else:
             is_white_bg = bg_mode == "white"
@@ -300,13 +372,19 @@ def run_cv_detection(image_path, sensitivity, bg_mode, min_width_pct, min_height
         is_tall_strip = h / w > 1.2
         if auto_split and is_tall_strip:
             logger.info("[Panel Detection] Using Webtoon Gutter Slicing strategy for tall strip (PIL fallback)")
-            row_vars = np.var(gray_arr, axis=1)
-            row_means = np.mean(gray_arr, axis=1)
+            # Calculate horizontal background match on the central region to ignore edge borders/noise
+            margin = max(4, min(40, int(w * 0.05)))
+            gray_center = gray_arr[:, margin:-margin] if w > margin * 2 else gray_arr
+            w_center = gray_center.shape[1]
 
+            # Gutter row definition: check if a high percentage of pixels match the background.
+            # This is robust against vertical border lines or side noise.
             if is_white_bg:
-                is_gutter_row = (row_vars < 64) & (row_means > threshold_val)
+                bg_pixel_count = np.sum(gray_center > threshold_val, axis=1)
             else:
-                is_gutter_row = (row_vars < 64) & (row_means < threshold_val)
+                bg_pixel_count = np.sum(gray_center < threshold_val, axis=1)
+
+            is_gutter_row = (bg_pixel_count / w_center) >= 0.95
             is_content_row = ~is_gutter_row
 
             # Join small content gaps (dynamic threshold based on width)
@@ -345,37 +423,66 @@ def run_cv_detection(image_path, sensitivity, bg_mode, min_width_pct, min_height
                 col_vars = np.var(panel_slice, axis=0)
                 col_means = np.mean(panel_slice, axis=0)
 
-                slice_mean = np.mean(panel_slice)
-                is_slice_white = slice_mean > 127
-                if is_slice_white:
+                if is_white_bg:
                     is_content_col = (col_vars >= 2) | (col_means < 240)
                 else:
                     is_content_col = (col_vars >= 2) | (col_means > 15)
 
-                content_indices = np.where(is_content_col)[0]
-                if len(content_indices) > 0:
-                    start_x = max(0, int(content_indices[0]) - 8)
-                    end_x = min(w, int(content_indices[-1]) + 8)
-                else:
-                    start_x = 0
+                # Scan for multiple columns (vertical sub-panels) inside this horizontal slice
+                sub_panels = []
+                in_sub = False
+                start_x = 0
+
+                # Smooth the column content mask to avoid splitting inside a panel due to small gaps
+                smoothed_col = np.copy(is_content_col)
+                col_gap_count = 0
+                col_gap_thresh = max(18, min(60, int(w * 0.08)))
+
+                for j in range(len(smoothed_col)):
+                    if not smoothed_col[j]:
+                        col_gap_count += 1
+                    else:
+                        if 0 < col_gap_count < col_gap_thresh:
+                            smoothed_col[j - col_gap_count : j] = True
+                        col_gap_count = 0
+
+                for j in range(w):
+                    if smoothed_col[j] and not in_sub:
+                        in_sub = True
+                        start_x = j
+                    elif not smoothed_col[j] and in_sub:
+                        in_sub = False
+                        end_x = j
+                        if end_x - start_x >= max(10, int(w * min_width_pct * 0.5)):
+                            sub_panels.append((start_x, end_x))
+                if in_sub:
                     end_x = w
+                    if end_x - start_x >= max(10, int(w * min_width_pct * 0.5)):
+                        sub_panels.append((start_x, end_x))
 
-                # Enforce a minimum width by expanding the horizontal bounds, rather than discarding
-                box_w = end_x - start_x
-                min_w = int(w * min_width_pct)
-                if box_w < min_w:
-                    shortage = min_w - box_w
-                    start_x = max(0, start_x - shortage // 2)
-                    end_x = min(w, start_x + min_w)
-                    if end_x - start_x < min_w:
-                        start_x = max(0, end_x - min_w)
+                if not sub_panels:
+                    sub_panels = [(0, w)]
 
-                raw_boxes.append({
-                    "x": start_x,
-                    "y": start_y,
-                    "w": end_x - start_x,
-                    "h": end_y - start_y
-                })
+                for sx, ex in sub_panels:
+                    pad_sx = max(0, sx - 8)
+                    pad_ex = min(w, ex + 8)
+
+                    # Enforce a minimum width by expanding the horizontal bounds, rather than discarding
+                    box_w = pad_ex - pad_sx
+                    min_w = int(w * min_width_pct)
+                    if box_w < min_w:
+                        shortage = min_w - box_w
+                        pad_sx = max(0, pad_sx - shortage // 2)
+                        pad_ex = min(w, pad_sx + min_w)
+                        if pad_ex - pad_sx < min_w:
+                            pad_sx = max(0, pad_ex - min_w)
+
+                    raw_boxes.append({
+                        "x": pad_sx,
+                        "y": start_y,
+                        "w": pad_ex - pad_sx,
+                        "h": end_y - start_y
+                    })
         else:
             # Calculate horizontal projection profile
             row_means = np.mean(gray_arr, axis=1)
@@ -474,9 +581,18 @@ def run_cv_detection(image_path, sensitivity, bg_mode, min_width_pct, min_height
     # Adjust to aspect ratio & format response
     final_panels = []
     logger.info(f"[Panel Detection] Found {len(merged_boxes)} panels after merging and filtering.")
+    is_tall_strip = h / w > 1.2
     for box in merged_boxes:
+        bx, by, bw, bh = box["x"], box["y"], box["w"], box["h"]
+        
+        if auto_split and is_tall_strip:
+            pad_by = max(0, by - 8)
+            pad_ey = min(h, by + bh + 8)
+            by = pad_by
+            bh = pad_ey - pad_by
+            
         x, y, w_box, h_box = adjust_to_aspect_ratio(
-            box["x"], box["y"], box["w"], box["h"], w, h, aspect_ratio_str
+            bx, by, bw, bh, w, h, aspect_ratio_str
         )
         
         crop_top = (y / h) * 100

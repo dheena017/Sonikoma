@@ -411,6 +411,8 @@ export default function StoryboardTimeline({
                           cropRight: box.cropRight,
                           autoTrim: true,
                           padding: 10,
+                          sensitivity: cropSensitivity,
+                          backgroundColorMode: cropBackgroundMode,
                         }),
                       });
                       if (!cropRes.ok)

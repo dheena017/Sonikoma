@@ -156,8 +156,6 @@ async def edit_image(body: EditImageRequest):
 
         img_buffer, content_type = await asyncio.to_thread(edit_sync)
 
-        img_buffer, content_type = await asyncio.to_thread(edit_sync)
-
         # Attempt to upload to Supabase
         filename = f"edited_{uuid.uuid4().hex[:8]}.jpeg" if "jpeg" in content_type or "jpg" in content_type else f"edited_{uuid.uuid4().hex[:8]}.png"
         supabase_url = await asyncio.to_thread(
