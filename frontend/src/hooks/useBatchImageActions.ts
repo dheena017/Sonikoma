@@ -346,6 +346,8 @@ export function useBatchImageActions({
                           cropRight: box.cropRight,
                           autoTrim: true,
                           padding: cropPaddingPx,
+                          sensitivity: cropSensitivity,
+                          backgroundColorMode: cropBackgroundMode,
                         }),
                       }
                     );
