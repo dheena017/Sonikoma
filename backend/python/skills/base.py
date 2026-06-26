@@ -382,10 +382,30 @@ def extract_json(text: str) -> str:
     match = re.search(r"```json\s*(.*?)\s*```", text, re.DOTALL | re.IGNORECASE)
     if match:
         return match.group(1).strip()
-    # Find first { and last }
-    start = text.find("{")
-    end = text.rfind("}")
-    if start != -1 and end != -1:
+        
+    start_bracket = text.find("[")
+    start_brace = text.find("{")
+    end_bracket = text.rfind("]")
+    end_brace = text.rfind("}")
+    
+    start = -1
+    end = -1
+    
+    if start_bracket != -1 and start_brace != -1:
+        start = min(start_bracket, start_brace)
+    elif start_bracket != -1:
+        start = start_bracket
+    elif start_brace != -1:
+        start = start_brace
+        
+    if end_bracket != -1 and end_brace != -1:
+        end = max(end_bracket, end_brace)
+    elif end_bracket != -1:
+        end = end_bracket
+    elif end_brace != -1:
+        end = end_brace
+        
+    if start != -1 and end != -1 and start < end:
         return text[start:end+1].strip()
     return text.strip()
 
