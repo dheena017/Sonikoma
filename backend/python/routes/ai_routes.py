@@ -921,10 +921,12 @@ async def analyze_sequence(body: AnalyzeSequenceRequest, user_api_key: str = Dep
             for img in image_parts:
                 contents.append(types.Part.from_bytes(data=img["data"], mime_type=img["mime_type"]))
                 
-            response = client.models.generate_content(
-                model=clean_model,
-                contents=contents,
-                config=types.GenerateContentConfig(response_mime_type="application/json")
+            response = await call_gemini_with_retry(
+                lambda: client.models.generate_content(
+                    model=clean_model,
+                    contents=contents,
+                    config=types.GenerateContentConfig(response_mime_type="application/json")
+                )
             )
             raw_text = response.text
         elif provider == "openai":
@@ -1554,7 +1556,9 @@ async def enhance_prompt(body: EnhancePromptRequest, user_keys: dict = Depends(g
     try:
         from google import genai
         client = genai.Client(api_key=api_key)
-        response = client.models.generate_content(model=model_id, contents=full_prompt)
+        response = await call_gemini_with_retry(
+            lambda: client.models.generate_content(model=model_id, contents=full_prompt)
+        )
         latency_ms = int((time.monotonic() - start_time) * 1000)
 
         enhanced_text = (response.text or "").strip()
@@ -1587,6 +1591,14 @@ async def test_model_latency(body: TestModelLatencyRequest, user_keys: dict = De
     import requests
     
     provider = body.provider.lower()
+    if "gemini" in provider:
+        provider = "gemini"
+    elif "openai" in provider:
+        provider = "openai"
+    elif "anthropic" in provider:
+        provider = "anthropic"
+    elif "hugging" in provider or "hf" in provider:
+        provider = "huggingface"
     model_id = body.model
     api_key = body.apiKey
     prompt = body.prompt or "Say: Connection Successful!"
@@ -1616,13 +1628,42 @@ async def test_model_latency(body: TestModelLatencyRequest, user_keys: dict = De
             "error": f"Missing API Key for {provider}."
         }
         
+    # Provider-Model mismatch validation
+    m_lower = model_id.lower()
+    if "/" in model_id and provider != "huggingface":
+        return {
+            "success": False,
+            "error": f"Model ID '{model_id}' contains a slash (/), indicating it is a Hugging Face repository, but the selected provider is '{body.provider}'. Please change the provider to Hugging Face."
+        }
+    elif ("gpt-" in m_lower or "o1-" in m_lower or "o3-" in m_lower) and provider != "openai":
+        return {
+            "success": False,
+            "error": f"Model ID '{model_id}' appears to be an OpenAI model, but the selected provider is '{body.provider}'. Please change the provider to OpenAI."
+        }
+    elif "claude-" in m_lower and provider != "anthropic":
+        return {
+            "success": False,
+            "error": f"Model ID '{model_id}' appears to be an Anthropic Claude model, but the selected provider is '{body.provider}'. Please change the provider to Anthropic."
+        }
+    elif "gemini-" in m_lower and provider != "gemini":
+        return {
+            "success": False,
+            "error": f"Model ID '{model_id}' appears to be a Google Gemini model, but the selected provider is '{body.provider}'. Please change the provider to Google Gemini."
+        }
+        
     start_time = time.monotonic()
     try:
         if provider == "gemini":
             from google import genai
             client = genai.Client(api_key=api_key)
-            response = client.models.generate_content(model=model_id, contents=prompt)
-            latency_ms = int((time.monotonic() - start_time) * 1000)
+            call_start = time.monotonic()
+            def _execute():
+                nonlocal call_start
+                call_start = time.monotonic()
+                return client.models.generate_content(model=model_id, contents=prompt)
+                
+            response = await call_gemini_with_retry(_execute)
+            latency_ms = int((time.monotonic() - call_start) * 1000)
             
             usage = getattr(response, 'usage_metadata', None)
             p_tokens = getattr(usage, 'prompt_token_count', 0) if usage else 0
