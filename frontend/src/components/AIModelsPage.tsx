@@ -628,46 +628,41 @@ export default function AIModelsPage({
       addNotification("Please enter a short prompt to enhance.", "warning");
       return;
     }
-    if (!playgroundModel) {
-      addNotification("Please select a model to run prompt enhancement.", "warning");
-      return;
-    }
 
     setIsEnhancingPrompt(true);
-    addNotification("Enhancing prompt with AI...", "info");
+    addNotification("Enhancing prompt with Gemini AI...", "info");
 
-    const provider = playgroundProvider || "gemini";
-    const model = playgroundModel;
-    const customKey = localStorage.getItem(`user_${provider}_key`) || undefined;
-    
-    const enhancerPrompt = `You are an expert prompt engineer. Refine and enhance the following user instruction to be extremely detailed, structured, clear, and effective for AI model generation. Maintain the core request and original language of the prompt, but wrap it in clear sections, roles, and instructions. Do NOT include any explanations, preambles, introductory text, or markdown code block wrapper (such as \`\`\`). Output ONLY the final enhanced prompt.
-
-Original Prompt to enhance:
-${playgroundPrompt}`;
+    // Always use Gemini for prompt enhancement (most reliable)
+    const geminiKey = localStorage.getItem("user_gemini_key") || undefined;
+    const enhanceModel = playgroundProvider === "gemini" && playgroundModel
+      ? playgroundModel
+      : "gemini-2.5-flash";
 
     try {
-      const res = await activeFetch("/api/test-model-latency", {
+      const res = await activeFetch("/api/enhance-prompt", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(geminiKey ? { "X-User-Gemini-Key": geminiKey } : {}),
+        },
         body: JSON.stringify({
-          provider,
-          model,
-          apiKey: customKey,
-          prompt: enhancerPrompt,
+          prompt: playgroundPrompt,
+          model: enhanceModel,
+          apiKey: geminiKey,
         }),
       });
       const data = await res.json();
-      if (data.success && data.response) {
-        setPlaygroundPrompt(data.response.trim());
-        addNotification("Successfully enhanced prompt using AI!", "success");
+      if (data.success && data.enhanced_prompt) {
+        setPlaygroundPrompt(data.enhanced_prompt.trim());
+        addNotification("✨ Prompt enhanced successfully using Gemini AI!", "success");
       } else {
-        throw new Error(data.error || "Model failed to respond.");
+        throw new Error(data.error || "Prompt enhancement returned no result.");
       }
     } catch (err: any) {
       console.warn("AI prompt enhancement failed, falling back to template:", err.message);
-      // Fallback to static template
+      // Fallback to static template so the button is always useful
       const enhanced = `[ROLE]
-You are a developer-grade AI optimization assistant.
+You are a developer-grade AI optimization assistant specialized in webtoon content analysis and narrative generation.
 
 [TASK]
 Fulfill the following instruction with strict adherence to detail, completeness, and structure.
@@ -675,20 +670,22 @@ Fulfill the following instruction with strict adherence to detail, completeness,
 [USER INSTRUCTION]
 ${playgroundPrompt}
 
-[FORMATTING DIRECTIVE]
+[OUTPUT FORMAT]
 - Present your response in clear, structured sections.
 - Use precise professional terminology.
 - Provide a summary and action points if applicable.
 
 [CONSTRAINTS]
 - Do not include conversational preambles or meta-commentary.
-- Focus strictly on factual, high-utility details.`;
+- Focus strictly on factual, high-utility details.
+- Keep the response concise yet comprehensive.`;
       setPlaygroundPrompt(enhanced);
-      addNotification("Enhanced prompt using fallback template.", "info");
+      addNotification("Enhanced prompt using structured template (AI offline).", "info");
     } finally {
       setIsEnhancingPrompt(false);
     }
   };
+
 
   // Export Run History to JSON
   const exportRunHistory = () => {

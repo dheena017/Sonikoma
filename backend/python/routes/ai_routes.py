@@ -1507,6 +1507,80 @@ async def get_copyright_scrub_batch(
     
     return {"success": True, "results": results}
 
+class EnhancePromptRequest(BaseModel):
+    prompt: str
+    model: Optional[str] = "gemini-2.5-flash"
+    apiKey: Optional[str] = None
+
+@router.post("/enhance-prompt", summary="Enhance and optimize a user prompt using Gemini AI")
+async def enhance_prompt(body: EnhancePromptRequest, user_keys: dict = Depends(get_all_user_keys)):
+    """
+    Enhance a short user prompt into a detailed, structured, professional instruction
+    using Gemini AI. Falls back gracefully if the model call fails.
+    """
+    import time
+
+    raw_prompt = body.prompt.strip()
+    if not raw_prompt:
+        return {"success": False, "error": "No prompt provided to enhance."}
+
+    # Always use Gemini for prompt enhancement (most reliable)
+    api_key = None
+    if body.apiKey:
+        import re
+        api_key = re.sub(r'^[\s\'"()\[\]{}]+|[\s\'"()\[\]{}]+$', '', body.apiKey)
+
+    if not api_key:
+        api_key = user_keys.get("gemini") or os.getenv("GEMINI_API_KEY")
+
+    if not api_key:
+        return {"success": False, "error": "No Gemini API key available for prompt enhancement."}
+
+    model_id = body.model or "gemini-2.5-flash"
+
+    enhancer_system = (
+        "You are an elite prompt engineering specialist. Your task is to refine and enhance a short user instruction "
+        "into a detailed, highly-structured, professional AI prompt. "
+        "Rules: "
+        "1. Maintain the EXACT SAME core request and language as the original. "
+        "2. Wrap it in clear labeled sections: [ROLE], [TASK], [USER INSTRUCTION], [OUTPUT FORMAT], [CONSTRAINTS]. "
+        "3. Do NOT add explanations, apologies, preambles, or markdown code fences. "
+        "4. Output ONLY the final enhanced prompt text, ready to paste."
+    )
+
+    full_prompt = f"{enhancer_system}\n\nOriginal Prompt:\n{raw_prompt}"
+
+    start_time = time.monotonic()
+    try:
+        from google import genai
+        client = genai.Client(api_key=api_key)
+        response = client.models.generate_content(model=model_id, contents=full_prompt)
+        latency_ms = int((time.monotonic() - start_time) * 1000)
+
+        enhanced_text = (response.text or "").strip()
+        if not enhanced_text:
+            return {"success": False, "error": "AI returned an empty response."}
+
+        usage = getattr(response, 'usage_metadata', None)
+        input_tokens = getattr(usage, 'prompt_token_count', 0) if usage else 0
+        output_tokens = getattr(usage, 'candidates_token_count', 0) if usage else 0
+
+        return {
+            "success": True,
+            "enhanced_prompt": enhanced_text,
+            "latencyMs": latency_ms,
+            "inputTokens": input_tokens,
+            "outputTokens": output_tokens,
+        }
+    except Exception as e:
+        err_msg = str(e)
+        if "NameResolutionError" in err_msg or "Failed to resolve" in err_msg or "getaddrinfo failed" in err_msg:
+            err_msg = "Network error: Could not reach Gemini API. Check your internet connection."
+        elif "API_KEY_INVALID" in err_msg.upper() or "API KEY NOT VALID" in err_msg.upper():
+            err_msg = "Invalid Gemini API key. Please check your credentials."
+        return {"success": False, "error": err_msg}
+
+
 @router.post("/test-model-latency", summary="Test latency and quota for any model of any provider")
 async def test_model_latency(body: TestModelLatencyRequest, user_keys: dict = Depends(get_all_user_keys)):
     import time

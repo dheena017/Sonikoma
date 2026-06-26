@@ -269,19 +269,24 @@ export default function ModelPlaygroundAndSkills({
                   placeholder="Type test instructions for the model..."
                   className="w-full p-3 bg-neutral-900 border border-neutral-800 rounded-xl text-white placeholder:text-neutral-600 focus:outline-none focus:border-purple-500 transition-colors resize-none leading-relaxed"
                 />
-                <div className="flex justify-end pt-0.5">
+                <div className="flex justify-end pt-1">
                   <button
                     onClick={handleEnhancePrompt}
                     disabled={isEnhancingPrompt || !playgroundPrompt.trim()}
-                    className="text-[9px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="flex items-center gap-1.5 px-2.5 py-1 bg-indigo-950/60 hover:bg-indigo-900/70 border border-indigo-700/30 hover:border-indigo-500/50 text-indigo-300 hover:text-indigo-200 rounded-lg text-[9px] font-bold transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                     type="button"
+                    title="Enhance your prompt using Gemini AI into a structured professional instruction"
                   >
                     {isEnhancingPrompt ? (
-                      <span className="flex items-center gap-1">
-                        <RefreshCw className="h-2.5 w-2.5 animate-spin" /> Enhancing...
-                      </span>
+                      <>
+                        <RefreshCw className="h-2.5 w-2.5 animate-spin" />
+                        <span>Enhancing...</span>
+                      </>
                     ) : (
-                      "⚡ Enhance Prompt"
+                      <>
+                        <Sparkles className="h-2.5 w-2.5" />
+                        <span>⚡ Enhance Prompt</span>
+                      </>
                     )}
                   </button>
                 </div>
@@ -455,19 +460,24 @@ export default function ModelPlaygroundAndSkills({
                   placeholder="Type benchmark instructions for all models..."
                   className="w-full p-3 bg-neutral-900 border border-neutral-800 rounded-xl text-white placeholder:text-neutral-600 focus:outline-none focus:border-purple-500 transition-colors resize-none leading-relaxed"
                 />
-                <div className="flex justify-end pt-0.5">
+                <div className="flex justify-end pt-1">
                   <button
                     onClick={handleEnhancePrompt}
                     disabled={isEnhancingPrompt || !playgroundPrompt.trim()}
-                    className="text-[9px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="flex items-center gap-1.5 px-2.5 py-1 bg-indigo-950/60 hover:bg-indigo-900/70 border border-indigo-700/30 hover:border-indigo-500/50 text-indigo-300 hover:text-indigo-200 rounded-lg text-[9px] font-bold transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                     type="button"
+                    title="Enhance your prompt using Gemini AI into a structured professional instruction"
                   >
                     {isEnhancingPrompt ? (
-                      <span className="flex items-center gap-1">
-                        <RefreshCw className="h-2.5 w-2.5 animate-spin" /> Enhancing...
-                      </span>
+                      <>
+                        <RefreshCw className="h-2.5 w-2.5 animate-spin" />
+                        <span>Enhancing...</span>
+                      </>
                     ) : (
-                      "⚡ Enhance Prompt"
+                      <>
+                        <Sparkles className="h-2.5 w-2.5" />
+                        <span>⚡ Enhance Prompt</span>
+                      </>
                     )}
                   </button>
                 </div>
