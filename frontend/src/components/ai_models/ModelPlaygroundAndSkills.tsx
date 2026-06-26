@@ -234,7 +234,19 @@ export default function ModelPlaygroundAndSkills({
                   type="text"
                   placeholder="Enter model name (e.g. gemini-2.5-flash)"
                   value={playgroundModel}
-                  onChange={(e) => setPlaygroundModel(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setPlaygroundModel(val);
+                    if (val.includes("gpt") || val.includes("o1")) {
+                      setPlaygroundProvider("openai");
+                    } else if (val.includes("claude")) {
+                      setPlaygroundProvider("anthropic");
+                    } else if (val.includes("huggingface") || val.includes("/") || val.includes("llama")) {
+                      setPlaygroundProvider("huggingface");
+                    } else if (val.includes("gemini")) {
+                      setPlaygroundProvider("gemini");
+                    }
+                  }}
                   className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-3 py-2 text-white placeholder:text-neutral-600 focus:outline-none focus:border-purple-500 transition-colors"
                 />
                 <p className="text-[9px] text-neutral-500">

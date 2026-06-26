@@ -159,7 +159,7 @@ export default function ModelRegistryExplorer({
                     if (!showFreeOnly) return true;
                     if (selectedProvider !== "gemini") return true;
                     const name = m.name.toLowerCase();
-                    return name.includes("flash") || name.includes("lite") || name.includes("8b");
+                    return name.includes("flash") || name.includes("lite") || name.includes("8b") || name.includes("gemma") || name.includes("banana");
                   })
                   .map((m, idx) => {
                     const isCurrentlyActive = globalSelectedModel === m.name;

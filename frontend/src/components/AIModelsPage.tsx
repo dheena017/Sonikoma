@@ -162,7 +162,7 @@ export default function AIModelsPage({
       setPlaygroundProvider("openai");
     } else if (globalSelectedModel.includes("claude")) {
       setPlaygroundProvider("anthropic");
-    } else if (globalSelectedModel.includes("huggingface") || globalSelectedModel.includes("llama")) {
+    } else if (globalSelectedModel.includes("huggingface") || globalSelectedModel.includes("/") || globalSelectedModel.includes("llama")) {
       setPlaygroundProvider("huggingface");
     } else {
       setPlaygroundProvider("gemini");
