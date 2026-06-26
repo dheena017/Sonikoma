@@ -149,13 +149,3 @@ async def call_gemini_with_retry(
                     await asyncio.sleep(delay)
                 else:
                     raise err
-
-
-# ── Background video URLs by genre ────────────────────────────────────────────
-DYNAMIC_BACKGROUND_VIDEOS = {
-    "action":    "https://assets.mixkit.co/videos/preview/mixkit-fire-sparkles-and-embers-on-black-background-43026-large.mp4",
-    "romance":   "https://assets.mixkit.co/videos/preview/mixkit-rain-drops-on-a-window-looking-out-to-city-lights-4122-large.mp4",
-    "fantasy":   "https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-background-with-shining-stars-and-clouds-43187-large.mp4",
-    "cyberpunk": "https://assets.mixkit.co/videos/preview/mixkit-futuristic-subway-station-with-neon-lights-41710-large.mp4",
-    "general":   "https://assets.mixkit.co/videos/preview/mixkit-retro-futuristic-grid-background-42999-large.mp4"
-}

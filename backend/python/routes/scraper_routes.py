@@ -43,7 +43,6 @@ from utils.url_utils import extract_webtoon_url, parse_webtoon_url
 from utils.id_utils import generate_project_id
 from utils.cache import stitched_cache, edit_history
 import utils.image_utils as img_utils
-from config.clients import DYNAMIC_BACKGROUND_VIDEOS
 from services.scraper import scrape_images_from_url, scraped_metadata_cache
 from services.storyboard_ai import generate_dynamic_panels
 from routes.ai_routes import get_all_user_keys
@@ -629,8 +628,7 @@ async def generate_storyboard(request: Request, body: GenerateStoryboardRequest,
                 video_url = f"/videos/{compiled_filename}"
             except Exception as ve:
                 logger.error(f"[Video Compiler] Compilation failed: {ve}")
-                # Fallback to general video if generation fails to not break frontend
-                video_url = DYNAMIC_BACKGROUND_VIDEOS["general"]
+                video_url = None
 
             # Update the DB with the final video URL
             if user_id and not project_id.startswith("temp_"):
@@ -710,7 +708,7 @@ async def generate_storyboard(request: Request, body: GenerateStoryboardRequest,
             video_url = f"/videos/{compiled_filename}"
         except Exception as ve:
             logger.error(f"[Video Compiler] Compilation failed: {ve}")
-            video_url = DYNAMIC_BACKGROUND_VIDEOS["general"]
+            video_url = None
 
         # Update the DB with the final video URL
         if user_id and not project_id.startswith("temp_"):
