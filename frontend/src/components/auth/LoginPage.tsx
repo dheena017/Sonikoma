@@ -245,13 +245,15 @@ export default function LoginPage({
 
   const handleQrSimulateSuccess = () => {
     setIsLoading(true);
-    setTimeout (async () => {
+    setTimeout(async () => {
       setEmail("qr_direct_creator@sonikoma.com");
       setPassword("qr_token_verified_99");
       setRememberMe(true);
       setIsLoading(false);
       setIsQrLogin(false);
-      await (window as any).alertAsync("Mobile authenticator token successfully verified! Logging in...");
+      await (window as any).alertAsync(
+        "Mobile authenticator token successfully verified! Logging in..."
+      );
     }, 1200);
   };
 

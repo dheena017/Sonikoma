@@ -64,7 +64,9 @@ export default function DashboardPage() {
         }
       } catch (err: any) {
         console.error("Failed to fetch projects", err);
-        setError(err.message || "An unexpected error occurred while loading projects.");
+        setError(
+          err.message || "An unexpected error occurred while loading projects."
+        );
       } finally {
         setLoading(false);
       }
@@ -150,7 +152,9 @@ export default function DashboardPage() {
             }}
             alt="Sonikoma Logo"
             className="h-16 w-16 mb-6 rounded-2xl shadow-lg shadow-purple-900/20 object-cover"
-            style={{ background: themeMode === "light" ? "#ffffff" : "#000000" }}
+            style={{
+              background: themeMode === "light" ? "#ffffff" : "#000000",
+            }}
           />
           <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-3">
             Welcome to{" "}
@@ -241,7 +245,9 @@ export default function DashboardPage() {
                 <div className="relative w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center animate-pulse shadow-lg shadow-purple-500/20">
                   <img
                     src={
-                      themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"
+                      themeMode === "light"
+                        ? "/logo-light.png"
+                        : "/logo-dark.png"
                     }
                     onError={(e) => {
                       (e.currentTarget as HTMLImageElement).src = "/logo.png";

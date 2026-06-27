@@ -16,7 +16,6 @@ import {
   Download,
 } from "lucide-react";
 
-
 interface StatusPageProps {
   onNavigateHome: () => void;
   fetchWithInterceptor?: any;
@@ -34,8 +33,6 @@ export default function StatusPage({
   const [ffmpegData, setFfmpegData] = useState<any>(null);
   const [online, setOnline] = useState<boolean | null>(null);
   const [lastChecked, setLastChecked] = useState<string | null>(null);
-
-
 
   const [isPurging, setIsPurging] = useState(false);
   const [showPurgeModal, setShowPurgeModal] = useState(false);
@@ -70,8 +67,6 @@ export default function StatusPage({
   }, [showPurgeModal, showStopModal]);
 
   const activeFetch = fetchWithInterceptor || fetch;
-
-
 
   const executePurgeCache = async () => {
     setIsPurging(true);
@@ -287,7 +282,6 @@ export default function StatusPage({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Live Status, Memory, DB, API Keys */}
         <div className="lg:col-span-7 space-y-6">
-
           {/* Uptime and Server Connection Card */}
           <div
             className={`p-6 rounded-3xl border shadow-xl transition-all duration-300 ${

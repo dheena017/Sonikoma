@@ -41,7 +41,7 @@ export function useAIModels() {
         const openai = localStorage.getItem("user_openai_key");
         const anthropic = localStorage.getItem("user_anthropic_key");
         const huggingface = localStorage.getItem("user_huggingface_key");
-        
+
         if (gemini) reqHeaders["X-User-Gemini-Key"] = gemini;
         if (openai) reqHeaders["X-User-OpenAI-Key"] = openai;
         if (anthropic) reqHeaders["X-User-Anthropic-Key"] = anthropic;
@@ -56,9 +56,11 @@ export function useAIModels() {
         // Check if any keys are configured (either in backend env or local browser storage)
         const availableProviders = [];
         if (env.GEMINI_API_KEY || gemini) availableProviders.push("gemini");
-        if (env.HUGGINGFACE_API_KEY || huggingface) availableProviders.push("huggingface");
+        if (env.HUGGINGFACE_API_KEY || huggingface)
+          availableProviders.push("huggingface");
         if (env.OPENAI_API_KEY || openai) availableProviders.push("openai");
-        if (env.ANTHROPIC_API_KEY || anthropic) availableProviders.push("anthropic");
+        if (env.ANTHROPIC_API_KEY || anthropic)
+          availableProviders.push("anthropic");
 
         // If no keys configured, return fallback
         if (availableProviders.length === 0) {
@@ -72,9 +74,9 @@ export function useAIModels() {
           try {
             const res = await fetch("/api/list-models", {
               method: "POST",
-              headers: { 
+              headers: {
                 "Content-Type": "application/json",
-                ...reqHeaders
+                ...reqHeaders,
               },
               body: JSON.stringify({ provider }),
             });

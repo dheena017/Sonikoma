@@ -471,7 +471,9 @@ export default function Header({
               (e.currentTarget as HTMLImageElement).src = "/logo.png";
             }}
             className="h-8 w-8 rounded-full shadow-lg shadow-purple-900/40 shrink-0 object-cover transition-all duration-300 animate-[fadeIn_0.3s_ease-out]"
-            style={{ background: themeMode === "light" ? "#ffffff" : "#000000" }}
+            style={{
+              background: themeMode === "light" ? "#ffffff" : "#000000",
+            }}
             alt="Sonikoma Logo"
           />
           <span className="font-bold text-sm tracking-tight text-white font-sans hidden sm:inline">
@@ -961,12 +963,18 @@ export default function Header({
                       Interface Appearance
                     </p>
                     <p className="text-[9px] text-neutral-500 font-mono">
-                      {themeMode === "dark" ? "Dark mode active" : "Light mode active"}
+                      {themeMode === "dark"
+                        ? "Dark mode active"
+                        : "Light mode active"}
                     </p>
                   </div>
                   <button
                     onClick={toggleThemeMode}
-                    title={themeMode === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                    title={
+                      themeMode === "dark"
+                        ? "Switch to Light Mode"
+                        : "Switch to Dark Mode"
+                    }
                     className={`relative inline-flex items-center w-14 h-7 rounded-full border-2 transition-all duration-300 cursor-pointer focus:outline-none ${
                       themeMode === "light"
                         ? "bg-amber-400 border-amber-500 shadow-[0_0_10px_rgba(251,191,36,0.4)]"

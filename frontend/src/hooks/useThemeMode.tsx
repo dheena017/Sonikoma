@@ -58,7 +58,9 @@ export function useThemeMode() {
 
       // 3. Fade IN — mask the old theme
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => { overlay.style.opacity = "1"; });
+        requestAnimationFrame(() => {
+          overlay.style.opacity = "1";
+        });
       });
 
       // 4. At peak opacity → switch theme instantly (hidden behind overlay)

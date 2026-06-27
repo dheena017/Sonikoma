@@ -44,7 +44,9 @@ export default function AIProviderKeysConfig() {
           });
         }
       })
-      .catch((err) => console.error("Failed to fetch health for env API keys:", err));
+      .catch((err) =>
+        console.error("Failed to fetch health for env API keys:", err)
+      );
   }, []);
 
   const handleSaveKeys = async () => {
@@ -164,7 +166,9 @@ export default function AIProviderKeysConfig() {
             value={value}
             onChange={(e) => setter(e.target.value)}
             autoComplete="new-password"
-            placeholder={envKeys[provider] ? "Active via environment (.env)" : placeholder}
+            placeholder={
+              envKeys[provider] ? "Active via environment (.env)" : placeholder
+            }
             className={`w-full pl-9 pr-10 py-2.5 bg-black/40 border rounded-xl text-xs font-mono text-white focus:outline-none focus:ring-1 transition-all placeholder:text-neutral-500 ${
               isInvalid
                 ? "border-rose-500/50 focus:border-rose-500/80 focus:ring-rose-500/50"

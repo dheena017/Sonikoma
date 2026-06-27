@@ -222,7 +222,9 @@ export default function ProjectDetailsPage({
         setExportStatus("JSON downloaded successfully!");
       } catch (err: any) {
         console.error("JSON export failed:", err);
-        await (window as any).alertAsync(err.message || "Failed to export JSON.");
+        await (window as any).alertAsync(
+          err.message || "Failed to export JSON."
+        );
         setExportStatus("JSON export failed.");
       } finally {
         setIsExporting(false);
@@ -272,7 +274,9 @@ export default function ProjectDetailsPage({
         }
       } catch (err: any) {
         console.error("ZIP download failed:", err);
-        await (window as any).alertAsync(err.message || "Failed to compile ZIP archive.");
+        await (window as any).alertAsync(
+          err.message || "Failed to compile ZIP archive."
+        );
         setExportStatus("ZIP download failed.");
       } finally {
         setIsExporting(false);
@@ -1422,7 +1426,9 @@ export default function ProjectDetailsPage({
                                     const confirm =
                                       (window as any).confirmAsync ||
                                       window.confirm;
-                                    const confirmed = await (window as any).confirmAsync(
+                                    const confirmed = await (
+                                      window as any
+                                    ).confirmAsync(
                                       `Remove panel #${
                                         originalIdx + 1
                                       } from timeline?`,

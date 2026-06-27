@@ -173,7 +173,9 @@ export default function ProfileAccountTab({
       !newPortfolioUrl.startsWith("http://") &&
       !newPortfolioUrl.startsWith("https://")
     ) {
-      await (window as any).alertAsync("Portfolio link must start with http:// or https://");
+      await (window as any).alertAsync(
+        "Portfolio link must start with http:// or https://"
+      );
       return;
     }
 

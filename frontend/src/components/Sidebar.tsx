@@ -306,7 +306,9 @@ export default function Sidebar({
                 (e.currentTarget as HTMLImageElement).src = "/logo.png";
               }}
               className="h-14 w-14 rounded-full shadow-lg shadow-purple-900/40 shrink-0 object-cover"
-              style={{ background: themeMode === "light" ? "#ffffff" : "#000000" }}
+              style={{
+                background: themeMode === "light" ? "#ffffff" : "#000000",
+              }}
               alt="Sonikoma Logo"
             />
             <div>
