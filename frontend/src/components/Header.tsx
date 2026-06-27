@@ -479,7 +479,7 @@ export default function Header({
             alt="Sonikoma Logo"
           />
           <span className="font-bold text-sm tracking-tight text-white font-sans hidden sm:inline">
-            Webtoon<span className="text-purple-400">To</span>Video
+            Sonikoma
           </span>
         </div>
       </div>

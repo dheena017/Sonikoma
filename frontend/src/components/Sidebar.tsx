@@ -302,13 +302,17 @@ export default function Sidebar({
           >
             <img
               src={themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"}
-              className="h-14 w-14 rounded-full bg-black shadow-lg shadow-purple-900/40 shrink-0 object-cover"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = "/logo.png";
+              }}
+              className="h-14 w-14 rounded-full shadow-lg shadow-purple-900/40 shrink-0 object-cover"
+              style={{ background: themeMode === "light" ? "#ffffff" : "#000000" }}
               alt="Sonikoma Logo"
             />
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-bold text-base tracking-tight text-white font-sans">
-                  Ani<span className="text-purple-400">vox</span>
+                  Sonikoma
                 </span>
               </div>
               <p className="text-[10px] text-neutral-400 font-mono">

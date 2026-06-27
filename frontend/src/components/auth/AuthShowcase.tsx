@@ -356,7 +356,7 @@ export default function AuthShowcase({
           >
             <img
               src="/logo-dark.png"
-              alt="Logo"
+              alt="Sonikoma Logo"
               className="w-7 h-7 object-contain drop-shadow-md"
             />
           </div>
@@ -429,7 +429,7 @@ export default function AuthShowcase({
                 >
                   <img
                     src="/logo-dark.png"
-                    alt="Logo"
+                    alt="Sonikoma Logo"
                     className="w-8 h-8 object-contain drop-shadow-md"
                   />
                 </div>
