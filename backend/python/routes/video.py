@@ -279,9 +279,10 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
 
     try:
         panels_data = []
-        RENDER_JOBS[video_id]["progress"] = 10
+        RENDER_JOBS[video_id]["progress"] = 1
 
-        # 1. Asset Downloads
+        # 1. Asset Downloads (1% to 25%)
+        total_panels = len(panels)
         for idx, panel in enumerate(panels):
             img_ext = panel.image_url.split(".")[-1].split("?")[0] if "." in panel.image_url else "jpg"
             if len(img_ext) > 4: img_ext = "jpg"
@@ -306,10 +307,11 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
                     p_dict["local_audio"] = audio_path
 
             panels_data.append(p_dict)
+            if total_panels > 0:
+                progress = 1 + int(((idx + 1) / total_panels) * 24)
+                RENDER_JOBS[video_id]["progress"] = min(progress, 25)
 
-        RENDER_JOBS[video_id]["progress"] = 30
-
-        # 2. Missing TTS Generation
+        # 2. Missing TTS Generation (25% to 40%)
         tts_tasks = []
         tts_mapping = []
         for idx, p_dict in enumerate(panels_data):
@@ -327,11 +329,24 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
 
         if tts_tasks:
             logger.info(f"[Render] Generating TTS for {len(tts_tasks)} panels.")
-            results = await asyncio.gather(*tts_tasks)
+            completed_tts = 0
+            total_tts = len(tts_tasks)
+            async def wrapped_tts_task(task, mapping_dict):
+                nonlocal completed_tts
+                res = await task
+                completed_tts += 1
+                progress = 25 + int((completed_tts / total_tts) * 15)
+                RENDER_JOBS[video_id]["progress"] = min(progress, 40)
+                return res
+            
+            wrapped_tasks = [wrapped_tts_task(task, tts_mapping[i]) for i, task in enumerate(tts_tasks)]
+            results = await asyncio.gather(*wrapped_tasks)
             for i, (_, actual_dur) in enumerate(results):
                 tts_mapping[i]["duration"] = actual_dur
+        else:
+            RENDER_JOBS[video_id]["progress"] = 40
 
-        # 3. Image Prep (Layout)
+        # 3. Image Prep (Layout) (40% to 50%)
         from PIL import Image
         tall_count = 0
         for p in panels_data:
@@ -346,7 +361,7 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
 
         target_w, target_h = (1080, 1920) if tall_count > len(panels_data)/2 else (1920, 1080)
 
-        for p in panels_data:
+        for idx, p in enumerate(panels_data):
             if os.path.exists(p["raw_img"]):
                 with Image.open(p["raw_img"]) as img:
                     img = img.convert("RGB")
@@ -362,21 +377,26 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
                         bg = draw_subtitles_on_image(bg, p["speech_text"].strip())
                         
                     bg.save(p["local_img"], "JPEG")
+            
+            if len(panels_data) > 0:
+                progress = 40 + int(((idx + 1) / len(panels_data)) * 10)
+                RENDER_JOBS[video_id]["progress"] = min(progress, 50)
 
         RENDER_JOBS[video_id]["progress"] = 50
 
-        # 4. Rendering
+        # 4. Rendering (50% to 95%)
         logger.info(f"[Render] Starting MoviePy pipeline for {video_id}")
         await asyncio.to_thread(render_pipeline_sync, video_id, panels_data, output_path)
 
         final_video_url = f"/videos/{output_filename}"
 
-        # 5. Supabase Upload
+        # 5. Supabase Upload (95% to 100%)
         try:
             from supabase import create_client
             s_url = os.environ.get("SUPABASE_URL")
             s_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
             if s_url and s_key:
+                RENDER_JOBS[video_id]["progress"] = 96
                 with open(output_path, "rb") as f:
                     create_client(s_url, s_key).storage.from_("videos").upload(output_filename, f, {"content-type": "video/mp4", "upsert": "true"})
                 final_video_url = create_client(s_url, s_key).storage.from_("videos").get_public_url(output_filename)
