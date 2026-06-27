@@ -85,7 +85,6 @@ def create_subtitle_clip(text, w, h, duration):
         curr_line = ""
         for word in words:
             test_line = curr_line + " " + word if curr_line else word
-            # Using basic textlength for compatibility
             text_w = draw.textlength(test_line, font=font) if hasattr(draw, 'textlength') else font.getsize(test_line)[0]
             if text_w > w * 0.9:
                 lines.append(curr_line)
@@ -128,17 +127,26 @@ def render_pipeline_sync(panels_data, output_path, work_dir):
         if not os.path.exists(img_path):
             continue
 
-        clip = ImageClip(img_path).set_duration(duration)
+        # Prioritize natural audio length if available
+        if audio_path and os.path.exists(audio_path):
+            try:
+                audio_clip_temp = AudioFileClip(audio_path)
+                duration = audio_clip_temp.duration
+                audio_clip_temp.close()
+            except Exception as e:
+                logger.error(f"Failed to read audio duration for panel {i}: {e}")
+
+        safe_duration = max(duration, 0.1)
+        clip = ImageClip(img_path).set_duration(safe_duration)
         
         if audio_path and os.path.exists(audio_path):
             try:
-                audio_clip = AudioFileClip(audio_path).set_duration(min(duration, AudioFileClip(audio_path).duration))
+                audio_clip = AudioFileClip(audio_path).set_duration(safe_duration)
                 clip = clip.set_audio(audio_clip)
             except Exception as e:
                 logger.error(f"Failed to attach audio {audio_path}: {e}")
 
         # Step 12: Schedule SFX
-        safe_duration = max(duration, 0.1)
         if sfx_name and sfx_name.strip():
             sfx_path = os.path.join(os.getcwd(), "public", "audio", "sfx", f"{sfx_name.strip()}.mp3")
             if os.path.exists(sfx_path):
@@ -165,7 +173,6 @@ def render_pipeline_sync(panels_data, output_path, work_dir):
 
         if motion_type == "zoom_in":
             clip = clip.resize(lambda t: 1 + 0.08 * (t / safe_duration))
-            # Center crop the zoomed clip to maintain original dimensions
             clip = apply_dynamic_crop(clip, lambda t: (clip.w - w)/2, lambda t: (clip.h - h)/2, w, h)
         elif motion_type == "pan_left":
             clip = clip.resize(1.15)
@@ -188,23 +195,20 @@ def render_pipeline_sync(panels_data, output_path, work_dir):
             txt_clip = create_subtitle_clip(speech_text, w, h, safe_duration)
             layers.append(txt_clip.set_position(('center', 'bottom')))
             
-        # Lock everything into a static size container to prevent drift
         clip = CompositeVideoClip(layers, size=(w, h)).set_duration(safe_duration)
 
-        # Basic Crossfade (0.5 second) between image sequences
         if i > 0:
             clip = clip.crossfadein(0.5)
 
         clips.append(clip)
         
-        # Calculate start time for the next panel (accounting for -0.5s padding overlap)
         current_global_time += safe_duration
-        current_global_time -= 0.5
+        if i < len(panels_data) - 1:
+            current_global_time -= 0.5
 
     if not clips:
         raise Exception("No valid clips were generated.")
 
-    # Stitch them together with a -0.5s overlap to enable the crossfade
     final_clip = concatenate_videoclips(clips, padding=-0.5, method="compose")
     import moviepy.audio.fx.all as afx
     
@@ -215,33 +219,29 @@ def render_pipeline_sync(panels_data, output_path, work_dir):
     bgm_path = os.path.join(os.getcwd(), "public", "audio", "bgm", "theme.mp3")
     if os.path.exists(bgm_path):
         try:
-            # Load BGM, lower volume to 10%, and loop to match total video duration
             bgm_clip = AudioFileClip(bgm_path).volumex(0.1)
             bgm_clip = afx.audio_loop(bgm_clip, duration=final_clip.duration)
             audio_tracks.append(bgm_clip)
         except Exception as e:
             logger.error(f"Failed to load BGM audio: {e}")
             
-    # Add scheduled SFX tracks
     audio_tracks.extend(sfx_clips)
     
     if audio_tracks:
         try:
-            final_audio = CompositeAudioClip(audio_tracks)
+            final_audio = CompositeAudioClip(audio_tracks).set_duration(final_clip.duration)
             final_clip = final_clip.set_audio(final_audio)
         except Exception as e:
             logger.error(f"Failed to mix final audio: {e}")
             
-    # Write to file
     final_clip.write_videofile(
         output_path, 
         fps=24, 
         codec="libx264", 
         audio_codec="aac", 
-        logger=None # Disable moviepy terminal spam
+        logger=None
     )
     
-    # Close clips
     for c in clips:
         c.close()
     final_clip.close()
@@ -259,7 +259,6 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
         panels_data = []
         download_tasks = []
 
-        # 1. Download all assets
         RENDER_JOBS[video_id]["progress"] = 15
         for idx, panel in enumerate(panels):
             img_ext = panel.image_url.split(".")[-1].split("?")[0] if "." in panel.image_url else "jpg"
@@ -280,25 +279,19 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
             }
             
             download_tasks.append(download_asset(panel.image_url, raw_img_path))
-            
             if panel.audio_url:
-                audio_ext = "mp3"
-                audio_path = os.path.join(work_dir, f"audio_{idx}.{audio_ext}")
+                audio_path = os.path.join(work_dir, f"audio_{idx}.mp3")
                 p_data["local_audio"] = audio_path
                 download_tasks.append(download_asset(panel.audio_url, audio_path))
-                
             panels_data.append(p_data)
 
         logger.info(f"Downloading {len(download_tasks)} assets...")
-        results = await asyncio.gather(*download_tasks)
-        if not any(results):
-             raise Exception("Failed to download video assets.")
+        await asyncio.gather(*download_tasks)
 
-        # 1.5 Generate TTS audio for panels that have speech_text but no audio_url
         tts_tasks = []
         for idx, p_data in enumerate(panels_data):
             panel = panels[idx]
-            if not panel.audio_url and panel.speech_text and panel.speech_text.strip():
+            if not p_data["local_audio"] and panel.speech_text and panel.speech_text.strip():
                 audio_path = os.path.join(work_dir, f"audio_{idx}.mp3")
                 p_data["local_audio"] = audio_path
                 tts_tasks.append(
@@ -307,168 +300,96 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
                         target_duration=p_data["duration"],
                         output_path=audio_path,
                         voice=voice,
-                        force_duration=True # Force for final render
+                        force_duration=False
                     )
                 )
         if tts_tasks:
-            logger.info(f"Generating TTS audio for {len(tts_tasks)} panels...")
-            await asyncio.gather(*tts_tasks)
+            logger.info(f"Generating missing TTS audio for {len(tts_tasks)} panels...")
+            tts_results = await asyncio.gather(*tts_tasks)
+            # Update p_data duration with natural natural duration
+            tts_ptr = 0
+            for p_data in panels_data:
+                if p_data["local_audio"] and not any(panel.audio_url for panel in panels if panel.id == p_data["id"]):
+                    _, actual_dur = tts_results[tts_ptr]
+                    p_data["duration"] = actual_dur
+                    tts_ptr += 1
 
-        # 2. Inspect dimensions and determine standard target layout size
         from PIL import Image
-        
         tall_count = 0
         wide_count = 0
-        for idx, p_data in enumerate(panels_data):
-            raw_img = p_data["raw_img"]
-            if os.path.exists(raw_img):
+        for p_data in panels_data:
+            if os.path.exists(p_data["raw_img"]):
                 try:
-                    with Image.open(raw_img) as img:
+                    with Image.open(p_data["raw_img"]) as img:
                         w, h = img.size
-                        # Throw a friendly error for raw, unsliced webtoon strips
                         if h > 8000:
-                            raise Exception(f"Panel #{p_data['id']} image is extremely tall ({h}px). It looks like a raw, unsliced webtoon strip. Please slice it into individual panels using the Auto-Crop tool before rendering.")
-                        if h > w:
-                            tall_count += 1
-                        else:
-                            wide_count += 1
+                            raise Exception(f"Panel #{p_data['id']} image is extremely tall ({h}px). Please slice it before rendering.")
+                        if h > w: tall_count += 1
+                        else: wide_count += 1
                 except Exception as e:
-                    if "unsliced" in str(e):
-                        raise e
-                    logger.warning(f"Failed to inspect dimensions for panel {idx}: {e}")
+                    if "extremely tall" in str(e): raise e
+                    logger.warning(f"Failed to inspect dimensions: {e}")
                     
-        # Determine standard target dimensions (1080x1920 for portrait, 1920x1080 for landscape)
-        if tall_count >= wide_count:
-            target_width, target_height = 1080, 1920
-        else:
-            target_width, target_height = 1920, 1080
+        target_width, target_height = (1080, 1920) if tall_count >= wide_count else (1920, 1080)
 
-        logger.info(f"Target video dimensions determined: {target_width}x{target_height} (portrait={tall_count >= wide_count})")
-
-        # 3. Resize and pad all images to target size (ensuring even dimensions and uniform sizing)
-        for idx, p_data in enumerate(panels_data):
-            raw_img = p_data["raw_img"]
-            final_img = p_data["local_img"]
-            if os.path.exists(raw_img):
+        for p_data in panels_data:
+            if os.path.exists(p_data["raw_img"]):
                 try:
-                    with Image.open(raw_img) as img:
+                    with Image.open(p_data["raw_img"]) as img:
                         img = img.convert("RGB")
                         img_w, img_h = img.size
-                        
-                        # Scale to fit
                         scale = min(target_width / img_w, target_height / img_h)
-                        new_w = int(img_w * scale)
-                        new_h = int(img_h * scale)
-                        
-                        # Ensure even dimensions
+                        new_w, new_h = int(img_w * scale), int(img_h * scale)
                         if new_w % 2 != 0: new_w -= 1
                         if new_h % 2 != 0: new_h -= 1
-                        new_w = max(2, new_w)
-                        new_h = max(2, new_h)
-                        
-                        resized = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
-                        
-                        # Create black background and paste resized image in the center
+                        resized = img.resize((max(2, new_w), max(2, new_h)), Image.Resampling.LANCZOS)
                         bg = Image.new("RGB", (target_width, target_height), (0, 0, 0))
-                        offset_x = (target_width - new_w) // 2
-                        offset_y = (target_height - new_h) // 2
-                        bg.paste(resized, (offset_x, offset_y))
-                        bg.save(final_img, "JPEG")
+                        bg.paste(resized, ((target_width - resized.width) // 2, (target_height - resized.height) // 2))
+                        bg.save(p_data["local_img"], "JPEG")
                 except Exception as e:
-                    logger.error(f"Failed to process and pad image {raw_img}: {e}")
-                    raise Exception(f"Failed to format image assets for video compilation: {e}")
+                    logger.error(f"Failed to process image: {e}")
 
         RENDER_JOBS[video_id]["progress"] = 40
-
-        # 4. Stitch using MoviePy in a thread
-        logger.info("Starting video compilation using MoviePy...")
+        logger.info("Starting video compilation...")
         await asyncio.to_thread(render_pipeline_sync, panels_data, output_path, work_dir)
 
-        logger.info(f"Render completed: {output_path}")
-        
-        # Step 13: Supabase Storage Integration
         final_video_url = f"/videos/{output_filename}"
         try:
-            from supabase import create_client, Client
-            url = os.environ.get("SUPABASE_URL", "")
-            key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", os.environ.get("SUPABASE_ANON_KEY", ""))
-            
+            from supabase import create_client
+            url, key = os.environ.get("SUPABASE_URL"), os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
             if url and key:
-                supabase: Client = create_client(url, key)
+                supabase = create_client(url, key)
                 with open(output_path, "rb") as f:
-                    # Upload to 'videos' bucket
-                    supabase.storage.from_("videos").upload(
-                        file=f, 
-                        path=output_filename, 
-                        file_options={"content-type": "video/mp4", "upsert": "true"}
-                    )
-                
-                # Get public URL
+                    supabase.storage.from_("videos").upload(output_filename, f, {"content-type": "video/mp4", "upsert": "true"})
                 final_video_url = supabase.storage.from_("videos").get_public_url(output_filename)
-                logger.info(f"Uploaded to Supabase Storage: {final_video_url}")
-            else:
-                logger.warning("Supabase credentials not found. Falling back to local URL.")
         except Exception as e:
-            logger.error(f"Supabase upload failed, falling back to local: {e}")
+            logger.error(f"Supabase upload failed: {e}")
         
-        RENDER_JOBS[video_id]["progress"] = 100
-        RENDER_JOBS[video_id]["status"] = "completed"
-        RENDER_JOBS[video_id]["url"] = final_video_url
-
+        RENDER_JOBS[video_id].update({"progress": 100, "status": "completed", "url": final_video_url})
     except Exception as e:
         logger.error(f"Render failed: {e}", exc_info=True)
-        RENDER_JOBS[video_id]["status"] = "failed"
-        RENDER_JOBS[video_id]["error"] = str(e)
+        RENDER_JOBS[video_id].update({"status": "failed", "error": str(e)})
     finally:
         import shutil
-        try:
-            if os.path.exists(work_dir):
-                shutil.rmtree(work_dir)
-            if os.path.exists(output_path):
-                job_info = RENDER_JOBS.get(video_id, {})
-                status = job_info.get("status")
-                url = job_info.get("url")
-                is_remote_url = url and (url.startswith("http://") or url.startswith("https://"))
-                if status == "failed" or is_remote_url:
-                    os.remove(output_path)
-                    logger.info(f"Cleaned up output video file for job {video_id} (cleaned because status is {status} or remote={is_remote_url})")
-            logger.info(f"Cleaned up temporary workspace for job {video_id}")
-        except Exception as cleanup_err:
-            logger.error(f"Failed to clean up files for job {video_id}: {cleanup_err}")
-
+        if os.path.exists(work_dir): shutil.rmtree(work_dir)
+        if os.path.exists(output_path):
+            info = RENDER_JOBS.get(video_id, {})
+            if info.get("status") == "failed" or (info.get("url") and info.get("url").startswith("http")):
+                os.remove(output_path)
 
 @router.post("/render")
 async def render_video(request: RenderRequest, background_tasks: BackgroundTasks):
-    logger.info(f"Received render request for {len(request.panels)} panels.")
-    
     if not HAS_MOVIEPY:
-        logger.error("moviepy is not installed.")
-        raise HTTPException(status_code=500, detail="moviepy is not installed on the backend.")
-
+        raise HTTPException(status_code=500, detail="moviepy is not installed")
     if not request.panels:
-        raise HTTPException(status_code=400, detail="No panels provided for rendering.")
-
+        raise HTTPException(status_code=400, detail="No panels provided")
     video_id = str(uuid.uuid4())[:8]
-    
-    # Initialize job tracking
-    RENDER_JOBS[video_id] = {
-        "status": "processing",
-        "progress": 0,
-        "url": None
-    }
-    
-    # Delegate to background task
+    RENDER_JOBS[video_id] = {"status": "processing", "progress": 0, "url": None}
     background_tasks.add_task(process_render_job, video_id, request.panels, request.voice)
-    
-    return {
-        "success": True,
-        "job_id": video_id,
-        "message": "Render job started in the background."
-    }
+    return {"success": True, "job_id": video_id}
 
 @router.get("/status/{job_id}")
 async def get_render_status(job_id: str):
     job = RENDER_JOBS.get(job_id)
-    if not job:
-        raise HTTPException(status_code=404, detail="Job not found")
+    if not job: raise HTTPException(status_code=404, detail="Job not found")
     return job
