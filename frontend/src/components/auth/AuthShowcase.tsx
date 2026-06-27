@@ -356,6 +356,9 @@ export default function AuthShowcase({
           >
             <img
               src="/logo-dark.png"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = "/logo.png";
+              }}
               alt="Sonikoma Logo"
               className="w-7 h-7 object-contain drop-shadow-md"
             />
@@ -429,6 +432,9 @@ export default function AuthShowcase({
                 >
                   <img
                     src="/logo-dark.png"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = "/logo.png";
+                    }}
                     alt="Sonikoma Logo"
                     className="w-8 h-8 object-contain drop-shadow-md"
                   />

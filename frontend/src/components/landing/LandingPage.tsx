@@ -79,6 +79,9 @@ export default function LandingPage({
           >
             <img
               src="/logo-dark.png"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = "/logo.png";
+              }}
               className="w-10 h-10 rounded-xl shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform object-cover bg-black"
               alt="Sonikoma Logo"
             />

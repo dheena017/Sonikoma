@@ -247,6 +247,9 @@ export default function ForgotPasswordPage({
               >
                 <img
                   src="/logo-dark.png"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = "/logo.png";
+                  }}
                   alt="Sonikoma Logo"
                   className="w-6 h-6 object-contain drop-shadow-md"
                 />
