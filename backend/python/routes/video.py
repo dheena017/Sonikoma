@@ -145,13 +145,23 @@ def render_pipeline_sync(panels_data: List[Dict[str, Any]], output_path: str):
                 logger.error(f"Failed to read audio duration for panel {i}: {e}")
 
         safe_duration = max(duration, 0.2) # Minimum duration safety
+        # Avoid overlapping voices: MoviePy overlaps clips by 0.5s on concatenation.
+        # To prevent the voice audio from overlapping with the next panel's voice,
+        # we extend the visual duration of all non-last panels by 0.5s.
+        if i < len(panels_data) - 1:
+            safe_duration += 0.5
+
         clip = ImageClip(img_path).set_duration(safe_duration)
         
         # Attach audio to this visual clip
         if audio_path and os.path.exists(audio_path):
             try:
                 # set_audio returns a copy
-                panel_audio = AudioFileClip(audio_path).set_duration(safe_duration)
+                raw_audio = AudioFileClip(audio_path)
+                if safe_duration > raw_audio.duration:
+                    panel_audio = CompositeAudioClip([raw_audio]).set_duration(safe_duration)
+                else:
+                    panel_audio = raw_audio.set_duration(safe_duration)
                 clip = clip.set_audio(panel_audio)
             except Exception as e:
                 logger.error(f"Failed to attach audio to clip {i}: {e}")
