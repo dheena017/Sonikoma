@@ -94,6 +94,7 @@ export default function ProjectDetailsPage({
   // Export states
   const [isExporting, setIsExporting] = React.useState(false);
   const [exportStatus, setExportStatus] = React.useState<string | null>(null);
+  const [detectedRatio, setDetectedRatio] = React.useState<"9/16" | "16/9">("16/9");
 
   // Search filter inside storyboard tab
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -1503,11 +1504,26 @@ export default function ProjectDetailsPage({
                               Compiled MP4 Output Video
                             </h3>
                           </div>
-                          <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/10 bg-black/90 shadow-inner">
+                          <div 
+                            className="relative mx-auto rounded-2xl overflow-hidden border border-white/10 bg-black/90 shadow-inner transition-all duration-300 w-full"
+                            style={
+                              detectedRatio === "9/16"
+                                ? { maxWidth: "340px", aspectRatio: "9/16" }
+                                : { maxWidth: "100%", aspectRatio: "16/9" }
+                            }
+                          >
                             <video
                               src={project.video_url}
                               controls
                               className="w-full h-full object-contain"
+                              onLoadedMetadata={(e) => {
+                                const video = e.currentTarget;
+                                if (video.videoHeight > video.videoWidth) {
+                                  setDetectedRatio("9/16");
+                                } else {
+                                  setDetectedRatio("16/9");
+                                }
+                              }}
                             />
                           </div>
                         </div>
@@ -1540,13 +1556,28 @@ export default function ProjectDetailsPage({
                             </div>
                           </div>
 
-                          <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/10 bg-black/90 shadow-inner flex items-center justify-center">
+                          <div 
+                            className="relative mx-auto rounded-2xl overflow-hidden border border-white/10 bg-black/90 shadow-inner transition-all duration-300 w-full flex items-center justify-center"
+                            style={
+                              detectedRatio === "9/16"
+                                ? { maxWidth: "340px", aspectRatio: "9/16" }
+                                : { maxWidth: "100%", aspectRatio: "16/9" }
+                            }
+                          >
                             {panels[slideshowIdx] ? (
                               <>
                                 <img
                                   src={panels[slideshowIdx].image_url}
                                   alt={`Slide ${slideshowIdx + 1}`}
                                   className="w-full h-full object-contain"
+                                  onLoad={(e) => {
+                                    const img = e.currentTarget;
+                                    if (img.naturalHeight > img.naturalWidth) {
+                                      setDetectedRatio("9/16");
+                                    } else {
+                                      setDetectedRatio("16/9");
+                                    }
+                                  }}
                                   style={{
                                     filter: getPanelFilterStyle(
                                       panels[slideshowIdx]

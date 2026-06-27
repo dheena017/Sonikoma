@@ -37,6 +37,7 @@ export default function DisplayPage({ projectId }: DisplayPageProps) {
   const [panels, setPanels] = useState<PanelData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [detectedRatio, setDetectedRatio] = useState<"9/16" | "16/9">("16/9");
 
   useEffect(() => {
     const fetchPublicData = async () => {
@@ -162,12 +163,27 @@ export default function DisplayPage({ projectId }: DisplayPageProps) {
               </h2>
             </div>
             <div className="bg-[#0b0b0f]/80 border border-white/5 rounded-3xl p-6 backdrop-blur-xl shadow-2xl">
-              <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/10 bg-black shadow-2xl">
+              <div 
+                className="relative mx-auto rounded-2xl overflow-hidden border border-white/10 bg-black shadow-2xl transition-all duration-300 w-full"
+                style={
+                  detectedRatio === "9/16"
+                    ? { maxWidth: "340px", aspectRatio: "9/16" }
+                    : { maxWidth: "100%", aspectRatio: "16/9" }
+                }
+              >
                 <video
                   src={project.video_url}
                   controls
                   className="w-full h-full object-contain"
                   poster={project.cover_image}
+                  onLoadedMetadata={(e) => {
+                    const video = e.currentTarget;
+                    if (video.videoHeight > video.videoWidth) {
+                      setDetectedRatio("9/16");
+                    } else {
+                      setDetectedRatio("16/9");
+                    }
+                  }}
                 />
               </div>
             </div>
