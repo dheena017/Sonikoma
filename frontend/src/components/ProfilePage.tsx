@@ -51,7 +51,14 @@ export default function ProfilePage({
 
   // Navigation tabs
   const [activeTab, setActiveTab] = React.useState<
-    "projects" | "account" | "security" | "billing" | "api" | "analytics" | "preferences" | "stats"
+    | "projects"
+    | "account"
+    | "security"
+    | "billing"
+    | "api"
+    | "analytics"
+    | "preferences"
+    | "stats"
   >("projects");
 
   // Local state for profile values
@@ -80,21 +87,21 @@ export default function ProfilePage({
   const [workspacePrefs, setWorkspacePrefs] = React.useState({
     hardwareAcceleration: true,
     compactMode: false,
-    autoSaveInterval: "5m"
+    autoSaveInterval: "5m",
   });
   const [privacyPrefs, setPrivacyPrefs] = React.useState({
     analyticsTelemetry: true,
-    publicProfile: false
+    publicProfile: false,
   });
   const [aiPrefs, setAiPrefs] = React.useState({
     defaultModel: "gemini-1.5-flash",
     defaultVoice: "google-tts-en-US-Standard-D",
-    autoCropSensitivity: "medium"
+    autoCropSensitivity: "medium",
   });
   const [exportPrefs, setExportPrefs] = React.useState({
     resolution: "1080p",
     framerate: "30fps",
-    audioFormat: "mp3"
+    audioFormat: "mp3",
   });
   const [themePrefs, setThemePrefs] = React.useState("dark");
   const [accentColor, setAccentColor] = React.useState("purple");
@@ -170,7 +177,9 @@ export default function ProfilePage({
     if (!file) return;
 
     if (file.size > 2 * 1024 * 1024) {
-      await (window as any).alertAsync("Image is too large. Please choose an image smaller than 2MB.");
+      await (window as any).alertAsync(
+        "Image is too large. Please choose an image smaller than 2MB."
+      );
       return;
     }
 
@@ -239,7 +248,9 @@ export default function ProfilePage({
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err: any) {
-      await (window as any).alertAsync(err.message || "Failed to update profile picture");
+      await (window as any).alertAsync(
+        err.message || "Failed to update profile picture"
+      );
     } finally {
       setShowConfirmModal(false);
       setTempAvatarUrl(null);
@@ -494,7 +505,6 @@ export default function ProfilePage({
     return () => clearInterval(interval);
   }, []);
 
-
   // Render initials or background gradients for avatar
   const renderAvatarContent = (url: string, name: string) => {
     if (url.startsWith("linear-gradient")) {
@@ -557,7 +567,9 @@ export default function ProfilePage({
         setTimeout(() => setSaveSuccess(false), 3000);
       })
       .catch(async (err) => {
-        await (window as any).alertAsync(err.message || "Failed to save profile changes");
+        await (window as any).alertAsync(
+          err.message || "Failed to save profile changes"
+        );
       });
   };
 
@@ -670,7 +682,9 @@ export default function ProfilePage({
         }
       })
       .catch(async (err) => {
-        await (window as any).alertAsync(err.message || "Could not claim daily credits");
+        await (window as any).alertAsync(
+          err.message || "Could not claim daily credits"
+        );
       });
   };
 
@@ -707,7 +721,9 @@ export default function ProfilePage({
         if (onRefreshUser) {
           await onRefreshUser(false);
         }
-        await (window as any).alertAsync("Successfully upgraded to Studio Pro!");
+        await (window as any).alertAsync(
+          "Successfully upgraded to Studio Pro!"
+        );
       }
     } catch (err: any) {
       await (window as any).alertAsync(err.message || "Failed to upgrade plan");
@@ -786,10 +802,14 @@ export default function ProfilePage({
         if (onRefreshUser) {
           await onRefreshUser(false);
         }
-        await (window as any).alertAsync(`Successfully purchased ${amountOfCredits} credits!`);
+        await (window as any).alertAsync(
+          `Successfully purchased ${amountOfCredits} credits!`
+        );
       }
     } catch (err: any) {
-      await (window as any).alertAsync(err.message || "Failed to purchase package");
+      await (window as any).alertAsync(
+        err.message || "Failed to purchase package"
+      );
     }
   };
 
@@ -833,7 +853,9 @@ export default function ProfilePage({
         }
       })
       .catch(async (err) => {
-        await (window as any).alertAsync(err.message || "Failed to generate key");
+        await (window as any).alertAsync(
+          err.message || "Failed to generate key"
+        );
       });
   };
 
@@ -968,7 +990,9 @@ export default function ProfilePage({
         }
       })
       .catch(async (err) => {
-        await (window as any).alertAsync(err.message || "Failed to bulk delete projects");
+        await (window as any).alertAsync(
+          err.message || "Failed to bulk delete projects"
+        );
       });
   };
 
@@ -995,7 +1019,9 @@ export default function ProfilePage({
         }
       })
       .catch(async (err) => {
-        await (window as any).alertAsync(err.message || "Failed to delete chapter");
+        await (window as any).alertAsync(
+          err.message || "Failed to delete chapter"
+        );
       });
   };
 
@@ -1024,7 +1050,9 @@ export default function ProfilePage({
         }
       })
       .catch(async (err) => {
-        await (window as any).alertAsync(err.message || "Failed to delete series");
+        await (window as any).alertAsync(
+          err.message || "Failed to delete series"
+        );
       });
   };
 
@@ -1051,14 +1079,18 @@ export default function ProfilePage({
         accentColor: accentColor,
         fontScale: fontScale,
         reduceMotion: reduceMotion,
-        cornerRadius: cornerRadius
-      }
+        cornerRadius: cornerRadius,
+      },
     };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `sonikoma_account_export_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `sonikoma_account_export_${
+      new Date().toISOString().split("T")[0]
+    }.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -1074,7 +1106,9 @@ export default function ProfilePage({
     );
     if (!confirmed) return;
 
-    const token = localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token");
+    const token =
+      localStorage.getItem("sonikoma_token") ||
+      sessionStorage.getItem("sonikoma_token");
     if (!token) {
       onLogout();
       return;
@@ -1083,14 +1117,16 @@ export default function ProfilePage({
     try {
       const response = await fetch("/api/auth/me", {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {
         await (window as any).alertAsync("Account deleted successfully.");
         onLogout();
       } else {
         const res = await response.json();
-        await (window as any).alertAsync(res.detail || "Failed to delete account");
+        await (window as any).alertAsync(
+          res.detail || "Failed to delete account"
+        );
       }
     } catch (err) {
       console.error(err);
@@ -1361,7 +1397,6 @@ export default function ProfilePage({
 
           {/* TAB CONTENT PANEL SWITCHER */}
           <div className="space-y-6">
-
             {/* TAB: WORKSPACE STATS */}
             {activeTab === "stats" && (
               <div className="bg-[#0c0c0e]/30 border border-white/5 rounded-3xl p-6 space-y-6 text-left shadow-xl animate-in fade-in zoom-in-95 duration-300">
@@ -1521,7 +1556,11 @@ export default function ProfilePage({
                 exportSettings={exportPrefs}
                 setExportSettings={setExportPrefs}
                 themeMode={themeMode || themePrefs}
-                toggleThemeMode={toggleThemeMode || (() => setThemePrefs(p => p === "dark" ? "light" : "dark"))}
+                toggleThemeMode={
+                  toggleThemeMode ||
+                  (() =>
+                    setThemePrefs((p) => (p === "dark" ? "light" : "dark")))
+                }
                 accentColor={accentColor}
                 setAccentColor={setAccentColor}
                 fontScale={fontScale}
@@ -1608,4 +1647,3 @@ export default function ProfilePage({
     </div>
   );
 }
-

@@ -286,22 +286,38 @@ export default function ProfilePreferencesTab({
               </h4>
               <div className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
                 <div className="flex items-start gap-3">
-                  <div className={`mt-0.5 p-2 ${themeMode === "light" ? "bg-amber-500/10 text-amber-500" : "bg-purple-500/10 text-purple-400"} rounded-lg`}>
-                    {themeMode === "light" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                  <div
+                    className={`mt-0.5 p-2 ${
+                      themeMode === "light"
+                        ? "bg-amber-500/10 text-amber-500"
+                        : "bg-purple-500/10 text-purple-400"
+                    } rounded-lg`}
+                  >
+                    {themeMode === "light" ? (
+                      <Sun className="w-4 h-4" />
+                    ) : (
+                      <Moon className="w-4 h-4" />
+                    )}
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-white">
                       Dark / Light Mode
                     </h4>
                     <p className="text-[10px] text-neutral-500 font-semibold mt-1">
-                      {themeMode === "dark" ? "Dark mode active" : "Light mode active"}
+                      {themeMode === "dark"
+                        ? "Dark mode active"
+                        : "Light mode active"}
                     </p>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={toggleThemeMode}
-                  title={themeMode === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                  title={
+                    themeMode === "dark"
+                      ? "Switch to Light Mode"
+                      : "Switch to Dark Mode"
+                  }
                   className={`relative inline-flex items-center w-14 h-7 rounded-full border-2 transition-all duration-300 cursor-pointer focus:outline-none ${
                     themeMode === "light"
                       ? "bg-amber-400 border-amber-500 shadow-[0_0_10px_rgba(251,191,36,0.4)]"
@@ -449,7 +465,9 @@ export default function ProfilePreferencesTab({
               <div className="pt-4 border-t border-white/5">
                 <div className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
                   <div className="flex items-start gap-3">
-                    <div className={`mt-0.5 p-2 bg-purple-500/10 rounded-lg ${tc.text}`}>
+                    <div
+                      className={`mt-0.5 p-2 bg-purple-500/10 rounded-lg ${tc.text}`}
+                    >
                       <ZapOff className="w-4 h-4" />
                     </div>
                     <div>
@@ -475,7 +493,6 @@ export default function ProfilePreferencesTab({
                 </div>
               </div>
             )}
-
           </div>
 
           {/* NOTIFICATION PREFERENCES */}

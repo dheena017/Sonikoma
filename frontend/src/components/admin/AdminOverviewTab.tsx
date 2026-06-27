@@ -104,7 +104,8 @@ export function AdminOverviewTab({ stats }: { stats: any }) {
             <div className="flex items-center gap-4 text-sm">
               <div className="w-2 h-2 rounded-full bg-blue-500"></div>
               <div className="flex-1 text-neutral-300">
-                New user <span className="font-semibold">john_doe</span> registered.
+                New user <span className="font-semibold">john_doe</span>{" "}
+                registered.
               </div>
               <div className="text-neutral-600">2 mins ago</div>
             </div>
@@ -118,7 +119,8 @@ export function AdminOverviewTab({ stats }: { stats: any }) {
             <div className="flex items-center gap-4 text-sm">
               <div className="w-2 h-2 rounded-full bg-purple-500"></div>
               <div className="flex-1 text-neutral-300">
-                Project <span className="font-semibold">"Epic Manga Edit"</span> rendered.
+                Project <span className="font-semibold">"Epic Manga Edit"</span>{" "}
+                rendered.
               </div>
               <div className="text-neutral-600">3 hours ago</div>
             </div>
@@ -134,23 +136,41 @@ export function AdminOverviewTab({ stats }: { stats: any }) {
 
         {/* Quick Actions */}
         <div className="bg-[#111115] border border-neutral-800 rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
+          <h3 className="text-lg font-semibold text-white mb-4">
+            Quick Actions
+          </h3>
           <div className="grid grid-cols-2 gap-4">
             <button className="p-4 border border-neutral-800 rounded-lg hover:border-purple-500 hover:bg-purple-500/5 transition-all text-left group">
-              <h4 className="text-neutral-200 font-medium group-hover:text-purple-400 transition-colors">Broadcast Message</h4>
-              <p className="text-sm text-neutral-500 mt-1">Send a global alert to all users</p>
+              <h4 className="text-neutral-200 font-medium group-hover:text-purple-400 transition-colors">
+                Broadcast Message
+              </h4>
+              <p className="text-sm text-neutral-500 mt-1">
+                Send a global alert to all users
+              </p>
             </button>
             <button className="p-4 border border-neutral-800 rounded-lg hover:border-emerald-500 hover:bg-emerald-500/5 transition-all text-left group">
-              <h4 className="text-neutral-200 font-medium group-hover:text-emerald-400 transition-colors">Run Health Check</h4>
-              <p className="text-sm text-neutral-500 mt-1">Diagnose services and database</p>
+              <h4 className="text-neutral-200 font-medium group-hover:text-emerald-400 transition-colors">
+                Run Health Check
+              </h4>
+              <p className="text-sm text-neutral-500 mt-1">
+                Diagnose services and database
+              </p>
             </button>
             <button className="p-4 border border-neutral-800 rounded-lg hover:border-blue-500 hover:bg-blue-500/5 transition-all text-left group">
-              <h4 className="text-neutral-200 font-medium group-hover:text-blue-400 transition-colors">Export Logs</h4>
-              <p className="text-sm text-neutral-500 mt-1">Download recent audit logs as CSV</p>
+              <h4 className="text-neutral-200 font-medium group-hover:text-blue-400 transition-colors">
+                Export Logs
+              </h4>
+              <p className="text-sm text-neutral-500 mt-1">
+                Download recent audit logs as CSV
+              </p>
             </button>
             <button className="p-4 border border-neutral-800 rounded-lg hover:border-rose-500 hover:bg-rose-500/5 transition-all text-left group">
-              <h4 className="text-neutral-200 font-medium group-hover:text-rose-400 transition-colors">Clear Cache</h4>
-              <p className="text-sm text-neutral-500 mt-1">Reset system memory cache</p>
+              <h4 className="text-neutral-200 font-medium group-hover:text-rose-400 transition-colors">
+                Clear Cache
+              </h4>
+              <p className="text-sm text-neutral-500 mt-1">
+                Reset system memory cache
+              </p>
             </button>
           </div>
         </div>

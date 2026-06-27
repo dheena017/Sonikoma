@@ -44,7 +44,14 @@ export default function AdminPage({
   ) => Promise<Response>;
 }) {
   const [activeTab, setActiveTab] = useState<
-    "overview" | "announcements" | "users" | "settings" | "health" | "activity" | "analytics" | "content"
+    | "overview"
+    | "announcements"
+    | "users"
+    | "settings"
+    | "health"
+    | "activity"
+    | "analytics"
+    | "content"
   >("overview");
 
   // Tab: Users
@@ -94,7 +101,9 @@ export default function AdminPage({
   const [projectSearch, setProjectSearch] = useState("");
   const [projectTypeFilter, setProjectTypeFilter] = useState("all");
   const [moderationFilter, setModerationFilter] = useState("all");
-  const [selectedProjects, setSelectedProjects] = useState<Set<string>>(new Set());
+  const [selectedProjects, setSelectedProjects] = useState<Set<string>>(
+    new Set()
+  );
 
   // Modals state
   const [editingUser, setEditingUser] = useState<any | null>(null);
@@ -408,27 +417,27 @@ export default function AdminPage({
     );
   }
 
-  let filteredUsers = users.filter(
-    (u) => {
-      const matchesSearch = (u.full_name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (u.email || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (u.creator_role || "").toLowerCase().includes(searchQuery.toLowerCase());
-      
-      const matchesRole = roleFilter === "all" || (u.creator_role || "user") === roleFilter;
-      const mockStatus = u.credits > 100 ? "active" : "inactive";
-      const matchesStatus = statusFilter === "all" || mockStatus === statusFilter;
-      
-      const mockLastActive = new Date(u.created_at).getTime();
-      const now = Date.now();
-      const diffDays = (now - mockLastActive) / (1000 * 60 * 60 * 24);
-      let matchesActive = true;
-      if (lastActiveFilter === "24h") matchesActive = diffDays <= 1;
-      else if (lastActiveFilter === "7d") matchesActive = diffDays <= 7;
-      else if (lastActiveFilter === "30d") matchesActive = diffDays <= 30;
+  let filteredUsers = users.filter((u) => {
+    const matchesSearch =
+      (u.full_name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (u.email || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (u.creator_role || "").toLowerCase().includes(searchQuery.toLowerCase());
 
-      return matchesSearch && matchesRole && matchesStatus && matchesActive;
-    }
-  );
+    const matchesRole =
+      roleFilter === "all" || (u.creator_role || "user") === roleFilter;
+    const mockStatus = u.credits > 100 ? "active" : "inactive";
+    const matchesStatus = statusFilter === "all" || mockStatus === statusFilter;
+
+    const mockLastActive = new Date(u.created_at).getTime();
+    const now = Date.now();
+    const diffDays = (now - mockLastActive) / (1000 * 60 * 60 * 24);
+    let matchesActive = true;
+    if (lastActiveFilter === "24h") matchesActive = diffDays <= 1;
+    else if (lastActiveFilter === "7d") matchesActive = diffDays <= 7;
+    else if (lastActiveFilter === "30d") matchesActive = diffDays <= 30;
+
+    return matchesSearch && matchesRole && matchesStatus && matchesActive;
+  });
 
   filteredUsers.sort((a, b) => {
     let aVal = a[sortConfig.key];
@@ -558,7 +567,9 @@ export default function AdminPage({
         </div>
 
         {activeTab === "overview" && <AdminOverviewTab stats={stats} />}
-        {activeTab === "announcements" && <AdminAnnouncementsTab fetchWithInterceptor={fetchWithInterceptor} />}
+        {activeTab === "announcements" && (
+          <AdminAnnouncementsTab fetchWithInterceptor={fetchWithInterceptor} />
+        )}
 
         {/* Tab Content: USERS */}
         {activeTab === "users" && (
@@ -575,8 +586,8 @@ export default function AdminPage({
                     className="w-full bg-[#0b0b0e] border border-neutral-800 text-sm text-neutral-200 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:border-purple-500/50"
                   />
                 </div>
-                <select 
-                  value={roleFilter} 
+                <select
+                  value={roleFilter}
                   onChange={(e) => setRoleFilter(e.target.value)}
                   className="bg-[#0b0b0e] border border-neutral-800 text-sm text-neutral-200 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500/50"
                 >
@@ -585,8 +596,8 @@ export default function AdminPage({
                   <option value="pro">Pro</option>
                   <option value="user">User</option>
                 </select>
-                <select 
-                  value={statusFilter} 
+                <select
+                  value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                   className="bg-[#0b0b0e] border border-neutral-800 text-sm text-neutral-200 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500/50"
                 >
@@ -594,8 +605,8 @@ export default function AdminPage({
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
                 </select>
-                <select 
-                  value={lastActiveFilter} 
+                <select
+                  value={lastActiveFilter}
                   onChange={(e) => setLastActiveFilter(e.target.value)}
                   className="bg-[#0b0b0e] border border-neutral-800 text-sm text-neutral-200 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500/50"
                 >
@@ -609,9 +620,16 @@ export default function AdminPage({
                 <p className="text-sm text-neutral-500 font-medium whitespace-nowrap">
                   Showing {filteredUsers.length} users
                 </p>
-                <button 
+                <button
                   onClick={() => {
-                    const csv = "Email,Name,Role,Credits\n" + filteredUsers.map(u => `${u.email},${u.full_name},${u.creator_role},${u.credits}`).join("\n");
+                    const csv =
+                      "Email,Name,Role,Credits\n" +
+                      filteredUsers
+                        .map(
+                          (u) =>
+                            `${u.email},${u.full_name},${u.creator_role},${u.credits}`
+                        )
+                        .join("\n");
                     const blob = new Blob([csv], { type: "text/csv" });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement("a");
@@ -735,14 +753,28 @@ export default function AdminPage({
                                     alt="Avatar"
                                     className="w-8 h-8 rounded-full bg-neutral-800"
                                   />
-                                  <div className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-[#111115] ${u.credits > 100 ? 'bg-emerald-500' : 'bg-neutral-500'}`}></div>
+                                  <div
+                                    className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-[#111115] ${
+                                      u.credits > 100
+                                        ? "bg-emerald-500"
+                                        : "bg-neutral-500"
+                                    }`}
+                                  ></div>
                                 </div>
                               ) : (
                                 <div className="relative">
                                   <div className="w-8 h-8 rounded-full bg-purple-900/50 flex items-center justify-center text-purple-300 font-bold text-xs">
-                                    {u.full_name?.charAt(0) || u.email?.charAt(0) || "?"}
+                                    {u.full_name?.charAt(0) ||
+                                      u.email?.charAt(0) ||
+                                      "?"}
                                   </div>
-                                  <div className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-[#111115] ${u.credits > 100 ? 'bg-emerald-500' : 'bg-neutral-500'}`}></div>
+                                  <div
+                                    className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-[#111115] ${
+                                      u.credits > 100
+                                        ? "bg-emerald-500"
+                                        : "bg-neutral-500"
+                                    }`}
+                                  ></div>
                                 </div>
                               )}
                               <span className="font-medium text-neutral-200">
@@ -883,11 +915,24 @@ export default function AdminPage({
                       </span>
                     </div>
                     <div className="mt-4 w-full bg-neutral-800 rounded-full h-1.5 overflow-hidden">
-                      <div className="bg-purple-500 h-1.5 rounded-full" style={{ width: `${Math.min(((analytics.total_users || 0) / 5000) * 100, 100)}%` }}></div>
+                      <div
+                        className="bg-purple-500 h-1.5 rounded-full"
+                        style={{
+                          width: `${Math.min(
+                            ((analytics.total_users || 0) / 5000) * 100,
+                            100
+                          )}%`,
+                        }}
+                      ></div>
                     </div>
                     <div className="text-xs text-neutral-500 mt-1 flex justify-between">
-                       <span>Server Capacity</span>
-                       <span>{Math.round(((analytics.total_users || 0) / 5000) * 100)}%</span>
+                      <span>Server Capacity</span>
+                      <span>
+                        {Math.round(
+                          ((analytics.total_users || 0) / 5000) * 100
+                        )}
+                        %
+                      </span>
                     </div>
                   </div>
                   <div className="bg-[#111115] border border-neutral-800 rounded-xl p-6 relative overflow-hidden group">
@@ -906,11 +951,24 @@ export default function AdminPage({
                       </span>
                     </div>
                     <div className="mt-4 w-full bg-neutral-800 rounded-full h-1.5 overflow-hidden">
-                      <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: `${Math.min(((analytics.total_credits || 0) / 100000) * 100, 100)}%` }}></div>
+                      <div
+                        className="bg-emerald-500 h-1.5 rounded-full"
+                        style={{
+                          width: `${Math.min(
+                            ((analytics.total_credits || 0) / 100000) * 100,
+                            100
+                          )}%`,
+                        }}
+                      ></div>
                     </div>
                     <div className="text-xs text-neutral-500 mt-1 flex justify-between">
-                       <span>Monthly Allocation Limit</span>
-                       <span>{Math.round(((analytics.total_credits || 0) / 100000) * 100)}%</span>
+                      <span>Monthly Allocation Limit</span>
+                      <span>
+                        {Math.round(
+                          ((analytics.total_credits || 0) / 100000) * 100
+                        )}
+                        %
+                      </span>
                     </div>
                   </div>
                   <div className="bg-[#111115] border border-neutral-800 rounded-xl p-6 relative overflow-hidden group">
@@ -932,11 +990,24 @@ export default function AdminPage({
                       </span>
                     </div>
                     <div className="mt-4 w-full bg-neutral-800 rounded-full h-1.5 overflow-hidden">
-                      <div className="bg-amber-500 h-1.5 rounded-full" style={{ width: `${Math.min(((analytics.total_duration_sec || 0) / 3600) * 100, 100)}%` }}></div>
+                      <div
+                        className="bg-amber-500 h-1.5 rounded-full"
+                        style={{
+                          width: `${Math.min(
+                            ((analytics.total_duration_sec || 0) / 3600) * 100,
+                            100
+                          )}%`,
+                        }}
+                      ></div>
                     </div>
                     <div className="text-xs text-neutral-500 mt-1 flex justify-between">
-                       <span>Compute Quota</span>
-                       <span>{Math.round(((analytics.total_duration_sec || 0) / 3600) * 100)}%</span>
+                      <span>Compute Quota</span>
+                      <span>
+                        {Math.round(
+                          ((analytics.total_duration_sec || 0) / 3600) * 100
+                        )}
+                        %
+                      </span>
                     </div>
                   </div>
                   <div className="bg-[#111115] border border-neutral-800 rounded-xl p-6 relative overflow-hidden group">
@@ -1008,24 +1079,36 @@ export default function AdminPage({
                     <div className="space-y-4">
                       <div className="flex justify-between items-center bg-[#0b0b0e] p-3 rounded-lg border border-neutral-800">
                         <div className="flex items-center gap-3">
-                           <div className="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">1</div>
-                           <span className="text-neutral-200">Alex Johnson</span>
+                          <div className="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">
+                            1
+                          </div>
+                          <span className="text-neutral-200">Alex Johnson</span>
                         </div>
-                        <span className="text-sm font-medium text-purple-400">42 Projects</span>
+                        <span className="text-sm font-medium text-purple-400">
+                          42 Projects
+                        </span>
                       </div>
                       <div className="flex justify-between items-center bg-[#0b0b0e] p-3 rounded-lg border border-neutral-800">
                         <div className="flex items-center gap-3">
-                           <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">2</div>
-                           <span className="text-neutral-200">Maria Garcia</span>
+                          <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">
+                            2
+                          </div>
+                          <span className="text-neutral-200">Maria Garcia</span>
                         </div>
-                        <span className="text-sm font-medium text-blue-400">38 Projects</span>
+                        <span className="text-sm font-medium text-blue-400">
+                          38 Projects
+                        </span>
                       </div>
                       <div className="flex justify-between items-center bg-[#0b0b0e] p-3 rounded-lg border border-neutral-800">
                         <div className="flex items-center gap-3">
-                           <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">3</div>
-                           <span className="text-neutral-200">James Smith</span>
+                          <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+                            3
+                          </div>
+                          <span className="text-neutral-200">James Smith</span>
                         </div>
-                        <span className="text-sm font-medium text-emerald-400">27 Projects</span>
+                        <span className="text-sm font-medium text-emerald-400">
+                          27 Projects
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -1033,20 +1116,33 @@ export default function AdminPage({
                   {/* Average Metrics */}
                   <div className="bg-[#111115] border border-neutral-800 rounded-xl p-6">
                     <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-                      <Activity className="w-5 h-5 text-emerald-400" /> Platform Averages
+                      <Activity className="w-5 h-5 text-emerald-400" /> Platform
+                      Averages
                     </h3>
                     <div className="space-y-4">
                       <div className="flex justify-between items-center p-4 bg-[#0b0b0e] border border-neutral-800 rounded-lg">
-                        <span className="text-neutral-400">Avg Render Time</span>
-                        <span className="font-mono text-white text-lg">2m 14s</span>
+                        <span className="text-neutral-400">
+                          Avg Render Time
+                        </span>
+                        <span className="font-mono text-white text-lg">
+                          2m 14s
+                        </span>
                       </div>
                       <div className="flex justify-between items-center p-4 bg-[#0b0b0e] border border-neutral-800 rounded-lg">
-                        <span className="text-neutral-400">Avg Scenes per Project</span>
-                        <span className="font-mono text-white text-lg">12.5</span>
+                        <span className="text-neutral-400">
+                          Avg Scenes per Project
+                        </span>
+                        <span className="font-mono text-white text-lg">
+                          12.5
+                        </span>
                       </div>
                       <div className="flex justify-between items-center p-4 bg-[#0b0b0e] border border-neutral-800 rounded-lg">
-                        <span className="text-neutral-400">Avg Credit Spend / User</span>
-                        <span className="font-mono text-white text-lg">450</span>
+                        <span className="text-neutral-400">
+                          Avg Credit Spend / User
+                        </span>
+                        <span className="font-mono text-white text-lg">
+                          450
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -1054,23 +1150,44 @@ export default function AdminPage({
                   {/* Revenue Mock */}
                   <div className="bg-[#111115] border border-neutral-800 rounded-xl p-6 lg:col-span-2">
                     <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5 text-amber-400" /> Revenue & Subscriptions (Mock)
+                      <TrendingUp className="w-5 h-5 text-amber-400" /> Revenue
+                      & Subscriptions (Mock)
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div className="p-4 bg-[#0b0b0e] border border-neutral-800 rounded-lg border-l-2 border-l-emerald-500">
-                        <div className="text-neutral-400 text-sm mb-1">Monthly Recurring Revenue</div>
-                        <div className="text-2xl font-bold text-white">${(analytics.mrr || 0).toLocaleString()}</div>
-                        <div className="text-xs text-emerald-400 mt-1">+15% from last month</div>
+                        <div className="text-neutral-400 text-sm mb-1">
+                          Monthly Recurring Revenue
+                        </div>
+                        <div className="text-2xl font-bold text-white">
+                          ${(analytics.mrr || 0).toLocaleString()}
+                        </div>
+                        <div className="text-xs text-emerald-400 mt-1">
+                          +15% from last month
+                        </div>
                       </div>
                       <div className="p-4 bg-[#0b0b0e] border border-neutral-800 rounded-lg border-l-2 border-l-purple-500">
-                        <div className="text-neutral-400 text-sm mb-1">Active Subscriptions</div>
-                        <div className="text-2xl font-bold text-white">{(analytics.active_subscriptions || 0).toLocaleString()}</div>
-                        <div className="text-xs text-emerald-400 mt-1">+42 new this week</div>
+                        <div className="text-neutral-400 text-sm mb-1">
+                          Active Subscriptions
+                        </div>
+                        <div className="text-2xl font-bold text-white">
+                          {(
+                            analytics.active_subscriptions || 0
+                          ).toLocaleString()}
+                        </div>
+                        <div className="text-xs text-emerald-400 mt-1">
+                          +42 new this week
+                        </div>
                       </div>
                       <div className="p-4 bg-[#0b0b0e] border border-neutral-800 rounded-lg border-l-2 border-l-rose-500">
-                        <div className="text-neutral-400 text-sm mb-1">Churn Rate</div>
-                        <div className="text-2xl font-bold text-white">{analytics.churn_rate || '0'}%</div>
-                        <div className="text-xs text-rose-400 mt-1">Slight increase</div>
+                        <div className="text-neutral-400 text-sm mb-1">
+                          Churn Rate
+                        </div>
+                        <div className="text-2xl font-bold text-white">
+                          {analytics.churn_rate || "0"}%
+                        </div>
+                        <div className="text-xs text-rose-400 mt-1">
+                          Slight increase
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1081,193 +1198,223 @@ export default function AdminPage({
         )}
 
         {/* Tab Content: CONTENT MODERATION */}
-        {activeTab === "content" && (() => {
-          const filteredProjects = projects.filter(p => {
-            const matchesSearch = (p.title || "").toLowerCase().includes(projectSearch.toLowerCase()) ||
-              (p.user_email || "").toLowerCase().includes(projectSearch.toLowerCase());
-            
-            const mockType = (p.id.length % 3 === 0) ? "video" : (p.id.length % 2 === 0) ? "audio" : "image";
-            const matchesType = projectTypeFilter === "all" || mockType === projectTypeFilter;
-            
-            const isFlagged = p.id.includes("1") || p.id.includes("a");
-            const matchesMod = moderationFilter === "all" || (moderationFilter === "flagged" && isFlagged) || (moderationFilter === "clean" && !isFlagged);
-            
-            return matchesSearch && matchesType && matchesMod;
-          });
+        {activeTab === "content" &&
+          (() => {
+            const filteredProjects = projects.filter((p) => {
+              const matchesSearch =
+                (p.title || "")
+                  .toLowerCase()
+                  .includes(projectSearch.toLowerCase()) ||
+                (p.user_email || "")
+                  .toLowerCase()
+                  .includes(projectSearch.toLowerCase());
 
-          return (
-          <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#111115] border border-neutral-800 rounded-xl p-4">
-              <div className="flex-1 flex flex-col sm:flex-row gap-4 w-full">
-                <div className="relative w-full sm:max-w-md">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
-                  <input
-                    type="text"
-                    placeholder="Search projects by title or creator..."
-                    value={projectSearch}
-                    onChange={(e) => setProjectSearch(e.target.value)}
-                    className="w-full bg-[#0b0b0e] border border-neutral-800 text-sm text-neutral-200 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:border-purple-500/50"
-                  />
+              const mockType =
+                p.id.length % 3 === 0
+                  ? "video"
+                  : p.id.length % 2 === 0
+                  ? "audio"
+                  : "image";
+              const matchesType =
+                projectTypeFilter === "all" || mockType === projectTypeFilter;
+
+              const isFlagged = p.id.includes("1") || p.id.includes("a");
+              const matchesMod =
+                moderationFilter === "all" ||
+                (moderationFilter === "flagged" && isFlagged) ||
+                (moderationFilter === "clean" && !isFlagged);
+
+              return matchesSearch && matchesType && matchesMod;
+            });
+
+            return (
+              <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#111115] border border-neutral-800 rounded-xl p-4">
+                  <div className="flex-1 flex flex-col sm:flex-row gap-4 w-full">
+                    <div className="relative w-full sm:max-w-md">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                      <input
+                        type="text"
+                        placeholder="Search projects by title or creator..."
+                        value={projectSearch}
+                        onChange={(e) => setProjectSearch(e.target.value)}
+                        className="w-full bg-[#0b0b0e] border border-neutral-800 text-sm text-neutral-200 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:border-purple-500/50"
+                      />
+                    </div>
+                    <select
+                      value={projectTypeFilter}
+                      onChange={(e) => setProjectTypeFilter(e.target.value)}
+                      className="bg-[#0b0b0e] border border-neutral-800 text-sm text-neutral-200 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500/50"
+                    >
+                      <option value="all">All Content Types</option>
+                      <option value="video">Video</option>
+                      <option value="audio">Audio</option>
+                      <option value="image">Image</option>
+                    </select>
+                    <select
+                      value={moderationFilter}
+                      onChange={(e) => setModerationFilter(e.target.value)}
+                      className="bg-[#0b0b0e] border border-neutral-800 text-sm text-neutral-200 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500/50"
+                    >
+                      <option value="all">All Moderation Status</option>
+                      <option value="clean">Clean</option>
+                      <option value="flagged">Flagged</option>
+                    </select>
+                  </div>
+                  <p className="text-sm text-neutral-500 font-medium">
+                    Showing {filteredProjects.length} projects
+                  </p>
                 </div>
-                <select 
-                  value={projectTypeFilter} 
-                  onChange={(e) => setProjectTypeFilter(e.target.value)}
-                  className="bg-[#0b0b0e] border border-neutral-800 text-sm text-neutral-200 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500/50"
-                >
-                  <option value="all">All Content Types</option>
-                  <option value="video">Video</option>
-                  <option value="audio">Audio</option>
-                  <option value="image">Image</option>
-                </select>
-                <select 
-                  value={moderationFilter} 
-                  onChange={(e) => setModerationFilter(e.target.value)}
-                  className="bg-[#0b0b0e] border border-neutral-800 text-sm text-neutral-200 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500/50"
-                >
-                  <option value="all">All Moderation Status</option>
-                  <option value="clean">Clean</option>
-                  <option value="flagged">Flagged</option>
-                </select>
-              </div>
-              <p className="text-sm text-neutral-500 font-medium">
-                Showing {filteredProjects.length} projects
-              </p>
-            </div>
 
-            <div className="bg-[#111115] border border-neutral-800 rounded-xl overflow-hidden shadow-xl">
-              <div className="p-4 border-b border-neutral-800 flex justify-between items-center bg-[#0b0b0e]">
-                <h2 className="font-bold text-white flex items-center gap-2">
-                  <FolderGit2 className="w-4 h-4 text-blue-400" /> Global
-                  Project Registry
-                </h2>
-                <button
-                  onClick={fetchProjects}
-                  className="text-xs text-neutral-400 hover:text-white transition-colors flex items-center gap-1"
-                >
-                  <ActivitySquare className="w-3 h-3" /> Refresh
-                </button>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm whitespace-nowrap">
-                  <thead className="bg-[#0b0b0e] text-neutral-400 border-b border-neutral-800 text-xs uppercase font-semibold">
-                    <tr>
-                      <th className="px-4 py-4 w-10">
-                        <button
-                          onClick={() => {
-                            if (selectedProjects.size === filteredProjects.length) setSelectedProjects(new Set());
-                            else setSelectedProjects(new Set(filteredProjects.map(p => p.id)));
-                          }}
-                          className="hover:text-white transition-colors"
-                        >
-                          {selectedProjects.size === filteredProjects.length && filteredProjects.length > 0 ? (
-                            <CheckSquare className="w-4 h-4 text-purple-400" />
-                          ) : (
-                            <Square className="w-4 h-4" />
-                          )}
-                        </button>
-                      </th>
-                      <th className="px-6 py-4">Project ID</th>
-                      <th className="px-6 py-4">Title</th>
-                      <th className="px-6 py-4">Creator</th>
-                      <th className="px-6 py-4">Created At</th>
-                      <th className="px-6 py-4 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-neutral-800/50">
-                    {loadingProjects ? (
-                      <tr>
-                        <td
-                          colSpan={6}
-                          className="px-6 py-12 text-center text-neutral-500"
-                        >
-                          Loading projects...
-                        </td>
-                      </tr>
-                    ) : filteredProjects.length === 0 ? (
-                      <tr>
-                        <td
-                          colSpan={6}
-                          className="px-6 py-12 text-center text-neutral-500"
-                        >
-                          No projects found.
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredProjects.map((p) => (
-                        <tr
-                          key={p.id}
-                          className={`hover:bg-white/[0.02] transition-colors ${
-                            selectedProjects.has(p.id) ? "bg-purple-500/5" : ""
-                          }`}
-                        >
-                          <td className="px-4 py-4">
+                <div className="bg-[#111115] border border-neutral-800 rounded-xl overflow-hidden shadow-xl">
+                  <div className="p-4 border-b border-neutral-800 flex justify-between items-center bg-[#0b0b0e]">
+                    <h2 className="font-bold text-white flex items-center gap-2">
+                      <FolderGit2 className="w-4 h-4 text-blue-400" /> Global
+                      Project Registry
+                    </h2>
+                    <button
+                      onClick={fetchProjects}
+                      className="text-xs text-neutral-400 hover:text-white transition-colors flex items-center gap-1"
+                    >
+                      <ActivitySquare className="w-3 h-3" /> Refresh
+                    </button>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm whitespace-nowrap">
+                      <thead className="bg-[#0b0b0e] text-neutral-400 border-b border-neutral-800 text-xs uppercase font-semibold">
+                        <tr>
+                          <th className="px-4 py-4 w-10">
                             <button
                               onClick={() => {
-                                const next = new Set(selectedProjects);
-                                if (next.has(p.id)) next.delete(p.id);
-                                else next.add(p.id);
-                                setSelectedProjects(next);
+                                if (
+                                  selectedProjects.size ===
+                                  filteredProjects.length
+                                )
+                                  setSelectedProjects(new Set());
+                                else
+                                  setSelectedProjects(
+                                    new Set(filteredProjects.map((p) => p.id))
+                                  );
                               }}
-                              className="text-neutral-500 hover:text-white"
+                              className="hover:text-white transition-colors"
                             >
-                              {selectedProjects.has(p.id) ? (
+                              {selectedProjects.size ===
+                                filteredProjects.length &&
+                              filteredProjects.length > 0 ? (
                                 <CheckSquare className="w-4 h-4 text-purple-400" />
                               ) : (
                                 <Square className="w-4 h-4" />
                               )}
                             </button>
-                          </td>
-                          <td className="px-6 py-4 text-neutral-500 font-mono text-xs">
-                            {p.id.substring(0, 8)}...
-                          </td>
-                          <td className="px-6 py-4 font-medium text-neutral-200">
-                            {p.title || "Untitled Project"}
-                          </td>
-                          <td className="px-6 py-4 text-neutral-400">
-                            {p.user_email || "Unknown User"}
-                          </td>
-                          <td className="px-6 py-4 text-neutral-500 font-mono text-xs">
-                            {new Date(p.created_at).toLocaleDateString()}
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <button
-                              onClick={() => handleDeleteProject(p.id)}
-                              className="p-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 rounded-md border border-rose-500/20 transition-colors"
-                              title="Delete Project"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </td>
+                          </th>
+                          <th className="px-6 py-4">Project ID</th>
+                          <th className="px-6 py-4">Title</th>
+                          <th className="px-6 py-4">Creator</th>
+                          <th className="px-6 py-4">Created At</th>
+                          <th className="px-6 py-4 text-right">Actions</th>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            {selectedProjects.size > 0 && (
-              <div className="fixed bottom-0 left-0 right-0 p-4 flex justify-center z-40 animate-[slideUp_0.3s_ease-out]">
-                <div className="bg-[#1a1a24] border border-rose-500/30 shadow-[0_0_40px_rgba(244,63,94,0.15)] rounded-full px-6 py-3 flex items-center gap-6">
-                  <span className="text-sm font-semibold text-white">
-                    {selectedProjects.size} projects selected
-                  </span>
-                  <div className="h-4 w-[1px] bg-neutral-700" />
-                  <button
-                    onClick={async () => {
-                      if(await (window as any).confirmAsync('Delete selected projects?')) {
-                        setSelectedProjects(new Set());
-                      }
-                    }}
-                    className="text-xs font-medium px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-md transition-colors flex items-center gap-2"
-                  >
-                    <Trash2 className="w-3 h-3" /> Bulk Delete
-                  </button>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-800/50">
+                        {loadingProjects ? (
+                          <tr>
+                            <td
+                              colSpan={6}
+                              className="px-6 py-12 text-center text-neutral-500"
+                            >
+                              Loading projects...
+                            </td>
+                          </tr>
+                        ) : filteredProjects.length === 0 ? (
+                          <tr>
+                            <td
+                              colSpan={6}
+                              className="px-6 py-12 text-center text-neutral-500"
+                            >
+                              No projects found.
+                            </td>
+                          </tr>
+                        ) : (
+                          filteredProjects.map((p) => (
+                            <tr
+                              key={p.id}
+                              className={`hover:bg-white/[0.02] transition-colors ${
+                                selectedProjects.has(p.id)
+                                  ? "bg-purple-500/5"
+                                  : ""
+                              }`}
+                            >
+                              <td className="px-4 py-4">
+                                <button
+                                  onClick={() => {
+                                    const next = new Set(selectedProjects);
+                                    if (next.has(p.id)) next.delete(p.id);
+                                    else next.add(p.id);
+                                    setSelectedProjects(next);
+                                  }}
+                                  className="text-neutral-500 hover:text-white"
+                                >
+                                  {selectedProjects.has(p.id) ? (
+                                    <CheckSquare className="w-4 h-4 text-purple-400" />
+                                  ) : (
+                                    <Square className="w-4 h-4" />
+                                  )}
+                                </button>
+                              </td>
+                              <td className="px-6 py-4 text-neutral-500 font-mono text-xs">
+                                {p.id.substring(0, 8)}...
+                              </td>
+                              <td className="px-6 py-4 font-medium text-neutral-200">
+                                {p.title || "Untitled Project"}
+                              </td>
+                              <td className="px-6 py-4 text-neutral-400">
+                                {p.user_email || "Unknown User"}
+                              </td>
+                              <td className="px-6 py-4 text-neutral-500 font-mono text-xs">
+                                {new Date(p.created_at).toLocaleDateString()}
+                              </td>
+                              <td className="px-6 py-4 text-right">
+                                <button
+                                  onClick={() => handleDeleteProject(p.id)}
+                                  className="p-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 rounded-md border border-rose-500/20 transition-colors"
+                                  title="Delete Project"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
+                {selectedProjects.size > 0 && (
+                  <div className="fixed bottom-0 left-0 right-0 p-4 flex justify-center z-40 animate-[slideUp_0.3s_ease-out]">
+                    <div className="bg-[#1a1a24] border border-rose-500/30 shadow-[0_0_40px_rgba(244,63,94,0.15)] rounded-full px-6 py-3 flex items-center gap-6">
+                      <span className="text-sm font-semibold text-white">
+                        {selectedProjects.size} projects selected
+                      </span>
+                      <div className="h-4 w-[1px] bg-neutral-700" />
+                      <button
+                        onClick={async () => {
+                          if (
+                            await (window as any).confirmAsync(
+                              "Delete selected projects?"
+                            )
+                          ) {
+                            setSelectedProjects(new Set());
+                          }
+                        }}
+                        className="text-xs font-medium px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-md transition-colors flex items-center gap-2"
+                      >
+                        <Trash2 className="w-3 h-3" /> Bulk Delete
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-          );
-        })()}
+            );
+          })()}
 
         {/* Tab Content: SETTINGS */}
         {activeTab === "settings" && (
@@ -1383,7 +1530,8 @@ export default function AdminPage({
                       Enable Beta Features
                     </h3>
                     <p className="text-xs text-neutral-500 mt-1">
-                      Allows users to access experimental AI models and advanced crop tools.
+                      Allows users to access experimental AI models and advanced
+                      crop tools.
                     </p>
                   </div>
                   <button
@@ -1391,9 +1539,7 @@ export default function AdminPage({
                       setSettings({
                         ...settings,
                         enable_beta:
-                          settings.enable_beta === "true"
-                            ? "false"
-                            : "true",
+                          settings.enable_beta === "true" ? "false" : "true",
                       })
                     }
                     className={`p-1 rounded-full transition-colors ${
@@ -1416,76 +1562,163 @@ export default function AdminPage({
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-medium text-neutral-400 mb-1">Max Upload Size (MB)</label>
-                      <input type="number" defaultValue={50} className="w-full bg-[#111115] border border-neutral-700 text-sm text-white rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500/50" />
+                      <label className="block text-xs font-medium text-neutral-400 mb-1">
+                        Max Upload Size (MB)
+                      </label>
+                      <input
+                        type="number"
+                        defaultValue={50}
+                        className="w-full bg-[#111115] border border-neutral-700 text-sm text-white rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500/50"
+                      />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-neutral-400 mb-1">Max Scenes per Project</label>
-                      <input type="number" defaultValue={100} className="w-full bg-[#111115] border border-neutral-700 text-sm text-white rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500/50" />
+                      <label className="block text-xs font-medium text-neutral-400 mb-1">
+                        Max Scenes per Project
+                      </label>
+                      <input
+                        type="number"
+                        defaultValue={100}
+                        className="w-full bg-[#111115] border border-neutral-700 text-sm text-white rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500/50"
+                      />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-neutral-400 mb-1">Default Starting Credits</label>
-                      <input type="number" defaultValue={200} className="w-full bg-[#111115] border border-neutral-700 text-sm text-white rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500/50" />
+                      <label className="block text-xs font-medium text-neutral-400 mb-1">
+                        Default Starting Credits
+                      </label>
+                      <input
+                        type="number"
+                        defaultValue={200}
+                        className="w-full bg-[#111115] border border-neutral-700 text-sm text-white rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500/50"
+                      />
                     </div>
                   </div>
                 </div>
 
                 <div className="p-4 border border-neutral-800 rounded-lg bg-[#0b0b0e] space-y-4">
                   <h3 className="font-semibold text-neutral-200 border-b border-neutral-800 pb-2 flex items-center gap-2">
-                    <Mail className="w-4 h-4 text-purple-400" /> SMTP Email Configuration
+                    <Mail className="w-4 h-4 text-purple-400" /> SMTP Email
+                    Configuration
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="sm:col-span-2">
-                      <label className="block text-xs font-medium text-neutral-400 mb-1">SMTP Host</label>
-                      <input type="text" placeholder="smtp.mailgun.org" className="w-full bg-[#111115] border border-neutral-700 text-sm text-white rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500/50" />
+                      <label className="block text-xs font-medium text-neutral-400 mb-1">
+                        SMTP Host
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="smtp.mailgun.org"
+                        className="w-full bg-[#111115] border border-neutral-700 text-sm text-white rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500/50"
+                      />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-neutral-400 mb-1">SMTP Port</label>
-                      <input type="text" placeholder="587" className="w-full bg-[#111115] border border-neutral-700 text-sm text-white rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500/50" />
+                      <label className="block text-xs font-medium text-neutral-400 mb-1">
+                        SMTP Port
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="587"
+                        className="w-full bg-[#111115] border border-neutral-700 text-sm text-white rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500/50"
+                      />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-neutral-400 mb-1">SMTP User</label>
-                      <input type="text" placeholder="postmaster@domain.com" className="w-full bg-[#111115] border border-neutral-700 text-sm text-white rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500/50" />
+                      <label className="block text-xs font-medium text-neutral-400 mb-1">
+                        SMTP User
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="postmaster@domain.com"
+                        className="w-full bg-[#111115] border border-neutral-700 text-sm text-white rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500/50"
+                      />
                     </div>
                   </div>
                 </div>
 
                 <div className="p-4 border border-neutral-800 rounded-lg bg-[#0b0b0e] space-y-4">
                   <h3 className="font-semibold text-neutral-200 border-b border-neutral-800 pb-2 flex items-center gap-2">
-                    <ShieldAlert className="w-4 h-4 text-rose-400" /> Security Policies
+                    <ShieldAlert className="w-4 h-4 text-rose-400" /> Security
+                    Policies
                   </h3>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <div className="text-sm text-neutral-300 font-medium">Enforce 2FA for Admins</div>
-                        <div className="text-xs text-neutral-500">Requires all admin accounts to use two-factor authentication.</div>
+                        <div className="text-sm text-neutral-300 font-medium">
+                          Enforce 2FA for Admins
+                        </div>
+                        <div className="text-xs text-neutral-500">
+                          Requires all admin accounts to use two-factor
+                          authentication.
+                        </div>
                       </div>
-                      <button 
-                        onClick={() => setSettings({...settings, enforce_2fa: settings.enforce_2fa === "true" ? "false" : "true"})}
-                        className={`p-1 rounded-full ${settings.enforce_2fa === "true" ? "text-purple-500" : "text-neutral-600"}`}
+                      <button
+                        onClick={() =>
+                          setSettings({
+                            ...settings,
+                            enforce_2fa:
+                              settings.enforce_2fa === "true"
+                                ? "false"
+                                : "true",
+                          })
+                        }
+                        className={`p-1 rounded-full ${
+                          settings.enforce_2fa === "true"
+                            ? "text-purple-500"
+                            : "text-neutral-600"
+                        }`}
                       >
-                        {settings.enforce_2fa === "true" ? <ToggleRight className="w-8 h-8" /> : <ToggleLeft className="w-8 h-8" />}
+                        {settings.enforce_2fa === "true" ? (
+                          <ToggleRight className="w-8 h-8" />
+                        ) : (
+                          <ToggleLeft className="w-8 h-8" />
+                        )}
                       </button>
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
-                        <div className="text-sm text-neutral-300 font-medium">Strict IP Binding</div>
-                        <div className="text-xs text-neutral-500">Invalidate sessions if the IP address changes suddenly.</div>
+                        <div className="text-sm text-neutral-300 font-medium">
+                          Strict IP Binding
+                        </div>
+                        <div className="text-xs text-neutral-500">
+                          Invalidate sessions if the IP address changes
+                          suddenly.
+                        </div>
                       </div>
-                      <button 
-                        onClick={() => setSettings({...settings, strict_ip_binding: settings.strict_ip_binding === "true" ? "false" : "true"})}
-                        className={`p-1 rounded-full ${settings.strict_ip_binding === "true" ? "text-purple-500" : "text-neutral-600"}`}
+                      <button
+                        onClick={() =>
+                          setSettings({
+                            ...settings,
+                            strict_ip_binding:
+                              settings.strict_ip_binding === "true"
+                                ? "false"
+                                : "true",
+                          })
+                        }
+                        className={`p-1 rounded-full ${
+                          settings.strict_ip_binding === "true"
+                            ? "text-purple-500"
+                            : "text-neutral-600"
+                        }`}
                       >
-                        {settings.strict_ip_binding === "true" ? <ToggleRight className="w-8 h-8" /> : <ToggleLeft className="w-8 h-8" />}
+                        {settings.strict_ip_binding === "true" ? (
+                          <ToggleRight className="w-8 h-8" />
+                        ) : (
+                          <ToggleLeft className="w-8 h-8" />
+                        )}
                       </button>
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-neutral-400 mb-1">Session Timeout (minutes)</label>
-                      <input 
-                        type="number" 
-                        value={settings.session_timeout || "120"} 
-                        onChange={(e) => setSettings({...settings, session_timeout: e.target.value})}
-                        className="w-full sm:max-w-xs bg-[#111115] border border-neutral-700 text-sm text-white rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500/50" 
+                      <label className="block text-xs font-medium text-neutral-400 mb-1">
+                        Session Timeout (minutes)
+                      </label>
+                      <input
+                        type="number"
+                        value={settings.session_timeout || "120"}
+                        onChange={(e) =>
+                          setSettings({
+                            ...settings,
+                            session_timeout: e.target.value,
+                          })
+                        }
+                        className="w-full sm:max-w-xs bg-[#111115] border border-neutral-700 text-sm text-white rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500/50"
                       />
                     </div>
                   </div>
@@ -1493,20 +1726,36 @@ export default function AdminPage({
 
                 <div className="p-4 border border-neutral-800 rounded-lg bg-[#0b0b0e] space-y-4">
                   <h3 className="font-semibold text-neutral-200 border-b border-neutral-800 pb-2 flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-blue-400" /> Webhook Configuration
+                    <Activity className="w-4 h-4 text-blue-400" /> Webhook
+                    Configuration
                   </h3>
                   <div>
-                    <label className="block text-xs font-medium text-neutral-400 mb-1">System Events Webhook URL</label>
+                    <label className="block text-xs font-medium text-neutral-400 mb-1">
+                      System Events Webhook URL
+                    </label>
                     <div className="flex gap-2">
-                      <input 
-                        type="url" 
-                        value={settings.webhookUrl || "https://api.sonikoma.com/webhooks"} 
-                        onChange={(e) => setSettings({...settings, webhookUrl: e.target.value})}
-                        className="flex-1 bg-[#111115] border border-neutral-700 text-sm text-white rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500/50" 
+                      <input
+                        type="url"
+                        value={
+                          settings.webhookUrl ||
+                          "https://api.sonikoma.com/webhooks"
+                        }
+                        onChange={(e) =>
+                          setSettings({
+                            ...settings,
+                            webhookUrl: e.target.value,
+                          })
+                        }
+                        className="flex-1 bg-[#111115] border border-neutral-700 text-sm text-white rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500/50"
                       />
-                      <button className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded-lg text-sm font-medium transition-colors">Test</button>
+                      <button className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded-lg text-sm font-medium transition-colors">
+                        Test
+                      </button>
                     </div>
-                    <p className="text-xs text-neutral-500 mt-2">Fires on user creation, project rendering, and high severity errors.</p>
+                    <p className="text-xs text-neutral-500 mt-2">
+                      Fires on user creation, project rendering, and high
+                      severity errors.
+                    </p>
                   </div>
                 </div>
 
@@ -1563,7 +1812,8 @@ export default function AdminPage({
               <div className="bg-[#111115] border border-emerald-500/20 rounded-xl p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-bold text-white flex items-center gap-2">
-                    <ActivitySquare className="w-4 h-4 text-emerald-400" /> Real-time Traffic
+                    <ActivitySquare className="w-4 h-4 text-emerald-400" />{" "}
+                    Real-time Traffic
                   </h3>
                   <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded">
                     LIVE
@@ -1572,7 +1822,9 @@ export default function AdminPage({
                 <div className="space-y-4">
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-neutral-400">Active WebSocket:</span>
-                    <span className="font-mono text-emerald-400 font-bold">142</span>
+                    <span className="font-mono text-emerald-400 font-bold">
+                      142
+                    </span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-neutral-400">Requests / Sec:</span>
@@ -1583,9 +1835,15 @@ export default function AdminPage({
                     <span className="font-mono text-white">0.02%</span>
                   </div>
                   <div className="h-12 flex items-end gap-1 mt-2">
-                     {[12, 15, 14, 20, 45, 30, 22, 18, 25, 40, 15, 20].map((v, i) => (
-                       <div key={i} className="flex-1 bg-emerald-500/20 rounded-t-sm" style={{ height: `${(v/45)*100}%` }}></div>
-                     ))}
+                    {[12, 15, 14, 20, 45, 30, 22, 18, 25, 40, 15, 20].map(
+                      (v, i) => (
+                        <div
+                          key={i}
+                          className="flex-1 bg-emerald-500/20 rounded-t-sm"
+                          style={{ height: `${(v / 45) * 100}%` }}
+                        ></div>
+                      )
+                    )}
                   </div>
                 </div>
               </div>
@@ -1656,7 +1914,8 @@ export default function AdminPage({
               {/* System Memory */}
               <div className="bg-[#111115] border border-neutral-800 rounded-xl p-6">
                 <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-                  <ActivitySquare className="w-5 h-5 text-amber-400" /> System Memory
+                  <ActivitySquare className="w-5 h-5 text-amber-400" /> System
+                  Memory
                 </h3>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
@@ -1683,7 +1942,8 @@ export default function AdminPage({
               {/* Background Services */}
               <div className="bg-[#111115] border border-neutral-800 rounded-xl p-6">
                 <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-                  <Settings className="w-5 h-5 text-indigo-400" /> Background Services
+                  <Settings className="w-5 h-5 text-indigo-400" /> Background
+                  Services
                 </h3>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
@@ -1717,150 +1977,173 @@ export default function AdminPage({
         )}
 
         {/* Tab Content: ACTIVITY */}
-        {activeTab === "activity" && (() => {
-          const filteredLogs = globalLogs.filter((log) => {
-            const matchesSearch = (log.action || "").toLowerCase().includes(logSearch.toLowerCase()) || (log.user_email || "").toLowerCase().includes(logSearch.toLowerCase());
-            const matchesSeverity = logSeverityFilter === "all" || (log.status || "info").toLowerCase() === logSeverityFilter;
-            const matchesIp = !logIpFilter || (log.ip_address || "").includes(logIpFilter);
-            return matchesSearch && matchesSeverity && matchesIp;
-          });
-          
-          return (
-          <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#111115] border border-neutral-800 rounded-xl p-4">
-              <div className="flex-1 flex flex-col sm:flex-row gap-4 w-full">
-                <div className="relative w-full sm:max-w-md">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
-                  <input
-                    type="text"
-                    placeholder="Search logs by action or user..."
-                    value={logSearch}
-                    onChange={(e) => setLogSearch(e.target.value)}
-                    className="w-full bg-[#0b0b0e] border border-neutral-800 text-sm text-neutral-200 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:border-purple-500/50"
-                  />
-                </div>
-                <select 
-                  value={logSeverityFilter} 
-                  onChange={(e) => setLogSeverityFilter(e.target.value)}
-                  className="bg-[#0b0b0e] border border-neutral-800 text-sm text-neutral-200 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500/50"
-                >
-                  <option value="all">All Severities</option>
-                  <option value="info">Info</option>
-                  <option value="success">Success</option>
-                  <option value="warn">Warning</option>
-                  <option value="error">Error</option>
-                </select>
-                <input
-                  type="text"
-                  placeholder="Filter by IP..."
-                  value={logIpFilter}
-                  onChange={(e) => setLogIpFilter(e.target.value)}
-                  className="w-full sm:w-32 bg-[#0b0b0e] border border-neutral-800 text-sm text-neutral-200 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500/50"
-                />
-              </div>
-              <div className="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-end">
-                <p className="text-sm text-neutral-500 font-medium whitespace-nowrap">
-                  Showing {filteredLogs.length} logs
-                </p>
-                <button 
-                  onClick={() => {
-                    const csv = "Time,User,Action,IP,Status\n" + filteredLogs.map(l => `"${new Date(l.created_at).toLocaleString()}","${l.user_email || 'System'}","${l.action}","${l.ip_address || ''}","${l.status || 'info'}"`).join("\n");
-                    const blob = new Blob([csv], { type: "text/csv" });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = "activity_logs.csv";
-                    a.click();
-                  }}
-                  className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded-lg text-sm font-medium transition-colors"
-                >
-                  Export CSV
-                </button>
-              </div>
-            </div>
+        {activeTab === "activity" &&
+          (() => {
+            const filteredLogs = globalLogs.filter((log) => {
+              const matchesSearch =
+                (log.action || "")
+                  .toLowerCase()
+                  .includes(logSearch.toLowerCase()) ||
+                (log.user_email || "")
+                  .toLowerCase()
+                  .includes(logSearch.toLowerCase());
+              const matchesSeverity =
+                logSeverityFilter === "all" ||
+                (log.status || "info").toLowerCase() === logSeverityFilter;
+              const matchesIp =
+                !logIpFilter || (log.ip_address || "").includes(logIpFilter);
+              return matchesSearch && matchesSeverity && matchesIp;
+            });
 
-            <div className="bg-[#111115] border border-neutral-800 rounded-xl overflow-hidden shadow-xl">
-              <div className="p-4 border-b border-neutral-800 flex justify-between items-center bg-[#0b0b0e]">
-                <h2 className="font-bold text-white flex items-center gap-2">
-                  <History className="w-4 h-4 text-blue-400" /> Global Activity
-                  Feed
-                </h2>
-                <button
-                  onClick={fetchGlobalLogs}
-                  className="text-xs text-neutral-400 hover:text-white transition-colors flex items-center gap-1"
-                >
-                  <ActivitySquare className="w-3 h-3" /> Refresh
-                </button>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm whitespace-nowrap">
-                  <thead className="bg-[#0b0b0e] text-neutral-400 border-b border-neutral-800 text-xs uppercase font-semibold">
-                    <tr>
-                      <th className="px-6 py-4">Time</th>
-                      <th className="px-6 py-4">User</th>
-                      <th className="px-6 py-4">Action</th>
-                      <th className="px-6 py-4">IP Address</th>
-                      <th className="px-6 py-4">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-neutral-800/50">
-                    {loadingGlobalLogs ? (
-                      <tr>
-                        <td
-                          colSpan={5}
-                          className="px-6 py-12 text-center text-neutral-500"
-                        >
-                          Loading logs...
-                        </td>
-                      </tr>
-                    ) : filteredLogs.length === 0 ? (
-                      <tr>
-                        <td
-                          colSpan={5}
-                          className="px-6 py-12 text-center text-neutral-500"
-                        >
-                          No activity logs match your filters.
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredLogs.map((log) => (
-                        <tr
-                          key={log.id}
-                          className="hover:bg-white/[0.02] transition-colors"
-                        >
-                          <td className="px-6 py-3 text-neutral-500 font-mono text-xs">
-                            {new Date(log.created_at).toLocaleString()}
-                          </td>
-                          <td className="px-6 py-3 font-medium text-neutral-300">
-                            {log.email || "Unknown"}
-                          </td>
-                          <td className="px-6 py-3 text-neutral-200">
-                            {log.action}
-                          </td>
-                          <td className="px-6 py-3 text-neutral-500 font-mono text-xs">
-                            {log.ip_address}
-                          </td>
-                          <td className="px-6 py-3">
-                            <span
-                              className={
-                                log.status === "Success"
-                                  ? "text-emerald-400"
-                                  : "text-rose-400"
-                              }
-                            >
-                              {log.status}
-                            </span>
-                          </td>
+            return (
+              <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#111115] border border-neutral-800 rounded-xl p-4">
+                  <div className="flex-1 flex flex-col sm:flex-row gap-4 w-full">
+                    <div className="relative w-full sm:max-w-md">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                      <input
+                        type="text"
+                        placeholder="Search logs by action or user..."
+                        value={logSearch}
+                        onChange={(e) => setLogSearch(e.target.value)}
+                        className="w-full bg-[#0b0b0e] border border-neutral-800 text-sm text-neutral-200 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:border-purple-500/50"
+                      />
+                    </div>
+                    <select
+                      value={logSeverityFilter}
+                      onChange={(e) => setLogSeverityFilter(e.target.value)}
+                      className="bg-[#0b0b0e] border border-neutral-800 text-sm text-neutral-200 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500/50"
+                    >
+                      <option value="all">All Severities</option>
+                      <option value="info">Info</option>
+                      <option value="success">Success</option>
+                      <option value="warn">Warning</option>
+                      <option value="error">Error</option>
+                    </select>
+                    <input
+                      type="text"
+                      placeholder="Filter by IP..."
+                      value={logIpFilter}
+                      onChange={(e) => setLogIpFilter(e.target.value)}
+                      className="w-full sm:w-32 bg-[#0b0b0e] border border-neutral-800 text-sm text-neutral-200 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500/50"
+                    />
+                  </div>
+                  <div className="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-end">
+                    <p className="text-sm text-neutral-500 font-medium whitespace-nowrap">
+                      Showing {filteredLogs.length} logs
+                    </p>
+                    <button
+                      onClick={() => {
+                        const csv =
+                          "Time,User,Action,IP,Status\n" +
+                          filteredLogs
+                            .map(
+                              (l) =>
+                                `"${new Date(
+                                  l.created_at
+                                ).toLocaleString()}","${
+                                  l.user_email || "System"
+                                }","${l.action}","${l.ip_address || ""}","${
+                                  l.status || "info"
+                                }"`
+                            )
+                            .join("\n");
+                        const blob = new Blob([csv], { type: "text/csv" });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = "activity_logs.csv";
+                        a.click();
+                      }}
+                      className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded-lg text-sm font-medium transition-colors"
+                    >
+                      Export CSV
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-[#111115] border border-neutral-800 rounded-xl overflow-hidden shadow-xl">
+                  <div className="p-4 border-b border-neutral-800 flex justify-between items-center bg-[#0b0b0e]">
+                    <h2 className="font-bold text-white flex items-center gap-2">
+                      <History className="w-4 h-4 text-blue-400" /> Global
+                      Activity Feed
+                    </h2>
+                    <button
+                      onClick={fetchGlobalLogs}
+                      className="text-xs text-neutral-400 hover:text-white transition-colors flex items-center gap-1"
+                    >
+                      <ActivitySquare className="w-3 h-3" /> Refresh
+                    </button>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm whitespace-nowrap">
+                      <thead className="bg-[#0b0b0e] text-neutral-400 border-b border-neutral-800 text-xs uppercase font-semibold">
+                        <tr>
+                          <th className="px-6 py-4">Time</th>
+                          <th className="px-6 py-4">User</th>
+                          <th className="px-6 py-4">Action</th>
+                          <th className="px-6 py-4">IP Address</th>
+                          <th className="px-6 py-4">Status</th>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-800/50">
+                        {loadingGlobalLogs ? (
+                          <tr>
+                            <td
+                              colSpan={5}
+                              className="px-6 py-12 text-center text-neutral-500"
+                            >
+                              Loading logs...
+                            </td>
+                          </tr>
+                        ) : filteredLogs.length === 0 ? (
+                          <tr>
+                            <td
+                              colSpan={5}
+                              className="px-6 py-12 text-center text-neutral-500"
+                            >
+                              No activity logs match your filters.
+                            </td>
+                          </tr>
+                        ) : (
+                          filteredLogs.map((log) => (
+                            <tr
+                              key={log.id}
+                              className="hover:bg-white/[0.02] transition-colors"
+                            >
+                              <td className="px-6 py-3 text-neutral-500 font-mono text-xs">
+                                {new Date(log.created_at).toLocaleString()}
+                              </td>
+                              <td className="px-6 py-3 font-medium text-neutral-300">
+                                {log.email || "Unknown"}
+                              </td>
+                              <td className="px-6 py-3 text-neutral-200">
+                                {log.action}
+                              </td>
+                              <td className="px-6 py-3 text-neutral-500 font-mono text-xs">
+                                {log.ip_address}
+                              </td>
+                              <td className="px-6 py-3">
+                                <span
+                                  className={
+                                    log.status === "Success"
+                                      ? "text-emerald-400"
+                                      : "text-rose-400"
+                                  }
+                                >
+                                  {log.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-          );
-        })()}
+            );
+          })()}
       </div>
 
       {/* Modals: User Logs, Edit User, Delete User */}
