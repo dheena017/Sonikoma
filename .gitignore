@@ -27,6 +27,7 @@ __pycache__/
 .idea/
 *.swp
 *.swo
+client_secrets.json
 
 # OS files
 Thumbs.db
