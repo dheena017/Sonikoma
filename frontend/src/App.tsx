@@ -606,7 +606,7 @@ export default function App() {
     const loadingStatus = isInitializing
       ? "Initializing App..."
       : "Checking Authentication...";
-    return <LoadingPage status={loadingStatus} />;
+    return <LoadingPage status={loadingStatus} themeMode={themeMode} />;
   }
 
   // --- Guard: Public Landing Page ---

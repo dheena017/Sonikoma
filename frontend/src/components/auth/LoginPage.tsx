@@ -312,7 +312,7 @@ export default function LoginPage({
               >
                 <img
                   src="/logo-dark.png"
-                  alt="Logo"
+                  alt="Sonikoma Logo"
                   className="w-6 h-6 object-contain drop-shadow-md"
                 />
               </div>

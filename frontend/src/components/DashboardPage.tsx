@@ -20,6 +20,7 @@ import {
   FileText,
 } from "lucide-react";
 import { getSourceName } from "../utils.js";
+import { useThemeMode } from "../hooks/useThemeMode";
 
 interface Project {
   project_id: string;
@@ -33,6 +34,7 @@ interface Project {
 }
 
 export default function DashboardPage() {
+  const { themeMode } = useThemeMode();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [latency, setLatency] = useState<number | null>(null);
@@ -107,14 +109,13 @@ export default function DashboardPage() {
       <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <img
-            src={
-              typeof document !== "undefined" &&
-              document.documentElement.getAttribute("data-mode") === "light"
-                ? "/logo-light.png"
-                : "/logo-dark.png"
-            }
+            src={themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"}
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = "/logo.png";
+            }}
             alt="Sonikoma Logo"
             className="h-16 w-16 mb-6 rounded-2xl shadow-lg shadow-purple-900/20 object-cover"
+            style={{ background: themeMode === "light" ? "#ffffff" : "#000000" }}
           />
           <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-3">
             Welcome to{" "}
@@ -205,13 +206,16 @@ export default function DashboardPage() {
                 <div className="relative w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center animate-pulse shadow-lg shadow-purple-500/20">
                   <img
                     src={
-                      typeof document !== "undefined" &&
-                      document.documentElement.getAttribute("data-mode") === "light"
-                        ? "/logo-light.png"
-                        : "/logo-dark.png"
+                      themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"
                     }
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = "/logo.png";
+                    }}
                     alt="Loading..."
                     className="w-full h-full rounded-[10px] object-cover p-[2px]"
+                    style={{
+                      background: themeMode === "light" ? "#ffffff" : "#000000",
+                    }}
                   />
                 </div>
               </div>
@@ -297,7 +301,7 @@ export default function DashboardPage() {
               </h3>
             </div>
             <p className="text-xs text-neutral-400 font-mono mb-6 leading-relaxed">
-              AniVox orchestrates multiple specialized models to synthesize
+              Sonikoma orchestrates multiple specialized models to synthesize
               static webtoon series strips into full cinematic animated videos.
             </p>
 

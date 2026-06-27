@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 
+export type ThemeMode = "dark" | "light";
+
 interface LoadingPageProps {
+  themeMode?: ThemeMode;
   status?: string;
   progress?: number;
 }
@@ -18,6 +21,7 @@ const LOADING_TIPS = [
 export default function LoadingPage({
   status = "Initializing",
   progress,
+  themeMode,
 }: LoadingPageProps) {
   const [tipIndex, setTipIndex] = useState(0);
   const [fadeState, setFadeState] = useState<"in" | "out">("in");
@@ -110,7 +114,6 @@ export default function LoadingPage({
             animation: "lp-pulse 2s infinite ease-in-out",
           }}
         >
-
           <div
             style={{
               position: "relative",
@@ -125,12 +128,10 @@ export default function LoadingPage({
             }}
           >
             <img
-              src={
-                typeof document !== "undefined" &&
-                document.documentElement.getAttribute("data-mode") === "light"
-                  ? "/logo-light.png"
-                  : "/logo-dark.png"
-              }
+              src={themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"}
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = "/logo.png";
+              }}
               alt="Sonikoma Logo"
               style={{
                 width: "100%",
@@ -138,6 +139,7 @@ export default function LoadingPage({
                 borderRadius: "15px",
                 objectFit: "cover",
                 padding: "3px",
+                background: themeMode === "light" ? "#ffffff" : "#000000",
               }}
             />
           </div>
