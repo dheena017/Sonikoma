@@ -129,23 +129,7 @@ export function VideoMonitorActive({
             }
           />
 
-          {/* Subtitles Overlay on top of the Video Player */}
-          {activeVideoPanel && activeVideoPanel.speech_text?.trim() && (
-            <div className="absolute bottom-16 left-3 right-3 z-10 text-center pointer-events-none">
-              {activeVideoPanel.sfx && (
-                <span className="hidden sm:inline-block transform -rotate-2 bg-yellow-500 text-black font-extrabold text-[10px] px-2 py-0.5 rounded shadow-lg font-mono tracking-widest uppercase mb-1">
-                  {activeVideoPanel.sfx}
-                </span>
-              )}
-              <p className="text-white font-bold text-xs leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,1)] bg-black/75 p-2.5 rounded-lg border border-white/5 backdrop-blur-xs text-center font-sans max-w-lg mx-auto">
-                {getSubtitleChunk(
-                  activeVideoPanel.speech_text,
-                  activeVideoPanel.duration || 4.5,
-                  relativeVideoTime
-                )}
-              </p>
-            </div>
-          )}
+
         </div>
       )}
 

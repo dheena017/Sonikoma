@@ -372,9 +372,9 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
                     bg = Image.new("RGB", (target_w, target_h), (0, 0, 0))
                     bg.paste(resized, ((target_w - resized.width)//2, (target_h - resized.height)//2))
                     
-                    # Bake subtitles if present
-                    if p.get("speech_text") and p["speech_text"].strip():
-                        bg = draw_subtitles_on_image(bg, p["speech_text"].strip())
+                    # Bake subtitles if present (Disabled as requested)
+                    # if p.get("speech_text") and p["speech_text"].strip():
+                    #     bg = draw_subtitles_on_image(bg, p["speech_text"].strip())
                         
                     bg.save(p["local_img"], "JPEG")
             
