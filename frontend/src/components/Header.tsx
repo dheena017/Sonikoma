@@ -460,11 +460,7 @@ export default function Header({
         </button>
 
         <div
-          className={`flex items-center gap-2 cursor-pointer select-none transition-all duration-300 ${
-            isSidebarOpen
-              ? "lg:opacity-0 lg:pointer-events-none"
-              : "lg:opacity-100"
-          }`}
+          className="flex items-center gap-2 cursor-pointer select-none transition-all duration-300"
           onClick={() => navigateTo("/dashboard")}
         >
           <img
