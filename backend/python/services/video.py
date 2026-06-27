@@ -35,7 +35,7 @@ async def compile_video_from_panels(
 
     os.makedirs(output_dir, exist_ok=True)
     temp_dir = tempfile.gettempdir()
-    
+
     output_filename = f"compiled_{project_id}_{uuid.uuid4().hex[:8]}.mp4"
     output_path = os.path.join(output_dir, output_filename)
 
@@ -46,7 +46,7 @@ async def compile_video_from_panels(
 
     for idx, panel in enumerate(panels):
         logger.info(f"[Video Compiler] Processing panel {idx + 1}/{len(panels)}")
-        
+
         image_url = panel.get("image_url")
         if not image_url:
             logger.warning(f"Panel {idx + 1} is missing an image_url. Skipping.")
@@ -93,7 +93,7 @@ async def compile_video_from_panels(
         try:
             bg_clip = ImageClip(bg_array).set_duration(duration)
             fg_clip = ImageClip(fg_array).set_duration(duration).set_position("center")
-            
+
             composite_clip = CompositeVideoClip([bg_clip, fg_clip], size=(target_width, target_height))
         except Exception as e:
             logger.error(f"Failed to create MoviePy clip for panel {idx + 1}: {e}")
@@ -107,9 +107,10 @@ async def compile_video_from_panels(
                 dialogue_list=dialogue_list,
                 target_duration=duration,
                 output_path=audio_path,
-                voice="en-US-GuyNeural"
+                voice="en-US-GuyNeural",
+                force_duration=True # For final video compilation, we usually want to force duration to match visuals
             )
-            
+
             if os.path.exists(audio_path):
                 audio_clip = AudioFileClip(audio_path)
                 # Ensure the audio matches the video duration exactly
@@ -126,11 +127,11 @@ async def compile_video_from_panels(
         raise RuntimeError("No valid clips were generated. Cannot compile video.")
 
     logger.info(f"[Video Compiler] Concatenating {len(clips)} clips...")
-    
+
     # 5. Concatenate and Render
     try:
         final_video = concatenate_videoclips(clips, method="compose")
-        
+
         # We must use asyncio.to_thread because moviepy's write_videofile is blocking
         def render_video():
             final_video.write_videofile(
@@ -142,9 +143,9 @@ async def compile_video_from_panels(
                 preset="ultrafast",
                 logger=None # Disable moviepy console bar logging which pollutes stdout
             )
-            
+
         await asyncio.to_thread(render_video)
-        
+
         logger.info(f"[Video Compiler] Video compilation successful: {output_path}")
     except Exception as e:
         logger.error(f"[Video Compiler] Failed to render video: {e}")

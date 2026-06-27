@@ -1,6 +1,7 @@
 import os
 import logging
 import tempfile
+import asyncio
 from typing import List, Optional
 import edge_tts
 from pydub import AudioSegment
@@ -19,21 +20,24 @@ async def generate_panel_audio(
     dialogue_list: List[str],
     target_duration: float,
     output_path: str,
-    voice: Optional[str] = "en-US-GuyNeural"
-) -> str:
+    voice: Optional[str] = "en-US-GuyNeural",
+    force_duration: bool = False
+) -> (str, float):
     """
     Generates dynamic text-to-speech elements for an ordered sequence of storyboard dialogue transcripts,
     concatenates all sentences into a coherent wave, and applies advanced pitch-preserved time-stretching or
-    silence-padding mechanisms using pydub to match the target duration perfectly.
+    silence-padding mechanisms using pydub.
 
     Args:
         dialogue_list (List[str]): Extracted dialog items to encode.
         target_duration (float): Exact target duration of the audio in seconds.
         output_path (str): File path to save the completed MP3/WAV segment.
         voice (Optional[str]): Standard edge-tts voice code or friendly UI name.
+        force_duration (bool): If True, audio will be stretched/padded to match target_duration exactly.
+                               If False, audio will retain natural length (unless longer than target_duration).
 
     Returns:
-        str: Absolute destination where the master timeline panel audio has been encoded.
+        (str, float): Tuple of (Absolute destination path, Actual duration in seconds).
     """
     if not dialogue_list or all(not text.strip() for text in dialogue_list):
         # Gracefully generate complete ambient silence if there is no audio transcript specified
@@ -43,7 +47,7 @@ async def generate_panel_audio(
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
         silence_segment.export(output_path, format="mp3")
         logger.info(f"[Narration/TTS] Successfully generated {target_duration}s of silence.")
-        return output_path
+        return output_path, target_duration
 
     target_duration_ms = int(target_duration * 1000)
     temp_dir = tempfile.gettempdir()
@@ -56,7 +60,7 @@ async def generate_panel_audio(
         for idx, text in enumerate(dialogue_list):
             if not text.strip():
                 continue
-            
+
             # Escape or skip empty texts
             temp_file_path = os.path.join(temp_dir, f"dialog_segment_{uuid_hex()}_{idx}.mp3")
             temp_files.append(temp_file_path)
@@ -72,8 +76,6 @@ async def generate_panel_audio(
             communicate = edge_tts.Communicate(text, actual_voice)
             await communicate.save(temp_file_path)
 
-        import asyncio
-
         def process_audio_sync():
             # Phase 2: Loading & Concatenating files using defensive format normalizer
             combined_audio = AudioSegment.empty()
@@ -84,7 +86,7 @@ async def generate_panel_audio(
                 segment = AudioSegment.from_file(file_path, format="mp3")
                 # Normalize tracks sample rate & active channels to avoid standard concat glitches
                 normalized_seg = segment.set_frame_rate(44100).set_channels(2)
-                
+
                 # If combining multiple segments, introduce a short natural 100ms pause, except for last
                 combined_audio += normalized_seg
                 if idx < len(temp_files) - 1:
@@ -97,41 +99,44 @@ async def generate_panel_audio(
             if current_duration_ms == 0:
                 logger.warning("Combined audio yielded zero duration. Exporting silence.")
                 final_audio = AudioSegment.silent(duration=target_duration_ms)
-            elif current_duration_ms > target_duration_ms:
-                # Seamless speedup without pitch shifting using pydub.effects
-                playback_speed = float(current_duration_ms) / float(target_duration_ms)
-                logger.info(f"Action: Audio is longer than target. Compressing seamlessly with speedup factor: {playback_speed:.2f}x")
-                
-                # Pydub speedup effect typically expects playback_speed > 1.0
-                if playback_speed > 1.0:
-                    try:
-                        # speedup is pitch-preserved
-                        final_audio = speedup(combined_audio, playback_speed=playback_speed)
-                    except Exception as stretch_err:
-                        logger.error(f"Pydub speedup failed, falling back to direct curtailing: {str(stretch_err)}")
+            elif force_duration:
+                if current_duration_ms > target_duration_ms and target_duration_ms > 0:
+                    # Seamless speedup without pitch shifting using pydub.effects
+                    playback_speed = float(current_duration_ms) / float(target_duration_ms)
+                    logger.info(f"Action: Force duration enabled. Compressing with factor: {playback_speed:.2f}x")
+
+                    if playback_speed > 1.0:
+                        try:
+                            final_audio = speedup(combined_audio, playback_speed=playback_speed)
+                        except Exception as stretch_err:
+                            logger.error(f"Pydub speedup failed, falling back to direct curtailing: {str(stretch_err)}")
+                            final_audio = combined_audio
+                    else:
                         final_audio = combined_audio
+                    final_audio = final_audio[:target_duration_ms]
                 else:
-                    final_audio = combined_audio
-
-                # Final precise microsecond crop
-                final_audio = final_audio[:target_duration_ms]
+                    # Padding with tailing organic silence
+                    silence_needed_ms = target_duration_ms - current_duration_ms
+                    logger.info(f"Action: Force duration enabled. Appending {silence_needed_ms}ms of silence.")
+                    silence_padding = AudioSegment.silent(duration=silence_needed_ms)
+                    final_audio = combined_audio + silence_padding
+                    final_audio = final_audio[:target_duration_ms]
             else:
-                # Padding with tailing organic silence
-                silence_needed_ms = target_duration_ms - current_duration_ms
-                logger.info(f"Action: Audio is shorter than target. Appending {silence_needed_ms}ms of silence.")
-                silence_padding = AudioSegment.silent(duration=silence_needed_ms)
-                final_audio = combined_audio + silence_padding
+                # Natural length logic:
+                final_audio = combined_audio
 
-            # Ensure absolute precision matching target_duration to avoid downstream video sync creep
-            final_audio = final_audio[:target_duration_ms]
+            # Final measurement
+            final_duration_ms = len(final_audio)
 
             # Phase 4: Export finished compilation stream
             if os.path.dirname(output_path):
                 os.makedirs(os.path.dirname(output_path), exist_ok=True)
             final_audio.export(output_path, format="mp3")
-            logger.info(f"Audio compilation saved successfully at: {output_path} with final length {len(final_audio)}ms")
+            logger.info(f"Audio compilation saved successfully at: {output_path} with final length {final_duration_ms}ms")
+            return final_duration_ms / 1000.0
 
-        await asyncio.to_thread(process_audio_sync)
+        actual_duration = await asyncio.to_thread(process_audio_sync)
+        return output_path, actual_duration
 
     except Exception as general_err:
         logger.error(f"Audio Engine pipeline failure: {str(general_err)}", exc_info=True)
@@ -142,6 +147,7 @@ async def generate_panel_audio(
             fallback_silence = AudioSegment.silent(duration=target_duration_ms)
             fallback_silence.export(output_path, format="mp3")
             logger.info(f"Safeguard silent master audio exported safely to: {output_path}")
+            return output_path, target_duration
         except Exception as write_fallback_err:
             logger.critical(f"Fatal fallback sound export failure: {str(write_fallback_err)}")
             raise general_err
@@ -154,8 +160,6 @@ async def generate_panel_audio(
             except Exception as rm_err:
                 logger.debug(f"Failed clearing temporary fragment tracking block {f}: {str(rm_err)}")
 
-    return output_path
-
 def uuid_hex() -> str:
     import uuid
     return uuid.uuid4().hex[:8]
@@ -163,7 +167,6 @@ def uuid_hex() -> str:
 if __name__ == "__main__":
     import argparse
     import json
-    import asyncio
 
     parser = argparse.ArgumentParser(description="Sonikoma TTS Audio Engine CLI")
     parser.add_argument("--dialogue_list", required=True, help="JSON list of dialogue strings")
@@ -176,13 +179,13 @@ if __name__ == "__main__":
     async def main():
         try:
             dialogue = json.loads(args.dialogue_list)
-            await generate_panel_audio(
+            path, dur = await generate_panel_audio(
                 dialogue_list=dialogue,
                 target_duration=args.target_duration,
                 output_path=args.output_path,
                 voice=args.voice
             )
-            print("SUCCESS")
+            print(f"SUCCESS: {dur}")
         except Exception as e:
             import sys
             print(f"ERROR: {str(e)}", file=sys.stderr)

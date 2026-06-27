@@ -306,7 +306,8 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
                         dialogue_list=[panel.speech_text.strip()],
                         target_duration=p_data["duration"],
                         output_path=audio_path,
-                        voice=voice
+                        voice=voice,
+                        force_duration=True # Force for final render
                     )
                 )
         if tts_tasks:
