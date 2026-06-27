@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
-import { Film, FolderOpen, Loader2, ArrowRight, Plus, Search, Filter, BarChart2, CheckCircle2, FileVideo, LayoutGrid, List, MoreVertical, Trash2, Link, Square, CheckSquare, X } from "lucide-react";
+import { Film, FolderOpen, Loader2, ArrowRight, Plus, Search, Filter, BarChart2, CheckCircle2, FileVideo, LayoutGrid, List, MoreVertical, Trash2, Link, Square, CheckSquare, X, Activity } from "lucide-react";
 import { getSourceName } from "../utils.js";
 
 interface Project {
@@ -21,6 +21,7 @@ interface Project {
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Filters, Sorting, and Selection State
   const [searchQuery, setSearchQuery] = useState("");
@@ -34,6 +35,7 @@ export default function ProjectsPage() {
   const fetchProjects = async () => {
     try {
       setLoading(true);
+      setError(null);
       const res = await fetch("/api/projects", {
         headers: {
           Authorization: `Bearer ${
@@ -43,12 +45,18 @@ export default function ProjectsPage() {
           }`,
         },
       });
+      if (!res.ok) {
+        throw new Error(`Failed to fetch projects (HTTP ${res.status})`);
+      }
       const data = await res.json();
       if (data.projects) {
         setProjects(data.projects);
+      } else {
+        setProjects([]);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to fetch projects", err);
+      setError(err.message || "An unexpected error occurred while loading projects.");
     } finally {
       setLoading(false);
     }
@@ -346,6 +354,24 @@ export default function ProjectsPage() {
         {loading ? (
           <div className="flex justify-center items-center py-20 text-neutral-500">
             <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        ) : error ? (
+          <div className="border border-red-500/20 bg-red-500/5 rounded-3xl p-12 text-center flex flex-col items-center justify-center max-w-2xl mx-auto mt-10">
+            <div className="w-16 h-16 rounded-3xl bg-red-900/20 border border-red-500/20 flex items-center justify-center text-red-500 mb-4">
+              <Activity className="h-8 w-8" />
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">
+              Failed to load projects
+            </h3>
+            <p className="text-sm text-neutral-400 max-w-sm mb-6 font-mono">
+              {error}
+            </p>
+            <button
+              onClick={() => fetchProjects()}
+              className="px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold text-sm transition-all cursor-pointer"
+            >
+              Retry Connection
+            </button>
           </div>
         ) : projects.length === 0 ? (
           <div className="border border-white/5 bg-[#0b0b0e]/50 rounded-3xl p-12 text-center flex flex-col items-center justify-center max-w-2xl mx-auto mt-10">
