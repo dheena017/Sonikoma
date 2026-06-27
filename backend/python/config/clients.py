@@ -59,7 +59,7 @@ _gemini_global_lock = asyncio.Lock()
 
 async def call_gemini_with_retry(
     fn: Callable[[], Any],
-    max_attempts: int = 1,
+    max_attempts: int = 3,
     initial_delay_sec: float = 2.0
 ) -> Any:
     """
