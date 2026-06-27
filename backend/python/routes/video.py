@@ -63,61 +63,54 @@ async def download_asset(url: str, dest_path: str) -> bool:
         logger.error(f"Error downloading {url}: {e}")
         return False
 
-def create_subtitle_clip(text, w, h, duration):
+def draw_subtitles_on_image(img: Image.Image, text: str) -> Image.Image:
     """
-    Creates a subtitle overlay clip.
+    Bakes subtitles directly onto a PIL image.
     """
+    from PIL import ImageDraw, ImageFont
+    w, h = img.size
+    overlay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(overlay)
+    
     try:
-        from moviepy.editor import TextClip
-        txt_clip = TextClip(text, fontsize=40, color='white', font='Arial-Bold', 
-                            bg_color='rgba(0,0,0,0.6)', 
-                            method='caption', size=(int(w*0.9), None))
-        return txt_clip.set_duration(duration)
-    except Exception as e:
-        logger.warning(f"TextClip failed, using PIL fallback: {e}")
-        from PIL import Image, ImageDraw, ImageFont
-        import numpy as np
+        font = ImageFont.truetype("arial.ttf", 40)
+    except:
+        font = ImageFont.load_default()
         
-        img = Image.new('RGBA', (w, h), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
+    lines = []
+    words = text.split()
+    curr_line = ""
+    for word in words:
+        test_line = curr_line + " " + word if curr_line else word
         try:
-            font = ImageFont.truetype("arial.ttf", 40)
+            tw = draw.textlength(test_line, font=font)
         except:
-            font = ImageFont.load_default()
-            
-        lines = []
-        words = text.split()
-        curr_line = ""
-        for word in words:
-            test_line = curr_line + " " + word if curr_line else word
-            # Handle text wrapping
-            try:
-                tw = draw.textlength(test_line, font=font)
-            except:
-                tw = font.getsize(test_line)[0]
+            tw = font.getsize(test_line)[0]
 
-            if tw > w * 0.9:
-                lines.append(curr_line)
-                curr_line = word
-            else:
-                curr_line = test_line
-        lines.append(curr_line)
+        if tw > w * 0.9:
+            lines.append(curr_line)
+            curr_line = word
+        else:
+            curr_line = test_line
+    lines.append(curr_line)
+    
+    line_height = 50
+    total_height = len(lines) * line_height
+    start_y = h - total_height - 60
+    
+    # Background box for readability
+    draw.rectangle([w*0.05, start_y - 10, w*0.95, start_y + total_height + 10], fill=(0, 0, 0, 160))
+    
+    for i, line in enumerate(lines):
+        try:
+            tw = draw.textlength(line, font=font)
+        except:
+            tw = font.getsize(line)[0]
+        draw.text(((w - tw) / 2, start_y + i * line_height), line, font=font, fill=(255, 255, 255, 255))
         
-        line_height = 50
-        total_height = len(lines) * line_height
-        start_y = h - total_height - 60
-        
-        # Background box for readability
-        draw.rectangle([w*0.05, start_y - 10, w*0.95, start_y + total_height + 10], fill=(0, 0, 0, 160))
-        
-        for i, line in enumerate(lines):
-            try:
-                tw = draw.textlength(line, font=font)
-            except:
-                tw = font.getsize(line)[0]
-            draw.text(((w - tw) / 2, start_y + i * line_height), line, font=font, fill=(255, 255, 255, 255))
-            
-        return ImageClip(np.array(img)).set_duration(duration)
+    base_rgba = img.convert("RGBA")
+    combined = Image.alpha_composite(base_rgba, overlay)
+    return combined.convert("RGB")
 
 def render_pipeline_sync(panels_data: List[Dict[str, Any]], output_path: str):
     """
@@ -182,15 +175,8 @@ def render_pipeline_sync(panels_data: List[Dict[str, Any]], output_path: str):
             # Simple constant zoom for pans to avoid edge bleed
             clip = clip.resize(1.15)
 
-        # Subtitles
-        speech_text = p.get("speech_text")
-        layers = [clip.set_position(('center', 'center'))]
-        if speech_text and speech_text.strip():
-            sub_clip = create_subtitle_clip(speech_text, w, h, safe_duration)
-            layers.append(sub_clip.set_position(('center', 'bottom')))
-
-        # Flatten layers
-        panel_composite = CompositeVideoClip(layers, size=(w, h)).set_duration(safe_duration)
+        # Flatten layers (subtitles are pre-baked into the image in process_render_job)
+        panel_composite = CompositeVideoClip([clip.set_position(('center', 'center'))], size=(w, h)).set_duration(safe_duration)
 
         # Crossfade transition (except first)
         if i > 0:
@@ -338,6 +324,11 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
                     resized = img.resize((max(2, nw - nw%2), max(2, nh - nh%2)), Image.Resampling.LANCZOS)
                     bg = Image.new("RGB", (target_w, target_h), (0, 0, 0))
                     bg.paste(resized, ((target_w - resized.width)//2, (target_h - resized.height)//2))
+                    
+                    # Bake subtitles if present
+                    if p.get("speech_text") and p["speech_text"].strip():
+                        bg = draw_subtitles_on_image(bg, p["speech_text"].strip())
+                        
                     bg.save(p["local_img"], "JPEG")
 
         RENDER_JOBS[video_id]["progress"] = 50
