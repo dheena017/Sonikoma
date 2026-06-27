@@ -1585,13 +1585,6 @@ export default function ProjectDetailsPage({
                                   }}
                                 />
 
-                                {/* Subtitle Caption */}
-                                {panels[slideshowIdx].speech_text && (
-                                  <div className="absolute bottom-4 inset-x-4 bg-black/85 backdrop-blur-md border border-white/5 p-3 rounded-2xl text-center text-xs font-semibold text-neutral-250 font-sans shadow-lg leading-relaxed">
-                                    {panels[slideshowIdx].speech_text}
-                                  </div>
-                                )}
-
                                 {/* SFX cue */}
                                 {panels[slideshowIdx].sfx && (
                                   <div className="absolute top-4 left-4 bg-purple-600 text-neutral-950 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase border border-purple-500/20 tracking-wider font-mono shadow-md animate-pulse">
