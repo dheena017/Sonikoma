@@ -585,7 +585,7 @@ export default function LandingPage({
             {/* Pro Plan */}
             <PricingCard
               title="Creator Pro"
-              price={billingCycle === "monthly" ? 29 : 23}
+              price={billingCycle === "monthly" ? 19 : 15}
               desc="Unlimited power for serious webtoon animators and content creators."
               features={[
                 "Unlimited video exports",

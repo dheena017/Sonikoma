@@ -670,7 +670,7 @@ export default function App() {
     currentPath !== "/workspace"
   ) {
     setTimeout(() => navigateTo("/"), 0);
-    return null;
+    return <LoadingPage status="Redirecting to Landing Page..." />;
   }
 
   // --------------------------------------------------------------------------

@@ -35,11 +35,13 @@ interface Project {
 export default function DashboardPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [latency, setLatency] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
+        setError(null);
         const res = await fetch("/api/projects", {
           headers: {
             Authorization: `Bearer ${
@@ -49,12 +51,18 @@ export default function DashboardPage() {
             }`,
           },
         });
+        if (!res.ok) {
+          throw new Error(`Failed to fetch projects (HTTP ${res.status})`);
+        }
         const data = await res.json();
         if (data.projects) {
           setProjects(data.projects);
+        } else {
+          setProjects([]);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to fetch projects", err);
+        setError(err.message || "An unexpected error occurred while loading projects.");
       } finally {
         setLoading(false);
       }
@@ -73,6 +81,33 @@ export default function DashboardPage() {
     fetchProjects();
     testLatency();
   }, []);
+
+  const handleRetry = () => {
+    setLoading(true);
+    setError(null);
+    // Explicitly re-running the fetch logic
+    const fetchProjects = async () => {
+      try {
+        const res = await fetch("/api/projects", {
+          headers: {
+            Authorization: `Bearer ${
+              localStorage.getItem("sonikoma_token") ||
+              sessionStorage.getItem("sonikoma_token") ||
+              ""
+            }`,
+          },
+        });
+        if (!res.ok) throw new Error(`Failed to fetch (HTTP ${res.status})`);
+        const data = await res.json();
+        setProjects(data.projects || []);
+      } catch (err: any) {
+        setError(err.message || "Retry failed.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProjects();
+  };
 
   const handleNewSeries = () => {
     (window as any).navigateTo?.("/workspace");
@@ -214,6 +249,24 @@ export default function DashboardPage() {
                     className="w-full h-full rounded-[10px] object-cover p-[2px]"
                   />
                 </div>
+              </div>
+            ) : error ? (
+              <div className="border border-red-500/20 bg-red-500/5 rounded-3xl p-12 text-center flex flex-col items-center justify-center">
+                <div className="w-16 h-16 rounded-3xl bg-red-900/20 border border-red-500/20 flex items-center justify-center text-red-500 mb-4">
+                  <Activity className="h-8 w-8" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">
+                  Failed to load projects
+                </h3>
+                <p className="text-sm text-neutral-400 max-w-sm mb-6 font-mono">
+                  {error}
+                </p>
+                <button
+                  onClick={handleRetry}
+                  className="px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold text-sm transition-all cursor-pointer"
+                >
+                  Retry Connection
+                </button>
               </div>
             ) : projects.length === 0 ? (
               <div className="border border-white/5 bg-[#0b0b0e]/50 rounded-3xl p-12 text-center flex flex-col items-center justify-center">
