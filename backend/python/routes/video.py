@@ -19,6 +19,7 @@ from services.audio import generate_panel_audio
 # Try importing moviepy; fallback gracefully if not installed
 try:
     from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips, CompositeVideoClip, CompositeAudioClip
+    from proglog import ProgressBarLogger
     HAS_MOVIEPY = True
 except ImportError:
     HAS_MOVIEPY = False
@@ -112,7 +113,21 @@ def draw_subtitles_on_image(img: Image.Image, text: str) -> Image.Image:
     combined = Image.alpha_composite(base_rgba, overlay)
     return combined.convert("RGB")
 
-def render_pipeline_sync(panels_data: List[Dict[str, Any]], output_path: str):
+class MoviePyProgressLogger(ProgressBarLogger):
+    def __init__(self, video_id: str):
+        super().__init__()
+        self.video_id = video_id
+
+    def bars_callback(self, bar, attr, value, old_value=None):
+        if bar == "t" and attr == "index":
+            total = self.bars[bar].get("total")
+            if total and total > 0:
+                progress = 50 + int((value / total) * 45)
+                progress = min(progress, 95)
+                if self.video_id in RENDER_JOBS:
+                    RENDER_JOBS[self.video_id]["progress"] = progress
+
+def render_pipeline_sync(video_id: str, panels_data: List[Dict[str, Any]], output_path: str):
     """
     Stitches panels together into a final video file.
     """
@@ -153,6 +168,12 @@ def render_pipeline_sync(panels_data: List[Dict[str, Any]], output_path: str):
 
         clip = ImageClip(img_path).set_duration(safe_duration)
         
+        # CRITICAL FIX: Downscale to 720p before animation.
+        # Rendering 4K images with zoom/crop is extremely slow. 
+        # 720p is visually indistinguishable in a 1080p final video but 60% faster to render.
+        if clip.h > 720 or clip.w > 720:
+            clip = clip.resize(height=720) # Resizes width proportionally
+
         # Attach audio to this visual clip
         if audio_path and os.path.exists(audio_path):
             try:
@@ -231,12 +252,13 @@ def render_pipeline_sync(panels_data: List[Dict[str, Any]], output_path: str):
             logger.error(f"Final audio mix error: {e}")
             
     # Render to disk
+    progress_logger = MoviePyProgressLogger(video_id) if HAS_MOVIEPY else None
     final_video.write_videofile(
         output_path, 
         fps=24, 
         codec="libx264", 
         audio_codec="aac", 
-        logger=None,
+        logger=progress_logger,
         threads=4,
         preset="ultrafast"
     )
@@ -345,7 +367,7 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
 
         # 4. Rendering
         logger.info(f"[Render] Starting MoviePy pipeline for {video_id}")
-        await asyncio.to_thread(render_pipeline_sync, panels_data, output_path)
+        await asyncio.to_thread(render_pipeline_sync, video_id, panels_data, output_path)
 
         final_video_url = f"/videos/{output_filename}"
 
