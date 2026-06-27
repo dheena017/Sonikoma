@@ -72,7 +72,7 @@ async def generate_audio(body: AudioGenerateRequest):
             f"target={body.target_duration}s, voice={body.voice}"
         )
 
-        saved_path = await generate_panel_audio(
+        saved_path, actual_dur = await generate_panel_audio(
             dialogue_list=body.dialogue_list,
             target_duration=body.target_duration,
             output_path=output_path,
@@ -94,6 +94,7 @@ async def generate_audio(body: AudioGenerateRequest):
                 "audio_base64": audio_b64,
                 "mime_type": "audio/mpeg",
                 "duration_target_s": body.target_duration,
+                "duration_actual_s": actual_dur,
                 "file_size_kb": file_size_kb,
                 "voice": body.voice,
                 "segments": len(body.dialogue_list),
@@ -102,6 +103,7 @@ async def generate_audio(body: AudioGenerateRequest):
             return JSONResponse(content={
                 "success": True,
                 "audio_path": saved_path,
+                "duration_actual_s": actual_dur,
                 "voice": body.voice,
                 "segments": len(body.dialogue_list),
             })
