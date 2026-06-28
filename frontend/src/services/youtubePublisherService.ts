@@ -11,6 +11,14 @@ interface PublishJsonParams {
   isScheduled: boolean;
   scheduleDate: string;
   scheduleTime: string;
+  playlist?: string;
+  authorName?: string;
+  artistName?: string;
+  webtoonPlatform?: string;
+  chapterStart?: string;
+  chapterEnd?: string;
+  subtitlesType?: string;
+  subtitlesLanguage?: string;
 }
 
 interface PublishMultipartParams {
@@ -25,6 +33,14 @@ interface PublishMultipartParams {
   isScheduled: boolean;
   scheduleDate: string;
   scheduleTime: string;
+  playlist?: string;
+  authorName?: string;
+  artistName?: string;
+  webtoonPlatform?: string;
+  chapterStart?: string;
+  chapterEnd?: string;
+  subtitlesType?: string;
+  subtitlesLanguage?: string;
 }
 
 function getAuthHeaders(): HeadersInit {
@@ -45,6 +61,14 @@ export async function publishVideoJson({
   isScheduled,
   scheduleDate,
   scheduleTime,
+  playlist,
+  authorName,
+  artistName,
+  webtoonPlatform,
+  chapterStart,
+  chapterEnd,
+  subtitlesType,
+  subtitlesLanguage,
 }: PublishJsonParams) {
   let finalDescription = description;
   if (isScheduled && scheduleDate) {
@@ -65,6 +89,14 @@ export async function publishVideoJson({
       privacy_status: privacy,
       category_id: category,
       is_short: isShort,
+      playlist,
+      author_name: authorName,
+      artist_name: artistName,
+      webtoon_platform: webtoonPlatform,
+      chapter_start: chapterStart,
+      chapter_end: chapterEnd,
+      subtitles_type: subtitlesType,
+      subtitles_language: subtitlesLanguage,
     }),
   });
 
@@ -87,6 +119,14 @@ export async function publishVideoMultipart({
   isScheduled,
   scheduleDate,
   scheduleTime,
+  playlist,
+  authorName,
+  artistName,
+  webtoonPlatform,
+  chapterStart,
+  chapterEnd,
+  subtitlesType,
+  subtitlesLanguage,
 }: PublishMultipartParams) {
   const formData = new FormData();
   formData.append("file", videoFile);
@@ -102,6 +142,15 @@ export async function publishVideoMultipart({
   formData.append("privacy_status", privacy);
   formData.append("category_id", category);
   formData.append("is_short", isShort ? "true" : "false");
+
+  if (playlist) formData.append("playlist", playlist);
+  if (authorName) formData.append("author_name", authorName);
+  if (artistName) formData.append("artist_name", artistName);
+  if (webtoonPlatform) formData.append("webtoon_platform", webtoonPlatform);
+  if (chapterStart) formData.append("chapter_start", chapterStart);
+  if (chapterEnd) formData.append("chapter_end", chapterEnd);
+  if (subtitlesType) formData.append("subtitles_type", subtitlesType);
+  if (subtitlesLanguage) formData.append("subtitles_language", subtitlesLanguage);
 
   if (thumbnailFile) {
     formData.append("thumbnail", thumbnailFile);
@@ -196,6 +245,14 @@ export async function saveDbProfile(profile: any) {
       channel_link: profile.channelLink || "",
       discord_link: profile.discordLink || "",
       patreon_link: profile.patreonLink || "",
+      playlist: profile.playlist || "",
+      author_name: profile.authorName || "",
+      artist_name: profile.artistName || "",
+      webtoon_platform: profile.webtoonPlatform || "",
+      chapter_start: profile.chapterStart || "",
+      chapter_end: profile.chapterEnd || "",
+      subtitles_type: profile.subtitlesType || "",
+      subtitles_language: profile.subtitlesLanguage || "",
     }),
   });
   const data = await res.json();
