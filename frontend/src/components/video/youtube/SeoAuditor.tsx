@@ -23,7 +23,7 @@ export default function SeoAuditor({ seoScore, seoChecks }: SeoAuditorProps) {
         </div>
         <p className="text-[10px] text-neutral-450 leading-relaxed max-w-md">
           Analyzes key elements (Title Hook, Description Length, Chapters, Tag
-          Volume) to optimize video search rank.
+          Volume, and Metadata Consistency) to optimize video search rank.
         </p>
       </div>
 

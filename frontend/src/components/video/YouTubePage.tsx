@@ -15,6 +15,9 @@ import SelfRatingForm from "./youtube/SelfRatingForm.js";
 import AdvancedSettings from "./youtube/AdvancedSettings.js";
 import PublishMonitor from "./youtube/PublishMonitor.js";
 import UploadHistory from "./youtube/UploadHistory.js";
+import PlaylistSelector from "./youtube/PlaylistSelector.js";
+import WebtoonMetadata from "./youtube/WebtoonMetadata.js";
+import SubtitleConfig from "./youtube/SubtitleConfig.js";
 
 // Import custom hook
 import { useYouTubePublisher } from "../../hooks/useYouTubePublisher.js";
@@ -109,6 +112,25 @@ export default function YouTubePage({
     setDiscordLink,
     patreonLink,
     setPatreonLink,
+    playlist,
+    setPlaylist,
+    authorName,
+    setAuthorName,
+    artistName,
+    setArtistName,
+    webtoonPlatform,
+    setWebtoonPlatform,
+    customPlatform,
+    setCustomPlatform,
+    chapterStart,
+    setChapterStart,
+    chapterEnd,
+    setChapterEnd,
+    chapterValidationError,
+    subtitlesType,
+    setSubtitlesType,
+    subtitlesLanguage,
+    setSubtitlesLanguage,
     showSocialsConfig,
     setShowSocialsConfig,
     profiles,
@@ -263,6 +285,38 @@ export default function YouTubePage({
                     onInsertDisclaimer={handleInsertDisclaimer}
                     onInsertSocials={handleInsertSocials}
                     onInsertMusicCredit={handleInsertMusicCredit}
+                  />
+
+                  {/* Playlist selection */}
+                  <PlaylistSelector
+                    playlist={playlist}
+                    setPlaylist={setPlaylist}
+                    hasCustomCredentials={hasCustomCredentials}
+                  />
+
+                  {/* Webtoon Source Metadata */}
+                  <WebtoonMetadata
+                    authorName={authorName}
+                    setAuthorName={setAuthorName}
+                    artistName={artistName}
+                    setArtistName={setArtistName}
+                    webtoonPlatform={webtoonPlatform}
+                    setWebtoonPlatform={setWebtoonPlatform}
+                    customPlatform={customPlatform}
+                    setCustomPlatform={setCustomPlatform}
+                    chapterStart={chapterStart}
+                    setChapterStart={setChapterStart}
+                    chapterEnd={chapterEnd}
+                    setChapterEnd={setChapterEnd}
+                    chapterValidationError={chapterValidationError}
+                  />
+
+                  {/* Subtitle / Caption Tracks */}
+                  <SubtitleConfig
+                    subtitlesType={subtitlesType}
+                    setSubtitlesType={setSubtitlesType}
+                    subtitlesLanguage={subtitlesLanguage}
+                    setSubtitlesLanguage={setSubtitlesLanguage}
                   />
 
                   {/* Chapters timeline offset tuner */}
