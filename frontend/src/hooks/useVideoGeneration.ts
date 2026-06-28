@@ -25,6 +25,7 @@ interface UseVideoGenerationProps {
   seriesAuthor?: string;
   seriesCoverImage?: string;
   seriesSynopsis?: string;
+  audioFeedback?: any;
 }
 
 export function useVideoGeneration({
@@ -259,6 +260,7 @@ export function useVideoGeneration({
         "Video generated successfully! Check the preview player.",
         "success"
       );
+      audioFeedback?.playSuccess();
     } catch (err: any) {
       setConsoleLogs((prev) => [
         ...prev,
@@ -395,6 +397,7 @@ export function useVideoGeneration({
             setVideoUrl(statusData.url);
             setActivePreviewTab("video");
             addNotification("Final video rendered successfully!", "success");
+            audioFeedback?.playSuccess();
             setIsRendering(false);
             setTimeout(() => setRenderProgress(0), 2000);
           } else if (statusData.status === "failed") {

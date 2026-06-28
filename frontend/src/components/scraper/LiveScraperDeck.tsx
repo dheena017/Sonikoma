@@ -61,6 +61,7 @@ export default function LiveScraperDeck({
   selectedSource = "",
   handleSaveAssets,
   handleCancelBatch,
+  audioFeedback,
 }: LiveScraperDeckProps) {
   const [isZipping, setIsZipping] = useState(false);
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(

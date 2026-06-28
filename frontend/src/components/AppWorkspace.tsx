@@ -131,6 +131,7 @@ interface AppWorkspaceProps {
   renderProgress?: number;
   renderEtaSeconds?: number | null;
   handleRenderFinalVideo?: () => void;
+  audioFeedback?: any;
 }
 
 export function AppWorkspace({
@@ -246,6 +247,7 @@ export function AppWorkspace({
   renderProgress = 0,
   renderEtaSeconds = null,
   handleRenderFinalVideo,
+  audioFeedback,
 }: AppWorkspaceProps) {
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -521,6 +523,7 @@ export function AppWorkspace({
           handleCleanBubblesSelected={handleCleanBubblesSelected}
           handleCancelBatch={handleCancelBatch}
           addPanelsToStoryboard={addPanelsToStoryboard}
+          audioFeedback={audioFeedback}
           seriesTitle={seriesTitle}
           chapterNumber={chapterNumber}
           chapterTitle={chapterTitle}
@@ -580,6 +583,7 @@ export function AppWorkspace({
               autoSplitTallStrips={autoSplitTallStrips}
               handleSaveStoryboard={handleSaveStoryboard}
               handleCancelBatch={handleCancelBatch}
+              audioFeedback={audioFeedback}
             />
           </div>
         )}

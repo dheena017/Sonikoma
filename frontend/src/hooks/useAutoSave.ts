@@ -31,6 +31,7 @@ interface AutoSaveState {
   ) => void;
   accumulatedTokens?: number;
   setAccumulatedTokens?: (val: React.SetStateAction<number>) => void;
+  audioFeedback?: any;
 }
 
 export function useAutoSave(state: AutoSaveState) {
@@ -330,6 +331,9 @@ export function useAutoSave(state: AutoSaveState) {
               details: detailMsg,
             }
           );
+        } else {
+          // If notifications are hidden (auto-save), play a subtle tick
+          state.audioFeedback?.playTick();
         }
         return true;
       } else {

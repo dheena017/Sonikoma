@@ -16,6 +16,7 @@ interface UseLiveScraperActionsProps {
   ) => void;
   fetchWithInterceptor?: typeof fetch;
   addNotification?: (message: string, type: any) => void;
+  audioFeedback?: any;
 }
 
 export function useLiveScraperActions({
@@ -115,6 +116,7 @@ export function useLiveScraperActions({
     console.log(`[GUI] Adding ${selectedScraped.length} image(s) to timeline`);
     addPanelsToStoryboard(selectedScraped);
     setSelectedScraped([]);
+    audioFeedback?.playTick();
   };
 
   return {

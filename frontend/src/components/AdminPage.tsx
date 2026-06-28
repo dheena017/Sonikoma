@@ -36,6 +36,7 @@ export default function AdminPage({
   navigateTo,
   isAuthenticated,
   fetchWithInterceptor,
+  audioFeedback,
 }: {
   navigateTo: (path: string) => void;
   isAuthenticated: boolean;
@@ -43,6 +44,7 @@ export default function AdminPage({
     url: string,
     options?: RequestInit
   ) => Promise<Response>;
+  audioFeedback?: any;
 }) {
   const [activeTab, setActiveTab] = useState<
     | "overview"
@@ -237,6 +239,7 @@ export default function AdminPage({
         deletingUser.id
       );
       if (data) {
+        audioFeedback?.playError();
         setDeletingUser(null);
         setSelectedUsers((prev) => {
           const next = new Set(prev);
@@ -258,7 +261,10 @@ export default function AdminPage({
     if (!confirm) return;
     try {
       const data = await api.adminDeleteProject(fetchWithInterceptor, id);
-      if (data) fetchProjects();
+      if (data) {
+        audioFeedback?.playError();
+        fetchProjects();
+      }
     } catch (err) {
       console.error("Failed to delete project:", err);
     }
@@ -298,6 +304,9 @@ export default function AdminPage({
         value,
       });
       if (data) {
+        if (action === "delete") {
+          audioFeedback?.playError();
+        }
         setSelectedUsers(new Set());
         fetchUsers();
         fetchStats();

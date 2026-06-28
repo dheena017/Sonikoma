@@ -46,6 +46,7 @@ interface ProjectDetailsPageProps {
     type: "info" | "success" | "warning" | "error",
     options?: { details?: string }
   ) => void;
+  audioFeedback?: any;
 }
 
 export default function ProjectDetailsPage({
@@ -55,6 +56,7 @@ export default function ProjectDetailsPage({
   setGlobalSaveStatus,
   registerSaveHandler,
   addNotification,
+  audioFeedback,
 }: ProjectDetailsPageProps) {
   const [projectId, setProjectId] = React.useState<string | null>(null);
   const [project, setProject] = React.useState<any | null>(null);
@@ -507,6 +509,7 @@ export default function ProjectDetailsPage({
         sessionStorage.getItem("sonikoma_token");
       const data = await api.deleteProject(projectId, token || undefined);
       if (data.success) {
+        audioFeedback?.playError();
         navigateTo("/profile");
       } else {
         throw new Error(data.message || "Failed to delete project");

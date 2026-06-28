@@ -7,6 +7,7 @@ interface UseSceneModifierProps {
   setCurrentPanelIndex: (idx: number) => void;
   setConsoleLogs?: React.Dispatch<React.SetStateAction<string[]>>;
   addNotification?: (message: string, type: any) => void;
+  audioFeedback?: any;
 }
 
 export function useSceneModifier({
@@ -69,6 +70,7 @@ export function useSceneModifier({
       `Panel #${panelId} dialogue updated. ${durationMsg}`,
       "info"
     );
+    audioFeedback?.playTick();
   };
 
   const handleModifyMotion = (panelId: number, motionVal: string) => {
@@ -94,6 +96,7 @@ export function useSceneModifier({
       `Panel #${panelId} motion updated to ${motionVal}.`,
       "info"
     );
+    audioFeedback?.playTick();
   };
 
   const handleModifyDuration = (panelId: number, durVal: number) => {
@@ -118,6 +121,7 @@ export function useSceneModifier({
       ]);
     }
     addNotification?.(`Panel #${panelId} duration set to ${durVal}s.`, "info");
+    audioFeedback?.playTick();
   };
 
   const handleModifySFX = (panelId: number, sfxVal: string) => {
@@ -137,6 +141,7 @@ export function useSceneModifier({
         ...prev,
       ]);
     }
+    audioFeedback?.playTick();
   };
 
   const handleModifyVisualDescription = (panelId: number, descVal: string) => {
@@ -160,9 +165,11 @@ export function useSceneModifier({
         ...prev,
       ]);
     }
+    audioFeedback?.playTick();
   };
 
   const handleShiftPanel = (index: number, direction: "left" | "right") => {
+    audioFeedback?.playTick();
     if (direction === "left" && index > 0) {
       setPanels((prev) => {
         const copy = [...prev];
