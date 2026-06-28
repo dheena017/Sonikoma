@@ -8,6 +8,7 @@
   /* Custom color extensions to map non-standard values (e.g. neutral-850) */
   --color-neutral-150: #ededed;
   --color-neutral-250: #dcdcdc;
+  --color-neutral-305: #d4d4d8;
   --color-neutral-350: #b5b5b5;
   --color-neutral-450: #8a8a8a;
   --color-neutral-750: #333333;
@@ -19,6 +20,17 @@
 
   --color-rose-250: #fecdd3;
   --color-rose-350: #fb7185;
+}
+
+/* Explicit class styles to resolve non-standard border definitions & browser defaults */
+.border-neutral-855 {
+  border-color: #27272a !important;
+}
+
+select,
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+textarea {
+  border-color: #27272a;
 }
 
 body {
