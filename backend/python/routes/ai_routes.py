@@ -254,6 +254,12 @@ class SubtitleStylerRequest(BaseModel):
     speech_text: str
     model: Optional[str] = "gemini-2.5-flash"
 
+class GenerateThumbnailRequest(BaseModel):
+    title: str
+    genre: str
+    panels: List[Dict[str, Any]]
+    model: Optional[str] = "gemini-2.5-flash"
+
 class YouTubeChapterRequest(BaseModel):
     compiled_script: str
     model: Optional[str] = "gemini-2.5-flash"
@@ -1491,6 +1497,51 @@ async def get_transition_speed(body: TransitionSpeedRequest, user_api_key: str =
 @router.post("/skills/thumbnail-visual")
 async def get_thumbnail_visual(body: ThumbnailVisualRequest, user_api_key: str = Depends(get_user_gemini_key)):
     return await run_md_skill("thumbnail_visual_comp", body.model, api_key=user_api_key, thumbnail_concept=body.thumbnail_concept)
+
+@router.post("/skills/generate-thumbnail")
+async def generate_thumbnail_variation(body: GenerateThumbnailRequest, user_api_key: str = Depends(get_user_gemini_key)):
+    from services.thumbnail import compose_thumbnail
+
+    # 1. Prepare panel descriptions for Gemini
+    panel_descriptions = ""
+    for i, p in enumerate(body.panels):
+        panel_descriptions += f"Panel {i}: {p.get('visual_description', 'No description')}\n"
+
+    # 2. Ask Gemini for the recipe
+    recipe_res = await run_md_skill(
+        "thumbnail_auto_composition",
+        body.model,
+        api_key=user_api_key,
+        title=body.title,
+        genre=body.genre,
+        total_panels=len(body.panels),
+        panel_descriptions=panel_descriptions
+    )
+
+    if not recipe_res.get("success"):
+        return recipe_res
+
+    recipe = recipe_res["result"]
+
+    # 3. Compose the image
+    try:
+        image_bytes = await compose_thumbnail(recipe, body.panels)
+
+        # 4. Cache and return
+        import uuid
+        unique_id = f"thumb_{uuid.uuid4().hex[:8]}"
+        stitched_cache.set(unique_id, {"data": image_bytes, "content_type": "image/jpeg"})
+
+        return {
+            "success": True,
+            "url": f"/api/image/cached/{unique_id}",
+            "recipe": recipe,
+            "inputTokens": recipe_res.get("inputTokens", 0),
+            "outputTokens": recipe_res.get("outputTokens", 0)
+        }
+    except Exception as e:
+        logger.error(f"Thumbnail composition failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Thumbnail composition failed: {e}")
 
 @router.post("/skills/outro-cta")
 async def get_outro_cta(body: OutroCTARequest, user_api_key: str = Depends(get_user_gemini_key)):

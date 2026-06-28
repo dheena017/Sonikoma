@@ -705,14 +705,31 @@ export function useYouTubePublisher({
 
   const handleClearThumbnail = () => {
     setSelectedThumbnail(null);
-    if (thumbnailPreviewUrl) {
+    if (thumbnailPreviewUrl && thumbnailPreviewUrl.startsWith("blob:")) {
       URL.revokeObjectURL(thumbnailPreviewUrl);
-      setThumbnailPreviewUrl(null);
     }
+    setThumbnailPreviewUrl(null);
     setPublishLogs((prev) => [
       ...prev,
       `[Thumbnail] Cleared custom thumbnail.`,
     ]);
+  };
+
+  const handleThumbnailSelect = async (url: string) => {
+    // If it's a cached local URL, we might want to fetch it as a File for multipart upload
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const file = new File([blob], "ai_thumbnail.jpg", { type: "image/jpeg" });
+      setSelectedThumbnail(file);
+      setThumbnailPreviewUrl(url);
+      setPublishLogs((prev) => [
+        ...prev,
+        `[Thumbnail] Selected AI generated thumbnail from project library.`,
+      ]);
+    } catch (e) {
+      console.error("Failed to select AI thumbnail", e);
+    }
   };
 
   // Description quick insert helpers
@@ -1077,5 +1094,6 @@ export function useYouTubePublisher({
     handleInjectPowerWord,
     handleInsertMusicCredit,
     handleAppendTunedChapters,
+    handleThumbnailSelect,
   };
 }
