@@ -1,3 +1,5 @@
+import { Globe, Book, Smartphone, ExternalLink } from "lucide-react";
+
 // Extracts the first valid URL if the pasted string contains duplicate or concatenated links.
 export function extractWebtoonUrl(urlStr: string): string {
   if (!urlStr) return "";
@@ -206,5 +208,24 @@ export function getSourceName(urlStr: string): string {
     return "Custom Source";
   } catch {
     return "Custom Source";
+  }
+}
+
+export function getSourceIcon(urlStr: string) {
+  try {
+    if (!urlStr) return Globe;
+    const cleaned = urlStr.trim();
+    const urlObj = new URL(
+      cleaned.startsWith("http") ? cleaned : "https://" + cleaned
+    );
+    const host = urlObj.hostname.toLowerCase();
+
+    if (host.includes("webtoons.com") || host.includes("webtoon.com"))
+      return Book;
+    if (host.includes("webcomicsapp.com")) return Smartphone;
+
+    return ExternalLink;
+  } catch {
+    return Globe;
   }
 }
