@@ -1,4 +1,5 @@
 import React from "react";
+import * as api from "../api/index.js";
 import {
   ArrowLeft,
   BookOpen,
@@ -62,19 +63,12 @@ export default function SeriesDetailsPage({
         if (token) {
           headers["Authorization"] = `Bearer ${token}`;
         }
-        const res = await fetch(`/api/projects/series/${seriesSlug}`, {
-          headers,
-        });
-        if (!res.ok) {
-          throw new Error(`Failed to load series (HTTP ${res.status})`);
-        }
-        const data = await res.json();
+        const data = await api.getSeries(seriesSlug, token || undefined);
         if (data.success) {
           setSeries(data.series);
 
           // Also fetch chapters for this series
-          const chaptersRes = await fetch(`/api/projects`, { headers });
-          const chaptersData = await chaptersRes.json();
+          const chaptersData = await api.getProjects(token || "");
           if (chaptersData.success) {
             const seriesChapters = chaptersData.projects.filter(
               (p: any) => p.series_id === data.series.id
@@ -116,13 +110,8 @@ export default function SeriesDetailsPage({
       const token =
         localStorage.getItem("sonikoma_token") ||
         sessionStorage.getItem("sonikoma_token");
-      const res = await fetch(`/api/projects/${projectId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (res.ok) {
+      const res = await api.deleteProject(projectId, token || undefined);
+      if (res) {
         setChapters((prev) => prev.filter((ch) => ch.project_id !== projectId));
       }
     } catch (err) {

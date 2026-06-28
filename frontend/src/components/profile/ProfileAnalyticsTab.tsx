@@ -1,4 +1,5 @@
 import React from "react";
+import * as api from "../../api/index.js";
 import {
   Activity,
   Film,
@@ -21,10 +22,7 @@ export default function ProfileAnalyticsTab() {
       sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
-    fetch("/api/auth/analytics", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((r) => r.json())
+    api.getCreatorAnalytics(token)
       .then((data) => {
         if (data.success && data.analytics) {
           setAnalytics(data.analytics);

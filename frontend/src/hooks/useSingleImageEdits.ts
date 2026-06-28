@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { NotificationType } from "../components/NotificationStack";
-import { processWithConcurrency } from "../utils/batchUtils";
+import { NotificationType } from "../components/NotificationStack.js";
+import { processWithConcurrency } from "../utils/batchUtils.js";
+import * as api from "../api/index.js";
 
 interface UseSingleImageEditsProps {
   editingImageIdx: number | null;
@@ -54,20 +55,15 @@ export function useSingleImageEdits({
     ]);
 
     try {
-      const response = await fetchWithInterceptor("/api/image/edit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          url: originalUrl,
-          cropTop: editCropTop,
-          cropBottom: editCropBottom,
-          cropLeft: editCropLeft,
-          cropRight: editCropRight,
-          autoTrim: editAutoTrim,
-        }),
+      const data = await api.editImage(fetchWithInterceptor, {
+        url: originalUrl,
+        cropTop: editCropTop,
+        cropBottom: editCropBottom,
+        cropLeft: editCropLeft,
+        cropRight: editCropRight,
+        autoTrim: editAutoTrim,
       });
 
-      const data = await response.json();
       const croppedUrl = data.url;
 
       // Add directly to Timeline only
@@ -148,19 +144,14 @@ export function useSingleImageEdits({
             `[Image Editor] Starting Crop Cut #${index + 1}/${cuts.length}...`,
             ...prev,
           ]);
-          const response = await fetchWithInterceptor("/api/image/edit", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              url: originalUrl,
-              cropTop: cut.cropTop,
-              cropBottom: cut.cropBottom,
-              cropLeft: cut.cropLeft,
-              cropRight: cut.cropRight,
-              autoTrim: cut.autoTrim,
-            }),
+          const data = await api.editImage(fetchWithInterceptor, {
+            url: originalUrl,
+            cropTop: cut.cropTop,
+            cropBottom: cut.cropBottom,
+            cropLeft: cut.cropLeft,
+            cropRight: cut.cropRight,
+            autoTrim: cut.autoTrim,
           });
-          const data = await response.json();
           setConsoleLogs((prev) => [
             `[Image Editor] Crop Cut #${index + 1}/${cuts.length} complete.`,
             ...prev,
@@ -217,13 +208,7 @@ export function useSingleImageEdits({
       const img1 = scrapedImages[idx];
       const img2 = scrapedImages[idx + 1];
 
-      const response = await fetchWithInterceptor("/api/image/merge", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ urls: [img1, img2] }),
-      });
-
-      const data = await response.json();
+      const data = await api.mergeImages(fetchWithInterceptor, { urls: [img1, img2] });
       const stitchedUrl = data.url;
 
       setScrapedImages((prev) => {

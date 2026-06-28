@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Megaphone, Plus, Trash2, Send, Clock, AlertTriangle } from "lucide-react";
+import * as api from "../../api/index.js";
 
 export function AdminAnnouncementsTab({ fetchWithInterceptor }: { fetchWithInterceptor: (url: string, options?: RequestInit) => Promise<Response> }) {
   const [announcements, setAnnouncements] = useState<any[]>([]);
@@ -16,8 +17,7 @@ export function AdminAnnouncementsTab({ fetchWithInterceptor }: { fetchWithInter
   const fetchAnnouncements = async () => {
     try {
       setLoading(true);
-      const res = await fetchWithInterceptor("http://localhost:8000/api/auth/admin/announcements");
-      const data = await res.json();
+      const data = await api.adminGetAnnouncements(fetchWithInterceptor);
       if (data.success) {
         setAnnouncements(data.announcements);
       }
@@ -33,12 +33,7 @@ export function AdminAnnouncementsTab({ fetchWithInterceptor }: { fetchWithInter
     if (!newTitle || !newMessage) return;
     
     try {
-      const res = await fetchWithInterceptor("http://localhost:8000/api/auth/admin/announcements", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: newTitle, message: newMessage, type: newType }),
-      });
-      const data = await res.json();
+      const data = await api.adminCreateAnnouncement(fetchWithInterceptor, { title: newTitle, message: newMessage, type: newType });
       if (data.success) {
         setIsCreating(false);
         setNewTitle("");
@@ -54,10 +49,7 @@ export function AdminAnnouncementsTab({ fetchWithInterceptor }: { fetchWithInter
   const handleDelete = async (id: number) => {
     if (!await (window as any).confirmAsync("Delete this announcement?")) return;
     try {
-      const res = await fetchWithInterceptor(`http://localhost:8000/api/auth/admin/announcements/${id}`, {
-        method: "DELETE",
-      });
-      const data = await res.json();
+      const data = await api.adminDeleteAnnouncement(fetchWithInterceptor, id);
       if (data.success) {
         setAnnouncements(announcements.filter((a) => a.id !== id));
       }

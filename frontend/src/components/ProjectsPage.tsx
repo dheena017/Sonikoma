@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
 import { Film, FolderOpen, Loader2, ArrowRight, Plus, Search, Filter, BarChart2, CheckCircle2, FileVideo, LayoutGrid, List, MoreVertical, Trash2, Link, Square, CheckSquare, X } from "lucide-react";
 import { getSourceName } from "../utils.js";
+import * as api from "../api/index.js";
 
 interface Project {
   project_id: string;
@@ -34,16 +35,8 @@ export default function ProjectsPage() {
   const fetchProjects = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/projects", {
-        headers: {
-          Authorization: `Bearer ${
-            localStorage.getItem("sonikoma_token") ||
-            sessionStorage.getItem("sonikoma_token") ||
-            ""
-          }`,
-        },
-      });
-      const data = await res.json();
+      const token = localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token") || "";
+      const data = await api.getProjects(token);
       if (data.projects) {
         setProjects(data.projects);
       }
@@ -93,17 +86,8 @@ export default function ProjectsPage() {
     
     if (await (window as any).confirmAsync?.("Are you sure you want to permanently delete this project? This action cannot be undone.", "Delete Project", "rose")) {
       try {
-        const res = await fetch(`/api/projects/${projectId}`, {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${
-              localStorage.getItem("sonikoma_token") ||
-              sessionStorage.getItem("sonikoma_token") ||
-              ""
-            }`,
-          }
-        });
-        const data = await res.json();
+        const token = localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token") || "";
+        const data = await api.deleteProject(projectId, token);
         if (data.success) {
           setProjects(projects.filter(p => p.project_id !== projectId));
           setSelectedProjects(prev => {
@@ -126,19 +110,8 @@ export default function ProjectsPage() {
     
     if (await (window as any).confirmAsync?.(`Are you sure you want to delete ${selectedProjects.size} selected projects? This action cannot be undone.`, "Bulk Delete", "rose")) {
       try {
-        const res = await fetch(`/api/projects/batch-delete`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${
-              localStorage.getItem("sonikoma_token") ||
-              sessionStorage.getItem("sonikoma_token") ||
-              ""
-            }`,
-          },
-          body: JSON.stringify({ project_ids: Array.from(selectedProjects) })
-        });
-        const data = await res.json();
+        const token = localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token") || "";
+        const data = await api.batchDeleteProjects(Array.from(selectedProjects), token);
         if (data.success) {
           setProjects(projects.filter(p => !selectedProjects.has(p.project_id)));
           setSelectedProjects(new Set());

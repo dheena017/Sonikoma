@@ -1,16 +1,15 @@
 import React from "react";
+import * as api from "../api/index.js";
 import {
   User,
   Mail,
   Shield,
-  History,
   Settings,
   LogOut,
   Camera,
   LayoutGrid,
   CreditCard,
   Key,
-  Globe,
   Sparkles,
   BarChart3,
   Activity,
@@ -51,7 +50,14 @@ export default function ProfilePage({
 
   // Navigation tabs
   const [activeTab, setActiveTab] = React.useState<
-    "projects" | "account" | "security" | "billing" | "api" | "analytics" | "preferences" | "stats"
+    | "projects"
+    | "account"
+    | "security"
+    | "billing"
+    | "api"
+    | "analytics"
+    | "preferences"
+    | "stats"
   >("projects");
 
   // Local state for profile values
@@ -80,21 +86,21 @@ export default function ProfilePage({
   const [workspacePrefs, setWorkspacePrefs] = React.useState({
     hardwareAcceleration: true,
     compactMode: false,
-    autoSaveInterval: "5m"
+    autoSaveInterval: "5m",
   });
   const [privacyPrefs, setPrivacyPrefs] = React.useState({
     analyticsTelemetry: true,
-    publicProfile: false
+    publicProfile: false,
   });
   const [aiPrefs, setAiPrefs] = React.useState({
     defaultModel: "gemini-1.5-flash",
     defaultVoice: "google-tts-en-US-Standard-D",
-    autoCropSensitivity: "medium"
+    autoCropSensitivity: "medium",
   });
   const [exportPrefs, setExportPrefs] = React.useState({
     resolution: "1080p",
     framerate: "30fps",
-    audioFormat: "mp3"
+    audioFormat: "mp3",
   });
   const [themePrefs, setThemePrefs] = React.useState("dark");
   const [accentColor, setAccentColor] = React.useState("purple");
@@ -165,12 +171,26 @@ export default function ProfilePage({
   // MFA state
   const [is2faEnabled, setIs2faEnabled] = React.useState(false);
 
+  const identifyPortfolioSite = (url: string) => {
+    const low = url.toLowerCase();
+    if (low.includes("webtoons.com")) return "Webtoons";
+    if (low.includes("tapas.io")) return "Tapas";
+    if (low.includes("artstation.com")) return "ArtStation";
+    if (low.includes("behance.net")) return "Behance";
+    if (low.includes("twitter.com") || low.includes("x.com")) return "Twitter";
+    if (low.includes("instagram.com")) return "Instagram";
+    if (low.includes("github.com")) return "GitHub";
+    return "Website";
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (file.size > 2 * 1024 * 1024) {
-      await (window as any).alertAsync("Image is too large. Please choose an image smaller than 2MB.");
+      await (window as any).alertAsync(
+        "Image is too large. Please choose an image smaller than 2MB."
+      );
       return;
     }
 
@@ -193,13 +213,8 @@ export default function ProfilePage({
     if (!token) return;
 
     try {
-      const response = await fetch("/api/auth/profile", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
+      const data = await api.updateProfile(
+        {
           full_name: profileUser.fullName,
           avatar_url: tempAvatarUrl,
           creator_role: profileUser.role,
@@ -208,13 +223,9 @@ export default function ProfilePage({
           language: profileUser.language,
           portfolio_links: portfolios.map((p) => p.url),
           social_connections: connections,
-        }),
-      });
-
-      const res = await response.json();
-      if (!response.ok) {
-        throw new Error(res.detail || "Profile picture update failed");
-      }
+        },
+        token
+      );
 
       setProfileUser((prev) => ({
         ...prev,
@@ -239,7 +250,9 @@ export default function ProfilePage({
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err: any) {
-      await (window as any).alertAsync(err.message || "Failed to update profile picture");
+      await (window as any).alertAsync(
+        err.message || "Failed to update profile picture"
+      );
     } finally {
       setShowConfirmModal(false);
       setTempAvatarUrl(null);
@@ -306,14 +319,10 @@ export default function ProfilePage({
       sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
-    fetch("/api/projects", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((r) => r.json())
+    api
+      .getProjects(token)
       .then((res) => {
-        if (res.success) {
-          setLocalProjects(res.projects || []);
-        }
+        if (res.success) setLocalProjects(res.projects);
       })
       .catch(console.error);
   }, []);
@@ -325,69 +334,29 @@ export default function ProfilePage({
       sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
-    fetch("/api/auth/me", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((r) => r.json())
+    api
+      .getCurrentUser(token)
       .then((data) => {
-        if (data.user_id) {
-          setCredits(data.credits);
-          setUnlockedRewards(data.unlocked_rewards || []);
-
-          const loadedConnections = data.social_connections || {
-            google: true,
-            github: false,
-            discord: false,
-          };
-          setConnections(loadedConnections);
-
-          setUnlockedAchievements(data.unlocked_achievements || []);
-          setAchievementPoints(
-            data.achievement_points !== undefined
-              ? data.achievement_points
-              : 380
+        const u = data.user || data;
+        if (u && (u.user_id || u.id)) {
+          setCredits(u.credits);
+          setSubscriptionTier(u.subscription_tier || "free");
+          setAchievementPoints(u.achievement_points || 0);
+          setUnlockedRewards(u.unlocked_rewards || []);
+          setIs2faEnabled(u.mfa_enabled);
+          setPortfolios(
+            (u.portfolio_links || []).map((url: string) => ({
+              id: Math.random().toString(36).substring(2, 11),
+              site: identifyPortfolioSite(url),
+              url,
+            }))
           );
-
-          const loadedPortfolios = (data.portfolio_links || []).map(
-            (url: string, idx: number) => {
-              const lower = url.toLowerCase();
-              let site = "Webtoons";
-              if (lower.includes("tapas")) site = "Tapas";
-              else if (lower.includes("artstation")) site = "ArtStation";
-              else if (lower.includes("behance")) site = "Behance";
-              return {
-                id: idx.toString(),
-                site: site,
-                url: url,
-              };
+          setConnections(
+            u.social_connections || {
+              google: false,
+              github: false,
+              discord: false,
             }
-          );
-          setPortfolios(loadedPortfolios);
-
-          const loadedUser = {
-            fullName: data.full_name || "Sonikoma Creator",
-            email: data.email || "creator@sonikoma.com",
-            avatarUrl: data.avatar_url || "",
-            role: data.creator_role || "creator",
-            bio:
-              data.bio ||
-              "Comic visual director and anime fan editing high-quality cinematic stories.",
-            newsletter: data.newsletter !== undefined ? data.newsletter : true,
-            language: data.language || "en",
-          };
-          setProfileUser(loadedUser);
-
-          setIs2faEnabled(!!data.mfa_enabled);
-          setHasClaimedToday(!!data.has_claimed_today);
-          setStreakDays(data.streak_days || 1);
-          setSubscriptionTier(data.subscription_tier || "free");
-          setCardInfo(data.preferences?.card_info || null);
-
-          // Update last saved ref with loaded data
-          lastSavedProfileRef.current = getSerializedProfile(
-            loadedUser,
-            loadedConnections,
-            loadedPortfolios
           );
         }
       })
@@ -395,53 +364,38 @@ export default function ProfilePage({
 
     fetchProjects();
 
-    fetch("/api/auth/sessions", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((r) => r.json())
+    api
+      .getSessions(token)
       .then((res) => {
-        if (res.success) {
+        if (res.success && res.sessions) {
           setSessions(
             res.sessions.map((s: any) => ({
-              id: s.session_id,
+              id: s.session_id || s.id,
               browser: s.browser,
               ip: s.ip,
-              location: s.location,
-              active: s.active === 1,
+              location: s.location || "Unknown",
+              active: !!s.active,
             }))
           );
         }
       })
       .catch(console.error);
 
-    fetch("/api/auth/api-keys", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((r) => r.json())
+    api
+      .getApiKeys(token)
       .then((res) => {
-        if (res.success) {
-          setApiTokens(
-            res.keys.map((k: any) => ({
-              id: k.key_id,
-              name: k.name,
-              key: k.api_key,
-              created: k.created_at.split(" ")[0],
-            }))
-          );
-        }
+        if (res.success) setApiTokens(res.keys);
       })
       .catch(console.error);
 
-    fetch("/api/auth/invoices", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((r) => r.json())
+    api
+      .getInvoices(token)
       .then((res) => {
-        if (res.success) {
+        if (res.success && res.invoices) {
           setInvoices(
             res.invoices.map((inv: any) => ({
-              id: inv.invoice_id,
-              date: inv.created_at.split(" ")[0],
+              id: inv.invoice_id || inv.id,
+              date: inv.created_at || inv.date,
               amount: inv.amount,
               status: inv.status,
             }))
@@ -450,8 +404,8 @@ export default function ProfilePage({
       })
       .catch(console.error);
 
-    fetch("/api/metrics")
-      .then((r) => r.json())
+    api
+      .getMetrics()
       .then((res) => {
         if (res.storage) {
           setCacheUsed(res.storage.usedBytes);
@@ -459,13 +413,13 @@ export default function ProfilePage({
         }
       })
       .catch(console.error);
-  }, [user]);
+  }, [user, fetchProjects]);
 
   // Real-time polling for Workspace Stats
   React.useEffect(() => {
     const interval = setInterval(() => {
-      fetch("/api/metrics")
-        .then((r) => r.json())
+      api
+        .getMetrics()
         .then((res) => {
           if (res.storage) {
             setCacheUsed(res.storage.usedBytes);
@@ -478,14 +432,11 @@ export default function ProfilePage({
         localStorage.getItem("sonikoma_token") ||
         sessionStorage.getItem("sonikoma_token");
       if (token) {
-        fetch("/api/auth/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-          .then((r) => r.json())
-          .then((res) => {
-            if (res.credits !== undefined) {
-              setCredits(res.credits);
-            }
+        api
+          .getCurrentUser(token)
+          .then((data) => {
+            const u = data.user || data;
+            if (u) setCredits(u.credits);
           })
           .catch(() => {});
       }
@@ -493,7 +444,6 @@ export default function ProfilePage({
 
     return () => clearInterval(interval);
   }, []);
-
 
   // Render initials or background gradients for avatar
   const renderAvatarContent = (url: string, name: string) => {
@@ -526,30 +476,19 @@ export default function ProfilePage({
       sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
-    fetch("/api/auth/profile", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        full_name: profileUser.fullName,
-        avatar_url: profileUser.avatarUrl,
-        creator_role: profileUser.role,
-        bio: profileUser.bio,
-        newsletter: profileUser.newsletter,
-        language: profileUser.language,
-        portfolio_links: portfolios.map((p) => p.url),
-        social_connections: connections,
-      }),
-    })
-      .then(async (r) => {
-        const res = await r.json();
-        if (!r.ok) {
-          throw new Error(res.detail || "Profile save failed");
-        }
-        return res;
-      })
+    const data = {
+      full_name: profileUser.fullName,
+      avatar_url: profileUser.avatarUrl,
+      creator_role: profileUser.role,
+      bio: profileUser.bio,
+      newsletter: profileUser.newsletter,
+      language: profileUser.language,
+      portfolio_links: portfolios.map((p) => p.url),
+      social_connections: connections,
+    };
+
+    api
+      .updateProfile(data, token)
       .then(() => {
         setSaveSuccess(true);
         lastSavedProfileRef.current = currentProfileStr;
@@ -557,7 +496,9 @@ export default function ProfilePage({
         setTimeout(() => setSaveSuccess(false), 3000);
       })
       .catch(async (err) => {
-        await (window as any).alertAsync(err.message || "Failed to save profile changes");
+        await (window as any).alertAsync(
+          err.message || "Failed to save profile changes"
+        );
       });
   };
 
@@ -584,24 +525,13 @@ export default function ProfilePage({
       sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
-    fetch("/api/auth/password", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        current_password: passwordState.current,
-        new_password: passwordState.new,
-      }),
-    })
-      .then(async (r) => {
-        const res = await r.json();
-        if (!r.ok) {
-          throw new Error(res.detail || "Password update failed");
-        }
-        return res;
-      })
+    const data = {
+      current_password: passwordState.current,
+      new_password: passwordState.new,
+    };
+
+    api
+      .updatePassword(data, token)
       .then(() => {
         setPasswordSuccess(true);
         setPasswordState({ current: "", new: "", confirm: "" });
@@ -626,11 +556,8 @@ export default function ProfilePage({
       return;
     }
 
-    fetch(`/api/auth/sessions/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((r) => r.json())
+    api
+      .terminateSession(id, token)
       .then((res) => {
         if (res.success) {
           setSessions((prev) => prev.filter((s) => s.id !== id));
@@ -646,17 +573,8 @@ export default function ProfilePage({
       sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
-    fetch("/api/auth/claim-credits", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(async (r) => {
-        const res = await r.json();
-        if (!r.ok) {
-          throw new Error(res.detail || "Failed to claim credits");
-        }
-        return res;
-      })
+    api
+      .claimCredits(token)
       .then((res) => {
         if (res.success) {
           setCredits(res.credits);
@@ -670,7 +588,9 @@ export default function ProfilePage({
         }
       })
       .catch(async (err) => {
-        await (window as any).alertAsync(err.message || "Could not claim daily credits");
+        await (window as any).alertAsync(
+          err.message || "Could not claim daily credits"
+        );
       });
   };
 
@@ -680,34 +600,13 @@ export default function ProfilePage({
       sessionStorage.getItem("sonikoma_token");
     if (!token) return;
     try {
-      const r = await fetch("/api/auth/upgrade-plan", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const res = await r.json();
-      if (!r.ok) {
-        throw new Error(res.detail || "Failed to upgrade plan");
-      }
+      const res = await api.upgradePlan(token);
       if (res.success) {
         setSubscriptionTier("pro");
-        const invRes = await fetch("/api/auth/invoices", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const invData = await invRes.json();
-        if (invData.success) {
-          setInvoices(
-            invData.invoices.map((inv: any) => ({
-              id: inv.invoice_id,
-              date: inv.created_at.split(" ")[0],
-              amount: inv.amount,
-              status: inv.status,
-            }))
-          );
+        const invRes = await api.getInvoices(token);
+        if (invRes.success) {
+          setInvoices(invRes.invoices);
         }
-        if (onRefreshUser) {
-          await onRefreshUser(false);
-        }
-        await (window as any).alertAsync("Successfully upgraded to Studio Pro!");
       }
     } catch (err: any) {
       await (window as any).alertAsync(err.message || "Failed to upgrade plan");
@@ -725,18 +624,7 @@ export default function ProfilePage({
       sessionStorage.getItem("sonikoma_token");
     if (!token) return;
     try {
-      const r = await fetch("/api/auth/save-card", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(card),
-      });
-      const res = await r.json();
-      if (!r.ok) {
-        throw new Error(res.detail || "Failed to save card");
-      }
+      const res = await api.saveCard(card, token);
       if (res.success) {
         setCardInfo(card);
         await (window as any).alertAsync("Payment method saved successfully!");
@@ -755,41 +643,19 @@ export default function ProfilePage({
       sessionStorage.getItem("sonikoma_token");
     if (!token) return;
     try {
-      const r = await fetch("/api/auth/purchase-credits", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ credits: amountOfCredits, amount: priceUSD }),
-      });
-      const res = await r.json();
-      if (!r.ok) {
-        throw new Error(res.detail || "Failed to purchase package");
-      }
+      const data = { credits: amountOfCredits, amount: priceUSD };
+      const res = await api.purchaseCredits(data, token);
       if (res.success) {
         setCredits(res.credits);
-        const invRes = await fetch("/api/auth/invoices", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const invData = await invRes.json();
-        if (invData.success) {
-          setInvoices(
-            invData.invoices.map((inv: any) => ({
-              id: inv.invoice_id,
-              date: inv.created_at.split(" ")[0],
-              amount: inv.amount,
-              status: inv.status,
-            }))
-          );
+        const invRes = await api.getInvoices(token);
+        if (invRes.success) {
+          setInvoices(invRes.invoices);
         }
-        if (onRefreshUser) {
-          await onRefreshUser(false);
-        }
-        await (window as any).alertAsync(`Successfully purchased ${amountOfCredits} credits!`);
       }
     } catch (err: any) {
-      await (window as any).alertAsync(err.message || "Failed to purchase package");
+      await (window as any).alertAsync(
+        err.message || "Failed to purchase package"
+      );
     }
   };
 
@@ -802,21 +668,8 @@ export default function ProfilePage({
       sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
-    fetch("/api/auth/api-keys", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ name: newTokenName }),
-    })
-      .then(async (r) => {
-        const res = await r.json();
-        if (!r.ok) {
-          throw new Error(res.detail || "Failed to generate key");
-        }
-        return res;
-      })
+    api
+      .createApiKey({ name: newTokenName }, token)
       .then((res) => {
         if (res.success) {
           setApiTokens((prev) => [
@@ -833,7 +686,9 @@ export default function ProfilePage({
         }
       })
       .catch(async (err) => {
-        await (window as any).alertAsync(err.message || "Failed to generate key");
+        await (window as any).alertAsync(
+          err.message || "Failed to generate key"
+        );
       });
   };
 
@@ -856,11 +711,8 @@ export default function ProfilePage({
       return;
     }
 
-    fetch(`/api/auth/api-keys/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((r) => r.json())
+    api
+      .deleteApiKey(id, token)
       .then((res) => {
         if (res.success) {
           setApiTokens((prev) => prev.filter((t) => t.id !== id));
@@ -876,17 +728,7 @@ export default function ProfilePage({
     if (!token) return false;
 
     try {
-      const response = await fetch("/api/auth/mfa", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ mfa_enabled: enabled }),
-      });
-
-      if (!response.ok) return false;
-      const res = await response.json();
+      const res = await api.updateMfa(enabled, token);
       if (res.success) {
         setIs2faEnabled(enabled);
         return true;
@@ -909,21 +751,12 @@ export default function ProfilePage({
     if (!token) return false;
 
     try {
-      const response = await fetch("/api/auth/redeem-points", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          points: cost,
-          reward_type: type,
-          reward_value: value,
-        }),
-      });
-
-      if (!response.ok) return false;
-      const res = await response.json();
+      const data = {
+        points: cost,
+        reward_type: type,
+        reward_value: value,
+      };
+      const res = await api.redeemReward(data, token);
       if (res.success) {
         if (type === "credits") {
           setCredits(res.credits);
@@ -945,21 +778,8 @@ export default function ProfilePage({
       sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
-    fetch("/api/projects/batch-delete", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ project_ids: ids }),
-    })
-      .then(async (r) => {
-        const res = await r.json();
-        if (!r.ok) {
-          throw new Error(res.detail || "Bulk deletion failed");
-        }
-        return res;
-      })
+    api
+      .batchDeleteProjects(ids, token)
       .then((res) => {
         if (res.success) {
           setLocalProjects((prev) =>
@@ -968,7 +788,9 @@ export default function ProfilePage({
         }
       })
       .catch(async (err) => {
-        await (window as any).alertAsync(err.message || "Failed to bulk delete projects");
+        await (window as any).alertAsync(
+          err.message || "Failed to bulk delete projects"
+        );
       });
   };
 
@@ -978,24 +800,17 @@ export default function ProfilePage({
       sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
-    fetch(`/api/projects/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(async (r) => {
-        const res = await r.json();
-        if (!r.ok) {
-          throw new Error(res.detail || "Deletion failed");
-        }
-        return res;
-      })
+    api
+      .deleteProject(id, token)
       .then((res) => {
         if (res.success) {
           setLocalProjects((prev) => prev.filter((p) => p.project_id !== id));
         }
       })
       .catch(async (err) => {
-        await (window as any).alertAsync(err.message || "Failed to delete chapter");
+        await (window as any).alertAsync(
+          err.message || "Failed to delete chapter"
+        );
       });
   };
 
@@ -1005,17 +820,8 @@ export default function ProfilePage({
       sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
-    fetch(`/api/projects/series/${seriesId}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(async (r) => {
-        const res = await r.json();
-        if (!r.ok) {
-          throw new Error(res.detail || "Deletion failed");
-        }
-        return res;
-      })
+    api
+      .deleteSeries(seriesId, token)
       .then((res) => {
         if (res.success) {
           setLocalProjects((prev) =>
@@ -1024,7 +830,9 @@ export default function ProfilePage({
         }
       })
       .catch(async (err) => {
-        await (window as any).alertAsync(err.message || "Failed to delete series");
+        await (window as any).alertAsync(
+          err.message || "Failed to delete series"
+        );
       });
   };
 
@@ -1051,14 +859,18 @@ export default function ProfilePage({
         accentColor: accentColor,
         fontScale: fontScale,
         reduceMotion: reduceMotion,
-        cornerRadius: cornerRadius
-      }
+        cornerRadius: cornerRadius,
+      },
     };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `sonikoma_account_export_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `sonikoma_account_export_${
+      new Date().toISOString().split("T")[0]
+    }.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -1074,27 +886,29 @@ export default function ProfilePage({
     );
     if (!confirmed) return;
 
-    const token = localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token");
+    const token =
+      localStorage.getItem("sonikoma_token") ||
+      sessionStorage.getItem("sonikoma_token");
     if (!token) {
       onLogout();
       return;
     }
 
     try {
-      const response = await fetch("/api/auth/me", {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (response.ok) {
+      const res = await api.deleteAccount(token);
+      if (res.success) {
         await (window as any).alertAsync("Account deleted successfully.");
         onLogout();
       } else {
-        const res = await response.json();
-        await (window as any).alertAsync(res.detail || "Failed to delete account");
+        await (window as any).alertAsync(
+          res.detail || "Failed to delete account"
+        );
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      await (window as any).alertAsync("Failed to delete account.");
+      await (window as any).alertAsync(
+        err.message || "Failed to delete account."
+      );
     }
   };
 
@@ -1361,7 +1175,6 @@ export default function ProfilePage({
 
           {/* TAB CONTENT PANEL SWITCHER */}
           <div className="space-y-6">
-
             {/* TAB: WORKSPACE STATS */}
             {activeTab === "stats" && (
               <div className="bg-[#0c0c0e]/30 border border-white/5 rounded-3xl p-6 space-y-6 text-left shadow-xl animate-in fade-in zoom-in-95 duration-300">
@@ -1521,7 +1334,10 @@ export default function ProfilePage({
                 exportSettings={exportPrefs}
                 setExportSettings={setExportPrefs}
                 themeMode={themeMode || themePrefs}
-                toggleThemeMode={toggleThemeMode || (() => setThemePrefs(p => p === "dark" ? "light" : "dark"))}
+                toggleThemeMode={
+                  toggleThemeMode ||
+                  (() => setThemePrefs((p) => (p === "dark" ? "light" : "dark")))
+                }
                 accentColor={accentColor}
                 setAccentColor={setAccentColor}
                 fontScale={fontScale}
@@ -1608,4 +1424,3 @@ export default function ProfilePage({
     </div>
   );
 }
-

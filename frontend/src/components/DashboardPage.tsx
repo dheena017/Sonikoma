@@ -20,6 +20,7 @@ import {
   FileText,
 } from "lucide-react";
 import { getSourceName } from "../utils.js";
+import * as api from "../api/index.js";
 
 interface Project {
   project_id: string;
@@ -40,16 +41,8 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const res = await fetch("/api/projects", {
-          headers: {
-            Authorization: `Bearer ${
-              localStorage.getItem("sonikoma_token") ||
-              sessionStorage.getItem("sonikoma_token") ||
-              ""
-            }`,
-          },
-        });
-        const data = await res.json();
+        const token = localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token") || "";
+        const data = await api.getProjects(token);
         if (data.projects) {
           setProjects(data.projects);
         }
@@ -63,7 +56,7 @@ export default function DashboardPage() {
     const testLatency = async () => {
       const start = Date.now();
       try {
-        await fetch("/api/health");
+        await api.checkHealth();
         setLatency(Date.now() - start);
       } catch {
         setLatency(null);

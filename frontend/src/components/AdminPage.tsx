@@ -30,6 +30,7 @@ import {
 
 import { AdminOverviewTab } from "./admin/AdminOverviewTab";
 import { AdminAnnouncementsTab } from "./admin/AdminAnnouncementsTab";
+import * as api from "../api/index.js";
 
 export default function AdminPage({
   navigateTo,
@@ -105,11 +106,8 @@ export default function AdminPage({
 
   const fetchUsers = async () => {
     try {
-      const res = await fetchWithInterceptor("/api/auth/admin/users");
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success) setUsers(data.users);
-      }
+      const data = await api.adminGetUsers(fetchWithInterceptor);
+      if (data.success) setUsers(data.users);
     } catch (err) {
       console.error("Failed to fetch admin users:", err);
     } finally {
@@ -119,24 +117,21 @@ export default function AdminPage({
 
   const fetchStats = async () => {
     try {
-      const res = await fetchWithInterceptor("/api/metrics");
-      if (res.ok) {
-        const data = await res.json();
-        setStats({
-          users: data.database?.users || 0,
-          projects: data.database?.projects || 0,
-          scenes: data.database?.scenes || 0,
-          memory: `${data.memory?.rssMB || 0}MB`,
-          dbLatencyMs: data.database?.dbLatencyMs || 0,
-          gpuWorkers: data.database?.gpuWorkers || {
-            total: 0,
-            busy: 0,
-            idle: 0,
-          },
-          uptime: data.server?.uptime || "",
-          cpuPct: data.memory?.cpuPct || 0,
-        });
-      }
+      const data = await api.getMetrics();
+      setStats({
+        users: data.database?.users || 0,
+        projects: data.database?.projects || 0,
+        scenes: data.database?.scenes || 0,
+        memory: `${data.memory?.rssMB || 0}MB`,
+        dbLatencyMs: data.database?.dbLatencyMs || 0,
+        gpuWorkers: data.database?.gpuWorkers || {
+          total: 0,
+          busy: 0,
+          idle: 0,
+        },
+        uptime: data.server?.uptime || "",
+        cpuPct: data.memory?.cpuPct || 0,
+      });
     } catch (err) {
       console.error("Failed to fetch stats:", err);
     }
@@ -145,11 +140,8 @@ export default function AdminPage({
   const fetchSettings = async () => {
     setLoadingSettings(true);
     try {
-      const res = await fetchWithInterceptor("/api/auth/admin/settings");
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success) setSettings(data.settings);
-      }
+      const data = await api.adminGetSettings(fetchWithInterceptor);
+      if (data.success) setSettings(data.settings);
     } catch (err) {
       console.error("Failed to fetch settings:", err);
     } finally {
@@ -160,11 +152,8 @@ export default function AdminPage({
   const fetchGlobalLogs = async () => {
     setLoadingGlobalLogs(true);
     try {
-      const res = await fetchWithInterceptor("/api/auth/admin/audit-logs");
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success) setGlobalLogs(data.logs);
-      }
+      const data = await api.adminGetAuditLogs(fetchWithInterceptor);
+      if (data.success) setGlobalLogs(data.logs);
     } catch (err) {
       console.error("Failed to fetch global logs:", err);
     } finally {
@@ -175,11 +164,8 @@ export default function AdminPage({
   const fetchAnalytics = async () => {
     setLoadingAnalytics(true);
     try {
-      const res = await fetchWithInterceptor("/api/auth/admin/analytics");
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success) setAnalytics(data.analytics);
-      }
+      const data = await api.adminGetAnalytics(fetchWithInterceptor);
+      if (data.success) setAnalytics(data.analytics);
     } catch (err) {
       console.error("Failed to fetch analytics:", err);
     } finally {
@@ -190,11 +176,8 @@ export default function AdminPage({
   const fetchProjects = async () => {
     setLoadingProjects(true);
     try {
-      const res = await fetchWithInterceptor("/api/auth/admin/projects");
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success) setProjects(data.projects);
-      }
+      const data = await api.adminGetProjects(fetchWithInterceptor);
+      if (data.success) setProjects(data.projects);
     } catch (err) {
       console.error("Failed to fetch projects:", err);
     } finally {
@@ -220,18 +203,11 @@ export default function AdminPage({
     e.preventDefault();
     if (!editingUser) return;
     try {
-      const res = await fetchWithInterceptor(
-        `/api/auth/admin/users/${editingUser.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+      const data = await api.adminUpdateUser(fetchWithInterceptor, editingUser.id, {
             creator_role: editingUser.creator_role,
             credits: parseInt(editingUser.credits),
-          }),
-        }
-      );
-      if (res.ok) {
+          });
+      if (data) {
         setEditingUser(null);
         fetchUsers();
       }
@@ -243,13 +219,8 @@ export default function AdminPage({
   const handleDeleteUser = async () => {
     if (!deletingUser) return;
     try {
-      const res = await fetchWithInterceptor(
-        `/api/auth/admin/users/${deletingUser.id}`,
-        {
-          method: "DELETE",
-        }
-      );
-      if (res.ok) {
+      const data = await api.adminDeleteUser(fetchWithInterceptor, deletingUser.id);
+      if (data) {
         setDeletingUser(null);
         setSelectedUsers((prev) => {
           const next = new Set(prev);
@@ -270,10 +241,8 @@ export default function AdminPage({
     );
     if (!confirm) return;
     try {
-      const res = await fetchWithInterceptor(`/api/auth/admin/projects/${id}`, {
-        method: "DELETE",
-      });
-      if (res.ok) fetchProjects();
+      const data = await api.adminDeleteProject(fetchWithInterceptor, id);
+      if (data) fetchProjects();
     } catch (err) {
       console.error("Failed to delete project:", err);
     }
@@ -284,13 +253,8 @@ export default function AdminPage({
     setLoadingLogs(true);
     setUserLogs([]);
     try {
-      const res = await fetchWithInterceptor(
-        `/api/auth/admin/users/${user.id}/logs?limit=20`
-      );
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success) setUserLogs(data.logs || []);
-      }
+      const data = await api.adminGetUserLogs(fetchWithInterceptor, user.id, 20);
+      if (data.success) setUserLogs(data.logs || []);
     } catch (err) {
       console.error("Failed to fetch logs:", err);
     } finally {
@@ -308,16 +272,12 @@ export default function AdminPage({
     }
 
     try {
-      const res = await fetchWithInterceptor("/api/auth/admin/users/bulk", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const data = await api.adminBulkAction(fetchWithInterceptor, {
           user_ids: Array.from(selectedUsers),
           action,
           value,
-        }),
-      });
-      if (res.ok) {
+        });
+      if (data) {
         setSelectedUsers(new Set());
         fetchUsers();
         fetchStats();
@@ -333,19 +293,16 @@ export default function AdminPage({
     );
     if (!confirm) return;
     try {
-      const res = await fetchWithInterceptor(
-        `/api/auth/admin/impersonate/${user_id}`,
-        { method: "POST" }
+      const data = await api.adminImpersonateUser(
+        fetchWithInterceptor,
+        user_id
       );
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success) {
-          const currentToken = localStorage.getItem("sonikoma_token");
-          if (currentToken)
-            localStorage.setItem("sonikoma_admin_token", currentToken);
-          localStorage.setItem("sonikoma_token", data.access_token);
-          window.location.href = "/";
-        }
+      if (data.success) {
+        const currentToken = localStorage.getItem("sonikoma_token");
+        if (currentToken)
+          localStorage.setItem("sonikoma_admin_token", currentToken);
+        localStorage.setItem("sonikoma_token", data.access_token);
+        window.location.href = "/";
       }
     } catch (err) {
       console.error("Impersonation failed:", err);
@@ -355,12 +312,8 @@ export default function AdminPage({
   const handleSaveSettings = async () => {
     setSavingSettings(true);
     try {
-      const res = await fetchWithInterceptor("/api/auth/admin/settings", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ settings }),
-      });
-      if (res.ok) {
+      const data = await api.adminUpdateSettings(fetchWithInterceptor, settings);
+      if (data) {
         await (window as any).alertAsync("Settings saved successfully.");
       }
     } catch (err) {

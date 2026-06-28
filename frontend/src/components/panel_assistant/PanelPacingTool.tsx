@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Sparkles, Copy, Check } from "lucide-react";
-import { GeneratedPanel } from "../../types";
+import { GeneratedPanel } from "../../types.js";
+import * as api from "../../api/index.js";
 
 interface PanelPacingToolProps {
   panel: GeneratedPanel;
@@ -37,18 +38,13 @@ export default function PanelPacingTool({ panel }: PanelPacingToolProps) {
   const handleGeneratePacing = async () => {
     setLoadingPacing(true);
     try {
-      const res = await fetch("/api/skills/pacing", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const json = await api.runPacingSkill({
           visual_description:
             panel.visual_description || "Detailed drawing panel",
           speech_text: panel.speech_text || "",
           sfx: panel.sfx || "",
           model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
-      });
-      const json = await res.json();
+        });
       if (json.success && json.result) {
         setPacingData(json.result);
       }
@@ -62,17 +58,12 @@ export default function PanelPacingTool({ panel }: PanelPacingToolProps) {
   const handleGenerateTrans = async () => {
     setLoadingTrans(true);
     try {
-      const res = await fetch("/api/skills/transition-speed", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const json = await api.runTransitionSpeedSkill({
           visual_description:
             panel.visual_description || "Detailed drawing panel",
           speech_text: panel.speech_text || "",
           model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
-      });
-      const json = await res.json();
+        });
       if (json.success && json.result) {
         setTransData(json.result);
       }
@@ -86,17 +77,12 @@ export default function PanelPacingTool({ panel }: PanelPacingToolProps) {
   const handleGenerateShake = async () => {
     setLoadingShake(true);
     try {
-      const res = await fetch("/api/skills/camera-shake", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const json = await api.runCameraShakeSkill({
           visual_description:
             panel.visual_description || "Action close-up illustration",
           sfx: panel.sfx || "[Impact]",
           model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
-      });
-      const json = await res.json();
+        });
       if (json.success && json.result) {
         setShakeData(json.result);
       }

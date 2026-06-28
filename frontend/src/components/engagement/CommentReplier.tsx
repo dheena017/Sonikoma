@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Sparkles, Copy, Check, MessageSquare } from "lucide-react";
+import * as api from "../../api/index.js";
 
 interface CommentReplierProps {
   title: string;
@@ -21,16 +22,11 @@ export default function CommentReplier({ title }: CommentReplierProps) {
   const handleGenerate = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/skills/comment-reply", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const json = await api.runCommentReplySkill({
           user_comment: comment,
           video_title: title || "Solo Leveling Recap",
           model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
-      });
-      const json = await res.json();
+        });
       if (json.success && json.result) {
         setReply(json.result);
       }

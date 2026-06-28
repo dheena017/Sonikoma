@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { AlertTriangle, ShieldCheck, Settings, Shield } from "lucide-react";
-import { GeneratedPanel } from "../../types";
-import { processWithConcurrency, chunkArray } from "../../utils/batchUtils";
+import { GeneratedPanel } from "../../types.js";
+import { processWithConcurrency, chunkArray } from "../../utils/batchUtils.js";
+import * as api from "../../api/index.js";
 
 interface BulkScrubberControlProps {
   panels: GeneratedPanel[];
@@ -45,17 +46,11 @@ export default function BulkScrubberControl({
           if (panelsToScrub.length === 0) return [];
 
           try {
-            const res = await fetch("/api/skills/copyright-scrub-batch", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                texts: panelsToScrub.map((p) => p.speech_text),
-                model:
-                  localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-              }),
+            const json = await api.runCopyrightScrubBatchSkill({
+              texts: panelsToScrub.map((p) => p.speech_text),
+              model:
+                localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
             });
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const json = await res.json();
             if (json.success && json.results) {
               const mappedResults = [];
               for (let i = 0; i < panelsToScrub.length; i++) {

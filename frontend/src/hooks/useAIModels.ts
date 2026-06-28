@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { AIModel, AI_MODELS as FALLBACK_MODELS } from "../models";
+import { AIModel, AI_MODELS as FALLBACK_MODELS } from "../models.js";
+import * as api from "../api/index.js";
 
 let cachedModels: AIModel[] | null = null;
 let isFetching = false;
@@ -48,9 +49,7 @@ export function useAIModels() {
         if (huggingface) reqHeaders["X-User-HuggingFace-Key"] = huggingface;
 
         // 1. Fetch backend health to see which API keys are available
-        const healthRes = await fetch("/api/health", { headers: reqHeaders });
-        if (!healthRes.ok) throw new Error("Health check failed");
-        const healthData = await healthRes.json();
+        const healthData = await api.checkHealth(reqHeaders);
         const env = healthData.env || {};
 
         // Check if any keys are configured (either in backend env or local browser storage)
@@ -70,32 +69,22 @@ export function useAIModels() {
         // 2. Fetch models for each available provider
         for (const provider of availableProviders) {
           try {
-            const res = await fetch("/api/list-models", {
-              method: "POST",
-              headers: { 
-                "Content-Type": "application/json",
-                ...reqHeaders
-              },
-              body: JSON.stringify({ provider }),
-            });
-            if (res.ok) {
-              const data = await res.json();
-              if (data.success && data.models) {
-                let providerFriendly = "Google";
-                if (provider === "huggingface")
-                  providerFriendly = "Hugging Face";
-                else if (provider === "openai") providerFriendly = "OpenAI";
-                else if (provider === "anthropic")
-                  providerFriendly = "Anthropic";
+            const data = await api.listModels({ provider }, reqHeaders);
+            if (data.success && data.models) {
+              let providerFriendly = "Google";
+              if (provider === "huggingface")
+                providerFriendly = "Hugging Face";
+              else if (provider === "openai") providerFriendly = "OpenAI";
+              else if (provider === "anthropic")
+                providerFriendly = "Anthropic";
 
-                const mapped = data.models.map((m: any) => ({
-                  id: m.name,
-                  name: m.displayName || m.name,
-                  type: provider === "huggingface" ? "open-source" : "paid",
-                  provider: providerFriendly,
-                }));
-                aggregatedModels = [...aggregatedModels, ...mapped];
-              }
+              const mapped = data.models.map((m: any) => ({
+                id: m.name,
+                name: m.displayName || m.name,
+                type: provider === "huggingface" ? "open-source" : "paid",
+                provider: providerFriendly,
+              }));
+              aggregatedModels = [...aggregatedModels, ...mapped];
             }
           } catch (err) {
             console.error(`Failed to fetch models for ${provider}`, err);

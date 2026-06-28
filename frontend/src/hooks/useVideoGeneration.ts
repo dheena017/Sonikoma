@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { GeneratedPanel } from "../types";
-import { NotificationType } from "../components/NotificationStack";
+import { GeneratedPanel } from "../types.js";
+import { NotificationType } from "../components/NotificationStack.js";
+import * as api from "../api/index.js";
 
 interface UseVideoGenerationProps {
   panels: GeneratedPanel[];
@@ -227,15 +228,9 @@ export function useVideoGeneration({
         synopsis: seriesSynopsis ? seriesSynopsis.trim() : undefined,
       };
 
-      console.log(`[API] POST /api/generate`, requestBody);
-      const response = await fetchWithInterceptor("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
-      });
-
-      const responseData = await response.json();
-      console.log(`[API] /api/generate response:`, responseData);
+      console.log(`[API] Requesting video generation`, requestBody);
+      const responseData = await api.generateVideo(fetchWithInterceptor, requestBody);
+      console.log(`[API] Video generation response:`, responseData);
 
       if (responseData.status !== "success" || !responseData.video_url) {
         throw new Error(
@@ -303,7 +298,7 @@ export function useVideoGeneration({
 
     try {
       let currentUrl = activePanel.image_url;
-      if (currentUrl.includes("/api/proxy-image")) {
+      if (api.isProxyUrl(currentUrl)) {
         const urlObj = new URL(currentUrl, window.location.origin);
         urlObj.searchParams.set("reprocess_nonce", Date.now().toString());
         if (activePanel.smart_crop) {
@@ -359,13 +354,7 @@ export function useVideoGeneration({
     setRenderStartTime(startTime);
 
     try {
-      const response = await fetchWithInterceptor("/api/video/render", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ panels, voice: voiceActor }),
-      });
-
-      const data = await response.json();
+      const data = await api.renderVideo(fetchWithInterceptor, { panels, voice: voiceActor });
       if (!data.success || !data.job_id) {
         throw new Error(
           data.detail || data.error || "Failed to start render job"
@@ -377,10 +366,7 @@ export function useVideoGeneration({
       // Start polling
       const pollInterval = setInterval(async () => {
         try {
-          const statusRes = await fetchWithInterceptor(
-            `/api/video/status/${jobId}`
-          );
-          const statusData = await statusRes.json();
+          const statusData = await api.getVideoStatus(fetchWithInterceptor, jobId);
 
           if (statusData.progress) {
             setRenderProgress(statusData.progress);

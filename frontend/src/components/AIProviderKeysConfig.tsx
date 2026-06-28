@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Key, Eye, EyeOff, ShieldCheck, Save, Trash2 } from "lucide-react";
+import * as api from "../api/index.js";
 
 export default function AIProviderKeysConfig() {
   const [geminiKey, setGeminiKey] = useState("");
@@ -32,8 +33,7 @@ export default function AIProviderKeysConfig() {
     setHuggingFaceKey(localStorage.getItem("user_huggingface_key") || "");
     checkSaved();
 
-    fetch("/api/health")
-      .then((res) => res.json())
+    api.checkHealth()
       .then((data) => {
         if (data.success && data.env) {
           setEnvKeys({

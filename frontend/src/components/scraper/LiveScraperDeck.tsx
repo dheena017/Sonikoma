@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
+import * as api from "../../api/index.js";
 import { LiveScraperDeckProps } from "./types";
 import PanelCard from "./PanelCard.js";
 import ScraperControls from "./ScraperControls.js";
@@ -269,22 +270,16 @@ export default function LiveScraperDeck({
     ]);
 
     try {
-      const response = await activeFetch("/api/image/merge", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          urls: selectedScraped,
-          layout: "vertical",
-          spacing: 0,
-          spacingColor: "white",
-          scaleToFit: true,
-          alignMode: "center",
-          padding: 0,
-        }),
+      const data = await api.mergeImages(activeFetch, {
+        urls: selectedScraped,
+        layout: "vertical",
+        spacing: 0,
+        spacingColor: "white",
+        scaleToFit: true,
+        alignMode: "center",
+        padding: 0,
       });
 
-      if (!response.ok) throw new Error("Stitch failed: " + response.status);
-      const data = await response.json();
       if (data.url) {
         const firstSelectedIdx = scrapedImages.findIndex((img) =>
           selectedScraped.includes(img)

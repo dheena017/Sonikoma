@@ -43,11 +43,13 @@ interface ModelPlaygroundAndSkillsProps {
   isEnhancingPrompt: boolean;
 }
 
+import * as api from "../../api/index.js";
+
 const SUPPORTED_SKILLS = [
   {
     id: "translation",
     name: "Dialogue Translation Studio",
-    endpoint: "/api/skills/translate",
+    endpoint: api.SKILL_ENDPOINTS.TRANSLATE,
     description: "Translate manga dialogue into a target language, retaining context and style.",
     inputs: [
       { name: "text", label: "Dialogue Text", type: "textarea", placeholder: "Stop right there! You won't get away with this!" },
@@ -57,7 +59,7 @@ const SUPPORTED_SKILLS = [
   {
     id: "dramatize",
     name: "Script Dramatization",
-    endpoint: "/api/skills/dramatize",
+    endpoint: api.SKILL_ENDPOINTS.DRAMATIZE,
     description: "Dramatize raw panel transcription texts based on genre and scene context.",
     inputs: [
       { name: "raw_ocr_text", label: "Raw OCR Text (Comma separated list)", type: "list", placeholder: "CRASH!, What was that?, Oh no!" },
@@ -68,7 +70,7 @@ const SUPPORTED_SKILLS = [
   {
     id: "seo",
     name: "YouTube SEO Metadata Generator",
-    endpoint: "/api/skills/seo",
+    endpoint: api.SKILL_ENDPOINTS.SEO,
     description: "Generate highly optimized video titles, tags, and descriptions for Webtoon recaps.",
     inputs: [
       { name: "title", label: "Webtoon Title", type: "text", placeholder: "Solo Leveling Chapter 1" },
@@ -79,7 +81,7 @@ const SUPPORTED_SKILLS = [
   {
     id: "cliffhanger",
     name: "Cliffhanger Generator",
-    endpoint: "/api/skills/cliffhanger",
+    endpoint: api.SKILL_ENDPOINTS.CLIFFHANGER,
     description: "Suggest narrative hook variations or cliffhanger statements to boost viewer retention.",
     inputs: [
       { name: "story_outline", label: "Story Outline / Scene Summary", type: "textarea", placeholder: "The hero holds back the monster horde, but his sword cracks..." },
@@ -88,7 +90,7 @@ const SUPPORTED_SKILLS = [
   {
     id: "voice-cast",
     name: "Voice Casting Profiler",
-    endpoint: "/api/skills/voice-cast",
+    endpoint: api.SKILL_ENDPOINTS.VOICE_CAST,
     description: "Analyze characters' descriptions and suggest appropriate voice casting guides.",
     inputs: [
       { name: "character_name", label: "Character Name", type: "text", placeholder: "Jinwoo Sung" },
@@ -99,7 +101,7 @@ const SUPPORTED_SKILLS = [
   {
     id: "copyright-scrub",
     name: "Copyright Text Scrubber",
-    endpoint: "/api/skills/copyright-scrub",
+    endpoint: api.SKILL_ENDPOINTS.COPYRIGHT_SCRUB,
     description: "Clean up transcription errors, remove watermarks, scan/filter advertiser-unfriendly speech.",
     inputs: [
       { name: "text", label: "Transcribed Text", type: "textarea", placeholder: "Read free manga on manga-site.com - Huh? What is this?" },
@@ -108,7 +110,7 @@ const SUPPORTED_SKILLS = [
   {
     id: "bgm-vibe",
     name: "BGM Mood Selector",
-    endpoint: "/api/skills/bgm-vibe",
+    endpoint: api.SKILL_ENDPOINTS.BGM_VIBE,
     description: "Map current scene's narrative mood to background music vibe suggestions.",
     inputs: [
       { name: "narrative_mood", label: "Narrative Mood", type: "text", placeholder: "Suspenseful, dark, build-up" },

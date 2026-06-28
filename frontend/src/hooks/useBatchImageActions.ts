@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { GeneratedPanel } from "../types";
-import { NotificationType } from "../components/NotificationStack";
-import { processWithConcurrency } from "../utils/batchUtils";
+import { GeneratedPanel } from "../types.js";
+import { NotificationType } from "../components/NotificationStack.js";
+import { processWithConcurrency } from "../utils/batchUtils.js";
+import * as api from "../api/index.js";
 
 interface UseBatchImageActionsProps {
   selectedScraped: string[];
@@ -146,24 +147,15 @@ export function useBatchImageActions({
           setBubbleCroppingImgUrl(url);
           try {
             abortControllerRef.current = new AbortController();
-            const response = await fetchWithInterceptor(
-              "/api/image/remove-speech-bubbles",
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  url: url,
-                  method: bubbleEraseMethod,
-                  sensitivity: bubbleSensitivity,
-                  detection_style: bubbleDetectionStyle,
-                  dilation: bubbleDilation,
-                  inpaint_radius: bubbleInpaintRadius,
-                }),
-                signal: abortControllerRef.current.signal,
-              }
-            );
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const data = await response.json();
+            // Need to pass signal to the API call. I'll update the api.removeSpeechBubbles to accept options.
+            const data = await api.removeSpeechBubbles(fetchWithInterceptor, {
+              url: url,
+              method: bubbleEraseMethod,
+              sensitivity: bubbleSensitivity,
+              detection_style: bubbleDetectionStyle,
+              dilation: bubbleDilation,
+              inpaint_radius: bubbleInpaintRadius,
+            }, { signal: abortControllerRef.current.signal });
 
             if (data.success && data.url) {
               setScrapedImages((prev) =>
@@ -276,40 +268,23 @@ export function useBatchImageActions({
           setCroppingImgUrl(url);
           try {
             abortControllerRef.current = new AbortController();
-            const response = await fetchWithInterceptor("/api/detect-panels", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                url: url,
-                sensitivity: cropSensitivity,
-                backgroundColorMode: cropBackgroundMode,
-                aspectRatio: aspectRatioLock,
-                minAreaPct: minPanelAreaPct / 100.0,
-                mergeThreshold: overlapMergeThreshold,
-                strategy: useLocalCV ? "local-cv" : "balanced",
-                model: cropModel,
-                cannyLow: cropCannyLow,
-                cannyHigh: cropCannyHigh,
-                closeKernelSize: cropCloseKernelSize,
-                minHeightPx: cropMinHeightPx,
-                autoSplit: autoSplitTallStrips,
-                guidanceInstructions: cropGuidance,
-                focusMode: cropFocusMode,
-              }),
-              signal: abortControllerRef.current.signal,
-            });
-
-            if (!response.ok) {
-              let errMsg = `HTTP ${response.status}`;
-              try {
-                const errorData = await response.json();
-                if (errorData?.detail) {
-                  errMsg = errorData.detail;
-                }
-              } catch (_) {}
-              throw new Error(errMsg);
-            }
-            const data = await response.json();
+            const data = await api.detectPanels(fetchWithInterceptor, {
+              url: url,
+              sensitivity: cropSensitivity,
+              backgroundColorMode: cropBackgroundMode,
+              aspectRatio: aspectRatioLock,
+              minAreaPct: minPanelAreaPct / 100.0,
+              mergeThreshold: overlapMergeThreshold,
+              strategy: useLocalCV ? "local-cv" : "balanced",
+              model: cropModel,
+              cannyLow: cropCannyLow,
+              cannyHigh: cropCannyHigh,
+              closeKernelSize: cropCloseKernelSize,
+              minHeightPx: cropMinHeightPx,
+              autoSplit: autoSplitTallStrips,
+              guidanceInstructions: cropGuidance,
+              focusMode: cropFocusMode,
+            }, { signal: abortControllerRef.current.signal });
             if (data.fallback) {
               setConsoleLogs((prev) => [
                 `[Smart Cropper Fallback] Smart Scanner detection failed on ${url.substring(
@@ -333,27 +308,17 @@ export function useBatchImageActions({
                   if (box.croppedUrl) {
                     croppedUrls.push(box.croppedUrl);
                   } else {
-                    const cropResponse = await fetchWithInterceptor(
-                      "/api/image/edit",
-                      {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                          url: url,
-                          cropTop: box.cropTop,
-                          cropBottom: box.cropBottom,
-                          cropLeft: box.cropLeft,
-                          cropRight: box.cropRight,
-                          autoTrim: true,
-                          padding: cropPaddingPx,
-                          sensitivity: cropSensitivity,
-                          backgroundColorMode: cropBackgroundMode,
-                        }),
-                      }
-                    );
-                    if (!cropResponse.ok)
-                      throw new Error(`Edit-image HTTP ${cropResponse.status}`);
-                    const cropData = await cropResponse.json();
+                    const cropData = await api.editImage(fetchWithInterceptor, {
+                      url: url,
+                      cropTop: box.cropTop,
+                      cropBottom: box.cropBottom,
+                      cropLeft: box.cropLeft,
+                      cropRight: box.cropRight,
+                      autoTrim: true,
+                      padding: cropPaddingPx,
+                      sensitivity: cropSensitivity,
+                      backgroundColorMode: cropBackgroundMode,
+                    });
                     croppedUrls.push(cropData.url);
                   }
                 }

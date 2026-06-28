@@ -1,3 +1,4 @@
+import * as api from "../../api/index.js";
 import React, { useState, useEffect } from "react";
 import { Sparkles, Copy, Check, Wand2 } from "lucide-react";
 import { GeneratedPanel } from "../../types";
@@ -44,17 +45,12 @@ export default function ScriptDramatizerForm({
   const handleDramatize = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/skills/dramatize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const json = await api.runDramatizeSkill({
           raw_ocr_text: rawLines,
           genre,
           scene_context: context,
           model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
-      });
-      const json = await res.json();
+        });
       if (json.success && json.result && json.result.dramatized_scripts) {
         setResults(json.result.dramatized_scripts);
       } else if (json.success && json.result) {

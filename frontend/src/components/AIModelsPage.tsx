@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ArrowLeft, Award, Zap } from "lucide-react";
+import * as api from "../api/index.js";
 
 import CredentialsAndTuner from "./ai_models/CredentialsAndTuner";
 import ModelRegistryExplorer from "./ai_models/ModelRegistryExplorer";
@@ -132,8 +133,7 @@ export default function AIModelsPage({
 
   const fetchEnvKeyStatus = async () => {
     try {
-      const res = await activeFetch("/api/health");
-      const data = await res.json();
+      const data = await api.checkHealth();
       if (data.success && data.env) {
         setEnvKeys({
           gemini: !!data.env.GEMINI_API_KEY,
@@ -181,11 +181,8 @@ export default function AIModelsPage({
         setTokenLogs([]);
         return;
       }
-      const res = await activeFetch("/api/projects/analytics/tokens", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
+      const data = await api.getProjectTokenAnalytics(token);
+      if (data) {
         if (data.success && data.token_logs) {
           setTokenLogs(data.token_logs);
         }
@@ -209,14 +206,7 @@ export default function AIModelsPage({
     setLoadingModels(true);
     setModelsError(null);
     try {
-      const res = await activeFetch("/api/list-models", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ provider: prov }),
-      });
-      const data = await res.json();
+      const data = await api.listModels({ provider: prov });
       if (data.success) {
         setModels(data.models || []);
       } else {
@@ -393,17 +383,12 @@ export default function AIModelsPage({
 
       try {
         const startMonotonic = performance.now();
-        const res = await activeFetch("/api/test-model-latency", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+        const data = await api.testModelLatency(activeFetch, {
             provider,
             model: modelName,
             apiKey: customKey,
             prompt: playgroundPrompt,
-          }),
-        });
-        const data = await res.json();
+          });
         const endMonotonic = performance.now();
         const elapsedMs = Math.round(endMonotonic - startMonotonic);
 
@@ -465,13 +450,13 @@ export default function AIModelsPage({
   // Execute Skill sandbox action
   const executeSkill = async () => {
     const config = [
-      { id: "translation", endpoint: "/api/skills/translate", name: "Dialogue Translation Studio", inputs: [{ name: "text" }, { name: "target_lang" }] },
-      { id: "dramatize", endpoint: "/api/skills/dramatize", name: "Script Dramatization", inputs: [{ name: "raw_ocr_text" }, { name: "genre" }, { name: "scene_context" }] },
-      { id: "seo", endpoint: "/api/skills/seo", name: "YouTube SEO Metadata Generator", inputs: [{ name: "title" }, { name: "genre" }, { name: "storyboard_summary" }] },
-      { id: "cliffhanger", endpoint: "/api/skills/cliffhanger", name: "Cliffhanger Generator", inputs: [{ name: "story_outline" }] },
-      { id: "voice-cast", endpoint: "/api/skills/voice-cast", name: "Voice Casting Profiler", inputs: [{ name: "character_name" }, { name: "visual_description" }, { name: "dialogue_sample" }] },
-      { id: "copyright-scrub", endpoint: "/api/skills/copyright-scrub", name: "Copyright Text Scrubber", inputs: [{ name: "text" }] },
-      { id: "bgm-vibe", endpoint: "/api/skills/bgm-vibe", name: "BGM Mood Selector", inputs: [{ name: "narrative_mood" }, { name: "action_scale" }] },
+      { id: "translation", endpoint: api.SKILL_ENDPOINTS.TRANSLATE, name: "Dialogue Translation Studio", inputs: [{ name: "text" }, { name: "target_lang" }] },
+      { id: "dramatize", endpoint: api.SKILL_ENDPOINTS.DRAMATIZE, name: "Script Dramatization", inputs: [{ name: "raw_ocr_text" }, { name: "genre" }, { name: "scene_context" }] },
+      { id: "seo", endpoint: api.SKILL_ENDPOINTS.SEO, name: "YouTube SEO Metadata Generator", inputs: [{ name: "title" }, { name: "genre" }, { name: "storyboard_summary" }] },
+      { id: "cliffhanger", endpoint: api.SKILL_ENDPOINTS.CLIFFHANGER, name: "Cliffhanger Generator", inputs: [{ name: "story_outline" }] },
+      { id: "voice-cast", endpoint: api.SKILL_ENDPOINTS.VOICE_CAST, name: "Voice Casting Profiler", inputs: [{ name: "character_name" }, { name: "visual_description" }, { name: "dialogue_sample" }] },
+      { id: "copyright-scrub", endpoint: api.SKILL_ENDPOINTS.COPYRIGHT_SCRUB, name: "Copyright Text Scrubber", inputs: [{ name: "text" }] },
+      { id: "bgm-vibe", endpoint: api.SKILL_ENDPOINTS.BGM_VIBE, name: "BGM Mood Selector", inputs: [{ name: "narrative_mood" }, { name: "action_scale" }] },
     ].find((s) => s.id === selectedSkill);
     if (!config) return;
 
@@ -515,16 +500,11 @@ export default function AIModelsPage({
 
     try {
       const startMonotonic = performance.now();
-      const res = await activeFetch(config.endpoint, {
-        method: "POST",
-        headers: customHeaders,
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
+      const data = await api.executeSkill(config.endpoint, payload, customHeaders);
       const endMonotonic = performance.now();
       const elapsedMs = Math.round(endMonotonic - startMonotonic);
 
-      if (res.ok && data.success) {
+      if (data.success) {
         setSkillOutput(data);
         
         logRunToHistory({
@@ -581,17 +561,12 @@ export default function AIModelsPage({
     if (provider === "huggingface") testModel = "mistralai/Mistral-7B-Instruct-v0.2";
 
     try {
-      const res = await activeFetch("/api/test-model-latency", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const data = await api.testModelLatency(activeFetch, {
           provider,
           model: testModel,
           apiKey: keyValue || undefined,
           prompt: "Say: OK",
-        }),
-      });
-      const data = await res.json();
+        });
       if (data.success) {
         setVerificationResult((prev) => ({
           ...prev,
@@ -639,19 +614,11 @@ export default function AIModelsPage({
       : "gemini-2.5-flash";
 
     try {
-      const res = await activeFetch("/api/enhance-prompt", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(geminiKey ? { "X-User-Gemini-Key": geminiKey } : {}),
-        },
-        body: JSON.stringify({
+      const data = await api.enhancePrompt(activeFetch, {
           prompt: playgroundPrompt,
           model: enhanceModel,
           apiKey: geminiKey,
-        }),
-      });
-      const data = await res.json();
+        }, geminiKey ? { "X-User-Gemini-Key": geminiKey } : {});
       if (data.success && data.enhanced_prompt) {
         setPlaygroundPrompt(data.enhanced_prompt.trim());
         addNotification("✨ Prompt enhanced successfully using Gemini AI!", "success");
@@ -724,17 +691,12 @@ ${playgroundPrompt}
 
     try {
       const startMonotonic = performance.now();
-      const res = await activeFetch("/api/test-model-latency", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const data = await api.testModelLatency(activeFetch, {
           provider: playgroundProvider,
           model: playgroundModel,
           apiKey: customKey,
           prompt: playgroundPrompt,
-        }),
-      });
-      const data = await res.json();
+        });
       const endMonotonic = performance.now();
       const elapsedMs = Math.round(endMonotonic - startMonotonic);
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Terminal, RefreshCw, X, ChevronDown, ChevronUp } from "lucide-react";
+import * as api from "../../api/index.js";
 
 export function ScraperLogStream() {
   const [logs, setLogs] = useState<any[]>([]);
@@ -8,7 +9,7 @@ export function ScraperLogStream() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const eventSource = new Event_Source("/api/py/health/system-logs/stream");
+    const eventSource = new EventSource(api.getPySystemLogsStreamUrl());
 
     eventSource.onopen = () => setIsConnected(true);
     eventSource.onmessage = (event) => {
@@ -117,21 +118,3 @@ export function ScraperLogStream() {
   );
 }
 
-class Event_Source {
-  es: EventSource;
-  constructor(url: string) {
-    this.es = new EventSource(url);
-  }
-  set onopen(fn: any) {
-    this.es.onopen = fn;
-  }
-  set onmessage(fn: any) {
-    this.es.onmessage = fn;
-  }
-  set onerror(fn: any) {
-    this.es.onerror = fn;
-  }
-  close() {
-    this.es.close();
-  }
-}

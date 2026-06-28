@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Coins, Loader2, AlertTriangle, BarChart3 } from "lucide-react";
+import * as api from "../../api/index.js";
 
 interface TokenLog {
   id: string;
@@ -34,13 +35,7 @@ export default function TokenUsageDashboard({
       const token =
         localStorage.getItem("sonikoma_token") ||
         sessionStorage.getItem("sonikoma_token");
-      const res = await fetch("/api/projects/analytics/tokens", {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (!res.ok) {
-        throw new Error("Failed to fetch token analytics");
-      }
-      const data = await res.json();
+      const data = await api.getProjectTokenAnalytics(token || "");
       if (data.success && data.token_logs) {
         setLogs(data.token_logs);
       } else {

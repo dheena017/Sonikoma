@@ -32,7 +32,8 @@ import {
   X,
   Search,
 } from "lucide-react";
-import { getSourceName, getPanelFilterStyle } from "../utils";
+import { getSourceName, getPanelFilterStyle } from "../utils.js";
+import * as api from "../api/index.js";
 
 interface ProjectDetailsPageProps {
   onNavigateHome: () => void;
@@ -239,21 +240,11 @@ export default function ProjectDetailsPage({
         const token =
           localStorage.getItem("sonikoma_token") ||
           sessionStorage.getItem("sonikoma_token");
-        const headers: HeadersInit = { "Content-Type": "application/json" };
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
-        }
 
         const urls = panels.map((p) => p.image_url);
-        const res = await fetch("/api/image/download-zip", {
-          method: "POST",
-          headers,
-          body: JSON.stringify({ urls, url: project.url || null }),
+        const data = await api.downloadZip(fetch, { urls, url: project.url || null }, {
+          headers: token ? { "Authorization": `Bearer ${token}` } : {}
         });
-        if (!res.ok) {
-          throw new Error(`ZIP generation failed (HTTP ${res.status})`);
-        }
-        const data = await res.json();
         if (data.success && data.downloadUrl) {
           const link = document.createElement("a");
           link.href = data.downloadUrl;
@@ -401,17 +392,7 @@ export default function ProjectDetailsPage({
         const token =
           localStorage.getItem("sonikoma_token") ||
           sessionStorage.getItem("sonikoma_token");
-        const headers: HeadersInit = {};
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
-        }
-        const res = await fetch(`/api/projects/${projectId}`, { headers });
-        if (!res.ok) {
-          throw new Error(
-            `Failed to load project details (HTTP ${res.status})`
-          );
-        }
-        const data = await res.json();
+        const data = await api.getProject(projectId, token || undefined);
         if (data.success) {
           setProject(data.project);
           setPanels(data.panels || []);
@@ -449,25 +430,17 @@ export default function ProjectDetailsPage({
         const token =
           localStorage.getItem("sonikoma_token") ||
           sessionStorage.getItem("sonikoma_token");
-        const response = await fetch("/api/scrape-images", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-          body: JSON.stringify({ url: project.url, bypass_cache: false }),
+        const data = await api.scrapeImages(fetch, { url: project.url, bypass_cache: false }, {
+          headers: token ? { "Authorization": `Bearer ${token}` } : {}
         });
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.images) {
-            const proxied = data.images.map((img: string) => {
-              if (img.startsWith("http") && !img.startsWith("/api/")) {
-                return `/api/proxy-image?url=${encodeURIComponent(img)}`;
-              }
-              return img;
-            });
-            setScrapedImages(proxied);
-          }
+        if (data.success && data.images) {
+          const proxied = data.images.map((img: string) => {
+            if (img.startsWith("http") && !api.isApiUrl(img)) {
+              return api.getProxyImageUrl(img);
+            }
+            return img;
+          });
+          setScrapedImages(proxied);
         }
       } catch (err) {
         console.error("Failed to fetch scraped images:", err);
@@ -517,18 +490,7 @@ export default function ProjectDetailsPage({
       const token =
         localStorage.getItem("sonikoma_token") ||
         sessionStorage.getItem("sonikoma_token");
-      const headers: HeadersInit = { "Content-Type": "application/json" };
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-      const res = await fetch(`/api/projects/${projectId}`, {
-        method: "DELETE",
-        headers,
-      });
-      if (!res.ok) {
-        throw new Error(`Failed to delete (HTTP ${res.status})`);
-      }
-      const data = await res.json();
+      const data = await api.deleteProject(projectId, token || undefined);
       if (data.success) {
         navigateTo("/profile");
       } else {
@@ -607,24 +569,15 @@ export default function ProjectDetailsPage({
         return num || "Chapter 1";
       })();
 
-      const res = await fetch(`/api/projects/${projectId}`, {
-        method: "PUT",
-        headers,
-        body: JSON.stringify({
-          title: project.title.trim() || "Untitled Project",
-          genre: project.genre.trim() || "general",
-          episode: formattedEpisode,
-          author: (project.author || "Unknown Author").trim(),
-          cover_image: project.cover_image || null,
-          synopsis: project.synopsis || null,
-          panels: mappedPanels,
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error(`Failed to save (HTTP ${res.status})`);
-      }
-      const data = await res.json();
+      const data = await api.updateProject(projectId, {
+        title: project.title.trim() || "Untitled Project",
+        genre: project.genre.trim() || "general",
+        episode: formattedEpisode,
+        author: (project.author || "Unknown Author").trim(),
+        cover_image: project.cover_image || null,
+        synopsis: project.synopsis || null,
+        panels: mappedPanels,
+      }, token || undefined);
       if (data.success) {
         initialProjectRef.current = serializeState(project, panels);
         initialPanelsRef.current = JSON.parse(JSON.stringify(panels));
