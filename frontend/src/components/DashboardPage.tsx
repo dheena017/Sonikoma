@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import {
   LayoutDashboard,
+  Search,
+  CheckCircle2,
+  Circle,
   Film,
   Scissors,
   Plus,
@@ -39,6 +42,15 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [latency, setLatency] = useState<number | null>(null);
+  const [analytics, setAnalytics] = useState<any>(null);
+  const [metrics, setMetrics] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [onboardingTasks, setOnboardingTasks] = useState([
+    { id: 1, text: "Create your first series", completed: false },
+    { id: 2, text: "Analyze panel storyboards", completed: false },
+    { id: 3, text: "Generate AI character voices", completed: false },
+    { id: 4, text: "Render your first video", completed: false },
+  ]);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -82,8 +94,44 @@ export default function DashboardPage() {
       }
     };
 
+    const fetchMetrics = async () => {
+      try {
+        const res = await fetch("/api/metrics");
+        if (res.ok) {
+          const data = await res.json();
+          setMetrics(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch metrics", err);
+      }
+    };
+
+    const fetchAnalytics = async () => {
+      try {
+        const res = await fetch("/api/auth/analytics", {
+          headers: {
+            Authorization: `Bearer ${
+              localStorage.getItem("sonikoma_token") ||
+              sessionStorage.getItem("sonikoma_token") ||
+              ""
+            }`,
+          },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setAnalytics(data.analytics);
+        }
+      } catch (err) {
+        console.error("Failed to fetch analytics", err);
+      }
+    };
+
     fetchProjects();
     testLatency();
+    fetchAnalytics();
+    fetchMetrics();
+    const interval = setInterval(fetchMetrics, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleRetry = () => {
@@ -132,9 +180,33 @@ export default function DashboardPage() {
   const completedCount = projects.filter(
     (p) => p.status?.toLowerCase() === "completed"
   ).length;
+
+  useEffect(() => {
+    if (projects.length > 0) {
+      setOnboardingTasks((prev) =>
+        prev.map((t) => (t.id === 1 ? { ...t, completed: true } : t))
+      );
+    }
+    const hasAnalyzed = projects.some((p) => p.panels_count > 0);
+    if (hasAnalyzed) {
+      setOnboardingTasks((prev) =>
+        prev.map((t) => (t.id === 2 ? { ...t, completed: true } : t))
+      );
+    }
+    if (completedCount > 0) {
+      setOnboardingTasks((prev) =>
+        prev.map((t) => (t.id === 4 ? { ...t, completed: true } : t))
+      );
+    }
+  }, [projects, completedCount]);
   const processingCount = projects.filter(
     (p) => p.status?.toLowerCase() === "processing"
   ).length;
+
+  const filteredProjects = projects.filter((p) =>
+    (p.title || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (p.url || "").toLowerCase().includes(searchQuery.toLowerCase())
+  );
   const totalPanels = projects.reduce(
     (acc, p) => acc + (p.panels_count || 0),
     0
@@ -162,11 +234,22 @@ export default function DashboardPage() {
               Dashboard
             </span>
           </h1>
-          <p className="text-neutral-400 text-sm md:text-base font-mono max-w-xl">
+          <p className="text-neutral-400 text-sm md:text-base font-mono max-w-xl mb-8">
             Your command center for converting webtoons to stunning narrated
             videos. Manage series, track AI pipeline progress, and start new
             conversions.
           </p>
+
+          <div className="relative max-w-md group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-500 group-focus-within:text-purple-400 transition-colors" />
+            <input
+              type="text"
+              placeholder="Search your projects or series..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[#0b0b0e] border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-sm focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all placeholder:text-neutral-600"
+            />
+          </div>
         </div>
 
         <div className="flex shrink-0">
@@ -181,7 +264,7 @@ export default function DashboardPage() {
       </div>
 
       {/* QUICK STATS */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-12">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-8">
         <div className="bg-[#0b0b0e]/80 border border-white/5 rounded-3xl p-6 shadow-xl relative overflow-hidden group">
           <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
             <Film className="h-32 w-32" />
@@ -225,6 +308,61 @@ export default function DashboardPage() {
           </p>
           <div className="text-4xl font-black text-white">{totalPanels}</div>
         </div>
+      </div>
+
+      {/* QUICK ACCESS LINKS */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+        <button
+          onClick={() => (window as any).navigateTo?.("/workspace")}
+          className="bg-white/5 hover:bg-white/10 border border-white/5 p-4 rounded-2xl flex items-center gap-4 transition-all group cursor-pointer"
+        >
+          <div className="h-10 w-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <Sparkles className="h-5 w-5" />
+          </div>
+          <div className="text-left">
+            <p className="text-xs font-bold text-white">AI Scraper</p>
+            <p className="text-[10px] text-neutral-500">Extract webtoon panels</p>
+          </div>
+        </button>
+
+        <button
+          onClick={() => (window as any).navigateTo?.("/audio-lab")}
+          className="bg-white/5 hover:bg-white/10 border border-white/5 p-4 rounded-2xl flex items-center gap-4 transition-all group cursor-pointer"
+        >
+          <div className="h-10 w-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <Volume2 className="h-5 w-5" />
+          </div>
+          <div className="text-left">
+            <p className="text-xs font-bold text-white">Audio Lab</p>
+            <p className="text-[10px] text-neutral-500">Synthesis & character voices</p>
+          </div>
+        </button>
+
+        <button
+          onClick={() => (window as any).navigateTo?.("/characters")}
+          className="bg-white/5 hover:bg-white/10 border border-white/5 p-4 rounded-2xl flex items-center gap-4 transition-all group cursor-pointer"
+        >
+          <div className="h-10 w-10 rounded-xl bg-pink-500/20 text-pink-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <Plus className="h-5 w-5" />
+          </div>
+          <div className="text-left">
+            <p className="text-xs font-bold text-white">Characters</p>
+            <p className="text-[10px] text-neutral-500">Manage character profiles</p>
+          </div>
+        </button>
+
+        <button
+          onClick={() => (window as any).navigateTo?.("/settings")}
+          className="bg-white/5 hover:bg-white/10 border border-white/5 p-4 rounded-2xl flex items-center gap-4 transition-all group cursor-pointer"
+        >
+          <div className="h-10 w-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <Settings className="h-5 w-5" />
+          </div>
+          <div className="text-left">
+            <p className="text-xs font-bold text-white">Settings</p>
+            <p className="text-[10px] text-neutral-500">Global app configuration</p>
+          </div>
+        </button>
       </div>
 
       {/* TWO COLUMN CONTENT LAYOUT */}
@@ -299,7 +437,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                {projects.slice(0, 6).map((project) => (
+                {(searchQuery ? filteredProjects : projects).slice(0, 6).map((project) => (
                   <div
                     key={project.project_id}
                     onClick={() => handleOpenProject(project)}
@@ -349,6 +487,44 @@ export default function DashboardPage() {
                 ))}
               </div>
             )}
+          </div>
+
+          {/* RECENT ACTIVITY FEED */}
+          <div className="bg-[#0b0b0e]/80 border border-white/5 rounded-3xl p-6 shadow-xl">
+            <h2 className="text-xl font-bold flex items-center gap-2 mb-6">
+              <Activity className="h-5 w-5 text-emerald-400" />
+              Recent Activity
+            </h2>
+
+            <div className="space-y-4">
+              {analytics?.activities?.length > 0 ? (
+                analytics.activities.map((act: any, idx: number) => (
+                  <div
+                    key={idx}
+                    className="flex gap-4 p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group"
+                  >
+                    <div className="h-10 w-10 rounded-xl bg-neutral-900 flex items-center justify-center shrink-0 border border-white/5">
+                      <FileText className="h-5 w-5 text-neutral-500 group-hover:text-purple-400 transition-colors" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white mb-0.5">
+                        {act.title}
+                      </h4>
+                      <p className="text-xs text-neutral-500 mb-1">
+                        {act.desc}
+                      </p>
+                      <p className="text-[10px] text-neutral-600 font-mono">
+                        {act.time}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-10 text-center">
+                  <p className="text-sm text-neutral-500">No recent activity found.</p>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* AI PROCESSING CAPABILITIES */}
@@ -434,6 +610,44 @@ export default function DashboardPage() {
 
         {/* Right Column: Sidebar (Status & Quick Links) */}
         <div className="lg:col-span-4 space-y-6">
+          {/* QUICK START CHECKLIST */}
+          <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 border border-purple-500/20 rounded-3xl p-6 shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-10">
+              <Sparkles className="h-20 w-20 text-purple-400" />
+            </div>
+            <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-wider font-mono flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-purple-400" />
+              Quick Start Guide
+            </h3>
+
+            <div className="space-y-3 relative z-10">
+              {onboardingTasks.map((task) => (
+                <div key={task.id} className="flex items-center gap-3">
+                  {task.completed ? (
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                  ) : (
+                    <Circle className="h-4 w-4 text-neutral-600 shrink-0" />
+                  )}
+                  <span
+                    className={`text-xs font-medium ${
+                      task.completed ? "text-neutral-400 line-through" : "text-neutral-200"
+                    }`}
+                  >
+                    {task.text}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {onboardingTasks.every((t) => t.completed) && (
+              <div className="mt-6 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-center">
+                <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
+                  Level 1 Creator Achieved!
+                </p>
+              </div>
+            )}
+          </div>
+
           {/* SYSTEM HEALTH / METRICS */}
           <div className="bg-[#0b0b0e]/80 border border-white/5 rounded-3xl p-6 shadow-xl">
             <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-wider font-mono flex items-center gap-2">
@@ -489,6 +703,96 @@ export default function DashboardPage() {
                       Ready
                     </span>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* SYSTEM RESOURCE METRICS */}
+          <div className="bg-[#0b0b0e]/80 border border-white/5 rounded-3xl p-6 shadow-xl">
+            <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-wider font-mono flex items-center gap-2">
+              <Cpu className="h-4 w-4 text-purple-400" />
+              System Resources
+            </h3>
+
+            <div className="space-y-6">
+              {/* Memory Usage */}
+              <div>
+                <div className="flex justify-between items-end mb-2">
+                  <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest font-mono">
+                    Memory Usage
+                  </span>
+                  <span className="text-xs font-mono text-neutral-300">
+                    {metrics?.memory?.rssMB ? `${metrics.memory.rssMB} MB` : "---"}
+                  </span>
+                </div>
+                <div className="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden border border-white/5">
+                  <div
+                    className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 transition-all duration-1000"
+                    style={{ width: metrics?.memory?.systemUsedPct || "0%" }}
+                  />
+                </div>
+              </div>
+
+              {/* CPU Load */}
+              <div>
+                <div className="flex justify-between items-end mb-2">
+                  <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest font-mono">
+                    CPU Load
+                  </span>
+                  <span className="text-xs font-mono text-neutral-300">
+                    {metrics?.memory?.cpuPct ? `${metrics.memory.cpuPct}%` : "---"}
+                  </span>
+                </div>
+                <div className="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden border border-white/5">
+                  <div
+                    className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 transition-all duration-1000"
+                    style={{ width: `${metrics?.memory?.cpuPct || 0}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Storage */}
+              <div>
+                <div className="flex justify-between items-end mb-2">
+                  <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest font-mono">
+                    Storage Usage
+                  </span>
+                  <span className="text-xs font-mono text-neutral-300">
+                    {metrics?.storage?.usedBytes ? `${(metrics.storage.usedBytes / (1024 * 1024)).toFixed(1)} MB` : "---"}
+                  </span>
+                </div>
+                <div className="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden border border-white/5">
+                  <div
+                    className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-1000"
+                    style={{
+                      width: `${
+                        metrics?.storage?.usedBytes && metrics?.storage?.limitBytes
+                          ? (metrics.storage.usedBytes / metrics.storage.limitBytes) * 100
+                          : 0
+                      }%`,
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* AI Token Usage (from analytics) */}
+              <div>
+                <div className="flex justify-between items-end mb-2">
+                  <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest font-mono">
+                    AI Tokens Used
+                  </span>
+                  <span className="text-xs font-mono text-neutral-300">
+                    {analytics?.total_tokens ? analytics.total_tokens.toLocaleString() : "0"}
+                  </span>
+                </div>
+                <div className="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden border border-white/5">
+                  <div
+                    className="h-full bg-gradient-to-r from-pink-500 to-rose-500 transition-all duration-1000"
+                    style={{
+                      width: `${Math.min(100, (analytics?.total_tokens || 0) / 10000)}%`,
+                    }}
+                  />
                 </div>
               </div>
             </div>
