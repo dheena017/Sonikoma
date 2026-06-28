@@ -33,7 +33,8 @@ export default function AIProviderKeysConfig() {
     setHuggingFaceKey(localStorage.getItem("user_huggingface_key") || "");
     checkSaved();
 
-    api.checkHealth()
+    api
+      .checkHealth()
       .then((data) => {
         if (data.success && data.env) {
           setEnvKeys({

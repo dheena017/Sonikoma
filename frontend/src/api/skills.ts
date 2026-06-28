@@ -67,7 +67,8 @@ export const runSfxMixSkill = (fetchWithInterceptor: any, data: any) =>
 export const runCopyrightScrubBatchSkill = (
   fetchWithInterceptor: any,
   data: any
-) => runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.COPYRIGHT_SCRUB_BATCH, data);
+) =>
+  runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.COPYRIGHT_SCRUB_BATCH, data);
 export const runThumbnailVisualSkill = (fetchWithInterceptor: any, data: any) =>
   runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.THUMBNAIL_VISUAL, data);
 export const runThumbnailLayoutSkill = (fetchWithInterceptor: any, data: any) =>

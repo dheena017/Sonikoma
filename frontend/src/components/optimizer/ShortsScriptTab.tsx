@@ -9,6 +9,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { GeneratedPanel } from "../../types";
+import { fetchWithAuth } from "../../utils.js";
 
 interface ShortsScriptTabProps {
   title: string;
@@ -54,21 +55,21 @@ export default function ShortsScriptTab({
     setLoading(true);
     try {
       // 1. Shorts script adapter
-      const scriptJson = await api.runShortsScriptSkill({
-          storyboard_summary:
-            storyboardSummary || "The story summary details go here.",
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        });
+      const scriptJson = await api.runShortsScriptSkill(fetchWithAuth, {
+        storyboard_summary:
+          storyboardSummary || "The story summary details go here.",
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+      });
       if (scriptJson.success && scriptJson.result) {
         setScriptData(scriptJson.result);
       }
 
       // 2. Shorts hook
-      const hookJson = await api.runShortsHookSkill({
-          title: title || "This Webtoon",
-          key_event: "absolute overpowered betrayal scene",
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        });
+      const hookJson = await api.runShortsHookSkill(fetchWithAuth, {
+        title: title || "This Webtoon",
+        key_event: "absolute overpowered betrayal scene",
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+      });
       if (hookJson.success && hookJson.result) {
         setHookData(hookJson.result);
       }

@@ -251,8 +251,13 @@ export default function ProfileProjectsTab({
             synopsis: proj.synopsis || null,
           };
 
-          const createRes = await api.createProject(fetch, createBody, {
-            headers: token ? { "Authorization": `Bearer ${token}` } : {}
+          const createRes = await fetch("/api/projects", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify(createBody),
           });
 
           if (!createRes.ok) {
@@ -283,9 +288,17 @@ export default function ProfileProjectsTab({
               })),
             };
 
-            const panelsRes = await api.updateProjectPanels(fetch, proj.project_id, panelsList, {
-              headers: token ? { "Authorization": `Bearer ${token}` } : {}
-            });
+            const panelsRes = await fetch(
+              `/api/projects/${proj.project_id}/panels`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+                body: JSON.stringify(panelsBody),
+              }
+            );
 
             if (!panelsRes.ok) {
               console.error(

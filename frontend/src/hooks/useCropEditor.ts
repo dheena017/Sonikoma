@@ -405,7 +405,10 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
     appLogic.setIsSavingEdit(true);
 
     try {
-      const data = await api.splitImage(activeFetch, { url: currentUrl, splitLines: state.splitLines });
+      const data = await api.splitImage(activeFetch, {
+        url: currentUrl,
+        splitLines: state.splitLines,
+      });
       if (data.success && Array.isArray(data.urls) && data.urls.length > 0) {
         addPanelsToStoryboard(data.urls);
         addNotification(

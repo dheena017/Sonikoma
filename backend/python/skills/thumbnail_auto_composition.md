@@ -14,6 +14,7 @@ Genre: {genre}
 Total Panels: {total_panels}
 
 INSTRUCTIONS:
+
 1. Identify 1-3 focal assets from the storyboard. Choose panels with intense emotions, high-quality character art, or key action beats.
 2. Recommend a background type:
    - `blurred_panel`: A specific panel stretched and blurred (best for atmosphere).

@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { Youtube, Sparkles, Loader2, ArrowLeft, Sliders, Key, FileText } from "lucide-react";
+import {
+  Youtube,
+  Sparkles,
+  Loader2,
+  ArrowLeft,
+  Sliders,
+  Key,
+  FileText,
+} from "lucide-react";
 import { GeneratedPanel } from "../../types";
 
 // Import modular sub-components
@@ -39,7 +47,9 @@ export default function YouTubePage({
   onNavigateHome,
   addNotification,
 }: YouTubePageProps) {
-  const [activeTab, setActiveTab] = useState<"details" | "settings" | "integrations">("details");
+  const [activeTab, setActiveTab] = useState<
+    "details" | "settings" | "integrations"
+  >("details");
 
   // Leverage custom logic hook
   const {
@@ -188,7 +198,8 @@ export default function YouTubePage({
               YouTube Publisher Studio
             </h2>
             <p className="text-xs text-neutral-400 font-mono mt-0.5">
-              Customize video tags, title descriptions, and configure direct exports
+              Customize video tags, title descriptions, and configure direct
+              exports
             </p>
           </div>
         </div>
@@ -379,9 +390,13 @@ export default function YouTubePage({
                         onChange={(e) => setPrivacy(e.target.value)}
                         className="w-full bg-black/50 border border-neutral-855 rounded-xl px-4 py-3 text-xs text-neutral-305 focus:outline-none focus:border-purple-500/80 transition-all cursor-pointer"
                       >
-                        <option value="unlisted">Unlisted (Review First)</option>
+                        <option value="unlisted">
+                          Unlisted (Review First)
+                        </option>
                         <option value="private">Private</option>
-                        <option value="public">Public (Immediate Publish)</option>
+                        <option value="public">
+                          Public (Immediate Publish)
+                        </option>
                       </select>
                     </div>
                   </div>
@@ -396,7 +411,8 @@ export default function YouTubePage({
                         </span>
                       </div>
                       <p className="text-[10px] text-neutral-450 leading-relaxed font-sans">
-                        Optimize video format description and hashtag indicators suited for vertical mobile feeds.
+                        Optimize video format description and hashtag indicators
+                        suited for vertical mobile feeds.
                       </p>
                     </div>
                     <button

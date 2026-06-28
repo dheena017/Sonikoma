@@ -1,6 +1,7 @@
 import * as api from "../../api/index.js";
 import React, { useState } from "react";
 import { Sparkles, Layers } from "lucide-react";
+import { fetchWithAuth } from "../../utils.js";
 
 interface ThumbnailLayoutFormProps {
   conceptPrompt: string;
@@ -23,12 +24,12 @@ export default function ThumbnailLayoutForm({
   const handleGenerate = async () => {
     setLoading(true);
     try {
-      const json = await api.runThumbnailLayoutSkill({
-          thumbnail_concept:
-            conceptPrompt || "Tense combat close-up illustration",
-          main_character: character,
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        });
+      const json = await api.runThumbnailLayoutSkill(fetchWithAuth, {
+        thumbnail_concept:
+          conceptPrompt || "Tense combat close-up illustration",
+        main_character: character,
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+      });
       if (json.success && json.result) {
         setLayout(json.result);
       }

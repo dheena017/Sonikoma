@@ -222,8 +222,6 @@ export default function ProfilePage({
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-      const data = await api.updateProfile(
-        {
           full_name: profileUser.fullName,
           avatar_url: tempAvatarUrl,
           creator_role: profileUser.role,
@@ -239,9 +237,6 @@ export default function ProfilePage({
       if (!response.ok) {
         throw new Error(res.detail || "Profile picture update failed");
       }
-        },
-        token
-      );
 
       setProfileUser((prev) => ({
         ...prev,
@@ -343,10 +338,6 @@ export default function ProfilePage({
         if (res.success) {
           setLocalProjects(res.projects || []);
         }
-    api
-      .getProjects(token)
-      .then((res) => {
-        if (res.success) setLocalProjects(res.projects);
       })
       .catch(console.error);
   }, []);
@@ -422,30 +413,6 @@ export default function ProfilePage({
             loadedConnections,
             loadedPortfolios
           );
-    api
-      .getCurrentUser(token)
-      .then((data) => {
-        const u = data.user || data;
-        if (u && (u.user_id || u.id)) {
-          setCredits(u.credits);
-          setSubscriptionTier(u.subscription_tier || "free");
-          setAchievementPoints(u.achievement_points || 0);
-          setUnlockedRewards(u.unlocked_rewards || []);
-          setIs2faEnabled(u.mfa_enabled);
-          setPortfolios(
-            (u.portfolio_links || []).map((url: string) => ({
-              id: Math.random().toString(36).substring(2, 11),
-              site: identifyPortfolioSite(url),
-              url,
-            }))
-          );
-          setConnections(
-            u.social_connections || {
-              google: false,
-              github: false,
-              discord: false,
-            }
-          );
         }
       })
       .catch(console.error);
@@ -458,17 +425,6 @@ export default function ProfilePage({
       .then((r) => r.json())
       .then((res) => {
         if (res.success) {
-          setSessions(
-            res.sessions.map((s: any) => ({
-              id: s.session_id,
-              browser: s.browser,
-              ip: s.ip,
-              location: s.location,
-              active: s.active === 1,
-    api
-      .getSessions(token)
-      .then((res) => {
-        if (res.success && res.sessions) {
           setSessions(
             res.sessions.map((s: any) => ({
               id: s.session_id || s.id,
@@ -508,23 +464,8 @@ export default function ProfilePage({
         if (res.success) {
           setInvoices(
             res.invoices.map((inv: any) => ({
-              id: inv.invoice_id,
-              date: inv.created_at.split(" ")[0],
-    api
-      .getApiKeys(token)
-      .then((res) => {
-        if (res.success) setApiTokens(res.keys);
-      })
-      .catch(console.error);
-
-    api
-      .getInvoices(token)
-      .then((res) => {
-        if (res.success && res.invoices) {
-          setInvoices(
-            res.invoices.map((inv: any) => ({
               id: inv.invoice_id || inv.id,
-              date: inv.created_at || inv.date,
+              date: (inv.created_at || inv.date || "").split(" ")[0],
               amount: inv.amount,
               status: inv.status,
             }))
@@ -535,8 +476,6 @@ export default function ProfilePage({
 
     fetch("/api/metrics")
       .then((r) => r.json())
-    api
-      .getMetrics()
       .then((res) => {
         if (res.storage) {
           setCacheUsed(res.storage.usedBytes);
@@ -544,7 +483,6 @@ export default function ProfilePage({
         }
       })
       .catch(console.error);
-  }, [user]);
   }, [user, fetchProjects]);
 
   // Real-time polling for Workspace Stats
@@ -552,8 +490,6 @@ export default function ProfilePage({
     const interval = setInterval(() => {
       fetch("/api/metrics")
         .then((r) => r.json())
-      api
-        .getMetrics()
         .then((res) => {
           if (res.storage) {
             setCacheUsed(res.storage.usedBytes);
@@ -574,11 +510,6 @@ export default function ProfilePage({
             if (res.credits !== undefined) {
               setCredits(res.credits);
             }
-        api
-          .getCurrentUser(token)
-          .then((data) => {
-            const u = data.user || data;
-            if (u) setCredits(u.credits);
           })
           .catch(() => {});
       }
@@ -589,9 +520,19 @@ export default function ProfilePage({
 
   // Render initials or background gradients for avatar
   const renderAvatarContent = (url: string, name: string) => {
-    if (url && !url.startsWith("linear-gradient")) {
+    if (url) {
+      if (url.startsWith("linear-gradient")) {
+        return (
+          <div
+            className="w-full h-full flex items-center justify-center text-white font-extrabold text-3xl select-none"
+            style={{ background: url }}
+          >
+            {name.charAt(0).toUpperCase()}
+          </div>
+        );
+      }
       return (
-        <div className="w-full h-full relative">
+        <div className="w-full h-full relative bg-neutral-900">
           <img
             src={url}
             alt="Profile"
@@ -604,27 +545,6 @@ export default function ProfilePage({
             {name.charAt(0).toUpperCase()}
           </div>
         </div>
-      );
-    }
-    const bgStyle = url ? { background: url } : {};
-    return (
-      <div 
-        className="w-full h-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white font-extrabold text-3xl select-none"
-        style={bgStyle}
-      >
-    if (url.startsWith("linear-gradient")) {
-      return (
-        <div
-          className="w-full h-full flex items-center justify-center text-white font-extrabold text-3xl select-none"
-          style={{ background: url }}
-        >
-          {name.charAt(0).toUpperCase()}
-        </div>
-      );
-    }
-    if (url) {
-      return (
-        <img src={url} alt="Profile" className="w-full h-full object-cover" />
       );
     }
     return (
@@ -665,19 +585,6 @@ export default function ProfilePage({
         }
         return res;
       })
-    const data = {
-      full_name: profileUser.fullName,
-      avatar_url: profileUser.avatarUrl,
-      creator_role: profileUser.role,
-      bio: profileUser.bio,
-      newsletter: profileUser.newsletter,
-      language: profileUser.language,
-      portfolio_links: portfolios.map((p) => p.url),
-      social_connections: connections,
-    };
-
-    api
-      .updateProfile(data, token)
       .then(() => {
         setSaveSuccess(true);
         lastSavedProfileRef.current = currentProfileStr;
@@ -732,13 +639,6 @@ export default function ProfilePage({
         }
         return res;
       })
-    const data = {
-      current_password: passwordState.current,
-      new_password: passwordState.new,
-    };
-
-    api
-      .updatePassword(data, token)
       .then(() => {
         setPasswordSuccess(true);
         setPasswordState({ current: "", new: "", confirm: "" });
@@ -767,13 +667,15 @@ export default function ProfilePage({
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then((r) => r.json())
-    api
-      .terminateSession(id, token)
-      .then((res) => {
-        if (res.success) {
-          setSessions((prev) => prev.filter((s) => s.id !== id));
+      .then(async (r) => {
+        const res = await r.json();
+        if (!r.ok) {
+          throw new Error(res.detail || "Failed to terminate session");
         }
+        return res;
+      })
+      .then(() => {
+        setSessions((prev) => prev.filter((s) => s.id !== id));
       })
       .catch(console.error);
   };
@@ -796,8 +698,6 @@ export default function ProfilePage({
         }
         return res;
       })
-    api
-      .claimCredits(token)
       .then((res) => {
         if (res.success) {
           setCredits(res.credits);
@@ -853,13 +753,6 @@ export default function ProfilePage({
         await (window as any).alertAsync(
           "Successfully upgraded to Studio Pro!"
         );
-      const res = await api.upgradePlan(token);
-      if (res.success) {
-        setSubscriptionTier("pro");
-        const invRes = await api.getInvoices(token);
-        if (invRes.success) {
-          setInvoices(invRes.invoices);
-        }
       }
     } catch (err: any) {
       await (window as any).alertAsync(err.message || "Failed to upgrade plan");
@@ -889,7 +782,6 @@ export default function ProfilePage({
       if (!r.ok) {
         throw new Error(res.detail || "Failed to save card");
       }
-      const res = await api.saveCard(card, token);
       if (res.success) {
         setCardInfo(card);
         await (window as any).alertAsync("Payment method saved successfully!");
@@ -942,14 +834,6 @@ export default function ProfilePage({
         await (window as any).alertAsync(
           `Successfully purchased ${amountOfCredits} credits!`
         );
-      const data = { credits: amountOfCredits, amount: priceUSD };
-      const res = await api.purchaseCredits(data, token);
-      if (res.success) {
-        setCredits(res.credits);
-        const invRes = await api.getInvoices(token);
-        if (invRes.success) {
-          setInvoices(invRes.invoices);
-        }
       }
     } catch (err: any) {
       await (window as any).alertAsync(
@@ -982,8 +866,6 @@ export default function ProfilePage({
         }
         return res;
       })
-    api
-      .createApiKey({ name: newTokenName }, token)
       .then((res) => {
         if (res.success) {
           setApiTokens((prev) => [
@@ -1029,9 +911,13 @@ export default function ProfilePage({
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then((r) => r.json())
-    api
-      .deleteApiKey(id, token)
+      .then(async (r) => {
+        const res = await r.json();
+        if (!r.ok) {
+          throw new Error(res.detail || "Failed to delete API key");
+        }
+        return res;
+      })
       .then((res) => {
         if (res.success) {
           setApiTokens((prev) => prev.filter((t) => t.id !== id));
@@ -1058,7 +944,6 @@ export default function ProfilePage({
 
       if (!response.ok) return false;
       const res = await response.json();
-      const res = await api.updateMfa(enabled, token);
       if (res.success) {
         setIs2faEnabled(enabled);
         return true;
@@ -1096,12 +981,6 @@ export default function ProfilePage({
 
       if (!response.ok) return false;
       const res = await response.json();
-      const data = {
-        points: cost,
-        reward_type: type,
-        reward_value: value,
-      };
-      const res = await api.redeemReward(data, token);
       if (res.success) {
         if (type === "credits") {
           setCredits(res.credits);
@@ -1138,14 +1017,10 @@ export default function ProfilePage({
         }
         return res;
       })
-    api
-      .batchDeleteProjects(ids, token)
-      .then((res) => {
-        if (res.success) {
-          setLocalProjects((prev) =>
-            prev.filter((p) => !ids.includes(p.project_id))
-          );
-        }
+      .then(() => {
+        setLocalProjects((prev) =>
+          prev.filter((p) => !ids.includes(p.project_id))
+        );
       })
       .catch(async (err) => {
         await (window as any).alertAsync(
@@ -1171,12 +1046,8 @@ export default function ProfilePage({
         }
         return res;
       })
-    api
-      .deleteProject(id, token)
-      .then((res) => {
-        if (res.success) {
-          setLocalProjects((prev) => prev.filter((p) => p.project_id !== id));
-        }
+      .then(() => {
+        setLocalProjects((prev) => prev.filter((p) => p.project_id !== id));
       })
       .catch(async (err) => {
         await (window as any).alertAsync(
@@ -1202,14 +1073,10 @@ export default function ProfilePage({
         }
         return res;
       })
-    api
-      .deleteSeries(seriesId, token)
-      .then((res) => {
-        if (res.success) {
-          setLocalProjects((prev) =>
-            prev.filter((p) => p.series_id !== seriesId)
-          );
-        }
+      .then(() => {
+        setLocalProjects((prev) =>
+          prev.filter((p) => p.series_id !== seriesId)
+        );
       })
       .catch(async (err) => {
         await (window as any).alertAsync(
@@ -1285,19 +1152,11 @@ export default function ProfilePage({
         await (window as any).alertAsync("Account deleted successfully.");
         onLogout();
       } else {
-        const res = await response.json();
-      const res = await api.deleteAccount(token);
-      if (res.success) {
-        await (window as any).alertAsync("Account deleted successfully.");
-        onLogout();
-      } else {
+        const data = await response.json();
         await (window as any).alertAsync(
-          res.detail || "Failed to delete account"
+          data.detail || "Failed to delete account"
         );
       }
-    } catch (err) {
-      console.error(err);
-      await (window as any).alertAsync("Failed to delete account.");
     } catch (err: any) {
       console.error(err);
       await (window as any).alertAsync(
@@ -1732,7 +1591,6 @@ export default function ProfilePage({
                   toggleThemeMode ||
                   (() =>
                     setThemePrefs((p) => (p === "dark" ? "light" : "dark")))
-                  (() => setThemePrefs((p) => (p === "dark" ? "light" : "dark")))
                 }
                 accentColor={accentColor}
                 setAccentColor={setAccentColor}

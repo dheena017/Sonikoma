@@ -229,7 +229,10 @@ export function useVideoGeneration({
       };
 
       console.log(`[API] Requesting video generation`, requestBody);
-      const responseData = await api.generateVideo(fetchWithInterceptor, requestBody);
+      const responseData = await api.generateVideo(
+        fetchWithInterceptor,
+        requestBody
+      );
       console.log(`[API] Video generation response:`, responseData);
 
       if (responseData.status !== "success" || !responseData.video_url) {
@@ -354,7 +357,10 @@ export function useVideoGeneration({
     setRenderStartTime(startTime);
 
     try {
-      const data = await api.renderVideo(fetchWithInterceptor, { panels, voice: voiceActor });
+      const data = await api.renderVideo(fetchWithInterceptor, {
+        panels,
+        voice: voiceActor,
+      });
       if (!data.success || !data.job_id) {
         throw new Error(
           data.detail || data.error || "Failed to start render job"
@@ -366,7 +372,10 @@ export function useVideoGeneration({
       // Start polling
       const pollInterval = setInterval(async () => {
         try {
-          const statusData = await api.getVideoStatus(fetchWithInterceptor, jobId);
+          const statusData = await api.getVideoStatus(
+            fetchWithInterceptor,
+            jobId
+          );
 
           if (statusData.progress) {
             setRenderProgress(statusData.progress);

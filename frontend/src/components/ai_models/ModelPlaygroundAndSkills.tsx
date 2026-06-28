@@ -49,11 +49,9 @@ const SUPPORTED_SKILLS = [
   {
     id: "translation",
     name: "Dialogue Translation Studio",
-    endpoint: "/api/skills/translate",
+    endpoint: api.SKILL_ENDPOINTS.TRANSLATE,
     description:
       "Translate manga dialogue into a target language, retaining context and style.",
-    endpoint: api.SKILL_ENDPOINTS.TRANSLATE,
-    description: "Translate manga dialogue into a target language, retaining context and style.",
     inputs: [
       {
         name: "text",
@@ -73,11 +71,9 @@ const SUPPORTED_SKILLS = [
   {
     id: "dramatize",
     name: "Script Dramatization",
-    endpoint: "/api/skills/dramatize",
+    endpoint: api.SKILL_ENDPOINTS.DRAMATIZE,
     description:
       "Dramatize raw panel transcription texts based on genre and scene context.",
-    endpoint: api.SKILL_ENDPOINTS.DRAMATIZE,
-    description: "Dramatize raw panel transcription texts based on genre and scene context.",
     inputs: [
       {
         name: "raw_ocr_text",
@@ -104,11 +100,9 @@ const SUPPORTED_SKILLS = [
   {
     id: "seo",
     name: "YouTube SEO Metadata Generator",
-    endpoint: "/api/skills/seo",
+    endpoint: api.SKILL_ENDPOINTS.SEO,
     description:
       "Generate highly optimized video titles, tags, and descriptions for Webtoon recaps.",
-    endpoint: api.SKILL_ENDPOINTS.SEO,
-    description: "Generate highly optimized video titles, tags, and descriptions for Webtoon recaps.",
     inputs: [
       {
         name: "title",
@@ -135,11 +129,9 @@ const SUPPORTED_SKILLS = [
   {
     id: "cliffhanger",
     name: "Cliffhanger Generator",
-    endpoint: "/api/skills/cliffhanger",
+    endpoint: api.SKILL_ENDPOINTS.CLIFFHANGER,
     description:
       "Suggest narrative hook variations or cliffhanger statements to boost viewer retention.",
-    endpoint: api.SKILL_ENDPOINTS.CLIFFHANGER,
-    description: "Suggest narrative hook variations or cliffhanger statements to boost viewer retention.",
     inputs: [
       {
         name: "story_outline",
@@ -153,11 +145,9 @@ const SUPPORTED_SKILLS = [
   {
     id: "voice-cast",
     name: "Voice Casting Profiler",
-    endpoint: "/api/skills/voice-cast",
+    endpoint: api.SKILL_ENDPOINTS.VOICE_CAST,
     description:
       "Analyze characters' descriptions and suggest appropriate voice casting guides.",
-    endpoint: api.SKILL_ENDPOINTS.VOICE_CAST,
-    description: "Analyze characters' descriptions and suggest appropriate voice casting guides.",
     inputs: [
       {
         name: "character_name",
@@ -182,11 +172,9 @@ const SUPPORTED_SKILLS = [
   {
     id: "copyright-scrub",
     name: "Copyright Text Scrubber",
-    endpoint: "/api/skills/copyright-scrub",
+    endpoint: api.SKILL_ENDPOINTS.COPYRIGHT_SCRUB,
     description:
       "Clean up transcription errors, remove watermarks, scan/filter advertiser-unfriendly speech.",
-    endpoint: api.SKILL_ENDPOINTS.COPYRIGHT_SCRUB,
-    description: "Clean up transcription errors, remove watermarks, scan/filter advertiser-unfriendly speech.",
     inputs: [
       {
         name: "text",
@@ -199,11 +187,9 @@ const SUPPORTED_SKILLS = [
   {
     id: "bgm-vibe",
     name: "BGM Mood Selector",
-    endpoint: "/api/skills/bgm-vibe",
+    endpoint: api.SKILL_ENDPOINTS.BGM_VIBE,
     description:
       "Map current scene's narrative mood to background music vibe suggestions.",
-    endpoint: api.SKILL_ENDPOINTS.BGM_VIBE,
-    description: "Map current scene's narrative mood to background music vibe suggestions.",
     inputs: [
       {
         name: "narrative_mood",

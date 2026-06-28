@@ -26,8 +26,6 @@ import {
   Download,
 } from "lucide-react";
 import { getSourceName, getSourceIcon } from "../utils.js";
-import { Film, FolderOpen, Loader2, ArrowRight, Plus, Search, Filter, BarChart2, CheckCircle2, FileVideo, LayoutGrid, List, MoreVertical, Trash2, Link, Square, CheckSquare, X } from "lucide-react";
-import { getSourceName } from "../utils.js";
 import * as api from "../api/index.js";
 
 interface Project {
@@ -79,8 +77,6 @@ export default function ProjectsPage() {
         throw new Error(`Failed to fetch projects (HTTP ${res.status})`);
       }
       const data = await res.json();
-      const token = localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token") || "";
-      const data = await api.getProjects(token);
       if (data.projects) {
         setProjects(data.projects);
       } else {
@@ -184,32 +180,6 @@ export default function ProjectsPage() {
           },
         });
         const data = await res.json();
-        const token = localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token") || "";
-        const data = await api.deleteProject(projectId, token);
-        if (data.success) {
-          setProjects(projects.filter(p => p.project_id !== projectId));
-          setSelectedProjects(prev => {
-            const next = new Set(prev);
-            next.delete(projectId);
-            return next;
-          });
-          (window as any).alertAsync?.("Project deleted successfully.", "Deleted");
-        } else {
-          throw new Error(data.detail || "Failed to delete");
-        }
-      } catch (err: any) {
-        (window as any).alertAsync?.(err.message || "Failed to delete project.", "Error", "rose");
-      }
-    }
-  };
-
-  const handleBulkDelete = async () => {
-    if (selectedProjects.size === 0) return;
-    
-    if (await (window as any).confirmAsync?.(`Are you sure you want to delete ${selectedProjects.size} selected projects? This action cannot be undone.`, "Bulk Delete", "rose")) {
-      try {
-        const token = localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token") || "";
-        const data = await api.batchDeleteProjects(Array.from(selectedProjects), token);
         if (data.success) {
           setProjects(projects.filter((p) => p.project_id !== projectId));
           setSelectedProjects((prev) => {
@@ -590,7 +560,9 @@ export default function ProjectsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredProjects.map((project) => {
               const isSelected = selectedProjects.has(project.project_id);
-              const isProcessing = project.status?.toLowerCase() === "processing" || project.status?.toLowerCase() === "exporting";
+              const isProcessing =
+                project.status?.toLowerCase() === "processing" ||
+                project.status?.toLowerCase() === "exporting";
               const SourceIcon = getSourceIcon?.(project.url) || ExternalLink;
 
               return (
@@ -780,7 +752,10 @@ export default function ProjectsPage() {
                   {/* Processing Progress Bar */}
                   {isProcessing && (
                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-neutral-800 z-20">
-                      <div className="h-full bg-gradient-to-r from-amber-500 to-purple-500 animate-shimmer" style={{ width: '100%', backgroundSize: '200% 100%' }} />
+                      <div
+                        className="h-full bg-gradient-to-r from-amber-500 to-purple-500 animate-shimmer"
+                        style={{ width: "100%", backgroundSize: "200% 100%" }}
+                      />
                     </div>
                   )}
                 </div>
@@ -816,8 +791,11 @@ export default function ProjectsPage() {
               <tbody className="divide-y divide-neutral-800/50">
                 {filteredProjects.map((project) => {
                   const isSelected = selectedProjects.has(project.project_id);
-                  const isProcessing = project.status?.toLowerCase() === "processing" || project.status?.toLowerCase() === "exporting";
-                  const SourceIcon = getSourceIcon?.(project.url) || ExternalLink;
+                  const isProcessing =
+                    project.status?.toLowerCase() === "processing" ||
+                    project.status?.toLowerCase() === "exporting";
+                  const SourceIcon =
+                    getSourceIcon?.(project.url) || ExternalLink;
 
                   return (
                     <tr
@@ -890,7 +868,13 @@ export default function ProjectsPage() {
                           </div>
                           {isProcessing && (
                             <div className="w-full h-1 bg-neutral-800 rounded-full overflow-hidden">
-                              <div className="h-full bg-gradient-to-r from-amber-500 to-purple-500 animate-shimmer" style={{ width: '100%', backgroundSize: '200% 100%' }} />
+                              <div
+                                className="h-full bg-gradient-to-r from-amber-500 to-purple-500 animate-shimmer"
+                                style={{
+                                  width: "100%",
+                                  backgroundSize: "200% 100%",
+                                }}
+                              />
                             </div>
                           )}
                         </div>

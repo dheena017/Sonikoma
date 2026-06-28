@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Sparkles, Check, AlertTriangle } from "lucide-react";
 import { GeneratedPanel } from "../../types.js";
 import * as api from "../../api/index.js";
+import { fetchWithAuth } from "../../utils.js";
 
 interface PanelTranslationToolProps {
   panel: GeneratedPanel;
@@ -31,14 +32,11 @@ export default function PanelTranslationTool({
   const handleTranslate = async () => {
     setTranslating(true);
     try {
-      const token =
-        localStorage.getItem("sonikoma_token") ||
-        sessionStorage.getItem("sonikoma_token");
-      const json = await api.runTranslateSkill({
-          text: panel.speech_text,
-          target_lang: lang,
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }, token ? { "Authorization": `Bearer ${token}` } : {});
+      const json = await api.runTranslateSkill(fetchWithAuth, {
+        text: panel.speech_text,
+        target_lang: lang,
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+      });
       if (json.success && json.result) {
         setTranslationResult(json.result.translated_text);
       }
@@ -52,10 +50,10 @@ export default function PanelTranslationTool({
   const handleScrub = async () => {
     setScrububbing(true);
     try {
-      const json = await api.runCopyrightScrubSkill({
-          text: panel.speech_text,
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        });
+      const json = await api.runCopyrightScrubSkill(fetchWithAuth, {
+        text: panel.speech_text,
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+      });
       if (json.success && json.result) {
         setScrubResult(json.result);
       }

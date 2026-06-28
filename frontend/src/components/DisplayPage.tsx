@@ -45,7 +45,7 @@ export default function DisplayPage({ projectId }: DisplayPageProps) {
       setLoading(true);
       setError(null);
       try {
-        const data = await api.getPublicProject(projectId);
+        const data = await api.getPublicProject(fetch, projectId);
         if (data.success) {
           setProject(data.project);
           setPanels(data.panels || []);

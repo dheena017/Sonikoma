@@ -34,12 +34,14 @@ export default function WebtoonMetadata({
   setChapterEnd,
   chapterValidationError,
 }: WebtoonMetadataProps) {
-  const handleNumericChange = (setter: (val: string) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    if (val === "" || /^\d+$/.test(val)) {
-      setter(val);
-    }
-  };
+  const handleNumericChange =
+    (setter: (val: string) => void) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const val = e.target.value;
+      if (val === "" || /^\d+$/.test(val)) {
+        setter(val);
+      }
+    };
 
   return (
     <div className="bg-neutral-950/40 border border-neutral-850/60 rounded-2xl p-5 space-y-4">
@@ -90,7 +92,9 @@ export default function WebtoonMetadata({
             <select
               value={webtoonPlatform}
               onChange={(e) => setWebtoonPlatform(e.target.value)}
-              className={`bg-black/40 border border-neutral-855 rounded-xl px-3.5 py-2.5 text-xs text-neutral-305 focus:outline-none focus:border-purple-500/50 transition-all cursor-pointer ${webtoonPlatform === "Other" ? "w-1/3" : "w-full"}`}
+              className={`bg-black/40 border border-neutral-855 rounded-xl px-3.5 py-2.5 text-xs text-neutral-305 focus:outline-none focus:border-purple-500/50 transition-all cursor-pointer ${
+                webtoonPlatform === "Other" ? "w-1/3" : "w-full"
+              }`}
             >
               {PLATFORMS.map((p) => (
                 <option key={p} value={p}>
@@ -120,7 +124,11 @@ export default function WebtoonMetadata({
               value={chapterStart}
               onChange={handleNumericChange(setChapterStart)}
               placeholder="e.g. 1"
-              className={`w-full bg-black/40 border rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none transition-all ${chapterValidationError ? "border-red-500/50 focus:border-red-500" : "border-neutral-855 focus:border-purple-500/50"}`}
+              className={`w-full bg-black/40 border rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none transition-all ${
+                chapterValidationError
+                  ? "border-red-500/50 focus:border-red-500"
+                  : "border-neutral-855 focus:border-purple-500/50"
+              }`}
             />
           </div>
           <div className="space-y-1.5">
@@ -132,7 +140,11 @@ export default function WebtoonMetadata({
               value={chapterEnd}
               onChange={handleNumericChange(setChapterEnd)}
               placeholder="e.g. 10"
-              className={`w-full bg-black/40 border rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none transition-all ${chapterValidationError ? "border-red-500/50 focus:border-red-500" : "border-neutral-855 focus:border-purple-500/50"}`}
+              className={`w-full bg-black/40 border rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none transition-all ${
+                chapterValidationError
+                  ? "border-red-500/50 focus:border-red-500"
+                  : "border-neutral-855 focus:border-purple-500/50"
+              }`}
             />
           </div>
         </div>
@@ -143,7 +155,8 @@ export default function WebtoonMetadata({
         </p>
       )}
       <p className="text-[9px] text-neutral-500 font-mono italic">
-        Format: Seconds (e.g., 60 for 1 minute) or Chapter Numbers as per use case.
+        Format: Seconds (e.g., 60 for 1 minute) or Chapter Numbers as per use
+        case.
       </p>
     </div>
   );

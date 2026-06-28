@@ -38,6 +38,7 @@ interface PublishMultipartParams {
   authorName?: string;
   artistName?: string;
   webtoonPlatform?: string;
+  customPlatform?: string;
   chapterStart?: string;
   chapterEnd?: string;
   subtitlesType?: string;
@@ -66,6 +67,7 @@ export async function publishVideoJson({
   authorName,
   artistName,
   webtoonPlatform,
+  customPlatform,
   chapterStart,
   chapterEnd,
   subtitlesType,
@@ -125,6 +127,7 @@ export async function publishVideoMultipart({
   authorName,
   artistName,
   webtoonPlatform,
+  customPlatform,
   chapterStart,
   chapterEnd,
   subtitlesType,
@@ -153,7 +156,8 @@ export async function publishVideoMultipart({
   if (chapterStart) formData.append("chapter_start", chapterStart);
   if (chapterEnd) formData.append("chapter_end", chapterEnd);
   if (subtitlesType) formData.append("subtitles_type", subtitlesType);
-  if (subtitlesLanguage) formData.append("subtitles_language", subtitlesLanguage);
+  if (subtitlesLanguage)
+    formData.append("subtitles_language", subtitlesLanguage);
 
   if (thumbnailFile) {
     formData.append("thumbnail", thumbnailFile);

@@ -12,23 +12,25 @@ export default function PlaylistSelector({
   setPlaylist,
   hasCustomCredentials,
 }: PlaylistSelectorProps) {
-  const [playlists, setPlaylists] = useState<{ id: string; title: string }[]>([]);
+  const [playlists, setPlaylists] = useState<{ id: string; title: string }[]>(
+    []
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     // In a real implementation, we would fetch from YouTube API if authenticated.
     // For now, we'll provide a placeholder or mock behavior.
     if (hasCustomCredentials) {
-        // Mocking dynamic fetch
-        setIsLoading(true);
-        setTimeout(() => {
-            setPlaylists([
-                { id: "PL1", title: "Webtoon Recaps" },
-                { id: "PL2", title: "Action Manhwa" },
-                { id: "PL3", title: "Romance Stories" },
-            ]);
-            setIsLoading(false);
-        }, 1000);
+      // Mocking dynamic fetch
+      setIsLoading(true);
+      setTimeout(() => {
+        setPlaylists([
+          { id: "PL1", title: "Webtoon Recaps" },
+          { id: "PL2", title: "Action Manhwa" },
+          { id: "PL3", title: "Romance Stories" },
+        ]);
+        setIsLoading(false);
+      }, 1000);
     }
   }, [hasCustomCredentials]);
 

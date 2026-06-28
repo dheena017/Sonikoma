@@ -213,34 +213,38 @@ export function useAutoSave(state: AutoSaveState) {
         headers["Authorization"] = `Bearer ${token}`;
       }
 
-      const data = await api.updateProject(targetProjectId, {
-        url: state.targetUrl || "",
-        title: state.seriesTitle.trim() || "Untitled Project",
-        genre: state.scrapedGenre.trim() || "general",
-        episode: formattedEpisode || "Chapter 1",
-        author: state.seriesAuthor.trim() || "Unknown Author",
-        cover_image: state.seriesCoverImage.trim() || null,
-        synopsis: state.seriesSynopsis.trim() || null,
-        panels: targetPanels.map((p) => ({
-          image_url: p.image_url,
-          original_url: p.original_url || null,
-          speech_text: p.speech_text || "",
-          sfx: p.sfx || "",
-          duration: p.duration || 4.5,
-          motion_type: p.motion_type || "zoom_in",
-          visual_description: p.visual_description || null,
-          brightness: p.brightness ?? null,
-          contrast: p.contrast ?? null,
-          saturation: p.saturation ?? null,
-          grayscale: p.grayscale || false,
-          filter_preset: p.filter_preset || null,
-          bubble_method: p.bubble_method || null,
-          bubble_sensitivity: p.bubble_sensitivity ?? null,
-          bubble_dilation: p.bubble_dilation ?? null,
-          inpaint_radius: p.inpaint_radius ?? null,
-          detection_style: p.detection_style || null,
-        })),
-      }, token || undefined);
+      const data = await api.updateProject(
+        state.fetchWithInterceptor,
+        targetProjectId,
+        {
+          url: state.targetUrl || "",
+          title: state.seriesTitle.trim() || "Untitled Project",
+          genre: state.scrapedGenre.trim() || "general",
+          episode: formattedEpisode || "Chapter 1",
+          author: state.seriesAuthor.trim() || "Unknown Author",
+          cover_image: state.seriesCoverImage.trim() || null,
+          synopsis: state.seriesSynopsis.trim() || null,
+          panels: targetPanels.map((p) => ({
+            image_url: p.image_url,
+            original_url: p.original_url || null,
+            speech_text: p.speech_text || "",
+            sfx: p.sfx || "",
+            duration: p.duration || 4.5,
+            motion_type: p.motion_type || "zoom_in",
+            visual_description: p.visual_description || null,
+            brightness: p.brightness ?? null,
+            contrast: p.contrast ?? null,
+            saturation: p.saturation ?? null,
+            grayscale: p.grayscale || false,
+            filter_preset: p.filter_preset || null,
+            bubble_method: p.bubble_method || null,
+            bubble_sensitivity: p.bubble_sensitivity ?? null,
+            bubble_dilation: p.bubble_dilation ?? null,
+            inpaint_radius: p.inpaint_radius ?? null,
+            detection_style: p.detection_style || null,
+          })),
+        }
+      );
       if (data.success) {
         if (isConvertingTemp || data.series_slug) {
           state.setProjectId?.(targetProjectId);
@@ -271,10 +275,13 @@ export function useAutoSave(state: AutoSaveState) {
             console.log(
               `[Save Hook] Saving raw scraped images cache list to backend for URL: ${state.targetUrl}`
             );
-            await api.saveScrapedImages({
-              url: state.targetUrl,
-              images: state.scrapedImages,
-            }, token || undefined);
+            await api.saveScrapedImages(
+              {
+                url: state.targetUrl,
+                images: state.scrapedImages,
+              },
+              token || undefined
+            );
           } catch (scrapeErr) {
             console.error(
               "[Save Hook] Error saving raw scraped images cache list:",
@@ -290,7 +297,11 @@ export function useAutoSave(state: AutoSaveState) {
         // Sync accumulated tokens if any exist
         if (state.accumulatedTokens && state.accumulatedTokens > 0) {
           try {
-            await api.updateProjectTokens(state.fetchWithInterceptor, data.project_id || targetProjectId, state.accumulatedTokens);
+            await api.updateProjectTokens(
+              state.fetchWithInterceptor,
+              data.project_id || targetProjectId,
+              state.accumulatedTokens
+            );
             state.setAccumulatedTokens?.(0);
             console.log(
               `[Save Hook] Synced ${state.accumulatedTokens} tokens to project.`

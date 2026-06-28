@@ -150,7 +150,10 @@ export default function ShortcutsPage({
     });
     if (addNotification) {
       const details = getActionDetails(id);
-      addNotification(`Reset ${details.label} to default: ${defaultValue}`, "info");
+      addNotification(
+        `Reset ${details.label} to default: ${defaultValue}`,
+        "info"
+      );
     }
   };
 
@@ -169,7 +172,8 @@ export default function ShortcutsPage({
 
   const handleExport = () => {
     const dataStr = JSON.stringify(shortcuts, null, 2);
-    const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+    const dataUri =
+      "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
     const exportFileDefaultName = "sonikoma_shortcuts.json";
 
     const linkElement = document.createElement("a");
@@ -265,7 +269,8 @@ export default function ShortcutsPage({
       const matchesSearch =
         details.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
         val.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = activeCategory === "all" || details.category === activeCategory;
+      const matchesCategory =
+        activeCategory === "all" || details.category === activeCategory;
       return matchesSearch && matchesCategory;
     });
   }, [shortcuts, searchQuery, activeCategory]);
@@ -277,7 +282,10 @@ export default function ShortcutsPage({
       <span>
         {parts.map((part, i) =>
           part.toLowerCase() === highlight.toLowerCase() ? (
-            <mark key={i} className="bg-purple-500/40 text-purple-200 rounded px-0.5 border-b border-purple-400/50">
+            <mark
+              key={i}
+              className="bg-purple-500/40 text-purple-200 rounded px-0.5 border-b border-purple-400/50"
+            >
               {part}
             </mark>
           ) : (
@@ -289,7 +297,8 @@ export default function ShortcutsPage({
   };
 
   const renderKeyCombo = (combo: string) => {
-    if (!combo) return <span className="text-neutral-600 italic">Disabled</span>;
+    if (!combo)
+      return <span className="text-neutral-600 italic">Disabled</span>;
 
     const keys = combo.split("+");
     return (
@@ -299,7 +308,9 @@ export default function ShortcutsPage({
             <kbd className="min-w-[24px] px-2 py-1 text-[10px] font-bold font-mono bg-neutral-900 border-b-2 border-neutral-800 text-purple-300 rounded shadow-[0_2px_0_0_rgba(0,0,0,0.5)] flex items-center justify-center group-hover:text-purple-200 group-hover:border-purple-700/50 transition-all active:translate-y-[1px] active:shadow-none">
               {key}
             </kbd>
-            {idx < keys.length - 1 && <span className="text-neutral-600 text-[10px]">+</span>}
+            {idx < keys.length - 1 && (
+              <span className="text-neutral-600 text-[10px]">+</span>
+            )}
           </React.Fragment>
         ))}
       </div>
@@ -328,7 +339,8 @@ export default function ShortcutsPage({
             Shortcuts & Macros
           </h2>
           <p className="text-sm text-neutral-400 mt-2 max-w-xl leading-relaxed">
-            Boost your productivity with custom keybindings. Control the editor, navigate the workspace, and trigger AI workflows with your keyboard.
+            Boost your productivity with custom keybindings. Control the editor,
+            navigate the workspace, and trigger AI workflows with your keyboard.
           </p>
         </div>
 
@@ -371,7 +383,16 @@ export default function ShortcutsPage({
           <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest px-3 mb-2 font-mono">
             Command Groups
           </p>
-          {(["all", "nav", "trigger", "playback", "editor", "deck"] as Category[]).map((cat) => (
+          {(
+            [
+              "all",
+              "nav",
+              "trigger",
+              "playback",
+              "editor",
+              "deck",
+            ] as Category[]
+          ).map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
@@ -387,7 +408,13 @@ export default function ShortcutsPage({
               {cat === "playback" && <Play className="h-4 w-4" />}
               {cat === "editor" && <Layers className="h-4 w-4" />}
               {cat === "deck" && <ImageIcon className="h-4 w-4" />}
-              <span className="capitalize">{cat === "nav" ? "Navigation" : cat === "deck" ? "Gallery" : cat}</span>
+              <span className="capitalize">
+                {cat === "nav"
+                  ? "Navigation"
+                  : cat === "deck"
+                  ? "Gallery"
+                  : cat}
+              </span>
             </button>
           ))}
         </div>
@@ -409,7 +436,9 @@ export default function ShortcutsPage({
           {/* Grid of Shortcuts */}
           <div className="bg-neutral-900/30 border border-neutral-800/60 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
             <div className="grid grid-cols-12 bg-neutral-950/50 px-6 py-4 border-b border-neutral-800 text-[10px] font-bold font-mono text-neutral-500 tracking-wider uppercase">
-              <div className="col-span-6 sm:col-span-7">Action & Description</div>
+              <div className="col-span-6 sm:col-span-7">
+                Action & Description
+              </div>
               <div className="col-span-2 hidden sm:block">Scope</div>
               <div className="col-span-6 sm:col-span-3 text-right">Mapping</div>
             </div>
@@ -424,7 +453,10 @@ export default function ShortcutsPage({
                     No shortcuts found matching your criteria.
                   </p>
                   <button
-                    onClick={() => { setSearchQuery(""); setActiveCategory("all"); }}
+                    onClick={() => {
+                      setSearchQuery("");
+                      setActiveCategory("all");
+                    }}
                     className="text-xs text-purple-400 hover:text-purple-300 font-bold uppercase tracking-wider"
                   >
                     Clear all filters
@@ -456,7 +488,13 @@ export default function ShortcutsPage({
                       )}
 
                       <div className="col-span-6 sm:col-span-7 flex items-center gap-4">
-                        <div className={`p-2 rounded-lg ${isRecording ? "bg-purple-500 text-white" : "bg-neutral-900 text-neutral-500 group-hover:text-neutral-300 group-hover:bg-neutral-800"} transition-all`}>
+                        <div
+                          className={`p-2 rounded-lg ${
+                            isRecording
+                              ? "bg-purple-500 text-white"
+                              : "bg-neutral-900 text-neutral-500 group-hover:text-neutral-300 group-hover:bg-neutral-800"
+                          } transition-all`}
+                        >
                           {details.icon}
                         </div>
                         <div className="flex flex-col">
@@ -465,7 +503,10 @@ export default function ShortcutsPage({
                               {highlightText(details.label, searchQuery)}
                             </span>
                             {isModified && (
-                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]" title="Modified from default" />
+                              <span
+                                className="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
+                                title="Modified from default"
+                              />
                             )}
                           </div>
                           <span className="text-[10px] text-neutral-500 font-mono mt-0.5 sm:hidden">
@@ -524,7 +565,8 @@ export default function ShortcutsPage({
 
             <div className="bg-neutral-950/80 px-6 py-3 border-t border-neutral-800 flex justify-between items-center">
               <span className="text-[10px] text-neutral-500 font-mono">
-                Showing {filteredShortcuts.length} of {Object.keys(shortcuts).length} actions
+                Showing {filteredShortcuts.length} of{" "}
+                {Object.keys(shortcuts).length} actions
               </span>
               <div className="flex items-center gap-4 text-[10px] text-neutral-600 font-mono">
                 <div className="flex items-center gap-1.5">
@@ -532,7 +574,9 @@ export default function ShortcutsPage({
                   <span>Customized</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <kbd className="px-1.5 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-[9px]">Esc</kbd>
+                  <kbd className="px-1.5 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-[9px]">
+                    Esc
+                  </kbd>
                   <span>Cancel recording</span>
                 </div>
               </div>
@@ -568,11 +612,16 @@ export default function ShortcutsPage({
                 Waiting for input...
               </span>
               <span className="text-xs text-neutral-500 font-mono mt-4 leading-relaxed max-w-xs">
-                Press any combination of modifier keys (Ctrl, Alt, Shift) and a standard key.
+                Press any combination of modifier keys (Ctrl, Alt, Shift) and a
+                standard key.
               </span>
               <div className="mt-8 flex gap-2">
-                <span className="px-3 py-1.5 rounded-lg bg-neutral-950 border border-white/5 text-[10px] text-neutral-400 font-mono">Example: Ctrl + Shift + S</span>
-                <span className="px-3 py-1.5 rounded-lg bg-neutral-950 border border-white/5 text-[10px] text-neutral-400 font-mono">Example: F5</span>
+                <span className="px-3 py-1.5 rounded-lg bg-neutral-950 border border-white/5 text-[10px] text-neutral-400 font-mono">
+                  Example: Ctrl + Shift + S
+                </span>
+                <span className="px-3 py-1.5 rounded-lg bg-neutral-950 border border-white/5 text-[10px] text-neutral-400 font-mono">
+                  Example: F5
+                </span>
               </div>
             </div>
 
@@ -586,7 +635,9 @@ export default function ShortcutsPage({
             <div className="flex justify-between items-center gap-6 pt-4">
               <div className="flex items-center gap-2 text-[10px] font-bold font-mono text-neutral-500 uppercase tracking-widest">
                 <span>Press</span>
-                <kbd className="px-2 py-1 rounded-lg bg-neutral-900 text-neutral-300 border border-white/5 shadow-inner">Esc</kbd>
+                <kbd className="px-2 py-1 rounded-lg bg-neutral-900 text-neutral-300 border border-white/5 shadow-inner">
+                  Esc
+                </kbd>
                 <span>to abort</span>
               </div>
               <button

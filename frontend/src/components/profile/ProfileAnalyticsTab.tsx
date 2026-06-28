@@ -22,7 +22,8 @@ export default function ProfileAnalyticsTab() {
       sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
-    api.getCreatorAnalytics(token)
+    api
+      .getCreatorAnalytics(token)
       .then((data) => {
         if (data.success && data.analytics) {
           setAnalytics(data.analytics);

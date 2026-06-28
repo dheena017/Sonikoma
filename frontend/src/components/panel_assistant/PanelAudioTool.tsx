@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Sparkles, Copy, Check } from "lucide-react";
 import { GeneratedPanel } from "../../types.js";
 import * as api from "../../api/index.js";
+import { fetchWithAuth } from "../../utils.js";
 
 interface PanelAudioToolProps {
   panel: GeneratedPanel;
@@ -30,7 +31,7 @@ export default function PanelAudioTool({ panel }: PanelAudioToolProps) {
   const handleGenerateSfx = async () => {
     setLoadingSfx(true);
     try {
-      const json = await api.runSfxAudioSkill({
+      const json = await api.runSfxAudioSkill(fetchWithAuth, {
         visual_description: panel.visual_description || "Action scene panel",
         sfx_tag: panel.sfx || "[Action]",
         model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
@@ -48,7 +49,7 @@ export default function PanelAudioTool({ panel }: PanelAudioToolProps) {
   const handleGenerateVoice = async () => {
     setLoadingVoice(true);
     try {
-      const json = await api.runVoiceCastSkill({
+      const json = await api.runVoiceCastSkill(fetchWithAuth, {
         character_name: "Protagonist",
         dialogue_sample: panel.speech_text || "Stop right there!",
         visual_description:

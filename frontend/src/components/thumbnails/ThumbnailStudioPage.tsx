@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Image } from "lucide-react";
+import { Image, Sparkles } from "lucide-react";
 import { GeneratedPanel } from "../../types";
 
 import ThumbnailGenerator from "./ThumbnailGenerator.js";
@@ -69,7 +69,10 @@ export default function ThumbnailStudioPage({
           <button
             onClick={async () => {
               if (panels.length === 0) {
-                addNotification?.("No storyboard panels found to analyze.", "error");
+                addNotification?.(
+                  "No storyboard panels found to analyze.",
+                  "error"
+                );
                 return;
               }
               setIsGenerating(true);
@@ -80,14 +83,22 @@ export default function ThumbnailStudioPage({
                   body: JSON.stringify({
                     title,
                     genre,
-                    panels: panels.map(p => ({ visual_description: p.visual_description, image_url: p.image_url })),
-                    model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+                    panels: panels.map((p) => ({
+                      visual_description: p.visual_description,
+                      image_url: p.image_url,
+                    })),
+                    model:
+                      localStorage.getItem("ai_comic_model") ||
+                      "gemini-2.5-flash",
                   }),
                 });
                 const data = await res.json();
                 if (data.success) {
-                  setGeneratedThumbs(prev => [data.url, ...prev].slice(0, 4));
-                  addNotification?.("Thumbnail variation generated successfully!", "success");
+                  setGeneratedThumbs((prev) => [data.url, ...prev].slice(0, 4));
+                  addNotification?.(
+                    "Thumbnail variation generated successfully!",
+                    "success"
+                  );
                 }
               } catch (e) {
                 addNotification?.("Failed to generate thumbnail.", "error");
@@ -105,20 +116,36 @@ export default function ThumbnailStudioPage({
         {generatedThumbs.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in">
             {generatedThumbs.map((url, idx) => (
-              <div key={idx} className="group relative aspect-video bg-neutral-950 rounded-lg border border-neutral-800 overflow-hidden hover:border-purple-500/50 transition-all">
-                <img src={url} alt={`Variation ${idx}`} className="w-full h-full object-cover" />
+              <div
+                key={idx}
+                className="group relative aspect-video bg-neutral-950 rounded-lg border border-neutral-800 overflow-hidden hover:border-purple-500/50 transition-all"
+              >
+                <img
+                  src={url}
+                  alt={`Variation ${idx}`}
+                  className="w-full h-full object-cover"
+                />
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
-                   <button
-                     onClick={() => {
-                        // In a real app, we'd save this to the project's permanent thumbnails list
-                        const saved = JSON.parse(localStorage.getItem(`project_thumbnails_${title}`) || "[]");
-                        localStorage.setItem(`project_thumbnails_${title}`, JSON.stringify([url, ...saved]));
-                        addNotification?.("Thumbnail saved to project library!", "success");
-                     }}
-                     className="px-3 py-1.5 bg-white text-black text-[10px] font-bold rounded-lg hover:bg-neutral-200 transition-colors"
-                   >
-                     Save to Project
-                   </button>
+                  <button
+                    onClick={() => {
+                      // In a real app, we'd save this to the project's permanent thumbnails list
+                      const saved = JSON.parse(
+                        localStorage.getItem(`project_thumbnails_${title}`) ||
+                          "[]"
+                      );
+                      localStorage.setItem(
+                        `project_thumbnails_${title}`,
+                        JSON.stringify([url, ...saved])
+                      );
+                      addNotification?.(
+                        "Thumbnail saved to project library!",
+                        "success"
+                      );
+                    }}
+                    className="px-3 py-1.5 bg-white text-black text-[10px] font-bold rounded-lg hover:bg-neutral-200 transition-colors"
+                  >
+                    Save to Project
+                  </button>
                 </div>
               </div>
             ))}

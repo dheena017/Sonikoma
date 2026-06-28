@@ -374,10 +374,13 @@ export function AppWorkspace({
     }
     try {
       addNotification("Saving images...", "info");
-      const data = await api.saveScrapedImages({
+      const data = await api.saveScrapedImages(
+        {
           url: targetUrl,
           images: scrapedImages,
-        }, token || undefined);
+        },
+        token || undefined
+      );
       if (data) {
         addNotification("Images saved successfully!", "success");
       } else {

@@ -1,6 +1,7 @@
 import * as api from "../../api/index.js";
 import React, { useState } from "react";
 import { Sparkles, Copy, Check } from "lucide-react";
+import { fetchWithAuth } from "../../utils.js";
 
 interface ThumbnailGeneratorProps {
   title: string;
@@ -29,12 +30,12 @@ export default function ThumbnailGenerator({
   const handleGenerate = async () => {
     setLoading(true);
     try {
-      const json = await api.runThumbnailSkill({
-          title: title || "Solo Leveling",
-          genre: genre || "Fantasy",
-          plot_point: plotPoint,
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        });
+      const json = await api.runThumbnailSkill(fetchWithAuth, {
+        title: title || "Solo Leveling",
+        genre: genre || "Fantasy",
+        plot_point: plotPoint,
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+      });
       if (json.success && json.result) {
         setConcept(json.result);
         onGeneratedConcept(json.result.image_generation_prompt);

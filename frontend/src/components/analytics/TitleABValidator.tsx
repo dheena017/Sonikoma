@@ -2,6 +2,7 @@ import * as api from "../../api/index.js";
 import React, { useState, useEffect } from "react";
 import { Sparkles, BarChart2, Check, Copy } from "lucide-react";
 import { GeneratedPanel } from "../../types";
+import { fetchWithAuth } from "../../utils.js";
 
 interface TitleABValidatorProps {
   addNotification?: (msg: string, type: any) => void;
@@ -65,11 +66,11 @@ export default function TitleABValidator({
   const handleValidate = async () => {
     setLoading(true);
     try {
-      const json = await api.runTitleAbSkill({
-          title,
-          key_climax_event: event,
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        });
+      const json = await api.runTitleAbSkill(fetchWithAuth, {
+        title,
+        key_climax_event: event,
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+      });
       if (json.success && json.result) {
         setResults(json.result);
         if (addNotification) {

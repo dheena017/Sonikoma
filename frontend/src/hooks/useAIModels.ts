@@ -49,7 +49,7 @@ export function useAIModels() {
         if (huggingface) reqHeaders["X-User-HuggingFace-Key"] = huggingface;
 
         // 1. Fetch backend health to see which API keys are available
-        const healthData = await api.checkHealth(reqHeaders);
+        const healthData = await api.checkHealth();
         const env = healthData.env || {};
 
         // Check if any keys are configured (either in backend env or local browser storage)
@@ -88,22 +88,15 @@ export function useAIModels() {
                 else if (provider === "openai") providerFriendly = "OpenAI";
                 else if (provider === "anthropic")
                   providerFriendly = "Anthropic";
-            const data = await api.listModels({ provider }, reqHeaders);
-            if (data.success && data.models) {
-              let providerFriendly = "Google";
-              if (provider === "huggingface")
-                providerFriendly = "Hugging Face";
-              else if (provider === "openai") providerFriendly = "OpenAI";
-              else if (provider === "anthropic")
-                providerFriendly = "Anthropic";
 
-              const mapped = data.models.map((m: any) => ({
-                id: m.name,
-                name: m.displayName || m.name,
-                type: provider === "huggingface" ? "open-source" : "paid",
-                provider: providerFriendly,
-              }));
-              aggregatedModels = [...aggregatedModels, ...mapped];
+                const mapped = data.models.map((m: any) => ({
+                  id: m.name,
+                  name: m.displayName || m.name,
+                  type: provider === "huggingface" ? "open-source" : "paid",
+                  provider: providerFriendly,
+                }));
+                aggregatedModels = [...aggregatedModels, ...mapped];
+              }
             }
           } catch (err) {
             console.error(`Failed to fetch models for ${provider}`, err);

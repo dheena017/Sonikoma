@@ -74,7 +74,11 @@ export function useImageTransform({
     );
     setIsTransforming(true);
     try {
-      const data = await api.transformImage(activeFetch, { url: currentUrl, type, value });
+      const data = await api.transformImage(activeFetch, {
+        url: currentUrl,
+        type,
+        value,
+      });
       if (data.url && setScrapedImages) {
         setScrapedImages((prev) => {
           const copy = [...prev];

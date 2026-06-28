@@ -3,6 +3,7 @@ import { AlertTriangle, ShieldCheck, Settings, Shield } from "lucide-react";
 import { GeneratedPanel } from "../../types.js";
 import { processWithConcurrency, chunkArray } from "../../utils/batchUtils.js";
 import * as api from "../../api/index.js";
+import { fetchWithAuth } from "../../utils.js";
 
 interface BulkScrubberControlProps {
   panels: GeneratedPanel[];
@@ -46,7 +47,7 @@ export default function BulkScrubberControl({
           if (panelsToScrub.length === 0) return [];
 
           try {
-            const json = await api.runCopyrightScrubBatchSkill({
+            const json = await api.runCopyrightScrubBatchSkill(fetchWithAuth, {
               texts: panelsToScrub.map((p) => p.speech_text),
               model:
                 localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",

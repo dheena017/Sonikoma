@@ -35,7 +35,10 @@ export const getMetrics = async (fetchWithInterceptor?: any) => {
   return res.json();
 };
 
-export const testModelLatency = async (fetchWithInterceptor: any, data: any) => {
+export const testModelLatency = async (
+  fetchWithInterceptor: any,
+  data: any
+) => {
   const res = await fetchWithInterceptor("/api/test-model-latency", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

@@ -9,6 +9,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { GeneratedPanel } from "../../types";
+import { fetchWithAuth } from "../../utils.js";
 
 interface AdPlacementTabProps {
   compiledScript: string;
@@ -50,12 +51,12 @@ export default function AdPlacementTab({
 
     setLoading(true);
     try {
-      const json = await api.runMidrollsSkill({
-          compiled_script:
-            compiledScript || "Script content representing timeline narration.",
-          max_ads: maxAds,
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        });
+      const json = await api.runMidrollsSkill(fetchWithAuth, {
+        compiled_script:
+          compiledScript || "Script content representing timeline narration.",
+        max_ads: maxAds,
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+      });
       if (json.success && json.result) {
         setData(json.result);
         if (addNotification) {

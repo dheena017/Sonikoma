@@ -9,6 +9,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { GeneratedPanel } from "../../types";
+import { fetchWithAuth } from "../../utils.js";
 
 interface SeoOptimizationTabProps {
   title: string;
@@ -51,13 +52,13 @@ export default function SeoOptimizationTab({
 
     setLoading(true);
     try {
-      const json = await api.runSeoSkill({
-          title: title || "My Webtoon Recap",
-          genre: genre || "Action",
-          storyboard_summary:
-            storyboardSummary || "The story summary details go here.",
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        });
+      const json = await api.runSeoSkill(fetchWithAuth, {
+        title: title || "My Webtoon Recap",
+        genre: genre || "Action",
+        storyboard_summary:
+          storyboardSummary || "The story summary details go here.",
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+      });
       if (json.success && json.result) {
         setData(json.result);
         if (addNotification) {

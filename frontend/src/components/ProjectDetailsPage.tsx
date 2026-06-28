@@ -247,9 +247,13 @@ export default function ProjectDetailsPage({
           sessionStorage.getItem("sonikoma_token");
 
         const urls = panels.map((p) => p.image_url);
-        const data = await api.downloadZip(fetch, { urls, url: project.url || null }, {
-          headers: token ? { "Authorization": `Bearer ${token}` } : {}
-        });
+        const data = await api.downloadZip(
+          fetch,
+          { urls, url: project.url || null },
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          }
+        );
         if (data.success && data.downloadUrl) {
           const link = document.createElement("a");
           link.href = data.downloadUrl;
@@ -437,9 +441,13 @@ export default function ProjectDetailsPage({
         const token =
           localStorage.getItem("sonikoma_token") ||
           sessionStorage.getItem("sonikoma_token");
-        const data = await api.scrapeImages(fetch, { url: project.url, bypass_cache: false }, {
-          headers: token ? { "Authorization": `Bearer ${token}` } : {}
-        });
+        const data = await api.scrapeImages(
+          fetch,
+          { url: project.url, bypass_cache: false },
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          }
+        );
         if (data.success && data.images) {
           const proxied = data.images.map((img: string) => {
             if (img.startsWith("http") && !api.isApiUrl(img)) {
@@ -576,16 +584,28 @@ export default function ProjectDetailsPage({
         return num || "Chapter 1";
       })();
 
-      const data = await api.updateProject(projectId, {
-        title: project.title.trim() || "Untitled Project",
-        genre: project.genre.trim() || "general",
-        episode: formattedEpisode,
-        author: (project.author || "Unknown Author").trim(),
-        cover_image: project.cover_image || null,
-        synopsis: project.synopsis || null,
-        panels: mappedPanels,
-      }, token || undefined);
-      if (data.success) {
+      const response = await fetch(`/api/projects/${projectId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          title: project.title.trim() || "Untitled Project",
+          genre: project.genre.trim() || "general",
+          episode: formattedEpisode,
+          author: (project.author || "Unknown Author").trim(),
+          cover_image: project.cover_image || null,
+          synopsis: project.synopsis || null,
+          panels: mappedPanels,
+        }),
+      });
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.detail || "Failed to update project");
+      }
+      const data = await response.json();
+      if (response.ok) {
         initialProjectRef.current = serializeState(project, panels);
         initialPanelsRef.current = JSON.parse(JSON.stringify(panels));
 

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Sparkles } from "lucide-react";
 import { CharacterBio, GeneratedPanel } from "../../types.js";
 import * as api from "../../api/index.js";
+import { fetchWithAuth } from "../../utils.js";
 
 interface CharacterAutoDetectorProps {
   panels: GeneratedPanel[];
@@ -26,10 +27,10 @@ export default function CharacterAutoDetector({
       const results: CharacterBio[] = [];
 
       for (const dial of testDialogues) {
-        const json = await api.runCharacterBioSkill({
-            dialogue: dial,
-            model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-          });
+        const json = await api.runCharacterBioSkill(fetchWithAuth, {
+          dialogue: dial,
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+        });
         if (json.success && json.result) {
           results.push(json.result);
         }

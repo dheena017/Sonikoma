@@ -1,6 +1,7 @@
 import * as api from "../../api/index.js";
 import React, { useState } from "react";
 import { Sparkles, Grid } from "lucide-react";
+import { fetchWithAuth } from "../../utils.js";
 
 interface ThumbnailCompositionGuideProps {
   conceptPrompt: string;
@@ -22,11 +23,11 @@ export default function ThumbnailCompositionGuide({
   const handleGenerate = async () => {
     setLoading(true);
     try {
-      const json = await api.runThumbnailVisualSkill({
-          thumbnail_concept:
-            conceptPrompt || "Tense combat close-up illustration",
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        });
+      const json = await api.runThumbnailVisualSkill(fetchWithAuth, {
+        thumbnail_concept:
+          conceptPrompt || "Tense combat close-up illustration",
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+      });
       if (json.success && json.result) {
         setData(json.result);
       }

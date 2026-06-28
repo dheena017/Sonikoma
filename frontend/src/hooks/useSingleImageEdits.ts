@@ -208,7 +208,9 @@ export function useSingleImageEdits({
       const img1 = scrapedImages[idx];
       const img2 = scrapedImages[idx + 1];
 
-      const data = await api.mergeImages(fetchWithInterceptor, { urls: [img1, img2] });
+      const data = await api.mergeImages(fetchWithInterceptor, {
+        urls: [img1, img2],
+      });
       const stitchedUrl = data.url;
 
       setScrapedImages((prev) => {

@@ -473,7 +473,7 @@ export function useAppState() {
         return;
       }
       try {
-        const data = await api.getCurrentUser(token);
+        const data = await api.getCurrentUser(fetchWithInterceptor);
         setUser(data);
         setIsAuthenticated(true);
       } catch (e: any) {
@@ -486,7 +486,7 @@ export function useAppState() {
         setIsInitializing(false);
       }
     },
-    [getToken]
+    [getToken, fetchWithInterceptor]
   );
 
   const forgotPassword = useCallback(

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Sparkles, Sliders, Volume2 } from "lucide-react";
 import { GeneratedPanel } from "../../types.js";
 import * as api from "../../api/index.js";
+import { fetchWithAuth } from "../../utils.js";
 
 interface SfxOverlayMixerProps {
   panels: GeneratedPanel[];
@@ -25,7 +26,7 @@ export default function SfxOverlayMixer({ panels }: SfxOverlayMixerProps) {
       const results: Record<number, OverlayData> = {};
       // Test first 3 panels
       for (const p of panels.slice(0, 3)) {
-        const json = await api.runSfxMixSkill({
+        const json = await api.runSfxMixSkill(fetchWithAuth, {
           visual_description: p.visual_description || "Action segment",
           speech_text: p.speech_text || "",
           sfx: p.sfx || "[Drums]",

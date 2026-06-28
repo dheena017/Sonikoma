@@ -9,6 +9,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { GeneratedPanel } from "../../types";
+import { fetchWithAuth } from "../../utils.js";
 
 interface SoundOutroTabProps {
   title: string;
@@ -60,11 +61,10 @@ export default function SoundOutroTab({
     setLoading(true);
     try {
       // 1. Cliffhanger generator
-      const cliffJson = await api.runCliffhangerSkill({
-          story_outline:
-            storyboardSummary || "The recap story outline details.",
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        });
+      const cliffJson = await api.runCliffhangerSkill(fetchWithAuth, {
+        story_outline: storyboardSummary || "The recap story outline details.",
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+      });
       let cliffText = "";
       if (cliffJson.success && cliffJson.result) {
         setCliffhanger(cliffJson.result);
@@ -72,21 +72,21 @@ export default function SoundOutroTab({
       }
 
       // 2. Outro CTA
-      const outroJson = await api.runOutroCtaSkill({
-          title: title || "This Webtoon",
-          ending_cliffhanger: cliffText || "epic resolution reveal",
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        });
+      const outroJson = await api.runOutroCtaSkill(fetchWithAuth, {
+        title: title || "This Webtoon",
+        ending_cliffhanger: cliffText || "epic resolution reveal",
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+      });
       if (outroJson.success && outroJson.result) {
         setOutro(outroJson.result);
       }
 
       // 3. BGM vibe selector
-      const bgmJson = await api.runBgmVibeSkill({
-          narrative_mood: "tense antihero action",
-          action_scale: "high",
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        });
+      const bgmJson = await api.runBgmVibeSkill(fetchWithAuth, {
+        narrative_mood: "tense antihero action",
+        action_scale: "high",
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+      });
       if (bgmJson.success && bgmJson.result) {
         setBgm(bgmJson.result);
       }

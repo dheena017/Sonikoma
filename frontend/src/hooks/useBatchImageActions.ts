@@ -148,14 +148,18 @@ export function useBatchImageActions({
           try {
             abortControllerRef.current = new AbortController();
             // Need to pass signal to the API call. I'll update the api.removeSpeechBubbles to accept options.
-            const data = await api.removeSpeechBubbles(fetchWithInterceptor, {
-              url: url,
-              method: bubbleEraseMethod,
-              sensitivity: bubbleSensitivity,
-              detection_style: bubbleDetectionStyle,
-              dilation: bubbleDilation,
-              inpaint_radius: bubbleInpaintRadius,
-            }, { signal: abortControllerRef.current.signal });
+            const data = await api.removeSpeechBubbles(
+              fetchWithInterceptor,
+              {
+                url: url,
+                method: bubbleEraseMethod,
+                sensitivity: bubbleSensitivity,
+                detection_style: bubbleDetectionStyle,
+                dilation: bubbleDilation,
+                inpaint_radius: bubbleInpaintRadius,
+              },
+              { signal: abortControllerRef.current.signal }
+            );
 
             if (data.success && data.url) {
               setScrapedImages((prev) =>
@@ -268,23 +272,27 @@ export function useBatchImageActions({
           setCroppingImgUrl(url);
           try {
             abortControllerRef.current = new AbortController();
-            const data = await api.detectPanels(fetchWithInterceptor, {
-              url: url,
-              sensitivity: cropSensitivity,
-              backgroundColorMode: cropBackgroundMode,
-              aspectRatio: aspectRatioLock,
-              minAreaPct: minPanelAreaPct / 100.0,
-              mergeThreshold: overlapMergeThreshold,
-              strategy: useLocalCV ? "local-cv" : "balanced",
-              model: cropModel,
-              cannyLow: cropCannyLow,
-              cannyHigh: cropCannyHigh,
-              closeKernelSize: cropCloseKernelSize,
-              minHeightPx: cropMinHeightPx,
-              autoSplit: autoSplitTallStrips,
-              guidanceInstructions: cropGuidance,
-              focusMode: cropFocusMode,
-            }, { signal: abortControllerRef.current.signal });
+            const data = await api.detectPanels(
+              fetchWithInterceptor,
+              {
+                url: url,
+                sensitivity: cropSensitivity,
+                backgroundColorMode: cropBackgroundMode,
+                aspectRatio: aspectRatioLock,
+                minAreaPct: minPanelAreaPct / 100.0,
+                mergeThreshold: overlapMergeThreshold,
+                strategy: useLocalCV ? "local-cv" : "balanced",
+                model: cropModel,
+                cannyLow: cropCannyLow,
+                cannyHigh: cropCannyHigh,
+                closeKernelSize: cropCloseKernelSize,
+                minHeightPx: cropMinHeightPx,
+                autoSplit: autoSplitTallStrips,
+                guidanceInstructions: cropGuidance,
+                focusMode: cropFocusMode,
+              },
+              { signal: abortControllerRef.current.signal }
+            );
             if (data.fallback) {
               setConsoleLogs((prev) => [
                 `[Smart Cropper Fallback] Smart Scanner detection failed on ${url.substring(

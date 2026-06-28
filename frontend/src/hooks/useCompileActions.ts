@@ -123,12 +123,16 @@ export function useCompileActions({
     try {
       abortControllerRef.current = new AbortController();
       console.log("[API] Analyzing image for panel", panelId);
-      const data = await api.analyzeImage(activeFetch, {
-        url: imageUrl,
-        model: activeModel,
-        narrationStyle,
-        voice: voiceActor,
-      }, { signal: abortControllerRef.current.signal });
+      const data = await api.analyzeImage(
+        activeFetch,
+        {
+          url: imageUrl,
+          model: activeModel,
+          narrationStyle,
+          voice: voiceActor,
+        },
+        { signal: abortControllerRef.current.signal }
+      );
       if (data.success && data.analysis) {
         const aiDuration = Number(data.analysis.duration);
         const aiMotion = String(data.analysis.motion_type || "").trim();
@@ -235,12 +239,16 @@ export function useCompileActions({
 
       const imageUrls = targetPanels.map((p) => p.image_url);
 
-      const data = await api.analyzeSequence(activeFetch, {
-        urls: imageUrls,
-        model: activeModel,
-        narrationStyle,
-        voice: voiceActor,
-      }, { signal: abortControllerRef.current.signal });
+      const data = await api.analyzeSequence(
+        activeFetch,
+        {
+          urls: imageUrls,
+          model: activeModel,
+          narrationStyle,
+          voice: voiceActor,
+        },
+        { signal: abortControllerRef.current.signal }
+      );
 
       if (data.success && data.results) {
         setPanels((prev) =>
@@ -332,12 +340,16 @@ export function useCompileActions({
 
       const imageUrls = panels.map((p) => p.image_url);
 
-      const data = await api.analyzeSequence(activeFetch, {
-        urls: imageUrls,
-        model: activeModel,
-        narrationStyle,
-        voice: voiceActor,
-      }, { signal: abortControllerRef.current.signal });
+      const data = await api.analyzeSequence(
+        activeFetch,
+        {
+          urls: imageUrls,
+          model: activeModel,
+          narrationStyle,
+          voice: voiceActor,
+        },
+        { signal: abortControllerRef.current.signal }
+      );
 
       if (data.success && data.results) {
         setPanels((prev) =>

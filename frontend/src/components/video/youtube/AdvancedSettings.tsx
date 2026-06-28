@@ -77,7 +77,6 @@ export default function AdvancedSettings({
 
       {showAdvanced && (
         <div className="p-4 bg-neutral-950/60 space-y-5 text-xs font-sans text-neutral-450 animate-slide-down">
-          
           {/* Made For Kids */}
           <div className="space-y-1.5">
             <label className="font-mono text-neutral-250 font-bold block">
@@ -152,7 +151,8 @@ export default function AdvancedSettings({
                 Paid Promotion Declaration
               </span>
               <p className="text-[10px] text-neutral-500 leading-relaxed">
-                Declare if your video contains paid product placements, sponsorships, or endorsements.
+                Declare if your video contains paid product placements,
+                sponsorships, or endorsements.
               </p>
             </div>
             <button
@@ -230,7 +230,9 @@ export default function AdvancedSettings({
                 className="w-full bg-neutral-950 border border-neutral-850 rounded-lg px-3 py-2 text-[11px] text-neutral-300 focus:outline-none cursor-pointer"
               >
                 <option value="allow_all">Allow all comments</option>
-                <option value="hold_inappropriate">Hold inappropriate for review</option>
+                <option value="hold_inappropriate">
+                  Hold inappropriate for review
+                </option>
                 <option value="hold_all">Hold all comments for review</option>
                 <option value="disable">Disable comments</option>
               </select>
@@ -331,7 +333,6 @@ export default function AdvancedSettings({
               />
             </div>
           </div>
-
         </div>
       )}
     </div>

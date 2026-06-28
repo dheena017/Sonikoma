@@ -79,10 +79,10 @@ function PanelCard({
     ]);
     try {
       const data = await api.editImage(fetch, {
-          url: imgUrl,
-          rotate: 90,
-          autoTrim: false,
-        });
+        url: imgUrl,
+        rotate: 90,
+        autoTrim: false,
+      });
 
       setScrapedImages?.((prev: any[]) =>
         prev.map((img: any, i: number) => (i === idx ? data.url : img))
@@ -114,10 +114,10 @@ function PanelCard({
     ]);
     try {
       const data = await api.editImage(fetch, {
-          url: imgUrl,
-          flipHorizontal: true,
-          autoTrim: false,
-        });
+        url: imgUrl,
+        flipHorizontal: true,
+        autoTrim: false,
+      });
 
       setScrapedImages?.((prev: any[]) =>
         prev.map((img: any, i: number) => (i === idx ? data.url : img))

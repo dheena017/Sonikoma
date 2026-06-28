@@ -186,7 +186,9 @@ export default function CleanBubblesPanel({
     }
     try {
       abortControllerRef.current = new AbortController();
-      const data = await api.removeSpeechBubbles(activeFetch, {
+      const data = await api.removeSpeechBubbles(
+        activeFetch,
+        {
           url: imgUrl,
           method: eraseMethod,
           sensitivity: sensitivity,
@@ -201,7 +203,9 @@ export default function CleanBubblesPanel({
           morph_shape: morphShape,
           custom_color_target: useCustomColorTarget ? customColorTarget : "",
           custom_color_tolerance: customColorTolerance,
-        }, { signal: abortControllerRef.current.signal });
+        },
+        { signal: abortControllerRef.current.signal }
+      );
       if (data.success && data.url) {
         // Update scraped image and panels
         if (setScrapedImages) {

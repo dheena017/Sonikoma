@@ -17,8 +17,10 @@ import { PublisherProfile } from "../components/video/youtube/ProfileManager.js"
 const DEFAULT_PRESETS: PublisherProfile[] = [
   {
     name: "Webtoon Recap (Landscape)",
-    title: "The Insane OP MC Leveling Up in [Series Name] Chapters [Start]-[End] Recap",
-    description: "🎬 [Series Name] Recap\n\nEnjoyed this recap? Hit that subscribe button and turn on notifications!\n\n📚 Read the Original Webtoon here:\n👉 [Link]\n\n#webtoon #manhwa #recap",
+    title:
+      "The Insane OP MC Leveling Up in [Series Name] Chapters [Start]-[End] Recap",
+    description:
+      "🎬 [Series Name] Recap\n\nEnjoyed this recap? Hit that subscribe button and turn on notifications!\n\n📚 Read the Original Webtoon here:\n👉 [Link]\n\n#webtoon #manhwa #recap",
     tags: ["manhwa recap", "webtoon recap", "op mc", "leveling up"],
     category: "1",
     privacy: "unlisted",
@@ -42,7 +44,8 @@ const DEFAULT_PRESETS: PublisherProfile[] = [
   {
     name: "YouTube Shorts (Vertical)",
     title: "This OP MC is just too clean... 🥶 #shorts #manhwa",
-    description: "This overpowered main character is breaking all limits! Full recap on channel.\n\n#shorts #manhwa #webtoon #anime",
+    description:
+      "This overpowered main character is breaking all limits! Full recap on channel.\n\n#shorts #manhwa #webtoon #anime",
     tags: ["shorts", "manhwa", "webtoon", "recap"],
     category: "24",
     privacy: "unlisted",
@@ -62,7 +65,7 @@ const DEFAULT_PRESETS: PublisherProfile[] = [
     chapterEnd: "",
     subtitlesType: "None",
     subtitlesLanguage: "en",
-  }
+  },
 ];
 
 interface UseYouTubePublisherProps {
@@ -129,11 +132,11 @@ export function useYouTubePublisher({
   const [ageRestriction, setAgeRestriction] = useState(
     () => getCachedValue("age_restriction", "false") === "true"
   );
-  const [shortsRemixing, setShortsRemixing] = useState(
-    () => getCachedValue("shorts_remixing", "allow_all")
+  const [shortsRemixing, setShortsRemixing] = useState(() =>
+    getCachedValue("shorts_remixing", "allow_all")
   );
-  const [commentsMode, setCommentsMode] = useState(
-    () => getCachedValue("comments_mode", "hold_inappropriate")
+  const [commentsMode, setCommentsMode] = useState(() =>
+    getCachedValue("comments_mode", "hold_inappropriate")
   );
   const [showLikes, setShowLikes] = useState(
     () => getCachedValue("show_likes", "true") === "true"
@@ -144,11 +147,11 @@ export function useYouTubePublisher({
   const [notifySubscribers, setNotifySubscribers] = useState(
     () => getCachedValue("notify_subscribers", "true") === "true"
   );
-  const [recordingDate, setRecordingDate] = useState(
-    () => getCachedValue("recording_date", "")
+  const [recordingDate, setRecordingDate] = useState(() =>
+    getCachedValue("recording_date", "")
   );
-  const [videoLocation, setVideoLocation] = useState(
-    () => getCachedValue("video_location", "")
+  const [videoLocation, setVideoLocation] = useState(() =>
+    getCachedValue("video_location", "")
   );
 
   // Schedule publishing state
@@ -169,16 +172,36 @@ export function useYouTubePublisher({
   const [showSocialsConfig, setShowSocialsConfig] = useState(false);
 
   // New Advanced Metadata states
-  const [playlist, setPlaylist] = useState(() => getCachedValue("playlist", ""));
-  const [authorName, setAuthorName] = useState(() => getCachedValue("author_name", ""));
-  const [artistName, setArtistName] = useState(() => getCachedValue("artist_name", ""));
-  const [webtoonPlatform, setWebtoonPlatform] = useState(() => getCachedValue("webtoon_platform", "Webtoon"));
-  const [customPlatform, setCustomPlatform] = useState(() => getCachedValue("custom_platform", ""));
-  const [chapterStart, setChapterStart] = useState(() => getCachedValue("chapter_start", ""));
-  const [chapterEnd, setChapterEnd] = useState(() => getCachedValue("chapter_end", ""));
-  const [chapterValidationError, setChapterValidationError] = useState<string | null>(null);
-  const [subtitlesType, setSubtitlesType] = useState(() => getCachedValue("subtitles_type", "None"));
-  const [subtitlesLanguage, setSubtitlesLanguage] = useState(() => getCachedValue("subtitles_language", "en"));
+  const [playlist, setPlaylist] = useState(() =>
+    getCachedValue("playlist", "")
+  );
+  const [authorName, setAuthorName] = useState(() =>
+    getCachedValue("author_name", "")
+  );
+  const [artistName, setArtistName] = useState(() =>
+    getCachedValue("artist_name", "")
+  );
+  const [webtoonPlatform, setWebtoonPlatform] = useState(() =>
+    getCachedValue("webtoon_platform", "Webtoon")
+  );
+  const [customPlatform, setCustomPlatform] = useState(() =>
+    getCachedValue("custom_platform", "")
+  );
+  const [chapterStart, setChapterStart] = useState(() =>
+    getCachedValue("chapter_start", "")
+  );
+  const [chapterEnd, setChapterEnd] = useState(() =>
+    getCachedValue("chapter_end", "")
+  );
+  const [chapterValidationError, setChapterValidationError] = useState<
+    string | null
+  >(null);
+  const [subtitlesType, setSubtitlesType] = useState(() =>
+    getCachedValue("subtitles_type", "None")
+  );
+  const [subtitlesLanguage, setSubtitlesLanguage] = useState(() =>
+    getCachedValue("subtitles_language", "en")
+  );
 
   // Profile manager states
   const [profiles, setProfiles] = useState<PublisherProfile[]>([]);
@@ -285,7 +308,10 @@ export function useYouTubePublisher({
   }, [videoLanguage]);
 
   useEffect(() => {
-    localStorage.setItem("yt_pub_age_restriction", ageRestriction ? "true" : "false");
+    localStorage.setItem(
+      "yt_pub_age_restriction",
+      ageRestriction ? "true" : "false"
+    );
   }, [ageRestriction]);
 
   useEffect(() => {
@@ -301,7 +327,10 @@ export function useYouTubePublisher({
   }, [showLikes]);
 
   useEffect(() => {
-    localStorage.setItem("yt_pub_allow_embedding", allowEmbedding ? "true" : "false");
+    localStorage.setItem(
+      "yt_pub_allow_embedding",
+      allowEmbedding ? "true" : "false"
+    );
   }, [allowEmbedding]);
 
   useEffect(() => {
@@ -365,7 +394,9 @@ export function useYouTubePublisher({
       const start = parseInt(chapterStart);
       const end = parseInt(chapterEnd);
       if (!isNaN(start) && !isNaN(end) && end < start) {
-        setChapterValidationError("Chapter End cannot be less than Chapter Start.");
+        setChapterValidationError(
+          "Chapter End cannot be less than Chapter Start."
+        );
       } else {
         setChapterValidationError(null);
       }
@@ -386,15 +417,24 @@ export function useYouTubePublisher({
 
   // Placeholder Auto-Sync Logic (Incremental & Non-Destructive)
   useEffect(() => {
-    const currentPlatform = webtoonPlatform === "Other" ? customPlatform : webtoonPlatform;
+    const currentPlatform =
+      webtoonPlatform === "Other" ? customPlatform : webtoonPlatform;
 
     const syncMap = [
       { key: "[Author]", prev: prevMetadata.current.author, curr: authorName },
       { key: "[Artist]", prev: prevMetadata.current.artist, curr: artistName },
-      { key: "[Platform]", prev: prevMetadata.current.platform, curr: currentPlatform },
+      {
+        key: "[Platform]",
+        prev: prevMetadata.current.platform,
+        curr: currentPlatform,
+      },
       { key: "[Start]", prev: prevMetadata.current.start, curr: chapterStart },
       { key: "[End]", prev: prevMetadata.current.end, curr: chapterEnd },
-      { key: "[Series Name]", prev: prevMetadata.current.series, curr: scrapedTitle },
+      {
+        key: "[Series Name]",
+        prev: prevMetadata.current.series,
+        curr: scrapedTitle,
+      },
     ];
 
     let newTitle = title;
@@ -438,7 +478,15 @@ export function useYouTubePublisher({
       end: chapterEnd,
       series: scrapedTitle,
     };
-  }, [authorName, artistName, webtoonPlatform, customPlatform, chapterStart, chapterEnd, scrapedTitle]);
+  }, [
+    authorName,
+    artistName,
+    webtoonPlatform,
+    customPlatform,
+    chapterStart,
+    chapterEnd,
+    scrapedTitle,
+  ]);
 
   useEffect(() => {
     localStorage.setItem("yt_pub_subtitles_type", subtitlesType);
@@ -478,7 +526,7 @@ export function useYouTubePublisher({
           subtitlesType: p.subtitles_type || "None",
           subtitlesLanguage: p.subtitles_language || "en",
         }));
-        
+
         // Merge default templates with database profiles
         const merged = [...DEFAULT_PRESETS, ...mapped];
         setProfiles(merged);
@@ -545,18 +593,21 @@ export function useYouTubePublisher({
       descChapters: /\d{1,2}:\d{2}/.test(description),
       descSocials: /(https?:\/\/|patreon|discord|subscribe)/i.test(description),
       tagsVolume: tags.length >= 5,
-      metadataConsistency: (
-        (!authorName || description.toLowerCase().includes(authorName.toLowerCase())) &&
-        (!artistName || description.toLowerCase().includes(artistName.toLowerCase())) &&
+      metadataConsistency:
+        (!authorName ||
+          description.toLowerCase().includes(authorName.toLowerCase())) &&
+        (!artistName ||
+          description.toLowerCase().includes(artistName.toLowerCase())) &&
         (!chapterStart || description.includes(chapterStart)) &&
-        (!chapterEnd || description.includes(chapterEnd))
-      ),
+        (!chapterEnd || description.includes(chapterEnd)),
     };
 
     setSeoChecks(checks);
 
     const passedChecksCount = Object.values(checks).filter(Boolean).length;
-    setSeoScore(Math.round((passedChecksCount / Object.keys(checks).length) * 100));
+    setSeoScore(
+      Math.round((passedChecksCount / Object.keys(checks).length) * 100)
+    );
   }, [title, description, tags]);
 
   // Auto-detect duration & aspect ratio if video is loaded
@@ -675,7 +726,9 @@ export function useYouTubePublisher({
   };
 
   const handleDeleteProfile = async (profileName: string) => {
-    const isPreset = DEFAULT_PRESETS.some((preset) => preset.name === profileName);
+    const isPreset = DEFAULT_PRESETS.some(
+      (preset) => preset.name === profileName
+    );
     if (isPreset) {
       setProfiles(profiles.filter((p) => p.name !== profileName));
       setCurrentProfileName("");

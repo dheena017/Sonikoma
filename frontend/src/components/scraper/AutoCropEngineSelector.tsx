@@ -91,7 +91,8 @@ export function AutoCropEngineSelector({
   // Mount effect to check backend key
   useEffect(() => {
     let isMounted = true;
-    api.checkHealth()
+    api
+      .checkHealth()
       .then((data) => {
         if (isMounted) {
           const hasKey = !!data?.env?.GEMINI_API_KEY;
@@ -157,9 +158,9 @@ export function AutoCropEngineSelector({
     setTestResult(null);
     try {
       const data = await api.testModelLatency(fetch, {
-          provider: "gemini",
-          model: cropModel,
-        });
+        provider: "gemini",
+        model: cropModel,
+      });
       setTestResult(data);
     } catch (err: any) {
       setTestResult({

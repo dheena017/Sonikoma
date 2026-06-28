@@ -1072,7 +1072,8 @@ export default function Header({
           title="View Profile"
         >
           <div className="w-6 h-6 rounded-lg bg-purple-600/20 flex items-center justify-center overflow-hidden shrink-0 border border-purple-500/30">
-            {user?.avatar_url && !user.avatar_url.startsWith("linear-gradient") ? (
+            {user?.avatar_url &&
+            !user.avatar_url.startsWith("linear-gradient") ? (
               <div className="w-full h-full relative">
                 <img
                   src={user.avatar_url}

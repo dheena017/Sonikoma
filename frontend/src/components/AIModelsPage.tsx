@@ -223,7 +223,7 @@ export default function AIModelsPage({
     setLoadingModels(true);
     setModelsError(null);
     try {
-      const data = await api.listModels({ provider: prov });
+      const data = await api.listModels(activeFetch, { provider: prov });
       if (data.success) {
         setModels(data.models || []);
       } else {
@@ -413,11 +413,11 @@ export default function AIModelsPage({
       try {
         const startMonotonic = performance.now();
         const data = await api.testModelLatency(activeFetch, {
-            provider,
-            model: modelName,
-            apiKey: customKey,
-            prompt: playgroundPrompt,
-          });
+          provider,
+          model: modelName,
+          apiKey: customKey,
+          prompt: playgroundPrompt,
+        });
         const endMonotonic = performance.now();
         const elapsedMs = Math.round(endMonotonic - startMonotonic);
 
@@ -538,13 +538,60 @@ export default function AIModelsPage({
         name: "BGM Mood Selector",
         inputs: [{ name: "narrative_mood" }, { name: "action_scale" }],
       },
-      { id: "translation", endpoint: api.SKILL_ENDPOINTS.TRANSLATE, name: "Dialogue Translation Studio", inputs: [{ name: "text" }, { name: "target_lang" }] },
-      { id: "dramatize", endpoint: api.SKILL_ENDPOINTS.DRAMATIZE, name: "Script Dramatization", inputs: [{ name: "raw_ocr_text" }, { name: "genre" }, { name: "scene_context" }] },
-      { id: "seo", endpoint: api.SKILL_ENDPOINTS.SEO, name: "YouTube SEO Metadata Generator", inputs: [{ name: "title" }, { name: "genre" }, { name: "storyboard_summary" }] },
-      { id: "cliffhanger", endpoint: api.SKILL_ENDPOINTS.CLIFFHANGER, name: "Cliffhanger Generator", inputs: [{ name: "story_outline" }] },
-      { id: "voice-cast", endpoint: api.SKILL_ENDPOINTS.VOICE_CAST, name: "Voice Casting Profiler", inputs: [{ name: "character_name" }, { name: "visual_description" }, { name: "dialogue_sample" }] },
-      { id: "copyright-scrub", endpoint: api.SKILL_ENDPOINTS.COPYRIGHT_SCRUB, name: "Copyright Text Scrubber", inputs: [{ name: "text" }] },
-      { id: "bgm-vibe", endpoint: api.SKILL_ENDPOINTS.BGM_VIBE, name: "BGM Mood Selector", inputs: [{ name: "narrative_mood" }, { name: "action_scale" }] },
+      {
+        id: "translation",
+        endpoint: api.SKILL_ENDPOINTS.TRANSLATE,
+        name: "Dialogue Translation Studio",
+        inputs: [{ name: "text" }, { name: "target_lang" }],
+      },
+      {
+        id: "dramatize",
+        endpoint: api.SKILL_ENDPOINTS.DRAMATIZE,
+        name: "Script Dramatization",
+        inputs: [
+          { name: "raw_ocr_text" },
+          { name: "genre" },
+          { name: "scene_context" },
+        ],
+      },
+      {
+        id: "seo",
+        endpoint: api.SKILL_ENDPOINTS.SEO,
+        name: "YouTube SEO Metadata Generator",
+        inputs: [
+          { name: "title" },
+          { name: "genre" },
+          { name: "storyboard_summary" },
+        ],
+      },
+      {
+        id: "cliffhanger",
+        endpoint: api.SKILL_ENDPOINTS.CLIFFHANGER,
+        name: "Cliffhanger Generator",
+        inputs: [{ name: "story_outline" }],
+      },
+      {
+        id: "voice-cast",
+        endpoint: api.SKILL_ENDPOINTS.VOICE_CAST,
+        name: "Voice Casting Profiler",
+        inputs: [
+          { name: "character_name" },
+          { name: "visual_description" },
+          { name: "dialogue_sample" },
+        ],
+      },
+      {
+        id: "copyright-scrub",
+        endpoint: api.SKILL_ENDPOINTS.COPYRIGHT_SCRUB,
+        name: "Copyright Text Scrubber",
+        inputs: [{ name: "text" }],
+      },
+      {
+        id: "bgm-vibe",
+        endpoint: api.SKILL_ENDPOINTS.BGM_VIBE,
+        name: "BGM Mood Selector",
+        inputs: [{ name: "narrative_mood" }, { name: "action_scale" }],
+      },
     ].find((s) => s.id === selectedSkill);
     if (!config) return;
 
@@ -596,7 +643,14 @@ export default function AIModelsPage({
 
     try {
       const startMonotonic = performance.now();
-      const data = await api.executeSkill(config.endpoint, payload, customHeaders);
+      const data = await api.executeSkill(
+        activeFetch,
+        config.endpoint,
+        payload,
+        {
+          headers: customHeaders,
+        }
+      );
       const endMonotonic = performance.now();
       const elapsedMs = Math.round(endMonotonic - startMonotonic);
 
@@ -672,11 +726,11 @@ export default function AIModelsPage({
 
     try {
       const data = await api.testModelLatency(activeFetch, {
-          provider,
-          model: testModel,
-          apiKey: keyValue || undefined,
-          prompt: "Say: OK",
-        });
+        provider,
+        model: testModel,
+        apiKey: keyValue || undefined,
+        prompt: "Say: OK",
+      });
       if (data.success) {
         setVerificationResult((prev) => ({
           ...prev,
@@ -726,11 +780,15 @@ export default function AIModelsPage({
         : "gemini-2.5-flash";
 
     try {
-      const data = await api.enhancePrompt(activeFetch, {
+      const data = await api.enhancePrompt(
+        activeFetch,
+        {
           prompt: playgroundPrompt,
           model: enhanceModel,
           apiKey: geminiKey,
-        }, geminiKey ? { "X-User-Gemini-Key": geminiKey } : {});
+        },
+        geminiKey ? { headers: { "X-User-Gemini-Key": geminiKey } } : {}
+      );
       if (data.success && data.enhanced_prompt) {
         setPlaygroundPrompt(data.enhanced_prompt.trim());
         addNotification(
@@ -818,11 +876,11 @@ ${playgroundPrompt}
     try {
       const startMonotonic = performance.now();
       const data = await api.testModelLatency(activeFetch, {
-          provider: playgroundProvider,
-          model: playgroundModel,
-          apiKey: customKey,
-          prompt: playgroundPrompt,
-        });
+        provider: playgroundProvider,
+        model: playgroundModel,
+        apiKey: customKey,
+        prompt: playgroundPrompt,
+      });
       const endMonotonic = performance.now();
       const elapsedMs = Math.round(endMonotonic - startMonotonic);
 

@@ -2,6 +2,7 @@ import * as api from "../../api/index.js";
 import React, { useState, useEffect } from "react";
 import { Sparkles, Trophy, HelpCircle, Check, Copy } from "lucide-react";
 import { GeneratedPanel } from "../../types";
+import { fetchWithAuth } from "../../utils.js";
 
 interface OutroCliffhangerAnalyzerProps {
   addNotification?: (msg: string, type: any) => void;
@@ -54,10 +55,10 @@ export default function OutroCliffhangerAnalyzer({
   const handleAnalyze = async () => {
     setLoading(true);
     try {
-      const json = await api.runCliffhangerSkill({
-          story_outline: outline,
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        });
+      const json = await api.runCliffhangerSkill(fetchWithAuth, {
+        story_outline: outline,
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+      });
       if (json.success && json.result) {
         setResults(json.result);
         if (addNotification) {

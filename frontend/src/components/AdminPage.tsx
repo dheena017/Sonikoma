@@ -212,10 +212,14 @@ export default function AdminPage({
     e.preventDefault();
     if (!editingUser) return;
     try {
-      const data = await api.adminUpdateUser(fetchWithInterceptor, editingUser.id, {
-            creator_role: editingUser.creator_role,
-            credits: parseInt(editingUser.credits),
-          });
+      const data = await api.adminUpdateUser(
+        fetchWithInterceptor,
+        editingUser.id,
+        {
+          creator_role: editingUser.creator_role,
+          credits: parseInt(editingUser.credits),
+        }
+      );
       if (data) {
         setEditingUser(null);
         fetchUsers();
@@ -228,7 +232,10 @@ export default function AdminPage({
   const handleDeleteUser = async () => {
     if (!deletingUser) return;
     try {
-      const data = await api.adminDeleteUser(fetchWithInterceptor, deletingUser.id);
+      const data = await api.adminDeleteUser(
+        fetchWithInterceptor,
+        deletingUser.id
+      );
       if (data) {
         setDeletingUser(null);
         setSelectedUsers((prev) => {
@@ -262,7 +269,11 @@ export default function AdminPage({
     setLoadingLogs(true);
     setUserLogs([]);
     try {
-      const data = await api.adminGetUserLogs(fetchWithInterceptor, user.id, 20);
+      const data = await api.adminGetUserLogs(
+        fetchWithInterceptor,
+        user.id,
+        20
+      );
       if (data.success) setUserLogs(data.logs || []);
     } catch (err) {
       console.error("Failed to fetch logs:", err);
@@ -282,10 +293,10 @@ export default function AdminPage({
 
     try {
       const data = await api.adminBulkAction(fetchWithInterceptor, {
-          user_ids: Array.from(selectedUsers),
-          action,
-          value,
-        });
+        user_ids: Array.from(selectedUsers),
+        action,
+        value,
+      });
       if (data) {
         setSelectedUsers(new Set());
         fetchUsers();
@@ -321,7 +332,10 @@ export default function AdminPage({
   const handleSaveSettings = async () => {
     setSavingSettings(true);
     try {
-      const data = await api.adminUpdateSettings(fetchWithInterceptor, settings);
+      const data = await api.adminUpdateSettings(
+        fetchWithInterceptor,
+        settings
+      );
       if (data) {
         await (window as any).alertAsync("Settings saved successfully.");
       }

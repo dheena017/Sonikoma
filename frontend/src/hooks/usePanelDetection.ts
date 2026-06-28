@@ -74,7 +74,11 @@ export function usePanelDetection({
     setIsAiDetecting(true);
     try {
       abortControllerRef.current = new AbortController();
-      const data = await api.aiDetectPanels(activeFetch, { url: currentUrl }, { signal: abortControllerRef.current.signal });
+      const data = await api.aiDetectPanels(
+        activeFetch,
+        { url: currentUrl },
+        { signal: abortControllerRef.current.signal }
+      );
       if (
         data.success &&
         Array.isArray(data.panels) &&
@@ -205,20 +209,24 @@ export function usePanelDetection({
     setIsDetecting(true);
     try {
       abortControllerRef.current = new AbortController();
-      const data = await api.detectPanels(activeFetch, {
-        url: currentUrl,
-        sensitivity: settings?.sensitivity ?? 30,
-        backgroundColorMode: settings?.backgroundMode ?? "auto",
-        aspectRatio: settings?.aspectRatio ?? "free",
-        minAreaPct: settings?.minAreaPct ?? 0.15,
-        mergeThreshold: settings?.mergeThreshold ?? 20,
-        strategy: settings?.strategy ?? "ai",
-        model: settings?.model ?? "gemini-2.5-flash",
-        cannyLow: settings?.cannyLow ?? 20,
-        cannyHigh: settings?.cannyHigh ?? 100,
-        closeKernelSize: settings?.closeKernelSize ?? 15,
-        minHeightPx: settings?.minHeightPx ?? 60,
-      }, { signal: abortControllerRef.current.signal });
+      const data = await api.detectPanels(
+        activeFetch,
+        {
+          url: currentUrl,
+          sensitivity: settings?.sensitivity ?? 30,
+          backgroundColorMode: settings?.backgroundMode ?? "auto",
+          aspectRatio: settings?.aspectRatio ?? "free",
+          minAreaPct: settings?.minAreaPct ?? 0.15,
+          mergeThreshold: settings?.mergeThreshold ?? 20,
+          strategy: settings?.strategy ?? "ai",
+          model: settings?.model ?? "gemini-2.5-flash",
+          cannyLow: settings?.cannyLow ?? 20,
+          cannyHigh: settings?.cannyHigh ?? 100,
+          closeKernelSize: settings?.closeKernelSize ?? 15,
+          minHeightPx: settings?.minHeightPx ?? 60,
+        },
+        { signal: abortControllerRef.current.signal }
+      );
       if (data.success && Array.isArray(data.panels)) {
         if (data.fallback) {
           addNotification(
