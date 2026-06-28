@@ -113,11 +113,20 @@ async def proxy_image(
     start_time = time.time()
     
     fetch_url = url
-    if "/api/proxy-image" in fetch_url:
+    visited = set()
+    while "/api/proxy-image" in fetch_url:
+        if fetch_url in visited:
+            raise HTTPException(status_code=400, detail="Infinite proxy redirect loop detected")
+        visited.add(fetch_url)
         parsed = urlparse(fetch_url)
         query = parse_qs(parsed.query)
         if "url" in query:
             fetch_url = query["url"][0]
+        else:
+            break
+
+    if fetch_url.startswith("data:") or "data:image/svg" in fetch_url:
+        raise HTTPException(status_code=400, detail="Data URLs are not supported by the image proxy")
 
     tighter = request.query_params.get("tighter") == "true"
     crop_padding_str = request.query_params.get("crop_padding")
@@ -135,6 +144,8 @@ async def proxy_image(
                 is_local = True
 
         if is_local:
+            if "/api/proxy-image" in parsed_url.path:
+                raise HTTPException(status_code=400, detail="Local proxy redirect loop is not allowed")
             redirect_url = parsed_url.path
             if parsed_url.query:
                 redirect_url += f"?{parsed_url.query}"

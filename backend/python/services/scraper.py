@@ -230,33 +230,7 @@ def scrape_local_archive(path: str) -> List[str]:
     return file_urls
 
 
-# ─── Fail-Safe SVG Placeholder Fallback ───────────────────────────────────────
-
-def generate_failsafe_svgs(url: str, reason: str) -> List[str]:
-    """Generates informative instruction panels if scraping fails entirely."""
-    logger.warning(f"[Scraper] Scrape failed: {reason}. Compiling instructions SVG placeholders...")
-    placeholders = []
-    colors = ["%232e1065", "%230f172a", "%231e1b4b", "%23064e3b", "%231c1917"]
-    messages = [
-        "Web Scrape Blocked by Host",
-        "Use Crop Editor to manually load panels",
-        "Or paste direct image URLs in Storyboard",
-        "Verify your target webtoon URL works",
-        "Check backend console logs for errors"
-    ]
-    for i in range(5):
-        color = colors[i]
-        msg = messages[i]
-        svg = (
-            f"<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600'>"
-            f"<rect width='100%' height='100%' fill='{color}'/>"
-            f"<text x='50%' y='45%' fill='%23f8fafc' font-weight='bold' font-size='24' text-anchor='middle'>Scraper Fallback Panel {i+1}</text>"
-            f"<text x='50%' y='55%' fill='%23cbd5e1' font-size='18' text-anchor='middle'>{msg}</text>"
-            f"</svg>"
-        )
-        encoded = quote(svg)
-        placeholders.append(f"data:image/svg+xml;utf8,{encoded}")
-    return placeholders
+# ─── Scraper Core ─────────────────────────────────────────────────────────────
 
 
 # ─── SQLite & In-Memory Scrape Caches ─────────────────────────────────────────
@@ -266,8 +240,11 @@ def check_sqlite_cache(url: str) -> Optional[List[str]]:
         try:
             session = get_latest_scrape_session(url)
             if session and session.get('image_urls'):
+                urls = session['image_urls']
+                if any("data:" in str(u) or "data%" in str(u) or "svg" in str(u).lower() for u in urls):
+                    return None
                 logger.info(f"[Scraper] Cache HIT (SQLite persisted): {url}")
-                return session['image_urls']
+                return urls
         except Exception as e:
             logger.warning(f"[Scraper] SQLite cache read failed: {e}")
     return None
@@ -696,7 +673,7 @@ async def scrape_images_from_url(
         except Exception as e:
             logger.error(f"[Scraper] Archive extract failed: {e}")
             if fetch_url.startswith("file://"):
-                return generate_failsafe_svgs(fetch_url, str(e))
+                return []
                 
     # Cache lookup
     if not bypass_cache:
@@ -763,8 +740,7 @@ async def scrape_images_from_url(
             pass
             
     if not html:
-        # Generate informative SVG panels if blocked entirely by protection software
-        return generate_failsafe_svgs(fetch_url, "Endpoint connection blocked by server security context.")
+        return []
         
     # Metadata extraction
     meta = extract_metadata(html, fetch_url)
@@ -892,7 +868,7 @@ async def scrape_images_from_url(
     logger.info(f"[Scraper] Final parsed panel candidates count: {len(filtered_images)} (elapsed: {int((time.time() - start_time)*1000)}ms)")
     
     if not filtered_images:
-        return generate_failsafe_svgs(fetch_url, "No comic panels extracted from DOM tree structures.")
+        return []
         
     # Save cache
     save_sqlite_cache(fetch_url, filtered_images)

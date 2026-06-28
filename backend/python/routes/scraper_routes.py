@@ -157,6 +157,10 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
                     stitched_cache.set(uid, {"data": stitched_bytes, "content_type": "image/png"})
                     stitched_cache.set(cache_key, stitched_url)
                     edit_history.set(stitched_url, proxied_urls[0])
+                    try:
+                        db.save_edit_history(stitched_url, proxied_urls[0])
+                    except Exception:
+                        pass
                     final_images = [stitched_url]
                 except: final_images = proxied_urls
 
