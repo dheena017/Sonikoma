@@ -507,23 +507,29 @@ export default function ProfilePage({
 
   // Render initials or background gradients for avatar
   const renderAvatarContent = (url: string, name: string) => {
-    if (url.startsWith("linear-gradient")) {
+    if (url && !url.startsWith("linear-gradient")) {
       return (
-        <div
-          className="w-full h-full flex items-center justify-center text-white font-extrabold text-3xl select-none"
-          style={{ background: url }}
-        >
-          {name.charAt(0).toUpperCase()}
+        <div className="w-full h-full relative">
+          <img
+            src={url}
+            alt="Profile"
+            className="w-full h-full object-cover relative z-10"
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white font-extrabold text-3xl select-none">
+            {name.charAt(0).toUpperCase()}
+          </div>
         </div>
       );
     }
-    if (url) {
-      return (
-        <img src={url} alt="Profile" className="w-full h-full object-cover" />
-      );
-    }
+    const bgStyle = url ? { background: url } : {};
     return (
-      <div className="w-full h-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white font-extrabold text-3xl select-none">
+      <div 
+        className="w-full h-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white font-extrabold text-3xl select-none"
+        style={bgStyle}
+      >
         {name.charAt(0).toUpperCase()}
       </div>
     );

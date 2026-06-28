@@ -289,6 +289,7 @@ export default function Sidebar({
     { label: "Community Coach", path: "/ai-engagement" },
     { label: "Voice Studio", path: "/ai-voice" },
     { label: "CTR Predictor", path: "/ai-analytics" },
+    { label: "YouTube Publisher", path: "/youtube" },
   ];
 
   const sidebarContent = (

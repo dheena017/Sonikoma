@@ -214,10 +214,11 @@ export default function LoginPage({
   };
 
   const handleSocialLogin = (provider: string) => {
-    console.log(`[OAuth] Initiate login with ${provider}`);
-    setError(
-      `OAuth sign in with ${provider} is not configured for this environment yet.`
-    );
+    if (provider === "Google") {
+      window.location.href = "/api/auth/google/login";
+    } else {
+      setError(`OAuth sign in with ${provider} is not configured yet.`);
+    }
   };
 
   const handleQuickFill = () => {
@@ -412,20 +413,13 @@ export default function LoginPage({
           </div>
 
           {/* Social Sign-In buttons */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="w-full">
             <button
               onClick={() => handleSocialLogin("Google")}
-              className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-white font-medium text-xs transition-all duration-300 cursor-pointer shadow-sm active:scale-[0.98]"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-white font-medium text-xs transition-all duration-300 cursor-pointer shadow-sm active:scale-[0.98]"
             >
               <Chrome className="w-4 h-4 text-neutral-300" />
-              Google
-            </button>
-            <button
-              onClick={() => handleSocialLogin("GitHub")}
-              className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-white font-medium text-xs transition-all duration-300 cursor-pointer shadow-sm active:scale-[0.98]"
-            >
-              <Github className="w-4 h-4 text-neutral-300" />
-              GitHub
+              Sign in with Google
             </button>
           </div>
 
