@@ -94,7 +94,9 @@ export default function ProjectDetailsPage({
   // Export states
   const [isExporting, setIsExporting] = React.useState(false);
   const [exportStatus, setExportStatus] = React.useState<string | null>(null);
-  const [detectedRatio, setDetectedRatio] = React.useState<"9/16" | "16/9">("16/9");
+  const [detectedRatio, setDetectedRatio] = React.useState<"9/16" | "16/9">(
+    "16/9"
+  );
 
   // Search filter inside storyboard tab
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -1504,7 +1506,7 @@ export default function ProjectDetailsPage({
                               Compiled MP4 Output Video
                             </h3>
                           </div>
-                          <div 
+                          <div
                             className="relative mx-auto rounded-2xl overflow-hidden border border-white/10 bg-black/90 shadow-inner transition-all duration-300 w-full"
                             style={
                               detectedRatio === "9/16"
@@ -1556,7 +1558,7 @@ export default function ProjectDetailsPage({
                             </div>
                           </div>
 
-                          <div 
+                          <div
                             className="relative mx-auto rounded-2xl overflow-hidden border border-white/10 bg-black/90 shadow-inner transition-all duration-300 w-full flex items-center justify-center"
                             style={
                               detectedRatio === "9/16"

@@ -163,7 +163,7 @@ export default function DisplayPage({ projectId }: DisplayPageProps) {
               </h2>
             </div>
             <div className="bg-[#0b0b0f]/80 border border-white/5 rounded-3xl p-6 backdrop-blur-xl shadow-2xl">
-              <div 
+              <div
                 className="relative mx-auto rounded-2xl overflow-hidden border border-white/10 bg-black shadow-2xl transition-all duration-300 w-full"
                 style={
                   detectedRatio === "9/16"

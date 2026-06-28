@@ -140,6 +140,7 @@ export function useAppRouter({
             path === "/ai-engagement" ||
             path === "/ai-voice" ||
             path === "/ai-analytics" ||
+            path === "/youtube" ||
             path === "/profile" ||
             path === "/notifications" ||
             path === "/auto-crop" ||
@@ -205,6 +206,7 @@ export function useAppRouter({
         path === "/ai-engagement" ||
         path === "/ai-voice" ||
         path === "/ai-analytics" ||
+        path === "/youtube" ||
         path === "/profile" ||
         path === "/notifications" ||
         path === "/projects" ||

@@ -124,6 +124,64 @@ def init_db() -> None:
                     logger.warning("[Database] schema_postgres.sql not found.")
             else:
                 logger.info("[Database] Relational database schema is already initialized.")
+            
+            # Check and initialize YouTube tables in Postgres/Supabase
+            row_yt = conn.execute("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'youtube_profiles') as exists").fetchone()
+            if not row_yt or not row_yt.get('exists'):
+                logger.info("[Database] Initializing PostgreSQL YouTube schema...")
+                conn.executescript("""
+                CREATE TABLE IF NOT EXISTS youtube_profiles (
+                  id                  SERIAL PRIMARY KEY,
+                  user_id             TEXT    NOT NULL,
+                  name                TEXT    NOT NULL,
+                  title_template      TEXT    NOT NULL,
+                  description_template TEXT   NOT NULL,
+                  tags                TEXT    NOT NULL,
+                  category_id         TEXT    NOT NULL DEFAULT '1',
+                  privacy_status      TEXT    NOT NULL DEFAULT 'unlisted',
+                  is_short            INTEGER NOT NULL DEFAULT 0,
+                  made_for_kids       TEXT    NOT NULL DEFAULT 'no',
+                  paid_promotion      INTEGER NOT NULL DEFAULT 0,
+                  license             TEXT    NOT NULL DEFAULT 'youtube',
+                  video_language      TEXT    NOT NULL DEFAULT 'en',
+                  channel_link        TEXT,
+                  discord_link        TEXT,
+                  patreon_link        TEXT,
+                  created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                  UNIQUE(user_id, name)
+                );
+                CREATE TABLE IF NOT EXISTS youtube_publications (
+                  id                  SERIAL PRIMARY KEY,
+                  user_id             TEXT    NOT NULL,
+                  chapter_id          TEXT,
+                  youtube_url         TEXT    NOT NULL,
+                  title               TEXT    NOT NULL,
+                  privacy_status      TEXT    NOT NULL DEFAULT 'unlisted',
+                  published_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                  FOREIGN KEY (chapter_id) REFERENCES chapters(id) ON DELETE SET NULL
+                );
+                CREATE INDEX IF NOT EXISTS idx_youtube_profiles_user ON youtube_profiles(user_id);
+                CREATE INDEX IF NOT EXISTS idx_youtube_publications_user ON youtube_publications(user_id);
+                """)
+                conn.commit()
+                logger.info("[Database] PostgreSQL YouTube schema applied successfully.")
+
+            row_creds = conn.execute("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'youtube_credentials') as exists").fetchone()
+            if not row_creds or not row_creds.get('exists'):
+                logger.info("[Database] Initializing PostgreSQL YouTube credentials schema...")
+                conn.executescript("""
+                CREATE TABLE IF NOT EXISTS youtube_credentials (
+                  user_id             TEXT    PRIMARY KEY,
+                  client_id           TEXT    NOT NULL,
+                  client_secret       TEXT    NOT NULL,
+                  project_id          TEXT    NOT NULL,
+                  updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                );
+                """)
+                conn.commit()
         except Exception as e:
             logger.error(f"[Database] Error checking PostgreSQL schema: {e}")
         finally:
@@ -231,6 +289,59 @@ def init_db() -> None:
             logger.info("[Database] Migration: verified token_usage_logs table.")
         except:
             logger.error(f"[Database] Schema file not found: {schema_file}")
+
+        # Ensure youtube_profiles and youtube_publications exist in SQLite
+        try:
+            cursor.execute("""
+            CREATE TABLE IF NOT EXISTS youtube_profiles (
+              id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+              user_id             TEXT    NOT NULL,
+              name                TEXT    NOT NULL,
+              title_template      TEXT    NOT NULL,
+              description_template TEXT   NOT NULL,
+              tags                TEXT    NOT NULL,
+              category_id         TEXT    NOT NULL DEFAULT '1',
+              privacy_status      TEXT    NOT NULL DEFAULT 'unlisted',
+              is_short            INTEGER NOT NULL DEFAULT 0,
+              made_for_kids       TEXT    NOT NULL DEFAULT 'no',
+              paid_promotion      INTEGER NOT NULL DEFAULT 0,
+              license             TEXT    NOT NULL DEFAULT 'youtube',
+              video_language      TEXT    NOT NULL DEFAULT 'en',
+              channel_link        TEXT,
+              discord_link        TEXT,
+              patreon_link        TEXT,
+              created_at          TEXT    NOT NULL DEFAULT (datetime('now')),
+              FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+              UNIQUE(user_id, name)
+            )""")
+            cursor.execute("""
+            CREATE TABLE IF NOT EXISTS youtube_publications (
+              id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+              user_id             TEXT    NOT NULL,
+              chapter_id          TEXT,
+              youtube_url         TEXT    NOT NULL,
+              title               TEXT    NOT NULL,
+              privacy_status      TEXT    NOT NULL DEFAULT 'unlisted',
+              published_at        TEXT    NOT NULL DEFAULT (datetime('now')),
+              FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+              FOREIGN KEY (chapter_id) REFERENCES chapters(id) ON DELETE SET NULL
+            )""")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_youtube_profiles_user ON youtube_profiles(user_id)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_youtube_publications_user ON youtube_publications(user_id)")
+            
+            # Ensure youtube_credentials exists in SQLite
+            cursor.execute("""
+            CREATE TABLE IF NOT EXISTS youtube_credentials (
+              user_id             TEXT    PRIMARY KEY,
+              client_id           TEXT    NOT NULL,
+              client_secret       TEXT    NOT NULL,
+              project_id          TEXT    NOT NULL,
+              updated_at          TEXT    NOT NULL DEFAULT (datetime('now')),
+              FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )""")
+            logger.info("[Database] SQLite YouTube tables and credentials checked.")
+        except Exception as e_yt:
+            logger.error(f"[Database] Error checking SQLite YouTube schema: {e_yt}")
 
         # Ensure platform settings table exists
         cursor.execute("""
@@ -1749,3 +1860,145 @@ def delete_announcement(announcement_id: int) -> bool:
         return cursor.rowcount > 0
     finally:
         conn.close()
+
+
+# --- YouTube Publishing Profiles & Publications ---------------------------
+
+def save_youtube_profile(user_id: str, profile: Dict[str, Any]) -> Dict[str, Any]:
+    conn = get_db_connection()
+    try:
+        cursor = conn.execute("""
+            INSERT INTO youtube_profiles (
+                user_id, name, title_template, description_template, tags,
+                category_id, privacy_status, is_short, made_for_kids,
+                paid_promotion, license, video_language, channel_link,
+                discord_link, patreon_link
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(user_id, name) DO UPDATE SET
+                title_template=excluded.title_template,
+                description_template=excluded.description_template,
+                tags=excluded.tags,
+                category_id=excluded.category_id,
+                privacy_status=excluded.privacy_status,
+                is_short=excluded.is_short,
+                made_for_kids=excluded.made_for_kids,
+                paid_promotion=excluded.paid_promotion,
+                license=excluded.license,
+                video_language=excluded.video_language,
+                channel_link=excluded.channel_link,
+                discord_link=excluded.discord_link,
+                patreon_link=excluded.patreon_link
+            RETURNING *
+        """, (
+            user_id,
+            profile['name'],
+            profile['title_template'],
+            profile['description_template'],
+            json.dumps(profile['tags']),
+            profile.get('category_id', '1'),
+            profile.get('privacy_status', 'unlisted'),
+            1 if profile.get('is_short') else 0,
+            profile.get('made_for_kids', 'no'),
+            1 if profile.get('paid_promotion') else 0,
+            profile.get('license', 'youtube'),
+            profile.get('video_language', 'en'),
+            profile.get('channel_link', ''),
+            profile.get('discord_link', ''),
+            profile.get('patreon_link', '')
+        ))
+        row = cursor.fetchone()
+        conn.commit()
+        return dict(row) if row else {}
+    finally:
+        conn.close()
+
+def get_youtube_profiles(user_id: str) -> List[Dict[str, Any]]:
+    conn = get_db_connection()
+    try:
+        rows = conn.execute("SELECT * FROM youtube_profiles WHERE user_id = ? ORDER BY name ASC", (user_id,)).fetchall()
+        result = []
+        for r in rows:
+            d = dict(r)
+            try:
+                d['tags'] = json.loads(d['tags'])
+            except Exception:
+                d['tags'] = []
+            d['is_short'] = bool(d['is_short'])
+            d['paid_promotion'] = bool(d['paid_promotion'])
+            result.append(d)
+        return result
+    finally:
+        conn.close()
+
+def delete_youtube_profile(user_id: str, name: str) -> bool:
+    conn = get_db_connection()
+    try:
+        cursor = conn.execute("DELETE FROM youtube_profiles WHERE user_id = ? AND name = ?", (user_id, name))
+        conn.commit()
+        return cursor.rowcount > 0
+    finally:
+        conn.close()
+
+def log_youtube_publication(user_id: str, chapter_id: Optional[str], youtube_url: str, title: str, privacy_status: str) -> Dict[str, Any]:
+    conn = get_db_connection()
+    try:
+        cursor = conn.execute("""
+            INSERT INTO youtube_publications (user_id, chapter_id, youtube_url, title, privacy_status)
+            VALUES (?, ?, ?, ?, ?)
+            RETURNING *
+        """, (user_id, chapter_id, youtube_url, title, privacy_status))
+        row = cursor.fetchone()
+        conn.commit()
+        return dict(row) if row else {}
+    finally:
+        conn.close()
+
+def get_youtube_publications(user_id: str) -> List[Dict[str, Any]]:
+    conn = get_db_connection()
+    try:
+        rows = conn.execute("SELECT * FROM youtube_publications WHERE user_id = ? ORDER BY published_at DESC", (user_id,)).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+# --- YouTube Custom Credentials Methods ---
+
+def save_youtube_credentials(user_id: str, client_id: str, client_secret: str, project_id: str) -> Dict[str, Any]:
+    conn = get_db_connection()
+    try:
+        cursor = conn.execute("""
+            INSERT INTO youtube_credentials (user_id, client_id, client_secret, project_id, updated_at)
+            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(user_id) DO UPDATE SET
+                client_id=excluded.client_id,
+                client_secret=excluded.client_secret,
+                project_id=excluded.project_id,
+                updated_at=CURRENT_TIMESTAMP
+            RETURNING *
+        """, (user_id, client_id, client_secret, project_id))
+        row = cursor.fetchone()
+        conn.commit()
+        return dict(row) if row else {}
+    finally:
+        conn.close()
+
+def get_youtube_credentials(user_id: str) -> Optional[Dict[str, Any]]:
+    conn = get_db_connection()
+    try:
+        row = conn.execute("SELECT * FROM youtube_credentials WHERE user_id = ?", (user_id,)).fetchone()
+        return dict(row) if row else None
+    finally:
+        conn.close()
+
+def delete_youtube_credentials(user_id: str) -> bool:
+    conn = get_db_connection()
+    try:
+        cursor = conn.execute("DELETE FROM youtube_credentials WHERE user_id = ?", (user_id,))
+        conn.commit()
+        return cursor.rowcount > 0
+    finally:
+        conn.close()
+
+

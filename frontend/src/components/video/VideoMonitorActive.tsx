@@ -128,8 +128,6 @@ export function VideoMonitorActive({
               setVideoCurrentTime(e.currentTarget.currentTime)
             }
           />
-
-
         </div>
       )}
 

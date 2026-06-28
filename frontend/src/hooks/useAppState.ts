@@ -525,6 +525,13 @@ export function useAppState() {
   );
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tokenParam = params.get("token");
+    if (tokenParam) {
+      localStorage.setItem("sonikoma_token", tokenParam);
+      sessionStorage.removeItem("sonikoma_token");
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
     checkAuth();
   }, [checkAuth]);
 

@@ -189,3 +189,54 @@ CREATE TABLE IF NOT EXISTS system_announcements (
   status TEXT NOT NULL DEFAULT 'active',
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+-- 13. YouTube Publishing Profiles (Custom Settings)
+CREATE TABLE IF NOT EXISTS youtube_profiles (
+  id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id             TEXT    NOT NULL,
+  name                TEXT    NOT NULL,
+  title_template      TEXT    NOT NULL,
+  description_template TEXT   NOT NULL,
+  tags                TEXT    NOT NULL,                 -- JSON array format
+  category_id         TEXT    NOT NULL DEFAULT '1',
+  privacy_status      TEXT    NOT NULL DEFAULT 'unlisted',
+  is_short            INTEGER NOT NULL DEFAULT 0,
+  made_for_kids       TEXT    NOT NULL DEFAULT 'no',
+  paid_promotion      INTEGER NOT NULL DEFAULT 0,
+  license             TEXT    NOT NULL DEFAULT 'youtube',
+  video_language      TEXT    NOT NULL DEFAULT 'en',
+  channel_link        TEXT,
+  discord_link        TEXT,
+  patreon_link        TEXT,
+  created_at          TEXT    NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE(user_id, name)
+);
+
+-- 14. YouTube Publications Log (Upload History)
+CREATE TABLE IF NOT EXISTS youtube_publications (
+  id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id             TEXT    NOT NULL,
+  chapter_id          TEXT,
+  youtube_url         TEXT    NOT NULL,
+  title               TEXT    NOT NULL,
+  privacy_status      TEXT    NOT NULL DEFAULT 'unlisted',
+  published_at        TEXT    NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (chapter_id) REFERENCES chapters(id) ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_youtube_profiles_user ON youtube_profiles(user_id);
+CREATE INDEX IF NOT EXISTS idx_youtube_publications_user ON youtube_publications(user_id);
+
+-- 15. YouTube Custom OAuth Credentials
+CREATE TABLE IF NOT EXISTS youtube_credentials (
+  user_id             TEXT    PRIMARY KEY,
+  client_id           TEXT    NOT NULL,
+  client_secret       TEXT    NOT NULL,
+  project_id          TEXT    NOT NULL,
+  updated_at          TEXT    NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+

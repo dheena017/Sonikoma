@@ -30,10 +30,13 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
+from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
 import bcrypt
 import jwt
+import requests
+from google_auth_oauthlib.flow import Flow
 from database.db import (
     create_user, get_user_by_email, get_user_by_id, update_user,
     create_user_session, get_user_sessions, terminate_user_session,
@@ -224,6 +227,160 @@ async def forgot_password(request: ForgotPasswordRequest):
     logger.info(f"[Auth] Forgot password request for {request.email}. Reset link would be sent.")
 
     return {"message": "If an account exists for this email, you will receive a reset link shortly."}
+
+
+@router.get("/google/login", summary="Initiate Google OAuth2 authentication flow")
+async def google_login(request: Request):
+    import urllib.parse
+    import json
+
+    PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+    client_secrets_file = os.path.join(PROJECT_ROOT, "client_secrets.json")
+    if not os.path.exists(client_secrets_file):
+        cwd_secrets = os.path.join(os.getcwd(), "client_secrets.json")
+        if os.path.exists(cwd_secrets):
+            client_secrets_file = cwd_secrets
+
+    if not os.path.exists(client_secrets_file):
+        repo_default = os.path.join(PROJECT_ROOT, "backend", "python", "youtube_client_secrets.json")
+        if os.path.exists(repo_default):
+            client_secrets_file = repo_default
+
+    if not os.path.exists(client_secrets_file):
+        raise HTTPException(
+            status_code=400,
+            detail="Google login is not configured on the server. Please add 'client_secrets.json' to the project root."
+        )
+
+    try:
+        with open(client_secrets_file, "r", encoding="utf-8") as f:
+            secrets_data = json.load(f)
+        key = "web" if "web" in secrets_data else "installed"
+        client_id = secrets_data[key]["client_id"]
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Failed to parse client_secrets.json: {e}"
+        )
+
+    host = request.headers.get("host", "localhost:8000")
+    scheme = "https" if request.url.scheme == "https" else "http"
+    redirect_uri = f"{scheme}://{host}/api/auth/google/callback"
+
+    scopes = [
+        "openid",
+        "https://www.googleapis.com/auth/userinfo.email",
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/youtube.upload"
+    ]
+
+    params = {
+        "client_id": client_id,
+        "redirect_uri": redirect_uri,
+        "response_type": "code",
+        "scope": " ".join(scopes),
+        "access_type": "offline",
+        "prompt": "consent"
+    }
+
+    auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?{urllib.parse.urlencode(params)}"
+    return RedirectResponse(auth_url)
+
+
+@router.get("/google/callback", summary="Google OAuth2 authentication callback")
+async def google_callback(request: Request):
+    import json
+    code = request.query_params.get("code")
+    if not code:
+        raise HTTPException(status_code=400, detail="Missing authorization code")
+
+    PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+    client_secrets_file = os.path.join(PROJECT_ROOT, "client_secrets.json")
+    if not os.path.exists(client_secrets_file):
+        cwd_secrets = os.path.join(os.getcwd(), "client_secrets.json")
+        if os.path.exists(cwd_secrets):
+            client_secrets_file = cwd_secrets
+
+    if not os.path.exists(client_secrets_file):
+        repo_default = os.path.join(PROJECT_ROOT, "backend", "python", "youtube_client_secrets.json")
+        if os.path.exists(repo_default):
+            client_secrets_file = repo_default
+
+    try:
+        with open(client_secrets_file, "r", encoding="utf-8") as f:
+            secrets_data = json.load(f)
+        key = "web" if "web" in secrets_data else "installed"
+        client_id = secrets_data[key]["client_id"]
+        client_secret = secrets_data[key]["client_secret"]
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Failed to parse client_secrets.json: {e}"
+        )
+
+    host = request.headers.get("host", "localhost:8000")
+    scheme = "https" if request.url.scheme == "https" else "http"
+    redirect_uri = f"{scheme}://{host}/api/auth/google/callback"
+
+    # Stateless POST request to exchange authorization code for access tokens
+    token_url = "https://oauth2.googleapis.com/token"
+    token_payload = {
+        "code": code,
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "redirect_uri": redirect_uri,
+        "grant_type": "authorization_code"
+    }
+
+    try:
+        token_resp = requests.post(token_url, data=token_payload)
+        if token_resp.status_code != 200:
+            raise HTTPException(status_code=400, detail=f"Google token exchange failed: {token_resp.text}")
+        
+        token_data = token_resp.json()
+        google_access_token = token_data.get("access_token")
+        if not google_access_token:
+            raise HTTPException(status_code=400, detail="Google response did not return an access token")
+
+        user_info_url = "https://www.googleapis.com/oauth2/v3/userinfo"
+        headers = {"Authorization": f"Bearer {google_access_token}"}
+        resp = requests.get(user_info_url, headers=headers)
+        if resp.status_code != 200:
+            raise HTTPException(status_code=400, detail="Failed to fetch userinfo from Google")
+        
+        info = resp.json()
+        email = info.get("email")
+        google_id = info.get("sub")
+        name = info.get("name") or email.split("@")[0]
+        picture = info.get("picture") or f"https://api.dicebear.com/7.x/avataaars/svg?seed={google_id}"
+
+        if not email:
+            raise HTTPException(status_code=400, detail="Google account did not return a valid email address")
+
+        user = get_user_by_email(email)
+        if not user:
+            user_uuid = f"user_{uuid.uuid4().hex[:8]}"
+            user_data = {
+                "id": user_uuid,
+                "email": email,
+                "google_id": google_id,
+                "full_name": name,
+                "avatar_url": picture,
+                "password_hash": get_password_hash(f"google_oauth_{uuid.uuid4().hex}"),
+            }
+            create_user(user_data)
+            user = get_user_by_email(email)
+        elif not user.get("google_id"):
+            update_user(user["user_id"], {"google_id": google_id})
+            user["google_id"] = google_id
+
+        access_token = create_access_token(data={"sub": user["user_id"]})
+        frontend_url = "http://localhost:3000"
+        return RedirectResponse(f"{frontend_url}/?token={access_token}")
+    except Exception as e:
+        logger.error(f"[Google Auth] Callback processing error: {e}")
+        raise HTTPException(status_code=500, detail=f"Google Callback processing failed: {e}")
+
 
 @router.get("/me")
 async def get_me(current_user: dict = Depends(get_current_user)):

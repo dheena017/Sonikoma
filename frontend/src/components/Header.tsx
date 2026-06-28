@@ -1072,21 +1072,27 @@ export default function Header({
           title="View Profile"
         >
           <div className="w-6 h-6 rounded-lg bg-purple-600/20 flex items-center justify-center overflow-hidden shrink-0 border border-purple-500/30">
-            {user?.avatar_url ? (
-              user.avatar_url.startsWith("linear-gradient") ? (
-                <div
-                  className="w-full h-full"
-                  style={{ background: user.avatar_url }}
-                />
-              ) : (
+            {user?.avatar_url && !user.avatar_url.startsWith("linear-gradient") ? (
+              <div className="w-full h-full relative">
                 <img
                   src={user.avatar_url}
                   alt="Profile"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover relative z-10"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
                 />
-              )
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white select-none">
+                  {(user.full_name || "U").charAt(0).toUpperCase()}
+                </div>
+              </div>
             ) : (
-              <span className="text-[10px] font-bold text-purple-400">U</span>
+              <div
+                className="w-full h-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white select-none"
+                style={user?.avatar_url ? { background: user.avatar_url } : {}}
+              >
+                {(user?.full_name || "U").charAt(0).toUpperCase()}
+              </div>
             )}
           </div>
           <span className="text-[10px] font-bold text-neutral-300 truncate hidden sm:inline">

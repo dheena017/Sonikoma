@@ -62,6 +62,7 @@ import VoiceStudioPage from "./components/voice/VoiceStudioPage.js";
 import CTRAnalyticsPage from "./components/analytics/CTRAnalyticsPage.js";
 import NotificationsPage from "./components/NotificationsPage.js";
 import AdminPage from "./components/AdminPage.js";
+import YouTubePage from "./components/video/YouTubePage.js";
 
 // ============================================================================
 // SECTION 2: MAIN APP COMPONENT
@@ -566,6 +567,7 @@ export default function App() {
   const isEngagementPath = currentPath === "/ai-engagement";
   const isVoicePath = currentPath === "/ai-voice";
   const isAnalyticsPath = currentPath === "/ai-analytics";
+  const isYouTubePath = currentPath === "/youtube";
   const isProfilePath = currentPath === "/profile";
   const isNotificationsPath = currentPath === "/notifications";
   const isAdminPath = currentPath === "/admin";
@@ -1161,6 +1163,18 @@ export default function App() {
             />
           )}
 
+          {/* PAGE VIEW 14.5: YouTube Publisher Studio */}
+          {isYouTubePath && (
+            <YouTubePage
+              panels={panels}
+              videoUrl={videoUrl}
+              scrapedTitle={scrapedTitle}
+              scrapedGenre={scrapedGenre}
+              onNavigateHome={handleNavigateHome}
+              addNotification={addNotification}
+            />
+          )}
+
           {/* PAGE VIEW 15: User Profile & Account Settings */}
           {isProfilePath && (
             <ProfilePage
@@ -1371,6 +1385,7 @@ export default function App() {
             !isEngagementPath &&
             !isVoicePath &&
             !isAnalyticsPath &&
+            !isYouTubePath &&
             !isProfilePath &&
             !isNotificationsPath &&
             !isAdminPath &&
