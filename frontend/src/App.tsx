@@ -1360,6 +1360,7 @@ export default function App() {
               navigateTo={navigateTo}
               isAuthenticated={isAuthenticated}
               fetchWithInterceptor={fetchWithInterceptor}
+              addNotification={addNotification}
             />
           )}
 
