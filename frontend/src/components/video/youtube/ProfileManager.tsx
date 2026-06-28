@@ -16,6 +16,14 @@ export interface PublisherProfile {
   channelLink: string;
   discordLink: string;
   patreonLink: string;
+  playlist: string;
+  authorName: string;
+  artistName: string;
+  webtoonPlatform: string;
+  chapterStart: string;
+  chapterEnd: string;
+  subtitlesType: string;
+  subtitlesLanguage: string;
 }
 
 interface ProfileManagerProps {

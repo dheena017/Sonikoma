@@ -30,6 +30,14 @@ const DEFAULT_PRESETS: PublisherProfile[] = [
     channelLink: "",
     discordLink: "",
     patreonLink: "",
+    playlist: "",
+    authorName: "",
+    artistName: "",
+    webtoonPlatform: "Webtoon",
+    chapterStart: "",
+    chapterEnd: "",
+    subtitlesType: "None",
+    subtitlesLanguage: "en",
   },
   {
     name: "YouTube Shorts (Vertical)",
@@ -46,6 +54,14 @@ const DEFAULT_PRESETS: PublisherProfile[] = [
     channelLink: "",
     discordLink: "",
     patreonLink: "",
+    playlist: "",
+    authorName: "",
+    artistName: "",
+    webtoonPlatform: "Webtoon",
+    chapterStart: "",
+    chapterEnd: "",
+    subtitlesType: "None",
+    subtitlesLanguage: "en",
   }
 ];
 
@@ -151,6 +167,16 @@ export function useYouTubePublisher({
     getCachedValue("link_patreon", "")
   );
   const [showSocialsConfig, setShowSocialsConfig] = useState(false);
+
+  // New Advanced Metadata states
+  const [playlist, setPlaylist] = useState(() => getCachedValue("playlist", ""));
+  const [authorName, setAuthorName] = useState(() => getCachedValue("author_name", ""));
+  const [artistName, setArtistName] = useState(() => getCachedValue("artist_name", ""));
+  const [webtoonPlatform, setWebtoonPlatform] = useState(() => getCachedValue("webtoon_platform", "Webtoon"));
+  const [chapterStart, setChapterStart] = useState(() => getCachedValue("chapter_start", ""));
+  const [chapterEnd, setChapterEnd] = useState(() => getCachedValue("chapter_end", ""));
+  const [subtitlesType, setSubtitlesType] = useState(() => getCachedValue("subtitles_type", "None"));
+  const [subtitlesLanguage, setSubtitlesLanguage] = useState(() => getCachedValue("subtitles_language", "en"));
 
   // Profile manager states
   const [profiles, setProfiles] = useState<PublisherProfile[]>([]);
@@ -302,6 +328,38 @@ export function useYouTubePublisher({
     localStorage.setItem("yt_pub_link_patreon", patreonLink);
   }, [patreonLink]);
 
+  useEffect(() => {
+    localStorage.setItem("yt_pub_playlist", playlist);
+  }, [playlist]);
+
+  useEffect(() => {
+    localStorage.setItem("yt_pub_author_name", authorName);
+  }, [authorName]);
+
+  useEffect(() => {
+    localStorage.setItem("yt_pub_artist_name", artistName);
+  }, [artistName]);
+
+  useEffect(() => {
+    localStorage.setItem("yt_pub_webtoon_platform", webtoonPlatform);
+  }, [webtoonPlatform]);
+
+  useEffect(() => {
+    localStorage.setItem("yt_pub_chapter_start", chapterStart);
+  }, [chapterStart]);
+
+  useEffect(() => {
+    localStorage.setItem("yt_pub_chapter_end", chapterEnd);
+  }, [chapterEnd]);
+
+  useEffect(() => {
+    localStorage.setItem("yt_pub_subtitles_type", subtitlesType);
+  }, [subtitlesType]);
+
+  useEffect(() => {
+    localStorage.setItem("yt_pub_subtitles_language", subtitlesLanguage);
+  }, [subtitlesLanguage]);
+
   // Load profiles, publish history, and custom credentials from database on mount
   useEffect(() => {
     async function loadDatabaseData() {
@@ -323,6 +381,14 @@ export function useYouTubePublisher({
           channelLink: p.channel_link || "",
           discordLink: p.discord_link || "",
           patreonLink: p.patreon_link || "",
+          playlist: p.playlist || "",
+          authorName: p.author_name || "",
+          artistName: p.artist_name || "",
+          webtoonPlatform: p.webtoon_platform || "Webtoon",
+          chapterStart: p.chapter_start || "",
+          chapterEnd: p.chapter_end || "",
+          subtitlesType: p.subtitles_type || "None",
+          subtitlesLanguage: p.subtitles_language || "en",
         }));
         
         // Merge default templates with database profiles
@@ -448,6 +514,14 @@ export function useYouTubePublisher({
       channelLink,
       discordLink,
       patreonLink,
+      playlist,
+      authorName,
+      artistName,
+      webtoonPlatform,
+      chapterStart,
+      chapterEnd,
+      subtitlesType,
+      subtitlesLanguage,
     };
 
     try {
@@ -490,6 +564,14 @@ export function useYouTubePublisher({
     setChannelLink(target.channelLink);
     setDiscordLink(target.discordLink);
     setPatreonLink(target.patreonLink);
+    setPlaylist(target.playlist);
+    setAuthorName(target.authorName);
+    setArtistName(target.artistName);
+    setWebtoonPlatform(target.webtoonPlatform);
+    setChapterStart(target.chapterStart);
+    setChapterEnd(target.chapterEnd);
+    setSubtitlesType(target.subtitlesType);
+    setSubtitlesLanguage(target.subtitlesLanguage);
 
     setCurrentProfileName(profileName);
     if (addNotification)
@@ -892,6 +974,14 @@ export function useYouTubePublisher({
           isScheduled,
           scheduleDate,
           scheduleTime,
+          playlist,
+          authorName,
+          artistName,
+          webtoonPlatform,
+          chapterStart,
+          chapterEnd,
+          subtitlesType,
+          subtitlesLanguage,
         });
       } else if (videoUrl) {
         setPublishLogs([
@@ -923,6 +1013,14 @@ export function useYouTubePublisher({
             isScheduled,
             scheduleDate,
             scheduleTime,
+            playlist,
+            authorName,
+            artistName,
+            webtoonPlatform,
+            chapterStart,
+            chapterEnd,
+            subtitlesType,
+            subtitlesLanguage,
           });
         } else {
           data = await publishVideoJson({
@@ -936,6 +1034,14 @@ export function useYouTubePublisher({
             isScheduled,
             scheduleDate,
             scheduleTime,
+            playlist,
+            authorName,
+            artistName,
+            webtoonPlatform,
+            chapterStart,
+            chapterEnd,
+            subtitlesType,
+            subtitlesLanguage,
           });
         }
       }
@@ -1046,6 +1152,22 @@ export function useYouTubePublisher({
     setDiscordLink,
     patreonLink,
     setPatreonLink,
+    playlist,
+    setPlaylist,
+    authorName,
+    setAuthorName,
+    artistName,
+    setArtistName,
+    webtoonPlatform,
+    setWebtoonPlatform,
+    chapterStart,
+    setChapterStart,
+    chapterEnd,
+    setChapterEnd,
+    subtitlesType,
+    setSubtitlesType,
+    subtitlesLanguage,
+    setSubtitlesLanguage,
     showSocialsConfig,
     setShowSocialsConfig,
     profiles,
