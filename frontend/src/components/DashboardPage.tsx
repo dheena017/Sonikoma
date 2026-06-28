@@ -359,7 +359,7 @@ export default function DashboardPage() {
                     <div
                       key={project.project_id}
                       onClick={() => handleOpenProject(project)}
-                      className="bg-[#0b0b0e]/80 border border-white/5 hover:border-purple-500/30 rounded-2xl overflow-hidden cursor-pointer transition-all hover:bg-neutral-900/80 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-900/10 group flex flex-col relative"
+                      className="bg-[#0b0b0e]/80 border border-white/5 hover:border-purple-500/30 rounded-2xl overflow-hidden cursor-pointer transition-all hover:bg-neutral-900/80 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-900/10 group flex flex-col relative min-h-[380px]"
                     >
                       {/* Context Menu Button */}
                       <div className="absolute top-3 right-3 z-20">

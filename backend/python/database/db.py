@@ -1202,7 +1202,8 @@ def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
                 SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                        c.episode_number AS episode, c.status, c.panels_count, c.video_url, 
                        c.created_at, c.updated_at, s.user_id, s.id AS series_id,
-                       s.slug AS series_slug, c.slug AS chapter_slug
+                       s.slug AS series_slug, c.slug AS chapter_slug,
+                       (SELECT image_url FROM panels WHERE chapter_id = c.id ORDER BY panel_index ASC LIMIT 1) AS first_panel_image
                 FROM chapters c
                 JOIN series s ON c.series_id = s.id
                 WHERE s.user_id = ?
@@ -1213,7 +1214,8 @@ def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
                 SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                        c.episode_number AS episode, c.status, c.panels_count, c.video_url, 
                        c.created_at, c.updated_at, s.user_id, s.id AS series_id,
-                       s.slug AS series_slug, c.slug AS chapter_slug
+                       s.slug AS series_slug, c.slug AS chapter_slug,
+                       (SELECT image_url FROM panels WHERE chapter_id = c.id ORDER BY panel_index ASC LIMIT 1) AS first_panel_image
                 FROM chapters c
                 JOIN series s ON c.series_id = s.id
                 ORDER BY c.created_at DESC
@@ -1230,7 +1232,8 @@ def get_project(project_id: str) -> Optional[Dict[str, Any]]:
             SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                    c.episode_number AS episode, c.status, c.panels_count, c.video_url, 
                    c.created_at, c.updated_at, s.user_id, s.id AS series_id,
-                   s.slug AS series_slug, c.slug AS chapter_slug
+                   s.slug AS series_slug, c.slug AS chapter_slug,
+                   (SELECT image_url FROM panels WHERE chapter_id = c.id ORDER BY panel_index ASC LIMIT 1) AS first_panel_image
             FROM chapters c
             JOIN series s ON c.series_id = s.id
             WHERE c.id = ?
@@ -1247,7 +1250,8 @@ def get_project_by_slug(chapter_slug: str) -> Optional[Dict[str, Any]]:
             SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                    c.episode_number AS episode, c.status, c.panels_count, c.video_url,
                    c.created_at, c.updated_at, s.user_id, s.id AS series_id,
-                   s.slug AS series_slug, c.slug AS chapter_slug
+                   s.slug AS series_slug, c.slug AS chapter_slug,
+                   (SELECT image_url FROM panels WHERE chapter_id = c.id ORDER BY panel_index ASC LIMIT 1) AS first_panel_image
             FROM chapters c
             JOIN series s ON c.series_id = s.id
             WHERE c.slug = ?
