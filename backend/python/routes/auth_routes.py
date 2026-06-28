@@ -116,7 +116,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
+
     # Authenticate via Developer API key if token starts with av_live_
     if token.startswith("av_live_"):
         user = get_user_by_api_key(token)
@@ -458,6 +458,7 @@ async def get_admin_users(current_user: dict = Depends(get_current_user)):
 class AdminUpdateUser(BaseModel):
     creator_role: Optional[str] = None
     credits: Optional[int] = None
+    is_locked: Optional[bool] = None
 
 @router.put("/admin/users/{user_id}")
 async def admin_update_user(user_id: str, body: AdminUpdateUser, request: Request, current_user: dict = Depends(get_current_user)):
@@ -468,10 +469,18 @@ async def admin_update_user(user_id: str, body: AdminUpdateUser, request: Reques
         updates["creator_role"] = body.creator_role
     if body.credits is not None:
         updates["credits"] = body.credits
+    if body.is_locked is not None:
+        updates["is_locked"] = 1 if body.is_locked else 0
         
     if updates:
         update_user(user_id, updates)
-        write_audit_log(current_user["user_id"], f"Admin updated user {user_id} settings", ip_addr, "Success")
+
+        log_msg = f"Admin updated user {user_id} settings"
+        if "is_locked" in updates:
+            action = "locked" if updates["is_locked"] else "unlocked"
+            log_msg = f"Admin {action} account of user {user_id}"
+
+        write_audit_log(current_user["user_id"], log_msg, ip_addr, "Success")
         
     return {"success": True, "message": "User updated successfully."}
 
@@ -904,6 +913,32 @@ async def admin_get_projects(current_user: dict = Depends(get_current_user)):
         return {'success': True, 'projects': get_all_projects_admin()}
     except Exception as e:
         logger.error(f'Failed to fetch projects: {e}')
+        raise HTTPException(status_code=500, detail=str(e))
+
+class AdminUpdateProject(BaseModel):
+    status: Optional[str] = None
+    title: Optional[str] = None
+    is_flagged: Optional[int] = None
+
+@router.put('/admin/projects/{project_id}')
+async def admin_update_project(project_id: str, body: AdminUpdateProject, request: Request, current_user: dict = Depends(get_current_user)):
+    ip_addr = request.client.host if request.client else '127.0.0.1'
+    try:
+        from database.db import update_series_admin
+        updates = body.dict(exclude_unset=True)
+        update_series_admin(project_id, updates)
+
+        log_msg = f'Admin updated project {project_id}'
+        if 'is_flagged' in updates:
+            action = "flagged" if updates['is_flagged'] else "unflagged"
+            log_msg = f'Admin {action} project {project_id}'
+        elif 'status' in updates:
+            log_msg = f'Admin set status of project {project_id} to {updates["status"]}'
+
+        write_audit_log(current_user['user_id'], log_msg, ip_addr, 'Success')
+        return {'success': True, 'message': 'Project updated successfully'}
+    except Exception as e:
+        logger.error(f'Failed to update project: {e}')
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete('/admin/projects/{project_id}')

@@ -3481,8 +3481,10 @@ def get_all_projects_admin() -> list[dict]:
     conn = get_db_connection()
     try:
         # Fetch all series with user email attached
+        # Also need status which is in chapters. Let's take the first chapter's status.
         rows = conn.execute('''
-            SELECT s.*, u.email as user_email
+            SELECT s.*, u.email as user_email,
+                   (SELECT status FROM chapters WHERE series_id = s.id LIMIT 1) as status
             FROM series s
             LEFT JOIN users u ON s.user_id = u.id
             ORDER BY s.created_at DESC

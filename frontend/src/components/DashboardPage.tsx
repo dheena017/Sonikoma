@@ -489,29 +489,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                {(searchQuery ? filteredProjects : projects).slice(0, 6).map((project) => (
-                  <div
-                    key={project.project_id}
-                    onClick={() => handleOpenProject(project)}
-                    className="bg-[#0b0b0e]/80 border border-white/5 hover:border-purple-500/30 rounded-2xl p-5 cursor-pointer transition-all hover:bg-neutral-900/80 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-900/10 group"
-                  >
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="w-12 h-12 rounded-xl bg-purple-900/20 text-purple-400 border border-purple-500/20 flex items-center justify-center shrink-0">
-                        <Film className="h-6 w-6" />
-                      </div>
-                      <div
-                        className={`px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest rounded-lg border ${
-                          project.status?.toLowerCase() === "completed"
-                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                            : project.status?.toLowerCase() === "processing"
-                            ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                            : "bg-neutral-800/50 text-neutral-400 border-white/5"
-                        }`}
-                      >
-                        {project.status || "Draft"}
-                      </div>
-                    </div>
-                {projects.slice(0, 6).map((project) => {
+                                {projects.slice(0, 6).map((project) => {
                   const isProcessing = project.status?.toLowerCase() === "processing" || project.status?.toLowerCase() === "exporting";
                   const SourceIcon = getSourceIcon?.(project.url) || ExternalLink;
 
