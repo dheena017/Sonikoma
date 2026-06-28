@@ -244,6 +244,7 @@ async def server_metrics():
         },
         "config": {
             "port": int(os.getenv("BACKEND_PORT", "5173")),
+            "rateLimitRpm": int(os.getenv("RATE_LIMIT_RPM", "120")),
         },
         "memory": {
             "rssMB": mem_used,
