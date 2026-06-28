@@ -19,6 +19,7 @@ interface UseGlobalShortcutsProps {
   resetStoryboardPlayback: () => void;
   navigateTo: (path: string) => void;
   setIsPipMode: (v: boolean) => void;
+  toggleThemeMode?: () => void;
 }
 
 export const DEFAULT_SHORTCUTS = {
@@ -31,8 +32,20 @@ export const DEFAULT_SHORTCUTS = {
   nav_status: "Alt+G",
   nav_shortcuts: "Alt+K",
   nav_profile: "Alt+U",
+  nav_optimizer: "Alt+O",
+  nav_panel_assistant: "Alt+F",
+  nav_characters: "Alt+H",
+  nav_translation: "Alt+T",
+  nav_audio_lab: "Alt+A",
+  nav_thumbnails: "Alt+I",
+  nav_engagement: "Alt+J",
+  nav_voice: "Alt+Shift+V",
+  nav_analytics: "Alt+Y",
+  nav_youtube: "Alt+W",
+  nav_notifications: "Alt+N",
   trigger_compile: "Alt+P",
-  trigger_scrape: "Alt+N",
+  trigger_scrape: "Alt+V",
+  trigger_theme: "Alt+Shift+T",
   playback_toggle: "Space",
   playback_reset: "Alt+R",
   playback_speed_1: "Alt+Z",
@@ -79,6 +92,7 @@ export function useGlobalShortcuts({
   resetStoryboardPlayback,
   navigateTo,
   setIsPipMode,
+  toggleThemeMode,
 }: UseGlobalShortcutsProps) {
   const [shortcuts, setShortcuts] = React.useState<Record<string, string>>(
     () => {
@@ -195,6 +209,42 @@ export function useGlobalShortcuts({
         case "nav_profile":
           navigateTo("/profile");
           break;
+        case "nav_optimizer":
+          navigateTo("/ai-optimizer");
+          break;
+        case "nav_panel_assistant":
+          navigateTo("/panel-assistant");
+          break;
+        case "nav_characters":
+          navigateTo("/ai-characters");
+          break;
+        case "nav_translation":
+          navigateTo("/ai-translation");
+          break;
+        case "nav_audio_lab":
+          navigateTo("/ai-audio-lab");
+          break;
+        case "nav_thumbnails":
+          navigateTo("/ai-thumbnails");
+          break;
+        case "nav_engagement":
+          navigateTo("/ai-engagement");
+          break;
+        case "nav_voice":
+          navigateTo("/ai-voice");
+          break;
+        case "nav_analytics":
+          navigateTo("/ai-analytics");
+          break;
+        case "nav_youtube":
+          navigateTo("/youtube");
+          break;
+        case "nav_notifications":
+          navigateTo("/notifications");
+          break;
+        case "trigger_theme":
+          toggleThemeMode?.();
+          break;
         case "trigger_compile":
           handleGenerateVideo();
           break;
@@ -217,22 +267,28 @@ export function useGlobalShortcuts({
         case "playback_speed_1":
           if (isDashboard) {
             const video = document.querySelector("video");
-            if (video) video.playbackRate = 1.0;
-            addNotification("Playback speed: 1x", "info");
+            if (video) {
+              video.playbackRate = 1.0;
+              addNotification("Playback speed: 1x", "info");
+            }
           }
           break;
         case "playback_speed_1_5":
           if (isDashboard) {
             const video = document.querySelector("video");
-            if (video) video.playbackRate = 1.5;
-            addNotification("Playback speed: 1.5x", "info");
+            if (video) {
+              video.playbackRate = 1.5;
+              addNotification("Playback speed: 1.5x", "info");
+            }
           }
           break;
         case "playback_speed_2":
           if (isDashboard) {
             const video = document.querySelector("video");
-            if (video) video.playbackRate = 2.0;
-            addNotification("Playback speed: 2x", "info");
+            if (video) {
+              video.playbackRate = 2.0;
+              addNotification("Playback speed: 2x", "info");
+            }
           }
           break;
         case "volume_up":
@@ -387,6 +443,7 @@ export function useGlobalShortcuts({
     setSelectedScraped,
     navigateTo,
     setIsPipMode,
+    toggleThemeMode,
   ]);
 
   return {

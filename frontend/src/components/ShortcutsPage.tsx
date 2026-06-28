@@ -14,12 +14,18 @@ import {
   Play,
   Navigation,
   Image as ImageIcon,
+  CheckCircle2,
+  Filter,
+  BarChart3,
+  BookOpen,
+  X,
+  AlertCircle,
 } from "lucide-react";
+import { DEFAULT_SHORTCUTS } from "../hooks/useGlobalShortcuts.js";
 
 interface ShortcutsPageProps {
   shortcuts: Record<string, string>;
   setShortcuts: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-  defaultShortcuts: Record<string, string>;
   onNavigateHome: () => void;
   addNotification?: (msg: string, type: any) => void;
 }
@@ -29,7 +35,6 @@ type Category = "all" | "nav" | "trigger" | "playback" | "editor" | "deck";
 export default function ShortcutsPage({
   shortcuts,
   setShortcuts,
-  defaultShortcuts,
   onNavigateHome,
   addNotification,
 }: ShortcutsPageProps) {
@@ -39,6 +44,8 @@ export default function ShortcutsPage({
   );
   const [conflictMsg, setConflictMsg] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<Category>("all");
+  const [showModifiedOnly, setShowModifiedOnly] = useState(false);
+  const [showCheatSheet, setShowCheatSheet] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Set window global flag to lock main router listeners
@@ -129,10 +136,10 @@ export default function ShortcutsPage({
       "Are you sure you want to restore all keyboard shortcuts to factory defaults?"
     );
     if (confirmed) {
-      setShortcuts(defaultShortcuts);
+      setShortcuts(DEFAULT_SHORTCUTS);
       localStorage.setItem(
         "ai_comic_shortcuts",
-        JSON.stringify(defaultShortcuts)
+        JSON.stringify(DEFAULT_SHORTCUTS)
       );
       if (addNotification) {
         addNotification("Restored default key configurations", "info");
@@ -140,9 +147,35 @@ export default function ShortcutsPage({
     }
   };
 
+  const handleResetCategory = async (cat: Category) => {
+    if (cat === "all") return handleResetToDefaults();
+
+    const confirm = (window as any).confirmAsync || window.confirm;
+    const confirmed = await confirm(
+      `Are you sure you want to reset all ${cat.toUpperCase()} shortcuts to defaults?`
+    );
+    if (!confirmed) return;
+
+    setShortcuts((prev) => {
+      const next = { ...prev };
+      Object.keys(DEFAULT_SHORTCUTS).forEach((id) => {
+        const details = getActionDetails(id);
+        if (details.category === cat) {
+          next[id] = (DEFAULT_SHORTCUTS as any)[id];
+        }
+      });
+      localStorage.setItem("ai_comic_shortcuts", JSON.stringify(next));
+      return next;
+    });
+
+    if (addNotification) {
+      addNotification(`Reset all ${cat} shortcuts to defaults`, "info");
+    }
+  };
+
   const handleResetSingle = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    const defaultValue = defaultShortcuts[id];
+    const defaultValue = (DEFAULT_SHORTCUTS as any)[id];
     setShortcuts((prev) => {
       const next = { ...prev, [id]: defaultValue };
       localStorage.setItem("ai_comic_shortcuts", JSON.stringify(next));
@@ -255,6 +288,7 @@ export default function ShortcutsPage({
     if (id === "editor_brush_dec") label = "Editor: Decrease Brush Size";
     if (id === "editor_zoom_in") label = "Editor: Zoom In";
     if (id === "editor_zoom_out") label = "Editor: Zoom Out";
+    if (id === "trigger_theme") label = "Action: Toggle Dark/Light Theme";
 
     return { label, scope, icon, category };
   };
@@ -266,13 +300,41 @@ export default function ShortcutsPage({
         details.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
         val.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = activeCategory === "all" || details.category === activeCategory;
-      return matchesSearch && matchesCategory;
+      const isModified = val !== (DEFAULT_SHORTCUTS as any)[id];
+      const matchesModified = !showModifiedOnly || isModified;
+      return matchesSearch && matchesCategory && matchesModified;
     });
-  }, [shortcuts, searchQuery, activeCategory]);
+  }, [shortcuts, searchQuery, activeCategory, showModifiedOnly]);
+
+  const stats = useMemo(() => {
+    const all = Object.entries(shortcuts);
+    const customized = all.filter(([id, val]) => val !== (DEFAULT_SHORTCUTS as any)[id]).length;
+    const disabled = all.filter(([_, val]) => !val).length;
+    const currentCategoryCount = all.filter(([id, _]) => activeCategory === "all" || getActionDetails(id).category === activeCategory).length;
+
+    return {
+      total: all.length,
+      customized,
+      disabled,
+      currentCategoryCount
+    };
+  }, [shortcuts, activeCategory]);
+
+  const conflicts = useMemo(() => {
+    const valueMap: Record<string, string[]> = {};
+    Object.entries(shortcuts).forEach(([id, val]) => {
+      if (!val) return;
+      const lower = val.toLowerCase();
+      if (!valueMap[lower]) valueMap[lower] = [];
+      valueMap[lower].push(id);
+    });
+    return Object.fromEntries(Object.entries(valueMap).filter(([_, ids]) => ids.length > 1));
+  }, [shortcuts]);
 
   const highlightText = (text: string, highlight: string) => {
     if (!highlight.trim()) return text;
-    const parts = text.split(new RegExp(`(${highlight})`, "gi"));
+    const escaped = highlight.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const parts = text.split(new RegExp(`(${escaped})`, "gi"));
     return (
       <span>
         {parts.map((part, i) =>
@@ -288,15 +350,19 @@ export default function ShortcutsPage({
     );
   };
 
-  const renderKeyCombo = (combo: string) => {
+  const renderKeyCombo = (combo: string, hasConflict: boolean = false) => {
     if (!combo) return <span className="text-neutral-600 italic">Disabled</span>;
 
     const keys = combo.split("+");
     return (
-      <div className="flex items-center gap-1.5 justify-end">
+      <div className={`flex items-center gap-1.5 justify-end ${hasConflict ? "animate-pulse" : ""}`}>
         {keys.map((key, idx) => (
           <React.Fragment key={idx}>
-            <kbd className="min-w-[24px] px-2 py-1 text-[10px] font-bold font-mono bg-neutral-900 border-b-2 border-neutral-800 text-purple-300 rounded shadow-[0_2px_0_0_rgba(0,0,0,0.5)] flex items-center justify-center group-hover:text-purple-200 group-hover:border-purple-700/50 transition-all active:translate-y-[1px] active:shadow-none">
+            <kbd className={`min-w-[24px] px-2 py-1 text-[10px] font-bold font-mono border-b-2 rounded shadow-[0_2px_0_0_rgba(0,0,0,0.5)] flex items-center justify-center transition-all active:translate-y-[1px] active:shadow-none ${
+              hasConflict
+                ? "bg-rose-950/40 border-rose-800 text-rose-400"
+                : "bg-neutral-900 border-neutral-800 text-purple-300 group-hover:text-purple-200 group-hover:border-purple-700/50"
+            }`}>
               {key}
             </kbd>
             {idx < keys.length - 1 && <span className="text-neutral-600 text-[10px]">+</span>}
@@ -307,7 +373,7 @@ export default function ShortcutsPage({
   };
 
   return (
-    <div className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 md:py-10 flex flex-col space-y-6 animate-[fadeIn_0.22s_ease-out]">
+    <div className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-6 md:py-10 flex flex-col space-y-6 animate-[fadeIn_0.22s_ease-out]">
       {/* Header title */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-neutral-800 pb-6">
         <div>
@@ -333,6 +399,14 @@ export default function ShortcutsPage({
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
+          <button
+            onClick={() => setShowCheatSheet(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white hover:bg-neutral-800 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm"
+          >
+            <BookOpen className="h-4 w-4" />
+            Cheat Sheet
+          </button>
+          <div className="h-8 w-px bg-neutral-800 mx-1 hidden sm:block" />
           <button
             onClick={() => fileInputRef.current?.click()}
             className="flex items-center gap-2 px-4 py-2.5 bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white hover:bg-neutral-800 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm"
@@ -365,31 +439,87 @@ export default function ShortcutsPage({
         </div>
       </div>
 
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: "Total Actions", value: stats.total, icon: <Keyboard className="h-4 w-4" />, color: "text-neutral-400" },
+          { label: "Customized", value: stats.customized, icon: <Edit3 className="h-4 w-4" />, color: "text-amber-400" },
+          { label: "Disabled", value: stats.disabled, icon: <Trash2 className="h-4 w-4" />, color: "text-rose-400" },
+          { label: "Category Count", value: stats.currentCategoryCount, icon: <BarChart3 className="h-4 w-4" />, color: "text-purple-400" },
+        ].map((stat, i) => (
+          <div key={i} className="bg-neutral-900/40 border border-neutral-800/60 rounded-2xl p-4 flex items-center justify-between shadow-sm">
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest font-mono">{stat.label}</span>
+              <span className={`text-xl font-bold mt-1 ${stat.color}`}>{stat.value}</span>
+            </div>
+            <div className={`p-2 rounded-xl bg-neutral-950/50 border border-neutral-800 ${stat.color}`}>
+              {stat.icon}
+            </div>
+          </div>
+        ))}
+      </div>
+
       <div className="flex flex-col md:flex-row gap-6">
         {/* Sidebar / Filter Tabs */}
-        <div className="w-full md:w-56 shrink-0 flex flex-col gap-1.5">
+        <div className="w-full md:w-60 shrink-0 flex flex-col gap-1.5">
           <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest px-3 mb-2 font-mono">
             Command Groups
           </p>
           {(["all", "nav", "trigger", "playback", "editor", "deck"] as Category[]).map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-all text-left ${
-                activeCategory === cat
-                  ? "bg-purple-500/10 border border-purple-500/20 text-purple-300 font-bold"
-                  : "text-neutral-450 hover:text-neutral-300 hover:bg-neutral-900/50"
-              }`}
-            >
-              {cat === "all" && <Keyboard className="h-4 w-4" />}
-              {cat === "nav" && <Navigation className="h-4 w-4" />}
-              {cat === "trigger" && <Settings className="h-4 w-4" />}
-              {cat === "playback" && <Play className="h-4 w-4" />}
-              {cat === "editor" && <Layers className="h-4 w-4" />}
-              {cat === "deck" && <ImageIcon className="h-4 w-4" />}
-              <span className="capitalize">{cat === "nav" ? "Navigation" : cat === "deck" ? "Gallery" : cat}</span>
-            </button>
+            <div key={cat} className="group relative">
+              <button
+                onClick={() => setActiveCategory(cat)}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-all text-left ${
+                  activeCategory === cat
+                    ? "bg-purple-500/10 border border-purple-500/20 text-purple-300 font-bold"
+                    : "text-neutral-450 hover:text-neutral-300 hover:bg-neutral-900/50"
+                }`}
+              >
+                {cat === "all" && <Keyboard className="h-4 w-4" />}
+                {cat === "nav" && <Navigation className="h-4 w-4" />}
+                {cat === "trigger" && <Settings className="h-4 w-4" />}
+                {cat === "playback" && <Play className="h-4 w-4" />}
+                {cat === "editor" && <Layers className="h-4 w-4" />}
+                {cat === "deck" && <ImageIcon className="h-4 w-4" />}
+                <span className="capitalize flex-1">{cat === "nav" ? "Navigation" : cat === "deck" ? "Gallery" : cat}</span>
+                {cat !== "all" && activeCategory === cat && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleResetCategory(cat); }}
+                    className="p-1 rounded-md hover:bg-purple-500/20 text-purple-400 transition-colors"
+                    title={`Reset all ${cat} shortcuts`}
+                  >
+                    <RefreshCw className="h-3 w-3" />
+                  </button>
+                )}
+              </button>
+            </div>
           ))}
+
+          <div className="h-px bg-neutral-800 my-4 mx-3" />
+
+          <div className="px-3 space-y-4">
+             <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest font-mono">Modified Only</span>
+                <button
+                  onClick={() => setShowModifiedOnly(!showModifiedOnly)}
+                  className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${showModifiedOnly ? "bg-purple-600" : "bg-neutral-800"}`}
+                >
+                  <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${showModifiedOnly ? "translate-x-5" : "translate-x-0"}`} />
+                </button>
+             </div>
+
+             {Object.keys(conflicts).length > 0 && (
+                <div className="p-3 rounded-xl bg-rose-500/5 border border-rose-500/20 space-y-2">
+                   <div className="flex items-center gap-2 text-rose-400">
+                      <AlertCircle className="h-3.5 w-3.5" />
+                      <span className="text-[10px] font-bold uppercase font-mono">Shortcut Conflicts</span>
+                   </div>
+                   <p className="text-[10px] text-neutral-500 leading-relaxed">
+                      {Object.keys(conflicts).length} keyboard combinations are assigned to multiple actions.
+                   </p>
+                </div>
+             )}
+          </div>
         </div>
 
         {/* Main Content Area */}
@@ -404,6 +534,14 @@ export default function ShortcutsPage({
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-neutral-900/50 border border-neutral-800 hover:border-neutral-700 focus:border-purple-500/50 focus:ring-4 focus:ring-purple-500/5 rounded-2xl pl-12 pr-4 py-3 text-sm text-neutral-200 outline-none transition-all placeholder:text-neutral-600 shadow-inner"
             />
+            {searchQuery && (
+               <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-neutral-800 text-neutral-500 transition-all"
+               >
+                 <X className="h-4 w-4" />
+               </button>
+            )}
           </div>
 
           {/* Grid of Shortcuts */}
@@ -418,13 +556,13 @@ export default function ShortcutsPage({
               {filteredShortcuts.length === 0 ? (
                 <div className="p-16 text-center space-y-3">
                   <div className="inline-flex p-4 rounded-full bg-neutral-900 border border-neutral-800">
-                    <Search className="h-8 w-8 text-neutral-700" />
+                    <Filter className="h-8 w-8 text-neutral-700" />
                   </div>
                   <p className="text-sm text-neutral-500 font-medium">
-                    No shortcuts found matching your criteria.
+                    No shortcuts match your current filters.
                   </p>
                   <button
-                    onClick={() => { setSearchQuery(""); setActiveCategory("all"); }}
+                    onClick={() => { setSearchQuery(""); setActiveCategory("all"); setShowModifiedOnly(false); }}
                     className="text-xs text-purple-400 hover:text-purple-300 font-bold uppercase tracking-wider"
                   >
                     Clear all filters
@@ -434,7 +572,9 @@ export default function ShortcutsPage({
                 filteredShortcuts.map(([id, val]) => {
                   const details = getActionDetails(id);
                   const isRecording = recordingActionId === id;
-                  const isModified = val !== defaultShortcuts[id];
+                  const isModified = val !== (DEFAULT_SHORTCUTS as any)[id];
+                  const lowerVal = val.toLowerCase();
+                  const hasConflict = lowerVal && conflicts[lowerVal]?.length > 1;
 
                   return (
                     <div
@@ -448,24 +588,41 @@ export default function ShortcutsPage({
                       className={`grid grid-cols-12 items-center px-6 py-4 transition-all cursor-pointer group relative ${
                         isRecording
                           ? "bg-purple-950/20 z-10"
-                          : "hover:bg-white/[0.02]"
+                          : hasConflict
+                            ? "bg-rose-500/[0.03] hover:bg-rose-500/[0.05]"
+                            : "hover:bg-white/[0.02]"
                       }`}
                     >
                       {isRecording && (
                         <div className="absolute inset-y-0 left-0 w-1 bg-purple-500" />
                       )}
+                      {hasConflict && !isRecording && (
+                         <div className="absolute inset-y-0 left-0 w-1 bg-rose-500" />
+                      )}
 
                       <div className="col-span-6 sm:col-span-7 flex items-center gap-4">
-                        <div className={`p-2 rounded-lg ${isRecording ? "bg-purple-500 text-white" : "bg-neutral-900 text-neutral-500 group-hover:text-neutral-300 group-hover:bg-neutral-800"} transition-all`}>
+                        <div className={`p-2 rounded-lg transition-all ${
+                          isRecording
+                            ? "bg-purple-500 text-white"
+                            : hasConflict
+                              ? "bg-rose-900/40 text-rose-400"
+                              : "bg-neutral-900 text-neutral-500 group-hover:text-neutral-300 group-hover:bg-neutral-800"
+                        }`}>
                           {details.icon}
                         </div>
                         <div className="flex flex-col">
                           <div className="flex items-center gap-2">
-                            <span className="font-bold text-white text-sm tracking-tight">
+                            <span className={`font-bold text-sm tracking-tight transition-colors ${hasConflict ? "text-rose-400" : "text-white"}`}>
                               {highlightText(details.label, searchQuery)}
                             </span>
                             {isModified && (
                               <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]" title="Modified from default" />
+                            )}
+                            {hasConflict && (
+                               <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-rose-500/10 border border-rose-500/20 text-[8px] font-bold text-rose-400 uppercase font-mono tracking-tighter">
+                                  <ShieldAlert className="h-2.5 w-2.5" />
+                                  Conflict
+                               </div>
                             )}
                           </div>
                           <span className="text-[10px] text-neutral-500 font-mono mt-0.5 sm:hidden">
@@ -489,7 +646,7 @@ export default function ShortcutsPage({
                           </div>
                         ) : (
                           <div className="flex items-center gap-3">
-                            {renderKeyCombo(val)}
+                            {renderKeyCombo(val, !!hasConflict)}
                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all ml-2">
                               {val && (
                                 <button
@@ -532,14 +689,66 @@ export default function ShortcutsPage({
                   <span>Customized</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <kbd className="px-1.5 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-[9px]">Esc</kbd>
-                  <span>Cancel recording</span>
+                  <div className="w-2 h-2 rounded-full bg-rose-500" />
+                  <span>Conflict</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Cheat Sheet Modal */}
+      {showCheatSheet && (
+         <div className="fixed inset-0 z-[10001] bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="w-full max-w-4xl bg-neutral-950 border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+               <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between bg-neutral-900/50">
+                  <div className="flex items-center gap-3">
+                     <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/20">
+                        <BookOpen className="h-6 w-6 text-purple-400" />
+                     </div>
+                     <div>
+                        <h3 className="text-xl font-bold text-white">Keyboard Cheat Sheet</h3>
+                        <p className="text-xs text-neutral-500 font-mono">Quick reference for all mapped commands</p>
+                     </div>
+                  </div>
+                  <button
+                     onClick={() => setShowCheatSheet(false)}
+                     className="p-2 rounded-full hover:bg-neutral-800 text-neutral-500 transition-all"
+                  >
+                     <X className="h-6 w-6" />
+                  </button>
+               </div>
+
+               <div className="flex-1 overflow-y-auto p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {(["nav", "trigger", "playback", "editor", "deck"] as Category[]).map(cat => {
+                     const catShortcuts = Object.entries(shortcuts).filter(([id, _]) => getActionDetails(id).category === cat && shortcuts[id]);
+                     if (catShortcuts.length === 0) return null;
+
+                     return (
+                        <div key={cat} className="space-y-4">
+                           <h4 className="text-[10px] font-bold text-purple-400 uppercase tracking-widest font-mono border-b border-purple-500/20 pb-2">
+                              {cat === "nav" ? "Navigation" : cat === "deck" ? "Gallery" : cat}
+                           </h4>
+                           <div className="space-y-3">
+                              {catShortcuts.map(([id, val]) => (
+                                 <div key={id} className="flex items-center justify-between gap-4">
+                                    <span className="text-xs text-neutral-400 font-medium truncate flex-1">{getActionDetails(id).label.replace(/Navigate: |Action: |Preview: |Editor: |Gallery: |Volume: /, "")}</span>
+                                    {renderKeyCombo(val)}
+                                 </div>
+                              ))}
+                           </div>
+                        </div>
+                     );
+                  })}
+               </div>
+
+               <div className="px-8 py-4 bg-neutral-900/50 border-t border-white/5 text-center">
+                  <span className="text-[10px] text-neutral-500 font-mono">Press Esc to close this reference window</span>
+               </div>
+            </div>
+         </div>
+      )}
 
       {/* Recording Prompt Modal */}
       {recordingActionId && (

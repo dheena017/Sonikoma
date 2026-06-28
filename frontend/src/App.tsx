@@ -518,6 +518,7 @@ export default function App() {
     resetStoryboardPlayback,
     navigateTo,
     setIsPipMode,
+    toggleThemeMode,
   });
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -1063,7 +1064,6 @@ export default function App() {
               <ShortcutsPage
                 shortcuts={shortcuts}
                 setShortcuts={setShortcuts}
-                defaultShortcuts={DEFAULT_SHORTCUTS}
                 onNavigateHome={handleNavigateHome}
                 addNotification={addNotification}
               />
