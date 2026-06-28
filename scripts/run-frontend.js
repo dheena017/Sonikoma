@@ -2,6 +2,7 @@ import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
 import http from "http";
+import net from "net";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -134,7 +135,26 @@ process.on("exit", () => {
   }
 });
 
-// Check if backend is already running
+// Check if something is listening on the port (even if not yet healthy)
+function isPortTaken(port) {
+  return new Promise((resolve) => {
+    const tester = net
+      .createServer()
+      .once("error", (err) => {
+        if (err.code !== "EADDRINUSE") {
+          resolve(false);
+          return;
+        }
+        resolve(true);
+      })
+      .once("listening", () => {
+        tester.once("close", () => resolve(false)).close();
+      })
+      .listen(port, "127.0.0.1");
+  });
+}
+
+// Check if backend is already running and responding
 function checkBackendRunning() {
   return new Promise((resolve) => {
     const req = http.get(url, (res) => {
@@ -256,9 +276,15 @@ async function restartBackend(changedFile) {
 
 async function start() {
   const isRunning = await checkBackendRunning();
+  const isTaken = await isPortTaken(port);
 
   if (isRunning) {
-    logger.info(`Backend is online on port ${port}.`);
+    logger.info(`Backend is online and healthy on port ${port}.`);
+  } else if (isTaken) {
+    logger.warn(
+      `⚠️ Port ${port} is occupied, but backend is not responding yet. It might be starting up.`
+    );
+    logger.info(`Waiting for existing process to initialize...`);
   } else {
     if (onlyFrontend) {
       logger.warn(`⚠️ WARNING: Backend is not running on port ${port}!`);
