@@ -27,6 +27,7 @@ __pycache__/
 .idea/
 *.swp
 *.swo
+client_secrets.json
 
 # OS files
 Thumbs.db
@@ -37,3 +38,10 @@ Desktop.ini
 test_panel_input.png
 *.png_cropped
 *.png_clean_bubbles
+
+# Temporary scratch, workspace, and test directories
+scratch/
+temp/
+temp_test_combos/
+skills-lock.json
+verify_fix.cjs

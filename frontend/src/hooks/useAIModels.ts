@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { AIModel, AI_MODELS as FALLBACK_MODELS } from "../models";
+import { AIModel, AI_MODELS as FALLBACK_MODELS } from "../models.js";
+import * as api from "../api/index.js";
 
 let cachedModels: AIModel[] | null = null;
 let isFetching = false;
@@ -41,24 +42,24 @@ export function useAIModels() {
         const openai = localStorage.getItem("user_openai_key");
         const anthropic = localStorage.getItem("user_anthropic_key");
         const huggingface = localStorage.getItem("user_huggingface_key");
-        
+
         if (gemini) reqHeaders["X-User-Gemini-Key"] = gemini;
         if (openai) reqHeaders["X-User-OpenAI-Key"] = openai;
         if (anthropic) reqHeaders["X-User-Anthropic-Key"] = anthropic;
         if (huggingface) reqHeaders["X-User-HuggingFace-Key"] = huggingface;
 
         // 1. Fetch backend health to see which API keys are available
-        const healthRes = await fetch("/api/health", { headers: reqHeaders });
-        if (!healthRes.ok) throw new Error("Health check failed");
-        const healthData = await healthRes.json();
+        const healthData = await api.checkHealth();
         const env = healthData.env || {};
 
         // Check if any keys are configured (either in backend env or local browser storage)
         const availableProviders = [];
         if (env.GEMINI_API_KEY || gemini) availableProviders.push("gemini");
-        if (env.HUGGINGFACE_API_KEY || huggingface) availableProviders.push("huggingface");
+        if (env.HUGGINGFACE_API_KEY || huggingface)
+          availableProviders.push("huggingface");
         if (env.OPENAI_API_KEY || openai) availableProviders.push("openai");
-        if (env.ANTHROPIC_API_KEY || anthropic) availableProviders.push("anthropic");
+        if (env.ANTHROPIC_API_KEY || anthropic)
+          availableProviders.push("anthropic");
 
         // If no keys configured, return fallback
         if (availableProviders.length === 0) {
@@ -72,9 +73,9 @@ export function useAIModels() {
           try {
             const res = await fetch("/api/list-models", {
               method: "POST",
-              headers: { 
+              headers: {
                 "Content-Type": "application/json",
-                ...reqHeaders
+                ...reqHeaders,
               },
               body: JSON.stringify({ provider }),
             });

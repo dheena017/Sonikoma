@@ -6,6 +6,7 @@ import { useCropEditorHistory } from "./useCropEditorHistory.js";
 import { useCropEditorDrag } from "./useCropEditorDrag.js";
 import { useCropEditorPipelines } from "./useCropEditorPipelines.js";
 import { useAppLogic } from "./useAppLogic.js";
+import * as api from "../api/index.js";
 
 interface UseCropEditorProps {
   appLogic: ReturnType<typeof useAppLogic>;
@@ -404,13 +405,10 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
     appLogic.setIsSavingEdit(true);
 
     try {
-      const response = await activeFetch("/api/image/split", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: currentUrl, splitLines: state.splitLines }),
+      const data = await api.splitImage(activeFetch, {
+        url: currentUrl,
+        splitLines: state.splitLines,
       });
-      if (!response.ok) throw new Error("Splits execution failed");
-      const data = await response.json();
       if (data.success && Array.isArray(data.urls) && data.urls.length > 0) {
         addPanelsToStoryboard(data.urls);
         addNotification(

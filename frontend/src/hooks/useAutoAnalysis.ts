@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from "react";
-import { GeneratedPanel } from "../types";
-import { NotificationType } from "../components/NotificationStack";
+import { GeneratedPanel } from "../types.js";
+import { NotificationType } from "../components/NotificationStack.js";
+import * as api from "../api/index.js";
 
 interface UseAutoAnalysisProps {
   panels: GeneratedPanel[];
@@ -33,18 +34,11 @@ export function useAutoAnalysis({
         `[Smart Auto-Analysis] Starting analysis for panel #${panelId}`
       );
       try {
-        const res = await fetchWithInterceptor("/api/analyze-image", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            url: imageUrl,
-            model: selectedModel,
-            narrationStyle,
-          }),
+        const data = await api.analyzeImage(fetchWithInterceptor, {
+          url: imageUrl,
+          model: selectedModel,
+          narrationStyle,
         });
-        if (!res.ok)
-          throw new Error(`Analysis failed with status ${res.status}`);
-        const data = await res.json();
         console.log(
           `[Smart Auto-Analysis] Response for panel #${panelId}:`,
           data
@@ -137,20 +131,11 @@ export function useAutoAnalysis({
       );
 
       try {
-        const res = await fetchWithInterceptor("/api/analyze-sequence", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            urls: imageUrls,
-            model: selectedModel,
-            narrationStyle,
-          }),
+        const data = await api.analyzeSequence(fetchWithInterceptor, {
+          urls: imageUrls,
+          model: selectedModel,
+          narrationStyle,
         });
-
-        if (!res.ok)
-          throw new Error(`Sequence Analysis failed with status ${res.status}`);
-
-        const data = await res.json();
 
         if (data.success && data.results) {
           // Map results back to the respective panels

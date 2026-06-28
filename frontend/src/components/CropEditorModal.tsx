@@ -220,10 +220,65 @@ export default function CropEditorModal({
     (window as any).editorHasUnsavedChanges = () => {
       return history.length > 0 || slices.length > 0;
     };
+    (window as any).dispatchEditorAction = (action: any) => {
+      switch (action.type) {
+        case "SWITCH_TAB":
+          setActiveTab(action.tab);
+          break;
+        case "PREV_IMAGE":
+          handlePrevImage();
+          break;
+        case "NEXT_IMAGE":
+          handleNextImage();
+          break;
+        case "UNDO":
+          handleUndo();
+          break;
+        case "REDO":
+          handleRedo();
+          break;
+        case "SAVE":
+          handleExecuteSave();
+          break;
+        case "CLOSE":
+          if (editingImageIdx !== null) {
+            setEditingImageIdx(null);
+            window.history.pushState({}, "", "/");
+            window.dispatchEvent(new Event("popstate"));
+          }
+          break;
+        case "ZOOM_IN":
+          setZoom((z) => Math.min(5, z + 0.1));
+          break;
+        case "ZOOM_OUT":
+          setZoom((z) => Math.max(0.1, z - 0.1));
+          break;
+        case "BRUSH_INC":
+          setBrushSize((s) => Math.min(200, s + 5));
+          break;
+        case "BRUSH_DEC":
+          setBrushSize((s) => Math.max(1, s - 5));
+          break;
+      }
+    };
     return () => {
       delete (window as any).editorHasUnsavedChanges;
+      delete (window as any).dispatchEditorAction;
     };
-  }, [history.length, slices.length]);
+  }, [
+    history.length,
+    slices.length,
+    setActiveTab,
+    setZoom,
+    setBrushSize,
+    handlePrevImage,
+    handleNextImage,
+    handleUndo,
+    handleRedo,
+    handleExecuteSave,
+    editingImageIdx,
+    setEditingImageIdx,
+  ]);
 
   const activeStoryboardPanel = panels?.find(
     (p) => p.image_url === scrapedImages[editingImageIdx!]

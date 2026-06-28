@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Sparkles, Check, AlertTriangle } from "lucide-react";
-import { GeneratedPanel } from "../../types";
+import { GeneratedPanel } from "../../types.js";
+import * as api from "../../api/index.js";
+import { fetchWithAuth } from "../../utils.js";
 
 interface PanelTranslationToolProps {
   panel: GeneratedPanel;
@@ -30,23 +32,11 @@ export default function PanelTranslationTool({
   const handleTranslate = async () => {
     setTranslating(true);
     try {
-      const token =
-        localStorage.getItem("sonikoma_token") ||
-        sessionStorage.getItem("sonikoma_token");
-      const headers: HeadersInit = { "Content-Type": "application/json" };
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-      const res = await fetch("/api/skills/translate", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          text: panel.speech_text,
-          target_lang: lang,
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
+      const json = await api.runTranslateSkill(fetchWithAuth, {
+        text: panel.speech_text,
+        target_lang: lang,
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
       });
-      const json = await res.json();
       if (json.success && json.result) {
         setTranslationResult(json.result.translated_text);
       }
@@ -60,15 +50,10 @@ export default function PanelTranslationTool({
   const handleScrub = async () => {
     setScrububbing(true);
     try {
-      const res = await fetch("/api/skills/copyright-scrub", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text: panel.speech_text,
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
+      const json = await api.runCopyrightScrubSkill(fetchWithAuth, {
+        text: panel.speech_text,
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
       });
-      const json = await res.json();
       if (json.success && json.result) {
         setScrubResult(json.result);
       }

@@ -30,10 +30,14 @@ export const DEFAULT_SHORTCUTS = {
   nav_logs: "Alt+L",
   nav_status: "Alt+G",
   nav_shortcuts: "Alt+K",
+  nav_profile: "Alt+U",
   trigger_compile: "Alt+P",
   trigger_scrape: "Alt+N",
   playback_toggle: "Space",
   playback_reset: "Alt+R",
+  playback_speed_1: "Alt+Z",
+  playback_speed_1_5: "Alt+X",
+  playback_speed_2: "Alt+C",
   volume_up: "Alt+ArrowUp",
   volume_down: "Alt+ArrowDown",
   volume_mute: "Alt+M",
@@ -49,6 +53,10 @@ export const DEFAULT_SHORTCUTS = {
   editor_redo: "Control+Y",
   editor_save: "Control+S",
   editor_close: "Escape",
+  editor_zoom_in: "Control++",
+  editor_zoom_out: "Control+-",
+  editor_brush_inc: "]",
+  editor_brush_dec: "[",
   deck_select_all: "Alt+A",
   deck_invert: "Alt+I",
   deck_clear: "Alt+X",
@@ -184,6 +192,9 @@ export function useGlobalShortcuts({
         case "nav_shortcuts":
           navigateTo("/shortcuts");
           break;
+        case "nav_profile":
+          navigateTo("/profile");
+          break;
         case "trigger_compile":
           handleGenerateVideo();
           break;
@@ -202,6 +213,27 @@ export function useGlobalShortcuts({
           break;
         case "playback_reset":
           if (isDashboard) resetStoryboardPlayback();
+          break;
+        case "playback_speed_1":
+          if (isDashboard) {
+            const video = document.querySelector("video");
+            if (video) video.playbackRate = 1.0;
+            addNotification("Playback speed: 1x", "info");
+          }
+          break;
+        case "playback_speed_1_5":
+          if (isDashboard) {
+            const video = document.querySelector("video");
+            if (video) video.playbackRate = 1.5;
+            addNotification("Playback speed: 1.5x", "info");
+          }
+          break;
+        case "playback_speed_2":
+          if (isDashboard) {
+            const video = document.querySelector("video");
+            if (video) video.playbackRate = 2.0;
+            addNotification("Playback speed: 2x", "info");
+          }
           break;
         case "volume_up":
           if (isDashboard) {
@@ -316,6 +348,22 @@ export function useGlobalShortcuts({
         case "editor_close":
           if (isEditor)
             (window as any).dispatchEditorAction?.({ type: "CLOSE" });
+          break;
+        case "editor_zoom_in":
+          if (isEditor)
+            (window as any).dispatchEditorAction?.({ type: "ZOOM_IN" });
+          break;
+        case "editor_zoom_out":
+          if (isEditor)
+            (window as any).dispatchEditorAction?.({ type: "ZOOM_OUT" });
+          break;
+        case "editor_brush_inc":
+          if (isEditor)
+            (window as any).dispatchEditorAction?.({ type: "BRUSH_INC" });
+          break;
+        case "editor_brush_dec":
+          if (isEditor)
+            (window as any).dispatchEditorAction?.({ type: "BRUSH_DEC" });
           break;
       }
     };

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Sparkles, Copy, Check } from "lucide-react";
-import { GeneratedPanel } from "../../types";
+import { GeneratedPanel } from "../../types.js";
+import * as api from "../../api/index.js";
+import { fetchWithAuth } from "../../utils.js";
 
 interface PanelCreativeToolProps {
   panel: GeneratedPanel;
@@ -31,17 +33,12 @@ export default function PanelCreativeTool({ panel }: PanelCreativeToolProps) {
   const handleGeneratePrompt = async () => {
     setLoadingPrompt(true);
     try {
-      const res = await fetch("/api/skills/scene-composition", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          visual_description:
-            panel.visual_description || "Detailed drawing panel",
-          speech_text: panel.speech_text || "",
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
+      const json = await api.runSceneCompositionSkill(fetchWithAuth, {
+        visual_description:
+          panel.visual_description || "Detailed drawing panel",
+        speech_text: panel.speech_text || "",
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
       });
-      const json = await res.json();
       if (json.success && json.result) {
         setPromptData(json.result);
       }
@@ -55,16 +52,11 @@ export default function PanelCreativeTool({ panel }: PanelCreativeToolProps) {
   const handleGenerateSubtitle = async () => {
     setLoadingSubtitle(true);
     try {
-      const res = await fetch("/api/skills/subtitle-styler", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          visual_description: panel.visual_description || "Action scene panel",
-          speech_text: panel.speech_text || "Stop right there!",
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
+      const json = await api.runSubtitleStylerSkill(fetchWithAuth, {
+        visual_description: panel.visual_description || "Action scene panel",
+        speech_text: panel.speech_text || "Stop right there!",
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
       });
-      const json = await res.json();
       if (json.success && json.result) {
         setSubtitleData(json.result);
       }

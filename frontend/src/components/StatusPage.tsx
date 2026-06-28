@@ -15,7 +15,7 @@ import {
   Trash2,
   Download,
 } from "lucide-react";
-
+import * as api from "../api/index.js";
 
 interface StatusPageProps {
   onNavigateHome: () => void;
@@ -34,8 +34,6 @@ export default function StatusPage({
   const [ffmpegData, setFfmpegData] = useState<any>(null);
   const [online, setOnline] = useState<boolean | null>(null);
   const [lastChecked, setLastChecked] = useState<string | null>(null);
-
-
 
   const [isPurging, setIsPurging] = useState(false);
   const [showPurgeModal, setShowPurgeModal] = useState(false);
@@ -71,16 +69,12 @@ export default function StatusPage({
 
   const activeFetch = fetchWithInterceptor || fetch;
 
-
-
   const executePurgeCache = async () => {
     setIsPurging(true);
     setPurgeResult(null);
     try {
-      const res = await activeFetch("/api/metrics/purge-cache", {
-        method: "POST",
-      });
-      if (res.ok) {
+      const data = await api.purgeCache(activeFetch);
+      if (data) {
         setPurgeResult({
           success: true,
           message: "LRU Caches successfully purged!",
@@ -106,11 +100,8 @@ export default function StatusPage({
     setIsStopping(true);
     setStopResult(null);
     try {
-      const res = await activeFetch("/api/metrics/emergency-stop", {
-        method: "POST",
-      });
-      const data = await res.json();
-      if (res.ok && data.success !== false) {
+      const data = await api.emergencyStop(activeFetch);
+      if (data && data.success !== false) {
         setStopResult({
           success: true,
           message: data.message || "Background processes terminated.",
@@ -161,20 +152,15 @@ export default function StatusPage({
     setLoading(true);
     try {
       // 1. Fetch Health Probe
-      const healthRes = await activeFetch("/api/health");
-      const healthJson = await healthRes.json();
+      const healthJson = await api.checkHealth();
 
       // 2. Fetch Performance Metrics
-      const metricsRes = await activeFetch("/api/metrics");
-      const metricsJson = await metricsRes.json();
+      const metricsJson = await api.getMetrics();
 
       // 3. Fetch FFmpeg Diagnostics
       let ffmpegJson = null;
       try {
-        const ffmpegRes = await activeFetch("/api/health/ffmpeg");
-        if (ffmpegRes.ok) {
-          ffmpegJson = await ffmpegRes.json();
-        }
+        ffmpegJson = await api.checkFfmpeg();
       } catch (e) {
         console.warn("FFmpeg check failed", e);
       }
@@ -208,7 +194,7 @@ export default function StatusPage({
     let eventSource: EventSource | null = null;
 
     if (typeof window !== "undefined" && "EventSource" in window) {
-      eventSource = new EventSource("/api/system-logs/stream");
+      eventSource = new EventSource(api.getSystemLogsStreamUrl());
 
       eventSource.onmessage = (event) => {
         try {
@@ -287,7 +273,6 @@ export default function StatusPage({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Live Status, Memory, DB, API Keys */}
         <div className="lg:col-span-7 space-y-6">
-
           {/* Uptime and Server Connection Card */}
           <div
             className={`p-6 rounded-3xl border shadow-xl transition-all duration-300 ${

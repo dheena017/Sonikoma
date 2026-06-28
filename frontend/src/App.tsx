@@ -17,6 +17,7 @@ import {
 import { useBackendHealth } from "./hooks/useBackendHealth.js";
 import { useAutoSave } from "./hooks/useAutoSave.js";
 import { useThemeMode } from "./hooks/useThemeMode";
+import * as api from "./api/index.js";
 
 // --- Layout & Main Workspace Components ---
 import Header from "./components/Header.js";
@@ -62,6 +63,7 @@ import VoiceStudioPage from "./components/voice/VoiceStudioPage.js";
 import CTRAnalyticsPage from "./components/analytics/CTRAnalyticsPage.js";
 import NotificationsPage from "./components/NotificationsPage.js";
 import AdminPage from "./components/AdminPage.js";
+import YouTubePage from "./components/video/YouTubePage.js";
 
 // ============================================================================
 // SECTION 2: MAIN APP COMPONENT
@@ -89,21 +91,15 @@ export default function App() {
     setIsStartingBackend(true);
     setStartBackendError(null);
     try {
-      const res = await fetch("/start-backend", { method: "POST" });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || "Failed to start backend");
-      }
+      const data = await api.startBackend();
 
       // Poll checking health for up to 15 seconds (30 attempts * 500ms)
       let attempts = 0;
       const interval = setInterval(async () => {
         attempts++;
         try {
-          const checkRes = await fetch("/api/health", { method: "GET" }).catch(
-            () => null
-          );
-          if (checkRes && checkRes.ok) {
+          const data = await api.checkHealth();
+          if (data) {
             clearInterval(interval);
             setIsStartingBackend(false);
             recheckBackend();
@@ -566,6 +562,7 @@ export default function App() {
   const isEngagementPath = currentPath === "/ai-engagement";
   const isVoicePath = currentPath === "/ai-voice";
   const isAnalyticsPath = currentPath === "/ai-analytics";
+  const isYouTubePath = currentPath === "/youtube";
   const isProfilePath = currentPath === "/profile";
   const isNotificationsPath = currentPath === "/notifications";
   const isAdminPath = currentPath === "/admin";
@@ -1161,6 +1158,18 @@ export default function App() {
             />
           )}
 
+          {/* PAGE VIEW 14.5: YouTube Publisher Studio */}
+          {isYouTubePath && (
+            <YouTubePage
+              panels={panels}
+              videoUrl={videoUrl}
+              scrapedTitle={scrapedTitle}
+              scrapedGenre={scrapedGenre}
+              onNavigateHome={handleNavigateHome}
+              addNotification={addNotification}
+            />
+          )}
+
           {/* PAGE VIEW 15: User Profile & Account Settings */}
           {isProfilePath && (
             <ProfilePage
@@ -1371,6 +1380,7 @@ export default function App() {
             !isEngagementPath &&
             !isVoicePath &&
             !isAnalyticsPath &&
+            !isYouTubePath &&
             !isProfilePath &&
             !isNotificationsPath &&
             !isAdminPath &&

@@ -1316,7 +1316,9 @@ function CinematicRenderDemo({ onGetStarted }: { onGetStarted: () => void }) {
         <div className="flex items-center gap-3">
           <Volume2 className="w-5 h-5 text-purple-400 shrink-0" />
           <div className="space-y-0.5">
-            <div className="text-xs font-bold text-neutral-100">TTS Sync Wave</div>
+            <div className="text-xs font-bold text-neutral-100">
+              TTS Sync Wave
+            </div>
             <div className="text-[9px] font-mono text-neutral-500">
               Audio track synchronized with Panel #1
             </div>

@@ -8,3 +8,12 @@ scratch
 .idea
 .vscode
 .llm-chat-history
+temp
+temp_test_combos
+skills-lock.json
+verify_fix.cjs
+*.db
+*.db-wal
+*.db-shm
+*.log
+__pycache__

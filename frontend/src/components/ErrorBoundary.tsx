@@ -43,14 +43,19 @@ class ErrorBoundary extends Component<Props, State> {
               <AlertTriangle className="w-10 h-10 text-rose-500" />
             </div>
 
-            <h1 className="text-2xl font-black text-white mb-3">Application Fault Detected</h1>
+            <h1 className="text-2xl font-black text-white mb-3">
+              Application Fault Detected
+            </h1>
             <p className="text-neutral-400 text-sm mb-8 leading-relaxed font-mono">
-              A critical runtime error occurred in the UI layer. The workspace state has been preserved, but the view must be reset.
+              A critical runtime error occurred in the UI layer. The workspace
+              state has been preserved, but the view must be reset.
             </p>
 
             {this.state.error && (
               <div className="bg-black/40 border border-white/5 rounded-2xl p-4 mb-8 text-left overflow-x-auto">
-                <p className="text-[10px] font-bold text-rose-400 uppercase tracking-widest mb-1">Error Trace</p>
+                <p className="text-[10px] font-bold text-rose-400 uppercase tracking-widest mb-1">
+                  Error Trace
+                </p>
                 <code className="text-[11px] text-neutral-500 font-mono break-all">
                   {this.state.error.toString()}
                 </code>
@@ -75,7 +80,9 @@ class ErrorBoundary extends Component<Props, State> {
             </div>
 
             <p className="mt-8 text-[10px] text-neutral-600 font-mono uppercase tracking-tighter">
-              Session ID: {Math.random().toString(36).substring(7).toUpperCase()} • Error Boundary v1.0
+              Session ID:{" "}
+              {Math.random().toString(36).substring(7).toUpperCase()} • Error
+              Boundary v1.0
             </p>
           </div>
         </div>

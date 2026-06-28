@@ -30,7 +30,8 @@ export default function BenchmarkRunHistory({
               Benchmark Run Metrics & History
             </h2>
             <p className="text-[10px] text-neutral-500 font-mono mt-0.5">
-              Analyze session activity logs, prompt runs, estimated API expenditure, and latency averages.
+              Analyze session activity logs, prompt runs, estimated API
+              expenditure, and latency averages.
             </p>
           </div>
           {runHistory.length > 0 && (
@@ -55,15 +56,44 @@ export default function BenchmarkRunHistory({
         {/* Session Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Total Runs", val: totalRuns, sub: "Single + Sandbox runs", color: "text-purple-400" },
-            { label: "Avg Latency", val: `${avgLatency.toLocaleString()} ms`, sub: "Successful runs only", color: "text-cyan-400" },
-            { label: "Est. Spend (USD)", val: `$${totalCost.toFixed(5)}`, sub: "Based on token pricing", color: "text-emerald-450" },
-            { label: "Total Tokens", val: totalTokens.toLocaleString(), sub: "Input + Output volume", color: "text-amber-400" },
+            {
+              label: "Total Runs",
+              val: totalRuns,
+              sub: "Single + Sandbox runs",
+              color: "text-purple-400",
+            },
+            {
+              label: "Avg Latency",
+              val: `${avgLatency.toLocaleString()} ms`,
+              sub: "Successful runs only",
+              color: "text-cyan-400",
+            },
+            {
+              label: "Est. Spend (USD)",
+              val: `$${totalCost.toFixed(5)}`,
+              sub: "Based on token pricing",
+              color: "text-emerald-450",
+            },
+            {
+              label: "Total Tokens",
+              val: totalTokens.toLocaleString(),
+              sub: "Input + Output volume",
+              color: "text-amber-400",
+            },
           ].map((stat, i) => (
-            <div key={i} className="p-4 bg-neutral-900/30 border border-neutral-900 rounded-2xl font-mono text-center">
-              <span className="text-[9px] text-neutral-500 block uppercase font-bold">{stat.label}</span>
-              <span className={`text-lg font-bold block mt-1.5 ${stat.color}`}>{stat.val}</span>
-              <span className="text-[8px] text-neutral-600 block mt-1">{stat.sub}</span>
+            <div
+              key={i}
+              className="p-4 bg-neutral-900/30 border border-neutral-900 rounded-2xl font-mono text-center"
+            >
+              <span className="text-[9px] text-neutral-500 block uppercase font-bold">
+                {stat.label}
+              </span>
+              <span className={`text-lg font-bold block mt-1.5 ${stat.color}`}>
+                {stat.val}
+              </span>
+              <span className="text-[8px] text-neutral-600 block mt-1">
+                {stat.sub}
+              </span>
             </div>
           ))}
         </div>
@@ -75,7 +105,8 @@ export default function BenchmarkRunHistory({
           </h3>
           {runHistory.length === 0 ? (
             <div className="p-6 bg-neutral-900/10 border border-neutral-900 border-dashed rounded-2xl text-center text-neutral-500 text-xs font-mono">
-              No query history recorded yet. Run a latency test or execute a skill above.
+              No query history recorded yet. Run a latency test or execute a
+              skill above.
             </div>
           ) : (
             <div className="border border-neutral-900 rounded-2xl overflow-hidden max-h-[300px] overflow-y-auto scrollbar-thin">
@@ -91,29 +122,49 @@ export default function BenchmarkRunHistory({
                 </thead>
                 <tbody>
                   {runHistory.map((log, idx) => (
-                    <tr key={idx} className="border-b border-neutral-900/60 hover:bg-neutral-900/10 transition-all">
+                    <tr
+                      key={idx}
+                      className="border-b border-neutral-900/60 hover:bg-neutral-900/10 transition-all"
+                    >
                       <td className="p-3 text-neutral-500 whitespace-nowrap">
                         {new Date(log.timestamp).toLocaleTimeString()}
                       </td>
-                      <td className="p-3 text-white font-bold max-w-[150px] truncate" title={log.model}>
+                      <td
+                        className="p-3 text-white font-bold max-w-[150px] truncate"
+                        title={log.model}
+                      >
                         {log.model}
                       </td>
-                      <td className="p-3 text-neutral-400 max-w-[280px] truncate" title={log.prompt}>
+                      <td
+                        className="p-3 text-neutral-400 max-w-[280px] truncate"
+                        title={log.prompt}
+                      >
                         {log.prompt}
                       </td>
                       <td className="p-3 text-neutral-400 whitespace-nowrap">
                         {log.success ? (
-                          <span>{log.latencyMs}ms | {log.inputTokens + log.outputTokens} tok | ${log.cost.toFixed(5)}</span>
+                          <span>
+                            {log.latencyMs}ms |{" "}
+                            {log.inputTokens + log.outputTokens} tok | $
+                            {log.cost.toFixed(5)}
+                          </span>
                         ) : (
-                          <span className="text-rose-500 truncate max-w-[150px] block" title={log.error}>{log.error || "Failed"}</span>
+                          <span
+                            className="text-rose-500 truncate max-w-[150px] block"
+                            title={log.error}
+                          >
+                            {log.error || "Failed"}
+                          </span>
                         )}
                       </td>
                       <td className="p-3 text-right">
-                        <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase ${
-                          log.success
-                            ? "bg-emerald-950/40 text-emerald-400 border border-emerald-900/30"
-                            : "bg-rose-950/40 text-rose-400 border border-rose-900/30"
-                        }`}>
+                        <span
+                          className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase ${
+                            log.success
+                              ? "bg-emerald-950/40 text-emerald-400 border border-emerald-900/30"
+                              : "bg-rose-950/40 text-rose-400 border border-rose-900/30"
+                          }`}
+                        >
                           {log.success ? "Success" : "Error"}
                         </span>
                       </td>

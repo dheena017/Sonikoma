@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import * as api from "../api/index.js";
 
 interface HealthStatus {
   status: "online" | "offline" | "checking";
@@ -18,34 +19,26 @@ export function useBackendHealth() {
   const checkHealth = useCallback(async (): Promise<boolean> => {
     const start = performance.now();
     try {
-      // Mock ping to the backend API
-      const response = await fetch("/api/health", { method: "GET" }).catch(
-        () => null
-      );
+      const data = await api.checkHealth();
       const end = performance.now();
 
-      if (response && response.ok) {
-        const data = await response.json().catch(() => ({}));
-        setHealth({
-          status: "online",
-          latency: Math.round(end - start),
-          lastChecked: new Date(),
-          version: data.version || "1.0.0",
-        });
-        return true;
-      } else {
-        if (response && response.status === 429) {
-          setHealth({
-            status: "offline",
-            latency: null,
-            lastChecked: new Date(),
-            error: "Rate limited (429)",
-          });
-          return false; // Return false to indicate 429 rate limit
-        }
-        throw new Error("Backend unreachable");
-      }
+      setHealth({
+        status: "online",
+        latency: Math.round(end - start),
+        lastChecked: new Date(),
+        version: data.version || "1.0.0",
+      });
+      return true;
     } catch (err: any) {
+      if (err.message && err.message.includes("429")) {
+        setHealth({
+          status: "offline",
+          latency: null,
+          lastChecked: new Date(),
+          error: "Rate limited (429)",
+        });
+        return false;
+      }
       setHealth({
         status: "offline",
         latency: null,

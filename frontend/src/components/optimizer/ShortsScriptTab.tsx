@@ -1,3 +1,4 @@
+import * as api from "../../api/index.js";
 import React, { useState } from "react";
 import {
   Sparkles,
@@ -8,6 +9,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { GeneratedPanel } from "../../types";
+import { fetchWithAuth } from "../../utils.js";
 
 interface ShortsScriptTabProps {
   title: string;
@@ -53,31 +55,21 @@ export default function ShortsScriptTab({
     setLoading(true);
     try {
       // 1. Shorts script adapter
-      const scriptRes = await fetch("/api/skills/shorts-script", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          storyboard_summary:
-            storyboardSummary || "The story summary details go here.",
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
+      const scriptJson = await api.runShortsScriptSkill(fetchWithAuth, {
+        storyboard_summary:
+          storyboardSummary || "The story summary details go here.",
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
       });
-      const scriptJson = await scriptRes.json();
       if (scriptJson.success && scriptJson.result) {
         setScriptData(scriptJson.result);
       }
 
       // 2. Shorts hook
-      const hookRes = await fetch("/api/skills/shorts-hook", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: title || "This Webtoon",
-          key_event: "absolute overpowered betrayal scene",
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
+      const hookJson = await api.runShortsHookSkill(fetchWithAuth, {
+        title: title || "This Webtoon",
+        key_event: "absolute overpowered betrayal scene",
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
       });
-      const hookJson = await hookRes.json();
       if (hookJson.success && hookJson.result) {
         setHookData(hookJson.result);
       }

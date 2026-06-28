@@ -32,7 +32,8 @@ import {
   X,
   Search,
 } from "lucide-react";
-import { getSourceName, getPanelFilterStyle } from "../utils";
+import { getSourceName, getPanelFilterStyle } from "../utils.js";
+import * as api from "../api/index.js";
 
 interface ProjectDetailsPageProps {
   onNavigateHome: () => void;
@@ -94,6 +95,9 @@ export default function ProjectDetailsPage({
   // Export states
   const [isExporting, setIsExporting] = React.useState(false);
   const [exportStatus, setExportStatus] = React.useState<string | null>(null);
+  const [detectedRatio, setDetectedRatio] = React.useState<"9/16" | "16/9">(
+    "16/9"
+  );
 
   // Search filter inside storyboard tab
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -222,7 +226,9 @@ export default function ProjectDetailsPage({
         setExportStatus("JSON downloaded successfully!");
       } catch (err: any) {
         console.error("JSON export failed:", err);
-        await (window as any).alertAsync(err.message || "Failed to export JSON.");
+        await (window as any).alertAsync(
+          err.message || "Failed to export JSON."
+        );
         setExportStatus("JSON export failed.");
       } finally {
         setIsExporting(false);
@@ -239,21 +245,15 @@ export default function ProjectDetailsPage({
         const token =
           localStorage.getItem("sonikoma_token") ||
           sessionStorage.getItem("sonikoma_token");
-        const headers: HeadersInit = { "Content-Type": "application/json" };
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
-        }
 
         const urls = panels.map((p) => p.image_url);
-        const res = await fetch("/api/image/download-zip", {
-          method: "POST",
-          headers,
-          body: JSON.stringify({ urls, url: project.url || null }),
-        });
-        if (!res.ok) {
-          throw new Error(`ZIP generation failed (HTTP ${res.status})`);
-        }
-        const data = await res.json();
+        const data = await api.downloadZip(
+          fetch,
+          { urls, url: project.url || null },
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          }
+        );
         if (data.success && data.downloadUrl) {
           const link = document.createElement("a");
           link.href = data.downloadUrl;
@@ -272,7 +272,9 @@ export default function ProjectDetailsPage({
         }
       } catch (err: any) {
         console.error("ZIP download failed:", err);
-        await (window as any).alertAsync(err.message || "Failed to compile ZIP archive.");
+        await (window as any).alertAsync(
+          err.message || "Failed to compile ZIP archive."
+        );
         setExportStatus("ZIP download failed.");
       } finally {
         setIsExporting(false);
@@ -401,17 +403,7 @@ export default function ProjectDetailsPage({
         const token =
           localStorage.getItem("sonikoma_token") ||
           sessionStorage.getItem("sonikoma_token");
-        const headers: HeadersInit = {};
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
-        }
-        const res = await fetch(`/api/projects/${projectId}`, { headers });
-        if (!res.ok) {
-          throw new Error(
-            `Failed to load project details (HTTP ${res.status})`
-          );
-        }
-        const data = await res.json();
+        const data = await api.getProject(projectId, token || undefined);
         if (data.success) {
           setProject(data.project);
           setPanels(data.panels || []);
@@ -449,25 +441,21 @@ export default function ProjectDetailsPage({
         const token =
           localStorage.getItem("sonikoma_token") ||
           sessionStorage.getItem("sonikoma_token");
-        const response = await fetch("/api/scrape-images", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-          body: JSON.stringify({ url: project.url, bypass_cache: false }),
-        });
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.images) {
-            const proxied = data.images.map((img: string) => {
-              if (img.startsWith("http") && !img.startsWith("/api/")) {
-                return `/api/proxy-image?url=${encodeURIComponent(img)}`;
-              }
-              return img;
-            });
-            setScrapedImages(proxied);
+        const data = await api.scrapeImages(
+          fetch,
+          { url: project.url, bypass_cache: false },
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
           }
+        );
+        if (data.success && data.images) {
+          const proxied = data.images.map((img: string) => {
+            if (img.startsWith("http") && !api.isApiUrl(img)) {
+              return api.getProxyImageUrl(img);
+            }
+            return img;
+          });
+          setScrapedImages(proxied);
         }
       } catch (err) {
         console.error("Failed to fetch scraped images:", err);
@@ -517,18 +505,7 @@ export default function ProjectDetailsPage({
       const token =
         localStorage.getItem("sonikoma_token") ||
         sessionStorage.getItem("sonikoma_token");
-      const headers: HeadersInit = { "Content-Type": "application/json" };
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-      const res = await fetch(`/api/projects/${projectId}`, {
-        method: "DELETE",
-        headers,
-      });
-      if (!res.ok) {
-        throw new Error(`Failed to delete (HTTP ${res.status})`);
-      }
-      const data = await res.json();
+      const data = await api.deleteProject(projectId, token || undefined);
       if (data.success) {
         navigateTo("/profile");
       } else {
@@ -607,9 +584,12 @@ export default function ProjectDetailsPage({
         return num || "Chapter 1";
       })();
 
-      const res = await fetch(`/api/projects/${projectId}`, {
+      const response = await fetch(`/api/projects/${projectId}`, {
         method: "PUT",
-        headers,
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           title: project.title.trim() || "Untitled Project",
           genre: project.genre.trim() || "general",
@@ -620,12 +600,12 @@ export default function ProjectDetailsPage({
           panels: mappedPanels,
         }),
       });
-
-      if (!res.ok) {
-        throw new Error(`Failed to save (HTTP ${res.status})`);
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.detail || "Failed to update project");
       }
-      const data = await res.json();
-      if (data.success) {
+      const data = await response.json();
+      if (response.ok) {
         initialProjectRef.current = serializeState(project, panels);
         initialPanelsRef.current = JSON.parse(JSON.stringify(panels));
 
@@ -1422,7 +1402,9 @@ export default function ProjectDetailsPage({
                                     const confirm =
                                       (window as any).confirmAsync ||
                                       window.confirm;
-                                    const confirmed = await (window as any).confirmAsync(
+                                    const confirmed = await (
+                                      window as any
+                                    ).confirmAsync(
                                       `Remove panel #${
                                         originalIdx + 1
                                       } from timeline?`,
@@ -1497,11 +1479,26 @@ export default function ProjectDetailsPage({
                               Compiled MP4 Output Video
                             </h3>
                           </div>
-                          <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/10 bg-black/90 shadow-inner">
+                          <div
+                            className="relative mx-auto rounded-2xl overflow-hidden border border-white/10 bg-black/90 shadow-inner transition-all duration-300 w-full"
+                            style={
+                              detectedRatio === "9/16"
+                                ? { maxWidth: "340px", aspectRatio: "9/16" }
+                                : { maxWidth: "100%", aspectRatio: "16/9" }
+                            }
+                          >
                             <video
                               src={project.video_url}
                               controls
                               className="w-full h-full object-contain"
+                              onLoadedMetadata={(e) => {
+                                const video = e.currentTarget;
+                                if (video.videoHeight > video.videoWidth) {
+                                  setDetectedRatio("9/16");
+                                } else {
+                                  setDetectedRatio("16/9");
+                                }
+                              }}
                             />
                           </div>
                         </div>
@@ -1534,26 +1531,34 @@ export default function ProjectDetailsPage({
                             </div>
                           </div>
 
-                          <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/10 bg-black/90 shadow-inner flex items-center justify-center">
+                          <div
+                            className="relative mx-auto rounded-2xl overflow-hidden border border-white/10 bg-black/90 shadow-inner transition-all duration-300 w-full flex items-center justify-center"
+                            style={
+                              detectedRatio === "9/16"
+                                ? { maxWidth: "340px", aspectRatio: "9/16" }
+                                : { maxWidth: "100%", aspectRatio: "16/9" }
+                            }
+                          >
                             {panels[slideshowIdx] ? (
                               <>
                                 <img
                                   src={panels[slideshowIdx].image_url}
                                   alt={`Slide ${slideshowIdx + 1}`}
                                   className="w-full h-full object-contain"
+                                  onLoad={(e) => {
+                                    const img = e.currentTarget;
+                                    if (img.naturalHeight > img.naturalWidth) {
+                                      setDetectedRatio("9/16");
+                                    } else {
+                                      setDetectedRatio("16/9");
+                                    }
+                                  }}
                                   style={{
                                     filter: getPanelFilterStyle(
                                       panels[slideshowIdx]
                                     ),
                                   }}
                                 />
-
-                                {/* Subtitle Caption */}
-                                {panels[slideshowIdx].speech_text && (
-                                  <div className="absolute bottom-4 inset-x-4 bg-black/85 backdrop-blur-md border border-white/5 p-3 rounded-2xl text-center text-xs font-semibold text-neutral-250 font-sans shadow-lg leading-relaxed">
-                                    {panels[slideshowIdx].speech_text}
-                                  </div>
-                                )}
 
                                 {/* SFX cue */}
                                 {panels[slideshowIdx].sfx && (

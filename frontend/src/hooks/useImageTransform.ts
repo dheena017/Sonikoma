@@ -1,6 +1,7 @@
 import React from "react";
-import { Slice } from "../components/crop/types";
-import { NotificationType } from "../components/NotificationStack";
+import { Slice } from "../components/crop/types.js";
+import { NotificationType } from "../components/NotificationStack.js";
+import * as api from "../api/index.js";
 
 interface UseImageTransformProps {
   activeFetch: typeof fetch;
@@ -73,13 +74,11 @@ export function useImageTransform({
     );
     setIsTransforming(true);
     try {
-      const response = await activeFetch("/api/image/transform", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: currentUrl, type, value }),
+      const data = await api.transformImage(activeFetch, {
+        url: currentUrl,
+        type,
+        value,
       });
-      if (!response.ok) throw new Error("Transform failed: " + response.status);
-      const data = await response.json();
       if (data.url && setScrapedImages) {
         setScrapedImages((prev) => {
           const copy = [...prev];
@@ -143,21 +142,15 @@ export function useImageTransform({
     );
     setIsMerging(true);
     try {
-      const response = await activeFetch("/api/image/merge", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          urls: urlsToMerge,
-          layout: config.layout,
-          spacing: config.spacing,
-          spacingColor: config.spacingColor,
-          scaleToFit: config.scaleToFit,
-          alignMode: config.alignMode,
-          padding: config.padding,
-        }),
+      const data = await api.mergeImages(activeFetch, {
+        urls: urlsToMerge,
+        layout: config.layout,
+        spacing: config.spacing,
+        spacingColor: config.spacingColor,
+        scaleToFit: config.scaleToFit,
+        alignMode: config.alignMode,
+        padding: config.padding,
       });
-      if (!response.ok) throw new Error("Merge failed: " + response.status);
-      const data = await response.json();
       if (data.url && setScrapedImages) {
         const stitchedUrl = data.url;
         setScrapedImages((prev) => {
@@ -194,26 +187,19 @@ export function useImageTransform({
     );
     setIsCleaning(true);
     try {
-      const response = await activeFetch("/api/image/remove-speech-bubbles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          url: imageUrl,
-          box: { ymin, xmin, ymax, xmax },
-          text,
-          method: eraseMethod,
-          sensitivity,
-          dilation,
-          inpaint_radius: inpaintRadius,
-          detection_style: detectionStyle,
-          debug_mode: debugMode,
-          fill_color: eraseMethod === "solid_color" ? fillColor : "",
-          gpu,
-        }),
+      const data = await api.removeSpeechBubbles(activeFetch, {
+        url: imageUrl,
+        box: { ymin, xmin, ymax, xmax },
+        text,
+        method: eraseMethod,
+        sensitivity,
+        dilation,
+        inpaint_radius: inpaintRadius,
+        detection_style: detectionStyle,
+        debug_mode: debugMode,
+        fill_color: eraseMethod === "solid_color" ? fillColor : "",
+        gpu,
       });
-      if (!response.ok)
-        throw new Error(`Single bubble clean failed: ${response.status}`);
-      const data = await response.json();
       if (data.success && data.url) {
         if (setScrapedImages) {
           setScrapedImages((prev) => {
@@ -259,24 +245,14 @@ export function useImageTransform({
 
     setIsCroppingSlice(slice.id);
     try {
-      const response = await activeFetch("/api/image/edit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          url: originalUrl,
-          cropTop: slice.cropTop,
-          cropBottom: slice.cropBottom,
-          cropLeft: slice.cropLeft,
-          cropRight: slice.cropRight,
-          autoTrim: slice.autoTrim,
-        }),
+      const data = await api.editImage(activeFetch, {
+        url: originalUrl,
+        cropTop: slice.cropTop,
+        cropBottom: slice.cropBottom,
+        cropLeft: slice.cropLeft,
+        cropRight: slice.cropRight,
+        autoTrim: slice.autoTrim,
       });
-
-      if (!response.ok) {
-        throw new Error(`Server returned ${response.status}`);
-      }
-
-      const data = await response.json();
 
       // Add directly to Storyboard only
       addPanelsToStoryboard([data.url]);

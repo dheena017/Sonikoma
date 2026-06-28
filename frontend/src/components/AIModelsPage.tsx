@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ArrowLeft, Award, Zap } from "lucide-react";
+import * as api from "../api/index.js";
 
 import CredentialsAndTuner from "./ai_models/CredentialsAndTuner";
 import ModelRegistryExplorer from "./ai_models/ModelRegistryExplorer";
@@ -43,8 +44,12 @@ export default function AIModelsPage({
   });
 
   // Key Verification States
-  const [verifyingProvider, setVerifyingProvider] = useState<string | null>(null);
-  const [verificationResult, setVerificationResult] = useState<Record<string, { success: boolean; message: string } | null>>({});
+  const [verifyingProvider, setVerifyingProvider] = useState<string | null>(
+    null
+  );
+  const [verificationResult, setVerificationResult] = useState<
+    Record<string, { success: boolean; message: string } | null>
+  >({});
 
   // Model matrix & fetching states
   const [models, setModels] = useState<any[]>([]);
@@ -58,13 +63,18 @@ export default function AIModelsPage({
 
   // Playground States
   const [playgroundModel, setPlaygroundModel] = useState<string>("");
-  const [playgroundProvider, setPlaygroundProvider] = useState<string>("gemini");
-  const [playgroundPrompt, setPlaygroundPrompt] = useState("Explain the concept of Webtoons in three short sentences.");
+  const [playgroundProvider, setPlaygroundProvider] =
+    useState<string>("gemini");
+  const [playgroundPrompt, setPlaygroundPrompt] = useState(
+    "Explain the concept of Webtoons in three short sentences."
+  );
   const [isRunningPlayground, setIsRunningPlayground] = useState(false);
   const [playgroundResult, setPlaygroundResult] = useState<any | null>(null);
 
   // New Enhanced Features States
-  const [activePlaygroundTab, setActivePlaygroundTab] = useState<"single" | "compare" | "skills">("single");
+  const [activePlaygroundTab, setActivePlaygroundTab] = useState<
+    "single" | "compare" | "skills"
+  >("single");
   const [compareModelList, setCompareModelList] = useState<string[]>([]);
   const [compareResults, setCompareResults] = useState<Record<string, any>>({});
   const [isBenchmarkingCompare, setIsBenchmarkingCompare] = useState(false);
@@ -116,9 +126,10 @@ export default function AIModelsPage({
   const [maxTokens, setMaxTokens] = useState<number>(() =>
     parseInt(localStorage.getItem("ai_config_max_tokens") || "2048")
   );
-  const [systemPrompt, setSystemPrompt] = useState<string>(() =>
-    localStorage.getItem("ai_config_system_prompt") ||
-    "You are an AI assistant designed to help translate, narrate, and optimize webtoon comic strips for video rendering."
+  const [systemPrompt, setSystemPrompt] = useState<string>(
+    () =>
+      localStorage.getItem("ai_config_system_prompt") ||
+      "You are an AI assistant designed to help translate, narrate, and optimize webtoon comic strips for video rendering."
   );
 
   const checkSavedCredentials = () => {
@@ -132,8 +143,7 @@ export default function AIModelsPage({
 
   const fetchEnvKeyStatus = async () => {
     try {
-      const res = await activeFetch("/api/health");
-      const data = await res.json();
+      const data = await api.checkHealth();
       if (data.success && data.env) {
         setEnvKeys({
           gemini: !!data.env.GEMINI_API_KEY,
@@ -158,11 +168,18 @@ export default function AIModelsPage({
 
     // Default playground model to globalSelectedModel
     setPlaygroundModel(globalSelectedModel);
-    if (globalSelectedModel.includes("gpt") || globalSelectedModel.includes("o1")) {
+    if (
+      globalSelectedModel.includes("gpt") ||
+      globalSelectedModel.includes("o1")
+    ) {
       setPlaygroundProvider("openai");
     } else if (globalSelectedModel.includes("claude")) {
       setPlaygroundProvider("anthropic");
-    } else if (globalSelectedModel.includes("huggingface") || globalSelectedModel.includes("/") || globalSelectedModel.includes("llama")) {
+    } else if (
+      globalSelectedModel.includes("huggingface") ||
+      globalSelectedModel.includes("/") ||
+      globalSelectedModel.includes("llama")
+    ) {
       setPlaygroundProvider("huggingface");
     } else {
       setPlaygroundProvider("gemini");
@@ -181,11 +198,8 @@ export default function AIModelsPage({
         setTokenLogs([]);
         return;
       }
-      const res = await activeFetch("/api/projects/analytics/tokens", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
+      const data = await api.getProjectTokenAnalytics(token);
+      if (data) {
         if (data.success && data.token_logs) {
           setTokenLogs(data.token_logs);
         }
@@ -209,14 +223,7 @@ export default function AIModelsPage({
     setLoadingModels(true);
     setModelsError(null);
     try {
-      const res = await activeFetch("/api/list-models", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ provider: prov }),
-      });
-      const data = await res.json();
+      const data = await api.listModels(activeFetch, { provider: prov });
       if (data.success) {
         setModels(data.models || []);
       } else {
@@ -270,11 +277,12 @@ export default function AIModelsPage({
   };
 
   const handleClearKeys = async () => {
-    const confirmed = await (window as any).confirmAsync?.(
-      "Are you sure you want to clear all locally stored API credentials? You will fall back to server-configured keys.",
-      "Clear Keys",
-      "red"
-    ) || window.confirm("Clear all locally stored API keys?");
+    const confirmed =
+      (await (window as any).confirmAsync?.(
+        "Are you sure you want to clear all locally stored API credentials? You will fall back to server-configured keys.",
+        "Clear Keys",
+        "red"
+      )) || window.confirm("Clear all locally stored API keys?");
 
     if (!confirmed) return;
 
@@ -341,14 +349,17 @@ export default function AIModelsPage({
   // Compare Models list toggle
   const handleToggleCompare = (modelId: string) => {
     if (compareModelList.includes(modelId)) {
-      setCompareModelList(prev => prev.filter(id => id !== modelId));
+      setCompareModelList((prev) => prev.filter((id) => id !== modelId));
       addNotification(`Removed ${modelId} from comparison list.`, "info");
     } else {
       if (compareModelList.length >= 5) {
-        addNotification("Maximum 5 models can be compared simultaneously.", "warning");
+        addNotification(
+          "Maximum 5 models can be compared simultaneously.",
+          "warning"
+        );
         return;
       }
-      setCompareModelList(prev => [...prev, modelId]);
+      setCompareModelList((prev) => [...prev, modelId]);
       addNotification(`Added ${modelId} to comparison list.`, "success");
     }
   };
@@ -377,7 +388,10 @@ export default function AIModelsPage({
 
     setIsBenchmarkingCompare(true);
     setCompareResults({});
-    addNotification(`Starting parallel benchmarks on ${compareModelList.length} models...`, "info");
+    addNotification(
+      `Starting parallel benchmarks on ${compareModelList.length} models...`,
+      "info"
+    );
 
     const promises = compareModelList.map(async (modelName) => {
       let provider = "gemini";
@@ -385,31 +399,36 @@ export default function AIModelsPage({
         provider = "openai";
       } else if (modelName.includes("claude")) {
         provider = "anthropic";
-      } else if (modelName.includes("huggingface") || modelName.includes("/") || modelName.includes("llama")) {
+      } else if (
+        modelName.includes("huggingface") ||
+        modelName.includes("/") ||
+        modelName.includes("llama")
+      ) {
         provider = "huggingface";
       }
 
-      const customKey = localStorage.getItem(`user_${provider}_key`) || undefined;
+      const customKey =
+        localStorage.getItem(`user_${provider}_key`) || undefined;
 
       try {
         const startMonotonic = performance.now();
-        const res = await activeFetch("/api/test-model-latency", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            provider,
-            model: modelName,
-            apiKey: customKey,
-            prompt: playgroundPrompt,
-          }),
+        const data = await api.testModelLatency(activeFetch, {
+          provider,
+          model: modelName,
+          apiKey: customKey,
+          prompt: playgroundPrompt,
         });
-        const data = await res.json();
         const endMonotonic = performance.now();
         const elapsedMs = Math.round(endMonotonic - startMonotonic);
 
         if (data.success) {
-          const cost = calculateEstimatedCost(provider, modelName, data.inputTokens || 0, data.outputTokens || 0);
-          
+          const cost = calculateEstimatedCost(
+            provider,
+            modelName,
+            data.inputTokens || 0,
+            data.outputTokens || 0
+          );
+
           logRunToHistory({
             timestamp: new Date().toISOString(),
             model: modelName,
@@ -465,26 +484,132 @@ export default function AIModelsPage({
   // Execute Skill sandbox action
   const executeSkill = async () => {
     const config = [
-      { id: "translation", endpoint: "/api/skills/translate", name: "Dialogue Translation Studio", inputs: [{ name: "text" }, { name: "target_lang" }] },
-      { id: "dramatize", endpoint: "/api/skills/dramatize", name: "Script Dramatization", inputs: [{ name: "raw_ocr_text" }, { name: "genre" }, { name: "scene_context" }] },
-      { id: "seo", endpoint: "/api/skills/seo", name: "YouTube SEO Metadata Generator", inputs: [{ name: "title" }, { name: "genre" }, { name: "storyboard_summary" }] },
-      { id: "cliffhanger", endpoint: "/api/skills/cliffhanger", name: "Cliffhanger Generator", inputs: [{ name: "story_outline" }] },
-      { id: "voice-cast", endpoint: "/api/skills/voice-cast", name: "Voice Casting Profiler", inputs: [{ name: "character_name" }, { name: "visual_description" }, { name: "dialogue_sample" }] },
-      { id: "copyright-scrub", endpoint: "/api/skills/copyright-scrub", name: "Copyright Text Scrubber", inputs: [{ name: "text" }] },
-      { id: "bgm-vibe", endpoint: "/api/skills/bgm-vibe", name: "BGM Mood Selector", inputs: [{ name: "narrative_mood" }, { name: "action_scale" }] },
+      {
+        id: "translation",
+        endpoint: "/api/skills/translate",
+        name: "Dialogue Translation Studio",
+        inputs: [{ name: "text" }, { name: "target_lang" }],
+      },
+      {
+        id: "dramatize",
+        endpoint: "/api/skills/dramatize",
+        name: "Script Dramatization",
+        inputs: [
+          { name: "raw_ocr_text" },
+          { name: "genre" },
+          { name: "scene_context" },
+        ],
+      },
+      {
+        id: "seo",
+        endpoint: "/api/skills/seo",
+        name: "YouTube SEO Metadata Generator",
+        inputs: [
+          { name: "title" },
+          { name: "genre" },
+          { name: "storyboard_summary" },
+        ],
+      },
+      {
+        id: "cliffhanger",
+        endpoint: "/api/skills/cliffhanger",
+        name: "Cliffhanger Generator",
+        inputs: [{ name: "story_outline" }],
+      },
+      {
+        id: "voice-cast",
+        endpoint: "/api/skills/voice-cast",
+        name: "Voice Casting Profiler",
+        inputs: [
+          { name: "character_name" },
+          { name: "visual_description" },
+          { name: "dialogue_sample" },
+        ],
+      },
+      {
+        id: "copyright-scrub",
+        endpoint: "/api/skills/copyright-scrub",
+        name: "Copyright Text Scrubber",
+        inputs: [{ name: "text" }],
+      },
+      {
+        id: "bgm-vibe",
+        endpoint: "/api/skills/bgm-vibe",
+        name: "BGM Mood Selector",
+        inputs: [{ name: "narrative_mood" }, { name: "action_scale" }],
+      },
+      {
+        id: "translation",
+        endpoint: api.SKILL_ENDPOINTS.TRANSLATE,
+        name: "Dialogue Translation Studio",
+        inputs: [{ name: "text" }, { name: "target_lang" }],
+      },
+      {
+        id: "dramatize",
+        endpoint: api.SKILL_ENDPOINTS.DRAMATIZE,
+        name: "Script Dramatization",
+        inputs: [
+          { name: "raw_ocr_text" },
+          { name: "genre" },
+          { name: "scene_context" },
+        ],
+      },
+      {
+        id: "seo",
+        endpoint: api.SKILL_ENDPOINTS.SEO,
+        name: "YouTube SEO Metadata Generator",
+        inputs: [
+          { name: "title" },
+          { name: "genre" },
+          { name: "storyboard_summary" },
+        ],
+      },
+      {
+        id: "cliffhanger",
+        endpoint: api.SKILL_ENDPOINTS.CLIFFHANGER,
+        name: "Cliffhanger Generator",
+        inputs: [{ name: "story_outline" }],
+      },
+      {
+        id: "voice-cast",
+        endpoint: api.SKILL_ENDPOINTS.VOICE_CAST,
+        name: "Voice Casting Profiler",
+        inputs: [
+          { name: "character_name" },
+          { name: "visual_description" },
+          { name: "dialogue_sample" },
+        ],
+      },
+      {
+        id: "copyright-scrub",
+        endpoint: api.SKILL_ENDPOINTS.COPYRIGHT_SCRUB,
+        name: "Copyright Text Scrubber",
+        inputs: [{ name: "text" }],
+      },
+      {
+        id: "bgm-vibe",
+        endpoint: api.SKILL_ENDPOINTS.BGM_VIBE,
+        name: "BGM Mood Selector",
+        inputs: [{ name: "narrative_mood" }, { name: "action_scale" }],
+      },
     ].find((s) => s.id === selectedSkill);
     if (!config) return;
 
     setIsRunningSkill(true);
     setSkillOutput(null);
 
-    const modelToUse = playgroundModel || globalSelectedModel || "gemini-2.5-flash";
+    const modelToUse =
+      playgroundModel || globalSelectedModel || "gemini-2.5-flash";
     let provider = "gemini";
     if (modelToUse.includes("gpt") || modelToUse.includes("o1")) {
       provider = "openai";
     } else if (modelToUse.includes("claude")) {
       provider = "anthropic";
-    } else if (modelToUse.includes("huggingface") || modelToUse.includes("/") || modelToUse.includes("llama")) {
+    } else if (
+      modelToUse.includes("huggingface") ||
+      modelToUse.includes("/") ||
+      modelToUse.includes("llama")
+    ) {
       provider = "huggingface";
     }
 
@@ -504,10 +629,13 @@ export default function AIModelsPage({
       model: modelToUse,
     };
 
-    config.inputs.forEach(input => {
+    config.inputs.forEach((input) => {
       const val = skillInputs[input.name];
       if (input.name === "raw_ocr_text" && typeof val === "string") {
-        payload[input.name] = val.split(",").map(s => s.trim()).filter(s => s.length > 0);
+        payload[input.name] = val
+          .split(",")
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0);
       } else {
         payload[input.name] = val;
       }
@@ -515,18 +643,20 @@ export default function AIModelsPage({
 
     try {
       const startMonotonic = performance.now();
-      const res = await activeFetch(config.endpoint, {
-        method: "POST",
-        headers: customHeaders,
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
+      const data = await api.executeSkill(
+        activeFetch,
+        config.endpoint,
+        payload,
+        {
+          headers: customHeaders,
+        }
+      );
       const endMonotonic = performance.now();
       const elapsedMs = Math.round(endMonotonic - startMonotonic);
 
-      if (res.ok && data.success) {
+      if (data.success) {
         setSkillOutput(data);
-        
+
         logRunToHistory({
           timestamp: new Date().toISOString(),
           model: `Skill: ${config.name} (${modelToUse})`,
@@ -535,14 +665,27 @@ export default function AIModelsPage({
           latencyMs: elapsedMs,
           inputTokens: data.inputTokens || 0,
           outputTokens: data.outputTokens || 0,
-          cost: calculateEstimatedCost(provider, modelToUse, data.inputTokens || 0, data.outputTokens || 0),
+          cost: calculateEstimatedCost(
+            provider,
+            modelToUse,
+            data.inputTokens || 0,
+            data.outputTokens || 0
+          ),
           success: true,
         });
-        
-        addNotification(`Skill '${config.name}' executed successfully.`, "success");
+
+        addNotification(
+          `Skill '${config.name}' executed successfully.`,
+          "success"
+        );
       } else {
-        setSkillOutput({ error: data.error || data.detail || "Skill execution failed." });
-        addNotification(`Skill execution failed: ${data.error || data.detail || "Error"}`, "error");
+        setSkillOutput({
+          error: data.error || data.detail || "Skill execution failed.",
+        });
+        addNotification(
+          `Skill execution failed: ${data.error || data.detail || "Error"}`,
+          "error"
+        );
       }
     } catch (err: any) {
       setSkillOutput({ error: err.message || "Failed to contact backend." });
@@ -554,9 +697,9 @@ export default function AIModelsPage({
 
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
-    setCopiedStatus(prev => ({ ...prev, [id]: true }));
+    setCopiedStatus((prev) => ({ ...prev, [id]: true }));
     setTimeout(() => {
-      setCopiedStatus(prev => ({ ...prev, [id]: false }));
+      setCopiedStatus((prev) => ({ ...prev, [id]: false }));
     }, 2000);
     addNotification("Copied output to clipboard!", "success");
   };
@@ -578,20 +721,16 @@ export default function AIModelsPage({
     let testModel = "gemini-2.5-flash";
     if (provider === "openai") testModel = "gpt-4o-mini";
     if (provider === "anthropic") testModel = "claude-3-5-haiku-20241022";
-    if (provider === "huggingface") testModel = "mistralai/Mistral-7B-Instruct-v0.2";
+    if (provider === "huggingface")
+      testModel = "mistralai/Mistral-7B-Instruct-v0.2";
 
     try {
-      const res = await activeFetch("/api/test-model-latency", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          provider,
-          model: testModel,
-          apiKey: keyValue || undefined,
-          prompt: "Say: OK",
-        }),
+      const data = await api.testModelLatency(activeFetch, {
+        provider,
+        model: testModel,
+        apiKey: keyValue || undefined,
+        prompt: "Say: OK",
       });
-      const data = await res.json();
       if (data.success) {
         setVerificationResult((prev) => ({
           ...prev,
@@ -605,7 +744,8 @@ export default function AIModelsPage({
           ...prev,
           [provider]: {
             success: false,
-            message: data.error || "Verification test failed. Check key validity.",
+            message:
+              data.error || "Verification test failed. Check key validity.",
           },
         }));
       }
@@ -634,32 +774,35 @@ export default function AIModelsPage({
 
     // Always use Gemini for prompt enhancement (most reliable)
     const geminiKey = localStorage.getItem("user_gemini_key") || undefined;
-    const enhanceModel = playgroundProvider === "gemini" && playgroundModel
-      ? playgroundModel
-      : "gemini-2.5-flash";
+    const enhanceModel =
+      playgroundProvider === "gemini" && playgroundModel
+        ? playgroundModel
+        : "gemini-2.5-flash";
 
     try {
-      const res = await activeFetch("/api/enhance-prompt", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(geminiKey ? { "X-User-Gemini-Key": geminiKey } : {}),
-        },
-        body: JSON.stringify({
+      const data = await api.enhancePrompt(
+        activeFetch,
+        {
           prompt: playgroundPrompt,
           model: enhanceModel,
           apiKey: geminiKey,
-        }),
-      });
-      const data = await res.json();
+        },
+        geminiKey ? { headers: { "X-User-Gemini-Key": geminiKey } } : {}
+      );
       if (data.success && data.enhanced_prompt) {
         setPlaygroundPrompt(data.enhanced_prompt.trim());
-        addNotification("✨ Prompt enhanced successfully using Gemini AI!", "success");
+        addNotification(
+          "✨ Prompt enhanced successfully using Gemini AI!",
+          "success"
+        );
       } else {
         throw new Error(data.error || "Prompt enhancement returned no result.");
       }
     } catch (err: any) {
-      console.warn("AI prompt enhancement failed, falling back to template:", err.message);
+      console.warn(
+        "AI prompt enhancement failed, falling back to template:",
+        err.message
+      );
       // Fallback to static template so the button is always useful
       const enhanced = `[ROLE]
 You are a developer-grade AI optimization assistant specialized in webtoon content analysis and narrative generation.
@@ -680,12 +823,14 @@ ${playgroundPrompt}
 - Focus strictly on factual, high-utility details.
 - Keep the response concise yet comprehensive.`;
       setPlaygroundPrompt(enhanced);
-      addNotification("Enhanced prompt using structured template (AI offline).", "info");
+      addNotification(
+        "Enhanced prompt using structured template (AI offline).",
+        "info"
+      );
     } finally {
       setIsEnhancingPrompt(false);
     }
   };
-
 
   // Export Run History to JSON
   const exportRunHistory = () => {
@@ -693,10 +838,15 @@ ${playgroundPrompt}
       addNotification("No run history to export.", "warning");
       return;
     }
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(runHistory, null, 2));
+    const dataStr =
+      "data:text/json;charset=utf-8," +
+      encodeURIComponent(JSON.stringify(runHistory, null, 2));
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `playground_run_history_${new Date().toISOString().split('T')[0]}.json`);
+    downloadAnchor.setAttribute(
+      "download",
+      `playground_run_history_${new Date().toISOString().split("T")[0]}.json`
+    );
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -720,26 +870,27 @@ ${playgroundPrompt}
     setIsRunningPlayground(true);
     setPlaygroundResult(null);
 
-    const customKey = localStorage.getItem(`user_${playgroundProvider}_key`) || undefined;
+    const customKey =
+      localStorage.getItem(`user_${playgroundProvider}_key`) || undefined;
 
     try {
       const startMonotonic = performance.now();
-      const res = await activeFetch("/api/test-model-latency", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          provider: playgroundProvider,
-          model: playgroundModel,
-          apiKey: customKey,
-          prompt: playgroundPrompt,
-        }),
+      const data = await api.testModelLatency(activeFetch, {
+        provider: playgroundProvider,
+        model: playgroundModel,
+        apiKey: customKey,
+        prompt: playgroundPrompt,
       });
-      const data = await res.json();
       const endMonotonic = performance.now();
       const elapsedMs = Math.round(endMonotonic - startMonotonic);
 
       if (data.success) {
-        const estCost = calculateEstimatedCost(playgroundProvider, playgroundModel, data.inputTokens || 0, data.outputTokens || 0);
+        const estCost = calculateEstimatedCost(
+          playgroundProvider,
+          playgroundModel,
+          data.inputTokens || 0,
+          data.outputTokens || 0
+        );
         setPlaygroundResult({
           success: true,
           response: data.response,
@@ -748,7 +899,7 @@ ${playgroundPrompt}
           outputTokens: data.outputTokens || 0,
           cost: estCost,
         });
-        
+
         logRunToHistory({
           timestamp: new Date().toISOString(),
           model: playgroundModel,
@@ -763,7 +914,9 @@ ${playgroundPrompt}
       } else {
         setPlaygroundResult({
           success: false,
-          error: data.error || "Model returned an error. Check credentials or quotas.",
+          error:
+            data.error ||
+            "Model returned an error. Check credentials or quotas.",
         });
         logRunToHistory({
           timestamp: new Date().toISOString(),
@@ -781,7 +934,9 @@ ${playgroundPrompt}
     } catch (err: any) {
       setPlaygroundResult({
         success: false,
-        error: err.message || "Request timed out or failed to connect to local server.",
+        error:
+          err.message ||
+          "Request timed out or failed to connect to local server.",
       });
       logRunToHistory({
         timestamp: new Date().toISOString(),
@@ -810,7 +965,7 @@ ${playgroundPrompt}
     const model = modelName.toLowerCase();
     // Pricing per 1M tokens in USD
     let inputPrice = 0.075; // default low baseline (e.g. Gemini Flash / Llama-3-8B)
-    let outputPrice = 0.30; // default low baseline
+    let outputPrice = 0.3; // default low baseline
 
     if (provider === "gemini") {
       if (model.includes("pro")) {
@@ -820,12 +975,12 @@ ${playgroundPrompt}
       } else {
         // Flash/Lite pricing
         inputPrice = 0.075;
-        outputPrice = 0.30;
+        outputPrice = 0.3;
       }
     } else if (provider === "openai") {
       if (model.includes("gpt-4o-mini")) {
         inputPrice = 0.15;
-        outputPrice = 0.60;
+        outputPrice = 0.6;
       } else if (model.includes("gpt-4o") || model.includes("gpt-4")) {
         inputPrice = 5.0;
         outputPrice = 15.0;
@@ -838,20 +993,20 @@ ${playgroundPrompt}
         inputPrice = 3.0;
         outputPrice = 15.0;
       } else if (model.includes("haiku")) {
-        inputPrice = 0.80;
-        outputPrice = 4.00;
+        inputPrice = 0.8;
+        outputPrice = 4.0;
       } else if (model.includes("opus")) {
         inputPrice = 15.0;
         outputPrice = 75.0;
       } else {
-        inputPrice = 0.80;
-        outputPrice = 4.00;
+        inputPrice = 0.8;
+        outputPrice = 4.0;
       }
     } else if (provider === "huggingface") {
       // standard open source inference endpoint pricing simulation
       if (model.includes("llama-3-70b") || model.includes("mixtral")) {
-        inputPrice = 0.70;
-        outputPrice = 0.90;
+        inputPrice = 0.7;
+        outputPrice = 0.9;
       } else {
         inputPrice = 0.15;
         outputPrice = 0.15;
@@ -881,7 +1036,8 @@ ${playgroundPrompt}
               AI Model Control Hub
             </h1>
             <p className="text-xs text-neutral-500 font-mono">
-              Manage API keys, select global models, tune settings, and benchmark latency.
+              Manage API keys, select global models, tune settings, and
+              benchmark latency.
             </p>
           </div>
         </div>
@@ -889,11 +1045,16 @@ ${playgroundPrompt}
         {/* Currently active model pill */}
         <div className="bg-purple-950/20 border border-purple-500/20 px-4 py-2 rounded-2xl flex items-center gap-3 font-mono text-xs shadow-inner">
           <div>
-            <span className="text-[9px] text-purple-400 uppercase tracking-wider block font-bold">Active System Model</span>
-            <span className="text-white font-bold block mt-0.5">{globalSelectedModel}</span>
+            <span className="text-[9px] text-purple-400 uppercase tracking-wider block font-bold">
+              Active System Model
+            </span>
+            <span className="text-white font-bold block mt-0.5">
+              {globalSelectedModel}
+            </span>
           </div>
           <span className="bg-emerald-950/40 text-emerald-400 border border-emerald-800/30 text-[8px] font-bold px-2 py-0.5 rounded uppercase flex items-center gap-0.5">
-            <Zap className="h-2.5 w-2.5 text-emerald-400 fill-emerald-400" /> Active
+            <Zap className="h-2.5 w-2.5 text-emerald-400 fill-emerald-400" />{" "}
+            Active
           </span>
         </div>
       </div>

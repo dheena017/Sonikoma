@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Sparkles, Check, Users, ShieldAlert } from "lucide-react";
+import * as api from "../../api/index.js";
+import { fetchWithAuth } from "../../utils.js";
 
 interface VoiceSettingsPanelProps {
   addNotification?: (msg: string, type: any) => void;
@@ -55,8 +57,8 @@ export default function VoiceSettingsPanel({
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
 
   React.useEffect(() => {
-    fetch("/api/audio/voices")
-      .then((res) => res.json())
+    api
+      .getVoices(fetch)
       .then((data) => {
         if (data.success && data.voices) {
           setVoices(data.voices);
@@ -81,17 +83,12 @@ export default function VoiceSettingsPanel({
   const handleCast = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/skills/voice-cast", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          character_name: name,
-          dialogue_sample: dialogue,
-          visual_description: visual,
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
+      const json = await api.runVoiceCastSkill(fetchWithAuth, {
+        character_name: name,
+        dialogue_sample: dialogue,
+        visual_description: visual,
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
       });
-      const json = await res.json();
       if (json.success && json.result) {
         setCastData(json.result);
         if (addNotification) {
@@ -138,18 +135,12 @@ export default function VoiceSettingsPanel({
         parseFloat((words / 2.2 + 0.8).toFixed(1))
       );
 
-      const res = await fetch("/api/audio/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          dialogue_list: [testScript],
-          target_duration: estimatedDuration,
-          voice: selectedVoice,
-          return_base64: true,
-        }),
+      const json = await api.generateAudio(fetchWithAuth, {
+        dialogue_list: [testScript],
+        target_duration: estimatedDuration,
+        voice: selectedVoice,
+        return_base64: true,
       });
-
-      const json = await res.json();
       if (json.success && json.audio_base64) {
         const audioSrc = `data:${json.mime_type || "audio/mpeg"};base64,${
           json.audio_base64

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from "react";
-import { GeneratedPanel } from "../types";
+import { GeneratedPanel } from "../types.js";
+import * as api from "../api/index.js";
 
 export type SaveStatus = "idle" | "saving" | "saved" | "error";
 
@@ -212,10 +213,10 @@ export function useAutoSave(state: AutoSaveState) {
         headers["Authorization"] = `Bearer ${token}`;
       }
 
-      const res = await fetch(`/api/projects/${targetProjectId}`, {
-        method: "PUT",
-        headers,
-        body: JSON.stringify({
+      const data = await api.updateProject(
+        state.fetchWithInterceptor,
+        targetProjectId,
+        {
           url: state.targetUrl || "",
           title: state.seriesTitle.trim() || "Untitled Project",
           genre: state.scrapedGenre.trim() || "general",
@@ -242,14 +243,8 @@ export function useAutoSave(state: AutoSaveState) {
             inpaint_radius: p.inpaint_radius ?? null,
             detection_style: p.detection_style || null,
           })),
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error(`Failed to save (HTTP ${res.status})`);
-      }
-
-      const data = await res.json();
+        }
+      );
       if (data.success) {
         if (isConvertingTemp || data.series_slug) {
           state.setProjectId?.(targetProjectId);
@@ -280,19 +275,13 @@ export function useAutoSave(state: AutoSaveState) {
             console.log(
               `[Save Hook] Saving raw scraped images cache list to backend for URL: ${state.targetUrl}`
             );
-            const scrapeRes = await fetch("/api/save-scraped-images", {
-              method: "PUT",
-              headers,
-              body: JSON.stringify({
+            await api.saveScrapedImages(
+              {
                 url: state.targetUrl,
                 images: state.scrapedImages,
-              }),
-            });
-            if (!scrapeRes.ok) {
-              console.warn(
-                "[Save Hook] Failed to save updated scraped images cache."
-              );
-            }
+              },
+              token || undefined
+            );
           } catch (scrapeErr) {
             console.error(
               "[Save Hook] Error saving raw scraped images cache list:",
@@ -308,13 +297,10 @@ export function useAutoSave(state: AutoSaveState) {
         // Sync accumulated tokens if any exist
         if (state.accumulatedTokens && state.accumulatedTokens > 0) {
           try {
-            await state.fetchWithInterceptor(
-              `/api/projects/${data.project_id || targetProjectId}/tokens`,
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ tokens: state.accumulatedTokens }),
-              }
+            await api.updateProjectTokens(
+              state.fetchWithInterceptor,
+              data.project_id || targetProjectId,
+              state.accumulatedTokens
             );
             state.setAccumulatedTokens?.(0);
             console.log(

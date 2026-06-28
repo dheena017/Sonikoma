@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   Download,
 } from "lucide-react";
+import * as api from "../../api/index.js";
 
 interface ProfileSecurityTabProps {
   passwordState: {
@@ -72,15 +73,8 @@ export default function ProfileSecurityTab({
       sessionStorage.getItem("sonikoma_token");
     if (!token) return;
 
-    fetch(
-      `/api/auth/audit-logs?query=${encodeURIComponent(
-        searchQuery
-      )}&page=${currentPage}&limit=3`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    )
-      .then((r) => r.json())
+    api
+      .getAuditLogs(token, searchQuery, currentPage, 3)
       .then((data) => {
         if (data.success) {
           setAuditLogs(

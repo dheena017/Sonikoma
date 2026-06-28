@@ -21,7 +21,8 @@ import {
   Calendar,
   Eye,
 } from "lucide-react";
-import { getSourceName } from "../../utils";
+import { getSourceName } from "../../utils.js";
+import * as api from "../../api/index.js";
 
 const parseEpisodeString = (epStr: string) => {
   if (!epStr) return { numberStr: "Chapter 1", titleStr: "" };
@@ -213,12 +214,6 @@ export default function ProfileProjectsTab({
         const token =
           localStorage.getItem("sonikoma_token") ||
           sessionStorage.getItem("sonikoma_token");
-        const headers: HeadersInit = {
-          "Content-Type": "application/json",
-        };
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
-        }
 
         let imports: any[] = [];
         if (Array.isArray(parsed)) {
@@ -258,7 +253,10 @@ export default function ProfileProjectsTab({
 
           const createRes = await fetch("/api/projects", {
             method: "POST",
-            headers,
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
             body: JSON.stringify(createBody),
           });
 
@@ -294,7 +292,10 @@ export default function ProfileProjectsTab({
               `/api/projects/${proj.project_id}/panels`,
               {
                 method: "POST",
-                headers,
+                headers: {
+                  "Content-Type": "application/json",
+                  ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
                 body: JSON.stringify(panelsBody),
               }
             );
@@ -310,16 +311,22 @@ export default function ProfileProjectsTab({
         }
 
         if (successCount > 0) {
-          await (window as any).alertAsync(`Successfully imported ${successCount} project(s)!`);
+          await (window as any).alertAsync(
+            `Successfully imported ${successCount} project(s)!`
+          );
           if (onRefreshProjects) {
             onRefreshProjects();
           }
         } else {
-          await (window as any).alertAsync("No projects were successfully imported.");
+          await (window as any).alertAsync(
+            "No projects were successfully imported."
+          );
         }
       } catch (err: any) {
         console.error("Failed to parse or import JSON:", err);
-        await (window as any).alertAsync(err.message || "Failed to import JSON.");
+        await (window as any).alertAsync(
+          err.message || "Failed to import JSON."
+        );
       } finally {
         if (e.target) {
           e.target.value = "";
@@ -740,7 +747,9 @@ export default function ProfileProjectsTab({
                                 const confirm =
                                   (window as any).confirmAsync ||
                                   window.confirm;
-                                const confirmed = await (window as any).confirmAsync(
+                                const confirmed = await (
+                                  window as any
+                                ).confirmAsync(
                                   `Are you sure you want to delete ${numberStr}?`
                                 );
                                 if (confirmed) {
@@ -792,7 +801,9 @@ export default function ProfileProjectsTab({
                           onClick={async () => {
                             const confirm =
                               (window as any).confirmAsync || window.confirm;
-                            const confirmed = await (window as any).confirmAsync(
+                            const confirmed = await (
+                              window as any
+                            ).confirmAsync(
                               `Are you sure you want to delete the entire series "${group.title}" and all its chapters?`
                             );
                             if (confirmed) {
@@ -897,7 +908,9 @@ export default function ProfileProjectsTab({
                                   const confirm =
                                     (window as any).confirmAsync ||
                                     window.confirm;
-                                  const confirmed = await (window as any).confirmAsync(
+                                  const confirmed = await (
+                                    window as any
+                                  ).confirmAsync(
                                     `Are you sure you want to delete ${numberStr}?`
                                   );
                                   if (confirmed) {

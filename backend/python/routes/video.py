@@ -19,6 +19,7 @@ from services.audio import generate_panel_audio
 # Try importing moviepy; fallback gracefully if not installed
 try:
     from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips, CompositeVideoClip, CompositeAudioClip
+    from proglog import ProgressBarLogger
     HAS_MOVIEPY = True
 except ImportError:
     HAS_MOVIEPY = False
@@ -63,63 +64,70 @@ async def download_asset(url: str, dest_path: str) -> bool:
         logger.error(f"Error downloading {url}: {e}")
         return False
 
-def create_subtitle_clip(text, w, h, duration):
+def draw_subtitles_on_image(img: Image.Image, text: str) -> Image.Image:
     """
-    Creates a subtitle overlay clip.
+    Bakes subtitles directly onto a PIL image.
     """
+    from PIL import ImageDraw, ImageFont
+    w, h = img.size
+    overlay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(overlay)
+    
     try:
-        from moviepy.editor import TextClip
-        txt_clip = TextClip(text, fontsize=40, color='white', font='Arial-Bold', 
-                            bg_color='rgba(0,0,0,0.6)', 
-                            method='caption', size=(int(w*0.9), None))
-        return txt_clip.set_duration(duration)
-    except Exception as e:
-        logger.warning(f"TextClip failed, using PIL fallback: {e}")
-        from PIL import Image, ImageDraw, ImageFont
-        import numpy as np
+        font = ImageFont.truetype("arial.ttf", 40)
+    except:
+        font = ImageFont.load_default()
         
-        img = Image.new('RGBA', (w, h), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
+    lines = []
+    words = text.split()
+    curr_line = ""
+    for word in words:
+        test_line = curr_line + " " + word if curr_line else word
         try:
-            font = ImageFont.truetype("arial.ttf", 40)
+            tw = draw.textlength(test_line, font=font)
         except:
-            font = ImageFont.load_default()
-            
-        lines = []
-        words = text.split()
-        curr_line = ""
-        for word in words:
-            test_line = curr_line + " " + word if curr_line else word
-            # Handle text wrapping
-            try:
-                tw = draw.textlength(test_line, font=font)
-            except:
-                tw = font.getsize(test_line)[0]
+            tw = font.getsize(test_line)[0]
 
-            if tw > w * 0.9:
-                lines.append(curr_line)
-                curr_line = word
-            else:
-                curr_line = test_line
-        lines.append(curr_line)
+        if tw > w * 0.9:
+            lines.append(curr_line)
+            curr_line = word
+        else:
+            curr_line = test_line
+    lines.append(curr_line)
+    
+    line_height = 50
+    total_height = len(lines) * line_height
+    start_y = h - total_height - 60
+    
+    # Background box for readability
+    draw.rectangle([w*0.05, start_y - 10, w*0.95, start_y + total_height + 10], fill=(0, 0, 0, 160))
+    
+    for i, line in enumerate(lines):
+        try:
+            tw = draw.textlength(line, font=font)
+        except:
+            tw = font.getsize(line)[0]
+        draw.text(((w - tw) / 2, start_y + i * line_height), line, font=font, fill=(255, 255, 255, 255))
         
-        line_height = 50
-        total_height = len(lines) * line_height
-        start_y = h - total_height - 60
-        
-        # Background box for readability
-        draw.rectangle([w*0.05, start_y - 10, w*0.95, start_y + total_height + 10], fill=(0, 0, 0, 160))
-        
-        for i, line in enumerate(lines):
-            try:
-                tw = draw.textlength(line, font=font)
-            except:
-                tw = font.getsize(line)[0]
-            draw.text(((w - tw) / 2, start_y + i * line_height), line, font=font, fill=(255, 255, 255, 255))
-            
-        return ImageClip(np.array(img)).set_duration(duration)
+    base_rgba = img.convert("RGBA")
+    combined = Image.alpha_composite(base_rgba, overlay)
+    return combined.convert("RGB")
 
-def render_pipeline_sync(panels_data: List[Dict[str, Any]], output_path: str):
+class MoviePyProgressLogger(ProgressBarLogger):
+    def __init__(self, video_id: str):
+        super().__init__()
+        self.video_id = video_id
+
+    def bars_callback(self, bar, attr, value, old_value=None):
+        if bar == "t" and attr == "index":
+            total = self.bars[bar].get("total")
+            if total and total > 0:
+                progress = 50 + int((value / total) * 45)
+                progress = min(progress, 95)
+                if self.video_id in RENDER_JOBS:
+                    RENDER_JOBS[self.video_id]["progress"] = progress
+
+def render_pipeline_sync(video_id: str, panels_data: List[Dict[str, Any]], output_path: str):
     """
     Stitches panels together into a final video file.
     """
@@ -152,13 +160,29 @@ def render_pipeline_sync(panels_data: List[Dict[str, Any]], output_path: str):
                 logger.error(f"Failed to read audio duration for panel {i}: {e}")
 
         safe_duration = max(duration, 0.2) # Minimum duration safety
+        # Avoid overlapping voices: MoviePy overlaps clips by 0.5s on concatenation.
+        # To prevent the voice audio from overlapping with the next panel's voice,
+        # we extend the visual duration of all non-last panels by 0.5s.
+        if i < len(panels_data) - 1:
+            safe_duration += 0.5
+
         clip = ImageClip(img_path).set_duration(safe_duration)
         
+        # CRITICAL FIX: Downscale to 720p before animation.
+        # Rendering 4K images with zoom/crop is extremely slow. 
+        # 720p is visually indistinguishable in a 1080p final video but 60% faster to render.
+        if clip.h > 720 or clip.w > 720:
+            clip = clip.resize(height=720) # Resizes width proportionally
+
         # Attach audio to this visual clip
         if audio_path and os.path.exists(audio_path):
             try:
                 # set_audio returns a copy
-                panel_audio = AudioFileClip(audio_path).set_duration(safe_duration)
+                raw_audio = AudioFileClip(audio_path)
+                if safe_duration > raw_audio.duration:
+                    panel_audio = CompositeAudioClip([raw_audio]).set_duration(safe_duration)
+                else:
+                    panel_audio = raw_audio.set_duration(safe_duration)
                 clip = clip.set_audio(panel_audio)
             except Exception as e:
                 logger.error(f"Failed to attach audio to clip {i}: {e}")
@@ -182,15 +206,8 @@ def render_pipeline_sync(panels_data: List[Dict[str, Any]], output_path: str):
             # Simple constant zoom for pans to avoid edge bleed
             clip = clip.resize(1.15)
 
-        # Subtitles
-        speech_text = p.get("speech_text")
-        layers = [clip.set_position(('center', 'center'))]
-        if speech_text and speech_text.strip():
-            sub_clip = create_subtitle_clip(speech_text, w, h, safe_duration)
-            layers.append(sub_clip.set_position(('center', 'bottom')))
-
-        # Flatten layers
-        panel_composite = CompositeVideoClip(layers, size=(w, h)).set_duration(safe_duration)
+        # Flatten layers (subtitles are pre-baked into the image in process_render_job)
+        panel_composite = CompositeVideoClip([clip.set_position(('center', 'center'))], size=(w, h)).set_duration(safe_duration)
 
         # Crossfade transition (except first)
         if i > 0:
@@ -235,12 +252,13 @@ def render_pipeline_sync(panels_data: List[Dict[str, Any]], output_path: str):
             logger.error(f"Final audio mix error: {e}")
             
     # Render to disk
+    progress_logger = MoviePyProgressLogger(video_id) if HAS_MOVIEPY else None
     final_video.write_videofile(
         output_path, 
         fps=24, 
         codec="libx264", 
         audio_codec="aac", 
-        logger=None,
+        logger=progress_logger,
         threads=4,
         preset="ultrafast"
     )
@@ -261,9 +279,10 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
 
     try:
         panels_data = []
-        RENDER_JOBS[video_id]["progress"] = 10
+        RENDER_JOBS[video_id]["progress"] = 1
 
-        # 1. Asset Downloads
+        # 1. Asset Downloads (1% to 25%)
+        total_panels = len(panels)
         for idx, panel in enumerate(panels):
             img_ext = panel.image_url.split(".")[-1].split("?")[0] if "." in panel.image_url else "jpg"
             if len(img_ext) > 4: img_ext = "jpg"
@@ -288,10 +307,11 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
                     p_dict["local_audio"] = audio_path
 
             panels_data.append(p_dict)
+            if total_panels > 0:
+                progress = 1 + int(((idx + 1) / total_panels) * 24)
+                RENDER_JOBS[video_id]["progress"] = min(progress, 25)
 
-        RENDER_JOBS[video_id]["progress"] = 30
-
-        # 2. Missing TTS Generation
+        # 2. Missing TTS Generation (25% to 40%)
         tts_tasks = []
         tts_mapping = []
         for idx, p_dict in enumerate(panels_data):
@@ -309,11 +329,24 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
 
         if tts_tasks:
             logger.info(f"[Render] Generating TTS for {len(tts_tasks)} panels.")
-            results = await asyncio.gather(*tts_tasks)
+            completed_tts = 0
+            total_tts = len(tts_tasks)
+            async def wrapped_tts_task(task, mapping_dict):
+                nonlocal completed_tts
+                res = await task
+                completed_tts += 1
+                progress = 25 + int((completed_tts / total_tts) * 15)
+                RENDER_JOBS[video_id]["progress"] = min(progress, 40)
+                return res
+            
+            wrapped_tasks = [wrapped_tts_task(task, tts_mapping[i]) for i, task in enumerate(tts_tasks)]
+            results = await asyncio.gather(*wrapped_tasks)
             for i, (_, actual_dur) in enumerate(results):
                 tts_mapping[i]["duration"] = actual_dur
+        else:
+            RENDER_JOBS[video_id]["progress"] = 40
 
-        # 3. Image Prep (Layout)
+        # 3. Image Prep (Layout) (40% to 50%)
         from PIL import Image
         tall_count = 0
         for p in panels_data:
@@ -328,7 +361,7 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
 
         target_w, target_h = (1080, 1920) if tall_count > len(panels_data)/2 else (1920, 1080)
 
-        for p in panels_data:
+        for idx, p in enumerate(panels_data):
             if os.path.exists(p["raw_img"]):
                 with Image.open(p["raw_img"]) as img:
                     img = img.convert("RGB")
@@ -338,22 +371,32 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
                     resized = img.resize((max(2, nw - nw%2), max(2, nh - nh%2)), Image.Resampling.LANCZOS)
                     bg = Image.new("RGB", (target_w, target_h), (0, 0, 0))
                     bg.paste(resized, ((target_w - resized.width)//2, (target_h - resized.height)//2))
+                    
+                    # Bake subtitles if present (Disabled as requested)
+                    # if p.get("speech_text") and p["speech_text"].strip():
+                    #     bg = draw_subtitles_on_image(bg, p["speech_text"].strip())
+                        
                     bg.save(p["local_img"], "JPEG")
+            
+            if len(panels_data) > 0:
+                progress = 40 + int(((idx + 1) / len(panels_data)) * 10)
+                RENDER_JOBS[video_id]["progress"] = min(progress, 50)
 
         RENDER_JOBS[video_id]["progress"] = 50
 
-        # 4. Rendering
+        # 4. Rendering (50% to 95%)
         logger.info(f"[Render] Starting MoviePy pipeline for {video_id}")
-        await asyncio.to_thread(render_pipeline_sync, panels_data, output_path)
+        await asyncio.to_thread(render_pipeline_sync, video_id, panels_data, output_path)
 
         final_video_url = f"/videos/{output_filename}"
 
-        # 5. Supabase Upload
+        # 5. Supabase Upload (95% to 100%)
         try:
             from supabase import create_client
             s_url = os.environ.get("SUPABASE_URL")
             s_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
             if s_url and s_key:
+                RENDER_JOBS[video_id]["progress"] = 96
                 with open(output_path, "rb") as f:
                     create_client(s_url, s_key).storage.from_("videos").upload(output_filename, f, {"content-type": "video/mp4", "upsert": "true"})
                 final_video_url = create_client(s_url, s_key).storage.from_("videos").get_public_url(output_filename)

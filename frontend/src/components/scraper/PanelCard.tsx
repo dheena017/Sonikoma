@@ -1,5 +1,6 @@
 import React from "react";
 import { ScraperDeckProps } from "./types.js";
+import * as api from "../../api/index.js";
 import { PanelCardThumbnail } from "./PanelCardThumbnail.js";
 import { PanelCardControls } from "./PanelCardControls.js";
 import { PanelCardActions } from "./PanelCardActions.js";
@@ -77,18 +78,11 @@ function PanelCard({
       ...prev,
     ]);
     try {
-      const response = await fetch("/api/image/edit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          url: imgUrl,
-          rotate: 90,
-          autoTrim: false,
-        }),
+      const data = await api.editImage(fetch, {
+        url: imgUrl,
+        rotate: 90,
+        autoTrim: false,
       });
-      if (!response.ok)
-        throw new Error(`Rotate failed with status ${response.status}`);
-      const data = await response.json();
 
       setScrapedImages?.((prev: any[]) =>
         prev.map((img: any, i: number) => (i === idx ? data.url : img))
@@ -119,18 +113,11 @@ function PanelCard({
       ...prev,
     ]);
     try {
-      const response = await fetch("/api/image/edit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          url: imgUrl,
-          flipHorizontal: true,
-          autoTrim: false,
-        }),
+      const data = await api.editImage(fetch, {
+        url: imgUrl,
+        flipHorizontal: true,
+        autoTrim: false,
       });
-      if (!response.ok)
-        throw new Error(`Flip failed with status ${response.status}`);
-      const data = await response.json();
 
       setScrapedImages?.((prev: any[]) =>
         prev.map((img: any, i: number) => (i === idx ? data.url : img))
@@ -161,14 +148,7 @@ function PanelCard({
       ...prev,
     ]);
     try {
-      const response = await fetch("/api/image/undo-crop", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: imgUrl }),
-      });
-      if (!response.ok)
-        throw new Error(`Undo failed with status ${response.status}`);
-      const data = await response.json();
+      const data = await api.undoCrop(fetch, { url: imgUrl });
 
       if (data.success && data.previous_url) {
         setScrapedImages?.((prev: any[]) =>

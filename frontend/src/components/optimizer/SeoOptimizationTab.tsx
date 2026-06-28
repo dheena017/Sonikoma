@@ -1,3 +1,4 @@
+import * as api from "../../api/index.js";
 import React, { useState } from "react";
 import {
   Sparkles,
@@ -8,6 +9,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { GeneratedPanel } from "../../types";
+import { fetchWithAuth } from "../../utils.js";
 
 interface SeoOptimizationTabProps {
   title: string;
@@ -50,18 +52,13 @@ export default function SeoOptimizationTab({
 
     setLoading(true);
     try {
-      const res = await fetch("/api/skills/seo", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: title || "My Webtoon Recap",
-          genre: genre || "Action",
-          storyboard_summary:
-            storyboardSummary || "The story summary details go here.",
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
+      const json = await api.runSeoSkill(fetchWithAuth, {
+        title: title || "My Webtoon Recap",
+        genre: genre || "Action",
+        storyboard_summary:
+          storyboardSummary || "The story summary details go here.",
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
       });
-      const json = await res.json();
       if (json.success && json.result) {
         setData(json.result);
         if (addNotification) {

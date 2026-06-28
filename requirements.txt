@@ -42,7 +42,6 @@ lxml>=5.2.0                      # Fast XML/HTML parser (used with BeautifulSoup
 google-genai>=2.8.0              # Gemini REST client (cleaner.py bubble detection)
 
 # ── Utilities ─────────────────────────────────────────────────────────────────
-pydantic>=2.7.0                  # Data validation for incoming CLI/JSON payloads
 python-dotenv>=1.0.1             # Load .env files (GEMINI_API_KEY etc.)
 python-multipart>=0.0.9          # Multipart form support for FastAPI file uploads
 aiofiles>=23.2.1                 # Async file I/O for FastAPI
@@ -50,18 +49,25 @@ bcrypt>=4.1.2                    # Password hashing
 PyJWT>=2.8.0                     # JWT authentication
 psycopg2-binary>=2.9.9           # PostgreSQL support (Supabase)
 supabase>=2.4.0                  # Supabase client (Storage + DB)
+google-auth-oauthlib>=1.2.0      # YouTube API authentication
+google-api-python-client>=2.128.0 # YouTube Data API
+huggingface_hub>=0.20.0          # Hugging Face API client (storyboard_ai.py)
+playwright>=1.40.0               # Headless browser scraping fallback (scraper.py)
+psutil>=5.9.0                    # Process resource monitoring & lifecycle (health.py)
+colorama>=0.4.6                  # Console colored logs (main.py)
+proglog>=0.1.10                  # Moviepy render progress logger (video.py)
 
 # =============================================================================
 # SYSTEM DEPENDENCIES (install separately — NOT via pip)
 # =============================================================================
-# ffmpeg  — Required by pydub and moviepy for audio/video encoding
+ffmpeg  — Required by pydub and moviepy for audio/video encoding
 #           Windows: winget install ffmpeg
 #                 OR download from https://ffmpeg.org/download.html
 #           macOS:   brew install ffmpeg
 #           Linux:   sudo apt install ffmpeg
-#
+
 # =============================================================================
 # OPTIONAL — GPU acceleration for EasyOCR (much faster OCR, not required)
 # =============================================================================
-# torch>=2.3.0       # PyTorch — enables GPU mode for easyocr (large download ~2GB)
-# torchvision>=0.18.0
+torch>=2.3.0       # PyTorch — enables GPU mode for easyocr (large download ~2GB)
+torchvision>=0.18.0

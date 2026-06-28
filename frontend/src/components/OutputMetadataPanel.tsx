@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Download, Youtube, Loader2, ExternalLink } from "lucide-react";
+import * as api from "../api/index.js";
+import { fetchWithAuth } from "../utils.js";
 
 interface OutputMetadataPanelProps {
   musicTheme: string;
@@ -23,16 +25,11 @@ export default function OutputMetadataPanel({
     setIsPublishing(true);
     setPublishMessage(null);
     try {
-      const res = await fetch("/api/export/youtube", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          video_url: videoUrl,
-          title: `Webtoon Comic Video - ${musicTheme}`,
-          synopsis: `Cinematic Webtoon Video featuring ${voiceActor} and ${musicTheme}.`,
-        }),
+      const data = await api.exportToYoutube(fetchWithAuth, {
+        video_url: videoUrl,
+        title: `Webtoon Comic Video - ${musicTheme}`,
+        synopsis: `Cinematic Webtoon Video featuring ${voiceActor} and ${musicTheme}.`,
       });
-      const data = await res.json();
       if (data.success) {
         setYoutubeUrl(data.youtube_url);
         setPublishMessage(data.message);

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Brain, RefreshCw, Sliders, HelpCircle, Eye } from "lucide-react";
-import { NotificationType } from "../../NotificationStack";
-import { PRESETS } from "../auto/bubblePresets";
+import { NotificationType } from "../../NotificationStack.js";
+import { PRESETS } from "../auto/bubblePresets.js";
+import * as api from "../../../api/index.js";
 import CleanBubblesPresets from "./CleanBubblesPresets";
 import CleanBubblesModes from "./CleanBubblesModes";
 import CleanBubblesAdvanced from "./CleanBubblesAdvanced";
@@ -185,10 +186,9 @@ export default function CleanBubblesPanel({
     }
     try {
       abortControllerRef.current = new AbortController();
-      const response = await activeFetch("/api/image/remove-speech-bubbles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const data = await api.removeSpeechBubbles(
+        activeFetch,
+        {
           url: imgUrl,
           method: eraseMethod,
           sensitivity: sensitivity,
@@ -203,17 +203,9 @@ export default function CleanBubblesPanel({
           morph_shape: morphShape,
           custom_color_target: useCustomColorTarget ? customColorTarget : "",
           custom_color_tolerance: customColorTolerance,
-        }),
-        signal: abortControllerRef.current.signal,
-      });
-
-      if (!response.ok) {
-        throw new Error(
-          `Speech bubble removal failed with status ${response.status}`
-        );
-      }
-
-      const data = await response.json();
+        },
+        { signal: abortControllerRef.current.signal }
+      );
       if (data.success && data.url) {
         // Update scraped image and panels
         if (setScrapedImages) {

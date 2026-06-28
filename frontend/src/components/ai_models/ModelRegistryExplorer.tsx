@@ -17,7 +17,9 @@ interface ModelRegistryExplorerProps {
   filterQuery: string;
   setFilterQuery: (q: string) => void;
   selectedProvider: "gemini" | "huggingface" | "openai" | "anthropic";
-  handleProviderTabChange: (prov: "gemini" | "huggingface" | "openai" | "anthropic") => void;
+  handleProviderTabChange: (
+    prov: "gemini" | "huggingface" | "openai" | "anthropic"
+  ) => void;
   showFreeOnly: boolean;
   setShowFreeOnly: (v: boolean) => void;
   fetchModels: (prov?: any) => Promise<void>;
@@ -25,7 +27,10 @@ interface ModelRegistryExplorerProps {
   handleSetActiveModel: (modelId: string) => void;
   setPlaygroundModel: (modelId: string) => void;
   setPlaygroundProvider: (prov: string) => void;
-  addNotification: (msg: string, type: "success" | "info" | "warning" | "error") => void;
+  addNotification: (
+    msg: string,
+    type: "success" | "info" | "warning" | "error"
+  ) => void;
 }
 
 export default function ModelRegistryExplorer({
@@ -57,7 +62,8 @@ export default function ModelRegistryExplorer({
               Model Registry Explorer
             </h2>
             <p className="text-[10px] text-neutral-500 font-mono mt-0.5">
-              Browse and filter supported vision/chat models. Highlight a model to set as active or load into benchmark playground.
+              Browse and filter supported vision/chat models. Highlight a model
+              to set as active or load into benchmark playground.
             </p>
           </div>
           {models.length > 0 && (
@@ -71,19 +77,21 @@ export default function ModelRegistryExplorer({
         <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 font-mono text-xs">
           {/* Tabs */}
           <div className="flex bg-neutral-900/60 p-1 rounded-xl border border-neutral-850 text-xs font-mono flex-1">
-            {(["gemini", "huggingface", "openai", "anthropic"] as const).map((prov) => (
-              <button
-                key={prov}
-                onClick={() => handleProviderTabChange(prov)}
-                className={`flex-1 py-2 text-center rounded-lg transition-all cursor-pointer font-bold capitalize ${
-                  selectedProvider === prov
-                    ? "bg-purple-650 text-white"
-                    : "text-neutral-400 hover:text-white"
-                }`}
-              >
-                {prov === "huggingface" ? "Hugging Face" : prov}
-              </button>
-            ))}
+            {(["gemini", "huggingface", "openai", "anthropic"] as const).map(
+              (prov) => (
+                <button
+                  key={prov}
+                  onClick={() => handleProviderTabChange(prov)}
+                  className={`flex-1 py-2 text-center rounded-lg transition-all cursor-pointer font-bold capitalize ${
+                    selectedProvider === prov
+                      ? "bg-purple-650 text-white"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  {prov === "huggingface" ? "Hugging Face" : prov}
+                </button>
+              )
+            )}
           </div>
 
           {/* Search & filters */}
@@ -92,7 +100,9 @@ export default function ModelRegistryExplorer({
               <Search className="absolute inset-y-0 left-3 h-3.5 w-3.5 text-neutral-500 my-auto" />
               <input
                 type="text"
-                placeholder={`Search ${selectedProvider === "huggingface" ? "HF" : selectedProvider} models...`}
+                placeholder={`Search ${
+                  selectedProvider === "huggingface" ? "HF" : selectedProvider
+                } models...`}
                 value={filterQuery}
                 onChange={(e) => setFilterQuery(e.target.value)}
                 className="w-full bg-neutral-900 border border-neutral-800 text-white rounded-xl pl-9 pr-3 py-2 text-xs font-mono placeholder:text-neutral-500 focus:outline-none focus:border-purple-500 transition-colors"
@@ -123,7 +133,9 @@ export default function ModelRegistryExplorer({
 
         {!loadingModels && modelsError && (
           <div className="p-8 rounded-2xl border border-rose-500/10 bg-rose-955/10 text-rose-350 text-xs font-mono text-center space-y-2">
-            <p>Failed to query API models for {selectedProvider}: {modelsError}</p>
+            <p>
+              Failed to query API models for {selectedProvider}: {modelsError}
+            </p>
             <button
               onClick={() => fetchModels(selectedProvider)}
               className="px-3 py-1.5 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-300 rounded-lg text-[10px] font-bold cursor-pointer transition-all"
@@ -135,7 +147,8 @@ export default function ModelRegistryExplorer({
 
         {!loadingModels && !modelsError && models.length === 0 && (
           <div className="p-8 rounded-2xl border border-neutral-900 bg-neutral-900/10 text-neutral-500 text-xs font-mono text-center">
-            No active configurations loaded for {selectedProvider}. Ensure credentials are configured.
+            No active configurations loaded for {selectedProvider}. Ensure
+            credentials are configured.
           </div>
         )}
 
@@ -154,40 +167,78 @@ export default function ModelRegistryExplorer({
               </thead>
               <tbody>
                 {models
-                  .filter((m) => m.name.toLowerCase().includes(filterQuery.toLowerCase()))
+                  .filter((m) =>
+                    m.name.toLowerCase().includes(filterQuery.toLowerCase())
+                  )
                   .filter((m) => {
                     if (!showFreeOnly) return true;
                     if (selectedProvider !== "gemini") return true;
                     const name = m.name.toLowerCase();
-                    return name.includes("flash") || name.includes("lite") || name.includes("8b") || name.includes("gemma") || name.includes("banana");
+                    return (
+                      name.includes("flash") ||
+                      name.includes("lite") ||
+                      name.includes("8b") ||
+                      name.includes("gemma") ||
+                      name.includes("banana")
+                    );
                   })
                   .map((m, idx) => {
                     const isCurrentlyActive = globalSelectedModel === m.name;
                     const isHuggingFace = selectedProvider === "huggingface";
                     const pricingBadge = isHuggingFace
-                      ? { text: "Open-Source", className: "bg-emerald-950/40 text-emerald-450 border-emerald-800/30" }
+                      ? {
+                          text: "Open-Source",
+                          className:
+                            "bg-emerald-950/40 text-emerald-450 border-emerald-800/30",
+                        }
                       : selectedProvider === "gemini" && !m.name.includes("pro")
-                      ? { text: "Free Tier", className: "bg-purple-950/40 text-purple-300 border-purple-800/30" }
-                      : { text: "Paid Model", className: "bg-amber-950/40 text-amber-450 border-amber-800/30" };
+                      ? {
+                          text: "Free Tier",
+                          className:
+                            "bg-purple-950/40 text-purple-300 border-purple-800/30",
+                        }
+                      : {
+                          text: "Paid Model",
+                          className:
+                            "bg-amber-950/40 text-amber-450 border-amber-800/30",
+                        };
 
                     return (
-                      <tr key={idx} className={`border-b border-neutral-900/60 hover:bg-neutral-900/20 transition-all ${isCurrentlyActive ? "bg-purple-950/5" : ""}`}>
-                        <td className="p-4 font-bold text-white max-w-[200px] truncate" title={m.displayName || m.name}>
+                      <tr
+                        key={idx}
+                        className={`border-b border-neutral-900/60 hover:bg-neutral-900/20 transition-all ${
+                          isCurrentlyActive ? "bg-purple-950/5" : ""
+                        }`}
+                      >
+                        <td
+                          className="p-4 font-bold text-white max-w-[200px] truncate"
+                          title={m.displayName || m.name}
+                        >
                           {m.displayName || m.name}
                         </td>
-                        <td className="p-4 text-[10px] text-neutral-400 select-all max-w-[250px] truncate" title={m.fullName || m.name}>
+                        <td
+                          className="p-4 text-[10px] text-neutral-400 select-all max-w-[250px] truncate"
+                          title={m.fullName || m.name}
+                        >
                           {m.name}
                         </td>
                         <td className="p-4">
-                          <span className={`px-2 py-0.5 rounded-full border text-[9px] font-bold ${pricingBadge.className}`}>
+                          <span
+                            className={`px-2 py-0.5 rounded-full border text-[9px] font-bold ${pricingBadge.className}`}
+                          >
                             {pricingBadge.text}
                           </span>
                         </td>
                         <td className="p-4 text-neutral-400 text-[10px]">
                           {m.inputTokenLimit ? (
-                            <span>In: {m.inputTokenLimit.toLocaleString()} | Out: {m.outputTokenLimit?.toLocaleString() || "N/A"}</span>
+                            <span>
+                              In: {m.inputTokenLimit.toLocaleString()} | Out:{" "}
+                              {m.outputTokenLimit?.toLocaleString() || "N/A"}
+                            </span>
                           ) : (
-                            <span className="text-neutral-600">Dynamic limit</span>
+                            <span className="text-neutral-600">
+                              Dynamic limit
+                            </span>
                           )}
                         </td>
                         <td className="p-4 text-right">
@@ -196,9 +247,16 @@ export default function ModelRegistryExplorer({
                               onClick={() => {
                                 setPlaygroundModel(m.name);
                                 setPlaygroundProvider(selectedProvider);
-                                addNotification(`Loaded ${m.name} into Playground`, "info");
-                                const element = document.getElementById("playground-section");
-                                if (element) element.scrollIntoView({ behavior: "smooth" });
+                                addNotification(
+                                  `Loaded ${m.name} into Playground`,
+                                  "info"
+                                );
+                                const element =
+                                  document.getElementById("playground-section");
+                                if (element)
+                                  element.scrollIntoView({
+                                    behavior: "smooth",
+                                  });
                               }}
                               className="px-2.5 py-1 bg-neutral-900 hover:bg-neutral-850 border border-neutral-850 text-neutral-300 rounded-lg text-[10px] cursor-pointer transition-all"
                             >
@@ -214,7 +272,8 @@ export default function ModelRegistryExplorer({
                             >
                               {compareModelList.includes(m.name) ? (
                                 <>
-                                  <Check className="h-3.5 w-3.5 text-purple-400" /> Compared
+                                  <Check className="h-3.5 w-3.5 text-purple-400" />{" "}
+                                  Compared
                                 </>
                               ) : (
                                 <>

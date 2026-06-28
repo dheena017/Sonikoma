@@ -1,3 +1,4 @@
+import * as api from "../../api/index.js";
 import React, { useState } from "react";
 import {
   Sparkles,
@@ -8,6 +9,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { GeneratedPanel } from "../../types";
+import { fetchWithAuth } from "../../utils.js";
 
 interface AdPlacementTabProps {
   compiledScript: string;
@@ -49,17 +51,12 @@ export default function AdPlacementTab({
 
     setLoading(true);
     try {
-      const res = await fetch("/api/skills/midrolls", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          compiled_script:
-            compiledScript || "Script content representing timeline narration.",
-          max_ads: maxAds,
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
+      const json = await api.runMidrollsSkill(fetchWithAuth, {
+        compiled_script:
+          compiledScript || "Script content representing timeline narration.",
+        max_ads: maxAds,
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
       });
-      const json = await res.json();
       if (json.success && json.result) {
         setData(json.result);
         if (addNotification) {

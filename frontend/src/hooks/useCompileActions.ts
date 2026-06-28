@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { GeneratedPanel } from "../types";
-import { processWithConcurrency, chunkArray } from "../utils/batchUtils";
+import { GeneratedPanel } from "../types.js";
+import { processWithConcurrency, chunkArray } from "../utils/batchUtils.js";
+import * as api from "../api/index.js";
 
 interface UseCompileActionsProps {
   panels: GeneratedPanel[];
@@ -59,19 +60,11 @@ export function useCompileActions({
     try {
       const urls = panels.map((p) => p.image_url);
       console.log(
-        "[API] POST /api/image/download-zip with",
+        "[API] Requesting image ZIP download with",
         urls.length,
         "image URLs"
       );
-      const res = await activeFetch("/api/image/download-zip", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ urls, url: targetUrl }),
-      });
-      if (!res.ok) {
-        throw new Error("ZIP generation failed");
-      }
-      const data = await res.json();
+      const data = await api.downloadZip(activeFetch, { urls, url: targetUrl });
       if (data.success && data.downloadUrl) {
         const link = document.createElement("a");
         link.href = data.downloadUrl;
@@ -129,20 +122,17 @@ export function useCompileActions({
 
     try {
       abortControllerRef.current = new AbortController();
-      console.log("[API] POST /api/analyze-image for panel", panelId);
-      const res = await activeFetch("/api/analyze-image", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      console.log("[API] Analyzing image for panel", panelId);
+      const data = await api.analyzeImage(
+        activeFetch,
+        {
           url: imageUrl,
           model: activeModel,
           narrationStyle,
           voice: voiceActor,
-        }),
-        signal: abortControllerRef.current.signal,
-      });
-      if (!res.ok) throw new Error("Image analysis failed");
-      const data = await res.json();
+        },
+        { signal: abortControllerRef.current.signal }
+      );
       if (data.success && data.analysis) {
         const aiDuration = Number(data.analysis.duration);
         const aiMotion = String(data.analysis.motion_type || "").trim();
@@ -249,20 +239,16 @@ export function useCompileActions({
 
       const imageUrls = targetPanels.map((p) => p.image_url);
 
-      const res = await activeFetch("/api/analyze-sequence", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const data = await api.analyzeSequence(
+        activeFetch,
+        {
           urls: imageUrls,
           model: activeModel,
           narrationStyle,
           voice: voiceActor,
-        }),
-        signal: abortControllerRef.current.signal,
-      });
-
-      if (!res.ok) throw new Error("Sequence analysis failed");
-      const data = await res.json();
+        },
+        { signal: abortControllerRef.current.signal }
+      );
 
       if (data.success && data.results) {
         setPanels((prev) =>
@@ -354,20 +340,16 @@ export function useCompileActions({
 
       const imageUrls = panels.map((p) => p.image_url);
 
-      const res = await activeFetch("/api/analyze-sequence", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const data = await api.analyzeSequence(
+        activeFetch,
+        {
           urls: imageUrls,
           model: activeModel,
           narrationStyle,
           voice: voiceActor,
-        }),
-        signal: abortControllerRef.current.signal,
-      });
-
-      if (!res.ok) throw new Error("Sequence analysis failed");
-      const data = await res.json();
+        },
+        { signal: abortControllerRef.current.signal }
+      );
 
       if (data.success && data.results) {
         setPanels((prev) =>
