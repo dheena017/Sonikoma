@@ -85,7 +85,7 @@ class PostgresConnectionWrapper:
 def get_db_connection():
     if not _db_initialized:
         init_db()
-        
+
     if _is_postgres:
         if not psycopg2:
             raise RuntimeError("psycopg2-binary is required for PostgreSQL support. Please install it.")
@@ -124,7 +124,7 @@ def init_db() -> None:
                     logger.warning("[Database] schema_postgres.sql not found.")
             else:
                 logger.info("[Database] Relational database schema is already initialized.")
-            
+
             # Check and initialize YouTube tables in Postgres/Supabase
             row_yt = conn.execute("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'youtube_profiles') as exists").fetchone()
             if not row_yt or not row_yt.get('exists'):
@@ -194,15 +194,15 @@ def init_db() -> None:
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
-        
+
         # Check if users table exists. If so, inspect it for relational upgrade indicator.
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
         users_table_exists = cursor.fetchone() is not None
-        
+
         if users_table_exists:
             cursor.execute("PRAGMA table_info(users)")
             columns = [col[1] for col in cursor.fetchall()]
-            
+
             # If the users table does not have 'username' column, it's the old flat schema.
             # Perform clean relational schema upgrade.
             if "username" not in columns:
@@ -212,7 +212,7 @@ def init_db() -> None:
                     cursor.execute(f"DROP TABLE IF EXISTS {table}")
                 conn.commit()
                 users_table_exists = False
-        
+
         if not users_table_exists:
             schema_file = SCHEMA_PATH if os.path.exists(SCHEMA_PATH) else '/app/schema_backup.sql'
             if not os.path.exists(schema_file):
@@ -228,7 +228,7 @@ def init_db() -> None:
                 logger.warning("[Database] schema.sql not found — skipping schema apply.")
         else:
             logger.info("[Database] Relational database schema is already initialized.")
-        
+
         # Safe migration check: add synopsis column to series table if missing
         try:
             cursor.execute("ALTER TABLE series ADD COLUMN synopsis TEXT")
@@ -269,7 +269,7 @@ def init_db() -> None:
 
         # Run one-time slug generation for existing data
         generate_missing_slugs(conn)
-            
+
         # Ensure token_usage_logs exists
         try:
             cursor.execute("""
@@ -328,7 +328,7 @@ def init_db() -> None:
             )""")
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_youtube_profiles_user ON youtube_profiles(user_id)")
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_youtube_publications_user ON youtube_publications(user_id)")
-            
+
             # Ensure youtube_credentials exists in SQLite
             cursor.execute("""
             CREATE TABLE IF NOT EXISTS youtube_credentials (
@@ -351,14 +351,14 @@ def init_db() -> None:
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
-        
+
         # Populate default settings if empty
         cursor.execute("SELECT COUNT(*) FROM platform_settings")
         if cursor.fetchone()[0] == 0:
             cursor.execute("INSERT INTO platform_settings (key, value) VALUES ('maintenance_mode', 'false')")
             cursor.execute("INSERT INTO platform_settings (key, value) VALUES ('disable_signups', 'false')")
             cursor.execute("INSERT INTO platform_settings (key, value) VALUES ('global_banner', '')")
-            
+
         conn.commit()
     except sqlite3.Error as e:
         logger.error(f"[Database] Error checking or applying schema: {e}")
@@ -382,7 +382,7 @@ def create_user(data: Dict[str, Any]) -> None:
         username = data.get('username') or data.get('full_name') or user_uuid
         password_hash = data.get('password_hash') or data.get('hashed_password')
         preferences = data.get('preferences') or '{}'
-        
+
         conn.execute("""
             INSERT INTO users (id, username, email, password_hash, preferences, avatar_url, full_name, google_id)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -464,7 +464,7 @@ def update_user(user_id: str, updates: Dict[str, Any]) -> None:
                 db_key = key
                 if key == 'hashed_password':
                     db_key = 'password_hash'
-                
+
                 set_parts.append(f"{db_key} = ?")
                 params.append(updates[key])
         if set_parts:
@@ -489,16 +489,16 @@ def delete_user(user_id: str) -> None:
                 series_id = s["id"]
                 conn.execute("DELETE FROM panels WHERE chapter_id IN (SELECT id FROM chapters WHERE series_id = ?)", (series_id,))
                 conn.execute("DELETE FROM chapters WHERE series_id = ?", (series_id,))
-            
+
             # Delete series
             conn.execute("DELETE FROM series WHERE user_id = ?", (user_id,))
-            
+
             # Delete secondary data
             conn.execute("DELETE FROM user_sessions WHERE user_id = ?", (user_id,))
             conn.execute("DELETE FROM user_api_keys WHERE user_id = ?", (user_id,))
             conn.execute("DELETE FROM user_audit_logs WHERE user_id = ?", (user_id,))
             conn.execute("DELETE FROM user_invoices WHERE user_id = ?", (user_id,))
-            
+
             # Finally, delete the user
             conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
     finally:
@@ -511,14 +511,14 @@ def create_user_session(user_id: str, session_id: str, browser: str, ip: str, lo
     try:
         # 1. Check if there is an existing session for the same user, browser, and IP
         existing = conn.execute("""
-            SELECT session_id FROM user_sessions 
+            SELECT session_id FROM user_sessions
             WHERE user_id = ? AND browser = ? AND ip = ?
             LIMIT 1
         """, (user_id, browser, ip)).fetchone()
-        
+
         if existing:
             conn.execute("""
-                UPDATE user_sessions 
+                UPDATE user_sessions
                 SET session_id = ?, active = 1, created_at = datetime('now')
                 WHERE user_id = ? AND browser = ? AND ip = ?
             """, (session_id, user_id, browser, ip))
@@ -527,11 +527,11 @@ def create_user_session(user_id: str, session_id: str, browser: str, ip: str, lo
                 INSERT INTO user_sessions (session_id, user_id, browser, ip, location, active)
                 VALUES (?, ?, ?, ?, ?, 1)
             """, (session_id, user_id, browser, ip, location))
-            
+
         # 2. Prune active sessions if they exceed 5
         rows = conn.execute("""
-            SELECT session_id FROM user_sessions 
-            WHERE user_id = ? AND active = 1 
+            SELECT session_id FROM user_sessions
+            WHERE user_id = ? AND active = 1
             ORDER BY created_at DESC
         """, (user_id,)).fetchall()
         active_sids = [r['session_id'] for r in rows]
@@ -539,7 +539,7 @@ def create_user_session(user_id: str, session_id: str, browser: str, ip: str, lo
             to_remove = active_sids[5:]
             for sid in to_remove:
                 conn.execute("DELETE FROM user_sessions WHERE user_id = ? AND session_id = ?", (user_id, sid))
-                
+
         conn.commit()
     finally:
         conn.close()
@@ -550,11 +550,11 @@ def get_user_sessions(user_id: str) -> List[Dict[str, Any]]:
         # Automatically deduplicate and prune sessions for same browser & IP
         # keeping the most recent one
         rows = conn.execute("""
-            SELECT id, browser, ip, created_at FROM user_sessions 
-            WHERE user_id = ? 
+            SELECT id, browser, ip, created_at FROM user_sessions
+            WHERE user_id = ?
             ORDER BY created_at DESC
         """, (user_id,)).fetchall()
-        
+
         seen = set()
         to_delete = []
         for r in rows:
@@ -563,15 +563,15 @@ def get_user_sessions(user_id: str) -> List[Dict[str, Any]]:
                 to_delete.append(r['id'])
             else:
                 seen.add(key)
-                
+
         if to_delete:
             conn.execute(f"DELETE FROM user_sessions WHERE id IN ({','.join(map(str, to_delete))})")
             conn.commit()
-            
+
         # Also enforce maximum 5 active sessions
         active_rows = conn.execute("""
-            SELECT session_id FROM user_sessions 
-            WHERE user_id = ? AND active = 1 
+            SELECT session_id FROM user_sessions
+            WHERE user_id = ? AND active = 1
             ORDER BY created_at DESC
         """, (user_id,)).fetchall()
         active_sids = [r['session_id'] for r in active_rows]
@@ -610,21 +610,21 @@ def get_audit_logs(user_id: str, query: str = "", limit: int = 10, offset: int =
     try:
         # Search criteria
         search_pattern = f"%{query}%"
-        
+
         # Get count
         count_row = conn.execute("""
-            SELECT COUNT(*) as c FROM user_audit_logs 
+            SELECT COUNT(*) as c FROM user_audit_logs
             WHERE user_id = ? AND (event LIKE ? OR ip LIKE ?)
         """, (user_id, search_pattern, search_pattern)).fetchone()
         total = count_row['c'] if count_row else 0
-        
+
         # Get logs
         rows = conn.execute("""
-            SELECT * FROM user_audit_logs 
+            SELECT * FROM user_audit_logs
             WHERE user_id = ? AND (event LIKE ? OR ip LIKE ?)
             ORDER BY created_at DESC LIMIT ? OFFSET ?
         """, (user_id, search_pattern, search_pattern, limit, offset)).fetchall()
-        
+
         return [dict(r) for r in rows], total
     finally:
         conn.close()
@@ -633,56 +633,64 @@ def get_creator_analytics(user_id: str) -> Dict[str, Any]:
     conn = get_db_connection()
     try:
         import datetime
-        
+
         # 1. Videos Completed
         completed_row = conn.execute("""
-            SELECT COUNT(*) as c FROM chapters c 
-            JOIN series s ON c.series_id = s.id 
+            SELECT COUNT(*) as c FROM chapters c
+            JOIN series s ON c.series_id = s.id
             WHERE s.user_id = ? AND c.status = 'completed'
         """, (user_id,)).fetchone()
         videos_completed = completed_row['c'] if completed_row else 0
-        
+
         # 2. Render Duration (sum of duration of panels in completed chapters)
         duration_row = conn.execute("""
-            SELECT SUM(p.duration) as d FROM panels p 
-            JOIN chapters c ON p.chapter_id = c.id 
-            JOIN series s ON c.series_id = s.id 
+            SELECT SUM(p.duration) as d FROM panels p
+            JOIN chapters c ON p.chapter_id = c.id
+            JOIN series s ON c.series_id = s.id
             WHERE s.user_id = ? AND c.status = 'completed'
         """, (user_id,)).fetchone()
         total_duration_sec = duration_row['d'] if duration_row and duration_row['d'] is not None else 0
-        
+
+        # 2.1 Token Usage
+        token_row = conn.execute("""
+            SELECT SUM(total_tokens_used) as t FROM chapters c
+            JOIN series s ON c.series_id = s.id
+            WHERE s.user_id = ?
+        """, (user_id,)).fetchone()
+        total_tokens = token_row['t'] if token_row and token_row['t'] is not None else 0
+
         # 3. Credits Optimized (estimate based on bubble cleaning or edits)
         clean_row = conn.execute("""
-            SELECT COUNT(*) as c FROM panels p 
-            JOIN chapters c ON p.chapter_id = c.id 
-            JOIN series s ON c.series_id = s.id 
+            SELECT COUNT(*) as c FROM panels p
+            JOIN chapters c ON p.chapter_id = c.id
+            JOIN series s ON c.series_id = s.id
             WHERE s.user_id = ? AND (p.bubble_method IS NOT NULL OR p.grayscale = 1)
         """, (user_id,)).fetchone()
         bubble_cleans = clean_row['c'] if clean_row else 0
-        
+
         edit_row = conn.execute("SELECT COUNT(*) as c FROM edit_history").fetchone()
         total_edits = edit_row['c'] if edit_row else 0
-        
+
         credits_optimized_pct = min(95, max(15, 10 + bubble_cleans * 3 + total_edits * 2))
-        
+
         # 4. Average Latency (base 1.8s, slightly dynamic depending on total load)
         avg_latency = round(max(0.8, min(3.5, 1.8 + (bubble_cleans * 0.05) - (videos_completed * 0.02))), 1)
-        
+
         # 5. Output Formats Breakdown (look at chapters / series data or fallback to realistic percentages)
         chapter_rows = conn.execute("""
-            SELECT COUNT(*) as c FROM chapters c 
-            JOIN series s ON c.series_id = s.id 
+            SELECT COUNT(*) as c FROM chapters c
+            JOIN series s ON c.series_id = s.id
             WHERE s.user_id = ?
         """, (user_id,)).fetchone()
         total_chaps = chapter_rows['c'] if chapter_rows else 0
-        
+
         user_row = conn.execute("SELECT preferences FROM users WHERE id = ?", (user_id,)).fetchone()
         pref_str = user_row['preferences'] if user_row else '{}'
         try:
             prefs = json.loads(pref_str)
         except Exception:
             prefs = {}
-        
+
         curr_ratio = prefs.get('aspectRatio', '9:16')
         if curr_ratio == '16:9':
             aspect_widescreen_count = max(1, total_chaps)
@@ -690,7 +698,7 @@ def get_creator_analytics(user_id: str) -> Dict[str, Any]:
         else:
             aspect_vertical_count = max(1, total_chaps)
             aspect_widescreen_count = 0
-            
+
         total_ratio = aspect_vertical_count + aspect_widescreen_count
         if total_ratio > 0:
             vertical_pct = round((aspect_vertical_count / total_ratio) * 100)
@@ -698,27 +706,27 @@ def get_creator_analytics(user_id: str) -> Dict[str, Any]:
         else:
             vertical_pct = 0
             widescreen_pct = 0
-            
+
                 # 6. AI Voices Preference
         voice_pref = prefs.get('voiceActor', 'Matthew')
         voices = {"Matthew": 0, "Rachel": 0, "Marcus": 0}
         if total_chaps > 0 and voice_pref in voices:
             voices[voice_pref] = 100
-            
+
         # 7. Narration Mode
         narrations = {"Storyteller Badges": 0, "Snappy Subtitles": 0}
         if total_chaps > 0:
             narrations["Storyteller Badges"] = 100
-        
+
         # 8. Activity feed (real time events sorted desc)
         activities = []
-        
+
         # Chapter events
         chap_list = conn.execute("""
-            SELECT c.id, c.episode_number, s.title, c.status, c.created_at 
-            FROM chapters c 
-            JOIN series s ON c.series_id = s.id 
-            WHERE s.user_id = ? 
+            SELECT c.id, c.episode_number, s.title, c.status, c.created_at
+            FROM chapters c
+            JOIN series s ON c.series_id = s.id
+            WHERE s.user_id = ?
             ORDER BY c.created_at DESC LIMIT 5
         """, (user_id,)).fetchall()
         for chap in chap_list:
@@ -735,7 +743,7 @@ def get_creator_analytics(user_id: str) -> Dict[str, Any]:
                     "desc": "Extracted panel strips and storyboard metadata",
                     "time": time_str
                 })
-                
+
         # Edits
         edit_list = conn.execute("SELECT edit_type, created_at FROM edit_history ORDER BY created_at DESC LIMIT 5").fetchall()
         for edit in edit_list:
@@ -744,12 +752,12 @@ def get_creator_analytics(user_id: str) -> Dict[str, Any]:
                 "desc": f"Applied {edit['edit_type']} filter / panel crop modification",
                 "time": edit['created_at']
             })
-            
+
         # Audit logs
         audit_list = conn.execute("""
-            SELECT event, created_at 
-            FROM user_audit_logs 
-            WHERE user_id = ? 
+            SELECT event, created_at
+            FROM user_audit_logs
+            WHERE user_id = ?
             ORDER BY created_at DESC LIMIT 5
         """, (user_id,)).fetchall()
         for audit in audit_list:
@@ -758,11 +766,11 @@ def get_creator_analytics(user_id: str) -> Dict[str, Any]:
                 "desc": "Triggered by user account activity",
                 "time": audit['created_at']
             })
-            
+
         # Sort activities by time desc
         activities.sort(key=lambda x: x['time'], reverse=True)
         activities = activities[:4] # Take top 4
-        
+
         # Format times nicely relative to now
         for act in activities:
             try:
@@ -781,55 +789,55 @@ def get_creator_analytics(user_id: str) -> Dict[str, Any]:
                     act['time'] = f"{diff.days} days ago"
             except Exception:
                 act['time'] = act['time'].split(" ")[0]
-                
+
         if not activities:
             activities = [
                 {"title": "System Initialized", "desc": "Creator account profile created successfully", "time": "Just now"}
             ]
-            
+
         # 9. Heatmap activity (last 12 weeks = 84 days)
         counts_by_date = {}
-        
+
         def aggregate_counts(query, params=()):
             rows = conn.execute(query, params).fetchall()
             for r in rows:
                 counts_by_date[r['date']] = counts_by_date.get(r['date'], 0) + r['count']
-                
+
         aggregate_counts("""
-            SELECT strftime('%Y-%m-%d', c.created_at) as date, COUNT(*) as count 
-            FROM chapters c 
-            JOIN series s ON c.series_id = s.id 
-            WHERE s.user_id = ? 
+            SELECT strftime('%Y-%m-%d', c.created_at) as date, COUNT(*) as count
+            FROM chapters c
+            JOIN series s ON c.series_id = s.id
+            WHERE s.user_id = ?
             GROUP BY date
         """, (user_id,))
-        
+
         aggregate_counts("SELECT strftime('%Y-%m-%d', created_at) as date, COUNT(*) as count FROM user_audit_logs WHERE user_id = ? GROUP BY date", (user_id,))
         aggregate_counts("SELECT strftime('%Y-%m-%d', created_at) as date, COUNT(*) as count FROM edit_history GROUP BY date")
-        
+
         today = datetime.datetime.now().date()
         cells = []
         for i in range(84):
             date_val = today - datetime.timedelta(days=(83 - i))
             date_str = date_val.strftime("%Y-%m-%d")
             count = counts_by_date.get(date_str, 0)
-            
+
             level = 0
             if count > 0 and count <= 2: level = 1
             elif count > 2 and count <= 4: level = 2
             elif count > 4: level = 3
-            
+
             cells.append({
                 "day": date_val.strftime("%a"),
                 "date": date_str,
                 "count": count,
                 "level": level
             })
-            
+
         weeks = []
         for w in range(12):
             week_cells = cells[w*7 : (w+1)*7]
             weeks.append(week_cells)
-            
+
         return {
             "videos_completed": videos_completed,
             "total_duration_sec": total_duration_sec,
@@ -842,6 +850,7 @@ def get_creator_analytics(user_id: str) -> Dict[str, Any]:
             "voices": voices,
             "narrations": narrations,
             "heatmap": weeks,
+            "total_tokens": total_tokens,
             "activities": activities
         }
     finally:
@@ -851,7 +860,7 @@ def get_user_achievements_and_points(user_id: str) -> dict:
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
-        
+
         # 1. First Scrape: check if user has created at least one series
         cursor.execute("SELECT COUNT(*) FROM series WHERE user_id = ?", (user_id,))
         series_count = cursor.fetchone()[0]
@@ -859,7 +868,7 @@ def get_user_achievements_and_points(user_id: str) -> dict:
 
         # 2. Gemini Translator: check if there is an audit log for translation
         cursor.execute("""
-            SELECT COUNT(*) FROM user_audit_logs 
+            SELECT COUNT(*) FROM user_audit_logs
             WHERE user_id = ? AND (event LIKE '%translation%' OR event LIKE '%translate%')
         """, (user_id,))
         translation_count = cursor.fetchone()[0]
@@ -867,11 +876,11 @@ def get_user_achievements_and_points(user_id: str) -> dict:
 
         # 3. Keyframe Director: check if they have saved panels, or have panels in database
         cursor.execute("""
-            SELECT COUNT(*) FROM user_audit_logs 
+            SELECT COUNT(*) FROM user_audit_logs
             WHERE user_id = ? AND event LIKE '%Saved Storyboard Panels%'
         """, (user_id,))
         saved_panels_count = cursor.fetchone()[0]
-        
+
         cursor.execute("""
             SELECT COUNT(*) FROM panels p
             JOIN chapters c ON p.chapter_id = c.id
@@ -1137,7 +1146,7 @@ def insert_project(data: Dict[str, Any]) -> None:
         author = data.get('author') or 'Unknown Author'
         cover_image = unwrap_proxy_url(data.get('cover_image'))
         synopsis = data.get('synopsis')
-        
+
         # First, check if a Series matching this title and user already exists.
         # If not, create a series.
         row = conn.execute("SELECT id FROM series WHERE user_id = ? AND title = ? LIMIT 1", (user_id, title)).fetchone()
@@ -1146,9 +1155,9 @@ def insert_project(data: Dict[str, Any]) -> None:
             # Update the series with newly provided metadata if present
             if data.get('author') or data.get('genre') or data.get('cover_image') or data.get('synopsis'):
                 conn.execute("""
-                    UPDATE series 
-                    SET author = COALESCE(?, author), 
-                        genre = COALESCE(?, genre), 
+                    UPDATE series
+                    SET author = COALESCE(?, author),
+                        genre = COALESCE(?, genre),
                         cover_image = COALESCE(?, cover_image),
                         synopsis = COALESCE(?, synopsis)
                     WHERE id = ?
@@ -1161,7 +1170,7 @@ def insert_project(data: Dict[str, Any]) -> None:
                 INSERT INTO series (id, user_id, title, slug, author, cover_image, genre, synopsis)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """, (series_id, user_id, title, series_slug, author, cover_image, genre, synopsis))
-        
+
         # Now, insert the Chapter (which represents the flat Project)
         chapter_id = data['project_id']
         episode_number = data.get('episode') or 'Chapter 1'
@@ -1169,15 +1178,15 @@ def insert_project(data: Dict[str, Any]) -> None:
         status = data.get('status') or 'pending'
         panels_count = data.get('panels_count') or 0
         video_url = data.get('video_url')
-        
+
         row_ch = conn.execute("SELECT id, total_tokens_used FROM chapters WHERE id = ? LIMIT 1", (chapter_id,)).fetchone()
         if row_ch:
             # Accumulate tokens if they are passed
             tokens_to_add = data.get('total_tokens_used', 0)
             new_token_total = (row_ch['total_tokens_used'] or 0) + tokens_to_add if tokens_to_add else row_ch['total_tokens_used']
-            
+
             conn.execute("""
-                UPDATE chapters 
+                UPDATE chapters
                 SET episode_number = ?, original_url = ?, status = ?, panels_count = ?, video_url = ?, total_tokens_used = ?
                 WHERE id = ?
             """, (episode_number, original_url, status, panels_count, video_url, new_token_total, chapter_id))
@@ -1200,7 +1209,7 @@ def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
         if user_id:
             rows = conn.execute("""
                 SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
-                       c.episode_number AS episode, c.status, c.panels_count, c.video_url, 
+                       c.episode_number AS episode, c.status, c.panels_count, c.video_url,
                        c.created_at, c.updated_at, s.user_id, s.id AS series_id,
                        s.slug AS series_slug, c.slug AS chapter_slug
                 FROM chapters c
@@ -1211,7 +1220,7 @@ def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
         else:
             rows = conn.execute("""
                 SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
-                       c.episode_number AS episode, c.status, c.panels_count, c.video_url, 
+                       c.episode_number AS episode, c.status, c.panels_count, c.video_url,
                        c.created_at, c.updated_at, s.user_id, s.id AS series_id,
                        s.slug AS series_slug, c.slug AS chapter_slug
                 FROM chapters c
@@ -1228,7 +1237,7 @@ def get_project(project_id: str) -> Optional[Dict[str, Any]]:
     try:
         row = conn.execute("""
             SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
-                   c.episode_number AS episode, c.status, c.panels_count, c.video_url, 
+                   c.episode_number AS episode, c.status, c.panels_count, c.video_url,
                    c.created_at, c.updated_at, s.user_id, s.id AS series_id,
                    s.slug AS series_slug, c.slug AS chapter_slug
             FROM chapters c
@@ -1291,7 +1300,7 @@ def increment_project_tokens(project_id: str, tokens: int) -> None:
     conn = get_db_connection()
     try:
         conn.execute("""
-            UPDATE chapters 
+            UPDATE chapters
             SET total_tokens_used = total_tokens_used + ?,
                 updated_at = datetime('now')
             WHERE id = ?
@@ -1318,7 +1327,7 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
             series_id = row['series_id']
             current_title = row['title']
             current_episode = row['episode_number']
-            
+
             # 2. Update chapters table fields
             chapter_set_parts = []
             chapter_params = []
@@ -1340,13 +1349,13 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
             if 'panels_count' in updates:
                 chapter_set_parts.append("panels_count = ?")
                 chapter_params.append(updates['panels_count'])
-                
+
             if chapter_set_parts:
                 chapter_set_parts.append("updated_at = datetime('now')")
                 chapter_params.append(project_id)
                 query = f"UPDATE chapters SET {', '.join(chapter_set_parts)} WHERE id = ?"
                 conn.execute(query, tuple(chapter_params))
-                
+
             # 3. Update series table fields
             series_set_parts = []
             series_params = []
@@ -1367,17 +1376,17 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                 series_params.append(series_id)
                 query = f"UPDATE series SET {', '.join(series_set_parts)} WHERE id = ?"
                 conn.execute(query, tuple(series_params))
-                
+
             # 4. Update panels if provided
             if panels is not None:
                 # Delete existing panels for this chapter
                 conn.execute('DELETE FROM panels WHERE chapter_id = ?', (project_id,))
-                
+
                 # Insert the new ones
                 for i, p in enumerate(panels):
                     speech_text = (p.get('speech_text') or "")[:1000]
                     visual_description = (p.get('visual_description') or "")[:2000]
-                    
+
                     conn.execute("""
                         INSERT INTO panels (
                             chapter_id, panel_index, image_url, original_url, speech_text, sfx,
@@ -1410,7 +1419,7 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                         p.get('crop_padding'),
                         1 if p.get('is_sanitized') else 0
                     ))
-                
+
                 # Sync panel count
                 conn.execute("UPDATE chapters SET panels_count = ?, updated_at = datetime('now') WHERE id = ?", (len(panels), project_id))
     finally:
@@ -1444,7 +1453,7 @@ def insert_panels(project_id: str, panels: List[Dict[str, Any]]) -> None:
                 # Length validation matching TS rules
                 speech_text = (p.get('speech_text') or "")[:1000]
                 visual_description = (p.get('visual_description') or "")[:2000]
-                
+
                 conn.execute("""
                     INSERT INTO panels (
                         chapter_id, panel_index, image_url, original_url, speech_text, sfx,
@@ -1581,7 +1590,7 @@ def get_db_stats() -> Dict[str, int]:
 def create_user_relational(user_id: str, username: str, email: str, password_hash: str, preferences: str = "{}") -> None:
     """
     Inserts a new user record into the SQLite database.
-    
+
     SQL Query Explanation:
     - INSERT INTO users (id, username, email, password_hash, preferences) VALUES (?, ?, ?, ?, ?)
     - Inserts a single row with user credentials and default preferences.
@@ -1594,7 +1603,7 @@ def create_user_relational(user_id: str, username: str, email: str, password_has
             INSERT INTO users (id, username, email, password_hash, preferences)
             VALUES (?, ?, ?, ?, ?)
         """, (user_id, username, email, password_hash, preferences))
-        
+
         # Commit saves the transaction permanently in the database
         conn.commit()
     finally:
@@ -1604,7 +1613,7 @@ def create_user_relational(user_id: str, username: str, email: str, password_has
 def create_series(series_id: str, user_id: str, title: str, author: str, cover_image: Optional[str] = None, genre: str = "general") -> None:
     """
     Creates a parent Series metadata entity for a specific user.
-    
+
     SQL Query Explanation:
     - INSERT INTO series (id, user_id, title, author, cover_image, genre) VALUES (?, ?, ?, ?, ?, ?)
     - Saves series parameters linked directly to the parent user.
@@ -1622,7 +1631,7 @@ def create_series(series_id: str, user_id: str, title: str, author: str, cover_i
 def get_series_for_user(user_id: str) -> List[Dict[str, Any]]:
     """
     Queries and returns all Series publishing metadata linked to a specific user.
-    
+
     SQL Query Explanation:
     - SELECT * FROM series WHERE user_id = ? ORDER BY created_at DESC
     - Fetches all series rows belonging to the given user, ordered newest first.
@@ -1637,7 +1646,7 @@ def get_series_for_user(user_id: str) -> List[Dict[str, Any]]:
 def add_chapter_to_series(chapter_id: str, series_id: str, episode_number: str, original_url: Optional[str] = None, panels_count: int = 0, video_url: Optional[str] = None) -> None:
     """
     Inserts a new Chapter row nested directly under a parent Series.
-    
+
     SQL Query Explanation:
     - INSERT INTO chapters (id, series_id, episode_number, original_url, panels_count, video_url) VALUES (?, ?, ?, ?, ?, ?)
     - Appends chapter configurations to SQLite tables under a series ID foreign key constraint.
@@ -1655,7 +1664,7 @@ def add_chapter_to_series(chapter_id: str, series_id: str, episode_number: str, 
 def get_chapters_for_series(series_id: str) -> List[Dict[str, Any]]:
     """
     Retrieves all Chapters publishing metadata nested under a specific Series parent ID.
-    
+
     SQL Query Explanation:
     - SELECT * FROM chapters WHERE series_id = ? ORDER BY created_at ASC
     - Fetches all chapters in chronological order by creation date.
@@ -1690,7 +1699,7 @@ def get_token_logs(user_id: str) -> List[Dict[str, Any]]:
     conn = get_db_connection()
     try:
         rows = conn.execute("""
-            SELECT l.*, p.title 
+            SELECT l.*, p.title
             FROM token_usage_logs l
             JOIN projects p ON l.project_id = p.project_id
             WHERE p.user_id = ?
@@ -1700,7 +1709,7 @@ def get_token_logs(user_id: str) -> List[Dict[str, Any]]:
     except Exception:
         try:
             rows = conn.execute("""
-                SELECT l.*, c.episode_number, s.title 
+                SELECT l.*, c.episode_number, s.title
                 FROM token_usage_logs l
                 JOIN chapters c ON l.project_id = c.id
                 JOIN series s ON c.series_id = s.id
@@ -2000,5 +2009,4 @@ def delete_youtube_credentials(user_id: str) -> bool:
         return cursor.rowcount > 0
     finally:
         conn.close()
-
 
