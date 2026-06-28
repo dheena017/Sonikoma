@@ -17,3 +17,8 @@ __pycache__/
 *.pyo
 *.pyd
 .pytest_cache/
+scratch/
+temp/
+temp_test_combos/
+skills-lock.json
+verify_fix.cjs

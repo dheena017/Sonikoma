@@ -42,7 +42,6 @@ lxml>=5.2.0                      # Fast XML/HTML parser (used with BeautifulSoup
 google-genai>=2.8.0              # Gemini REST client (cleaner.py bubble detection)
 
 # ── Utilities ─────────────────────────────────────────────────────────────────
-pydantic>=2.7.0                  # Data validation for incoming CLI/JSON payloads
 python-dotenv>=1.0.1             # Load .env files (GEMINI_API_KEY etc.)
 python-multipart>=0.0.9          # Multipart form support for FastAPI file uploads
 aiofiles>=23.2.1                 # Async file I/O for FastAPI
@@ -52,92 +51,23 @@ psycopg2-binary>=2.9.9           # PostgreSQL support (Supabase)
 supabase>=2.4.0                  # Supabase client (Storage + DB)
 google-auth-oauthlib>=1.2.0      # YouTube API authentication
 google-api-python-client>=2.128.0 # YouTube Data API
+huggingface_hub>=0.20.0          # Hugging Face API client (storyboard_ai.py)
+playwright>=1.40.0               # Headless browser scraping fallback (scraper.py)
+psutil>=5.9.0                    # Process resource monitoring & lifecycle (health.py)
+colorama>=0.4.6                  # Console colored logs (main.py)
+proglog>=0.1.10                  # Moviepy render progress logger (video.py)
 
 # =============================================================================
 # SYSTEM DEPENDENCIES (install separately — NOT via pip)
 # =============================================================================
-# ffmpeg  — Required by pydub and moviepy for audio/video encoding
+ffmpeg  — Required by pydub and moviepy for audio/video encoding
 #           Windows: winget install ffmpeg
 #                 OR download from https://ffmpeg.org/download.html
 #           macOS:   brew install ffmpeg
 #           Linux:   sudo apt install ffmpeg
-#
+
 # =============================================================================
 # OPTIONAL — GPU acceleration for EasyOCR (much faster OCR, not required)
 # =============================================================================
-# torch>=2.3.0       # PyTorch — enables GPU mode for easyocr (large download ~2GB)
-# torchvision>=0.18.0
-aiohappyeyeballs==2.6.2
-aiohttp==3.14.1
-aiosignal==1.4.0
-annotated-doc==0.0.4
-annotated-types==0.7.0
-anyio==4.14.1
-attrs==26.1.0
-bcrypt==5.0.0
-certifi==2026.6.17
-cffi==2.0.0
-charset-normalizer==3.4.7
-click==8.4.2
-colorama==0.4.6
-cryptography==49.0.0
-decorator==4.4.2
-distro==1.9.0
-dnspython==2.8.0
-edge-tts==7.2.8
-email-validator==2.3.0
-fastapi==0.138.1
-frozenlist==1.8.0
-google-api-core==2.31.0
-google-api-python-client==2.198.0
-google-auth==2.55.1
-google-auth-httplib2==0.4.0
-google-auth-oauthlib==1.4.0
-google-genai==2.10.0
-googleapis-common-protos==1.75.0
-greenlet==3.3.2
-h11==0.16.0
-httpcore==1.0.9
-httplib2==0.32.0
-httpx==0.28.1
-idna==3.18
-ImageIO==2.37.3
-imageio-ffmpeg==0.6.0
-moviepy==1.0.3
-multidict==6.7.1
-numpy==2.5.0
-oauthlib==3.3.1
-opencv-python==4.13.0.92
-passlib==1.7.4
-pillow==12.2.0
-playwright==1.58.0
-proglog==0.1.12
-propcache==0.5.2
-proto-plus==1.28.0
-protobuf==7.35.1
-psutil==7.2.2
-pyasn1==0.6.3
-pyasn1_modules==0.4.2
-pycparser==3.0
-pydantic==2.13.4
-pydantic_core==2.46.4
-pydub==0.25.1
-pyee==13.0.1
-PyJWT==2.13.0
-pyparsing==3.3.2
-python-dotenv==1.2.2
-python-multipart==0.0.32
-requests==2.34.2
-requests-oauthlib==2.0.0
-sniffio==1.3.1
-starlette==1.3.1
-tabulate==0.10.0
-tenacity==9.1.4
-tqdm==4.68.3
-typing-inspection==0.4.2
-typing_extensions==4.15.0
-uritemplate==4.2.0
-urllib3==2.7.0
-uvicorn==0.49.0
-websockets==16.0
-yarl==1.24.2
+torch>=2.3.0       # PyTorch — enables GPU mode for easyocr (large download ~2GB)
+torchvision>=0.18.0

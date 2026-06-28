@@ -28,7 +28,9 @@
 }
 
 select,
-input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
+    [type="color"]
+  ),
 textarea {
   border-color: #27272a;
 }
