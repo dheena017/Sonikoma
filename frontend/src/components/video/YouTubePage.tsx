@@ -162,6 +162,7 @@ export default function YouTubePage({
     handleInjectPowerWord,
     handleInsertMusicCredit,
     handleAppendTunedChapters,
+    handleThumbnailSelect,
   } = useYouTubePublisher({
     panels,
     videoUrl,
@@ -520,6 +521,7 @@ export default function YouTubePage({
             onClearThumbnail={handleClearThumbnail}
             onFileChange={handleFileChange}
             onThumbnailChange={handleThumbnailChange}
+            onThumbnailSelect={handleThumbnailSelect}
             onPublish={handlePublish}
             isScheduled={isScheduled}
             setIsScheduled={setIsScheduled}

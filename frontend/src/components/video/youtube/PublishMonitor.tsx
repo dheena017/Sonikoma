@@ -38,6 +38,7 @@ interface PublishMonitorProps {
   onClearThumbnail: () => void;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onThumbnailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onThumbnailSelect?: (url: string) => void;
   onPublish: () => void;
 
   isScheduled: boolean;
@@ -66,6 +67,7 @@ export default function PublishMonitor({
   onClearThumbnail,
   onFileChange,
   onThumbnailChange,
+  onThumbnailSelect,
   onPublish,
   isScheduled,
   setIsScheduled,
@@ -106,6 +108,17 @@ export default function PublishMonitor({
   const [arrowTop, setArrowTop] = useState(30);
   const [arrowSize, setArrowSize] = useState(50);
   const [showFilterControls, setShowFilterControls] = useState(false);
+
+  // Fetch project thumbnails from localStorage
+  const [projectThumbnails, setProjectThumbnails] = useState<string[]>([]);
+  useEffect(() => {
+    if (title) {
+      const saved = JSON.parse(
+        localStorage.getItem(`project_thumbnails_${title}`) || "[]"
+      );
+      setProjectThumbnails(saved);
+    }
+  }, [title]);
 
   // Generate clickbait slogans based on title
   const handleGenerateSlogans = () => {
@@ -324,6 +337,35 @@ export default function PublishMonitor({
             <span className="text-[10px] font-mono text-neutral-450">
               Click to upload custom Thumbnail (.jpg, .png)
             </span>
+          </div>
+        )}
+
+        {/* Project AI Thumbnails Carousel */}
+        {projectThumbnails.length > 0 && !selectedThumbnail && (
+          <div className="space-y-1.5 pt-1">
+            <span className="text-[9px] font-mono text-neutral-500 uppercase flex items-center gap-1">
+              <Sparkles className="h-3 w-3 text-purple-400" />
+              Generated AI Thumbnails
+            </span>
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+              {projectThumbnails.map((url, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => onThumbnailSelect?.(url)}
+                  className={`relative min-w-[120px] aspect-video bg-neutral-950 rounded-lg border overflow-hidden cursor-pointer transition-all hover:scale-105 active:scale-95 ${
+                    thumbnailPreviewUrl === url
+                      ? "border-purple-500 ring-1 ring-purple-500/50"
+                      : "border-neutral-800 hover:border-neutral-700"
+                  }`}
+                >
+                  <img
+                    src={url}
+                    alt={`AI Thumbnail ${idx}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
