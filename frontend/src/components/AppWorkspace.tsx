@@ -1,5 +1,6 @@
 import React from "react";
 import { CheckCircle2 } from "lucide-react";
+import * as api from "../api/index.js";
 import UrlInputPanel from "./scraper/UrlInputPanel.js";
 import LiveScraperDeck from "./scraper/LiveScraperDeck.js";
 import PipelineStatusCard from "./pipeline/PipelineStatusCard.js";
@@ -373,15 +374,11 @@ export function AppWorkspace({
     }
     try {
       addNotification("Saving images...", "info");
-      const scrapeRes = await fetch("/api/save-scraped-images", {
-        method: "PUT",
-        headers,
-        body: JSON.stringify({
+      const data = await api.saveScrapedImages({
           url: targetUrl,
           images: scrapedImages,
-        }),
-      });
-      if (scrapeRes.ok) {
+        }, token || undefined);
+      if (data) {
         addNotification("Images saved successfully!", "success");
       } else {
         throw new Error("Failed to save images");

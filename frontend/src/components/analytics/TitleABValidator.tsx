@@ -1,3 +1,4 @@
+import * as api from "../../api/index.js";
 import React, { useState, useEffect } from "react";
 import { Sparkles, BarChart2, Check, Copy } from "lucide-react";
 import { GeneratedPanel } from "../../types";
@@ -64,16 +65,11 @@ export default function TitleABValidator({
   const handleValidate = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/skills/title-ab", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const json = await api.runTitleAbSkill({
           title,
           key_climax_event: event,
           model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
-      });
-      const json = await res.json();
+        });
       if (json.success && json.result) {
         setResults(json.result);
         if (addNotification) {

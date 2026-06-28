@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import * as api from "../api/index.js";
 import {
   Film,
   BookOpen,
@@ -44,13 +45,7 @@ export default function DisplayPage({ projectId }: DisplayPageProps) {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`/api/projects/public/${projectId}`);
-        if (!response.ok) {
-          throw new Error(
-            `Failed to load project details (HTTP ${response.status})`
-          );
-        }
-        const data = await response.json();
+        const data = await api.getPublicProject(projectId);
         if (data.success) {
           setProject(data.project);
           setPanels(data.panels || []);

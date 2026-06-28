@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Sparkles, Music } from "lucide-react";
+import * as api from "../../api/index.js";
 
 interface AmbientSoundPickerProps {
   onSelectMusicTheme: (theme: string) => void;
@@ -19,16 +20,11 @@ export default function AmbientSoundPicker({
   const handleGenerate = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/skills/bgm-vibe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          narrative_mood: mood,
-          action_scale: actionScale,
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
+      const json = await api.runBgmVibeSkill({
+        narrative_mood: mood,
+        action_scale: actionScale,
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
       });
-      const json = await res.json();
       if (json.success && json.result) {
         setVibe(json.result);
       }

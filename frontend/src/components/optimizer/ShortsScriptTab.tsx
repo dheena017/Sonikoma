@@ -1,3 +1,4 @@
+import * as api from "../../api/index.js";
 import React, { useState } from "react";
 import {
   Sparkles,
@@ -53,31 +54,21 @@ export default function ShortsScriptTab({
     setLoading(true);
     try {
       // 1. Shorts script adapter
-      const scriptRes = await fetch("/api/skills/shorts-script", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const scriptJson = await api.runShortsScriptSkill({
           storyboard_summary:
             storyboardSummary || "The story summary details go here.",
           model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
-      });
-      const scriptJson = await scriptRes.json();
+        });
       if (scriptJson.success && scriptJson.result) {
         setScriptData(scriptJson.result);
       }
 
       // 2. Shorts hook
-      const hookRes = await fetch("/api/skills/shorts-hook", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const hookJson = await api.runShortsHookSkill({
           title: title || "This Webtoon",
           key_event: "absolute overpowered betrayal scene",
           model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
-      });
-      const hookJson = await hookRes.json();
+        });
       if (hookJson.success && hookJson.result) {
         setHookData(hookJson.result);
       }

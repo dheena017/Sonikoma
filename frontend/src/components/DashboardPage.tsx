@@ -29,6 +29,8 @@ import {
 } from "lucide-react";
 import { getSourceName, getSourceIcon } from "../utils.js";
 import { useThemeMode } from "../hooks/useThemeMode";
+import { getSourceName } from "../utils.js";
+import * as api from "../api/index.js";
 
 interface Project {
   project_id: string;
@@ -78,6 +80,8 @@ export default function DashboardPage() {
           throw new Error(`Failed to fetch projects (HTTP ${res.status})`);
         }
         const data = await res.json();
+        const token = localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token") || "";
+        const data = await api.getProjects(token);
         if (data.projects) {
           setProjects(data.projects);
         } else {
@@ -96,7 +100,7 @@ export default function DashboardPage() {
     const testLatency = async () => {
       const start = Date.now();
       try {
-        await fetch("/api/health");
+        await api.checkHealth();
         setLatency(Date.now() - start);
       } catch {
         setLatency(null);

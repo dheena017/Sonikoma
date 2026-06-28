@@ -26,6 +26,9 @@ import {
   Download,
 } from "lucide-react";
 import { getSourceName, getSourceIcon } from "../utils.js";
+import { Film, FolderOpen, Loader2, ArrowRight, Plus, Search, Filter, BarChart2, CheckCircle2, FileVideo, LayoutGrid, List, MoreVertical, Trash2, Link, Square, CheckSquare, X } from "lucide-react";
+import { getSourceName } from "../utils.js";
+import * as api from "../api/index.js";
 
 interface Project {
   project_id: string;
@@ -76,6 +79,8 @@ export default function ProjectsPage() {
         throw new Error(`Failed to fetch projects (HTTP ${res.status})`);
       }
       const data = await res.json();
+      const token = localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token") || "";
+      const data = await api.getProjects(token);
       if (data.projects) {
         setProjects(data.projects);
       } else {
@@ -179,6 +184,32 @@ export default function ProjectsPage() {
           },
         });
         const data = await res.json();
+        const token = localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token") || "";
+        const data = await api.deleteProject(projectId, token);
+        if (data.success) {
+          setProjects(projects.filter(p => p.project_id !== projectId));
+          setSelectedProjects(prev => {
+            const next = new Set(prev);
+            next.delete(projectId);
+            return next;
+          });
+          (window as any).alertAsync?.("Project deleted successfully.", "Deleted");
+        } else {
+          throw new Error(data.detail || "Failed to delete");
+        }
+      } catch (err: any) {
+        (window as any).alertAsync?.(err.message || "Failed to delete project.", "Error", "rose");
+      }
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedProjects.size === 0) return;
+    
+    if (await (window as any).confirmAsync?.(`Are you sure you want to delete ${selectedProjects.size} selected projects? This action cannot be undone.`, "Bulk Delete", "rose")) {
+      try {
+        const token = localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token") || "";
+        const data = await api.batchDeleteProjects(Array.from(selectedProjects), token);
         if (data.success) {
           setProjects(projects.filter((p) => p.project_id !== projectId));
           setSelectedProjects((prev) => {

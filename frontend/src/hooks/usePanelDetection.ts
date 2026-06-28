@@ -1,6 +1,7 @@
 import React from "react";
-import { Slice, DetectedPanel } from "../components/crop/types";
-import { NotificationType } from "../components/NotificationStack";
+import { Slice, DetectedPanel } from "../components/crop/types.js";
+import { NotificationType } from "../components/NotificationStack.js";
+import * as api from "../api/index.js";
 
 interface UsePanelDetectionProps {
   activeFetch: typeof fetch;
@@ -73,23 +74,7 @@ export function usePanelDetection({
     setIsAiDetecting(true);
     try {
       abortControllerRef.current = new AbortController();
-      const response = await activeFetch("/api/ai-detect-panels", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: currentUrl }),
-        signal: abortControllerRef.current.signal,
-      });
-      if (!response.ok) {
-        let errMsg = "Smart Scanner analysis failed";
-        try {
-          const errorData = await response.json();
-          if (errorData?.detail) {
-            errMsg = errorData.detail;
-          }
-        } catch (_) {}
-        throw new Error(errMsg);
-      }
-      const data = await response.json();
+      const data = await api.aiDetectPanels(activeFetch, { url: currentUrl }, { signal: abortControllerRef.current.signal });
       if (
         data.success &&
         Array.isArray(data.panels) &&
@@ -220,36 +205,20 @@ export function usePanelDetection({
     setIsDetecting(true);
     try {
       abortControllerRef.current = new AbortController();
-      const response = await activeFetch("/api/detect-panels", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          url: currentUrl,
-          sensitivity: settings?.sensitivity ?? 30,
-          backgroundColorMode: settings?.backgroundMode ?? "auto",
-          aspectRatio: settings?.aspectRatio ?? "free",
-          minAreaPct: settings?.minAreaPct ?? 0.15,
-          mergeThreshold: settings?.mergeThreshold ?? 20,
-          strategy: settings?.strategy ?? "ai",
-          model: settings?.model ?? "gemini-2.5-flash",
-          cannyLow: settings?.cannyLow ?? 20,
-          cannyHigh: settings?.cannyHigh ?? 100,
-          closeKernelSize: settings?.closeKernelSize ?? 15,
-          minHeightPx: settings?.minHeightPx ?? 60,
-        }),
-        signal: abortControllerRef.current.signal,
-      });
-      if (!response.ok) {
-        let errMsg = "Failed to detect panels";
-        try {
-          const errorData = await response.json();
-          if (errorData?.detail) {
-            errMsg = errorData.detail;
-          }
-        } catch (_) {}
-        throw new Error(errMsg);
-      }
-      const data = await response.json();
+      const data = await api.detectPanels(activeFetch, {
+        url: currentUrl,
+        sensitivity: settings?.sensitivity ?? 30,
+        backgroundColorMode: settings?.backgroundMode ?? "auto",
+        aspectRatio: settings?.aspectRatio ?? "free",
+        minAreaPct: settings?.minAreaPct ?? 0.15,
+        mergeThreshold: settings?.mergeThreshold ?? 20,
+        strategy: settings?.strategy ?? "ai",
+        model: settings?.model ?? "gemini-2.5-flash",
+        cannyLow: settings?.cannyLow ?? 20,
+        cannyHigh: settings?.cannyHigh ?? 100,
+        closeKernelSize: settings?.closeKernelSize ?? 15,
+        minHeightPx: settings?.minHeightPx ?? 60,
+      }, { signal: abortControllerRef.current.signal });
       if (data.success && Array.isArray(data.panels)) {
         if (data.fallback) {
           addNotification(

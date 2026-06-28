@@ -43,6 +43,8 @@ interface ModelPlaygroundAndSkillsProps {
   isEnhancingPrompt: boolean;
 }
 
+import * as api from "../../api/index.js";
+
 const SUPPORTED_SKILLS = [
   {
     id: "translation",
@@ -50,6 +52,8 @@ const SUPPORTED_SKILLS = [
     endpoint: "/api/skills/translate",
     description:
       "Translate manga dialogue into a target language, retaining context and style.",
+    endpoint: api.SKILL_ENDPOINTS.TRANSLATE,
+    description: "Translate manga dialogue into a target language, retaining context and style.",
     inputs: [
       {
         name: "text",
@@ -72,6 +76,8 @@ const SUPPORTED_SKILLS = [
     endpoint: "/api/skills/dramatize",
     description:
       "Dramatize raw panel transcription texts based on genre and scene context.",
+    endpoint: api.SKILL_ENDPOINTS.DRAMATIZE,
+    description: "Dramatize raw panel transcription texts based on genre and scene context.",
     inputs: [
       {
         name: "raw_ocr_text",
@@ -101,6 +107,8 @@ const SUPPORTED_SKILLS = [
     endpoint: "/api/skills/seo",
     description:
       "Generate highly optimized video titles, tags, and descriptions for Webtoon recaps.",
+    endpoint: api.SKILL_ENDPOINTS.SEO,
+    description: "Generate highly optimized video titles, tags, and descriptions for Webtoon recaps.",
     inputs: [
       {
         name: "title",
@@ -130,6 +138,8 @@ const SUPPORTED_SKILLS = [
     endpoint: "/api/skills/cliffhanger",
     description:
       "Suggest narrative hook variations or cliffhanger statements to boost viewer retention.",
+    endpoint: api.SKILL_ENDPOINTS.CLIFFHANGER,
+    description: "Suggest narrative hook variations or cliffhanger statements to boost viewer retention.",
     inputs: [
       {
         name: "story_outline",
@@ -146,6 +156,8 @@ const SUPPORTED_SKILLS = [
     endpoint: "/api/skills/voice-cast",
     description:
       "Analyze characters' descriptions and suggest appropriate voice casting guides.",
+    endpoint: api.SKILL_ENDPOINTS.VOICE_CAST,
+    description: "Analyze characters' descriptions and suggest appropriate voice casting guides.",
     inputs: [
       {
         name: "character_name",
@@ -173,6 +185,8 @@ const SUPPORTED_SKILLS = [
     endpoint: "/api/skills/copyright-scrub",
     description:
       "Clean up transcription errors, remove watermarks, scan/filter advertiser-unfriendly speech.",
+    endpoint: api.SKILL_ENDPOINTS.COPYRIGHT_SCRUB,
+    description: "Clean up transcription errors, remove watermarks, scan/filter advertiser-unfriendly speech.",
     inputs: [
       {
         name: "text",
@@ -188,6 +202,8 @@ const SUPPORTED_SKILLS = [
     endpoint: "/api/skills/bgm-vibe",
     description:
       "Map current scene's narrative mood to background music vibe suggestions.",
+    endpoint: api.SKILL_ENDPOINTS.BGM_VIBE,
+    description: "Map current scene's narrative mood to background music vibe suggestions.",
     inputs: [
       {
         name: "narrative_mood",

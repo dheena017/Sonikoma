@@ -17,6 +17,7 @@ import {
 import { useBackendHealth } from "./hooks/useBackendHealth.js";
 import { useAutoSave } from "./hooks/useAutoSave.js";
 import { useThemeMode } from "./hooks/useThemeMode";
+import * as api from "./api/index.js";
 
 // --- Layout & Main Workspace Components ---
 import Header from "./components/Header.js";
@@ -90,21 +91,15 @@ export default function App() {
     setIsStartingBackend(true);
     setStartBackendError(null);
     try {
-      const res = await fetch("/start-backend", { method: "POST" });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || "Failed to start backend");
-      }
+      const data = await api.startBackend();
 
       // Poll checking health for up to 15 seconds (30 attempts * 500ms)
       let attempts = 0;
       const interval = setInterval(async () => {
         attempts++;
         try {
-          const checkRes = await fetch("/api/health", { method: "GET" }).catch(
-            () => null
-          );
-          if (checkRes && checkRes.ok) {
+          const data = await api.checkHealth();
+          if (data) {
             clearInterval(interval);
             setIsStartingBackend(false);
             recheckBackend();

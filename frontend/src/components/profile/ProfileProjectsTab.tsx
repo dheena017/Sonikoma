@@ -21,7 +21,8 @@ import {
   Calendar,
   Eye,
 } from "lucide-react";
-import { getSourceName } from "../../utils";
+import { getSourceName } from "../../utils.js";
+import * as api from "../../api/index.js";
 
 const parseEpisodeString = (epStr: string) => {
   if (!epStr) return { numberStr: "Chapter 1", titleStr: "" };
@@ -213,12 +214,6 @@ export default function ProfileProjectsTab({
         const token =
           localStorage.getItem("sonikoma_token") ||
           sessionStorage.getItem("sonikoma_token");
-        const headers: HeadersInit = {
-          "Content-Type": "application/json",
-        };
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
-        }
 
         let imports: any[] = [];
         if (Array.isArray(parsed)) {
@@ -256,10 +251,8 @@ export default function ProfileProjectsTab({
             synopsis: proj.synopsis || null,
           };
 
-          const createRes = await fetch("/api/projects", {
-            method: "POST",
-            headers,
-            body: JSON.stringify(createBody),
+          const createRes = await api.createProject(fetch, createBody, {
+            headers: token ? { "Authorization": `Bearer ${token}` } : {}
           });
 
           if (!createRes.ok) {
@@ -290,14 +283,9 @@ export default function ProfileProjectsTab({
               })),
             };
 
-            const panelsRes = await fetch(
-              `/api/projects/${proj.project_id}/panels`,
-              {
-                method: "POST",
-                headers,
-                body: JSON.stringify(panelsBody),
-              }
-            );
+            const panelsRes = await api.updateProjectPanels(fetch, proj.project_id, panelsList, {
+              headers: token ? { "Authorization": `Bearer ${token}` } : {}
+            });
 
             if (!panelsRes.ok) {
               console.error(

@@ -1,5 +1,6 @@
 import { useRef, useEffect, useCallback, useState } from "react";
 import { useAppState } from "./useAppState.js";
+import * as api from "../api/index.js";
 import { usePlaybackEngine } from "./usePlaybackEngine.js";
 import { usePipelineActions } from "./usePipelineActions.js";
 import { parseWebtoonUrl } from "../utils.js";
@@ -42,32 +43,22 @@ export function useAppLogic() {
         return "";
       })();
 
-      const res = await state.fetchWithInterceptor("/api/generate-storyboard", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          url: extractWebtoonUrl(activeUrl),
-          project_id: projId,
-          model: selectedModel,
-          narrationStyle: state.narrationStyle,
-          title: state.seriesTitle ? state.seriesTitle.trim() : undefined,
-          episode: formattedEpisode || undefined,
-          genre: state.scrapedGenre ? state.scrapedGenre.trim() : undefined,
-          author: state.seriesAuthor ? state.seriesAuthor.trim() : undefined,
-          cover_image: state.seriesCoverImage
-            ? state.seriesCoverImage.trim()
-            : undefined,
-          synopsis: state.seriesSynopsis
-            ? state.seriesSynopsis.trim()
-            : undefined,
-        }),
+      const data = await api.generateStoryboard(state.fetchWithInterceptor, {
+        url: extractWebtoonUrl(activeUrl),
+        project_id: projId,
+        model: selectedModel,
+        narrationStyle: state.narrationStyle,
+        title: state.seriesTitle ? state.seriesTitle.trim() : undefined,
+        episode: formattedEpisode || undefined,
+        genre: state.scrapedGenre ? state.scrapedGenre.trim() : undefined,
+        author: state.seriesAuthor ? state.seriesAuthor.trim() : undefined,
+        cover_image: state.seriesCoverImage
+          ? state.seriesCoverImage.trim()
+          : undefined,
+        synopsis: state.seriesSynopsis
+          ? state.seriesSynopsis.trim()
+          : undefined,
       });
-
-      if (!res.ok) {
-        throw new Error(`Failed to generate timeline (HTTP ${res.status})`);
-      }
-
-      const data = await res.json();
       if (data.success && data.panels) {
         const mappedPanels = data.panels.map((p: any, idx: number) => ({
           ...p,
@@ -185,21 +176,8 @@ export function useAppLogic() {
     const doPoll = async () => {
       if (!isCurrent || !isPolling) return;
       try {
-        const res = await fetch(
-          `/api/system-logs?since=${lastLogIdRef.current}`
-        );
-        if (!res.ok) {
-          if (res.status === 429) {
-            console.warn(
-              "[System Logs] Rate limited. Stopping logs polling to preserve API quota."
-            );
-            stopPolling();
-            return;
-          }
-          throw new Error(`HTTP ${res.status}`);
-        }
+        const data = await api.getSystemLogs(String(lastLogIdRef.current));
         pollIntervalMs = 5000; // Reset on success
-        const data = await res.json();
         if (data.success && Array.isArray(data.logs)) {
           const newLogs = data.logs.filter(
             (log: any) => log.id > lastLogIdRef.current
@@ -241,7 +219,7 @@ export function useAppLogic() {
 
     const connectSSE = () => {
       try {
-        eventSource = new EventSource("/api/system-logs/stream");
+        eventSource = new EventSource(api.getSystemLogsStreamUrl());
 
         eventSource.onmessage = (event) => {
           try {
@@ -424,36 +402,31 @@ export function useAppLogic() {
           return "";
         })();
 
-        const res = await state.fetchWithInterceptor("/api/scrape-images", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            url: normalizedTargetUrl,
-            model: selectedModel,
-            source: selectedSource,
-            bypass_cache: false,
-            smart_slice: state.smartSlice,
-            title: state.seriesTitle ? state.seriesTitle.trim() : undefined,
-            episode: formattedEpisode || undefined,
-            genre: state.scrapedGenre ? state.scrapedGenre.trim() : undefined,
-            author: state.seriesAuthor ? state.seriesAuthor.trim() : undefined,
-            cover_image: state.seriesCoverImage
-              ? state.seriesCoverImage.trim()
-              : undefined,
-            synopsis: state.seriesSynopsis
-              ? state.seriesSynopsis.trim()
-              : undefined,
-            project_id: overrideProjectId || undefined,
-            scrape_only: state.smartSlice, // true = fast separate images; false = trigger stitch pipeline
-          }),
+        const data = await api.scrapeImages(state.fetchWithInterceptor, {
+          url: normalizedTargetUrl,
+          model: selectedModel,
+          source: selectedSource,
+          bypass_cache: false,
+          smart_slice: state.smartSlice,
+          title: state.seriesTitle ? state.seriesTitle.trim() : undefined,
+          episode: formattedEpisode || undefined,
+          genre: state.scrapedGenre ? state.scrapedGenre.trim() : undefined,
+          author: state.seriesAuthor ? state.seriesAuthor.trim() : undefined,
+          cover_image: state.seriesCoverImage
+            ? state.seriesCoverImage.trim()
+            : undefined,
+          synopsis: state.seriesSynopsis
+            ? state.seriesSynopsis.trim()
+            : undefined,
+          project_id: overrideProjectId || undefined,
+          scrape_only: state.smartSlice, // true = fast separate images; false = trigger stitch pipeline
         });
-        const data = await res.json();
 
         if (data.success && data.images && data.images.length > 0) {
           // Ensure all images are proxied if they aren't already internal API paths
           const finalImages = data.images.map((img: string) =>
-            img.startsWith("http") && !img.includes("/api/")
-              ? `/api/proxy-image?url=${encodeURIComponent(img)}`
+            img.startsWith("http") && !api.isApiUrl(img)
+              ? api.getProxyImageUrl(img)
               : img
           );
 

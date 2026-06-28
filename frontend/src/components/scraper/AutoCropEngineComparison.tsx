@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import * as api from "../../api/index.js";
 import {
   Sparkles,
   Brain,
@@ -52,8 +53,7 @@ export function AutoCropEngineComparison({
     const start = performance.now();
     try {
       if (activeEngine === "opencv") {
-        const resp = await fetch(firstImageUrl);
-        const blob = await resp.blob();
+        const blob = await api.fetchBlob(firstImageUrl);
         const reader = new FileReader();
         const b64 = await new Promise<string>((resolve) => {
           reader.onloadend = () =>
@@ -61,25 +61,19 @@ export function AutoCropEngineComparison({
           reader.readAsDataURL(blob);
         });
 
-        const detectResp = await fetch("/api/py/panels/detect-b64", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            image_base64: b64,
-            sensitivity,
-            background_mode: bgMode,
-            min_width_pct: 0.15,
-            min_height_px: 60,
-            merge_threshold: overlapMerge,
-            aspect_ratio: aspectRatio,
-            canny_low: cannyLow,
-            canny_high: cannyHigh,
-            close_kernel_size: closeKernel,
-            auto_split: autoSplit,
-          }),
+        const data = await api.detectPanelsB64(fetch, {
+          image_base64: b64,
+          sensitivity,
+          background_mode: bgMode,
+          min_width_pct: 0.15,
+          min_height_px: 60,
+          merge_threshold: overlapMerge,
+          aspect_ratio: aspectRatio,
+          canny_low: cannyLow,
+          canny_high: cannyHigh,
+          close_kernel_size: closeKernel,
+          auto_split: autoSplit,
         });
-
-        const data = await detectResp.json();
         if (data.success) {
           const mapped = data.panels.map((p: any) => ({
             ...p,
@@ -95,27 +89,21 @@ export function AutoCropEngineComparison({
           });
         }
       } else {
-        const detectResp = await fetch("/api/detect-panels", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            url: firstImageUrl,
-            sensitivity,
-            backgroundColorMode: bgMode,
-            aspectRatio: aspectRatio,
-            minAreaPct: 0.15,
-            mergeThreshold: overlapMerge,
-            strategy: "balanced",
-            model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-            cannyLow,
-            cannyHigh,
-            closeKernelSize: closeKernel,
-            minHeightPx: 60,
-            autoSplit,
-          }),
+        const data = await api.detectPanels(fetch, {
+          url: firstImageUrl,
+          sensitivity,
+          backgroundColorMode: bgMode,
+          aspectRatio: aspectRatio,
+          minAreaPct: 0.15,
+          mergeThreshold: overlapMerge,
+          strategy: "balanced",
+          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+          cannyLow,
+          cannyHigh,
+          closeKernelSize: closeKernel,
+          minHeightPx: 60,
+          autoSplit,
         });
-
-        const data = await detectResp.json();
         if (data.success && Array.isArray(data.panels)) {
           const mapped = data.panels.map((p: any) => ({
             ...p,
@@ -147,8 +135,7 @@ export function AutoCropEngineComparison({
 
     setIsScanningOcr(true);
     try {
-      const resp = await fetch(firstImageUrl);
-      const blob = await resp.blob();
+      const blob = await api.fetchBlob(firstImageUrl);
       const reader = new FileReader();
       const b64 = await new Promise<string>((resolve) => {
         reader.onloadend = () =>
@@ -156,13 +143,10 @@ export function AutoCropEngineComparison({
         reader.readAsDataURL(blob);
       });
 
-      const ocrResp = await fetch("/api/py/ocr/extract-full-b64", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image_base64: b64, langs: ["en"] }),
+      const data = await api.extractOcrB64(fetch, {
+        image_base64: b64,
+        langs: ["en"],
       });
-
-      const data = await ocrResp.json();
       if (data.success) {
         setOcrResults(data.results);
         setOcrActive(true);
@@ -175,7 +159,7 @@ export function AutoCropEngineComparison({
   };
 
   return (
-    <div className="bg-neutral-950/40 border border-neutral-800 rounded-2xl p-4 space-y-4">
+    <div className="bg-neutral-955/40 border border-neutral-900 rounded-2xl p-4 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-xs font-bold text-white uppercase tracking-wider font-mono">
           <Sparkles className="h-3.5 w-3.5 text-cyan-400" />

@@ -4,6 +4,7 @@ import { X, Trash2 } from "lucide-react";
 import { GeneratedPanel } from "../../types";
 import { useStoryboardOperations } from "../../hooks/useStoryboardOperations";
 import { processWithConcurrency, chunkArray } from "../../utils/batchUtils";
+import * as api from "../../api/index.js";
 
 import TimelineEmptyState from "./TimelineEmptyState";
 import TimelineHeader from "./TimelineHeader";
@@ -259,23 +260,14 @@ export default function StoryboardTimeline({
 
       await processWithConcurrency(chunks, 4, async (chunkPanels) => {
         try {
-          const res = await activeFetch(
-            "/api/image/remove-speech-bubbles-batch",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                urls: chunkPanels.map((p) => p.image_url),
-                method: bubbleEraseMethod,
-                sensitivity: bubbleSensitivity,
-                detection_style: bubbleDetectionStyle,
-                dilation: bubbleDilation,
-                inpaint_radius: bubbleInpaintRadius,
-              }),
-            }
-          );
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const data = await res.json();
+          const data = await api.removeSpeechBubblesBatch(activeFetch, {
+            urls: chunkPanels.map((p) => p.image_url),
+            method: bubbleEraseMethod,
+            sensitivity: bubbleSensitivity,
+            detection_style: bubbleDetectionStyle,
+            dilation: bubbleDilation,
+            inpaint_radius: bubbleInpaintRadius,
+          });
 
           if (data.success && data.results) {
             setPanels((prev) =>
@@ -359,28 +351,21 @@ export default function StoryboardTimeline({
         async (chunkPanels) => {
           const chunkMap = new Map<number, GeneratedPanel[]>();
           try {
-            const res = await activeFetch("/api/detect-panels-batch", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                urls: chunkPanels.map((p) => p.image_url),
-                sensitivity: cropSensitivity,
-                backgroundColorMode: cropBackgroundMode,
-                aspectRatio: aspectRatioLock,
-                minAreaPct: minPanelAreaPct / 100.0,
-                mergeThreshold: overlapMergeThreshold,
-                strategy: useLocalCV ? "local-cv" : "balanced",
-                model: cropModel,
-                cannyLow: cropCannyLow,
-                cannyHigh: cropCannyHigh,
-                closeKernelSize: cropCloseKernelSize,
-                minHeightPx: cropMinHeightPx,
-                autoSplit: autoSplitTallStrips,
-              }),
+            const data = await api.detectPanelsBatch(activeFetch, {
+              urls: chunkPanels.map((p) => p.image_url),
+              sensitivity: cropSensitivity,
+              backgroundColorMode: cropBackgroundMode,
+              aspectRatio: aspectRatioLock,
+              minAreaPct: minPanelAreaPct / 100.0,
+              mergeThreshold: overlapMergeThreshold,
+              strategy: useLocalCV ? "local-cv" : "balanced",
+              model: cropModel,
+              cannyLow: cropCannyLow,
+              cannyHigh: cropCannyHigh,
+              closeKernelSize: cropCloseKernelSize,
+              minHeightPx: cropMinHeightPx,
+              autoSplit: autoSplitTallStrips,
             });
-
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
 
             if (data.success && data.results) {
               for (const result of data.results) {
@@ -400,24 +385,17 @@ export default function StoryboardTimeline({
                     let croppedUrl = box.croppedUrl;
 
                     if (!croppedUrl) {
-                      const cropRes = await activeFetch("/api/image/edit", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                          url: originalPanel.image_url,
-                          cropTop: box.cropTop,
-                          cropBottom: box.cropBottom,
-                          cropLeft: box.cropLeft,
-                          cropRight: box.cropRight,
-                          autoTrim: true,
-                          padding: 10,
-                          sensitivity: cropSensitivity,
-                          backgroundColorMode: cropBackgroundMode,
-                        }),
+                      const cropData = await api.editImage(activeFetch, {
+                        url: originalPanel.image_url,
+                        cropTop: box.cropTop,
+                        cropBottom: box.cropBottom,
+                        cropLeft: box.cropLeft,
+                        cropRight: box.cropRight,
+                        autoTrim: true,
+                        padding: 10,
+                        sensitivity: cropSensitivity,
+                        backgroundColorMode: cropBackgroundMode,
                       });
-                      if (!cropRes.ok)
-                        throw new Error(`Crop HTTP ${cropRes.status}`);
-                      const cropData = await cropRes.json();
                       croppedUrl = cropData.url;
                     }
 
@@ -512,22 +490,15 @@ export default function StoryboardTimeline({
     const activeFetch = fetchWithInterceptor || fetch;
 
     try {
-      const response = await activeFetch("/api/image/merge", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          urls: urls,
-          layout: "vertical",
-          spacing: 0,
-          spacingColor: "white",
-          scaleToFit: true,
-          alignMode: "center",
-          padding: 0,
-        }),
+      const data = await api.mergeImages(activeFetch, {
+        urls: urls,
+        layout: "vertical",
+        spacing: 0,
+        spacingColor: "white",
+        scaleToFit: true,
+        alignMode: "center",
+        padding: 0,
       });
-
-      if (!response.ok) throw new Error("Stitch failed: " + response.status);
-      const data = await response.json();
 
       if (data.url) {
         const firstPanelIdx = panels.findIndex((p) =>

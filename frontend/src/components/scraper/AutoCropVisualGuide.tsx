@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import * as api from "../../api/index.js";
 import {
   Info,
   LayoutGrid,
@@ -59,8 +60,7 @@ export function AutoCropVisualGuide({
     if (!firstImageUrl) return;
     setIsDetecting(true);
     try {
-      const resp = await fetch(firstImageUrl);
-      const blob = await resp.blob();
+      const blob = await api.fetchBlob(firstImageUrl);
       const reader = new FileReader();
 
       const b64 = await new Promise<string>((resolve) => {
@@ -69,25 +69,19 @@ export function AutoCropVisualGuide({
         reader.readAsDataURL(blob);
       });
 
-      const detectResp = await fetch("/api/py/panels/detect-b64", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          image_base64: b64,
-          sensitivity,
-          background_mode: cropBackgroundMode,
-          min_width_pct: 0.15,
-          min_height_px: 60,
-          merge_threshold: overlapMerge,
-          aspect_ratio: aspectRatioLock,
-          canny_low: cannyLow,
-          canny_high: cannyHigh,
-          close_kernel_size: closeKernel,
-          auto_split: autoSplit,
-        }),
+      const data = await api.detectPanelsB64(fetch, {
+        image_base64: b64,
+        sensitivity,
+        background_mode: cropBackgroundMode,
+        min_width_pct: 0.15,
+        min_height_px: 60,
+        merge_threshold: overlapMerge,
+        aspect_ratio: aspectRatioLock,
+        canny_low: cannyLow,
+        canny_high: cannyHigh,
+        close_kernel_size: closeKernel,
+        auto_split: autoSplit,
       });
-
-      const data = await detectResp.json();
       if (data.success) {
         setDetectedPanels(data.panels);
       }

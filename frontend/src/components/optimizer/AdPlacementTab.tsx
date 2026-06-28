@@ -1,3 +1,4 @@
+import * as api from "../../api/index.js";
 import React, { useState } from "react";
 import {
   Sparkles,
@@ -49,17 +50,12 @@ export default function AdPlacementTab({
 
     setLoading(true);
     try {
-      const res = await fetch("/api/skills/midrolls", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const json = await api.runMidrollsSkill({
           compiled_script:
             compiledScript || "Script content representing timeline narration.",
           max_ads: maxAds,
           model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
-      });
-      const json = await res.json();
+        });
       if (json.success && json.result) {
         setData(json.result);
         if (addNotification) {

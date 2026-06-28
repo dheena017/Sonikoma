@@ -1,3 +1,4 @@
+import * as api from "../../api/index.js";
 import React, { useState } from "react";
 import {
   Sparkles,
@@ -78,17 +79,12 @@ export default function EngagementTab({
 
     setLoadingCliff(true);
     try {
-      const res = await fetch("/api/skills/cliffhanger", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const json = await api.runCliffhangerSkill({
           story_outline:
             storyboardSummary ||
             "The protagonist faces an unbeatable dungeon boss.",
           model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
-      });
-      const json = await res.json();
+        });
       if (json.success && json.result) {
         setCliffData(json.result);
         if (addNotification) {
@@ -121,16 +117,11 @@ export default function EngagementTab({
 
     setLoadingOutro(true);
     try {
-      const res = await fetch("/api/skills/outro-cta", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const json = await api.runOutroCtaSkill({
           title: title || "This Webtoon",
           ending_cliffhanger: climaxHook,
           model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
-      });
-      const json = await res.json();
+        });
       if (json.success && json.result) {
         setOutroData(json.result);
         if (addNotification) {
@@ -163,16 +154,11 @@ export default function EngagementTab({
 
     setLoadingComment(true);
     try {
-      const res = await fetch("/api/skills/comment-reply", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const json = await api.runCommentReplySkill({
           user_comment: userComment,
           video_title: title || "This Webtoon Recap",
           model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
-      });
-      const json = await res.json();
+        });
       if (json.success && json.result) {
         setCommentData(json.result);
         if (addNotification) {

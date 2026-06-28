@@ -7,6 +7,8 @@ import {
   Clock,
   AlertTriangle,
 } from "lucide-react";
+import { Megaphone, Plus, Trash2, Send, Clock, AlertTriangle } from "lucide-react";
+import * as api from "../../api/index.js";
 
 export function AdminAnnouncementsTab({
   fetchWithInterceptor,
@@ -34,6 +36,7 @@ export function AdminAnnouncementsTab({
         "http://localhost:8000/api/auth/admin/announcements"
       );
       const data = await res.json();
+      const data = await api.adminGetAnnouncements(fetchWithInterceptor);
       if (data.success) {
         setAnnouncements(data.announcements);
       }
@@ -62,6 +65,7 @@ export function AdminAnnouncementsTab({
         }
       );
       const data = await res.json();
+      const data = await api.adminCreateAnnouncement(fetchWithInterceptor, { title: newTitle, message: newMessage, type: newType });
       if (data.success) {
         setIsCreating(false);
         setNewTitle("");
@@ -85,6 +89,7 @@ export function AdminAnnouncementsTab({
         }
       );
       const data = await res.json();
+      const data = await api.adminDeleteAnnouncement(fetchWithInterceptor, id);
       if (data.success) {
         setAnnouncements(announcements.filter((a) => a.id !== id));
       }

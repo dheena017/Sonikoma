@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Sparkles, Copy, Check } from "lucide-react";
-import { GeneratedPanel } from "../../types";
+import { GeneratedPanel } from "../../types.js";
+import * as api from "../../api/index.js";
 
 interface PanelAudioToolProps {
   panel: GeneratedPanel;
@@ -29,16 +30,11 @@ export default function PanelAudioTool({ panel }: PanelAudioToolProps) {
   const handleGenerateSfx = async () => {
     setLoadingSfx(true);
     try {
-      const res = await fetch("/api/skills/sfx-audio", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          visual_description: panel.visual_description || "Action scene panel",
-          sfx_tag: panel.sfx || "[Action]",
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
+      const json = await api.runSfxAudioSkill({
+        visual_description: panel.visual_description || "Action scene panel",
+        sfx_tag: panel.sfx || "[Action]",
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
       });
-      const json = await res.json();
       if (json.success && json.result) {
         setSfxData(json.result);
       }
@@ -52,18 +48,13 @@ export default function PanelAudioTool({ panel }: PanelAudioToolProps) {
   const handleGenerateVoice = async () => {
     setLoadingVoice(true);
     try {
-      const res = await fetch("/api/skills/voice-cast", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          character_name: "Protagonist",
-          dialogue_sample: panel.speech_text || "Stop right there!",
-          visual_description:
-            panel.visual_description || "Action scene character close-up",
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
+      const json = await api.runVoiceCastSkill({
+        character_name: "Protagonist",
+        dialogue_sample: panel.speech_text || "Stop right there!",
+        visual_description:
+          panel.visual_description || "Action scene character close-up",
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
       });
-      const json = await res.json();
       if (json.success && json.result) {
         setVoiceData(json.result);
       }

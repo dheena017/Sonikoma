@@ -1,3 +1,4 @@
+import * as api from "../../api/index.js";
 import React, { useState } from "react";
 import { Sparkles, Layers } from "lucide-react";
 
@@ -22,17 +23,12 @@ export default function ThumbnailLayoutForm({
   const handleGenerate = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/skills/thumbnail-layout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const json = await api.runThumbnailLayoutSkill({
           thumbnail_concept:
             conceptPrompt || "Tense combat close-up illustration",
           main_character: character,
           model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
-      });
-      const json = await res.json();
+        });
       if (json.success && json.result) {
         setLayout(json.result);
       }

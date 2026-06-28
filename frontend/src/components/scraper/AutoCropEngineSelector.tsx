@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import * as api from "../../api/index.js";
 import {
   Cpu,
   ChevronDown,
@@ -90,8 +91,7 @@ export function AutoCropEngineSelector({
   // Mount effect to check backend key
   useEffect(() => {
     let isMounted = true;
-    fetch("/api/health")
-      .then((res) => res.json())
+    api.checkHealth()
       .then((data) => {
         if (isMounted) {
           const hasKey = !!data?.env?.GEMINI_API_KEY;
@@ -156,15 +156,10 @@ export function AutoCropEngineSelector({
     setTestingConnection(true);
     setTestResult(null);
     try {
-      const response = await fetch("/api/test-model-latency", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const data = await api.testModelLatency(fetch, {
           provider: "gemini",
           model: cropModel,
-        }),
-      });
-      const data = await response.json();
+        });
       setTestResult(data);
     } catch (err: any) {
       setTestResult({
