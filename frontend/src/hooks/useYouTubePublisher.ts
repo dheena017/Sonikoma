@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { GeneratedPanel } from "../types";
 import {
   publishVideoJson,
@@ -173,8 +173,10 @@ export function useYouTubePublisher({
   const [authorName, setAuthorName] = useState(() => getCachedValue("author_name", ""));
   const [artistName, setArtistName] = useState(() => getCachedValue("artist_name", ""));
   const [webtoonPlatform, setWebtoonPlatform] = useState(() => getCachedValue("webtoon_platform", "Webtoon"));
+  const [customPlatform, setCustomPlatform] = useState(() => getCachedValue("custom_platform", ""));
   const [chapterStart, setChapterStart] = useState(() => getCachedValue("chapter_start", ""));
   const [chapterEnd, setChapterEnd] = useState(() => getCachedValue("chapter_end", ""));
+  const [chapterValidationError, setChapterValidationError] = useState<string | null>(null);
   const [subtitlesType, setSubtitlesType] = useState(() => getCachedValue("subtitles_type", "None"));
   const [subtitlesLanguage, setSubtitlesLanguage] = useState(() => getCachedValue("subtitles_language", "en"));
 
@@ -212,6 +214,7 @@ export function useYouTubePublisher({
     descChapters: false,
     descSocials: false,
     tagsVolume: false,
+    metadataConsistency: false,
   });
 
   // States
@@ -345,12 +348,97 @@ export function useYouTubePublisher({
   }, [webtoonPlatform]);
 
   useEffect(() => {
+    localStorage.setItem("yt_pub_custom_platform", customPlatform);
+  }, [customPlatform]);
+
+  useEffect(() => {
     localStorage.setItem("yt_pub_chapter_start", chapterStart);
   }, [chapterStart]);
 
   useEffect(() => {
     localStorage.setItem("yt_pub_chapter_end", chapterEnd);
   }, [chapterEnd]);
+
+  // Chapter Range Validation Logic
+  useEffect(() => {
+    if (chapterStart && chapterEnd) {
+      const start = parseInt(chapterStart);
+      const end = parseInt(chapterEnd);
+      if (!isNaN(start) && !isNaN(end) && end < start) {
+        setChapterValidationError("Chapter End cannot be less than Chapter Start.");
+      } else {
+        setChapterValidationError(null);
+      }
+    } else {
+      setChapterValidationError(null);
+    }
+  }, [chapterStart, chapterEnd]);
+
+  // Ref to track previous metadata values for non-destructive incremental sync
+  const prevMetadata = useRef({
+    author: authorName,
+    artist: artistName,
+    platform: webtoonPlatform === "Other" ? customPlatform : webtoonPlatform,
+    start: chapterStart,
+    end: chapterEnd,
+    series: scrapedTitle,
+  });
+
+  // Placeholder Auto-Sync Logic (Incremental & Non-Destructive)
+  useEffect(() => {
+    const currentPlatform = webtoonPlatform === "Other" ? customPlatform : webtoonPlatform;
+
+    const syncMap = [
+      { key: "[Author]", prev: prevMetadata.current.author, curr: authorName },
+      { key: "[Artist]", prev: prevMetadata.current.artist, curr: artistName },
+      { key: "[Platform]", prev: prevMetadata.current.platform, curr: currentPlatform },
+      { key: "[Start]", prev: prevMetadata.current.start, curr: chapterStart },
+      { key: "[End]", prev: prevMetadata.current.end, curr: chapterEnd },
+      { key: "[Series Name]", prev: prevMetadata.current.series, curr: scrapedTitle },
+    ];
+
+    let newTitle = title;
+    let newDesc = description;
+    let hasChanged = false;
+
+    syncMap.forEach(({ key, prev, curr }) => {
+      if (prev !== curr) {
+        // 1. Try to replace the literal placeholder key first
+        if (newTitle.includes(key)) {
+          newTitle = newTitle.split(key).join(curr || key);
+          hasChanged = true;
+        }
+        // 2. Otherwise, if we have a previous value, replace that value with the new one
+        else if (prev && newTitle.includes(prev)) {
+          newTitle = newTitle.split(prev).join(curr || key);
+          hasChanged = true;
+        }
+
+        if (newDesc.includes(key)) {
+          newDesc = newDesc.split(key).join(curr || key);
+          hasChanged = true;
+        } else if (prev && newDesc.includes(prev)) {
+          newDesc = newDesc.split(prev).join(curr || key);
+          hasChanged = true;
+        }
+      }
+    });
+
+    if (hasChanged) {
+      if (newTitle !== title) setTitle(newTitle);
+      if (newDesc !== description) setDescription(newDesc);
+    }
+
+    // Update refs for next cycle
+    prevMetadata.current = {
+      author: authorName,
+      artist: artistName,
+      platform: currentPlatform,
+      start: chapterStart,
+      end: chapterEnd,
+      series: scrapedTitle,
+    };
+  }, [authorName, artistName, webtoonPlatform, customPlatform, chapterStart, chapterEnd, scrapedTitle]);
 
   useEffect(() => {
     localStorage.setItem("yt_pub_subtitles_type", subtitlesType);
@@ -457,12 +545,18 @@ export function useYouTubePublisher({
       descChapters: /\d{1,2}:\d{2}/.test(description),
       descSocials: /(https?:\/\/|patreon|discord|subscribe)/i.test(description),
       tagsVolume: tags.length >= 5,
+      metadataConsistency: (
+        (!authorName || description.toLowerCase().includes(authorName.toLowerCase())) &&
+        (!artistName || description.toLowerCase().includes(artistName.toLowerCase())) &&
+        (!chapterStart || description.includes(chapterStart)) &&
+        (!chapterEnd || description.includes(chapterEnd))
+      ),
     };
 
     setSeoChecks(checks);
 
     const passedChecksCount = Object.values(checks).filter(Boolean).length;
-    setSeoScore(Math.round((passedChecksCount / 6) * 100));
+    setSeoScore(Math.round((passedChecksCount / Object.keys(checks).length) * 100));
   }, [title, description, tags]);
 
   // Auto-detect duration & aspect ratio if video is loaded
@@ -522,6 +616,7 @@ export function useYouTubePublisher({
       chapterEnd,
       subtitlesType,
       subtitlesLanguage,
+      customPlatform,
     };
 
     try {
@@ -568,6 +663,7 @@ export function useYouTubePublisher({
     setAuthorName(target.authorName);
     setArtistName(target.artistName);
     setWebtoonPlatform(target.webtoonPlatform);
+    setCustomPlatform(target.customPlatform || "");
     setChapterStart(target.chapterStart);
     setChapterEnd(target.chapterEnd);
     setSubtitlesType(target.subtitlesType);
@@ -1160,10 +1256,13 @@ export function useYouTubePublisher({
     setArtistName,
     webtoonPlatform,
     setWebtoonPlatform,
+    customPlatform,
+    setCustomPlatform,
     chapterStart,
     setChapterStart,
     chapterEnd,
     setChapterEnd,
+    chapterValidationError,
     subtitlesType,
     setSubtitlesType,
     subtitlesLanguage,

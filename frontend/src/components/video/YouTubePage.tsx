@@ -120,10 +120,13 @@ export default function YouTubePage({
     setArtistName,
     webtoonPlatform,
     setWebtoonPlatform,
+    customPlatform,
+    setCustomPlatform,
     chapterStart,
     setChapterStart,
     chapterEnd,
     setChapterEnd,
+    chapterValidationError,
     subtitlesType,
     setSubtitlesType,
     subtitlesLanguage,
@@ -299,10 +302,13 @@ export default function YouTubePage({
                     setArtistName={setArtistName}
                     webtoonPlatform={webtoonPlatform}
                     setWebtoonPlatform={setWebtoonPlatform}
+                    customPlatform={customPlatform}
+                    setCustomPlatform={setCustomPlatform}
                     chapterStart={chapterStart}
                     setChapterStart={setChapterStart}
                     chapterEnd={chapterEnd}
                     setChapterEnd={setChapterEnd}
+                    chapterValidationError={chapterValidationError}
                   />
 
                   {/* Subtitle / Caption Tracks */}

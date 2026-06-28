@@ -20,6 +20,7 @@ export interface PublisherProfile {
   authorName: string;
   artistName: string;
   webtoonPlatform: string;
+  customPlatform?: string;
   chapterStart: string;
   chapterEnd: string;
   subtitlesType: string;

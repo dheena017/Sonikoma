@@ -15,6 +15,7 @@ interface PublishJsonParams {
   authorName?: string;
   artistName?: string;
   webtoonPlatform?: string;
+  customPlatform?: string;
   chapterStart?: string;
   chapterEnd?: string;
   subtitlesType?: string;
@@ -93,6 +94,7 @@ export async function publishVideoJson({
       author_name: authorName,
       artist_name: artistName,
       webtoon_platform: webtoonPlatform,
+      custom_platform: customPlatform,
       chapter_start: chapterStart,
       chapter_end: chapterEnd,
       subtitles_type: subtitlesType,
@@ -147,6 +149,7 @@ export async function publishVideoMultipart({
   if (authorName) formData.append("author_name", authorName);
   if (artistName) formData.append("artist_name", artistName);
   if (webtoonPlatform) formData.append("webtoon_platform", webtoonPlatform);
+  if (customPlatform) formData.append("custom_platform", customPlatform);
   if (chapterStart) formData.append("chapter_start", chapterStart);
   if (chapterEnd) formData.append("chapter_end", chapterEnd);
   if (subtitlesType) formData.append("subtitles_type", subtitlesType);
@@ -249,6 +252,7 @@ export async function saveDbProfile(profile: any) {
       author_name: profile.authorName || "",
       artist_name: profile.artistName || "",
       webtoon_platform: profile.webtoonPlatform || "",
+      custom_platform: profile.customPlatform || "",
       chapter_start: profile.chapterStart || "",
       chapter_end: profile.chapterEnd || "",
       subtitles_type: profile.subtitlesType || "",
