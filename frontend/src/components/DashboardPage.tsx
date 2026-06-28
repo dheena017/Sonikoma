@@ -21,8 +21,13 @@ import {
   Settings,
   HelpCircle,
   FileText,
+  MoreVertical,
+  Trash2,
+  Edit2,
+  Download,
+  ExternalLink,
 } from "lucide-react";
-import { getSourceName } from "../utils.js";
+import { getSourceName, getSourceIcon } from "../utils.js";
 import { useThemeMode } from "../hooks/useThemeMode";
 
 interface Project {
@@ -34,6 +39,9 @@ interface Project {
   panels_count: number;
   series_slug?: string;
   chapter_slug?: string;
+  author?: string;
+  cover_image?: string;
+  synopsis?: string;
 }
 
 export default function DashboardPage() {
@@ -51,6 +59,7 @@ export default function DashboardPage() {
     { id: 3, text: "Generate AI character voices", completed: false },
     { id: 4, text: "Render your first video", completed: false },
   ]);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -167,15 +176,58 @@ export default function DashboardPage() {
 
   const handleOpenProject = (project: Project) => {
     if (project.series_slug && project.chapter_slug) {
-      // Navigate using slug-based URL → opens the chapter details page
       (window as any).navigateTo?.(
         `/series/${project.series_slug}/chapters/${project.chapter_slug}/details`
       );
     } else {
-      // Fallback: open in workspace editor by project ID
       (window as any).navigateTo?.(`/workspace?id=${project.project_id}`);
     }
   };
+
+  const handleDeleteProject = async (e: React.MouseEvent, projectId: string) => {
+    e.stopPropagation();
+    setOpenMenuId(null);
+    if (await (window as any).confirmAsync?.("Are you sure you want to delete this project?", "Delete Project", "rose")) {
+      try {
+        const res = await fetch(`/api/projects/${projectId}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("sonikoma_token") || ""}`,
+          },
+        });
+        if (res.ok) {
+          setProjects(projects.filter(p => p.project_id !== projectId));
+        }
+      } catch (err) {
+        console.error("Delete failed", err);
+      }
+    }
+  };
+
+  const handleExport = (e: React.MouseEvent, project: Project) => {
+    e.stopPropagation();
+    setOpenMenuId(null);
+    (window as any).navigateTo?.(`/workspace?id=${project.project_id}&action=export`);
+  };
+
+  const handleRename = (e: React.MouseEvent, project: Project) => {
+    e.stopPropagation();
+    setOpenMenuId(null);
+    // Logic for rename could be a modal or direct navigation
+    (window as any).navigateTo?.(`/workspace?id=${project.project_id}`);
+  };
+
+  const toggleMenu = (e: React.MouseEvent, projectId: string) => {
+    e.stopPropagation();
+    setOpenMenuId(openMenuId === projectId ? null : projectId);
+  };
+
+  // Close menu on click outside
+  useEffect(() => {
+    const handleClickOutside = () => setOpenMenuId(null);
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   const completedCount = projects.filter(
     (p) => p.status?.toLowerCase() === "completed"
@@ -459,32 +511,116 @@ export default function DashboardPage() {
                         {project.status || "Draft"}
                       </div>
                     </div>
+                {projects.slice(0, 6).map((project) => {
+                  const isProcessing = project.status?.toLowerCase() === "processing" || project.status?.toLowerCase() === "exporting";
+                  const SourceIcon = getSourceIcon?.(project.url) || ExternalLink;
 
-                    <h3 className="text-base font-bold text-white mb-1 line-clamp-1 group-hover:text-purple-300 transition-colors">
-                      {project.title || "Untitled Series"}
-                    </h3>
-                    <p className="text-[10px] text-neutral-500 font-mono mb-4 flex items-center gap-1.5">
-                      <span>
-                        {new Date(project.created_at).toLocaleDateString()}
-                      </span>
-                      <span>•</span>
-                      <span>{getSourceName(project.url)}</span>
-                    </p>
+                  return (
+                    <div
+                      key={project.project_id}
+                      onClick={() => handleOpenProject(project)}
+                      className="bg-[#0b0b0e]/80 border border-white/5 hover:border-purple-500/30 rounded-2xl overflow-hidden cursor-pointer transition-all hover:bg-neutral-900/80 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-900/10 group flex flex-col relative min-h-[380px]"
+                    >
+                      {/* Context Menu Button */}
+                      <div className="absolute top-3 right-3 z-20">
+                        <button
+                          onClick={(e) => toggleMenu(e, project.project_id)}
+                          className="p-1.5 rounded-lg bg-black/40 text-neutral-400 hover:text-white hover:bg-black/60 transition-colors backdrop-blur-sm"
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </button>
+                        {openMenuId === project.project_id && (
+                          <div className="absolute right-0 mt-2 w-40 bg-[#16161b] border border-white/10 rounded-xl shadow-2xl py-1.5 z-30 animate-in fade-in zoom-in duration-100">
+                            <button onClick={(e) => handleRename(e, project)} className="w-full text-left px-4 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2">
+                              <Edit2 className="h-3.5 w-3.5" /> Rename
+                            </button>
+                            <button onClick={(e) => handleExport(e, project)} className="w-full text-left px-4 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2">
+                              <Download className="h-3.5 w-3.5" /> Export
+                            </button>
+                            <div className="h-px bg-white/5 my-1" />
+                            <button onClick={(e) => handleDeleteProject(e, project.project_id)} className="w-full text-left px-4 py-2 text-xs text-rose-400 hover:bg-rose-500/10 flex items-center gap-2">
+                              <Trash2 className="h-3.5 w-3.5" /> Delete
+                            </button>
+                          </div>
+                        )}
+                      </div>
 
-                    <div className="flex items-center justify-between border-t border-white/5 pt-4">
-                      <div className="text-xs text-neutral-400 font-semibold">
-                        <span className="text-white font-bold">
-                          {project.panels_count || 0}
-                        </span>{" "}
-                        panels
+                      {/* Cover Image or Thumbnail */}
+                      <div className="h-32 w-full bg-neutral-900 relative overflow-hidden shrink-0">
+                        {project.cover_image ? (
+                          <img
+                            src={project.cover_image}
+                            alt={project.title}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-neutral-700 bg-gradient-to-br from-neutral-900 to-neutral-800">
+                            <Film className="h-10 w-10 opacity-30" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#0b0b0e] to-transparent opacity-60" />
+
+                        {/* Play Overlay */}
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 backdrop-blur-[2px]">
+                          <div className="h-12 w-12 rounded-full bg-purple-600 flex items-center justify-center shadow-lg shadow-purple-900/40 transform scale-75 group-hover:scale-100 transition-transform">
+                            <Play className="h-6 w-6 text-white fill-white ml-0.5" />
+                          </div>
+                        </div>
+
+                        {/* Status Badge Overlay */}
+                        <div className="absolute top-3 left-3">
+                          <div
+                            className={`px-2 py-0.5 text-[8px] font-black uppercase tracking-widest rounded-md border backdrop-blur-md ${
+                              project.status?.toLowerCase() === "completed"
+                                ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                                : project.status?.toLowerCase() === "processing"
+                                ? "bg-amber-500/20 text-amber-400 border-amber-500/30 animate-pulse"
+                                : "bg-neutral-800/40 text-neutral-300 border-white/10"
+                            }`}
+                          >
+                            {project.status || "Draft"}
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 text-xs font-bold">
-                        <span>Open</span>
-                        <ArrowRight className="h-3 w-3" />
+
+                      <div className="p-4 flex flex-col flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <SourceIcon className="h-3 w-3 text-neutral-500" />
+                          <span className="text-[10px] text-neutral-500 font-mono tracking-wider uppercase">
+                            {getSourceName(project.url)}
+                          </span>
+                        </div>
+
+                        <h3 className="text-sm font-bold text-white mb-1.5 line-clamp-1 group-hover:text-purple-300 transition-colors">
+                          {project.title || "Untitled Series"}
+                        </h3>
+
+                        {project.synopsis && (
+                          <p className="text-[11px] text-neutral-500 line-clamp-2 mb-4 leading-relaxed font-sans">
+                            {project.synopsis}
+                          </p>
+                        )}
+
+                        <div className="mt-auto pt-3 border-t border-white/5 flex items-center justify-between">
+                          <div className="text-[10px] text-neutral-400 font-medium flex items-center gap-1.5">
+                            <Scissors className="h-3 w-3 text-neutral-600" />
+                            <span className="text-white font-bold">{project.panels_count || 0}</span> panels
+                          </div>
+                          <div className="text-[10px] text-neutral-600 font-mono">
+                            {new Date(project.created_at).toLocaleDateString()}
+                          </div>
+                        </div>
                       </div>
+
+                      {/* Processing Progress Bar */}
+                      {isProcessing && (
+                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-neutral-800">
+                          <div className="h-full bg-gradient-to-r from-amber-500 to-purple-500 animate-shimmer" style={{ width: '100%', backgroundSize: '200% 100%' }} />
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

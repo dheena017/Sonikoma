@@ -2,6 +2,7 @@ import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
 import http from "http";
+import net from "net";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -130,23 +131,24 @@ async function restartBackend(changedFile) {
   isRestarting = false;
 }
 
-logger.info(`Starting python backend from ${backendDir}...`);
-
-pyProcess = spawn(pythonPath, ["main.py"], {
-  cwd: backendDir,
-  stdio: "inherit",
-  env: { ...process.env, PYTHONIOENCODING: "utf-8", FORCE_COLOR: "1" },
-});
-
-const initialProcess = pyProcess;
-initialProcess.on("error", (err) => {
-  logger.error(`Failed to start backend process:`, err);
-  process.exit(1);
-});
-
-initialProcess.on("exit", (code) => {
-  handleBackendExit(initialProcess, code);
-});
+// Check if something is listening on the port (even if not yet healthy)
+function isPortTaken(port) {
+  return new Promise((resolve) => {
+    const tester = net
+      .createServer()
+      .once("error", (err) => {
+        if (err.code !== "EADDRINUSE") {
+          resolve(false);
+          return;
+        }
+        resolve(true);
+      })
+      .once("listening", () => {
+        tester.once("close", () => resolve(false)).close();
+      })
+      .listen(port, "127.0.0.1");
+  });
+}
 
 // Poll the health endpoint
 const url = `http://127.0.0.1:${port}/api/health`;
@@ -175,8 +177,38 @@ function checkHealth() {
     });
 }
 
-// Start checking after a short delay
-setTimeout(checkHealth, 500);
+async function init() {
+  const isTaken = await isPortTaken(port);
+  if (isTaken) {
+    logger.warn(`⚠️ Port ${port} is already in use.`);
+    logger.info(`Waiting for existing process to respond...`);
+    checkHealth();
+    return;
+  }
+
+  logger.info(`Starting python backend from ${backendDir}...`);
+
+  pyProcess = spawn(pythonPath, ["main.py"], {
+    cwd: backendDir,
+    stdio: "inherit",
+    env: { ...process.env, PYTHONIOENCODING: "utf-8", FORCE_COLOR: "1" },
+  });
+
+  const initialProcess = pyProcess;
+  initialProcess.on("error", (err) => {
+    logger.error(`Failed to start backend process:`, err);
+    process.exit(1);
+  });
+
+  initialProcess.on("exit", (code) => {
+    handleBackendExit(initialProcess, code);
+  });
+
+  // Start checking after a short delay
+  setTimeout(checkHealth, 500);
+}
+
+init();
 
 // Set up file watcher to restart backend on changes
 const fileMtimes = new Map();

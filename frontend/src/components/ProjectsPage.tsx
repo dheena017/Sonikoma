@@ -19,8 +19,13 @@ import {
   CheckSquare,
   X,
   Activity,
+  Play,
+  Scissors,
+  ExternalLink,
+  Edit2,
+  Download,
 } from "lucide-react";
-import { getSourceName } from "../utils.js";
+import { getSourceName, getSourceIcon } from "../utils.js";
 
 interface Project {
   project_id: string;
@@ -35,7 +40,7 @@ interface Project {
   author?: string;
   cover_image?: string;
   synopsis?: string;
-  episode?: number;
+  episode?: string | number;
 }
 
 export default function ProjectsPage() {
@@ -102,6 +107,32 @@ export default function ProjectsPage() {
   };
 
   const handleOpenProject = (project: Project) => {
+    if (project.series_slug && project.chapter_slug) {
+      (window as any).navigateTo?.(
+        `/series/${project.series_slug}/chapters/${project.chapter_slug}/details`
+      );
+    } else {
+      (window as any).navigateTo?.(`/workspace?id=${project.project_id}`);
+    }
+  };
+
+  const handleExport = (e: React.MouseEvent, project: Project) => {
+    e.stopPropagation();
+    setOpenMenuId(null);
+    (window as any).navigateTo?.(
+      `/workspace?id=${project.project_id}&action=export`
+    );
+  };
+
+  const handleRename = (e: React.MouseEvent, project: Project) => {
+    e.stopPropagation();
+    setOpenMenuId(null);
+    (window as any).navigateTo?.(`/workspace?id=${project.project_id}`);
+  };
+
+  const handleOpenDetails = (e: React.MouseEvent, project: Project) => {
+    e.stopPropagation();
+    setOpenMenuId(null);
     if (project.series_slug && project.chapter_slug) {
       (window as any).navigateTo?.(
         `/series/${project.series_slug}/chapters/${project.chapter_slug}/details`
@@ -528,6 +559,8 @@ export default function ProjectsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredProjects.map((project) => {
               const isSelected = selectedProjects.has(project.project_id);
+              const isProcessing = project.status?.toLowerCase() === "processing" || project.status?.toLowerCase() === "exporting";
+              const SourceIcon = getSourceIcon?.(project.url) || ExternalLink;
 
               return (
                 <div
@@ -555,37 +588,55 @@ export default function ProjectsPage() {
                   <div className="absolute top-4 right-4 z-20">
                     <button
                       onClick={(e) => toggleMenu(e, project.project_id)}
-                      className="p-1 rounded-md bg-black/50 text-white/80 hover:text-white hover:bg-black/80 transition-colors backdrop-blur-md"
+                      className="p-1.5 rounded-lg bg-black/40 text-neutral-400 hover:text-white hover:bg-black/60 transition-colors backdrop-blur-sm"
                     >
                       <MoreVertical className="w-5 h-5" />
                     </button>
 
                     {openMenuId === project.project_id && (
-                      <div className="absolute right-0 top-8 w-40 bg-[#1c1c21] border border-neutral-700 rounded-lg shadow-2xl py-1 z-30 animate-in fade-in zoom-in duration-100">
+                      <div className="absolute right-0 top-10 w-40 bg-[#16161b] border border-white/10 rounded-xl shadow-2xl py-1.5 z-30 animate-in fade-in zoom-in duration-100">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleOpenProject(project);
                             setOpenMenuId(null);
                           }}
-                          className="w-full text-left px-4 py-2 text-sm text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
+                          className="w-full text-left px-4 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
                         >
-                          <FolderOpen className="w-4 h-4" /> Open
+                          <Play className="w-3.5 h-3.5" /> Resume
+                        </button>
+                        <button
+                          onClick={(e) => handleOpenDetails(e, project)}
+                          className="w-full text-left px-4 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
+                        >
+                          <FolderOpen className="w-3.5 h-3.5" /> Details
+                        </button>
+                        <button
+                          onClick={(e) => handleRename(e, project)}
+                          className="w-full text-left px-4 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
+                        >
+                          <Edit2 className="h-3.5 h-3.5" /> Rename
+                        </button>
+                        <button
+                          onClick={(e) => handleExport(e, project)}
+                          className="w-full text-left px-4 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
+                        >
+                          <Download className="h-3.5 h-3.5" /> Export
                         </button>
                         <button
                           onClick={(e) => handleCopyLink(e, project)}
-                          className="w-full text-left px-4 py-2 text-sm text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
+                          className="w-full text-left px-4 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
                         >
-                          <Link className="w-4 h-4" /> Copy Link
+                          <Link className="w-3.5 h-3.5" /> Copy Link
                         </button>
-                        <div className="h-px bg-neutral-800 my-1"></div>
+                        <div className="h-px bg-white/5 my-1"></div>
                         <button
                           onClick={(e) =>
                             handleDeleteSingle(e, project.project_id)
                           }
-                          className="w-full text-left px-4 py-2 text-sm text-rose-400 hover:bg-rose-500/10 flex items-center gap-2"
+                          className="w-full text-left px-4 py-2 text-xs text-rose-400 hover:bg-rose-500/10 flex items-center gap-2"
                         >
-                          <Trash2 className="w-4 h-4" /> Delete
+                          <Trash2 className="w-3.5 h-3.5" /> Delete
                         </button>
                       </div>
                     )}
@@ -612,8 +663,15 @@ export default function ProjectsPage() {
                       </div>
                     )}
 
+                    {/* Play Overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 backdrop-blur-[2px] z-10">
+                      <div className="h-14 w-14 rounded-full bg-purple-600 flex items-center justify-center shadow-xl shadow-purple-900/40 transform scale-75 group-hover:scale-100 transition-transform">
+                        <Play className="h-7 w-7 text-white fill-white ml-1" />
+                      </div>
+                    </div>
+
                     {/* Status Badge */}
-                    <div className="absolute top-4 right-12 pr-2">
+                    <div className="absolute top-4 right-12 pr-2 z-20">
                       <div
                         className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest rounded-lg border backdrop-blur-md ${
                           project.status?.toLowerCase() === "completed"
@@ -640,6 +698,13 @@ export default function ProjectsPage() {
 
                   {/* Content Body */}
                   <div className="p-5 flex flex-col flex-1 relative z-10 -mt-2">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <SourceIcon className="h-3 w-3 text-neutral-500" />
+                      <span className="text-[10px] text-neutral-500 font-mono tracking-wider uppercase">
+                        {getSourceName(project.url)}
+                      </span>
+                    </div>
+
                     <h3 className="text-lg font-bold text-white mb-1 line-clamp-1 group-hover:text-purple-400 transition-colors drop-shadow-md">
                       {project.title || "Untitled Series"}
                     </h3>
@@ -668,7 +733,7 @@ export default function ProjectsPage() {
                       </p>
                       <div className="flex items-center justify-between border-t border-neutral-800 pt-4">
                         <div className="text-xs text-neutral-400 font-medium flex items-center gap-1.5">
-                          <FileVideo className="w-4 h-4 text-neutral-500" />
+                          <Scissors className="h-4 w-4 text-neutral-500" />
                           <span className="text-white font-bold">
                             {project.panels_count || 0}
                           </span>{" "}
@@ -680,6 +745,13 @@ export default function ProjectsPage() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Processing Progress Bar */}
+                  {isProcessing && (
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-neutral-800 z-20">
+                      <div className="h-full bg-gradient-to-r from-amber-500 to-purple-500 animate-shimmer" style={{ width: '100%', backgroundSize: '200% 100%' }} />
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -713,11 +785,14 @@ export default function ProjectsPage() {
               <tbody className="divide-y divide-neutral-800/50">
                 {filteredProjects.map((project) => {
                   const isSelected = selectedProjects.has(project.project_id);
+                  const isProcessing = project.status?.toLowerCase() === "processing" || project.status?.toLowerCase() === "exporting";
+                  const SourceIcon = getSourceIcon?.(project.url) || ExternalLink;
+
                   return (
                     <tr
                       key={project.project_id}
                       onClick={() => handleOpenProject(project)}
-                      className={`group cursor-pointer transition-colors ${
+                      className={`group cursor-pointer transition-colors relative ${
                         isSelected
                           ? "bg-purple-900/10 hover:bg-purple-900/20"
                           : "hover:bg-white/5"
@@ -755,8 +830,9 @@ export default function ProjectsPage() {
                             )}
                           </div>
                           <div>
-                            <div className="font-bold text-white group-hover:text-purple-400 transition-colors">
+                            <div className="font-bold text-white group-hover:text-purple-400 transition-colors flex items-center gap-2">
                               {project.title || "Untitled Series"}
+                              <SourceIcon className="h-3 w-3 text-neutral-600" />
                             </div>
                             <div className="text-[10px] text-neutral-500 font-mono mt-0.5">
                               {project.episode !== undefined &&
@@ -769,16 +845,23 @@ export default function ProjectsPage() {
                         </div>
                       </td>
                       <td className="p-4">
-                        <div
-                          className={`inline-flex px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest rounded border ${
-                            project.status?.toLowerCase() === "completed"
-                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                              : project.status?.toLowerCase() === "processing"
-                              ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                              : "bg-neutral-800 text-neutral-400 border-neutral-700"
-                          }`}
-                        >
-                          {project.status || "Draft"}
+                        <div className="flex flex-col gap-1.5 min-w-[100px]">
+                          <div
+                            className={`inline-flex px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest rounded border self-start ${
+                              project.status?.toLowerCase() === "completed"
+                                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                : project.status?.toLowerCase() === "processing"
+                                ? "bg-amber-500/10 text-amber-400 border-amber-500/20 animate-pulse"
+                                : "bg-neutral-800 text-neutral-400 border-neutral-700"
+                            }`}
+                          >
+                            {project.status || "Draft"}
+                          </div>
+                          {isProcessing && (
+                            <div className="w-full h-1 bg-neutral-800 rounded-full overflow-hidden">
+                              <div className="h-full bg-gradient-to-r from-amber-500 to-purple-500 animate-shimmer" style={{ width: '100%', backgroundSize: '200% 100%' }} />
+                            </div>
+                          )}
                         </div>
                       </td>
                       <td className="p-4 text-neutral-400">
@@ -801,31 +884,49 @@ export default function ProjectsPage() {
                         </button>
 
                         {openMenuId === project.project_id && (
-                          <div className="absolute right-8 top-8 w-40 bg-[#1c1c21] border border-neutral-700 rounded-lg shadow-2xl py-1 z-30 animate-in fade-in zoom-in duration-100">
+                          <div className="absolute right-8 top-10 w-40 bg-[#16161b] border border-white/10 rounded-xl shadow-2xl py-1.5 z-30 animate-in fade-in zoom-in duration-100">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleOpenProject(project);
                                 setOpenMenuId(null);
                               }}
-                              className="w-full text-left px-4 py-2 text-sm text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
+                              className="w-full text-left px-4 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
                             >
-                              <FolderOpen className="w-4 h-4" /> Open
+                              <Play className="w-3.5 h-3.5" /> Resume
+                            </button>
+                            <button
+                              onClick={(e) => handleOpenDetails(e, project)}
+                              className="w-full text-left px-4 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
+                            >
+                              <FolderOpen className="w-3.5 h-3.5" /> Details
+                            </button>
+                            <button
+                              onClick={(e) => handleRename(e, project)}
+                              className="w-full text-left px-4 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
+                            >
+                              <Edit2 className="h-3.5 h-3.5" /> Rename
+                            </button>
+                            <button
+                              onClick={(e) => handleExport(e, project)}
+                              className="w-full text-left px-4 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
+                            >
+                              <Download className="h-3.5 h-3.5" /> Export
                             </button>
                             <button
                               onClick={(e) => handleCopyLink(e, project)}
-                              className="w-full text-left px-4 py-2 text-sm text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
+                              className="w-full text-left px-4 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
                             >
-                              <Link className="w-4 h-4" /> Copy Link
+                              <Link className="w-3.5 h-3.5" /> Copy Link
                             </button>
-                            <div className="h-px bg-neutral-800 my-1"></div>
+                            <div className="h-px bg-white/5 my-1"></div>
                             <button
                               onClick={(e) =>
                                 handleDeleteSingle(e, project.project_id)
                               }
-                              className="w-full text-left px-4 py-2 text-sm text-rose-400 hover:bg-rose-500/10 flex items-center gap-2"
+                              className="w-full text-left px-4 py-2 text-xs text-rose-400 hover:bg-rose-500/10 flex items-center gap-2"
                             >
-                              <Trash2 className="w-4 h-4" /> Delete
+                              <Trash2 className="w-3.5 h-3.5" /> Delete
                             </button>
                           </div>
                         )}

@@ -157,6 +157,8 @@ async def get_projects(current_user: dict = Depends(get_current_user)):
         for proj in projects:
             if proj.get("cover_image"):
                 proj["cover_image"] = wrap_proxy_url(proj["cover_image"])
+            elif proj.get("first_panel_image"):
+                proj["cover_image"] = wrap_proxy_url(proj["first_panel_image"])
                 
         logger.info(f"[Database] Retrieved {len(projects)} projects.")
         return {"success": True, "projects": projects}
@@ -191,6 +193,8 @@ async def get_single_project(
         # Ensure project cover image is proxied
         if project.get("cover_image"):
             project["cover_image"] = wrap_proxy_url(project["cover_image"])
+        elif project.get("first_panel_image"):
+            project["cover_image"] = wrap_proxy_url(project["first_panel_image"])
 
         panels = db.get_panels(project_id)
         # Ensure all panel images are proxied
@@ -571,6 +575,8 @@ async def get_public_project(project_id: str = Path(..., description="Project ID
         # Ensure cover image is proxied
         if project.get("cover_image"):
             project["cover_image"] = wrap_proxy_url(project["cover_image"])
+        elif project.get("first_panel_image"):
+            project["cover_image"] = wrap_proxy_url(project["first_panel_image"])
 
         # Fetch panels
         panels = db.get_panels(project["project_id"])
