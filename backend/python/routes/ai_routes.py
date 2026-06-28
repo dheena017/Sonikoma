@@ -1287,6 +1287,11 @@ async def ai_smart_crop(body: SmartCropRequest, user_api_key: str = Depends(get_
 
             stitched_cache.set(unique_id, {"data": cropped_buffer, "content_type": content_type})
             edit_history.set(cached_url, body.url)
+            try:
+                import database.db as db
+                db.save_edit_history(cached_url, body.url)
+            except Exception:
+                pass
 
             logger.info(f"[AI Smart Crop] Cached cropped panel {i+1}/{len(coord_panels)}: {cached_url}")
 

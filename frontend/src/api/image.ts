@@ -114,6 +114,9 @@ export const undoCrop = async (
 };
 
 export const getProxyImageUrl = (url: string) => {
+  if (isProxyUrl(url)) {
+    return url;
+  }
   return `/api/proxy-image?url=${encodeURIComponent(url)}`;
 };
 

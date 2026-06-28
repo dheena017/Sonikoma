@@ -581,6 +581,9 @@ async def rate_limiting_middleware(request: Request, call_next):
         return await call_next(request)
         
     client_ip = request.client.host if request.client else "unknown"
+    if client_ip in ("127.0.0.1", "localhost", "::1"):
+        return await call_next(request)
+        
     now = time.time()
     
     # Clean old requests and get the log
