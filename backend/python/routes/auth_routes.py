@@ -132,6 +132,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     except jwt.PyJWTError:
         raise credentials_exception
 
+
     user = get_user_by_id(user_id)
     if user is None:
         raise credentials_exception
@@ -459,11 +460,19 @@ class AdminUpdateUser(BaseModel):
     creator_role: Optional[str] = None
     credits: Optional[int] = None
     is_locked: Optional[bool] = None
+    reason: Optional[str] = None
 
 @router.put("/admin/users/{user_id}")
 async def admin_update_user(user_id: str, body: AdminUpdateUser, request: Request, current_user: dict = Depends(get_current_user)):
     ip_addr = request.client.host if request.client else "127.0.0.1"
     
+    # Self-protection
+    if user_id == current_user['user_id']:
+        if body.is_locked is True:
+            raise HTTPException(status_code=400, detail="Admins cannot lock their own account.")
+        if body.creator_role and body.creator_role != 'admin':
+             raise HTTPException(status_code=400, detail="Admins cannot downgrade their own role.")
+
     updates = {}
     if body.creator_role is not None:
         updates["creator_role"] = body.creator_role
@@ -488,6 +497,9 @@ async def admin_update_user(user_id: str, body: AdminUpdateUser, request: Reques
 async def admin_delete_user(user_id: str, request: Request, current_user: dict = Depends(get_current_user)):
     ip_addr = request.client.host if request.client else "127.0.0.1"
     
+    if user_id == current_user['user_id']:
+        raise HTTPException(status_code=400, detail="Admins cannot delete their own account.")
+
     delete_user(user_id)
     write_audit_log(current_user["user_id"], f"Admin deleted user {user_id}", ip_addr, "Success")
     
@@ -907,6 +919,39 @@ async def admin_get_analytics(current_user: dict = Depends(get_current_user)):
         logger.error(f'Failed to fetch analytics: {e}')
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get('/admin/activity/export')
+async def admin_export_activity(current_user: dict = Depends(get_current_user)):
+    try:
+        import io
+        import csv
+        from fastapi.responses import StreamingResponse
+
+        logs = get_global_audit_logs()
+
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(['ID', 'User ID', 'Action', 'IP Address', 'Timestamp', 'Status'])
+
+        for log in logs:
+            writer.writerow([
+                log.get('id'),
+                log.get('user_id'),
+                log.get('action'),
+                log.get('ip_address'),
+                log.get('created_at'),
+                log.get('status')
+            ])
+
+        output.seek(0)
+        return StreamingResponse(
+            iter([output.getvalue()]),
+            media_type='text/csv',
+            headers={'Content-Disposition': 'attachment; filename=audit_logs.csv'}
+        )
+    except Exception as e:
+        logger.error(f'Failed to export activity: {e}')
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.get('/admin/projects')
 async def admin_get_projects(current_user: dict = Depends(get_current_user)):
     try:
@@ -915,10 +960,21 @@ async def admin_get_projects(current_user: dict = Depends(get_current_user)):
         logger.error(f'Failed to fetch projects: {e}')
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get('/admin/db/query')
+async def admin_db_query(table: str = 'series', limit: int = 100, offset: int = 0, current_user: dict = Depends(get_current_user)):
+    try:
+        from database.db import admin_query_db
+        data = admin_query_db(table, limit, offset)
+        return {'success': True, 'data': data}
+    except Exception as e:
+        logger.error(f'DB Query failed: {e}')
+        raise HTTPException(status_code=500, detail=str(e))
+
 class AdminUpdateProject(BaseModel):
     status: Optional[str] = None
     title: Optional[str] = None
     is_flagged: Optional[int] = None
+    reason: Optional[str] = None
 
 @router.put('/admin/projects/{project_id}')
 async def admin_update_project(project_id: str, body: AdminUpdateProject, request: Request, current_user: dict = Depends(get_current_user)):
@@ -926,6 +982,9 @@ async def admin_update_project(project_id: str, body: AdminUpdateProject, reques
     try:
         from database.db import update_series_admin
         updates = body.dict(exclude_unset=True)
+        if 'reason' in updates:
+            del updates['reason']
+
         update_series_admin(project_id, updates)
 
         log_msg = f'Admin updated project {project_id}'
@@ -934,6 +993,9 @@ async def admin_update_project(project_id: str, body: AdminUpdateProject, reques
             log_msg = f'Admin {action} project {project_id}'
         elif 'status' in updates:
             log_msg = f'Admin set status of project {project_id} to {updates["status"]}'
+
+        if body.reason:
+            log_msg += f" (Reason: {body.reason})"
 
         write_audit_log(current_user['user_id'], log_msg, ip_addr, 'Success')
         return {'success': True, 'message': 'Project updated successfully'}
