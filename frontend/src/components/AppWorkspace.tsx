@@ -4,7 +4,6 @@ import * as api from "../api/index.js";
 import UrlInputPanel from "./scraper/UrlInputPanel.js";
 import LiveScraperDeck from "./scraper/LiveScraperDeck.js";
 import PipelineStatusCard from "./pipeline/PipelineStatusCard.js";
-import TerminalLogs from "./terminal/TerminalLogs.js";
 import StoryboardTimeline from "./timeline/StoryboardTimeline.js";
 import VideoMonitor from "./video/VideoMonitor.js";
 import VolumeAndProgressPanel from "./video/VolumeAndProgressPanel.js";
@@ -535,12 +534,6 @@ const AppWorkspaceInner = ({
 
         {/* ACTIVE QUEUE / LIVE PIPELINE PROGRESS */}
         {isProcessing && <PipelineStatusCard progressStatus={progressStatus} />}
-
-        {/* REAL-TIME LOG MONITOR — Always visible */}
-        <TerminalLogs
-          consoleLogs={consoleLogs}
-          setConsoleLogs={setConsoleLogs}
-        />
 
         {/* DYNAMIC STORYBOARD TIMELINE DECK (hidden when empty to save vertical space on mobile) */}
         {panels.length > 0 && (
