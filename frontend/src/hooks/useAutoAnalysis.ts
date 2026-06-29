@@ -9,7 +9,7 @@ interface UseAutoAnalysisProps {
   selectedModel?: string;
   scrapedImages: string[];
   setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
-  setConsoleLogs: React.Dispatch<React.SetStateAction<LogEntry[]>>;
+  setConsoleLogs: React.Dispatch<React.SetStateAction<any[]>>;
   addNotification: (message: string, type: NotificationType) => void;
   fetchWithInterceptor: any;
   setActivePreviewTab: (tab: "video" | "timeline") => void;

@@ -9,7 +9,7 @@ interface UseSingleImageEditsProps {
   scrapedImages: string[];
   setScrapedImages: React.Dispatch<React.SetStateAction<string[]>>;
   setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
-  setConsoleLogs: React.Dispatch<React.SetStateAction<LogEntry[]>>;
+  setConsoleLogs: React.Dispatch<React.SetStateAction<any[]>>;
   addNotification: (message: string, type: NotificationType) => void;
   fetchWithInterceptor: any;
   editCropTop: number;

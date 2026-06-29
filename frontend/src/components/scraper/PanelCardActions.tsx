@@ -10,7 +10,7 @@ interface PanelCardActionsProps {
   setEditingImageIdx: (index: number | null) => void;
   setScrapedImages: React.Dispatch<React.SetStateAction<string[]>>;
   setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
-  setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>>;
+  setConsoleLogs: React.Dispatch<React.SetStateAction<any[]>>;
   addNotification: (message: string, type: NotificationType) => void;
 }
 

@@ -221,7 +221,7 @@ export function useAppState() {
 
   // ── Callbacks & effects AFTER all useState declarations ──────────────────
 
-  const setConsoleLogs = useCallback((val: React.SetStateAction<LogEntry[]>) => {
+  const setConsoleLogs = useCallback((val: React.SetStateAction<any[]>) => {
     setRawConsoleLogs((prev) => {
       const incoming = typeof val === "function" ? val(prev) : val;
       // If incoming is already normalized array, just slice

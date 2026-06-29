@@ -9,7 +9,7 @@ interface UseLiveScraperActionsProps {
   selectedScraped: string[];
   setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
   setScrapedImages: React.Dispatch<React.SetStateAction<string[]>>;
-  setConsoleLogs: React.Dispatch<React.SetStateAction<LogEntry[]>>;
+  setConsoleLogs: React.Dispatch<React.SetStateAction<any[]>>;
   addPanelsToStoryboard: (
     urls: string[],
     currentScrapedList?: string[],
