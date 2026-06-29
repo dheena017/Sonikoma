@@ -38,10 +38,12 @@ export default function AdminPage({
 }) {
   const [activeTab, setActiveTab] = useState<string>("overview");
   const [stats, setStats] = useState<any>({});
+  const [analytics, setAnalytics] = useState<any>(null);
+  const [loadingAnalytics, setLoadingAnalytics] = useState<boolean>(true);
 
   const fetchStats = async () => {
     try {
-      const res = await fetchWithInterceptor("/api/health/metrics");
+      const res = await fetchWithInterceptor("/api/metrics");
       if (res.ok) {
         const data = await res.json();
         setStats({
@@ -59,9 +61,32 @@ export default function AdminPage({
     }
   };
 
+  const fetchAnalytics = async () => {
+    try {
+      setLoadingAnalytics(true);
+      const res = await fetchWithInterceptor("/api/auth/admin/analytics");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setAnalytics(data.analytics);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch analytics:", err);
+    } finally {
+      setLoadingAnalytics(false);
+    }
+  };
+
   useEffect(() => {
-    if (isAuthenticated) fetchStats();
-  }, [isAuthenticated]);
+    if (isAuthenticated) {
+      if (activeTab === "analytics") {
+        fetchAnalytics();
+      } else {
+        fetchStats();
+      }
+    }
+  }, [isAuthenticated, activeTab]);
 
   if (!isAuthenticated) {
     return (
@@ -153,7 +178,10 @@ export default function AdminPage({
             />
           )}
           {activeTab === "analytics" && (
-            <AdminAnalyticsTab fetchWithInterceptor={fetchWithInterceptor} />
+            <AdminAnalyticsTab
+              analytics={analytics}
+              loadingAnalytics={loadingAnalytics}
+            />
           )}
           {activeTab === "settings" && (
             <AdminSettingsTab
