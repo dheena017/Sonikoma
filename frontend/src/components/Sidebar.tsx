@@ -474,23 +474,6 @@ const SidebarInner = ({
 
       {/* BOTTOM STATUS CARD */}
       <div className="space-y-4 pt-4 border-t border-neutral-900">
-        {/* Status Indicator */}
-        <div className="px-3 py-2.5 rounded-xl border flex items-center justify-between font-mono border-neutral-900 bg-neutral-950/80">
-          <div className="flex items-center gap-2">
-            <span
-              className={`h-2.5 w-2.5 rounded-full ${
-                isProcessing ? "bg-purple-500 animate-ping" : "bg-emerald-500"
-              }`}
-            />
-            <span className="text-[10px] text-neutral-300 font-bold">
-              {isProcessing ? "PROCESSING" : "SYSTEM READY"}
-            </span>
-          </div>
-          <span className="text-[9px] px-1.5 py-0.5 rounded tracking-wider bg-purple-950 text-purple-400 border border-purple-900/60">
-            v1.0
-          </span>
-        </div>
-
         {/* Total calculated output metadata */}
         {panels.length > 0 && (
           <div className="px-3 py-2 rounded-xl bg-neutral-900/30 text-neutral-400 text-[10px] font-mono flex items-center justify-between border border-neutral-900/40">
