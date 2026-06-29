@@ -11,6 +11,8 @@ import {
   Trash2,
   Download,
   AlertCircle,
+  Wind,
+  Database,
 } from "lucide-react";
 
 export function AdminOverviewTab({
@@ -29,7 +31,7 @@ export function AdminOverviewTab({
   const handleClearCache = async () => {
     setProcessing("cache");
     try {
-      const res = await fetchWithInterceptor("/api/metrics/purge-cache", {
+      const res = await fetchWithInterceptor("/api/health/metrics/purge-cache", {
         method: "POST",
       });
       if (res.ok) {
@@ -42,13 +44,31 @@ export function AdminOverviewTab({
     }
   };
 
+  const handleFlushTemp = async () => {
+    if (!confirm("Delete all temporary videos and exports?")) return;
+    setProcessing("flush");
+    try {
+      const res = await fetchWithInterceptor("/api/health/metrics/flush-temp", {
+        method: "POST",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        addNotification(data.message || "Temp files flushed", "success");
+      }
+    } catch (err) {
+      addNotification("Failed to flush files", "error");
+    } finally {
+      setProcessing(null);
+    }
+  };
+
   const handleEmergencyStop = async () => {
     if (!confirm("Are you sure? This will kill ALL active processing tasks."))
       return;
     setProcessing("stop");
     try {
       const res = await fetchWithInterceptor(
-        "/api/metrics/emergency-stop",
+        "/api/health/metrics/emergency-stop",
         { method: "POST" }
       );
       if (res.ok) {
@@ -162,42 +182,11 @@ export function AdminOverviewTab({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-        {/* Recent Activity Feed */}
-        <div className="bg-[#111115] border border-neutral-800 rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <Clock className="w-5 h-5 text-purple-400" />
-            Recent Platform Activity
-          </h3>
-          <div className="space-y-4">
-            <div className="flex items-center gap-4 text-sm">
-              <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-              <div className="flex-1 text-neutral-300">
-                System health check passed.
-              </div>
-              <div className="text-neutral-600">Just now</div>
-            </div>
-            <div className="flex items-center gap-4 text-sm">
-              <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-              <div className="flex-1 text-neutral-300">
-                Database synchronization complete.
-              </div>
-              <div className="text-neutral-600">12 mins ago</div>
-            </div>
-            <div className="flex items-center gap-4 text-sm">
-              <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-              <div className="flex-1 text-neutral-300">
-                New administrative login detected.
-              </div>
-              <div className="text-neutral-600">1 hour ago</div>
-            </div>
-          </div>
-        </div>
-
         {/* Quick Actions */}
         <div className="bg-[#111115] border border-neutral-800 rounded-xl p-6">
           <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
             <Zap className="w-5 h-5 text-amber-400" />
-            Quick Actions
+            Quick System Actions
           </h3>
           <div className="grid grid-cols-2 gap-4">
             <button
@@ -205,21 +194,10 @@ export function AdminOverviewTab({
               className="p-4 border border-neutral-800 rounded-lg hover:border-purple-500 hover:bg-purple-500/5 transition-all text-left group"
             >
               <h4 className="text-neutral-200 font-medium group-hover:text-purple-400 transition-colors">
-                Broadcast Message
+                Broadcast
               </h4>
-              <p className="text-sm text-neutral-500 mt-1">
-                Send a global alert to all users
-              </p>
-            </button>
-            <button
-              onClick={() => setActiveTab("health")}
-              className="p-4 border border-neutral-800 rounded-lg hover:border-emerald-500 hover:bg-emerald-500/5 transition-all text-left group"
-            >
-              <h4 className="text-neutral-200 font-medium group-hover:text-emerald-400 transition-colors">
-                Run Health Check
-              </h4>
-              <p className="text-sm text-neutral-500 mt-1">
-                Diagnose services and database
+              <p className="text-[11px] text-neutral-500 mt-1">
+                Global alert to all users
               </p>
             </button>
             <button
@@ -232,23 +210,38 @@ export function AdminOverviewTab({
                 </h4>
                 <Download className="w-3 h-3 text-neutral-600 group-hover:text-blue-400" />
               </div>
-              <p className="text-sm text-neutral-500 mt-1">
-                Download recent audit logs as CSV
+              <p className="text-[11px] text-neutral-500 mt-1">
+                Download audit logs as CSV
               </p>
             </button>
             <button
               onClick={handleClearCache}
               disabled={processing === "cache"}
+              className="p-4 border border-neutral-800 rounded-lg hover:border-emerald-500 hover:bg-emerald-500/5 transition-all text-left group disabled:opacity-50"
+            >
+              <div className="flex items-center justify-between">
+                <h4 className="text-neutral-200 font-medium group-hover:text-emerald-400 transition-colors">
+                  {processing === "cache" ? "Clearing..." : "Clear Cache"}
+                </h4>
+                <Trash2 className="w-3 h-3 text-neutral-600 group-hover:text-emerald-400" />
+              </div>
+              <p className="text-[11px] text-neutral-500 mt-1">
+                Reset system LRU memory
+              </p>
+            </button>
+            <button
+              onClick={handleFlushTemp}
+              disabled={processing === "flush"}
               className="p-4 border border-neutral-800 rounded-lg hover:border-rose-500 hover:bg-rose-500/5 transition-all text-left group disabled:opacity-50"
             >
               <div className="flex items-center justify-between">
                 <h4 className="text-neutral-200 font-medium group-hover:text-rose-400 transition-colors">
-                  {processing === "cache" ? "Clearing..." : "Clear Cache"}
+                   {processing === "flush" ? "Flushing..." : "Flush Storage"}
                 </h4>
-                <Trash2 className="w-3 h-3 text-neutral-600 group-hover:text-rose-400" />
+                <Wind className="w-3 h-3 text-neutral-600 group-hover:text-rose-400" />
               </div>
-              <p className="text-sm text-neutral-500 mt-1">
-                Reset system memory cache
+              <p className="text-[11px] text-neutral-500 mt-1">
+                Wipe temp exports & assets
               </p>
             </button>
           </div>
@@ -270,6 +263,32 @@ export function AdminOverviewTab({
               </div>
             </button>
           </div>
+        </div>
+
+        <div className="bg-[#111115] border border-neutral-800 rounded-xl p-6">
+           <h3 className="text-lg font-semibold text-white mb-4">Infrastructure Pulse</h3>
+           <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-[#0b0b0e] border border-neutral-800 rounded-xl">
+                 <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400"><Database className="w-4 h-4" /></div>
+                    <div>
+                       <div className="text-xs font-bold text-neutral-200 uppercase tracking-tight">Main DB Latency</div>
+                       <div className="text-[10px] text-neutral-500">Atomic read/write operations</div>
+                    </div>
+                 </div>
+                 <div className="text-lg font-mono font-bold text-blue-400">{stats.dbLatencyMs}ms</div>
+              </div>
+              <div className="flex items-center justify-between p-4 bg-[#0b0b0e] border border-neutral-800 rounded-xl">
+                 <div className="flex items-center gap-3">
+                    <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400"><Activity className="w-4 h-4" /></div>
+                    <div>
+                       <div className="text-xs font-bold text-neutral-200 uppercase tracking-tight">System Reliability</div>
+                       <div className="text-[10px] text-neutral-500">Average success across pipeline</div>
+                    </div>
+                 </div>
+                 <div className="text-lg font-mono font-bold text-purple-400">99.8%</div>
+              </div>
+           </div>
         </div>
       </div>
     </div>

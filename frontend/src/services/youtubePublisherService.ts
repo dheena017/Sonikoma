@@ -38,7 +38,6 @@ interface PublishMultipartParams {
   authorName?: string;
   artistName?: string;
   webtoonPlatform?: string;
-  customPlatform?: string;
   chapterStart?: string;
   chapterEnd?: string;
   subtitlesType?: string;
@@ -67,7 +66,6 @@ export async function publishVideoJson({
   authorName,
   artistName,
   webtoonPlatform,
-  customPlatform,
   chapterStart,
   chapterEnd,
   subtitlesType,
@@ -127,7 +125,6 @@ export async function publishVideoMultipart({
   authorName,
   artistName,
   webtoonPlatform,
-  customPlatform,
   chapterStart,
   chapterEnd,
   subtitlesType,
