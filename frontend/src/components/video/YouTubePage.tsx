@@ -7,6 +7,7 @@ import {
   Sliders,
   Key,
   FileText,
+  Trash2,
 } from "lucide-react";
 import { GeneratedPanel } from "../../types";
 
@@ -154,6 +155,7 @@ const YouTubePage = React.memo(({
     handleSaveProfile,
     handleLoadProfile,
     handleDeleteProfile,
+    handleClearForm,
     handleSaveCredentials,
     handleDeleteCredentials,
     handleAddTag,
@@ -203,6 +205,15 @@ const YouTubePage = React.memo(({
             </p>
           </div>
         </div>
+
+        <button
+          onClick={handleClearForm}
+          className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 border border-neutral-855 text-neutral-400 hover:text-rose-455 hover:border-rose-900/50 hover:bg-rose-955/20 rounded-xl text-xs font-bold font-mono transition-all hover:scale-102 active:scale-98 shadow-sm cursor-pointer self-start md:self-center"
+          title="Clear all form fields"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+          <span>Clear Form</span>
+        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">

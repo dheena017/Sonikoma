@@ -83,76 +83,32 @@ export function useYouTubePublisher({
   scrapedGenre = "",
   addNotification,
 }: UseYouTubePublisherProps) {
-  // Load initial values from localStorage for UX persistence
-  const getCachedValue = (key: string, defaultValue: string) => {
-    return localStorage.getItem(`yt_pub_${key}`) || defaultValue;
-  };
-
-  const getCachedTags = (): string[] => {
-    const cached = localStorage.getItem("yt_pub_tags");
-    return cached
-      ? JSON.parse(cached)
-      : ["sonikoma", "webtoon", "manga", "comic"];
-  };
-
   // Form fields
-  const [title, setTitle] = useState(() => getCachedValue("title", ""));
-  const [description, setDescription] = useState(() =>
-    getCachedValue("description", "")
-  );
-  const [tags, setTags] = useState<string[]>(getCachedTags);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
 
-  const [category, setCategory] = useState(() =>
-    getCachedValue("category", "1")
-  );
-  const [privacy, setPrivacy] = useState(() =>
-    getCachedValue("privacy", "unlisted")
-  );
-  const [isShort, setIsShort] = useState(
-    () => getCachedValue("is_short", "false") === "true"
-  );
+  const [category, setCategory] = useState("1");
+  const [privacy, setPrivacy] = useState("unlisted");
+  const [isShort, setIsShort] = useState(false);
 
   // Advanced settings accordion state
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [madeForKids, setMadeForKids] = useState(() =>
-    getCachedValue("made_for_kids", "no")
-  );
-  const [paidPromotion, setPaidPromotion] = useState(
-    () => getCachedValue("paid_promotion", "false") === "true"
-  );
-  const [license, setLicense] = useState(() =>
-    getCachedValue("license", "youtube")
-  );
-  const [videoLanguage, setVideoLanguage] = useState(() =>
-    getCachedValue("language", "en")
-  );
+  const [madeForKids, setMadeForKids] = useState("no");
+  const [paidPromotion, setPaidPromotion] = useState(false);
+  const [license, setLicense] = useState("youtube");
+  const [videoLanguage, setVideoLanguage] = useState("en");
 
   // Extra advanced publishing settings states
-  const [ageRestriction, setAgeRestriction] = useState(
-    () => getCachedValue("age_restriction", "false") === "true"
-  );
-  const [shortsRemixing, setShortsRemixing] = useState(() =>
-    getCachedValue("shorts_remixing", "allow_all")
-  );
-  const [commentsMode, setCommentsMode] = useState(() =>
-    getCachedValue("comments_mode", "hold_inappropriate")
-  );
-  const [showLikes, setShowLikes] = useState(
-    () => getCachedValue("show_likes", "true") === "true"
-  );
-  const [allowEmbedding, setAllowEmbedding] = useState(
-    () => getCachedValue("allow_embedding", "true") === "true"
-  );
-  const [notifySubscribers, setNotifySubscribers] = useState(
-    () => getCachedValue("notify_subscribers", "true") === "true"
-  );
-  const [recordingDate, setRecordingDate] = useState(() =>
-    getCachedValue("recording_date", "")
-  );
-  const [videoLocation, setVideoLocation] = useState(() =>
-    getCachedValue("video_location", "")
-  );
+  const [ageRestriction, setAgeRestriction] = useState(false);
+  const [shortsRemixing, setShortsRemixing] = useState("allow_all");
+  const [commentsMode, setCommentsMode] = useState("hold_inappropriate");
+  const [showLikes, setShowLikes] = useState(true);
+  const [allowEmbedding, setAllowEmbedding] = useState(true);
+  const [notifySubscribers, setNotifySubscribers] = useState(true);
+  const [recordingDate, setRecordingDate] = useState("");
+  const [videoLocation, setVideoLocation] = useState("");
 
   // Schedule publishing state
   const [isScheduled, setIsScheduled] = useState(false);
@@ -160,48 +116,24 @@ export function useYouTubePublisher({
   const [scheduleTime, setScheduleTime] = useState("12:00");
 
   // Custom social links config states
-  const [channelLink, setChannelLink] = useState(() =>
-    getCachedValue("link_channel", "")
-  );
-  const [discordLink, setDiscordLink] = useState(() =>
-    getCachedValue("link_discord", "")
-  );
-  const [patreonLink, setPatreonLink] = useState(() =>
-    getCachedValue("link_patreon", "")
-  );
+  const [channelLink, setChannelLink] = useState("");
+  const [discordLink, setDiscordLink] = useState("");
+  const [patreonLink, setPatreonLink] = useState("");
   const [showSocialsConfig, setShowSocialsConfig] = useState(false);
 
   // New Advanced Metadata states
-  const [playlist, setPlaylist] = useState(() =>
-    getCachedValue("playlist", "")
-  );
-  const [authorName, setAuthorName] = useState(() =>
-    getCachedValue("author_name", "")
-  );
-  const [artistName, setArtistName] = useState(() =>
-    getCachedValue("artist_name", "")
-  );
-  const [webtoonPlatform, setWebtoonPlatform] = useState(() =>
-    getCachedValue("webtoon_platform", "Webtoon")
-  );
-  const [customPlatform, setCustomPlatform] = useState(() =>
-    getCachedValue("custom_platform", "")
-  );
-  const [chapterStart, setChapterStart] = useState(() =>
-    getCachedValue("chapter_start", "")
-  );
-  const [chapterEnd, setChapterEnd] = useState(() =>
-    getCachedValue("chapter_end", "")
-  );
+  const [playlist, setPlaylist] = useState("");
+  const [authorName, setAuthorName] = useState("");
+  const [artistName, setArtistName] = useState("");
+  const [webtoonPlatform, setWebtoonPlatform] = useState("Webtoon");
+  const [customPlatform, setCustomPlatform] = useState("");
+  const [chapterStart, setChapterStart] = useState("");
+  const [chapterEnd, setChapterEnd] = useState("");
   const [chapterValidationError, setChapterValidationError] = useState<
     string | null
   >(null);
-  const [subtitlesType, setSubtitlesType] = useState(() =>
-    getCachedValue("subtitles_type", "None")
-  );
-  const [subtitlesLanguage, setSubtitlesLanguage] = useState(() =>
-    getCachedValue("subtitles_language", "en")
-  );
+  const [subtitlesType, setSubtitlesType] = useState("None");
+  const [subtitlesLanguage, setSubtitlesLanguage] = useState("en");
 
   // Profile manager states
   const [profiles, setProfiles] = useState<PublisherProfile[]>([]);
@@ -263,130 +195,7 @@ export function useYouTubePublisher({
   // Calculate active video source URL
   const activeVideoUrl = localPreviewUrl || videoUrl;
 
-  // Persist form values to localStorage on change
-  useEffect(() => {
-    localStorage.setItem("yt_pub_title", title);
-  }, [title]);
 
-  useEffect(() => {
-    localStorage.setItem("yt_pub_description", description);
-  }, [description]);
-
-  useEffect(() => {
-    localStorage.setItem("yt_pub_tags", JSON.stringify(tags));
-  }, [tags]);
-
-  useEffect(() => {
-    localStorage.setItem("yt_pub_category", category);
-  }, [category]);
-
-  useEffect(() => {
-    localStorage.setItem("yt_pub_privacy", privacy);
-  }, [privacy]);
-
-  useEffect(() => {
-    localStorage.setItem("yt_pub_is_short", isShort ? "true" : "false");
-  }, [isShort]);
-
-  useEffect(() => {
-    localStorage.setItem("yt_pub_made_for_kids", madeForKids);
-  }, [madeForKids]);
-
-  useEffect(() => {
-    localStorage.setItem(
-      "yt_pub_paid_promotion",
-      paidPromotion ? "true" : "false"
-    );
-  }, [paidPromotion]);
-
-  useEffect(() => {
-    localStorage.setItem("yt_pub_license", license);
-  }, [license]);
-
-  useEffect(() => {
-    localStorage.setItem("yt_pub_language", videoLanguage);
-  }, [videoLanguage]);
-
-  useEffect(() => {
-    localStorage.setItem(
-      "yt_pub_age_restriction",
-      ageRestriction ? "true" : "false"
-    );
-  }, [ageRestriction]);
-
-  useEffect(() => {
-    localStorage.setItem("yt_pub_shorts_remixing", shortsRemixing);
-  }, [shortsRemixing]);
-
-  useEffect(() => {
-    localStorage.setItem("yt_pub_comments_mode", commentsMode);
-  }, [commentsMode]);
-
-  useEffect(() => {
-    localStorage.setItem("yt_pub_show_likes", showLikes ? "true" : "false");
-  }, [showLikes]);
-
-  useEffect(() => {
-    localStorage.setItem(
-      "yt_pub_allow_embedding",
-      allowEmbedding ? "true" : "false"
-    );
-  }, [allowEmbedding]);
-
-  useEffect(() => {
-    localStorage.setItem(
-      "yt_pub_notify_subscribers",
-      notifySubscribers ? "true" : "false"
-    );
-  }, [notifySubscribers]);
-
-  useEffect(() => {
-    localStorage.setItem("yt_pub_recording_date", recordingDate);
-  }, [recordingDate]);
-
-  useEffect(() => {
-    localStorage.setItem("yt_pub_video_location", videoLocation);
-  }, [videoLocation]);
-
-  useEffect(() => {
-    localStorage.setItem("yt_pub_link_channel", channelLink);
-  }, [channelLink]);
-
-  useEffect(() => {
-    localStorage.setItem("yt_pub_link_discord", discordLink);
-  }, [discordLink]);
-
-  useEffect(() => {
-    localStorage.setItem("yt_pub_link_patreon", patreonLink);
-  }, [patreonLink]);
-
-  useEffect(() => {
-    localStorage.setItem("yt_pub_playlist", playlist);
-  }, [playlist]);
-
-  useEffect(() => {
-    localStorage.setItem("yt_pub_author_name", authorName);
-  }, [authorName]);
-
-  useEffect(() => {
-    localStorage.setItem("yt_pub_artist_name", artistName);
-  }, [artistName]);
-
-  useEffect(() => {
-    localStorage.setItem("yt_pub_webtoon_platform", webtoonPlatform);
-  }, [webtoonPlatform]);
-
-  useEffect(() => {
-    localStorage.setItem("yt_pub_custom_platform", customPlatform);
-  }, [customPlatform]);
-
-  useEffect(() => {
-    localStorage.setItem("yt_pub_chapter_start", chapterStart);
-  }, [chapterStart]);
-
-  useEffect(() => {
-    localStorage.setItem("yt_pub_chapter_end", chapterEnd);
-  }, [chapterEnd]);
 
   // Chapter Range Validation Logic
   useEffect(() => {
@@ -488,13 +297,7 @@ export function useYouTubePublisher({
     scrapedTitle,
   ]);
 
-  useEffect(() => {
-    localStorage.setItem("yt_pub_subtitles_type", subtitlesType);
-  }, [subtitlesType]);
 
-  useEffect(() => {
-    localStorage.setItem("yt_pub_subtitles_language", subtitlesLanguage);
-  }, [subtitlesLanguage]);
 
   // Load profiles, publish history, and custom credentials from database on mount
   useEffect(() => {
@@ -687,6 +490,49 @@ export function useYouTubePublisher({
           `Failed to save profile to database: ${err.message}`,
           "error"
         );
+    }
+  };
+
+  const handleClearForm = () => {
+    setTitle("");
+    setDescription("");
+    setTags([]);
+    setTagInput("");
+    setCategory("1");
+    setPrivacy("unlisted");
+    setIsShort(false);
+    setShowAdvanced(false);
+    setMadeForKids("no");
+    setPaidPromotion(false);
+    setLicense("youtube");
+    setVideoLanguage("en");
+    setAgeRestriction(false);
+    setShortsRemixing("allow_all");
+    setCommentsMode("hold_inappropriate");
+    setShowLikes(true);
+    setAllowEmbedding(true);
+    setNotifySubscribers(true);
+    setRecordingDate("");
+    setVideoLocation("");
+    setIsScheduled(false);
+    setScheduleDate("");
+    setScheduleTime("12:00");
+    setChannelLink("");
+    setDiscordLink("");
+    setPatreonLink("");
+    setShowSocialsConfig(false);
+    setPlaylist("");
+    setAuthorName("");
+    setArtistName("");
+    setWebtoonPlatform("Webtoon");
+    setCustomPlatform("");
+    setChapterStart("");
+    setChapterEnd("");
+    setSubtitlesType("None");
+    setSubtitlesLanguage("en");
+    setCurrentProfileName("");
+    if (addNotification) {
+      addNotification("YouTube export form cleared.", "info");
     }
   };
 
@@ -1350,6 +1196,7 @@ export function useYouTubePublisher({
     handleSaveProfile,
     handleLoadProfile,
     handleDeleteProfile,
+    handleClearForm,
     handleSaveCredentials,
     handleDeleteCredentials,
     handleAddTag,
