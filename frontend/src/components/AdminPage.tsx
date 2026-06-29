@@ -32,7 +32,7 @@ import { AdminUsageTab } from "./admin/AdminUsageTab";
 import { AdminScrapersTab } from "./admin/AdminScrapersTab";
 import { AdminFinanceTab } from "./admin/AdminFinanceTab";
 
-export default function AdminPage({
+const AdminPage = React.memo(({
   navigateTo,
   isAuthenticated,
   fetchWithInterceptor,
@@ -47,7 +47,7 @@ export default function AdminPage({
   ) => Promise<Response>;
   addNotification?: any;
   audioFeedback?: any;
-}) {
+}) => {
   const [activeTab, setActiveTab] = useState<string>("overview");
   const [stats, setStats] = useState<any>({});
   const [analytics, setAnalytics] = useState<any>(null);
@@ -232,4 +232,6 @@ export default function AdminPage({
       </div>
     </div>
   );
-}
+});
+
+export default AdminPage;

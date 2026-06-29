@@ -13,12 +13,12 @@ interface CTRAnalyticsPageProps {
   panels?: GeneratedPanel[];
 }
 
-export default function CTRAnalyticsPage({
+const CTRAnalyticsPage = React.memo(({
   onNavigateHome,
   addNotification,
   scrapedTitle,
   panels,
-}: CTRAnalyticsPageProps) {
+}: CTRAnalyticsPageProps) => {
   const [activeTab, setActiveTab] = useState<"titles" | "outros" | "tokens">(
     "titles"
   );
@@ -99,4 +99,6 @@ export default function CTRAnalyticsPage({
       </div>
     </div>
   );
-}
+});
+
+export default CTRAnalyticsPage;

@@ -10,12 +10,12 @@ interface OutputMetadataPanelProps {
   handleSaveVideo?: () => void;
 }
 
-export default function OutputMetadataPanel({
+const OutputMetadataPanel = React.memo(({
   musicTheme,
   voiceActor,
   videoUrl,
   handleSaveVideo,
-}: OutputMetadataPanelProps) {
+}: OutputMetadataPanelProps) => {
   const [isPublishing, setIsPublishing] = useState(false);
   const [youtubeUrl, setYoutubeUrl] = useState<string | null>(null);
   const [publishMessage, setPublishMessage] = useState<string | null>(null);
@@ -151,4 +151,6 @@ export default function OutputMetadataPanel({
       )}
     </div>
   );
-}
+});
+
+export default OutputMetadataPanel;

@@ -13,13 +13,13 @@ interface CharacterProfilePageProps {
   addNotification?: (msg: string, type: any) => void;
 }
 
-export default function CharacterProfilePage({
+const CharacterProfilePage = React.memo(({
   panels,
   characters,
   setCharacters,
   onNavigateHome,
   addNotification,
-}: CharacterProfilePageProps) {
+}: CharacterProfilePageProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCharIdx, setEditingCharIdx] = useState<number | null>(null);
 
@@ -148,4 +148,6 @@ export default function CharacterProfilePage({
       />
     </div>
   );
-}
+});
+
+export default CharacterProfilePage;

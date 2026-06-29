@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 
 interface UseGlobalShortcutsProps {
   scrapedImages: string[];
@@ -389,8 +389,8 @@ export function useGlobalShortcuts({
     setIsPipMode,
   ]);
 
-  return {
+  return useMemo(() => ({
     shortcuts,
     setShortcuts,
-  };
+  }), [shortcuts]);
 }

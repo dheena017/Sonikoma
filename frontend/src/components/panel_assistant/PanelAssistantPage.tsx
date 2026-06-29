@@ -14,12 +14,12 @@ interface PanelAssistantPageProps {
   addNotification?: (msg: string, type: any) => void;
 }
 
-export default function PanelAssistantPage({
+const PanelAssistantPage = React.memo(({
   panels,
   setPanels,
   onNavigateHome,
   addNotification,
-}: PanelAssistantPageProps) {
+}: PanelAssistantPageProps) => {
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [activeTab, setActiveTab] = useState<
     "translation" | "audio" | "creative" | "pacing"
@@ -203,4 +203,6 @@ export default function PanelAssistantPage({
       </div>
     </div>
   );
-}
+});
+
+export default PanelAssistantPage;

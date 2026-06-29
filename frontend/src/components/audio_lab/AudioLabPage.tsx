@@ -11,12 +11,12 @@ interface AudioLabPageProps {
   addNotification?: (msg: string, type: any) => void;
 }
 
-export default function AudioLabPage({
+const AudioLabPage = React.memo(({
   panels,
   setMusicTheme,
   onNavigateHome,
   addNotification,
-}: AudioLabPageProps) {
+}: AudioLabPageProps) => {
   if (panels.length === 0) {
     return (
       <div className="flex-grow flex flex-col items-center justify-center p-8 text-center min-h-[60vh] max-w-xl mx-auto space-y-5 animate-fade-in">
@@ -85,4 +85,6 @@ export default function AudioLabPage({
       <SfxOverlayMixer panels={panels} />
     </div>
   );
-}
+});
+
+export default AudioLabPage;

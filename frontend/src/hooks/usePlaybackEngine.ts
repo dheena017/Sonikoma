@@ -196,7 +196,7 @@ export function usePlaybackEngine({
     playbackTime,
   ]);
 
-  const toggleStoryboardPlayback = () => {
+  const toggleStoryboardPlayback = useCallback(() => {
     if (panels.length === 0) return;
     console.log("[Playback] Toggling storyboard playback:", !storyboardPlaying);
     if (storyboardPlaying) {
@@ -209,9 +209,9 @@ export function usePlaybackEngine({
       setStoryboardPlaying(true);
       playStoryboardAudio(currentPanelIndex);
     }
-  };
+  }, [panels.length, storyboardPlaying, playStoryboardAudio, currentPanelIndex]);
 
-  const resetStoryboardPlayback = () => {
+  const resetStoryboardPlayback = useCallback(() => {
     console.log("[Playback] Resetting storyboard playback");
     setStoryboardPlaying(false);
     setCurrentPanelIndex(0);
@@ -222,9 +222,9 @@ export function usePlaybackEngine({
       activeAudioRef.current = null;
     }
     stopAmbientBackgroundMusic();
-  };
+  }, []);
 
-  return {
+  return useMemo(() => ({
     currentPanelIndex,
     setCurrentPanelIndex,
     playbackTime,
@@ -234,5 +234,15 @@ export function usePlaybackEngine({
     toggleStoryboardPlayback,
     resetStoryboardPlayback,
     playStoryboardAudio,
-  };
+  }), [
+    currentPanelIndex,
+    setCurrentPanelIndex,
+    playbackTime,
+    setPlaybackTime,
+    storyboardPlaying,
+    setStoryboardPlaying,
+    toggleStoryboardPlayback,
+    resetStoryboardPlayback,
+    playStoryboardAudio,
+  ]);
 }

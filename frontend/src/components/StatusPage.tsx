@@ -23,11 +23,11 @@ interface StatusPageProps {
   setSelectedModel?: (model: string) => void;
 }
 
-export default function StatusPage({
+const StatusPage = React.memo(({
   onNavigateHome,
   fetchWithInterceptor,
   setSelectedModel: setGlobalSelectedModel,
-}: StatusPageProps) {
+}: StatusPageProps) => {
   const [loading, setLoading] = useState(false);
   const [healthData, setHealthData] = useState<any>(null);
   const [metricsData, setMetricsData] = useState<any>(null);
@@ -1030,4 +1030,6 @@ export default function StatusPage({
       )}
     </div>
   );
-}
+});
+
+export default StatusPage;

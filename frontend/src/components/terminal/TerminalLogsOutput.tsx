@@ -470,10 +470,11 @@ export function TerminalLogsOutput({
         [...filteredLogs].reverse().map((log, index) => {
           const logColor = getLogColor(log);
           const borderColor = getLogBorderColor(log);
+          const logKey = log.id || `l-${index}-${log.timestamp}`;
 
           return (
             <div
-              key={index}
+              key={logKey}
               className={`leading-relaxed border-l-2 pl-2 hover:bg-neutral-900/30 rounded-r transition-colors ${logColor} ${borderColor}`}
             >
               <span className="text-neutral-600 mr-2 select-none w-10 inline-block">

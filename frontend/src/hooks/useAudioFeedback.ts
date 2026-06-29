@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useMemo } from "react";
 
 export function useAudioFeedback(globalVolume: number, globalMuted: boolean) {
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -113,10 +113,10 @@ export function useAudioFeedback(globalVolume: number, globalMuted: boolean) {
     playTone(1000, 0.05, "sine", 0.5);
   }, [playTone]);
 
-  return {
+  return useMemo(() => ({
     playSuccess,
     playError,
     playInfo,
     playTick,
-  };
+  }), [playSuccess, playError, playInfo, playTick]);
 }

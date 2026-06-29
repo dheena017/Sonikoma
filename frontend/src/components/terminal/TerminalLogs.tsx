@@ -19,10 +19,10 @@ function getTimestamp(): string {
   });
 }
 
-export default function TerminalLogs({
+const TerminalLogs = React.memo(({
   consoleLogs,
   setConsoleLogs,
-}: TerminalLogsProps) {
+}: TerminalLogsProps) => {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [copied, setCopied] = useState(false);
   const [autoScroll, setAutoScroll] = useState(true);
@@ -98,45 +98,52 @@ export default function TerminalLogs({
   };
 
   // Filter and search logic
-  const filteredLogs = consoleLogs.filter((log) => {
-    const query = searchQuery.toLowerCase().trim();
-    const matchesQuery =
-      query === "" ||
-      log.message.toLowerCase().includes(query) ||
-      log.module.toLowerCase().includes(query);
 
-    if (!matchesQuery) return false;
+  const filteredLogs = useMemo(() => {
+    return consoleLogs.filter((log) => {
+      const query = searchQuery.toLowerCase().trim();
+      const matchesQuery = query === "" ||
+        log.message.toLowerCase().includes(query) ||
+        log.module.toLowerCase().includes(query);
 
-    if (activeFilter === "errors") {
-      return (
-        log.level === "ERROR" || log.message.toLowerCase().includes("fail")
-      );
-    }
-    if (activeFilter === "warnings") {
-      return log.level === "WARN" || log.level === "WARNING";
-    }
-    if (activeFilter === "ai") {
-      return (
-        log.module.toLowerCase().includes("ai") ||
-        log.module.toLowerCase().includes("gemini")
-      );
-    }
-    if (activeFilter === "success") {
-      return (
-        log.level === "SUCCESS" || log.message.toLowerCase().includes("success")
-      );
-    }
+      if (!matchesQuery) return false;
 
-    return true;
-  });
+      if (activeFilter === "errors") {
+        return (
+          log.level === "ERROR" ||
+          log.message.toLowerCase().includes("fail")
+        );
+      }
+      if (activeFilter === "warnings") {
+        return log.level === "WARN" || log.level === "WARNING";
+      }
+      if (activeFilter === "ai") {
+        return (
+          log.module.toLowerCase().includes("ai") ||
+          log.module.toLowerCase().includes("gemini")
+        );
+      }
+      if (activeFilter === "success") {
+        return (
+          log.level === "SUCCESS" ||
+          log.message.toLowerCase().includes("success")
+        );
+      }
+      return true;
+    });
+  }, [consoleLogs, searchQuery, activeFilter]);
 
   // When paused, only show up to `lastVisibleCount` logs to avoid UI jumping
-  const displayedLogs = paused
-    ? filteredLogs.slice(
-        0,
-        Math.max(0, Math.min(lastVisibleCount, filteredLogs.length))
-      )
-    : filteredLogs;
+  const displayedLogs = useMemo(() => {
+    const logs = paused
+      ? filteredLogs.slice(
+          0,
+          Math.max(0, Math.min(lastVisibleCount, filteredLogs.length))
+        )
+      : filteredLogs;
+    // Memoize the reverse too if we were doing it here, but it's done in the Output component.
+    return logs;
+  }, [paused, filteredLogs, lastVisibleCount]);
 
   // Calculate statistics counts
   const errorCount = consoleLogs.filter(
@@ -190,4 +197,10 @@ export default function TerminalLogs({
       />
     </div>
   );
+});
+
+export default TerminalLogs;
+function useMemo(arg0: () => LogEntry[], arg1: (string | LogEntry[])[]) {
+  throw new Error("Function not implemented.");
 }
+

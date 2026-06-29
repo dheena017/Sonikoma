@@ -30,7 +30,7 @@ interface VolumeAndProgressPanelProps {
   addNotification?: (message: string, type: any) => void;
 }
 
-export default function VolumeAndProgressPanel({
+const VolumeAndProgressPanel = React.memo(({
   panels,
   currentPanelIndex,
   playbackTime,
@@ -43,7 +43,7 @@ export default function VolumeAndProgressPanel({
   setVolume,
   setPanels,
   addNotification,
-}: VolumeAndProgressPanelProps) {
+}: VolumeAndProgressPanelProps) => {
   const activeStoryboardPanel = panels[currentPanelIndex] || null;
   const [showCustomizer, setShowCustomizer] = useState(false);
   const [activeTab, setActiveTab] = useState<"visuals" | "timeline">("visuals");
@@ -504,4 +504,6 @@ export default function VolumeAndProgressPanel({
       )}
     </div>
   );
-}
+});
+
+export default VolumeAndProgressPanel;

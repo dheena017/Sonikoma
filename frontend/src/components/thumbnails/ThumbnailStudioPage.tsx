@@ -14,13 +14,13 @@ interface ThumbnailStudioPageProps {
   scrapedGenre?: string;
 }
 
-export default function ThumbnailStudioPage({
+const ThumbnailStudioPage = React.memo(({
   panels,
   onNavigateHome,
   addNotification,
   scrapedTitle,
   scrapedGenre,
-}: ThumbnailStudioPageProps) {
+}: ThumbnailStudioPageProps) => {
   const [conceptPrompt, setConceptPrompt] = useState("");
   const [generatedThumbs, setGeneratedThumbs] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -176,4 +176,6 @@ export default function ThumbnailStudioPage({
       </div>
     </div>
   );
-}
+});
+
+export default ThumbnailStudioPage;
