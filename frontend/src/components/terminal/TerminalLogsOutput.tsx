@@ -33,7 +33,11 @@ function getLogColor(log: LogEntry): string {
     return "text-amber-400 font-semibold";
 
   // Priority 3: Success requests and messages
-  if (level === "SUCCESS" || msg.includes("completed cleanly") || msg.includes("successfully"))
+  if (
+    level === "SUCCESS" ||
+    msg.includes("completed cleanly") ||
+    msg.includes("successfully")
+  )
     return "text-emerald-400 font-medium";
   if (
     msg.includes(" 200 ") ||
@@ -56,7 +60,8 @@ function getLogColor(log: LogEntry): string {
     msg.includes("sonikoma.api")
   )
     return "text-sky-400";
-  if (module === "vite" || msg.includes("[vite]")) return "text-fuchsia-400 font-medium";
+  if (module === "vite" || msg.includes("[vite]"))
+    return "text-fuchsia-400 font-medium";
   if (msg.includes("httpx") || msg.includes("http request:")) {
     if (msg.includes("post")) return "text-amber-400 font-medium";
     if (msg.includes("get")) return "text-emerald-400 font-light";
@@ -68,30 +73,29 @@ function getLogColor(log: LogEntry): string {
   if (module === "ai" || module === "engine" || module === "gemini")
     return "text-purple-300 font-medium";
 
-  if (module === "crop" || module === "autocrop" || msg.includes("[smart crop]"))
+  if (
+    module === "crop" ||
+    module === "autocrop" ||
+    msg.includes("[smart crop]")
+  )
     return "text-violet-400 font-medium";
 
-  if (
-    module === "ocr" ||
-    module === "vision" ||
-    module === "cv"
-  )
+  if (module === "ocr" || module === "vision" || module === "cv")
     return "text-purple-300";
 
   if (module === "downloader") return "text-cyan-400";
   if (module === "server") return "text-cyan-300 font-medium";
 
-  if (module === "pipeline" || module === "control")
-    return "text-blue-400";
+  if (module === "pipeline" || module === "control") return "text-blue-400";
 
   if (module === "video" || module === "moviepy" || module === "ffmpeg")
     return "text-amber-300";
 
   if (module === "image editor") return "text-orange-400";
-  if (module === "stitcher" || module === "stitch")
-    return "text-indigo-300";
+  if (module === "stitcher" || module === "stitch") return "text-indigo-300";
 
-  if (module === "bubbles" || module === "speech bubbles") return "text-pink-400";
+  if (module === "bubbles" || module === "speech bubbles")
+    return "text-pink-400";
   if (module === "gui") return "text-neutral-300";
   if (module === "preloader") return "text-neutral-500";
   if (module === "model") return "text-violet-300";
@@ -143,8 +147,7 @@ function getLogBorderColor(log: LogEntry): string {
   if (module === "pipeline" || module === "control")
     return "border-blue-500/40";
 
-  if (module === "database" || module === "db")
-    return "border-emerald-500/60";
+  if (module === "database" || module === "db") return "border-emerald-500/60";
 
   return "border-neutral-800";
 }

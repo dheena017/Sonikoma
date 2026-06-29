@@ -226,7 +226,7 @@ export function useAppState() {
       const incoming = typeof val === "function" ? val(prev) : val;
       // If incoming is already normalized array, just slice
       if (Array.isArray(incoming)) {
-        const normalized = incoming.map(log => normalizeLog(log));
+        const normalized = incoming.map((log) => normalizeLog(log));
         return normalized.slice(-200);
       }
       return prev;
@@ -693,7 +693,7 @@ export function useAppState() {
     setSeriesCoverImage("");
     setSeriesSynopsis("");
     setRawConsoleLogs([
-      normalizeLog(`[System] Workspace initialized for new project.`)
+      normalizeLog(`[System] Workspace initialized for new project.`),
     ]);
     // Optionally remove project_id from URL
     window.history.pushState(null, "");

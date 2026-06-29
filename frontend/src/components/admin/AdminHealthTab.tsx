@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Server, Activity, Database, Cpu, HardDrive, ShieldCheck, AlertCircle } from "lucide-react";
+import {
+  Server,
+  Activity,
+  Database,
+  Cpu,
+  HardDrive,
+  ShieldCheck,
+  AlertCircle,
+} from "lucide-react";
 
 export function AdminHealthTab({ fetchWithInterceptor }: any) {
   const [metrics, setMetrics] = useState<any>(null);
@@ -26,7 +34,11 @@ export function AdminHealthTab({ fetchWithInterceptor }: any) {
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-neutral-500">Loading system diagnostics...</div>;
+    return (
+      <div className="p-8 text-center text-neutral-500">
+        Loading system diagnostics...
+      </div>
+    );
   }
 
   const memoryPct = metrics?.memory?.systemUsedPct || "0%";
@@ -48,15 +60,21 @@ export function AdminHealthTab({ fetchWithInterceptor }: any) {
           <div className="space-y-4">
             <div className="flex justify-between items-center text-sm">
               <span className="text-neutral-500">Uptime</span>
-              <span className="text-neutral-200 font-mono">{metrics?.server?.uptime}</span>
+              <span className="text-neutral-200 font-mono">
+                {metrics?.server?.uptime}
+              </span>
             </div>
             <div className="flex justify-between items-center text-sm">
               <span className="text-neutral-500">API Version</span>
-              <span className="text-neutral-200 font-mono">{metrics?.server?.apiVersion}</span>
+              <span className="text-neutral-200 font-mono">
+                {metrics?.server?.apiVersion}
+              </span>
             </div>
             <div className="flex justify-between items-center text-sm">
               <span className="text-neutral-500">Python</span>
-              <span className="text-neutral-200 font-mono">{metrics?.server?.pythonVersion}</span>
+              <span className="text-neutral-200 font-mono">
+                {metrics?.server?.pythonVersion}
+              </span>
             </div>
           </div>
         </div>
@@ -71,20 +89,28 @@ export function AdminHealthTab({ fetchWithInterceptor }: any) {
           <div className="space-y-5">
             <div className="space-y-2">
               <div className="flex justify-between text-xs">
-                <span className="text-neutral-500 uppercase tracking-widest font-bold">CPU Usage</span>
+                <span className="text-neutral-500 uppercase tracking-widest font-bold">
+                  CPU Usage
+                </span>
                 <span className="text-neutral-200">{cpuPct}%</span>
               </div>
               <div className="w-full bg-[#0b0b0e] h-1.5 rounded-full overflow-hidden">
                 <div
-                  className={`h-full transition-all duration-1000 ${cpuPct > 80 ? "bg-rose-500" : "bg-purple-500"}`}
+                  className={`h-full transition-all duration-1000 ${
+                    cpuPct > 80 ? "bg-rose-500" : "bg-purple-500"
+                  }`}
                   style={{ width: `${cpuPct}%` }}
                 />
               </div>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-xs">
-                <span className="text-neutral-500 uppercase tracking-widest font-bold">Memory (RSS)</span>
-                <span className="text-neutral-200">{metrics?.memory?.rssMB} MB</span>
+                <span className="text-neutral-500 uppercase tracking-widest font-bold">
+                  Memory (RSS)
+                </span>
+                <span className="text-neutral-200">
+                  {metrics?.memory?.rssMB} MB
+                </span>
               </div>
               <div className="w-full bg-[#0b0b0e] h-1.5 rounded-full overflow-hidden">
                 <div
@@ -109,7 +135,13 @@ export function AdminHealthTab({ fetchWithInterceptor }: any) {
           <div className="space-y-4">
             <div className="flex justify-between items-center text-sm">
               <span className="text-neutral-500">Latency</span>
-              <span className={`font-mono ${metrics?.database?.dbLatencyMs > 50 ? "text-rose-400" : "text-emerald-400"}`}>
+              <span
+                className={`font-mono ${
+                  metrics?.database?.dbLatencyMs > 50
+                    ? "text-rose-400"
+                    : "text-emerald-400"
+                }`}
+              >
                 {metrics?.database?.dbLatencyMs}ms
               </span>
             </div>
@@ -133,21 +165,37 @@ export function AdminHealthTab({ fetchWithInterceptor }: any) {
           </h3>
           <div className="grid grid-cols-2 gap-8">
             <div className="space-y-4">
-              {Object.entries(metrics?.cache || {}).map(([name, stats]: any) => (
-                <div key={name} className="flex justify-between items-center text-sm">
-                  <span className="text-neutral-500 capitalize">{name.replace("_", " ")}</span>
-                  <span className="text-neutral-200 font-mono">{stats.items} items</span>
-                </div>
-              ))}
+              {Object.entries(metrics?.cache || {}).map(
+                ([name, stats]: any) => (
+                  <div
+                    key={name}
+                    className="flex justify-between items-center text-sm"
+                  >
+                    <span className="text-neutral-500 capitalize">
+                      {name.replace("_", " ")}
+                    </span>
+                    <span className="text-neutral-200 font-mono">
+                      {stats.items} items
+                    </span>
+                  </div>
+                )
+              )}
             </div>
             <div className="flex flex-col items-center justify-center p-4 bg-[#0b0b0e] rounded-xl border border-neutral-800">
-               <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-2">Assets Storage</div>
-               <div className="text-2xl font-bold text-white">
-                 {Math.round((metrics?.storage?.usedBytes || 0) / 1024 / 1024)} MB
-               </div>
-               <div className="text-[10px] text-neutral-600 mt-1">
-                 of {Math.round((metrics?.storage?.limitBytes || 0) / 1024 / 1024 / 1024)} GB Limit
-               </div>
+              <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-2">
+                Assets Storage
+              </div>
+              <div className="text-2xl font-bold text-white">
+                {Math.round((metrics?.storage?.usedBytes || 0) / 1024 / 1024)}{" "}
+                MB
+              </div>
+              <div className="text-[10px] text-neutral-600 mt-1">
+                of{" "}
+                {Math.round(
+                  (metrics?.storage?.limitBytes || 0) / 1024 / 1024 / 1024
+                )}{" "}
+                GB Limit
+              </div>
             </div>
           </div>
         </div>
@@ -158,25 +206,35 @@ export function AdminHealthTab({ fetchWithInterceptor }: any) {
           </h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between p-3 bg-[#0b0b0e] border border-neutral-800 rounded-lg">
-               <div className="flex items-center gap-3">
-                 <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                 <span className="text-sm text-neutral-300">Image Scraper</span>
-               </div>
-               <span className="text-[10px] font-bold text-neutral-500 uppercase">Idle</span>
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span className="text-sm text-neutral-300">Image Scraper</span>
+              </div>
+              <span className="text-[10px] font-bold text-neutral-500 uppercase">
+                Idle
+              </span>
             </div>
             <div className="flex items-center justify-between p-3 bg-[#0b0b0e] border border-neutral-800 rounded-lg">
-               <div className="flex items-center gap-3">
-                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                 <span className="text-sm text-neutral-300">GPU Inference Worker</span>
-               </div>
-               <span className="text-[10px] font-bold text-emerald-500 uppercase">Polling</span>
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-sm text-neutral-300">
+                  GPU Inference Worker
+                </span>
+              </div>
+              <span className="text-[10px] font-bold text-emerald-500 uppercase">
+                Polling
+              </span>
             </div>
             <div className="flex items-center justify-between p-3 bg-[#0b0b0e] border border-neutral-800 rounded-lg">
-               <div className="flex items-center gap-3">
-                 <div className="w-2 h-2 rounded-full bg-amber-500" />
-                 <span className="text-sm text-neutral-300">Audio Synth (TTS)</span>
-               </div>
-               <span className="text-[10px] font-bold text-neutral-500 uppercase">Standby</span>
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-amber-500" />
+                <span className="text-sm text-neutral-300">
+                  Audio Synth (TTS)
+                </span>
+              </div>
+              <span className="text-[10px] font-bold text-neutral-500 uppercase">
+                Standby
+              </span>
             </div>
           </div>
         </div>

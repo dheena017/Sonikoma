@@ -47,7 +47,9 @@ export default function TerminalLogs({
   }, [consoleLogs, autoScroll, searchQuery, activeFilter]);
 
   const handleCopyAll = () => {
-    const allLogs = consoleLogs.map(l => `[${l.timestamp}] [${l.module}] [${l.level}] ${l.message}`).join("\n");
+    const allLogs = consoleLogs
+      .map((l) => `[${l.timestamp}] [${l.module}] [${l.level}] ${l.message}`)
+      .join("\n");
     navigator.clipboard.writeText(allLogs).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -57,7 +59,9 @@ export default function TerminalLogs({
   const handleCopyVisible = () => {
     const visible = (
       paused ? consoleLogs.slice(0, lastVisibleCount) : consoleLogs
-    ).map(l => `[${l.timestamp}] [${l.module}] [${l.level}] ${l.message}`).join("\n");
+    )
+      .map((l) => `[${l.timestamp}] [${l.module}] [${l.level}] ${l.message}`)
+      .join("\n");
     navigator.clipboard.writeText(visible).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -65,9 +69,18 @@ export default function TerminalLogs({
   };
 
   const handleDownloadLogs = () => {
-    const blob = new Blob([consoleLogs.map(l => `[${l.timestamp}] [${l.module}] [${l.level}] ${l.message}`).join("\n")], {
-      type: "text/plain;charset=utf-8",
-    });
+    const blob = new Blob(
+      [
+        consoleLogs
+          .map(
+            (l) => `[${l.timestamp}] [${l.module}] [${l.level}] ${l.message}`
+          )
+          .join("\n"),
+      ],
+      {
+        type: "text/plain;charset=utf-8",
+      }
+    );
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -80,14 +93,15 @@ export default function TerminalLogs({
 
   const handleClear = () => {
     setConsoleLogs([
-      normalizeLog(`[GUI] Active shell cleared at user prompt.`)
+      normalizeLog(`[GUI] Active shell cleared at user prompt.`),
     ]);
   };
 
   // Filter and search logic
   const filteredLogs = consoleLogs.filter((log) => {
     const query = searchQuery.toLowerCase().trim();
-    const matchesQuery = query === "" ||
+    const matchesQuery =
+      query === "" ||
       log.message.toLowerCase().includes(query) ||
       log.module.toLowerCase().includes(query);
 
@@ -95,8 +109,7 @@ export default function TerminalLogs({
 
     if (activeFilter === "errors") {
       return (
-        log.level === "ERROR" ||
-        log.message.toLowerCase().includes("fail")
+        log.level === "ERROR" || log.message.toLowerCase().includes("fail")
       );
     }
     if (activeFilter === "warnings") {
@@ -110,8 +123,7 @@ export default function TerminalLogs({
     }
     if (activeFilter === "success") {
       return (
-        log.level === "SUCCESS" ||
-        log.message.toLowerCase().includes("success")
+        log.level === "SUCCESS" || log.message.toLowerCase().includes("success")
       );
     }
 
@@ -128,18 +140,19 @@ export default function TerminalLogs({
 
   // Calculate statistics counts
   const errorCount = consoleLogs.filter(
-    (log) =>
-      log.level === "ERROR" ||
-      log.message.toLowerCase().includes("fail")
+    (log) => log.level === "ERROR" || log.message.toLowerCase().includes("fail")
   ).length;
   const warningCount = consoleLogs.filter(
     (log) => log.level === "WARN" || log.level === "WARNING"
   ).length;
   const successCount = consoleLogs.filter(
-    (log) => log.level === "SUCCESS" || log.message.toLowerCase().includes("success")
+    (log) =>
+      log.level === "SUCCESS" || log.message.toLowerCase().includes("success")
   ).length;
   const aiCount = consoleLogs.filter(
-    (log) => log.module.toLowerCase().includes("ai") || log.module.toLowerCase().includes("gemini")
+    (log) =>
+      log.module.toLowerCase().includes("ai") ||
+      log.module.toLowerCase().includes("gemini")
   ).length;
 
   return (

@@ -71,12 +71,17 @@ export function AdminUsersTab({
 
     // Check if reason is required
     const isSensitive =
-        editingUser.is_locked !== users.find(u => u.id === editingUser.id)?.is_locked ||
-        editingUser.credits !== users.find(u => u.id === editingUser.id)?.credits;
+      editingUser.is_locked !==
+        users.find((u) => u.id === editingUser.id)?.is_locked ||
+      editingUser.credits !==
+        users.find((u) => u.id === editingUser.id)?.credits;
 
     if (isSensitive && !justificationReason.trim()) {
-        addNotification("Justification reason is required for sensitive changes", "warning");
-        return;
+      addNotification(
+        "Justification reason is required for sensitive changes",
+        "warning"
+      );
+      return;
     }
 
     try {
@@ -89,7 +94,7 @@ export function AdminUsersTab({
             creator_role: editingUser.creator_role,
             credits: parseInt(editingUser.credits),
             is_locked: editingUser.is_locked,
-            reason: justificationReason
+            reason: justificationReason,
           }),
         }
       );
@@ -110,8 +115,8 @@ export function AdminUsersTab({
   const handleDeleteUser = async () => {
     if (!deletingUser) return;
     if (!justificationReason.trim()) {
-        addNotification("Reason is required for deletion", "warning");
-        return;
+      addNotification("Reason is required for deletion", "warning");
+      return;
     }
     try {
       const res = await fetchWithInterceptor(
@@ -181,7 +186,8 @@ export function AdminUsersTab({
         const data = await res.json();
         if (data.success) {
           const currentToken = localStorage.getItem("sonikoma_token");
-          if (currentToken) localStorage.setItem("sonikoma_admin_token", currentToken);
+          if (currentToken)
+            localStorage.setItem("sonikoma_admin_token", currentToken);
           localStorage.setItem("sonikoma_token", data.access_token);
           window.location.href = "/";
         }
@@ -195,7 +201,8 @@ export function AdminUsersTab({
     const matchesSearch =
       (u.full_name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
       (u.email || "").toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesRole = roleFilter === "all" || (u.creator_role || "user") === roleFilter;
+    const matchesRole =
+      roleFilter === "all" || (u.creator_role || "user") === roleFilter;
     const status = u.is_locked ? "locked" : "active";
     const matchesStatus = statusFilter === "all" || status === statusFilter;
     return matchesSearch && matchesRole && matchesStatus;
@@ -209,7 +216,8 @@ export function AdminUsersTab({
   };
 
   const toggleSelectAll = () => {
-    if (selectedUsers.size === filteredUsers.length) setSelectedUsers(new Set());
+    if (selectedUsers.size === filteredUsers.length)
+      setSelectedUsers(new Set());
     else setSelectedUsers(new Set(filteredUsers.map((u) => u.id)));
   };
 
@@ -265,16 +273,30 @@ export function AdminUsersTab({
             <thead className="bg-[#0b0b0e] text-neutral-400 border-b border-neutral-800 text-xs uppercase font-semibold">
               <tr>
                 <th className="px-4 py-4 w-10">
-                  <button onClick={toggleSelectAll} className="hover:text-white">
-                    {selectedUsers.size === filteredUsers.length && filteredUsers.length > 0 ? (
+                  <button
+                    onClick={toggleSelectAll}
+                    className="hover:text-white"
+                  >
+                    {selectedUsers.size === filteredUsers.length &&
+                    filteredUsers.length > 0 ? (
                       <CheckSquare className="w-4 h-4 text-purple-400" />
                     ) : (
                       <Square className="w-4 h-4" />
                     )}
                   </button>
                 </th>
-                <th className="px-4 py-4 cursor-pointer hover:text-white" onClick={() => handleSort("full_name")}>User</th>
-                <th className="px-4 py-4 cursor-pointer hover:text-white" onClick={() => handleSort("email")}>Email</th>
+                <th
+                  className="px-4 py-4 cursor-pointer hover:text-white"
+                  onClick={() => handleSort("full_name")}
+                >
+                  User
+                </th>
+                <th
+                  className="px-4 py-4 cursor-pointer hover:text-white"
+                  onClick={() => handleSort("email")}
+                >
+                  Email
+                </th>
                 <th className="px-4 py-4">Role</th>
                 <th className="px-4 py-4">Credits</th>
                 <th className="px-4 py-4">Status</th>
@@ -283,37 +305,95 @@ export function AdminUsersTab({
             </thead>
             <tbody className="divide-y divide-neutral-800/50">
               {loading ? (
-                <tr><td colSpan={7} className="px-6 py-12 text-center text-neutral-500">Loading...</td></tr>
+                <tr>
+                  <td
+                    colSpan={7}
+                    className="px-6 py-12 text-center text-neutral-500"
+                  >
+                    Loading...
+                  </td>
+                </tr>
               ) : (
                 filteredUsers.map((u) => (
-                  <tr key={u.id} className={`hover:bg-white/[0.02] transition-colors group ${selectedUsers.has(u.id) ? "bg-purple-500/5" : ""}`}>
+                  <tr
+                    key={u.id}
+                    className={`hover:bg-white/[0.02] transition-colors group ${
+                      selectedUsers.has(u.id) ? "bg-purple-500/5" : ""
+                    }`}
+                  >
                     <td className="px-4 py-4">
-                      <button onClick={() => toggleSelectUser(u.id)} className="text-neutral-500 hover:text-white">
-                        {selectedUsers.has(u.id) ? <CheckSquare className="w-4 h-4 text-purple-400" /> : <Square className="w-4 h-4" />}
+                      <button
+                        onClick={() => toggleSelectUser(u.id)}
+                        className="text-neutral-500 hover:text-white"
+                      >
+                        {selectedUsers.has(u.id) ? (
+                          <CheckSquare className="w-4 h-4 text-purple-400" />
+                        ) : (
+                          <Square className="w-4 h-4" />
+                        )}
                       </button>
                     </td>
-                    <td className="px-4 py-4 font-medium text-neutral-200">{u.full_name || "No Name"}</td>
+                    <td className="px-4 py-4 font-medium text-neutral-200">
+                      {u.full_name || "No Name"}
+                    </td>
                     <td className="px-4 py-4 text-neutral-400">{u.email}</td>
                     <td className="px-4 py-4">
-                      <span className={`px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider ${u.creator_role === "admin" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" : "bg-neutral-800 text-neutral-300 border border-neutral-700"}`}>
+                      <span
+                        className={`px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider ${
+                          u.creator_role === "admin"
+                            ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                            : "bg-neutral-800 text-neutral-300 border border-neutral-700"
+                        }`}
+                      >
                         {u.creator_role || "user"}
                       </span>
                     </td>
-                    <td className="px-4 py-4 text-emerald-400 font-mono"><Coins className="w-3 h-3 inline mr-1" />{u.credits}</td>
+                    <td className="px-4 py-4 text-emerald-400 font-mono">
+                      <Coins className="w-3 h-3 inline mr-1" />
+                      {u.credits}
+                    </td>
                     <td className="px-4 py-4">
                       {u.is_locked ? (
-                        <span className="text-rose-400 flex items-center gap-1 text-xs"><Lock className="w-3 h-3" /> Locked</span>
+                        <span className="text-rose-400 flex items-center gap-1 text-xs">
+                          <Lock className="w-3 h-3" /> Locked
+                        </span>
                       ) : (
-                        <span className="text-emerald-400 flex items-center gap-1 text-xs"><Unlock className="w-3 h-3" /> Active</span>
+                        <span className="text-emerald-400 flex items-center gap-1 text-xs">
+                          <Unlock className="w-3 h-3" /> Active
+                        </span>
                       )}
                     </td>
                     <td className="px-4 py-4 text-right">
-                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                         <button onClick={() => handleImpersonate(u.id)} className="p-1.5 hover:bg-yellow-500/10 text-yellow-500 rounded-md" title="Impersonate"><Ghost className="w-4 h-4" /></button>
-                         <button onClick={() => handleFetchLogs(u)} className="p-1.5 hover:bg-blue-500/10 text-blue-500 rounded-md" title="Logs"><History className="w-4 h-4" /></button>
-                         <button onClick={() => setEditingUser(u)} className="p-1.5 hover:bg-neutral-800 text-neutral-300 rounded-md" title="Edit"><Edit2 className="w-4 h-4" /></button>
-                         <button onClick={() => setDeletingUser(u)} className="p-1.5 hover:bg-rose-500/10 text-rose-500 rounded-md" title="Delete"><Trash2 className="w-4 h-4" /></button>
-                       </div>
+                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => handleImpersonate(u.id)}
+                          className="p-1.5 hover:bg-yellow-500/10 text-yellow-500 rounded-md"
+                          title="Impersonate"
+                        >
+                          <Ghost className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleFetchLogs(u)}
+                          className="p-1.5 hover:bg-blue-500/10 text-blue-500 rounded-md"
+                          title="Logs"
+                        >
+                          <History className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => setEditingUser(u)}
+                          className="p-1.5 hover:bg-neutral-800 text-neutral-300 rounded-md"
+                          title="Edit"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => setDeletingUser(u)}
+                          className="p-1.5 hover:bg-rose-500/10 text-rose-500 rounded-md"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -328,16 +408,29 @@ export function AdminUsersTab({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-[#111115] border border-neutral-800 rounded-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[80vh]">
             <div className="p-6 border-b border-neutral-800 flex justify-between items-center">
-              <h3 className="font-bold text-white flex items-center gap-2"><History className="w-5 h-5" /> Logs for {viewLogsUser.email}</h3>
-              <button onClick={() => setViewLogsUser(null)}><X className="w-5 h-5" /></button>
+              <h3 className="font-bold text-white flex items-center gap-2">
+                <History className="w-5 h-5" /> Logs for {viewLogsUser.email}
+              </h3>
+              <button onClick={() => setViewLogsUser(null)}>
+                <X className="w-5 h-5" />
+              </button>
             </div>
             <div className="overflow-y-auto p-4 space-y-2">
-              {loadingLogs ? <p className="text-center p-8">Loading...</p> : userLogs.map(l => (
-                <div key={l.id} className="text-xs font-mono p-2 bg-black/20 rounded border border-neutral-800 flex justify-between">
-                  <span className="text-neutral-400">{l.action}</span>
-                  <span className="text-neutral-600">{new Date(l.created_at).toLocaleString()}</span>
-                </div>
-              ))}
+              {loadingLogs ? (
+                <p className="text-center p-8">Loading...</p>
+              ) : (
+                userLogs.map((l) => (
+                  <div
+                    key={l.id}
+                    className="text-xs font-mono p-2 bg-black/20 rounded border border-neutral-800 flex justify-between"
+                  >
+                    <span className="text-neutral-400">{l.action}</span>
+                    <span className="text-neutral-600">
+                      {new Date(l.created_at).toLocaleString()}
+                    </span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
@@ -349,10 +442,17 @@ export function AdminUsersTab({
             <h3 className="font-bold text-white mb-4">Edit User</h3>
             <div className="space-y-4">
               <div>
-                <label className="text-xs text-neutral-500 block mb-1">Role</label>
+                <label className="text-xs text-neutral-500 block mb-1">
+                  Role
+                </label>
                 <select
                   value={editingUser.creator_role}
-                  onChange={e => setEditingUser({...editingUser, creator_role: e.target.value})}
+                  onChange={(e) =>
+                    setEditingUser({
+                      ...editingUser,
+                      creator_role: e.target.value,
+                    })
+                  }
                   className="w-full bg-[#0b0b0e] border border-neutral-800 rounded p-2 text-white"
                 >
                   <option value="user">User</option>
@@ -361,11 +461,15 @@ export function AdminUsersTab({
                 </select>
               </div>
               <div>
-                <label className="text-xs text-neutral-500 block mb-1">Credits</label>
+                <label className="text-xs text-neutral-500 block mb-1">
+                  Credits
+                </label>
                 <input
                   type="number"
                   value={editingUser.credits}
-                  onChange={e => setEditingUser({...editingUser, credits: e.target.value})}
+                  onChange={(e) =>
+                    setEditingUser({ ...editingUser, credits: e.target.value })
+                  }
                   className="w-full bg-[#0b0b0e] border border-neutral-800 rounded p-2 text-white"
                 />
               </div>
@@ -373,25 +477,46 @@ export function AdminUsersTab({
                 <input
                   type="checkbox"
                   checked={editingUser.is_locked}
-                  onChange={e => setEditingUser({...editingUser, is_locked: e.target.checked})}
+                  onChange={(e) =>
+                    setEditingUser({
+                      ...editingUser,
+                      is_locked: e.target.checked,
+                    })
+                  }
                   className="rounded border-neutral-800 bg-neutral-900"
                 />
                 <label className="text-sm text-neutral-300">Lock Account</label>
               </div>
 
               <div className="pt-4 border-t border-neutral-800">
-                <label className="text-xs text-neutral-500 block mb-1 flex items-center gap-1.5"><AlertTriangle className="w-3 h-3 text-amber-500" /> Justification / Reason</label>
+                <label className="text-xs text-neutral-500 block mb-1 flex items-center gap-1.5">
+                  <AlertTriangle className="w-3 h-3 text-amber-500" />{" "}
+                  Justification / Reason
+                </label>
                 <textarea
                   value={justificationReason}
-                  onChange={e => setJustificationReason(e.target.value)}
+                  onChange={(e) => setJustificationReason(e.target.value)}
                   placeholder="Reason for change (required for sensitive actions)..."
                   className="w-full bg-[#0b0b0e] border border-neutral-800 rounded p-2 text-white text-sm h-20 focus:border-purple-500/50 outline-none"
                 />
               </div>
             </div>
             <div className="flex gap-2 mt-6">
-              <button onClick={() => { setEditingUser(null); setJustificationReason(""); }} className="flex-1 p-2 bg-neutral-800 rounded">Cancel</button>
-              <button onClick={handleUpdateUser} className="flex-1 p-2 bg-purple-600 rounded shadow-lg shadow-purple-500/20">Save Changes</button>
+              <button
+                onClick={() => {
+                  setEditingUser(null);
+                  setJustificationReason("");
+                }}
+                className="flex-1 p-2 bg-neutral-800 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateUser}
+                className="flex-1 p-2 bg-purple-600 rounded shadow-lg shadow-purple-500/20"
+              >
+                Save Changes
+              </button>
             </div>
           </div>
         </div>
@@ -400,37 +525,72 @@ export function AdminUsersTab({
       {deletingUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-[#111115] border border-rose-500/20 rounded-xl w-full max-w-md p-6">
-             <div className="flex items-center gap-3 text-rose-500 mb-4">
-               <ShieldAlert className="w-6 h-6" />
-               <h3 className="font-bold">Delete User?</h3>
-             </div>
-             <p className="text-sm text-neutral-400 mb-6">Are you sure you want to delete <strong>{deletingUser.email}</strong>? This is irreversible.</p>
+            <div className="flex items-center gap-3 text-rose-500 mb-4">
+              <ShieldAlert className="w-6 h-6" />
+              <h3 className="font-bold">Delete User?</h3>
+            </div>
+            <p className="text-sm text-neutral-400 mb-6">
+              Are you sure you want to delete{" "}
+              <strong>{deletingUser.email}</strong>? This is irreversible.
+            </p>
 
-             <div className="mb-6">
-                <label className="text-xs text-neutral-500 block mb-1">Audit Reason</label>
-                <textarea
-                  value={justificationReason}
-                  onChange={e => setJustificationReason(e.target.value)}
-                  placeholder="Ticket # or deletion reason..."
-                  className="w-full bg-[#0b0b0e] border border-neutral-800 rounded p-2 text-white text-sm h-16 focus:border-rose-500/50 outline-none"
-                />
-             </div>
+            <div className="mb-6">
+              <label className="text-xs text-neutral-500 block mb-1">
+                Audit Reason
+              </label>
+              <textarea
+                value={justificationReason}
+                onChange={(e) => setJustificationReason(e.target.value)}
+                placeholder="Ticket # or deletion reason..."
+                className="w-full bg-[#0b0b0e] border border-neutral-800 rounded p-2 text-white text-sm h-16 focus:border-rose-500/50 outline-none"
+              />
+            </div>
 
-             <div className="flex gap-2">
-               <button onClick={() => { setDeletingUser(null); setJustificationReason(""); }} className="flex-1 p-2 bg-neutral-800 rounded">Cancel</button>
-               <button onClick={handleDeleteUser} className="flex-1 p-2 bg-rose-600 rounded">Delete</button>
-             </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setDeletingUser(null);
+                  setJustificationReason("");
+                }}
+                className="flex-1 p-2 bg-neutral-800 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteUser}
+                className="flex-1 p-2 bg-rose-600 rounded"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {selectedUsers.size > 0 && (
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-[#1a1a24] border border-purple-500/30 px-6 py-3 rounded-full flex items-center gap-4 shadow-2xl">
-          <span className="text-sm font-bold text-white">{selectedUsers.size} Selected</span>
+          <span className="text-sm font-bold text-white">
+            {selectedUsers.size} Selected
+          </span>
           <div className="w-px h-4 bg-neutral-700" />
-          <button onClick={() => handleBulkAction("lock")} className="text-xs text-rose-400 hover:underline">Lock All</button>
-          <button onClick={() => handleBulkAction("unlock")} className="text-xs text-emerald-400 hover:underline">Unlock All</button>
-          <button onClick={() => handleBulkAction("delete")} className="text-xs text-rose-500 hover:underline">Delete All</button>
+          <button
+            onClick={() => handleBulkAction("lock")}
+            className="text-xs text-rose-400 hover:underline"
+          >
+            Lock All
+          </button>
+          <button
+            onClick={() => handleBulkAction("unlock")}
+            className="text-xs text-emerald-400 hover:underline"
+          >
+            Unlock All
+          </button>
+          <button
+            onClick={() => handleBulkAction("delete")}
+            className="text-xs text-rose-500 hover:underline"
+          >
+            Delete All
+          </button>
         </div>
       )}
     </div>

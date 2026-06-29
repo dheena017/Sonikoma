@@ -32,7 +32,11 @@ import {
   X,
   Search,
 } from "lucide-react";
-import { getSourceName, getPanelFilterStyle, getProxiedImageUrl } from "../utils.js";
+import {
+  getSourceName,
+  getPanelFilterStyle,
+  getProxiedImageUrl,
+} from "../utils.js";
 import * as api from "../api/index.js";
 
 interface ProjectDetailsPageProps {
@@ -251,10 +255,10 @@ export default function ProjectDetailsPage({
           sessionStorage.getItem("sonikoma_token");
 
         const urls = panels.map((p) => p.image_url);
-        const data = await api.downloadZip(
-          fetchWithInterceptor || fetch,
-          { urls, url: project.url || null }
-        );
+        const data = await api.downloadZip(fetchWithInterceptor || fetch, {
+          urls,
+          url: project.url || null,
+        });
         if (data.success && data.downloadUrl) {
           const link = document.createElement("a");
           link.href = data.downloadUrl;
@@ -401,7 +405,10 @@ export default function ProjectDetailsPage({
       setLoading(true);
       setError(null);
       try {
-        const data = await api.getProject(fetchWithInterceptor || fetch, projectId);
+        const data = await api.getProject(
+          fetchWithInterceptor || fetch,
+          projectId
+        );
         if (data.success) {
           setProject(data.project);
           setPanels(data.panels || []);
@@ -436,10 +443,10 @@ export default function ProjectDetailsPage({
     const fetchScraped = async () => {
       setLoadingScraped(true);
       try {
-        const data = await api.scrapeImages(
-          fetchWithInterceptor || fetch,
-          { url: project.url, bypass_cache: false }
-        );
+        const data = await api.scrapeImages(fetchWithInterceptor || fetch, {
+          url: project.url,
+          bypass_cache: false,
+        });
         if (data.success && data.images) {
           const proxied = data.images.map((img: string) => {
             if (img.startsWith("http") && !api.isApiUrl(img)) {
@@ -494,7 +501,10 @@ export default function ProjectDetailsPage({
     if (!confirmDelete) return;
     setDeleting(true);
     try {
-      const data = await api.deleteProject(fetchWithInterceptor || fetch, projectId);
+      const data = await api.deleteProject(
+        fetchWithInterceptor || fetch,
+        projectId
+      );
       if (data.success) {
         audioFeedback?.playError();
         navigateTo("/profile");
@@ -1087,7 +1097,9 @@ export default function ProjectDetailsPage({
                         {/* Image panel */}
                         <div className="md:col-span-1 aspect-square rounded-2xl overflow-hidden border border-white/10 bg-black/60 shadow-lg relative group flex items-center justify-center">
                           <img
-                            src={getProxiedImageUrl(activePanelPreview.image_url)}
+                            src={getProxiedImageUrl(
+                              activePanelPreview.image_url
+                            )}
                             alt={`Panel ${activePanelPreview.panel_index + 1}`}
                             className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
                             style={{
@@ -1532,7 +1544,9 @@ export default function ProjectDetailsPage({
                             {panels[slideshowIdx] ? (
                               <>
                                 <img
-                                  src={getProxiedImageUrl(panels[slideshowIdx].image_url)}
+                                  src={getProxiedImageUrl(
+                                    panels[slideshowIdx].image_url
+                                  )}
                                   alt={`Slide ${slideshowIdx + 1}`}
                                   className="w-full h-full object-contain"
                                   onLoad={(e) => {

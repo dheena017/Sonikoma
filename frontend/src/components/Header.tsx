@@ -999,9 +999,7 @@ function HeaderInner({
                       max="100"
                       step="5"
                       value={sfxVolume}
-                      onChange={(e) =>
-                        setSfxVolume?.(parseInt(e.target.value))
-                      }
+                      onChange={(e) => setSfxVolume?.(parseInt(e.target.value))}
                       className="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-purple-500 outline-none transition-all"
                     />
                   </div>

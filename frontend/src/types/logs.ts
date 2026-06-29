@@ -1,4 +1,12 @@
-export type LogLevel = "INFO" | "SUCCESS" | "WARN" | "WARNING" | "ERROR" | "CRITICAL" | "DEBUG" | "SYSTEM";
+export type LogLevel =
+  | "INFO"
+  | "SUCCESS"
+  | "WARN"
+  | "WARNING"
+  | "ERROR"
+  | "CRITICAL"
+  | "DEBUG"
+  | "SYSTEM";
 
 export interface LogEntry {
   id?: number;
@@ -24,18 +32,25 @@ export function normalizeLog(log: any): LogEntry {
   // If it's already a well-formed object from the backend
   if (typeof log === "object" && log !== null) {
     if (log.message && log.level && log.timestamp) {
-       return {
-         ...log,
-         level: (log.level || "INFO").toUpperCase() as LogLevel,
-         snapshot: typeof log.snapshot === 'string' && log.snapshot.startsWith('{') ? JSON.parse(log.snapshot) : log.snapshot
-       };
+      return {
+        ...log,
+        level: (log.level || "INFO").toUpperCase() as LogLevel,
+        snapshot:
+          typeof log.snapshot === "string" && log.snapshot.startsWith("{")
+            ? JSON.parse(log.snapshot)
+            : log.snapshot,
+      };
     }
 
     // Handle database row format
     if (log.message) {
       let snapshot = log.snapshot;
-      if (typeof snapshot === 'string' && snapshot.startsWith('{')) {
-        try { snapshot = JSON.parse(snapshot); } catch { /* ignore */ }
+      if (typeof snapshot === "string" && snapshot.startsWith("{")) {
+        try {
+          snapshot = JSON.parse(snapshot);
+        } catch {
+          /* ignore */
+        }
       }
       return {
         id: log.id,
@@ -47,7 +62,7 @@ export function normalizeLog(log: any): LogEntry {
         correlation_id: log.correlation_id,
         user_id: log.user_id,
         snapshot: snapshot,
-        created_at: log.created_at
+        created_at: log.created_at,
       };
     }
   }
@@ -59,17 +74,40 @@ export function normalizeLog(log: any): LogEntry {
   let message = logStr;
 
   // Extract metadata if formatted as "[Module] [LEVEL] Message"
-  const bracketMatch = logStr.match(/^\[([^\]]+)\]\s*(?:\[([^\]]+)\])?\s*(.*)$/);
+  const bracketMatch = logStr.match(
+    /^\[([^\]]+)\]\s*(?:\[([^\]]+)\])?\s*(.*)$/
+  );
   if (bracketMatch) {
     const firstTag = bracketMatch[1];
     const secondTag = bracketMatch[2];
     const rest = bracketMatch[3];
 
-    if (secondTag && ["INFO", "DEBUG", "WARN", "WARNING", "ERROR", "CRITICAL", "SUCCESS"].includes(secondTag.toUpperCase())) {
+    if (
+      secondTag &&
+      [
+        "INFO",
+        "DEBUG",
+        "WARN",
+        "WARNING",
+        "ERROR",
+        "CRITICAL",
+        "SUCCESS",
+      ].includes(secondTag.toUpperCase())
+    ) {
       level = secondTag.toUpperCase() as LogLevel;
       module = firstTag;
       message = rest;
-    } else if (["INFO", "DEBUG", "WARN", "WARNING", "ERROR", "CRITICAL", "SUCCESS"].includes(firstTag.toUpperCase())) {
+    } else if (
+      [
+        "INFO",
+        "DEBUG",
+        "WARN",
+        "WARNING",
+        "ERROR",
+        "CRITICAL",
+        "SUCCESS",
+      ].includes(firstTag.toUpperCase())
+    ) {
       level = firstTag.toUpperCase() as LogLevel;
       message = secondTag ? `[${secondTag}] ${rest}` : rest;
     } else {
@@ -80,7 +118,12 @@ export function normalizeLog(log: any): LogEntry {
 
   // Final level inference from message content
   const lowerMsg = message.toLowerCase();
-  if (lowerMsg.includes("error") || lowerMsg.includes("failed") || lowerMsg.includes("critical")) level = "ERROR";
+  if (
+    lowerMsg.includes("error") ||
+    lowerMsg.includes("failed") ||
+    lowerMsg.includes("critical")
+  )
+    level = "ERROR";
   else if (lowerMsg.includes("warn")) level = "WARN";
   else if (lowerMsg.includes("success")) level = "SUCCESS";
 
@@ -88,6 +131,6 @@ export function normalizeLog(log: any): LogEntry {
     timestamp: defaultTimestamp,
     message,
     level,
-    module
+    module,
   };
 }

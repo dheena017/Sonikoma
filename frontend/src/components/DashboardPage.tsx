@@ -1056,7 +1056,6 @@ const DashboardPage = React.memo(function DashboardPageInner() {
       </div>
     </div>
   );
-}
-);
+});
 
 export default DashboardPage;

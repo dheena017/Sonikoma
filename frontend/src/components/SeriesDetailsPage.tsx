@@ -59,12 +59,17 @@ export default function SeriesDetailsPage({
       setLoading(true);
       setError(null);
       try {
-        const data = await api.getSeries(fetchWithInterceptor || fetch, seriesSlug);
+        const data = await api.getSeries(
+          fetchWithInterceptor || fetch,
+          seriesSlug
+        );
         if (data.success) {
           setSeries(data.series);
 
           // Also fetch chapters for this series
-          const chaptersData = await api.getProjects(fetchWithInterceptor || fetch);
+          const chaptersData = await api.getProjects(
+            fetchWithInterceptor || fetch
+          );
           if (chaptersData.success) {
             const seriesChapters = chaptersData.projects.filter(
               (p: any) => p.series_id === data.series.id
@@ -103,7 +108,10 @@ export default function SeriesDetailsPage({
 
     setIsDeleting(projectId);
     try {
-      const res = await api.deleteProject(fetchWithInterceptor || fetch, projectId);
+      const res = await api.deleteProject(
+        fetchWithInterceptor || fetch,
+        projectId
+      );
       if (res) {
         setChapters((prev) => prev.filter((ch) => ch.project_id !== projectId));
       }

@@ -178,7 +178,9 @@ export default function LiveScraperDeck({
       const targetFilename = getZipFilename();
       saveAs(blobContent, targetFilename);
       setConsoleLogs((prev) => [
-        normalizeLog(`[GUI] Successfully generated zip named ${targetFilename} for ${toDownload.length} images`),
+        normalizeLog(
+          `[GUI] Successfully generated zip named ${targetFilename} for ${toDownload.length} images`
+        ),
         ...prev,
       ]);
     } catch (err) {
@@ -267,7 +269,9 @@ export default function LiveScraperDeck({
     );
     setIsBatchMerging(true);
     setConsoleLogs((prev) => [
-      normalizeLog(`[Stitch Generator] Merging ${selectedScraped.length} selected images vertically...`),
+      normalizeLog(
+        `[Stitch Generator] Merging ${selectedScraped.length} selected images vertically...`
+      ),
       ...prev,
     ]);
 
@@ -298,7 +302,9 @@ export default function LiveScraperDeck({
         setSelectedScraped([]);
         setLastSelectedIndex(null);
         setConsoleLogs((prev) => [
-          normalizeLog(`[Stitch Generator] ✓ Stitching completed! Stored URL: ${data.url}`),
+          normalizeLog(
+            `[Stitch Generator] ✓ Stitching completed! Stored URL: ${data.url}`
+          ),
           ...prev,
         ]);
         addNotification(

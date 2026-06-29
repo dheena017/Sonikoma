@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Search, Database, Code, ChevronRight, FileJson, Table, Layers, ArrowLeft, ArrowRight } from "lucide-react";
+import {
+  Search,
+  Database,
+  Code,
+  ChevronRight,
+  FileJson,
+  Table,
+  Layers,
+  ArrowLeft,
+  ArrowRight,
+} from "lucide-react";
 
 export function AdminExplorerTab({
   fetchWithInterceptor,
@@ -42,7 +52,9 @@ export function AdminExplorerTab({
   const fetchTableData = async () => {
     setLoading(true);
     try {
-      const res = await fetchWithInterceptor(`/api/auth/admin/db/query?table=${activeTable}&limit=${limit}&offset=${offset}`);
+      const res = await fetchWithInterceptor(
+        `/api/auth/admin/db/query?table=${activeTable}&limit=${limit}&offset=${offset}`
+      );
       if (res.ok) {
         const data = await res.json();
         if (data.success) setTableData(data.data);
@@ -60,7 +72,14 @@ export function AdminExplorerTab({
       p.id.toLowerCase().includes(search.toLowerCase())
   );
 
-  const tables = ["users", "series", "chapters", "panels", "user_audit_logs", "platform_settings"];
+  const tables = [
+    "users",
+    "series",
+    "chapters",
+    "panels",
+    "user_audit_logs",
+    "platform_settings",
+  ];
 
   return (
     <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">
@@ -69,7 +88,9 @@ export function AdminExplorerTab({
           <button
             onClick={() => setView("index")}
             className={`px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${
-              view === "index" ? "bg-purple-600 text-white shadow-lg shadow-purple-500/20" : "text-neutral-500 hover:text-neutral-300"
+              view === "index"
+                ? "bg-purple-600 text-white shadow-lg shadow-purple-500/20"
+                : "text-neutral-500 hover:text-neutral-300"
             }`}
           >
             <Layers className="w-3.5 h-3.5" /> Project Index
@@ -77,7 +98,9 @@ export function AdminExplorerTab({
           <button
             onClick={() => setView("table")}
             className={`px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${
-              view === "table" ? "bg-purple-600 text-white shadow-lg shadow-purple-500/20" : "text-neutral-500 hover:text-neutral-300"
+              view === "table"
+                ? "bg-purple-600 text-white shadow-lg shadow-purple-500/20"
+                : "text-neutral-500 hover:text-neutral-300"
             }`}
           >
             <Table className="w-3.5 h-3.5" /> DB Browser
@@ -86,12 +109,17 @@ export function AdminExplorerTab({
 
         {view === "table" && (
           <div className="flex items-center gap-2 mr-2">
-            {tables.map(t => (
+            {tables.map((t) => (
               <button
                 key={t}
-                onClick={() => { setActiveTable(t); setOffset(0); }}
+                onClick={() => {
+                  setActiveTable(t);
+                  setOffset(0);
+                }}
                 className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-tighter transition-all border ${
-                  activeTable === t ? "bg-purple-500/10 border-purple-500/50 text-purple-400" : "bg-neutral-900 border-neutral-800 text-neutral-500 hover:text-neutral-400"
+                  activeTable === t
+                    ? "bg-purple-500/10 border-purple-500/50 text-purple-400"
+                    : "bg-neutral-900 border-neutral-800 text-neutral-500 hover:text-neutral-400"
                 }`}
               >
                 {t}
@@ -108,7 +136,9 @@ export function AdminExplorerTab({
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
               <input
                 type="text"
-                placeholder={view === "index" ? "Search projects..." : "Filter results..."}
+                placeholder={
+                  view === "index" ? "Search projects..." : "Filter results..."
+                }
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full bg-[#0b0b0e] border border-neutral-800 text-sm text-neutral-200 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:border-purple-500/50"
@@ -119,15 +149,21 @@ export function AdminExplorerTab({
           <div className="bg-[#111115] border border-neutral-800 rounded-xl overflow-hidden max-h-[600px] overflow-y-auto">
             <div className="p-3 border-b border-neutral-800 bg-[#0b0b0e] flex items-center justify-between">
               <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-2">
-                <Database className="w-3 h-3" /> {view === "index" ? "Object Registry" : `${activeTable} Records`}
+                <Database className="w-3 h-3" />{" "}
+                {view === "index"
+                  ? "Object Registry"
+                  : `${activeTable} Records`}
               </h3>
               <span className="text-[10px] text-neutral-500">
-                {view === "index" ? filteredProjects.length : tableData.length} records
+                {view === "index" ? filteredProjects.length : tableData.length}{" "}
+                records
               </span>
             </div>
             <div className="divide-y divide-neutral-800/50">
               {loading ? (
-                <div className="p-8 text-center text-neutral-500 text-sm">Loading...</div>
+                <div className="p-8 text-center text-neutral-500 text-sm">
+                  Loading...
+                </div>
               ) : view === "index" ? (
                 filteredProjects.map((p) => (
                   <button
@@ -138,12 +174,26 @@ export function AdminExplorerTab({
                     }`}
                   >
                     <div className="min-w-0">
-                      <p className={`text-sm font-medium truncate ${selectedObject?.id === p.id ? "text-purple-400" : "text-neutral-200"}`}>
+                      <p
+                        className={`text-sm font-medium truncate ${
+                          selectedObject?.id === p.id
+                            ? "text-purple-400"
+                            : "text-neutral-200"
+                        }`}
+                      >
                         {p.title || "Untitled"}
                       </p>
-                      <p className="text-[10px] text-neutral-500 font-mono mt-0.5 truncate">{p.id}</p>
+                      <p className="text-[10px] text-neutral-500 font-mono mt-0.5 truncate">
+                        {p.id}
+                      </p>
                     </div>
-                    <ChevronRight className={`w-4 h-4 text-neutral-600 transition-transform ${selectedObject?.id === p.id ? "translate-x-1 text-purple-500" : "group-hover:translate-x-1"}`} />
+                    <ChevronRight
+                      className={`w-4 h-4 text-neutral-600 transition-transform ${
+                        selectedObject?.id === p.id
+                          ? "translate-x-1 text-purple-500"
+                          : "group-hover:translate-x-1"
+                      }`}
+                    />
                   </button>
                 ))
               ) : (
@@ -156,14 +206,29 @@ export function AdminExplorerTab({
                     }`}
                   >
                     <div className="min-w-0">
-                      <p className={`text-sm font-mono truncate ${selectedObject === row ? "text-purple-400" : "text-neutral-300"}`}>
+                      <p
+                        className={`text-sm font-mono truncate ${
+                          selectedObject === row
+                            ? "text-purple-400"
+                            : "text-neutral-300"
+                        }`}
+                      >
                         {row.id || row.email || row.user_id || i}
                       </p>
                       <p className="text-[10px] text-neutral-500 mt-0.5 truncate">
-                        {Object.keys(row).slice(0, 3).map(k => `${k}: ${row[k]}`).join(" | ")}
+                        {Object.keys(row)
+                          .slice(0, 3)
+                          .map((k) => `${k}: ${row[k]}`)
+                          .join(" | ")}
                       </p>
                     </div>
-                    <ChevronRight className={`w-4 h-4 text-neutral-600 transition-transform ${selectedObject === row ? "translate-x-1 text-purple-500" : "group-hover:translate-x-1"}`} />
+                    <ChevronRight
+                      className={`w-4 h-4 text-neutral-600 transition-transform ${
+                        selectedObject === row
+                          ? "translate-x-1 text-purple-500"
+                          : "group-hover:translate-x-1"
+                      }`}
+                    />
                   </button>
                 ))
               )}
@@ -178,7 +243,9 @@ export function AdminExplorerTab({
                 >
                   <ArrowLeft className="w-4 h-4" />
                 </button>
-                <span className="text-[10px] text-neutral-600 font-bold uppercase">Offset: {offset}</span>
+                <span className="text-[10px] text-neutral-600 font-bold uppercase">
+                  Offset: {offset}
+                </span>
                 <button
                   disabled={tableData.length < limit}
                   onClick={() => setOffset(offset + limit)}
@@ -201,22 +268,30 @@ export function AdminExplorerTab({
                   </div>
                   <div>
                     <h3 className="font-bold text-white">Record Inspector</h3>
-                    <p className="text-xs text-neutral-500 font-mono">{selectedObject.id || "N/A"}</p>
+                    <p className="text-xs text-neutral-500 font-mono">
+                      {selectedObject.id || "N/A"}
+                    </p>
                   </div>
                 </div>
               </div>
 
               <div className="flex-1 overflow-auto p-4 bg-[#0b0b0e] font-mono text-[13px] leading-relaxed relative">
-                <pre className="text-blue-400">{JSON.stringify(selectedObject, null, 2)}</pre>
+                <pre className="text-blue-400">
+                  {JSON.stringify(selectedObject, null, 2)}
+                </pre>
               </div>
 
               <div className="p-4 border-t border-neutral-800 bg-[#111115] flex justify-between items-center text-xs">
                 <span className="text-neutral-500 flex items-center gap-1">
-                  <Code className="w-3 h-3" /> Size: {JSON.stringify(selectedObject).length.toLocaleString()} bytes
+                  <Code className="w-3 h-3" /> Size:{" "}
+                  {JSON.stringify(selectedObject).length.toLocaleString()} bytes
                 </span>
                 <button
                   onClick={() => {
-                    const blob = new Blob([JSON.stringify(selectedObject, null, 2)], { type: "application/json" });
+                    const blob = new Blob(
+                      [JSON.stringify(selectedObject, null, 2)],
+                      { type: "application/json" }
+                    );
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement("a");
                     a.href = url;
@@ -234,9 +309,13 @@ export function AdminExplorerTab({
               <div className="p-4 bg-neutral-900 rounded-full mb-4 text-neutral-500">
                 <Database className="w-12 h-12" />
               </div>
-              <h3 className="text-lg font-bold text-neutral-300">No Record Selected</h3>
+              <h3 className="text-lg font-bold text-neutral-300">
+                No Record Selected
+              </h3>
               <p className="text-neutral-500 max-w-xs mt-2 text-sm">
-                Select a record from the {view === "index" ? "Project Index" : "DB Table"} to inspect its raw JSON structure.
+                Select a record from the{" "}
+                {view === "index" ? "Project Index" : "DB Table"} to inspect its
+                raw JSON structure.
               </p>
             </div>
           )}

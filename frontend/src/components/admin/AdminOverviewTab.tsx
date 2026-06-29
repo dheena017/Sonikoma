@@ -67,10 +67,9 @@ export function AdminOverviewTab({
       return;
     setProcessing("stop");
     try {
-      const res = await fetchWithInterceptor(
-        "/api/metrics/emergency-stop",
-        { method: "POST" }
-      );
+      const res = await fetchWithInterceptor("/api/metrics/emergency-stop", {
+        method: "POST",
+      });
       if (res.ok) {
         addNotification("Emergency stop executed", "warning");
       }
@@ -236,7 +235,7 @@ export function AdminOverviewTab({
             >
               <div className="flex items-center justify-between">
                 <h4 className="text-neutral-200 font-medium group-hover:text-rose-400 transition-colors">
-                   {processing === "flush" ? "Flushing..." : "Flush Storage"}
+                  {processing === "flush" ? "Flushing..." : "Flush Storage"}
                 </h4>
                 <Wind className="w-3 h-3 text-neutral-600 group-hover:text-rose-400" />
               </div>
@@ -266,29 +265,47 @@ export function AdminOverviewTab({
         </div>
 
         <div className="bg-[#111115] border border-neutral-800 rounded-xl p-6">
-           <h3 className="text-lg font-semibold text-white mb-4">Infrastructure Pulse</h3>
-           <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-[#0b0b0e] border border-neutral-800 rounded-xl">
-                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400"><Database className="w-4 h-4" /></div>
-                    <div>
-                       <div className="text-xs font-bold text-neutral-200 uppercase tracking-tight">Main DB Latency</div>
-                       <div className="text-[10px] text-neutral-500">Atomic read/write operations</div>
-                    </div>
-                 </div>
-                 <div className="text-lg font-mono font-bold text-blue-400">{stats.dbLatencyMs}ms</div>
+          <h3 className="text-lg font-semibold text-white mb-4">
+            Infrastructure Pulse
+          </h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-4 bg-[#0b0b0e] border border-neutral-800 rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
+                  <Database className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-neutral-200 uppercase tracking-tight">
+                    Main DB Latency
+                  </div>
+                  <div className="text-[10px] text-neutral-500">
+                    Atomic read/write operations
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center justify-between p-4 bg-[#0b0b0e] border border-neutral-800 rounded-xl">
-                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400"><Activity className="w-4 h-4" /></div>
-                    <div>
-                       <div className="text-xs font-bold text-neutral-200 uppercase tracking-tight">System Reliability</div>
-                       <div className="text-[10px] text-neutral-500">Average success across pipeline</div>
-                    </div>
-                 </div>
-                 <div className="text-lg font-mono font-bold text-purple-400">99.8%</div>
+              <div className="text-lg font-mono font-bold text-blue-400">
+                {stats.dbLatencyMs}ms
               </div>
-           </div>
+            </div>
+            <div className="flex items-center justify-between p-4 bg-[#0b0b0e] border border-neutral-800 rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400">
+                  <Activity className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-neutral-200 uppercase tracking-tight">
+                    System Reliability
+                  </div>
+                  <div className="text-[10px] text-neutral-500">
+                    Average success across pipeline
+                  </div>
+                </div>
+              </div>
+              <div className="text-lg font-mono font-bold text-purple-400">
+                99.8%
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Terminal, Trash2, Download, Pause, Play, Search, Filter } from "lucide-react";
+import {
+  Terminal,
+  Trash2,
+  Download,
+  Pause,
+  Play,
+  Search,
+  Filter,
+} from "lucide-react";
 
 export function AdminConsoleTab() {
   const [logs, setLogs] = useState<any[]>([]);
@@ -15,8 +23,12 @@ export function AdminConsoleTab() {
 
     const connect = () => {
       if (ev) ev.close();
-      const token = localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token");
-      const url = token ? `/api/system-logs/stream?token=${encodeURIComponent(token)}` : "/api/system-logs/stream";
+      const token =
+        localStorage.getItem("sonikoma_token") ||
+        sessionStorage.getItem("sonikoma_token");
+      const url = token
+        ? `/api/system-logs/stream?token=${encodeURIComponent(token)}`
+        : "/api/system-logs/stream";
       ev = new EventSource(url);
 
       ev.onmessage = (event) => {
@@ -53,17 +65,23 @@ export function AdminConsoleTab() {
   }, [logs, isPaused]);
 
   const filteredLogs = logs.filter((log) => {
-    const matchesFilter = log.message?.toLowerCase().includes(filter.toLowerCase());
+    const matchesFilter = log.message
+      ?.toLowerCase()
+      .includes(filter.toLowerCase());
     const matchesLevel = levelFilter === "ALL" || log.level === levelFilter;
     return matchesFilter && matchesLevel;
   });
 
   const getLevelColor = (level: string) => {
     switch (level) {
-      case "ERROR": return "text-red-400";
-      case "WARNING": return "text-amber-400";
-      case "DEBUG": return "text-blue-400";
-      default: return "text-emerald-400";
+      case "ERROR":
+        return "text-red-400";
+      case "WARNING":
+        return "text-amber-400";
+      case "DEBUG":
+        return "text-blue-400";
+      default:
+        return "text-emerald-400";
     }
   };
 
@@ -76,8 +94,12 @@ export function AdminConsoleTab() {
             <Terminal className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-bold text-white leading-tight">System Console</h3>
-            <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">Real-time Service Logs</p>
+            <h3 className="font-bold text-white leading-tight">
+              System Console
+            </h3>
+            <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">
+              Real-time Service Logs
+            </p>
           </div>
         </div>
 
@@ -109,10 +131,18 @@ export function AdminConsoleTab() {
 
           <button
             onClick={() => setIsPaused(!isPaused)}
-            className={`p-2 rounded-lg transition-colors ${isPaused ? "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20" : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"}`}
+            className={`p-2 rounded-lg transition-colors ${
+              isPaused
+                ? "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20"
+                : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
+            }`}
             title={isPaused ? "Resume" : "Pause"}
           >
-            {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+            {isPaused ? (
+              <Play className="w-4 h-4" />
+            ) : (
+              <Pause className="w-4 h-4" />
+            )}
           </button>
 
           <button
@@ -125,7 +155,12 @@ export function AdminConsoleTab() {
 
           <button
             onClick={() => {
-              const text = logs.map(l => `[${l.timestamp}] [${l.level}] ${l.logger}: ${l.message}`).join("\n");
+              const text = logs
+                .map(
+                  (l) =>
+                    `[${l.timestamp}] [${l.level}] ${l.logger}: ${l.message}`
+                )
+                .join("\n");
               const blob = new Blob([text], { type: "text/plain" });
               const url = URL.createObjectURL(blob);
               const a = document.createElement("a");
@@ -148,7 +183,9 @@ export function AdminConsoleTab() {
       >
         {filteredLogs.length === 0 ? (
           <div className="h-full flex items-center justify-center text-neutral-600 italic">
-            {isPaused ? "Console paused. Resume to see new entries." : "Waiting for incoming logs..."}
+            {isPaused
+              ? "Console paused. Resume to see new entries."
+              : "Waiting for incoming logs..."}
           </div>
         ) : (
           <div className="space-y-1">
@@ -157,10 +194,17 @@ export function AdminConsoleTab() {
                 <span className="text-neutral-600 shrink-0 select-none">
                   [{new Date(log.timestamp * 1000).toLocaleTimeString()}]
                 </span>
-                <span className={`font-bold shrink-0 w-16 select-none ${getLevelColor(log.level)}`}>
+                <span
+                  className={`font-bold shrink-0 w-16 select-none ${getLevelColor(
+                    log.level
+                  )}`}
+                >
                   {log.level}
                 </span>
-                <span className="text-neutral-500 shrink-0 w-24 truncate select-none" title={log.logger}>
+                <span
+                  className="text-neutral-500 shrink-0 w-24 truncate select-none"
+                  title={log.logger}
+                >
                   {log.logger}
                 </span>
                 <span className="text-neutral-300 break-all">
@@ -176,14 +220,18 @@ export function AdminConsoleTab() {
       <div className="px-4 py-2 bg-[#111115] border-t border-neutral-800 flex items-center justify-between text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-1.5">
-            <div className={`w-1.5 h-1.5 rounded-full ${isPaused ? "bg-amber-500" : "bg-emerald-500 animate-pulse"}`} />
+            <div
+              className={`w-1.5 h-1.5 rounded-full ${
+                isPaused ? "bg-amber-500" : "bg-emerald-500 animate-pulse"
+              }`}
+            />
             {isPaused ? "Paused" : "Live Streaming"}
           </span>
-          <span>Showing {filteredLogs.length} of {logs.length} cached lines</span>
+          <span>
+            Showing {filteredLogs.length} of {logs.length} cached lines
+          </span>
         </div>
-        <div>
-          Auto-scroll Enabled
-        </div>
+        <div>Auto-scroll Enabled</div>
       </div>
     </div>
   );

@@ -53,8 +53,6 @@ export default function AdminPage({
   const [analytics, setAnalytics] = useState<any>(null);
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
 
-
-
   const fetchStats = async () => {
     try {
       const data = await api.getMetrics(fetchWithInterceptor);
@@ -96,8 +94,6 @@ export default function AdminPage({
     if (activeTab === "health") fetchStats();
     if (activeTab === "analytics") fetchAnalytics();
   }, [isAuthenticated, fetchWithInterceptor, activeTab]);
-
-
 
   if (!isAuthenticated) {
     return (
@@ -159,7 +155,9 @@ export default function AdminPage({
                 }`}
               >
                 <tab.icon className="w-4 h-4" />
-                <span className={activeTab === tab.id ? "block" : "hidden xl:block"}>
+                <span
+                  className={activeTab === tab.id ? "block" : "hidden xl:block"}
+                >
                   {tab.label}
                 </span>
               </button>
@@ -177,7 +175,9 @@ export default function AdminPage({
             />
           )}
           {activeTab === "announcements" && (
-            <AdminAnnouncementsTab fetchWithInterceptor={fetchWithInterceptor} />
+            <AdminAnnouncementsTab
+              fetchWithInterceptor={fetchWithInterceptor}
+            />
           )}
           {activeTab === "users" && (
             <AdminUsersTab

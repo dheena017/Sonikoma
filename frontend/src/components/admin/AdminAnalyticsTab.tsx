@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Users, TrendingUp, Coins, Film, FolderGit2, CheckCircle2, Clock } from "lucide-react";
+import {
+  Users,
+  TrendingUp,
+  Coins,
+  Film,
+  FolderGit2,
+  CheckCircle2,
+  Clock,
+} from "lucide-react";
 
 export function AdminAnalyticsTab({
   fetchWithInterceptor,
@@ -130,7 +138,9 @@ export function AdminAnalyticsTab({
             <span className="text-3xl font-bold text-white">
               {Math.round((analytics.total_duration_sec || 0) / 60)}
             </span>
-            <span className="text-sm font-medium text-neutral-500">minutes</span>
+            <span className="text-sm font-medium text-neutral-500">
+              minutes
+            </span>
           </div>
           <div className="mt-4 w-full bg-neutral-800 rounded-full h-1.5 overflow-hidden">
             <div
@@ -200,7 +210,9 @@ export function AdminAnalyticsTab({
           </div>
           <div
             className={`p-3 rounded-full ${
-              analytics.success_rate > 90 ? "bg-emerald-500/10 text-emerald-400" : "bg-amber-500/10 text-amber-400"
+              analytics.success_rate > 90
+                ? "bg-emerald-500/10 text-emerald-400"
+                : "bg-amber-500/10 text-amber-400"
             }`}
           >
             <CheckCircle2 className="w-8 h-8" />
