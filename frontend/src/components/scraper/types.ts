@@ -52,6 +52,7 @@ export interface ScraperDeckProps {
   targetUrl?: string;
   selectedSource?: string;
   handleSaveAssets?: () => void;
+  audioFeedback?: any;
 }
 
 export type LiveScraperDeckProps = ScraperDeckProps;

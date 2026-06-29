@@ -48,6 +48,10 @@ interface HeaderProps {
   setVolume?: (vol: number) => void;
   isMuted?: boolean;
   setIsMuted?: (muted: boolean) => void;
+  sfxVolume?: number;
+  setSfxVolume?: (vol: number) => void;
+  sfxEnabled?: boolean;
+  setSfxEnabled?: (enabled: boolean) => void;
   user?: any;
   notifications: Notification[];
   markNotificationAsRead: (id: number) => void;
@@ -94,6 +98,10 @@ export default function Header({
   setVolume,
   isMuted = false,
   setIsMuted,
+  sfxVolume = 60,
+  setSfxVolume,
+  sfxEnabled = true,
+  setSfxEnabled,
   user,
   notifications,
   markNotificationAsRead,
@@ -955,6 +963,49 @@ export default function Header({
                     className="w-4 h-4 rounded bg-neutral-950 border border-neutral-850 accent-purple-500 cursor-pointer"
                   />
                 </div>
+
+                {/* Sound Effects Toggle */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold text-neutral-300">
+                      Interface Sound Effects
+                    </p>
+                    <p className="text-[9px] text-neutral-500 font-mono">
+                      Clicks, chimes, and alerts
+                    </p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={sfxEnabled}
+                    onChange={(e) => setSfxEnabled?.(e.target.checked)}
+                    className="w-4 h-4 rounded bg-neutral-950 border border-neutral-850 accent-purple-500 cursor-pointer"
+                  />
+                </div>
+
+                {/* SFX Volume Slider */}
+                {sfxEnabled && (
+                  <div className="space-y-1.5 pt-1">
+                    <div className="flex justify-between items-center">
+                      <p className="text-[10px] font-bold text-neutral-300">
+                        SFX Volume
+                      </p>
+                      <span className="text-[9px] text-neutral-500 font-mono">
+                        {sfxVolume}%
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="5"
+                      value={sfxVolume}
+                      onChange={(e) =>
+                        setSfxVolume?.(parseInt(e.target.value))
+                      }
+                      className="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-purple-500 outline-none transition-all"
+                    />
+                  </div>
+                )}
 
                 {/* Dark / Light Mode Toggle */}
                 <div className="flex items-center justify-between">

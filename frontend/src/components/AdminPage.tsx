@@ -37,26 +37,23 @@ export default function AdminPage({
   isAuthenticated,
   fetchWithInterceptor,
   addNotification,
+  audioFeedback,
 }: {
   navigateTo: (path: string) => void;
   isAuthenticated: boolean;
-  fetchWithInterceptor: any;
-  addNotification: any;
+  fetchWithInterceptor: (
+    url: string,
+    options?: RequestInit
+  ) => Promise<Response>;
+  addNotification?: any;
+  audioFeedback?: any;
 }) {
   const [activeTab, setActiveTab] = useState<string>("overview");
   const [stats, setStats] = useState<any>({});
   const [analytics, setAnalytics] = useState<any>(null);
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
 
-  // Tab: Content (Projects)
-  const [projects, setProjects] = useState<any[]>([]);
-  const [loadingProjects, setLoadingProjects] = useState(false);
-  const [projectSearch, setProjectSearch] = useState("");
-  const [projectTypeFilter, setProjectTypeFilter] = useState("all");
-  const [moderationFilter, setModerationFilter] = useState("all");
-  const [selectedProjects, setSelectedProjects] = useState<Set<string>>(
-    new Set()
-  );
+
 
   const fetchStats = async () => {
     try {
@@ -91,18 +88,6 @@ export default function AdminPage({
     }
   };
 
-  const fetchProjects = async () => {
-    setLoadingProjects(true);
-    try {
-      const data = await api.adminGetProjects(fetchWithInterceptor);
-      if (data.success) setProjects(data.projects);
-    } catch (err) {
-      console.error("Failed to fetch projects:", err);
-    } finally {
-      setLoadingProjects(false);
-    }
-  };
-
   useEffect(() => {
     if (isAuthenticated) {
       fetchStats();
@@ -110,8 +95,9 @@ export default function AdminPage({
     }
     if (activeTab === "health") fetchStats();
     if (activeTab === "analytics") fetchAnalytics();
-    if (activeTab === "content") fetchProjects();
   }, [isAuthenticated, fetchWithInterceptor, activeTab]);
+
+
 
   if (!isAuthenticated) {
     return (

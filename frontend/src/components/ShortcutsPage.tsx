@@ -22,6 +22,7 @@ interface ShortcutsPageProps {
   defaultShortcuts: Record<string, string>;
   onNavigateHome: () => void;
   addNotification?: (msg: string, type: any) => void;
+  audioFeedback?: any;
 }
 
 type Category = "all" | "nav" | "trigger" | "playback" | "editor" | "deck";
@@ -32,6 +33,7 @@ export default function ShortcutsPage({
   defaultShortcuts,
   onNavigateHome,
   addNotification,
+  audioFeedback,
 }: ShortcutsPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [recordingActionId, setRecordingActionId] = useState<string | null>(
@@ -137,6 +139,7 @@ export default function ShortcutsPage({
       if (addNotification) {
         addNotification("Restored default key configurations", "info");
       }
+      audioFeedback?.playError();
     }
   };
 

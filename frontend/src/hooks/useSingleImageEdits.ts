@@ -21,6 +21,7 @@ interface UseSingleImageEditsProps {
     currentScrapedList?: string[],
     shouldScroll?: boolean
   ) => void;
+  audioFeedback?: any;
 }
 
 export function useSingleImageEdits({
@@ -37,6 +38,7 @@ export function useSingleImageEdits({
   editCropRight,
   editAutoTrim,
   addPanelsToStoryboard,
+  audioFeedback,
 }: UseSingleImageEditsProps) {
   const [mergingIndices, setMergingIndices] = useState<number[]>([]);
   const [isSavingEdit, setIsSavingEdit] = useState<boolean>(false);
@@ -95,6 +97,7 @@ export function useSingleImageEdits({
         } cropped and added to Timeline successfully!`,
         "success"
       );
+      audioFeedback?.playTick();
     } catch (err: any) {
       setConsoleLogs((prev) => [
         `[Image Editor] [ERROR] Failed to save edits for Frame #${
@@ -177,6 +180,7 @@ export function useSingleImageEdits({
         `Generated ${cuts.length} separate cuts added to Timeline!`,
         "success"
       );
+      audioFeedback?.playTick();
     } catch (err: any) {
       console.error(
         `[Image Editor] Batch crop failed for Frame #${editingImageIdx + 1}:`,
@@ -242,6 +246,7 @@ export function useSingleImageEdits({
         `Frames #${idx + 1} and #${idx + 2} stitched successfully!`,
         "success"
       );
+      audioFeedback?.playTick();
       return stitchedUrl;
     } catch (err: any) {
       setConsoleLogs((prev) => [

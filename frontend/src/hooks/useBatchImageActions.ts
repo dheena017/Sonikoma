@@ -55,6 +55,7 @@ interface UseBatchImageActionsProps {
   >;
   croppingImgUrl: string | null;
   setCroppingImgUrl: React.Dispatch<React.SetStateAction<string | null>>;
+  audioFeedback?: any;
 }
 
 export function useBatchImageActions({
@@ -102,6 +103,7 @@ export function useBatchImageActions({
   setBatchProgress,
   croppingImgUrl,
   setCroppingImgUrl,
+  audioFeedback,
 }: UseBatchImageActionsProps) {
   const abortBatchRef = React.useRef({ aborted: false });
   const abortControllerRef = React.useRef<AbortController | null>(null);
@@ -229,6 +231,7 @@ export function useBatchImageActions({
         `Successfully cleaned speech bubbles for ${targetImages.length} images!`,
         "success"
       );
+      audioFeedback?.playSuccess();
       setConsoleLogs((prev) => [
         `[Speech Bubbles] ✓ Batch clean speech bubbles job completed successfully!`,
         ...prev,
@@ -407,6 +410,7 @@ export function useBatchImageActions({
       ]);
     } else {
       addNotification(`Successfully sliced & auto-cropped panels!`, "success");
+      audioFeedback?.playSuccess();
       setConsoleLogs((prev) => [
         `[Auto Cropper] ✓ Batch auto crop job completed successfully!`,
         ...prev,

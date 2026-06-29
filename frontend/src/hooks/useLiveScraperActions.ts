@@ -16,6 +16,7 @@ interface UseLiveScraperActionsProps {
   ) => void;
   fetchWithInterceptor?: typeof fetch;
   addNotification?: (message: string, type: any) => void;
+  audioFeedback?: any;
 }
 
 export function useLiveScraperActions({
@@ -27,6 +28,7 @@ export function useLiveScraperActions({
   addPanelsToStoryboard,
   fetchWithInterceptor,
   addNotification,
+  audioFeedback,
 }: UseLiveScraperActionsProps) {
   const [isZipping, setIsZipping] = useState(false);
   const activeFetch = fetchWithInterceptor || fetch;
@@ -115,6 +117,7 @@ export function useLiveScraperActions({
     console.log(`[GUI] Adding ${selectedScraped.length} image(s) to timeline`);
     addPanelsToStoryboard(selectedScraped);
     setSelectedScraped([]);
+    audioFeedback?.playTick();
   };
 
   return {

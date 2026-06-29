@@ -18,6 +18,7 @@ interface UseStoryboardOperationsProps {
   voiceActor?: string;
   musicTheme?: string;
   narrationStyle?: string;
+  audioFeedback?: any;
 }
 
 export function useStoryboardOperations({
@@ -34,6 +35,7 @@ export function useStoryboardOperations({
   voiceActor,
   musicTheme,
   narrationStyle = "long",
+  audioFeedback,
 }: UseStoryboardOperationsProps) {
   const {
     showBulkOps,
@@ -62,6 +64,7 @@ export function useStoryboardOperations({
     setCurrentPanelIndex,
     setConsoleLogs,
     addNotification,
+    audioFeedback,
   });
 
   const {
@@ -86,6 +89,7 @@ export function useStoryboardOperations({
     voiceActor,
     musicTheme,
     narrationStyle,
+    audioFeedback,
   });
 
   const handleClearTimeline = async () => {
@@ -98,6 +102,7 @@ export function useStoryboardOperations({
     if (confirmClear) {
       setPanels([]);
       addNotification?.("Timeline cleared", "info");
+      audioFeedback?.playTick();
     }
   };
 
