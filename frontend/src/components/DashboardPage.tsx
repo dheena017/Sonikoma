@@ -298,7 +298,7 @@ const DashboardPage = React.memo(function DashboardPageInner() {
           <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-3">
             Welcome to{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-500">
-              Dashboard
+              Sonikoma
             </span>
           </h1>
           <p className="text-neutral-400 text-sm md:text-base font-mono max-w-xl mb-8">
