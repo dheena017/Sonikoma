@@ -120,6 +120,9 @@ async def get_current_user(request: Request, token: Optional[str] = Depends(oaut
         headers={"WWW-Authenticate": "Bearer"},
     )
 
+    if not token:
+        raise credentials_exception
+
     # Authenticate via Developer API key if token starts with av_live_
     if token.startswith("av_live_"):
         user = get_user_by_api_key(token)
