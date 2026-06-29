@@ -1,3 +1,4 @@
+import { normalizeLog } from "../types/logs";
 import React, { useState } from "react";
 import { GeneratedPanel } from "../types.js";
 import { processWithConcurrency, chunkArray } from "../utils/batchUtils.js";

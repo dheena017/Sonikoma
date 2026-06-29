@@ -239,4 +239,18 @@ CREATE TABLE IF NOT EXISTS youtube_credentials (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- 16. Persistent System Logs (High Volume Diagnostic Data)
+CREATE TABLE IF NOT EXISTS system_logs (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  timestamp   TEXT    NOT NULL,                 -- Display time (HH:MM:SS)
+  message     TEXT    NOT NULL,
+  level       TEXT    NOT NULL,                 -- INFO, SUCCESS, WARN, ERROR, etc.
+  module      TEXT    NOT NULL,                 -- Scraper, Model, AI, API, etc.
+  details     TEXT,                             -- JSON or raw payload details
+  created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_system_logs_level ON system_logs(level);
+CREATE INDEX IF NOT EXISTS idx_system_logs_module ON system_logs(module);
+CREATE INDEX IF NOT EXISTS idx_system_logs_created_at ON system_logs(created_at);
 

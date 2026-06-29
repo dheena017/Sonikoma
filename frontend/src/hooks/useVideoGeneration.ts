@@ -1,3 +1,4 @@
+import { LogEntry, normalizeLog } from "../types/logs";
 import React, { useState } from "react";
 import { GeneratedPanel } from "../types.js";
 import { NotificationType } from "../components/NotificationStack.js";
@@ -6,7 +7,7 @@ import * as api from "../api/index.js";
 interface UseVideoGenerationProps {
   panels: GeneratedPanel[];
   setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
-  setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>>;
+  setConsoleLogs: React.Dispatch<React.SetStateAction<LogEntry[]>>;
   addNotification: (message: string, type: NotificationType) => void;
   fetchWithInterceptor: any;
   targetUrl: string;

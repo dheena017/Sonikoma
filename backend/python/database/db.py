@@ -86,6 +86,7 @@ def get_db_connection():
     if not _db_initialized:
         init_db()
 
+
     if _is_postgres:
         if not psycopg2:
             raise RuntimeError("psycopg2-binary is required for PostgreSQL support. Please install it.")
@@ -365,26 +366,45 @@ def init_db() -> None:
             )
         """)
 
+        # Ensure system_logs table exists
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS system_logs (
+          id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+          timestamp           TEXT NOT NULL,
+          message             TEXT NOT NULL,
+          level               TEXT NOT NULL,
+          module              TEXT NOT NULL,
+          details             TEXT,
+          correlation_id      TEXT,
+          user_id             TEXT,
+          snapshot            TEXT,
+          created_at          TEXT NOT NULL DEFAULT (datetime('now'))
+        )
+        """)
+
+        # Migration: Add missing columns if table already exists
+        try:
+            cursor.execute("ALTER TABLE system_logs ADD COLUMN correlation_id TEXT")
+        except: pass
+        try:
+            cursor.execute("ALTER TABLE system_logs ADD COLUMN user_id TEXT")
+        except: pass
+        try:
+            cursor.execute("ALTER TABLE system_logs ADD COLUMN snapshot TEXT")
+        except: pass
+
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_system_logs_level ON system_logs(level)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_system_logs_module ON system_logs(module)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_system_logs_created_at ON system_logs(created_at)")
+
         # Populate default settings if empty
         cursor.execute("SELECT COUNT(*) FROM platform_settings")
         if cursor.fetchone()[0] == 0:
-            defaults = [
-                ('maintenance_mode', 'false'),
-                ('disable_signups', 'false'),
-                ('global_banner', ''),
-                ('enable_beta', 'false'),
-                ('max_upload_size_mb', '50'),
-                ('max_scenes_per_project', '100'),
-                ('default_starting_credits', '200'),
-                ('smtp_host', 'smtp.mailgun.org'),
-                ('smtp_port', '587'),
-                ('smtp_user', ''),
-                ('enforce_2fa', 'false'),
-                ('strict_ip_binding', 'false'),
-                ('session_timeout_min', '120'),
-                ('webhook_url', 'https://api.sonikoma.com/webhooks')
-            ]
-            cursor.executemany("INSERT INTO platform_settings (key, value) VALUES (?, ?)", defaults)
+            cursor.execute("INSERT INTO platform_settings (key, value) VALUES ('maintenance_mode', 'false')")
+            cursor.execute("INSERT INTO platform_settings (key, value) VALUES ('disable_signups', 'false')")
+            cursor.execute("INSERT INTO platform_settings (key, value) VALUES ('global_banner', '')")
+            cursor.execute("INSERT INTO platform_settings (key, value) VALUES ('log_retention_days', '7')")
+            cursor.execute("INSERT INTO platform_settings (key, value) VALUES ('log_max_entries', '5000')")
 
         conn.commit()
     except sqlite3.Error as e:
@@ -677,14 +697,6 @@ def get_creator_analytics(user_id: str) -> Dict[str, Any]:
             WHERE s.user_id = ? AND c.status = 'completed'
         """, (user_id,)).fetchone()
         total_duration_sec = duration_row['d'] if duration_row and duration_row['d'] is not None else 0
-
-        # 2.1 Token Usage
-        token_row = conn.execute("""
-            SELECT SUM(total_tokens_used) as t FROM chapters c
-            JOIN series s ON c.series_id = s.id
-            WHERE s.user_id = ?
-        """, (user_id,)).fetchone()
-        total_tokens = token_row['t'] if token_row and token_row['t'] is not None else 0
 
         # 3. Credits Optimized (estimate based on bubble cleaning or edits)
         clean_row = conn.execute("""
@@ -3046,7 +3058,7 @@ def increment_project_tokens(project_id: str, tokens: int) -> None:
     conn = get_db_connection()
     try:
         conn.execute("""
-            UPDATE chapters 
+            UPDATE chapters
             SET total_tokens_used = total_tokens_used + ?,
                 updated_at = datetime('now')
             WHERE id = ?
@@ -3073,7 +3085,7 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
             series_id = row['series_id']
             current_title = row['title']
             current_episode = row['episode_number']
-            
+
             # 2. Update chapters table fields
             chapter_set_parts = []
             chapter_params = []
@@ -3095,13 +3107,13 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
             if 'panels_count' in updates:
                 chapter_set_parts.append("panels_count = ?")
                 chapter_params.append(updates['panels_count'])
-                
+
             if chapter_set_parts:
                 chapter_set_parts.append("updated_at = datetime('now')")
                 chapter_params.append(project_id)
                 query = f"UPDATE chapters SET {', '.join(chapter_set_parts)} WHERE id = ?"
                 conn.execute(query, tuple(chapter_params))
-                
+
             # 3. Update series table fields
             series_set_parts = []
             series_params = []
@@ -3122,17 +3134,17 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                 series_params.append(series_id)
                 query = f"UPDATE series SET {', '.join(series_set_parts)} WHERE id = ?"
                 conn.execute(query, tuple(series_params))
-                
+
             # 4. Update panels if provided
             if panels is not None:
                 # Delete existing panels for this chapter
                 conn.execute('DELETE FROM panels WHERE chapter_id = ?', (project_id,))
-                
+
                 # Insert the new ones
                 for i, p in enumerate(panels):
                     speech_text = (p.get('speech_text') or "")[:1000]
                     visual_description = (p.get('visual_description') or "")[:2000]
-                    
+
                     conn.execute("""
                         INSERT INTO panels (
                             chapter_id, panel_index, image_url, original_url, speech_text, sfx,
@@ -3165,7 +3177,7 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                         p.get('crop_padding'),
                         1 if p.get('is_sanitized') else 0
                     ))
-                
+
                 # Sync panel count
                 conn.execute("UPDATE chapters SET panels_count = ?, updated_at = datetime('now') WHERE id = ?", (len(panels), project_id))
     finally:
@@ -3199,7 +3211,7 @@ def insert_panels(project_id: str, panels: List[Dict[str, Any]]) -> None:
                 # Length validation matching TS rules
                 speech_text = (p.get('speech_text') or "")[:1000]
                 visual_description = (p.get('visual_description') or "")[:2000]
-                
+
                 conn.execute("""
                     INSERT INTO panels (
                         chapter_id, panel_index, image_url, original_url, speech_text, sfx,
@@ -3336,7 +3348,7 @@ def get_db_stats() -> Dict[str, int]:
 def create_user_relational(user_id: str, username: str, email: str, password_hash: str, preferences: str = "{}") -> None:
     """
     Inserts a new user record into the SQLite database.
-    
+
     SQL Query Explanation:
     - INSERT INTO users (id, username, email, password_hash, preferences) VALUES (?, ?, ?, ?, ?)
     - Inserts a single row with user credentials and default preferences.
@@ -3349,7 +3361,7 @@ def create_user_relational(user_id: str, username: str, email: str, password_has
             INSERT INTO users (id, username, email, password_hash, preferences)
             VALUES (?, ?, ?, ?, ?)
         """, (user_id, username, email, password_hash, preferences))
-        
+
         # Commit saves the transaction permanently in the database
         conn.commit()
     finally:
@@ -3359,7 +3371,7 @@ def create_user_relational(user_id: str, username: str, email: str, password_has
 def create_series(series_id: str, user_id: str, title: str, author: str, cover_image: Optional[str] = None, genre: str = "general") -> None:
     """
     Creates a parent Series metadata entity for a specific user.
-    
+
     SQL Query Explanation:
     - INSERT INTO series (id, user_id, title, author, cover_image, genre) VALUES (?, ?, ?, ?, ?, ?)
     - Saves series parameters linked directly to the parent user.
@@ -3377,7 +3389,7 @@ def create_series(series_id: str, user_id: str, title: str, author: str, cover_i
 def get_series_for_user(user_id: str) -> List[Dict[str, Any]]:
     """
     Queries and returns all Series publishing metadata linked to a specific user.
-    
+
     SQL Query Explanation:
     - SELECT * FROM series WHERE user_id = ? ORDER BY created_at DESC
     - Fetches all series rows belonging to the given user, ordered newest first.
@@ -3392,7 +3404,7 @@ def get_series_for_user(user_id: str) -> List[Dict[str, Any]]:
 def add_chapter_to_series(chapter_id: str, series_id: str, episode_number: str, original_url: Optional[str] = None, panels_count: int = 0, video_url: Optional[str] = None) -> None:
     """
     Inserts a new Chapter row nested directly under a parent Series.
-    
+
     SQL Query Explanation:
     - INSERT INTO chapters (id, series_id, episode_number, original_url, panels_count, video_url) VALUES (?, ?, ?, ?, ?, ?)
     - Appends chapter configurations to SQLite tables under a series ID foreign key constraint.
@@ -3410,7 +3422,7 @@ def add_chapter_to_series(chapter_id: str, series_id: str, episode_number: str, 
 def get_chapters_for_series(series_id: str) -> List[Dict[str, Any]]:
     """
     Retrieves all Chapters publishing metadata nested under a specific Series parent ID.
-    
+
     SQL Query Explanation:
     - SELECT * FROM chapters WHERE series_id = ? ORDER BY created_at ASC
     - Fetches all chapters in chronological order by creation date.
@@ -3445,7 +3457,7 @@ def get_token_logs(user_id: str) -> List[Dict[str, Any]]:
     conn = get_db_connection()
     try:
         rows = conn.execute("""
-            SELECT l.*, p.title 
+            SELECT l.*, p.title
             FROM token_usage_logs l
             JOIN projects p ON l.project_id = p.project_id
             WHERE p.user_id = ?
@@ -3455,7 +3467,7 @@ def get_token_logs(user_id: str) -> List[Dict[str, Any]]:
     except Exception:
         try:
             rows = conn.execute("""
-                SELECT l.*, c.episode_number, s.title 
+                SELECT l.*, c.episode_number, s.title
                 FROM token_usage_logs l
                 JOIN chapters c ON l.project_id = c.id
                 JOIN series s ON c.series_id = s.id
@@ -3633,6 +3645,115 @@ def delete_announcement(announcement_id: int) -> bool:
         conn.close()
 
 
+# --- System Logs Persistence & Retention -----------------------------------
+
+def insert_system_log(level: str, module: str, message: str, details: Optional[str] = None, correlation_id: Optional[str] = None, user_id: Optional[str] = None, snapshot: Optional[str] = None) -> None:
+    """
+    Inserts a log entry into the database.
+    """
+    import datetime
+    conn = get_db_connection()
+    try:
+        now = datetime.datetime.now()
+        timestamp = now.strftime("%H:%M:%S")
+
+        conn.execute("""
+            INSERT INTO system_logs (timestamp, message, level, module, details, correlation_id, user_id, snapshot)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (timestamp, message, level, module, details, correlation_id, user_id, snapshot))
+        conn.commit()
+    except Exception as e:
+        logger.error(f"[Database] Failed to insert system log: {e}")
+    finally:
+        conn.close()
+
+def get_system_logs(limit: int = 200, offset: int = 0, level: Optional[str] = None, module: Optional[str] = None, search: Optional[str] = None) -> List[Dict[str, Any]]:
+    """
+    Retrieves logs with optional filtering.
+    """
+    conn = get_db_connection()
+    try:
+        query = "SELECT * FROM system_logs WHERE 1=1"
+        params = []
+
+        if level and level != 'ALL':
+            query += " AND level = ?"
+            params.append(level)
+        if module:
+            query += " AND module = ?"
+            params.append(module)
+        if search:
+            query += " AND (message LIKE ? OR details LIKE ?)"
+            params.append(f"%{search}%")
+            params.append(f"%{search}%")
+
+        query += " ORDER BY created_at DESC LIMIT ? OFFSET ?"
+        params.extend([limit, offset])
+
+        rows = conn.execute(query, tuple(params)).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+def prune_system_logs(max_entries: Optional[int] = None, max_days: Optional[int] = None) -> int:
+    """
+    Deletes old logs to prevent database bloating.
+    Uses configurable settings from platform_settings if not provided.
+    Returns the number of deleted entries.
+    """
+    conn = get_db_connection()
+    try:
+        # Resolve settings from DB if not passed
+        if max_entries is None or max_days is None:
+            settings = get_platform_settings()
+            if max_entries is None:
+                max_entries = int(settings.get('log_max_entries', 5000))
+            if max_days is None:
+                max_days = int(settings.get('log_retention_days', 7))
+
+        # 0 = Unlimited (skip pruning)
+        if max_days == 0 and max_entries == 0:
+            return 0
+
+        # 1. Prune by date (skip if 0)
+        deleted_count = 0
+        if max_days > 0:
+            cursor = conn.execute(
+                "DELETE FROM system_logs WHERE created_at < datetime('now', ?)",
+                (f"-{max_days} days",)
+            )
+            deleted_count = cursor.rowcount
+
+        # 2. Prune by total count (keep newest max_entries) (skip if 0)
+        if max_entries > 0:
+            # We find the ID of the max_entries-th newest log
+            row = conn.execute(
+                "SELECT id FROM system_logs ORDER BY created_at DESC LIMIT 1 OFFSET ?",
+                (max_entries,)
+            ).fetchone()
+
+            if row:
+                cutoff_id = row['id']
+                cursor2 = conn.execute("DELETE FROM system_logs WHERE id <= ?", (cutoff_id,))
+                deleted_count += cursor2.rowcount
+
+        conn.commit()
+        if deleted_count > 0:
+            logger.info(f"[Database] Pruned {deleted_count} old system logs.")
+        return deleted_count
+    finally:
+        conn.close()
+
+def wipe_system_logs() -> None:
+    """Wipe all logs from the database."""
+    conn = get_db_connection()
+    try:
+        conn.execute("DELETE FROM system_logs")
+        conn.commit()
+    finally:
+        conn.close()
+
+
 # --- YouTube Publishing Profiles & Publications ---------------------------
 
 def save_youtube_profile(user_id: str, profile: Dict[str, Any]) -> Dict[str, Any]:
@@ -3772,51 +3893,3 @@ def delete_youtube_credentials(user_id: str) -> bool:
     finally:
         conn.close()
 
-
-def admin_query_db(table: str, limit: int = 100, offset: int = 0) -> list[dict]:
-    allowed_tables = ['users', 'series', 'chapters', 'panels', 'user_audit_logs', 'platform_settings', 'system_announcements', 'user_invoices', 'scrape_sessions', 'user_api_keys', 'token_usage_logs']
-    if table not in allowed_tables:
-        raise ValueError("Table not allowed")
-
-    conn = get_db_connection()
-    try:
-        rows = conn.execute(f"SELECT * FROM {table} ORDER BY 1 DESC LIMIT ? OFFSET ?", (limit, offset)).fetchall()
-        return [dict(row) for row in rows]
-    finally:
-        conn.close()
-
-def update_series_admin(series_id: str, updates: dict):
-    conn = get_db_connection()
-    try:
-        set_parts = []
-        params = []
-        for k, v in updates.items():
-            set_parts.append(f"{k} = ?")
-            params.append(v)
-        params.append(series_id)
-
-        query = f"UPDATE series SET {', '.join(set_parts)} WHERE id = ?"
-        conn.execute(query, params)
-        conn.commit()
-    finally:
-        conn.close()
-
-def get_platform_settings() -> dict:
-    conn = get_db_connection()
-    try:
-        rows = conn.execute("SELECT key, value FROM platform_settings").fetchall()
-        return {row['key']: row['value'] for row in rows}
-    finally:
-        conn.close()
-
-def update_platform_settings(settings: dict):
-    conn = get_db_connection()
-    try:
-        for k, v in settings.items():
-            conn.execute("""
-                INSERT INTO platform_settings (key, value) VALUES (?, ?)
-                ON CONFLICT(key) DO UPDATE SET value=excluded.value
-            """, (k, str(v)))
-        conn.commit()
-    finally:
-        conn.close()

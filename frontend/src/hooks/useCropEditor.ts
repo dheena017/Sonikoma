@@ -1,3 +1,4 @@
+import { normalizeLog } from "../types/logs";
 import { useRef, useEffect, useCallback } from "react";
 import { Slice, Slot, DetectedPanel } from "../components/crop/types.js";
 import { NotificationType } from "../components/NotificationStack.js";
@@ -416,7 +417,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
           "success"
         );
         setEditingImageIdx(null);
-        window.history.pushState({}, "", "/");
+        window.history.pushState({}, "");
         window.dispatchEvent(new Event("popstate"));
       }
     } catch (err: any) {
@@ -447,7 +448,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
       // Default single frame crop
       await handleSaveEditedImageCallback();
     }
-    window.history.pushState({}, "", "/");
+    window.history.pushState({}, "");
     window.dispatchEvent(new Event("popstate"));
   };
 
@@ -469,7 +470,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
 
       // Only close editor if no images left
       if (filtered.length === 0) {
-        window.history.pushState({}, "", "/");
+        window.history.pushState({}, "");
         window.dispatchEvent(new Event("popstate"));
         return filtered;
       }

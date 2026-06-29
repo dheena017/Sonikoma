@@ -1,199 +1,151 @@
 import React from "react";
 import { Terminal } from "lucide-react";
+import { LogEntry } from "../../types/logs";
 
 interface TerminalLogsOutputProps {
   scrollRef: React.RefObject<HTMLDivElement | null>;
-  filteredLogs: string[];
+  filteredLogs: LogEntry[];
   searchQuery: string;
   activeFilter: string;
 }
 
-function getLogColor(log: string): string {
+function getLogColor(log: LogEntry): string {
+  const level = log.level.toUpperCase();
+  const module = log.module.toLowerCase();
+  const msg = log.message.toLowerCase();
+
   // Priority 1: Errors & Fatal errors
-  if (
-    log.includes("[ERROR]") ||
-    log.includes("ERROR]") ||
-    log.includes("[Error]") ||
-    log.includes("Error]")
-  )
+  if (level === "ERROR" || msg.includes("fatal") || msg.includes("error]"))
     return "text-red-400 font-semibold";
-  if (log.includes("[FATAL]")) return "text-red-500 font-bold";
-  if (log.includes(" 500 ") || log.includes("-> 500"))
+  if (msg.includes(" 500 ") || msg.includes("-> 500"))
     return "text-red-400 font-semibold";
 
   // Priority 2: Warnings
-  if (
-    log.includes("[WARNING]") ||
-    log.includes("[WARN]") ||
-    log.includes("[Warning]") ||
-    log.includes("Warning]")
-  )
+  if (level === "WARN" || level === "WARNING" || msg.includes("warning]"))
     return "text-amber-400 font-semibold";
   if (
-    log.includes(" 404 ") ||
-    log.includes("-> 404") ||
-    log.includes(" 429 ") ||
-    log.includes("429 Too Many Requests") ||
-    log.includes("-> 429")
+    msg.includes(" 404 ") ||
+    msg.includes("-> 404") ||
+    msg.includes(" 429 ") ||
+    msg.includes("429 too many requests") ||
+    msg.includes("-> 429")
   )
     return "text-amber-400 font-semibold";
 
   // Priority 3: Success requests and messages
-  if (
-    log.includes("[SUCCESS]") ||
-    log.includes("completed cleanly") ||
-    log.includes("Successfully")
-  )
+  if (level === "SUCCESS" || msg.includes("completed cleanly") || msg.includes("successfully"))
     return "text-emerald-400 font-medium";
   if (
-    log.includes(" 200 ") ||
-    log.includes(" 200 OK") ||
-    log.includes("-> 200")
+    msg.includes(" 200 ") ||
+    msg.includes(" 200 ok") ||
+    msg.includes("-> 200")
   )
     return "text-emerald-400 font-medium";
 
   // Specific components
   if (
-    log.includes("[Proxy]") ||
-    log.includes("[Proxy-image]") ||
-    log.includes("proxy-image") ||
-    log.includes("sonikoma.routes.proxy")
+    module === "proxy" ||
+    msg.includes("proxy-image") ||
+    msg.includes("sonikoma.routes.proxy")
   )
     return "text-sky-300 font-medium";
   if (
-    log.includes("[API]") ||
-    log.includes("[Network]") ||
-    log.includes("[HTTP]") ||
-    log.includes("sonikoma.api")
+    module === "api" ||
+    module === "network" ||
+    module === "http" ||
+    msg.includes("sonikoma.api")
   )
     return "text-sky-400";
-  if (log.includes("[Vite]")) return "text-fuchsia-400 font-medium";
-  if (log.includes("httpx") || log.includes("HTTP Request:")) {
-    if (log.includes("POST")) return "text-amber-400 font-medium";
-    if (log.includes("GET")) return "text-emerald-400 font-light";
-    if (log.includes("PUT")) return "text-sky-400 font-light";
-    if (log.includes("DELETE")) return "text-red-400 font-medium";
+  if (module === "vite" || msg.includes("[vite]")) return "text-fuchsia-400 font-medium";
+  if (msg.includes("httpx") || msg.includes("http request:")) {
+    if (msg.includes("post")) return "text-amber-400 font-medium";
+    if (msg.includes("get")) return "text-emerald-400 font-light";
+    if (msg.includes("put")) return "text-sky-400 font-light";
+    if (msg.includes("delete")) return "text-red-400 font-medium";
     return "text-purple-400 font-light";
   }
 
-  log.includes("[Auto-Analysis]") ||
-    log.includes("[Engine]") ||
-    log.includes("[Voice Engine]") ||
-    log.includes("[Gemini]");
-  return "text-purple-300 font-medium";
-  if (log.includes("[Smart Crop]")) return "text-violet-400 font-medium";
+  if (module === "ai" || module === "engine" || module === "gemini")
+    return "text-purple-300 font-medium";
+
+  if (module === "crop" || module === "autocrop" || msg.includes("[smart crop]"))
+    return "text-violet-400 font-medium";
+
   if (
-    log.includes("[Text Processing]") ||
-    log.includes("[Vision OCR]") ||
-    log.includes("[CV")
+    module === "ocr" ||
+    module === "vision" ||
+    module === "cv"
   )
     return "text-purple-300";
-  if (log.includes("[Downloader Helper]")) return "text-cyan-300 font-medium";
-  if (log.includes("[Downloader]")) return "text-cyan-400";
-  if (log.includes("[Server]")) return "text-cyan-300 font-medium";
-  if (
-    log.includes("HUGGINGFACE") ||
-    log.includes("injected env") ||
-    log.includes("No HUGGINGFACE_API_KEY")
-  )
-    return "text-amber-300";
-  if (log.includes("[Control]") || log.includes("[Pipeline]"))
+
+  if (module === "downloader") return "text-cyan-400";
+  if (module === "server") return "text-cyan-300 font-medium";
+
+  if (module === "pipeline" || module === "control")
     return "text-blue-400";
-  if (
-    log.includes("[MoviePy]") ||
-    log.includes("[Video]") ||
-    log.includes("[FFmpeg]")
-  )
+
+  if (module === "video" || module === "moviepy" || module === "ffmpeg")
     return "text-amber-300";
-  if (log.includes("[Image Editor]")) return "text-orange-400";
-  if (
-    log.includes("[Stitcher]") ||
-    log.includes("Combined") ||
-    log.includes("[Stitch]")
-  )
+
+  if (module === "image editor") return "text-orange-400";
+  if (module === "stitcher" || module === "stitch")
     return "text-indigo-300";
-  if (log.includes("[Auto Cropper]") || log.includes("[Crop]"))
-    return "text-green-400";
-  if (log.includes("[Speech Bubbles]")) return "text-pink-400";
-  if (log.includes("[GUI]")) return "text-neutral-300";
-  if (log.includes("[Preloader]")) return "text-neutral-500";
-  if (log.includes("[Model]")) return "text-violet-300";
-  if (log.includes("[Database]") || log.includes("[DB]"))
+
+  if (module === "bubbles" || module === "speech bubbles") return "text-pink-400";
+  if (module === "gui") return "text-neutral-300";
+  if (module === "preloader") return "text-neutral-500";
+  if (module === "model") return "text-violet-300";
+  if (module === "database" || module === "db")
     return "text-emerald-400 font-bold";
+
   return "text-neutral-400";
 }
 
-function getLogBorderColor(log: string): string {
-  if (
-    log.includes("[ERROR]") ||
-    log.includes("ERROR]") ||
-    log.includes("[Error]") ||
-    log.includes("Error]") ||
-    log.includes("[FATAL]")
-  )
+function getLogBorderColor(log: LogEntry): string {
+  const level = log.level.toUpperCase();
+  const module = log.module.toLowerCase();
+  const msg = log.message.toLowerCase();
+
+  if (level === "ERROR" || msg.includes("fatal") || msg.includes("error]"))
     return "border-red-500/60";
-  if (log.includes(" 500 ") || log.includes("-> 500"))
+  if (msg.includes(" 500 ") || msg.includes("-> 500"))
     return "border-red-500/60";
-  if (log.includes("[SUCCESS]") || log.includes("Successfully"))
+  if (level === "SUCCESS" || msg.includes("successfully"))
     return "border-emerald-500/60";
   if (
-    log.includes(" 200 ") ||
-    log.includes(" 200 OK") ||
-    log.includes("-> 200")
+    msg.includes(" 200 ") ||
+    msg.includes(" 200 ok") ||
+    msg.includes("-> 200")
   )
     return "border-emerald-500/60";
-  if (
-    log.includes("[WARNING]") ||
-    log.includes("[WARN]") ||
-    log.includes("[Warning]") ||
-    log.includes("Warning]")
-  )
+  if (level === "WARN" || level === "WARNING" || msg.includes("warning]"))
     return "border-amber-500/60";
   if (
-    log.includes(" 404 ") ||
-    log.includes("-> 404") ||
-    log.includes(" 429 ") ||
-    log.includes("429 Too Many Requests") ||
-    log.includes("-> 429")
+    msg.includes(" 404 ") ||
+    msg.includes("-> 404") ||
+    msg.includes(" 429 ") ||
+    msg.includes("429 too many requests") ||
+    msg.includes("-> 429")
   )
     return "border-amber-500/60";
-  if (
-    log.includes("[Proxy]") ||
-    log.includes("[Proxy-image]") ||
-    log.includes("proxy-image") ||
-    log.includes("sonikoma.routes.proxy")
-  )
+
+  if (module === "proxy" || module === "api" || module === "network")
     return "border-sky-500/40";
-  if (
-    log.includes("[API]") ||
-    log.includes("[Network]") ||
-    log.includes("[HTTP]") ||
-    log.includes("sonikoma.api")
-  )
-    return "border-sky-500/40";
-  if (log.includes("[Vite]")) return "border-fuchsia-500/50";
-  if (log.includes("httpx") || log.includes("HTTP Request:")) {
-    if (log.includes("POST")) return "border-amber-500/40";
-    if (log.includes("GET")) return "border-emerald-500/40";
-    if (log.includes("PUT")) return "border-sky-500/40";
-    if (log.includes("DELETE")) return "border-red-500/40";
-    return "border-purple-500/40";
-  }
-  if (log.includes("[System") || log.includes("[Gemini]"))
+
+  if (module === "vite") return "border-fuchsia-500/50";
+
+  if (module === "system" || module === "gemini" || module === "ai")
     return "border-purple-500/50";
-  if (log.includes("[Downloader Helper]")) return "border-cyan-400/40";
-  if (log.includes("[Downloader]")) return "border-cyan-500/40";
-  if (log.includes("[Server]")) return "border-cyan-500/40";
-  if (
-    log.includes("HUGGINGFACE") ||
-    log.includes("injected env") ||
-    log.includes("No HUGGINGFACE_API_KEY")
-  )
-    return "border-amber-500/40";
-  if (log.includes("[Control]") || log.includes("[Pipeline]"))
+
+  if (module === "downloader") return "border-cyan-500/40";
+  if (module === "server") return "border-cyan-500/40";
+
+  if (module === "pipeline" || module === "control")
     return "border-blue-500/40";
-  if (log.includes("[Database]") || log.includes("[DB]"))
+
+  if (module === "database" || module === "db")
     return "border-emerald-500/60";
+
   return "border-neutral-800";
 }
 
@@ -521,10 +473,13 @@ export function TerminalLogsOutput({
               key={index}
               className={`leading-relaxed border-l-2 pl-2 hover:bg-neutral-900/30 rounded-r transition-colors ${logColor} ${borderColor}`}
             >
-              <span className="text-neutral-600 mr-2 select-none">
-                {String(filteredLogs.length - index).padStart(3, "0")}
+              <span className="text-neutral-600 mr-2 select-none w-10 inline-block">
+                {log.timestamp}
               </span>
-              {renderParsedLog(log)}
+              <span className="text-neutral-500 mr-2 select-none">
+                [{log.module}]
+              </span>
+              {renderParsedLog(log.message)}
             </div>
           );
         })
