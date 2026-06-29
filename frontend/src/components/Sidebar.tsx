@@ -44,7 +44,7 @@ interface SidebarProps {
   chapterSlug?: string | null;
 }
 
-function SidebarInner({
+const SidebarInner = ({
   isProcessing,
   panels,
   scrapedImages,
@@ -528,4 +528,5 @@ function SidebarInner({
   );
 }
 
-export default React.memo(SidebarInner);
+const Sidebar = React.memo(SidebarInner);
+export default Sidebar;

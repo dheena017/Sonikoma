@@ -517,8 +517,8 @@ export default function App() {
     setIsPipMode,
   });
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const detailsProjectId = (() => {
+  const detailsProjectId = React.useMemo(() => {
+    const urlParams = new URLSearchParams(window.location.search);
     const id = urlParams.get("id") || urlParams.get("project_id");
     if (id) return id;
 
@@ -531,7 +531,7 @@ export default function App() {
     if (seriesMatch) return seriesMatch[1];
 
     return null;
-  })();
+  }, [currentPath]);
 
   // --------------------------------------------------------------------------
   // SUB-SECTION 2.2: ROUTING / NAVIGATION PATH CHECKS
@@ -574,6 +574,15 @@ export default function App() {
   const isProjectEditorPath = currentPath === "/project-editor";
   const isSeriesDetailsPath =
     !chapterPathMatch && currentPath.match(/\/series\/([^\/]+)$/) !== null;
+
+  const memoizedAppLogic = React.useMemo(
+    () => ({
+      ...appLogic,
+      isPipMode,
+      setIsPipMode,
+    }),
+    [appLogic, isPipMode]
+  );
 
   const isLandingPath =
     currentPath === "/" ||
@@ -1339,7 +1348,7 @@ export default function App() {
             ) : (
               <CropEditorModal
                 isPage={true}
-                appLogic={{ ...appLogic, isPipMode, setIsPipMode }}
+                appLogic={memoizedAppLogic}
               />
             ))}
 
@@ -1525,7 +1534,7 @@ export default function App() {
       {isWorkspacePath && !isPipMode && editingImageIdx !== null && (
         <CropEditorModal
           isPage={false}
-          appLogic={{ ...appLogic, isPipMode, setIsPipMode }}
+          appLogic={memoizedAppLogic}
         />
       )}
 
@@ -1539,7 +1548,7 @@ export default function App() {
           }}
         >
           <CropEditorModal
-            appLogic={{ ...appLogic, isPipMode, setIsPipMode }}
+            appLogic={memoizedAppLogic}
           />
         </div>
       )}

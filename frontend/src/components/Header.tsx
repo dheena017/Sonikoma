@@ -78,7 +78,7 @@ function formatDuration(totalSeconds: number): string {
   return `${mins}m ${secs}s`;
 }
 
-function HeaderInner({
+const HeaderInner = ({
   isProcessing,
   panels,
   totalCalculatedDuration,
@@ -1156,4 +1156,5 @@ function HeaderInner({
   );
 }
 
-export default React.memo(HeaderInner);
+const Header = React.memo(HeaderInner);
+export default Header;

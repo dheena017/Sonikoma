@@ -76,6 +76,23 @@ export function useAppRouter({
   );
   const [isPipMode, setIsPipMode] = React.useState<boolean>(false);
 
+  // Use refs for unstable dependencies to prevent redundant effect re-runs
+  const scrapedImagesRef = React.useRef(scrapedImages);
+  const panelsRef = React.useRef(panels);
+  const editingImageIdxRef = React.useRef(editingImageIdx);
+
+  React.useEffect(() => {
+    scrapedImagesRef.current = scrapedImages;
+  }, [scrapedImages]);
+
+  React.useEffect(() => {
+    panelsRef.current = panels;
+  }, [panels]);
+
+  React.useEffect(() => {
+    editingImageIdxRef.current = editingImageIdx;
+  }, [editingImageIdx]);
+
   // Sync visual theme with root html element
   React.useEffect(() => {
     document.documentElement.setAttribute("data-theme", activeTheme);
@@ -221,7 +238,7 @@ export function useAppRouter({
       } else if (path === "/project-editor") {
         const params = new URLSearchParams(window.location.search);
         const hasProjId = params.has("id") || params.has("project_id");
-        if (scrapedImages.length === 0 && panels.length === 0 && !hasProjId) {
+        if (scrapedImagesRef.current.length === 0 && panelsRef.current.length === 0 && !hasProjId) {
           window.history.replaceState({}, "", "/dashboard");
           setCurrentPath("/dashboard");
           return;
@@ -240,7 +257,7 @@ export function useAppRouter({
       } else if (path.startsWith("/editor")) {
         const params = new URLSearchParams(window.location.search);
         const hasProjId = params.has("id") || params.has("project_id");
-        if (scrapedImages.length === 0 && panels.length === 0 && !hasProjId) {
+        if (scrapedImagesRef.current.length === 0 && panelsRef.current.length === 0 && !hasProjId) {
           window.history.replaceState({}, "", "/dashboard");
           setCurrentPath("/dashboard");
           return;
@@ -254,7 +271,7 @@ export function useAppRouter({
         const idxVal = params.get("idx");
         const idx = idxVal !== null ? parseInt(idxVal) : 0;
         const validatedIdx = isNaN(idx) ? 0 : idx;
-        if (editingImageIdx !== validatedIdx) {
+        if (editingImageIdxRef.current !== validatedIdx) {
           setEditingImageIdx(validatedIdx);
         }
       } else {
@@ -289,9 +306,6 @@ export function useAppRouter({
       window.removeEventListener("popstate", handleLocationChange);
     };
   }, [
-    scrapedImages,
-    panels,
-    editingImageIdx,
     isAuthenticated,
     authLoading,
     isInitializing,
