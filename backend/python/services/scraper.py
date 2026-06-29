@@ -569,21 +569,10 @@ async def try_fetch_with_playwright(
                     
             # Scrolling script to trigger lazy loading
             logger.info("[Scraper] Running scroll script for lazy-loaded assets...")
-            await page.evaluate("""async () => {
-                await new Promise((resolve) => {
-                    let totalHeight = 0;
-                    const distance = 3000;
-                    const timer = setInterval(() => {
-                        const scrollHeight = document.body.scrollHeight;
-                        window.scrollBy(0, distance);
-                        totalHeight += distance;
-                        if (totalHeight >= scrollHeight - window.innerHeight) {
-                            clearInterval(timer);
-                            resolve();
-                        }
-                    }, 15);
-                });
-            }""")
+            # Scroll down incrementally with pauses to allow lazy-loaded assets to load and render
+            for _ in range(8):
+                await page.evaluate("window.scrollBy(0, 2000)")
+                await page.wait_for_timeout(1000)
             
             # Extract HTML5 canvases to base64 Data URLs
             logger.info("[Scraper] Running canvas extraction script...")
@@ -847,9 +836,44 @@ async def scrape_images_from_url(
         ]
         for rx in fallback_regexes:
             for m in rx.finditer(search_block):
-                img = m.group(0).replace('\\u002F', '/').replace('\\', '').replace('&amp;', '&')
+                 img = m.group(0).replace('\\u002F', '/').replace('\\', '').replace('&amp;', '&')
+                 image_dict[urljoin(fetch_url, img)] = True
+                 
+    if not image_dict:
+        logger.info("[Scraper] No images found with standard HTML fetch. Initializing Playwright browser crawling fallback...")
+        html = await try_fetch_with_playwright(
+            fetch_url,
+            user_agent=fetch_headers["User-Agent"],
+            referer=fetch_headers["Referer"],
+            cookies=merged_cookies
+        )
+        if html:
+            # Re-extract metadata in case it was missing
+            meta = extract_metadata(html, fetch_url)
+            if meta:
+                scraped_metadata_cache[fetch_url] = meta
+                
+            bs_imgs = parse_with_bs4(html, fetch_url)
+            if bs_imgs:
+                logger.info(f"[Scraper] Found {len(bs_imgs)} images using BS4 after Playwright render.")
+            for img in bs_imgs:
+                image_dict[img] = True
+                
+            nuxt_imgs = extract_images_from_nuxt_payload(html)
+            for img in nuxt_imgs:
                 image_dict[urljoin(fetch_url, img)] = True
                 
+            if not image_dict:
+                img_regex = re.compile(r'<img\s+([^>]+)>', re.IGNORECASE)
+                for m in img_regex.finditer(html):
+                    attrs = m.group(1)
+                    data_url_match = re.search(r'data-url=["\']([^"\']+)["\']', attrs, re.IGNORECASE)
+                    src_match = re.search(r'src=["\']([^"\']+)["\']', attrs, re.IGNORECASE)
+                    candidate = (data_url_match.group(1) if data_url_match else (src_match.group(1) if src_match else "")).strip()
+                    candidate = candidate.replace('\\u002F', '/').replace('\\', '').replace('&amp;', '&')
+                    if candidate:
+                        image_dict[urljoin(fetch_url, candidate)] = True
+
     raw_images = list(image_dict.keys())
     filtered_images = []
     

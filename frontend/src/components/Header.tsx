@@ -67,6 +67,8 @@ interface HeaderProps {
   setNotificationsMuted?: (muted: boolean) => void;
   themeMode?: "dark" | "light";
   toggleThemeMode?: () => void;
+  autoPlayAudio?: boolean;
+  setAutoPlayAudio?: (val: boolean) => void;
 }
 
 /** Format seconds into a readable "Xm Ys" string */
@@ -117,6 +119,8 @@ const HeaderInner = ({
   setNotificationsMuted,
   themeMode = "dark",
   toggleThemeMode,
+  autoPlayAudio: autoPlayAudioProp,
+  setAutoPlayAudio,
 }: HeaderProps) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -263,10 +267,12 @@ const HeaderInner = ({
     styleEl.innerHTML = themeColors[accentColor] || "";
   }, [accentColor]);
 
-  // Audio Playback Auto-play setting local storage
-  const [autoPlayAudio, setAutoPlayAudio] = useState(() => {
+  // Audio Playback Auto-play setting local storage fallback
+  const [localAutoPlayAudio, setLocalAutoPlayAudio] = useState(() => {
     return localStorage.getItem("app-autoplay-audio") === "true";
   });
+  const autoPlayAudio = autoPlayAudioProp !== undefined ? autoPlayAudioProp : localAutoPlayAudio;
+
   useEffect(() => {
     localStorage.setItem("app-autoplay-audio", String(autoPlayAudio));
   }, [autoPlayAudio]);
@@ -959,7 +965,13 @@ const HeaderInner = ({
                   <input
                     type="checkbox"
                     checked={autoPlayAudio}
-                    onChange={(e) => setAutoPlayAudio(e.target.checked)}
+                    onChange={(e) => {
+                      if (setAutoPlayAudio) {
+                        setAutoPlayAudio(e.target.checked);
+                      } else {
+                        setLocalAutoPlayAudio(e.target.checked);
+                      }
+                    }}
                     className="w-4 h-4 rounded bg-neutral-950 border border-neutral-850 accent-purple-500 cursor-pointer"
                   />
                 </div>

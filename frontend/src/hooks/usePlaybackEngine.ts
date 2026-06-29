@@ -21,6 +21,7 @@ interface UsePlaybackEngineProps {
   isMuted: boolean;
   musicTheme: string;
   voiceActor: string;
+  autoPlayAudio: boolean;
 }
 
 export function usePlaybackEngine({
@@ -29,6 +30,7 @@ export function usePlaybackEngine({
   isMuted,
   musicTheme,
   voiceActor,
+  autoPlayAudio,
 }: UsePlaybackEngineProps) {
   const [currentPanelIndex, setCurrentPanelIndex] = useState<number>(0);
   const [playbackTime, setPlaybackTime] = useState<number>(0);
@@ -108,7 +110,7 @@ export function usePlaybackEngine({
   );
 
   const playStoryboardAudio = useCallback(
-    (panelIdx: number) => {
+    (panelIdx: number, forcePlay: boolean = false) => {
       const activePanel = panels[panelIdx];
       if (!activePanel) return;
 
@@ -118,11 +120,17 @@ export function usePlaybackEngine({
         activeAudioRef.current = null;
       }
 
+      // Stop browser speech synthesis if active
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+
+      // If autoplay is off and we are NOT forcing it (e.g. not manually clicking "Play"), do not play
+      if (!autoPlayAudio && !forcePlay) {
+        return;
+      }
+
       if (activePanel.audio_url && !isMuted) {
-        // Stop browser speech synthesis if active
-        if (window.speechSynthesis) {
-          window.speechSynthesis.cancel();
-        }
         const audio = new Audio(activePanel.audio_url);
         audio.volume = volume / 100;
         activeAudioRef.current = audio;
@@ -141,7 +149,7 @@ export function usePlaybackEngine({
         playComicSoundEffect(activePanel.sfx);
       }
     },
-    [panels, speakDialogue, isMuted, volume]
+    [panels, speakDialogue, isMuted, volume, autoPlayAudio]
   );
 
   useEffect(() => {
@@ -171,7 +179,7 @@ export function usePlaybackEngine({
             if (currentPanelIndex < panels.length - 1) {
               const nextIdx = currentPanelIndex + 1;
               setCurrentPanelIndex(nextIdx);
-              playStoryboardAudio(nextIdx);
+              playStoryboardAudio(nextIdx, true);
               return 0;
             } else {
               setStoryboardPlaying(false);
@@ -207,7 +215,7 @@ export function usePlaybackEngine({
       }
     } else {
       setStoryboardPlaying(true);
-      playStoryboardAudio(currentPanelIndex);
+      playStoryboardAudio(currentPanelIndex, true);
     }
   }, [panels.length, storyboardPlaying, playStoryboardAudio, currentPanelIndex]);
 

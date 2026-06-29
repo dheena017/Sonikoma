@@ -12,7 +12,7 @@ interface UsePipelineActionsProps {
   setCurrentPanelIndex: (idx: number) => void;
   setPlaybackTime: (time: number) => void;
   setStoryboardPlaying: (val: boolean) => void;
-  playStoryboardAudio: (idx: number) => void;
+  playStoryboardAudio: (idx: number, forcePlay?: boolean) => void;
 }
 
 export function usePipelineActions({

@@ -23,7 +23,7 @@ interface TimelineCardProps {
   handleCancelAnalysis?: () => void;
   isSelected: boolean;
   onToggleSelect: () => void;
-  playStoryboardAudio?: (idx: number) => void;
+  playStoryboardAudio?: (idx: number, forcePlay?: boolean) => void;
   onDragStart?: (e: React.DragEvent, index: number) => void;
   onDragOver?: (e: React.DragEvent, index: number) => void;
   onDragEnd?: (e: React.DragEvent) => void;

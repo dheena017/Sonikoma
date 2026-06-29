@@ -170,6 +170,9 @@ export function useAppState() {
   const [sfxEnabled, setSfxEnabled] = useState<boolean>(
     () => localStorage.getItem("ai_comic_sfx_enabled") !== "false"
   );
+  const [autoPlayAudio, setAutoPlayAudio] = useState<boolean>(
+    () => localStorage.getItem("app-autoplay-audio") === "true"
+  );
 
   const audioFeedback = useAudioFeedback(sfxVolume, !sfxEnabled);
 
@@ -705,6 +708,10 @@ export function useAppState() {
   }, [narrationStyle]);
 
   useEffect(() => {
+    localStorage.setItem("app-autoplay-audio", autoPlayAudio.toString());
+  }, [autoPlayAudio]);
+
+  useEffect(() => {
     localStorage.setItem("ai_comic_smart_slice", smartSlice.toString());
   }, [smartSlice]);
 
@@ -888,6 +895,8 @@ export function useAppState() {
     setVideoUrl,
     isSavingEdit,
     setIsSavingEdit,
+    autoPlayAudio,
+    setAutoPlayAudio,
     isScraping,
     setIsScraping,
     narrationStyle,
@@ -937,7 +946,7 @@ export function useAppState() {
     errorPopup, addNotification, removeNotification, fetchWithInterceptor, checkAuth,
     targetUrl, voiceActor, musicTheme, aspectRatio, selectedModel, selectedSource,
     frameRate, volume, isMuted, sfxVolume, sfxEnabled, videoUrl, isSavingEdit, isScraping,
-    narrationStyle, scrapedTitle, scrapedGenre, seriesTitle, chapterNumber, chapterTitle,
+    autoPlayAudio, narrationStyle, scrapedTitle, scrapedGenre, seriesTitle, chapterNumber, chapterTitle,
     seriesAuthor, seriesCoverImage, seriesSynopsis, audioFeedback, projectId,
     seriesSlugState, chapterSlugState, smartSlice, accumulatedTokens,
     clearAllNotifications, markAllNotificationsAsRead, markNotificationAsRead, deleteNotification

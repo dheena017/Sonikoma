@@ -904,6 +904,13 @@ async def analyze_sequence(body: AnalyzeSequenceRequest, user_api_key: str = Dep
         from skills.base import get_provider_and_model, resolve_api_key
         provider, clean_model = get_provider_and_model(target_model)
 
+        # HuggingFace text models don't support multimodal (vision) analysis.
+        # Fall back to Gemini which has native vision support.
+        if provider == "huggingface":
+            logger.info(f"[Sequence] Provider '{provider}' does not support multimodal analysis. Falling back to Gemini.")
+            provider = "gemini"
+            clean_model = "gemini-2.5-flash"
+
         style_hint = "max 25 words per panel, impactful" if body.narrationStyle == "short" else "detailed YouTube story narration describing actions and dialogue"
 
         system_instruction = f"""

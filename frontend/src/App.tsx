@@ -352,6 +352,8 @@ export default function App() {
     setVolume,
     isMuted,
     setIsMuted,
+    autoPlayAudio,
+    setAutoPlayAudio,
     currentPanelIndex,
     setCurrentPanelIndex,
     playbackTime,
@@ -938,6 +940,8 @@ export default function App() {
             setVolume={setVolume}
             isMuted={isMuted}
             setIsMuted={setIsMuted}
+            autoPlayAudio={autoPlayAudio}
+            setAutoPlayAudio={setAutoPlayAudio}
             sfxVolume={appLogic.sfxVolume}
             setSfxVolume={appLogic.setSfxVolume}
             sfxEnabled={appLogic.sfxEnabled}

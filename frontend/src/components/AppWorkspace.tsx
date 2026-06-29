@@ -35,7 +35,7 @@ interface AppWorkspaceProps {
   setEditAutoTrim: (v: boolean) => void;
   showBubbleModal: boolean;
   setShowBubbleModal: (v: boolean) => void;
-  playStoryboardAudio: (idx: number) => void;
+  playStoryboardAudio: (idx: number, forcePlay?: boolean) => void;
   isCleaningBubbles: boolean;
   cleanProgress: any;
   bubbleCroppingImgUrl: string | null;

@@ -134,6 +134,7 @@ export function useAppLogic() {
     isMuted: state.isMuted,
     musicTheme: state.musicTheme,
     voiceActor: state.voiceActor,
+    autoPlayAudio: state.autoPlayAudio,
   });
 
   const {

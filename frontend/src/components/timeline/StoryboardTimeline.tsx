@@ -47,7 +47,7 @@ interface StoryboardTimelineProps {
   cropCannyHigh?: number;
   cropCloseKernelSize?: number;
   autoSplitTallStrips?: boolean;
-  playStoryboardAudio?: (idx: number) => void;
+  playStoryboardAudio?: (idx: number, forcePlay?: boolean) => void;
   saveProject?: (customPanels?: GeneratedPanel[]) => Promise<boolean>;
   handleSaveStoryboard?: () => void;
   handleCancelBatch?: () => void;
