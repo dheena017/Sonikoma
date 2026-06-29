@@ -11,7 +11,7 @@ export interface ScraperDeckProps {
   setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
   setScrapedImages: React.Dispatch<React.SetStateAction<string[]>>;
   mergingIndices: number[];
-  setConsoleLogs: React.Dispatch<React.SetStateAction<LogEntry[]>>;
+  setConsoleLogs: React.Dispatch<React.SetStateAction<any[]>>;
   panels: GeneratedPanel[];
   setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
   currentPanelIndex: number;

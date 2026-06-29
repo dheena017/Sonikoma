@@ -18,7 +18,7 @@ interface LiveScraperGridProps {
   setEditAutoTrim: (v: boolean) => void;
   setScrapedImages: React.Dispatch<React.SetStateAction<string[]>>;
   setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
-  setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>>;
+  setConsoleLogs: React.Dispatch<React.SetStateAction<any[]>>;
   addPanelsToStoryboard: (
     urls: string[],
     currentScrapedList?: string[],
