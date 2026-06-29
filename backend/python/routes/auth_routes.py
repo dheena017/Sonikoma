@@ -124,6 +124,10 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
             raise credentials_exception
         return user
 
+
+
+
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: str = payload.get("sub")
@@ -133,11 +137,20 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         raise credentials_exception
 
 
-    user = get_user_by_id(user_id)
+        user = get_user_by_id(user_id)
     if user is None:
         raise credentials_exception
     return user
 
+async def get_admin_user(current_user: dict = Depends(get_current_user)):
+    if current_user.get('creator_role') != 'admin':
+        raise HTTPException(status_code=403, detail="Administrative privileges required.")
+    return current_user
+
+async def get_admin_users(current_user: dict = Depends(get_admin_user)):
+    # For now, allow any authenticated user or specific admins
+    users = get_all_users()
+    return {"success": True, "users": users}
 # ─── Routes ───────────────────────────────────────────────────────────────────
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
@@ -451,10 +464,6 @@ async def get_me(current_user: dict = Depends(get_current_user)):
     }
 
 @router.get("/admin/users")
-async def get_admin_users(current_user: dict = Depends(get_current_user)):
-    # For now, allow any authenticated user or specific admins
-    users = get_all_users()
-    return {"success": True, "users": users}
 
 class AdminUpdateUser(BaseModel):
     creator_role: Optional[str] = None
@@ -463,7 +472,7 @@ class AdminUpdateUser(BaseModel):
     reason: Optional[str] = None
 
 @router.put("/admin/users/{user_id}")
-async def admin_update_user(user_id: str, body: AdminUpdateUser, request: Request, current_user: dict = Depends(get_current_user)):
+async def admin_update_user(user_id: str, body: AdminUpdateUser, request: Request, current_user: dict = Depends(get_admin_user)):
     ip_addr = request.client.host if request.client else "127.0.0.1"
     
     # Self-protection
@@ -494,7 +503,7 @@ async def admin_update_user(user_id: str, body: AdminUpdateUser, request: Reques
     return {"success": True, "message": "User updated successfully."}
 
 @router.delete("/admin/users/{user_id}")
-async def admin_delete_user(user_id: str, request: Request, current_user: dict = Depends(get_current_user)):
+async def admin_delete_user(user_id: str, request: Request, current_user: dict = Depends(get_admin_user)):
     ip_addr = request.client.host if request.client else "127.0.0.1"
     
     if user_id == current_user['user_id']:
@@ -506,7 +515,7 @@ async def admin_delete_user(user_id: str, request: Request, current_user: dict =
     return {"success": True, "message": "User deleted successfully."}
 
 @router.get("/admin/users/{user_id}/logs")
-async def admin_get_user_logs(user_id: str, query: str = "", page: int = 1, limit: int = 20, current_user: dict = Depends(get_current_user)):
+async def admin_get_user_logs(user_id: str, query: str = "", page: int = 1, limit: int = 20, current_user: dict = Depends(get_admin_user)):
     offset = (page - 1) * limit
     logs, total = get_audit_logs(user_id, query=query, limit=limit, offset=offset)
     return {
@@ -523,7 +532,7 @@ class AdminBulkAction(BaseModel):
     value: Optional[str] = None
 
 @router.post("/admin/users/bulk")
-async def admin_bulk_action(body: AdminBulkAction, request: Request, current_user: dict = Depends(get_current_user)):
+async def admin_bulk_action(body: AdminBulkAction, request: Request, current_user: dict = Depends(get_admin_user)):
     ip_addr = request.client.host if request.client else "127.0.0.1"
     
     success_count = 0
@@ -873,25 +882,25 @@ async def purchase_credits(body: PurchaseCreditsRequest, request: Request, curre
 # --- Ultimate Admin Features -----------------------------------------------
 
 @router.get('/admin/settings')
-async def admin_get_settings(current_user: dict = Depends(get_current_user)):
+async def admin_get_settings(current_user: dict = Depends(get_admin_user)):
     return {'success': True, 'settings': get_platform_settings()}
 
 class AdminUpdateSettings(BaseModel):
     settings: dict[str, str]
 
 @router.put('/admin/settings')
-async def admin_update_settings(body: AdminUpdateSettings, request: Request, current_user: dict = Depends(get_current_user)):
+async def admin_update_settings(body: AdminUpdateSettings, request: Request, current_user: dict = Depends(get_admin_user)):
     ip_addr = request.client.host if request.client else '127.0.0.1'
     update_platform_settings(body.settings)
     write_audit_log(current_user['user_id'], 'Admin updated global platform settings', ip_addr, 'Success')
     return {'success': True, 'message': 'Settings updated successfully.'}
 
 @router.get('/admin/audit-logs')
-async def admin_get_global_audit_logs(limit: int = 50, current_user: dict = Depends(get_current_user)):
+async def admin_get_global_audit_logs(limit: int = 50, current_user: dict = Depends(get_admin_user)):
     return {'success': True, 'logs': get_global_audit_logs(limit)}
 
 @router.post('/admin/impersonate/{user_id}')
-async def admin_impersonate_user(user_id: str, request: Request, current_user: dict = Depends(get_current_user)):
+async def admin_impersonate_user(user_id: str, request: Request, current_user: dict = Depends(get_admin_user)):
     ip_addr = request.client.host if request.client else '127.0.0.1'
     target_user = get_user_by_id(user_id)
     if not target_user:
@@ -912,7 +921,7 @@ async def admin_impersonate_user(user_id: str, request: Request, current_user: d
 from database.db import get_all_projects_admin, get_global_analytics, delete_series_admin
 
 @router.get('/admin/analytics')
-async def admin_get_analytics(current_user: dict = Depends(get_current_user)):
+async def admin_get_analytics(current_user: dict = Depends(get_admin_user)):
     try:
         return {'success': True, 'analytics': get_global_analytics()}
     except Exception as e:
@@ -920,7 +929,7 @@ async def admin_get_analytics(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get('/admin/activity/export')
-async def admin_export_activity(current_user: dict = Depends(get_current_user)):
+async def admin_export_activity(current_user: dict = Depends(get_admin_user)):
     try:
         import io
         import csv
@@ -930,12 +939,13 @@ async def admin_export_activity(current_user: dict = Depends(get_current_user)):
 
         output = io.StringIO()
         writer = csv.writer(output)
-        writer.writerow(['ID', 'User ID', 'Action', 'IP Address', 'Timestamp', 'Status'])
+        writer.writerow(['ID', 'User ID', 'Email', 'Action', 'IP Address', 'Timestamp', 'Status'])
 
         for log in logs:
             writer.writerow([
                 log.get('id'),
                 log.get('user_id'),
+                log.get('email'),
                 log.get('action'),
                 log.get('ip_address'),
                 log.get('created_at'),
@@ -953,7 +963,7 @@ async def admin_export_activity(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get('/admin/projects')
-async def admin_get_projects(current_user: dict = Depends(get_current_user)):
+async def admin_get_projects(current_user: dict = Depends(get_admin_user)):
     try:
         return {'success': True, 'projects': get_all_projects_admin()}
     except Exception as e:
@@ -961,7 +971,7 @@ async def admin_get_projects(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get('/admin/db/query')
-async def admin_db_query(table: str = 'series', limit: int = 100, offset: int = 0, current_user: dict = Depends(get_current_user)):
+async def admin_db_query(table: str = 'series', limit: int = 100, offset: int = 0, current_user: dict = Depends(get_admin_user)):
     try:
         from database.db import admin_query_db
         data = admin_query_db(table, limit, offset)
@@ -977,7 +987,7 @@ class AdminUpdateProject(BaseModel):
     reason: Optional[str] = None
 
 @router.put('/admin/projects/{project_id}')
-async def admin_update_project(project_id: str, body: AdminUpdateProject, request: Request, current_user: dict = Depends(get_current_user)):
+async def admin_update_project(project_id: str, body: AdminUpdateProject, request: Request, current_user: dict = Depends(get_admin_user)):
     ip_addr = request.client.host if request.client else '127.0.0.1'
     try:
         from database.db import update_series_admin
@@ -1004,7 +1014,7 @@ async def admin_update_project(project_id: str, body: AdminUpdateProject, reques
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete('/admin/projects/{project_id}')
-async def admin_delete_project(project_id: str, request: Request, current_user: dict = Depends(get_current_user)):
+async def admin_delete_project(project_id: str, request: Request, current_user: dict = Depends(get_admin_user)):
     ip_addr = request.client.host if request.client else '127.0.0.1'
     try:
         delete_series_admin(project_id)
@@ -1029,7 +1039,7 @@ async def delete_my_account(request: Request, current_user: dict = Depends(get_c
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get('/admin/announcements')
-async def admin_get_announcements(current_user: dict = Depends(get_current_user)):
+async def admin_get_announcements(current_user: dict = Depends(get_admin_user)):
     try:
         return {'success': True, 'announcements': get_announcements()}
     except Exception as e:
@@ -1042,7 +1052,7 @@ class AnnouncementCreateRequest(BaseModel):
     type: Optional[str] = 'info'
 
 @router.post('/admin/announcements')
-async def admin_create_announcement(body: AnnouncementCreateRequest, request: Request, current_user: dict = Depends(get_current_user)):
+async def admin_create_announcement(body: AnnouncementCreateRequest, request: Request, current_user: dict = Depends(get_admin_user)):
     ip_addr = request.client.host if request.client else '127.0.0.1'
     try:
         announcement = create_announcement(body.title, body.message, body.type)
@@ -1053,7 +1063,7 @@ async def admin_create_announcement(body: AnnouncementCreateRequest, request: Re
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete('/admin/announcements/{announcement_id}')
-async def admin_delete_announcement(announcement_id: int, request: Request, current_user: dict = Depends(get_current_user)):
+async def admin_delete_announcement(announcement_id: int, request: Request, current_user: dict = Depends(get_admin_user)):
     ip_addr = request.client.host if request.client else '127.0.0.1'
     try:
         success = delete_announcement(announcement_id)

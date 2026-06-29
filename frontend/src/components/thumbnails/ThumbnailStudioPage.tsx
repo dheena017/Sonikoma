@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Image, Sparkles } from "lucide-react";
+import { Image } from "lucide-react";
 import { GeneratedPanel } from "../../types";
 
 import ThumbnailGenerator from "./ThumbnailGenerator.js";

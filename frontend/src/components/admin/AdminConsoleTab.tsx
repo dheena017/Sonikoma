@@ -15,7 +15,7 @@ export function AdminConsoleTab() {
 
     const connect = () => {
       if (ev) ev.close();
-      ev = new EventSource("/api/system-logs/stream");
+      ev = new EventSource("/api/health/system-logs/stream");
 
       ev.onmessage = (event) => {
         if (isPaused) return;
@@ -142,7 +142,7 @@ export function AdminConsoleTab() {
       {/* Terminal View */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-4 font-mono text-[13px] selection:bg-purple-500/30"
+        className="flex-1 overflow-auto p-4 font-mono text-[13px] selection:bg-purple-500/30 whitespace-pre"
       >
         {filteredLogs.length === 0 ? (
           <div className="h-full flex items-center justify-center text-neutral-600 italic">

@@ -12,6 +12,9 @@ import {
   ShieldAlert,
   Database,
   Terminal,
+  Cpu,
+  Globe,
+  DollarSign,
 } from "lucide-react";
 
 import { AdminOverviewTab } from "./admin/AdminOverviewTab";
@@ -24,6 +27,9 @@ import { AdminHealthTab } from "./admin/AdminHealthTab";
 import { AdminActivityTab } from "./admin/AdminActivityTab";
 import { AdminExplorerTab } from "./admin/AdminExplorerTab";
 import { AdminConsoleTab } from "./admin/AdminConsoleTab";
+import { AdminUsageTab } from "./admin/AdminUsageTab";
+import { AdminScrapersTab } from "./admin/AdminScrapersTab";
+import { AdminFinanceTab } from "./admin/AdminFinanceTab";
 
 export default function AdminPage({
   navigateTo,
@@ -39,11 +45,10 @@ export default function AdminPage({
   const [activeTab, setActiveTab] = useState<string>("overview");
   const [stats, setStats] = useState<any>({});
   const [analytics, setAnalytics] = useState<any>(null);
-  const [loadingAnalytics, setLoadingAnalytics] = useState<boolean>(true);
 
   const fetchStats = async () => {
     try {
-      const res = await fetchWithInterceptor("/api/metrics");
+      const res = await fetchWithInterceptor("/api/health/metrics");
       if (res.ok) {
         const data = await res.json();
         setStats({
@@ -63,30 +68,22 @@ export default function AdminPage({
 
   const fetchAnalytics = async () => {
     try {
-      setLoadingAnalytics(true);
       const res = await fetchWithInterceptor("/api/auth/admin/analytics");
       if (res.ok) {
         const data = await res.json();
-        if (data.success) {
-          setAnalytics(data.analytics);
-        }
+        if (data.success) setAnalytics(data.analytics);
       }
     } catch (err) {
       console.error("Failed to fetch analytics:", err);
-    } finally {
-      setLoadingAnalytics(false);
     }
   };
 
   useEffect(() => {
     if (isAuthenticated) {
-      if (activeTab === "analytics") {
-        fetchAnalytics();
-      } else {
-        fetchStats();
-      }
+      fetchStats();
+      fetchAnalytics();
     }
-  }, [isAuthenticated, activeTab]);
+  }, [isAuthenticated]);
 
   if (!isAuthenticated) {
     return (
@@ -111,6 +108,9 @@ export default function AdminPage({
     { id: "announcements", label: "Announcements", icon: Mail },
     { id: "users", label: "Users", icon: Users },
     { id: "content", label: "Content", icon: FolderGit2 },
+    { id: "usage", label: "Usage", icon: Cpu },
+    { id: "scrapers", label: "Scrapers", icon: Globe },
+    { id: "finance", label: "Finance", icon: DollarSign },
     { id: "analytics", label: "Analytics", icon: BarChart3 },
     { id: "explorer", label: "Explorer", icon: Database },
     { id: "console", label: "Console", icon: Terminal },
@@ -138,14 +138,14 @@ export default function AdminPage({
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
                   activeTab === tab.id
                     ? "bg-purple-600 text-white shadow-lg shadow-purple-500/20"
                     : "text-neutral-400 hover:text-neutral-200 hover:bg-white/5"
                 }`}
               >
                 <tab.icon className="w-4 h-4" />
-                <span className={activeTab === tab.id ? "block" : "hidden md:block"}>
+                <span className={activeTab === tab.id ? "block" : "hidden xl:block"}>
                   {tab.label}
                 </span>
               </button>
@@ -177,11 +177,26 @@ export default function AdminPage({
               addNotification={addNotification}
             />
           )}
-          {activeTab === "analytics" && (
-            <AdminAnalyticsTab
+          {activeTab === "usage" && (
+            <AdminUsageTab
+              fetchWithInterceptor={fetchWithInterceptor}
               analytics={analytics}
-              loadingAnalytics={loadingAnalytics}
             />
+          )}
+          {activeTab === "scrapers" && (
+            <AdminScrapersTab
+              fetchWithInterceptor={fetchWithInterceptor}
+              addNotification={addNotification}
+            />
+          )}
+          {activeTab === "finance" && (
+            <AdminFinanceTab
+              fetchWithInterceptor={fetchWithInterceptor}
+              analytics={analytics}
+            />
+          )}
+          {activeTab === "analytics" && (
+            <AdminAnalyticsTab fetchWithInterceptor={fetchWithInterceptor} />
           )}
           {activeTab === "settings" && (
             <AdminSettingsTab
