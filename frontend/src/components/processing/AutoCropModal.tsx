@@ -55,7 +55,7 @@ interface AutoCropModalProps {
   scrapedImages: string[];
   selectedScraped: string[];
   setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
-  setConsoleLogs?: React.Dispatch<React.SetStateAction<string[]>>;
+  setConsoleLogs?: React.Dispatch<React.SetStateAction<any[]>>;
   addNotification?: (msg: string, type: any) => void;
   isPage?: boolean;
 }

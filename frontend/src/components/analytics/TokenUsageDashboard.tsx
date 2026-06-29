@@ -35,7 +35,10 @@ export default function TokenUsageDashboard({
       const token =
         localStorage.getItem("sonikoma_token") ||
         sessionStorage.getItem("sonikoma_token");
-      const data = await api.getProjectTokenAnalytics(token || "");
+      const res = await fetch("/api/projects/analytics/tokens", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
       if (data.success && data.token_logs) {
         setLogs(data.token_logs);
       } else {

@@ -19,7 +19,7 @@ interface UsePanelDetectionProps {
   setEditCropBottom: (val: number) => void;
   addNotification: (message: string, type: NotificationType) => void;
   setScrapedImages?: React.Dispatch<React.SetStateAction<string[]>>;
-  setConsoleLogs?: React.Dispatch<React.SetStateAction<string[]>>;
+  setConsoleLogs?: React.Dispatch<React.SetStateAction<any[]>>;
   editAutoTrim: boolean;
   addPanelsToStoryboard: (
     urls: string[],

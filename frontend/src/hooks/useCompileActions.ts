@@ -13,7 +13,7 @@ interface UseCompileActionsProps {
   targetUrl?: string;
   fetchWithInterceptor?: typeof fetch;
   selectedModel?: string;
-  setConsoleLogs?: React.Dispatch<React.SetStateAction<string[]>>;
+  setConsoleLogs?: React.Dispatch<React.SetStateAction<any[]>>;
   voiceActor?: string;
   musicTheme?: string;
   narrationStyle?: string;

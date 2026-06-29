@@ -198,7 +198,10 @@ export default function AIModelsPage({
         setTokenLogs([]);
         return;
       }
-      const data = await api.getProjectTokenAnalytics(token);
+      const res = await fetch("/api/projects/analytics/tokens", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
       if (data) {
         if (data.success && data.token_logs) {
           setTokenLogs(data.token_logs);

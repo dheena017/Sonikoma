@@ -47,6 +47,7 @@ interface ProjectDetailsPageProps {
     options?: { details?: string }
   ) => void;
   audioFeedback?: any;
+  fetchWithInterceptor?: any;
 }
 
 export default function ProjectDetailsPage({
@@ -57,6 +58,7 @@ export default function ProjectDetailsPage({
   registerSaveHandler,
   addNotification,
   audioFeedback,
+  fetchWithInterceptor,
 }: ProjectDetailsPageProps) {
   const [projectId, setProjectId] = React.useState<string | null>(null);
   const [project, setProject] = React.useState<any | null>(null);
@@ -250,11 +252,8 @@ export default function ProjectDetailsPage({
 
         const urls = panels.map((p) => p.image_url);
         const data = await api.downloadZip(
-          fetch,
-          { urls, url: project.url || null },
-          {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          }
+          fetchWithInterceptor || fetch,
+          { urls, url: project.url || null }
         );
         if (data.success && data.downloadUrl) {
           const link = document.createElement("a");
@@ -402,10 +401,7 @@ export default function ProjectDetailsPage({
       setLoading(true);
       setError(null);
       try {
-        const token =
-          localStorage.getItem("sonikoma_token") ||
-          sessionStorage.getItem("sonikoma_token");
-        const data = await api.getProject(projectId, token || undefined);
+        const data = await api.getProject(fetchWithInterceptor || fetch, projectId);
         if (data.success) {
           setProject(data.project);
           setPanels(data.panels || []);
@@ -440,15 +436,9 @@ export default function ProjectDetailsPage({
     const fetchScraped = async () => {
       setLoadingScraped(true);
       try {
-        const token =
-          localStorage.getItem("sonikoma_token") ||
-          sessionStorage.getItem("sonikoma_token");
         const data = await api.scrapeImages(
-          fetch,
-          { url: project.url, bypass_cache: false },
-          {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          }
+          fetchWithInterceptor || fetch,
+          { url: project.url, bypass_cache: false }
         );
         if (data.success && data.images) {
           const proxied = data.images.map((img: string) => {
@@ -504,10 +494,7 @@ export default function ProjectDetailsPage({
     if (!confirmDelete) return;
     setDeleting(true);
     try {
-      const token =
-        localStorage.getItem("sonikoma_token") ||
-        sessionStorage.getItem("sonikoma_token");
-      const data = await api.deleteProject(projectId, token || undefined);
+      const data = await api.deleteProject(fetchWithInterceptor || fetch, projectId);
       if (data.success) {
         audioFeedback?.playError();
         navigateTo("/profile");

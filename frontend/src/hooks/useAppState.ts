@@ -501,7 +501,7 @@ export function useAppState() {
     const loadProject = async (lookupId: string) => {
       try {
         const token = getToken();
-        const data = await api.getProject(lookupId, token);
+        const data = await api.getProject(fetchWithInterceptor, lookupId);
         if (data.success && data.project) {
           setProjectId(data.project.project_id);
           setSeriesSlugState(data.project.series_slug || null);
@@ -638,7 +638,7 @@ export function useAppState() {
     window.addEventListener("popstate", handlePopState);
     handlePopState();
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [isAuthenticated, addNotification, getToken]);
+  }, [isAuthenticated, addNotification, getToken, fetchWithInterceptor]);
 
   useEffect(() => {
     localStorage.setItem(

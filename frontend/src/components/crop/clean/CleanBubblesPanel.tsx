@@ -16,7 +16,7 @@ interface CleanBubblesPanelProps {
   setPanels: React.Dispatch<React.SetStateAction<any[]>> | undefined;
   addNotification: (message: string, type: NotificationType) => void;
   fetchWithInterceptor: typeof fetch | undefined;
-  setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>> | undefined;
+  setConsoleLogs: React.Dispatch<React.SetStateAction<any[]>> | undefined;
 
   // Manual Brush Props
   editMode?: "crop" | "clean_auto" | "clean_manual" | "typeset" | "slices";

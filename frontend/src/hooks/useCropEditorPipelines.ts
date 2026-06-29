@@ -12,7 +12,7 @@ interface UseCropEditorPipelinesProps {
   scrapedImages: string[];
   setScrapedImages?: React.Dispatch<React.SetStateAction<string[]>>;
   setPanels?: React.Dispatch<React.SetStateAction<any[]>>;
-  setConsoleLogs?: React.Dispatch<React.SetStateAction<string[]>>;
+  setConsoleLogs?: React.Dispatch<React.SetStateAction<any[]>>;
   addNotification: (message: string, type: NotificationType) => void;
   addPanelsToStoryboard: (
     urls: string[],

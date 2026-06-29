@@ -85,7 +85,7 @@ export interface AutoCropSharedProps {
   setCropCloseKernelSize: (v: number) => void;
   scrapedImages: string[];
   selectedScraped: string[];
-  setConsoleLogs?: React.Dispatch<React.SetStateAction<string[]>>;
+  setConsoleLogs?: React.Dispatch<React.SetStateAction<any[]>>;
   addNotification?: (msg: string, type: any) => void;
   cropGuidance: string;
   setCropGuidance: (v: string) => void;

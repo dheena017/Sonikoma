@@ -1217,6 +1217,7 @@ export default function App() {
               }}
               addNotification={addNotification}
               audioFeedback={audioFeedback}
+              fetchWithInterceptor={fetchWithInterceptor}
             />
           )}
 
@@ -1225,6 +1226,7 @@ export default function App() {
             <SeriesDetailsPage
               onNavigateHome={handleNavigateHome}
               navigateTo={navigateTo}
+              fetchWithInterceptor={fetchWithInterceptor}
             />
           )}
 

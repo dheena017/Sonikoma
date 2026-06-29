@@ -6,7 +6,7 @@ interface UseSceneModifierProps {
   panels: GeneratedPanel[];
   setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
   setCurrentPanelIndex: (idx: number) => void;
-  setConsoleLogs?: React.Dispatch<React.SetStateAction<string[]>>;
+  setConsoleLogs?: React.Dispatch<React.SetStateAction<any[]>>;
   addNotification?: (message: string, type: any) => void;
   audioFeedback?: any;
 }

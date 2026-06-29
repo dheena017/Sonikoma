@@ -23,11 +23,13 @@ import { getProxiedImageUrl } from "../utils";
 interface SeriesDetailsPageProps {
   onNavigateHome: () => void;
   navigateTo: (path: string) => void;
+  fetchWithInterceptor?: any;
 }
 
 export default function SeriesDetailsPage({
   onNavigateHome,
   navigateTo,
+  fetchWithInterceptor,
 }: SeriesDetailsPageProps) {
   const [seriesSlug, setSeriesSlug] = React.useState<string | null>(null);
   const [series, setSeries] = React.useState<any | null>(null);
@@ -57,19 +59,12 @@ export default function SeriesDetailsPage({
       setLoading(true);
       setError(null);
       try {
-        const token =
-          localStorage.getItem("sonikoma_token") ||
-          sessionStorage.getItem("sonikoma_token");
-        const headers: HeadersInit = {};
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
-        }
-        const data = await api.getSeries(seriesSlug, token || undefined);
+        const data = await api.getSeries(fetchWithInterceptor || fetch, seriesSlug);
         if (data.success) {
           setSeries(data.series);
 
           // Also fetch chapters for this series
-          const chaptersData = await api.getProjects(token || "");
+          const chaptersData = await api.getProjects(fetchWithInterceptor || fetch);
           if (chaptersData.success) {
             const seriesChapters = chaptersData.projects.filter(
               (p: any) => p.series_id === data.series.id
@@ -108,10 +103,7 @@ export default function SeriesDetailsPage({
 
     setIsDeleting(projectId);
     try {
-      const token =
-        localStorage.getItem("sonikoma_token") ||
-        sessionStorage.getItem("sonikoma_token");
-      const res = await api.deleteProject(projectId, token || undefined);
+      const res = await api.deleteProject(fetchWithInterceptor || fetch, projectId);
       if (res) {
         setChapters((prev) => prev.filter((ch) => ch.project_id !== projectId));
       }
