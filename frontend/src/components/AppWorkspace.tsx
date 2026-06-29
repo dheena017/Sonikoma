@@ -9,6 +9,7 @@ import VideoMonitor from "./video/VideoMonitor.js";
 import VolumeAndProgressPanel from "./video/VolumeAndProgressPanel.js";
 import OutputMetadataPanel from "./OutputMetadataPanel.js";
 import ProjectConfirmModal from "./scraper/ProjectConfirmModal.js";
+import { LogEntry } from "../types/logs";
 
 interface AppWorkspaceProps {
   isDashboardOnly?: boolean;
@@ -17,7 +18,7 @@ interface AppWorkspaceProps {
   setPanels: any;
   isGeneratingStoryboard?: boolean;
   handleGenerateStoryboardAI?: () => Promise<void>;
-  consoleLogs: string[];
+  consoleLogs: LogEntry[];
   setConsoleLogs: any;
   scrapedImages: string[];
   setScrapedImages: any;

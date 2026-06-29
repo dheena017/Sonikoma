@@ -458,8 +458,17 @@ async def lifespan(app: FastAPI):
     logging.getLogger().addFilter(EndpointFilter())
 
     # Initialize database and load skills inside the worker process
-    from database.db import init_db
+    from database.db import init_db, prune_system_logs
     init_db()
+
+    # Run initial log pruning to keep DB healthy
+    try:
+        pruned = prune_system_logs()
+        if pruned > 0:
+            logger.info(f"[System] Startup maintenance: Pruned {pruned} old log entries.")
+    except Exception as e:
+        logger.warning(f"[System] Log pruning failed during startup: {e}")
+
     from skills.registry import registry
     registry.load_skills()
 

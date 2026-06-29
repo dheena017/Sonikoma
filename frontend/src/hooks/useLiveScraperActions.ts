@@ -1,3 +1,4 @@
+import { LogEntry, normalizeLog } from "../types/logs";
 import React, { useState } from "react";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
@@ -8,7 +9,7 @@ interface UseLiveScraperActionsProps {
   selectedScraped: string[];
   setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
   setScrapedImages: React.Dispatch<React.SetStateAction<string[]>>;
-  setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>>;
+  setConsoleLogs: React.Dispatch<React.SetStateAction<LogEntry[]>>;
   addPanelsToStoryboard: (
     urls: string[],
     currentScrapedList?: string[],

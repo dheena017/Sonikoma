@@ -622,15 +622,16 @@ export default function AdminPage({
                 </p>
                 <button
                   onClick={() => {
+                    const escape = (val: any) => `"${String(val || '').replace(/"/g, '""')}"`;
                     const csv =
-                      "Email,Name,Role,Credits\n" +
+                      "Email,Name,Role,Credits,Joined At\n" +
                       filteredUsers
                         .map(
                           (u) =>
-                            `${u.email},${u.full_name},${u.creator_role},${u.credits}`
+                            `${escape(u.email)},${escape(u.full_name)},${escape(u.creator_role)},${u.credits || 0},${escape(u.created_at)}`
                         )
                         .join("\n");
-                    const blob = new Blob([csv], { type: "text/csv" });
+                    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement("a");
                     a.href = url;
@@ -1563,6 +1564,40 @@ export default function AdminPage({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-medium text-neutral-400 mb-1">
+                        Log Retention (Days)
+                      </label>
+                      <select
+                        value={settings.log_retention_days || "7"}
+                        onChange={(e) => setSettings({...settings, log_retention_days: e.target.value})}
+                        className="w-full bg-[#111115] border border-neutral-700 text-sm text-white rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500/50"
+                      >
+                        <option value="1">1 Day</option>
+                        <option value="3">3 Days</option>
+                        <option value="7">7 Days (Default)</option>
+                        <option value="14">14 Days</option>
+                        <option value="30">30 Days</option>
+                        <option value="0">Unlimited</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-neutral-400 mb-1">
+                        Max Log Entries
+                      </label>
+                      <select
+                        value={settings.log_max_entries || "5000"}
+                        onChange={(e) => setSettings({...settings, log_max_entries: e.target.value})}
+                        className="w-full bg-[#111115] border border-neutral-700 text-sm text-white rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500/50"
+                      >
+                        <option value="1000">1,000</option>
+                        <option value="5000">5,000 (Default)</option>
+                        <option value="10000">10,000</option>
+                        <option value="25000">25,000</option>
+                        <option value="50000">50,000</option>
+                        <option value="0">Unlimited</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-neutral-400 mb-1">
                         Max Upload Size (MB)
                       </label>
                       <input
@@ -2034,21 +2069,20 @@ export default function AdminPage({
                     </p>
                     <button
                       onClick={() => {
+                        const escape = (val: any) => `"${String(val || '').replace(/"/g, '""')}"`;
                         const csv =
-                          "Time,User,Action,IP,Status\n" +
+                          "Timestamp,User,Action,IP Address,Status\n" +
                           filteredLogs
                             .map(
                               (l) =>
-                                `"${new Date(
-                                  l.created_at
-                                ).toLocaleString()}","${
-                                  l.user_email || "System"
-                                }","${l.action}","${l.ip_address || ""}","${
-                                  l.status || "info"
-                                }"`
+                                `${escape(new Date(l.created_at).toLocaleString())},${
+                                  escape(l.email || l.user_email || "System")
+                                },${escape(l.action)},${escape(l.ip_address)},${
+                                  escape(l.status)
+                                }`
                             )
                             .join("\n");
-                        const blob = new Blob([csv], { type: "text/csv" });
+                        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
                         const url = URL.createObjectURL(blob);
                         const a = document.createElement("a");
                         a.href = url;

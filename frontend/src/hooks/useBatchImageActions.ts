@@ -1,3 +1,4 @@
+import { LogEntry, normalizeLog } from "../types/logs";
 import React, { useState } from "react";
 import { GeneratedPanel } from "../types";
 import { NotificationType } from "../components/NotificationStack";
@@ -9,7 +10,7 @@ interface UseBatchImageActionsProps {
   scrapedImages: string[];
   setScrapedImages: React.Dispatch<React.SetStateAction<string[]>>;
   setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
-  setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>>;
+  setConsoleLogs: React.Dispatch<React.SetStateAction<LogEntry[]>>;
   addNotification: (message: string, type: NotificationType) => void;
   fetchWithInterceptor: any;
 

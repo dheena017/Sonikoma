@@ -1,8 +1,9 @@
 import React from "react";
 import { Search, X } from "lucide-react";
+import { LogEntry } from "../../types/logs";
 
 interface TerminalLogsFilterProps {
-  consoleLogs: string[];
+  consoleLogs: LogEntry[];
   activeFilter: "all" | "errors" | "warnings" | "ai" | "success";
   setActiveFilter: (
     val: "all" | "errors" | "warnings" | "ai" | "success"

@@ -1,3 +1,4 @@
+import { normalizeLog } from "../types/logs";
 import React from "react";
 import { Slice, DetectedPanel } from "../components/crop/types";
 import { NotificationType } from "../components/NotificationStack";
@@ -137,7 +138,7 @@ export function usePanelDetection({
 
           // Close editor and navigate home
           setEditingImageIdx(null);
-          window.history.pushState({}, "", "/");
+          window.history.pushState({}, "");
           window.dispatchEvent(new Event("popstate"));
           return;
         }

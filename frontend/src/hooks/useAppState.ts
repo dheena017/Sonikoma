@@ -8,6 +8,7 @@ import {
 } from "../components/NotificationStack";
 import { ErrorPopupDetail } from "../components/ErrorPopupModal";
 import { parseWebtoonUrl } from "../utils/url";
+import { LogEntry, normalizeLog } from "../types/logs";
 
 export function useAppState() {
   const [user, setUser] = useState<any>(null);
@@ -19,7 +20,7 @@ export function useAppState() {
   const [projectId, setProjectId] = useState<string | null>(null);
   const [seriesSlugState, setSeriesSlugState] = useState<string | null>(null);
   const [chapterSlugState, setChapterSlugState] = useState<string | null>(null);
-  const [consoleLogs, setRawConsoleLogs] = useState<string[]>([]);
+  const [consoleLogs, setRawConsoleLogs] = useState<LogEntry[]>([]);
   const [characters, setCharacters] = useState<CharacterBio[]>([]);
 
   const projectIdRef = useRef(projectId);
@@ -208,94 +209,15 @@ export function useAppState() {
 
   // ── Callbacks & effects AFTER all useState declarations ──────────────────
 
-  const setConsoleLogs = useCallback((val: React.SetStateAction<string[]>) => {
+  const setConsoleLogs = useCallback((val: React.SetStateAction<LogEntry[]>) => {
     setRawConsoleLogs((prev) => {
-      const resolved = typeof val === "function" ? val(prev) : val;
-      const capped = resolved.slice(-250);
-      return capped.map((log) => {
-        // Match standard format: HH:MM:SS [TAG]
-        const hasStandardFormat = /^\d{2}:\d{2}:\d{2} \[[A-Z_0-9]+\]/.test(log);
-        if (hasStandardFormat) {
-          return log;
-        }
-
-        let category = "FRONTEND";
-        let level = "INFO";
-        let filename = "App.tsx";
-        let message = log;
-
-        // Extract level categorizations from log content
-        if (
-          log.includes("[ERROR]") ||
-          log.includes("[FATAL]") ||
-          log.toLowerCase().includes("failed")
-        ) {
-          level = "ERROR";
-        } else if (log.includes("[WARNING]") || log.includes("[WARN]")) {
-          level = "WARN";
-        } else if (
-          log.includes("[SUCCESS]") ||
-          log.toLowerCase().includes("successfully")
-        ) {
-          level = "SUCCESS";
-        } else if (log.includes("[Smart") || log.includes("[System]")) {
-          level = "Smart Scanner";
-        } else if (log.includes("[Database]") || log.includes("[DB]")) {
-          level = "DATABASE";
-        } else if (log.includes("[API]") || log.includes("[HTTP]")) {
-          level = "API";
-        }
-
-        // Parse brackets like [Scraper] Spawned... or [GUI] Mounted...
-        const bracketMatch = log.match(
-          /^\[([^\]]+)\]\s*(?:\[([^\]]+)\])?\s*(.*)$/
-        );
-        if (bracketMatch) {
-          const firstTag = bracketMatch[1];
-          const secondTag = bracketMatch[2];
-          const rest = bracketMatch[3];
-
-          if (
-            secondTag &&
-            [
-              "INFO",
-              "DEBUG",
-              "WARN",
-              "WARNING",
-              "ERROR",
-              "SUCCESS",
-              "FATAL",
-            ].includes(secondTag.toUpperCase())
-          ) {
-            level = secondTag.toUpperCase();
-            filename = firstTag;
-            message = rest;
-          } else {
-            if (
-              [
-                "INFO",
-                "DEBUG",
-                "WARN",
-                "WARNING",
-                "ERROR",
-                "SUCCESS",
-                "FATAL",
-              ].includes(firstTag.toUpperCase())
-            ) {
-              level = firstTag.toUpperCase();
-              filename = "App.tsx";
-            } else {
-              filename = firstTag;
-            }
-            message = rest;
-          }
-        }
-
-        const timestamp = new Date().toLocaleTimeString("en-US", {
-          hour12: false,
-        });
-        return `${timestamp} [${category}] [${level}] [${filename}] ${message}`;
-      });
+      const incoming = typeof val === "function" ? val(prev) : val;
+      // If incoming is already normalized array, just slice
+      if (Array.isArray(incoming)) {
+        const normalized = incoming.map(log => normalizeLog(log));
+        return normalized.slice(-200);
+      }
+      return prev;
     });
   }, []);
 
@@ -814,9 +736,11 @@ export function useAppState() {
     setSeriesAuthor("");
     setSeriesCoverImage("");
     setSeriesSynopsis("");
-    setRawConsoleLogs(["[System] Workspace initialized for new project."]);
+    setRawConsoleLogs([
+      normalizeLog(`[System] Workspace initialized for new project.`)
+    ]);
     // Optionally remove project_id from URL
-    window.history.pushState(null, "", "/workspace");
+    window.history.pushState(null, "");
   }, []);
 
   return {

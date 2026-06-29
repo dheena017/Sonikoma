@@ -2,10 +2,11 @@ import React, { useEffect, useRef, useState } from "react";
 import { TerminalLogsHeader } from "./TerminalLogsHeader.js";
 import { TerminalLogsFilter } from "./TerminalLogsFilter.js";
 import { TerminalLogsOutput } from "./TerminalLogsOutput.js";
+import { LogEntry, normalizeLog } from "../../types/logs";
 
 interface TerminalLogsProps {
-  consoleLogs: string[];
-  setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>>;
+  consoleLogs: LogEntry[];
+  setConsoleLogs: React.Dispatch<React.SetStateAction<LogEntry[]>>;
 }
 
 function getTimestamp(): string {
@@ -46,7 +47,7 @@ export default function TerminalLogs({
   }, [consoleLogs, autoScroll, searchQuery, activeFilter]);
 
   const handleCopyAll = () => {
-    const allLogs = consoleLogs.join("\n");
+    const allLogs = consoleLogs.map(l => `[${l.timestamp}] [${l.module}] [${l.level}] ${l.message}`).join("\n");
     navigator.clipboard.writeText(allLogs).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -56,7 +57,7 @@ export default function TerminalLogs({
   const handleCopyVisible = () => {
     const visible = (
       paused ? consoleLogs.slice(0, lastVisibleCount) : consoleLogs
-    ).join("\n");
+    ).map(l => `[${l.timestamp}] [${l.module}] [${l.level}] ${l.message}`).join("\n");
     navigator.clipboard.writeText(visible).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -64,7 +65,7 @@ export default function TerminalLogs({
   };
 
   const handleDownloadLogs = () => {
-    const blob = new Blob([consoleLogs.join("\n")], {
+    const blob = new Blob([consoleLogs.map(l => `[${l.timestamp}] [${l.module}] [${l.level}] ${l.message}`).join("\n")], {
       type: "text/plain;charset=utf-8",
     });
     const url = URL.createObjectURL(blob);
@@ -79,39 +80,38 @@ export default function TerminalLogs({
 
   const handleClear = () => {
     setConsoleLogs([
-      `[GUI] ${getTimestamp()} — Active shell cleared at user prompt.`,
+      normalizeLog(`[GUI] Active shell cleared at user prompt.`)
     ]);
   };
 
   // Filter and search logic
   const filteredLogs = consoleLogs.filter((log) => {
     const query = searchQuery.toLowerCase().trim();
-    const matchesQuery = query === "" || log.toLowerCase().includes(query);
+    const matchesQuery = query === "" ||
+      log.message.toLowerCase().includes(query) ||
+      log.module.toLowerCase().includes(query);
 
     if (!matchesQuery) return false;
 
     if (activeFilter === "errors") {
       return (
-        log.includes("[ERROR]") ||
-        log.includes("ERROR]") ||
-        log.includes("[FATAL]")
+        log.level === "ERROR" ||
+        log.message.toLowerCase().includes("fail")
       );
     }
     if (activeFilter === "warnings") {
-      return log.includes("[WARNING]") || log.includes("[WARN]");
+      return log.level === "WARN" || log.level === "WARNING";
     }
     if (activeFilter === "ai") {
       return (
-        log.includes("[AI") ||
-        log.includes("[Gemini]") ||
-        log.includes("Gemini")
+        log.module.toLowerCase().includes("ai") ||
+        log.module.toLowerCase().includes("gemini")
       );
     }
     if (activeFilter === "success") {
       return (
-        log.includes("[SUCCESS]") ||
-        log.includes("Successfully") ||
-        log.includes("completed cleanly")
+        log.level === "SUCCESS" ||
+        log.message.toLowerCase().includes("success")
       );
     }
 
@@ -129,18 +129,17 @@ export default function TerminalLogs({
   // Calculate statistics counts
   const errorCount = consoleLogs.filter(
     (log) =>
-      log.includes("[ERROR]") ||
-      log.includes("ERROR]") ||
-      log.includes("[FATAL]")
+      log.level === "ERROR" ||
+      log.message.toLowerCase().includes("fail")
   ).length;
   const warningCount = consoleLogs.filter(
-    (log) => log.includes("[WARNING]") || log.includes("[WARN]")
+    (log) => log.level === "WARN" || log.level === "WARNING"
   ).length;
   const successCount = consoleLogs.filter(
-    (log) => log.includes("[SUCCESS]") || log.includes("Successfully")
+    (log) => log.level === "SUCCESS" || log.message.toLowerCase().includes("success")
   ).length;
   const aiCount = consoleLogs.filter(
-    (log) => log.includes("[AI") || log.includes("[Gemini]")
+    (log) => log.module.toLowerCase().includes("ai") || log.module.toLowerCase().includes("gemini")
   ).length;
 
   return (

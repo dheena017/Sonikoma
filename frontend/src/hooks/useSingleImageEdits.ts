@@ -1,3 +1,4 @@
+import { LogEntry, normalizeLog } from "../types/logs";
 import React, { useState } from "react";
 import { NotificationType } from "../components/NotificationStack";
 import { processWithConcurrency } from "../utils/batchUtils";
@@ -7,7 +8,7 @@ interface UseSingleImageEditsProps {
   scrapedImages: string[];
   setScrapedImages: React.Dispatch<React.SetStateAction<string[]>>;
   setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
-  setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>>;
+  setConsoleLogs: React.Dispatch<React.SetStateAction<LogEntry[]>>;
   addNotification: (message: string, type: NotificationType) => void;
   fetchWithInterceptor: any;
   editCropTop: number;

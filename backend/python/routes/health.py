@@ -96,13 +96,35 @@ async def health(
         }
     )
 
-@router.get("/system-logs", summary="JSON polling endpoint for console logs")
-async def system_logs(since: int = Query(0, description="Fetch logs generated after this sequence ID")):
+@router.get("/system-logs", summary="Diagnostic logs retrieval with historical support")
+async def system_logs(
+    since: int = Query(0, description="Fetch ephemeral logs generated after this sequence ID"),
+    limit: int = Query(200, description="Max records to return for historical query"),
+    offset: int = Query(0, description="Offset for historical query"),
+    level: Optional[str] = Query(None, description="Filter by log level"),
+    module: Optional[str] = Query(None, description="Filter by module"),
+    search: Optional[str] = Query(None, description="Text search in message or details")
+):
     try:
+        # If any filter or offset is provided, we fetch from persistent DB
+        if level or module or search or offset > 0:
+            logs = db.get_system_logs(limit, offset, level, module, search)
+            return {"success": True, "logs": logs, "historical": True}
+
+        # Otherwise fallback to ephemeral buffer for performance (polling mode)
         logs = get_logs(since)
-        return {"success": True, "logs": logs}
+        return {"success": True, "logs": logs, "historical": False}
     except Exception as e:
         logger.error(f"Failed to fetch system logs: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/system-logs", summary="Wipe all persistent system logs")
+async def clear_system_logs():
+    try:
+        db.wipe_system_logs()
+        return {"success": True, "message": "Persistent system logs wiped successfully."}
+    except Exception as e:
+        logger.error(f"Failed to wipe system logs: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

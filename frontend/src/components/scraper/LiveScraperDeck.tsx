@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from "react";
+import { normalizeLog } from "../../types/logs";
 import { createPortal } from "react-dom";
 import {
   Image as ImageIcon,
@@ -175,7 +176,7 @@ export default function LiveScraperDeck({
       const targetFilename = getZipFilename();
       saveAs(blobContent, targetFilename);
       setConsoleLogs((prev) => [
-        `[GUI] Successfully generated zip named ${targetFilename} for ${toDownload.length} images`,
+        normalizeLog(`[GUI] Successfully generated zip named ${targetFilename} for ${toDownload.length} images`),
         ...prev,
       ]);
     } catch (err) {
@@ -207,7 +208,7 @@ export default function LiveScraperDeck({
       prev.filter((img) => !selectedScraped.includes(img))
     );
     setConsoleLogs((prev) => [
-      `[GUI] Removed ${selectedScraped.length} images`,
+      normalizeLog(`[GUI] Removed ${selectedScraped.length} images`),
       ...prev,
     ]);
     addNotification(
@@ -264,7 +265,7 @@ export default function LiveScraperDeck({
     );
     setIsBatchMerging(true);
     setConsoleLogs((prev) => [
-      `[Stitch Generator] Merging ${selectedScraped.length} selected images vertically...`,
+      normalizeLog(`[Stitch Generator] Merging ${selectedScraped.length} selected images vertically...`),
       ...prev,
     ]);
 
@@ -301,7 +302,7 @@ export default function LiveScraperDeck({
         setSelectedScraped([]);
         setLastSelectedIndex(null);
         setConsoleLogs((prev) => [
-          `[Stitch Generator] ✓ Stitching completed! Stored URL: ${data.url}`,
+          normalizeLog(`[Stitch Generator] ✓ Stitching completed! Stored URL: ${data.url}`),
           ...prev,
         ]);
         addNotification(
