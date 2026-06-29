@@ -31,7 +31,7 @@ interface NotificationStackProps {
   notificationsMuted?: boolean;
 }
 
-export default function NotificationStack({
+function NotificationStackInner({
   notifications,
   removeNotification,
   notificationsMuted = false,
@@ -241,3 +241,5 @@ function IndividualNotification({
     </div>
   );
 }
+
+export default React.memo(NotificationStackInner);

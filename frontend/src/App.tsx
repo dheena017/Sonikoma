@@ -22,7 +22,7 @@ import * as api from "./api/index.js";
 // --- Layout & Main Workspace Components ---
 import Header from "./components/Header.js";
 import Sidebar from "./components/Sidebar.js";
-import { AppWorkspace } from "./components/AppWorkspace.js";
+import AppWorkspace from "./components/AppWorkspace.js";
 import PageNotFound from "./components/PageNotFound.js";
 import AdvancedSettings from "./components/AdvancedSettings.js";
 import LogsPage from "./components/LogsPage.js";

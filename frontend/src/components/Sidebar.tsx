@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Film,
   Activity,
@@ -44,7 +44,7 @@ interface SidebarProps {
   chapterSlug?: string | null;
 }
 
-export default function Sidebar({
+function SidebarInner({
   isProcessing,
   panels,
   scrapedImages,
@@ -82,9 +82,10 @@ export default function Sidebar({
   const isAIModels = currentPath === "/ai-models";
   const isProjects = currentPath === "/projects";
 
-  const params = new URLSearchParams(window.location.search);
-  const activeProjectId =
-    params.get("id") || params.get("project_id") || projectId;
+  const activeProjectId = useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("id") || params.get("project_id") || projectId;
+  }, [currentPath, projectId]);
 
   const isAiSuiteActive =
     currentPath.startsWith("/ai-") || currentPath === "/panel-assistant";
@@ -526,3 +527,5 @@ export default function Sidebar({
     </>
   );
 }
+
+export default React.memo(SidebarInner);

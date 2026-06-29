@@ -45,7 +45,7 @@ interface Project {
   synopsis?: string;
 }
 
-export default function DashboardPage() {
+const DashboardPage = React.memo(function DashboardPageInner() {
   const { themeMode } = useThemeMode();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1057,3 +1057,6 @@ export default function DashboardPage() {
     </div>
   );
 }
+);
+
+export default DashboardPage;
