@@ -18,6 +18,7 @@ import {
   Shield,
   FolderOpen,
   Award,
+  PlusSquare,
 } from "lucide-react";
 
 import { useThemeMode } from "../hooks/useThemeMode";
@@ -81,6 +82,7 @@ const SidebarInner = ({
   const isShortcuts = currentPath === "/shortcuts";
   const isAIModels = currentPath === "/ai-models";
   const isProjects = currentPath === "/projects";
+  const isNewSeries = currentPath === "/new-series";
 
   const activeProjectId = useMemo(() => {
     const params = new URLSearchParams(window.location.search);
@@ -155,6 +157,13 @@ const SidebarInner = ({
           icon: LayoutDashboard,
           active: isDashboardOverview,
           onClick: handleNavigateToDashboardOverview,
+          enabled: true,
+        },
+        {
+          label: "New Series",
+          icon: PlusSquare,
+          active: isNewSeries,
+          onClick: () => navigateTo("/new-series"),
           enabled: true,
         },
         {

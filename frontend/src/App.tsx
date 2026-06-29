@@ -50,6 +50,7 @@ import SeriesDetailsPage from "./components/SeriesDetailsPage.js";
 import DisplayPage from "./components/DisplayPage.js";
 import DashboardPage from "./components/DashboardPage.js";
 import ProjectsPage from "./components/ProjectsPage.js";
+import NewSeriesPage from "./components/NewSeriesPage.js";
 
 // --- AI Creator & Engagement Suite Views ---
 import AIOptimizerPage from "./components/optimizer/AIOptimizerPage.js";
@@ -573,6 +574,7 @@ export default function App() {
       isStatusPath: currentPath === "/status",
       isAIModelsPath: currentPath === "/ai-models",
       isShortcutsPath: currentPath === "/shortcuts",
+      isNewSeriesPath: currentPath === "/new-series",
       isOptimizerPath: currentPath === "/ai-optimizer",
       isPanelAssistantPath: currentPath.startsWith("/panel-assistant"),
       isCharacterPath: currentPath === "/ai-characters",
@@ -618,6 +620,7 @@ export default function App() {
     isStatusPath,
     isAIModelsPath,
     isShortcutsPath,
+    isNewSeriesPath,
     isOptimizerPath,
     isPanelAssistantPath,
     isCharacterPath,
@@ -1097,6 +1100,16 @@ export default function App() {
             </div>
           )}
 
+          {/* PAGE VIEW 1.85: Start New Series Workspace */}
+          {isNewSeriesPath && (
+            <div className="page-transition w-full flex-1 flex flex-col">
+              <NewSeriesPage
+                appLogic={appLogic}
+                onNavigateHome={handleNavigateHome}
+              />
+            </div>
+          )}
+
           {/* PAGE VIEW 2: Advanced System Configuration Settings */}
           {isSettingsPath && (
             <div className="page-transition w-full flex-1 flex flex-col max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6">
@@ -1490,6 +1503,7 @@ export default function App() {
             !isNotificationsPath &&
             !isAdminPath &&
             !isChapterDetailsPath &&
+            !isNewSeriesPath &&
             !isSeriesDetailsPath && (
               <PageNotFound onNavigateHome={() => navigateTo("/")} />
             )}
