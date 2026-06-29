@@ -17,6 +17,17 @@ export interface FetchInterceptorHandlers {
   onUnauthorized?: () => void;
 }
 
+// Back-compat: some call-sites expect a `fetchWithInterceptor` function export.
+// The interceptor is actually created via `createFetchWithInterceptor(...)`.
+// This default implementation prevents runtime crashes if the interceptor instance
+// hasn't been wired yet.
+export const fetchWithInterceptor = async (
+  input: RequestInfo,
+  init?: RequestInit
+): Promise<Response> => {
+  return fetch(input, init);
+};
+
 export function createFetchWithInterceptor({
   addNotification,
   setErrorPopup,
