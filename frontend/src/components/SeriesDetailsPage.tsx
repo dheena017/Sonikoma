@@ -17,6 +17,7 @@ import {
   Trash2,
   User,
 } from "lucide-react";
+import { getProxiedImageUrl } from "../utils";
 
 interface SeriesDetailsPageProps {
   onNavigateHome: () => void;
@@ -214,7 +215,7 @@ export default function SeriesDetailsPage({
               {series.cover_image && (
                 <div className="w-full aspect-[2/3] rounded-2xl overflow-hidden border border-white/5 bg-black/40">
                   <img
-                    src={series.cover_image}
+                    src={getProxiedImageUrl(series.cover_image)}
                     alt={series.title}
                     className="w-full h-full object-contain"
                   />

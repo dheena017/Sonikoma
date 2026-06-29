@@ -27,7 +27,7 @@ import {
   Download,
   ExternalLink,
 } from "lucide-react";
-import { getSourceName, getSourceIcon } from "../utils.js";
+import { getSourceName, getSourceIcon, getProxiedImageUrl } from "../utils.js";
 import { useThemeMode } from "../hooks/useThemeMode";
 
 interface Project {
@@ -527,7 +527,7 @@ export default function DashboardPage() {
                       <div className="h-32 w-full bg-neutral-900 relative overflow-hidden shrink-0">
                         {project.cover_image ? (
                           <img
-                            src={project.cover_image}
+                            src={getProxiedImageUrl(project.cover_image)}
                             alt={project.title}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                           />

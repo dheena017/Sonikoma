@@ -7,6 +7,7 @@ import {
   Music,
   MessageSquare,
 } from "lucide-react";
+import { getProxiedImageUrl } from "../utils";
 
 interface DisplayPageProps {
   projectId: string;

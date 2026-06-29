@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Search, FolderGit2, ActivitySquare, Archive, Flag, RefreshCw, Trash2, User, Hash, Clock, ExternalLink, AlertTriangle, X } from "lucide-react";
+import { getProxiedImageUrl } from "../../utils";
 
 export function AdminContentTab({
   fetchWithInterceptor,
@@ -143,7 +144,7 @@ export function AdminContentTab({
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
                         {p.cover_image ? (
-                          <img src={p.cover_image} alt="" className="w-10 h-14 object-cover rounded bg-neutral-900 border border-neutral-800" />
+                          <img src={getProxiedImageUrl(p.cover_image)} alt="" className="w-10 h-14 object-cover rounded bg-neutral-900 border border-neutral-800" />
                         ) : (
                           <div className="w-10 h-14 bg-neutral-900 rounded border border-neutral-800 flex items-center justify-center">
                             <FolderGit2 className="w-4 h-4 text-neutral-700" />
