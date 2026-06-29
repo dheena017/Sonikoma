@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { createRoot } from "react-dom/client";
 import LoadingPage from "../components/LoadingPage";
 
@@ -84,5 +84,5 @@ export function useThemeMode() {
     });
   }, []);
 
-  return { themeMode, setThemeMode, toggleThemeMode };
+  return useMemo(() => ({ themeMode, setThemeMode, toggleThemeMode }), [themeMode, toggleThemeMode]);
 }

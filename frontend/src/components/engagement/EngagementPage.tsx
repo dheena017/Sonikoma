@@ -7,10 +7,10 @@ interface EngagementPageProps {
   scrapedTitle?: string;
 }
 
-export default function EngagementPage({
+const EngagementPage = React.memo(({
   onNavigateHome,
   scrapedTitle,
-}: EngagementPageProps) {
+}: EngagementPageProps) => {
   return (
     <div className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in">
       <div className="flex items-center justify-between border-b border-neutral-850 pb-4">
@@ -43,4 +43,6 @@ export default function EngagementPage({
       </div>
     </div>
   );
-}
+});
+
+export default EngagementPage;

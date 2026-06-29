@@ -19,10 +19,10 @@ function getTimestamp(): string {
   });
 }
 
-export default function TerminalLogs({
+const TerminalLogs = React.memo(({
   consoleLogs,
   setConsoleLogs,
-}: TerminalLogsProps) {
+}: TerminalLogsProps) => {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [copied, setCopied] = useState(false);
   const [autoScroll, setAutoScroll] = useState(true);
@@ -85,62 +85,64 @@ export default function TerminalLogs({
   };
 
   // Filter and search logic
-  const filteredLogs = consoleLogs.filter((log) => {
-    const query = searchQuery.toLowerCase().trim();
-    const matchesQuery = query === "" ||
-      log.message.toLowerCase().includes(query) ||
-      log.module.toLowerCase().includes(query);
+  const filteredLogs = useMemo(() => {
+    return consoleLogs.filter((log) => {
+      const query = searchQuery.toLowerCase().trim();
+      const matchesQuery = query === "" ||
+        log.message.toLowerCase().includes(query) ||
+        log.module.toLowerCase().includes(query);
 
-    if (!matchesQuery) return false;
+      if (!matchesQuery) return false;
 
-    if (activeFilter === "errors") {
-      return (
-        log.level === "ERROR" ||
-        log.message.toLowerCase().includes("fail")
-      );
-    }
-    if (activeFilter === "warnings") {
-      return log.level === "WARN" || log.level === "WARNING";
-    }
-    if (activeFilter === "ai") {
-      return (
-        log.module.toLowerCase().includes("ai") ||
-        log.module.toLowerCase().includes("gemini")
-      );
-    }
-    if (activeFilter === "success") {
-      return (
-        log.level === "SUCCESS" ||
-        log.message.toLowerCase().includes("success")
-      );
-    }
+      if (activeFilter === "errors") {
+        return (
+          log.level === "ERROR" ||
+          log.message.toLowerCase().includes("fail")
+        );
+      }
+      if (activeFilter === "warnings") {
+        return log.level === "WARN" || log.level === "WARNING";
+      }
+      if (activeFilter === "ai") {
+        return (
+          log.module.toLowerCase().includes("ai") ||
+          log.module.toLowerCase().includes("gemini")
+        );
+      }
+      if (activeFilter === "success") {
+        return (
+          log.level === "SUCCESS" ||
+          log.message.toLowerCase().includes("success")
+        );
+      }
 
-    return true;
-  });
+      return true;
+    });
+  }, [consoleLogs, searchQuery, activeFilter]);
 
   // When paused, only show up to `lastVisibleCount` logs to avoid UI jumping
-  const displayedLogs = paused
-    ? filteredLogs.slice(
-        0,
-        Math.max(0, Math.min(lastVisibleCount, filteredLogs.length))
-      )
-    : filteredLogs;
+  const displayedLogs = useMemo(() => {
+    const logs = paused
+      ? filteredLogs.slice(
+          0,
+          Math.max(0, Math.min(lastVisibleCount, filteredLogs.length))
+        )
+      : filteredLogs;
+    // Memoize the reverse too if we were doing it here, but it's done in the Output component.
+    return logs;
+  }, [paused, filteredLogs, lastVisibleCount]);
 
   // Calculate statistics counts
-  const errorCount = consoleLogs.filter(
-    (log) =>
-      log.level === "ERROR" ||
-      log.message.toLowerCase().includes("fail")
-  ).length;
-  const warningCount = consoleLogs.filter(
-    (log) => log.level === "WARN" || log.level === "WARNING"
-  ).length;
-  const successCount = consoleLogs.filter(
-    (log) => log.level === "SUCCESS" || log.message.toLowerCase().includes("success")
-  ).length;
-  const aiCount = consoleLogs.filter(
-    (log) => log.module.toLowerCase().includes("ai") || log.module.toLowerCase().includes("gemini")
-  ).length;
+  const { errorCount, warningCount, successCount, aiCount } = useMemo(() => {
+    let e = 0, w = 0, s = 0, a = 0;
+    consoleLogs.forEach(log => {
+      if (log.level === "ERROR" || log.message.toLowerCase().includes("fail")) e++;
+      if (log.level === "WARN" || log.level === "WARNING") w++;
+      if (log.level === "SUCCESS" || log.message.toLowerCase().includes("success")) s++;
+      if (log.module.toLowerCase().includes("ai") || log.module.toLowerCase().includes("gemini")) a++;
+    });
+    return { errorCount: e, warningCount: w, successCount: s, aiCount: a };
+  }, [consoleLogs]);
 
   return (
     <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-3.5 min-w-0 w-full overflow-hidden">
@@ -177,4 +179,6 @@ export default function TerminalLogs({
       />
     </div>
   );
-}
+});
+
+export default TerminalLogs;

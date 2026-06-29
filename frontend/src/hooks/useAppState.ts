@@ -369,7 +369,13 @@ export function useAppState() {
     addNotification("Logged out successfully.", "info", {
       details: `Your session token has been cleared. You have been securely logged out.`,
     });
-    (window as any).navigateTo?.("/landing");
+    const nav = (window as any).navigateTo;
+    if (typeof nav === "function") {
+      nav("/landing");
+    } else {
+      window.history.pushState({}, "", "/landing");
+      window.dispatchEvent(new Event("popstate"));
+    }
   }, [addNotification]);
 
   const checkAuth = useCallback(
@@ -726,7 +732,26 @@ export function useAppState() {
     window.history.pushState(null, "");
   }, []);
 
-  return {
+  const clearAllNotifications = useCallback(() => {
+    setNotifications([]);
+    audioFeedback.playError();
+  }, [audioFeedback]);
+
+  const markAllNotificationsAsRead = useCallback(() => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+  }, []);
+
+  const markNotificationAsRead = useCallback((id: number) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+    );
+  }, []);
+
+  const deleteNotification = useCallback((id: number) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  }, []);
+
+  return useMemo(() => ({
     user,
     setUser,
     isAuthenticated,
@@ -894,20 +919,27 @@ export function useAppState() {
     setSmartSlice,
     accumulatedTokens,
     setAccumulatedTokens,
-    clearAllNotifications: () => {
-      setNotifications([]);
-      audioFeedback.playError();
-    },
-    markAllNotificationsAsRead: () => {
-      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-    },
-    markNotificationAsRead: (id: number) => {
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-      );
-    },
-    deleteNotification: (id: number) => {
-      setNotifications((prev) => prev.filter((n) => n.id !== id));
-    },
-  };
+    clearAllNotifications,
+    markAllNotificationsAsRead,
+    markNotificationAsRead,
+    deleteNotification,
+  }), [
+    user, isAuthenticated, authLoading, isInitializing, login, register, logout, forgotPassword,
+    panels, consoleLogs, scrapedImages, selectedScraped, activePreviewTab, editingImageIdx,
+    editCropTop, editCropBottom, editCropLeft, editCropRight, editAutoTrim, imageEditStates,
+    showBubbleModal, bubbleDetectionStyle, bubbleEraseMethod, bubbleSensitivity, bubbleDilation,
+    bubbleInpaintRadius, activeBubbleTab, isCleaningBubbles, cleanProgress, bubbleCroppingImgUrl,
+    showAutoCropModal, cropSensitivity, cropPaddingPx, cropBackgroundMode, autoSplitTallStrips,
+    processingStrategy, aspectRatioLock, minPanelAreaPct, overlapMergeThreshold, useLocalCV,
+    isBatchCropping, batchProgress, croppingImgUrl, cropModel, cropMinHeightPx, cropCannyLow,
+    cropCannyHigh, cropCloseKernelSize, activeAutoCropTab, cropGuidance, cropFocusMode,
+    characters, showScrapeConfirmModal, resetWorkspace, notifications, notificationsMuted,
+    errorPopup, addNotification, removeNotification, fetchWithInterceptor, checkAuth,
+    targetUrl, voiceActor, musicTheme, aspectRatio, selectedModel, selectedSource,
+    frameRate, volume, isMuted, sfxVolume, sfxEnabled, videoUrl, isSavingEdit, isScraping,
+    narrationStyle, scrapedTitle, scrapedGenre, seriesTitle, chapterNumber, chapterTitle,
+    seriesAuthor, seriesCoverImage, seriesSynopsis, audioFeedback, projectId,
+    seriesSlugState, chapterSlugState, smartSlice, accumulatedTokens,
+    clearAllNotifications, markAllNotificationsAsRead, markNotificationAsRead, deleteNotification
+  ]);
 }

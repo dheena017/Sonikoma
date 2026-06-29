@@ -54,7 +54,7 @@ interface StoryboardTimelineProps {
   audioFeedback?: any;
 }
 
-export default function StoryboardTimeline({
+const StoryboardTimeline = React.memo(({
   panels,
   setPanels,
   currentPanelIndex,
@@ -94,7 +94,7 @@ export default function StoryboardTimeline({
   handleSaveStoryboard,
   handleCancelBatch,
   audioFeedback,
-}: StoryboardTimelineProps) {
+}: StoryboardTimelineProps) => {
   // ── Panel selection state ────────────────────────────────────────────────
   const [selectedPanelIds, setSelectedPanelIds] = useState<Set<number>>(
     new Set()
@@ -164,22 +164,22 @@ export default function StoryboardTimeline({
     total: number;
   } | null>(null);
 
-  const togglePanelSelection = (id: number) => {
+  const togglePanelSelection = useCallback((id: number) => {
     setSelectedPanelIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
     });
-  };
+  }, []);
 
-  const selectAllPanels = () => {
+  const selectAllPanels = useCallback(() => {
     setSelectedPanelIds(new Set(panels.map((p) => p.id)));
-  };
+  }, [panels]);
 
-  const clearSelection = () => {
+  const clearSelection = useCallback(() => {
     setSelectedPanelIds(new Set());
-  };
+  }, []);
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -782,4 +782,6 @@ export default function StoryboardTimeline({
         )}
     </div>
   );
-}
+});
+
+export default StoryboardTimeline;

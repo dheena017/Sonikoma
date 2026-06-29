@@ -17,7 +17,7 @@ import ScraperControls from "./ScraperControls.js";
 import { FloatingSelectionBar } from "./FloatingSelectionBar.js";
 import { parseWebtoonUrl, getSourceName } from "../../utils.js";
 
-export default function LiveScraperDeck({
+const LiveScraperDeck = React.memo(({
   scrapedImages,
   isScraping,
   selectedScraped,
@@ -63,7 +63,7 @@ export default function LiveScraperDeck({
   handleSaveAssets,
   handleCancelBatch,
   audioFeedback,
-}: LiveScraperDeckProps) {
+}: LiveScraperDeckProps) => {
   const [isZipping, setIsZipping] = useState(false);
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(
     null
@@ -551,4 +551,6 @@ export default function LiveScraperDeck({
         )}
     </>
   );
-}
+});
+
+export default LiveScraperDeck;

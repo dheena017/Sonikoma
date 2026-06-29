@@ -20,11 +20,11 @@ interface ProjectEditorPageProps {
   navigateTo: (path: string) => void;
 }
 
-export default function ProjectEditorPage({
+const ProjectEditorPage = React.memo(({
   appLogic,
   onNavigateHome,
   navigateTo,
-}: ProjectEditorPageProps) {
+}: ProjectEditorPageProps) => {
   const {
     panels,
     setPanels,
@@ -436,4 +436,6 @@ export default function ProjectEditorPage({
       </main>
     </div>
   );
-}
+});
+
+export default ProjectEditorPage;

@@ -25,14 +25,14 @@ interface AIOptimizerPageProps {
   videoUrl?: string | null;
 }
 
-export default function AIOptimizerPage({
+const AIOptimizerPage = React.memo(({
   panels,
   onNavigateHome,
   addNotification,
   scrapedTitle,
   scrapedGenre,
   videoUrl,
-}: AIOptimizerPageProps) {
+}: AIOptimizerPageProps) => {
   if (panels.length === 0) {
     return (
       <div className="flex-grow flex flex-col items-center justify-center p-8 text-center min-h-[60vh] max-w-xl mx-auto space-y-5 animate-fade-in">
@@ -222,4 +222,6 @@ export default function AIOptimizerPage({
       </div>
     </div>
   );
-}
+});
+
+export default AIOptimizerPage;

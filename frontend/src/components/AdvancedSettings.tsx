@@ -41,7 +41,7 @@ interface WorkspacePreset {
   activeTheme: string;
 }
 
-export default function AdvancedSettings({
+const AdvancedSettings = React.memo(({
   voiceActor,
   setVoiceActor,
   musicTheme,
@@ -56,7 +56,7 @@ export default function AdvancedSettings({
   selectedModel = "",
   selectedSource = "",
   addNotification,
-}: AdvancedSettingsProps) {
+}: AdvancedSettingsProps) => {
   const [presetName, setPresetName] = React.useState("");
   const [presets, setPresets] = React.useState<WorkspacePreset[]>(() => {
     try {
@@ -460,4 +460,6 @@ export default function AdvancedSettings({
       </div>
     </div>
   );
-}
+});
+
+export default AdvancedSettings;

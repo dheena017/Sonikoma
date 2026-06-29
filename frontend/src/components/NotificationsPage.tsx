@@ -34,7 +34,7 @@ interface NotificationsPageProps {
   onToggleMute?: () => void;
 }
 
-export default function NotificationsPage({
+const NotificationsPage = React.memo(({
   notifications,
   onNavigateHome,
   onMarkAsRead,
@@ -44,7 +44,7 @@ export default function NotificationsPage({
   onClearRead,
   notificationsMuted = false,
   onToggleMute,
-}: NotificationsPageProps) {
+}: NotificationsPageProps) => {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [filter, setFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -539,7 +539,9 @@ export default function NotificationsPage({
       </div>
     </div>
   );
-}
+});
+
+export default NotificationsPage;
 
 function NotificationIcon({ type }: { type: string }) {
   switch (type) {

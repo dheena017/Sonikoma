@@ -173,6 +173,18 @@ export function useAppLogic() {
     let isCurrent = true;
     let pollIntervalMs = 5000; // Start with 5s
     const lastLogIdRef = { current: 0 };
+    const logBuffer: any[] = [];
+    const flushInterval = 1000; // Flush once per second
+
+    const flushLogs = () => {
+      if (logBuffer.length > 0) {
+        const newEntries = [...logBuffer];
+        logBuffer.length = 0; // Clear buffer
+        state.setConsoleLogs((prev) => [...prev, ...newEntries]);
+      }
+    };
+
+    const flushTimer = setInterval(flushLogs, flushInterval);
 
     const doPoll = async () => {
       if (!isCurrent || !isPolling) return;
@@ -188,11 +200,8 @@ export function useAppLogic() {
               if (log.id > lastLogIdRef.current) {
                 lastLogIdRef.current = log.id;
               }
+              logBuffer.push(log);
             });
-            state.setConsoleLogs((prev) => [
-              ...prev,
-              ...newLogs,
-            ]);
           }
         }
       } catch (err) {
@@ -229,7 +238,7 @@ export function useAppLogic() {
             const entry = JSON.parse(event.data);
             if (entry && entry.id > lastLogIdRef.current) {
               lastLogIdRef.current = entry.id;
-              state.setConsoleLogs((prev) => [...prev, entry]);
+              logBuffer.push(entry);
             }
           } catch (e) {
             // silent catch
@@ -258,6 +267,7 @@ export function useAppLogic() {
         eventSource.close();
       }
       stopPolling();
+      clearInterval(flushTimer);
     };
   }, [state.setConsoleLogs]);
 
@@ -658,7 +668,7 @@ export function useAppLogic() {
     0
   );
 
-  return {
+  return useMemo(() => ({
     ...state,
     videoPlayerRef,
     currentPanelIndex,
@@ -707,5 +717,44 @@ export function useAppLogic() {
     scrapedTitle: state.scrapedTitle,
     scrapedGenre: state.scrapedGenre,
     resetWorkspace: state.resetWorkspace,
-  };
+  }), [
+    state,
+    currentPanelIndex,
+    setCurrentPanelIndex,
+    playbackTime,
+    setPlaybackTime,
+    storyboardPlaying,
+    toggleStoryboardPlayback,
+    resetStoryboardPlayback,
+    playStoryboardAudio,
+    isProcessing,
+    progressStatus,
+    isScraping,
+    mergingIndices,
+    reprocessingPanelId,
+    isSavingEdit,
+    handleGenerateVideo,
+    handleSaveEditedImage,
+    handleSaveMultipleCuts,
+    handleStitchWithNext,
+    handleTriggerReprocess,
+    isRendering,
+    renderProgress,
+    renderEtaSeconds,
+    handleRenderFinalVideo,
+    addPanelsToStoryboard,
+    handleCleanBubblesSelected,
+    handleAutoCropSelected,
+    totalCalculatedDuration,
+    isCleaningBubbles,
+    cleanProgress,
+    bubbleCroppingImgUrl,
+    isBatchCropping,
+    batchProgress,
+    croppingImgUrl,
+    handleCancelBatch,
+    scrapeImages,
+    isGeneratingStoryboard,
+    handleGenerateStoryboardAI,
+  ]);
 }

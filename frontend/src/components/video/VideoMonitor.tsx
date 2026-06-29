@@ -15,7 +15,7 @@ interface VideoMonitorProps {
   reprocessingPanelId: number | null;
 }
 
-export default function VideoMonitor({
+const VideoMonitor = React.memo(({
   activePreviewTab,
   setActivePreviewTab,
   videoUrl,
@@ -25,7 +25,7 @@ export default function VideoMonitor({
   currentPanelIndex,
   playbackTime,
   reprocessingPanelId,
-}: VideoMonitorProps) {
+}: VideoMonitorProps) => {
   return (
     <div className="space-y-4">
       <VideoMonitorTabs
@@ -48,4 +48,6 @@ export default function VideoMonitor({
       />
     </div>
   );
-}
+});
+
+export default VideoMonitor;

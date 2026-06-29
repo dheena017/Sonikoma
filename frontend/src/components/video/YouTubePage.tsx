@@ -39,14 +39,14 @@ interface YouTubePageProps {
   addNotification?: (msg: string, type: any) => void;
 }
 
-export default function YouTubePage({
+const YouTubePage = React.memo(({
   panels,
   videoUrl,
   scrapedTitle = "",
   scrapedGenre = "",
   onNavigateHome,
   addNotification,
-}: YouTubePageProps) {
+}: YouTubePageProps) => {
   const [activeTab, setActiveTab] = useState<
     "details" | "settings" | "integrations"
   >("details");
@@ -553,4 +553,6 @@ export default function YouTubePage({
       </div>
     </div>
   );
-}
+});
+
+export default YouTubePage;

@@ -19,13 +19,13 @@ interface AIModelsPageProps {
   ) => void;
 }
 
-export default function AIModelsPage({
+const AIModelsPage = React.memo(({
   onNavigateHome,
   fetchWithInterceptor,
   selectedModel: globalSelectedModel,
   setSelectedModel: setGlobalSelectedModel,
   addNotification,
-}: AIModelsPageProps) {
+}: AIModelsPageProps) => {
   const activeFetch = fetchWithInterceptor || fetch;
 
   // Credentials BYOK States
@@ -1169,4 +1169,6 @@ ${playgroundPrompt}
       </div>
     </div>
   );
-}
+});
+
+export default AIModelsPage;

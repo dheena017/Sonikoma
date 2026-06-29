@@ -44,7 +44,7 @@ export function useSingleImageEdits({
   const [mergingIndices, setMergingIndices] = useState<number[]>([]);
   const [isSavingEdit, setIsSavingEdit] = useState<boolean>(false);
 
-  const handleSaveEditedImage = async () => {
+  const handleSaveEditedImage = useCallback(async () => {
     if (editingImageIdx === null) return;
 
     const originalUrl = scrapedImages[editingImageIdx];
@@ -117,9 +117,9 @@ export function useSingleImageEdits({
     } finally {
       setIsSavingEdit(false);
     }
-  };
+  }, [editingImageIdx, scrapedImages, setConsoleLogs, editCropTop, editCropBottom, editCropLeft, editCropRight, editAutoTrim, fetchWithInterceptor, addPanelsToStoryboard, addNotification, audioFeedback]);
 
-  const handleSaveMultipleCuts = async (
+  const handleSaveMultipleCuts = useCallback(async (
     cuts: Array<{
       cropTop: number;
       cropBottom: number;
@@ -196,9 +196,9 @@ export function useSingleImageEdits({
     } finally {
       setIsSavingEdit(false);
     }
-  };
+  }, [editingImageIdx, scrapedImages, setConsoleLogs, fetchWithInterceptor, addPanelsToStoryboard, addNotification, audioFeedback]);
 
-  const handleStitchWithNext = async (idx: number) => {
+  const handleStitchWithNext = useCallback(async (idx: number) => {
     if (idx < 0 || idx >= scrapedImages.length - 1) return;
 
     setMergingIndices((prev) => [...prev, idx]);
@@ -266,13 +266,19 @@ export function useSingleImageEdits({
     } finally {
       setMergingIndices((prev) => prev.filter((i) => i !== idx));
     }
-  };
+  }, [scrapedImages, setConsoleLogs, fetchWithInterceptor, setScrapedImages, setSelectedScraped, addNotification, audioFeedback]);
 
-  return {
+  return useMemo(() => ({
     mergingIndices,
     isSavingEdit,
     handleSaveEditedImage,
     handleSaveMultipleCuts,
     handleStitchWithNext,
-  };
+  }), [
+    mergingIndices,
+    isSavingEdit,
+    handleSaveEditedImage,
+    handleSaveMultipleCuts,
+    handleStitchWithNext,
+  ]);
 }

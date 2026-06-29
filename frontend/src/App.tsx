@@ -447,6 +447,13 @@ export default function App() {
     null
   );
 
+  const registerProjectDetailsSaveHandler = React.useCallback(
+    (handler: () => Promise<void>) => {
+      projectDetailsSaveRef.current = handler;
+    },
+    []
+  );
+
   const isWorkspaceDirty = isDirty || projectDetailsDirty;
 
   // --- Router & Path Hook ---
@@ -536,44 +543,98 @@ export default function App() {
   // --------------------------------------------------------------------------
   // SUB-SECTION 2.2: ROUTING / NAVIGATION PATH CHECKS
   // --------------------------------------------------------------------------
-  const chapterPathMatch = currentPath.match(
-    /\/series\/[^\/]+\/chapters\/([^\/]+)/
-  );
-  const isDetailsMode = currentPath.endsWith("/details");
+  const pathFlags = React.useMemo(() => {
+    const chapterPathMatch = currentPath.match(
+      /\/series\/[^\/]+\/chapters\/([^\/]+)/
+    );
+    const isDetailsMode = currentPath.endsWith("/details");
 
-  const isWorkspacePath =
-    currentPath === "/workspace" ||
-    (chapterPathMatch !== null && !isDetailsMode);
-  const isWorkspaceOnly = isWorkspacePath;
-  const isDashboardOverviewPath = currentPath === "/dashboard";
-  const isProjectsPath = currentPath === "/projects";
-  const isSettingsPath = currentPath === "/settings";
-  const isAutoCropPath = currentPath === "/auto-crop";
-  const isBubbleCleanerPath = currentPath === "/bubble-cleaner";
-  const isEditorPath = currentPath.startsWith("/editor");
-  const isLogsPath = currentPath === "/logs";
-  const isStatusPath = currentPath === "/status";
-  const isAIModelsPath = currentPath === "/ai-models";
-  const isShortcutsPath = currentPath === "/shortcuts";
-  const isOptimizerPath = currentPath === "/ai-optimizer";
-  const isPanelAssistantPath = currentPath.startsWith("/panel-assistant");
-  const isCharacterPath = currentPath === "/ai-characters";
-  const isTranslationPath = currentPath === "/ai-translation";
-  const isAudioLabPath = currentPath === "/ai-audio-lab";
-  const isThumbnailPath = currentPath === "/ai-thumbnails";
-  const isEngagementPath = currentPath === "/ai-engagement";
-  const isVoicePath = currentPath === "/ai-voice";
-  const isAnalyticsPath = currentPath === "/ai-analytics";
-  const isYouTubePath = currentPath === "/youtube";
-  const isProfilePath = currentPath === "/profile";
-  const isNotificationsPath = currentPath === "/notifications";
-  const isAdminPath = currentPath === "/admin";
-  const isChapterDetailsPath =
-    currentPath === "/project-details" ||
-    (chapterPathMatch !== null && isDetailsMode);
-  const isProjectEditorPath = currentPath === "/project-editor";
-  const isSeriesDetailsPath =
-    !chapterPathMatch && currentPath.match(/\/series\/([^\/]+)$/) !== null;
+    const isWorkspacePath =
+      currentPath === "/workspace" ||
+      (chapterPathMatch !== null && !isDetailsMode);
+
+    return {
+      chapterPathMatch,
+      isDetailsMode,
+      isWorkspacePath,
+      isWorkspaceOnly: isWorkspacePath,
+      isDashboardOverviewPath: currentPath === "/dashboard",
+      isProjectsPath: currentPath === "/projects",
+      isSettingsPath: currentPath === "/settings",
+      isAutoCropPath: currentPath === "/auto-crop",
+      isBubbleCleanerPath: currentPath === "/bubble-cleaner",
+      isEditorPath: currentPath.startsWith("/editor"),
+      isLogsPath: currentPath === "/logs",
+      isStatusPath: currentPath === "/status",
+      isAIModelsPath: currentPath === "/ai-models",
+      isShortcutsPath: currentPath === "/shortcuts",
+      isOptimizerPath: currentPath === "/ai-optimizer",
+      isPanelAssistantPath: currentPath.startsWith("/panel-assistant"),
+      isCharacterPath: currentPath === "/ai-characters",
+      isTranslationPath: currentPath === "/ai-translation",
+      isAudioLabPath: currentPath === "/ai-audio-lab",
+      isThumbnailPath: currentPath === "/ai-thumbnails",
+      isEngagementPath: currentPath === "/ai-engagement",
+      isVoicePath: currentPath === "/ai-voice",
+      isAnalyticsPath: currentPath === "/ai-analytics",
+      isYouTubePath: currentPath === "/youtube",
+      isProfilePath: currentPath === "/profile",
+      isNotificationsPath: currentPath === "/notifications",
+      isAdminPath: currentPath === "/admin",
+      isChapterDetailsPath:
+        currentPath === "/project-details" ||
+        (chapterPathMatch !== null && isDetailsMode),
+      isProjectEditorPath: currentPath === "/project-editor",
+      isSeriesDetailsPath:
+        !chapterPathMatch && currentPath.match(/\/series\/([^\/]+)$/) !== null,
+      isLandingPath:
+        currentPath === "/" ||
+        currentPath === "/landing" ||
+        currentPath === "" ||
+        currentPath === "/index.html",
+      isLoginPath: currentPath === "/login",
+      isRegisterPath: currentPath === "/register",
+      isForgotPasswordPath: currentPath === "/forgot-password",
+      isDisplayPath: currentPath.startsWith("/display/"),
+    };
+  }, [currentPath]);
+
+  const {
+    chapterPathMatch,
+    isWorkspacePath,
+    isWorkspaceOnly,
+    isDashboardOverviewPath,
+    isProjectsPath,
+    isSettingsPath,
+    isAutoCropPath,
+    isBubbleCleanerPath,
+    isEditorPath,
+    isLogsPath,
+    isStatusPath,
+    isAIModelsPath,
+    isShortcutsPath,
+    isOptimizerPath,
+    isPanelAssistantPath,
+    isCharacterPath,
+    isTranslationPath,
+    isAudioLabPath,
+    isThumbnailPath,
+    isEngagementPath,
+    isVoicePath,
+    isAnalyticsPath,
+    isYouTubePath,
+    isProfilePath,
+    isNotificationsPath,
+    isAdminPath,
+    isChapterDetailsPath,
+    isProjectEditorPath,
+    isSeriesDetailsPath,
+    isLandingPath,
+    isLoginPath,
+    isRegisterPath,
+    isForgotPasswordPath,
+    isDisplayPath,
+  } = pathFlags;
 
   const memoizedAppLogic = React.useMemo(
     () => ({
@@ -584,26 +645,61 @@ export default function App() {
     [appLogic, isPipMode]
   );
 
-  const isLandingPath =
-    currentPath === "/" ||
-    currentPath === "/landing" ||
-    currentPath === "" ||
-    currentPath === "/index.html";
-  const isLoginPath = currentPath === "/login";
-  const isRegisterPath = currentPath === "/register";
-  const isForgotPasswordPath = currentPath === "/forgot-password";
-  const isDisplayPath = currentPath.startsWith("/display/");
-
   const headerProjectId = isChapterDetailsPath ? detailsProjectId : projectId;
   const headerIsDirty = isChapterDetailsPath ? projectDetailsDirty : isDirty;
   const headerSaveStatus = isChapterDetailsPath
     ? projectDetailsSaveStatus
     : saveStatus;
-  const headerOnSave = isChapterDetailsPath
-    ? () => {
-        projectDetailsSaveRef.current?.();
-      }
-    : saveProject;
+
+  const headerOnSave = React.useCallback(() => {
+    if (isChapterDetailsPath) {
+      projectDetailsSaveRef.current?.();
+    } else {
+      saveProject();
+    }
+  }, [isChapterDetailsPath, saveProject]);
+
+  const handleAutoCropApply = React.useCallback(() => {
+    console.log("App: Applying AutoCrop configuration parameter changes");
+    addNotification(
+      "Auto-crop configurations applied successfully!",
+      "success"
+    );
+    if (isAutoCropPath) {
+      navigateTo("/");
+    } else {
+      setShowAutoCropModal(false);
+    }
+  }, [addNotification, isAutoCropPath, navigateTo, setShowAutoCropModal]);
+
+  const handleAutoCropClose = React.useCallback(() => {
+    if (isAutoCropPath) {
+      handleNavigateHome();
+    } else {
+      setShowAutoCropModal(false);
+    }
+  }, [isAutoCropPath, handleNavigateHome, setShowAutoCropModal]);
+
+  const handleBubbleCleanerApply = React.useCallback(() => {
+    console.log("App: Applying BubbleCleaner configuration parameter changes");
+    addNotification(
+      "Speech bubble cleanup configurations applied successfully!",
+      "success"
+    );
+    if (isBubbleCleanerPath) {
+      handleNavigateHome();
+    } else {
+      setShowBubbleModal(false);
+    }
+  }, [addNotification, isBubbleCleanerPath, handleNavigateHome, setShowBubbleModal]);
+
+  const handleBubbleCleanerClose = React.useCallback(() => {
+    if (isBubbleCleanerPath) {
+      handleNavigateHome();
+    } else {
+      setShowBubbleModal(false);
+    }
+  }, [isBubbleCleanerPath, handleNavigateHome, setShowBubbleModal]);
 
   // --------------------------------------------------------------------------
   // SUB-SECTION 2.3: AUTHENTICATION GUARDS & EARLY RETURNS
@@ -1221,9 +1317,7 @@ export default function App() {
               navigateTo={navigateTo}
               setGlobalDirty={setProjectDetailsDirty}
               setGlobalSaveStatus={setProjectDetailsSaveStatus}
-              registerSaveHandler={(handler) => {
-                projectDetailsSaveRef.current = handler;
-              }}
+              registerSaveHandler={registerProjectDetailsSaveHandler}
               addNotification={addNotification}
               audioFeedback={audioFeedback}
               fetchWithInterceptor={fetchWithInterceptor}
@@ -1243,17 +1337,8 @@ export default function App() {
           {isAutoCropPath && (
             <AutoCropModal
               isPage={true}
-              onClose={handleNavigateHome}
-              onApply={() => {
-                console.log(
-                  "App: Applying AutoCrop configuration parameter changes"
-                );
-                addNotification(
-                  "Auto-crop configurations applied successfully!",
-                  "success"
-                );
-                navigateTo("/");
-              }}
+              onClose={handleAutoCropClose}
+              onApply={handleAutoCropApply}
               sensitivity={cropSensitivity}
               setSensitivity={setCropSensitivity}
               padding={cropPaddingPx}
@@ -1300,17 +1385,8 @@ export default function App() {
           {isBubbleCleanerPath && (
             <BubbleCleanerModal
               isPage={true}
-              onClose={handleNavigateHome}
-              onApply={() => {
-                console.log(
-                  "App: Applying BubbleCleaner configuration parameter changes"
-                );
-                addNotification(
-                  "Speech bubble cleanup configurations applied successfully!",
-                  "success"
-                );
-                handleNavigateHome();
-              }}
+              onClose={handleBubbleCleanerClose}
+              onApply={handleBubbleCleanerApply}
               detectionStyle={bubbleDetectionStyle}
               setDetectionStyle={setBubbleDetectionStyle}
               eraseMethod={bubbleEraseMethod}
@@ -1439,17 +1515,8 @@ export default function App() {
       {isWorkspacePath && showAutoCropModal && (
         <AutoCropModal
           isPage={false}
-          onClose={() => setShowAutoCropModal(false)}
-          onApply={() => {
-            console.log(
-              "App: Applying AutoCrop configuration parameter changes"
-            );
-            addNotification(
-              "Auto-crop configurations applied successfully!",
-              "success"
-            );
-            setShowAutoCropModal(false);
-          }}
+          onClose={handleAutoCropClose}
+          onApply={handleAutoCropApply}
           sensitivity={cropSensitivity}
           setSensitivity={setCropSensitivity}
           padding={cropPaddingPx}
@@ -1496,17 +1563,8 @@ export default function App() {
       {isWorkspacePath && showBubbleModal && (
         <BubbleCleanerModal
           isPage={false}
-          onClose={() => setShowBubbleModal(false)}
-          onApply={() => {
-            console.log(
-              "App: Applying BubbleCleaner configuration parameter changes"
-            );
-            addNotification(
-              "Speech bubble cleanup configurations applied successfully!",
-              "success"
-            );
-            setShowBubbleModal(false);
-          }}
+          onClose={handleBubbleCleanerClose}
+          onApply={handleBubbleCleanerApply}
           detectionStyle={bubbleDetectionStyle}
           setDetectionStyle={setBubbleDetectionStyle}
           eraseMethod={bubbleEraseMethod}
@@ -1542,10 +1600,10 @@ export default function App() {
       {isPipMode && editingImageIdx !== null && (
         <div
           className="fixed bottom-6 right-6 w-96 h-56 rounded-3xl border border-white/10 shadow-2xl z-50 overflow-hidden bg-neutral-950/95 backdrop-blur-xl animate-fade-in cursor-pointer"
-          onClick={() => {
+              onClick={React.useCallback(() => {
             setIsPipMode(false);
             navigateTo(lastEditorPath);
-          }}
+              }, [setIsPipMode, navigateTo, lastEditorPath])}
         >
           <CropEditorModal
             appLogic={memoizedAppLogic}

@@ -6,9 +6,9 @@ interface PipelineStatusCardProps {
   progressStatus: string;
 }
 
-export default function PipelineStatusCard({
+const PipelineStatusCard = React.memo(({
   progressStatus,
-}: PipelineStatusCardProps) {
+}: PipelineStatusCardProps) => {
   return (
     <div
       id="pipeline_status_card"
@@ -39,4 +39,6 @@ export default function PipelineStatusCard({
       <ProcessBar progressStatus={progressStatus} />
     </div>
   );
-}
+});
+
+export default PipelineStatusCard;

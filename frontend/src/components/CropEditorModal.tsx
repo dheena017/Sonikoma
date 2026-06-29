@@ -20,10 +20,10 @@ interface CropEditorModalProps {
   isPage?: boolean;
 }
 
-export default function CropEditorModal({
+const CropEditorModal = React.memo(({
   appLogic,
   isPage = false,
-}: CropEditorModalProps) {
+}: CropEditorModalProps) => {
   const [isDeckExpanded, setIsDeckExpanded] = React.useState<boolean>(true);
   const {
     editingImageIdx,
@@ -809,4 +809,6 @@ export default function CropEditorModal({
       {mainCard}
     </div>
   );
-}
+});
+
+export default CropEditorModal;

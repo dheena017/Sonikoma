@@ -109,14 +109,15 @@ export function useBatchImageActions({
   const abortBatchRef = React.useRef({ aborted: false });
   const abortControllerRef = React.useRef<AbortController | null>(null);
 
-  const handleCancelBatch = () => {
+  const handleCancelBatch = useCallback(() => {
     abortBatchRef.current.aborted = true;
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
     addNotification("Cancelling batch operation...", "info");
-  };
-  const handleCleanBubblesSelected = async () => {
+  }, [addNotification]);
+
+  const handleCleanBubblesSelected = useCallback(async () => {
     const targetImages = selectedScraped;
     if (targetImages.length === 0) {
       addNotification(
@@ -239,9 +240,9 @@ export function useBatchImageActions({
       ]);
     }
     setSelectedScraped([]);
-  };
+  }, [selectedScraped, addNotification, setConsoleLogs, setIsCleaningBubbles, setCleanProgress, setBubbleCroppingImgUrl, fetchWithInterceptor, bubbleEraseMethod, bubbleSensitivity, bubbleDetectionStyle, bubbleDilation, bubbleInpaintRadius, setScrapedImages, setSelectedScraped, setPanels, audioFeedback]);
 
-  const handleAutoCropSelected = async () => {
+  const handleAutoCropSelected = useCallback(async () => {
     const targetImages = selectedScraped;
     if (targetImages.length === 0) {
       addNotification(
@@ -418,9 +419,9 @@ export function useBatchImageActions({
       ]);
     }
     setSelectedScraped([]);
-  };
+  }, [selectedScraped, addNotification, setIsBatchCropping, setBatchProgress, setConsoleLogs, setCroppingImgUrl, fetchWithInterceptor, cropSensitivity, cropBackgroundMode, aspectRatioLock, minPanelAreaPct, overlapMergeThreshold, useLocalCV, cropModel, cropCannyLow, cropCannyHigh, cropCloseKernelSize, cropMinHeightPx, autoSplitTallStrips, cropGuidance, cropFocusMode, cropPaddingPx, setScrapedImages, audioFeedback, setSelectedScraped]);
 
-  return {
+  return useMemo(() => ({
     isCleaningBubbles,
     cleanProgress,
     bubbleCroppingImgUrl,
@@ -430,5 +431,15 @@ export function useBatchImageActions({
     handleCleanBubblesSelected,
     handleAutoCropSelected,
     handleCancelBatch,
-  };
+  }), [
+    isCleaningBubbles,
+    cleanProgress,
+    bubbleCroppingImgUrl,
+    isBatchCropping,
+    batchProgress,
+    croppingImgUrl,
+    handleCleanBubblesSelected,
+    handleAutoCropSelected,
+    handleCancelBatch,
+  ]);
 }

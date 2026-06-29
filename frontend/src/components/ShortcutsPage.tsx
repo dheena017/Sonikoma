@@ -27,14 +27,14 @@ interface ShortcutsPageProps {
 
 type Category = "all" | "nav" | "trigger" | "playback" | "editor" | "deck";
 
-export default function ShortcutsPage({
+const ShortcutsPage = React.memo(({
   shortcuts,
   setShortcuts,
   defaultShortcuts,
   onNavigateHome,
   addNotification,
   audioFeedback,
-}: ShortcutsPageProps) {
+}: ShortcutsPageProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [recordingActionId, setRecordingActionId] = useState<string | null>(
     null
@@ -674,4 +674,6 @@ export default function ShortcutsPage({
       `}</style>
     </div>
   );
-}
+});
+
+export default ShortcutsPage;

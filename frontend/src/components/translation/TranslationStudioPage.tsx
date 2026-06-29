@@ -11,12 +11,12 @@ interface TranslationStudioPageProps {
   addNotification?: (msg: string, type: any) => void;
 }
 
-export default function TranslationStudioPage({
+const TranslationStudioPage = React.memo(({
   panels,
   setPanels,
   onNavigateHome,
   addNotification,
-}: TranslationStudioPageProps) {
+}: TranslationStudioPageProps) => {
   if (panels.length === 0) {
     return (
       <div className="flex-grow flex flex-col items-center justify-center p-8 text-center min-h-[60vh] max-w-xl mx-auto space-y-5 animate-fade-in">
@@ -119,4 +119,6 @@ export default function TranslationStudioPage({
       />
     </div>
   );
-}
+});
+
+export default TranslationStudioPage;

@@ -78,7 +78,7 @@ export function useVideoGeneration({
     };
   }, [isRendering]);
 
-  const handleGenerateVideo = async () => {
+  const handleGenerateVideo = useCallback(async () => {
     if (!targetUrl.trim()) {
       addNotification(
         "Please enter or select a valid Webtoon URL to initiate the process.",
@@ -289,9 +289,9 @@ export function useVideoGeneration({
     } finally {
       setIsProcessing(false);
     }
-  };
+  }, [targetUrl, addNotification, selectedSource, selectedModel, frameRate, voiceActor, musicTheme, panels, narrationStyle, seriesTitle, chapterNumber, chapterTitle, scrapedGenre, seriesAuthor, seriesCoverImage, seriesSynopsis, fetchWithInterceptor, setConsoleLogs, setPanels, setVideoUrl, setActivePreviewTab, audioFeedback]);
 
-  const handleTriggerReprocess = async (panelId: number) => {
+  const handleTriggerReprocess = useCallback(async (panelId: number) => {
     const activePanel = panels.find((p) => p.id === panelId);
     if (!activePanel) return;
 
@@ -351,9 +351,9 @@ export function useVideoGeneration({
     } finally {
       setReprocessingPanelId(null);
     }
-  };
+  }, [panels, setConsoleLogs, setPanels, addNotification]);
 
-  const handleRenderFinalVideo = async () => {
+  const handleRenderFinalVideo = useCallback(async () => {
     setIsRendering(true);
     setRenderProgress(5);
     setRenderEtaSeconds(null);
@@ -421,9 +421,9 @@ export function useVideoGeneration({
       setRenderProgress(0);
       setRenderEtaSeconds(null);
     }
-  };
+  }, [panels, voiceActor, fetchWithInterceptor, addNotification, setVideoUrl, setActivePreviewTab, audioFeedback]);
 
-  return {
+  return useMemo(() => ({
     isProcessing,
     progressStatus,
     reprocessingPanelId,
@@ -433,5 +433,15 @@ export function useVideoGeneration({
     renderProgress,
     renderEtaSeconds,
     handleRenderFinalVideo,
-  };
+  }), [
+    isProcessing,
+    progressStatus,
+    reprocessingPanelId,
+    handleGenerateVideo,
+    handleTriggerReprocess,
+    isRendering,
+    renderProgress,
+    renderEtaSeconds,
+    handleRenderFinalVideo,
+  ]);
 }

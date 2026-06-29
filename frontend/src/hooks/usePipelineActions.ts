@@ -213,7 +213,7 @@ export function usePipelineActions({
     audioFeedback: state.audioFeedback,
   });
 
-  return {
+  return useMemo(() => ({
     isProcessing,
     progressStatus,
     isScraping,
@@ -239,5 +239,31 @@ export function usePipelineActions({
     batchProgress,
     croppingImgUrl,
     handleCancelBatch,
-  };
+  }), [
+    isProcessing,
+    progressStatus,
+    isScraping,
+    mergingIndices,
+    reprocessingPanelId,
+    isSavingEdit,
+    handleGenerateVideo,
+    handleSaveEditedImage,
+    handleSaveMultipleCuts,
+    handleStitchWithNext,
+    handleTriggerReprocess,
+    isRendering,
+    renderProgress,
+    renderEtaSeconds,
+    handleRenderFinalVideo,
+    addPanelsToStoryboard,
+    handleCleanBubblesSelected,
+    handleAutoCropSelected,
+    isCleaningBubbles,
+    cleanProgress,
+    bubbleCroppingImgUrl,
+    isBatchCropping,
+    batchProgress,
+    croppingImgUrl,
+    handleCancelBatch,
+  ]);
 }

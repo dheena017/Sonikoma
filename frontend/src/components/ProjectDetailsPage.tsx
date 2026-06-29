@@ -50,7 +50,7 @@ interface ProjectDetailsPageProps {
   fetchWithInterceptor?: any;
 }
 
-export default function ProjectDetailsPage({
+const ProjectDetailsPage = React.memo(({
   onNavigateHome,
   navigateTo,
   setGlobalDirty,
@@ -59,7 +59,7 @@ export default function ProjectDetailsPage({
   addNotification,
   audioFeedback,
   fetchWithInterceptor,
-}: ProjectDetailsPageProps) {
+}: ProjectDetailsPageProps) => {
   const [projectId, setProjectId] = React.useState<string | null>(null);
   const [project, setProject] = React.useState<any | null>(null);
   const [panels, setPanels] = React.useState<any[]>([]);
@@ -1778,4 +1778,6 @@ export default function ProjectDetailsPage({
       </div>
     </div>
   );
-}
+});
+
+export default ProjectDetailsPage;

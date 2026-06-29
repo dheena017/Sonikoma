@@ -49,7 +49,7 @@ interface UrlInputPanelProps {
   handleSaveMeta?: () => void;
 }
 
-export default function UrlInputPanel(props: UrlInputPanelProps) {
+const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
   const { models: aiModels } = useAIModels();
   const {
     targetUrl,
@@ -596,4 +596,6 @@ export default function UrlInputPanel(props: UrlInputPanelProps) {
       </div>
     </div>
   );
-}
+});
+
+export default UrlInputPanel;

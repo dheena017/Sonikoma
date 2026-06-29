@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import * as api from "../api/index.js";
 
 interface HealthStatus {
@@ -73,5 +73,5 @@ export function useBackendHealth() {
     };
   }, [checkHealth]);
 
-  return { ...health, checkHealth };
+  return useMemo(() => ({ ...health, checkHealth }), [health, checkHealth]);
 }
