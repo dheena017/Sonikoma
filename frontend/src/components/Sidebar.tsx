@@ -62,7 +62,7 @@ const SidebarInner = ({
   notifications = [],
   seriesSlug = null,
   chapterSlug = null,
-}: SidebarProps) {
+}: SidebarProps) => {
   const { themeMode } = useThemeMode();
   const chapterPathMatch = currentPath.match(
     /\/series\/[^\/]+\/chapters\/([^\/]+)/

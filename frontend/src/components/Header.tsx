@@ -117,7 +117,7 @@ const HeaderInner = ({
   setNotificationsMuted,
   themeMode = "dark",
   toggleThemeMode,
-}: HeaderProps) {
+}: HeaderProps) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showStats, setShowStats] = useState(false);

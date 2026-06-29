@@ -249,7 +249,7 @@ const AppWorkspaceInner = ({
   renderEtaSeconds = null,
   handleRenderFinalVideo,
   audioFeedback,
-}: AppWorkspaceProps) {
+}: AppWorkspaceProps) => {
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("autoScrape") === "true" && targetUrl) {

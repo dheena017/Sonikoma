@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { TerminalLogsHeader } from "./TerminalLogsHeader.js";
 import { TerminalLogsFilter } from "./TerminalLogsFilter.js";
 import { TerminalLogsOutput } from "./TerminalLogsOutput.js";
@@ -200,7 +200,4 @@ const TerminalLogs = React.memo(({
 });
 
 export default TerminalLogs;
-function useMemo(arg0: () => LogEntry[], arg1: (string | LogEntry[])[]) {
-  throw new Error("Function not implemented.");
-}
 

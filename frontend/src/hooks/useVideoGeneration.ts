@@ -1,5 +1,5 @@
 import { LogEntry, normalizeLog } from "../types/logs";
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { GeneratedPanel } from "../types.js";
 import { NotificationType } from "../components/NotificationStack.js";
 import * as api from "../api/index.js";

@@ -38,7 +38,7 @@ const LogsPageInner = ({
   consoleLogs,
   setConsoleLogs,
   onNavigateHome,
-}: LogsPageProps) {
+}: LogsPageProps) => {
   // --- View States ---
   const [viewMode, setViewMode] = useState<"live" | "historical">("live");
   const [isPaused, setIsPaused] = useState(false);

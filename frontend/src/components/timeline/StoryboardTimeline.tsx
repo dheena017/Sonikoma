@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { X, Trash2 } from "lucide-react";
 import { GeneratedPanel } from "../../types";

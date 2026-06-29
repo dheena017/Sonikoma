@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { GeneratedPanel } from "../types.js";
 import { NotificationType } from "../components/NotificationStack.js";
 import { useAutoAnalysis } from "./useAutoAnalysis.js";
