@@ -15,7 +15,7 @@ export function AdminConsoleTab() {
 
     const connect = () => {
       if (ev) ev.close();
-      ev = new EventSource("/api/health/system-logs/stream");
+      ev = new EventSource("/api/system-logs/stream");
 
       ev.onmessage = (event) => {
         if (isPaused) return;

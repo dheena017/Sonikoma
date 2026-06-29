@@ -29,7 +29,7 @@ export function AdminOverviewTab({
   const handleClearCache = async () => {
     setProcessing("cache");
     try {
-      const res = await fetchWithInterceptor("/api/health/metrics/purge-cache", {
+      const res = await fetchWithInterceptor("/api/metrics/purge-cache", {
         method: "POST",
       });
       if (res.ok) {
@@ -48,7 +48,7 @@ export function AdminOverviewTab({
     setProcessing("stop");
     try {
       const res = await fetchWithInterceptor(
-        "/api/health/metrics/emergency-stop",
+        "/api/metrics/emergency-stop",
         { method: "POST" }
       );
       if (res.ok) {
