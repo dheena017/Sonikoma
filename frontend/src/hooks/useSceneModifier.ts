@@ -1,3 +1,4 @@
+import { normalizeLog } from "../types/logs";
 import React from "react";
 import { GeneratedPanel } from "../types";
 

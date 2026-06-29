@@ -5,6 +5,7 @@ import { usePlaybackEngine } from "./usePlaybackEngine.js";
 import { usePipelineActions } from "./usePipelineActions.js";
 import { parseWebtoonUrl } from "../utils.js";
 import { extractWebtoonUrl } from "../utils/url.js";
+import { normalizeLog } from "../types/logs";
 
 export function useAppLogic() {
   const state = useAppState();
@@ -190,7 +191,7 @@ export function useAppLogic() {
             });
             state.setConsoleLogs((prev) => [
               ...prev,
-              ...newLogs.map((log: any) => log.message),
+              ...newLogs,
             ]);
           }
         }
@@ -228,7 +229,7 @@ export function useAppLogic() {
             const entry = JSON.parse(event.data);
             if (entry && entry.id > lastLogIdRef.current) {
               lastLogIdRef.current = entry.id;
-              state.setConsoleLogs((prev) => [...prev, entry.message]);
+              state.setConsoleLogs((prev) => [...prev, entry]);
             }
           } catch (e) {
             // silent catch

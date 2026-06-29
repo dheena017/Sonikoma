@@ -9,9 +9,10 @@ import {
   Pause,
   Play,
 } from "lucide-react";
+import { LogEntry } from "../../types/logs";
 
 interface TerminalLogsHeaderProps {
-  consoleLogs: string[];
+  consoleLogs: LogEntry[];
   autoScroll: boolean;
   setAutoScroll: (val: boolean) => void;
   paused: boolean;

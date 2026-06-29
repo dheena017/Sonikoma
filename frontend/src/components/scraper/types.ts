@@ -2,6 +2,7 @@ import React from "react";
 import { GeneratedPanel } from "../../types";
 import { NotificationType } from "../NotificationStack";
 import { ErrorPopupDetail } from "../ErrorPopupModal";
+import { LogEntry } from "../../types/logs";
 
 export interface ScraperDeckProps {
   scrapedImages: string[];
@@ -10,7 +11,7 @@ export interface ScraperDeckProps {
   setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
   setScrapedImages: React.Dispatch<React.SetStateAction<string[]>>;
   mergingIndices: number[];
-  setConsoleLogs: React.Dispatch<React.SetStateAction<string[]>>;
+  setConsoleLogs: React.Dispatch<React.SetStateAction<LogEntry[]>>;
   panels: GeneratedPanel[];
   setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
   currentPanelIndex: number;
