@@ -641,39 +641,66 @@ export function useAppState() {
   }, [isAuthenticated, addNotification, getToken, fetchWithInterceptor]);
 
   useEffect(() => {
-    localStorage.setItem(
-      "ai_comic_notifications",
-      JSON.stringify(notifications)
-    );
+    const timeoutId = setTimeout(() => {
+      localStorage.setItem(
+        "ai_comic_notifications",
+        JSON.stringify(notifications)
+      );
+    }, 500);
+    return () => clearTimeout(timeoutId);
   }, [notifications]);
 
   useEffect(() => {
     localStorage.setItem("ai_comic_url", targetUrl);
+  }, [targetUrl]);
+
+  useEffect(() => {
     localStorage.setItem("ai_comic_voice", voiceActor);
+  }, [voiceActor]);
+
+  useEffect(() => {
     localStorage.setItem("ai_comic_music", musicTheme);
+  }, [musicTheme]);
+
+  useEffect(() => {
     localStorage.setItem("ai_comic_aspectRatio", aspectRatio);
+  }, [aspectRatio]);
+
+  useEffect(() => {
     localStorage.setItem("ai_comic_model", selectedModel);
+  }, [selectedModel]);
+
+  useEffect(() => {
     localStorage.setItem("ai_comic_source", selectedSource);
+  }, [selectedSource]);
+
+  useEffect(() => {
     localStorage.setItem("ai_comic_fps", frameRate.toString());
+  }, [frameRate]);
+
+  useEffect(() => {
     localStorage.setItem("ai_comic_volume", volume.toString());
+  }, [volume]);
+
+  useEffect(() => {
     localStorage.setItem("ai_comic_muted", isMuted.toString());
+  }, [isMuted]);
+
+  useEffect(() => {
     localStorage.setItem("ai_comic_sfx_volume", sfxVolume.toString());
+  }, [sfxVolume]);
+
+  useEffect(() => {
     localStorage.setItem("ai_comic_sfx_enabled", sfxEnabled.toString());
+  }, [sfxEnabled]);
+
+  useEffect(() => {
     localStorage.setItem("ai_comic_narration_style", narrationStyle);
+  }, [narrationStyle]);
+
+  useEffect(() => {
     localStorage.setItem("ai_comic_smart_slice", smartSlice.toString());
-  }, [
-    targetUrl,
-    voiceActor,
-    musicTheme,
-    aspectRatio,
-    selectedModel,
-    selectedSource,
-    frameRate,
-    volume,
-    isMuted,
-    narrationStyle,
-    smartSlice,
-  ]);
+  }, [smartSlice]);
 
   const resetWorkspace = useCallback(() => {
     setProjectId(null);

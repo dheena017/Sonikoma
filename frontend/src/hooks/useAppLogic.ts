@@ -383,8 +383,10 @@ export function useAppLogic() {
 
       state.setConsoleLogs((prev) => {
         const baseLogs = prev.filter(
-          (log) =>
-            !log.startsWith("[Preloader]") && !log.startsWith("[Scraper]")
+          (log) => {
+            const msg = typeof log === 'string' ? log : (log.message || '');
+            return !msg.startsWith("[Preloader]") && !msg.startsWith("[Scraper]");
+          }
         );
         return [
           `[Import] Spawned live import task to separate strip images from: ${normalizedTargetUrl}`,
@@ -535,7 +537,10 @@ export function useAppLogic() {
 
           state.setConsoleLogs((prev) => {
             const filtered = prev.filter(
-              (log) => !log.startsWith("[Scraper] Spawned live scraping task")
+              (log) => {
+                const msg = typeof log === 'string' ? log : (log.message || '');
+                return !msg.startsWith("[Scraper] Spawned live scraping task");
+              }
             );
             return [
               `[Scraper] Extraction completed. Total assets returned: ${data.total_images}`,

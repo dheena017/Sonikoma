@@ -135,7 +135,7 @@ interface AppWorkspaceProps {
   audioFeedback?: any;
 }
 
-function AppWorkspaceInner({
+const AppWorkspaceInner = ({
   isDashboardOnly = true,
   projectId,
   panels,
@@ -708,4 +708,5 @@ function AppWorkspaceInner({
   );
 }
 
-export default React.memo(AppWorkspaceInner);
+const AppWorkspace = React.memo(AppWorkspaceInner);
+export default AppWorkspace;

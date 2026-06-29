@@ -34,7 +34,7 @@ interface LogsPageProps {
   onNavigateHome: () => void;
 }
 
-function LogsPageInner({
+const LogsPageInner = ({
   consoleLogs,
   setConsoleLogs,
   onNavigateHome,
@@ -643,4 +643,5 @@ ${JSON.stringify({
   );
 }
 
-export default React.memo(LogsPageInner);
+const LogsPage = React.memo(LogsPageInner);
+export default LogsPage;
