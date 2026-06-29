@@ -2,6 +2,7 @@ import React from "react";
 import { ScraperDeckProps } from "./types.js";
 import { ScraperSelectionToolbar } from "./ScraperSelectionToolbar.js";
 import { ScraperActionButtons } from "./ScraperActionButtons.js";
+import { useLiveScraperActions } from "../../hooks/useLiveScraperActions.js";
 
 interface ScraperControlsProps
   extends Pick<
@@ -31,6 +32,7 @@ interface ScraperControlsProps
   /** Called when a filter action resets selection — so parent can clear lastSelectedIndex anchor */
   onLastSelectedReset?: () => void;
   handleCancelBatch?: () => void;
+  audioFeedback?: any;
 }
 
 export default function ScraperControls({
@@ -51,6 +53,9 @@ export default function ScraperControls({
   handleCleanBubblesSelected,
   onLastSelectedReset,
   handleCancelBatch,
+  audioFeedback,
+  addPanelsToStoryboard,
+  fetchWithInterceptor,
 }: ScraperControlsProps) {
   // ── Quick Selection Filters ──────────────────────────────────────────────
 
@@ -95,6 +100,7 @@ export default function ScraperControls({
     onLastSelectedReset?.();
     setConsoleLogs((prev) => ["[GUI] Reversed image order", ...prev]);
     addNotification("Reversed image order!", "info");
+    audioFeedback?.playTick();
   };
 
   // ── Advanced Count & Range Filters ───────────────────────────────────────
@@ -134,6 +140,18 @@ export default function ScraperControls({
     setConsoleLogs((prev) => ["[GUI] Cleared all selections", ...prev]);
   };
 
+  const { handleDownloadZip, handleAddToStoryboard } = useLiveScraperActions({
+    scrapedImages,
+    selectedScraped,
+    setSelectedScraped,
+    setScrapedImages,
+    setConsoleLogs,
+    addPanelsToStoryboard,
+    fetchWithInterceptor,
+    addNotification,
+    audioFeedback,
+  });
+
   // ─────────────────────────────────────────────────────────────────────────
 
   const controlsContent = (
@@ -159,6 +177,8 @@ export default function ScraperControls({
         isBatchCropping={isBatchCropping}
         batchProgress={batchProgress}
         handleAutoCropSelected={handleAutoCropSelected}
+        handleDownloadZip={handleDownloadZip}
+        handleAddToStoryboard={handleAddToStoryboard}
         setShowBubbleModal={setShowBubbleModal}
         isCleaningBubbles={isCleaningBubbles}
         cleanProgress={cleanProgress}

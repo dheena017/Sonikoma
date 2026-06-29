@@ -97,6 +97,7 @@ export function usePipelineActions({
     setActivePreviewTab,
     narrationStyle,
     setAccumulatedTokens,
+    audioFeedback: state.audioFeedback,
   });
 
   const {
@@ -131,6 +132,7 @@ export function usePipelineActions({
     seriesAuthor: state.seriesAuthor,
     seriesCoverImage: state.seriesCoverImage,
     seriesSynopsis: state.seriesSynopsis,
+    audioFeedback: state.audioFeedback,
   });
 
   const {
@@ -185,6 +187,7 @@ export function usePipelineActions({
     setBatchProgress,
     croppingImgUrl,
     setCroppingImgUrl,
+    audioFeedback: state.audioFeedback,
   });
 
   const {
@@ -207,6 +210,7 @@ export function usePipelineActions({
     editCropRight,
     editAutoTrim,
     addPanelsToStoryboard,
+    audioFeedback: state.audioFeedback,
   });
 
   return {

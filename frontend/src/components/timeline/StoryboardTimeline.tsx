@@ -51,6 +51,7 @@ interface StoryboardTimelineProps {
   saveProject?: (customPanels?: GeneratedPanel[]) => Promise<boolean>;
   handleSaveStoryboard?: () => void;
   handleCancelBatch?: () => void;
+  audioFeedback?: any;
 }
 
 export default function StoryboardTimeline({
@@ -92,6 +93,7 @@ export default function StoryboardTimeline({
   saveProject,
   handleSaveStoryboard,
   handleCancelBatch,
+  audioFeedback,
 }: StoryboardTimelineProps) {
   // ── Panel selection state ────────────────────────────────────────────────
   const [selectedPanelIds, setSelectedPanelIds] = useState<Set<number>>(
@@ -596,6 +598,7 @@ export default function StoryboardTimeline({
     voiceActor,
     musicTheme,
     narrationStyle,
+    audioFeedback,
   });
 
   if (panels.length === 0) {

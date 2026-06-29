@@ -14,6 +14,7 @@ interface UseAutoAnalysisProps {
   setActivePreviewTab: (tab: "video" | "timeline") => void;
   narrationStyle?: string;
   setAccumulatedTokens?: React.Dispatch<React.SetStateAction<number>>;
+  audioFeedback?: any;
 }
 
 export function useAutoAnalysis({
@@ -27,6 +28,7 @@ export function useAutoAnalysis({
   setActivePreviewTab,
   narrationStyle = "long",
   setAccumulatedTokens,
+  audioFeedback,
 }: UseAutoAnalysisProps) {
   const runBackgroundAnalysis = useCallback(
     async (panelId: number, imageUrl: string) => {
@@ -68,6 +70,7 @@ export function useAutoAnalysis({
             `Panel #${panelId} analysis completed successfully!`,
             "success"
           );
+          audioFeedback?.playSuccess();
           if (setAccumulatedTokens && (data.inputTokens || data.outputTokens)) {
             const addedTokens =
               (data.inputTokens || 0) + (data.outputTokens || 0);
@@ -168,6 +171,7 @@ export function useAutoAnalysis({
             `Sequence analysis completed successfully!`,
             "success"
           );
+          audioFeedback?.playSuccess();
 
           if (setAccumulatedTokens && (data.inputTokens || data.outputTokens)) {
             const addedTokens =

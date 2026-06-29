@@ -16,6 +16,7 @@ interface UseCompileActionsProps {
   voiceActor?: string;
   musicTheme?: string;
   narrationStyle?: string;
+  audioFeedback?: any;
 }
 
 export function useCompileActions({
@@ -31,6 +32,7 @@ export function useCompileActions({
   voiceActor,
   musicTheme,
   narrationStyle = "long",
+  audioFeedback,
 }: UseCompileActionsProps) {
   const activeFetch = fetchWithInterceptor || fetch;
   const [analyzingPanelId, setAnalyzingPanelId] = useState<number | null>(null);
@@ -75,6 +77,7 @@ export function useCompileActions({
         console.log("[Timeline] ZIP archive download triggered successfully");
         if (addNotification) {
           addNotification("ZIP archive downloaded successfully!", "success");
+          audioFeedback?.playSuccess();
         }
       } else {
         throw new Error(data.error || "Failed to package ZIP archive.");
@@ -176,6 +179,7 @@ export function useCompileActions({
             `Smart Scanner analysis completed for Panel #${panelId}!`,
             "success"
           );
+          audioFeedback?.playSuccess();
         }
       } else {
         throw new Error(
@@ -292,6 +296,7 @@ export function useCompileActions({
           `Smart Sequence Analysis completed for ${selectedIds.length} selected panel(s)!`,
           "success"
         );
+        audioFeedback?.playSuccess();
       }
     } catch (err: any) {
       if (err.name === "AbortError") {
@@ -390,6 +395,7 @@ export function useCompileActions({
           "Smart Sequence Analysis completed for all panels!",
           "success"
         );
+        audioFeedback?.playSuccess();
       }
     } catch (err: any) {
       if (err.name === "AbortError") {

@@ -8,6 +8,8 @@ import {
   Settings2,
   Link2,
   X,
+  Download,
+  Plus,
 } from "lucide-react";
 
 interface ScraperActionButtonsProps {
@@ -25,6 +27,8 @@ interface ScraperActionButtonsProps {
   handleBatchMergeSelected: () => void;
   isBatchMerging: boolean;
   handleCancelBatch?: () => void;
+  handleDownloadZip?: () => void;
+  handleAddToStoryboard?: () => void;
 }
 
 export function ScraperActionButtons({
@@ -42,6 +46,8 @@ export function ScraperActionButtons({
   handleBatchMergeSelected,
   isBatchMerging,
   handleCancelBatch,
+  handleDownloadZip,
+  handleAddToStoryboard,
 }: ScraperActionButtonsProps) {
   const isAllSelected =
     selectedScraped.length === scrapedImages.length && scrapedImages.length > 0;
@@ -161,6 +167,26 @@ export function ScraperActionButtons({
           <Link2 className="h-4 w-4 text-purple-400" />
         )}
         {isBatchMerging ? "Stitching..." : "Stitch Selected"}
+      </button>
+
+      {/* Download ZIP */}
+      <button
+        onClick={handleDownloadZip}
+        disabled={scrapedImages.length === 0}
+        className="px-3 sm:px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        <Download className="h-4 w-4 text-purple-400" />
+        Download ZIP
+      </button>
+
+      {/* Add to Storyboard */}
+      <button
+        onClick={handleAddToStoryboard}
+        disabled={selectedScraped.length === 0}
+        className="px-3 sm:px-4 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-purple-600/20 border-purple-500/30 hover:bg-purple-600/40 text-purple-300 hover:text-purple-200 disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        <Plus className="h-4 w-4" />
+        Add to Storyboard
       </button>
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { GeneratedPanel, CharacterBio } from "../types";
 import { AI_MODELS } from "../models";
 import { createFetchWithInterceptor } from "../api/fetchWithInterceptor";
@@ -9,6 +9,7 @@ import {
 } from "../components/NotificationStack";
 import { ErrorPopupDetail } from "../components/ErrorPopupModal";
 import { parseWebtoonUrl } from "../utils/url";
+import { useAudioFeedback } from "./useAudioFeedback";
 
 export function useAppState() {
   const [user, setUser] = useState<any>(null);
@@ -161,6 +162,16 @@ export function useAppState() {
   const [isMuted, setIsMuted] = useState<boolean>(
     () => localStorage.getItem("ai_comic_muted") === "true"
   );
+
+  const [sfxVolume, setSfxVolume] = useState<number>(() =>
+    parseInt(localStorage.getItem("ai_comic_sfx_volume") || "60")
+  );
+  const [sfxEnabled, setSfxEnabled] = useState<boolean>(
+    () => localStorage.getItem("ai_comic_sfx_enabled") !== "false"
+  );
+
+  const audioFeedback = useAudioFeedback(sfxVolume, !sfxEnabled);
+
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [isSavingEdit, setIsSavingEdit] = useState<boolean>(false);
   const [isScraping, setIsScraping] = useState<boolean>(false);
@@ -340,38 +351,14 @@ export function useAppState() {
         return [newNote, ...filtered];
       });
 
-      // Play soft chime sound if not muted
-      const isNotificationMuted =
-        localStorage.getItem("ai_comic_notifications_muted") === "true";
-      if (!isNotificationMuted) {
-        try {
-          const AudioContextClass =
-            window.AudioContext || (window as any).webkitAudioContext;
-          if (AudioContextClass) {
-            const ctx = new AudioContextClass();
-            const playTone = (
-              freq: number,
-              start: number,
-              duration: number
-            ) => {
-              const osc = ctx.createOscillator();
-              const gain = ctx.createGain();
-              osc.type = "sine";
-              osc.frequency.setValueAtTime(freq, start);
-              gain.gain.setValueAtTime(0, start);
-              gain.gain.linearRampToValueAtTime(0.08, start + 0.04);
-              gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-              osc.connect(gain);
-              gain.connect(ctx.destination);
-              osc.start(start);
-              osc.stop(start + duration);
-            };
-            const now = ctx.currentTime;
-            playTone(587.33, now, 0.25); // D5
-            playTone(880.0, now + 0.08, 0.35); // A5
-          }
-        } catch (err) {
-          console.warn("Failed to play notification sound:", err);
+      // Play audio feedback based on type
+      if (sfxEnabled) {
+        if (type === "success") {
+          audioFeedback.playSuccess();
+        } else if (type === "error") {
+          audioFeedback.playError();
+        } else {
+          audioFeedback.playInfo();
         }
       }
 
@@ -748,6 +735,8 @@ export function useAppState() {
     localStorage.setItem("ai_comic_fps", frameRate.toString());
     localStorage.setItem("ai_comic_volume", volume.toString());
     localStorage.setItem("ai_comic_muted", isMuted.toString());
+    localStorage.setItem("ai_comic_sfx_volume", sfxVolume.toString());
+    localStorage.setItem("ai_comic_sfx_enabled", sfxEnabled.toString());
     localStorage.setItem("ai_comic_narration_style", narrationStyle);
     localStorage.setItem("ai_comic_smart_slice", smartSlice.toString());
   }, [
@@ -915,6 +904,10 @@ export function useAppState() {
     setVolume,
     isMuted,
     setIsMuted,
+    sfxVolume,
+    setSfxVolume,
+    sfxEnabled,
+    setSfxEnabled,
     videoUrl,
     setVideoUrl,
     isSavingEdit,
@@ -939,6 +932,7 @@ export function useAppState() {
     setSeriesCoverImage,
     seriesSynopsis,
     setSeriesSynopsis,
+    audioFeedback,
     projectId,
     setProjectId,
     seriesSlugState,
@@ -951,6 +945,7 @@ export function useAppState() {
     setAccumulatedTokens,
     clearAllNotifications: () => {
       setNotifications([]);
+      audioFeedback.playError();
     },
     markAllNotificationsAsRead: () => {
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));

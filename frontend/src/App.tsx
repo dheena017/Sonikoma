@@ -415,6 +415,7 @@ export default function App() {
     resetWorkspace,
     accumulatedTokens,
     setAccumulatedTokens,
+    audioFeedback,
   } = appLogic;
 
   // --- Auto Save Hook ---
@@ -435,6 +436,7 @@ export default function App() {
     addNotification,
     accumulatedTokens,
     setAccumulatedTokens,
+    audioFeedback,
   });
 
   // --- Project Details Page Save Sync State ---
@@ -828,6 +830,10 @@ export default function App() {
             setVolume={setVolume}
             isMuted={isMuted}
             setIsMuted={setIsMuted}
+            sfxVolume={appLogic.sfxVolume}
+            setSfxVolume={appLogic.setSfxVolume}
+            sfxEnabled={appLogic.sfxEnabled}
+            setSfxEnabled={appLogic.setSfxEnabled}
             user={user}
             notifications={notifications}
             markNotificationAsRead={markNotificationAsRead}
@@ -961,6 +967,7 @@ export default function App() {
               cropCloseKernelSize={cropCloseKernelSize}
               showScrapeConfirmModal={showScrapeConfirmModal}
               setShowScrapeConfirmModal={setShowScrapeConfirmModal}
+              audioFeedback={audioFeedback}
             />
           </div>
 
@@ -1061,6 +1068,7 @@ export default function App() {
                 defaultShortcuts={DEFAULT_SHORTCUTS}
                 onNavigateHome={handleNavigateHome}
                 addNotification={addNotification}
+                audioFeedback={audioFeedback}
               />
             </div>
           )}
@@ -1208,6 +1216,7 @@ export default function App() {
                 projectDetailsSaveRef.current = handler;
               }}
               addNotification={addNotification}
+              audioFeedback={audioFeedback}
             />
           )}
 
@@ -1356,6 +1365,7 @@ export default function App() {
               isAuthenticated={isAuthenticated}
               fetchWithInterceptor={fetchWithInterceptor}
               addNotification={addNotification}
+              audioFeedback={audioFeedback}
             />
           )}
 
