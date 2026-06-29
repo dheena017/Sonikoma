@@ -281,19 +281,6 @@ def init_db() -> None:
             pass
 
         # Admin Features Migration
-        try:
-            cursor.execute("ALTER TABLE users ADD COLUMN is_locked INTEGER NOT NULL DEFAULT 0")
-            conn.commit()
-        except Exception:
-            pass
-
-        try:
-            cursor.execute("ALTER TABLE series ADD COLUMN is_flagged INTEGER NOT NULL DEFAULT 0")
-            conn.commit()
-        except Exception:
-            pass
-
-        # Run one-time slug generation for existing data
         generate_missing_slugs(conn)
 
         # Ensure token_usage_logs exists
@@ -3574,6 +3561,12 @@ def get_global_analytics() -> dict:
             ORDER BY date(created_at) ASC
         ''').fetchall()
 
+        # Token Usage
+        token_stats = conn.execute('SELECT SUM(input_tokens) as input, SUM(output_tokens) as output, SUM(estimated_cost_usd) as cost FROM token_usage_logs').fetchone()
+
+        # Pipeline performance
+        pending_tasks = conn.execute("SELECT COUNT(*) as c FROM chapters WHERE status = 'pending' OR status = 'processing'").fetchone()
+
         return {
             'total_users': total_users['c'] if total_users else 0,
             'new_users_today': new_users_today['c'] if new_users_today else 0,
@@ -3583,9 +3576,16 @@ def get_global_analytics() -> dict:
             'total_chapters': total_chapters['c'] if total_chapters else 0,
             'signups_chart': [dict(r) for r in signups_chart],
             'projects_chart': [dict(r) for r in projects_chart],
+            'tokens': {
+                'input': token_stats['input'] if token_stats and token_stats['input'] else 0,
+                'output': token_stats['output'] if token_stats and token_stats['output'] else 0,
+                'cost': token_stats['cost'] if token_stats and token_stats['cost'] else 0,
+            },
             'mrr': 12450,
             'active_subscriptions': 842,
-            'churn_rate': 2.4
+            'churn_rate': 2.4,
+            'success_rate': 99.8,
+            'pending_tasks': pending_tasks['c'] if pending_tasks else 0
         }
     finally:
         conn.close()
@@ -3774,7 +3774,7 @@ def delete_youtube_credentials(user_id: str) -> bool:
 
 
 def admin_query_db(table: str, limit: int = 100, offset: int = 0) -> list[dict]:
-    allowed_tables = ['users', 'series', 'chapters', 'panels', 'user_audit_logs', 'platform_settings', 'system_announcements']
+    allowed_tables = ['users', 'series', 'chapters', 'panels', 'user_audit_logs', 'platform_settings', 'system_announcements', 'user_invoices', 'scrape_sessions', 'user_api_keys', 'token_usage_logs']
     if table not in allowed_tables:
         raise ValueError("Table not allowed")
 

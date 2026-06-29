@@ -13,7 +13,7 @@ export function AdminHealthTab({ fetchWithInterceptor }: any) {
 
   const fetchMetrics = async () => {
     try {
-      const res = await fetchWithInterceptor("/api/metrics");
+      const res = await fetchWithInterceptor("/api/health/metrics");
       if (res.ok) {
         const data = await res.json();
         setMetrics(data);

@@ -8,7 +8,7 @@ export function ScraperLogStream() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const eventSource = new Event_Source("/api/system-logs/stream");
+    const eventSource = new Event_Source("/api/py/health/system-logs/stream");
 
     eventSource.onopen = () => setIsConnected(true);
     eventSource.onmessage = (event) => {
