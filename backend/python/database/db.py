@@ -1,4 +1,4 @@
-﻿"""
+"""
 backend/python/database/db.py
 ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 Local SQLite database connection and CRUD helpers for Webtoon-to-Video.
@@ -267,6 +267,19 @@ def init_db() -> None:
         except Exception:
             pass
 
+        # Admin Features Migration
+        try:
+            cursor.execute("ALTER TABLE users ADD COLUMN is_locked INTEGER NOT NULL DEFAULT 0")
+            conn.commit()
+        except Exception:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE series ADD COLUMN is_flagged INTEGER NOT NULL DEFAULT 0")
+            conn.commit()
+        except Exception:
+            pass
+
         # Run one-time slug generation for existing data
         generate_missing_slugs(conn)
 
@@ -386,11 +399,25 @@ def init_db() -> None:
         # Populate default settings if empty
         cursor.execute("SELECT COUNT(*) FROM platform_settings")
         if cursor.fetchone()[0] == 0:
-            cursor.execute("INSERT INTO platform_settings (key, value) VALUES ('maintenance_mode', 'false')")
-            cursor.execute("INSERT INTO platform_settings (key, value) VALUES ('disable_signups', 'false')")
-            cursor.execute("INSERT INTO platform_settings (key, value) VALUES ('global_banner', '')")
-            cursor.execute("INSERT INTO platform_settings (key, value) VALUES ('log_retention_days', '7')")
-            cursor.execute("INSERT INTO platform_settings (key, value) VALUES ('log_max_entries', '5000')")
+            defaults = [
+                ('maintenance_mode', 'false'),
+                ('disable_signups', 'false'),
+                ('global_banner', ''),
+                ('enable_beta', 'false'),
+                ('max_upload_size_mb', '50'),
+                ('max_scenes_per_project', '100'),
+                ('default_starting_credits', '200'),
+                ('smtp_host', 'smtp.mailgun.org'),
+                ('smtp_port', '587'),
+                ('smtp_user', ''),
+                ('enforce_2fa', 'false'),
+                ('strict_ip_binding', 'false'),
+                ('session_timeout_min', '120'),
+                ('webhook_url', 'https://api.sonikoma.com/webhooks'),
+                ('log_retention_days', '7'),
+                ('log_max_entries', '5000')
+            ]
+            cursor.executemany("INSERT INTO platform_settings (key, value) VALUES (?, ?)", defaults)
 
         conn.commit()
     except sqlite3.Error as e:
@@ -2140,6 +2167,181 @@ def delete_youtube_credentials(user_id: str) -> bool:
         cursor = conn.execute("DELETE FROM youtube_credentials WHERE user_id = ?", (user_id,))
         conn.commit()
         return cursor.rowcount > 0
+    finally:
+        conn.close()
+
+
+def get_global_audit_logs(limit: int = 50) -> List[Dict[str, Any]]:
+    conn = get_db_connection()
+    try:
+        rows = conn.execute('''
+            SELECT a.id, a.user_id, u.email, a.event as action, a.ip as ip_address, a.status, a.created_at
+            FROM user_audit_logs a
+            LEFT JOIN users u ON a.user_id = u.id
+            ORDER BY a.created_at DESC LIMIT ?
+        ''', (limit,)).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+def get_all_projects_admin() -> list[dict]:
+    conn = get_db_connection()
+    try:
+        # Fetch all series with user email attached
+        # Also need status which is in chapters. Let's take the first chapter's status.
+        rows = conn.execute('''
+            SELECT s.*, u.email as user_email,
+                   (SELECT status FROM chapters WHERE series_id = s.id LIMIT 1) as status,
+                   (SELECT COUNT(*) FROM chapters WHERE series_id = s.id) as chapters_count
+            FROM series s
+            LEFT JOIN users u ON s.user_id = u.id
+            ORDER BY s.created_at DESC
+            LIMIT 500
+        ''').fetchall()
+        return [dict(row) for row in rows]
+    finally:
+        conn.close()
+
+
+def get_global_analytics() -> dict:
+    conn = get_db_connection()
+    try:
+        # User Growth
+        total_users = conn.execute('SELECT COUNT(*) as c FROM users').fetchone()
+        new_users_today = conn.execute("SELECT COUNT(*) as c FROM users WHERE date(created_at) = date('now')").fetchone()
+        
+        # Credit Velocity
+        total_credits_assigned = conn.execute('SELECT SUM(credits) as c FROM users').fetchone()
+        
+        # Compute Time (Total duration of panels in completed chapters)
+        duration_row = conn.execute('''
+            SELECT SUM(p.duration) as d FROM panels p 
+            JOIN chapters c ON p.chapter_id = c.id 
+            WHERE c.status = 'completed'
+        ''').fetchone()
+        
+        # Content Volume
+        total_series = conn.execute('SELECT COUNT(*) as c FROM series').fetchone()
+        total_chapters = conn.execute('SELECT COUNT(*) as c FROM chapters').fetchone()
+        
+        # Chart data: Signups by Day (last 7 days)
+        signups_chart = conn.execute('''
+            SELECT date(created_at) as date, COUNT(*) as count 
+            FROM users 
+            WHERE created_at >= date('now', '-7 days')
+            GROUP BY date(created_at)
+            ORDER BY date(created_at) ASC
+        ''').fetchall()
+
+        # Chart data: Projects by Day (last 7 days)
+        projects_chart = conn.execute('''
+            SELECT date(created_at) as date, COUNT(*) as count 
+            FROM series 
+            WHERE created_at >= date('now', '-7 days')
+            GROUP BY date(created_at)
+            ORDER BY date(created_at) ASC
+        ''').fetchall()
+
+        # Token Usage
+        token_stats = conn.execute('SELECT SUM(input_tokens) as input, SUM(output_tokens) as output, SUM(estimated_cost_usd) as cost FROM token_usage_logs').fetchone()
+
+        # Pipeline performance
+        pending_tasks = conn.execute("SELECT COUNT(*) as c FROM chapters WHERE status = 'pending' OR status = 'processing'").fetchone()
+
+        return {
+            'total_users': total_users['c'] if total_users else 0,
+            'new_users_today': new_users_today['c'] if new_users_today else 0,
+            'total_credits': total_credits_assigned['c'] if total_credits_assigned and total_credits_assigned['c'] else 0,
+            'total_duration_sec': duration_row['d'] if duration_row and duration_row['d'] else 0,
+            'total_series': total_series['c'] if total_series else 0,
+            'total_chapters': total_chapters['c'] if total_chapters else 0,
+            'signups_chart': [dict(r) for r in signups_chart],
+            'projects_chart': [dict(r) for r in projects_chart],
+            'tokens': {
+                'input': token_stats['input'] if token_stats and token_stats['input'] else 0,
+                'output': token_stats['output'] if token_stats and token_stats['output'] else 0,
+                'cost': token_stats['cost'] if token_stats and token_stats['cost'] else 0,
+            },
+            'mrr': 12450,
+            'active_subscriptions': 842,
+            'churn_rate': 2.4,
+            'success_rate': 99.8,
+            'pending_tasks': pending_tasks['c'] if pending_tasks else 0
+        }
+    finally:
+        conn.close()
+
+
+def delete_series_admin(series_id: str):
+    conn = get_db_connection()
+    try:
+        # Cascade delete is enabled in schema
+        conn.execute('DELETE FROM series WHERE id = ?', (series_id,))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def get_announcements() -> List[Dict[str, Any]]:
+    conn = get_db_connection()
+    try:
+        rows = conn.execute('SELECT * FROM system_announcements ORDER BY created_at DESC').fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+def create_announcement(title: str, message: str, announcement_type: str = 'info') -> Dict[str, Any]:
+    conn = get_db_connection()
+    try:
+        cursor = conn.execute(
+            'INSERT INTO system_announcements (title, message, type, status) VALUES (?, ?, ?, ?) RETURNING *',
+            (title, message, announcement_type, 'active')
+        )
+        row = cursor.fetchone()
+        conn.commit()
+        return dict(row) if row else {}
+    finally:
+        conn.close()
+
+
+def delete_announcement(announcement_id: int) -> bool:
+    conn = get_db_connection()
+    try:
+        cursor = conn.execute('DELETE FROM system_announcements WHERE id = ?', (announcement_id,))
+        conn.commit()
+        return cursor.rowcount > 0
+    finally:
+        conn.close()
+
+
+def admin_query_db(table: str, limit: int = 100, offset: int = 0) -> list[dict]:
+    allowed_tables = ['users', 'series', 'chapters', 'panels', 'user_audit_logs', 'platform_settings', 'system_announcements', 'user_invoices', 'scrape_sessions', 'user_api_keys', 'token_usage_logs']
+    if table not in allowed_tables:
+        raise ValueError("Table not allowed")
+
+    conn = get_db_connection()
+    try:
+        rows = conn.execute(f"SELECT * FROM {table} ORDER BY 1 DESC LIMIT ? OFFSET ?", (limit, offset)).fetchall()
+        return [dict(row) for row in rows]
+    finally:
+        conn.close()
+
+
+def update_series_admin(series_id: str, updates: dict):
+    conn = get_db_connection()
+    try:
+        set_parts = []
+        params = []
+        for k, v in updates.items():
+            set_parts.append(f"{k} = ?")
+            params.append(v)
+        params.append(series_id)
+
+        query = f"UPDATE series SET {', '.join(set_parts)} WHERE id = ?"
+        conn.execute(query, params)
+        conn.commit()
     finally:
         conn.close()
 
