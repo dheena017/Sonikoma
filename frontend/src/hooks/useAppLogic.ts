@@ -219,7 +219,9 @@ export function useAppLogic() {
 
     const connectSSE = () => {
       try {
-        eventSource = new EventSource(api.getSystemLogsStreamUrl());
+        const token = localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token");
+        const url = token ? `/api/system-logs/stream?token=${encodeURIComponent(token)}` : "/api/system-logs/stream";
+        eventSource = new EventSource(url);
 
         eventSource.onmessage = (event) => {
           try {

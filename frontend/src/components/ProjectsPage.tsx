@@ -25,7 +25,7 @@ import {
   Edit2,
   Download,
 } from "lucide-react";
-import { getSourceName, getSourceIcon } from "../utils.js";
+import { getSourceName, getSourceIcon, getProxiedImageUrl } from "../utils.js";
 import * as api from "../api/index.js";
 
 interface Project {
@@ -650,7 +650,7 @@ export default function ProjectsPage() {
                     {project.cover_image ? (
                       <>
                         <img
-                          src={project.cover_image}
+                          src={getProxiedImageUrl(project.cover_image)}
                           alt={project.title}
                           className={`w-full h-full object-cover transition-transform duration-500 ${
                             isSelected
@@ -830,7 +830,7 @@ export default function ProjectsPage() {
                           <div className="w-10 h-10 shrink-0 rounded-lg bg-neutral-900 overflow-hidden relative border border-neutral-800">
                             {project.cover_image ? (
                               <img
-                                src={project.cover_image}
+                                src={getProxiedImageUrl(project.cover_image)}
                                 alt={project.title}
                                 className="w-full h-full object-cover"
                               />

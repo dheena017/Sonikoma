@@ -32,7 +32,7 @@ export function AdminAnnouncementsTab({
     try {
       setLoading(true);
       const res = await fetchWithInterceptor(
-        "http://localhost:8000/api/auth/admin/announcements"
+        "/api/auth/admin/announcements"
       );
       const data = await res.json();
       if (data.success) {
@@ -51,7 +51,7 @@ export function AdminAnnouncementsTab({
 
     try {
       const res = await fetchWithInterceptor(
-        "http://localhost:8000/api/auth/admin/announcements",
+        "/api/auth/admin/announcements",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -80,7 +80,7 @@ export function AdminAnnouncementsTab({
       return;
     try {
       const res = await fetchWithInterceptor(
-        `http://localhost:8000/api/auth/admin/announcements/${id}`,
+        `/api/auth/admin/announcements/${id}`,
         {
           method: "DELETE",
         }

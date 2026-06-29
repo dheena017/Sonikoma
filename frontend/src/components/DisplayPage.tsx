@@ -8,6 +8,7 @@ import {
   Music,
   MessageSquare,
 } from "lucide-react";
+import { getProxiedImageUrl } from "../utils";
 
 interface DisplayPageProps {
   projectId: string;
@@ -112,7 +113,7 @@ export default function DisplayPage({ projectId }: DisplayPageProps) {
           {project.cover_image && (
             <div className="w-48 h-48 rounded-2xl overflow-hidden border border-white/15 bg-black/40 flex-shrink-0 shadow-lg">
               <img
-                src={project.cover_image}
+                src={getProxiedImageUrl(project.cover_image)}
                 alt={project.title}
                 className="w-full h-full object-cover"
                 onError={(e) => {
@@ -209,7 +210,7 @@ export default function DisplayPage({ projectId }: DisplayPageProps) {
                 >
                   <div className="relative aspect-video w-full bg-black/40 overflow-hidden border-b border-white/5">
                     <img
-                      src={panel.image_url}
+                      src={getProxiedImageUrl(panel.image_url)}
                       alt={`Panel ${panel.panel_index}`}
                       className="w-full h-full object-contain group-hover:scale-[1.02] transition-transform duration-500"
                     />

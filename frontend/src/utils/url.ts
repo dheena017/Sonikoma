@@ -229,3 +229,11 @@ export function getSourceIcon(urlStr: string) {
     return Globe;
   }
 }
+
+export function getProxiedImageUrl(url?: string): string {
+  if (!url) return "";
+  if (url.startsWith("http") && !url.startsWith("/api/")) {
+    return `/api/proxy-image?url=${encodeURIComponent(url)}`;
+  }
+  return url;
+}

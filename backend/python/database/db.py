@@ -267,7 +267,20 @@ def init_db() -> None:
         except Exception:
             pass
 
-        # Run one-time slug generation for existing data
+        # Admin Features Migration
+        try:
+            cursor.execute("ALTER TABLE users ADD COLUMN is_locked INTEGER NOT NULL DEFAULT 0")
+            conn.commit()
+        except Exception:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE series ADD COLUMN is_flagged INTEGER NOT NULL DEFAULT 0")
+            conn.commit()
+        except Exception:
+            pass
+
+        # Admin Features Migration
         generate_missing_slugs(conn)
 
         # Ensure token_usage_logs exists
@@ -355,9 +368,23 @@ def init_db() -> None:
         # Populate default settings if empty
         cursor.execute("SELECT COUNT(*) FROM platform_settings")
         if cursor.fetchone()[0] == 0:
-            cursor.execute("INSERT INTO platform_settings (key, value) VALUES ('maintenance_mode', 'false')")
-            cursor.execute("INSERT INTO platform_settings (key, value) VALUES ('disable_signups', 'false')")
-            cursor.execute("INSERT INTO platform_settings (key, value) VALUES ('global_banner', '')")
+            defaults = [
+                ('maintenance_mode', 'false'),
+                ('disable_signups', 'false'),
+                ('global_banner', ''),
+                ('enable_beta', 'false'),
+                ('max_upload_size_mb', '50'),
+                ('max_scenes_per_project', '100'),
+                ('default_starting_credits', '200'),
+                ('smtp_host', 'smtp.mailgun.org'),
+                ('smtp_port', '587'),
+                ('smtp_user', ''),
+                ('enforce_2fa', 'false'),
+                ('strict_ip_binding', 'false'),
+                ('session_timeout_min', '120'),
+                ('webhook_url', 'https://api.sonikoma.com/webhooks')
+            ]
+            cursor.executemany("INSERT INTO platform_settings (key, value) VALUES (?, ?)", defaults)
 
         conn.commit()
     except sqlite3.Error as e:
@@ -3481,8 +3508,11 @@ def get_all_projects_admin() -> list[dict]:
     conn = get_db_connection()
     try:
         # Fetch all series with user email attached
+        # Also need status which is in chapters. Let's take the first chapter's status.
         rows = conn.execute('''
-            SELECT s.*, u.email as user_email
+            SELECT s.*, u.email as user_email,
+                   (SELECT status FROM chapters WHERE series_id = s.id LIMIT 1) as status,
+                   (SELECT COUNT(*) FROM chapters WHERE series_id = s.id) as chapters_count
             FROM series s
             LEFT JOIN users u ON s.user_id = u.id
             ORDER BY s.created_at DESC
@@ -3531,6 +3561,12 @@ def get_global_analytics() -> dict:
             ORDER BY date(created_at) ASC
         ''').fetchall()
 
+        # Token Usage
+        token_stats = conn.execute('SELECT SUM(input_tokens) as input, SUM(output_tokens) as output, SUM(estimated_cost_usd) as cost FROM token_usage_logs').fetchone()
+
+        # Pipeline performance
+        pending_tasks = conn.execute("SELECT COUNT(*) as c FROM chapters WHERE status = 'pending' OR status = 'processing'").fetchone()
+
         return {
             'total_users': total_users['c'] if total_users else 0,
             'new_users_today': new_users_today['c'] if new_users_today else 0,
@@ -3540,9 +3576,16 @@ def get_global_analytics() -> dict:
             'total_chapters': total_chapters['c'] if total_chapters else 0,
             'signups_chart': [dict(r) for r in signups_chart],
             'projects_chart': [dict(r) for r in projects_chart],
+            'tokens': {
+                'input': token_stats['input'] if token_stats and token_stats['input'] else 0,
+                'output': token_stats['output'] if token_stats and token_stats['output'] else 0,
+                'cost': token_stats['cost'] if token_stats and token_stats['cost'] else 0,
+            },
             'mrr': 12450,
             'active_subscriptions': 842,
-            'churn_rate': 2.4
+            'churn_rate': 2.4,
+            'success_rate': 99.8,
+            'pending_tasks': pending_tasks['c'] if pending_tasks else 0
         }
     finally:
         conn.close()
@@ -3729,3 +3772,51 @@ def delete_youtube_credentials(user_id: str) -> bool:
     finally:
         conn.close()
 
+
+def admin_query_db(table: str, limit: int = 100, offset: int = 0) -> list[dict]:
+    allowed_tables = ['users', 'series', 'chapters', 'panels', 'user_audit_logs', 'platform_settings', 'system_announcements', 'user_invoices', 'scrape_sessions', 'user_api_keys', 'token_usage_logs']
+    if table not in allowed_tables:
+        raise ValueError("Table not allowed")
+
+    conn = get_db_connection()
+    try:
+        rows = conn.execute(f"SELECT * FROM {table} ORDER BY 1 DESC LIMIT ? OFFSET ?", (limit, offset)).fetchall()
+        return [dict(row) for row in rows]
+    finally:
+        conn.close()
+
+def update_series_admin(series_id: str, updates: dict):
+    conn = get_db_connection()
+    try:
+        set_parts = []
+        params = []
+        for k, v in updates.items():
+            set_parts.append(f"{k} = ?")
+            params.append(v)
+        params.append(series_id)
+
+        query = f"UPDATE series SET {', '.join(set_parts)} WHERE id = ?"
+        conn.execute(query, params)
+        conn.commit()
+    finally:
+        conn.close()
+
+def get_platform_settings() -> dict:
+    conn = get_db_connection()
+    try:
+        rows = conn.execute("SELECT key, value FROM platform_settings").fetchall()
+        return {row['key']: row['value'] for row in rows}
+    finally:
+        conn.close()
+
+def update_platform_settings(settings: dict):
+    conn = get_db_connection()
+    try:
+        for k, v in settings.items():
+            conn.execute("""
+                INSERT INTO platform_settings (key, value) VALUES (?, ?)
+                ON CONFLICT(key) DO UPDATE SET value=excluded.value
+            """, (k, str(v)))
+        conn.commit()
+    finally:
+        conn.close()

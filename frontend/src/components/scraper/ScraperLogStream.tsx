@@ -9,7 +9,9 @@ export function ScraperLogStream() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const eventSource = new EventSource(api.getPySystemLogsStreamUrl());
+    const token = localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token");
+    const url = token ? `/api/system-logs/stream?token=${encodeURIComponent(token)}` : "/api/system-logs/stream";
+    const eventSource = new EventSource(url);
 
     eventSource.onopen = () => setIsConnected(true);
     eventSource.onmessage = (event) => {

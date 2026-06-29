@@ -32,7 +32,7 @@ import {
   X,
   Search,
 } from "lucide-react";
-import { getSourceName, getPanelFilterStyle } from "../utils.js";
+import { getSourceName, getPanelFilterStyle, getProxiedImageUrl } from "../utils.js";
 import * as api from "../api/index.js";
 
 interface ProjectDetailsPageProps {
@@ -815,7 +815,7 @@ export default function ProjectDetailsPage({
                 {project.cover_image && (
                   <div className="w-full aspect-[2/3] max-h-[180px] rounded-2xl overflow-hidden border border-white/5 relative group flex items-center justify-center bg-black/40">
                     <img
-                      src={project.cover_image}
+                      src={getProxiedImageUrl(project.cover_image)}
                       alt={project.title}
                       className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
                       onError={(e) => {
@@ -1097,7 +1097,7 @@ export default function ProjectDetailsPage({
                         {/* Image panel */}
                         <div className="md:col-span-1 aspect-square rounded-2xl overflow-hidden border border-white/10 bg-black/60 shadow-lg relative group flex items-center justify-center">
                           <img
-                            src={activePanelPreview.image_url}
+                            src={getProxiedImageUrl(activePanelPreview.image_url)}
                             alt={`Panel ${activePanelPreview.panel_index + 1}`}
                             className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
                             style={{
@@ -1436,7 +1436,7 @@ export default function ProjectDetailsPage({
                               {/* Thumbnail */}
                               <div className="aspect-square w-full rounded-xl overflow-hidden border border-white/5 bg-black/60 flex items-center justify-center shadow-inner relative">
                                 <img
-                                  src={panel.image_url}
+                                  src={getProxiedImageUrl(panel.image_url)}
                                   alt={`P${originalIdx + 1}`}
                                   className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-103"
                                   loading="lazy"
@@ -1542,7 +1542,7 @@ export default function ProjectDetailsPage({
                             {panels[slideshowIdx] ? (
                               <>
                                 <img
-                                  src={panels[slideshowIdx].image_url}
+                                  src={getProxiedImageUrl(panels[slideshowIdx].image_url)}
                                   alt={`Slide ${slideshowIdx + 1}`}
                                   className="w-full h-full object-contain"
                                   onLoad={(e) => {
@@ -1734,7 +1734,7 @@ export default function ProjectDetailsPage({
               {/* Left Column: Image */}
               <div className="w-1/3 max-w-[200px] shrink-0 border border-gray-200 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center aspect-square">
                 <img
-                  src={panel.image_url}
+                  src={getProxiedImageUrl(panel.image_url)}
                   alt={`Panel ${idx + 1}`}
                   className="w-full h-full object-contain"
                   style={{
