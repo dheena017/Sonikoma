@@ -59,7 +59,7 @@ SECRET_KEY = os.getenv("JWT_SECRET_KEY", "sonikoma_super_secret_key_change_me")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 365  # 1 year default
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
 
 # ─── Models ───────────────────────────────────────────────────────────────────
 
@@ -110,7 +110,10 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_current_user(request: Request, token: Optional[str] = Depends(oauth2_scheme)):
+    if not token:
+        token = request.query_params.get("token")
+
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -136,8 +139,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     except jwt.PyJWTError:
         raise credentials_exception
 
-
-        user = get_user_by_id(user_id)
+    user = get_user_by_id(user_id)
     if user is None:
         raise credentials_exception
     return user
@@ -146,11 +148,6 @@ async def get_admin_user(current_user: dict = Depends(get_current_user)):
     if current_user.get('creator_role') != 'admin':
         raise HTTPException(status_code=403, detail="Administrative privileges required.")
     return current_user
-
-async def get_admin_users(current_user: dict = Depends(get_admin_user)):
-    # For now, allow any authenticated user or specific admins
-    users = get_all_users()
-    return {"success": True, "users": users}
 # ─── Routes ───────────────────────────────────────────────────────────────────
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
@@ -464,6 +461,9 @@ async def get_me(current_user: dict = Depends(get_current_user)):
     }
 
 @router.get("/admin/users")
+async def get_admin_users(current_user: dict = Depends(get_admin_user)):
+    users = get_all_users()
+    return {"success": True, "users": users}
 
 class AdminUpdateUser(BaseModel):
     creator_role: Optional[str] = None

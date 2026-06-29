@@ -48,7 +48,7 @@ export default function AdminPage({
 
   const fetchStats = async () => {
     try {
-      const res = await fetchWithInterceptor("/api/health/metrics");
+      const res = await fetchWithInterceptor("/api/metrics");
       if (res.ok) {
         const data = await res.json();
         setStats({

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Save, Shield, Mail, Server, Globe, Bell, Trash2, RotateCcw } from "lucide-react";
+import { Save, Shield, Mail, Server, Globe, Bell, Trash2, RotateCcw, AlertCircle } from "lucide-react";
 
 export function AdminSettingsTab({ fetchWithInterceptor, addNotification }: any) {
   const [settings, setSettings] = useState<any>(null);
@@ -12,6 +12,7 @@ export function AdminSettingsTab({ fetchWithInterceptor, addNotification }: any)
 
   const fetchSettings = async () => {
     try {
+      setLoading(true);
       const res = await fetchWithInterceptor("/api/auth/admin/settings");
       if (res.ok) {
         const data = await res.json();
@@ -50,6 +51,21 @@ export function AdminSettingsTab({ fetchWithInterceptor, addNotification }: any)
     return (
       <div className="flex items-center justify-center h-64">
         <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!settings) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <AlertCircle className="w-12 h-12 text-rose-500" />
+        <p className="text-neutral-400 font-medium">Failed to load platform settings</p>
+        <button
+          onClick={fetchSettings}
+          className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded-lg text-sm font-medium transition-colors"
+        >
+          Retry
+        </button>
       </div>
     );
   }

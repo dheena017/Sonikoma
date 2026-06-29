@@ -64,7 +64,7 @@ def seed_data():
                 "user_testuser1", "testuser1", "creator@sonikoma.com", password_hash,
                 '{"theme": "dark", "autoSave": true, "volume": 0.8}', 
                 "https://api.dicebear.com/7.x/avataaars/svg?seed=testuser1", 
-                "Test User One", "creator", "Casual webtoon compiler and creator testing the Sonikoma suite.", 
+                "Test User One", "admin", "Casual webtoon compiler and creator testing the Sonikoma suite.", 
                 1, "en", "[]", 1250, None, "[]", 0, 
                 '{"google":true,"github":false,"discord":false}',
                 "2026-06-18 10:00:00", "2026-06-18 10:00:00"
@@ -74,7 +74,7 @@ def seed_data():
                 "user_creator_pro", "creator_pro", "pro@gmail.com", password_hash, 
                 '{"theme": "cyberpunk", "autoSave": true, "volume": 1.0}', 
                 "https://api.dicebear.com/7.x/avataaars/svg?seed=creator_pro", 
-                "Sarah Jenkins (Pro)", "director", "Professional animator and comic creator pushing Webtoons to cinematic heights.", 
+                "Sarah Jenkins (Pro)", "admin", "Professional animator and comic creator pushing Webtoons to cinematic heights.", 
                 1, "en", '["https://behance.net/sarah", "https://youtube.com/sarahanimations"]', 4850, 
                 (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d"), 
                 '["badge_pro_creator", "badge_early_bird"]', 1, 
