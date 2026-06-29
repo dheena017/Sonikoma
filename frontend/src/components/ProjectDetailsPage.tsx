@@ -483,7 +483,7 @@ const ProjectDetailsPage = React.memo(({
   const handleLoadToWorkspace = async () => {
     if (!project) return;
     try {
-      window.location.href = `/project-editor?id=${project.project_id}`;
+      (window as any).navigateTo?.(`/workspace?id=${project.project_id}`);
     } catch (e) {
       console.error(e);
     }

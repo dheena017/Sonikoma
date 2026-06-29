@@ -252,8 +252,7 @@ export function useAutoSave(state: AutoSaveState) {
           if (data.series_slug && data.chapter_slug) {
             const newPath = `/series/${data.series_slug}/chapters/${data.chapter_slug}`;
             const isEditor =
-              window.location.pathname.startsWith("/editor") ||
-              window.location.pathname === "/project-editor";
+              window.location.pathname.startsWith("/editor");
             if (window.location.pathname !== newPath && !isEditor) {
               window.history.pushState(null, "", newPath);
             }

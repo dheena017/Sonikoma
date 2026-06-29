@@ -163,8 +163,6 @@ export function useAppRouter({
             path === "/auto-crop" ||
             path === "/bubble-cleaner" ||
             path === "/projects" ||
-            path === "/project-details" ||
-            path === "/project-editor" ||
             path.startsWith("/series/") ||
             path.startsWith("/editor");
 
@@ -227,22 +225,10 @@ export function useAppRouter({
         path === "/profile" ||
         path === "/notifications" ||
         path === "/projects" ||
-        path === "/project-details" ||
         path === "/dashboard" ||
         path.startsWith("/display") ||
         isChapterDetails
       ) {
-        setShowAutoCropModal(false);
-        setShowBubbleModal(false);
-        setEditingImageIdx(null);
-      } else if (path === "/project-editor") {
-        const params = new URLSearchParams(window.location.search);
-        const hasProjId = params.has("id") || params.has("project_id");
-        if (scrapedImagesRef.current.length === 0 && panelsRef.current.length === 0 && !hasProjId) {
-          window.history.replaceState({}, "", "/dashboard");
-          setCurrentPath("/dashboard");
-          return;
-        }
         setShowAutoCropModal(false);
         setShowBubbleModal(false);
         setEditingImageIdx(null);

@@ -346,7 +346,7 @@ export default function ProfileProjectsTab({
         `/series/unknown/chapters/${project.chapter_slug}/details`
       );
     } else {
-      (window as any).navigateTo?.(`/project-details?id=${project.project_id}`);
+      (window as any).navigateTo?.(`/workspace?id=${project.project_id}`);
     }
   };
 

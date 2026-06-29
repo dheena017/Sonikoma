@@ -537,8 +537,7 @@ export function useAppState() {
               ? "/details"
               : "";
             const isEditor =
-              window.location.pathname.startsWith("/editor") ||
-              window.location.pathname === "/project-editor";
+              window.location.pathname.startsWith("/editor");
             if (!isEditor) {
               const newPath = `/series/${data.project.series_slug}/chapters/${data.project.chapter_slug}${suffix}`;
               if (window.location.pathname !== newPath) {

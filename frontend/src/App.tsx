@@ -46,8 +46,6 @@ import RegisterPage from "./components/auth/RegisterPage.js";
 import ForgotPasswordPage from "./components/auth/ForgotPasswordPage.js";
 import ProfilePage from "./components/ProfilePage.js";
 import LoadingPage from "./components/LoadingPage.js";
-import ProjectDetailsPage from "./components/ProjectDetailsPage.js";
-import ProjectEditorPage from "./components/ProjectEditorPage.js";
 import SeriesDetailsPage from "./components/SeriesDetailsPage.js";
 import DisplayPage from "./components/DisplayPage.js";
 import DashboardPage from "./components/DashboardPage.js";
@@ -456,22 +454,7 @@ export default function App() {
     audioFeedback,
   });
 
-  // --- Project Details Page Save Sync State ---
-  const [projectDetailsDirty, setProjectDetailsDirty] = React.useState(false);
-  const [projectDetailsSaveStatus, setProjectDetailsSaveStatus] =
-    React.useState<"idle" | "saving" | "saved" | "error">("idle");
-  const projectDetailsSaveRef = React.useRef<(() => Promise<void>) | null>(
-    null
-  );
-
-  const registerProjectDetailsSaveHandler = React.useCallback(
-    (handler: () => Promise<void>) => {
-      projectDetailsSaveRef.current = handler;
-    },
-    []
-  );
-
-  const isWorkspaceDirty = isDirty || projectDetailsDirty;
+  const isWorkspaceDirty = isDirty;
 
   // --- Router & Path Hook ---
   const {
@@ -599,9 +582,7 @@ export default function App() {
       isNotificationsPath: currentPath === "/notifications",
       isAdminPath: currentPath === "/admin",
       isChapterDetailsPath:
-        currentPath === "/project-details" ||
-        (chapterPathMatch !== null && isDetailsMode),
-      isProjectEditorPath: currentPath === "/project-editor",
+        chapterPathMatch !== null && isDetailsMode,
       isSeriesDetailsPath:
         !chapterPathMatch && currentPath.match(/\/series\/([^\/]+)$/) !== null,
       isLandingPath:
@@ -644,7 +625,6 @@ export default function App() {
     isNotificationsPath,
     isAdminPath,
     isChapterDetailsPath,
-    isProjectEditorPath,
     isSeriesDetailsPath,
     isLandingPath,
     isLoginPath,
@@ -661,20 +641,6 @@ export default function App() {
     }),
     [appLogic, isPipMode]
   );
-
-  const headerProjectId = isChapterDetailsPath ? detailsProjectId : projectId;
-  const headerIsDirty = isChapterDetailsPath ? projectDetailsDirty : isDirty;
-  const headerSaveStatus = isChapterDetailsPath
-    ? projectDetailsSaveStatus
-    : saveStatus;
-
-  const headerOnSave = React.useCallback(() => {
-    if (isChapterDetailsPath) {
-      projectDetailsSaveRef.current?.();
-    } else {
-      saveProject();
-    }
-  }, [isChapterDetailsPath, saveProject]);
 
   const handleAutoCropApply = React.useCallback(() => {
     console.log("App: Applying AutoCrop configuration parameter changes");
@@ -977,10 +943,10 @@ export default function App() {
             markAllNotificationsAsRead={markAllNotificationsAsRead}
             deleteNotification={deleteNotification}
             clearAllNotifications={clearAllNotifications}
-            projectId={headerProjectId}
-            saveStatus={headerSaveStatus}
-            isDirty={headerIsDirty}
-            onSave={headerOnSave}
+            projectId={projectId}
+            saveStatus={saveStatus}
+            isDirty={isDirty}
+            onSave={saveProject}
             navigateTo={navigateTo}
             notificationsMuted={notificationsMuted}
             setNotificationsMuted={setNotificationsMuted}
@@ -1342,20 +1308,6 @@ export default function App() {
             />
           )}
 
-          {/* PAGE VIEW 17: Project Details Dashboard */}
-          {isChapterDetailsPath && (
-            <ProjectDetailsPage
-              onNavigateHome={handleNavigateHome}
-              navigateTo={navigateTo}
-              setGlobalDirty={setProjectDetailsDirty}
-              setGlobalSaveStatus={setProjectDetailsSaveStatus}
-              registerSaveHandler={registerProjectDetailsSaveHandler}
-              addNotification={addNotification}
-              audioFeedback={audioFeedback}
-              fetchWithInterceptor={fetchWithInterceptor}
-            />
-          )}
-
           {/* PAGE VIEW 17.5: Series Landing Page */}
           {isSeriesDetailsPath && (
             <SeriesDetailsPage
@@ -1460,23 +1412,6 @@ export default function App() {
               />
             ))}
 
-          {/* PAGE VIEW 21: Dedicated Project Workspace Editor Page */}
-          {isProjectEditorPath &&
-            (scrapedImages.length === 0 ? (
-              <div className="flex-1 flex flex-col items-center justify-center min-h-[500px] text-neutral-400">
-                <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4" />
-                <p className="text-sm font-semibold font-mono text-purple-300">
-                  Loading project editor workspace...
-                </p>
-              </div>
-            ) : (
-              <ProjectEditorPage
-                appLogic={appLogic}
-                onNavigateHome={handleNavigateHome}
-                navigateTo={navigateTo}
-              />
-            ))}
-
           {/* PAGE VIEW 22: Admin Dashboard */}
           {isAdminPath && (
             <AdminPage
@@ -1496,7 +1431,6 @@ export default function App() {
             !isAutoCropPath &&
             !isBubbleCleanerPath &&
             !isEditorPath &&
-            !isProjectEditorPath &&
             !isLogsPath &&
             !isStatusPath &&
             !isAIModelsPath &&
