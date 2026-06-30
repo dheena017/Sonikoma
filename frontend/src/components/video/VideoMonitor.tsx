@@ -26,6 +26,7 @@ const VideoMonitor = React.memo(({
   currentPanelIndex,
   playbackTime,
   reprocessingPanelId,
+  quality,
 }: VideoMonitorProps) => {
   return (
     <div className="space-y-4">

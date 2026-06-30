@@ -4,6 +4,7 @@ import UrlInputPanel from "./scraper/UrlInputPanel.js";
 import ProjectConfirmModal from "./scraper/ProjectConfirmModal.js";
 
 interface AppWorkspaceProps {
+  [key: string]: any;
   projectId: string | null;
   addNotification: any;
   targetUrl: string;
@@ -45,6 +46,9 @@ interface AppWorkspaceProps {
   setAutoSplitTallStrips?: (v: boolean) => void;
   navigateTo?: (path: string) => void;
   panels?: any[];
+  isDashboardOnly?: boolean;
+  isGeneratingStoryboard?: boolean;
+  handleGenerateStoryboardAI?: () => Promise<void>;
 }
 
 const AppWorkspaceInner = (props: AppWorkspaceProps) => {
@@ -101,6 +105,7 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
     setAutoSplitTallStrips,
     navigateTo,
     panels = [],
+    isDashboardOnly = false,
   } = props;
 
   const handleConfirmProjectAndScrape = async (
