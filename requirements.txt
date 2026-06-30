@@ -60,11 +60,11 @@ proglog>=0.1.10                  # Moviepy render progress logger (video.py)
 # =============================================================================
 # SYSTEM DEPENDENCIES (install separately — NOT via pip)
 # =============================================================================
-ffmpeg  — Required by pydub and moviepy for audio/video encoding
-#           Windows: winget install ffmpeg
-#                 OR download from https://ffmpeg.org/download.html
-#           macOS:   brew install ffmpeg
-#           Linux:   sudo apt install ffmpeg
+# ffmpeg is required by pydub and moviepy for audio/video encoding.
+# Install it separately:
+#   Windows: winget install ffmpeg
+#   macOS:   brew install ffmpeg
+#   Linux:   sudo apt install ffmpeg
 
 # =============================================================================
 # OPTIONAL — GPU acceleration for EasyOCR (much faster OCR, not required)
