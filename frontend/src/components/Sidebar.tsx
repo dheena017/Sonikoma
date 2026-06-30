@@ -485,7 +485,7 @@ const SidebarInner = ({
       {/* Drawer backdrop (visible on both mobile and desktop when open) */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-md z-45 transition-opacity animate-fade-in"
+          className="fixed lg:hidden inset-0 bg-black/60 backdrop-blur-md z-45 transition-opacity animate-fade-in"
           onClick={onClose}
         />
       )}
@@ -494,7 +494,7 @@ const SidebarInner = ({
       <aside
         className={`fixed inset-y-0 left-0 w-72 shrink-0 bg-neutral-950/95 border-r border-neutral-900 h-full z-50 transition-transform duration-300 ease-out transform ${
           isOpen
-            ? "translate-x-0 shadow-2xl shadow-black/60"
+            ? "translate-x-0 shadow-2xl shadow-black/60 lg:shadow-none lg:border-r"
             : "-translate-x-full"
         }`}
       >

@@ -64,6 +64,8 @@ import CTRAnalyticsPage from "./components/analytics/CTRAnalyticsPage.js";
 import NotificationsPage from "./components/NotificationsPage.js";
 import AdminPage from "./components/AdminPage.js";
 import AdminSidebar from "./components/admin/AdminSidebar.js";
+import AdminMiniSidebar from "./components/admin/AdminMiniSidebar.js";
+import MiniSidebar from "./components/MiniSidebar.js";
 import YouTubePage from "./components/video/YouTubePage.js";
 
 // ============================================================================
@@ -796,40 +798,63 @@ export default function App() {
     >
       {/* --- Page Navigation Sidebar --- */}
       {isAdminPath ? (
-        <AdminSidebar
-          currentPath={currentPath}
-          navigateTo={navigateTo}
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-        />
+        <>
+          <AdminSidebar
+            currentPath={currentPath}
+            navigateTo={navigateTo}
+            isOpen={isSidebarOpen}
+            onClose={() => setIsSidebarOpen(false)}
+          />
+          {!isSidebarOpen && (
+            <AdminMiniSidebar
+              currentPath={currentPath}
+              navigateTo={navigateTo}
+              onOpenSidebar={() => setIsSidebarOpen(true)}
+            />
+          )}
+        </>
       ) : (
-        <Sidebar
-          isProcessing={isProcessing}
-          panels={panels}
-          scrapedImages={scrapedImages}
-          totalCalculatedDuration={totalCalculatedDuration}
-          currentPath={currentPath}
-          editingImageIdx={editingImageIdx}
-          lastEditorPath={lastEditorPath}
-          isBatchCropping={isBatchCropping}
-          isCleaningBubbles={isCleaningBubbles}
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          projectId={projectId}
-          isDirty={isWorkspaceDirty}
-          navigateTo={navigateTo}
-          notifications={notifications}
-          seriesSlug={seriesSlugState}
-          chapterSlug={chapterSlugState}
-        />
+        <>
+          <Sidebar
+            isProcessing={isProcessing}
+            panels={panels}
+            scrapedImages={scrapedImages}
+            totalCalculatedDuration={totalCalculatedDuration}
+            currentPath={currentPath}
+            editingImageIdx={editingImageIdx}
+            lastEditorPath={lastEditorPath}
+            isBatchCropping={isBatchCropping}
+            isCleaningBubbles={isCleaningBubbles}
+            isOpen={isSidebarOpen}
+            onClose={() => setIsSidebarOpen(false)}
+            projectId={projectId}
+            isDirty={isWorkspaceDirty}
+            navigateTo={navigateTo}
+            notifications={notifications}
+            seriesSlug={seriesSlugState}
+            chapterSlug={chapterSlugState}
+          />
+          {!isSidebarOpen && (
+            <MiniSidebar
+              currentPath={currentPath}
+              navigateTo={navigateTo}
+              onOpenSidebar={() => setIsSidebarOpen(true)}
+              notificationsCount={notifications.filter(n => !n.read).length}
+            />
+          )}
+        </>
       )}
 
       {/* --- Main Contents Controller & Router --- */}
       <div
         id="main-scroll-container"
-        className={`flex-grow flex-1 flex flex-col min-h-screen lg:max-h-screen justify-between ${
+        className={`flex-grow flex-1 flex flex-col min-h-screen lg:max-h-screen justify-between transition-all duration-300 ${
           !isAdminPath && isSidebarOpen ? "overflow-hidden" : ""
-        } ${!isAdminPath ? "lg:overflow-y-auto" : "overflow-y-auto"}`}
+        } ${!isAdminPath ? "lg:overflow-y-auto" : "overflow-y-auto"} ${
+          isAdminPath
+            ? isSidebarOpen ? "lg:ml-80" : "lg:ml-20"
+            : isSidebarOpen ? "lg:ml-72" : "lg:ml-20"
+        }`}
       >
         <div>
           {/* Impersonation Banner */}
