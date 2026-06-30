@@ -14,9 +14,7 @@ import {
   Settings,
   Server,
   ActivitySquare,
-  ChevronLeft,
-  ChevronRight,
-  LogOut,
+  X,
   ExternalLink,
 } from "lucide-react";
 import { useThemeMode } from "../../hooks/useThemeMode";
@@ -24,15 +22,15 @@ import { useThemeMode } from "../../hooks/useThemeMode";
 interface AdminSidebarProps {
   currentPath: string;
   navigateTo: (path: string) => void;
-  isCollapsed: boolean;
-  setIsCollapsed: (v: boolean) => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({
   currentPath,
   navigateTo,
-  isCollapsed,
-  setIsCollapsed,
+  isOpen,
+  onClose,
 }) => {
   const { themeMode } = useThemeMode();
 
@@ -79,66 +77,58 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
     return currentPath.startsWith(path);
   };
 
-  return (
-    <aside
-      className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-[#0a0a0e]/95 backdrop-blur-xl border-r border-violet-900/20 transition-all duration-300 ${
-        isCollapsed ? "w-20" : "w-72"
-      }`}
-    >
+  const sidebarContent = (
+    <div className="flex flex-col h-full bg-[#0a0a0e]/95 backdrop-blur-2xl border-r border-violet-900/20">
       {/* Sidebar Header */}
-      <div className="h-16 flex items-center justify-between px-6 border-b border-violet-900/10">
-        {!isCollapsed && (
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-violet-600 rounded-lg shadow-lg shadow-violet-600/20">
-              <Shield className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-bold text-white tracking-tight">Command Center</span>
+      <div className="h-20 flex items-center justify-between px-6 border-b border-violet-900/10">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-violet-600 rounded-xl shadow-lg shadow-violet-600/30">
+            <Shield className="w-6 h-6 text-white" />
           </div>
-        )}
-        {isCollapsed && (
-          <Shield className="w-6 h-6 text-violet-500 mx-auto" />
-        )}
+          <div>
+            <span className="font-black text-white tracking-tight block leading-tight">Command</span>
+            <span className="text-[10px] text-violet-400 font-mono uppercase tracking-widest">Center</span>
+          </div>
+        </div>
         <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="absolute -right-3 top-20 p-1.5 bg-violet-600 rounded-full border border-violet-500 text-white shadow-lg hover:bg-violet-500 transition-colors hidden lg:block"
+          onClick={onClose}
+          className="p-2 rounded-xl bg-white/5 border border-white/10 text-neutral-400 hover:text-white transition-colors"
         >
-          {isCollapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}
+          <X className="w-5 h-5" />
         </button>
       </div>
 
       {/* Navigation Groups */}
-      <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8 scrollbar-hide">
+      <div className="flex-1 overflow-y-auto py-8 px-5 space-y-9 scrollbar-hide">
         {groups.map((group) => (
-          <div key={group.name} className="space-y-2">
-            {!isCollapsed && (
-              <h4 className="px-4 text-[10px] font-bold text-violet-400/60 uppercase tracking-widest font-mono">
-                {group.name}
-              </h4>
-            )}
-            <ul className="space-y-1">
+          <div key={group.name} className="space-y-3">
+            <h4 className="px-4 text-[10px] font-black text-violet-400/40 uppercase tracking-[0.2em] font-mono">
+              {group.name}
+            </h4>
+            <ul className="space-y-1.5">
               {group.items.map((item) => {
                 const active = isActive(item.path);
                 return (
                   <li key={item.id}>
                     <button
-                      onClick={() => navigateTo(item.path)}
-                      className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group relative ${
+                      onClick={() => {
+                        navigateTo(item.path);
+                        onClose();
+                      }}
+                      className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl transition-all duration-300 group relative ${
                         active
-                          ? "bg-violet-600/10 text-white shadow-[inset_0_0_12px_rgba(139,92,246,0.05)] border border-violet-500/20"
+                          ? "bg-violet-600/15 text-white shadow-[inset_0_0_20px_rgba(139,92,246,0.1)] border border-violet-500/30"
                           : "text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent"
                       }`}
-                      title={isCollapsed ? item.label : ""}
                     >
                       <item.icon
-                        className={`w-5 h-5 shrink-0 transition-colors ${
+                        className={`w-5 h-5 shrink-0 transition-colors duration-300 ${
                           active ? "text-violet-400" : "text-neutral-500 group-hover:text-neutral-300"
                         }`}
                       />
-                      {!isCollapsed && (
-                        <span className="text-xs font-bold font-mono truncate">{item.label}</span>
-                      )}
+                      <span className="text-xs font-bold font-mono tracking-tight">{item.label}</span>
                       {active && (
-                        <div className="absolute left-0 w-1 h-6 bg-violet-500 rounded-r-full shadow-[0_0_8px_rgba(139,92,246,0.5)]" />
+                        <div className="absolute left-0 w-1.5 h-6 bg-violet-500 rounded-r-full shadow-[0_0_15px_rgba(139,92,246,0.8)]" />
                       )}
                     </button>
                   </li>
@@ -150,16 +140,40 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       </div>
 
       {/* Sidebar Footer */}
-      <div className="p-4 border-t border-violet-900/10">
+      <div className="p-6 border-t border-violet-900/10 bg-violet-950/5">
         <button
-          onClick={() => navigateTo("/dashboard")}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold font-mono transition-all shadow-lg shadow-violet-600/20 active:scale-95"
+          onClick={() => {
+            navigateTo("/dashboard");
+            onClose();
+          }}
+          className="w-full flex items-center justify-center gap-3 px-4 py-4 rounded-2xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-black font-mono transition-all shadow-xl shadow-violet-600/20 active:scale-95 border border-violet-400/20"
         >
           <ExternalLink className="w-4 h-4 shrink-0" />
-          {!isCollapsed && <span>Return to App</span>}
+          <span>RETURN TO APP</span>
         </button>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Backdrop */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] transition-opacity animate-fade-in"
+          onClick={onClose}
+        />
+      )}
+
+      {/* Sidebar Drawer */}
+      <aside
+        className={`fixed inset-y-0 left-0 w-80 z-[70] transition-transform duration-500 ease-out transform ${
+          isOpen ? "translate-x-0 shadow-2xl shadow-black/80" : "-translate-x-full"
+        }`}
+      >
+        {sidebarContent}
+      </aside>
+    </>
   );
 };
 

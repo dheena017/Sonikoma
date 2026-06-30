@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import AdminSidebar from "./AdminSidebar";
 import AdminNavbar from "./AdminNavbar";
 import * as api from "../../api/index.js";
 
@@ -16,7 +15,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
   navigateTo,
   fetchWithInterceptor,
 }) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [stats, setStats] = useState<any>({});
 
   const fetchStats = async () => {
@@ -49,35 +47,25 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#070709] text-neutral-100 flex selection:bg-violet-600 selection:text-white">
-      {/* Sidebar */}
-      <AdminSidebar
-        currentPath={currentPath}
-        navigateTo={navigateTo}
-        isCollapsed={isCollapsed}
-        setIsCollapsed={setIsCollapsed}
-      />
+    <div className="flex-1 flex flex-col min-h-full">
+      {/*
+        The AdminNavbar is now positioned below the global Header.
+        Since the global Header is fixed/sticky, the Navbar will naturally flow below it
+        within the scroll container.
+      */}
+      <AdminNavbar currentPath={currentPath} navigateTo={navigateTo} stats={stats} />
 
-      {/* Main Content Area */}
-      <div
-        className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${
-          isCollapsed ? "pl-20" : "pl-72"
-        }`}
-      >
-        <AdminNavbar currentPath={currentPath} navigateTo={navigateTo} stats={stats} />
+      <main className="flex-1 p-6 md:p-8">
+        <div className="max-w-7xl mx-auto animate-[fadeIn_0.3s_ease-out]">
+          {children}
+        </div>
+      </main>
 
-        <main className="flex-1 overflow-y-auto p-6 md:p-8">
-          <div className="max-w-7xl mx-auto animate-[fadeIn_0.3s_ease-out]">
-            {children}
-          </div>
-        </main>
-
-        <footer className="py-6 px-8 border-t border-violet-900/10 text-center">
-          <p className="text-[10px] text-neutral-600 font-mono uppercase tracking-widest">
-            Sonikoma Command Center &bull; Privileged Access Only
-          </p>
-        </footer>
-      </div>
+      <footer className="py-8 px-8 border-t border-violet-900/10 text-center bg-black/20">
+        <p className="text-[10px] text-neutral-600 font-black uppercase tracking-[0.3em] font-mono">
+          Sonikoma Command Center &bull; Privileged Access Only
+        </p>
+      </footer>
     </div>
   );
 };

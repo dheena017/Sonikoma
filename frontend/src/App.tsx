@@ -62,6 +62,7 @@ import VoiceStudioPage from "./components/voice/VoiceStudioPage.js";
 import CTRAnalyticsPage from "./components/analytics/CTRAnalyticsPage.js";
 import NotificationsPage from "./components/NotificationsPage.js";
 import AdminPage from "./components/AdminPage.js";
+import AdminSidebar from "./components/admin/AdminSidebar.js";
 import YouTubePage from "./components/video/YouTubePage.js";
 
 // ============================================================================
@@ -793,7 +794,14 @@ export default function App() {
       }`}
     >
       {/* --- Page Navigation Sidebar --- */}
-      {!isAdminPath && (
+      {isAdminPath ? (
+        <AdminSidebar
+          currentPath={currentPath}
+          navigateTo={navigateTo}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+        />
+      ) : (
         <Sidebar
           isProcessing={isProcessing}
           panels={panels}
@@ -820,7 +828,7 @@ export default function App() {
         id="main-scroll-container"
         className={`flex-grow flex-1 flex flex-col min-h-screen lg:max-h-screen justify-between ${
           !isAdminPath && isSidebarOpen ? "overflow-hidden" : ""
-        } ${!isAdminPath ? "lg:overflow-y-auto" : ""}`}
+        } ${!isAdminPath ? "lg:overflow-y-auto" : "overflow-y-auto"}`}
       >
         <div>
           {/* Impersonation Banner */}
@@ -924,8 +932,7 @@ export default function App() {
           )}
 
           {/* Top Header */}
-          {!isAdminPath && (
-            <Header
+          <Header
             isProcessing={isProcessing}
             panels={panels}
             totalCalculatedDuration={totalCalculatedDuration}
@@ -965,9 +972,8 @@ export default function App() {
             notificationsMuted={notificationsMuted}
             setNotificationsMuted={setNotificationsMuted}
             themeMode={themeMode}
-              toggleThemeMode={toggleThemeMode}
-            />
-          )}
+            toggleThemeMode={toggleThemeMode}
+          />
 
           {/* PAGE VIEW 1: Main Editor Workspace */}
           <div
