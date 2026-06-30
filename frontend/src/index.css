@@ -396,7 +396,7 @@ body {
 }
 
 /* ── Page-level containers (full-page dark wraps) ─────────── */
-/* Covers min-h-screen wrappers in ProfilePage, ProjectDetailsPage,
+/* Covers min-h-screen wrappers in ProfilePage, SeriesDetailsPage,
    SeriesDetailsPage, ProjectsPage, DashboardPage, etc. */
 [data-mode="light"] .min-h-screen.bg-\[\#070709\],
 [data-mode="light"] .min-h-screen.bg-neutral-950 {
@@ -608,7 +608,7 @@ body {
   background-color: rgba(249, 249, 251, 0.7) !important;
 }
 
-/* #0c0c10 family — used in ProjectDetailsPage, SeriesDetailsPage */
+/* #0c0c10 family — used in SeriesDetailsPage, SeriesDetailsPage */
 [data-mode="light"] .bg-\[\#0c0c10\] {
   background-color: #ffffff !important;
 }

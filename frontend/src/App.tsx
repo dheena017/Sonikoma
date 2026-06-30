@@ -586,11 +586,9 @@ export default function App() {
       isYouTubePath: currentPath === "/youtube",
       isProfilePath: currentPath === "/profile",
       isNotificationsPath: currentPath === "/notifications",
-      isAdminPath: currentPath === "/admin" || currentPath.startsWith("/admin/"),
-      isChapterDetailsPath:
-        currentPath === "/project-details" ||
-        (chapterPathMatch !== null && isDetailsMode),
-      isProjectEditorPath: currentPath === "/project-editor",
+      isAdminPath: currentPath === "/admin",
+      isChapterDetailsPath: false,
+      isProjectEditorPath: false,
       isSeriesDetailsPath:
         !chapterPathMatch && currentPath.match(/\/series\/([^\/]+)$/) !== null,
       isLandingPath:

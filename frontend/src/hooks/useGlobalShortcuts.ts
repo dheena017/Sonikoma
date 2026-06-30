@@ -149,7 +149,9 @@ export function useGlobalShortcuts({
       const isDashboard =
         path === "/dashboard" ||
         (chapterPathMatch !== null && !path.endsWith("/details"));
-      const isEditor = path.startsWith("/editor");
+      const isProEditor = path === "/editor";
+      const isInternalEditor = path.startsWith("/editor/");
+      const isAnyEditor = isProEditor || isInternalEditor;
 
       switch (matchedAction) {
         case "nav_dashboard":
@@ -209,44 +211,44 @@ export function useGlobalShortcuts({
           }
           break;
         case "playback_toggle":
-          if (isDashboard) toggleStoryboardPlayback();
+          if (isDashboard || isProEditor) toggleStoryboardPlayback();
           break;
         case "playback_reset":
-          if (isDashboard) resetStoryboardPlayback();
+          if (isDashboard || isProEditor) resetStoryboardPlayback();
           break;
         case "playback_speed_1":
-          if (isDashboard) {
+          if (isDashboard || isProEditor) {
             const video = document.querySelector("video");
             if (video) video.playbackRate = 1.0;
             addNotification("Playback speed: 1x", "info");
           }
           break;
         case "playback_speed_1_5":
-          if (isDashboard) {
+          if (isDashboard || isProEditor) {
             const video = document.querySelector("video");
             if (video) video.playbackRate = 1.5;
             addNotification("Playback speed: 1.5x", "info");
           }
           break;
         case "playback_speed_2":
-          if (isDashboard) {
+          if (isDashboard || isProEditor) {
             const video = document.querySelector("video");
             if (video) video.playbackRate = 2.0;
             addNotification("Playback speed: 2x", "info");
           }
           break;
         case "volume_up":
-          if (isDashboard) {
+          if (isDashboard || isProEditor) {
             setVolume((v) => Math.min(100, v + 10));
           }
           break;
         case "volume_down":
-          if (isDashboard) {
+          if (isDashboard || isProEditor) {
             setVolume((v) => Math.max(0, v - 10));
           }
           break;
         case "volume_mute":
-          if (isDashboard) {
+          if (isDashboard || isProEditor) {
             setIsMuted((m) => !m);
           }
           break;
@@ -284,85 +286,85 @@ export function useGlobalShortcuts({
 
         // Editor Shortcuts
         case "editor_tab_1":
-          if (isEditor)
+          if (isInternalEditor)
             (window as any).dispatchEditorAction?.({
               type: "SWITCH_TAB",
               tab: "adjust",
             });
           break;
         case "editor_tab_2":
-          if (isEditor)
+          if (isInternalEditor)
             (window as any).dispatchEditorAction?.({
               type: "SWITCH_TAB",
               tab: "edit",
             });
           break;
         case "editor_tab_3":
-          if (isEditor)
+          if (isInternalEditor)
             (window as any).dispatchEditorAction?.({
               type: "SWITCH_TAB",
               tab: "eraser",
             });
           break;
         case "editor_tab_4":
-          if (isEditor)
+          if (isInternalEditor)
             (window as any).dispatchEditorAction?.({
               type: "SWITCH_TAB",
               tab: "slice",
             });
           break;
         case "editor_tab_5":
-          if (isEditor)
+          if (isInternalEditor)
             (window as any).dispatchEditorAction?.({
               type: "SWITCH_TAB",
               tab: "crop",
             });
           break;
         case "editor_tab_6":
-          if (isEditor)
+          if (isInternalEditor)
             (window as any).dispatchEditorAction?.({
               type: "SWITCH_TAB",
               tab: "merge",
             });
           break;
         case "editor_prev":
-          if (isEditor)
+          if (isInternalEditor)
             (window as any).dispatchEditorAction?.({ type: "PREV_IMAGE" });
           break;
         case "editor_next":
-          if (isEditor)
+          if (isInternalEditor)
             (window as any).dispatchEditorAction?.({ type: "NEXT_IMAGE" });
           break;
         case "editor_undo":
-          if (isEditor)
+          if (isInternalEditor)
             (window as any).dispatchEditorAction?.({ type: "UNDO" });
           break;
         case "editor_redo":
-          if (isEditor)
+          if (isInternalEditor)
             (window as any).dispatchEditorAction?.({ type: "REDO" });
           break;
         case "editor_save":
-          if (isEditor)
+          if (isInternalEditor)
             (window as any).dispatchEditorAction?.({ type: "SAVE" });
           break;
         case "editor_close":
-          if (isEditor)
+          if (isInternalEditor)
             (window as any).dispatchEditorAction?.({ type: "CLOSE" });
           break;
         case "editor_zoom_in":
-          if (isEditor)
+          if (isInternalEditor)
             (window as any).dispatchEditorAction?.({ type: "ZOOM_IN" });
           break;
         case "editor_zoom_out":
-          if (isEditor)
+          if (isInternalEditor)
             (window as any).dispatchEditorAction?.({ type: "ZOOM_OUT" });
           break;
         case "editor_brush_inc":
-          if (isEditor)
+          if (isInternalEditor)
             (window as any).dispatchEditorAction?.({ type: "BRUSH_INC" });
           break;
         case "editor_brush_dec":
-          if (isEditor)
+          if (isInternalEditor)
             (window as any).dispatchEditorAction?.({ type: "BRUSH_DEC" });
           break;
       }
