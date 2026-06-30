@@ -1636,7 +1636,7 @@ export default function App() {
       )}
 
       {/* --- Terminal Floating Interface --- */}
-      <div className="fixed bottom-6 left-6 z-[100] flex flex-col items-start gap-4">
+      <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-4">
         {isTerminalOpen && (
           <div className="w-[90vw] md:w-[600px] max-h-[70vh] bg-neutral-900 border border-neutral-800 rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
             <div className="p-2">
