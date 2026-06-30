@@ -585,7 +585,7 @@ export default function App() {
       isYouTubePath: currentPath === "/youtube",
       isProfilePath: currentPath === "/profile",
       isNotificationsPath: currentPath === "/notifications",
-      isAdminPath: currentPath === "/admin",
+      isAdminPath: currentPath === "/admin" || currentPath.startsWith("/admin/"),
       isChapterDetailsPath:
         currentPath === "/project-details" ||
         (chapterPathMatch !== null && isDetailsMode),
@@ -788,35 +788,39 @@ export default function App() {
   return (
     <div
       id="app_root"
-      className="min-h-screen bg-[#070709] text-neutral-100 flex flex-col lg:flex-row selection:bg-purple-600 selection:text-white relative"
+      className={`min-h-screen bg-[#070709] text-neutral-100 flex flex-col selection:text-white relative ${
+        isAdminPath ? "selection:bg-violet-600" : "lg:flex-row selection:bg-purple-600"
+      }`}
     >
       {/* --- Page Navigation Sidebar --- */}
-      <Sidebar
-        isProcessing={isProcessing}
-        panels={panels}
-        scrapedImages={scrapedImages}
-        totalCalculatedDuration={totalCalculatedDuration}
-        currentPath={currentPath}
-        editingImageIdx={editingImageIdx}
-        lastEditorPath={lastEditorPath}
-        isBatchCropping={isBatchCropping}
-        isCleaningBubbles={isCleaningBubbles}
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-        projectId={projectId}
-        isDirty={isWorkspaceDirty}
-        navigateTo={navigateTo}
-        notifications={notifications}
-        seriesSlug={seriesSlugState}
-        chapterSlug={chapterSlugState}
-      />
+      {!isAdminPath && (
+        <Sidebar
+          isProcessing={isProcessing}
+          panels={panels}
+          scrapedImages={scrapedImages}
+          totalCalculatedDuration={totalCalculatedDuration}
+          currentPath={currentPath}
+          editingImageIdx={editingImageIdx}
+          lastEditorPath={lastEditorPath}
+          isBatchCropping={isBatchCropping}
+          isCleaningBubbles={isCleaningBubbles}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          projectId={projectId}
+          isDirty={isWorkspaceDirty}
+          navigateTo={navigateTo}
+          notifications={notifications}
+          seriesSlug={seriesSlugState}
+          chapterSlug={chapterSlugState}
+        />
+      )}
 
       {/* --- Main Contents Controller & Router --- */}
       <div
         id="main-scroll-container"
         className={`flex-grow flex-1 flex flex-col min-h-screen lg:max-h-screen justify-between ${
-          isSidebarOpen ? "overflow-hidden" : "lg:overflow-y-auto"
-        }`}
+          !isAdminPath && isSidebarOpen ? "overflow-hidden" : ""
+        } ${!isAdminPath ? "lg:overflow-y-auto" : ""}`}
       >
         <div>
           {/* Impersonation Banner */}
@@ -920,7 +924,8 @@ export default function App() {
           )}
 
           {/* Top Header */}
-          <Header
+          {!isAdminPath && (
+            <Header
             isProcessing={isProcessing}
             panels={panels}
             totalCalculatedDuration={totalCalculatedDuration}
@@ -960,8 +965,9 @@ export default function App() {
             notificationsMuted={notificationsMuted}
             setNotificationsMuted={setNotificationsMuted}
             themeMode={themeMode}
-            toggleThemeMode={toggleThemeMode}
-          />
+              toggleThemeMode={toggleThemeMode}
+            />
+          )}
 
           {/* PAGE VIEW 1: Main Editor Workspace */}
           <div
@@ -1425,6 +1431,7 @@ export default function App() {
           {isAdminPath && (
             <AdminPage
               navigateTo={navigateTo}
+              currentPath={currentPath}
               isAuthenticated={isAuthenticated}
               fetchWithInterceptor={fetchWithInterceptor}
               addNotification={addNotification}
@@ -1465,15 +1472,17 @@ export default function App() {
         </div>
 
         {/* --- Global Workspace Footer --- */}
-        <footer
-          id="footer_pane"
-          className="border-t border-neutral-900 bg-neutral-950/20 py-6 text-center text-xs text-neutral-500"
-        >
-          <p className="font-mono">
-            Webtoon-to-Video compilation dashboard &bull; Real-time Scraper
-            Integration
-          </p>
-        </footer>
+        {!isAdminPath && (
+          <footer
+            id="footer_pane"
+            className="border-t border-neutral-900 bg-neutral-950/20 py-6 text-center text-xs text-neutral-500"
+          >
+            <p className="font-mono">
+              Webtoon-to-Video compilation dashboard &bull; Real-time Scraper
+              Integration
+            </p>
+          </footer>
+        )}
       </div>
 
       {/* --------------------------------------------------------------------------
