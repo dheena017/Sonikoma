@@ -48,6 +48,7 @@ interface StoryboardTimelineProps {
   cropCloseKernelSize?: number;
   autoSplitTallStrips?: boolean;
   playStoryboardAudio?: (idx: number, forcePlay?: boolean) => void;
+  autoPlayAudio?: boolean;
   saveProject?: (customPanels?: GeneratedPanel[]) => Promise<boolean>;
   handleSaveStoryboard?: () => void;
   handleCancelBatch?: () => void;
@@ -90,6 +91,7 @@ const StoryboardTimeline = React.memo(({
   cropCloseKernelSize = 15,
   autoSplitTallStrips = true,
   playStoryboardAudio,
+  autoPlayAudio,
   saveProject,
   handleSaveStoryboard,
   handleCancelBatch,
@@ -680,6 +682,8 @@ const StoryboardTimeline = React.memo(({
             isSelected={selectedPanelIds.has(panel.id)}
             onToggleSelect={() => togglePanelSelection(panel.id)}
             playStoryboardAudio={playStoryboardAudio}
+            autoPlayAudio={autoPlayAudio}
+            addNotification={addNotification}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}

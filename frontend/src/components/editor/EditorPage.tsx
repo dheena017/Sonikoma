@@ -105,6 +105,7 @@ const EditorPage = ({ appLogic, navigateTo }: EditorPageProps) => {
     seriesTitle,
     chapterNumber,
     chapterTitle,
+    autoPlayAudio,
     saveProject,
     audioFeedback,
     isRendering,
@@ -364,6 +365,7 @@ const EditorPage = ({ appLogic, navigateTo }: EditorPageProps) => {
                           musicTheme={musicTheme}
                           narrationStyle={narrationStyle}
                           playStoryboardAudio={playStoryboardAudio}
+                          autoPlayAudio={autoPlayAudio}
                           bubbleSensitivity={bubbleSensitivity}
                           bubbleDetectionStyle={bubbleDetectionStyle}
                           bubbleEraseMethod={bubbleEraseMethod}

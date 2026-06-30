@@ -639,7 +639,7 @@ const HeaderInner = ({
           >
             {isMuted || volume === 0 ? (
               <VolumeX className="h-4 w-4 text-rose-450" />
-            ) : volume < 0.4 ? (
+            ) : volume < 40 ? (
               <Volume1 className="h-4 w-4" />
             ) : (
               <Volume2 className="h-4 w-4 text-purple-400" />
@@ -648,18 +648,18 @@ const HeaderInner = ({
           <input
             type="range"
             min="0"
-            max="1"
-            step="0.05"
+            max="100"
+            step="1"
             value={isMuted ? 0 : volume}
             onChange={(e) => {
-              const val = parseFloat(e.target.value);
+              const val = parseInt(e.target.value, 10);
               if (setVolume) setVolume(val);
               if (val > 0 && isMuted && setIsMuted) {
                 setIsMuted(false);
               }
             }}
             className="w-12 sm:w-16 h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-purple-500 outline-none transition-all"
-            title={`Volume: ${Math.round((isMuted ? 0 : volume) * 100)}%`}
+            title={`Volume: ${isMuted ? 0 : volume}%`}
           />
         </div>
 

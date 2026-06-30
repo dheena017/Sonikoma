@@ -3,6 +3,8 @@ import { Sparkles, RefreshCw, X } from "lucide-react";
 import { GeneratedPanel } from "../../types";
 import { getPanelFilterStyle } from "../../utils";
 
+let autoPlayHintShown = false;
+
 interface TimelineCardProps {
   panel: GeneratedPanel;
   idx: number;
@@ -24,6 +26,8 @@ interface TimelineCardProps {
   isSelected: boolean;
   onToggleSelect: () => void;
   playStoryboardAudio?: (idx: number, forcePlay?: boolean) => void;
+  autoPlayAudio?: boolean;
+  addNotification?: (message: string, type: any) => void;
   onDragStart?: (e: React.DragEvent, index: number) => void;
   onDragOver?: (e: React.DragEvent, index: number) => void;
   onDragEnd?: (e: React.DragEvent) => void;
@@ -57,6 +61,8 @@ const TimelineCard = ({
   onDragOver,
   onDragEnd,
   onDrop,
+  autoPlayAudio,
+  addNotification,
   isDragging,
   isDragOver,
 }: TimelineCardProps) => {
@@ -115,6 +121,13 @@ const TimelineCard = ({
             // Delay voice synthesis slightly so the UI state change and outline render instantly
             setTimeout(() => {
               playStoryboardAudio(idx);
+              if (!autoPlayAudio && !autoPlayHintShown) {
+                autoPlayHintShown = true;
+                addNotification?.(
+                  "Auto-play is off. Enable Auto-play TTS Audios in settings to hear this panel automatically.",
+                  "info"
+                );
+              }
             }, 50);
           }
         }}
