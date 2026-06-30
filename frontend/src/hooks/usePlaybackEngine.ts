@@ -22,6 +22,8 @@ interface UsePlaybackEngineProps {
   musicTheme: string;
   voiceActor: string;
   autoPlayAudio: boolean;
+  sfxEnabled: boolean;
+  sfxVolume: number;
 }
 
 export function usePlaybackEngine({
@@ -31,6 +33,8 @@ export function usePlaybackEngine({
   musicTheme,
   voiceActor,
   autoPlayAudio,
+  sfxEnabled,
+  sfxVolume,
 }: UsePlaybackEngineProps) {
   const [currentPanelIndex, setCurrentPanelIndex] = useState<number>(0);
   const [playbackTime, setPlaybackTime] = useState<number>(0);
@@ -127,11 +131,18 @@ export function usePlaybackEngine({
 
       // If autoplay is off and we are NOT forcing it (e.g. not manually clicking "Play"), do not play
       if (!autoPlayAudio && !forcePlay) {
+        console.debug(
+          `[Playback] Skipped panel ${panelIdx} audio because autoPlayAudio is disabled.`
+        );
         return;
       }
 
-      if (activePanel.audio_url && !isMuted) {
-        const audio = new Audio(activePanel.audio_url);
+      const shouldPlayAudio = !!activePanel.audio_url && !isMuted;
+      const shouldSpeak = !isMuted || !activePanel.audio_url;
+      const shouldPlaySfx = !!activePanel.sfx && !isMuted && sfxEnabled;
+
+      if (shouldPlayAudio) {
+        const audio = new Audio(activePanel.audio_url as string);
         audio.volume = volume / 100;
         activeAudioRef.current = audio;
         audio.play().catch((err) => {
@@ -141,15 +152,27 @@ export function usePlaybackEngine({
           );
           speakDialogue(activePanel.speech_text, activePanel.duration);
         });
-      } else {
+      } else if (shouldSpeak) {
         speakDialogue(activePanel.speech_text, activePanel.duration);
+      } else {
+        console.debug(
+          `[Playback] No speech or audio played for panel ${panelIdx} (muted or no audio available).`
+        );
       }
 
-      if (activePanel.sfx && !isMuted) {
-        playComicSoundEffect(activePanel.sfx);
+      if (activePanel.sfx && !isMuted && sfxEnabled) {
+        playComicSoundEffect(activePanel.sfx, sfxVolume / 100);
+      } else if (activePanel.sfx && !sfxEnabled) {
+        console.debug(
+          `[Playback] SFX disabled for panel ${panelIdx}; skipping ${activePanel.sfx}`
+        );
+      } else if (activePanel.sfx && isMuted) {
+        console.debug(
+          `[Playback] SFX skipped for panel ${panelIdx} because audio is muted.`
+        );
       }
     },
-    [panels, speakDialogue, isMuted, volume, autoPlayAudio]
+    [panels, speakDialogue, isMuted, volume, autoPlayAudio, sfxEnabled, sfxVolume]
   );
 
   useEffect(() => {
