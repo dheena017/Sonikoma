@@ -45,8 +45,6 @@ import RegisterPage from "./components/auth/RegisterPage.js";
 import ForgotPasswordPage from "./components/auth/ForgotPasswordPage.js";
 import ProfilePage from "./components/ProfilePage.js";
 import LoadingPage from "./components/LoadingPage.js";
-import ProjectDetailsPage from "./components/ProjectDetailsPage.js";
-import ProjectEditorPage from "./components/ProjectEditorPage.js";
 import SeriesDetailsPage from "./components/SeriesDetailsPage.js";
 import DisplayPage from "./components/DisplayPage.js";
 import DashboardPage from "./components/DashboardPage.js";
@@ -1319,20 +1317,6 @@ export default function App() {
             />
           )}
 
-          {/* PAGE VIEW 17: Project Details Dashboard */}
-          {isChapterDetailsPath && (
-            <ProjectDetailsPage
-              onNavigateHome={handleNavigateHome}
-              navigateTo={navigateTo}
-              setGlobalDirty={setProjectDetailsDirty}
-              setGlobalSaveStatus={setProjectDetailsSaveStatus}
-              registerSaveHandler={registerProjectDetailsSaveHandler}
-              addNotification={addNotification}
-              audioFeedback={audioFeedback}
-              fetchWithInterceptor={fetchWithInterceptor}
-            />
-          )}
-
           {/* PAGE VIEW 17.5: Series Landing Page */}
           {isSeriesDetailsPath && (
             <SeriesDetailsPage
@@ -1434,23 +1418,6 @@ export default function App() {
               <CropEditorModal
                 isPage={true}
                 appLogic={memoizedAppLogic}
-              />
-            ))}
-
-          {/* PAGE VIEW 21: Dedicated Project Workspace Editor Page */}
-          {isProjectEditorPath &&
-            (scrapedImages.length === 0 ? (
-              <div className="flex-1 flex flex-col items-center justify-center min-h-[500px] text-neutral-400">
-                <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4" />
-                <p className="text-sm font-semibold font-mono text-purple-300">
-                  Loading project editor workspace...
-                </p>
-              </div>
-            ) : (
-              <ProjectEditorPage
-                appLogic={appLogic}
-                onNavigateHome={handleNavigateHome}
-                navigateTo={navigateTo}
               />
             ))}
 

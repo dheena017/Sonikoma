@@ -137,6 +137,29 @@ export function useAppRouter({
       const path = window.location.pathname;
       setCurrentPath(path);
 
+      const isLegacyProjectPagePath =
+        path === "/project-details" || path === "/project-editor";
+
+      if (isLegacyProjectPagePath) {
+        const activeProjId =
+          localStorage.getItem("active_project_id") || projectId;
+        const activeSeriesSlug =
+          localStorage.getItem("active_series_slug") || seriesSlug;
+        const activeChapterSlug =
+          localStorage.getItem("active_chapter_slug") || chapterSlug;
+        let target = "/dashboard";
+
+        if (activeProjId && activeSeriesSlug && activeChapterSlug) {
+          target = `/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
+        } else if (activeProjId) {
+          target = `/workspace?id=${activeProjId}`;
+        }
+
+        window.history.replaceState({}, "", target);
+        setCurrentPath(target);
+        return;
+      }
+
       // Root redirect logic
       if (!isInitializing && !authLoading) {
         if (!isAuthenticated) {
