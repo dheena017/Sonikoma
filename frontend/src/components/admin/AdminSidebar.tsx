@@ -160,7 +160,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       {/* Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] transition-opacity animate-fade-in"
+          className="fixed lg:hidden inset-0 bg-black/60 backdrop-blur-md z-[60] transition-opacity animate-fade-in"
           onClick={onClose}
         />
       )}
@@ -168,7 +168,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       {/* Sidebar Drawer */}
       <aside
         className={`fixed inset-y-0 left-0 w-80 z-[70] transition-transform duration-500 ease-out transform ${
-          isOpen ? "translate-x-0 shadow-2xl shadow-black/80" : "-translate-x-full"
+          isOpen ? "translate-x-0 shadow-2xl shadow-black/80 lg:shadow-none" : "-translate-x-full"
         }`}
       >
         {sidebarContent}
