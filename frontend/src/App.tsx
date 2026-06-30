@@ -586,10 +586,8 @@ export default function App() {
       isProfilePath: currentPath === "/profile",
       isNotificationsPath: currentPath === "/notifications",
       isAdminPath: currentPath === "/admin",
-      isChapterDetailsPath:
-        currentPath === "/project-details" ||
-        (chapterPathMatch !== null && isDetailsMode),
-      isProjectEditorPath: currentPath === "/project-editor",
+      isChapterDetailsPath: false,
+      isProjectEditorPath: false,
       isSeriesDetailsPath:
         !chapterPathMatch && currentPath.match(/\/series\/([^\/]+)$/) !== null,
       isLandingPath:

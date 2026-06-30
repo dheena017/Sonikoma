@@ -67,9 +67,7 @@ const SidebarInner = ({
   const chapterPathMatch = currentPath.match(
     /\/series\/[^\/]+\/chapters\/([^\/]+)/
   );
-  const isWorkspace =
-    currentPath === "/workspace" ||
-    (chapterPathMatch !== null && !currentPath.endsWith("/details"));
+  const isWorkspace = currentPath === "/workspace";
   const isDashboardOverview = currentPath === "/dashboard";
   const isAdminPath = currentPath === "/admin";
   const isSettings = currentPath === "/settings";
@@ -124,12 +122,7 @@ const SidebarInner = ({
     const activeChapterSlug =
       localStorage.getItem("active_chapter_slug") || chapterSlug;
 
-    if (
-      currentPath.startsWith("/series/") &&
-      !currentPath.endsWith("/details")
-    ) {
-      navigateTo(currentPath);
-    } else if (activeProjId) {
+    if (activeProjId) {
       if (activeSeriesSlug && activeChapterSlug) {
         navigateTo(`/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`);
       } else {

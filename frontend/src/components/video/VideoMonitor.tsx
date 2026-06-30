@@ -13,6 +13,7 @@ interface VideoMonitorProps {
   currentPanelIndex: number;
   playbackTime: number;
   reprocessingPanelId: number | null;
+  quality?: "draft" | "high";
 }
 
 const VideoMonitor = React.memo(({
@@ -36,16 +37,18 @@ const VideoMonitor = React.memo(({
         aspectRatio={aspectRatio}
       />
 
-      <VideoMonitorActive
-        activePreviewTab={activePreviewTab}
-        videoUrl={videoUrl}
-        panels={panels}
-        aspectRatio={aspectRatio}
-        videoPlayerRef={videoPlayerRef}
-        currentPanelIndex={currentPanelIndex}
-        playbackTime={playbackTime}
-        reprocessingPanelId={reprocessingPanelId}
-      />
+      <div className={`transition-all duration-300 ${quality === 'draft' ? 'blur-[1px] brightness-90 grayscale-[0.2]' : ''}`}>
+        <VideoMonitorActive
+          activePreviewTab={activePreviewTab}
+          videoUrl={videoUrl}
+          panels={panels}
+          aspectRatio={aspectRatio}
+          videoPlayerRef={videoPlayerRef}
+          currentPanelIndex={currentPanelIndex}
+          playbackTime={playbackTime}
+          reprocessingPanelId={reprocessingPanelId}
+        />
+      </div>
     </div>
   );
 });

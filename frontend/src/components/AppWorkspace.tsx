@@ -1,55 +1,11 @@
 import React from "react";
-import { CheckCircle2 } from "lucide-react";
-import * as api from "../api/index.js";
+import { History, ArrowRight, Layout, Sparkles } from "lucide-react";
 import UrlInputPanel from "./scraper/UrlInputPanel.js";
-import LiveScraperDeck from "./scraper/LiveScraperDeck.js";
-import PipelineStatusCard from "./pipeline/PipelineStatusCard.js";
-import StoryboardTimeline from "./timeline/StoryboardTimeline.js";
-import VideoMonitor from "./video/VideoMonitor.js";
-import VolumeAndProgressPanel from "./video/VolumeAndProgressPanel.js";
-import OutputMetadataPanel from "./OutputMetadataPanel.js";
 import ProjectConfirmModal from "./scraper/ProjectConfirmModal.js";
-import { LogEntry } from "../types/logs";
 
 interface AppWorkspaceProps {
-  isDashboardOnly?: boolean;
   projectId: string | null;
-  panels: any[];
-  setPanels: any;
-  isGeneratingStoryboard?: boolean;
-  handleGenerateStoryboardAI?: () => Promise<void>;
-  consoleLogs: LogEntry[];
-  setConsoleLogs: any;
-  scrapedImages: string[];
-  setScrapedImages: any;
-  selectedScraped: string[];
-  setSelectedScraped: any;
-  activePreviewTab: "video" | "timeline";
-  setActivePreviewTab: (tab: "video" | "timeline") => void;
-  setEditingImageIdx: (idx: number | null) => void;
-  setEditCropTop: (v: number) => void;
-  setEditCropBottom: (v: number) => void;
-  setEditCropLeft: (v: number) => void;
-  setEditCropRight: (v: number) => void;
-  setEditAutoTrim: (v: boolean) => void;
-  showBubbleModal: boolean;
-  setShowBubbleModal: (v: boolean) => void;
-  playStoryboardAudio: (idx: number, forcePlay?: boolean) => void;
-  isCleaningBubbles: boolean;
-  cleanProgress: any;
-  bubbleCroppingImgUrl: string | null;
-  showAutoCropModal: boolean;
-  setShowAutoCropModal: (v: boolean) => void;
-  isBatchCropping: boolean;
-  batchProgress: any;
-  croppingImgUrl: string | null;
-  handleAutoCropSelected: () => void;
-  handleCleanBubblesSelected: () => void;
-  handleCancelBatch?: () => void;
-  videoPlayerRef: React.RefObject<HTMLVideoElement | null>;
   addNotification: any;
-  setErrorPopup: any;
-  fetchWithInterceptor: any;
   targetUrl: string;
   setTargetUrl: (v: string) => void;
   selectedSource: string;
@@ -57,56 +13,11 @@ interface AppWorkspaceProps {
   selectedModel: string;
   setSelectedModel: (v: string) => void;
   isProcessing: boolean;
-  handleGenerateVideo: () => void;
   isScraping: boolean;
   scrapeImages: (
     customUrl?: string,
     overrideProjectId?: string
   ) => Promise<void>;
-  mergingIndices: number[];
-  handleStitchWithNext: (idx: number) => Promise<void>;
-  addPanelsToStoryboard: (
-    urls: string[],
-    currentScrapedList?: string[],
-    shouldScroll?: boolean
-  ) => void;
-  progressStatus: any;
-  videoUrl: string | null;
-  setVideoUrl: any;
-  aspectRatio: "9:16" | "16:9";
-  currentPanelIndex: number;
-  setCurrentPanelIndex: (idx: number) => void;
-  playbackTime: number;
-  setPlaybackTime: (time: number) => void;
-  reprocessingPanelId: number | null;
-  storyboardPlaying: boolean;
-  toggleStoryboardPlayback: () => void;
-  resetStoryboardPlayback: () => void;
-  isMuted: boolean;
-  setIsMuted: (v: boolean) => void;
-  volume: number;
-  setVolume: (v: number) => void;
-  musicTheme: string;
-  voiceActor: string;
-  narrationStyle: string;
-  setNarrationStyle: (v: string) => void;
-  bubbleSensitivity?: number;
-  bubbleDetectionStyle?: string;
-  bubbleEraseMethod?: string;
-  bubbleDilation?: number;
-  bubbleInpaintRadius?: number;
-  cropSensitivity?: number;
-  cropBackgroundMode?: string;
-  aspectRatioLock?: string;
-  minPanelAreaPct?: number;
-  overlapMergeThreshold?: number;
-  useLocalCV?: boolean;
-  autoSplitTallStrips?: boolean;
-  cropModel?: string;
-  cropMinHeightPx?: number;
-  cropCannyLow?: number;
-  cropCannyHigh?: number;
-  cropCloseKernelSize?: number;
   seriesTitle: string;
   setSeriesTitle: (v: string) => void;
   chapterNumber: string;
@@ -125,166 +36,58 @@ interface AppWorkspaceProps {
   setSmartSlice?: (v: boolean) => void;
   showScrapeConfirmModal: boolean;
   setShowScrapeConfirmModal: (v: boolean) => void;
-  saveProject?: (customPanels?: any[], options?: any) => Promise<boolean>;
   resetWorkspace?: () => void;
-  isRendering?: boolean;
-  renderProgress?: number;
-  renderEtaSeconds?: number | null;
-  handleRenderFinalVideo?: () => void;
-  audioFeedback?: any;
+  narrationStyle: string;
+  setNarrationStyle: (v: string) => void;
+  cropSensitivity?: number;
+  setCropSensitivity?: (v: number) => void;
+  autoSplitTallStrips?: boolean;
+  setAutoSplitTallStrips?: (v: boolean) => void;
+  navigateTo?: (path: string) => void;
+  panels?: any[];
 }
 
-const AppWorkspaceInner = ({
-  isDashboardOnly = true,
-  projectId,
-  panels,
-  setPanels,
-  consoleLogs,
-  setConsoleLogs,
-  scrapedImages,
-  setScrapedImages,
-  selectedScraped,
-  setSelectedScraped,
-  activePreviewTab,
-  setActivePreviewTab,
-  setEditingImageIdx,
-  setEditCropTop,
-  setEditCropBottom,
-  setEditCropLeft,
-  setEditCropRight,
-  setEditAutoTrim,
-  showBubbleModal,
-  setShowBubbleModal,
-  playStoryboardAudio,
-  isCleaningBubbles,
-  cleanProgress,
-  bubbleCroppingImgUrl,
-  showAutoCropModal,
-  setShowAutoCropModal,
-  isBatchCropping,
-  batchProgress,
-  croppingImgUrl,
-  handleAutoCropSelected,
-  handleCleanBubblesSelected,
-  handleCancelBatch,
-  videoPlayerRef,
-  addNotification,
-  setErrorPopup,
-  fetchWithInterceptor,
-  targetUrl,
-  setTargetUrl,
-  selectedSource,
-  setSelectedSource,
-  selectedModel,
-  setSelectedModel,
-  isProcessing,
-  handleGenerateVideo,
-  isScraping,
-  scrapeImages,
-  mergingIndices,
-  handleStitchWithNext,
-  addPanelsToStoryboard,
-  progressStatus,
-  videoUrl,
-  setVideoUrl,
-  aspectRatio,
-  currentPanelIndex,
-  setCurrentPanelIndex,
-  playbackTime,
-  setPlaybackTime,
-  reprocessingPanelId,
-  storyboardPlaying,
-  toggleStoryboardPlayback,
-  resetStoryboardPlayback,
-  isMuted,
-  setIsMuted,
-  volume,
-  setVolume,
-  musicTheme,
-  voiceActor,
-  narrationStyle,
-  setNarrationStyle,
-  bubbleSensitivity,
-  bubbleDetectionStyle,
-  bubbleEraseMethod,
-  bubbleDilation,
-  bubbleInpaintRadius,
-  cropSensitivity,
-  cropBackgroundMode,
-  aspectRatioLock,
-  minPanelAreaPct,
-  overlapMergeThreshold,
-  useLocalCV,
-  autoSplitTallStrips,
-  cropModel,
-  cropMinHeightPx,
-  cropCannyLow,
-  cropCannyHigh,
-  cropCloseKernelSize,
-  seriesTitle,
-  setSeriesTitle,
-  chapterNumber,
-  setChapterNumber,
-  chapterTitle,
-  setChapterTitle,
-  scrapedGenre,
-  setScrapedGenre,
-  seriesAuthor,
-  setSeriesAuthor,
-  seriesCoverImage,
-  setSeriesCoverImage,
-  seriesSynopsis,
-  setSeriesSynopsis,
-  smartSlice,
-  setSmartSlice,
-  showScrapeConfirmModal,
-  setShowScrapeConfirmModal,
-  saveProject,
-  isGeneratingStoryboard = false,
-  handleGenerateStoryboardAI,
-  resetWorkspace,
-  isRendering = false,
-  renderProgress = 0,
-  renderEtaSeconds = null,
-  handleRenderFinalVideo,
-  audioFeedback,
-}: AppWorkspaceProps) => {
-  React.useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("autoScrape") === "true" && targetUrl) {
-      // Remove autoScrape so it doesn't loop on refresh
-      params.delete("autoScrape");
-      window.history.replaceState(
-        {},
-        "",
-        `${window.location.pathname}?${params.toString()}`
-      );
-
-      const token =
-        localStorage.getItem("sonikoma_token") ||
-        sessionStorage.getItem("sonikoma_token");
-
-      if (!token) {
-        const usedFree = localStorage.getItem("sonikoma_free_scrape_used");
-        if (usedFree === "true") {
-          addNotification(
-            "You've used your free try. Please sign in to import more links!",
-            "warning"
-          );
-          if (typeof (window as any).navigateTo === "function") {
-            (window as any).navigateTo("/login");
-          } else {
-            window.history.pushState({}, "", "/login");
-            window.dispatchEvent(new Event("popstate"));
-          }
-          return;
-        } else {
-          localStorage.setItem("sonikoma_free_scrape_used", "true");
-        }
-      }
-      setShowScrapeConfirmModal(true);
-    }
-  }, [targetUrl]);
+const AppWorkspaceInner = (props: AppWorkspaceProps) => {
+  const {
+    projectId,
+    addNotification,
+    targetUrl,
+    setTargetUrl,
+    selectedSource,
+    setSelectedSource,
+    selectedModel,
+    setSelectedModel,
+    isProcessing,
+    isScraping,
+    scrapeImages,
+    seriesTitle,
+    setSeriesTitle,
+    chapterNumber,
+    setChapterNumber,
+    chapterTitle,
+    setChapterTitle,
+    scrapedGenre,
+    setScrapedGenre,
+    seriesAuthor,
+    setSeriesAuthor,
+    seriesCoverImage,
+    setSeriesCoverImage,
+    seriesSynopsis,
+    setSeriesSynopsis,
+    smartSlice,
+    setSmartSlice,
+    showScrapeConfirmModal,
+    setShowScrapeConfirmModal,
+    resetWorkspace,
+    narrationStyle,
+    setNarrationStyle,
+    cropSensitivity,
+    setCropSensitivity,
+    autoSplitTallStrips,
+    setAutoSplitTallStrips,
+    navigateTo,
+    panels = [],
+  } = props;
 
   const handleConfirmProjectAndScrape = async (
     details: {
@@ -300,7 +103,6 @@ const AppWorkspaceInner = ({
   ) => {
     setShowScrapeConfirmModal(false);
 
-    // Update parent states
     setSeriesTitle(details.seriesTitle);
     setChapterNumber(details.chapterNumber);
     setChapterTitle(details.chapterTitle);
@@ -309,7 +111,6 @@ const AppWorkspaceInner = ({
     setSeriesCoverImage(details.seriesCoverImage);
     setSeriesSynopsis(details.seriesSynopsis);
 
-    // Generate project_id
     const generatedProjectId =
       (isTemporary ? "temp_" : "proj_") +
       Date.now() +
@@ -317,115 +118,73 @@ const AppWorkspaceInner = ({
       Math.random().toString(36).substring(2, 10);
 
     try {
-      const formattedEpisode = (() => {
-        const num = details.chapterNumber.trim();
-        const name = details.chapterTitle.trim();
-        if (num && name) return `Chapter ${num} - ${name}`;
-        if (num) return `Chapter ${num}`;
-        if (name) return name;
-        return "";
-      })();
-
-      const logMsg = isTemporary
-        ? "Initializing temporary preview session (no data will be saved)..."
-        : `Initializing workspace for "${details.seriesTitle}"...`;
-      addNotification(logMsg, "info");
-
-      if (!isTemporary) {
-        // Clear query parameters when moving into a managed project
-        window.history.pushState(null, "", "/workspace");
+      if (!isTemporary && navigateTo) {
+         // Optimistic navigation
+         navigateTo(`/editor?id=${generatedProjectId}`);
       }
-
-      // Start the actual scrape
       await scrapeImages(targetUrl, generatedProjectId);
     } catch (err: any) {
       console.error(err);
       addNotification(
-        `Failed to create project: ${err.message || "Unknown error"}`,
+        `Failed to start import: ${err.message || "Unknown error"}`,
         "error"
       );
     }
   };
 
-  const handleSaveMeta = async () => {
-    if (saveProject) {
-      await saveProject(undefined, {
-        savingMessage: "Saving metadata...",
-        successMessage: "Metadata saved successfully!",
-        errorMessage: "Failed to save metadata.",
-      });
-    }
-  };
-
-  const handleSaveAssets = async () => {
-    if (projectId?.startsWith("temp_")) {
-      addNotification(
-        "Temporary Session: Saving images is disabled.",
-        "warning"
-      );
-      return;
-    }
-    const token =
-      localStorage.getItem("sonikoma_token") ||
-      sessionStorage.getItem("sonikoma_token");
-    const headers: HeadersInit = {
-      "Content-Type": "application/json",
-    };
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-    try {
-      addNotification("Saving images...", "info");
-      const data = await api.saveScrapedImages(
-        {
-          url: targetUrl,
-          images: scrapedImages,
-        },
-        token || undefined
-      );
-      if (data) {
-        addNotification("Images saved successfully!", "success");
-      } else {
-        throw new Error("Failed to save images");
-      }
-    } catch (err: any) {
-      addNotification(`Failed to save images: ${err.message}`, "error");
-    }
-  };
-
-  const handleSaveStoryboard = async () => {
-    if (saveProject) {
-      await saveProject(panels, {
-        savingMessage: "Saving timeline...",
-        successMessage: "Timeline saved successfully!",
-        errorMessage: "Failed to save timeline.",
-      });
-    }
-  };
-
-  const handleSaveVideo = async () => {
-    if (saveProject) {
-      await saveProject(undefined, {
-        savingMessage: "Saving video...",
-        successMessage: "Video saved successfully!",
-        errorMessage: "Failed to save video.",
-      });
-    }
-  };
+  const hasActiveProject = (projectId && panels.length > 0) || (projectId && projectId.startsWith('proj_'));
 
   return (
     <main
       id="main_workspace"
-      className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-10 items-start"
+      className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 md:py-20 flex flex-col gap-10 items-center justify-center min-h-[80vh]"
     >
-      {/* LEFT COLUMN: SOURCE INTEGRATION */}
-      <div
-        id="controls_column"
-        className={`order-1 lg:order-1 flex flex-col gap-6 md:gap-8 min-w-0 ${
-          panels.length > 0 ? "lg:col-span-7" : "lg:col-span-12"
-        }`}
-      >
-        {/* CONVERSION INPUT CARD */}
+      <div className="w-full space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
+
+        {/* RESUME CARD (Optimized UX with Thumbnail) */}
+        {hasActiveProject && (
+           <div className="group bg-gradient-to-br from-purple-900/40 to-indigo-900/40 border border-purple-500/30 rounded-[32px] p-6 backdrop-blur-xl flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl transition-all hover:border-purple-400/50">
+              <div className="flex flex-col md:flex-row items-center gap-6 w-full">
+                 {/* Visual Anchor / Thumbnail */}
+                 <div className="relative h-28 w-48 rounded-2xl overflow-hidden border border-white/10 bg-black/40 shadow-inner shrink-0 group-hover:scale-[1.02] transition-transform duration-500">
+                    {seriesCoverImage ? (
+                      <img src={seriesCoverImage} className="w-full h-full object-cover" alt="Series Cover" />
+                    ) : panels.length > 0 ? (
+                      <img src={panels[0].image_url} className="w-full h-full object-cover" alt="Latest Panel" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-purple-600/10">
+                        <History className="h-8 w-8 text-purple-500/50" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    <div className="absolute bottom-2 left-3 flex items-center gap-1.5">
+                       <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                       <span className="text-[9px] font-black text-white uppercase tracking-widest font-mono">In Progress</span>
+                    </div>
+                 </div>
+
+                 <div className="flex-1 text-center md:text-left space-y-2">
+                    <div className="flex items-center justify-center md:justify-start gap-2.5">
+                      <div className="h-8 w-8 rounded-xl bg-purple-600/20 flex items-center justify-center border border-purple-500/30">
+                        <History className="h-4 w-4 text-purple-400" />
+                      </div>
+                      <h3 className="text-xl font-black text-white tracking-tight">Resume Session</h3>
+                    </div>
+                    <p className="text-xs text-purple-200/60 font-medium max-w-sm">
+                      Pick up exactly where you left off with <span className="text-purple-300 font-bold">"{seriesTitle || projectId}"</span>. Your assets and timeline are ready.
+                    </p>
+                 </div>
+              </div>
+
+              <button
+                onClick={() => navigateTo?.(`/editor?id=${projectId}`)}
+                className="w-full md:w-auto px-8 py-4 bg-white text-purple-950 font-black rounded-2xl text-xs uppercase tracking-[0.15em] hover:bg-purple-50 transition-all flex items-center justify-center gap-3 shadow-xl active:scale-95 group-hover:shadow-[0_0_30px_rgba(168,85,247,0.2)]"
+              >
+                Launch Workspace <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </button>
+           </div>
+        )}
+
         <UrlInputPanel
           targetUrl={targetUrl}
           setTargetUrl={setTargetUrl}
@@ -435,33 +194,8 @@ const AppWorkspaceInner = ({
           setSelectedModel={setSelectedModel}
           isProcessing={isProcessing}
           isScraping={isScraping}
-          handleGenerateVideo={handleGenerateVideo}
-          handleScrape={() => {
-            const token =
-              localStorage.getItem("sonikoma_token") ||
-              sessionStorage.getItem("sonikoma_token");
-            if (!token) {
-              const usedFree = localStorage.getItem(
-                "sonikoma_free_scrape_used"
-              );
-              if (usedFree === "true") {
-                addNotification(
-                  "You've used your free try. Please sign in to import more links!",
-                  "warning"
-                );
-                if (typeof (window as any).navigateTo === "function") {
-                  (window as any).navigateTo("/login");
-                } else {
-                  window.history.pushState({}, "", "/login");
-                  window.dispatchEvent(new Event("popstate"));
-                }
-                return;
-              } else {
-                localStorage.setItem("sonikoma_free_scrape_used", "true");
-              }
-            }
-            setShowScrapeConfirmModal(true);
-          }}
+          handleGenerateVideo={() => {}}
+          handleScrape={() => setShowScrapeConfirmModal(true)}
           addNotification={addNotification}
           narrationStyle={narrationStyle}
           setNarrationStyle={setNarrationStyle}
@@ -482,207 +216,43 @@ const AppWorkspaceInner = ({
           smartSlice={smartSlice}
           setSmartSlice={setSmartSlice}
           resetWorkspace={resetWorkspace}
-          handleSaveMeta={handleSaveMeta}
+          cropSensitivity={cropSensitivity}
+          setCropSensitivity={setCropSensitivity}
+          autoSplitTallStrips={autoSplitTallStrips}
+          setAutoSplitTallStrips={setAutoSplitTallStrips}
         />
 
-        {/* SEPARATED IMAGE STRIPS GALLERY */}
-        <LiveScraperDeck
-          isDashboardOnly={isDashboardOnly}
-          scrapedImages={scrapedImages}
-          isScraping={isScraping}
-          selectedScraped={selectedScraped}
-          setSelectedScraped={setSelectedScraped}
-          setScrapedImages={setScrapedImages}
-          mergingIndices={mergingIndices}
-          setConsoleLogs={setConsoleLogs}
-          panels={panels}
-          setPanels={setPanels}
-          currentPanelIndex={currentPanelIndex}
-          handleMergeWithNext={handleStitchWithNext}
-          setEditingImageIdx={setEditingImageIdx}
-          openEditingImageIdx={setEditingImageIdx}
-          setEditCropTop={setEditCropTop}
-          setEditCropBottom={setEditCropBottom}
-          setEditCropLeft={setEditCropLeft}
-          setEditCropRight={setEditCropRight}
-          setEditAutoTrim={setEditAutoTrim}
-          addNotification={addNotification}
-          fetchWithInterceptor={fetchWithInterceptor}
-          setErrorPopup={setErrorPopup}
-          showBubbleModal={showBubbleModal}
-          setShowBubbleModal={setShowBubbleModal}
-          isCleaningBubbles={isCleaningBubbles}
-          cleanProgress={cleanProgress}
-          bubbleCroppingImgUrl={bubbleCroppingImgUrl}
-          showAutoCropModal={showAutoCropModal}
-          setShowAutoCropModal={setShowAutoCropModal}
-          isBatchCropping={isBatchCropping}
-          batchProgress={batchProgress}
-          croppingImgUrl={croppingImgUrl}
-          handleAutoCropSelected={handleAutoCropSelected}
-          handleCleanBubblesSelected={handleCleanBubblesSelected}
-          handleCancelBatch={handleCancelBatch}
-          addPanelsToStoryboard={addPanelsToStoryboard}
-          audioFeedback={audioFeedback}
-          seriesTitle={seriesTitle}
-          chapterNumber={chapterNumber}
-          chapterTitle={chapterTitle}
-          targetUrl={targetUrl}
-          selectedSource={selectedSource}
-          handleSaveAssets={handleSaveAssets}
-        />
-
-        {/* ACTIVE QUEUE / LIVE PIPELINE PROGRESS */}
-        {isProcessing && <PipelineStatusCard progressStatus={progressStatus} />}
-
-        {/* DYNAMIC STORYBOARD TIMELINE DECK (hidden when empty to save vertical space on mobile) */}
-        {panels.length > 0 && (
-          <div id="storyboard_timeline_section">
-            <StoryboardTimeline
-              panels={panels}
-              setPanels={setPanels}
-              currentPanelIndex={currentPanelIndex}
-              setCurrentPanelIndex={setCurrentPanelIndex}
-              activePreviewTab={activePreviewTab}
-              setActivePreviewTab={setActivePreviewTab}
-              setPlaybackTime={setPlaybackTime}
-              hasScrapedImages={scrapedImages.length > 0}
-              setVideoUrl={setVideoUrl}
-              addNotification={addNotification}
-              targetUrl={targetUrl}
-              fetchWithInterceptor={fetchWithInterceptor}
-              selectedModel={selectedModel}
-              setConsoleLogs={setConsoleLogs}
-              voiceActor={voiceActor}
-              musicTheme={musicTheme}
-              narrationStyle={narrationStyle}
-              playStoryboardAudio={playStoryboardAudio}
-              bubbleSensitivity={bubbleSensitivity}
-              bubbleDetectionStyle={bubbleDetectionStyle}
-              bubbleEraseMethod={bubbleEraseMethod}
-              bubbleDilation={bubbleDilation}
-              bubbleInpaintRadius={bubbleInpaintRadius}
-              cropSensitivity={cropSensitivity}
-              cropBackgroundMode={cropBackgroundMode}
-              aspectRatioLock={aspectRatioLock}
-              minPanelAreaPct={minPanelAreaPct}
-              overlapMergeThreshold={overlapMergeThreshold}
-              useLocalCV={useLocalCV}
-              saveProject={saveProject}
-              cropModel={cropModel}
-              cropMinHeightPx={cropMinHeightPx}
-              cropCannyLow={cropCannyLow}
-              cropCannyHigh={cropCannyHigh}
-              cropCloseKernelSize={cropCloseKernelSize}
-              autoSplitTallStrips={autoSplitTallStrips}
-              handleSaveStoryboard={handleSaveStoryboard}
-              handleCancelBatch={handleCancelBatch}
-              audioFeedback={audioFeedback}
-            />
-          </div>
+        {/* LOADING CONTEXT BRIDGE */}
+        {isScraping && (
+           <div className="bg-black/40 border border-white/5 rounded-3xl p-8 backdrop-blur-md flex flex-col items-center gap-4 text-center animate-pulse">
+              <div className="flex gap-1.5">
+                {[0,1,2].map(i => (
+                  <div key={i} className="h-1.5 w-1.5 rounded-full bg-purple-500" style={{animationDelay: `${i*200}ms`}} />
+                ))}
+              </div>
+              <p className="text-sm font-bold text-neutral-300">
+                Launching Pro Editor for <span className="text-purple-400">"{seriesTitle || 'New Series'}"</span>...
+              </p>
+              <p className="text-xs text-neutral-500 max-w-sm">
+                Mindanao's upskilling project is initializing the vision pipeline. We are currently scraping and optimizing your assets for the workspace.
+              </p>
+           </div>
         )}
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center opacity-60 grayscale hover:grayscale-0 transition-all duration-700">
+           {[
+             {title: '1. Scrape', desc: 'Auto-fetch images from any link'},
+             {title: '2. Edit', desc: 'Sync audio & panels in Pro Editor'},
+             {title: '3. Render', desc: 'Export high-quality 4K videos'}
+           ].map(step => (
+             <div key={step.title} className="space-y-1">
+                <p className="text-[10px] font-black text-purple-500 uppercase tracking-widest">{step.title}</p>
+                <p className="text-xs text-neutral-400 font-medium">{step.desc}</p>
+             </div>
+           ))}
+        </div>
       </div>
 
-      {/* RIGHT COLUMN: INTEGRATED CINEMA PLAYER */}
-      {panels.length > 0 && (
-        <div
-          id="cinema_column"
-          className="order-2 lg:order-2 lg:col-span-5 flex flex-col gap-6 lg:sticky lg:top-24 min-w-0"
-        >
-          <VideoMonitor
-            activePreviewTab={activePreviewTab}
-            setActivePreviewTab={setActivePreviewTab}
-            videoUrl={videoUrl}
-            panels={panels}
-            aspectRatio={aspectRatio}
-            videoPlayerRef={videoPlayerRef}
-            currentPanelIndex={currentPanelIndex}
-            playbackTime={playbackTime}
-            reprocessingPanelId={reprocessingPanelId}
-          />
-
-          {/* PLAYBACK CONTROLLER ACCESSORIES FOR TIMELINE PREVIEW */}
-          {activePreviewTab === "timeline" && panels.length > 0 && (
-            <VolumeAndProgressPanel
-              panels={panels}
-              setPanels={setPanels}
-              currentPanelIndex={currentPanelIndex}
-              playbackTime={playbackTime}
-              storyboardPlaying={storyboardPlaying}
-              toggleStoryboardPlayback={toggleStoryboardPlayback}
-              resetStoryboardPlayback={resetStoryboardPlayback}
-              isMuted={isMuted}
-              setIsMuted={setIsMuted}
-              volume={volume}
-              setVolume={setVolume}
-              addNotification={addNotification}
-            />
-          )}
-
-          {/* RENDER FINAL VIDEO BUTTON */}
-          <div className="bg-[#111115] border border-white/5 rounded-2xl p-4 flex flex-col gap-3 relative overflow-hidden">
-            {isRendering && (
-              <div
-                className="absolute left-0 top-0 bottom-0 bg-purple-600/20 transition-all duration-300"
-                style={{ width: `${renderProgress}%` }}
-              />
-            )}
-            <button
-              onClick={handleRenderFinalVideo}
-              disabled={isRendering}
-              className={`relative z-10 w-full py-4 rounded-xl font-bold text-lg tracking-wide shadow-lg transition-all flex items-center justify-center gap-2 ${
-                isRendering
-                  ? "bg-purple-900/50 text-purple-200 cursor-not-allowed border border-purple-500/30"
-                  : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border border-white/10 hover:shadow-[0_0_20px_rgba(124,58,237,0.3)]"
-              }`}
-            >
-              {isRendering ? (
-                <>
-                  <svg
-                    className="animate-spin h-5 w-5 text-white"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                  Rendering {Math.round(renderProgress)}%
-                  {renderEtaSeconds !== null && renderEtaSeconds > 0 && (
-                    <span className="text-xs opacity-75 font-normal ml-1">
-                      (~{Math.floor(renderEtaSeconds / 60)}:
-                      {(renderEtaSeconds % 60).toString().padStart(2, "0")})
-                    </span>
-                  )}
-                  ...
-                </>
-              ) : (
-                <>🎬 Render Final Video</>
-              )}
-            </button>
-          </div>
-
-          {/* AI Model Capabilities panel intentionally removed */}
-
-          {/* METADATA RENDER MATRIX */}
-          <OutputMetadataPanel
-            videoUrl={videoUrl}
-            musicTheme={musicTheme}
-            voiceActor={voiceActor}
-            handleSaveVideo={handleSaveVideo}
-          />
-        </div>
-      )}
       <ProjectConfirmModal
         isOpen={showScrapeConfirmModal}
         onClose={() => setShowScrapeConfirmModal(false)}

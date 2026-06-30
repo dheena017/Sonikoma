@@ -108,13 +108,7 @@ export default function ProjectsPage() {
   };
 
   const handleOpenProject = (project: Project) => {
-    if (project.series_slug && project.chapter_slug) {
-      (window as any).navigateTo?.(
-        `/series/${project.series_slug}/chapters/${project.chapter_slug}/details`
-      );
-    } else {
-      (window as any).navigateTo?.(`/workspace?id=${project.project_id}`);
-    }
+    (window as any).navigateTo?.(`/editor?id=${project.project_id}`);
   };
 
   const handleExport = (e: React.MouseEvent, project: Project) => {
@@ -134,20 +128,12 @@ export default function ProjectsPage() {
   const handleOpenDetails = (e: React.MouseEvent, project: Project) => {
     e.stopPropagation();
     setOpenMenuId(null);
-    if (project.series_slug && project.chapter_slug) {
-      (window as any).navigateTo?.(
-        `/series/${project.series_slug}/chapters/${project.chapter_slug}/details`
-      );
-    } else {
-      (window as any).navigateTo?.(`/workspace?id=${project.project_id}`);
-    }
+    (window as any).navigateTo?.(`/editor?id=${project.project_id}`);
   };
 
   const handleCopyLink = (e: React.MouseEvent, project: Project) => {
     e.stopPropagation();
-    const url = `${window.location.origin}/series/${
-      project.series_slug || project.project_id
-    }/chapters/${project.chapter_slug || project.project_id}/details`;
+    const url = `${window.location.origin}/editor?id=${project.project_id}`;
     navigator.clipboard.writeText(url);
     (window as any).alertAsync?.(
       "Link copied to clipboard!",
