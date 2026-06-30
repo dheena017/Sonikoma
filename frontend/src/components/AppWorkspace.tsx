@@ -48,6 +48,20 @@ interface AppWorkspaceProps {
 }
 
 const AppWorkspaceInner = (props: AppWorkspaceProps) => {
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("autoScrape") === "true" && props.targetUrl) {
+      // Remove autoScrape so it doesn't loop on refresh
+      params.delete("autoScrape");
+      window.history.replaceState(
+        {},
+        "",
+        `${window.location.pathname}?${params.toString()}`
+      );
+      props.setShowScrapeConfirmModal(true);
+    }
+  }, [props.targetUrl]);
+
   const {
     projectId,
     addNotification,

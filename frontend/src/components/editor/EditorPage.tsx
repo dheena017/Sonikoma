@@ -280,16 +280,20 @@ const EditorPage = ({ appLogic, navigateTo }: EditorPageProps) => {
                )}
             </div>
 
-            {/* BOTTOM AREA: STORYBOARD/DECK (Hidden or Collapsed in Focus Mode) */}
+            {/* BOTTOM AREA: STORYBOARD & SCRAPER DECK (Always visible in Pro Editor) */}
             <div className={`transition-all duration-500 ${isFocusMode ? 'opacity-20 blur-sm pointer-events-none scale-[0.98]' : 'opacity-100'}`}>
-               <div className="space-y-6">
+               <div className="flex flex-col gap-10">
                   {isScraping && (
                     <PipelineStatusCard progressStatus={{...progressStatus, status: 'Scraping Assets...'}} />
                   )}
 
                   {isInitializing && scrapedImages.length === 0 ? skeletonLoader : (
-                    <>
-                      {currentSection === "images" ? (
+                    <div className="flex flex-col gap-12">
+                      {/* Section 1: Scraper Deck */}
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                           <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono">1. Imported Images (Live Scraper Deck)</h3>
+                        </div>
                         <LiveScraperDeck
                           isDashboardOnly={false}
                           scrapedImages={scrapedImages}
@@ -334,7 +338,13 @@ const EditorPage = ({ appLogic, navigateTo }: EditorPageProps) => {
                           targetUrl={targetUrl}
                           selectedSource={selectedSource}
                         />
-                      ) : (
+                      </div>
+
+                      {/* Section 2: Storyboard Timeline */}
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                           <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono">2. Timeline & Text (Storyboard Timeline)</h3>
+                        </div>
                         <StoryboardTimeline
                           panels={panels}
                           setPanels={setPanels}
@@ -376,8 +386,8 @@ const EditorPage = ({ appLogic, navigateTo }: EditorPageProps) => {
                           handleCancelBatch={handleCancelBatch}
                           audioFeedback={audioFeedback}
                         />
-                      )}
-                    </>
+                      </div>
+                    </div>
                   )}
                </div>
             </div>
