@@ -135,6 +135,8 @@ export function useAppLogic() {
     musicTheme: state.musicTheme,
     voiceActor: state.voiceActor,
     autoPlayAudio: state.autoPlayAudio,
+    sfxEnabled: state.sfxEnabled,
+    sfxVolume: state.sfxVolume,
   });
 
   const {
