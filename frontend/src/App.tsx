@@ -23,6 +23,7 @@ import * as api from "./api/index.js";
 import Header from "./components/Header.js";
 import Sidebar from "./components/Sidebar.js";
 import AppWorkspace from "./components/AppWorkspace.js";
+import EditorPage from "./components/editor/EditorPage.js";
 import PageNotFound from "./components/PageNotFound.js";
 import AdvancedSettings from "./components/AdvancedSettings.js";
 import LogsPage from "./components/LogsPage.js";
@@ -648,6 +649,8 @@ export default function App() {
     }),
     [appLogic, isPipMode]
   );
+
+  const isProEditorPage = currentPath === "/editor" || currentPath === "/editor/";
 
   const headerProjectId = isChapterDetailsPath ? detailsProjectId : projectId;
   const headerIsDirty = isChapterDetailsPath ? projectDetailsDirty : isDirty;
@@ -1413,9 +1416,20 @@ export default function App() {
             />
           )}
 
-          {/* PAGE VIEW 20: Advanced Crop & Trim Editor Page */}
+          {/* PAGE VIEW 20: Full Editor Page */}
           {isEditorPath &&
             !isPipMode &&
+            isProEditorPage && (
+              <EditorPage
+                appLogic={memoizedAppLogic}
+                navigateTo={navigateTo}
+              />
+            )}
+
+          {/* PAGE VIEW 21: Advanced Crop & Trim Editor Page */}
+          {isEditorPath &&
+            !isPipMode &&
+            !isProEditorPage &&
             editingImageIdx !== null &&
             (scrapedImages.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center min-h-[500px] text-neutral-400">
