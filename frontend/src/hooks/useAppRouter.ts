@@ -188,6 +188,8 @@ export function useAppRouter({
             path === "/projects" ||
             path === "/project-details" ||
             path === "/project-editor" ||
+            path === "/admin" ||
+            path.startsWith("/admin/") ||
             path.startsWith("/series/") ||
             path.startsWith("/editor");
 
@@ -252,6 +254,8 @@ export function useAppRouter({
         path === "/projects" ||
         path === "/project-details" ||
         path === "/dashboard" ||
+        path === "/admin" ||
+        path.startsWith("/admin/") ||
         path.startsWith("/display") ||
         isChapterDetails
       ) {

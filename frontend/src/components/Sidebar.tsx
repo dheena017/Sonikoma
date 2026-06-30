@@ -71,7 +71,7 @@ const SidebarInner = ({
     currentPath === "/workspace" ||
     (chapterPathMatch !== null && !currentPath.endsWith("/details"));
   const isDashboardOverview = currentPath === "/dashboard";
-  const isAdminPath = currentPath === "/admin";
+  const isAdminPath = currentPath === "/admin" || currentPath.startsWith("/admin/");
   const isSettings = currentPath === "/settings";
   const isAutoCrop = currentPath === "/auto-crop";
   const isBubbleCleaner = currentPath === "/bubble-cleaner";
