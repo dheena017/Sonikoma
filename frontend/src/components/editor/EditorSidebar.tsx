@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  type LucideIcon,
 } from "lucide-react";
 
 interface EditorSidebarProps {
@@ -23,6 +24,15 @@ interface EditorSidebarProps {
   navigateTo?: (path: string) => void;
 }
 
+interface SidebarMenuItem {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  path: string;
+  badge?: string | number;
+  isProcessing?: boolean;
+}
+
 const EditorSidebar = ({
   isCollapsed,
   setIsCollapsed,
@@ -35,42 +45,36 @@ const EditorSidebar = ({
   isCleaningBubbles,
   navigateTo,
 }: EditorSidebarProps) => {
-  const menuItems = [
+  const menuItems: SidebarMenuItem[] = [
     {
       id: "images",
-      label: "Imported Images (Live Scraper Deck)",
+      label: "Imported Images",
       icon: Layout,
-      badge: scrapedCount > 0 ? scrapedCount : undefined,
+      path: "/workspace/editor",
     },
     {
-      id: "timeline",
-      label: "Timeline & Text (Storyboard Timeline)",
-      icon: Film,
-      badge: panelsCount > 0 ? panelsCount : undefined,
+      id: "crop",
+      label: "Crop",
+      icon: Scissors,
+      path: "/workspace/editor",
     },
     {
-      id: "editor",
-      label: "Editor",
+      id: "edit",
+      label: "Edit",
       icon: Film,
       path: "/workspace/editor",
     },
     {
-      id: "autocrop",
-      label: "Auto-Crop",
-      icon: Scissors,
-      isProcessing: isBatchCropping,
-    },
-    {
-      id: "bubbles",
-      label: "Clean Bubbles",
+      id: "cut",
+      label: "Cut",
       icon: Brain,
-      isProcessing: isCleaningBubbles,
+      path: "/workspace/editor",
     },
   ];
 
   return (
     <aside
-      className={`fixed top-[6rem] bottom-0 left-4 h-[calc(100vh-6rem)] bg-[#0a0a0f] border border-white/5 rounded-none flex flex-col transition-all duration-300 z-40 shadow-2xl shadow-black/60 overflow-hidden ${
+      className={`fixed inset-y-0 left-4 h-screen bg-[#0a0a0f] border border-white/5 rounded-none flex flex-col transition-all duration-300 z-40 shadow-2xl shadow-black/60 overflow-hidden ${
         isCollapsed ? "w-16" : "w-64"
       }`}
     >

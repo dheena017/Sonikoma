@@ -69,7 +69,7 @@ export function PanelCardThumbnail({
   const status = getScrapedImageStatus(imgUrl);
 
   return (
-    <div className="relative h-28 sm:h-32 rounded-xl overflow-hidden bg-neutral-900 flex items-center justify-center ring-1 ring-neutral-800/60 group-hover:ring-purple-800/30 transition-all duration-200">
+    <div className="relative h-44 sm:h-52 rounded-xl overflow-hidden bg-neutral-900 flex items-center justify-center ring-1 ring-neutral-800/60 group-hover:ring-purple-800/30 transition-all duration-200">
       <img
         src={imgUrl}
         alt={`Panel #${idx + 1}`}

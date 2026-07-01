@@ -6,6 +6,7 @@ import {
   Film,
   ArrowLeft,
   ChevronRight,
+  type LucideIcon,
 } from "lucide-react";
 
 interface EditorMiniSidebarProps {
@@ -21,6 +22,15 @@ interface EditorMiniSidebarProps {
   navigateTo?: (path: string) => void;
 }
 
+interface SidebarMenuItem {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  path: string;
+  badge?: string | number;
+  isProcessing?: boolean;
+}
+
 const EditorMiniSidebar = ({
   isCollapsed,
   setIsCollapsed,
@@ -33,36 +43,30 @@ const EditorMiniSidebar = ({
   isCleaningBubbles,
   navigateTo,
 }: EditorMiniSidebarProps) => {
-  const menuItems = [
+  const menuItems: SidebarMenuItem[] = [
     {
       id: "images",
-      label: "Imported Images (Live Scraper Deck)",
+      label: "Imported Images",
       icon: Layout,
-      badge: scrapedCount > 0 ? scrapedCount : undefined,
+      path: "/workspace/editor",
     },
     {
-      id: "timeline",
-      label: "Timeline & Text (Storyboard Timeline)",
-      icon: Film,
-      badge: panelsCount > 0 ? panelsCount : undefined,
+      id: "crop",
+      label: "Crop",
+      icon: Scissors,
+      path: "/workspace/editor",
     },
     {
-      id: "editor",
-      label: "Editor",
+      id: "edit",
+      label: "Edit",
       icon: Film,
       path: "/workspace/editor",
     },
     {
-      id: "autocrop",
-      label: "Auto-Crop",
-      icon: Scissors,
-      isProcessing: isBatchCropping,
-    },
-    {
-      id: "bubbles",
-      label: "Clean Bubbles",
+      id: "cut",
+      label: "Cut",
       icon: Brain,
-      isProcessing: isCleaningBubbles,
+      path: "/workspace/editor",
     },
   ];
 

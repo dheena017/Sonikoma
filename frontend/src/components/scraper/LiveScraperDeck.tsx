@@ -13,8 +13,9 @@ import { saveAs } from "file-saver";
 import * as api from "../../api/index.js";
 import { LiveScraperDeckProps } from "./types";
 import PanelCard from "./PanelCard.js";
-import ScraperControls from "./ScraperControls.js";
+// ScraperControls moved into the floating selection bar; remove header rendering to free space
 import { FloatingSelectionBar } from "./FloatingSelectionBar.js";
+import { ScraperSelectionToolbar } from "./FloatingSelectionBar.js";
 import LiveScraperDeckEmptyState from "./LiveScraperDeckEmptyState.js";
 import { parseWebtoonUrl, getSourceName } from "../../utils.js";
 
@@ -248,6 +249,54 @@ const LiveScraperDeck = React.memo(({
     }
   };
 
+  // Selection / filter helpers (moved from ScraperControls)
+  const handleInvertSelection = () => {
+    setSelectedScraped((prev) => scrapedImages.filter((img) => !prev.includes(img)));
+    setLastSelectedIndex(null);
+    setConsoleLogs((prev) => ["[GUI] Inverted selection set", ...prev]);
+  };
+
+  const handleSelectOdd = () => {
+    setSelectedScraped(scrapedImages.filter((_, idx) => idx % 2 === 0));
+    setLastSelectedIndex(null);
+    setConsoleLogs((prev) => ["[GUI] Selected odd-numbered frames", ...prev]);
+  };
+
+  const handleSelectEven = () => {
+    setSelectedScraped(scrapedImages.filter((_, idx) => idx % 2 !== 0));
+    setLastSelectedIndex(null);
+    setConsoleLogs((prev) => ["[GUI] Selected even-numbered frames", ...prev]);
+  };
+
+  const handleReverseDeckOrder = () => {
+    setScrapedImages((prev) => [...prev].reverse());
+    setLastSelectedIndex(null);
+    setConsoleLogs((prev) => ["[GUI] Reversed image order", ...prev]);
+    addNotification("Reversed image order!", "info");
+  };
+
+  const handleSelectFirstN = (n: number) => {
+    const clamped = Math.min(Math.max(1, n), scrapedImages.length);
+    setSelectedScraped(scrapedImages.slice(0, clamped));
+    setLastSelectedIndex(null);
+    setConsoleLogs((prev) => [`[GUI] Selected first ${clamped} frames`, ...prev]);
+  };
+
+  const handleSelectLastN = (n: number) => {
+    const clamped = Math.min(Math.max(1, n), scrapedImages.length);
+    setSelectedScraped(scrapedImages.slice(-clamped));
+    setLastSelectedIndex(null);
+    setConsoleLogs((prev) => [`[GUI] Selected last ${clamped} frames`, ...prev]);
+  };
+
+  const handleSelectRange = (a: number, b: number) => {
+    const lo = Math.max(0, Math.min(a, b) - 1);
+    const hi = Math.min(scrapedImages.length, Math.max(a, b));
+    setSelectedScraped(scrapedImages.slice(lo, hi));
+    setLastSelectedIndex(null);
+    setConsoleLogs((prev) => [`[GUI] Selected panels ${a} to ${b}`, ...prev]);
+  };
+
   const handleBatchMergeSelected = async () => {
     if (selectedScraped.length < 2) {
       addNotification("Select at least 2 panels to stitch together", "info");
@@ -317,7 +366,7 @@ const LiveScraperDeck = React.memo(({
     <>
       <div
         id="scraped_strips_deck"
-        className="bg-neutral-900/40 rounded-2xl border border-neutral-800/80 p-4 sm:p-5 lg:p-6 backdrop-blur-md space-y-4 shadow-sm min-w-0 w-full min-h-[640px] overflow-hidden"
+        className="bg-neutral-900/40 rounded-2xl border border-neutral-800/80 p-4 sm:p-5 lg:p-6 backdrop-blur-md space-y-4 shadow-sm min-w-0 w-full overflow-hidden"
       >
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-neutral-800/60 pb-3">
           <div className="flex items-center gap-3">
@@ -337,29 +386,23 @@ const LiveScraperDeck = React.memo(({
           </div>
 
           <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2 self-start sm:self-end lg:self-auto w-full lg:w-auto mt-2 lg:mt-0">
-            {scrapedImages.length > 0 && (
-              <ScraperControls
+            {/* Inline selection toolbar in header (also available in floating bar) */}
+            <div className="hidden sm:block">
+              <ScraperSelectionToolbar
                 scrapedImages={scrapedImages}
                 selectedScraped={selectedScraped}
+                handleInvertSelection={handleInvertSelection}
+                handleSelectOdd={handleSelectOdd}
+                handleSelectEven={handleSelectEven}
+                handleReverseDeckOrder={handleReverseDeckOrder}
+                handleSelectFirstN={handleSelectFirstN}
+                handleSelectLastN={handleSelectLastN}
+                handleSelectRange={handleSelectRange}
+                handleClearAll={handleClearAll}
                 setSelectedScraped={setSelectedScraped}
-                setScrapedImages={setScrapedImages}
-                setConsoleLogs={setConsoleLogs}
-                addNotification={addNotification}
-                setShowBubbleModal={setShowBubbleModal}
-                isCleaningBubbles={isCleaningBubbles}
-                cleanProgress={cleanProgress}
-                addPanelsToStoryboard={addPanelsToStoryboard}
-                showAutoCropModal={showAutoCropModal}
-                setShowAutoCropModal={setShowAutoCropModal}
-                isBatchCropping={isBatchCropping}
-                batchProgress={batchProgress}
-                handleAutoCropSelected={handleAutoCropSelected}
-                handleCleanBubblesSelected={handleCleanBubblesSelected}
-                fetchWithInterceptor={fetchWithInterceptor}
-                onLastSelectedReset={() => setLastSelectedIndex(null)}
-                handleCancelBatch={handleCancelBatch}
               />
-            )}
+            </div>
+
             {handleSaveAssets && scrapedImages.length > 0 && (
               <button
                 type="button"
@@ -369,15 +412,6 @@ const LiveScraperDeck = React.memo(({
                 Save Images
               </button>
             )}
-            <button
-              type="button"
-              onClick={handleDownloadZip}
-              disabled={scrapedImages.length === 0 || isZipping}
-              className="text-[10px] font-mono border border-neutral-800/70 bg-neutral-950/60 hover:bg-neutral-900 text-neutral-300 hover:text-white rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0 whitespace-nowrap"
-            >
-              <Download className="h-3.5 w-3.5 shrink-0" />
-              <span>{isZipping ? "Downloading..." : "Download ZIP"}</span>
-            </button>
           </div>
         </div>
 
@@ -415,7 +449,7 @@ const LiveScraperDeck = React.memo(({
             )}
 
             {/* Grid list of extracted cards */}
-            <div className="flex gap-4 overflow-x-auto pb-8 pt-1.5 scrollbar-thin">
+            <div className="flex gap-4 overflow-x-auto pb-8 pt-1.5 scrollbar-thin pl-4 sm:pl-5 lg:pl-6">
               {scrapedImages.map((imgUrl, idx) => {
                 const isSelected = selectedScraped.includes(imgUrl);
                 return (
@@ -468,6 +502,19 @@ const LiveScraperDeck = React.memo(({
           handleDeleteSelected={handleDeleteSelected}
           handleClearAll={handleClearAll}
           handleSelectAllToggle={handleSelectAllToggle}
+          handleDownloadZip={handleDownloadZip}
+          isZipping={isZipping}
+          // selection/filter props
+          scrapedImages={scrapedImages}
+          selectedScraped={selectedScraped}
+          setSelectedScraped={setSelectedScraped}
+          handleInvertSelection={handleInvertSelection}
+          handleSelectOdd={handleSelectOdd}
+          handleSelectEven={handleSelectEven}
+          handleReverseDeckOrder={handleReverseDeckOrder}
+          handleSelectFirstN={handleSelectFirstN}
+          handleSelectLastN={handleSelectLastN}
+          handleSelectRange={handleSelectRange}
           setShowAutoCropModal={setShowAutoCropModal}
           setShowBubbleModal={setShowBubbleModal}
           handleCancelBatch={handleCancelBatch}

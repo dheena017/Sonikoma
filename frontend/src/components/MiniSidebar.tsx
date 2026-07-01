@@ -58,6 +58,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
         { label: "Projects", icon: FolderOpen, active: isProjects, onClick: () => navigateTo("/projects") },
       ],
     },
+
     {
       group: "System & Tools",
       items: [

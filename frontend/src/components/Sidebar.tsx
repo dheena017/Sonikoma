@@ -189,24 +189,9 @@ const SidebarInner = ({
           enabled: true,
           isProcessing: isCleaningBubbles,
         },
-        {
-          label: "Editor",
-          icon: Film,
-          active: isEditor,
-          onClick: () => {
-            if (lastEditorPath) navigateTo(lastEditorPath);
-          },
-          enabled: scrapedImages.length > 0 || panels.length > 0,
-          badge:
-            editingImageIdx !== null
-              ? `#${editingImageIdx + 1}`
-              : panels.length > 0
-              ? `Total: ${panels.length}`
-              : undefined,
-          disabledTip: "Requires imported images or timeline panels",
-        },
       ],
     },
+
     {
       group: "Diagnostics & Controls",
       items: [
