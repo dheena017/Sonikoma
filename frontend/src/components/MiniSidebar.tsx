@@ -56,9 +56,6 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
         { label: "Dashboard", icon: LayoutDashboard, active: isDashboardOverview, onClick: () => navigateTo("/") },
         { label: "Workspace", icon: Layout, active: isWorkspace, onClick: () => navigateTo("/workspace") },
         { label: "Projects", icon: FolderOpen, active: isProjects, onClick: () => navigateTo("/projects") },
-        { label: "Auto-Crop", icon: Scissors, active: isAutoCrop, onClick: () => navigateTo("/auto-crop") },
-        { label: "Clean-Bubbles", icon: Brain, active: isBubbleCleaner, onClick: () => navigateTo("/bubble-cleaner") },
-        { label: "Editor", icon: Film, active: isEditor, onClick: () => navigateTo("/workspace/editor") },
       ],
     },
     {

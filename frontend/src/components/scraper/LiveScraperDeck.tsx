@@ -15,6 +15,7 @@ import { LiveScraperDeckProps } from "./types";
 import PanelCard from "./PanelCard.js";
 import ScraperControls from "./ScraperControls.js";
 import { FloatingSelectionBar } from "./FloatingSelectionBar.js";
+import LiveScraperDeckEmptyState from "./LiveScraperDeckEmptyState.js";
 import { parseWebtoonUrl, getSourceName } from "../../utils.js";
 
 const LiveScraperDeck = React.memo(({
@@ -25,9 +26,6 @@ const LiveScraperDeck = React.memo(({
   setScrapedImages,
   mergingIndices,
   setConsoleLogs,
-  panels,
-  setPanels,
-  currentPanelIndex,
   handleMergeWithNext,
   setEditingImageIdx,
   setEditCropTop,
@@ -37,10 +35,8 @@ const LiveScraperDeck = React.memo(({
   setEditAutoTrim,
   addNotification,
   fetchWithInterceptor,
-  setErrorPopup,
   openEditingImageIdx,
   // Bubble Cleaner props from App.tsx
-  showBubbleModal,
   setShowBubbleModal,
   isCleaningBubbles,
   cleanProgress,
@@ -55,14 +51,9 @@ const LiveScraperDeck = React.memo(({
   handleCleanBubblesSelected,
   addPanelsToStoryboard,
   isDashboardOnly = true,
-  seriesTitle = "",
-  chapterNumber = "",
-  chapterTitle = "",
   targetUrl = "",
-  selectedSource = "",
   handleSaveAssets,
   handleCancelBatch,
-  audioFeedback,
 }: LiveScraperDeckProps) => {
   const [isZipping, setIsZipping] = useState(false);
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(
@@ -391,17 +382,7 @@ const LiveScraperDeck = React.memo(({
         </div>
 
         {showEmptyState ? (
-          <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-neutral-800 bg-neutral-950/70 py-12 px-6 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-500/10 text-purple-300">
-              <ImageIcon className="h-6 w-6" />
-            </div>
-            <div className="space-y-2 max-w-xs">
-              <p className="text-sm font-semibold text-white">No imported images yet</p>
-              <p className="text-xs text-neutral-400 leading-relaxed">
-                Run the scraper or paste a supported webtoon URL to import frames into the Live Scraper Deck.
-              </p>
-            </div>
-          </div>
+          <LiveScraperDeckEmptyState />
         ) : (
           <div className="space-y-4">
             {/* Live scraping progress banner */}
