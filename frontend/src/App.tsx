@@ -570,7 +570,7 @@ export default function App() {
       isSettingsPath: currentPath === "/settings",
       isAutoCropPath: currentPath === "/auto-crop",
       isBubbleCleanerPath: currentPath === "/bubble-cleaner",
-      isEditorPath: currentPath.startsWith("/editor"),
+      isEditorPath: currentPath.startsWith("/editor") || currentPath.startsWith("/workspace/editor"),
       isLogsPath: currentPath === "/logs",
       isStatusPath: currentPath === "/status",
       isAIModelsPath: currentPath === "/ai-models",
@@ -650,7 +650,8 @@ export default function App() {
     [appLogic, isPipMode]
   );
 
-  const isProEditorPage = currentPath === "/editor" || currentPath === "/editor/";
+  const proEditorMatch = currentPath.match(/\/workspace\/editor\/series\/([^\/]+)\/chapters\/([^\/]+)/);
+  const isProEditorPage = (currentPath === "/editor" || currentPath === "/editor/") || (proEditorMatch !== null);
 
   const headerProjectId = isChapterDetailsPath ? detailsProjectId : projectId;
   const headerIsDirty = isChapterDetailsPath ? projectDetailsDirty : isDirty;
@@ -1424,6 +1425,8 @@ export default function App() {
               <EditorPage
                 appLogic={memoizedAppLogic}
                 navigateTo={navigateTo}
+                seriesSlug={proEditorMatch?.[1]}
+                chapterSlug={proEditorMatch?.[2]}
               />
             )}
 

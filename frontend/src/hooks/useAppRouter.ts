@@ -191,7 +191,8 @@ export function useAppRouter({
             path === "/admin" ||
             path.startsWith("/admin/") ||
             path.startsWith("/series/") ||
-            path.startsWith("/editor");
+            path.startsWith("/editor") ||
+            path.startsWith("/workspace/editor");
 
           if (isProtectedRoute) {
             window.history.replaceState({}, "", "/");
@@ -281,6 +282,15 @@ export function useAppRouter({
         setShowAutoCropModal(false);
         setShowBubbleModal(true);
         setEditingImageIdx(null);
+      } else if (path.startsWith("/workspace/editor/series/")) {
+        setIsPipMode(false);
+        setLastEditorPath(path + window.location.search);
+        setShowAutoCropModal(false);
+        setShowBubbleModal(false);
+      } else if (path === "/workspace/editor" || path === "/workspace/editor/") {
+        window.history.replaceState({}, "", "/workspace");
+        setCurrentPath("/workspace");
+        return;
       } else if (path.startsWith("/editor")) {
         const params = new URLSearchParams(window.location.search);
         const hasProjId = params.has("id") || params.has("project_id");

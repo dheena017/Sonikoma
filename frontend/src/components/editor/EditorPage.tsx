@@ -12,9 +12,11 @@ import { useBackendHealth } from "../../hooks/useBackendHealth.js";
 interface EditorPageProps {
   appLogic: any;
   navigateTo: (path: string) => void;
+  seriesSlug?: string;
+  chapterSlug?: string;
 }
 
-const EditorPage = ({ appLogic, navigateTo }: EditorPageProps) => {
+const EditorPage = ({ appLogic, navigateTo, seriesSlug, chapterSlug }: EditorPageProps) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
   const [currentSection, setCurrentSection] = React.useState("timeline");
   const [isFocusMode, setIsFocusMode] = React.useState(false);
