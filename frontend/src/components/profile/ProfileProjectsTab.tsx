@@ -339,11 +339,11 @@ export default function ProfileProjectsTab({
   const handleViewDetails = (project: any) => {
     if (project.series_slug && project.chapter_slug) {
       (window as any).navigateTo?.(
-        `/series/${project.series_slug}/chapters/${project.chapter_slug}`
+        `/workspace/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
       );
     } else if (project.chapter_slug) {
       (window as any).navigateTo?.(
-        `/series/unknown/chapters/${project.chapter_slug}`
+        `/workspace/editor/series/unknown/chapters/${project.chapter_slug}`
       );
     } else {
       (window as any).navigateTo?.(`/workspace?id=${project.project_id}`);

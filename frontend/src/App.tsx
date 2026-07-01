@@ -441,7 +441,7 @@ export default function App() {
     panels,
     scrapedImages,
     targetUrl,
-    fetchWithInterceptor,
+    fetchWithInterceptor: fetchWithInterceptor as typeof fetch,
     addNotification,
     accumulatedTokens,
     setAccumulatedTokens,
@@ -505,7 +505,9 @@ export default function App() {
   const handleNavigateHome = React.useCallback(() => {
     if (projectId) {
       if (seriesSlugState && chapterSlugState) {
-        navigateTo(`/series/${seriesSlugState}/chapters/${chapterSlugState}`);
+        navigateTo(
+          `/workspace/editor/series/${seriesSlugState}/chapters/${chapterSlugState}`
+        );
       } else {
         navigateTo(`/workspace?id=${projectId}`);
       }
@@ -556,6 +558,9 @@ export default function App() {
     const chapterPathMatch = currentPath.match(
       /\/series\/[^\/]+\/chapters\/([^\/]+)/
     );
+    const editorRouteMatch = currentPath.match(
+      /^\/workspace\/editor\/series\/([^\/]+)\/chapters\/([^\/]+)\/?$/
+    );
     const isDetailsMode = currentPath.endsWith("/details");
 
     const isWorkspacePath =
@@ -572,7 +577,9 @@ export default function App() {
       isSettingsPath: currentPath === "/settings",
       isAutoCropPath: currentPath === "/auto-crop",
       isBubbleCleanerPath: currentPath === "/bubble-cleaner",
-      isEditorPath: currentPath.startsWith("/editor"),
+      isEditorPath:
+        currentPath.startsWith("/editor") ||
+        currentPath.startsWith("/workspace/editor"),
       isLogsPath: currentPath === "/logs",
       isStatusPath: currentPath === "/status",
       isAIModelsPath: currentPath === "/ai-models",
@@ -603,6 +610,7 @@ export default function App() {
       isRegisterPath: currentPath === "/register",
       isForgotPasswordPath: currentPath === "/forgot-password",
       isDisplayPath: currentPath.startsWith("/display/"),
+      editorRouteMatch,
     };
   }, [currentPath]);
 
@@ -641,6 +649,7 @@ export default function App() {
     isRegisterPath,
     isForgotPasswordPath,
     isDisplayPath,
+    editorRouteMatch,
   } = pathFlags;
 
   const memoizedAppLogic = React.useMemo(
@@ -652,7 +661,18 @@ export default function App() {
     [appLogic, isPipMode]
   );
 
-  const isProEditorPage = currentPath === "/editor" || currentPath === "/editor/";
+  const isWorkspaceEditorRoot =
+    currentPath === "/workspace/editor" || currentPath === "/workspace/editor/";
+  const isProEditorPage =
+    Boolean(editorRouteMatch) || currentPath === "/editor" || currentPath === "/editor/";
+  const editorSeriesSlug = editorRouteMatch?.[1] || seriesSlugState || null;
+  const editorChapterSlug = editorRouteMatch?.[2] || chapterSlugState || null;
+
+  React.useEffect(() => {
+    if (isWorkspaceEditorRoot) {
+      navigateTo("/workspace");
+    }
+  }, [isWorkspaceEditorRoot, navigateTo]);
 
   const headerProjectId = isChapterDetailsPath ? detailsProjectId : projectId;
   const headerIsDirty = isChapterDetailsPath ? projectDetailsDirty : isDirty;
@@ -793,7 +813,7 @@ export default function App() {
     <div
       id="app_root"
       className={`min-h-screen bg-[#070709] text-neutral-100 flex flex-col selection:text-white relative ${
-        isAdminPath ? "selection:bg-violet-600" : "lg:flex-row selection:bg-purple-600"
+        isAdminPath ? "selection:bg-violet-600" : "selection:bg-purple-600"
       }`}
     >
       {/* --- Page Navigation Sidebar --- */}
@@ -838,8 +858,7 @@ export default function App() {
             <MiniSidebar
               currentPath={currentPath}
               navigateTo={navigateTo}
-              onOpenSidebar={() => setIsSidebarOpen(true)}
-              notificationsCount={notifications.filter(n => !n.read).length}
+              notificationsCount={notifications.filter((n) => !n.isRead).length}
             />
           )}
         </>
@@ -850,11 +869,7 @@ export default function App() {
         id="main-scroll-container"
         className={`flex-grow flex-1 flex flex-col min-h-screen lg:max-h-screen justify-between transition-all duration-300 ${
           !isAdminPath && isSidebarOpen ? "overflow-hidden" : ""
-        } ${!isAdminPath ? "lg:overflow-y-auto" : "overflow-y-auto"} ${
-          isAdminPath
-            ? isSidebarOpen ? "lg:ml-80" : "lg:ml-20"
-            : isSidebarOpen ? "lg:ml-72" : "lg:ml-20"
-        }`}
+        } ${!isAdminPath ? "lg:overflow-y-auto" : "overflow-y-auto"}`}
       >
         <div>
           {/* Impersonation Banner */}
@@ -1448,6 +1463,8 @@ export default function App() {
               <EditorPage
                 appLogic={memoizedAppLogic}
                 navigateTo={navigateTo}
+                seriesSlug={editorSeriesSlug}
+                chapterSlug={editorChapterSlug}
               />
             )}
 

@@ -14,7 +14,6 @@ import {
   Bell,
   Sparkles,
   Shield,
-  Menu,
   Wand2,
   Users,
   MessageSquare,
@@ -32,14 +31,12 @@ import { useThemeMode } from "../hooks/useThemeMode.js";
 interface MiniSidebarProps {
   currentPath: string;
   navigateTo: (path: string) => void;
-  onOpenSidebar: () => void;
   notificationsCount: number;
 }
 
 const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
   currentPath,
   navigateTo,
-  onOpenSidebar,
   notificationsCount,
 }) => {
   const { themeMode } = useThemeMode();
@@ -50,7 +47,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
   const isProjects = currentPath.startsWith("/projects");
   const isAutoCrop = currentPath.startsWith("/auto-crop");
   const isBubbleCleaner = currentPath.startsWith("/bubble-cleaner");
-  const isEditor = currentPath.startsWith("/editor");
+  const isEditor = currentPath.startsWith("/editor") || currentPath.startsWith("/workspace/editor");
 
   const isLogs = currentPath.startsWith("/logs");
   const isStatus = currentPath.startsWith("/status");
@@ -68,7 +65,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
         { label: "Projects", icon: FolderOpen, active: isProjects, onClick: () => navigateTo("/projects") },
         { label: "Auto-Crop", icon: Scissors, active: isAutoCrop, onClick: () => navigateTo("/auto-crop") },
         { label: "Clean-Bubbles", icon: Brain, active: isBubbleCleaner, onClick: () => navigateTo("/bubble-cleaner") },
-        { label: "Editor", icon: Film, active: isEditor, onClick: () => navigateTo("/editor") },
+        { label: "Editor", icon: Film, active: isEditor, onClick: () => navigateTo("/workspace/editor") },
       ],
     },
     {
@@ -111,16 +108,6 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
             alt="Sonikoma Logo"
           />
         </div>
-      </div>
-
-      <div className="mb-4">
-        <button
-          onClick={onOpenSidebar}
-          className="p-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500/50"
-          title="Expand Sidebar"
-        >
-          <Menu className="h-5 w-5" />
-        </button>
       </div>
 
       <div className="flex-1 w-full overflow-y-auto scrollbar-hide flex flex-col items-center space-y-6">
@@ -166,7 +153,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           <div className="w-10 h-px bg-neutral-800/50 mb-1" />
           <div className="relative group w-full flex justify-center">
             <button
-              onClick={onOpenSidebar}
+              onClick={() => navigateTo("/workspace")}
               title="Creative Suite (Expand to View)"
               className={`p-2.5 rounded-xl transition-all duration-200 cursor-pointer relative flex items-center justify-center text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 border border-transparent`}
             >

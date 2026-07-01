@@ -389,7 +389,7 @@ const HeaderInner = ({
     },
     {
       name: "Timeline Editor",
-      path: "/editor",
+      path: "/workspace/editor",
       desc: "Refine timelines, motion settings, and generation",
     },
     {
@@ -481,7 +481,6 @@ const HeaderInner = ({
             key={themeMode}
             src={themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"}
             onError={(e) => {
-              // Graceful fallback to shared logo if mode-specific file missing
               (e.currentTarget as HTMLImageElement).src = "/logo.png";
             }}
             className="h-8 w-8 rounded-full shadow-lg shadow-purple-900/40 shrink-0 object-cover transition-all duration-300 animate-[fadeIn_0.3s_ease-out]"

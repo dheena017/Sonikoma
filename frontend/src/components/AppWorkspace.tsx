@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { History, ArrowRight, Layout, Sparkles } from "lucide-react";
 import UrlInputPanel from "./scraper/UrlInputPanel.js";
 import ProjectConfirmModal from "./scraper/ProjectConfirmModal.js";
@@ -51,8 +51,16 @@ interface AppWorkspaceProps {
   handleGenerateStoryboardAI?: () => Promise<void>;
 }
 
+interface StoredProject {
+  project_id: string;
+  url?: string;
+  series_slug?: string | null;
+  chapter_slug?: string | null;
+  title?: string;
+}
+
 const AppWorkspaceInner = (props: AppWorkspaceProps) => {
-  React.useEffect(() => {
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("autoScrape") === "true" && props.targetUrl) {
       // Remove autoScrape so it doesn't loop on refresh
@@ -108,6 +116,112 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
     isDashboardOnly = false,
   } = props;
 
+  const [storedProjects, setStoredProjects] = useState<StoredProject[]>([]);
+  const [hasExistingProjectMatch, setHasExistingProjectMatch] = useState(false);
+  const [matchedProject, setMatchedProject] = useState<StoredProject | null>(null);
+
+  useEffect(() => {
+    const fetchStoredProjects = async () => {
+      try {
+        const res = await fetch("/api/projects", {
+          headers: {
+            Authorization: `Bearer ${
+              localStorage.getItem("sonikoma_token") ||
+              sessionStorage.getItem("sonikoma_token") ||
+              ""
+            }`,
+          },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        setStoredProjects(Array.isArray(data.projects) ? data.projects : []);
+      } catch {
+        setStoredProjects([]);
+      }
+    };
+
+    fetchStoredProjects();
+  }, []);
+
+  const normalizedSourceUrl = useMemo(
+    () => targetUrl.trim().toLowerCase(),
+    [targetUrl]
+  );
+
+  useEffect(() => {
+    if (!normalizedSourceUrl) {
+      setHasExistingProjectMatch(false);
+      setMatchedProject(null);
+      return;
+    }
+
+    const foundProject = storedProjects.find((project) => {
+      const candidateUrl = (project.url || "").trim().toLowerCase();
+      return candidateUrl && candidateUrl === normalizedSourceUrl;
+    });
+
+    setMatchedProject(foundProject || null);
+    setHasExistingProjectMatch(Boolean(foundProject));
+  }, [normalizedSourceUrl, storedProjects]);
+
+  const getEditorPathForProject = useMemo(() => {
+    return (project: StoredProject | null | undefined) => {
+      if (!project) return "/workspace";
+      if (project.series_slug && project.chapter_slug) {
+        return `/workspace/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`;
+      }
+      return `/workspace?id=${project.project_id}`;
+    };
+  }, []);
+
+  const handleContinueInEditor = useMemo(() => {
+    return () => {
+      if (matchedProject) {
+        navigateTo?.(getEditorPathForProject(matchedProject));
+      }
+    };
+  }, [getEditorPathForProject, matchedProject, navigateTo]);
+
+  const handleStartFresh = async () => {
+    if (!matchedProject) {
+      await scrapeImages(targetUrl, undefined);
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/projects/${matchedProject.project_id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${
+            localStorage.getItem("sonikoma_token") ||
+            sessionStorage.getItem("sonikoma_token") ||
+            ""
+          }`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete existing project.");
+      }
+
+      setStoredProjects((prev) =>
+        prev.filter((project) => project.project_id !== matchedProject.project_id)
+      );
+      setMatchedProject(null);
+      setHasExistingProjectMatch(false);
+
+      const freshProjectId = `proj_${Date.now()}_${Math.random()
+        .toString(36)
+        .substring(2, 10)}`;
+      await scrapeImages(targetUrl, freshProjectId);
+    } catch (err: any) {
+      addNotification(
+        err.message || "Failed to start fresh import.",
+        "error"
+      );
+    }
+  };
+
   const handleConfirmProjectAndScrape = async (
     details: {
       seriesTitle: string;
@@ -137,10 +251,6 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
       Math.random().toString(36).substring(2, 10);
 
     try {
-      if (!isTemporary && navigateTo) {
-         // Optimistic navigation
-         navigateTo(`/editor?id=${generatedProjectId}`);
-      }
       await scrapeImages(targetUrl, generatedProjectId);
     } catch (err: any) {
       console.error(err);
@@ -151,7 +261,9 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
     }
   };
 
-  const hasActiveProject = (projectId && panels.length > 0) || (projectId && projectId.startsWith('proj_'));
+  const hasActiveProject =
+    (projectId && panels.length > 0) ||
+    (projectId && projectId.startsWith("proj_"));
 
   return (
     <main
@@ -187,7 +299,7 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
                       <div className="h-8 w-8 rounded-xl bg-purple-600/20 flex items-center justify-center border border-purple-500/30">
                         <History className="h-4 w-4 text-purple-400" />
                       </div>
-                      <h3 className="text-xl font-black text-white tracking-tight">Resume Session</h3>
+                      <h3 className="text-xl font-black text-white tracking-tight">Resume Workspace</h3>
                     </div>
                     <p className="text-xs text-purple-200/60 font-medium max-w-sm">
                       Pick up exactly where you left off with <span className="text-purple-300 font-bold">"{seriesTitle || projectId}"</span>. Your assets and timeline are ready.
@@ -196,7 +308,12 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
               </div>
 
               <button
-                onClick={() => navigateTo?.(`/editor?id=${projectId}`)}
+                onClick={() => {
+                  const activeProject = storedProjects.find(
+                    (project) => project.project_id === projectId
+                  );
+                  navigateTo?.(getEditorPathForProject(activeProject || matchedProject || null));
+                }}
                 className="w-full md:w-auto px-8 py-4 bg-white text-purple-950 font-black rounded-2xl text-xs uppercase tracking-[0.15em] hover:bg-purple-50 transition-all flex items-center justify-center gap-3 shadow-xl active:scale-95 group-hover:shadow-[0_0_30px_rgba(168,85,247,0.2)]"
               >
                 Launch Workspace <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -239,6 +356,28 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
           setCropSensitivity={setCropSensitivity}
           autoSplitTallStrips={autoSplitTallStrips}
           setAutoSplitTallStrips={setAutoSplitTallStrips}
+          actionSlot={
+            hasExistingProjectMatch ? (
+              <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleContinueInEditor}
+                  className="relative px-8 py-4 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 rounded-2xl text-sm font-bold text-white transition-all shadow-lg shadow-purple-900/20 active:scale-95 group overflow-hidden flex items-center gap-3"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span>Continue in Editor</span>
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleStartFresh}
+                  className="px-8 py-4 bg-neutral-950/80 border border-amber-500/30 hover:border-amber-400/60 hover:bg-amber-500/10 rounded-2xl text-sm font-bold text-amber-200 hover:text-white transition-all shadow-lg shadow-black/20 active:scale-95"
+                >
+                  Start Fresh
+                </button>
+              </div>
+            ) : undefined
+          }
         />
 
         {/* LOADING CONTEXT BRIDGE */}

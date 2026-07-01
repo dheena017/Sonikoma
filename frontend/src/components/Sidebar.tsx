@@ -18,6 +18,7 @@ import {
   Shield,
   FolderOpen,
   Award,
+  Menu,
 } from "lucide-react";
 
 import { useThemeMode } from "../hooks/useThemeMode";
@@ -73,7 +74,7 @@ const SidebarInner = ({
   const isSettings = currentPath === "/settings";
   const isAutoCrop = currentPath === "/auto-crop";
   const isBubbleCleaner = currentPath === "/bubble-cleaner";
-  const isEditor = currentPath.startsWith("/editor");
+  const isEditor = currentPath.startsWith("/editor") || currentPath.startsWith("/workspace/editor");
   const isLogs = currentPath === "/logs";
   const isStatus = currentPath === "/status";
   const isShortcuts = currentPath === "/shortcuts";
@@ -124,7 +125,9 @@ const SidebarInner = ({
 
     if (activeProjId) {
       if (activeSeriesSlug && activeChapterSlug) {
-        navigateTo(`/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`);
+        navigateTo(
+          `/workspace/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`
+        );
       } else {
         navigateTo(`/workspace?id=${activeProjId}`);
       }
@@ -318,12 +321,12 @@ const SidebarInner = ({
             </div>
           </div>
 
-          {/* Close button for drawer */}
+          {/* Close / toggle button for drawer */}
           <button
             onClick={onClose}
             className="p-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white cursor-pointer"
           >
-            <X className="h-4 w-4" />
+            {isOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
         </div>
 
@@ -347,11 +350,11 @@ const SidebarInner = ({
                             ? "text-white bg-purple-950/20 border border-purple-900/60 shadow-inner"
                             : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 border border-transparent"
                         } ${
-                          item.isProcessing
+                          (item as any).isProcessing
                             ? "ring-1 ring-purple-500/50 shadow-[0_0_8px_rgba(168,85,247,0.2)]"
                             : ""
                         }`}
-                        title={!item.enabled ? item.disabledTip : item.label}
+                        title={!item.enabled ? (item as any).disabledTip : item.label}
                       >
                         <div className="flex items-center gap-2.5">
                           <Icon
@@ -376,7 +379,7 @@ const SidebarInner = ({
                             {item.badge}
                           </span>
                         )}
-                        {item.isProcessing && (
+                        {(item as any).isProcessing && (
                           <span className="absolute right-3 top-3.5 h-1.5 w-1.5 rounded-full bg-purple-400 animate-ping" />
                         )}
                       </button>
@@ -485,14 +488,14 @@ const SidebarInner = ({
       {/* Drawer backdrop (visible on both mobile and desktop when open) */}
       {isOpen && (
         <div
-          className="fixed lg:hidden inset-0 bg-black/60 backdrop-blur-md z-45 transition-opacity animate-fade-in"
+          className="fixed inset-0 bg-black/60 backdrop-blur-md z-40 transition-opacity animate-fade-in"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar drawer container (visible on both mobile and desktop, slides in/out) */}
       <aside
-        className={`fixed inset-y-0 left-0 w-72 shrink-0 bg-neutral-950/95 border-r border-neutral-900 h-full z-50 transition-transform duration-300 ease-out transform ${
+        className={`fixed top-0 left-0 h-screen w-72 shrink-0 bg-neutral-950/95 border-r border-neutral-900 z-50 transition-all duration-300 ease-out transform ${
           isOpen
             ? "translate-x-0 shadow-2xl shadow-black/60 lg:shadow-none lg:border-r"
             : "-translate-x-full"

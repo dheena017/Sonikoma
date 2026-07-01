@@ -467,7 +467,7 @@ export function useAppLogic() {
           if (data.project_id) {
             state.setProjectId(data.project_id);
             if (data.series_slug && data.chapter_slug) {
-              const newPath = `/series/${data.series_slug}/chapters/${data.chapter_slug}`;
+              const newPath = `/workspace/editor/series/${data.series_slug}/chapters/${data.chapter_slug}`;
               if (window.location.pathname !== newPath) {
                 window.history.pushState(null, "", newPath);
               }

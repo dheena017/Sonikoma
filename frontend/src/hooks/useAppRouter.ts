@@ -150,7 +150,7 @@ export function useAppRouter({
         let target = "/dashboard";
 
         if (activeProjId && activeSeriesSlug && activeChapterSlug) {
-          target = `/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
+          target = `/workspace/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
         } else if (activeProjId) {
           target = `/workspace?id=${activeProjId}`;
         }
@@ -191,6 +191,7 @@ export function useAppRouter({
             path === "/admin" ||
             path.startsWith("/admin/") ||
             path.startsWith("/series/") ||
+            path.startsWith("/workspace/editor") ||
             path.startsWith("/editor");
 
           if (isProtectedRoute) {
@@ -216,7 +217,7 @@ export function useAppRouter({
             let target = "/dashboard";
             if (activeProjId) {
               if (activeSeriesSlug && activeChapterSlug) {
-                target = `/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
+                target = `/workspace/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
               } else {
                 target = `/workspace?id=${activeProjId}`;
               }

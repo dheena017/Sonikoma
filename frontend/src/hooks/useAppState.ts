@@ -478,7 +478,9 @@ export function useAppState() {
       const urlProjectId = params.get("id") || params.get("project_id");
 
       const path = window.location.pathname;
-      const match = path.match(/\/series\/[^\/]+\/chapters\/([^\/]+)/);
+      const match = path.match(
+        /(?:\/workspace\/editor)?\/series\/[^\/]+\/chapters\/([^\/]+)/
+      );
       const chapterSlug = match ? match[1] : null;
 
       if (!urlProjectId && !chapterSlug) {
@@ -540,7 +542,7 @@ export function useAppState() {
               window.location.pathname.startsWith("/editor") ||
               window.location.pathname === "/project-editor";
             if (!isEditor) {
-              const newPath = `/series/${data.project.series_slug}/chapters/${data.project.chapter_slug}${suffix}`;
+              const newPath = `/workspace/editor/series/${data.project.series_slug}/chapters/${data.project.chapter_slug}${suffix}`;
               if (window.location.pathname !== newPath) {
                 window.history.replaceState(null, "", newPath);
               }

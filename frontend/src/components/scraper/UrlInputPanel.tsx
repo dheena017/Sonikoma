@@ -41,6 +41,7 @@ interface UrlInputPanelProps {
   setCropSensitivity?: (v: number) => void;
   autoSplitTallStrips?: boolean;
   setAutoSplitTallStrips?: (v: boolean) => void;
+  actionSlot?: React.ReactNode;
 }
 
 const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
@@ -79,6 +80,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
     setCropSensitivity,
     autoSplitTallStrips = true,
     setAutoSplitTallStrips,
+    actionSlot,
   } = props;
 
   const [advancedSettingsOpen, setAdvancedSettingsOpen] = React.useState(false);
@@ -227,26 +229,28 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
             />
           </div>
 
-          <button
-            type="button"
-            onClick={handleImportClick}
-            disabled={isScraping || !targetUrl.trim()}
-            className="relative px-8 py-4 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 rounded-2xl text-sm font-bold text-white transition-all shadow-lg shadow-purple-900/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group overflow-hidden shrink-0 flex items-center gap-3"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            {isScraping ? (
-              <>
-                <div className="h-4 w-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                <span>Initializing...</span>
-              </>
-            ) : (
-              <>
-                <ImageIcon className="h-4 w-4" />
-                <span>Import Images</span>
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </>
-            )}
-          </button>
+          {actionSlot || (
+            <button
+              type="button"
+              onClick={handleImportClick}
+              disabled={isScraping || !targetUrl.trim()}
+              className="relative px-8 py-4 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 rounded-2xl text-sm font-bold text-white transition-all shadow-lg shadow-purple-900/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group overflow-hidden shrink-0 flex items-center gap-3"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              {isScraping ? (
+                <>
+                  <div className="h-4 w-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                  <span>Initializing...</span>
+                </>
+              ) : (
+                <>
+                  <ImageIcon className="h-4 w-4" />
+                  <span>Import Images</span>
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
 

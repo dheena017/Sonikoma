@@ -202,7 +202,7 @@ const DashboardPage = React.memo(function DashboardPageInner() {
   const handleOpenProject = (project: Project) => {
     if (project.series_slug && project.chapter_slug) {
       (window as any).navigateTo?.(
-        `/series/${project.series_slug}/chapters/${project.chapter_slug}/details`
+        `/workspace/editor/series/${project.series_slug}/chapters/${project.chapter_slug}/details`
       );
     } else {
       (window as any).navigateTo?.(`/workspace?id=${project.project_id}`);
