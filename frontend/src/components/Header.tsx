@@ -461,7 +461,7 @@ const HeaderInner = ({
   return (
     <header
       id="header_pane"
-      className="border-b border-neutral-900 bg-neutral-950/80 backdrop-blur-md sticky top-0 z-40 pl-4 pr-6 md:pr-8 py-3 flex items-center justify-between gap-4"
+      className="border-b border-neutral-900 bg-neutral-950/80 backdrop-blur-md sticky top-0 z-50 pl-4 pr-6 md:pr-8 py-3 flex items-center justify-between gap-4"
     >
       {/* Left side: Hamburger and Brand */}
       <div className="flex items-center gap-3 shrink-0">

@@ -876,22 +876,47 @@ body {
 
 /* Custom scrollbars */
 
+.scrollbar-thin {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
 .scrollbar-thin::-webkit-scrollbar {
+  height: 0;
+  width: 0;
+}
+
+.scrollbar-thin:hover,
+.scrollbar-thin:focus-within,
+.scrollbar-thin:active {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(63, 63, 70, 0.5) transparent;
+}
+
+.scrollbar-thin:hover::-webkit-scrollbar,
+.scrollbar-thin:focus-within::-webkit-scrollbar,
+.scrollbar-thin:active::-webkit-scrollbar {
   height: 6px;
   width: 6px;
 }
 
-.scrollbar-thin::-webkit-scrollbar-track {
+.scrollbar-thin:hover::-webkit-scrollbar-track,
+.scrollbar-thin:focus-within::-webkit-scrollbar-track,
+.scrollbar-thin:active::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 4px;
 }
 
-.scrollbar-thin::-webkit-scrollbar-thumb {
+.scrollbar-thin:hover::-webkit-scrollbar-thumb,
+.scrollbar-thin:focus-within::-webkit-scrollbar-thumb,
+.scrollbar-thin:active::-webkit-scrollbar-thumb {
   background: #3f3f46;
   border-radius: 4px;
 }
 
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+.scrollbar-thin:hover::-webkit-scrollbar-thumb:hover,
+.scrollbar-thin:focus-within::-webkit-scrollbar-thumb:hover,
+.scrollbar-thin:active::-webkit-scrollbar-thumb:hover {
   background: #52525b;
 }
 
@@ -903,32 +928,30 @@ body {
   scrollbar-width: none;
 }
 
-/* Scrollbar that only appears on hover */
+/* Custom scrollbar: thin, always visible */
 .custom-scrollbar {
-  scrollbar-width: none; /* Firefox */
-}
-.custom-scrollbar:hover {
-  scrollbar-width: thin; /* Firefox */
-  scrollbar-color: #3f3f46 transparent;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(63, 63, 70, 0.45) transparent;
 }
 .custom-scrollbar::-webkit-scrollbar {
-  height: 6px;
   width: 6px;
-  background: transparent;
-}
-.custom-scrollbar:not(:hover)::-webkit-scrollbar-thumb,
-.custom-scrollbar:not(:hover)::-webkit-scrollbar-track {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #3f3f46;
-  border-radius: 4px;
+  background: rgba(63, 63, 70, 0.45);
+  border-radius: 9999px;
+  border: 1px solid transparent;
+}
+.custom-scrollbar:hover::-webkit-scrollbar-thumb,
+.custom-scrollbar:focus-within::-webkit-scrollbar-thumb,
+.custom-scrollbar:active::-webkit-scrollbar-thumb {
+  background: rgba(100, 100, 120, 0.65);
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #52525b;
+  background: rgba(100, 100, 120, 0.75);
 }
 
 @keyframes pulse-glow {

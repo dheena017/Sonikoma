@@ -868,8 +868,10 @@ export default function App() {
       <div
         id="main-scroll-container"
         className={`flex-grow flex-1 flex flex-col min-h-screen lg:max-h-screen justify-between transition-all duration-300 ${
+          !isSidebarOpen ? "lg:pl-20" : ""
+        } ${!isAdminPath ? "lg:overflow-y-auto" : "overflow-y-auto"} ${
           !isAdminPath && isSidebarOpen ? "overflow-hidden" : ""
-        } ${!isAdminPath ? "lg:overflow-y-auto" : "overflow-y-auto"}`}
+        }`}
       >
         <div>
           {/* Impersonation Banner */}
@@ -973,8 +975,9 @@ export default function App() {
           )}
 
           {/* Top Header */}
-          <Header
-            isProcessing={isProcessing}
+          {!isSidebarOpen && (
+            <Header
+              isProcessing={isProcessing}
             panels={panels}
             totalCalculatedDuration={totalCalculatedDuration}
             currentPath={currentPath}
@@ -1015,6 +1018,7 @@ export default function App() {
             themeMode={themeMode}
             toggleThemeMode={toggleThemeMode}
           />
+          )}
 
           {/* PAGE VIEW 1: Main Editor Workspace */}
           <div

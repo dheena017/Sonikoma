@@ -1,6 +1,6 @@
 import React from "react";
 import EditorSidebar from "./EditorSidebar";
-import EditorNavbar from "./EditorNavbar";
+import EditorMiniSidebar from "./EditorMiniSidebar";
 import LiveScraperDeck from "../scraper/LiveScraperDeck.js";
 import StoryboardTimeline from "../timeline/StoryboardTimeline.js";
 import VideoMonitor from "../video/VideoMonitor.js";
@@ -169,7 +169,19 @@ const EditorPage: React.FC<EditorPageProps> = ({
 
   return (
     <div className="flex min-h-screen bg-[#070709] text-white overflow-hidden">
-      {!isFocusMode && (
+      {!isFocusMode && (isSidebarCollapsed ? (
+        <EditorMiniSidebar
+          isCollapsed={isSidebarCollapsed}
+          setIsCollapsed={setIsSidebarCollapsed}
+          currentSection={currentSection}
+          setCurrentSection={setCurrentSection}
+          onBackToApp={handleBackToApp}
+          scrapedCount={scrapedImages.length}
+          panelsCount={panels.length}
+          isBatchCropping={isBatchCropping}
+          isCleaningBubbles={isCleaningBubbles}
+        />
+      ) : (
         <EditorSidebar
           isCollapsed={isSidebarCollapsed}
           setIsCollapsed={setIsSidebarCollapsed}
@@ -181,29 +193,13 @@ const EditorPage: React.FC<EditorPageProps> = ({
           isBatchCropping={isBatchCropping}
           isCleaningBubbles={isCleaningBubbles}
         />
-      )}
+      ))}
 
       <div
         className={`flex-1 flex flex-col transition-all duration-300 ${
-          isFocusMode ? "ml-0" : isSidebarCollapsed ? "ml-16" : "ml-64"
+          isFocusMode ? "ml-0" : "ml-16"
         }`}
       >
-        <EditorNavbar
-          projectId={projectId}
-          seriesTitle={seriesTitle}
-          chapterNumber={chapterNumber}
-          chapterTitle={chapterTitle}
-          onSave={handleSave}
-          onCompile={handleGenerateVideo}
-          isProcessing={isProcessing}
-          isSaving={isSaving}
-          backendStatus={backendStatus}
-          isFocusMode={isFocusMode}
-          toggleFocusMode={() => setIsFocusMode(!isFocusMode)}
-          previewQuality={previewQuality}
-          setPreviewQuality={setPreviewQuality}
-        />
-
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           <div className="max-w-[1600px] mx-auto flex flex-col gap-8">
 

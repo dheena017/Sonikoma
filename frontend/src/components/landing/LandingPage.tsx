@@ -69,9 +69,9 @@ export default function LandingPage({
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-purple-600">
+    <div className="min-h-screen bg-[#f7f7f9] text-slate-900 selection:bg-purple-200">
       {/* NAVIGATION */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-neutral-950/80 backdrop-blur-xl border-b border-white/5">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div
             className="flex items-center gap-3 group cursor-pointer"
@@ -82,10 +82,10 @@ export default function LandingPage({
               onError={(e) => {
                 (e.currentTarget as HTMLImageElement).src = "/logo.png";
               }}
-              className="w-10 h-10 rounded-xl shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform object-cover bg-black"
+              className="w-10 h-10 rounded-xl shadow-lg shadow-purple-200/50 group-hover:scale-110 transition-transform object-cover bg-white"
               alt="Sonikoma Logo"
             />
-            <span className="text-xl font-black tracking-tighter text-neutral-100 uppercase">
+            <span className="text-xl font-black tracking-tighter text-slate-900 uppercase">
               Sonikoma
             </span>
           </div>
@@ -105,7 +105,7 @@ export default function LandingPage({
                     block: "start",
                   });
                 }}
-                className="text-sm font-semibold text-neutral-400 hover:text-white transition-all cursor-pointer relative py-2 group bg-transparent border-0"
+                className="text-sm font-semibold text-slate-600 hover:text-slate-900 transition-all cursor-pointer relative py-2 group bg-transparent border-0"
               >
                 {link.label}
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 transition-all duration-300 group-hover:w-full" />
@@ -115,13 +115,13 @@ export default function LandingPage({
           <div className="flex items-center gap-4">
             <button
               onClick={onLogin}
-              className="px-6 py-2.5 text-sm font-bold text-neutral-400 hover:text-neutral-100 transition-colors cursor-pointer"
+              className="px-6 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
             >
               Sign In
             </button>
             <button
               onClick={onGetStarted}
-              className="px-6 py-2.5 bg-neutral-100 text-neutral-900 text-sm font-black rounded-xl hover:bg-neutral-300 transition-all shadow-lg active:scale-95 cursor-pointer"
+              className="px-6 py-2.5 bg-purple-600 text-white text-sm font-black rounded-xl hover:bg-purple-500 transition-all shadow-lg active:scale-95 cursor-pointer"
             >
               Get Started
             </button>
@@ -132,37 +132,37 @@ export default function LandingPage({
       {/* HERO SECTION */}
       <section className="relative pt-40 pb-20 px-6 overflow-hidden">
         {/* Background Blobs */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-purple-600/10 blur-[120px] rounded-full -z-10 animate-pulse" />
-        <div className="absolute top-40 left-1/4 w-[400px] h-[400px] bg-indigo-600/10 blur-[100px] rounded-full -z-10" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-purple-500/12 blur-[120px] rounded-full -z-10 animate-pulse" />
+        <div className="absolute top-40 left-1/4 w-[400px] h-[400px] bg-indigo-500/10 blur-[100px] rounded-full -z-10" />
 
         <div className="max-w-7xl mx-auto text-center space-y-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold uppercase tracking-widest">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-100 border border-purple-200 text-purple-600 text-xs font-semibold tracking-widest uppercase">
             <Sparkles className="w-3.5 h-3.5" />
             Make Your Comics Move
           </div>
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9] max-w-4xl mx-auto">
+          <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9] max-w-4xl mx-auto text-slate-950">
             Turn Comics Into <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-400 to-emerald-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-indigo-500 to-emerald-400">
               Awesome Videos
             </span>
           </h1>
-          <p className="text-neutral-400 text-lg md:text-xl max-w-2xl mx-auto font-medium leading-relaxed">
+          <p className="text-slate-600 text-lg md:text-xl max-w-2xl mx-auto font-medium leading-relaxed">
             Just paste a link, and we'll turn your favorite webtoons into fully
             voiced, animated videos that are ready to share with the world.
           </p>
           <div className="pt-8 max-w-4xl mx-auto w-full text-left">
-            <div className="bg-neutral-900/40 rounded-3xl border border-neutral-800/80 p-5 sm:p-6 lg:p-8 backdrop-blur-md shadow-sm space-y-5 sm:space-y-6 min-w-0 w-full overflow-hidden">
+            <div className="bg-white rounded-3xl border border-slate-200 p-5 sm:p-6 lg:p-8 shadow-[0_20px_80px_rgba(99,102,241,0.08)] shadow-purple-200/40 space-y-5 sm:space-y-6 min-w-0 w-full overflow-hidden">
               <div className="space-y-1">
-                <div className="flex items-center gap-2 text-purple-400">
+                <div className="flex items-center gap-2 text-purple-600">
                   <Sparkles className="h-4 w-4 shrink-0" />
                   <span className="text-[10px] sm:text-xs font-semibold tracking-wider uppercase font-mono">
                     Quick Link Importer
                   </span>
                 </div>
-                <h2 className="text-base sm:text-lg font-bold text-neutral-100 tracking-tight leading-tight">
+                <h2 className="text-base sm:text-lg font-bold text-slate-950 tracking-tight leading-tight">
                   Turn a Link into a Video
                 </h2>
-                <p className="text-[10px] sm:text-xs text-neutral-400 font-sans leading-relaxed">
+                <p className="text-[10px] sm:text-xs text-slate-500 font-sans leading-relaxed">
                   Paste a link to any comic or manga chapter to get started.
                 </p>
               </div>
@@ -170,7 +170,7 @@ export default function LandingPage({
               <div className="space-y-5">
                 <div className="flex flex-col sm:flex-row gap-3">
                   <div className="relative group flex-grow">
-                    <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 opacity-20 blur group-focus-within:opacity-40 transition-opacity duration-300" />
+                    <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-purple-400/20 to-indigo-400/10 opacity-30 blur group-focus-within:opacity-50 transition-opacity duration-300" />
                     <input
                       type="url"
                       value={landingUrl}
@@ -183,7 +183,7 @@ export default function LandingPage({
                         }
                       }}
                       placeholder="Paste any comic or manga viewer URL (e.g. example.com/comic/chapter-1)"
-                      className="relative w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm text-neutral-200 outline-none placeholder:text-neutral-600 focus:border-purple-500 transition-colors"
+                      className="relative w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-purple-500 transition-colors"
                     />
                   </div>
 
@@ -210,9 +210,9 @@ export default function LandingPage({
                       }
                     }}
                     disabled={!landingUrl.trim()}
-                    className="relative px-6 py-3.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 rounded-xl text-sm font-bold text-white transition-all shadow-[0_0_20px_-5px_rgba(147,51,234,0.5)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 group overflow-hidden shrink-0 flex items-center justify-center gap-2"
+                    className="relative px-6 py-3.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 rounded-xl text-sm font-bold text-white transition-all shadow-[0_0_20px_-5px_rgba(147,51,234,0.25)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 group overflow-hidden shrink-0 flex items-center justify-center gap-2"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     <Sparkles className="w-4 h-4" />
                     Import Images
                   </button>
@@ -228,9 +228,9 @@ export default function LandingPage({
                   );
                   element?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className="px-6 py-3 bg-neutral-900 border border-white/10 hover:bg-neutral-800 text-neutral-100 font-bold rounded-2xl transition-all flex items-center justify-center gap-3 text-sm cursor-pointer"
+                className="px-6 py-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-900 font-bold rounded-2xl transition-all flex items-center justify-center gap-3 text-sm cursor-pointer shadow-sm"
               >
-                <Play className="w-4 h-4 fill-white" />
+                <Play className="w-4 h-4 fill-slate-900" />
                 Watch Demo
               </button>
             </div>
