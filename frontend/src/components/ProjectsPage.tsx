@@ -150,7 +150,7 @@ export default function ProjectsPage() {
     setOpenMenuId(null);
     if (project.series_slug && project.chapter_slug) {
       (window as any).navigateTo?.(
-        `/workspace/editor/series/${project.series_slug}/chapters/${project.chapter_slug}/details`
+        `/workspace/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
       );
     } else {
       (window as any).navigateTo?.(`/workspace?id=${project.project_id}`);

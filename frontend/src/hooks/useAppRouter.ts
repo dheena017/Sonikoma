@@ -137,6 +137,16 @@ export function useAppRouter({
       const path = window.location.pathname;
       setCurrentPath(path);
 
+      const isLegacyChapterDetailsPath =
+        path.startsWith("/workspace/editor/series/") && path.endsWith("/details");
+
+      if (isLegacyChapterDetailsPath) {
+        const normalizedPath = path.replace(/\/details$/, "");
+        window.history.replaceState({}, "", normalizedPath);
+        setCurrentPath(normalizedPath);
+        return;
+      }
+
       const isLegacyProjectPagePath =
         path === "/project-details" || path === "/project-editor";
 
