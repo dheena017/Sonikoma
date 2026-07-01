@@ -1213,7 +1213,7 @@ export default function ProfilePage({
       : "No finished compiles yet";
 
   return (
-    <div className="min-h-screen bg-[#070709] text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="flex-1 w-full min-w-0 bg-[#070709] text-white p-6 sm:p-8 relative overflow-hidden flex flex-col">
       {/* Hidden file input for custom profile image upload */}
       <input
         type="file"
@@ -1226,7 +1226,7 @@ export default function ProfilePage({
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-600/5 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-600/5 blur-[120px] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 relative z-10">
+      <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 relative z-10">
         {/* HEADER SECTION */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-white/5">
           <div className="flex items-center gap-6">

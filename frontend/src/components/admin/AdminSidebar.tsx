@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Shield,
   LayoutGrid,
@@ -102,7 +102,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
             right: isDesktopExpanded ? '15px' : 'auto'
           }}
         >
-          <Menu className="w-5 h-5" />
+          {isDesktopExpanded ? (
+            <X className="w-5 h-5" />
+          ) : (
+            <Menu className="w-5 h-5" />
+          )}
         </button>
 
         {/* Mobile Close Button */}
@@ -194,7 +198,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       {/* Drawer backdrop for mobile and desktop overlay */}
       {(isOpen || isDesktopExpanded) && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] transition-opacity animate-fade-in lg:absolute"
+          className="fixed inset-0 bg-black/60 backdrop-blur-md z-40 transition-opacity animate-fade-in"
           onClick={() => {
             if (isOpen) onClose();
             if (isDesktopExpanded) setIsDesktopExpanded(false);
@@ -204,14 +208,17 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
       {/* Sidebar Drawer */}
       <aside
-        className={`fixed lg:absolute inset-y-0 left-0 z-[70] transition-all duration-300 ease-out flex flex-col ${
-          isOpen
-            ? "translate-x-0 shadow-2xl shadow-black/80 w-80"
-            : "-translate-x-full lg:translate-x-0"
-        } ${!isDesktopExpanded ? "lg:w-20" : "lg:w-80 lg:shadow-2xl lg:shadow-black/80"}`}
+        className={`transition-all duration-300 ease-out flex flex-col ${
+          isOpen || isDesktopExpanded
+            ? "fixed top-0 left-0 h-screen z-50 translate-x-0 shadow-2xl shadow-black/80 w-80"
+            : "fixed lg:absolute inset-y-0 left-0 h-full z-50 -translate-x-full lg:translate-x-0 lg:w-20"
+        }`}
       >
         {sidebarContent}
       </aside>
+
+      {/* Placeholder to reserve space in document flow so main content doesn't jump */}
+      <div className="hidden lg:block lg:w-20 lg:h-full lg:shrink-0 pointer-events-none" />
     </>
   );
 };

@@ -74,7 +74,9 @@ const SidebarInner = ({
   const isSettings = currentPath === "/settings";
   const isAutoCrop = currentPath === "/auto-crop";
   const isBubbleCleaner = currentPath === "/bubble-cleaner";
-  const isEditor = currentPath.startsWith("/editor");
+  const isEditor =
+    currentPath.startsWith("/editor") ||
+    currentPath.startsWith("/workspace/editor");
   const isLogs = currentPath === "/logs";
   const isStatus = currentPath === "/status";
   const isShortcuts = currentPath === "/shortcuts";
@@ -126,7 +128,10 @@ const SidebarInner = ({
 
     if (activeProjId) {
       if (activeSeriesSlug && activeChapterSlug) {
-        navigateTo(`/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`);
+        // Navigate to the new deep-link editor path
+        navigateTo(
+          `/workspace/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}?id=${activeProjId}`
+        );
       } else {
         navigateTo(`/workspace?id=${activeProjId}`);
       }
@@ -331,7 +336,11 @@ const SidebarInner = ({
               right: isDesktopExpanded ? '0' : 'auto'
             }}
           >
-            <Menu className="h-5 w-5" />
+            {isDesktopExpanded ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
           </button>
 
           {/* Mobile Close Button */}
@@ -537,7 +546,7 @@ const SidebarInner = ({
       {/* Drawer backdrop for mobile and desktop overlay */}
       {(isOpen || isDesktopExpanded) && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-md z-45 transition-opacity animate-fade-in lg:absolute"
+          className="fixed inset-0 bg-black/60 backdrop-blur-md z-40 transition-opacity animate-fade-in"
           onClick={() => {
             if (isOpen) onClose();
             if (isDesktopExpanded) setIsDesktopExpanded(false);
@@ -547,14 +556,17 @@ const SidebarInner = ({
 
       {/* Sidebar drawer container */}
       <aside
-        className={`fixed lg:absolute inset-y-0 left-0 h-full bg-neutral-950/95 border-r border-neutral-900 z-50 transition-all duration-300 ease-out flex flex-col ${
-          isOpen
-            ? "translate-x-0 shadow-2xl shadow-black/60 w-72"
-            : "-translate-x-full lg:translate-x-0"
-        } ${!isDesktopExpanded ? "lg:w-20" : "lg:w-72 lg:shadow-2xl lg:shadow-black/60"}`}
+        className={`bg-neutral-950/95 border-r border-neutral-900 transition-all duration-300 ease-out flex flex-col ${
+          isOpen || isDesktopExpanded
+            ? "fixed top-0 left-0 h-screen z-50 translate-x-0 shadow-2xl shadow-black/60 w-72"
+            : "fixed lg:absolute inset-y-0 left-0 h-full z-50 -translate-x-full lg:translate-x-0 lg:w-20"
+        }`}
       >
         {sidebarContent}
       </aside>
+
+      {/* Placeholder to reserve space in document flow so main content doesn't jump */}
+      <div className="hidden lg:block lg:w-20 lg:h-full lg:shrink-0 pointer-events-none" />
     </>
   );
 }

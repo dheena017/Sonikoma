@@ -971,7 +971,7 @@ export default function App() {
         {/* --- Main Contents Controller & Router --- */}
         <div
           id="main-scroll-container"
-          className={`flex-1 flex flex-col h-full lg:ml-20 overflow-y-auto ${
+          className={`flex-1 flex flex-col h-full overflow-y-auto ${
             isSidebarOpen ? "overflow-hidden" : ""
           }`}
         >

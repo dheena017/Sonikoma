@@ -1,8 +1,18 @@
-import React from "react";
-import { History, ArrowRight, Layout, Sparkles } from "lucide-react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { History, ArrowRight, Layout, Sparkles, AlertTriangle, FolderOpen, RefreshCw } from "lucide-react";
 import UrlInputPanel from "./scraper/UrlInputPanel.js";
 import ProjectConfirmModal from "./scraper/ProjectConfirmModal.js";
 import { slugify } from "../utils/url.js";
+
+// Shape of a saved project returned from /api/projects
+interface SavedProject {
+  project_id: string;
+  title: string;
+  url: string;
+  series_slug?: string;
+  chapter_slug?: string;
+  cover_image?: string;
+}
 
 interface AppWorkspaceProps {
   [key: string]: any;
@@ -46,6 +56,7 @@ interface AppWorkspaceProps {
   autoSplitTallStrips?: boolean;
   setAutoSplitTallStrips?: (v: boolean) => void;
   navigateTo?: (path: string) => void;
+  fetchWithInterceptor?: (url: string, opts?: RequestInit) => Promise<Response>;
   panels?: any[];
   isDashboardOnly?: boolean;
   isGeneratingStoryboard?: boolean;
@@ -53,7 +64,10 @@ interface AppWorkspaceProps {
 }
 
 const AppWorkspaceInner = (props: AppWorkspaceProps) => {
-  React.useEffect(() => {
+  // --------------------------------------------------------------------------
+  // Autostart-from-URL param logic
+  // --------------------------------------------------------------------------
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("autoScrape") === "true" && props.targetUrl) {
       // Remove autoScrape so it doesn't loop on refresh
@@ -105,9 +119,94 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
     autoSplitTallStrips,
     setAutoSplitTallStrips,
     navigateTo,
+    fetchWithInterceptor,
     panels = [],
     isDashboardOnly = false,
   } = props;
+
+  // --------------------------------------------------------------------------
+  // Smart URL Detection — check entered URL against saved projects
+  // --------------------------------------------------------------------------
+  const [hasExistingProjectMatch, setHasExistingProjectMatch] = useState(false);
+  const [matchedProject, setMatchedProject] = useState<SavedProject | null>(null);
+  const [savedProjects, setSavedProjects] = useState<SavedProject[]>([]);
+  const fetchedProjectsRef = useRef(false);
+
+  // Load saved projects once on mount (lazy — only when component is rendered)
+  useEffect(() => {
+    if (fetchedProjectsRef.current) return;
+    fetchedProjectsRef.current = true;
+
+    const doFetch = async () => {
+      try {
+        const token =
+          localStorage.getItem("sonikoma_token") ||
+          sessionStorage.getItem("sonikoma_token") ||
+          "";
+        const fetcher = fetchWithInterceptor
+          ? (url: string) => fetchWithInterceptor(url)
+          : (url: string) => fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+
+        const res = await fetcher("/api/projects");
+        if (!res.ok) return;
+        const data = await res.json();
+        if (Array.isArray(data.projects)) {
+          setSavedProjects(data.projects);
+        }
+      } catch {
+        // silently fail — this is a convenience feature, not critical
+      }
+    };
+    doFetch();
+  }, [fetchWithInterceptor]);
+
+  // Debounced URL match check
+  useEffect(() => {
+    if (!targetUrl.trim() || savedProjects.length === 0) {
+      setHasExistingProjectMatch(false);
+      setMatchedProject(null);
+      return;
+    }
+
+    const normalizeUrl = (u: string) => {
+      try {
+        const parsed = new URL(u.startsWith("http") ? u : "https://" + u);
+        return parsed.origin + parsed.pathname;
+      } catch {
+        return u;
+      }
+    };
+
+    const enteredNorm = normalizeUrl(targetUrl.trim());
+    const found = savedProjects.find(
+      (p) => p.url && normalizeUrl(p.url) === enteredNorm
+    ) || null;
+
+    setMatchedProject(found);
+    setHasExistingProjectMatch(!!found);
+  }, [targetUrl, savedProjects]);
+
+  // Navigate to the matched project's editor
+  const handleContinueInEditor = useCallback(() => {
+    if (!matchedProject || !navigateTo) return;
+    const { series_slug, chapter_slug, project_id } = matchedProject;
+    if (series_slug && chapter_slug) {
+      navigateTo(`/workspace/editor/series/${series_slug}/chapters/${chapter_slug}?id=${project_id}`);
+    } else {
+      navigateTo(`/editor?id=${project_id}`);
+    }
+  }, [matchedProject, navigateTo]);
+
+  // Clear matched project data and start the scraper pipeline fresh
+  const handleStartFresh = useCallback(() => {
+    setHasExistingProjectMatch(false);
+    setMatchedProject(null);
+    // Remove the old project from local cached list so it won't match again mid-session
+    if (matchedProject) {
+      setSavedProjects((prev) => prev.filter((p) => p.project_id !== matchedProject.project_id));
+    }
+    setShowScrapeConfirmModal(true);
+  }, [matchedProject, setShowScrapeConfirmModal]);
 
   const handleConfirmProjectAndScrape = async (
     details: {
@@ -194,7 +293,7 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
                       <div className="h-8 w-8 rounded-xl bg-purple-600/20 flex items-center justify-center border border-purple-500/30">
                         <History className="h-4 w-4 text-purple-400" />
                       </div>
-                      <h3 className="text-xl font-black text-white tracking-tight">Resume Session</h3>
+                       <h3 className="text-xl font-black text-white tracking-tight">Resume Workspace</h3>
                     </div>
                     <p className="text-xs text-purple-200/60 font-medium max-w-sm">
                       Pick up exactly where you left off with <span className="text-purple-300 font-bold">"{seriesTitle || projectId}"</span>. Your assets and timeline are ready.
@@ -231,7 +330,7 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
           isProcessing={isProcessing}
           isScraping={isScraping}
           handleGenerateVideo={() => {}}
-          handleScrape={() => setShowScrapeConfirmModal(true)}
+          handleScrape={hasExistingProjectMatch ? undefined : () => setShowScrapeConfirmModal(true)}
           addNotification={addNotification}
           narrationStyle={narrationStyle}
           setNarrationStyle={setNarrationStyle}
@@ -257,6 +356,53 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
           autoSplitTallStrips={autoSplitTallStrips}
           setAutoSplitTallStrips={setAutoSplitTallStrips}
         />
+
+        {/* ------------------------------------------------------------------ */}
+        {/* SMART URL CONFLICT UI — shown when the entered URL matches a saved  */}
+        {/* project, replacing the normal Import Images action with two options  */}
+        {/* ------------------------------------------------------------------ */}
+        {hasExistingProjectMatch && matchedProject && (
+          <div className="animate-in fade-in slide-in-from-top-3 duration-400 rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-950/40 to-orange-950/30 backdrop-blur-md p-5 space-y-4 shadow-xl">
+
+            {/* Warning banner */}
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 border border-amber-500/30">
+                <AlertTriangle className="h-4 w-4 text-amber-400" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-amber-300 uppercase tracking-widest font-mono">Existing Project Detected</p>
+                <p className="mt-0.5 text-xs text-amber-200/70 font-medium">
+                  An existing project was found for this URL.{" "}
+                  <span className="text-amber-300 font-bold">"{matchedProject.title}"</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 pl-10">
+              {/* Primary — Continue in Editor */}
+              <button
+                type="button"
+                onClick={handleContinueInEditor}
+                className="group flex-1 flex items-center justify-center gap-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 border border-purple-500/50 px-5 py-3 text-xs font-black text-white uppercase tracking-[0.12em] transition-all shadow-lg shadow-purple-900/20 active:scale-95"
+              >
+                <FolderOpen className="h-3.5 w-3.5" />
+                Continue in Editor
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+              </button>
+
+              {/* Secondary / Destructive — Start Fresh */}
+              <button
+                type="button"
+                onClick={handleStartFresh}
+                className="group flex-1 flex items-center justify-center gap-2.5 rounded-xl bg-transparent hover:bg-red-950/50 border border-neutral-700 hover:border-red-500/50 px-5 py-3 text-xs font-black text-neutral-400 hover:text-red-400 uppercase tracking-[0.12em] transition-all active:scale-95"
+              >
+                <RefreshCw className="h-3.5 w-3.5 transition-transform group-hover:rotate-180 duration-300" />
+                Start Fresh
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* LOADING CONTEXT BRIDGE */}
         {isScraping && (
