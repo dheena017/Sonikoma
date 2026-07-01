@@ -53,7 +53,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
     {
       group: "Main Workspace",
       items: [
-        { label: "Dashboard", icon: LayoutDashboard, active: isDashboardOverview, onClick: () => navigateTo("/") },
+        { label: "Dashboard", icon: LayoutDashboard, active: isDashboardOverview, onClick: () => navigateTo("/dashboard") },
         { label: "Workspace", icon: Layout, active: isWorkspace, onClick: () => navigateTo("/workspace") },
         { label: "Projects", icon: FolderOpen, active: isProjects, onClick: () => navigateTo("/projects") },
       ],

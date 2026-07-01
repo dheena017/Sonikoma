@@ -670,7 +670,8 @@ export default function App() {
     Boolean(editorRouteMatch) ||
     currentPath === "/editor" ||
     currentPath === "/editor/" ||
-    isWorkspaceEditorRoot;
+    isWorkspaceEditorRoot ||
+    currentPath.startsWith("/workspace/editor/");
   const editorSeriesSlug = editorRouteMatch?.[1] || seriesSlugState || null;
   const editorChapterSlug = editorRouteMatch?.[2] || chapterSlugState || null;
 
@@ -1620,8 +1621,8 @@ export default function App() {
         notificationsMuted={notificationsMuted}
       />
 
-      {/* Dashboard Modal: Batch Panel Auto Crop */}
-      {isWorkspacePath && showAutoCropModal && (
+      {/* Dashboard / Editor Modal: Batch Panel Auto Crop */}
+      {(isWorkspacePath || isEditorPath) && showAutoCropModal && (
         <AutoCropModal
           isPage={false}
           onClose={handleAutoCropClose}
@@ -1668,8 +1669,8 @@ export default function App() {
         />
       )}
 
-      {/* Dashboard Modal: Batch Speech Bubble Cleaner */}
-      {isWorkspacePath && showBubbleModal && (
+      {/* Dashboard / Editor Modal: Batch Speech Bubble Cleaner */}
+      {(isWorkspacePath || isEditorPath) && showBubbleModal && (
         <BubbleCleanerModal
           isPage={false}
           onClose={handleBubbleCleanerClose}

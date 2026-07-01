@@ -292,7 +292,10 @@ export function useAppRouter({
         setShowAutoCropModal(false);
         setShowBubbleModal(true);
         setEditingImageIdx(null);
-      } else if (path.startsWith("/editor")) {
+      } else if (
+        path.startsWith("/editor") ||
+        path.startsWith("/workspace/editor")
+      ) {
         const params = new URLSearchParams(window.location.search);
         const hasProjId = params.has("id") || params.has("project_id");
         if (scrapedImagesRef.current.length === 0 && panelsRef.current.length === 0 && !hasProjId) {

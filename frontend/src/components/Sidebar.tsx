@@ -167,28 +167,6 @@ const SidebarInner = ({
           onClick: () => navigateTo("/projects"),
           enabled: true,
         },
-        {
-          label: "Auto-Crop",
-          icon: Scissors,
-          active: isAutoCrop,
-          onClick: () => navigateTo("/auto-crop"),
-          enabled: true,
-          badge:
-            scrapedImages.length > 0
-              ? scrapedImages.length
-              : panels.length > 0
-              ? panels.length
-              : undefined,
-          isProcessing: isBatchCropping,
-        },
-        {
-          label: "Clean-Bubbles",
-          icon: Brain,
-          active: isBubbleCleaner,
-          onClick: () => navigateTo("/bubble-cleaner"),
-          enabled: true,
-          isProcessing: isCleaningBubbles,
-        },
       ],
     },
 
@@ -351,7 +329,7 @@ const SidebarInner = ({
                           />
                           <span>{item.label}</span>
                         </div>
-                        {item.badge && (
+                        {(item as any).badge && (
                           <span
                             className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
                               item.label === "Notifications" && !item.active
@@ -361,7 +339,7 @@ const SidebarInner = ({
                                 : "bg-black/55 text-neutral-400"
                             }`}
                           >
-                            {item.badge}
+                            {(item as any).badge}
                           </span>
                         )}
                         {(item as any).isProcessing && (

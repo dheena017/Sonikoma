@@ -28,7 +28,7 @@ interface SidebarMenuItem {
   id: string;
   label: string;
   icon: LucideIcon;
-  path: string;
+  path?: string;
   badge?: string | number;
   isProcessing?: boolean;
 }
@@ -47,28 +47,19 @@ const EditorSidebar = ({
 }: EditorSidebarProps) => {
   const menuItems: SidebarMenuItem[] = [
     {
-      id: "images",
-      label: "Imported Images",
-      icon: Layout,
-      path: "/workspace/editor",
-    },
-    {
-      id: "crop",
-      label: "Crop",
+      id: "autocrop",
+      label: "Auto-Crop",
       icon: Scissors,
-      path: "/workspace/editor",
+      path: "/auto-crop",
+      badge: scrapedCount > 0 ? scrapedCount : undefined,
+      isProcessing: isBatchCropping,
     },
     {
-      id: "edit",
-      label: "Edit",
-      icon: Film,
-      path: "/workspace/editor",
-    },
-    {
-      id: "cut",
-      label: "Cut",
+      id: "bubbles",
+      label: "Clean-Bubbles",
       icon: Brain,
-      path: "/workspace/editor",
+      path: "/bubble-cleaner",
+      isProcessing: isCleaningBubbles,
     },
   ];
 
@@ -105,13 +96,18 @@ const EditorSidebar = ({
       <div className="flex-1 overflow-y-auto py-3 px-2 space-y-1">
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const isActive = currentSection === item.id;
+          const pathname = window.location.pathname;
+          const isActive =
+            currentSection === item.id ||
+            pathname === item.path ||
+            pathname.startsWith(`${item.path}/`);
           return (
             <button
               key={item.id}
               onClick={() => {
-                setCurrentSection(item.id);
-                if (item.path && navigateTo) {
+                const nextSection = item.id === "autocrop" ? "autocrop" : item.id === "bubbles" ? "bubbles" : item.id;
+                setCurrentSection(nextSection);
+                if (item.id !== "autocrop" && item.id !== "bubbles" && item.path && navigateTo) {
                   navigateTo(item.path);
                 }
               }}
