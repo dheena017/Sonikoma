@@ -303,7 +303,7 @@ const DashboardPage = React.memo(function DashboardPageInner() {
   );
 
   return (
-    <div className="w-full min-h-full bg-[#070709] text-neutral-100 flex flex-col pt-20 px-6 sm:px-12 md:px-20 lg:px-32 animate-fade-in relative z-10 pb-20">
+    <div className="w-full min-h-full bg-[#070709] text-neutral-100 flex flex-col pt-20 px-4 sm:px-6 animate-fade-in relative z-10 pb-20">
       {/* HEADER SECTION */}
       <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>

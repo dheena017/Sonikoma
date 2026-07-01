@@ -167,7 +167,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
       {/* Sidebar Drawer */}
       <aside
-        className={`fixed top-0 left-0 h-screen w-80 z-50 transition-transform duration-500 ease-out transform ${
+        className={`fixed top-16 bottom-0 left-0 w-80 z-50 transition-transform duration-500 ease-out transform ${
           isOpen ? "translate-x-0 shadow-2xl shadow-black/80 lg:shadow-none" : "-translate-x-full"
         }`}
       >

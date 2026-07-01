@@ -914,7 +914,7 @@ export default function App() {
             seriesSlug={seriesSlugState}
             chapterSlug={chapterSlugState}
           />
-          {!isSidebarOpen && (
+          {!isSidebarOpen && !isEditorPath && (
             <MiniSidebar
               currentPath={currentPath}
               navigateTo={navigateTo}
@@ -928,12 +928,56 @@ export default function App() {
       <div
         id="main-scroll-container"
         className={`flex-grow flex-1 flex flex-col min-h-screen lg:max-h-screen justify-between transition-all duration-300 ${
-          !isSidebarOpen ? "lg:pl-20" : ""
-        } ${!isAdminPath ? "lg:overflow-y-auto" : "overflow-y-auto"} ${
-          !isAdminPath && isSidebarOpen ? "overflow-hidden" : ""
-        }`}
+          !isAdminPath ? "lg:overflow-y-auto" : "overflow-y-auto"
+        } ${!isAdminPath && isSidebarOpen ? "overflow-hidden" : ""}`}
       >
-        <div>
+        {/* Top Header */}
+        {!isSidebarOpen && !isProEditorPage && (
+          <Header
+            isProcessing={isProcessing}
+            panels={panels}
+            totalCalculatedDuration={totalCalculatedDuration}
+            currentPath={currentPath}
+            editingImageIdx={editingImageIdx}
+            lastEditorPath={lastEditorPath}
+            isBatchCropping={isBatchCropping}
+            isCleaningBubbles={isCleaningBubbles}
+            onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+            isSidebarOpen={isSidebarOpen}
+            backendStatus={backendStatus}
+            narrationStyle={narrationStyle}
+            setNarrationStyle={setNarrationStyle}
+            selectedModel={selectedModel}
+            setSelectedModel={setSelectedModel}
+            volume={volume}
+            setVolume={setVolume}
+            isMuted={isMuted}
+            setIsMuted={setIsMuted}
+            autoPlayAudio={autoPlayAudio}
+            setAutoPlayAudio={setAutoPlayAudio}
+            sfxVolume={appLogic.sfxVolume}
+            setSfxVolume={appLogic.setSfxVolume}
+            sfxEnabled={appLogic.sfxEnabled}
+            setSfxEnabled={appLogic.setSfxEnabled}
+            user={user}
+            notifications={notifications}
+            markNotificationAsRead={markNotificationAsRead}
+            markAllNotificationsAsRead={markAllNotificationsAsRead}
+            deleteNotification={deleteNotification}
+            clearAllNotifications={clearAllNotifications}
+            projectId={headerProjectId}
+            saveStatus={headerSaveStatus}
+            isDirty={headerIsDirty}
+            onSave={headerOnSave}
+            navigateTo={navigateTo}
+            notificationsMuted={notificationsMuted}
+            setNotificationsMuted={setNotificationsMuted}
+            themeMode={themeMode}
+            toggleThemeMode={toggleThemeMode}
+          />
+        )}
+
+        <div className={`${!isSidebarOpen ? "lg:pl-20" : ""} flex-1 flex flex-col transition-all duration-300`}>
           {/* Impersonation Banner */}
           {localStorage.getItem("sonikoma_admin_token") && (
             <div className="bg-rose-600 text-white text-center py-2 px-4 text-sm font-bold flex justify-center items-center gap-4 z-[100] relative shadow-md">
@@ -1032,52 +1076,6 @@ export default function App() {
                 </div>
               )}
             </div>
-          )}
-
-          {/* Top Header */}
-          {!isSidebarOpen && !isProEditorPage && (
-            <Header
-              isProcessing={isProcessing}
-              panels={panels}
-              totalCalculatedDuration={totalCalculatedDuration}
-              currentPath={currentPath}
-              editingImageIdx={editingImageIdx}
-              lastEditorPath={lastEditorPath}
-              isBatchCropping={isBatchCropping}
-              isCleaningBubbles={isCleaningBubbles}
-              onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-              isSidebarOpen={isSidebarOpen}
-              backendStatus={backendStatus}
-              narrationStyle={narrationStyle}
-              setNarrationStyle={setNarrationStyle}
-              selectedModel={selectedModel}
-              setSelectedModel={setSelectedModel}
-              volume={volume}
-              setVolume={setVolume}
-              isMuted={isMuted}
-              setIsMuted={setIsMuted}
-              autoPlayAudio={autoPlayAudio}
-              setAutoPlayAudio={setAutoPlayAudio}
-              sfxVolume={appLogic.sfxVolume}
-              setSfxVolume={appLogic.setSfxVolume}
-              sfxEnabled={appLogic.sfxEnabled}
-              setSfxEnabled={appLogic.setSfxEnabled}
-              user={user}
-              notifications={notifications}
-              markNotificationAsRead={markNotificationAsRead}
-              markAllNotificationsAsRead={markAllNotificationsAsRead}
-              deleteNotification={deleteNotification}
-              clearAllNotifications={clearAllNotifications}
-              projectId={headerProjectId}
-              saveStatus={headerSaveStatus}
-              isDirty={headerIsDirty}
-              onSave={headerOnSave}
-              navigateTo={navigateTo}
-              notificationsMuted={notificationsMuted}
-              setNotificationsMuted={setNotificationsMuted}
-              themeMode={themeMode}
-              toggleThemeMode={toggleThemeMode}
-            />
           )}
 
           {/* PAGE VIEW 1: Main Editor Workspace */}

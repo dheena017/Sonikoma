@@ -43,6 +43,11 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
   const isShortcuts = currentPath.startsWith("/shortcuts");
   const isSettings = currentPath.startsWith("/settings");
   const isAdminPath = currentPath.startsWith("/admin");
+  const isProEditorPage =
+    currentPath === "/editor" ||
+    currentPath === "/editor/" ||
+    currentPath.startsWith("/editor/") ||
+    currentPath.startsWith("/workspace/editor");
 
   const groups = [
     {
@@ -121,7 +126,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
   const [creativeHover, setCreativeHover] = useState(false);
   const [creativeRect, setCreativeRect] = useState<DOMRect | null>(null);
   return (
-    <aside className="fixed top-16 bottom-0 left-0 w-20 shrink-0 bg-neutral-950/95 border-r border-neutral-900 hidden lg:flex flex-col items-center pb-5 z-40">
+    <aside className={`fixed ${isProEditorPage ? "top-12" : "top-16"} bottom-0 left-0 w-20 shrink-0 bg-neutral-950/95 border-r border-neutral-900 hidden lg:flex flex-col items-center pb-5 z-40`}>
       <div
         className="flex-1 w-full overflow-y-auto overflow-x-hidden scrollbar-thin custom-scrollbar flex flex-col items-center space-y-6 pt-3 px-2.5"
         style={{ scrollbarGutter: "stable" }}

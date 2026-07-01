@@ -6,7 +6,6 @@ import {
   Film,
   ArrowLeft,
   ChevronRight,
-  ChevronLeft,
 } from "lucide-react";
 
 interface EditorMiniSidebarProps {
@@ -61,11 +60,11 @@ const EditorMiniSidebar = ({
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 bg-[#0a0a0f] border-r border-white/5 flex flex-col transition-all duration-300 z-50 ${
-        isCollapsed ? "w-16" : "w-16"
+      className={`fixed top-[5.5rem] bottom-0 left-0 bg-[#0a0a0f] border border-white/5 rounded-2xl flex flex-col transition-all duration-300 z-50 shadow-2xl shadow-black/60 overflow-hidden ${
+        isCollapsed ? "w-16" : "w-20"
       }`}
     >
-      <div className="p-2 border-b border-white/5 flex items-center justify-center">
+      <div className="p-2 flex items-center justify-center border-b border-white/5">
         <img
           src="/logo.png"
           onError={(e) => {
@@ -94,13 +93,13 @@ const EditorMiniSidebar = ({
               key={item.id}
               onClick={() => setCurrentSection(item.id)}
               title={item.label}
-              className={`relative w-full flex items-center justify-center p-2.5 rounded-xl transition-all duration-200 ${
+              className={`relative w-full flex items-center justify-center p-3 rounded-xl transition-all duration-200 ${
                 isActive
                   ? "bg-purple-600/10 text-purple-400 border border-purple-500/20"
                   : "text-neutral-500 hover:text-neutral-300 hover:bg-white/5 border border-transparent"
               }`}
             >
-              <Icon className={`w-4.5 h-4.5 ${isActive ? "text-purple-400" : ""}`} />
+              <Icon className={`w-5 h-5 ${isActive ? "text-purple-400" : ""}`} />
               {item.badge !== undefined && (
                 <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-purple-600 text-[9px] font-bold text-white flex items-center justify-center">
                   {item.badge}
@@ -118,9 +117,9 @@ const EditorMiniSidebar = ({
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="w-full flex items-center justify-center p-2 rounded-xl bg-neutral-950 border border-white/5 text-neutral-500 hover:text-white transition-all"
-          title="Expand sidebar"
+          title="Toggle sidebar"
         >
-          {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          <ChevronRight className="w-4 h-4" />
         </button>
       </div>
     </aside>

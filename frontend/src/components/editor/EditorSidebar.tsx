@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
+  X,
 } from "lucide-react";
 
 interface EditorSidebarProps {
@@ -61,13 +62,13 @@ const EditorSidebar = ({
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 bg-[#0a0a0f] border-r border-white/5 flex flex-col transition-all duration-300 z-50 ${
+      className={`fixed top-[5.5rem] bottom-0 left-0 bg-[#0a0a0f] border border-white/5 rounded-2xl flex flex-col transition-all duration-300 z-50 shadow-2xl shadow-black/60 overflow-hidden ${
         isCollapsed ? "w-16" : "w-64"
       }`}
     >
       {/* Branding */}
-      <div className="p-3 border-b border-white/5">
-        <div className="flex items-center gap-3">
+      <div className="p-3 border-b border-white/5 flex items-center justify-between">
+        <div className="flex items-center gap-3 min-w-0">
           <img
             src="/logo.png"
             onError={(e) => {
@@ -83,6 +84,15 @@ const EditorSidebar = ({
             </div>
           )}
         </div>
+        {!isCollapsed && (
+          <button
+            onClick={() => setIsCollapsed(true)}
+            className="flex-shrink-0 p-1 rounded-lg text-neutral-400 hover:text-white hover:bg-white/5 transition"
+            title="Close sidebar"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* Exit Button */}

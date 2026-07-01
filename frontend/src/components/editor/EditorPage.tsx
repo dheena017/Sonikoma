@@ -25,7 +25,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
 }: EditorPageProps) => {
   void seriesSlug;
   void chapterSlug;
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(true);
   const [currentSection, setCurrentSection] = React.useState("timeline");
   const [isFocusMode, setIsFocusMode] = React.useState(false);
   const [previewQuality, setPreviewQuality] = React.useState<"draft" | "high">("high");
@@ -178,8 +178,8 @@ const EditorPage: React.FC<EditorPageProps> = ({
       isFocusMode={isFocusMode}
       setIsFocusMode={setIsFocusMode}
     >
-      <main className="flex-1 p-4 md:p-6 lg:p-8">
-        <div className="max-w-[1600px] mx-auto flex flex-col gap-8">
+      <main className="flex-1 w-full p-4 md:p-6 lg:p-8">
+        <div className="w-full flex flex-col gap-8">
 
             {/* TOP AREA: LIVE SCRAPER DECK + VIDEO MONITOR (Expanded in Focus Mode) */}
             <div className={`grid grid-cols-1 ${isFocusMode ? 'lg:grid-cols-1' : 'lg:grid-cols-12'} gap-8`}>
