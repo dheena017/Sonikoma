@@ -96,10 +96,10 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
       )}
 
       <div
-        className={`flex flex-1 flex-col transition-all duration-300 p-4 ${
+        className={`flex flex-1 flex-col transition-all duration-300 ${
           isFocusMode
             ? "pt-4 ml-0"
-            : "pt-28 ml-0"
+            : "pt-24 ml-0"
         }`}
       >
         <div className="flex-1 overflow-y-auto">

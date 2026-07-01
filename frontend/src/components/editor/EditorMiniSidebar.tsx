@@ -60,24 +60,14 @@ const EditorMiniSidebar = ({
 
   return (
     <aside
-      className={`fixed top-[5.5rem] bottom-0 left-0 bg-[#0a0a0f] border border-white/5 rounded-2xl flex flex-col transition-all duration-300 z-50 shadow-2xl shadow-black/60 overflow-hidden ${
+      className={`fixed top-[6rem] bottom-4 left-4 bg-[#0a0a0f] border border-white/5 rounded-2xl flex flex-col transition-all duration-300 z-40 shadow-2xl shadow-black/60 overflow-hidden ${
         isCollapsed ? "w-16" : "w-20"
       }`}
     >
-      <div className="p-2 flex items-center justify-center border-b border-white/5">
-        <img
-          src="/logo.png"
-          onError={(e) => {
-            (e.currentTarget as HTMLImageElement).src = "/logo.png";
-          }}
-          alt="Croex Logo"
-          className="h-10 w-10 rounded-full bg-neutral-900 shadow-lg shadow-purple-900/30 object-cover"
-        />
-      </div>
-      <div className="p-2 border-b border-white/5">
+      <div className="p-1.5 border-b border-white/5">
         <button
           onClick={onBackToApp}
-          className="w-full flex items-center justify-center p-2 rounded-xl bg-neutral-900/60 hover:bg-neutral-800 text-neutral-400 hover:text-white transition-all border border-white/5"
+          className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900/60 hover:bg-neutral-800 text-neutral-400 hover:text-white transition-all border border-white/5"
           title="Back to Dashboard"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -113,15 +103,6 @@ const EditorMiniSidebar = ({
         })}
       </div>
 
-      <div className="p-2 border-t border-white/5">
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="w-full flex items-center justify-center p-2 rounded-xl bg-neutral-950 border border-white/5 text-neutral-500 hover:text-white transition-all"
-          title="Toggle sidebar"
-        >
-          <ChevronRight className="w-4 h-4" />
-        </button>
-      </div>
     </aside>
   );
 };

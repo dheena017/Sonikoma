@@ -62,28 +62,11 @@ const EditorSidebar = ({
 
   return (
     <aside
-      className={`fixed top-[5.5rem] bottom-0 left-0 bg-[#0a0a0f] border border-white/5 rounded-2xl flex flex-col transition-all duration-300 z-50 shadow-2xl shadow-black/60 overflow-hidden ${
+      className={`fixed top-[6rem] bottom-0 left-4 h-[calc(100vh-6rem)] bg-[#0a0a0f] border border-white/5 rounded-none flex flex-col transition-all duration-300 z-40 shadow-2xl shadow-black/60 overflow-hidden ${
         isCollapsed ? "w-16" : "w-64"
       }`}
     >
-      {/* Branding */}
-      <div className="p-3 border-b border-white/5 flex items-center justify-between">
-        <div className="flex items-center gap-3 min-w-0">
-          <img
-            src="/logo.png"
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = "/logo.png";
-            }}
-            alt="Croex Logo"
-            className="h-11 w-11 rounded-full bg-neutral-900 shadow-lg shadow-purple-900/30 object-cover"
-          />
-          {!isCollapsed && (
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-white font-sans">Croex</p>
-              <p className="text-[10px] text-neutral-400 font-mono">Editor Suite</p>
-            </div>
-          )}
-        </div>
+      <div className="p-2 border-b border-white/5 flex items-center justify-end">
         {!isCollapsed && (
           <button
             onClick={() => setIsCollapsed(true)}
@@ -96,19 +79,18 @@ const EditorSidebar = ({
       </div>
 
       {/* Exit Button */}
-      <div className="p-3 border-b border-white/5">
+      <div className="p-2 border-b border-white/5">
         <button
           onClick={onBackToApp}
-          className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-neutral-900/50 hover:bg-neutral-800 text-neutral-400 hover:text-white transition-all border border-white/5 group`}
+          className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900/50 hover:bg-neutral-800 text-neutral-400 hover:text-white transition-all border border-white/5"
           title="Back to Dashboard"
         >
-          <ArrowLeft className="w-4 h-4 shrink-0 transition-transform group-hover:-translate-x-1" />
-          {!isCollapsed && <span className="text-xs font-bold font-mono">Back to App</span>}
+          <ArrowLeft className="w-4 h-4" />
         </button>
       </div>
 
       {/* Navigation */}
-      <div className="flex-1 overflow-y-auto py-4 px-2 space-y-1">
+      <div className="flex-1 overflow-y-auto py-3 px-2 space-y-1">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = currentSection === item.id;
@@ -116,7 +98,7 @@ const EditorSidebar = ({
             <button
               key={item.id}
               onClick={() => setCurrentSection(item.id)}
-              className={`w-full flex items-center justify-between px-3 py-3 rounded-xl transition-all duration-200 group relative ${
+              className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl transition-all duration-200 group relative ${
                 isActive
                   ? "bg-purple-600/10 text-purple-400 border border-purple-500/20 shadow-[0_0_15px_rgba(147,51,234,0.1)]"
                   : "text-neutral-500 hover:text-neutral-300 hover:bg-white/5 border border-transparent"
@@ -142,10 +124,10 @@ const EditorSidebar = ({
       </div>
 
       {/* Collapse Toggle */}
-      <div className="p-3 border-t border-white/5">
+      <div className="p-2 border-t border-white/5">
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="w-full flex items-center justify-center p-2 rounded-xl bg-neutral-950 border border-white/5 text-neutral-500 hover:text-white transition-all"
+          className="w-full flex items-center justify-center p-1.5 rounded-xl bg-neutral-950 border border-white/5 text-neutral-500 hover:text-white transition-all"
         >
           {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>

@@ -113,7 +113,7 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
   };
 
   return (
-    <aside className="fixed top-16 bottom-0 left-0 w-20 bg-[#0a0a0e] border-r border-violet-900/20 hidden lg:flex flex-col items-center py-5 z-40">
+    <aside className="fixed top-16 bottom-4 left-4 w-20 bg-[#0a0a0e] border border-violet-900/20 rounded-3xl shadow-2xl hidden lg:flex flex-col items-center py-5 z-40">
       {/* Brand Icon / Expand Sidebar */}
       <div className="mb-8 flex flex-col gap-4 items-center">
         <div className="p-2.5 bg-violet-600 rounded-xl shadow-lg shadow-violet-600/30">
@@ -129,7 +129,7 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
       </div>
 
       <div
-        className="flex-1 w-full overflow-y-auto scrollbar-thin custom-scrollbar flex flex-col items-center space-y-6 pt-6"
+        className="flex-1 w-full overflow-y-auto hide-scrollbar mini-sidebar-scrollbar flex flex-col items-center space-y-6 pt-6"
         style={{ scrollbarGutter: "stable" }}
       >
         {groups.map((group, groupIdx) => (

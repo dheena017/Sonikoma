@@ -78,7 +78,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
   };
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-[#0a0a0e]/95 backdrop-blur-2xl border-r border-violet-900/20">
+    <div className="flex h-full flex-col bg-[#0a0a0e]/95 backdrop-blur-2xl border-r border-violet-900/20">
       {/* Sidebar Header */}
       <div className="h-20 flex items-center justify-between px-6 border-b border-violet-900/10">
         <div className="flex items-center gap-3">
@@ -167,7 +167,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
       {/* Sidebar Drawer */}
       <aside
-        className={`fixed top-16 bottom-0 left-0 w-80 z-50 transition-transform duration-500 ease-out transform ${
+        className={`fixed top-0 bottom-0 left-0 h-screen w-80 z-50 transition-transform duration-500 ease-out transform overflow-hidden ${
           isOpen ? "translate-x-0 shadow-2xl shadow-black/80 lg:shadow-none" : "-translate-x-full"
         }`}
       >

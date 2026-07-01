@@ -36,11 +36,11 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
   return (
     <header
-      className={`z-40 mb-4 flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-2xl border px-4 py-3 transition-all duration-300 ${headerSurfaceClass} ${className ?? ""}`}
+      className={`fixed top-0 left-0 right-0 z-50 mb-0 flex min-w-0 flex-wrap items-center justify-between gap-2 rounded-none border px-3 py-2 transition-all duration-300 ${headerSurfaceClass}`}
       style={style}
     >
       {/* Left Section - Menu Icon + Title */}
-      <div className="flex items-center gap-3 min-w-0">
+      <div className="flex items-center gap-2 min-w-0">
         {onToggleSidebar && (
           <button
             onClick={onToggleSidebar}
@@ -50,6 +50,14 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
             <Menu className="h-4 w-4" />
           </button>
         )}
+        <img
+          src="/logo.png"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = "/logo.png";
+          }}
+          alt="Croex Logo"
+          className="h-10 w-10 rounded-full bg-neutral-900 shadow-lg shadow-purple-900/30 object-cover"
+        />
         <div className="min-w-0">
           <p className="font-mono text-[10px] font-black uppercase tracking-[0.25em] text-purple-400/80">
             Editor workspace
@@ -65,11 +73,11 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
       </div>
 
       {/* Right Section - Action Buttons */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-1.5">
         <button
           type="button"
           onClick={() => setIsFocusMode((value) => !value)}
-          className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-neutral-200 transition hover:bg-white/10"
+          className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-semibold text-neutral-200 transition hover:bg-white/10"
         >
           <Focus className="h-3.5 w-3.5" />
           {isFocusMode ? "Exit focus" : "Focus mode"}
@@ -79,7 +87,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           type="button"
           onClick={onSave}
           disabled={isSaving}
-          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-3 py-2 text-xs font-semibold text-white transition hover:from-purple-500 hover:to-indigo-500 disabled:cursor-not-allowed disabled:opacity-70"
+          className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-2.5 py-1.5 text-xs font-semibold text-white transition hover:from-purple-500 hover:to-indigo-500 disabled:cursor-not-allowed disabled:opacity-70"
         >
           <Save className="h-3.5 w-3.5" />
           {isSaving ? "Saving..." : "Save"}
@@ -88,7 +96,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
         <button
           type="button"
           onClick={onBackToApp}
-          className="flex items-center gap-2 rounded-xl border border-white/10 bg-neutral-900/80 px-3 py-2 text-xs font-semibold text-neutral-200 transition hover:bg-neutral-800"
+          className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-neutral-900/80 px-2.5 py-1.5 text-xs font-semibold text-neutral-200 transition hover:bg-neutral-800"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Back
