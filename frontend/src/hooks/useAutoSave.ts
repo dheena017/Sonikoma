@@ -7,6 +7,8 @@ export type SaveStatus = "idle" | "saving" | "saved" | "error";
 interface AutoSaveState {
   projectId: string | null;
   setProjectId?: (id: string | null) => void;
+  setSeriesSlug?: (slug: string | null) => void;
+  setChapterSlug?: (slug: string | null) => void;
   seriesTitle: string;
   chapterNumber: string;
   chapterTitle: string;
@@ -249,6 +251,12 @@ export function useAutoSave(state: AutoSaveState) {
       if (data.success) {
         if (isConvertingTemp || data.series_slug) {
           state.setProjectId?.(targetProjectId);
+          if (data.series_slug) {
+            state.setSeriesSlug?.(data.series_slug);
+          }
+          if (data.chapter_slug) {
+            state.setChapterSlug?.(data.chapter_slug);
+          }
           if (data.series_slug && data.chapter_slug) {
             const newPath = `/workspace/editor/series/${data.series_slug}/chapters/${data.chapter_slug}`;
             const isEditor =

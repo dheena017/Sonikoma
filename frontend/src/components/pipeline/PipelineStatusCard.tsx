@@ -3,12 +3,17 @@ import { Cpu } from "lucide-react";
 import ProcessBar from "./ProcessBar.js";
 
 interface PipelineStatusCardProps {
-  progressStatus: string;
+  progressStatus: string | { status?: string };
 }
 
 const PipelineStatusCard = React.memo(({
   progressStatus,
 }: PipelineStatusCardProps) => {
+  const statusText =
+    typeof progressStatus === "string"
+      ? progressStatus
+      : progressStatus.status || String(progressStatus);
+
   return (
     <div
       id="pipeline_status_card"
@@ -32,11 +37,11 @@ const PipelineStatusCard = React.memo(({
       {/* Console log status snippet */}
       <div className="bg-neutral-950/90 px-4 py-3 rounded-2xl border border-neutral-850 text-[11px] font-mono text-neutral-300 flex items-center gap-2">
         <span className="text-purple-400 font-bold shrink-0">&gt;&gt;</span>
-        <span className="truncate">{progressStatus}</span>
+        <span className="truncate">{statusText}</span>
       </div>
 
       {/* Stepper Progress Bar */}
-      <ProcessBar progressStatus={progressStatus} />
+      <ProcessBar progressStatus={statusText} />
     </div>
   );
 });

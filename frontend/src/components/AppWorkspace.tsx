@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { History, ArrowRight, Layout, Sparkles } from "lucide-react";
 import UrlInputPanel from "./scraper/UrlInputPanel.js";
 import ProjectConfirmModal from "./scraper/ProjectConfirmModal.js";
@@ -116,146 +116,22 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
     isDashboardOnly = false,
   } = props;
 
-  const [storedProjects, setStoredProjects] = useState<StoredProject[]>([]);
-  const [hasExistingProjectMatch, setHasExistingProjectMatch] = useState(false);
-  const [matchedProject, setMatchedProject] = useState<StoredProject | null>(null);
 
-  useEffect(() => {
-    const fetchStoredProjects = async () => {
-      try {
-        const res = await fetch("/api/projects", {
-          headers: {
-            Authorization: `Bearer ${
-              localStorage.getItem("sonikoma_token") ||
-              sessionStorage.getItem("sonikoma_token") ||
-              ""
-            }`,
-          },
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        setStoredProjects(Array.isArray(data.projects) ? data.projects : []);
-      } catch {
-        setStoredProjects([]);
-      }
-    };
+  const handleWorkspaceImport = async () => {
+    if (!targetUrl.trim()) return;
 
-    fetchStoredProjects();
-  }, []);
+    navigateTo?.("/workspace/editor");
 
-  const normalizedSourceUrl = useMemo(
-    () => targetUrl.trim().toLowerCase(),
-    [targetUrl]
-  );
-
-  useEffect(() => {
-    if (!normalizedSourceUrl) {
-      setHasExistingProjectMatch(false);
-      setMatchedProject(null);
-      return;
-    }
-
-    const foundProject = storedProjects.find((project) => {
-      const candidateUrl = (project.url || "").trim().toLowerCase();
-      return candidateUrl && candidateUrl === normalizedSourceUrl;
-    });
-
-    setMatchedProject(foundProject || null);
-    setHasExistingProjectMatch(Boolean(foundProject));
-  }, [normalizedSourceUrl, storedProjects]);
-
-  const getEditorPathForProject = useMemo(() => {
-    return (project: StoredProject | null | undefined) => {
-      if (!project) return "/workspace";
-      if (project.series_slug && project.chapter_slug) {
-        return `/workspace/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`;
-      }
-      return `/workspace?id=${project.project_id}`;
-    };
-  }, []);
-
-  const handleContinueInEditor = useMemo(() => {
-    return () => {
-      if (matchedProject) {
-        navigateTo?.(getEditorPathForProject(matchedProject));
-      }
-    };
-  }, [getEditorPathForProject, matchedProject, navigateTo]);
-
-  const handleStartFresh = async () => {
-    if (!matchedProject) {
-      await scrapeImages(targetUrl, undefined);
-      return;
-    }
+    const temporaryProjectId = `temp_${Date.now()}_${Math.random()
+      .toString(36)
+      .substring(2, 10)}`;
 
     try {
-      const response = await fetch(`/api/projects/${matchedProject.project_id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${
-            localStorage.getItem("sonikoma_token") ||
-            sessionStorage.getItem("sonikoma_token") ||
-            ""
-          }`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete existing project.");
-      }
-
-      setStoredProjects((prev) =>
-        prev.filter((project) => project.project_id !== matchedProject.project_id)
-      );
-      setMatchedProject(null);
-      setHasExistingProjectMatch(false);
-
-      const freshProjectId = `proj_${Date.now()}_${Math.random()
-        .toString(36)
-        .substring(2, 10)}`;
-      await scrapeImages(targetUrl, freshProjectId);
-    } catch (err: any) {
-      addNotification(
-        err.message || "Failed to start fresh import.",
-        "error"
-      );
-    }
-  };
-
-  const handleConfirmProjectAndScrape = async (
-    details: {
-      seriesTitle: string;
-      chapterNumber: string;
-      chapterTitle: string;
-      scrapedGenre: string;
-      seriesAuthor: string;
-      seriesCoverImage: string;
-      seriesSynopsis: string;
-    },
-    isTemporary?: boolean
-  ) => {
-    setShowScrapeConfirmModal(false);
-
-    setSeriesTitle(details.seriesTitle);
-    setChapterNumber(details.chapterNumber);
-    setChapterTitle(details.chapterTitle);
-    setScrapedGenre(details.scrapedGenre);
-    setSeriesAuthor(details.seriesAuthor);
-    setSeriesCoverImage(details.seriesCoverImage);
-    setSeriesSynopsis(details.seriesSynopsis);
-
-    const generatedProjectId =
-      (isTemporary ? "temp_" : "proj_") +
-      Date.now() +
-      "_" +
-      Math.random().toString(36).substring(2, 10);
-
-    try {
-      await scrapeImages(targetUrl, generatedProjectId);
+      await scrapeImages(targetUrl, temporaryProjectId);
     } catch (err: any) {
       console.error(err);
       addNotification(
-        `Failed to start import: ${err.message || "Unknown error"}`,
+        `Failed to import images: ${err.message || "Unknown error"}`,
         "error"
       );
     }
@@ -309,10 +185,8 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
 
               <button
                 onClick={() => {
-                  const activeProject = storedProjects.find(
-                    (project) => project.project_id === projectId
-                  );
-                  navigateTo?.(getEditorPathForProject(activeProject || matchedProject || null));
+                  if (!projectId) return;
+                  navigateTo?.(`/workspace?id=${projectId}`);
                 }}
                 className="w-full md:w-auto px-8 py-4 bg-white text-purple-950 font-black rounded-2xl text-xs uppercase tracking-[0.15em] hover:bg-purple-50 transition-all flex items-center justify-center gap-3 shadow-xl active:scale-95 group-hover:shadow-[0_0_30px_rgba(168,85,247,0.2)]"
               >
@@ -331,7 +205,7 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
           isProcessing={isProcessing}
           isScraping={isScraping}
           handleGenerateVideo={() => {}}
-          handleScrape={() => setShowScrapeConfirmModal(true)}
+          handleScrape={handleWorkspaceImport}
           addNotification={addNotification}
           narrationStyle={narrationStyle}
           setNarrationStyle={setNarrationStyle}
@@ -356,28 +230,6 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
           setCropSensitivity={setCropSensitivity}
           autoSplitTallStrips={autoSplitTallStrips}
           setAutoSplitTallStrips={setAutoSplitTallStrips}
-          actionSlot={
-            hasExistingProjectMatch ? (
-              <div className="flex flex-col sm:flex-row gap-3 shrink-0">
-                <button
-                  type="button"
-                  onClick={handleContinueInEditor}
-                  className="relative px-8 py-4 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 rounded-2xl text-sm font-bold text-white transition-all shadow-lg shadow-purple-900/20 active:scale-95 group overflow-hidden flex items-center gap-3"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <span>Continue in Editor</span>
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </button>
-                <button
-                  type="button"
-                  onClick={handleStartFresh}
-                  className="px-8 py-4 bg-neutral-950/80 border border-amber-500/30 hover:border-amber-400/60 hover:bg-amber-500/10 rounded-2xl text-sm font-bold text-amber-200 hover:text-white transition-all shadow-lg shadow-black/20 active:scale-95"
-                >
-                  Start Fresh
-                </button>
-              </div>
-            ) : undefined
-          }
         />
 
         {/* LOADING CONTEXT BRIDGE */}
@@ -411,20 +263,6 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
         </div>
       </div>
 
-      <ProjectConfirmModal
-        isOpen={showScrapeConfirmModal}
-        onClose={() => setShowScrapeConfirmModal(false)}
-        onConfirm={handleConfirmProjectAndScrape}
-        initialDetails={{
-          seriesTitle,
-          chapterNumber,
-          chapterTitle,
-          scrapedGenre,
-          seriesAuthor,
-          seriesCoverImage,
-          seriesSynopsis,
-        }}
-      />
     </main>
   );
 }

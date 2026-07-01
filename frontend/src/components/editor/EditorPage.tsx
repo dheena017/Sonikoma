@@ -1,17 +1,17 @@
 import React from "react";
-import EditorSidebar from "./EditorSidebar";
-import EditorMiniSidebar from "./EditorMiniSidebar";
 import LiveScraperDeck from "../scraper/LiveScraperDeck.js";
 import StoryboardTimeline from "../timeline/StoryboardTimeline.js";
 import VideoMonitor from "../video/VideoMonitor.js";
 import VolumeAndProgressPanel from "../video/VolumeAndProgressPanel.js";
 import OutputMetadataPanel from "../OutputMetadataPanel.js";
 import PipelineStatusCard from "../pipeline/PipelineStatusCard.js";
+import LayoutEditorPage from "./LayoutEditorPage";
 import { useBackendHealth } from "../../hooks/useBackendHealth.js";
 
 interface EditorPageProps {
   appLogic: any;
   navigateTo: (path: string) => void;
+  onRequestProjectConfirmation: () => void;
   seriesSlug?: string | null;
   chapterSlug?: string | null;
 }
@@ -19,6 +19,7 @@ interface EditorPageProps {
 const EditorPage: React.FC<EditorPageProps> = ({
   appLogic,
   navigateTo,
+  onRequestProjectConfirmation,
   seriesSlug,
   chapterSlug,
 }: EditorPageProps) => {
@@ -131,16 +132,8 @@ const EditorPage: React.FC<EditorPageProps> = ({
     return () => clearTimeout(timer);
   }, []);
 
-  const handleSave = async () => {
-    if (saveProject) {
-      setIsSaving(true);
-      await saveProject(panels, {
-        savingMessage: "Saving project...",
-        successMessage: "Project saved successfully!",
-        errorMessage: "Failed to save project.",
-      });
-      setIsSaving(false);
-    }
+  const handleSave = () => {
+    onRequestProjectConfirmation();
   };
 
   const handleBackToApp = () => {
@@ -168,45 +161,83 @@ const EditorPage: React.FC<EditorPageProps> = ({
   );
 
   return (
-    <div className="flex min-h-screen bg-[#070709] text-white overflow-hidden">
-      {!isFocusMode && (isSidebarCollapsed ? (
-        <EditorMiniSidebar
-          isCollapsed={isSidebarCollapsed}
-          setIsCollapsed={setIsSidebarCollapsed}
-          currentSection={currentSection}
-          setCurrentSection={setCurrentSection}
-          onBackToApp={handleBackToApp}
-          scrapedCount={scrapedImages.length}
-          panelsCount={panels.length}
-          isBatchCropping={isBatchCropping}
-          isCleaningBubbles={isCleaningBubbles}
-        />
-      ) : (
-        <EditorSidebar
-          isCollapsed={isSidebarCollapsed}
-          setIsCollapsed={setIsSidebarCollapsed}
-          currentSection={currentSection}
-          setCurrentSection={setCurrentSection}
-          onBackToApp={handleBackToApp}
-          scrapedCount={scrapedImages.length}
-          panelsCount={panels.length}
-          isBatchCropping={isBatchCropping}
-          isCleaningBubbles={isCleaningBubbles}
-        />
-      ))}
+    <LayoutEditorPage
+      isSidebarCollapsed={isSidebarCollapsed}
+      setIsSidebarCollapsed={setIsSidebarCollapsed}
+      currentSection={currentSection}
+      setCurrentSection={setCurrentSection}
+      onBackToApp={handleBackToApp}
+      scrapedCount={scrapedImages.length}
+      panelsCount={panels.length}
+      isBatchCropping={isBatchCropping}
+      isCleaningBubbles={isCleaningBubbles}
+      title={seriesTitle && chapterTitle ? `${seriesTitle} · ${chapterTitle}` : "Storyboard Editor"}
+      subtitle={seriesTitle && chapterNumber ? `Series ${seriesTitle} • Chapter ${chapterNumber}` : undefined}
+      onSave={handleSave}
+      isSaving={isSaving}
+      isFocusMode={isFocusMode}
+      setIsFocusMode={setIsFocusMode}
+    >
+      <main className="flex-1 p-4 md:p-6 lg:p-8">
+        <div className="max-w-[1600px] mx-auto flex flex-col gap-8">
 
-      <div
-        className={`flex-1 flex flex-col transition-all duration-300 ${
-          isFocusMode ? "ml-0" : "ml-16"
-        }`}
-      >
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-          <div className="max-w-[1600px] mx-auto flex flex-col gap-8">
-
-            {/* TOP AREA: VIDEO MONITOR (Expanded in Focus Mode) */}
+            {/* TOP AREA: LIVE SCRAPER DECK + VIDEO MONITOR (Expanded in Focus Mode) */}
             <div className={`grid grid-cols-1 ${isFocusMode ? 'lg:grid-cols-1' : 'lg:grid-cols-12'} gap-8`}>
+               {!isFocusMode && (
+                 <div className="lg:col-span-5 flex flex-col gap-6 min-h-[720px]">
+                   <div className="space-y-4">
+                     <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                        <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono">1. Imported Images (Live Scraper Deck)</h3>
+                     </div>
+                     <LiveScraperDeck
+                       isDashboardOnly={false}
+                       scrapedImages={scrapedImages}
+                       isScraping={isScraping}
+                       selectedScraped={selectedScraped}
+                       setSelectedScraped={setSelectedScraped}
+                       setScrapedImages={setScrapedImages}
+                       mergingIndices={mergingIndices}
+                       setConsoleLogs={() => {}}
+                       panels={panels}
+                       setPanels={setPanels}
+                       currentPanelIndex={currentPanelIndex}
+                       handleMergeWithNext={handleStitchWithNext}
+                       setEditingImageIdx={setEditingImageIdx}
+                       openEditingImageIdx={setEditingImageIdx}
+                       setEditCropTop={setEditCropTop}
+                       setEditCropBottom={setEditCropBottom}
+                       setEditCropLeft={setEditCropLeft}
+                       setEditCropRight={setEditCropRight}
+                       setEditAutoTrim={setEditAutoTrim}
+                       addNotification={addNotification}
+                       fetchWithInterceptor={fetchWithInterceptor}
+                       setErrorPopup={setErrorPopup}
+                       showBubbleModal={showBubbleModal}
+                       setShowBubbleModal={setShowBubbleModal}
+                       isCleaningBubbles={isCleaningBubbles}
+                       cleanProgress={cleanProgress}
+                       bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+                       showAutoCropModal={showAutoCropModal}
+                       setShowAutoCropModal={setShowAutoCropModal}
+                       isBatchCropping={isBatchCropping}
+                       batchProgress={batchProgress}
+                       croppingImgUrl={croppingImgUrl}
+                       handleAutoCropSelected={handleAutoCropSelected}
+                       handleCleanBubblesSelected={handleCleanBubblesSelected}
+                       handleCancelBatch={handleCancelBatch}
+                       addPanelsToStoryboard={addPanelsToStoryboard}
+                       audioFeedback={audioFeedback}
+                       seriesTitle={seriesTitle}
+                       chapterNumber={chapterNumber}
+                       chapterTitle={chapterTitle}
+                       targetUrl={targetUrl}
+                       selectedSource={selectedSource}
+                     />
+                   </div>
+                 </div>
+               )}
+
                <div className={`${isFocusMode ? 'lg:col-span-1' : 'lg:col-span-7'} flex flex-col gap-6`}>
-                  {/* Monitor Container */}
                   <div className={`${isFocusMode ? 'max-w-4xl mx-auto w-full' : 'w-full'}`}>
                     <VideoMonitor
                       activePreviewTab={activePreviewTab}
@@ -240,53 +271,52 @@ const EditorPage: React.FC<EditorPageProps> = ({
                       </div>
                     )}
                   </div>
-               </div>
 
-               {/* Right Side Metadata/Render (Hidden in Focus Mode) */}
-               {!isFocusMode && (
-                 <div className="lg:col-span-5 space-y-6">
-                    <div className="bg-[#111115] border border-white/5 rounded-3xl p-6 flex flex-col gap-4 relative overflow-hidden shadow-2xl">
-                      {isRendering && (
-                        <div
-                          className="absolute left-0 top-0 bottom-0 bg-purple-600/20 transition-all duration-300"
-                          style={{ width: `${renderProgress}%` }}
-                        />
-                      )}
-                      <div className="relative z-10 space-y-1">
-                         <h3 className="text-sm font-bold text-white uppercase tracking-wider">Final Production</h3>
-                         <p className="text-[10px] text-neutral-500 font-mono">Compile all storyboard panels into a high-res video.</p>
-                      </div>
-                      <button
-                        onClick={handleRenderFinalVideo}
-                        disabled={isRendering}
-                        className={`relative z-10 w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg transition-all flex items-center justify-center gap-3 ${
-                          isRendering
-                            ? "bg-purple-900/50 text-purple-200 cursor-not-allowed border border-purple-500/30"
-                            : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border border-white/10"
-                        }`}
-                      >
-                        {isRendering ? (
-                          <>
-                          <div className="h-4 w-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                          Rendering {Math.round(renderProgress)}%
-                        </>
-                        ) : (
-                          <>🎬 Export Master Video</>
+                  {!isFocusMode && (
+                    <div className="space-y-6">
+                      <div className="bg-[#111115] border border-white/5 rounded-3xl p-6 flex flex-col gap-4 relative overflow-hidden shadow-2xl">
+                        {isRendering && (
+                          <div
+                            className="absolute left-0 top-0 bottom-0 bg-purple-600/20 transition-all duration-300"
+                            style={{ width: `${renderProgress}%` }}
+                          />
                         )}
-                      </button>
-                    </div>
+                        <div className="relative z-10 space-y-1">
+                           <h3 className="text-sm font-bold text-white uppercase tracking-wider">Final Production</h3>
+                           <p className="text-[10px] text-neutral-500 font-mono">Compile all storyboard panels into a high-res video.</p>
+                        </div>
+                        <button
+                          onClick={handleRenderFinalVideo}
+                          disabled={isRendering}
+                          className={`relative z-10 w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg transition-all flex items-center justify-center gap-3 ${
+                            isRendering
+                              ? "bg-purple-900/50 text-purple-200 cursor-not-allowed border border-purple-500/30"
+                              : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border border-white/10"
+                          }`}
+                        >
+                          {isRendering ? (
+                            <>
+                            <div className="h-4 w-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                            Rendering {Math.round(renderProgress)}%
+                          </>
+                          ) : (
+                            <>🎬 Export Master Video</>
+                          )}
+                        </button>
+                      </div>
 
-                    <OutputMetadataPanel
-                      videoUrl={videoUrl}
-                      musicTheme={musicTheme}
-                      voiceActor={voiceActor}
-                      handleSaveVideo={handleSave}
-                    />
-                 </div>
-               )}
+                      <OutputMetadataPanel
+                        videoUrl={videoUrl}
+                        musicTheme={musicTheme}
+                        voiceActor={voiceActor}
+                        handleSaveVideo={handleSave}
+                      />
+                    </div>
+                  )}
+               </div>
             </div>
 
-            {/* BOTTOM AREA: STORYBOARD & SCRAPER DECK (Always visible in Pro Editor) */}
+            {/* BOTTOM AREA: STORYBOARD TIMELINE (Always visible in Pro Editor) */}
             <div className={`transition-all duration-500 ${isFocusMode ? 'opacity-20 blur-sm pointer-events-none scale-[0.98]' : 'opacity-100'}`}>
                <div className="flex flex-col gap-10">
                   {isScraping && (
@@ -295,57 +325,6 @@ const EditorPage: React.FC<EditorPageProps> = ({
 
                   {isInitializing && scrapedImages.length === 0 ? skeletonLoader : (
                     <div className="flex flex-col gap-12">
-                      {/* Section 1: Scraper Deck */}
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                           <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono">1. Imported Images (Live Scraper Deck)</h3>
-                        </div>
-                        <LiveScraperDeck
-                          isDashboardOnly={false}
-                          scrapedImages={scrapedImages}
-                          isScraping={isScraping}
-                          selectedScraped={selectedScraped}
-                          setSelectedScraped={setSelectedScraped}
-                          setScrapedImages={setScrapedImages}
-                          mergingIndices={mergingIndices}
-                          setConsoleLogs={() => {}}
-                          panels={panels}
-                          setPanels={setPanels}
-                          currentPanelIndex={currentPanelIndex}
-                          handleMergeWithNext={handleStitchWithNext}
-                          setEditingImageIdx={setEditingImageIdx}
-                          openEditingImageIdx={setEditingImageIdx}
-                          setEditCropTop={setEditCropTop}
-                          setEditCropBottom={setEditCropBottom}
-                          setEditCropLeft={setEditCropLeft}
-                          setEditCropRight={setEditCropRight}
-                          setEditAutoTrim={setEditAutoTrim}
-                          addNotification={addNotification}
-                          fetchWithInterceptor={fetchWithInterceptor}
-                          setErrorPopup={setErrorPopup}
-                          showBubbleModal={showBubbleModal}
-                          setShowBubbleModal={setShowBubbleModal}
-                          isCleaningBubbles={isCleaningBubbles}
-                          cleanProgress={cleanProgress}
-                          bubbleCroppingImgUrl={bubbleCroppingImgUrl}
-                          showAutoCropModal={showAutoCropModal}
-                          setShowAutoCropModal={setShowAutoCropModal}
-                          isBatchCropping={isBatchCropping}
-                          batchProgress={batchProgress}
-                          croppingImgUrl={croppingImgUrl}
-                          handleAutoCropSelected={handleAutoCropSelected}
-                          handleCleanBubblesSelected={handleCleanBubblesSelected}
-                          handleCancelBatch={handleCancelBatch}
-                          addPanelsToStoryboard={addPanelsToStoryboard}
-                          audioFeedback={audioFeedback}
-                          seriesTitle={seriesTitle}
-                          chapterNumber={chapterNumber}
-                          chapterTitle={chapterTitle}
-                          targetUrl={targetUrl}
-                          selectedSource={selectedSource}
-                        />
-                      </div>
-
                       {/* Section 2: Storyboard Timeline */}
                       <div className="space-y-4">
                         <div className="flex items-center justify-between border-b border-white/5 pb-2">
@@ -399,9 +378,8 @@ const EditorPage: React.FC<EditorPageProps> = ({
                </div>
             </div>
           </div>
-        </main>
-      </div>
-    </div>
+      </main>
+    </LayoutEditorPage>
   );
 };
 

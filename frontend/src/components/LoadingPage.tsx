@@ -9,7 +9,6 @@ interface LoadingPageProps {
 }
 
 const LOADING_TIPS = [
-  "Double-click a panel to manually adjust crop boundaries.",
   "Use the Speech Bubble Cleaner to erase text for translation.",
   "Select from multiple Voice Actors to narrate your webtoon.",
   "Enable Smart Scanner for automatic webtoon strip division.",
@@ -267,33 +266,6 @@ export default function LoadingPage({
           )}
         </div>
 
-        {/* Tip Box */}
-        <div
-          style={{
-            minHeight: "44px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100%",
-            borderTop: "1px solid rgba(255,255,255,0.05)",
-            paddingTop: "16px",
-          }}
-        >
-          <p
-            style={{
-              fontSize: "0.75rem",
-              color: "#a1a1aa",
-              textAlign: "center",
-              lineHeight: "1.4",
-              margin: 0,
-              opacity: fadeState === "in" ? 1 : 0,
-              transform: `translateY(${fadeState === "in" ? "0" : "4px"})`,
-              transition: "opacity 0.5s ease, transform 0.5s ease",
-            }}
-          >
-            {LOADING_TIPS[tipIndex]}
-          </p>
-        </div>
       </div>
 
       <style>{`
