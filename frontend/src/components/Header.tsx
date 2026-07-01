@@ -467,7 +467,7 @@ const HeaderInner = ({
       <div className="flex items-center gap-3 shrink-0">
         <button
           onClick={onToggleSidebar}
-          className="p-1.5 rounded-lg border border-neutral-800 bg-neutral-900 text-neutral-400 hover:text-white cursor-pointer"
+          className="p-1.5 rounded-lg border border-neutral-800 bg-neutral-900 text-neutral-400 hover:text-white cursor-pointer lg:hidden"
           title="Toggle Navigation Menu"
         >
           <Menu className="h-5 w-5" />
