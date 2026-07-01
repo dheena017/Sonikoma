@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import {
+  Menu,
   Film,
   Activity,
   Terminal,
@@ -88,6 +89,7 @@ const SidebarInner = ({
   const isAiSuiteActive =
     currentPath.startsWith("/ai-") || currentPath === "/panel-assistant";
   const [aiSuiteExpanded, setAiSuiteExpanded] = useState(isAiSuiteActive);
+  const [isDesktopExpanded, setIsDesktopExpanded] = useState(false);
 
   // Automatically expand AI Suite if active route is an AI page
   useEffect(() => {
@@ -290,9 +292,11 @@ const SidebarInner = ({
     <div className="flex flex-col h-full justify-between p-5 space-y-6">
       {/* BRANDING LOGO */}
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between relative">
           <div
-            className="flex items-center gap-3 cursor-pointer select-none hover:opacity-90 transition-opacity"
+            className={`flex items-center gap-3 cursor-pointer select-none hover:opacity-90 transition-all ${
+              !isDesktopExpanded ? "lg:opacity-0 lg:w-0 lg:overflow-hidden" : ""
+            }`}
             onClick={handleNavigateToDashboardOverview}
           >
             <img
@@ -306,7 +310,7 @@ const SidebarInner = ({
               }}
               alt="Sonikoma Logo"
             />
-            <div>
+            <div className="shrink-0 whitespace-nowrap">
               <div className="flex items-center gap-1.5">
                 <span className="font-bold text-base tracking-tight text-white font-sans">
                   Sonikoma
@@ -318,10 +322,22 @@ const SidebarInner = ({
             </div>
           </div>
 
-          {/* Close button for drawer */}
+          {/* Desktop Toggle Button */}
+          <button
+            onClick={() => setIsDesktopExpanded(!isDesktopExpanded)}
+            className="hidden lg:flex p-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white cursor-pointer absolute -top-2"
+            style={{
+              left: isDesktopExpanded ? 'auto' : '-4px',
+              right: isDesktopExpanded ? '0' : 'auto'
+            }}
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+
+          {/* Mobile Close Button */}
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white cursor-pointer"
+            className="lg:hidden p-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white cursor-pointer"
           >
             <X className="h-4 w-4" />
           </button>
@@ -331,7 +347,9 @@ const SidebarInner = ({
         <div className="space-y-6 overflow-y-auto max-h-[calc(100vh-220px)] scrollbar-thin pr-1">
           {menuItems.map((group) => (
             <div key={group.group} className="space-y-2">
-              <h4 className="text-[9px] font-bold text-neutral-500 uppercase tracking-widest font-mono pl-2">
+              <h4 className={`text-[9px] font-bold text-neutral-500 uppercase tracking-widest font-mono pl-2 transition-all ${
+                !isDesktopExpanded ? "lg:opacity-0 lg:h-0 overflow-hidden" : ""
+              }`}>
                 {group.group}
               </h4>
               <ul className="space-y-1">
@@ -355,17 +373,23 @@ const SidebarInner = ({
                       >
                         <div className="flex items-center gap-2.5">
                           <Icon
-                            className={`h-4 w-4 ${
+                            className={`h-5 w-5 shrink-0 ${
                               item.active
                                 ? "text-purple-400"
                                 : "text-neutral-500 group-hover:text-neutral-300"
                             }`}
                           />
-                          <span>{item.label}</span>
+                          <span className={`transition-all whitespace-nowrap ${
+                            !isDesktopExpanded ? "lg:opacity-0 lg:w-0 overflow-hidden" : ""
+                          }`}>
+                            {item.label}
+                          </span>
                         </div>
                         {item.badge && (
                           <span
-                            className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
+                            className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold transition-all ${
+                              !isDesktopExpanded ? "lg:hidden" : ""
+                            } ${
                               item.label === "Notifications" && !item.active
                                 ? "bg-purple-600 text-white shadow-sm shadow-purple-900/50"
                                 : item.active
@@ -389,7 +413,9 @@ const SidebarInner = ({
 
           {/* Creative Suite Dropdown/Accordion */}
           <div className="space-y-2">
-            <h4 className="text-[9px] font-bold text-neutral-500 uppercase tracking-widest font-mono pl-2">
+            <h4 className={`text-[9px] font-bold text-neutral-500 uppercase tracking-widest font-mono pl-2 transition-all ${
+                !isDesktopExpanded ? "lg:opacity-0 lg:h-0 overflow-hidden" : ""
+              }`}>
               Creative Tools
             </h4>
             <div className="space-y-1">
@@ -404,22 +430,27 @@ const SidebarInner = ({
               >
                 <div className="flex items-center gap-2.5">
                   <Sparkles
-                    className={`h-4 w-4 ${
+                    className={`h-5 w-5 shrink-0 ${
                       isAiSuiteActive
                         ? "text-purple-400 animate-pulse"
                         : "text-neutral-500"
                     }`}
                   />
-                  <span>Creative Suite</span>
+                  <span className={`transition-all whitespace-nowrap ${
+                    !isDesktopExpanded ? "lg:opacity-0 lg:w-0 overflow-hidden" : ""
+                  }`}>Creative Suite</span>
                 </div>
-                {aiSuiteExpanded ? (
-                  <ChevronUp className="h-3.5 w-3.5 text-neutral-500" />
-                ) : (
-                  <ChevronDown className="h-3.5 w-3.5 text-neutral-500" />
-                )}
+                <div className={`transition-all ${!isDesktopExpanded ? "lg:hidden" : ""}`}>
+                  {aiSuiteExpanded ? (
+                    <ChevronUp className="h-3.5 w-3.5 text-neutral-500 shrink-0" />
+                  ) : (
+                    <ChevronDown className="h-3.5 w-3.5 text-neutral-500 shrink-0" />
+                  )}
+                </div>
               </button>
 
               {aiSuiteExpanded && (
+                <div className={`transition-all ${!isDesktopExpanded ? "lg:hidden" : ""}`}>
                 <div className="pl-4 pr-1 py-1.5 space-y-1 bg-neutral-950/40 rounded-xl border border-neutral-900/40 mt-1">
                   {creativeSuiteItems.map((subItem) => {
                     const isSubActive = currentPath === subItem.path;
@@ -459,6 +490,7 @@ const SidebarInner = ({
                     );
                   })}
                 </div>
+                </div>
               )}
             </div>
           </div>
@@ -469,34 +501,57 @@ const SidebarInner = ({
       <div className="space-y-4 pt-4 border-t border-neutral-900">
         {/* Total calculated output metadata */}
         {panels.length > 0 && (
+          <div className={`transition-all ${!isDesktopExpanded ? "lg:hidden" : ""}`}>
           <div className="px-3 py-2 rounded-xl bg-neutral-900/30 text-neutral-400 text-[10px] font-mono flex items-center justify-between border border-neutral-900/40">
             <span>Video Duration:</span>
             <span className="font-bold text-neutral-200">
               {totalCalculatedDuration.toFixed(1)}s
             </span>
           </div>
+          </div>
         )}
       </div>
     </div>
   );
 
+  useEffect(() => {
+    if (isDesktopExpanded) {
+      document.body.style.overflow = "hidden";
+      const scrollContainer = document.getElementById("main-scroll-container");
+      if (scrollContainer) scrollContainer.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+      const scrollContainer = document.getElementById("main-scroll-container");
+      if (scrollContainer) scrollContainer.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+      const scrollContainer = document.getElementById("main-scroll-container");
+      if (scrollContainer) scrollContainer.style.overflow = "";
+    };
+  }, [isDesktopExpanded]);
+
   return (
     <>
-      {/* Drawer backdrop (visible on both mobile and desktop when open) */}
-      {isOpen && (
+      {/* Drawer backdrop for mobile and desktop overlay */}
+      {(isOpen || isDesktopExpanded) && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-md z-45 transition-opacity animate-fade-in"
-          onClick={onClose}
+          className="fixed inset-0 bg-black/60 backdrop-blur-md z-45 transition-opacity animate-fade-in lg:absolute"
+          onClick={() => {
+            if (isOpen) onClose();
+            if (isDesktopExpanded) setIsDesktopExpanded(false);
+          }}
         />
       )}
 
-      {/* Sidebar drawer container (visible on both mobile and desktop, slides in/out) */}
+      {/* Sidebar drawer container */}
       <aside
-        className={`fixed inset-y-0 left-0 w-72 shrink-0 bg-neutral-950/95 border-r border-neutral-900 h-full z-50 transition-transform duration-300 ease-out transform ${
+        className={`fixed lg:absolute inset-y-0 left-0 h-full bg-neutral-950/95 border-r border-neutral-900 z-50 transition-all duration-300 ease-out flex flex-col ${
           isOpen
-            ? "translate-x-0 shadow-2xl shadow-black/60"
-            : "-translate-x-full"
-        }`}
+            ? "translate-x-0 shadow-2xl shadow-black/60 w-72"
+            : "-translate-x-full lg:translate-x-0"
+        } ${!isDesktopExpanded ? "lg:w-20" : "lg:w-72 lg:shadow-2xl lg:shadow-black/60"}`}
       >
         {sidebarContent}
       </aside>
