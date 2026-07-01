@@ -485,23 +485,21 @@ const SidebarInner = ({
 
   return (
     <>
-      {/* Drawer backdrop (mobile only) */}
+      {/* Drawer backdrop (visible on both mobile and desktop when open) */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-md z-40 transition-opacity animate-fade-in lg:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-md z-40 transition-opacity animate-fade-in"
           onClick={onClose}
         />
       )}
 
-      {/* Sidebar container: Drawer on mobile, sidebar on desktop */}
+      {/* Sidebar drawer container (visible on both mobile and desktop, slides in/out) */}
       <aside
-        className={`w-72 shrink-0 bg-neutral-950/95 border-r border-neutral-900 h-full overflow-y-auto transition-all duration-300 ease-out
-          ${
-            isOpen
-              ? "fixed top-0 left-0 h-screen z-50 translate-x-0 shadow-2xl shadow-black/60 lg:static lg:translate-x-0 lg:shadow-none"
-              : "hidden lg:block absolute lg:static left-0 top-0"
-          }
-        `}
+        className={`fixed top-0 left-0 h-screen w-72 shrink-0 bg-neutral-950/95 border-r border-neutral-900 z-50 transition-all duration-300 ease-out transform ${
+          isOpen
+            ? "translate-x-0 shadow-2xl shadow-black/60 lg:shadow-none lg:border-r"
+            : "-translate-x-full"
+        }`}
       >
         {sidebarContent}
       </aside>
