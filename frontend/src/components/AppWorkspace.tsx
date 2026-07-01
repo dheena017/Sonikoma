@@ -2,6 +2,7 @@ import React from "react";
 import { History, ArrowRight, Layout, Sparkles } from "lucide-react";
 import UrlInputPanel from "./scraper/UrlInputPanel.js";
 import ProjectConfirmModal from "./scraper/ProjectConfirmModal.js";
+import { slugify } from "../utils/url.js";
 
 interface AppWorkspaceProps {
   [key: string]: any;
@@ -139,7 +140,13 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
     try {
       if (!isTemporary && navigateTo) {
          // Optimistic navigation
-         navigateTo(`/editor?id=${generatedProjectId}`);
+         const sSlug = slugify(details.seriesTitle);
+         const cSlug = slugify(details.chapterNumber);
+         if (sSlug && cSlug) {
+           navigateTo(`/workspace/editor/series/${sSlug}/chapters/${cSlug}?id=${generatedProjectId}`);
+         } else {
+           navigateTo(`/editor?id=${generatedProjectId}`);
+         }
       }
       await scrapeImages(targetUrl, generatedProjectId);
     } catch (err: any) {
@@ -196,7 +203,17 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
               </div>
 
               <button
-                onClick={() => navigateTo?.(`/editor?id=${projectId}`)}
+                onClick={() => {
+                  if (navigateTo) {
+                    const sSlug = slugify(seriesTitle || projectId || "");
+                    const cSlug = slugify(chapterNumber || "");
+                    if (sSlug && cSlug) {
+                      navigateTo(`/workspace/editor/series/${sSlug}/chapters/${cSlug}?id=${projectId}`);
+                    } else {
+                      navigateTo(`/editor?id=${projectId}`);
+                    }
+                  }
+                }}
                 className="w-full md:w-auto px-8 py-4 bg-white text-purple-950 font-black rounded-2xl text-xs uppercase tracking-[0.15em] hover:bg-purple-50 transition-all flex items-center justify-center gap-3 shadow-xl active:scale-95 group-hover:shadow-[0_0_30px_rgba(168,85,247,0.2)]"
               >
                 Launch Workspace <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
