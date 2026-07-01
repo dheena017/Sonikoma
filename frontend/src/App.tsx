@@ -24,6 +24,7 @@ import Header from "./components/Header.js";
 import Sidebar from "./components/Sidebar.js";
 import AppWorkspace from "./components/AppWorkspace.js";
 import EditorPage from "./components/editor/EditorPage.js";
+import ProjectConfirmModal from "./components/scraper/ProjectConfirmModal.js";
 import PageNotFound from "./components/PageNotFound.js";
 import AdvancedSettings from "./components/AdvancedSettings.js";
 import LogsPage from "./components/LogsPage.js";
@@ -431,6 +432,8 @@ export default function App() {
   const { saveStatus, saveProject, isDirty } = useAutoSave({
     projectId,
     setProjectId,
+    setSeriesSlug: setSeriesSlugState,
+    setChapterSlug: setChapterSlugState,
     seriesTitle,
     chapterNumber,
     chapterTitle,
@@ -565,7 +568,7 @@ export default function App() {
 
     const isWorkspacePath =
       currentPath === "/workspace" ||
-      (chapterPathMatch !== null && !isDetailsMode);
+      (chapterPathMatch !== null && !isDetailsMode && !currentPath.startsWith("/workspace/editor"));
 
     return {
       chapterPathMatch,
@@ -664,15 +667,26 @@ export default function App() {
   const isWorkspaceEditorRoot =
     currentPath === "/workspace/editor" || currentPath === "/workspace/editor/";
   const isProEditorPage =
-    Boolean(editorRouteMatch) || currentPath === "/editor" || currentPath === "/editor/";
+    Boolean(editorRouteMatch) ||
+    currentPath === "/editor" ||
+    currentPath === "/editor/" ||
+    isWorkspaceEditorRoot;
   const editorSeriesSlug = editorRouteMatch?.[1] || seriesSlugState || null;
   const editorChapterSlug = editorRouteMatch?.[2] || chapterSlugState || null;
 
   React.useEffect(() => {
-    if (isWorkspaceEditorRoot) {
-      navigateTo("/workspace");
+    if (
+      isWorkspaceEditorRoot &&
+      seriesSlugState &&
+      chapterSlugState &&
+      window.location.pathname !==
+        `/workspace/editor/series/${seriesSlugState}/chapters/${chapterSlugState}`
+    ) {
+      navigateTo(
+        `/workspace/editor/series/${seriesSlugState}/chapters/${chapterSlugState}`
+      );
     }
-  }, [isWorkspaceEditorRoot, navigateTo]);
+  }, [isWorkspaceEditorRoot, navigateTo, seriesSlugState, chapterSlugState]);
 
   const headerProjectId = isChapterDetailsPath ? detailsProjectId : projectId;
   const headerIsDirty = isChapterDetailsPath ? projectDetailsDirty : isDirty;
@@ -680,13 +694,59 @@ export default function App() {
     ? projectDetailsSaveStatus
     : saveStatus;
 
+  const handleRequestProjectConfirm = React.useCallback(() => {
+    setShowScrapeConfirmModal(true);
+  }, [setShowScrapeConfirmModal]);
+
+  const handleProjectConfirm = React.useCallback(
+    async (
+      details: {
+        seriesTitle: string;
+        chapterNumber: string;
+        chapterTitle: string;
+        scrapedGenre: string;
+        seriesAuthor: string;
+        seriesCoverImage: string;
+        seriesSynopsis: string;
+      },
+      isTemporary: boolean
+    ) => {
+      setShowScrapeConfirmModal(false);
+      setSeriesTitle(details.seriesTitle);
+      setChapterNumber(details.chapterNumber);
+      setChapterTitle(details.chapterTitle);
+      setScrapedGenre(details.scrapedGenre);
+      setSeriesAuthor(details.seriesAuthor);
+      setSeriesCoverImage(details.seriesCoverImage);
+      setSeriesSynopsis(details.seriesSynopsis);
+
+      if (!isTemporary) {
+        await saveProject(undefined, {
+          savingMessage: "Saving project...",
+          successMessage: "Project saved successfully!",
+          errorMessage: "Failed to save project.",
+        });
+      }
+    },
+    [saveProject,
+      setSeriesTitle,
+      setChapterNumber,
+      setChapterTitle,
+      setScrapedGenre,
+      setSeriesAuthor,
+      setSeriesCoverImage,
+      setSeriesSynopsis,
+      setShowScrapeConfirmModal
+    ]
+  );
+
   const headerOnSave = React.useCallback(() => {
     if (isChapterDetailsPath) {
       projectDetailsSaveRef.current?.();
     } else {
-      saveProject();
+      handleRequestProjectConfirm();
     }
-  }, [isChapterDetailsPath, saveProject]);
+  }, [isChapterDetailsPath, handleRequestProjectConfirm]);
 
   const handleAutoCropApply = React.useCallback(() => {
     console.log("App: Applying AutoCrop configuration parameter changes");
@@ -975,49 +1035,49 @@ export default function App() {
           )}
 
           {/* Top Header */}
-          {!isSidebarOpen && (
+          {!isSidebarOpen && !isProEditorPage && (
             <Header
               isProcessing={isProcessing}
-            panels={panels}
-            totalCalculatedDuration={totalCalculatedDuration}
-            currentPath={currentPath}
-            editingImageIdx={editingImageIdx}
-            lastEditorPath={lastEditorPath}
-            isBatchCropping={isBatchCropping}
-            isCleaningBubbles={isCleaningBubbles}
-            onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-            isSidebarOpen={isSidebarOpen}
-            backendStatus={backendStatus}
-            narrationStyle={narrationStyle}
-            setNarrationStyle={setNarrationStyle}
-            selectedModel={selectedModel}
-            setSelectedModel={setSelectedModel}
-            volume={volume}
-            setVolume={setVolume}
-            isMuted={isMuted}
-            setIsMuted={setIsMuted}
-            autoPlayAudio={autoPlayAudio}
-            setAutoPlayAudio={setAutoPlayAudio}
-            sfxVolume={appLogic.sfxVolume}
-            setSfxVolume={appLogic.setSfxVolume}
-            sfxEnabled={appLogic.sfxEnabled}
-            setSfxEnabled={appLogic.setSfxEnabled}
-            user={user}
-            notifications={notifications}
-            markNotificationAsRead={markNotificationAsRead}
-            markAllNotificationsAsRead={markAllNotificationsAsRead}
-            deleteNotification={deleteNotification}
-            clearAllNotifications={clearAllNotifications}
-            projectId={headerProjectId}
-            saveStatus={headerSaveStatus}
-            isDirty={headerIsDirty}
-            onSave={headerOnSave}
-            navigateTo={navigateTo}
-            notificationsMuted={notificationsMuted}
-            setNotificationsMuted={setNotificationsMuted}
-            themeMode={themeMode}
-            toggleThemeMode={toggleThemeMode}
-          />
+              panels={panels}
+              totalCalculatedDuration={totalCalculatedDuration}
+              currentPath={currentPath}
+              editingImageIdx={editingImageIdx}
+              lastEditorPath={lastEditorPath}
+              isBatchCropping={isBatchCropping}
+              isCleaningBubbles={isCleaningBubbles}
+              onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+              isSidebarOpen={isSidebarOpen}
+              backendStatus={backendStatus}
+              narrationStyle={narrationStyle}
+              setNarrationStyle={setNarrationStyle}
+              selectedModel={selectedModel}
+              setSelectedModel={setSelectedModel}
+              volume={volume}
+              setVolume={setVolume}
+              isMuted={isMuted}
+              setIsMuted={setIsMuted}
+              autoPlayAudio={autoPlayAudio}
+              setAutoPlayAudio={setAutoPlayAudio}
+              sfxVolume={appLogic.sfxVolume}
+              setSfxVolume={appLogic.setSfxVolume}
+              sfxEnabled={appLogic.sfxEnabled}
+              setSfxEnabled={appLogic.setSfxEnabled}
+              user={user}
+              notifications={notifications}
+              markNotificationAsRead={markNotificationAsRead}
+              markAllNotificationsAsRead={markAllNotificationsAsRead}
+              deleteNotification={deleteNotification}
+              clearAllNotifications={clearAllNotifications}
+              projectId={headerProjectId}
+              saveStatus={headerSaveStatus}
+              isDirty={headerIsDirty}
+              onSave={headerOnSave}
+              navigateTo={navigateTo}
+              notificationsMuted={notificationsMuted}
+              setNotificationsMuted={setNotificationsMuted}
+              themeMode={themeMode}
+              toggleThemeMode={toggleThemeMode}
+            />
           )}
 
           {/* PAGE VIEW 1: Main Editor Workspace */}
@@ -1136,6 +1196,7 @@ export default function App() {
               cropCloseKernelSize={cropCloseKernelSize}
               showScrapeConfirmModal={showScrapeConfirmModal}
               setShowScrapeConfirmModal={setShowScrapeConfirmModal}
+              navigateTo={navigateTo}
               audioFeedback={audioFeedback}
             />
           </div>
@@ -1467,6 +1528,7 @@ export default function App() {
               <EditorPage
                 appLogic={memoizedAppLogic}
                 navigateTo={navigateTo}
+                onRequestProjectConfirmation={handleRequestProjectConfirm}
                 seriesSlug={editorSeriesSlug}
                 chapterSlug={editorChapterSlug}
               />
@@ -1692,6 +1754,21 @@ export default function App() {
           }}
         />
       )}
+
+      <ProjectConfirmModal
+        isOpen={showScrapeConfirmModal}
+        onClose={() => setShowScrapeConfirmModal(false)}
+        onConfirm={handleProjectConfirm}
+        initialDetails={{
+          seriesTitle,
+          chapterNumber,
+          chapterTitle,
+          scrapedGenre,
+          seriesAuthor,
+          seriesCoverImage,
+          seriesSynopsis,
+        }}
+      />
 
       {/* --- Terminal Floating Interface --- */}
       <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-4">

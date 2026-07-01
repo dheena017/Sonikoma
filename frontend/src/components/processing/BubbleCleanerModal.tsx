@@ -126,14 +126,6 @@ export default function BubbleCleanerModal({
           <div className="h-10 w-10 rounded-xl bg-purple-950/60 border border-purple-800/50 flex items-center justify-center shadow-[0_0_14px_rgba(168,85,247,0.15)]">
             <Brain className="h-5 w-5 text-purple-400" />
           </div>
-          <div>
-            <h3 className="font-bold text-sm text-white">
-              Speech Bubble Cleaner Settings
-            </h3>
-            <p className="text-[10px] text-neutral-400 font-mono mt-0.5">
-              Advanced OpenCV clearing & text boundary cleanup parameters
-            </p>
-          </div>
         </div>
         <div className="flex items-center gap-3">
           <button

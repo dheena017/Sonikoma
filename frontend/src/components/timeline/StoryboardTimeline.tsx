@@ -10,7 +10,6 @@ import TimelineEmptyState from "./TimelineEmptyState";
 import TimelineHeader from "./TimelineHeader";
 import TimelineBulkOps from "./TimelineBulkOps";
 import TimelineCard from "./TimelineCard";
-import TimelineSelectionBar from "./TimelineSelectionBar";
 
 interface StoryboardTimelineProps {
   panels: GeneratedPanel[];
@@ -627,9 +626,23 @@ const StoryboardTimeline = React.memo(({
         setShowBulkOps={setShowBulkOps}
         isZipping={isZipping}
         panelsLength={panels.length}
+        selectedCount={selectedCount}
+        totalCount={panels.length}
         handleDownloadZip={handleDownloadZip}
         isAnalyzingAll={isAnalyzingAll}
         handleAnalyzeAllPanels={handleAnalyzeAllPanels}
+        handleAnalyzeSelected={() => {
+          handleAnalyzeSelectedPanels(Array.from(selectedPanelIds));
+          clearSelection();
+        }}
+        selectAllPanels={selectAllPanels}
+        clearSelection={clearSelection}
+        handleDeleteSelected={handleDeleteSelected}
+        handleAutoCropSelected={handleAutoCropSelected}
+        handleCleanBubblesSelected={handleCleanBubblesSelected}
+        handleBatchMergeSelected={handleBatchMergeSelected}
+        batchProgress={cropProgress}
+        cleanProgress={cleanProgress}
         handleSaveStoryboard={handleSaveStoryboard}
         isBatchCropping={isBatchCropping}
         isCleaningBubbles={isCleaningBubbles}
@@ -694,29 +707,6 @@ const StoryboardTimeline = React.memo(({
         ))}
       </div>
 
-      {/* Fixed floating selection bar — stays at bottom of screen when scrolling */}
-      <TimelineSelectionBar
-        selectedCount={selectedCount}
-        totalCount={panels.length}
-        isAnalyzingAll={isAnalyzingAll}
-        handleAnalyzeSelected={() => {
-          handleAnalyzeSelectedPanels(Array.from(selectedPanelIds));
-          clearSelection();
-        }}
-        selectAllPanels={selectAllPanels}
-        clearSelection={clearSelection}
-        handleDeleteSelected={handleDeleteSelected}
-        isBatchCropping={isBatchCropping}
-        isCleaningBubbles={isCleaningBubbles}
-        isBatchMerging={isBatchMerging}
-        handleAutoCropSelected={handleAutoCropSelected}
-        handleCleanBubblesSelected={handleCleanBubblesSelected}
-        handleBatchMergeSelected={handleBatchMergeSelected}
-        batchProgress={cropProgress}
-        cleanProgress={cleanProgress}
-        handleCancelAnalysis={handleCancelAnalysis}
-        handleCancelBatch={handleCancelBatch}
-      />
 
       {/* Delete Panels Confirmation Modal */}
       {showDeleteConfirm &&

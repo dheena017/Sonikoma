@@ -35,13 +35,13 @@ const EditorSidebar = ({
   const menuItems = [
     {
       id: "images",
-      label: "Imported Deck",
+      label: "Imported Images (Live Scraper Deck)",
       icon: Layout,
       badge: scrapedCount > 0 ? scrapedCount : undefined,
     },
     {
       id: "timeline",
-      label: "Storyboard",
+      label: "Timeline & Text (Storyboard Timeline)",
       icon: Film,
       badge: panelsCount > 0 ? panelsCount : undefined,
     },
@@ -65,6 +65,26 @@ const EditorSidebar = ({
         isCollapsed ? "w-16" : "w-64"
       }`}
     >
+      {/* Branding */}
+      <div className="p-3 border-b border-white/5">
+        <div className="flex items-center gap-3">
+          <img
+            src="/logo.png"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = "/logo.png";
+            }}
+            alt="Croex Logo"
+            className="h-11 w-11 rounded-full bg-neutral-900 shadow-lg shadow-purple-900/30 object-cover"
+          />
+          {!isCollapsed && (
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-white font-sans">Croex</p>
+              <p className="text-[10px] text-neutral-400 font-mono">Editor Suite</p>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Exit Button */}
       <div className="p-3 border-b border-white/5">
         <button

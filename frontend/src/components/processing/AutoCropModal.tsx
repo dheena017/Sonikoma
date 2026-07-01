@@ -165,18 +165,9 @@ export default function AutoCropModal({
     <div className="bg-neutral-900 border border-neutral-800 sm:rounded-3xl overflow-hidden shadow-2xl flex flex-col h-full">
       {/* Header */}
       <div className="px-4 py-4 sm:px-6 sm:py-5 border-b border-neutral-800 flex flex-col sm:flex-row sm:items-center justify-between bg-neutral-950/40 gap-4">
-        <div className="flex items-start gap-3">
+        <div className="flex items-center gap-3">
           <div className="h-10 w-10 shrink-0 rounded-xl bg-indigo-950/60 border border-indigo-800/50 flex items-center justify-center shadow-[0_0_14px_rgba(99,102,241,0.15)]">
             <Scissors className="h-5 w-5 text-indigo-400" />
-          </div>
-          <div>
-            <h3 className="font-bold text-[13px] sm:text-sm text-white leading-tight">
-              Auto-Crop Settings & Configuration
-            </h3>
-            <p className="text-[9px] sm:text-[10px] text-neutral-400 font-mono mt-1 sm:mt-0.5 leading-snug">
-              Configure OpenCV contour models or Smart Scanner prompts for
-              segmenting comic strips
-            </p>
           </div>
         </div>
         <div className="flex items-center justify-end gap-2 sm:gap-3">

@@ -35,13 +35,13 @@ const EditorMiniSidebar = ({
   const menuItems = [
     {
       id: "images",
-      label: "Imported Deck",
+      label: "Imported Images (Live Scraper Deck)",
       icon: Layout,
       badge: scrapedCount > 0 ? scrapedCount : undefined,
     },
     {
       id: "timeline",
-      label: "Storyboard",
+      label: "Timeline & Text (Storyboard Timeline)",
       icon: Film,
       badge: panelsCount > 0 ? panelsCount : undefined,
     },
@@ -65,6 +65,16 @@ const EditorMiniSidebar = ({
         isCollapsed ? "w-16" : "w-16"
       }`}
     >
+      <div className="p-2 border-b border-white/5 flex items-center justify-center">
+        <img
+          src="/logo.png"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = "/logo.png";
+          }}
+          alt="Croex Logo"
+          className="h-10 w-10 rounded-full bg-neutral-900 shadow-lg shadow-purple-900/30 object-cover"
+        />
+      </div>
       <div className="p-2 border-b border-white/5">
         <button
           onClick={onBackToApp}

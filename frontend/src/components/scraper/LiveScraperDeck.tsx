@@ -320,13 +320,13 @@ const LiveScraperDeck = React.memo(({
     }
   };
 
-  if (!isScraping && scrapedImages.length === 0) return null;
+  const showEmptyState = !isScraping && scrapedImages.length === 0;
 
   return (
     <>
       <div
         id="scraped_strips_deck"
-        className="bg-neutral-900/40 rounded-2xl border border-neutral-800/80 p-4 sm:p-5 lg:p-6 backdrop-blur-md space-y-4 shadow-sm min-w-0 w-full overflow-hidden"
+        className="bg-neutral-900/40 rounded-2xl border border-neutral-800/80 p-4 sm:p-5 lg:p-6 backdrop-blur-md space-y-4 shadow-sm min-w-0 w-full min-h-[640px] overflow-hidden"
       >
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-neutral-800/60 pb-3">
           <div className="flex items-center gap-3">
@@ -390,13 +390,17 @@ const LiveScraperDeck = React.memo(({
           </div>
         </div>
 
-        {isScraping && scrapedImages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-8 space-y-3">
-            <RefreshCw className="h-6 w-6 text-purple-500 animate-spin" />
-            <p className="text-xs text-neutral-400 font-mono">
-              Downloading images from the link... this may take up to 60
-              seconds.
-            </p>
+        {showEmptyState ? (
+          <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-neutral-800 bg-neutral-950/70 py-12 px-6 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-500/10 text-purple-300">
+              <ImageIcon className="h-6 w-6" />
+            </div>
+            <div className="space-y-2 max-w-xs">
+              <p className="text-sm font-semibold text-white">No imported images yet</p>
+              <p className="text-xs text-neutral-400 leading-relaxed">
+                Run the scraper or paste a supported webtoon URL to import frames into the Live Scraper Deck.
+              </p>
+            </div>
           </div>
         ) : (
           <div className="space-y-4">
