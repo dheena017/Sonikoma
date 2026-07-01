@@ -20,6 +20,7 @@ interface EditorSidebarProps {
   panelsCount: number;
   isBatchCropping: boolean;
   isCleaningBubbles: boolean;
+  navigateTo?: (path: string) => void;
 }
 
 const EditorSidebar = ({
@@ -32,6 +33,7 @@ const EditorSidebar = ({
   panelsCount,
   isBatchCropping,
   isCleaningBubbles,
+  navigateTo,
 }: EditorSidebarProps) => {
   const menuItems = [
     {
@@ -45,6 +47,12 @@ const EditorSidebar = ({
       label: "Timeline & Text (Storyboard Timeline)",
       icon: Film,
       badge: panelsCount > 0 ? panelsCount : undefined,
+    },
+    {
+      id: "editor",
+      label: "Editor",
+      icon: Film,
+      path: "/workspace/editor",
     },
     {
       id: "autocrop",
@@ -97,7 +105,12 @@ const EditorSidebar = ({
           return (
             <button
               key={item.id}
-              onClick={() => setCurrentSection(item.id)}
+              onClick={() => {
+                setCurrentSection(item.id);
+                if (item.path && navigateTo) {
+                  navigateTo(item.path);
+                }
+              }}
               className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl transition-all duration-200 group relative ${
                 isActive
                   ? "bg-purple-600/10 text-purple-400 border border-purple-500/20 shadow-[0_0_15px_rgba(147,51,234,0.1)]"

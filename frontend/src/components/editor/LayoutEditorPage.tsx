@@ -20,6 +20,7 @@ interface LayoutEditorPageProps {
   isSaving: boolean;
   isFocusMode: boolean;
   setIsFocusMode: React.Dispatch<React.SetStateAction<boolean>>;
+  navigateTo?: (path: string) => void;
 }
 
 const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
@@ -39,6 +40,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
   isSaving,
   isFocusMode,
   setIsFocusMode,
+  navigateTo,
 }) => {
   const isSidebarOpen = !isSidebarCollapsed && !isFocusMode;
 
@@ -63,6 +65,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
           panelsCount={panelsCount}
           isBatchCropping={isBatchCropping}
           isCleaningBubbles={isCleaningBubbles}
+          navigateTo={navigateTo}
         />
       ) : (
         <EditorSidebar
@@ -75,6 +78,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
           panelsCount={panelsCount}
           isBatchCropping={isBatchCropping}
           isCleaningBubbles={isCleaningBubbles}
+          navigateTo={navigateTo}
         />
       ))}
 

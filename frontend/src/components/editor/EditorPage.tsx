@@ -212,6 +212,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
       isSaving={isSaving}
       isFocusMode={isFocusMode}
       setIsFocusMode={setIsFocusMode}
+      navigateTo={navigateTo}
     >
       <main className="flex-1 w-full p-4 md:p-6 lg:p-8">
         <div className="w-full flex flex-col gap-8">
@@ -327,6 +328,46 @@ const EditorPage: React.FC<EditorPageProps> = ({
                           handleCancelBatch={handleCancelBatch}
                           audioFeedback={audioFeedback}
                         />
+                        
+                        <div className={`${isFocusMode ? "max-w-4xl mx-auto w-full" : "w-full"}`}>
+                          {/* Section 3: Video Monitor & Volume/Progress Panel */}
+                          <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                             <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono">3. Video Monitor & Volume/Progress Panel</h3>
+                          </div>
+                          <VideoMonitor
+                            activePreviewTab={activePreviewTab}
+                            setActivePreviewTab={setActivePreviewTab}
+                            videoUrl={videoUrl}
+                            panels={panels}
+                            aspectRatio={aspectRatio}
+                            videoPlayerRef={videoPlayerRef}
+                            currentPanelIndex={currentPanelIndex}
+                            playbackTime={playbackTime}
+                            reprocessingPanelId={reprocessingPanelId}
+                            quality={previewQuality}
+                          />
+
+                          {panels.length > 0 && (
+                            <div className="mt-4">
+                              <VolumeAndProgressPanel
+                                panels={panels}
+                                setPanels={setPanels}
+                                currentPanelIndex={currentPanelIndex}
+                                playbackTime={playbackTime}
+                                storyboardPlaying={storyboardPlaying}
+                                toggleStoryboardPlayback={toggleStoryboardPlayback}
+                                resetStoryboardPlayback={resetStoryboardPlayback}
+                                isMuted={isMuted}
+                                setIsMuted={setIsMuted}
+                                volume={volume}
+                                setVolume={setVolume}
+                                addNotification={addNotification}
+                              />
+                            </div>
+                          )}
+                        </div>
+                        
+                      </div>   
                         {/* Final Production panel and metadata below timeline */}
                         {!isFocusMode && (
                           <div className="mt-8 space-y-6">
@@ -341,11 +382,10 @@ const EditorPage: React.FC<EditorPageProps> = ({
                           </div>
                         )}
                       </div>
-                    </div>
                   )}
                </div>
             </div>
-          </div>
+        </div>
       </main>
     </LayoutEditorPage>
   );
