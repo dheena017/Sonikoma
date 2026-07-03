@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import {
   CustomBubblePreset,
   BubbleCleanerSharedProps,
-} from "../components/scraper/tabTypes";
+} from "@/components/Feature/scraper/tabTypes";
 import { useConfigHistory } from "./useConfigHistory";
 
 export function useBubbleCleanerPresets(props: BubbleCleanerSharedProps) {

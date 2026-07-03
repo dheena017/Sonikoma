@@ -1,6 +1,6 @@
 import React from "react";
-import { Slice } from "../components/crop/types";
-import { NotificationType } from "../components/NotificationStack";
+import { Slice } from "@/components/Feature/editor/crop";
+import { NotificationType } from "../components/notification/NotificationStack";
 import { usePanelDetection } from "./usePanelDetection";
 import { useImageTransform } from "./useImageTransform";
 

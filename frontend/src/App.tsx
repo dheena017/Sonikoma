@@ -8,66 +8,71 @@ import { createPortal } from "react-dom";
 import { AlertTriangle, X } from "lucide-react";
 
 // --- Custom Logic Hooks ---
-import { useAppLogic } from "./hooks/useAppLogic.js";
-import { useAppRouter } from "./hooks/useAppRouter.js";
 import {
+  useAppLogic,
+  useAppRouter,
   useGlobalShortcuts,
-  DEFAULT_SHORTCUTS,
-} from "./hooks/useGlobalShortcuts.js";
-import { useBackendHealth } from "./hooks/useBackendHealth.js";
-import { useAutoSave } from "./hooks/useAutoSave.js";
-import { useThemeMode } from "./hooks/useThemeMode";
-import * as api from "./api/index.js";
+  useBackendHealth,
+  useAutoSave,
+  useThemeMode,
+} from "./hooks";
+import { DEFAULT_SHORTCUTS } from "./hooks/useGlobalShortcuts";
+import * as api from "./api";
 
 // --- Layout & Main Workspace Components ---
-import Header from "./components/Header.js";
-import Sidebar from "./components/Sidebar.js";
-import AppWorkspace from "./components/AppWorkspace.js";
-import EditorPage from "./components/editor/EditorPage.js";
-import ProjectConfirmModal from "./components/scraper/ProjectConfirmModal.js";
-import PageNotFound from "./components/PageNotFound.js";
-import AdvancedSettings from "./components/AdvancedSettings.js";
-import LogsPage from "./components/LogsPage.js";
-import StatusPage from "./components/StatusPage.js";
-import TerminalLogs from "./components/terminal/TerminalLogs.js";
-import AIModelsPage from "./components/AIModelsPage.js";
-import ShortcutsPage from "./components/ShortcutsPage.js";
+import Header from "./components/MainHeader";
+import Sidebar from "./components/MainSidebar";
+import AppWorkspace from "./components/Workspace/AppWorkspace";
+import EditorPage from "./components/Feature/editor/EditorPage";
+import ProjectConfirmPanel from "./components/confirmationmodels/ProjectConfirmPanel";
+import PageNotFound from "./components/PageNotFound";
+import AdvancedSettings from "./components/Feature/video/AdvancedSettings";
+// import LogsPage from "./components/terminal/LogsPage"; // REMOVED: file doesn't exist
+import StatusPage from "./components/Status/StatusPage";
+// import TerminalLogs from "./components/terminal/TerminalLogs"; // REMOVED: file doesn't exist
+import AIModelsPage from "./components/Feature/ai_models/AIModelsPage";
+import ShortcutsPage from "./components/Shortcuts/ShortcutsPage";
 
 // --- Processing & Editor Modals ---
-import CropEditorModal from "./components/CropEditorModal.js";
-import BubbleCleanerModal from "./components/processing/BubbleCleanerModal.js";
-import AutoCropModal from "./components/processing/AutoCropModal.js";
-import NotificationStack from "./components/NotificationStack.js";
-import ConfirmModal from "./components/ConfirmModal.js";
+import CropEditorModal from "./components/Feature/editor/crop/CropEditorModal";
+import BubbleCleanerModal from "./components/Feature/processing/BubbleCleanerModal";
+import AutoCropModal from "./components/Feature/processing/AutoCropModal";
+import NotificationStack from "./components/notification/NotificationStack";
+import ConfirmModal from "./components/confirmationmodels/ConfirmModal";
 
 // --- Authentication & Landing Views ---
-import LandingPage from "./components/landing/LandingPage.js";
-import LoginPage from "./components/auth/LoginPage.js";
-import RegisterPage from "./components/auth/RegisterPage.js";
-import ForgotPasswordPage from "./components/auth/ForgotPasswordPage.js";
-import ProfilePage from "./components/ProfilePage.js";
-import LoadingPage from "./components/LoadingPage.js";
-import SeriesDetailsPage from "./components/SeriesDetailsPage.js";
-import DisplayPage from "./components/DisplayPage.js";
-import DashboardPage from "./components/DashboardPage.js";
-import ProjectsPage from "./components/ProjectsPage.js";
+import LandingPage from "./components/landing/LandingPage";
+import {
+  LoginPage,
+  RegisterPage,
+  ForgotPasswordPage,
+} from "./components/auth";
+import ProfilePage from "./components/profile/ProfilePage";
+import LoadingPage from "./components/LoadingPage";
+import TerminalLogs from "./components/terminal/TerminalLogs";
+import SeriesDetailsPage from "./components/SeriesDetailsPage";
+import DisplayPage from "./components/DisplayPage";
+import DashboardPage from "./components/Dashboard/DashboardPage";
+import { ProjectsPage } from "./components/Project";
 
 // --- AI Creator & Engagement Suite Views ---
-import AIOptimizerPage from "./components/optimizer/AIOptimizerPage.js";
-import PanelAssistantPage from "./components/panel_assistant/PanelAssistantPage.js";
-import CharacterProfilePage from "./components/characters/CharacterProfilePage.js";
-import TranslationStudioPage from "./components/translation/TranslationStudioPage.js";
-import AudioLabPage from "./components/audio_lab/AudioLabPage.js";
-import ThumbnailStudioPage from "./components/thumbnails/ThumbnailStudioPage.js";
-import EngagementPage from "./components/engagement/EngagementPage.js";
-import VoiceStudioPage from "./components/voice/VoiceStudioPage.js";
-import CTRAnalyticsPage from "./components/analytics/CTRAnalyticsPage.js";
-import NotificationsPage from "./components/NotificationsPage.js";
-import AdminPage from "./components/AdminPage.js";
-import AdminSidebar from "./components/admin/AdminSidebar.js";
-import AdminMiniSidebar from "./components/admin/AdminMiniSidebar.js";
-import MiniSidebar from "./components/MiniSidebar.js";
-import YouTubePage from "./components/video/YouTubePage.js";
+import AIOptimizerPage from "./components/Feature/optimizer/AIOptimizerPage";
+import PanelAssistantPage from "./components/Feature/panel_assistant/PanelAssistantPage";
+import CharacterProfilePage from "./components/Feature/characters/CharacterProfilePage";
+import TranslationStudioPage from "./components/Feature/translation/TranslationStudioPage";
+import AudioLabPage from "./components/Feature/audio_lab/AudioLabPage";
+import ThumbnailStudioPage from "./components/Feature/thumbnails/ThumbnailStudioPage";
+import EngagementPage from "./components/Feature/engagement/EngagementPage";
+import VoiceStudioPage from "./components/Feature/voice/VoiceStudioPage";
+import CTRAnalyticsPage from "./components/Feature/analytics/CTRAnalyticsPage";
+import NotificationsPage from "./components/notification/NotificationsPage";
+import {
+  AdminPage,
+  AdminSidebar,
+  AdminMiniSidebar,
+} from "./components/admin";
+import MiniSidebar from "./components/MainMiniSidebar";
+import YouTubePage from "./components/Feature/youtube/YouTubePage.js";
 
 // ============================================================================
 // SECTION 2: MAIN APP COMPONENT
@@ -1256,11 +1261,11 @@ export default function App() {
           {/* PAGE VIEW 3: Real-Time Engine Logs Console */}
           {isLogsPath && (
             <div className="page-transition w-full flex-1 flex flex-col">
-              <LogsPage
+              {/* <LogsPage
                 consoleLogs={consoleLogs}
                 setConsoleLogs={setConsoleLogs}
                 onNavigateHome={handleNavigateHome}
-              />
+              /> */}
             </div>
           )}
 
@@ -1754,7 +1759,7 @@ export default function App() {
         />
       )}
 
-      <ProjectConfirmModal
+      <ProjectConfirmPanel
         isOpen={showScrapeConfirmModal}
         onClose={() => setShowScrapeConfirmModal(false)}
         onConfirm={handleProjectConfirm}

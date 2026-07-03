@@ -1,13 +1,19 @@
 import React from "react";
+import TokenUsageDashboard from "../Feature/analytics/TokenUsageDashboard";
 import {
-  Gift,
-  Plus,
-  CreditCard,
-  ChevronRight,
-  CheckCircle2,
-  Ticket,
-} from "lucide-react";
-import TokenUsageDashboard from "../analytics/TokenUsageDashboard.js";
+  useBillingState,
+  useCurrencyFormatter,
+  useCouponCode,
+  useCardInfo,
+} from "./hooks";
+import {
+  SubscriptionPlanHeader,
+  DailyStreakTracker,
+  SubscriptionPlansGrid,
+  CreditCalculator,
+  CardPaymentForm,
+  CardPreview,
+} from "./billing";
 
 interface ProfileBillingTabProps {
   credits: number;
@@ -41,545 +47,114 @@ export default function ProfileBillingTab({
   onUpgradePlan,
   onPurchaseCredits,
 }: ProfileBillingTabProps) {
-  const [currency, setCurrency] = React.useState<"USD" | "KRW" | "JPY">("USD");
+  // Use custom hooks for state management
+  const billing = useBillingState(cardInfo);
+  const coupon = useCouponCode();
+  const cardHook = useCardInfo(cardInfo);
+  const formatter = useCurrencyFormatter(billing.currency, coupon.discount);
 
-  const onClaimClick = () => {
+  const handleClaimClick = () => {
     handleClaimCredits();
   };
 
-  const [couponCode, setCouponCode] = React.useState("");
-  const [couponStatus, setCouponStatus] = React.useState<string | null>(null);
-  const [discount, setDiscount] = React.useState(0); // percentage
-
-  // Interactive custom credits volume states
-  const [customCredits, setCustomCredits] = React.useState(500);
-
-  // Saved credit card states
-  const [cardNo, setCardNo] = React.useState("");
-  const [cardHolder, setCardHolder] = React.useState("");
-  const [cardExpiry, setCardExpiry] = React.useState("");
-  const [cardCvv, setCardCvv] = React.useState("");
-  const [isCardSaved, setIsCardSaved] = React.useState(false);
-
-  React.useEffect(() => {
-    if (cardInfo) {
-      setCardNo(cardInfo.cardNo || "");
-      setCardHolder(cardInfo.cardHolder || "");
-      setCardExpiry(cardInfo.cardExpiry || "");
-      setCardCvv(cardInfo.cardCvv || "");
-      setIsCardSaved(true);
-    }
-  }, [cardInfo]);
-
-  // Currency converter formatting helper
-  const formatPrice = (baseUSD: number) => {
-    const rate = {
-      USD: { symbol: "$", value: 1, suffix: "/mo" },
-      KRW: { symbol: "₩", value: 1300, suffix: "/월" },
-      JPY: { symbol: "¥", value: 150, suffix: "/月" },
-    };
-
-    const curr = rate[currency];
-    const converted = Math.round(baseUSD * curr.value * (1 - discount / 100));
-    return `${curr.symbol}${converted.toLocaleString()}${curr.suffix}`;
+  const handleCardNoChange = (value: string) => {
+    cardHook.formatCardNumber(value);
   };
 
-  // Custom credits purchase price formatter
-  const getCustomPrice = () => {
-    const baseUSD = customCredits * 0.02;
-    const rate = {
-      USD: { symbol: "$", value: 1 },
-      KRW: { symbol: "₩", value: 1300 },
-      JPY: { symbol: "¥", value: 150 },
-    };
-    const curr = rate[currency];
-    const converted = Math.round(baseUSD * curr.value * (1 - discount / 100));
-    return `${curr.symbol}${converted.toLocaleString()}`;
+  const handleCardExpiryChange = (value: string) => {
+    cardHook.formatCardExpiry(value);
   };
 
-  const handleApplyCoupon = (e: React.FormEvent) => {
-    e.preventDefault();
-    setCouponStatus(null);
-    if (couponCode.trim().toUpperCase() === "COMIC50") {
-      setDiscount(50);
-      setCouponStatus("Promo Code Applied: 50% discount locked!");
-    } else {
-      setDiscount(0);
-      setCouponStatus("Invalid promo code. Try: COMIC50");
+  const handleCardCvvChange = (value: string) => {
+    cardHook.formatCardCvv(value);
+  };
+
+  const handleSaveCard = async () => {
+    if (!cardHook.isCardComplete()) {
+      await (window as any).alertAsync("Please fill in all card details!");
+      return;
     }
+    await onUpdateCard({
+      cardHolder: cardHook.cardHolder,
+      cardNo: cardHook.cardNo,
+      cardExpiry: cardHook.cardExpiry,
+      cardCvv: cardHook.cardCvv,
+    });
+  };
+
+  const handlePurchaseCredits = () => {
+    const baseUSD = billing.customCredits * 0.02;
+    const discountedPriceUSD = formatter.getDiscountedPrice(baseUSD);
+    onPurchaseCredits(billing.customCredits, discountedPriceUSD);
   };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 text-left">
-      {/* Plan details and currency switchers */}
+      {/* Plan details header */}
+      <SubscriptionPlanHeader
+        subscriptionTier={subscriptionTier}
+        currency={billing.currency}
+        onCurrencyChange={billing.setCurrency}
+        onUpgradePlan={onUpgradePlan}
+        formatPrice={formatter.formatPrice}
+      />
+
+      {/* Streak Tracker */}
       <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-8 shadow-2xl relative">
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
-
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-white/5">
-          <div className="space-y-1">
-            <span className="text-[9px] font-extrabold text-purple-400 uppercase tracking-widest bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-full">
-              Subscription Plan
-            </span>
-            <h3 className="text-2xl font-black text-white">
-              {subscriptionTier === "pro"
-                ? "Creator Studio Pro Tier"
-                : "Creator Studio Free Tier"}
-            </h3>
-            <p className="text-xs text-neutral-500 font-semibold">
-              {subscriptionTier === "pro"
-                ? "Includes unlimited vertical compilations, 1080p/4K HD outputs, and advanced OCR tools"
-                : "Includes 1000 rendering credits per month with core scraping tools"}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-4 shrink-0">
-            {/* Currency toggle */}
-            <div className="flex items-center gap-1 bg-neutral-900 border border-white/5 p-1 rounded-xl">
-              {(["USD", "KRW", "JPY"] as const).map((curr) => (
-                <button
-                  key={curr}
-                  onClick={() => setCurrency(curr)}
-                  className={`py-1 px-2.5 rounded-lg text-[9px] font-bold transition-all cursor-pointer ${
-                    currency === curr
-                      ? "bg-purple-600/15 border border-purple-500/30 text-purple-400"
-                      : "text-neutral-500 hover:text-white"
-                  }`}
-                >
-                  {curr}
-                </button>
-              ))}
-            </div>
-
-            {subscriptionTier === "pro" ? (
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2.5 rounded-xl font-mono">
-                ✓ Current Plan
-              </span>
-            ) : (
-              <button
-                onClick={onUpgradePlan}
-                className="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-md shadow-purple-900/30 text-xs flex items-center gap-1.5 cursor-pointer active:scale-95 duration-300"
-              >
-                <Plus className="w-4 h-4" />
-                Upgrade to Studio Pro
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Claim Daily bonus credits - Streak Tracker */}
-        <div className="pt-6 flex flex-col gap-6">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div className="space-y-1 flex-1">
-              <div className="flex items-center gap-2 text-sm font-bold text-white">
-                <Gift className="w-4.5 h-4.5 text-amber-400 font-bold" />
-                Daily Claim Streak Tracker
-              </div>
-              <p className="text-xs text-neutral-400 font-semibold font-sans">
-                Claim consecutive daily credits to unlock the Mega Claim Bonus
-                on Day 7 (+150 credits!).
-              </p>
-            </div>
-
-            <div className="bg-neutral-900/80 border border-white/5 px-4 py-2 rounded-2xl flex items-center gap-2 shrink-0">
-              <span className="text-[9px] text-neutral-500 font-mono uppercase block">
-                Streak
-              </span>
-              <span className="text-xs font-black text-amber-400 font-mono">
-                {hasClaimedToday ? streakDays - 1 : streakDays - 1}{" "}
-                {streakDays - 1 === 1 ? "Day" : "Days"}
-              </span>
-            </div>
-          </div>
-
-          {/* 7 Day Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-            {[
-              { day: 1, reward: 50, label: "+50 Credits" },
-              { day: 2, reward: 60, label: "+60 Credits" },
-              { day: 3, reward: 75, label: "+75 Credits" },
-              { day: 4, reward: 90, label: "+90 Credits" },
-              { day: 5, reward: 110, label: "+110 Credits" },
-              { day: 6, reward: 130, label: "+130 Credits" },
-              { day: 7, reward: 150, label: "+150 Mega", special: true },
-            ].map((d) => {
-              const isClaimed = d.day < streakDays;
-              const isActive = d.day === streakDays && !hasClaimedToday;
-              const isLocked =
-                d.day > streakDays || (d.day === streakDays && hasClaimedToday);
-
-              return (
-                <button
-                  key={d.day}
-                  type="button"
-                  disabled={!isActive}
-                  onClick={onClaimClick}
-                  className={`p-3.5 rounded-2xl border text-center transition-all flex flex-col items-center justify-between gap-2 relative min-h-[110px] ${
-                    isClaimed
-                      ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-400/80 opacity-80"
-                      : isActive
-                      ? "bg-amber-500/10 border-amber-500/50 text-amber-400 cursor-pointer animate-pulse shadow-md shadow-amber-900/10"
-                      : "bg-[#09090b]/40 border-white/5 text-neutral-600"
-                  }`}
-                >
-                  <span className="text-[9px] font-extrabold uppercase font-mono tracking-wider">
-                    Day {d.day}
-                  </span>
-
-                  <div className="flex items-center justify-center py-1">
-                    {isClaimed ? (
-                      <CheckCircle2 className="w-5.5 h-5.5 text-emerald-400" />
-                    ) : d.special ? (
-                      <Ticket
-                        className={`w-6 h-6 ${
-                          isActive
-                            ? "text-amber-400 animate-bounce"
-                            : "text-neutral-650"
-                        }`}
-                      />
-                    ) : (
-                      <Gift
-                        className={`w-5 h-5 ${
-                          isActive ? "text-amber-400" : "text-neutral-700"
-                        }`}
-                      />
-                    )}
-                  </div>
-
-                  <span className="text-[10px] font-black font-mono">
-                    {d.label}
-                  </span>
-
-                  {/* Status Overlay Badge */}
-                  {isActive && (
-                    <span className="absolute -top-2 -right-1 px-1.5 py-0.5 bg-amber-500 text-[8px] font-black text-neutral-950 rounded-full tracking-wider uppercase">
-                      Claim!
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="flex justify-end">
-            <button
-              disabled={hasClaimedToday}
-              onClick={onClaimClick}
-              className={`py-2 px-5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 border transition-all cursor-pointer ${
-                hasClaimedToday
-                  ? "bg-neutral-900 border-white/5 text-neutral-500 cursor-not-allowed opacity-60"
-                  : "bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 border-amber-500/30 text-neutral-950 active:scale-95 shadow-md shadow-amber-950/30"
-              }`}
-            >
-              <Gift className="w-4 h-4" />
-              {hasClaimedToday
-                ? "Claimed for today"
-                : `Claim Day ${streakDays} Reward`}
-            </button>
-          </div>
-        </div>
-
-        {claimNotification && (
-          <div className="mt-4 p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold text-center rounded-xl animate-bounce">
-            🚀 Streak bonus claimed! Compute workspace updated.
-          </div>
-        )}
+        <DailyStreakTracker
+          hasClaimedToday={hasClaimedToday}
+          streakDays={streakDays}
+          onClaimClick={handleClaimClick}
+          claimNotification={claimNotification}
+        />
       </div>
 
       {/* Subscriptions Grid & Coupon Code Box */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Free Plan */}
-        <div className="bg-black/30 border border-white/5 rounded-3xl p-6 text-left space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold tracking-wider uppercase text-neutral-500">
-              Free Tier
-            </span>
-            {subscriptionTier !== "pro" ? (
-              <span className="text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 rounded-full font-bold">
-                Active
-              </span>
-            ) : (
-              <span className="text-[10px] text-neutral-550 font-bold">
-                Legacy
-              </span>
-            )}
-          </div>
-          <div className="text-2xl font-black text-white">{formatPrice(0)}</div>
-          <ul className="text-[11px] text-neutral-400 space-y-2 list-disc pl-4 leading-relaxed font-semibold">
-            <li>Up to 10 webtoon strip scrapes / day</li>
-            <li>Row-wise background panel segmentation</li>
-            <li>Standard voice synthesizing nodes</li>
-          </ul>
-        </div>
+      <SubscriptionPlansGrid
+        subscriptionTier={subscriptionTier}
+        formatPrice={formatter.formatPrice}
+        couponCode={coupon.couponCode}
+        setCouponCode={coupon.setCouponCode}
+        couponStatus={coupon.couponStatus}
+        onApplyCoupon={coupon.handleApplyCoupon}
+      />
 
-        {/* Pro Plan */}
-        <div className="bg-gradient-to-b from-[#121218]/80 to-[#070709]/80 border border-purple-500/20 rounded-3xl p-6 text-left space-y-4 shadow-xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
+      {/* Credit Calculator */}
+      <CreditCalculator
+        customCredits={billing.customCredits}
+        onCreditsChange={billing.setCustomCredits}
+        formatCustomPrice={formatter.formatCustomPrice}
+        onPurchase={handlePurchaseCredits}
+      />
 
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold tracking-wider uppercase text-purple-400">
-              Studio Pro
-            </span>
-            {subscriptionTier === "pro" ? (
-              <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 rounded-full font-bold">
-                Active
-              </span>
-            ) : (
-              <span className="text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 rounded-full font-bold">
-                Recommended
-              </span>
-            )}
-          </div>
-          <div className="text-2xl font-black text-white">
-            {formatPrice(19)}
-          </div>
-          <ul className="text-[11px] text-neutral-300 space-y-2 list-disc pl-4 leading-relaxed font-bold">
-            <li>Unlimited vertical scrapers & compiles</li>
-            <li>1080p / 4K Ultra-HD video compilation</li>
-            <li>Advanced character profiles & translation</li>
-          </ul>
-        </div>
-
-        {/* Coupon Promo code form */}
-        <div className="bg-black/30 border border-white/5 rounded-3xl p-6 text-left space-y-4 flex flex-col justify-between">
-          <div className="space-y-1">
-            <span className="text-[10px] font-bold tracking-wider uppercase text-neutral-500 flex items-center gap-1">
-              <Ticket className="w-3.5 h-3.5 text-purple-400" />
-              Promo Coupons
-            </span>
-            <p className="text-[10px] text-neutral-500 font-semibold leading-relaxed">
-              Enter coupon code to unlock premium subscription discounts
-            </p>
-          </div>
-
-          <form onSubmit={handleApplyCoupon} className="space-y-2">
-            <input
-              type="text"
-              required
-              value={couponCode}
-              onChange={(e) => setCouponCode(e.target.value)}
-              placeholder="e.g. COMIC50"
-              className="w-full bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all placeholder:text-neutral-700 uppercase"
-            />
-            <button
-              type="submit"
-              className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-xl text-[10px] transition-all cursor-pointer"
-            >
-              Apply Coupon
-            </button>
-          </form>
-
-          {couponStatus && (
-            <div
-              className={`text-[10px] font-bold ${
-                couponStatus.includes("Applied")
-                  ? "text-emerald-400"
-                  : "text-rose-400"
-              }`}
-            >
-              {couponStatus}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Credit Volume Pricing Calculator slider card */}
-      <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-8 shadow-2xl relative space-y-5">
-        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
-
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Gift className="w-5 h-5 text-purple-400" />
-              Interactive Credit Purchase Calculator
-            </h3>
-            <p className="text-xs text-neutral-400 font-semibold">
-              Slide to estimate pricing for custom rendering volume packages
-            </p>
-          </div>
-          <div className="bg-purple-600/10 border border-purple-500/20 px-4 py-2 rounded-2xl text-purple-400 text-sm font-black font-mono">
-            Price: {getCustomPrice()}
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <input
-            type="range"
-            min="100"
-            max="5000"
-            step="100"
-            value={customCredits}
-            onChange={(e) => setCustomCredits(parseInt(e.target.value))}
-            className="w-full h-2 bg-white/5 rounded-lg appearance-none cursor-pointer accent-purple-500"
-          />
-          <div className="flex justify-between text-[9px] font-mono text-neutral-500 uppercase tracking-widest font-bold">
-            <span>100 Credits</span>
-            <span className="text-white font-extrabold text-[11px]">
-              {customCredits} Credits chosen
-            </span>
-            <span>5000 Credits</span>
-          </div>
-        </div>
-
-        <button
-          onClick={() => {
-            const baseUSD = customCredits * 0.02;
-            const discountedPriceUSD = baseUSD * (1 - discount / 100);
-            onPurchaseCredits(customCredits, discountedPriceUSD);
-          }}
-          className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs transition-all cursor-pointer active:scale-95 shadow-md shadow-purple-900/10"
-        >
-          Purchase Package ({getCustomPrice()})
-        </button>
-      </div>
-
-      {/* Dynamic Payment Card details and visual layout */}
+      {/* Card Payment Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-8 shadow-2xl relative">
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
 
-        {/* Left: Input Form */}
-        <div className="space-y-4">
-          <div className="space-y-1 text-left">
-            <h4 className="text-sm font-bold text-white">
-              Save Credit Card Info
-            </h4>
-            <p className="text-xs text-neutral-500 font-semibold">
-              Add credit card for automated high-priority rendering upgrades
-            </p>
-          </div>
+        {/* Card Form */}
+        <CardPaymentForm
+          cardHolder={cardHook.cardHolder}
+          setCardHolder={cardHook.setCardHolder}
+          cardNo={cardHook.cardNo}
+          onCardNoChange={handleCardNoChange}
+          cardExpiry={cardHook.cardExpiry}
+          onCardExpiryChange={handleCardExpiryChange}
+          cardCvv={cardHook.cardCvv}
+          onCardCvvChange={handleCardCvvChange}
+          onSaveCard={handleSaveCard}
+          isComplete={cardHook.isCardComplete()}
+        />
 
-          <div className="space-y-3 text-xs">
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
-                Cardholder Name
-              </label>
-              <input
-                type="text"
-                value={cardHolder}
-                onChange={(e) => setCardHolder(e.target.value)}
-                placeholder="e.g. John Doe"
-                className="w-full bg-black/40 border border-white/5 rounded-xl py-2 px-3 focus:border-purple-500/50 text-white focus:outline-none"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
-                Card Number
-              </label>
-              <input
-                type="text"
-                maxLength={19}
-                value={cardNo}
-                onChange={(e) => {
-                  const val = e.target.value
-                    .replace(/\D/g, "")
-                    .replace(/(.{4})/g, "$1 ")
-                    .trim();
-                  setCardNo(val);
-                }}
-                placeholder="4111 2222 3333 4444"
-                className="w-full bg-black/40 border border-white/5 rounded-xl py-2.5 px-3 focus:border-purple-500/50 text-white focus:outline-none font-mono"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
-                  Expiry Date
-                </label>
-                <input
-                  type="text"
-                  maxLength={5}
-                  value={cardExpiry}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, "");
-                    if (val.length >= 2) {
-                      setCardExpiry(
-                        val.substring(0, 2) + "/" + val.substring(2, 4)
-                      );
-                    } else {
-                      setCardExpiry(val);
-                    }
-                  }}
-                  placeholder="MM/YY"
-                  className="w-full bg-black/40 border border-white/5 rounded-xl py-2 px-3 focus:border-purple-500/50 text-white focus:outline-none font-mono"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
-                  CVV
-                </label>
-                <input
-                  type="password"
-                  maxLength={3}
-                  value={cardCvv}
-                  onChange={(e) =>
-                    setCardCvv(e.target.value.replace(/\D/g, ""))
-                  }
-                  placeholder="•••"
-                  className="w-full bg-black/40 border border-white/5 rounded-xl py-2 px-3 focus:border-purple-500/50 text-white focus:outline-none font-mono"
-                />
-              </div>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={async () => {
-              if (!cardNo || !cardHolder || !cardExpiry || !cardCvv) {
-                await (window as any).alertAsync(
-                  "Please fill in all card details!"
-                );
-                return;
-              }
-              onUpdateCard({ cardHolder, cardNo, cardExpiry, cardCvv });
-            }}
-            className="w-full bg-purple-600 hover:bg-purple-500 py-2.5 rounded-xl text-xs font-bold transition-all text-white cursor-pointer"
-          >
-            Save Card Method
-          </button>
-        </div>
-
-        {/* Right: Graphic Mock Card preview */}
-        <div className="flex items-center justify-center p-4">
-          <div className="relative w-72 h-44 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-800 p-6 flex flex-col justify-between text-left text-white shadow-xl shadow-purple-950/20 overflow-hidden font-sans select-none">
-            <div className="absolute top-[-10%] right-[-10%] w-32 h-32 rounded-full bg-indigo-500/20 blur-xl pointer-events-none" />
-
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-widest text-purple-200">
-                Sonikoma Premium Pay
-              </span>
-              <CreditCard className="w-5 h-5 text-white/80" />
-            </div>
-
-            <div className="w-9 h-7 rounded bg-amber-400/80 border border-amber-300/20 shadow-inner flex items-center justify-center">
-              <div className="w-4 h-4 border border-black/10 rounded" />
-            </div>
-
-            <div className="text-base font-black tracking-widest font-mono text-white/95">
-              {cardNo || "•••• •••• •••• ••••"}
-            </div>
-
-            <div className="flex items-center justify-between text-[9px] uppercase tracking-wider text-white/70">
-              <div className="space-y-0.5">
-                <span className="text-[7px] text-white/55 block">
-                  Card Holder
-                </span>
-                <span className="font-bold truncate max-w-[150px] block">
-                  {cardHolder || "SONIKOMA CREATOR"}
-                </span>
-              </div>
-              <div className="space-y-0.5 text-right">
-                <span className="text-[7px] text-white/55 block">Expires</span>
-                <span className="font-bold font-mono">
-                  {cardExpiry || "MM/YY"}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Card Preview */}
+        <CardPreview
+          cardNo={cardHook.cardNo}
+          cardHolder={cardHook.cardHolder}
+          cardExpiry={cardHook.cardExpiry}
+        />
       </div>
 
-      {/* Real API Token Usage Ledger */}
+      {/* Token Usage Ledger */}
       <div className="w-full">
         <TokenUsageDashboard />
       </div>

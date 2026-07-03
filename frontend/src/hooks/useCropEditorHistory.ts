@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { Slice } from "../components/crop/types";
+import { Slice } from "@/components/Feature/editor/crop";
 
 interface UseCropEditorHistoryProps {
   editCropTop: number;

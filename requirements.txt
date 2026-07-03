@@ -6,26 +6,35 @@
 --extra-index-url https://download.pytorch.org/whl/cpu
 
 # ── Web Framework (FastAPI server + routing) ──────────────────────────────────
-fastapi>=0.111.0
+fastapi>=0.2.0
 uvicorn[standard]>=0.29.0
 pydantic>=2.7.0
 email-validator>=2.1.1
 
-# ── Image Processing (Core — OpenCV + Pillow + NumPy) ────────────────────────
+# ── Image Processing & AI Generation ─────────────────────────────────────────
 opencv-python>=4.9.0.80         # cv2 — panel detection, bubble removal, inpainting
-Pillow>=10.3.0                   # PIL — image load/save/filter fallback
+Pillow>=10.3.0                   # PIL — image load/save/filter (legacy)
 numpy>=1.26.0                    # np  — array operations for all CV tasks
+Wand>=0.6.10                     # ImageMagick Python binding (advanced transforms)
+diffusers>=0.21.0                # Stable Diffusion image generation
+transformers>=4.30.0             # Transformer models for image/text tasks
+torch>=2.0.0                     # PyTorch (required by diffusers, for CPU/GPU)
 
 # ── Text-to-Speech (TTS Audio Generation) ────────────────────────────────────
 edge-tts>=6.1.9                  # Microsoft Edge TTS — voice synthesis (audio.py)
 
-# ── Audio Processing & Manipulation ──────────────────────────────────────────
-pydub>=0.25.1                    # Audio concat, speedup, silence padding (audio.py)
-# Note: pydub requires ffmpeg installed on system (see below)
+# ── Audio Processing & Analysis ──────────────────────────────────────────────
+pydub>=0.25.1                    # Audio concat, speedup, silence padding (legacy)
+librosa>=0.10.0                  # Audio feature extraction (MFCC, spectral analysis)
+soundfile>=0.12.0                # Audio I/O (WAV, FLAC, OGG support)
+openai-whisper>=20230314         # Speech-to-text transcription (audio.py)
+scipy>=1.11.0                    # Signal processing (audio effects, analysis)
+# Note: pydub/librosa/whisper require ffmpeg installed on system (see below)
 
-# ── Video Compilation ─────────────────────────────────────────────────────────
-moviepy>=1.0.3,<2.0.0           # MP4 compilation with pan/zoom + audio ducking (video.py)
-# Note: moviepy requires ffmpeg installed on system (see below)
+# ── Video Compilation & Advanced Editing ───────────────────────────────────────
+moviepy>=1.0.3,<2.0.0           # MP4 compilation orchestrator + moviepy wrapper
+ffmpeg-python>=0.2.1            # FFmpeg Python wrapper for advanced video ops
+# Note: ffmpeg CLI must be installed on system (see below)
 
 # ── OCR — Text Extraction from Comic Panels ───────────────────────────────────
 easyocr>=1.7.1                   # EasyOCR — text detection in panels (cleaner.py, optional)
@@ -41,7 +50,7 @@ lxml>=5.2.0                      # Fast XML/HTML parser (used with BeautifulSoup
 # ── AI / ML — Google Gemini API (Python-side calls) ──────────────────────────
 google-genai>=2.8.0              # Gemini REST client (cleaner.py bubble detection)
 
-# ── Utilities ─────────────────────────────────────────────────────────────────
+# ── Utilities & Dependencies ──────────────────────────────────────────────────
 python-dotenv>=1.0.1             # Load .env files (GEMINI_API_KEY etc.)
 python-multipart>=0.0.9          # Multipart form support for FastAPI file uploads
 aiofiles>=23.2.1                 # Async file I/O for FastAPI
@@ -56,18 +65,37 @@ playwright>=1.40.0               # Headless browser scraping fallback (scraper.p
 psutil>=5.9.0                    # Process resource monitoring & lifecycle (health.py)
 colorama>=0.4.6                  # Console colored logs (main.py)
 proglog>=0.1.10                  # Moviepy render progress logger (video.py)
+tqdm>=4.65.0                     # Progress bars for batch operations
 
 # =============================================================================
 # SYSTEM DEPENDENCIES (install separately — NOT via pip)
 # =============================================================================
-# ffmpeg is required by pydub and moviepy for audio/video encoding.
-# Install it separately:
+# ffmpeg: Required by moviepy, pydub, librosa, whisper for media encoding/decoding
 #   Windows: winget install ffmpeg
 #   macOS:   brew install ffmpeg
 #   Linux:   sudo apt install ffmpeg
+#
+# imagemagick: Required by Wand for advanced image transformations
+#   Windows: winget install imagemagick
+#   macOS:   brew install imagemagick
+#   Linux:   sudo apt install imagemagick-6.q16
+#
+# stable-diffusion-cli (optional, for local inference): 
+#   Download from: https://github.com/replicate/cog (if local inference desired)
+#   Or use HuggingFace Diffusers library instead (default)
 
 # =============================================================================
-# OPTIONAL — GPU acceleration for EasyOCR (much faster OCR, not required)
+# GPU ACCELERATION (optional but STRONGLY RECOMMENDED for production)
 # =============================================================================
-torch>=2.3.0       # PyTorch — enables GPU mode for easyocr (large download ~2GB)
-torchvision>=0.18.0
+# For NVIDIA GPUs: Install CUDA 11.8+ and cuDNN 8.x first, then:
+#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+#
+# This enables GPU acceleration for:
+# - Stable Diffusion (10x faster image generation)
+# - Whisper (2-5x faster transcription)
+# - Librosa feature extraction (slightly faster)
+#
+# Models & cache directories (~15-20GB total):
+# - Whisper model cache: ~/.cache/huggingface/hub/
+# - Stable Diffusion cache: ~/.cache/huggingface/hub/
+# - Set HF_HOME=/path/to/custom/cache to customize location
