@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AdminNavbar from "./AdminNavbar";
-import * as api from "../../api/index.js";
+import * as api from "@/api";
 
 interface AdminLayoutProps {
   children: React.ReactNode;

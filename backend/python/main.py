@@ -697,6 +697,12 @@ from routes.ai_routes import router as ai_routes_router
 from routes.audio import router as audio_router
 from routes.video import router as video_router
 from routes.export import router as export_router
+from routes.ffmpeg_routes import router as ffmpeg_router
+from routes.librosa_routes import router as librosa_router
+from routes.whisper_routes import router as whisper_router
+from routes.imagemagick_routes import router as imagemagick_router
+from routes.stable_diffusion_routes import router as stable_diffusion_router
+from routes.compound_routes import router as compound_router
 
 # 1. Mount original Express routes under /api
 app.include_router(health_router,         prefix="/api", tags=["Health & System"])
@@ -708,6 +714,12 @@ app.include_router(scraper_routes_router, prefix="/api", tags=["Scraper"])
 app.include_router(ai_routes_router,      prefix="/api", tags=["AI Processing"])
 app.include_router(audio_router,          prefix="/api/audio", tags=["Audio Synthesis"])
 app.include_router(video_router,          prefix="/api/video", tags=["Video Rendering"])
+app.include_router(ffmpeg_router,         prefix="/api/ffmpeg", tags=["FFmpeg Video"])
+app.include_router(librosa_router,        prefix="/api/librosa", tags=["Librosa Audio"])
+app.include_router(whisper_router,        prefix="/api/whisper", tags=["Whisper Speech-to-Text"])
+app.include_router(imagemagick_router,    prefix="/api/imagemagick", tags=["ImageMagick Image"])
+app.include_router(stable_diffusion_router,prefix="/api/stable-diffusion", tags=["Stable Diffusion"])
+app.include_router(compound_router,       prefix="/api/compound", tags=["Compound Workflows"])
 app.include_router(export_router,         prefix="/api/export", tags=["Export"])
 
 # Legacy cached image endpoints compatibility

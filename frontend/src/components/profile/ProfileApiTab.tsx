@@ -16,7 +16,7 @@ interface ProfileApiTabProps {
   handleDeleteToken: (id: string) => void;
 }
 
-import AIProviderKeysConfig from "../AIProviderKeysConfig";
+import AIProviderKeysConfig from "@/components/Feature/ai_models/AIProviderKeysConfig";
 
 export default function ProfileApiTab({
   apiTokens,

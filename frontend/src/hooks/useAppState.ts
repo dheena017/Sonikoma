@@ -6,8 +6,8 @@ import * as api from "../api";
 import {
   Notification,
   NotificationType,
-} from "../components/NotificationStack";
-import { ErrorPopupDetail } from "../components/ErrorPopupModal";
+} from "../components/notification/NotificationStack";
+import { ErrorPopupDetail } from "../components/confirmationmodels/ErrorPopupModal";
 import { parseWebtoonUrl } from "../utils/url";
 import { useAudioFeedback } from "./useAudioFeedback";
 import { LogEntry, normalizeLog } from "../types/logs";

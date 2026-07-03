@@ -1,7 +1,7 @@
 import { LogEntry, normalizeLog } from "../types/logs";
 import React, { useState, useCallback, useMemo } from "react";
 import { GeneratedPanel } from "../types.js";
-import { NotificationType } from "../components/NotificationStack.js";
+import { NotificationType } from "../components/notification/NotificationStack.js";
 import { processWithConcurrency } from "../utils/batchUtils.js";
 import * as api from "../api/index.js";
 
