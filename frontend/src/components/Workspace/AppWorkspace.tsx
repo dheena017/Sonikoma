@@ -120,11 +120,18 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
   const handleWorkspaceImport = async () => {
     if (!targetUrl.trim()) return;
 
-    navigateTo?.("/workspace/editor");
-
     const temporaryProjectId = `temp_${Date.now()}_${Math.random()
       .toString(36)
       .substring(2, 10)}`;
+
+    const nav = navigateTo || (window as any).navigateTo;
+    const targetPath = `/workspace/editor?id=${temporaryProjectId}`;
+    if (typeof nav === "function") {
+      nav(targetPath);
+    } else {
+      window.history.pushState({}, "", targetPath);
+      window.dispatchEvent(new Event("popstate"));
+    }
 
     try {
       await scrapeImages(targetUrl, temporaryProjectId);

@@ -3,7 +3,7 @@
 # =============================================================================
 # Install with: pip3 install -r requirements.txt
 # =============================================================================
---extra-index-url https://download.pytorch.org/whl/cpu
+--extra-index-url *://download.pytorch.org/whl/cpu
 
 # ── Web Framework (FastAPI server + routing) ──────────────────────────────────
 fastapi>=0.2.0
@@ -33,7 +33,7 @@ scipy>=1.11.0                    # Signal processing (audio effects, analysis)
 
 # ── Video Compilation & Advanced Editing ───────────────────────────────────────
 moviepy>=1.0.3,<2.0.0           # MP4 compilation orchestrator + moviepy wrapper
-ffmpeg-python>=0.2.1            # FFmpeg Python wrapper for advanced video ops
+ffmpeg-python>=0.2.0,<0.3.0     # FFmpeg Python wrapper for advanced video ops
 # Note: ffmpeg CLI must be installed on system (see below)
 
 # ── OCR — Text Extraction from Comic Panels ───────────────────────────────────

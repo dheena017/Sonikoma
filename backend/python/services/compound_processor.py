@@ -18,9 +18,9 @@ from dataclasses import dataclass
 from enum import Enum
 
 from services.ffmpeg_engine import get_ffmpeg_engine, CutSpec, TransitionSpec
-from services.librosa_engine import get_librosa_engine
-from services.whisper_engine import get_whisper_engine, WhisperModel
-from services.imagemagick_engine import get_imagemagick_engine, ResizeMode
+from services.librosa_engine import get_librosa_engine, LIBROSA_AVAILABLE
+from services.whisper_engine import get_whisper_engine, WhisperModel, WHISPER_AVAILABLE
+from services.imagemagick_engine import get_imagemagick_engine, ResizeMode, WAND_AVAILABLE
 from services.stable_diffusion_engine import get_stable_diffusion_engine, StableDiffusionModel
 
 logger = logging.getLogger("sonikoma.services.compound_processor")
@@ -54,9 +54,9 @@ class CompoundProcessor:
     def __init__(self):
         """Initialize compound processor with all engines."""
         self.ffmpeg = get_ffmpeg_engine()
-        self.librosa = get_librosa_engine()
-        self.whisper = get_whisper_engine(model_name=WhisperModel.BASE)
-        self.imagemagick = get_imagemagick_engine()
+        self.librosa = get_librosa_engine() if LIBROSA_AVAILABLE else None
+        self.whisper = get_whisper_engine(model_name=WhisperModel.BASE) if WHISPER_AVAILABLE else None
+        self.imagemagick = get_imagemagick_engine() if WAND_AVAILABLE else None
         self.stable_diffusion = get_stable_diffusion_engine(device="cpu")
         
         # Workflow tracking
@@ -200,6 +200,11 @@ class CompoundProcessor:
 
             # Step 1: Transcribe
             if transcribe:
+                if self.whisper is None:
+                    raise RuntimeError(
+                        "Audio transcription requested but openai-whisper is not installed or unavailable. "
+                        "Install with: pip install openai-whisper"
+                    )
                 step_num += 1
                 self._progress(workflow_id, workflow_type, "Transcribing audio", step_num, total_steps)
                 
@@ -216,6 +221,11 @@ class CompoundProcessor:
 
             # Step 2: Analyze
             if analyze:
+                if self.librosa is None:
+                    raise RuntimeError(
+                        "Audio analysis requested but librosa/soundfile are not installed. "
+                        "Install with: pip install librosa soundfile"
+                    )
                 step_num += 1
                 self._progress(workflow_id, workflow_type, "Analyzing audio features", step_num, total_steps)
                 

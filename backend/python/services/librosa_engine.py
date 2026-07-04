@@ -22,8 +22,11 @@ import numpy as np
 try:
     import librosa
     import soundfile as sf
+    LIBROSA_AVAILABLE = True
 except ImportError:
-    raise ImportError("librosa and soundfile required. Install with: pip install librosa soundfile")
+    librosa = None
+    sf = None
+    LIBROSA_AVAILABLE = False
 
 logger = logging.getLogger("sonikoma.services.librosa_engine")
 
@@ -75,6 +78,11 @@ class LibrosaEngine:
         Args:
             sr: Sample rate for audio loading (Hz)
         """
+        if not LIBROSA_AVAILABLE:
+            raise RuntimeError(
+                "librosa and soundfile required. Install with: pip install librosa soundfile"
+            )
+
         self.sr = sr
         self.hop_length = 512
         self.n_fft = 2048
@@ -395,6 +403,10 @@ _librosa_instance: Optional[LibrosaEngine] = None
 def get_librosa_engine(sr: int = 22050) -> LibrosaEngine:
     """Get or create Librosa engine singleton."""
     global _librosa_instance
+    if not LIBROSA_AVAILABLE:
+        raise ImportError(
+            "librosa and soundfile required. Install with: pip install librosa soundfile"
+        )
     if _librosa_instance is None:
         _librosa_instance = LibrosaEngine(sr=sr)
     return _librosa_instance
