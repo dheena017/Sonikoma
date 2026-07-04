@@ -385,9 +385,25 @@ export function useAppState() {
     async (showDelay: boolean = true) => {
       const token = getToken();
 
+      const startTime = Date.now();
+      const finishAuth = () => {
+        if (!showDelay) {
+          setAuthLoading(false);
+          setIsInitializing(false);
+          return;
+        }
+
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = Math.max(0, 2500 - elapsedTime);
+
+        setTimeout(() => {
+          setAuthLoading(false);
+          setIsInitializing(false);
+        }, remainingTime);
+      };
+
       if (!token) {
-        setAuthLoading(false);
-        setIsInitializing(false);
+        finishAuth();
         return;
       }
       try {
@@ -400,8 +416,7 @@ export function useAppState() {
         // I should probably refine getCurrentUser or keep the logic here.
         // Actually, let's keep it robust.
       } finally {
-        setAuthLoading(false);
-        setIsInitializing(false);
+        finishAuth();
       }
     },
     [getToken, fetchWithInterceptor]
