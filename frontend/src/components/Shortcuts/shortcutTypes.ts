@@ -1,6 +1,12 @@
 import React from "react";
 
-export type Category = "all" | "nav" | "trigger" | "playback" | "editor" | "deck";
+export type Category =
+  | "all"
+  | "nav"
+  | "trigger"
+  | "playback"
+  | "editor"
+  | "deck";
 
 export interface ShortcutsPageProps {
   shortcuts: Record<string, string>;

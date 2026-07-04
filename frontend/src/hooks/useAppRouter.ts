@@ -138,7 +138,8 @@ export function useAppRouter({
       setCurrentPath(path);
 
       const isLegacyChapterDetailsPath =
-        path.startsWith("/workspace/editor/series/") && path.endsWith("/details");
+        path.startsWith("/workspace/editor/series/") &&
+        path.endsWith("/details");
 
       if (isLegacyChapterDetailsPath) {
         const normalizedPath = path.replace(/\/details$/, "");
@@ -269,7 +270,11 @@ export function useAppRouter({
       } else if (path === "/project-editor") {
         const params = new URLSearchParams(window.location.search);
         const hasProjId = params.has("id") || params.has("project_id");
-        if (scrapedImagesRef.current.length === 0 && panelsRef.current.length === 0 && !hasProjId) {
+        if (
+          scrapedImagesRef.current.length === 0 &&
+          panelsRef.current.length === 0 &&
+          !hasProjId
+        ) {
           window.history.replaceState({}, "", "/dashboard");
           setCurrentPath("/dashboard");
           return;
@@ -291,7 +296,11 @@ export function useAppRouter({
       ) {
         const params = new URLSearchParams(window.location.search);
         const hasProjId = params.has("id") || params.has("project_id");
-        if (scrapedImagesRef.current.length === 0 && panelsRef.current.length === 0 && !hasProjId) {
+        if (
+          scrapedImagesRef.current.length === 0 &&
+          panelsRef.current.length === 0 &&
+          !hasProjId
+        ) {
           window.history.replaceState({}, "", "/dashboard");
           setCurrentPath("/dashboard");
           return;
@@ -339,11 +348,7 @@ export function useAppRouter({
       window.history.replaceState = originalReplaceState;
       window.removeEventListener("popstate", handleLocationChange);
     };
-  }, [
-    isAuthenticated,
-    authLoading,
-    isInitializing,
-  ]);
+  }, [isAuthenticated, authLoading, isInitializing]);
 
   const navigateTo = React.useCallback(
     (path: string) => {

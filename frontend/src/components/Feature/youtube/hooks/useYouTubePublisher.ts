@@ -195,8 +195,6 @@ export function useYouTubePublisher({
   // Calculate active video source URL
   const activeVideoUrl = localPreviewUrl || videoUrl;
 
-
-
   // Chapter Range Validation Logic
   useEffect(() => {
     if (chapterStart && chapterEnd) {
@@ -296,8 +294,6 @@ export function useYouTubePublisher({
     chapterEnd,
     scrapedTitle,
   ]);
-
-
 
   // Load profiles, publish history, and custom credentials from database on mount
   useEffect(() => {

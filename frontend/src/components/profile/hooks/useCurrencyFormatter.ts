@@ -12,7 +12,10 @@ const CURRENCY_RATES_NO_SUFFIX = {
   JPY: { symbol: "¥", value: 150 },
 };
 
-export const useCurrencyFormatter = (currency: "USD" | "KRW" | "JPY", discount: number) => {
+export const useCurrencyFormatter = (
+  currency: "USD" | "KRW" | "JPY",
+  discount: number
+) => {
   const formatPrice = React.useCallback(
     (baseUSD: number) => {
       const curr = CURRENCY_RATES[currency];

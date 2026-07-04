@@ -60,7 +60,7 @@ const NotificationStackInner = ({
       )}
     </div>
   );
-}
+};
 
 function IndividualNotification({
   note,

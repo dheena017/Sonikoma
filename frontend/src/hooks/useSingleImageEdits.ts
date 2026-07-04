@@ -117,168 +117,208 @@ export function useSingleImageEdits({
     } finally {
       setIsSavingEdit(false);
     }
-  }, [editingImageIdx, scrapedImages, setConsoleLogs, editCropTop, editCropBottom, editCropLeft, editCropRight, editAutoTrim, fetchWithInterceptor, addPanelsToStoryboard, addNotification, audioFeedback]);
-
-  const handleSaveMultipleCuts = useCallback(async (
-    cuts: Array<{
-      cropTop: number;
-      cropBottom: number;
-      cropLeft: number;
-      cropRight: number;
-      autoTrim: boolean;
-    }>
-  ) => {
-    if (editingImageIdx === null || cuts.length === 0) return;
-
-    const originalUrl = scrapedImages[editingImageIdx];
-    setIsSavingEdit(true);
-    setConsoleLogs((prev) => [
-      `[Image Editor] Processing Batch Multiple Cut operations (${
-        cuts.length
-      } cuts) on Frame #${editingImageIdx + 1}...`,
-      ...prev,
-    ]);
-
-    try {
-      const croppedUrls = await processWithConcurrency(
-        cuts,
-        8,
-        async (cut, index) => {
-          setConsoleLogs((prev) => [
-            `[Image Editor] Starting Crop Cut #${index + 1}/${cuts.length}...`,
-            ...prev,
-          ]);
-          const data = await api.editImage(fetchWithInterceptor, {
-            url: originalUrl,
-            cropTop: cut.cropTop,
-            cropBottom: cut.cropBottom,
-            cropLeft: cut.cropLeft,
-            cropRight: cut.cropRight,
-            autoTrim: cut.autoTrim,
-          });
-          setConsoleLogs((prev) => [
-            `[Image Editor] Crop Cut #${index + 1}/${cuts.length} complete.`,
-            ...prev,
-          ]);
-          return data.url;
-        }
-      );
-
-      // Add all cropped urls directly to Timeline
-      addPanelsToStoryboard(croppedUrls);
-
-      setConsoleLogs((prev) => [
-        `[Image Editor] Successfully added ${cuts.length} cropped/trimmed frames to Timeline!`,
-        ...prev,
-      ]);
-      console.log(
-        `[Image Editor] Generated ${cuts.length} cuts from Frame #${
-          editingImageIdx + 1
-        } and added to Timeline:`,
-        croppedUrls
-      );
-      addNotification(
-        `Generated ${cuts.length} separate cuts added to Timeline!`,
-        "success"
-      );
-      audioFeedback?.playTick();
-    } catch (err: any) {
-      console.error(
-        `[Image Editor] Batch crop failed for Frame #${editingImageIdx + 1}:`,
-        err
-      );
-      if (!(err as any).intercepted) {
-        addNotification(
-          `Batch crop failed. Please check the edits and try again.`,
-          "error"
-        );
-      }
-    } finally {
-      setIsSavingEdit(false);
-    }
-  }, [editingImageIdx, scrapedImages, setConsoleLogs, fetchWithInterceptor, addPanelsToStoryboard, addNotification, audioFeedback]);
-
-  const handleStitchWithNext = useCallback(async (idx: number) => {
-    if (idx < 0 || idx >= scrapedImages.length - 1) return;
-
-    setMergingIndices((prev) => [...prev, idx]);
-    setConsoleLogs((prev) => [
-      `[Stitcher] Merging Frame #${idx + 1} with Frame #${
-        idx + 2
-      } vertically...`,
-      ...prev,
-    ]);
-
-    try {
-      const img1 = scrapedImages[idx];
-      const img2 = scrapedImages[idx + 1];
-
-      const data = await api.mergeImages(fetchWithInterceptor, {
-        urls: [img1, img2],
-      });
-      const stitchedUrl = data.url;
-
-      setScrapedImages((prev) => {
-        const copy = [...prev];
-        copy.splice(idx, 2, stitchedUrl);
-        return copy;
-      });
-
-      setSelectedScraped((prev) => {
-        const hasImg1 = prev.includes(img1);
-        const hasImg2 = prev.includes(img2);
-        const filtered = prev.filter((img) => img !== img1 && img !== img2);
-        if (hasImg1 || hasImg2) {
-          return [...filtered, stitchedUrl];
-        }
-        return filtered;
-      });
-
-      setConsoleLogs((prev) => [
-        `[Stitcher] [SUCCESS] Successfully merged Frame #${
-          idx + 1
-        } and Frame #${idx + 2} vertically into a new seamless frame asset!`,
-        ...prev,
-      ]);
-      console.log(
-        `[Stitcher] Merged frames ${idx + 1} & ${idx + 2} -> ${stitchedUrl}`
-      );
-      addNotification(
-        `Frames #${idx + 1} and #${idx + 2} stitched successfully!`,
-        "success"
-      );
-      audioFeedback?.playTick();
-      return stitchedUrl;
-    } catch (err: any) {
-      setConsoleLogs((prev) => [
-        `[Stitcher] [ERROR] Merge failed for Frame #${idx + 1} + #${idx + 2}: ${
-          (err as any).message || "Unknown error"
-        }`,
-        ...prev,
-      ]);
-      if (!(err as any).intercepted) {
-        addNotification(
-          `Stitching failed. Please try again or refresh the page.`,
-          "error"
-        );
-      }
-      return null;
-    } finally {
-      setMergingIndices((prev) => prev.filter((i) => i !== idx));
-    }
-  }, [scrapedImages, setConsoleLogs, fetchWithInterceptor, setScrapedImages, setSelectedScraped, addNotification, audioFeedback]);
-
-  return useMemo(() => ({
-    mergingIndices,
-    isSavingEdit,
-    handleSaveEditedImage,
-    handleSaveMultipleCuts,
-    handleStitchWithNext,
-  }), [
-    mergingIndices,
-    isSavingEdit,
-    handleSaveEditedImage,
-    handleSaveMultipleCuts,
-    handleStitchWithNext,
+  }, [
+    editingImageIdx,
+    scrapedImages,
+    setConsoleLogs,
+    editCropTop,
+    editCropBottom,
+    editCropLeft,
+    editCropRight,
+    editAutoTrim,
+    fetchWithInterceptor,
+    addPanelsToStoryboard,
+    addNotification,
+    audioFeedback,
   ]);
+
+  const handleSaveMultipleCuts = useCallback(
+    async (
+      cuts: Array<{
+        cropTop: number;
+        cropBottom: number;
+        cropLeft: number;
+        cropRight: number;
+        autoTrim: boolean;
+      }>
+    ) => {
+      if (editingImageIdx === null || cuts.length === 0) return;
+
+      const originalUrl = scrapedImages[editingImageIdx];
+      setIsSavingEdit(true);
+      setConsoleLogs((prev) => [
+        `[Image Editor] Processing Batch Multiple Cut operations (${
+          cuts.length
+        } cuts) on Frame #${editingImageIdx + 1}...`,
+        ...prev,
+      ]);
+
+      try {
+        const croppedUrls = await processWithConcurrency(
+          cuts,
+          8,
+          async (cut, index) => {
+            setConsoleLogs((prev) => [
+              `[Image Editor] Starting Crop Cut #${index + 1}/${
+                cuts.length
+              }...`,
+              ...prev,
+            ]);
+            const data = await api.editImage(fetchWithInterceptor, {
+              url: originalUrl,
+              cropTop: cut.cropTop,
+              cropBottom: cut.cropBottom,
+              cropLeft: cut.cropLeft,
+              cropRight: cut.cropRight,
+              autoTrim: cut.autoTrim,
+            });
+            setConsoleLogs((prev) => [
+              `[Image Editor] Crop Cut #${index + 1}/${cuts.length} complete.`,
+              ...prev,
+            ]);
+            return data.url;
+          }
+        );
+
+        // Add all cropped urls directly to Timeline
+        addPanelsToStoryboard(croppedUrls);
+
+        setConsoleLogs((prev) => [
+          `[Image Editor] Successfully added ${cuts.length} cropped/trimmed frames to Timeline!`,
+          ...prev,
+        ]);
+        console.log(
+          `[Image Editor] Generated ${cuts.length} cuts from Frame #${
+            editingImageIdx + 1
+          } and added to Timeline:`,
+          croppedUrls
+        );
+        addNotification(
+          `Generated ${cuts.length} separate cuts added to Timeline!`,
+          "success"
+        );
+        audioFeedback?.playTick();
+      } catch (err: any) {
+        console.error(
+          `[Image Editor] Batch crop failed for Frame #${editingImageIdx + 1}:`,
+          err
+        );
+        if (!(err as any).intercepted) {
+          addNotification(
+            `Batch crop failed. Please check the edits and try again.`,
+            "error"
+          );
+        }
+      } finally {
+        setIsSavingEdit(false);
+      }
+    },
+    [
+      editingImageIdx,
+      scrapedImages,
+      setConsoleLogs,
+      fetchWithInterceptor,
+      addPanelsToStoryboard,
+      addNotification,
+      audioFeedback,
+    ]
+  );
+
+  const handleStitchWithNext = useCallback(
+    async (idx: number) => {
+      if (idx < 0 || idx >= scrapedImages.length - 1) return;
+
+      setMergingIndices((prev) => [...prev, idx]);
+      setConsoleLogs((prev) => [
+        `[Stitcher] Merging Frame #${idx + 1} with Frame #${
+          idx + 2
+        } vertically...`,
+        ...prev,
+      ]);
+
+      try {
+        const img1 = scrapedImages[idx];
+        const img2 = scrapedImages[idx + 1];
+
+        const data = await api.mergeImages(fetchWithInterceptor, {
+          urls: [img1, img2],
+        });
+        const stitchedUrl = data.url;
+
+        setScrapedImages((prev) => {
+          const copy = [...prev];
+          copy.splice(idx, 2, stitchedUrl);
+          return copy;
+        });
+
+        setSelectedScraped((prev) => {
+          const hasImg1 = prev.includes(img1);
+          const hasImg2 = prev.includes(img2);
+          const filtered = prev.filter((img) => img !== img1 && img !== img2);
+          if (hasImg1 || hasImg2) {
+            return [...filtered, stitchedUrl];
+          }
+          return filtered;
+        });
+
+        setConsoleLogs((prev) => [
+          `[Stitcher] [SUCCESS] Successfully merged Frame #${
+            idx + 1
+          } and Frame #${idx + 2} vertically into a new seamless frame asset!`,
+          ...prev,
+        ]);
+        console.log(
+          `[Stitcher] Merged frames ${idx + 1} & ${idx + 2} -> ${stitchedUrl}`
+        );
+        addNotification(
+          `Frames #${idx + 1} and #${idx + 2} stitched successfully!`,
+          "success"
+        );
+        audioFeedback?.playTick();
+        return stitchedUrl;
+      } catch (err: any) {
+        setConsoleLogs((prev) => [
+          `[Stitcher] [ERROR] Merge failed for Frame #${idx + 1} + #${
+            idx + 2
+          }: ${(err as any).message || "Unknown error"}`,
+          ...prev,
+        ]);
+        if (!(err as any).intercepted) {
+          addNotification(
+            `Stitching failed. Please try again or refresh the page.`,
+            "error"
+          );
+        }
+        return null;
+      } finally {
+        setMergingIndices((prev) => prev.filter((i) => i !== idx));
+      }
+    },
+    [
+      scrapedImages,
+      setConsoleLogs,
+      fetchWithInterceptor,
+      setScrapedImages,
+      setSelectedScraped,
+      addNotification,
+      audioFeedback,
+    ]
+  );
+
+  return useMemo(
+    () => ({
+      mergingIndices,
+      isSavingEdit,
+      handleSaveEditedImage,
+      handleSaveMultipleCuts,
+      handleStitchWithNext,
+    }),
+    [
+      mergingIndices,
+      isSavingEdit,
+      handleSaveEditedImage,
+      handleSaveMultipleCuts,
+      handleStitchWithNext,
+    ]
+  );
 }

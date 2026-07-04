@@ -1,5 +1,13 @@
 import React from "react";
-import { Search, Keyboard, Navigation, Settings, Play, Layers, Image as ImageIcon } from "lucide-react";
+import {
+  Search,
+  Keyboard,
+  Navigation,
+  Settings,
+  Play,
+  Layers,
+  Image as ImageIcon,
+} from "lucide-react";
 import { Category } from "./shortcutTypes";
 import { categoryOptions } from "./shortcutUtils";
 
@@ -31,7 +39,10 @@ const labelMap: Record<Category, string> = {
   deck: "Gallery",
 };
 
-export function ShortcutSearch({ searchQuery, onSearchChange }: ShortcutSearchProps) {
+export function ShortcutSearch({
+  searchQuery,
+  onSearchChange,
+}: ShortcutSearchProps) {
   return (
     <div className="relative w-full">
       <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-neutral-500" />
@@ -46,7 +57,10 @@ export function ShortcutSearch({ searchQuery, onSearchChange }: ShortcutSearchPr
   );
 }
 
-export function ShortcutCategoryTabs({ activeCategory, onCategoryChange }: ShortcutCategoryTabsProps) {
+export function ShortcutCategoryTabs({
+  activeCategory,
+  onCategoryChange,
+}: ShortcutCategoryTabsProps) {
   return (
     <div className="w-full md:w-56 shrink-0 flex flex-col gap-1.5">
       <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest px-3 mb-2 font-mono">

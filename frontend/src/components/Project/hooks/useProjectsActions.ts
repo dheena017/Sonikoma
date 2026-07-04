@@ -6,7 +6,11 @@ export interface UseProjectsActionsHandlers {
   handleNewSeries: () => void;
   handleOpenProject: (project: Project) => void;
   handleExport: (e: MouseEvent, project: Project) => void;
-  handleRename: (e: MouseEvent, project: Project, onRename: (id: string) => void) => void;
+  handleRename: (
+    e: MouseEvent,
+    project: Project,
+    onRename: (id: string) => void
+  ) => void;
   handleOpenDetails: (e: MouseEvent, project: Project) => void;
   handleCopyLink: (e: MouseEvent, project: Project) => void;
   handleDeleteSingle: (
@@ -64,9 +68,10 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
 
   const handleCopyLink = useCallback((e: MouseEvent, project: Project) => {
     e.stopPropagation();
-    const url = project.series_slug && project.chapter_slug
-      ? `${window.location.origin}/workspace/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
-      : `${window.location.origin}/workspace?id=${project.project_id}`;
+    const url =
+      project.series_slug && project.chapter_slug
+        ? `${window.location.origin}/workspace/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
+        : `${window.location.origin}/workspace?id=${project.project_id}`;
     navigator.clipboard.writeText(url);
     (window as any).alertAsync?.(
       "Link copied to clipboard!",
@@ -126,10 +131,7 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
   );
 
   const handleBulkDelete = useCallback(
-    async (
-      selectedIds: string[],
-      onDeleteSuccess: (ids: string[]) => void
-    ) => {
+    async (selectedIds: string[], onDeleteSuccess: (ids: string[]) => void) => {
       if (selectedIds.length === 0) return;
 
       if (

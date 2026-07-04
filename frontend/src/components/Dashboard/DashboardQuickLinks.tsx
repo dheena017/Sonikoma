@@ -38,7 +38,9 @@ export default function DashboardQuickLinks({
         </div>
         <div className="text-left">
           <p className="text-xs font-bold text-white">Audio Lab</p>
-          <p className="text-[10px] text-neutral-500">Synthesis & character voices</p>
+          <p className="text-[10px] text-neutral-500">
+            Synthesis & character voices
+          </p>
         </div>
       </button>
 
@@ -51,7 +53,9 @@ export default function DashboardQuickLinks({
         </div>
         <div className="text-left">
           <p className="text-xs font-bold text-white">Characters</p>
-          <p className="text-[10px] text-neutral-500">Manage character profiles</p>
+          <p className="text-[10px] text-neutral-500">
+            Manage character profiles
+          </p>
         </div>
       </button>
 
@@ -64,7 +68,9 @@ export default function DashboardQuickLinks({
         </div>
         <div className="text-left">
           <p className="text-xs font-bold text-white">Settings</p>
-          <p className="text-[10px] text-neutral-500">Global app configuration</p>
+          <p className="text-[10px] text-neutral-500">
+            Global app configuration
+          </p>
         </div>
       </button>
     </div>

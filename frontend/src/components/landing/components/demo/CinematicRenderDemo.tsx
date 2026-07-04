@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import { Volume2 } from "lucide-react";
 
-export function CinematicRenderDemo({ onGetStarted }: { onGetStarted: () => void }) {
+export function CinematicRenderDemo({
+  onGetStarted,
+}: {
+  onGetStarted: () => void;
+}) {
   const [isPlaying, setIsPlaying] = useState(true);
   const [audioStyle, setAudioStyle] = useState("Aiden - Epic Trailer");
   const [musicTheme, setMusicTheme] = useState("Cyberpunk Synthwave");
@@ -69,10 +73,16 @@ export function CinematicRenderDemo({ onGetStarted }: { onGetStarted: () => void
             </div>
             <div
               className={`absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-sm transition-opacity ${
-                isPlaying ? "bg-emerald-500/20 border border-emerald-400" : "bg-neutral-900/50 border border-white/10"
+                isPlaying
+                  ? "bg-emerald-500/20 border border-emerald-400"
+                  : "bg-neutral-900/50 border border-white/10"
               }`}
             >
-              <div className={`w-2 h-2 rounded-full ${isPlaying ? "bg-emerald-400 animate-pulse" : "bg-neutral-500"}`} />
+              <div
+                className={`w-2 h-2 rounded-full ${
+                  isPlaying ? "bg-emerald-400 animate-pulse" : "bg-neutral-500"
+                }`}
+              />
               <span className="text-[10px] font-mono">
                 {isPlaying ? "RENDERING" : "IDLE"}
               </span>

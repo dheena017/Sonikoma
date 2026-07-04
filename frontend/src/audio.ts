@@ -32,7 +32,11 @@ function getAudioContext(): AudioContext | null {
 export function setEngineVolume(volume: number, isMuted: boolean = false) {
   currentVolume = isMuted ? 0 : Math.min(Math.max(volume / 100, 0), 1);
   if (masterGain) {
-    masterGain.gain.setTargetAtTime(currentVolume, getAudioContext()?.currentTime || 0, 0.01);
+    masterGain.gain.setTargetAtTime(
+      currentVolume,
+      getAudioContext()?.currentTime || 0,
+      0.01
+    );
   }
 }
 

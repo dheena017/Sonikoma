@@ -70,11 +70,14 @@ const SidebarInner = ({
   );
   const isWorkspace = currentPath === "/workspace";
   const isDashboardOverview = currentPath === "/dashboard";
-  const isAdminPath = currentPath === "/admin" || currentPath.startsWith("/admin/");
+  const isAdminPath =
+    currentPath === "/admin" || currentPath.startsWith("/admin/");
   const isSettings = currentPath === "/settings";
   const isAutoCrop = currentPath === "/auto-crop";
   const isBubbleCleaner = currentPath === "/bubble-cleaner";
-  const isEditor = currentPath.startsWith("/editor") || currentPath.startsWith("/workspace/editor");
+  const isEditor =
+    currentPath.startsWith("/editor") ||
+    currentPath.startsWith("/workspace/editor");
   const isLogs = currentPath === "/logs";
   const isStatus = currentPath === "/status";
   const isShortcuts = currentPath === "/shortcuts";
@@ -317,7 +320,9 @@ const SidebarInner = ({
                             ? "ring-1 ring-purple-500/50 shadow-[0_0_8px_rgba(168,85,247,0.2)]"
                             : ""
                         }`}
-                        title={!item.enabled ? (item as any).disabledTip : item.label}
+                        title={
+                          !item.enabled ? (item as any).disabledTip : item.label
+                        }
                       >
                         <div className="flex items-center gap-2.5">
                           <Icon
@@ -468,7 +473,7 @@ const SidebarInner = ({
       </aside>
     </>
   );
-}
+};
 
 const Sidebar = React.memo(SidebarInner);
 export default Sidebar;

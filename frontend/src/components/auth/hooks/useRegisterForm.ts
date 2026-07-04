@@ -18,7 +18,9 @@ export default function useRegisterForm(props: RegisterFormProps) {
   const [subscribeNewsletter, setSubscribeNewsletter] = React.useState(true);
   const [creatorRole, setCreatorRole] = React.useState("creator");
   const [activeTheme, setActiveTheme] = React.useState<ThemeKey>("purple");
-  const [passwordNotification, setPasswordNotification] = React.useState<string | null>(null);
+  const [passwordNotification, setPasswordNotification] = React.useState<
+    string | null
+  >(null);
 
   const hasMinLength = password.length >= 8;
   const hasUppercase = /[A-Z]/.test(password);
@@ -37,7 +39,9 @@ export default function useRegisterForm(props: RegisterFormProps) {
   }, [email]);
 
   const isFormValid = React.useMemo(() => {
-    return fullName.trim().length > 0 && isEmailValid && hasMinLength && acceptTerms;
+    return (
+      fullName.trim().length > 0 && isEmailValid && hasMinLength && acceptTerms
+    );
   }, [fullName, isEmailValid, hasMinLength, acceptTerms]);
 
   const handleGeneratePassword = () => {
@@ -90,7 +94,9 @@ export default function useRegisterForm(props: RegisterFormProps) {
 
   const handleSocialRegister = (provider: string) => {
     console.log(`[OAuth] Register with ${provider}`);
-    setError(`OAuth register via ${provider} is not configured for this environment.`);
+    setError(
+      `OAuth register via ${provider} is not configured for this environment.`
+    );
   };
 
   return {

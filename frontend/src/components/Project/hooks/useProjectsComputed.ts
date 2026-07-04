@@ -69,8 +69,7 @@ export function useProjectsComputed(
         );
       if (sortBy === "Most Panels")
         return (b.panels_count || 0) - (a.panels_count || 0);
-      if (sortBy === "A-Z")
-        return (a.title || "").localeCompare(b.title || "");
+      if (sortBy === "A-Z") return (a.title || "").localeCompare(b.title || "");
       return 0;
     });
 

@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { LogEntry, normalizeLog } from "../../../types/logs";
 import { LogsPageConsole } from "./LogsPageConsole";
 import { LogsPageHelpBanner } from "./LogsPageHelpBanner";
@@ -20,10 +26,14 @@ const LogsPageInner = ({
   const [viewMode, setViewMode] = useState<"live" | "historical">("live");
   const [isPaused, setIsPaused] = useState(false);
   const [autoScroll, setAutoScroll] = useState(true);
-  const [expandedLogId, setExpandedLogId] = useState<number | string | null>(null);
+  const [expandedLogId, setExpandedLogId] = useState<number | string | null>(
+    null
+  );
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [levelFilter, setLevelFilter] = useState<"ALL" | "INFO" | "SUCCESS" | "WARN" | "ERROR">("ALL");
+  const [levelFilter, setLevelFilter] = useState<
+    "ALL" | "INFO" | "SUCCESS" | "WARN" | "ERROR"
+  >("ALL");
   const [moduleFilter, setModuleFilter] = useState<string>("ALL");
   const [highlightPattern, setHighlightPattern] = useState("");
 
@@ -38,8 +48,10 @@ const LogsPageInner = ({
     const logs = viewMode === "live" ? consoleLogs : historicalLogs;
     return {
       total: logs.length,
-      errors: logs.filter((l) => l.level === "ERROR" || l.level === "CRITICAL").length,
-      warnings: logs.filter((l) => l.level === "WARN" || l.level === "WARNING").length,
+      errors: logs.filter((l) => l.level === "ERROR" || l.level === "CRITICAL")
+        .length,
+      warnings: logs.filter((l) => l.level === "WARN" || l.level === "WARNING")
+        .length,
       success: logs.filter((l) => l.level === "SUCCESS").length,
     };
   }, [consoleLogs, historicalLogs, viewMode]);
@@ -67,7 +79,14 @@ const LogsPageInner = ({
     } finally {
       setIsHistoryLoading(false);
     }
-  }, [viewMode, historyPage, historyLimit, levelFilter, moduleFilter, searchQuery]);
+  }, [
+    viewMode,
+    historyPage,
+    historyLimit,
+    levelFilter,
+    moduleFilter,
+    searchQuery,
+  ]);
 
   useEffect(() => {
     fetchHistory();
@@ -100,7 +119,9 @@ const LogsPageInner = ({
 
   const handleWipeDatabase = async () => {
     const confirmFn = (window as any).confirmAsync || window.confirm;
-    const confirmed = await confirmFn("PERMANENTLY delete all logs from the database?");
+    const confirmed = await confirmFn(
+      "PERMANENTLY delete all logs from the database?"
+    );
     if (!confirmed) return;
 
     try {
@@ -122,7 +143,8 @@ const LogsPageInner = ({
       const matchesSearch =
         log.message.toLowerCase().includes(query) ||
         log.module.toLowerCase().includes(query) ||
-        (log.correlation_id && log.correlation_id.toLowerCase().includes(query));
+        (log.correlation_id &&
+          log.correlation_id.toLowerCase().includes(query));
 
       if (!matchesSearch) return false;
       if (levelFilter !== "ALL") {
@@ -156,34 +178,38 @@ const LogsPageInner = ({
 
 #### 🖥️ System Context
 ${
-      snapshot
-        ? `- **Platform:** ${snapshot.platform?.system || "Unknown"} ${snapshot.platform?.release || ""}
-- **Memory:** ${snapshot.process?.memory_rss_mb || "?"} MB (Process) / ${snapshot.system?.memory_percent || "?"}% (System)
+  snapshot
+    ? `- **Platform:** ${snapshot.platform?.system || "Unknown"} ${
+        snapshot.platform?.release || ""
+      }
+- **Memory:** ${snapshot.process?.memory_rss_mb || "?"} MB (Process) / ${
+        snapshot.system?.memory_percent || "?"
+      }% (System)
 - **CPU:** ${snapshot.system?.cpu_percent || "?"}% Load
 `
-        : "- No system snapshot available for this entry."
-    }
+    : "- No system snapshot available for this entry."
+}
 
 <details>
 <summary>📦 Raw Diagnostic Data</summary>
 
 \`\`\`json
 ${JSON.stringify(
-      {
-        log_entry: {
-          message: log.message,
-          level: log.level,
-          module: log.module,
-          timestamp: log.timestamp,
-          details: log.details,
-        },
-        correlation_id: log.correlation_id,
-        user_id: log.user_id,
-        snapshot: log.snapshot,
-      },
-      null,
-      2
-    )}
+  {
+    log_entry: {
+      message: log.message,
+      level: log.level,
+      module: log.module,
+      timestamp: log.timestamp,
+      details: log.details,
+    },
+    correlation_id: log.correlation_id,
+    user_id: log.user_id,
+    snapshot: log.snapshot,
+  },
+  null,
+  2
+)}
 \`\`\`
 
 </details>

@@ -37,7 +37,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
 
   return (
     <div className="min-h-screen bg-[#050507] text-white flex flex-col selection:bg-violet-500/30">
-      
       <AdminHeaderPage
         currentPath={currentPath}
         navigateTo={navigateTo}
@@ -51,13 +50,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
         notificationsMuted={notificationsMuted}
         setNotificationsMuted={setNotificationsMuted}
         // Pass the state down so the header knows when to hide
-        isSidebarOpen={isSidebarOpen} 
+        isSidebarOpen={isSidebarOpen}
       />
 
-      <AdminMiniSidebar
-        currentPath={currentPath}
-        navigateTo={navigateTo}
-      />
+      <AdminMiniSidebar currentPath={currentPath} navigateTo={navigateTo} />
 
       <AdminSidebar
         currentPath={currentPath}

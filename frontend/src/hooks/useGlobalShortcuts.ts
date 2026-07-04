@@ -391,8 +391,11 @@ export function useGlobalShortcuts({
     setIsPipMode,
   ]);
 
-  return useMemo(() => ({
-    shortcuts,
-    setShortcuts,
-  }), [shortcuts]);
+  return useMemo(
+    () => ({
+      shortcuts,
+      setShortcuts,
+    }),
+    [shortcuts]
+  );
 }

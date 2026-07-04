@@ -92,8 +92,7 @@ export const highlightText = (text: string, highlight: string) => {
 };
 
 export const renderKeyCombo = (combo: string) => {
-  if (!combo)
-    return <span className="text-neutral-600 italic">Disabled</span>;
+  if (!combo) return <span className="text-neutral-600 italic">Disabled</span>;
 
   const keys = combo.split("+");
   return (

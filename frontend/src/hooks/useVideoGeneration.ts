@@ -289,69 +289,95 @@ export function useVideoGeneration({
     } finally {
       setIsProcessing(false);
     }
-  }, [targetUrl, addNotification, selectedSource, selectedModel, frameRate, voiceActor, musicTheme, panels, narrationStyle, seriesTitle, chapterNumber, chapterTitle, scrapedGenre, seriesAuthor, seriesCoverImage, seriesSynopsis, fetchWithInterceptor, setConsoleLogs, setPanels, setVideoUrl, setActivePreviewTab, audioFeedback]);
+  }, [
+    targetUrl,
+    addNotification,
+    selectedSource,
+    selectedModel,
+    frameRate,
+    voiceActor,
+    musicTheme,
+    panels,
+    narrationStyle,
+    seriesTitle,
+    chapterNumber,
+    chapterTitle,
+    scrapedGenre,
+    seriesAuthor,
+    seriesCoverImage,
+    seriesSynopsis,
+    fetchWithInterceptor,
+    setConsoleLogs,
+    setPanels,
+    setVideoUrl,
+    setActivePreviewTab,
+    audioFeedback,
+  ]);
 
-  const handleTriggerReprocess = useCallback(async (panelId: number) => {
-    const activePanel = panels.find((p) => p.id === panelId);
-    if (!activePanel) return;
+  const handleTriggerReprocess = useCallback(
+    async (panelId: number) => {
+      const activePanel = panels.find((p) => p.id === panelId);
+      if (!activePanel) return;
 
-    setReprocessingPanelId(panelId);
-    const activePadding =
-      activePanel.crop_padding !== undefined ? activePanel.crop_padding : 4;
-    setConsoleLogs((prev) => [
-      `[Image Editor] Updating cropping margins (padding: ${activePadding}%) for Panel #${panelId}...`,
-      ...prev,
-    ]);
+      setReprocessingPanelId(panelId);
+      const activePadding =
+        activePanel.crop_padding !== undefined ? activePanel.crop_padding : 4;
+      setConsoleLogs((prev) => [
+        `[Image Editor] Updating cropping margins (padding: ${activePadding}%) for Panel #${panelId}...`,
+        ...prev,
+      ]);
 
-    try {
-      let currentUrl = activePanel.image_url;
-      if (api.isProxyUrl(currentUrl)) {
-        const urlObj = new URL(currentUrl, window.location.origin);
-        urlObj.searchParams.set("reprocess_nonce", Date.now().toString());
-        if (activePanel.smart_crop) {
-          urlObj.searchParams.set("tighter", "true");
+      try {
+        let currentUrl = activePanel.image_url;
+        if (api.isProxyUrl(currentUrl)) {
+          const urlObj = new URL(currentUrl, window.location.origin);
+          urlObj.searchParams.set("reprocess_nonce", Date.now().toString());
+          if (activePanel.smart_crop) {
+            urlObj.searchParams.set("tighter", "true");
+          }
+          if (activePanel.crop_padding !== undefined) {
+            urlObj.searchParams.set(
+              "crop_padding",
+              activePanel.crop_padding.toString()
+            );
+          }
+          currentUrl = urlObj.pathname + urlObj.search;
         }
-        if (activePanel.crop_padding !== undefined) {
-          urlObj.searchParams.set(
-            "crop_padding",
-            activePanel.crop_padding.toString()
-          );
-        }
-        currentUrl = urlObj.pathname + urlObj.search;
+
+        console.log(`[Image Editor] Updating panel #${panelId}...`);
+        await new Promise((resolve) => setTimeout(resolve, 900));
+
+        setPanels((prev) =>
+          prev.map((p) =>
+            p.id === panelId ? { ...p, image_url: currentUrl } : p
+          )
+        );
+
+        setConsoleLogs((prev) => [
+          `[Image Editor] [SUCCESS] Panel #${panelId} successfully updated with padding ${activePadding}%!`,
+          ...prev,
+        ]);
+        addNotification(
+          `Panel #${panelId} reprocessed with tighter margins (${activePadding}% padding).`,
+          "success"
+        );
+      } catch (err: any) {
+        setConsoleLogs((prev) => [
+          `[Image Editor] [ERROR] Update failed for Panel #${panelId}: ${
+            (err as any).message || "Unknown error"
+          }`,
+          ...prev,
+        ]);
+        addNotification(
+          `Panel reprocessing failed. Please try again later.`,
+          "error"
+        );
+      } finally {
+        setReprocessingPanelId(null);
       }
-
-      console.log(`[Image Editor] Updating panel #${panelId}...`);
-      await new Promise((resolve) => setTimeout(resolve, 900));
-
-      setPanels((prev) =>
-        prev.map((p) =>
-          p.id === panelId ? { ...p, image_url: currentUrl } : p
-        )
-      );
-
-      setConsoleLogs((prev) => [
-        `[Image Editor] [SUCCESS] Panel #${panelId} successfully updated with padding ${activePadding}%!`,
-        ...prev,
-      ]);
-      addNotification(
-        `Panel #${panelId} reprocessed with tighter margins (${activePadding}% padding).`,
-        "success"
-      );
-    } catch (err: any) {
-      setConsoleLogs((prev) => [
-        `[Image Editor] [ERROR] Update failed for Panel #${panelId}: ${
-          (err as any).message || "Unknown error"
-        }`,
-        ...prev,
-      ]);
-      addNotification(
-        `Panel reprocessing failed. Please try again later.`,
-        "error"
-      );
-    } finally {
-      setReprocessingPanelId(null);
-    }
-  }, [panels, setConsoleLogs, setPanels, addNotification]);
+    },
+    [panels, setConsoleLogs, setPanels, addNotification]
+  );
 
   const handleRenderFinalVideo = useCallback(async () => {
     setIsRendering(true);
@@ -421,27 +447,38 @@ export function useVideoGeneration({
       setRenderProgress(0);
       setRenderEtaSeconds(null);
     }
-  }, [panels, voiceActor, fetchWithInterceptor, addNotification, setVideoUrl, setActivePreviewTab, audioFeedback]);
-
-  return useMemo(() => ({
-    isProcessing,
-    progressStatus,
-    reprocessingPanelId,
-    handleGenerateVideo,
-    handleTriggerReprocess,
-    isRendering,
-    renderProgress,
-    renderEtaSeconds,
-    handleRenderFinalVideo,
-  }), [
-    isProcessing,
-    progressStatus,
-    reprocessingPanelId,
-    handleGenerateVideo,
-    handleTriggerReprocess,
-    isRendering,
-    renderProgress,
-    renderEtaSeconds,
-    handleRenderFinalVideo,
+  }, [
+    panels,
+    voiceActor,
+    fetchWithInterceptor,
+    addNotification,
+    setVideoUrl,
+    setActivePreviewTab,
+    audioFeedback,
   ]);
+
+  return useMemo(
+    () => ({
+      isProcessing,
+      progressStatus,
+      reprocessingPanelId,
+      handleGenerateVideo,
+      handleTriggerReprocess,
+      isRendering,
+      renderProgress,
+      renderEtaSeconds,
+      handleRenderFinalVideo,
+    }),
+    [
+      isProcessing,
+      progressStatus,
+      reprocessingPanelId,
+      handleGenerateVideo,
+      handleTriggerReprocess,
+      isRendering,
+      renderProgress,
+      renderEtaSeconds,
+      handleRenderFinalVideo,
+    ]
+  );
 }

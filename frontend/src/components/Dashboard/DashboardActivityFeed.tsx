@@ -11,7 +11,9 @@ interface DashboardActivityFeedProps {
   analytics: { activities?: ActivityItem[] } | null;
 }
 
-export default function DashboardActivityFeed({ analytics }: DashboardActivityFeedProps) {
+export default function DashboardActivityFeed({
+  analytics,
+}: DashboardActivityFeedProps) {
   return (
     <div className="bg-[#0b0b0e]/80 border border-white/5 rounded-3xl p-6 shadow-xl">
       <h2 className="text-xl font-bold flex items-center gap-2 mb-6">
@@ -30,15 +32,21 @@ export default function DashboardActivityFeed({ analytics }: DashboardActivityFe
                 <FileText className="h-5 w-5 text-neutral-500 group-hover:text-purple-400 transition-colors" />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-white mb-0.5">{act.title}</h4>
+                <h4 className="text-sm font-bold text-white mb-0.5">
+                  {act.title}
+                </h4>
                 <p className="text-xs text-neutral-500 mb-1">{act.desc}</p>
-                <p className="text-[10px] text-neutral-600 font-mono">{act.time}</p>
+                <p className="text-[10px] text-neutral-600 font-mono">
+                  {act.time}
+                </p>
               </div>
             </div>
           ))
         ) : (
           <div className="py-10 text-center">
-            <p className="text-sm text-neutral-500">No recent activity found.</p>
+            <p className="text-sm text-neutral-500">
+              No recent activity found.
+            </p>
           </div>
         )}
       </div>

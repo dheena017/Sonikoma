@@ -10,4 +10,3 @@ interface ForgotPasswordPageProps {
 export default function ForgotPasswordPage(props: ForgotPasswordPageProps) {
   return <ForgotPasswordForm {...props} />;
 }
-

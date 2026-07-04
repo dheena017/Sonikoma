@@ -240,7 +240,24 @@ export function useBatchImageActions({
       ]);
     }
     setSelectedScraped([]);
-  }, [selectedScraped, addNotification, setConsoleLogs, setIsCleaningBubbles, setCleanProgress, setBubbleCroppingImgUrl, fetchWithInterceptor, bubbleEraseMethod, bubbleSensitivity, bubbleDetectionStyle, bubbleDilation, bubbleInpaintRadius, setScrapedImages, setSelectedScraped, setPanels, audioFeedback]);
+  }, [
+    selectedScraped,
+    addNotification,
+    setConsoleLogs,
+    setIsCleaningBubbles,
+    setCleanProgress,
+    setBubbleCroppingImgUrl,
+    fetchWithInterceptor,
+    bubbleEraseMethod,
+    bubbleSensitivity,
+    bubbleDetectionStyle,
+    bubbleDilation,
+    bubbleInpaintRadius,
+    setScrapedImages,
+    setSelectedScraped,
+    setPanels,
+    audioFeedback,
+  ]);
 
   const handleAutoCropSelected = useCallback(async () => {
     const targetImages = selectedScraped;
@@ -419,27 +436,56 @@ export function useBatchImageActions({
       ]);
     }
     setSelectedScraped([]);
-  }, [selectedScraped, addNotification, setIsBatchCropping, setBatchProgress, setConsoleLogs, setCroppingImgUrl, fetchWithInterceptor, cropSensitivity, cropBackgroundMode, aspectRatioLock, minPanelAreaPct, overlapMergeThreshold, useLocalCV, cropModel, cropCannyLow, cropCannyHigh, cropCloseKernelSize, cropMinHeightPx, autoSplitTallStrips, cropGuidance, cropFocusMode, cropPaddingPx, setScrapedImages, audioFeedback, setSelectedScraped]);
-
-  return useMemo(() => ({
-    isCleaningBubbles,
-    cleanProgress,
-    bubbleCroppingImgUrl,
-    isBatchCropping,
-    batchProgress,
-    croppingImgUrl,
-    handleCleanBubblesSelected,
-    handleAutoCropSelected,
-    handleCancelBatch,
-  }), [
-    isCleaningBubbles,
-    cleanProgress,
-    bubbleCroppingImgUrl,
-    isBatchCropping,
-    batchProgress,
-    croppingImgUrl,
-    handleCleanBubblesSelected,
-    handleAutoCropSelected,
-    handleCancelBatch,
+  }, [
+    selectedScraped,
+    addNotification,
+    setIsBatchCropping,
+    setBatchProgress,
+    setConsoleLogs,
+    setCroppingImgUrl,
+    fetchWithInterceptor,
+    cropSensitivity,
+    cropBackgroundMode,
+    aspectRatioLock,
+    minPanelAreaPct,
+    overlapMergeThreshold,
+    useLocalCV,
+    cropModel,
+    cropCannyLow,
+    cropCannyHigh,
+    cropCloseKernelSize,
+    cropMinHeightPx,
+    autoSplitTallStrips,
+    cropGuidance,
+    cropFocusMode,
+    cropPaddingPx,
+    setScrapedImages,
+    audioFeedback,
+    setSelectedScraped,
   ]);
+
+  return useMemo(
+    () => ({
+      isCleaningBubbles,
+      cleanProgress,
+      bubbleCroppingImgUrl,
+      isBatchCropping,
+      batchProgress,
+      croppingImgUrl,
+      handleCleanBubblesSelected,
+      handleAutoCropSelected,
+      handleCancelBatch,
+    }),
+    [
+      isCleaningBubbles,
+      cleanProgress,
+      bubbleCroppingImgUrl,
+      isBatchCropping,
+      batchProgress,
+      croppingImgUrl,
+      handleCleanBubblesSelected,
+      handleAutoCropSelected,
+      handleCancelBatch,
+    ]
+  );
 }

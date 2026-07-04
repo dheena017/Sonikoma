@@ -14,19 +14,25 @@ export function useProjectsSelection(): UseProjectsSelectionState {
     new Set()
   );
 
-  const toggleSelection = useCallback((e: React.MouseEvent, projectId: string) => {
-    e.stopPropagation();
-    setSelectedProjects((prev) => {
-      const next = new Set(prev);
-      if (next.has(projectId)) next.delete(projectId);
-      else next.add(projectId);
-      return next;
-    });
-  }, []);
+  const toggleSelection = useCallback(
+    (e: React.MouseEvent, projectId: string) => {
+      e.stopPropagation();
+      setSelectedProjects((prev) => {
+        const next = new Set(prev);
+        if (next.has(projectId)) next.delete(projectId);
+        else next.add(projectId);
+        return next;
+      });
+    },
+    []
+  );
 
   const toggleSelectAll = useCallback((filteredProjects: Project[]) => {
     setSelectedProjects((prev) => {
-      if (prev.size === filteredProjects.length && filteredProjects.length > 0) {
+      if (
+        prev.size === filteredProjects.length &&
+        filteredProjects.length > 0
+      ) {
         return new Set();
       }
       return new Set(filteredProjects.map((p) => p.project_id));

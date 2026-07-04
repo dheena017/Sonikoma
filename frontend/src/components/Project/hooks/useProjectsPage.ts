@@ -154,7 +154,7 @@ export default function useProjectsPage(): ProjectsPageState {
     toggleSelection: selectionState.toggleSelection,
     toggleMenu: menuState.toggleMenu,
     toggleSelectAll: handleToggleSelectAll,
-      clearSelection: selectionState.clearSelection,
+    clearSelection: selectionState.clearSelection,
     handleNewSeries: actionsState.handleNewSeries,
     handleOpenProject: actionsState.handleOpenProject,
     handleExport,

@@ -54,33 +54,78 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       name: "Core",
       items: [
         { id: "overview", label: "Overview", icon: LayoutGrid, path: "/admin" },
-        { id: "announcements", label: "Announcements", icon: Mail, path: "/admin/announcements" },
+        {
+          id: "announcements",
+          label: "Announcements",
+          icon: Mail,
+          path: "/admin/announcements",
+        },
         { id: "users", label: "Users", icon: Users, path: "/admin/users" },
-        { id: "content", label: "Content", icon: FolderGit2, path: "/admin/content" },
+        {
+          id: "content",
+          label: "Content",
+          icon: FolderGit2,
+          path: "/admin/content",
+        },
       ],
     },
     {
       name: "Monitoring",
       items: [
         { id: "health", label: "Health", icon: Server, path: "/admin/health" },
-        { id: "activity", label: "Audit Logs", icon: ActivitySquare, path: "/admin/activity" },
+        {
+          id: "activity",
+          label: "Audit Logs",
+          icon: ActivitySquare,
+          path: "/admin/activity",
+        },
         { id: "usage", label: "Usage", icon: Cpu, path: "/admin/usage" },
       ],
     },
     {
       name: "Business & Data",
       items: [
-        { id: "finance", label: "Finance", icon: DollarSign, path: "/admin/finance" },
-        { id: "scrapers", label: "Scrapers", icon: Globe, path: "/admin/scrapers" },
-        { id: "analytics", label: "Analytics", icon: BarChart3, path: "/admin/analytics" },
+        {
+          id: "finance",
+          label: "Finance",
+          icon: DollarSign,
+          path: "/admin/finance",
+        },
+        {
+          id: "scrapers",
+          label: "Scrapers",
+          icon: Globe,
+          path: "/admin/scrapers",
+        },
+        {
+          id: "analytics",
+          label: "Analytics",
+          icon: BarChart3,
+          path: "/admin/analytics",
+        },
       ],
     },
     {
       name: "Technical",
       items: [
-        { id: "explorer", label: "Explorer", icon: Database, path: "/admin/explorer" },
-        { id: "console", label: "Console", icon: Terminal, path: "/admin/console" },
-        { id: "settings", label: "Settings", icon: Settings, path: "/admin/settings" },
+        {
+          id: "explorer",
+          label: "Explorer",
+          icon: Database,
+          path: "/admin/explorer",
+        },
+        {
+          id: "console",
+          label: "Console",
+          icon: Terminal,
+          path: "/admin/console",
+        },
+        {
+          id: "settings",
+          label: "Settings",
+          icon: Settings,
+          path: "/admin/settings",
+        },
       ],
     },
   ];
@@ -101,8 +146,12 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
             <Shield className="w-5 h-5 text-white" />
           </div>
           <div>
-            <span className="font-black text-white tracking-tight block leading-none text-sm">Command</span>
-            <span className="text-[9px] text-violet-400 font-mono uppercase tracking-widest block mt-0.5 leading-none">Center</span>
+            <span className="font-black text-white tracking-tight block leading-none text-sm">
+              Command
+            </span>
+            <span className="text-[9px] text-violet-400 font-mono uppercase tracking-widest block mt-0.5 leading-none">
+              Center
+            </span>
           </div>
         </div>
         <button
@@ -126,12 +175,12 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                 return (
                   <li key={item.id} className="relative">
                     {/* Premium Floating Active Pill */}
-                    <div 
+                    <div
                       className={`absolute left-2 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
-                        active 
-                          ? "h-5 bg-violet-400 shadow-[0_0_12px_rgba(167,139,250,0.8)] opacity-100" 
+                        active
+                          ? "h-5 bg-violet-400 shadow-[0_0_12px_rgba(167,139,250,0.8)] opacity-100"
                           : "h-0 bg-transparent opacity-0"
-                      }`} 
+                      }`}
                     />
 
                     <button
@@ -147,10 +196,14 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                     >
                       <item.icon
                         className={`w-[18px] h-[18px] shrink-0 transition-transform duration-300 ${
-                          active ? "text-violet-400" : "text-neutral-500 group-hover:scale-110 group-hover:text-neutral-300"
+                          active
+                            ? "text-violet-400"
+                            : "text-neutral-500 group-hover:scale-110 group-hover:text-neutral-300"
                         }`}
                       />
-                      <span className="text-sm font-bold tracking-wide">{item.label}</span>
+                      <span className="text-sm font-bold tracking-wide">
+                        {item.label}
+                      </span>
                     </button>
                   </li>
                 );

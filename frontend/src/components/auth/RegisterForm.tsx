@@ -234,7 +234,9 @@ export default function RegisterForm({
                         }`}
                       >
                         <div className="text-xs font-bold">{role.label}</div>
-                        <div className="text-[9px] text-neutral-500 mt-0.5">{role.desc}</div>
+                        <div className="text-[9px] text-neutral-500 mt-0.5">
+                          {role.desc}
+                        </div>
                       </button>
                     );
                   })}
@@ -273,9 +275,15 @@ export default function RegisterForm({
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-300 transition-colors focus:outline-none"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
                 {passwordNotification && (
@@ -292,7 +300,9 @@ export default function RegisterForm({
                       <div
                         key={step}
                         className={`flex-grow h-full rounded-full transition-colors duration-300 ${
-                          passwordStrength >= step ? strengthColor() : "bg-white/5"
+                          passwordStrength >= step
+                            ? strengthColor()
+                            : "bg-white/5"
                         }`}
                       />
                     ))}
@@ -322,7 +332,11 @@ export default function RegisterForm({
                       >
                         <Check className="w-2.5 h-2.5 stroke-[4px]" />
                       </div>
-                      <span className={hasMinLength ? "text-neutral-300" : "text-neutral-500"}>
+                      <span
+                        className={
+                          hasMinLength ? "text-neutral-300" : "text-neutral-500"
+                        }
+                      >
                         8+ characters
                       </span>
                     </div>
@@ -337,7 +351,11 @@ export default function RegisterForm({
                       >
                         <Check className="w-2.5 h-2.5 stroke-[4px]" />
                       </div>
-                      <span className={hasUppercase ? "text-neutral-300" : "text-neutral-500"}>
+                      <span
+                        className={
+                          hasUppercase ? "text-neutral-300" : "text-neutral-500"
+                        }
+                      >
                         1 uppercase letter
                       </span>
                     </div>
@@ -352,7 +370,11 @@ export default function RegisterForm({
                       >
                         <Check className="w-2.5 h-2.5 stroke-[4px]" />
                       </div>
-                      <span className={hasNumber ? "text-neutral-300" : "text-neutral-500"}>
+                      <span
+                        className={
+                          hasNumber ? "text-neutral-300" : "text-neutral-500"
+                        }
+                      >
                         1 number
                       </span>
                     </div>
@@ -377,16 +399,24 @@ export default function RegisterForm({
                           : "bg-black/40 border-white/10 group-hover:border-white/20"
                       }`}
                     >
-                      {acceptTerms && <Check className="w-3 h-3 text-white stroke-[4px]" />}
+                      {acceptTerms && (
+                        <Check className="w-3 h-3 text-white stroke-[4px]" />
+                      )}
                     </div>
                   </div>
                   <span className="text-xs text-neutral-400 group-hover:text-neutral-300 transition-colors font-medium leading-relaxed">
                     I accept Sonikoma's{" "}
-                    <button type="button" className="text-purple-400 hover:text-purple-300 underline font-semibold">
+                    <button
+                      type="button"
+                      className="text-purple-400 hover:text-purple-300 underline font-semibold"
+                    >
                       Terms of Service
                     </button>{" "}
                     and{" "}
-                    <button type="button" className="text-purple-400 hover:text-purple-300 underline font-semibold">
+                    <button
+                      type="button"
+                      className="text-purple-400 hover:text-purple-300 underline font-semibold"
+                    >
                       Privacy Policy
                     </button>
                     .
@@ -410,7 +440,9 @@ export default function RegisterForm({
                           : "bg-black/40 border-white/10 group-hover:border-white/20"
                       }`}
                     >
-                      {subscribeNewsletter && <Check className="w-3 h-3 text-white stroke-[4px]" />}
+                      {subscribeNewsletter && (
+                        <Check className="w-3 h-3 text-white stroke-[4px]" />
+                      )}
                     </div>
                   </div>
                   <span className="text-xs text-neutral-400 group-hover:text-neutral-300 transition-colors font-medium flex items-center gap-1">

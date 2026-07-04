@@ -31,7 +31,8 @@ export function LandingFooter() {
             </span>
           </div>
           <p className="text-neutral-500 text-sm leading-relaxed">
-            Turn your favorite comics into fully voiced, animated videos that are ready to share.
+            Turn your favorite comics into fully voiced, animated videos that
+            are ready to share.
           </p>
           <div className="flex items-center gap-3">
             <FooterSocial icon={<Github />} />
@@ -44,17 +45,26 @@ export function LandingFooter() {
           <h4 className="font-black text-sm uppercase mb-6">Product</h4>
           <ul className="space-y-3 text-sm text-neutral-500">
             <li>
-              <a href="#" className="hover:text-white transition-colors cursor-pointer">
+              <a
+                href="#"
+                className="hover:text-white transition-colors cursor-pointer"
+              >
                 Features
               </a>
             </li>
             <li>
-              <a href="#" className="hover:text-white transition-colors cursor-pointer">
+              <a
+                href="#"
+                className="hover:text-white transition-colors cursor-pointer"
+              >
                 Pricing
               </a>
             </li>
             <li>
-              <a href="#" className="hover:text-white transition-colors cursor-pointer">
+              <a
+                href="#"
+                className="hover:text-white transition-colors cursor-pointer"
+              >
                 FAQ
               </a>
             </li>
@@ -65,17 +75,26 @@ export function LandingFooter() {
           <h4 className="font-black text-sm uppercase mb-6">Company</h4>
           <ul className="space-y-3 text-sm text-neutral-500">
             <li>
-              <a href="#" className="hover:text-white transition-colors cursor-pointer">
+              <a
+                href="#"
+                className="hover:text-white transition-colors cursor-pointer"
+              >
                 About
               </a>
             </li>
             <li>
-              <a href="#" className="hover:text-white transition-colors cursor-pointer">
+              <a
+                href="#"
+                className="hover:text-white transition-colors cursor-pointer"
+              >
                 Blog
               </a>
             </li>
             <li>
-              <a href="#" className="hover:text-white transition-colors cursor-pointer">
+              <a
+                href="#"
+                className="hover:text-white transition-colors cursor-pointer"
+              >
                 Contact
               </a>
             </li>

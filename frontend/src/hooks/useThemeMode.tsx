@@ -84,5 +84,8 @@ export function useThemeMode() {
     });
   }, []);
 
-  return useMemo(() => ({ themeMode, setThemeMode, toggleThemeMode }), [themeMode, toggleThemeMode]);
+  return useMemo(
+    () => ({ themeMode, setThemeMode, toggleThemeMode }),
+    [themeMode, toggleThemeMode]
+  );
 }

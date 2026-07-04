@@ -77,7 +77,8 @@ export default function ShortcutList({
 
       <div className="bg-neutral-950/80 px-6 py-3 border-t border-neutral-800 flex justify-between items-center">
         <span className="text-[10px] text-neutral-500 font-mono">
-          Showing {filteredShortcuts.length} of {Object.keys(shortcuts).length} actions
+          Showing {filteredShortcuts.length} of {Object.keys(shortcuts).length}{" "}
+          actions
         </span>
         <div className="flex items-center gap-4 text-[10px] text-neutral-600 font-mono">
           <div className="flex items-center gap-1.5">

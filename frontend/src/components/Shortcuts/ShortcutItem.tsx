@@ -37,7 +37,9 @@ export default function ShortcutItem({
         isRecording ? "bg-purple-950/20 z-10" : "hover:bg-white/[0.02]"
       }`}
     >
-      {isRecording && <div className="absolute inset-y-0 left-0 w-1 bg-purple-500" />}
+      {isRecording && (
+        <div className="absolute inset-y-0 left-0 w-1 bg-purple-500" />
+      )}
 
       <div className="col-span-6 sm:col-span-7 flex items-center gap-4">
         <div
@@ -102,7 +104,10 @@ export default function ShortcutItem({
                   <RefreshCw className="h-3.5 w-3.5" />
                 </button>
               )}
-              <button className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-500 hover:text-purple-400 transition-all" title="Edit Shortcut">
+              <button
+                className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-500 hover:text-purple-400 transition-all"
+                title="Edit Shortcut"
+              >
                 <Edit3 className="h-3.5 w-3.5" />
               </button>
             </div>

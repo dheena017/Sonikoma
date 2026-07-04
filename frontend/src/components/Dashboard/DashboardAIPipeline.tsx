@@ -9,7 +9,8 @@ export default function DashboardAIPipeline() {
         <h3 className="text-lg font-bold text-white">AI Processing Pipeline</h3>
       </div>
       <p className="text-xs text-neutral-400 font-mono mb-6 leading-relaxed">
-        Sonikoma orchestrates multiple specialized models to synthesize static webtoon series strips into full cinematic animated videos.
+        Sonikoma orchestrates multiple specialized models to synthesize static
+        webtoon series strips into full cinematic animated videos.
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -18,9 +19,12 @@ export default function DashboardAIPipeline() {
             <Scissors className="h-5 w-5" />
           </div>
           <div>
-            <h4 className="text-sm font-bold text-white mb-1">1. Smart Panel Slicer</h4>
+            <h4 className="text-sm font-bold text-white mb-1">
+              1. Smart Panel Slicer
+            </h4>
             <p className="text-xs text-neutral-400 leading-relaxed font-sans">
-              Runs Canny Edge detection algorithms on backend workers to detect gutters, isolate layout frames, and slice strips cleanly.
+              Runs Canny Edge detection algorithms on backend workers to detect
+              gutters, isolate layout frames, and slice strips cleanly.
             </p>
           </div>
         </div>
@@ -30,9 +34,13 @@ export default function DashboardAIPipeline() {
             <Sliders className="h-5 w-5" />
           </div>
           <div>
-            <h4 className="text-sm font-bold text-white mb-1">2. Speech Bubble OCR & Clean</h4>
+            <h4 className="text-sm font-bold text-white mb-1">
+              2. Speech Bubble OCR & Clean
+            </h4>
             <p className="text-xs text-neutral-400 leading-relaxed font-sans">
-              Locates text boundaries in comics, erases speech bubbles using clearing methods, and OCR transcribes dialog into transcription nodes.
+              Locates text boundaries in comics, erases speech bubbles using
+              clearing methods, and OCR transcribes dialog into transcription
+              nodes.
             </p>
           </div>
         </div>
@@ -42,9 +50,12 @@ export default function DashboardAIPipeline() {
             <Volume2 className="h-5 w-5" />
           </div>
           <div>
-            <h4 className="text-sm font-bold text-white mb-1">3. Dialog Voice Synthesis</h4>
+            <h4 className="text-sm font-bold text-white mb-1">
+              3. Dialog Voice Synthesis
+            </h4>
             <p className="text-xs text-neutral-400 leading-relaxed font-sans">
-              Streams script lines into advanced voice generation engines to assign custom voices to different characters.
+              Streams script lines into advanced voice generation engines to
+              assign custom voices to different characters.
             </p>
           </div>
         </div>
@@ -54,9 +65,13 @@ export default function DashboardAIPipeline() {
             <Cpu className="h-5 w-5" />
           </div>
           <div>
-            <h4 className="text-sm font-bold text-white mb-1">4. FFmpeg Video Compositor</h4>
+            <h4 className="text-sm font-bold text-white mb-1">
+              4. FFmpeg Video Compositor
+            </h4>
             <p className="text-xs text-neutral-400 leading-relaxed font-sans">
-              Binds sliced visuals with generated audios, overlays ambient soundscapes, and compiles MP4 render outputs using smooth camera paths.
+              Binds sliced visuals with generated audios, overlays ambient
+              soundscapes, and compiles MP4 render outputs using smooth camera
+              paths.
             </p>
           </div>
         </div>

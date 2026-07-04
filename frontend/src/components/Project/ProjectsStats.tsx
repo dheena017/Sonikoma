@@ -28,7 +28,9 @@ export default function ProjectsStats({
             <Film className="w-6 h-6" />
           </div>
           <div>
-            <div className="text-2xl font-bold text-white">{stats.totalProjects}</div>
+            <div className="text-2xl font-bold text-white">
+              {stats.totalProjects}
+            </div>
             <div className="text-xs text-neutral-500 font-medium uppercase tracking-wider">
               Total Projects
             </div>
@@ -40,7 +42,9 @@ export default function ProjectsStats({
             <CheckCircle2 className="w-6 h-6" />
           </div>
           <div>
-            <div className="text-2xl font-bold text-white">{stats.completedProjects}</div>
+            <div className="text-2xl font-bold text-white">
+              {stats.completedProjects}
+            </div>
             <div className="text-xs text-neutral-500 font-medium uppercase tracking-wider">
               Completed
             </div>
@@ -52,7 +56,9 @@ export default function ProjectsStats({
             <BarChart2 className="w-6 h-6" />
           </div>
           <div>
-            <div className="text-2xl font-bold text-white">{stats.totalPanels.toLocaleString()}</div>
+            <div className="text-2xl font-bold text-white">
+              {stats.totalPanels.toLocaleString()}
+            </div>
             <div className="text-xs text-neutral-500 font-medium uppercase tracking-wider">
               Total Panels
             </div>

@@ -182,7 +182,9 @@ export default function DashboardSidebar({
               </span>
               <span className="text-xs font-mono text-neutral-300">
                 {metrics?.storage?.usedBytes
-                  ? `${(metrics.storage.usedBytes / (1024 * 1024)).toFixed(1)} MB`
+                  ? `${(metrics.storage.usedBytes / (1024 * 1024)).toFixed(
+                      1
+                    )} MB`
                   : "---"}
               </span>
             </div>
@@ -192,7 +194,9 @@ export default function DashboardSidebar({
                 style={{
                   width: `${
                     metrics?.storage?.usedBytes && metrics?.storage?.limitBytes
-                      ? (metrics.storage.usedBytes / metrics.storage.limitBytes) * 100
+                      ? (metrics.storage.usedBytes /
+                          metrics.storage.limitBytes) *
+                        100
                       : 0
                   }%`,
                 }}
@@ -206,14 +210,19 @@ export default function DashboardSidebar({
                 AI Tokens Used
               </span>
               <span className="text-xs font-mono text-neutral-300">
-                {analytics?.total_tokens ? analytics.total_tokens.toLocaleString() : "0"}
+                {analytics?.total_tokens
+                  ? analytics.total_tokens.toLocaleString()
+                  : "0"}
               </span>
             </div>
             <div className="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden border border-white/5">
               <div
                 className="h-full bg-gradient-to-r from-pink-500 to-rose-500 transition-all duration-1000"
                 style={{
-                  width: `${Math.min(100, (analytics?.total_tokens || 0) / 10000)}%`,
+                  width: `${Math.min(
+                    100,
+                    (analytics?.total_tokens || 0) / 10000
+                  )}%`,
                 }}
               />
             </div>
@@ -237,7 +246,9 @@ export default function DashboardSidebar({
                 <Sliders className="h-4 w-4" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-white">Keyboard Shortcuts</h4>
+                <h4 className="text-xs font-bold text-white">
+                  Keyboard Shortcuts
+                </h4>
                 <p className="text-[10px] text-neutral-500 font-sans mt-0.5">
                   Quickly edit storyboards & camera sweeps
                 </p>
@@ -255,7 +266,9 @@ export default function DashboardSidebar({
                 <Settings className="h-4 w-4" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-white">Pipeline Settings</h4>
+                <h4 className="text-xs font-bold text-white">
+                  Pipeline Settings
+                </h4>
                 <p className="text-[10px] text-neutral-500 font-sans mt-0.5">
                   Configure OCR & voice models
                 </p>
@@ -273,7 +286,9 @@ export default function DashboardSidebar({
                 <FileText className="h-4 w-4" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-white">System Output Logs</h4>
+                <h4 className="text-xs font-bold text-white">
+                  System Output Logs
+                </h4>
                 <p className="text-[10px] text-neutral-500 font-sans mt-0.5">
                   Examine processing execution in real-time
                 </p>

@@ -3,7 +3,8 @@ import type { ChangeEvent, MouseEvent } from "react";
 import { getActionDetails } from "../shortcutUtils";
 import { ShortcutsPageProps } from "../shortcutTypes";
 
-interface UseShortcutPersistenceParams extends Omit<ShortcutsPageProps, "onNavigateHome"> {}
+interface UseShortcutPersistenceParams
+  extends Omit<ShortcutsPageProps, "onNavigateHome"> {}
 
 export function useShortcutPersistence({
   shortcuts,
@@ -22,7 +23,10 @@ export function useShortcutPersistence({
     if (!confirmed) return;
 
     setShortcuts(defaultShortcuts);
-    localStorage.setItem("ai_comic_shortcuts", JSON.stringify(defaultShortcuts));
+    localStorage.setItem(
+      "ai_comic_shortcuts",
+      JSON.stringify(defaultShortcuts)
+    );
 
     addNotification?.("Restored default key configurations", "info");
     audioFeedback?.playError();
@@ -59,7 +63,8 @@ export function useShortcutPersistence({
 
   const handleExport = () => {
     const dataStr = JSON.stringify(shortcuts, null, 2);
-    const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+    const dataUri =
+      "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
     const exportFileDefaultName = "sonikoma_shortcuts.json";
 
     const linkElement = document.createElement("a");

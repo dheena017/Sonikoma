@@ -5,7 +5,7 @@ interface UseCropEditorDragProps {
   containerRef: React.RefObject<HTMLDivElement | null>;
   dragStart: { x: number; y: number } | null;
   setDragStart: (val: { x: number; y: number } | null) => void;
-  dragType: any;  
+  dragType: any;
   setDragType: (val: any) => void;
   dragStartPercent: { x: number; y: number } | null;
   setDragStartPercent: (val: { x: number; y: number } | null) => void;

@@ -9,7 +9,9 @@ export function TranslationBefore() {
 
         {/* Original speech bubble with foreign text */}
         <div className="absolute top-10 right-6 bg-white text-black p-4 rounded-[20px] rounded-tl-none shadow-2xl max-w-[150px] border-2 border-black">
-          <span className="text-sm font-bold text-center block">정말 멋있어!</span>
+          <span className="text-sm font-bold text-center block">
+            정말 멋있어!
+          </span>
           <span className="text-xs text-gray-600 block">이건 훌륭해</span>
           <div className="absolute -left-2 top-0 w-4 h-4 bg-white border-l-2 border-t-2 border-black rotate-45 pointer-events-none" />
         </div>

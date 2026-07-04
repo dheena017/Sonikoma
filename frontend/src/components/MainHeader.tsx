@@ -271,7 +271,8 @@ const HeaderInner = ({
   const [localAutoPlayAudio, setLocalAutoPlayAudio] = useState(() => {
     return localStorage.getItem("app-autoplay-audio") === "true";
   });
-  const autoPlayAudio = autoPlayAudioProp !== undefined ? autoPlayAudioProp : localAutoPlayAudio;
+  const autoPlayAudio =
+    autoPlayAudioProp !== undefined ? autoPlayAudioProp : localAutoPlayAudio;
 
   useEffect(() => {
     localStorage.setItem("app-autoplay-audio", String(autoPlayAudio));
@@ -379,17 +380,61 @@ const HeaderInner = ({
 
   // Search Navigation options
   const navigationItems = [
-    { name: "Main Dashboard", path: "/dashboard", desc: "Go to series workspace and panel upload" },
-    { name: "Timeline Editor", path: "/workspace/editor", desc: "Refine timelines, motion settings, and generation" },
-    { name: "Auto-Crop Panel Slicer", path: "/auto-crop", desc: "Slice webtoon sheets into individual images" },
-    { name: "Clean-Bubbles Editor", path: "/bubble-cleaner", desc: "Smart text bubble erasing and clearing" },
-    { name: "Audio Design Lab", path: "/ai-audio-lab", desc: "Overlay SFX, composition themes, and voice actors" },
-    { name: "Voice Studio", path: "/ai-voice", desc: "Configure TTS and preview voice characters" },
-    { name: "CTR Analytics & Title Predictor", path: "/ai-analytics", desc: "A/B validate thumbnails, CTR, and retention" },
-    { name: "System Log Viewer", path: "/logs", desc: "Real-time backend worker processes and logs" },
-    { name: "Server Status Dashboard", path: "/status", desc: "Server connection latency and engine states" },
-    { name: "Keyboard Shortcuts", path: "/shortcuts", desc: "Quick keys for navigation and timelines" },
-    { name: "User Account Profile", path: "/profile", desc: "User statistics, account detail settings" },
+    {
+      name: "Main Dashboard",
+      path: "/dashboard",
+      desc: "Go to series workspace and panel upload",
+    },
+    {
+      name: "Timeline Editor",
+      path: "/workspace/editor",
+      desc: "Refine timelines, motion settings, and generation",
+    },
+    {
+      name: "Auto-Crop Panel Slicer",
+      path: "/auto-crop",
+      desc: "Slice webtoon sheets into individual images",
+    },
+    {
+      name: "Clean-Bubbles Editor",
+      path: "/bubble-cleaner",
+      desc: "Smart text bubble erasing and clearing",
+    },
+    {
+      name: "Audio Design Lab",
+      path: "/ai-audio-lab",
+      desc: "Overlay SFX, composition themes, and voice actors",
+    },
+    {
+      name: "Voice Studio",
+      path: "/ai-voice",
+      desc: "Configure TTS and preview voice characters",
+    },
+    {
+      name: "CTR Analytics & Title Predictor",
+      path: "/ai-analytics",
+      desc: "A/B validate thumbnails, CTR, and retention",
+    },
+    {
+      name: "System Log Viewer",
+      path: "/logs",
+      desc: "Real-time backend worker processes and logs",
+    },
+    {
+      name: "Server Status Dashboard",
+      path: "/status",
+      desc: "Server connection latency and engine states",
+    },
+    {
+      name: "Keyboard Shortcuts",
+      path: "/shortcuts",
+      desc: "Quick keys for navigation and timelines",
+    },
+    {
+      name: "User Account Profile",
+      path: "/profile",
+      desc: "User statistics, account detail settings",
+    },
   ];
 
   const filteredNavItems = navigationItems.filter(
@@ -418,7 +463,6 @@ const HeaderInner = ({
     >
       {/* Left side: Hamburger and Brand */}
       <div className="flex items-center gap-3 shrink-0">
-        
         {/* NEW: Wrapper added here to perfectly match the 80px (w-20) width of the mini sidebar */}
         <div className="w-auto lg:w-20 flex items-center justify-center shrink-0">
           <button
@@ -1022,12 +1066,42 @@ const HeaderInner = ({
                 </span>
                 <div className="flex gap-2.5 items-center bg-neutral-950/30 border border-neutral-850 p-2 rounded-xl justify-center">
                   {[
-                    { id: "purple", color: "bg-purple-600", border: "border-purple-400", label: "Classic Purple" },
-                    { id: "emerald", color: "bg-emerald-600", border: "border-emerald-400", label: "Neon Emerald" },
-                    { id: "rose", color: "bg-rose-600", border: "border-rose-450", label: "Vibrant Rose" },
-                    { id: "amber", color: "bg-amber-600", border: "border-amber-400", label: "Retro Amber" },
-                    { id: "cyan", color: "bg-cyan-600", border: "border-cyan-400", label: "Ocean Cyan" },
-                    { id: "slate", color: "bg-neutral-400", border: "border-neutral-200", label: "Monochrome Slate" },
+                    {
+                      id: "purple",
+                      color: "bg-purple-600",
+                      border: "border-purple-400",
+                      label: "Classic Purple",
+                    },
+                    {
+                      id: "emerald",
+                      color: "bg-emerald-600",
+                      border: "border-emerald-400",
+                      label: "Neon Emerald",
+                    },
+                    {
+                      id: "rose",
+                      color: "bg-rose-600",
+                      border: "border-rose-450",
+                      label: "Vibrant Rose",
+                    },
+                    {
+                      id: "amber",
+                      color: "bg-amber-600",
+                      border: "border-amber-400",
+                      label: "Retro Amber",
+                    },
+                    {
+                      id: "cyan",
+                      color: "bg-cyan-600",
+                      border: "border-cyan-400",
+                      label: "Ocean Cyan",
+                    },
+                    {
+                      id: "slate",
+                      color: "bg-neutral-400",
+                      border: "border-neutral-200",
+                      label: "Monochrome Slate",
+                    },
                   ].map((theme) => (
                     <button
                       key={theme.id}

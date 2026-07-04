@@ -4,7 +4,7 @@ import StoryboardTimeline from "../timeline/StoryboardTimeline";
 import VideoMonitor from "../video/VideoMonitor";
 import VolumeAndProgressPanel from "../video/VolumeAndProgressPanel";
 import OutputMetadataPanel from "../video/OutputMetadataPanel";
-import PipelineStatusCard from "../pipeline/PipelineStatusCard.js";
+import PipelineStatusCard from "../pipeline/ProcessBar.js";
 import LayoutEditorPage from "./LayoutEditorPage.js";
 import { useBackendHealth } from "../../../hooks/useBackendHealth.js";
 
@@ -28,7 +28,9 @@ const EditorPage: React.FC<EditorPageProps> = ({
   const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(true);
   const [currentSection, setCurrentSection] = React.useState("timeline");
   const [isFocusMode, setIsFocusMode] = React.useState(false);
-  const [previewQuality, setPreviewQuality] = React.useState<"draft" | "high">("high");
+  const [previewQuality, setPreviewQuality] = React.useState<"draft" | "high">(
+    "high"
+  );
   const [isInitializing, setIsInitializing] = React.useState(true);
 
   const { status: backendStatus } = useBackendHealth();
@@ -127,7 +129,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
-        setIsInitializing(false);
+      setIsInitializing(false);
     }, 2000);
     return () => clearTimeout(timer);
   }, []);
@@ -154,9 +156,9 @@ const EditorPage: React.FC<EditorPageProps> = ({
 
   const skeletonLoader = (
     <div className="flex-1 flex flex-col items-center justify-center min-h-[400px] space-y-4 animate-pulse">
-       <div className="w-12 h-12 bg-neutral-800 rounded-full" />
-       <div className="h-4 w-48 bg-neutral-800 rounded" />
-       <div className="h-3 w-32 bg-neutral-900 rounded" />
+      <div className="w-12 h-12 bg-neutral-800 rounded-full" />
+      <div className="h-4 w-48 bg-neutral-800 rounded" />
+      <div className="h-3 w-32 bg-neutral-900 rounded" />
     </div>
   );
 
@@ -170,8 +172,12 @@ const EditorPage: React.FC<EditorPageProps> = ({
           />
         )}
         <div className="relative z-10 space-y-1">
-           <h3 className="text-sm font-bold text-white uppercase tracking-wider">Final Production</h3>
-           <p className="text-[10px] text-neutral-500 font-mono">Compile all storyboard panels into a high-res video.</p>
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+            Final Production
+          </h3>
+          <p className="text-[10px] text-neutral-500 font-mono">
+            Compile all storyboard panels into a high-res video.
+          </p>
         </div>
         <button
           onClick={handleRenderFinalVideo}
@@ -184,9 +190,9 @@ const EditorPage: React.FC<EditorPageProps> = ({
         >
           {isRendering ? (
             <>
-            <div className="h-4 w-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-            Rendering {Math.round(renderProgress)}%
-          </>
+              <div className="h-4 w-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+              Rendering {Math.round(renderProgress)}%
+            </>
           ) : (
             <>🎬 Export Master Video</>
           )}
@@ -206,8 +212,16 @@ const EditorPage: React.FC<EditorPageProps> = ({
       panelsCount={panels.length}
       isBatchCropping={isBatchCropping}
       isCleaningBubbles={isCleaningBubbles}
-      title={seriesTitle && chapterTitle ? `${seriesTitle} · ${chapterTitle}` : "Storyboard Editor"}
-      subtitle={seriesTitle && chapterNumber ? `Series ${seriesTitle} • Chapter ${chapterNumber}` : undefined}
+      title={
+        seriesTitle && chapterTitle
+          ? `${seriesTitle} · ${chapterTitle}`
+          : "Storyboard Editor"
+      }
+      subtitle={
+        seriesTitle && chapterNumber
+          ? `Series ${seriesTitle} • Chapter ${chapterNumber}`
+          : undefined
+      }
       onSave={handleSave}
       isSaving={isSaving}
       isFocusMode={isFocusMode}
@@ -221,7 +235,12 @@ const EditorPage: React.FC<EditorPageProps> = ({
       <main className="flex-1 w-full h-full relative overflow-hidden flex flex-col items-center justify-center bg-black">
         {isScraping && (
           <div className="absolute top-4 z-50">
-            <PipelineStatusCard progressStatus={{...progressStatus, status: 'Scraping Assets...'}} />
+            <PipelineStatusCard
+              progressStatus={{
+                ...progressStatus,
+                status: "Scraping Assets...",
+              }}
+            />
           </div>
         )}
 
@@ -230,164 +249,180 @@ const EditorPage: React.FC<EditorPageProps> = ({
         ) : (
           <>
             {/* Primary Canvas: Video Monitor */}
-            <div id="section-monitor" className="absolute inset-0 w-full h-full flex flex-col">
+            <div
+              id="section-monitor"
+              className="absolute inset-0 w-full h-full flex flex-col"
+            >
               <div className="flex-1 w-full h-full relative">
                 <VideoMonitor
-                    activePreviewTab={activePreviewTab}
-                    setActivePreviewTab={setActivePreviewTab}
-                    videoUrl={videoUrl}
-                    panels={panels}
-                    aspectRatio={aspectRatio}
-                    videoPlayerRef={videoPlayerRef}
-                    currentPanelIndex={currentPanelIndex}
-                    playbackTime={playbackTime}
-                    reprocessingPanelId={reprocessingPanelId}
-                    quality={previewQuality}
-                  />
-
-                  {/* Overlay Controls */}
-                  {panels.length > 0 && (
-                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-4xl z-[60] bg-black/60 backdrop-blur-md rounded-2xl border border-white/10 p-2 shadow-2xl">
-                      <VolumeAndProgressPanel
-                        panels={panels}
-                        setPanels={setPanels}
-                        currentPanelIndex={currentPanelIndex}
-                        playbackTime={playbackTime}
-                        storyboardPlaying={storyboardPlaying}
-                        toggleStoryboardPlayback={toggleStoryboardPlayback}
-                        resetStoryboardPlayback={resetStoryboardPlayback}
-                        isMuted={isMuted}
-                        setIsMuted={setIsMuted}
-                        volume={volume}
-                        setVolume={setVolume}
-                        addNotification={addNotification}
-                      />
-                    </div>
-                  )}
-              </div>
-            </div>
-
-            {/* Scrolling Overlay Content (Timeline, Assets, Meta) */}
-            <div className={`absolute inset-0 overflow-y-auto w-full h-full pointer-events-none z-50 ${isFocusMode ? 'hidden' : 'block'}`}>
-              <div className="min-h-screen"></div> {/* Spacer to push content below the fold */}
-
-              <div className="pointer-events-auto bg-[#070709] border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] relative z-50 px-4 md:px-8 py-8 flex flex-col gap-12">
-
-              {/* MIDDLE: Storyboard Timeline */}
-              <div id="section-timeline" className="w-full max-w-[1600px] mx-auto space-y-4">
-                <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                   <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono">Timeline</h3>
-                </div>
-                <StoryboardTimeline
-                  panels={panels}
-                  setPanels={setPanels}
-                  currentPanelIndex={currentPanelIndex}
-                  setCurrentPanelIndex={setCurrentPanelIndex}
                   activePreviewTab={activePreviewTab}
                   setActivePreviewTab={setActivePreviewTab}
-                  setPlaybackTime={setPlaybackTime}
-                  hasScrapedImages={scrapedImages.length > 0}
-                  setVideoUrl={setVideoUrl}
-                  addNotification={addNotification}
-                  targetUrl={targetUrl}
-                  fetchWithInterceptor={fetchWithInterceptor}
-                  selectedModel={selectedModel}
-                  setConsoleLogs={() => {}}
-                  voiceActor={voiceActor}
-                  musicTheme={musicTheme}
-                  narrationStyle={narrationStyle}
-                  playStoryboardAudio={playStoryboardAudio}
-                  autoPlayAudio={autoPlayAudio}
-                  bubbleSensitivity={bubbleSensitivity}
-                  bubbleDetectionStyle={bubbleDetectionStyle}
-                  bubbleEraseMethod={bubbleEraseMethod}
-                  bubbleDilation={bubbleDilation}
-                  bubbleInpaintRadius={bubbleInpaintRadius}
-                  cropSensitivity={cropSensitivity}
-                  cropBackgroundMode={cropBackgroundMode}
-                  aspectRatioLock={aspectRatioLock}
-                  minPanelAreaPct={minPanelAreaPct}
-                  overlapMergeThreshold={overlapMergeThreshold}
-                  useLocalCV={useLocalCV}
-                  saveProject={saveProject}
-                  cropModel={cropModel}
-                  cropMinHeightPx={cropMinHeightPx}
-                  cropCannyLow={cropCannyLow}
-                  cropCannyHigh={cropCannyHigh}
-                  cropCloseKernelSize={cropCloseKernelSize}
-                  autoSplitTallStrips={autoSplitTallStrips}
-                  handleSaveStoryboard={handleSave}
-                  handleCancelBatch={handleCancelBatch}
-                  audioFeedback={audioFeedback}
+                  videoUrl={videoUrl}
+                  panels={panels}
+                  aspectRatio={aspectRatio}
+                  videoPlayerRef={videoPlayerRef}
+                  currentPanelIndex={currentPanelIndex}
+                  playbackTime={playbackTime}
+                  reprocessingPanelId={reprocessingPanelId}
+                  quality={previewQuality}
                 />
-              </div>
 
-              {/* BOTTOM: Imported Assets (Resource Pool) */}
-              <div id="section-assets" className="w-full max-w-[1600px] mx-auto space-y-4">
-                <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                   <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono">Imported Assets</h3>
-                </div>
-                <div className="bg-transparent">
-                  <LiveScraperDeck
-                    isDashboardOnly={false}
-                    scrapedImages={scrapedImages}
-                    isScraping={isScraping}
-                    selectedScraped={selectedScraped}
-                    setSelectedScraped={setSelectedScraped}
-                    setScrapedImages={setScrapedImages}
-                    mergingIndices={mergingIndices}
-                    setConsoleLogs={() => {}}
+                {/* Overlay Controls */}
+                {panels.length > 0 && (
+                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-4xl z-[60] bg-black/60 backdrop-blur-md rounded-2xl border border-white/10 p-2 shadow-2xl">
+                    <VolumeAndProgressPanel
+                      panels={panels}
+                      setPanels={setPanels}
+                      currentPanelIndex={currentPanelIndex}
+                      playbackTime={playbackTime}
+                      storyboardPlaying={storyboardPlaying}
+                      toggleStoryboardPlayback={toggleStoryboardPlayback}
+                      resetStoryboardPlayback={resetStoryboardPlayback}
+                      isMuted={isMuted}
+                      setIsMuted={setIsMuted}
+                      volume={volume}
+                      setVolume={setVolume}
+                      addNotification={addNotification}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* Scrolling Overlay Content (Timeline, Assets, Meta) */}
+            <div
+              className={`absolute inset-0 overflow-y-auto w-full h-full pointer-events-none z-50 ${
+                isFocusMode ? "hidden" : "block"
+              }`}
+            >
+              <div className="min-h-screen"></div>{" "}
+              {/* Spacer to push content below the fold */}
+              <div className="pointer-events-auto bg-[#070709] border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] relative z-50 px-4 md:px-8 py-8 flex flex-col gap-12">
+                {/* MIDDLE: Storyboard Timeline */}
+                <div
+                  id="section-timeline"
+                  className="w-full max-w-[1600px] mx-auto space-y-4"
+                >
+                  <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                    <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono">
+                      Timeline
+                    </h3>
+                  </div>
+                  <StoryboardTimeline
                     panels={panels}
                     setPanels={setPanels}
                     currentPanelIndex={currentPanelIndex}
-                    handleMergeWithNext={handleStitchWithNext}
-                    setEditingImageIdx={setEditingImageIdx}
-                    openEditingImageIdx={setEditingImageIdx}
-                    setEditCropTop={setEditCropTop}
-                    setEditCropBottom={setEditCropBottom}
-                    setEditCropLeft={setEditCropLeft}
-                    setEditCropRight={setEditCropRight}
-                    setEditAutoTrim={setEditAutoTrim}
+                    setCurrentPanelIndex={setCurrentPanelIndex}
+                    activePreviewTab={activePreviewTab}
+                    setActivePreviewTab={setActivePreviewTab}
+                    setPlaybackTime={setPlaybackTime}
+                    hasScrapedImages={scrapedImages.length > 0}
+                    setVideoUrl={setVideoUrl}
                     addNotification={addNotification}
-                    fetchWithInterceptor={fetchWithInterceptor}
-                    setErrorPopup={setErrorPopup}
-                    showBubbleModal={showBubbleModal}
-                    setShowBubbleModal={setShowBubbleModal}
-                    isCleaningBubbles={isCleaningBubbles}
-                    cleanProgress={cleanProgress}
-                    bubbleCroppingImgUrl={bubbleCroppingImgUrl}
-                    showAutoCropModal={showAutoCropModal}
-                    setShowAutoCropModal={setShowAutoCropModal}
-                    isBatchCropping={isBatchCropping}
-                    batchProgress={batchProgress}
-                    croppingImgUrl={croppingImgUrl}
-                    handleAutoCropSelected={handleAutoCropSelected}
-                    handleCleanBubblesSelected={handleCleanBubblesSelected}
-                    handleCancelBatch={handleCancelBatch}
-                    addPanelsToStoryboard={addPanelsToStoryboard}
-                    audioFeedback={audioFeedback}
-                    seriesTitle={seriesTitle}
-                    chapterNumber={chapterNumber}
-                    chapterTitle={chapterTitle}
                     targetUrl={targetUrl}
-                    selectedSource={selectedSource}
+                    fetchWithInterceptor={fetchWithInterceptor}
+                    selectedModel={selectedModel}
+                    setConsoleLogs={() => {}}
+                    voiceActor={voiceActor}
+                    musicTheme={musicTheme}
+                    narrationStyle={narrationStyle}
+                    playStoryboardAudio={playStoryboardAudio}
+                    autoPlayAudio={autoPlayAudio}
+                    bubbleSensitivity={bubbleSensitivity}
+                    bubbleDetectionStyle={bubbleDetectionStyle}
+                    bubbleEraseMethod={bubbleEraseMethod}
+                    bubbleDilation={bubbleDilation}
+                    bubbleInpaintRadius={bubbleInpaintRadius}
+                    cropSensitivity={cropSensitivity}
+                    cropBackgroundMode={cropBackgroundMode}
+                    aspectRatioLock={aspectRatioLock}
+                    minPanelAreaPct={minPanelAreaPct}
+                    overlapMergeThreshold={overlapMergeThreshold}
+                    useLocalCV={useLocalCV}
+                    saveProject={saveProject}
+                    cropModel={cropModel}
+                    cropMinHeightPx={cropMinHeightPx}
+                    cropCannyLow={cropCannyLow}
+                    cropCannyHigh={cropCannyHigh}
+                    cropCloseKernelSize={cropCloseKernelSize}
+                    autoSplitTallStrips={autoSplitTallStrips}
+                    handleSaveStoryboard={handleSave}
+                    handleCancelBatch={handleCancelBatch}
+                    audioFeedback={audioFeedback}
                   />
                 </div>
-              </div>
 
-              {/* Final Production panel and metadata below timeline */}
-              <div className="w-full max-w-[1600px] mx-auto mt-12 space-y-6 pt-8 border-t border-white/5">
-                <FinalProductionPanel />
-                <OutputMetadataPanel
-                  videoUrl={videoUrl}
-                  musicTheme={musicTheme}
-                  voiceActor={voiceActor}
-                  handleSaveVideo={handleSave}
-                />
-              </div>
+                {/* BOTTOM: Imported Assets (Resource Pool) */}
+                <div
+                  id="section-assets"
+                  className="w-full max-w-[1600px] mx-auto space-y-4"
+                >
+                  <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                    <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono">
+                      Imported Assets
+                    </h3>
+                  </div>
+                  <div className="bg-transparent">
+                    <LiveScraperDeck
+                      isDashboardOnly={false}
+                      scrapedImages={scrapedImages}
+                      isScraping={isScraping}
+                      selectedScraped={selectedScraped}
+                      setSelectedScraped={setSelectedScraped}
+                      setScrapedImages={setScrapedImages}
+                      mergingIndices={mergingIndices}
+                      setConsoleLogs={() => {}}
+                      panels={panels}
+                      setPanels={setPanels}
+                      currentPanelIndex={currentPanelIndex}
+                      handleMergeWithNext={handleStitchWithNext}
+                      setEditingImageIdx={setEditingImageIdx}
+                      openEditingImageIdx={setEditingImageIdx}
+                      setEditCropTop={setEditCropTop}
+                      setEditCropBottom={setEditCropBottom}
+                      setEditCropLeft={setEditCropLeft}
+                      setEditCropRight={setEditCropRight}
+                      setEditAutoTrim={setEditAutoTrim}
+                      addNotification={addNotification}
+                      fetchWithInterceptor={fetchWithInterceptor}
+                      setErrorPopup={setErrorPopup}
+                      showBubbleModal={showBubbleModal}
+                      setShowBubbleModal={setShowBubbleModal}
+                      isCleaningBubbles={isCleaningBubbles}
+                      cleanProgress={cleanProgress}
+                      bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+                      showAutoCropModal={showAutoCropModal}
+                      setShowAutoCropModal={setShowAutoCropModal}
+                      isBatchCropping={isBatchCropping}
+                      batchProgress={batchProgress}
+                      croppingImgUrl={croppingImgUrl}
+                      handleAutoCropSelected={handleAutoCropSelected}
+                      handleCleanBubblesSelected={handleCleanBubblesSelected}
+                      handleCancelBatch={handleCancelBatch}
+                      addPanelsToStoryboard={addPanelsToStoryboard}
+                      audioFeedback={audioFeedback}
+                      seriesTitle={seriesTitle}
+                      chapterNumber={chapterNumber}
+                      chapterTitle={chapterTitle}
+                      targetUrl={targetUrl}
+                      selectedSource={selectedSource}
+                    />
+                  </div>
+                </div>
 
-              </div> {/* End of background container */}
-            </div> {/* End of scrolling overlay */}
+                {/* Final Production panel and metadata below timeline */}
+                <div className="w-full max-w-[1600px] mx-auto mt-12 space-y-6 pt-8 border-t border-white/5">
+                  <FinalProductionPanel />
+                  <OutputMetadataPanel
+                    videoUrl={videoUrl}
+                    musicTheme={musicTheme}
+                    voiceActor={voiceActor}
+                    handleSaveVideo={handleSave}
+                  />
+                </div>
+              </div>{" "}
+              {/* End of background container */}
+            </div>{" "}
+            {/* End of scrolling overlay */}
           </>
         )}
       </main>

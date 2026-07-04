@@ -10,5 +10,10 @@ export { GlobalScraperConfigTool } from "./GlobalScraperConfigTool";
 export { ScraperLogStream } from "./ScraperLogStream";
 export { default as UrlInputPanel } from "./UrlInputPanel";
 export type { LiveScraperDeckProps } from "./types";
-export type { CustomBubblePreset, CustomCropPreset, BubbleCleanerSharedProps, AutoCropSharedProps } from "./tabTypes";
+export type {
+  CustomBubblePreset,
+  CustomCropPreset,
+  BubbleCleanerSharedProps,
+  AutoCropSharedProps,
+} from "./tabTypes";
 export { useLiveScraperActions } from "./hooks";

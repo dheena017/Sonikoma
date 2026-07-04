@@ -172,7 +172,15 @@ export function usePlaybackEngine({
         );
       }
     },
-    [panels, speakDialogue, isMuted, volume, autoPlayAudio, sfxEnabled, sfxVolume]
+    [
+      panels,
+      speakDialogue,
+      isMuted,
+      volume,
+      autoPlayAudio,
+      sfxEnabled,
+      sfxVolume,
+    ]
   );
 
   useEffect(() => {
@@ -240,7 +248,12 @@ export function usePlaybackEngine({
       setStoryboardPlaying(true);
       playStoryboardAudio(currentPanelIndex, true);
     }
-  }, [panels.length, storyboardPlaying, playStoryboardAudio, currentPanelIndex]);
+  }, [
+    panels.length,
+    storyboardPlaying,
+    playStoryboardAudio,
+    currentPanelIndex,
+  ]);
 
   const resetStoryboardPlayback = useCallback(() => {
     console.log("[Playback] Resetting storyboard playback");
@@ -255,25 +268,28 @@ export function usePlaybackEngine({
     stopAmbientBackgroundMusic();
   }, []);
 
-  return useMemo(() => ({
-    currentPanelIndex,
-    setCurrentPanelIndex,
-    playbackTime,
-    setPlaybackTime,
-    storyboardPlaying,
-    setStoryboardPlaying,
-    toggleStoryboardPlayback,
-    resetStoryboardPlayback,
-    playStoryboardAudio,
-  }), [
-    currentPanelIndex,
-    setCurrentPanelIndex,
-    playbackTime,
-    setPlaybackTime,
-    storyboardPlaying,
-    setStoryboardPlaying,
-    toggleStoryboardPlayback,
-    resetStoryboardPlayback,
-    playStoryboardAudio,
-  ]);
+  return useMemo(
+    () => ({
+      currentPanelIndex,
+      setCurrentPanelIndex,
+      playbackTime,
+      setPlaybackTime,
+      storyboardPlaying,
+      setStoryboardPlaying,
+      toggleStoryboardPlayback,
+      resetStoryboardPlayback,
+      playStoryboardAudio,
+    }),
+    [
+      currentPanelIndex,
+      setCurrentPanelIndex,
+      playbackTime,
+      setPlaybackTime,
+      storyboardPlaying,
+      setStoryboardPlaying,
+      toggleStoryboardPlayback,
+      resetStoryboardPlayback,
+      playStoryboardAudio,
+    ]
+  );
 }

@@ -20,10 +20,17 @@ export async function buildZipBlobFromUrls(
         );
       }
       const blob = await response.blob();
-      const filename = `webtoon_frame_${String(index + 1).padStart(3, "0")}.png`;
+      const filename = `webtoon_frame_${String(index + 1).padStart(
+        3,
+        "0"
+      )}.png`;
       folder.file(filename, blob);
     } catch (err) {
-      console.error("[useLiveScraperZip] Failed to add image to ZIP:", url, err);
+      console.error(
+        "[useLiveScraperZip] Failed to add image to ZIP:",
+        url,
+        err
+      );
     }
   });
 

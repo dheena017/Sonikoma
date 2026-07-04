@@ -2,7 +2,7 @@
 
 **For**: Sonikoma Media Processing Pipeline  
 **Version**: 1.0  
-**Date**: 2026-07-03  
+**Date**: 2026-07-03
 
 ---
 
@@ -88,32 +88,37 @@ END
 **n8n Nodes**:
 
 1. **Webhook** (Listen)
+
    - Method: POST
    - Path: `/workflows/video/edit`
    - Return immediately
 
 2. **HTTP Request** (Download video)
+
    ```
    GET {{ $json.video_url }}
    Save binary to temp file
    ```
 
 3. **Function** (Parse parameters)
+
    ```javascript
    return {
-     video_path: '/tmp/video.mp4',
+     video_path: "/tmp/video.mp4",
      cuts: $json.cuts,
-     audio_path: $json.audio_url ? '/tmp/audio.mp3' : null
+     audio_path: $json.audio_url ? "/tmp/audio.mp3" : null,
    };
    ```
 
 4. **HTTP Request** (Get metadata)
+
    ```
    POST http://localhost:5000/api/py/ffmpeg/metadata
    Body: { "video_path": "{{ $prev.video_path }}" }
    ```
 
 5. **HTTP Request** (Cut video)
+
    ```
    POST http://localhost:5000/api/py/ffmpeg/cut
    Body: {
@@ -124,12 +129,14 @@ END
    ```
 
 6. **HTTP Request** (Transcribe) - Parallel
+
    ```
    POST http://localhost:5000/api/py/audio/transcribe
    Body: { "audio_url": "{{ $prev.audio_path }}" }
    ```
 
 7. **HTTP Request** (Mix audio)
+
    ```
    POST http://localhost:5000/api/py/ffmpeg/mix-audio
    Body: {
@@ -140,6 +147,7 @@ END
    ```
 
 8. **Supabase** (Upload to Storage)
+
    ```
    Insert file to storage/videos/
    Filename: {{ $json.project_id }}_{{ Date.now() }}.mp4
@@ -193,15 +201,18 @@ END
 **n8n Nodes**:
 
 1. **Webhook**
+
    - Method: POST
    - Path: `/workflows/audio/enhance`
 
 2. **HTTP Request** (Download)
+
    ```
    GET {{ $json.audio_url }}
    ```
 
 3. **HTTP Request** (Transcribe) - Parallel
+
    ```
    POST http://localhost:5000/api/py/audio/transcribe
    Body: {
@@ -211,6 +222,7 @@ END
    ```
 
 4. **HTTP Request** (Analyze Audio) - Parallel
+
    ```
    POST http://localhost:5000/api/py/audio/analyze
    Body: {
@@ -220,6 +232,7 @@ END
    ```
 
 5. **HTTP Request** (Generate SRT)
+
    ```
    POST http://localhost:5000/api/py/whisper/generate-srt
    Body: {
@@ -229,6 +242,7 @@ END
    ```
 
 6. **Merge** (Combine results)
+
    ```javascript
    return {
      transcription: {{ $prev.transcribe_result }},
@@ -277,11 +291,13 @@ END
 **n8n Nodes**:
 
 1. **Webhook**
+
    ```
    POST /workflows/image/generate
    ```
 
 2. **HTTP Request** (Generate)
+
    ```
    POST http://localhost:5000/api/py/image/generate-ai
    Body: {
@@ -293,6 +309,7 @@ END
    ```
 
 3. **Loop** (For each generated image)
+
    ```
    {
      "HTTP Request": {
@@ -452,7 +469,7 @@ STORAGE_API_KEY=your_storage_key
 ### Docker Compose
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   n8n:
@@ -514,28 +531,33 @@ docker-compose logs -f n8n
 ## Best Practices
 
 ### 1. Error Handling
+
 - Wrap all HTTP requests in try-catch
 - Implement exponential backoff for retries
 - Log detailed errors for debugging
 
 ### 2. Performance
+
 - Use parallel execution for independent tasks
 - Implement timeouts on long-running operations
 - Cache results when possible
 
 ### 3. Security
+
 - Validate all inputs
 - Use authentication tokens for API calls
 - Encrypt sensitive data in transit
 - Implement rate limiting
 
 ### 4. Monitoring
+
 - Track workflow execution times
 - Monitor failure rates
 - Set up alerts for critical failures
 - Log all workflow inputs/outputs
 
 ### 5. Scaling
+
 - Use job queues for heavy operations
 - Implement worker pools for parallel tasks
 - Consider distributed processing for large batches
@@ -546,16 +568,19 @@ docker-compose logs -f n8n
 ## Troubleshooting
 
 ### Workflow Timeout
+
 - Increase timeout in HTTP Request nodes
 - Break into smaller sequential tasks
 - Run heavy tasks asynchronously
 
 ### Memory Issues
+
 - Reduce batch sizes
 - Stream large files instead of loading fully
 - Clean up temporary files after use
 
 ### API Rate Limiting
+
 - Implement delays between requests
 - Use batch endpoints when available
 - Cache results
@@ -582,4 +607,3 @@ docker-compose logs -f n8n
 - [Librosa Documentation](https://librosa.org/)
 - [Whisper Documentation](https://github.com/openai/whisper)
 - [Stable Diffusion Guide](https://huggingface.co/docs/diffusers)
-

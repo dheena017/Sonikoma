@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Cpu, Globe, Sparkles, Film, CheckCircle2 } from "lucide-react";
 
 interface ProcessBarProps {
-  progressStatus: string;
+  // Can be missing / non-string from the backend; keep UI resilient.
+  progressStatus?: string | null;
 }
 
 interface StepInfo {
@@ -42,7 +43,9 @@ export default function ProcessBar({ progressStatus }: ProcessBarProps) {
   ];
 
   // 2. Map progress status string to target percentage and active step
-  const statusLower = (progressStatus || "").toLowerCase();
+  // progressStatus may come from backend as a non-string (or missing) value.
+  const statusLower =
+    typeof progressStatus === "string" ? progressStatus.toLowerCase() : "";
   let targetPercent = 10;
   let activeStep = 0;
 

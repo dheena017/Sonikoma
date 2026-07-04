@@ -1,5 +1,13 @@
 import React from "react";
-import { Search, Filter, Terminal, Fingerprint, Pause, Play, RefreshCw } from "lucide-react";
+import {
+  Search,
+  Filter,
+  Terminal,
+  Fingerprint,
+  Pause,
+  Play,
+  RefreshCw,
+} from "lucide-react";
 import { LogEntry } from "../../../types/logs";
 
 interface LogsPageToolbarProps {
@@ -9,7 +17,9 @@ interface LogsPageToolbarProps {
   highlightPattern: string;
   setHighlightPattern: (value: string) => void;
   levelFilter: "ALL" | "INFO" | "SUCCESS" | "WARN" | "ERROR";
-  setLevelFilter: (value: "ALL" | "INFO" | "SUCCESS" | "WARN" | "ERROR") => void;
+  setLevelFilter: (
+    value: "ALL" | "INFO" | "SUCCESS" | "WARN" | "ERROR"
+  ) => void;
   moduleFilter: string;
   setModuleFilter: (value: string) => void;
   consoleLogs: LogEntry[];
@@ -117,7 +127,11 @@ export function LogsPageToolbar({
                 }`}
                 title={isPaused ? "Resume Live Feed" : "Pause Live Feed"}
               >
-                {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+                {isPaused ? (
+                  <Play className="h-4 w-4" />
+                ) : (
+                  <Pause className="h-4 w-4" />
+                )}
               </button>
               <button
                 onClick={() => setAutoScroll(!autoScroll)}
@@ -138,7 +152,9 @@ export function LogsPageToolbar({
               disabled={isHistoryLoading}
               className="p-2 bg-neutral-800 border border-neutral-700 text-neutral-400 hover:text-white rounded-xl disabled:opacity-50"
             >
-              <RefreshCw className={`h-4 w-4 ${isHistoryLoading ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`h-4 w-4 ${isHistoryLoading ? "animate-spin" : ""}`}
+              />
             </button>
           )}
         </div>
