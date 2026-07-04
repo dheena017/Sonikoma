@@ -214,24 +214,25 @@ const EditorPage: React.FC<EditorPageProps> = ({
       setIsFocusMode={setIsFocusMode}
       navigateTo={navigateTo}
     >
-      <main className="flex-1 w-full p-4 md:p-6 lg:p-8">
-        {/* CSS Grid for vertical flow (Video Monitor -> Timeline -> Assets) */}
-        <div className="w-full flex flex-col gap-12 max-w-[1600px] mx-auto">
-          {isScraping && (
+      {/*
+        Full-Screen Edge-to-Edge Layout
+        The Video Monitor is the primary canvas, with floating controls.
+      */}
+      <main className="flex-1 w-full h-full relative overflow-hidden flex flex-col items-center justify-center bg-black">
+        {isScraping && (
+          <div className="absolute top-4 z-50">
             <PipelineStatusCard progressStatus={{...progressStatus, status: 'Scraping Assets...'}} />
-          )}
+          </div>
+        )}
 
-          {isInitializing && scrapedImages.length === 0 ? (
-            skeletonLoader
-          ) : (
-            <>
-              {/* TOP: Video Monitor (Large & Centered) */}
-              <div id="section-monitor" className="w-full flex flex-col items-center justify-center space-y-4 pt-4">
-                <div className="w-full flex items-center justify-between border-b border-white/5 pb-2">
-                   <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono">1. Video Monitor</h3>
-                </div>
-                <div className={`w-full ${isFocusMode ? "max-w-6xl" : "max-w-4xl"}`}>
-                  <VideoMonitor
+        {isInitializing && scrapedImages.length === 0 ? (
+          skeletonLoader
+        ) : (
+          <>
+            {/* Primary Canvas: Video Monitor */}
+            <div id="section-monitor" className="absolute inset-0 w-full h-full flex flex-col">
+              <div className="flex-1 w-full h-full relative">
+                <VideoMonitor
                     activePreviewTab={activePreviewTab}
                     setActivePreviewTab={setActivePreviewTab}
                     videoUrl={videoUrl}
@@ -243,8 +244,10 @@ const EditorPage: React.FC<EditorPageProps> = ({
                     reprocessingPanelId={reprocessingPanelId}
                     quality={previewQuality}
                   />
+
+                  {/* Overlay Controls */}
                   {panels.length > 0 && (
-                    <div className="mt-4">
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-4xl z-[60] bg-black/60 backdrop-blur-md rounded-2xl border border-white/10 p-2 shadow-2xl">
                       <VolumeAndProgressPanel
                         panels={panels}
                         setPanels={setPanels}
@@ -261,13 +264,19 @@ const EditorPage: React.FC<EditorPageProps> = ({
                       />
                     </div>
                   )}
-                </div>
               </div>
+            </div>
+
+            {/* Scrolling Overlay Content (Timeline, Assets, Meta) */}
+            <div className={`absolute inset-0 overflow-y-auto w-full h-full pointer-events-none z-50 ${isFocusMode ? 'hidden' : 'block'}`}>
+              <div className="min-h-screen"></div> {/* Spacer to push content below the fold */}
+
+              <div className="pointer-events-auto bg-[#070709] border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] relative z-50 px-4 md:px-8 py-8 flex flex-col gap-12">
 
               {/* MIDDLE: Storyboard Timeline */}
-              <div id="section-timeline" className={`w-full space-y-4 transition-all duration-500 ${isFocusMode ? 'opacity-20 blur-sm pointer-events-none scale-[0.98]' : 'opacity-100'}`}>
+              <div id="section-timeline" className="w-full max-w-[1600px] mx-auto space-y-4">
                 <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                   <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono">2. Storyboard Timeline</h3>
+                   <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono">Timeline</h3>
                 </div>
                 <StoryboardTimeline
                   panels={panels}
@@ -314,9 +323,9 @@ const EditorPage: React.FC<EditorPageProps> = ({
               </div>
 
               {/* BOTTOM: Imported Assets (Resource Pool) */}
-              <div id="section-assets" className={`w-full space-y-4 transition-all duration-500 ${isFocusMode ? 'hidden' : 'opacity-100'}`}>
+              <div id="section-assets" className="w-full max-w-[1600px] mx-auto space-y-4">
                 <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                   <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono">3. Imported Assets</h3>
+                   <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono">Imported Assets</h3>
                 </div>
                 <div className="bg-transparent">
                   <LiveScraperDeck
@@ -367,20 +376,20 @@ const EditorPage: React.FC<EditorPageProps> = ({
               </div>
 
               {/* Final Production panel and metadata below timeline */}
-              {!isFocusMode && (
-                <div className="mt-12 space-y-6 pt-8 border-t border-white/5">
-                  <FinalProductionPanel />
-                  <OutputMetadataPanel
-                    videoUrl={videoUrl}
-                    musicTheme={musicTheme}
-                    voiceActor={voiceActor}
-                    handleSaveVideo={handleSave}
-                  />
-                </div>
-              )}
-            </>
-          )}
-        </div>
+              <div className="w-full max-w-[1600px] mx-auto mt-12 space-y-6 pt-8 border-t border-white/5">
+                <FinalProductionPanel />
+                <OutputMetadataPanel
+                  videoUrl={videoUrl}
+                  musicTheme={musicTheme}
+                  voiceActor={voiceActor}
+                  handleSaveVideo={handleSave}
+                />
+              </div>
+
+              </div> {/* End of background container */}
+            </div> {/* End of scrolling overlay */}
+          </>
+        )}
       </main>
     </LayoutEditorPage>
   );
