@@ -38,7 +38,9 @@ export default function useDashboardPage() {
     { id: 4, text: "Render your first video", completed: false },
   ]);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const [renamingProjectId, setRenamingProjectId] = useState<string | null>(null);
+  const [renamingProjectId, setRenamingProjectId] = useState<string | null>(
+    null
+  );
 
   const saveProjectName = useCallback(
     async (projectId: string, newName: string) => {
@@ -73,7 +75,9 @@ export default function useDashboardPage() {
         setProjects(data.projects || []);
       } catch (err: any) {
         console.error("Failed to fetch projects", err);
-        setError(err.message || "An unexpected error occurred while loading projects.");
+        setError(
+          err.message || "An unexpected error occurred while loading projects."
+        );
       } finally {
         setLoading(false);
       }
@@ -197,11 +201,15 @@ export default function useDashboardPage() {
           const res = await fetch(`/api/projects/${projectId}`, {
             method: "DELETE",
             headers: {
-              Authorization: `Bearer ${localStorage.getItem("sonikoma_token") || ""}`,
+              Authorization: `Bearer ${
+                localStorage.getItem("sonikoma_token") || ""
+              }`,
             },
           });
           if (res.ok) {
-            setProjects((current) => current.filter((p) => p.project_id !== projectId));
+            setProjects((current) =>
+              current.filter((p) => p.project_id !== projectId)
+            );
           }
         } catch (err) {
           console.error("Delete failed", err);
@@ -230,13 +238,10 @@ export default function useDashboardPage() {
     setRenamingProjectId(project.project_id);
   }, []);
 
-  const toggleMenu = useCallback(
-    (e: React.MouseEvent, projectId: string) => {
-      e.stopPropagation();
-      setOpenMenuId((current) => (current === projectId ? null : projectId));
-    },
-    []
-  );
+  const toggleMenu = useCallback((e: React.MouseEvent, projectId: string) => {
+    e.stopPropagation();
+    setOpenMenuId((current) => (current === projectId ? null : projectId));
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = () => setOpenMenuId(null);
@@ -245,12 +250,14 @@ export default function useDashboardPage() {
   }, []);
 
   const completedCount = useMemo(
-    () => projects.filter((p) => p.status?.toLowerCase() === "completed").length,
+    () =>
+      projects.filter((p) => p.status?.toLowerCase() === "completed").length,
     [projects]
   );
 
   const processingCount = useMemo(
-    () => projects.filter((p) => p.status?.toLowerCase() === "processing").length,
+    () =>
+      projects.filter((p) => p.status?.toLowerCase() === "processing").length,
     [projects]
   );
 

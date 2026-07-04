@@ -60,7 +60,11 @@ export function getLogColor(log: LogEntry): string {
   if (module === "ai" || module === "engine" || module === "gemini")
     return "text-purple-300 font-medium";
 
-  if (module === "crop" || module === "autocrop" || msg.includes("[smart crop]"))
+  if (
+    module === "crop" ||
+    module === "autocrop" ||
+    msg.includes("[smart crop]")
+  )
     return "text-violet-400 font-medium";
 
   if (module === "ocr" || module === "vision" || module === "cv")

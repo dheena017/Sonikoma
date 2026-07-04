@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { AlertTriangle, ShieldCheck, Settings, Shield } from "lucide-react";
 import { GeneratedPanel } from "../../../types.js";
-import { processWithConcurrency, chunkArray } from "../../../utils/batchUtils.js";
+import {
+  processWithConcurrency,
+  chunkArray,
+} from "../../../utils/batchUtils.js";
 import * as api from "../../../api/index.js";
 import { fetchWithAuth } from "../../../utils.js";
 

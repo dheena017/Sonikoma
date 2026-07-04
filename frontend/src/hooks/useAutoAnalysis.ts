@@ -268,9 +268,12 @@ export function useAutoAnalysis({
     [panels, addNotification, setActivePreviewTab, setPanels, setConsoleLogs]
   );
 
-  return useMemo(() => ({
-    runBackgroundAnalysis,
-    runSequenceAnalysis,
-    addPanelsToStoryboard,
-  }), [runBackgroundAnalysis, runSequenceAnalysis, addPanelsToStoryboard]);
+  return useMemo(
+    () => ({
+      runBackgroundAnalysis,
+      runSequenceAnalysis,
+      addPanelsToStoryboard,
+    }),
+    [runBackgroundAnalysis, runSequenceAnalysis, addPanelsToStoryboard]
+  );
 }

@@ -7,7 +7,11 @@ interface TooltipPortalProps {
   anchorRect: DOMRect | null;
 }
 
-const TooltipPortal: React.FC<TooltipPortalProps> = ({ text, visible, anchorRect }) => {
+const TooltipPortal: React.FC<TooltipPortalProps> = ({
+  text,
+  visible,
+  anchorRect,
+}) => {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {

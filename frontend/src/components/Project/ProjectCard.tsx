@@ -16,7 +16,11 @@ import {
 import type { Project } from "./hooks/ProjectTypes.js";
 
 type ProjectCardItem = Project;
-import { getProxiedImageUrl, getSourceIcon, getSourceName } from "../../utils.js";
+import {
+  getProxiedImageUrl,
+  getSourceIcon,
+  getSourceName,
+} from "../../utils.js";
 
 interface ProjectCardProps {
   project: Project;
@@ -154,9 +158,7 @@ export default function ProjectCard({
               src={getProxiedImageUrl(project.cover_image)}
               alt={project.title}
               className={`w-full h-full object-cover transition-transform duration-500 ${
-                isSelected
-                  ? "scale-105 opacity-80"
-                  : "group-hover:scale-105"
+                isSelected ? "scale-105 opacity-80" : "group-hover:scale-105"
               }`}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#111115] via-[#111115]/50 to-transparent" />
@@ -253,12 +255,15 @@ export default function ProjectCard({
             </span>
           </div>
           <p className="text-[10px] text-neutral-600 font-mono mb-3">
-            Updated {new Date(project.created_at).toLocaleDateString()} • {getSourceName(project.url)}
+            Updated {new Date(project.created_at).toLocaleDateString()} •{" "}
+            {getSourceName(project.url)}
           </p>
           <div className="flex items-center justify-between border-t border-neutral-800 pt-4">
             <div className="text-xs text-neutral-400 font-medium flex items-center gap-1.5">
               <Scissors className="h-4 w-4 text-neutral-500" />
-              <span className="text-white font-bold">{project.panels_count || 0}</span>{" "}
+              <span className="text-white font-bold">
+                {project.panels_count || 0}
+              </span>{" "}
               panels
             </div>
             <div className="w-8 h-8 rounded-full bg-purple-500/10 text-purple-400 flex items-center justify-center opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all">

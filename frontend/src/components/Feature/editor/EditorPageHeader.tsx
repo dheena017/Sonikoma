@@ -37,7 +37,9 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 h-16 flex min-w-0 flex-wrap items-center justify-between gap-2 border-b border-purple-900/20 bg-[#0a0a0e]/90 backdrop-blur-md shadow-2xl shadow-black/40 pr-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${className || ""}`}
+      className={`fixed top-0 left-0 right-0 z-50 h-16 flex min-w-0 flex-wrap items-center justify-between gap-2 border-b border-purple-900/20 bg-[#0a0a0e]/90 backdrop-blur-md shadow-2xl shadow-black/40 pr-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${
+        className || ""
+      }`}
       style={style}
     >
       {/* Left Section - Menu Icon + Title */}
@@ -70,10 +72,14 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
             </p>
             <div className="mt-1 flex items-center gap-2">
               <LayoutPanelTop className="h-3.5 w-3.5 text-purple-400" />
-              <h2 className="truncate text-sm font-bold text-white leading-none tracking-wide">{title}</h2>
+              <h2 className="truncate text-sm font-bold text-white leading-none tracking-wide">
+                {title}
+              </h2>
             </div>
             {subtitle ? (
-              <p className="mt-1 truncate text-[10px] text-neutral-400 font-mono leading-none">{subtitle}</p>
+              <p className="mt-1 truncate text-[10px] text-neutral-400 font-mono leading-none">
+                {subtitle}
+              </p>
             ) : null}
           </div>
         </div>
@@ -85,13 +91,15 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           type="button"
           onClick={() => setIsFocusMode((value) => !value)}
           className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-bold transition-all active:scale-95 cursor-pointer ${
-            isFocusMode 
-              ? "border-purple-500/50 bg-purple-500/10 text-purple-300 shadow-[inset_0_0_12px_rgba(168,85,247,0.15)]" 
+            isFocusMode
+              ? "border-purple-500/50 bg-purple-500/10 text-purple-300 shadow-[inset_0_0_12px_rgba(168,85,247,0.15)]"
               : "border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
           }`}
         >
           <Focus className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">{isFocusMode ? "Exit Focus" : "Focus Mode"}</span>
+          <span className="hidden sm:inline">
+            {isFocusMode ? "Exit Focus" : "Focus Mode"}
+          </span>
         </button>
 
         <button

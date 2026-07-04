@@ -86,7 +86,9 @@ export default function LandingPage({
               <button
                 key={link.target}
                 onClick={() => {
-                  document.getElementById(link.target)?.scrollIntoView({ behavior: "smooth" });
+                  document
+                    .getElementById(link.target)
+                    ?.scrollIntoView({ behavior: "smooth" });
                 }}
                 className="text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
               >
@@ -154,7 +156,9 @@ export default function LandingPage({
               </button>
             </div>
             <div className="flex items-center justify-center gap-4 pt-6">
-              <span className="text-xs text-slate-500 font-mono">✓ Works with ToonCrew, MangaDex, Webtoon</span>
+              <span className="text-xs text-slate-500 font-mono">
+                ✓ Works with ToonCrew, MangaDex, Webtoon
+              </span>
             </div>
           </div>
         </div>
@@ -379,7 +383,10 @@ export default function LandingPage({
           <p className="text-neutral-500">
             Get early access to new features and exclusive creator tips.
           </p>
-          <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+          <form
+            onSubmit={handleSubscribe}
+            className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
+          >
             <input
               type="email"
               placeholder="your@email.com"

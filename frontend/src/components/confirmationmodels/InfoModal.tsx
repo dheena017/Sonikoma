@@ -10,9 +10,11 @@ interface InfoModalProps {
 }
 
 const ACCENT_CLASSES: Record<string, string> = {
-  purple: "from-purple-600 to-indigo-600 border-purple-500/30 shadow-[0_0_20px_-5px_rgba(147,51,234,0.5)]",
+  purple:
+    "from-purple-600 to-indigo-600 border-purple-500/30 shadow-[0_0_20px_-5px_rgba(147,51,234,0.5)]",
   cyan: "from-cyan-500 to-sky-500 border-cyan-500/30 shadow-[0_0_20px_-5px_rgba(56,189,248,0.5)]",
-  green: "from-emerald-500 to-lime-500 border-emerald-500/30 shadow-[0_0_20px_-5px_rgba(16,185,129,0.5)]",
+  green:
+    "from-emerald-500 to-lime-500 border-emerald-500/30 shadow-[0_0_20px_-5px_rgba(16,185,129,0.5)]",
 };
 
 export default function InfoModal({

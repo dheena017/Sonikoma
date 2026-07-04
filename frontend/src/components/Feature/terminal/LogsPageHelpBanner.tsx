@@ -12,7 +12,11 @@ export function LogsPageHelpBanner() {
           Telemetry Orchestration Info
         </h4>
         <p className="text-xs text-purple-300/60 leading-relaxed font-mono">
-          Live view displays high-frequency ephemeral events stored in server memory. Historical view queries the persistent SQL transaction log for deep forensic analysis. Logs are automatically pruned every 7 days or when exceeding 5,000 records. Snapshot metadata is captured automatically for all critical engine failures.
+          Live view displays high-frequency ephemeral events stored in server
+          memory. Historical view queries the persistent SQL transaction log for
+          deep forensic analysis. Logs are automatically pruned every 7 days or
+          when exceeding 5,000 records. Snapshot metadata is captured
+          automatically for all critical engine failures.
         </p>
       </div>
     </div>

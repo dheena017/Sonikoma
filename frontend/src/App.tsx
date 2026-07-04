@@ -42,11 +42,7 @@ import ConfirmModal from "./components/confirmationmodels/ConfirmModal";
 
 // --- Authentication & Landing Views ---
 import LandingPage from "./components/landing/LandingPage";
-import {
-  LoginPage,
-  RegisterPage,
-  ForgotPasswordPage,
-} from "./components/auth";
+import { LoginPage, RegisterPage, ForgotPasswordPage } from "./components/auth";
 import ProfilePage from "./components/profile/ProfilePage";
 import LoadingPage from "./components/LoadingPage";
 import TerminalLogs from "./components/Feature/terminal/TerminalLogs";
@@ -66,11 +62,7 @@ import EngagementPage from "./components/Feature/engagement/EngagementPage";
 import VoiceStudioPage from "./components/Feature/voice/VoiceStudioPage";
 import CTRAnalyticsPage from "./components/Feature/analytics/CTRAnalyticsPage";
 import NotificationsPage from "./components/notification/NotificationsPage";
-import {
-  AdminPage,
-  AdminSidebar,
-  AdminMiniSidebar,
-} from "./components/admin";
+import { AdminPage, AdminSidebar, AdminMiniSidebar } from "./components/admin";
 import MiniSidebar from "./components/MainMiniSidebar";
 import YouTubePage from "./components/Feature/youtube/YouTubePage.js";
 
@@ -571,11 +563,14 @@ export default function App() {
     );
     const isDetailsMode = currentPath.endsWith("/details");
     const isWorkspaceEditorRoot =
-      currentPath === "/workspace/editor" || currentPath === "/workspace/editor/";
+      currentPath === "/workspace/editor" ||
+      currentPath === "/workspace/editor/";
 
     const isWorkspacePath =
       currentPath === "/workspace" ||
-      (chapterPathMatch !== null && !isDetailsMode && !currentPath.startsWith("/workspace/editor/"));
+      (chapterPathMatch !== null &&
+        !isDetailsMode &&
+        !currentPath.startsWith("/workspace/editor/"));
 
     return {
       chapterPathMatch,
@@ -608,7 +603,8 @@ export default function App() {
       isYouTubePath: currentPath === "/youtube",
       isProfilePath: currentPath === "/profile",
       isNotificationsPath: currentPath === "/notifications",
-      isAdminPath: currentPath === "/admin" || currentPath.startsWith("/admin/"),
+      isAdminPath:
+        currentPath === "/admin" || currentPath.startsWith("/admin/"),
       isChapterDetailsPath: false,
       isProjectEditorPath: false,
       isSeriesDetailsPath:
@@ -739,7 +735,8 @@ export default function App() {
         });
       }
     },
-    [saveProject,
+    [
+      saveProject,
       setSeriesTitle,
       setChapterNumber,
       setChapterTitle,
@@ -747,7 +744,7 @@ export default function App() {
       setSeriesAuthor,
       setSeriesCoverImage,
       setSeriesSynopsis,
-      setShowScrapeConfirmModal
+      setShowScrapeConfirmModal,
     ]
   );
 
@@ -791,7 +788,12 @@ export default function App() {
     } else {
       setShowBubbleModal(false);
     }
-  }, [addNotification, isBubbleCleanerPath, handleNavigateHome, setShowBubbleModal]);
+  }, [
+    addNotification,
+    isBubbleCleanerPath,
+    handleNavigateHome,
+    setShowBubbleModal,
+  ]);
 
   const handleBubbleCleanerClose = React.useCallback(() => {
     if (isBubbleCleanerPath) {
@@ -989,7 +991,11 @@ export default function App() {
           />
         )}
 
-        <div className={`${!isSidebarOpen ? "lg:pl-20" : ""} flex-1 flex flex-col transition-all duration-300`}>
+        <div
+          className={`${
+            !isSidebarOpen ? "lg:pl-20" : ""
+          } flex-1 flex flex-col transition-all duration-300`}
+        >
           {/* Impersonation Banner */}
           {localStorage.getItem("sonikoma_admin_token") && (
             <div className="bg-rose-600 text-white text-center py-2 px-4 text-sm font-bold flex justify-center items-center gap-4 z-[100] relative shadow-md">
@@ -1532,17 +1538,15 @@ export default function App() {
           )}
 
           {/* PAGE VIEW 20: Full Editor Page */}
-          {isEditorPath &&
-            !isPipMode &&
-            isProEditorPage && (
-              <EditorPage
-                appLogic={memoizedAppLogic}
-                navigateTo={navigateTo}
-                onRequestProjectConfirmation={handleRequestProjectConfirm}
-                seriesSlug={editorSeriesSlug}
-                chapterSlug={editorChapterSlug}
-              />
-            )}
+          {isEditorPath && !isPipMode && isProEditorPage && (
+            <EditorPage
+              appLogic={memoizedAppLogic}
+              navigateTo={navigateTo}
+              onRequestProjectConfirmation={handleRequestProjectConfirm}
+              seriesSlug={editorSeriesSlug}
+              chapterSlug={editorChapterSlug}
+            />
+          )}
 
           {/* PAGE VIEW 21: Advanced Crop & Trim Editor Page */}
           {isEditorPath &&
@@ -1557,10 +1561,7 @@ export default function App() {
                 </p>
               </div>
             ) : (
-              <CropEditorModal
-                isPage={true}
-                appLogic={memoizedAppLogic}
-              />
+              <CropEditorModal isPage={true} appLogic={memoizedAppLogic} />
             ))}
 
           {/* PAGE VIEW 22: Admin Dashboard */}
@@ -1711,24 +1712,19 @@ export default function App() {
 
       {/* Dashboard Modal: Advanced Crop & Trim Editor */}
       {isWorkspacePath && !isPipMode && editingImageIdx !== null && (
-        <CropEditorModal
-          isPage={false}
-          appLogic={memoizedAppLogic}
-        />
+        <CropEditorModal isPage={false} appLogic={memoizedAppLogic} />
       )}
 
       {/* Modal: Advanced Crop & Trim Editor (PIP Mode only) */}
       {isPipMode && editingImageIdx !== null && (
         <div
           className="fixed bottom-6 right-6 w-96 h-56 rounded-3xl border border-white/10 shadow-2xl z-50 overflow-hidden bg-neutral-950/95 backdrop-blur-xl animate-fade-in cursor-pointer"
-              onClick={React.useCallback(() => {
+          onClick={React.useCallback(() => {
             setIsPipMode(false);
             navigateTo(lastEditorPath);
-              }, [setIsPipMode, navigateTo, lastEditorPath])}
+          }, [setIsPipMode, navigateTo, lastEditorPath])}
         >
-          <CropEditorModal
-            appLogic={memoizedAppLogic}
-          />
+          <CropEditorModal appLogic={memoizedAppLogic} />
         </div>
       )}
 

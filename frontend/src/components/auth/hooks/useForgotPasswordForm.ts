@@ -14,10 +14,15 @@ export default function useForgotPasswordForm(props: ForgotPasswordFormProps) {
   const [isLoading, setIsLoading] = React.useState(false);
   const [isSent, setIsSent] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const [resetMethod, setResetMethod] = React.useState<"email" | "phone" | "question">("email");
+  const [resetMethod, setResetMethod] = React.useState<
+    "email" | "phone" | "question"
+  >("email");
   const [verificationCode, setVerificationCode] = React.useState("");
   const [isCodeSent, setIsCodeSent] = React.useState(false);
-  const [securityAnswers, setSecurityAnswers] = React.useState({ comicTitle: "", studioCity: "" });
+  const [securityAnswers, setSecurityAnswers] = React.useState({
+    comicTitle: "",
+    studioCity: "",
+  });
   const [newPassword, setNewPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [isResetReady, setIsResetReady] = React.useState(false);
@@ -45,7 +50,10 @@ export default function useForgotPasswordForm(props: ForgotPasswordFormProps) {
   }, [phoneNumber]);
 
   const isQuestionValid = React.useMemo(() => {
-    return securityAnswers.comicTitle.trim().length > 0 && securityAnswers.studioCity.trim().length > 0;
+    return (
+      securityAnswers.comicTitle.trim().length > 0 &&
+      securityAnswers.studioCity.trim().length > 0
+    );
   }, [securityAnswers]);
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,14 +97,20 @@ export default function useForgotPasswordForm(props: ForgotPasswordFormProps) {
       setIsLoading(true);
       setError(null);
       setTimeout(() => {
-        const cleanTitle = securityAnswers.comicTitle.toLowerCase().replace(/\s/g, "");
-        const cleanCity = securityAnswers.studioCity.toLowerCase().replace(/\s/g, "");
+        const cleanTitle = securityAnswers.comicTitle
+          .toLowerCase()
+          .replace(/\s/g, "");
+        const cleanCity = securityAnswers.studioCity
+          .toLowerCase()
+          .replace(/\s/g, "");
 
         if (cleanTitle === "webtoon" && cleanCity === "newyork") {
           setIsResetReady(true);
           setError(null);
         } else {
-          setError("Incorrect answer combination. Try hints: 'webtoon' and 'newyork'.");
+          setError(
+            "Incorrect answer combination. Try hints: 'webtoon' and 'newyork'."
+          );
           setSliderVal(0);
           setIsVerified(false);
         }
@@ -124,7 +138,8 @@ export default function useForgotPasswordForm(props: ForgotPasswordFormProps) {
 
   const handleNewPasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newPassword.length < 6 || newPassword !== confirmPassword || isLoading) return;
+    if (newPassword.length < 6 || newPassword !== confirmPassword || isLoading)
+      return;
     setIsLoading(true);
     setError(null);
     setTimeout(() => {

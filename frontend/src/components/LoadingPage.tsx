@@ -265,7 +265,6 @@ export default function LoadingPage({
             </svg>
           )}
         </div>
-
       </div>
 
       <style>{`

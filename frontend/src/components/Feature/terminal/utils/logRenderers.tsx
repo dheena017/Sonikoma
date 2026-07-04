@@ -190,12 +190,18 @@ export function renderParsedLog(log: string): ReactNode {
     }
 
     let methodColor = "text-purple-400";
-    if (method.toUpperCase() === "POST") methodColor = "text-amber-400 font-bold";
-    else if (method.toUpperCase() === "GET") methodColor = "text-emerald-400 font-bold";
-    else if (method.toUpperCase() === "PUT") methodColor = "text-sky-400 font-bold";
-    else if (method.toUpperCase() === "DELETE") methodColor = "text-red-400 font-bold";
+    if (method.toUpperCase() === "POST")
+      methodColor = "text-amber-400 font-bold";
+    else if (method.toUpperCase() === "GET")
+      methodColor = "text-emerald-400 font-bold";
+    else if (method.toUpperCase() === "PUT")
+      methodColor = "text-sky-400 font-bold";
+    else if (method.toUpperCase() === "DELETE")
+      methodColor = "text-red-400 font-bold";
 
-    const statusMatch = rest.match(/^(?:\s+(?:["']HTTP\/\d\.\d \d{3} .*?["']|(\d{3})\b))?/i);
+    const statusMatch = rest.match(
+      /^(?:\s+(?:["']HTTP\/\d\.\d \d{3} .*?["']|(\d{3})\b))?/i
+    );
     const status = statusMatch?.[0]?.trim() || "";
     const suffix = rest.slice(statusMatch?.[0]?.length || 0);
 
@@ -219,13 +225,18 @@ export function renderParsedLog(log: string): ReactNode {
     /^(.*?)(\[.*?[a-f0-9]+.*?\]\s+)(GET|POST|PUT|DELETE)(\s+\S+)(\s+->\s+)(\d{3})(\s+\(.*?\))?$/i;
   const serverMatch = cleanLog.match(serverLogRegex);
   if (serverMatch) {
-    const [_, prefix, reqId, method, path, arrow, status, duration] = serverMatch;
+    const [_, prefix, reqId, method, path, arrow, status, duration] =
+      serverMatch;
 
     let methodColor = "text-purple-400";
-    if (method.toUpperCase() === "POST") methodColor = "text-amber-400 font-bold";
-    else if (method.toUpperCase() === "GET") methodColor = "text-emerald-400 font-bold";
-    else if (method.toUpperCase() === "PUT") methodColor = "text-sky-400 font-bold";
-    else if (method.toUpperCase() === "DELETE") methodColor = "text-red-400 font-bold";
+    if (method.toUpperCase() === "POST")
+      methodColor = "text-amber-400 font-bold";
+    else if (method.toUpperCase() === "GET")
+      methodColor = "text-emerald-400 font-bold";
+    else if (method.toUpperCase() === "PUT")
+      methodColor = "text-sky-400 font-bold";
+    else if (method.toUpperCase() === "DELETE")
+      methodColor = "text-red-400 font-bold";
 
     let statusColor = "text-neutral-400";
     if (status.startsWith("2")) statusColor = "text-emerald-400 font-medium";
@@ -253,10 +264,14 @@ export function renderParsedLog(log: string): ReactNode {
     if (standaloneMatch) {
       const [_, prefix, method, suffix] = standaloneMatch;
       let methodColor = "text-purple-400";
-      if (method.toUpperCase() === "POST") methodColor = "text-amber-400 font-bold";
-      else if (method.toUpperCase() === "GET") methodColor = "text-emerald-400 font-bold";
-      else if (method.toUpperCase() === "PUT") methodColor = "text-sky-400 font-bold";
-      else if (method.toUpperCase() === "DELETE") methodColor = "text-red-400 font-bold";
+      if (method.toUpperCase() === "POST")
+        methodColor = "text-amber-400 font-bold";
+      else if (method.toUpperCase() === "GET")
+        methodColor = "text-emerald-400 font-bold";
+      else if (method.toUpperCase() === "PUT")
+        methodColor = "text-sky-400 font-bold";
+      else if (method.toUpperCase() === "DELETE")
+        methodColor = "text-red-400 font-bold";
 
       return (
         <>

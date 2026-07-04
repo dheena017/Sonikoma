@@ -24,7 +24,13 @@ import {
   QrCode,
 } from "lucide-react";
 import AuthShowcase from "./AuthShowcase.js";
-import { THEMES, ThemeKey, TOUR_STEPS, TRANSLATIONS, Language } from "./constants";
+import {
+  THEMES,
+  ThemeKey,
+  TOUR_STEPS,
+  TRANSLATIONS,
+  Language,
+} from "./constants";
 import { useLoginForm } from "./hooks";
 
 interface LoginPageProps {
@@ -33,7 +39,6 @@ interface LoginPageProps {
   onNavigateToForgotPassword: () => void;
   onNavigateHome?: () => void;
 }
-
 
 export default function LoginPage({
   onLogin,

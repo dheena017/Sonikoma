@@ -64,8 +64,12 @@ export default function ProjectsPageResultView({
         <div className="w-16 h-16 rounded-3xl bg-red-900/20 border border-red-500/20 flex items-center justify-center text-red-500 mb-4">
           <Activity className="h-8 w-8" />
         </div>
-        <h3 className="text-lg font-bold text-white mb-2">Failed to load projects</h3>
-        <p className="text-sm text-neutral-400 max-w-sm mb-6 font-mono">{error}</p>
+        <h3 className="text-lg font-bold text-white mb-2">
+          Failed to load projects
+        </h3>
+        <p className="text-sm text-neutral-400 max-w-sm mb-6 font-mono">
+          {error}
+        </p>
         <button
           onClick={() => window.location.reload()}
           className="px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold text-sm transition-all cursor-pointer"
@@ -84,7 +88,8 @@ export default function ProjectsPageResultView({
         </div>
         <h3 className="text-lg font-bold text-white mb-2">No projects yet</h3>
         <p className="text-sm text-neutral-400 max-w-sm mb-6 font-mono">
-          You haven't created any storyboard series yet. Start by scraping a webtoon URL!
+          You haven't created any storyboard series yet. Start by scraping a
+          webtoon URL!
         </p>
       </div>
     );
@@ -97,7 +102,9 @@ export default function ProjectsPageResultView({
           <Search className="w-8 h-8" />
         </div>
         <h3 className="text-xl font-bold text-white mb-2">No projects found</h3>
-        <p className="text-neutral-500">Try adjusting your filters or search query.</p>
+        <p className="text-neutral-500">
+          Try adjusting your filters or search query.
+        </p>
       </div>
     );
   }
@@ -115,7 +122,9 @@ export default function ProjectsPageResultView({
                 onOpenProject={onOpenProject}
                 onRename={(e, projectItem) => onRename(e, projectItem)}
                 onExport={(e, projectItem) => onExport(e, projectItem)}
-                onOpenDetails={(e, projectItem) => onOpenDetails(e, projectItem)}
+                onOpenDetails={(e, projectItem) =>
+                  onOpenDetails(e, projectItem)
+                }
                 onDelete={(e, projectId) => onDelete(e, projectId)}
                 onCopyLink={(e, projectItem) => onCopyLink(e, projectItem)}
                 isSelected={isSelected}
@@ -124,7 +133,9 @@ export default function ProjectsPageResultView({
                 openMenuId={openMenuId}
                 onToggleMenu={(e, projectId) => onToggleMenu(e, projectId)}
                 renamingProjectId={renamingProjectId}
-                onSaveRename={(projectId, newName) => onSaveRename(projectId, newName)}
+                onSaveRename={(projectId, newName) =>
+                  onSaveRename(projectId, newName)
+                }
               />
             );
           })}

@@ -19,7 +19,9 @@ export default function LiveScraperDeckEmptyState({
       </div>
       <div className="space-y-2 max-w-xs">
         <p className="text-sm font-semibold text-white">{title}</p>
-        <p className="text-xs text-neutral-400 leading-relaxed">{description}</p>
+        <p className="text-xs text-neutral-400 leading-relaxed">
+          {description}
+        </p>
       </div>
     </div>
   );

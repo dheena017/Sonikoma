@@ -58,7 +58,6 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
 
   return (
     <div className="flex min-h-screen bg-[#050507] text-white selection:bg-purple-500/30 overflow-hidden">
-      
       {/* Blurred Background Overlay when expanded sidebar is open */}
       {isSidebarOpen && (
         <div
@@ -68,33 +67,34 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
       )}
 
       {/* Sidebars */}
-      {!isFocusMode && (isSidebarCollapsed ? (
-        <EditorMiniSidebar
-          isCollapsed={isSidebarCollapsed}
-          setIsCollapsed={setIsSidebarCollapsed}
-          currentSection={currentSection}
-          setCurrentSection={setCurrentSection}
-          onBackToApp={onBackToApp}
-          scrapedCount={scrapedCount}
-          panelsCount={panelsCount}
-          isBatchCropping={isBatchCropping}
-          isCleaningBubbles={isCleaningBubbles}
-          navigateTo={navigateTo}
-        />
-      ) : (
-        <EditorSidebar
-          isCollapsed={isSidebarCollapsed}
-          setIsCollapsed={setIsSidebarCollapsed}
-          currentSection={currentSection}
-          setCurrentSection={setCurrentSection}
-          onBackToApp={onBackToApp}
-          scrapedCount={scrapedCount}
-          panelsCount={panelsCount}
-          isBatchCropping={isBatchCropping}
-          isCleaningBubbles={isCleaningBubbles}
-          navigateTo={navigateTo}
-        />
-      ))}
+      {!isFocusMode &&
+        (isSidebarCollapsed ? (
+          <EditorMiniSidebar
+            isCollapsed={isSidebarCollapsed}
+            setIsCollapsed={setIsSidebarCollapsed}
+            currentSection={currentSection}
+            setCurrentSection={setCurrentSection}
+            onBackToApp={onBackToApp}
+            scrapedCount={scrapedCount}
+            panelsCount={panelsCount}
+            isBatchCropping={isBatchCropping}
+            isCleaningBubbles={isCleaningBubbles}
+            navigateTo={navigateTo}
+          />
+        ) : (
+          <EditorSidebar
+            isCollapsed={isSidebarCollapsed}
+            setIsCollapsed={setIsSidebarCollapsed}
+            currentSection={currentSection}
+            setCurrentSection={setCurrentSection}
+            onBackToApp={onBackToApp}
+            scrapedCount={scrapedCount}
+            panelsCount={panelsCount}
+            isBatchCropping={isBatchCropping}
+            isCleaningBubbles={isCleaningBubbles}
+            navigateTo={navigateTo}
+          />
+        ))}
 
       {/* Fixed Premium Header */}
       {!isFocusMode && (
@@ -119,19 +119,14 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
       */}
       <div
         className={`flex flex-1 flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] h-screen ${
-          isFocusMode
-            ? "pt-0 pl-0"
-            : "pt-16 pl-20"
+          isFocusMode ? "pt-0 pl-0" : "pt-16 pl-20"
         }`}
       >
         {/* Inner scrolling container so the header stays fixed at the top */}
         <div className="flex-1 overflow-y-auto w-full h-full relative">
-          <div className="animate-[fadeIn_0.3s_ease-out]">
-            {children}
-          </div>
+          <div className="animate-[fadeIn_0.3s_ease-out]">{children}</div>
         </div>
       </div>
-      
     </div>
   );
 };

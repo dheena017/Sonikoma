@@ -12,7 +12,11 @@ import {
   Square,
   Trash2,
 } from "lucide-react";
-import { getProxiedImageUrl, getSourceIcon, getSourceName } from "../../../utils.js";
+import {
+  getProxiedImageUrl,
+  getSourceIcon,
+  getSourceName,
+} from "../../../utils.js";
 import type { Project } from "./ProjectTypes.js";
 
 interface ProjectsTableProps {
@@ -44,7 +48,8 @@ export default function ProjectsTable({
   onCopyLink,
   onDelete,
 }: ProjectsTableProps) {
-  const allSelected = projects.length > 0 && selectedProjects.size === projects.length;
+  const allSelected =
+    projects.length > 0 && selectedProjects.size === projects.length;
 
   return (
     <div className="overflow-x-auto bg-[#111115] border border-neutral-800 rounded-xl">
@@ -124,7 +129,10 @@ export default function ProjectsTable({
                         <SourceIcon className="h-3 w-3 text-neutral-600" />
                       </div>
                       <div className="text-[10px] text-neutral-500 font-mono mt-0.5">
-                        {project.episode !== undefined && project.episode !== null ? `EP ${project.episode} • ` : ""}
+                        {project.episode !== undefined &&
+                        project.episode !== null
+                          ? `EP ${project.episode} • `
+                          : ""}
                         {project.author || "Unknown"}
                       </div>
                     </div>
@@ -158,7 +166,9 @@ export default function ProjectsTable({
                   {new Date(project.created_at).toLocaleDateString()}
                 </td>
                 <td className="p-4 text-right">
-                  <div className="font-bold text-white">{project.panels_count || 0}</div>
+                  <div className="font-bold text-white">
+                    {project.panels_count || 0}
+                  </div>
                 </td>
                 <td className="p-4 relative">
                   <button

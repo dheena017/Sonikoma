@@ -60,15 +60,19 @@ export function LogsPageConsole({
             ) : (
               <Monitor className="h-3 w-3 text-purple-400" />
             )}
-            {viewMode === "live" ? "SYSTEM_REALTIME_STREAM" : "HISTORICAL_AUDIT_LOGS"}
+            {viewMode === "live"
+              ? "SYSTEM_REALTIME_STREAM"
+              : "HISTORICAL_AUDIT_LOGS"}
           </span>
         </div>
         <div className="flex items-center gap-4">
-          <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-tighter border ${
-            viewMode === "live"
-              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
-              : "bg-purple-500/10 border-purple-500/20 text-purple-500"
-          }`}>
+          <span
+            className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-tighter border ${
+              viewMode === "live"
+                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
+                : "bg-purple-500/10 border-purple-500/20 text-purple-500"
+            }`}
+          >
             {viewMode === "live" ? "Active Feed" : `Page ${historyPage + 1}`}
           </span>
           <span className="text-[10px] opacity-60">
@@ -103,13 +107,23 @@ export function LogsPageConsole({
             const isExpanded = expandedLogId === (log.id || `l-${index}`);
             const isHighlighted =
               highlightPattern &&
-              (log.message.toLowerCase().includes(highlightPattern.toLowerCase()) ||
-                log.module.toLowerCase().includes(highlightPattern.toLowerCase()));
+              (log.message
+                .toLowerCase()
+                .includes(highlightPattern.toLowerCase()) ||
+                log.module
+                  .toLowerCase()
+                  .includes(highlightPattern.toLowerCase()));
 
             let logColorClass = "text-neutral-400";
-            if (log.level.toUpperCase() === "ERROR" || log.level.toUpperCase() === "CRITICAL")
+            if (
+              log.level.toUpperCase() === "ERROR" ||
+              log.level.toUpperCase() === "CRITICAL"
+            )
               logColorClass = "text-red-400";
-            else if (log.level.toUpperCase() === "WARN" || log.level.toUpperCase() === "WARNING")
+            else if (
+              log.level.toUpperCase() === "WARN" ||
+              log.level.toUpperCase() === "WARNING"
+            )
               logColorClass = "text-amber-400";
             else if (log.level.toUpperCase() === "SUCCESS")
               logColorClass = "text-emerald-400";
@@ -117,8 +131,7 @@ export function LogsPageConsole({
               logColorClass = "text-purple-400";
             else if (log.module === "AI" || log.module === "Model")
               logColorClass = "text-violet-400";
-            else if (log.module === "API")
-              logColorClass = "text-sky-400";
+            else if (log.module === "API") logColorClass = "text-sky-400";
 
             return (
               <div
@@ -144,10 +157,14 @@ export function LogsPageConsole({
                   <span className="text-neutral-600 select-none shrink-0 w-16 tabular-nums">
                     {log.timestamp}
                   </span>
-                  <span className={`shrink-0 w-20 text-[9px] font-bold uppercase tracking-tighter opacity-80 ${logColorClass}`}>
+                  <span
+                    className={`shrink-0 w-20 text-[9px] font-bold uppercase tracking-tighter opacity-80 ${logColorClass}`}
+                  >
                     [{log.module}]
                   </span>
-                  <span className={`flex-1 break-words ${logColorClass} group-hover:text-white transition-colors`}>
+                  <span
+                    className={`flex-1 break-words ${logColorClass} group-hover:text-white transition-colors`}
+                  >
                     {log.message}
                   </span>
                   <div className="flex items-center gap-2 shrink-0">
@@ -158,7 +175,11 @@ export function LogsPageConsole({
                     )}
                     {(log.details || log.snapshot || log.correlation_id) && (
                       <button className="text-neutral-600 group-hover:text-purple-400 transition-colors">
-                        {isExpanded ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3" />}
+                        {isExpanded ? (
+                          <Minimize2 className="h-3 w-3" />
+                        ) : (
+                          <Maximize2 className="h-3 w-3" />
+                        )}
                       </button>
                     )}
                   </div>
@@ -267,7 +288,9 @@ export function LogsPageConsole({
       {viewMode === "historical" && (
         <div className="px-5 py-3 border-t border-neutral-800 bg-neutral-900/50 flex items-center justify-between">
           <div className="text-[10px] text-neutral-500 font-mono flex items-center gap-3">
-            <span className="uppercase tracking-widest font-bold">Historical Archive</span>
+            <span className="uppercase tracking-widest font-bold">
+              Historical Archive
+            </span>
             <span className="h-1 w-1 rounded-full bg-neutral-700" />
             <span>PAGE {historyPage + 1}</span>
           </div>
@@ -280,11 +303,14 @@ export function LogsPageConsole({
               <ChevronLeft className="h-4 w-4" />
             </button>
             <span className="text-[10px] font-bold text-neutral-300 font-mono px-3 py-1 bg-black/40 border border-white/5 rounded-md min-w-[80px] text-center">
-              {historyPage * historyLimit + 1} - {historyPage * historyLimit + historicalLogs.length}
+              {historyPage * historyLimit + 1} -{" "}
+              {historyPage * historyLimit + historicalLogs.length}
             </span>
             <button
               onClick={() => setHistoryPage((p) => p + 1)}
-              disabled={historicalLogs.length < historyLimit || isHistoryLoading}
+              disabled={
+                historicalLogs.length < historyLimit || isHistoryLoading
+              }
               className="p-1.5 rounded-lg bg-neutral-800 border border-neutral-700 text-neutral-400 hover:text-white disabled:opacity-30 transition-all active:scale-95"
             >
               <ChevronRight className="h-4 w-4" />

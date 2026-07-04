@@ -408,8 +408,7 @@ export function useAppLogic() {
 
       state.setConsoleLogs((prev) => {
         const baseLogs = prev.filter((log) => {
-          const msg =
-            typeof log === "string" ? log : (log.message || "");
+          const msg = typeof log === "string" ? log : log.message || "";
           return !msg.startsWith("[Preloader]") && !msg.startsWith("[Scraper]");
         });
 
@@ -520,8 +519,7 @@ export function useAppLogic() {
 
           state.setConsoleLogs((prev) => {
             const filtered = prev.filter((log) => {
-              const msg =
-                typeof log === "string" ? log : (log.message || "");
+              const msg = typeof log === "string" ? log : log.message || "";
               return !msg.startsWith("[Scraper] Spawned live scraping task");
             });
             return [
@@ -558,14 +556,17 @@ export function useAppLogic() {
 
         if (!err.intercepted) {
           const errMsg =
-            err.message || "Failed to retrieve comic panels from the specified URL.";
+            err.message ||
+            "Failed to retrieve comic panels from the specified URL.";
           state.addNotification(
             `Service unable to access target site. Check the URL or refresh the page. (${errMsg})`,
             "error",
             {
               details: `Error Details: ${
                 err.message || String(err)
-              }\nStack Trace: ${err.stack || "N/A"}\nTarget URL: ${normalizedTargetUrl}\nSelected Source Portal: ${selectedSource}`,
+              }\nStack Trace: ${
+                err.stack || "N/A"
+              }\nTarget URL: ${normalizedTargetUrl}\nSelected Source Portal: ${selectedSource}`,
             }
           );
         }
@@ -607,7 +608,15 @@ export function useAppLogic() {
     }
 
     // Auto-scrape is intentionally disabled.
-  }, [targetUrl, isProcessing, scrapeImages, state.setScrapedImages, state.setSelectedScraped, state.setPanels, state.setIsScraping]);
+  }, [
+    targetUrl,
+    isProcessing,
+    scrapeImages,
+    state.setScrapedImages,
+    state.setSelectedScraped,
+    state.setPanels,
+    state.setIsScraping,
+  ]);
 
   const totalCalculatedDuration = state.panels.reduce(
     (sum, p) => sum + (p.duration || 0),
@@ -707,4 +716,3 @@ export function useAppLogic() {
     ]
   );
 }
-

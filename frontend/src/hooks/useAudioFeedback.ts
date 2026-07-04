@@ -113,10 +113,13 @@ export function useAudioFeedback(globalVolume: number, globalMuted: boolean) {
     playTone(1000, 0.05, "sine", 0.5);
   }, [playTone]);
 
-  return useMemo(() => ({
-    playSuccess,
-    playError,
-    playInfo,
-    playTick,
-  }), [playSuccess, playError, playInfo, playTick]);
+  return useMemo(
+    () => ({
+      playSuccess,
+      playError,
+      playInfo,
+      playTick,
+    }),
+    [playSuccess, playError, playInfo, playTick]
+  );
 }

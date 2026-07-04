@@ -31,33 +31,78 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
       name: "Core",
       items: [
         { id: "overview", label: "Overview", icon: LayoutGrid, path: "/admin" },
-        { id: "announcements", label: "Announcements", icon: Mail, path: "/admin/announcements" },
+        {
+          id: "announcements",
+          label: "Announcements",
+          icon: Mail,
+          path: "/admin/announcements",
+        },
         { id: "users", label: "Users", icon: Users, path: "/admin/users" },
-        { id: "content", label: "Content", icon: FolderGit2, path: "/admin/content" },
+        {
+          id: "content",
+          label: "Content",
+          icon: FolderGit2,
+          path: "/admin/content",
+        },
       ],
     },
     {
       name: "Monitoring",
       items: [
         { id: "health", label: "Health", icon: Server, path: "/admin/health" },
-        { id: "activity", label: "Audit Logs", icon: ActivitySquare, path: "/admin/activity" },
+        {
+          id: "activity",
+          label: "Audit Logs",
+          icon: ActivitySquare,
+          path: "/admin/activity",
+        },
         { id: "usage", label: "Usage", icon: Cpu, path: "/admin/usage" },
       ],
     },
     {
       name: "Business & Data",
       items: [
-        { id: "finance", label: "Finance", icon: DollarSign, path: "/admin/finance" },
-        { id: "scrapers", label: "Scrapers", icon: Globe, path: "/admin/scrapers" },
-        { id: "analytics", label: "Analytics", icon: BarChart3, path: "/admin/analytics" },
+        {
+          id: "finance",
+          label: "Finance",
+          icon: DollarSign,
+          path: "/admin/finance",
+        },
+        {
+          id: "scrapers",
+          label: "Scrapers",
+          icon: Globe,
+          path: "/admin/scrapers",
+        },
+        {
+          id: "analytics",
+          label: "Analytics",
+          icon: BarChart3,
+          path: "/admin/analytics",
+        },
       ],
     },
     {
       name: "Technical",
       items: [
-        { id: "explorer", label: "Explorer", icon: Database, path: "/admin/explorer" },
-        { id: "console", label: "Console", icon: Terminal, path: "/admin/console" },
-        { id: "settings", label: "Settings", icon: Settings, path: "/admin/settings" },
+        {
+          id: "explorer",
+          label: "Explorer",
+          icon: Database,
+          path: "/admin/explorer",
+        },
+        {
+          id: "console",
+          label: "Console",
+          icon: Terminal,
+          path: "/admin/console",
+        },
+        {
+          id: "settings",
+          label: "Settings",
+          icon: Settings,
+          path: "/admin/settings",
+        },
       ],
     },
   ];
@@ -78,12 +123,12 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
     return (
       <div className="relative group w-full flex justify-center py-0.5">
         {/* Premium Floating Active Pill */}
-        <div 
+        <div
           className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 ${
-            active 
-              ? "h-5 bg-violet-400 shadow-[0_0_12px_rgba(167,139,250,0.8)] opacity-100" 
+            active
+              ? "h-5 bg-violet-400 shadow-[0_0_12px_rgba(167,139,250,0.8)] opacity-100"
               : "h-0 bg-transparent opacity-0"
-          }`} 
+          }`}
         />
 
         <button
@@ -113,17 +158,17 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
   return (
     // Fixed below the header, hidden scrollbars, premium glassmorphism
     <aside className="fixed top-16 bottom-0 left-0 w-20 bg-[#0a0a0e]/80 backdrop-blur-xl border-r border-violet-900/10 hidden lg:flex flex-col items-center py-4 z-40 shadow-[4px_0_24px_rgba(0,0,0,0.4)]">
-      <div
-        className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2"
-      >
+      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
-          <div key={group.name} className="w-full flex flex-col items-center pb-2">
-            
+          <div
+            key={group.name}
+            className="w-full flex flex-col items-center pb-2"
+          >
             {/* Soft, premium gradient dot separator between groups */}
             {groupIdx > 0 && (
-               <div className="w-1 h-1 rounded-full bg-violet-900/50 shadow-[0_0_4px_rgba(139,92,246,0.3)] my-2" />
+              <div className="w-1 h-1 rounded-full bg-violet-900/50 shadow-[0_0_4px_rgba(139,92,246,0.3)] my-2" />
             )}
-            
+
             {group.items.map((item) => (
               <SidebarItem key={item.id} item={item} />
             ))}
@@ -140,7 +185,7 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
           >
             <ExternalLink className="w-[18px] h-[18px] shrink-0" />
           </button>
-          
+
           <div className="absolute left-16 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 -translate-x-2 group-hover:translate-x-0 bg-neutral-900 border border-white/10 text-white text-xs px-3 py-1.5 rounded-lg whitespace-nowrap z-50 shadow-2xl font-medium tracking-wide">
             Return to App
           </div>

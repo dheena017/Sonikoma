@@ -157,7 +157,6 @@ export default function ProjectConfirmPanel({
 
         {/* Scrollable Form Content */}
         <div className="p-6 space-y-8 overflow-y-auto flex-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          
           {/* Section 1: Basic Details */}
           <div className="space-y-4">
             <h3 className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] font-mono border-b border-neutral-850 pb-2">
@@ -243,7 +242,7 @@ export default function ProjectConfirmPanel({
             <h3 className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] font-mono border-b border-neutral-850 pb-2">
               2. Media & Details
             </h3>
-            
+
             {/* Project Status Dropdown */}
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider font-mono flex items-center gap-2">
@@ -270,11 +269,11 @@ export default function ProjectConfirmPanel({
                 {/* Live Image Preview */}
                 {seriesCoverImage ? (
                   <div className="w-12 h-16 shrink-0 rounded-lg overflow-hidden border border-neutral-800 bg-[#0a0a0e]">
-                    <img 
-                      src={seriesCoverImage} 
-                      alt="Cover Preview" 
+                    <img
+                      src={seriesCoverImage}
+                      alt="Cover Preview"
                       className="w-full h-full object-cover"
-                      onError={(e) => (e.currentTarget.style.display = 'none')}
+                      onError={(e) => (e.currentTarget.style.display = "none")}
                     />
                   </div>
                 ) : (
@@ -313,27 +312,50 @@ export default function ProjectConfirmPanel({
               3. Initial AI Generation Targets
             </h3>
             <p className="text-xs text-neutral-400">
-              Select which AI tasks should run automatically if you click "Save & Generate All" below.
+              Select which AI tasks should run automatically if you click "Save
+              & Generate All" below.
             </p>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {/* Task: Script */}
               <button
                 type="button"
                 onClick={() => toggleTask("generateScript")}
                 className={`p-3 rounded-xl border text-left transition-all active:scale-95 cursor-pointer ${
-                  aiTasks.generateScript 
-                    ? "bg-purple-600/10 border-purple-500/40 shadow-[inset_0_0_12px_rgba(168,85,247,0.1)]" 
+                  aiTasks.generateScript
+                    ? "bg-purple-600/10 border-purple-500/40 shadow-[inset_0_0_12px_rgba(168,85,247,0.1)]"
                     : "bg-[#0a0a0e] border-neutral-800 hover:border-neutral-700"
                 }`}
               >
                 <div className="flex justify-between items-start mb-2">
-                  <Wand2 className={`h-4 w-4 ${aiTasks.generateScript ? "text-purple-400" : "text-neutral-500"}`} />
-                  <div className={`w-3 h-3 rounded-full border flex items-center justify-center ${aiTasks.generateScript ? "bg-purple-500 border-purple-400" : "border-neutral-700"}`}>
-                    {aiTasks.generateScript && <CheckCircle className="h-2 w-2 text-white" />}
+                  <Wand2
+                    className={`h-4 w-4 ${
+                      aiTasks.generateScript
+                        ? "text-purple-400"
+                        : "text-neutral-500"
+                    }`}
+                  />
+                  <div
+                    className={`w-3 h-3 rounded-full border flex items-center justify-center ${
+                      aiTasks.generateScript
+                        ? "bg-purple-500 border-purple-400"
+                        : "border-neutral-700"
+                    }`}
+                  >
+                    {aiTasks.generateScript && (
+                      <CheckCircle className="h-2 w-2 text-white" />
+                    )}
                   </div>
                 </div>
-                <h4 className={`text-xs font-bold ${aiTasks.generateScript ? "text-purple-200" : "text-neutral-400"}`}>Extract Scripts</h4>
+                <h4
+                  className={`text-xs font-bold ${
+                    aiTasks.generateScript
+                      ? "text-purple-200"
+                      : "text-neutral-400"
+                  }`}
+                >
+                  Extract Scripts
+                </h4>
               </button>
 
               {/* Task: Voice */}
@@ -341,18 +363,40 @@ export default function ProjectConfirmPanel({
                 type="button"
                 onClick={() => toggleTask("generateVoice")}
                 className={`p-3 rounded-xl border text-left transition-all active:scale-95 cursor-pointer ${
-                  aiTasks.generateVoice 
-                    ? "bg-purple-600/10 border-purple-500/40 shadow-[inset_0_0_12px_rgba(168,85,247,0.1)]" 
+                  aiTasks.generateVoice
+                    ? "bg-purple-600/10 border-purple-500/40 shadow-[inset_0_0_12px_rgba(168,85,247,0.1)]"
                     : "bg-[#0a0a0e] border-neutral-800 hover:border-neutral-700"
                 }`}
               >
                 <div className="flex justify-between items-start mb-2">
-                  <Mic className={`h-4 w-4 ${aiTasks.generateVoice ? "text-purple-400" : "text-neutral-500"}`} />
-                  <div className={`w-3 h-3 rounded-full border flex items-center justify-center ${aiTasks.generateVoice ? "bg-purple-500 border-purple-400" : "border-neutral-700"}`}>
-                    {aiTasks.generateVoice && <CheckCircle className="h-2 w-2 text-white" />}
+                  <Mic
+                    className={`h-4 w-4 ${
+                      aiTasks.generateVoice
+                        ? "text-purple-400"
+                        : "text-neutral-500"
+                    }`}
+                  />
+                  <div
+                    className={`w-3 h-3 rounded-full border flex items-center justify-center ${
+                      aiTasks.generateVoice
+                        ? "bg-purple-500 border-purple-400"
+                        : "border-neutral-700"
+                    }`}
+                  >
+                    {aiTasks.generateVoice && (
+                      <CheckCircle className="h-2 w-2 text-white" />
+                    )}
                   </div>
                 </div>
-                <h4 className={`text-xs font-bold ${aiTasks.generateVoice ? "text-purple-200" : "text-neutral-400"}`}>Synthesize TTS</h4>
+                <h4
+                  className={`text-xs font-bold ${
+                    aiTasks.generateVoice
+                      ? "text-purple-200"
+                      : "text-neutral-400"
+                  }`}
+                >
+                  Synthesize TTS
+                </h4>
               </button>
 
               {/* Task: SFX */}
@@ -360,22 +404,41 @@ export default function ProjectConfirmPanel({
                 type="button"
                 onClick={() => toggleTask("generateSFX")}
                 className={`p-3 rounded-xl border text-left transition-all active:scale-95 cursor-pointer ${
-                  aiTasks.generateSFX 
-                    ? "bg-purple-600/10 border-purple-500/40 shadow-[inset_0_0_12px_rgba(168,85,247,0.1)]" 
+                  aiTasks.generateSFX
+                    ? "bg-purple-600/10 border-purple-500/40 shadow-[inset_0_0_12px_rgba(168,85,247,0.1)]"
                     : "bg-[#0a0a0e] border-neutral-800 hover:border-neutral-700"
                 }`}
               >
                 <div className="flex justify-between items-start mb-2">
-                  <Music className={`h-4 w-4 ${aiTasks.generateSFX ? "text-purple-400" : "text-neutral-500"}`} />
-                  <div className={`w-3 h-3 rounded-full border flex items-center justify-center ${aiTasks.generateSFX ? "bg-purple-500 border-purple-400" : "border-neutral-700"}`}>
-                    {aiTasks.generateSFX && <CheckCircle className="h-2 w-2 text-white" />}
+                  <Music
+                    className={`h-4 w-4 ${
+                      aiTasks.generateSFX
+                        ? "text-purple-400"
+                        : "text-neutral-500"
+                    }`}
+                  />
+                  <div
+                    className={`w-3 h-3 rounded-full border flex items-center justify-center ${
+                      aiTasks.generateSFX
+                        ? "bg-purple-500 border-purple-400"
+                        : "border-neutral-700"
+                    }`}
+                  >
+                    {aiTasks.generateSFX && (
+                      <CheckCircle className="h-2 w-2 text-white" />
+                    )}
                   </div>
                 </div>
-                <h4 className={`text-xs font-bold ${aiTasks.generateSFX ? "text-purple-200" : "text-neutral-400"}`}>Map Audio/SFX</h4>
+                <h4
+                  className={`text-xs font-bold ${
+                    aiTasks.generateSFX ? "text-purple-200" : "text-neutral-400"
+                  }`}
+                >
+                  Map Audio/SFX
+                </h4>
               </button>
             </div>
           </div>
-
         </div>
 
         {/* Premium Footer Actions */}
@@ -387,7 +450,7 @@ export default function ProjectConfirmPanel({
           >
             Cancel
           </button>
-          
+
           <button
             type="button"
             onClick={() => handleConfirm(false)}

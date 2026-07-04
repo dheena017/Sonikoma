@@ -10,4 +10,3 @@ interface RegisterPageProps {
 export default function RegisterPage(props: RegisterPageProps) {
   return <RegisterForm {...props} />;
 }
-

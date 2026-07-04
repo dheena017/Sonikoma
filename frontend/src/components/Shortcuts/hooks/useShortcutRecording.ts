@@ -12,7 +12,9 @@ export function useShortcutRecording({
   setShortcuts,
   addNotification,
 }: UseShortcutRecordingParams) {
-  const [recordingActionId, setRecordingActionId] = useState<string | null>(null);
+  const [recordingActionId, setRecordingActionId] = useState<string | null>(
+    null
+  );
   const [conflictMsg, setConflictMsg] = useState<string | null>(null);
 
   useEffect(() => {

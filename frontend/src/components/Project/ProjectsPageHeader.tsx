@@ -5,7 +5,9 @@ interface ProjectsPageHeaderProps {
   onNewSeries: () => void;
 }
 
-export default function ProjectsPageHeader({ onNewSeries }: ProjectsPageHeaderProps) {
+export default function ProjectsPageHeader({
+  onNewSeries,
+}: ProjectsPageHeaderProps) {
   return (
     <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-8">
       <div>

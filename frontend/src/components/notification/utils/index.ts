@@ -1,4 +1,8 @@
-export { getNotificationIcon, getNotificationIconBox, getTypeStyles } from "./notificationHelpers";
+export {
+  getNotificationIcon,
+  getNotificationIconBox,
+  getTypeStyles,
+} from "./notificationHelpers";
 export {
   getToastStyles,
   getToastIcon,

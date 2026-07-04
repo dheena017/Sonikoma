@@ -69,7 +69,10 @@ export default function TimelineHeader({
         </p>
       </div>
 
-      {(selectedCount > 0 || isAnalyzingAll || isBatchCropping || isCleaningBubbles) && (
+      {(selectedCount > 0 ||
+        isAnalyzingAll ||
+        isBatchCropping ||
+        isCleaningBubbles) && (
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-2">
             {selectedCount > 0 && (
@@ -194,13 +197,22 @@ export default function TimelineHeader({
               <button
                 type="button"
                 onClick={() => {
-                  if (isAnalyzingAll && handleCancelAnalysis) handleCancelAnalysis();
-                  if ((isBatchCropping || isCleaningBubbles) && handleCancelBatch)
+                  if (isAnalyzingAll && handleCancelAnalysis)
+                    handleCancelAnalysis();
+                  if (
+                    (isBatchCropping || isCleaningBubbles) &&
+                    handleCancelBatch
+                  )
                     handleCancelBatch();
                 }}
                 className="text-[10px] font-bold border border-red-500/50 bg-red-600 hover:bg-red-500 text-white rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors shadow-md active:scale-95"
               >
-                Stop {isAnalyzingAll ? "Analyzing" : isBatchCropping ? "Cropping" : "Cleaning"}
+                Stop{" "}
+                {isAnalyzingAll
+                  ? "Analyzing"
+                  : isBatchCropping
+                  ? "Cropping"
+                  : "Cleaning"}
               </button>
             )}
 

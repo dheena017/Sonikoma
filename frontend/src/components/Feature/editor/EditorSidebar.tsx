@@ -72,13 +72,17 @@ const EditorSidebar = ({
       }`}
     >
       {/* Top Header / Close Area (This perfectly replaces the space where the main header used to be) */}
-      <div className={`flex items-center border-b border-white/[0.02] transition-all duration-300 shrink-0 ${isCollapsed ? "p-4 justify-center" : "h-16 px-4 justify-between"}`}>
+      <div
+        className={`flex items-center border-b border-white/[0.02] transition-all duration-300 shrink-0 ${
+          isCollapsed ? "p-4 justify-center" : "h-16 px-4 justify-between"
+        }`}
+      >
         {!isCollapsed && (
           <span className="text-[10px] font-black text-purple-400/50 uppercase tracking-[0.25em] font-mono ml-2">
             Workspace
           </span>
         )}
-        
+
         {/* Mobile/Desktop Close Button */}
         {!isCollapsed && (
           <button
@@ -101,7 +105,11 @@ const EditorSidebar = ({
           title="Back to Dashboard"
         >
           <ArrowLeft className="w-5 h-5 shrink-0" />
-          {!isCollapsed && <span className="text-xs font-bold tracking-wide">Return to App</span>}
+          {!isCollapsed && (
+            <span className="text-xs font-bold tracking-wide">
+              Return to App
+            </span>
+          )}
         </button>
       </div>
 
@@ -118,21 +126,25 @@ const EditorSidebar = ({
           return (
             <div key={item.id} className="relative flex justify-center">
               {/* Premium Floating Active Pill */}
-              <div 
+              <div
                 className={`absolute left-1 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
-                  isActive 
-                    ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] opacity-100" 
+                  isActive
+                    ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] opacity-100"
                     : "h-0 bg-transparent opacity-0"
-                }`} 
+                }`}
               />
 
               <button
                 onClick={() => {
                   setCurrentSection(item.id);
                   const el = document.getElementById(`section-${item.id}`);
-                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  if (el) el.scrollIntoView({ behavior: "smooth" });
                 }}
-                className={`w-full flex items-center ${isCollapsed ? "justify-center p-3" : "justify-between px-4 py-3"} rounded-2xl transition-all duration-300 group relative cursor-pointer active:scale-[0.98] ${
+                className={`w-full flex items-center ${
+                  isCollapsed
+                    ? "justify-center p-3"
+                    : "justify-between px-4 py-3"
+                } rounded-2xl transition-all duration-300 group relative cursor-pointer active:scale-[0.98] ${
                   isActive
                     ? "bg-purple-500/10 text-white shadow-[inset_0_0_16px_rgba(168,85,247,0.15)] border border-purple-500/20"
                     : "text-neutral-500 hover:text-white hover:bg-white/5 border border-transparent"
@@ -140,24 +152,44 @@ const EditorSidebar = ({
                 title={isCollapsed ? item.label : undefined}
               >
                 <div className="flex items-center gap-3.5">
-                  <Icon className={`w-[18px] h-[18px] shrink-0 transition-transform duration-300 ${isActive ? "text-purple-400" : "group-hover:scale-110 group-hover:text-neutral-300"}`} />
-                  {!isCollapsed && <span className="text-sm font-bold tracking-wide">{item.label}</span>}
+                  <Icon
+                    className={`w-[18px] h-[18px] shrink-0 transition-transform duration-300 ${
+                      isActive
+                        ? "text-purple-400"
+                        : "group-hover:scale-110 group-hover:text-neutral-300"
+                    }`}
+                  />
+                  {!isCollapsed && (
+                    <span className="text-sm font-bold tracking-wide">
+                      {item.label}
+                    </span>
+                  )}
                 </div>
 
                 {/* Badge Logic */}
                 {item.badge !== undefined && (
-                  <span className={`absolute ${isCollapsed ? "-top-1 -right-1" : "relative top-0 right-0"} flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-lg text-[10px] font-bold font-mono transition-colors border ${
-                    isActive 
-                      ? "bg-purple-500/20 text-purple-300 border-purple-500/30" 
-                      : "bg-neutral-900 text-neutral-500 border-white/5"
-                  }`}>
+                  <span
+                    className={`absolute ${
+                      isCollapsed ? "-top-1 -right-1" : "relative top-0 right-0"
+                    } flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-lg text-[10px] font-bold font-mono transition-colors border ${
+                      isActive
+                        ? "bg-purple-500/20 text-purple-300 border-purple-500/30"
+                        : "bg-neutral-900 text-neutral-500 border-white/5"
+                    }`}
+                  >
                     {item.badge}
                   </span>
                 )}
 
                 {/* Processing Ping */}
                 {item.isProcessing && (
-                  <span className={`absolute ${isCollapsed ? "top-1 right-1" : "top-1/2 -translate-y-1/2 right-3"} h-2 w-2 rounded-full bg-purple-500 animate-ping`} />
+                  <span
+                    className={`absolute ${
+                      isCollapsed
+                        ? "top-1 right-1"
+                        : "top-1/2 -translate-y-1/2 right-3"
+                    } h-2 w-2 rounded-full bg-purple-500 animate-ping`}
+                  />
                 )}
               </button>
             </div>

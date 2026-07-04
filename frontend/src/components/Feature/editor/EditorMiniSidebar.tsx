@@ -1,10 +1,5 @@
 import React, { useState } from "react";
-import {
-  Scissors,
-  Brain,
-  ArrowLeft,
-  type LucideIcon,
-} from "lucide-react";
+import { Scissors, Brain, ArrowLeft, type LucideIcon } from "lucide-react";
 import TooltipPortal from "../../TooltipPortal";
 
 interface EditorMiniSidebarProps {
@@ -62,7 +57,7 @@ const EditorMiniSidebar = ({
   const SidebarItem: React.FC<{ item: SidebarMenuItem }> = ({ item }) => {
     const [hover, setHover] = useState(false);
     const [rect, setRect] = useState<DOMRect | null>(null);
-    
+
     const pathname = window.location.pathname;
     const isActive =
       currentSection === item.id ||
@@ -74,19 +69,29 @@ const EditorMiniSidebar = ({
     return (
       <div className="relative group w-full flex justify-center py-0.5">
         {/* Premium Floating Active Pill */}
-        <div 
+        <div
           className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
-            isActive 
-              ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] opacity-100" 
+            isActive
+              ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] opacity-100"
               : "h-0 bg-transparent opacity-0"
-          }`} 
+          }`}
         />
 
         <button
           onClick={() => {
-            const nextSection = item.id === "autocrop" ? "autocrop" : item.id === "bubbles" ? "bubbles" : item.id;
+            const nextSection =
+              item.id === "autocrop"
+                ? "autocrop"
+                : item.id === "bubbles"
+                ? "bubbles"
+                : item.id;
             setCurrentSection(nextSection);
-            if (item.id !== "autocrop" && item.id !== "bubbles" && item.path && navigateTo) {
+            if (
+              item.id !== "autocrop" &&
+              item.id !== "bubbles" &&
+              item.path &&
+              navigateTo
+            ) {
               navigateTo(item.path);
             }
           }}

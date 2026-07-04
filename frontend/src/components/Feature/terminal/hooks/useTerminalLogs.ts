@@ -17,7 +17,10 @@ interface UseTerminalLogsArgs {
   setConsoleLogs: Dispatch<SetStateAction<LogEntry[]>>;
 }
 
-export function useTerminalLogs({ consoleLogs, setConsoleLogs }: UseTerminalLogsArgs) {
+export function useTerminalLogs({
+  consoleLogs,
+  setConsoleLogs,
+}: UseTerminalLogsArgs) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [copied, setCopied] = useState(false);
   const [autoScroll, setAutoScroll] = useState(true);
@@ -51,8 +54,7 @@ export function useTerminalLogs({ consoleLogs, setConsoleLogs }: UseTerminalLogs
 
       if (activeFilter === "errors") {
         return (
-          log.level === "ERROR" ||
-          log.message.toLowerCase().includes("fail")
+          log.level === "ERROR" || log.message.toLowerCase().includes("fail")
         );
       }
       if (activeFilter === "warnings") {
@@ -127,7 +129,9 @@ export function useTerminalLogs({ consoleLogs, setConsoleLogs }: UseTerminalLogs
     const blob = new Blob(
       [
         consoleLogs
-          .map((l) => `[${l.timestamp}] [${l.module}] [${l.level}] ${l.message}`)
+          .map(
+            (l) => `[${l.timestamp}] [${l.module}] [${l.level}] ${l.message}`
+          )
           .join("\n"),
       ],
       {

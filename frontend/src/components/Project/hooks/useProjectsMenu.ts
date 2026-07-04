@@ -11,7 +11,9 @@ export interface UseProjectsMenuState {
 
 export function useProjectsMenu(): UseProjectsMenuState {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const [renamingProjectId, setRenamingProjectId] = useState<string | null>(null);
+  const [renamingProjectId, setRenamingProjectId] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     const handleClickOutside = () => setOpenMenuId(null);
@@ -28,15 +30,18 @@ export function useProjectsMenu(): UseProjectsMenuState {
     setOpenMenuId(null);
   }, []);
 
-  const saveProjectName = useCallback(async (projectId: string, newName: string) => {
-    if (!newName.trim()) {
-      setRenamingProjectId(null);
-      return;
-    }
+  const saveProjectName = useCallback(
+    async (projectId: string, newName: string) => {
+      if (!newName.trim()) {
+        setRenamingProjectId(null);
+        return;
+      }
 
-    console.log(`Renaming project ${projectId} to ${newName}`);
-    setRenamingProjectId(null);
-  }, []);
+      console.log(`Renaming project ${projectId} to ${newName}`);
+      setRenamingProjectId(null);
+    },
+    []
+  );
 
   return {
     openMenuId,

@@ -174,7 +174,9 @@ export function ScraperSelectionToolbar({
             </button>
 
             <div className="flex items-center gap-1.5 px-2.5 py-1">
-              <span className="text-[10px] text-neutral-400 font-sans">Every</span>
+              <span className="text-[10px] text-neutral-400 font-sans">
+                Every
+              </span>
               <input
                 type="number"
                 min="1"
@@ -185,7 +187,9 @@ export function ScraperSelectionToolbar({
                 }
                 className="w-8 px-1 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-white text-[10px] font-mono focus:outline-none focus:border-indigo-500 text-center"
               />
-              <span className="text-[10px] text-neutral-400 font-sans">th panel</span>
+              <span className="text-[10px] text-neutral-400 font-sans">
+                th panel
+              </span>
               <button
                 type="button"
                 onClick={() => {
@@ -277,7 +281,9 @@ export function ScraperSelectionToolbar({
             </div>
 
             <div className="flex items-center gap-1.5 px-2.5 py-1.5 border-t border-neutral-900 mt-1.5">
-              <span className="text-[10px] text-neutral-400 font-sans">Range</span>
+              <span className="text-[10px] text-neutral-400 font-sans">
+                Range
+              </span>
               <input
                 type="number"
                 min="1"
@@ -417,7 +423,13 @@ export function FloatingSelectionBar({
 
           {/* Progress indicator when busy */}
           {isAnyBusy && (
-            <div className={leftDock ? "flex flex-col gap-1.5 px-3 py-2 rounded-xl bg-purple-950/25 border border-purple-800/40 text-purple-300 text-xs font-mono shrink-0" : "flex flex-col gap-1.5 px-3.5 py-2.5 rounded-xl bg-purple-950/25 border border-purple-800/40 text-purple-300 text-xs font-mono shrink-0 min-w-[170px]"}>
+            <div
+              className={
+                leftDock
+                  ? "flex flex-col gap-1.5 px-3 py-2 rounded-xl bg-purple-950/25 border border-purple-800/40 text-purple-300 text-xs font-mono shrink-0"
+                  : "flex flex-col gap-1.5 px-3.5 py-2.5 rounded-xl bg-purple-950/25 border border-purple-800/40 text-purple-300 text-xs font-mono shrink-0 min-w-[170px]"
+              }
+            >
               <div className="flex items-center gap-2">
                 <RefreshCw className="h-3.5 w-3.5 animate-spin text-purple-400" />
                 <span className="font-bold tracking-tight whitespace-nowrap">
@@ -458,10 +470,20 @@ export function FloatingSelectionBar({
           )}
 
           {/* Divider */}
-          <div className={leftDock ? "h-px w-full bg-neutral-800/60 my-1" : "h-6 w-px bg-neutral-800 shrink-0 hidden sm:block"} />
+          <div
+            className={
+              leftDock
+                ? "h-px w-full bg-neutral-800/60 my-1"
+                : "h-6 w-px bg-neutral-800 shrink-0 hidden sm:block"
+            }
+          />
 
           {/* Selection Filter toolbar (moved from header) */}
-          <div className={leftDock ? "w-full" : "hidden sm:flex items-center ml-3 mr-1"}>
+          <div
+            className={
+              leftDock ? "w-full" : "hidden sm:flex items-center ml-3 mr-1"
+            }
+          >
             {typeof window !== "undefined" && (
               <ScraperSelectionToolbar
                 scrapedImages={scrapedImages || []}
@@ -472,7 +494,9 @@ export function FloatingSelectionBar({
                 handleReverseDeckOrder={handleReverseDeckOrder || (() => {})}
                 handleSelectFirstN={handleSelectFirstN || ((n: number) => {})}
                 handleSelectLastN={handleSelectLastN || ((n: number) => {})}
-                handleSelectRange={handleSelectRange || ((a: number, b: number) => {})}
+                handleSelectRange={
+                  handleSelectRange || ((a: number, b: number) => {})
+                }
                 handleClearAll={handleClearAll}
                 setSelectedScraped={setSelectedScraped}
               />
@@ -480,7 +504,13 @@ export function FloatingSelectionBar({
           </div>
 
           {/* Action Buttons */}
-          <div className={leftDock ? "flex flex-col gap-2 mt-2" : "flex items-center gap-2 flex-nowrap shrink-0 ml-auto"}>
+          <div
+            className={
+              leftDock
+                ? "flex flex-col gap-2 mt-2"
+                : "flex items-center gap-2 flex-nowrap shrink-0 ml-auto"
+            }
+          >
             {/* Select All / Deselect All */}
             <button
               type="button"
@@ -639,27 +669,27 @@ export function FloatingSelectionBar({
             </button>
           </div>
 
-            {/* Clear all / dismiss */}
-            {leftDock ? (
-              <button
-                type="button"
-                onClick={handleClearAll}
-                title="Deselect all panels"
-                className="px-3 py-2 mt-auto rounded-xl font-bold flex items-center justify-center cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200"
-              >
-                <X className="h-4 w-4" />
-                <span className="ml-2 text-[12px]">Clear</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleClearAll}
-                title="Deselect all panels"
-                className="p-2 ml-auto rounded-full font-bold flex items-center justify-center cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 shrink-0"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
+          {/* Clear all / dismiss */}
+          {leftDock ? (
+            <button
+              type="button"
+              onClick={handleClearAll}
+              title="Deselect all panels"
+              className="px-3 py-2 mt-auto rounded-xl font-bold flex items-center justify-center cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200"
+            >
+              <X className="h-4 w-4" />
+              <span className="ml-2 text-[12px]">Clear</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleClearAll}
+              title="Deselect all panels"
+              className="p-2 ml-auto rounded-full font-bold flex items-center justify-center cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 shrink-0"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
     </div>,

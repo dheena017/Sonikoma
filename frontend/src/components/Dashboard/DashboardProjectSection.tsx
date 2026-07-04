@@ -73,8 +73,12 @@ export default function DashboardProjectSection({
           <div className="w-16 h-16 rounded-3xl bg-red-900/20 border border-red-500/20 flex items-center justify-center text-red-500 mb-4">
             <Activity className="h-8 w-8" />
           </div>
-          <h3 className="text-lg font-bold text-white mb-2">Failed to load projects</h3>
-          <p className="text-sm text-neutral-400 max-w-sm mb-6 font-mono">{error}</p>
+          <h3 className="text-lg font-bold text-white mb-2">
+            Failed to load projects
+          </h3>
+          <p className="text-sm text-neutral-400 max-w-sm mb-6 font-mono">
+            {error}
+          </p>
           <button
             onClick={onRetry}
             className="px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold text-sm transition-all cursor-pointer"
@@ -89,7 +93,8 @@ export default function DashboardProjectSection({
           </div>
           <h3 className="text-lg font-bold text-white mb-2">No series yet</h3>
           <p className="text-sm text-neutral-400 max-w-sm mb-6 font-mono">
-            You haven't created any storyboard series yet. Start by scraping a webtoon URL!
+            You haven't created any storyboard series yet. Start by scraping a
+            webtoon URL!
           </p>
           <button
             onClick={onNewSeries}

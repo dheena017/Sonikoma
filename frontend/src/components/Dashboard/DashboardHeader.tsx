@@ -35,8 +35,9 @@ export default function DashboardHeader({
           </span>
         </h1>
         <p className="text-neutral-400 text-sm md:text-base font-mono max-w-xl mb-8">
-          Your command center for converting webtoons to stunning narrated videos.
-          Manage series, track AI pipeline progress, and start new conversions.
+          Your command center for converting webtoons to stunning narrated
+          videos. Manage series, track AI pipeline progress, and start new
+          conversions.
         </p>
 
         <div className="relative max-w-md group">

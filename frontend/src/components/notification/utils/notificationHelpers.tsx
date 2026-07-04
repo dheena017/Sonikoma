@@ -1,9 +1,4 @@
-import {
-  CircleAlert,
-  AlertCircle,
-  CheckCircle,
-  Info,
-} from "lucide-react";
+import { CircleAlert, AlertCircle, CheckCircle, Info } from "lucide-react";
 
 export const getNotificationIcon = (type: string) => {
   switch (type) {

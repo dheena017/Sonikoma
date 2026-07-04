@@ -43,7 +43,8 @@ export default function ShortcutRecordingModal({
             Waiting for input...
           </span>
           <span className="text-xs text-neutral-500 font-mono mt-4 leading-relaxed max-w-xs">
-            Press any combination of modifier keys (Ctrl, Alt, Shift) and a standard key.
+            Press any combination of modifier keys (Ctrl, Alt, Shift) and a
+            standard key.
           </span>
           <div className="mt-8 flex gap-2">
             <span className="px-3 py-1.5 rounded-lg bg-neutral-950 border border-white/5 text-[10px] text-neutral-400 font-mono">
