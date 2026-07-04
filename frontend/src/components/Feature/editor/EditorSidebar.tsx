@@ -47,19 +47,21 @@ const EditorSidebar = ({
 }: EditorSidebarProps) => {
   const menuItems: SidebarMenuItem[] = [
     {
-      id: "autocrop",
-      label: "Auto-Crop",
-      icon: Scissors,
-      path: "/auto-crop",
-      badge: scrapedCount > 0 ? scrapedCount : undefined,
-      isProcessing: isBatchCropping,
+      id: "monitor",
+      label: "Video Monitor",
+      icon: Film,
     },
     {
-      id: "bubbles",
-      label: "Clean-Bubbles",
-      icon: Brain,
-      path: "/bubble-cleaner",
-      isProcessing: isCleaningBubbles,
+      id: "assets",
+      label: "Imported Assets",
+      icon: Layout,
+      badge: scrapedCount > 0 ? scrapedCount : undefined,
+    },
+    {
+      id: "timeline",
+      label: "Storyboard Timeline",
+      icon: Scissors,
+      badge: panelsCount > 0 ? panelsCount : undefined,
     },
   ];
 
@@ -105,11 +107,10 @@ const EditorSidebar = ({
             <button
               key={item.id}
               onClick={() => {
-                const nextSection = item.id === "autocrop" ? "autocrop" : item.id === "bubbles" ? "bubbles" : item.id;
-                setCurrentSection(nextSection);
-                if (item.id !== "autocrop" && item.id !== "bubbles" && item.path && navigateTo) {
-                  navigateTo(item.path);
-                }
+                setCurrentSection(item.id);
+                // Also scroll to section in the grid if needed
+                const el = document.getElementById(`section-${item.id}`);
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
               }}
               className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl transition-all duration-200 group relative ${
                 isActive
