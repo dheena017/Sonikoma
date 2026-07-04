@@ -49,7 +49,7 @@ import {
 } from "./components/auth";
 import ProfilePage from "./components/profile/ProfilePage";
 import LoadingPage from "./components/LoadingPage";
-import TerminalLogs from "components/terminal/TerminalLogs";
+// import TerminalLogs from "components/terminal/TerminalLogs";
 import SeriesDetailsPage from "./components/SeriesDetailsPage";
 import DisplayPage from "./components/DisplayPage";
 import DashboardPage from "./components/Dashboard/DashboardPage";
