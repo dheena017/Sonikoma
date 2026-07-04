@@ -29,7 +29,7 @@ import PageNotFound from "./components/PageNotFound";
 import AdvancedSettings from "./components/Feature/video/AdvancedSettings";
 // import LogsPage from "./components/terminal/LogsPage"; // REMOVED: file doesn't exist
 import StatusPage from "./components/Status/StatusPage";
-// import TerminalLogs from "../components/terminal/TerminalLogs"; // REMOVED: file doesn't exist
+// import TerminalLogs from "./components/terminal/TerminalLogs"; // REMOVED: file doesn't exist
 import AIModelsPage from "./components/Feature/ai_models/AIModelsPage";
 import ShortcutsPage from "./components/Shortcuts/ShortcutsPage";
 
@@ -49,7 +49,7 @@ import {
 } from "./components/auth";
 import ProfilePage from "./components/profile/ProfilePage";
 import LoadingPage from "./components/LoadingPage";
-import TerminalLogs from "./components/Feature/terminal/TerminalLogs";
+import TerminalLogs from "./components/terminal/TerminalLogs";
 import SeriesDetailsPage from "./components/SeriesDetailsPage";
 import DisplayPage from "./components/DisplayPage";
 import DashboardPage from "./components/Dashboard/DashboardPage";
