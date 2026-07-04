@@ -1,12 +1,20 @@
-import React, { useState, useEffect } from "react";
-import AdminNavbar from "./AdminNavbar";
-import * as api from "@/api";
+import React, { useState } from "react";
+import AdminHeaderPage from "./AdminHeaderPage";
+import AdminMiniSidebar from "./AdminMiniSidebar";
+import AdminSidebar from "./AdminSidebar";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
   currentPath: string;
   navigateTo: (path: string) => void;
   fetchWithInterceptor: any;
+  notifications?: any[];
+  markNotificationAsRead?: (id: number) => void;
+  markAllNotificationsAsRead?: () => void;
+  deleteNotification?: (id: number) => void;
+  clearAllNotifications?: () => void;
+  notificationsMuted?: boolean;
+  setNotificationsMuted?: (muted: boolean) => void;
 }
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({
@@ -14,58 +22,63 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
   currentPath,
   navigateTo,
   fetchWithInterceptor,
+  notifications,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+  deleteNotification,
+  clearAllNotifications,
+  notificationsMuted,
+  setNotificationsMuted,
 }) => {
-  const [stats, setStats] = useState<any>({});
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const fetchStats = async () => {
-    try {
-      const data = await api.getMetrics(fetchWithInterceptor);
-      setStats({
-        users: data.database?.users || 0,
-        projects: data.database?.projects || 0,
-        scenes: data.database?.scenes || 0,
-        memory: `${data.memory?.rssMB || 0}MB`,
-        dbLatencyMs: data.database?.dbLatencyMs || 0,
-        gpuWorkers: data.database?.gpuWorkers || {
-          total: 0,
-          busy: 0,
-          idle: 0,
-        },
-        uptime: data.server?.uptime || "",
-        cpuPct: data.memory?.cpuPct || 0,
-        queueDepth: data.database?.activeJobs || 0,
-      });
-    } catch (err) {
-      console.error("Failed to fetch stats:", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchStats();
-    const interval = setInterval(fetchStats, 30000); // Update every 30s
-    return () => clearInterval(interval);
-  }, []);
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const closeSidebar = () => setIsSidebarOpen(false);
 
   return (
-    <div className="flex-1 flex flex-col min-h-full">
-      {/*
-        The AdminNavbar is now positioned below the global Header.
-        Since the global Header is fixed/sticky, the Navbar will naturally flow below it
-        within the scroll container.
-      */}
-      <AdminNavbar currentPath={currentPath} navigateTo={navigateTo} stats={stats} />
+    <div className="min-h-screen bg-[#050507] text-white flex flex-col selection:bg-violet-500/30">
+      
+      <AdminHeaderPage
+        currentPath={currentPath}
+        navigateTo={navigateTo}
+        fetchWithInterceptor={fetchWithInterceptor}
+        onToggleSidebar={toggleSidebar}
+        notifications={notifications}
+        markNotificationAsRead={markNotificationAsRead}
+        markAllNotificationsAsRead={markAllNotificationsAsRead}
+        deleteNotification={deleteNotification}
+        clearAllNotifications={clearAllNotifications}
+        notificationsMuted={notificationsMuted}
+        setNotificationsMuted={setNotificationsMuted}
+        // Pass the state down so the header knows when to hide
+        isSidebarOpen={isSidebarOpen} 
+      />
 
-      <main className="flex-1 p-6 md:p-8">
-        <div className="max-w-7xl mx-auto animate-[fadeIn_0.3s_ease-out]">
-          {children}
-        </div>
-      </main>
+      <AdminMiniSidebar
+        currentPath={currentPath}
+        navigateTo={navigateTo}
+      />
 
-      <footer className="py-8 px-8 border-t border-violet-900/10 text-center bg-black/20">
-        <p className="text-[10px] text-neutral-600 font-black uppercase tracking-[0.3em] font-mono">
-          Sonikoma Command Center &bull; Privileged Access Only
-        </p>
-      </footer>
+      <AdminSidebar
+        currentPath={currentPath}
+        navigateTo={navigateTo}
+        isOpen={isSidebarOpen}
+        onClose={closeSidebar}
+      />
+
+      <div className="flex-1 flex flex-col pt-16 lg:pl-20 min-h-screen transition-all duration-300">
+        <main className="flex-1 p-6 md:p-8">
+          <div className="max-w-7xl mx-auto animate-[fadeIn_0.3s_ease-out]">
+            {children}
+          </div>
+        </main>
+
+        <footer className="py-6 px-8 border-t border-violet-900/10 text-center bg-[#0a0a0e]/40 mt-auto">
+          <p className="text-[10px] text-neutral-600 font-black uppercase tracking-[0.3em] font-mono">
+            Sonikoma Command Center &bull; Privileged Access Only
+          </p>
+        </footer>
+      </div>
     </div>
   );
 };

@@ -29,6 +29,7 @@ import PageNotFound from "./components/PageNotFound";
 import AdvancedSettings from "./components/Feature/video/AdvancedSettings";
 // import LogsPage from "./components/terminal/LogsPage"; // REMOVED: file doesn't exist
 import StatusPage from "./components/Status/StatusPage";
+// import TerminalLogs from "./components/Feature/terminal/TerminalLogs"; // REMOVED: file doesn't exist
 import AIModelsPage from "./components/Feature/ai_models/AIModelsPage";
 import ShortcutsPage from "./components/Shortcuts/ShortcutsPage";
 
@@ -569,10 +570,12 @@ export default function App() {
       /^\/workspace\/editor\/series\/([^\/]+)\/chapters\/([^\/]+)\/?$/
     );
     const isDetailsMode = currentPath.endsWith("/details");
+    const isWorkspaceEditorRoot =
+      currentPath === "/workspace/editor" || currentPath === "/workspace/editor/";
 
     const isWorkspacePath =
       currentPath === "/workspace" ||
-      (chapterPathMatch !== null && !isDetailsMode && !currentPath.startsWith("/workspace/editor"));
+      (chapterPathMatch !== null && !isDetailsMode && !currentPath.startsWith("/workspace/editor/"));
 
     return {
       chapterPathMatch,
@@ -586,7 +589,9 @@ export default function App() {
       isBubbleCleanerPath: currentPath === "/bubble-cleaner",
       isEditorPath:
         currentPath.startsWith("/editor") ||
-        currentPath.startsWith("/workspace/editor"),
+        currentPath === "/workspace/editor" ||
+        currentPath === "/workspace/editor/" ||
+        currentPath.startsWith("/workspace/editor/"),
       isLogsPath: currentPath === "/logs",
       isStatusPath: currentPath === "/status",
       isAIModelsPath: currentPath === "/ai-models",
@@ -603,7 +608,7 @@ export default function App() {
       isYouTubePath: currentPath === "/youtube",
       isProfilePath: currentPath === "/profile",
       isNotificationsPath: currentPath === "/notifications",
-      isAdminPath: currentPath === "/admin",
+      isAdminPath: currentPath === "/admin" || currentPath.startsWith("/admin/"),
       isChapterDetailsPath: false,
       isProjectEditorPath: false,
       isSeriesDetailsPath:
@@ -674,7 +679,8 @@ export default function App() {
     Boolean(editorRouteMatch) ||
     currentPath === "/editor" ||
     currentPath === "/editor/" ||
-    isWorkspaceEditorRoot ||
+    currentPath === "/workspace/editor" ||
+    currentPath === "/workspace/editor/" ||
     currentPath.startsWith("/workspace/editor/");
   const editorSeriesSlug = editorRouteMatch?.[1] || seriesSlugState || null;
   const editorChapterSlug = editorRouteMatch?.[2] || chapterSlugState || null;
@@ -865,7 +871,8 @@ export default function App() {
     !isRegisterPath &&
     !isForgotPasswordPath &&
     !isDisplayPath &&
-    currentPath !== "/workspace"
+    currentPath !== "/workspace" &&
+    !currentPath.startsWith("/workspace/editor")
   ) {
     setTimeout(() => navigateTo("/"), 0);
     return <LoadingPage status="Redirecting to Landing Page..." />;
