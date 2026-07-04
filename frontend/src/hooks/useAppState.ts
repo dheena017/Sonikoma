@@ -499,12 +499,24 @@ export function useAppState() {
         return;
       }
 
-      const lookupId = urlProjectId || chapterSlug;
+      const lookupId = urlProjectId ?? chapterSlug;
+      if (!lookupId) return;
+
       if (
         lookupId === projectIdRef.current ||
         lookupId === chapterSlugStateRef.current
       )
         return;
+
+      if (lookupId.startsWith("temp_")) {
+        setProjectId(lookupId);
+        setSeriesSlugState(null);
+        setChapterSlugState(null);
+        localStorage.setItem("active_project_id", lookupId);
+        localStorage.removeItem("active_series_slug");
+        localStorage.removeItem("active_chapter_slug");
+        return;
+      }
 
       loadProject(lookupId);
     };
@@ -610,7 +622,7 @@ export function useAppState() {
           );
         }
       } catch (err: any) {
-        if (err.message?.includes("404")) {
+        if (err.message?.includes("404") || err.message?.includes("Project not found")) {
           console.warn(
             `[AppState] Project ${lookupId} not found. Clearing broken workspace state.`
           );

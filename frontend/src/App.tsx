@@ -570,10 +570,12 @@ export default function App() {
       /^\/workspace\/editor\/series\/([^\/]+)\/chapters\/([^\/]+)\/?$/
     );
     const isDetailsMode = currentPath.endsWith("/details");
+    const isWorkspaceEditorRoot =
+      currentPath === "/workspace/editor" || currentPath === "/workspace/editor/";
 
     const isWorkspacePath =
       currentPath === "/workspace" ||
-      (chapterPathMatch !== null && !isDetailsMode && !currentPath.startsWith("/workspace/editor"));
+      (chapterPathMatch !== null && !isDetailsMode && !currentPath.startsWith("/workspace/editor/"));
 
     return {
       chapterPathMatch,
@@ -587,7 +589,9 @@ export default function App() {
       isBubbleCleanerPath: currentPath === "/bubble-cleaner",
       isEditorPath:
         currentPath.startsWith("/editor") ||
-        currentPath.startsWith("/workspace/editor"),
+        currentPath === "/workspace/editor" ||
+        currentPath === "/workspace/editor/" ||
+        currentPath.startsWith("/workspace/editor/"),
       isLogsPath: currentPath === "/logs",
       isStatusPath: currentPath === "/status",
       isAIModelsPath: currentPath === "/ai-models",
@@ -675,7 +679,8 @@ export default function App() {
     Boolean(editorRouteMatch) ||
     currentPath === "/editor" ||
     currentPath === "/editor/" ||
-    isWorkspaceEditorRoot ||
+    currentPath === "/workspace/editor" ||
+    currentPath === "/workspace/editor/" ||
     currentPath.startsWith("/workspace/editor/");
   const editorSeriesSlug = editorRouteMatch?.[1] || seriesSlugState || null;
   const editorChapterSlug = editorRouteMatch?.[2] || chapterSlugState || null;
@@ -866,7 +871,8 @@ export default function App() {
     !isRegisterPath &&
     !isForgotPasswordPath &&
     !isDisplayPath &&
-    currentPath !== "/workspace"
+    currentPath !== "/workspace" &&
+    !currentPath.startsWith("/workspace/editor")
   ) {
     setTimeout(() => navigateTo("/"), 0);
     return <LoadingPage status="Redirecting to Landing Page..." />;
