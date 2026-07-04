@@ -123,8 +123,8 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
         }`}
       >
         {/* Inner scrolling container so the header stays fixed at the top */}
-        <div className="flex-1 overflow-y-auto w-full h-full relative">
-          <div className="animate-[fadeIn_0.3s_ease-out]">{children}</div>
+        <div className="flex-1  w-full h-full relative">
+          <div className="animate-[fadeIn_0.3s_ease-out] w-full h-full flex flex-col">{children}</div>
         </div>
       </div>
     </div>
