@@ -30,76 +30,87 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
   className,
   style,
 }) => {
-  const headerSurfaceClass = isSidebarOpen
-    ? "hidden"
-    : "border-white/10 bg-[#0f1014]/95 shadow-2xl shadow-black/40 backdrop-blur-xl";
+  // Smoothly slide out of view if the mobile/drawer sidebar is open
+  const headerVisibilityClass = isSidebarOpen
+    ? "-translate-y-full opacity-0 pointer-events-none"
+    : "translate-y-0 opacity-100";
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 mb-0 flex min-w-0 flex-wrap items-center justify-between gap-2 rounded-none border px-3 py-2 transition-all duration-300 ${headerSurfaceClass}`}
+      className={`fixed top-0 left-0 right-0 z-50 h-16 flex min-w-0 flex-wrap items-center justify-between gap-2 border-b border-purple-900/20 bg-[#0a0a0e]/90 backdrop-blur-md shadow-2xl shadow-black/40 pr-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${className || ""}`}
       style={style}
     >
       {/* Left Section - Menu Icon + Title */}
-      <div className="flex items-center gap-2 min-w-0">
-        {onToggleSidebar && (
-          <button
-            onClick={onToggleSidebar}
-            className="flex-shrink-0 p-2 rounded-xl border border-white/10 bg-white/5 text-neutral-200 hover:bg-white/10 transition"
-            title={isSidebarCollapsed ? "Open sidebar" : "Close sidebar"}
-          >
-            <Menu className="h-4 w-4" />
-          </button>
-        )}
-        <img
-          src="/logo.png"
-          onError={(e) => {
-            (e.currentTarget as HTMLImageElement).src = "/logo.png";
-          }}
-          alt="Croex Logo"
-          className="h-10 w-10 rounded-full bg-neutral-900 shadow-lg shadow-purple-900/30 object-cover"
-        />
-        <div className="min-w-0">
-          <p className="font-mono text-[10px] font-black uppercase tracking-[0.25em] text-purple-400/80">
-            Editor workspace
-          </p>
-          <div className="mt-1 flex items-center gap-2">
-            <LayoutPanelTop className="h-4 w-4 text-purple-400" />
-            <h2 className="truncate text-sm font-semibold text-white">{title}</h2>
+      <div className="flex items-center shrink-0">
+        {/* PREMIUM ALIGNMENT FIX: w-20 wrapper perfectly aligns the menu button above the mini-sidebar */}
+        <div className="w-16 lg:w-20 flex items-center justify-center shrink-0">
+          {onToggleSidebar && (
+            <button
+              onClick={onToggleSidebar}
+              className="p-1.5 rounded-lg border border-white/10 bg-white/5 text-neutral-400 hover:text-white cursor-pointer transition-colors active:scale-95"
+              title={isSidebarCollapsed ? "Open sidebar" : "Close sidebar"}
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          )}
+        </div>
+
+        <div className="flex items-center gap-3 cursor-pointer">
+          <img
+            src="/logo.png"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = "/logo.png";
+            }}
+            alt="Sonikoma Logo"
+            className="h-9 w-9 rounded-full bg-neutral-900 shadow-lg shadow-purple-900/30 object-cover border border-white/5"
+          />
+          <div className="min-w-0 hidden sm:block">
+            <p className="font-mono text-[9px] font-black uppercase tracking-[0.25em] text-purple-400/80 leading-none">
+              Editor Workspace
+            </p>
+            <div className="mt-1 flex items-center gap-2">
+              <LayoutPanelTop className="h-3.5 w-3.5 text-purple-400" />
+              <h2 className="truncate text-sm font-bold text-white leading-none tracking-wide">{title}</h2>
+            </div>
+            {subtitle ? (
+              <p className="mt-1 truncate text-[10px] text-neutral-400 font-mono leading-none">{subtitle}</p>
+            ) : null}
           </div>
-          {subtitle ? (
-            <p className="mt-1 truncate text-xs text-neutral-400">{subtitle}</p>
-          ) : null}
         </div>
       </div>
 
       {/* Right Section - Action Buttons */}
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={() => setIsFocusMode((value) => !value)}
-          className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-semibold text-neutral-200 transition hover:bg-white/10"
+          className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-bold transition-all active:scale-95 cursor-pointer ${
+            isFocusMode 
+              ? "border-purple-500/50 bg-purple-500/10 text-purple-300 shadow-[inset_0_0_12px_rgba(168,85,247,0.15)]" 
+              : "border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
+          }`}
         >
           <Focus className="h-3.5 w-3.5" />
-          {isFocusMode ? "Exit focus" : "Focus mode"}
+          <span className="hidden sm:inline">{isFocusMode ? "Exit Focus" : "Focus Mode"}</span>
         </button>
 
         <button
           type="button"
           onClick={onSave}
           disabled={isSaving}
-          className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-2.5 py-1.5 text-xs font-semibold text-white transition hover:from-purple-500 hover:to-indigo-500 disabled:cursor-not-allowed disabled:opacity-70"
+          className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-1.5 text-xs font-bold text-white transition-all hover:from-purple-500 hover:to-indigo-500 hover:shadow-[0_4px_14px_rgba(168,85,247,0.4)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 cursor-pointer"
         >
-          <Save className="h-3.5 w-3.5" />
-          {isSaving ? "Saving..." : "Save"}
+          <Save className={`h-3.5 w-3.5 ${isSaving ? "animate-pulse" : ""}`} />
+          {isSaving ? "Saving..." : "Save Project"}
         </button>
 
         <button
           type="button"
           onClick={onBackToApp}
-          className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-neutral-900/80 px-2.5 py-1.5 text-xs font-semibold text-neutral-200 transition hover:bg-neutral-800"
+          className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-neutral-900/60 hover:bg-neutral-800 px-3 py-1.5 text-xs font-bold text-neutral-300 transition-all hover:text-white active:scale-95 cursor-pointer"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Back
+          <span className="hidden sm:inline">Back</span>
         </button>
       </div>
     </header>

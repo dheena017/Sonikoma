@@ -29,16 +29,18 @@ const VideoMonitor = React.memo(({
   quality,
 }: VideoMonitorProps) => {
   return (
-    <div className="space-y-4">
-      <VideoMonitorTabs
-        activePreviewTab={activePreviewTab}
-        setActivePreviewTab={setActivePreviewTab}
-        videoUrl={videoUrl}
-        panels={panels}
-        aspectRatio={aspectRatio}
-      />
+    <div className="relative w-full h-full flex flex-col items-center justify-center">
+      <div className="absolute top-4 right-4 z-50 bg-black/50 backdrop-blur-md rounded-xl p-1 border border-white/10 hidden md:block">
+        <VideoMonitorTabs
+          activePreviewTab={activePreviewTab}
+          setActivePreviewTab={setActivePreviewTab}
+          videoUrl={videoUrl}
+          panels={panels}
+          aspectRatio={aspectRatio}
+        />
+      </div>
 
-      <div className={`transition-all duration-300 ${quality === 'draft' ? 'blur-[1px] brightness-90 grayscale-[0.2]' : ''}`}>
+      <div className={`w-full h-full max-h-screen flex items-center justify-center transition-all duration-300 ${quality === 'draft' ? 'blur-[1px] brightness-90 grayscale-[0.2]' : ''}`}>
         <VideoMonitorActive
           activePreviewTab={activePreviewTab}
           videoUrl={videoUrl}

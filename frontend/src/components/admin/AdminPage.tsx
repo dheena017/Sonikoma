@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { ShieldAlert } from "lucide-react";
+import { ShieldAlert, Lock, ArrowLeft } from "lucide-react";
 import * as api from "@/api";
 import {
   AdminActivityTab,
@@ -16,7 +16,7 @@ import {
   AdminUsageTab,
   AdminUsersTab,
 } from "./Tabs";
-import AdminLayout from "./AdminLayout.js";
+import AdminLayout from "./AdminLayout";
 
 const AdminPage = React.memo(({
   navigateTo,
@@ -69,6 +69,7 @@ const AdminPage = React.memo(({
 
   const fetchAnalytics = async () => {
     try {
+      setLoadingAnalytics(true);
       const data = await api.adminGetAnalytics(fetchWithInterceptor);
       if (data.success) setAnalytics(data.analytics);
     } catch (err) {
@@ -90,20 +91,34 @@ const AdminPage = React.memo(({
     if (activeTab === "analytics" || activeTab === "finance" || activeTab === "usage") fetchAnalytics();
   }, [activeTab]);
 
+  // PREMIUM UPGRADE: High-end "Access Denied" security screen
   if (!isAuthenticated) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center min-h-[50vh]">
-        <ShieldAlert className="w-16 h-16 text-rose-500 mb-4" />
-        <h2 className="text-2xl font-bold text-neutral-200">Access Denied</h2>
-        <p className="text-neutral-400 mt-2">
-          You must be logged in as an administrator to access this area.
-        </p>
-        <button
-          onClick={() => navigateTo("/")}
-          className="mt-6 px-6 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg font-medium transition-colors"
-        >
-          Return Home
-        </button>
+      <div className="min-h-screen bg-[#050507] flex flex-col items-center justify-center p-6 selection:bg-rose-500/30">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-rose-900/20 via-[#050507] to-[#050507] pointer-events-none" />
+        
+        <div className="relative z-10 max-w-md w-full bg-[#0a0a0e]/80 backdrop-blur-xl border border-rose-900/30 p-8 rounded-3xl shadow-2xl shadow-rose-900/20 text-center animate-[fadeIn_0.4s_ease-out]">
+          <div className="w-20 h-20 bg-rose-500/10 rounded-2xl mx-auto flex items-center justify-center mb-6 border border-rose-500/20 shadow-[inset_0_0_20px_rgba(244,63,94,0.2)]">
+            <ShieldAlert className="w-10 h-10 text-rose-500 animate-pulse" />
+          </div>
+          
+          <h2 className="text-2xl font-black text-white tracking-tight flex items-center justify-center gap-2">
+            <Lock className="w-5 h-5 text-rose-500" /> Access Restricted
+          </h2>
+          
+          <p className="text-neutral-400 mt-3 text-sm leading-relaxed">
+            You are attempting to access a secured administrative zone. Valid high-level authorization is required.
+          </p>
+          
+          <div className="mt-8 pt-6 border-t border-rose-900/20">
+            <button
+              onClick={() => navigateTo("/")}
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-bold text-white transition-all active:scale-95 cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4" /> Return to Safety
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -156,12 +171,13 @@ const AdminPage = React.memo(({
   };
 
   return (
+    // AdminLayout now flawlessly handles the fixed header, sidebar, and layout padding
     <AdminLayout
       currentPath={currentPath}
       navigateTo={navigateTo}
       fetchWithInterceptor={fetchWithInterceptor}
     >
-      <div className="min-h-[600px]">
+      <div className="w-full animate-[fadeIn_0.3s_ease-out]">
         {renderActiveModule()}
       </div>
     </AdminLayout>
