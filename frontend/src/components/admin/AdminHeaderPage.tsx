@@ -1,12 +1,22 @@
-import React, { useState, useEffect } from "react";
-import { Search, Bell, Clock, ExternalLink, Shield, Zap, Menu } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Search, Bell, BellOff, Clock, ExternalLink, Shield, Zap, Menu } from "lucide-react";
 import * as api from "@/api";
+// Adjust this import path if your NotificationDropdown is located elsewhere
+import NotificationDropdown from "../notification/NotificationDropdown"; 
 
-interface AdminHeaderPageProps {
+export interface AdminHeaderPageProps {
   currentPath: string;
   navigateTo: (path: string) => void;
   fetchWithInterceptor: any;
-  onToggleSidebar?: () => void; // Added to trigger the sidebar from the header
+  onToggleSidebar?: () => void;
+  // Notification Props added below
+  notifications?: any[];
+  markNotificationAsRead?: (id: number) => void;
+  markAllNotificationsAsRead?: () => void;
+  deleteNotification?: (id: number) => void;
+  clearAllNotifications?: () => void;
+  notificationsMuted?: boolean;
+  setNotificationsMuted?: (muted: boolean) => void;
 }
 
 interface AdminStats {
@@ -30,6 +40,13 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
   navigateTo,
   fetchWithInterceptor,
   onToggleSidebar,
+  notifications = [],
+  markNotificationAsRead = () => {},
+  markAllNotificationsAsRead = () => {},
+  deleteNotification = () => {},
+  clearAllNotifications = () => {},
+  notificationsMuted = false,
+  setNotificationsMuted,
 }) => {
   const [stats, setStats] = useState<AdminStats>({
     users: 0,
@@ -45,6 +62,26 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoadingStats, setIsLoadingStats] = useState(false);
+  
+  // Notification State & Refs
+  const [showNotifications, setShowNotifications] = useState(false);
+  const notificationsRef = useRef<HTMLDivElement>(null);
+  
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
+
+  // Click outside to close notifications
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        notificationsRef.current &&
+        !notificationsRef.current.contains(event.target as Node)
+      ) {
+        setShowNotifications(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const fetchStats = async () => {
     try {
@@ -76,16 +113,10 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* PREMIUM HEADER FIX: 
-        1. Changed 'sticky top-16' to 'fixed top-0'
-        2. Added glassmorphism (backdrop-blur-md)
-        3. Removed horizontal padding (px-8) and replaced it with pr-6 so left edge is flush 
-      */}
       <header className="h-16 bg-[#0a0a0e]/90 backdrop-blur-md border-b border-violet-900/20 fixed top-0 left-0 w-full z-50 flex items-center justify-between pr-6 md:pr-8">
         
         {/* Left side: Hamburger and Brand */}
         <div className="flex items-center shrink-0">
-          {/* Exactly w-20 to perfectly align with the MiniSidebar below it */}
           <div className="w-auto lg:w-20 flex items-center justify-center shrink-0 pl-4 lg:pl-0">
             <button
               onClick={onToggleSidebar}
@@ -132,16 +163,59 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
             </div>
           </div>
 
-          <button className="p-2 rounded-lg bg-neutral-900/60 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-colors cursor-pointer">
-            <Bell className="h-4 w-4" />
-          </button>
+          {/* Premium Notifications Bell & Dropdown */}
+          <div className="relative" ref={notificationsRef}>
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              className={`p-2 rounded-lg border transition-all cursor-pointer relative flex items-center justify-center ${
+                showNotifications
+                  ? "bg-violet-600 border-violet-500 text-white"
+                  : "bg-neutral-900/60 hover:bg-neutral-800 border-neutral-800 text-neutral-400 hover:text-white"
+              }`}
+              title="Notifications"
+            >
+              {notificationsMuted ? (
+                <BellOff className="h-4 w-4 text-rose-400" />
+              ) : (
+                <Bell className="h-4 w-4" />
+              )}
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white ring-2 ring-[#0a0a0e]">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </button>
+
+            {showNotifications && (
+              <div className="absolute right-0 mt-2 z-50">
+                <NotificationDropdown
+                  notifications={notifications}
+                  onClose={() => setShowNotifications(false)}
+                  onMarkAsRead={markNotificationAsRead}
+                  onMarkAllAsRead={markAllNotificationsAsRead}
+                  onDelete={deleteNotification}
+                  onClearAll={clearAllNotifications}
+                  onNavigateToAll={() => {
+                    setShowNotifications(false);
+                    navigateTo("/admin/activity"); // Or wherever your admin notifications live
+                  }}
+                  notificationsMuted={notificationsMuted}
+                  onToggleMute={() =>
+                    setNotificationsMuted &&
+                    setNotificationsMuted(!notificationsMuted)
+                  }
+                />
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
-      {/* --- Rest of your Stats overview grid stays exactly the same --- */}
-      {/* Add a pt-16 margin here so the fixed header doesn't cover your stats */}
+      {/* Stats Grid */}
       <div className="pt-16 space-y-6">
-         {/* ... Include your existing Stats Grid and Health Details here ... */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+           {/* Your existing stats rendering logic goes here exactly as it was */}
+        </div>
       </div>
     </div>
   );

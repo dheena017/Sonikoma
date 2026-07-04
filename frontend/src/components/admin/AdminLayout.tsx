@@ -1,12 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import AdminHeaderPage from "./AdminHeaderPage";
-import * as api from "@/api";
+import AdminMiniSidebar from "./AdminMiniSidebar";
+import AdminSidebar from "./AdminSidebar";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
   currentPath: string;
   navigateTo: (path: string) => void;
   fetchWithInterceptor: any;
+  // Expose notification props
+  notifications?: any[];
+  markNotificationAsRead?: (id: number) => void;
+  markAllNotificationsAsRead?: () => void;
+  deleteNotification?: (id: number) => void;
+  clearAllNotifications?: () => void;
+  notificationsMuted?: boolean;
+  setNotificationsMuted?: (muted: boolean) => void;
 }
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({
@@ -14,29 +23,63 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
   currentPath,
   navigateTo,
   fetchWithInterceptor,
+  notifications,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+  deleteNotification,
+  clearAllNotifications,
+  notificationsMuted,
+  setNotificationsMuted,
 }) => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const closeSidebar = () => setIsSidebarOpen(false);
+
   return (
-    <div className="flex-1 flex flex-col min-h-full">
-      {/* Admin Header with Stats */}
-      <AdminHeaderPage 
-        currentPath={currentPath} 
-        navigateTo={navigateTo} 
+    <div className="min-h-screen bg-[#050507] text-white flex flex-col selection:bg-violet-500/30">
+      
+      <AdminHeaderPage
+        currentPath={currentPath}
+        navigateTo={navigateTo}
         fetchWithInterceptor={fetchWithInterceptor}
+        onToggleSidebar={toggleSidebar}
+        // Pass notification props through to the header
+        notifications={notifications}
+        markNotificationAsRead={markNotificationAsRead}
+        markAllNotificationsAsRead={markAllNotificationsAsRead}
+        deleteNotification={deleteNotification}
+        clearAllNotifications={clearAllNotifications}
+        notificationsMuted={notificationsMuted}
+        setNotificationsMuted={setNotificationsMuted}
       />
 
-      {/* Main Content */}
-      <main className="flex-1 p-6 md:p-8">
-        <div className="max-w-7xl mx-auto animate-[fadeIn_0.3s_ease-out]">
-          {children}
-        </div>
-      </main>
+      <AdminMiniSidebar
+        currentPath={currentPath}
+        navigateTo={navigateTo}
+      />
 
-      {/* Footer */}
-      <footer className="py-8 px-8 border-t border-violet-900/10 text-center bg-black/20">
-        <p className="text-[10px] text-neutral-600 font-black uppercase tracking-[0.3em] font-mono">
-          Sonikoma Command Center &bull; Privileged Access Only
-        </p>
-      </footer>
+      <AdminSidebar
+        currentPath={currentPath}
+        navigateTo={navigateTo}
+        isOpen={isSidebarOpen}
+        onClose={closeSidebar}
+      />
+
+      <div className="flex-1 flex flex-col pt-16 lg:pl-20 min-h-screen transition-all duration-300">
+        <main className="flex-1 p-6 md:p-8">
+          <div className="max-w-7xl mx-auto animate-[fadeIn_0.3s_ease-out]">
+            {children}
+          </div>
+        </main>
+
+        {/* Premium Footer */}
+        <footer className="py-6 px-8 border-t border-violet-900/10 text-center bg-[#0a0a0e]/40 mt-auto">
+          <p className="text-[10px] text-neutral-600 font-black uppercase tracking-[0.3em] font-mono">
+            Sonikoma Command Center &bull; Privileged Access Only
+          </p>
+        </footer>
+      </div>
     </div>
   );
 };

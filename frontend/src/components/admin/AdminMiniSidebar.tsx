@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
 import {
-  Shield,
   LayoutGrid,
   Mail,
   Users,
@@ -15,25 +14,18 @@ import {
   Server,
   ActivitySquare,
   ExternalLink,
-  Menu,
 } from "lucide-react";
-import { useThemeMode } from "../../hooks/useThemeMode.js";
 import TooltipPortal from "../TooltipPortal";
-import { useState } from "react";
 
 interface AdminMiniSidebarProps {
   currentPath: string;
   navigateTo: (path: string) => void;
-  onOpenSidebar: () => void;
 }
 
 const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
   currentPath,
   navigateTo,
-  onOpenSidebar,
 }) => {
-  const { themeMode } = useThemeMode();
-
   const groups = [
     {
       name: "Core",
@@ -92,15 +84,15 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
             setHover(true);
           }}
           onMouseLeave={() => setHover(false)}
-          className={`p-2 transition-all duration-300 relative flex items-center justify-center ${
+          className={`p-2 transition-all duration-300 rounded-xl active:scale-95 cursor-pointer relative flex items-center justify-center ${
             active
               ? "bg-violet-600/15 text-white shadow-[inset_0_0_20px_rgba(139,92,246,0.1)] border border-violet-500/30"
               : "text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent"
           }`}
         >
           <Icon
-            className={`w-5 h-5 transition-colors duration-300 ${
-              active ? "text-violet-400" : "text-neutral-500 group-hover:text-neutral-300"
+            className={`w-5 h-5 transition-transform duration-300 ${
+              active ? "text-violet-400 scale-110" : "text-neutral-500 group-hover:scale-110 group-hover:text-neutral-300"
             }`}
           />
           {active && (
@@ -113,45 +105,30 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
   };
 
   return (
-    <aside className="fixed top-16 bottom-0 left-0 w-20 bg-[#0a0a0e] border border-violet-900/20 hidden lg:flex flex-col items-center py-0 z-40">
-      {/* Brand Icon / Expand Sidebar */}
-      <div className="mb-0 flex flex-col gap-2 items-center">
-        <div className="p-2.5 bg-violet-600 rounded-xl shadow-lg shadow-violet-600/30">
-          <Shield className="w-6 h-6 text-white" />
-        </div>
-        <button
-          onClick={onOpenSidebar}
-          className="p-2 rounded-xl bg-white/5 border border-white/10 text-neutral-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500/50"
-          title="Expand Sidebar"
-        >
-          <Menu className="h-5 w-5" />
-        </button>
-      </div>
-
+    // Fixed below the header, hidden scrollbars, glassmorphism applied
+    <aside className="fixed top-16 bottom-0 left-0 w-20 bg-[#0a0a0e]/90 backdrop-blur-md border-r border-violet-900/20 hidden lg:flex flex-col items-center py-4 z-40">
       <div
-        className="flex-1 w-full overflow-y-auto hide-scrollbar mini-sidebar-scrollbar flex flex-col items-center space-y-1 pt-2"
-        style={{ scrollbarGutter: "stable" }}
+        className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
       >
         {groups.map((group, groupIdx) => (
-          <div key={group.name} className="w-full flex flex-col items-center space-y-0">
+          <div key={group.name} className="w-full flex flex-col items-center space-y-1">
+            {groupIdx > 0 && (
+               <div className="w-6 h-px bg-gradient-to-r from-transparent via-violet-900/40 to-transparent my-1" />
+            )}
             {group.items.map((item) => (
               <SidebarItem key={item.id} item={item} />
             ))}
-            {groupIdx < groups.length - 1 && (
-              <div className="w-6 h-px bg-violet-900/10 my-0" />
-            )}
           </div>
         ))}
       </div>
 
-      {/* Footer Return Button */}
-      <div className="mt-auto pt-2 flex justify-center w-full pb-2">
+      <div className="mt-auto pt-4 flex justify-center w-full pb-2">
         <div className="relative group w-full flex justify-center">
           <button
             onClick={() => navigateTo("/dashboard")}
-            className="p-2 bg-violet-600 hover:bg-violet-500 text-white transition-all shadow-xl shadow-violet-600/20 active:scale-95 border border-violet-400/20"
+            className="p-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white transition-all shadow-xl shadow-violet-600/20 active:scale-95 border border-violet-400/20 cursor-pointer"
           >
-            <ExternalLink className="w-5 h-5 shrink-0" />
+            <ExternalLink className="w-4 h-4 shrink-0" />
           </button>
           {/* Tooltip on hover */}
           <div className="absolute left-14 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity bg-violet-950 border border-violet-800 text-white text-xs px-2.5 py-1.5 rounded-lg whitespace-nowrap z-50 shadow-xl font-mono">
