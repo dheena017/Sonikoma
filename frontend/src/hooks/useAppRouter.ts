@@ -173,6 +173,14 @@ export function useAppRouter({
       // Root redirect logic
       if (!isInitializing && !authLoading) {
         if (!isAuthenticated) {
+          const isEditorRoute =
+            path === "/workspace/editor" ||
+            path === "/workspace/editor/" ||
+            path.startsWith("/workspace/editor/") ||
+            path === "/editor" ||
+            path === "/editor/" ||
+            path.startsWith("/editor/");
+
           const isProtectedRoute =
             path === "/dashboard" ||
             path === "/workspace" ||
@@ -200,11 +208,9 @@ export function useAppRouter({
             path === "/project-editor" ||
             path === "/admin" ||
             path.startsWith("/admin/") ||
-            path.startsWith("/series/") ||
-            path.startsWith("/workspace/editor") ||
-            path.startsWith("/editor");
+            path.startsWith("/series/");
 
-          if (isProtectedRoute) {
+          if (isProtectedRoute && !isEditorRoute) {
             window.history.replaceState({}, "", "/");
             setCurrentPath("/");
             return;

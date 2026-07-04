@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import EditorSidebar from "./EditorSidebar";
 import EditorMiniSidebar from "./EditorMiniSidebar";
 import EditorPageHeader from "./EditorPageHeader";
@@ -44,16 +44,30 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
 }) => {
   const isSidebarOpen = !isSidebarCollapsed && !isFocusMode;
 
+  // PREMIUM SCROLL LOCK: Prevent the background page from scrolling when the sidebar overlay is open
+  useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isSidebarOpen]);
+
   return (
-    <div className="flex min-h-screen overflow-hidden bg-[#070709] text-white">
-      {/* Blurred Background Overlay when sidebar is open */}
+    <div className="flex min-h-screen bg-[#050507] text-white selection:bg-purple-500/30 overflow-hidden">
+      
+      {/* Blurred Background Overlay when expanded sidebar is open */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 transition-opacity animate-fade-in"
           onClick={() => setIsSidebarCollapsed(true)}
         />
       )}
 
+      {/* Sidebars */}
       {!isFocusMode && (isSidebarCollapsed ? (
         <EditorMiniSidebar
           isCollapsed={isSidebarCollapsed}
@@ -82,7 +96,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
         />
       ))}
 
-      {/* Fixed Header */}
+      {/* Fixed Premium Header */}
       {!isFocusMode && (
         <EditorPageHeader
           title={title}
@@ -95,21 +109,29 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
           onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           isSidebarCollapsed={isSidebarCollapsed}
           isSidebarOpen={isSidebarOpen}
-          className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
         />
       )}
 
+      {/* Main Content Wrapper 
+          PREMIUM LAYOUT SPACING: 
+          - pt-16 (64px) clears the fixed header.
+          - pl-20 (80px) clears the fixed mini sidebar so content doesn't hide underneath.
+      */}
       <div
-        className={`flex flex-1 flex-col transition-all duration-300 ${
+        className={`flex flex-1 flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] h-screen ${
           isFocusMode
-            ? "pt-4 ml-0"
-            : "pt-24 ml-0"
+            ? "pt-0 pl-0"
+            : "pt-16 pl-20"
         }`}
       >
-        <div className="flex-1 overflow-y-auto">
-          {children}
+        {/* Inner scrolling container so the header stays fixed at the top */}
+        <div className="flex-1 overflow-y-auto w-full h-full relative">
+          <div className="animate-[fadeIn_0.3s_ease-out]">
+            {children}
+          </div>
         </div>
       </div>
+      
     </div>
   );
 };

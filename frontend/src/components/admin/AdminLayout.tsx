@@ -8,7 +8,6 @@ interface AdminLayoutProps {
   currentPath: string;
   navigateTo: (path: string) => void;
   fetchWithInterceptor: any;
-  // Expose notification props
   notifications?: any[];
   markNotificationAsRead?: (id: number) => void;
   markAllNotificationsAsRead?: () => void;
@@ -44,7 +43,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
         navigateTo={navigateTo}
         fetchWithInterceptor={fetchWithInterceptor}
         onToggleSidebar={toggleSidebar}
-        // Pass notification props through to the header
         notifications={notifications}
         markNotificationAsRead={markNotificationAsRead}
         markAllNotificationsAsRead={markAllNotificationsAsRead}
@@ -52,6 +50,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
         clearAllNotifications={clearAllNotifications}
         notificationsMuted={notificationsMuted}
         setNotificationsMuted={setNotificationsMuted}
+        // Pass the state down so the header knows when to hide
+        isSidebarOpen={isSidebarOpen} 
       />
 
       <AdminMiniSidebar
@@ -73,7 +73,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
           </div>
         </main>
 
-        {/* Premium Footer */}
         <footer className="py-6 px-8 border-t border-violet-900/10 text-center bg-[#0a0a0e]/40 mt-auto">
           <p className="text-[10px] text-neutral-600 font-black uppercase tracking-[0.3em] font-mono">
             Sonikoma Command Center &bull; Privileged Access Only

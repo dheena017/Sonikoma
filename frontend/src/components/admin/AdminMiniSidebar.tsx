@@ -76,7 +76,16 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
     const Icon = item.icon;
 
     return (
-      <div className="relative group w-full flex justify-center">
+      <div className="relative group w-full flex justify-center py-0.5">
+        {/* Premium Floating Active Pill */}
+        <div 
+          className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 ${
+            active 
+              ? "h-5 bg-violet-400 shadow-[0_0_12px_rgba(167,139,250,0.8)] opacity-100" 
+              : "h-0 bg-transparent opacity-0"
+          }`} 
+        />
+
         <button
           onClick={() => navigateTo(item.path)}
           onMouseEnter={(e) => {
@@ -84,20 +93,17 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
             setHover(true);
           }}
           onMouseLeave={() => setHover(false)}
-          className={`p-2 transition-all duration-300 rounded-xl active:scale-95 cursor-pointer relative flex items-center justify-center ${
+          className={`p-2.5 transition-all duration-300 rounded-xl cursor-pointer relative flex items-center justify-center group-active:scale-95 ${
             active
-              ? "bg-violet-600/15 text-white shadow-[inset_0_0_20px_rgba(139,92,246,0.1)] border border-violet-500/30"
-              : "text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent"
+              ? "bg-violet-500/10 text-white border border-violet-500/20 shadow-[inset_0_0_12px_rgba(139,92,246,0.15)]"
+              : "text-neutral-500 hover:text-neutral-200 hover:bg-white/5 border border-transparent hover:scale-105"
           }`}
         >
           <Icon
-            className={`w-5 h-5 transition-transform duration-300 ${
-              active ? "text-violet-400 scale-110" : "text-neutral-500 group-hover:scale-110 group-hover:text-neutral-300"
+            className={`w-[18px] h-[18px] transition-transform duration-300 ${
+              active ? "text-violet-400" : "group-hover:text-neutral-200"
             }`}
           />
-          {active && (
-            <div className="absolute left-0 w-1 h-6 bg-violet-500 rounded-r-full shadow-[0_0_15px_rgba(139,92,246,0.8)]" />
-          )}
         </button>
         <TooltipPortal text={item.label} visible={hover} anchorRect={rect} />
       </div>
@@ -105,16 +111,19 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
   };
 
   return (
-    // Fixed below the header, hidden scrollbars, glassmorphism applied
-    <aside className="fixed top-16 bottom-0 left-0 w-20 bg-[#0a0a0e]/90 backdrop-blur-md border-r border-violet-900/20 hidden lg:flex flex-col items-center py-4 z-40">
+    // Fixed below the header, hidden scrollbars, premium glassmorphism
+    <aside className="fixed top-16 bottom-0 left-0 w-20 bg-[#0a0a0e]/80 backdrop-blur-xl border-r border-violet-900/10 hidden lg:flex flex-col items-center py-4 z-40 shadow-[4px_0_24px_rgba(0,0,0,0.4)]">
       <div
-        className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2"
       >
         {groups.map((group, groupIdx) => (
-          <div key={group.name} className="w-full flex flex-col items-center space-y-1">
+          <div key={group.name} className="w-full flex flex-col items-center pb-2">
+            
+            {/* Soft, premium gradient dot separator between groups */}
             {groupIdx > 0 && (
-               <div className="w-6 h-px bg-gradient-to-r from-transparent via-violet-900/40 to-transparent my-1" />
+               <div className="w-1 h-1 rounded-full bg-violet-900/50 shadow-[0_0_4px_rgba(139,92,246,0.3)] my-2" />
             )}
+            
             {group.items.map((item) => (
               <SidebarItem key={item.id} item={item} />
             ))}
@@ -122,16 +131,17 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
         ))}
       </div>
 
-      <div className="mt-auto pt-4 flex justify-center w-full pb-2">
+      {/* Return to App Button */}
+      <div className="mt-auto pt-4 flex justify-center w-full pb-2 border-t border-white/[0.02]">
         <div className="relative group w-full flex justify-center">
           <button
             onClick={() => navigateTo("/dashboard")}
-            className="p-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white transition-all shadow-xl shadow-violet-600/20 active:scale-95 border border-violet-400/20 cursor-pointer"
+            className="p-3 rounded-2xl bg-gradient-to-b from-violet-500 to-violet-700 hover:from-violet-400 hover:to-violet-600 text-white transition-all shadow-[0_4px_14px_rgba(139,92,246,0.4)] hover:shadow-[0_6px_20px_rgba(139,92,246,0.6)] active:scale-90 border border-violet-400/30 cursor-pointer"
           >
-            <ExternalLink className="w-4 h-4 shrink-0" />
+            <ExternalLink className="w-[18px] h-[18px] shrink-0" />
           </button>
-          {/* Tooltip on hover */}
-          <div className="absolute left-14 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity bg-violet-950 border border-violet-800 text-white text-xs px-2.5 py-1.5 rounded-lg whitespace-nowrap z-50 shadow-xl font-mono">
+          
+          <div className="absolute left-16 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 -translate-x-2 group-hover:translate-x-0 bg-neutral-900 border border-white/10 text-white text-xs px-3 py-1.5 rounded-lg whitespace-nowrap z-50 shadow-2xl font-medium tracking-wide">
             Return to App
           </div>
         </div>

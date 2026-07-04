@@ -67,15 +67,23 @@ const EditorSidebar = ({
 
   return (
     <aside
-      className={`fixed inset-y-0 left-4 h-screen bg-[#0a0a0f] border border-white/5 rounded-none flex flex-col transition-all duration-300 z-40 shadow-2xl shadow-black/60 overflow-hidden ${
-        isCollapsed ? "w-16" : "w-64"
+      className={`fixed top-0 bottom-0 left-0 h-screen bg-[#0a0a0e]/90 backdrop-blur-2xl border-r border-purple-900/10 flex flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-50 shadow-[8px_0_32px_rgba(0,0,0,0.6)] overflow-hidden ${
+        isCollapsed ? "w-20" : "w-[280px]"
       }`}
     >
-      <div className="p-2 border-b border-white/5 flex items-center justify-end">
+      {/* Top Header / Close Area (This perfectly replaces the space where the main header used to be) */}
+      <div className={`flex items-center border-b border-white/[0.02] transition-all duration-300 shrink-0 ${isCollapsed ? "p-4 justify-center" : "h-16 px-4 justify-between"}`}>
+        {!isCollapsed && (
+          <span className="text-[10px] font-black text-purple-400/50 uppercase tracking-[0.25em] font-mono ml-2">
+            Workspace
+          </span>
+        )}
+        
+        {/* Mobile/Desktop Close Button */}
         {!isCollapsed && (
           <button
             onClick={() => setIsCollapsed(true)}
-            className="flex-shrink-0 p-1 rounded-lg text-neutral-400 hover:text-white hover:bg-white/5 transition"
+            className="p-1.5 rounded-lg border border-white/10 bg-white/5 text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer active:scale-95"
             title="Close sidebar"
           >
             <X className="w-4 h-4" />
@@ -83,67 +91,96 @@ const EditorSidebar = ({
         )}
       </div>
 
-      {/* Exit Button */}
-      <div className="p-2 border-b border-white/5">
+      {/* Exit Button - Styled as a Premium Action */}
+      <div className="p-4 border-b border-white/[0.02]">
         <button
           onClick={onBackToApp}
-          className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900/50 hover:bg-neutral-800 text-neutral-400 hover:text-white transition-all border border-white/5"
+          className={`flex items-center justify-center rounded-2xl bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white transition-all active:scale-95 border border-white/10 cursor-pointer ${
+            isCollapsed ? "h-12 w-12" : "w-full py-3 gap-3"
+          }`}
           title="Back to Dashboard"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-5 h-5 shrink-0" />
+          {!isCollapsed && <span className="text-xs font-bold tracking-wide">Return to App</span>}
         </button>
       </div>
 
-      {/* Navigation */}
-      <div className="flex-1 overflow-y-auto py-3 px-2 space-y-1">
+      {/* Navigation Groups */}
+      <div className="flex-1 overflow-y-auto py-6 px-3 space-y-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const pathname = window.location.pathname;
           const isActive =
             currentSection === item.id ||
             pathname === item.path ||
-            pathname.startsWith(`${item.path}/`);
+            (item.path && pathname.startsWith(`${item.path}/`));
+
           return (
-            <button
-              key={item.id}
-              onClick={() => {
-                setCurrentSection(item.id);
-                // Also scroll to section in the grid if needed
-                const el = document.getElementById(`section-${item.id}`);
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl transition-all duration-200 group relative ${
-                isActive
-                  ? "bg-purple-600/10 text-purple-400 border border-purple-500/20 shadow-[0_0_15px_rgba(147,51,234,0.1)]"
-                  : "text-neutral-500 hover:text-neutral-300 hover:bg-white/5 border border-transparent"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <Icon className={`w-5 h-5 shrink-0 ${isActive ? "text-purple-400" : "group-hover:text-neutral-300"}`} />
-                {!isCollapsed && <span className="text-xs font-bold font-mono">{item.label}</span>}
-              </div>
+            <div key={item.id} className="relative flex justify-center">
+              {/* Premium Floating Active Pill */}
+              <div 
+                className={`absolute left-1 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
+                  isActive 
+                    ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] opacity-100" 
+                    : "h-0 bg-transparent opacity-0"
+                }`} 
+              />
 
-              {item.badge !== undefined && !isCollapsed && (
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold font-mono ${isActive ? "bg-purple-500/20 text-purple-300" : "bg-neutral-800 text-neutral-500"}`}>
-                  {item.badge}
-                </span>
-              )}
+              <button
+                onClick={() => {
+                  setCurrentSection(item.id);
+                  const el = document.getElementById(`section-${item.id}`);
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className={`w-full flex items-center ${isCollapsed ? "justify-center p-3" : "justify-between px-4 py-3"} rounded-2xl transition-all duration-300 group relative cursor-pointer active:scale-[0.98] ${
+                  isActive
+                    ? "bg-purple-500/10 text-white shadow-[inset_0_0_16px_rgba(168,85,247,0.15)] border border-purple-500/20"
+                    : "text-neutral-500 hover:text-white hover:bg-white/5 border border-transparent"
+                }`}
+                title={isCollapsed ? item.label : undefined}
+              >
+                <div className="flex items-center gap-3.5">
+                  <Icon className={`w-[18px] h-[18px] shrink-0 transition-transform duration-300 ${isActive ? "text-purple-400" : "group-hover:scale-110 group-hover:text-neutral-300"}`} />
+                  {!isCollapsed && <span className="text-sm font-bold tracking-wide">{item.label}</span>}
+                </div>
 
-              {item.isProcessing && (
-                <span className={`absolute right-2 top-3 h-2 w-2 rounded-full bg-purple-500 animate-ping`} />
-              )}
-            </button>
+                {/* Badge Logic */}
+                {item.badge !== undefined && (
+                  <span className={`absolute ${isCollapsed ? "-top-1 -right-1" : "relative top-0 right-0"} flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-lg text-[10px] font-bold font-mono transition-colors border ${
+                    isActive 
+                      ? "bg-purple-500/20 text-purple-300 border-purple-500/30" 
+                      : "bg-neutral-900 text-neutral-500 border-white/5"
+                  }`}>
+                    {item.badge}
+                  </span>
+                )}
+
+                {/* Processing Ping */}
+                {item.isProcessing && (
+                  <span className={`absolute ${isCollapsed ? "top-1 right-1" : "top-1/2 -translate-y-1/2 right-3"} h-2 w-2 rounded-full bg-purple-500 animate-ping`} />
+                )}
+              </button>
+            </div>
           );
         })}
       </div>
 
-      {/* Collapse Toggle */}
-      <div className="p-2 border-t border-white/5">
+      {/* Collapse Toggle Footer */}
+      <div className="p-4 border-t border-white/[0.02] bg-gradient-to-t from-black/20 to-transparent">
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="w-full flex items-center justify-center p-1.5 rounded-xl bg-neutral-950 border border-white/5 text-neutral-500 hover:text-white transition-all"
+          className={`flex items-center justify-center p-3 rounded-2xl bg-neutral-900/60 border border-white/5 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all active:scale-95 cursor-pointer ${
+            isCollapsed ? "w-12 h-12" : "w-full gap-2"
+          }`}
         >
-          {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          {isCollapsed ? (
+            <ChevronRight className="w-[18px] h-[18px]" />
+          ) : (
+            <>
+              <ChevronLeft className="w-[18px] h-[18px]" />
+              <span className="text-xs font-bold tracking-wide">Collapse</span>
+            </>
+          )}
         </button>
       </div>
     </aside>
