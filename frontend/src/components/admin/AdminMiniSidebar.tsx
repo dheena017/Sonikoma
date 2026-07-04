@@ -92,7 +92,7 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
             setHover(true);
           }}
           onMouseLeave={() => setHover(false)}
-          className={`p-3 rounded-xl transition-all duration-300 relative flex items-center justify-center ${
+          className={`p-2 transition-all duration-300 relative flex items-center justify-center ${
             active
               ? "bg-violet-600/15 text-white shadow-[inset_0_0_20px_rgba(139,92,246,0.1)] border border-violet-500/30"
               : "text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent"
@@ -113,9 +113,9 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
   };
 
   return (
-    <aside className="fixed top-16 bottom-4 left-4 w-20 bg-[#0a0a0e] border border-violet-900/20 rounded-3xl shadow-2xl hidden lg:flex flex-col items-center py-5 z-40">
+    <aside className="fixed top-16 bottom-0 left-0 w-20 bg-[#0a0a0e] border border-violet-900/20 hidden lg:flex flex-col items-center py-0 z-40">
       {/* Brand Icon / Expand Sidebar */}
-      <div className="mb-8 flex flex-col gap-4 items-center">
+      <div className="mb-0 flex flex-col gap-2 items-center">
         <div className="p-2.5 bg-violet-600 rounded-xl shadow-lg shadow-violet-600/30">
           <Shield className="w-6 h-6 text-white" />
         </div>
@@ -129,27 +129,27 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
       </div>
 
       <div
-        className="flex-1 w-full overflow-y-auto hide-scrollbar mini-sidebar-scrollbar flex flex-col items-center space-y-6 pt-6"
+        className="flex-1 w-full overflow-y-auto hide-scrollbar mini-sidebar-scrollbar flex flex-col items-center space-y-1 pt-2"
         style={{ scrollbarGutter: "stable" }}
       >
         {groups.map((group, groupIdx) => (
-          <div key={group.name} className="w-full flex flex-col items-center space-y-3">
+          <div key={group.name} className="w-full flex flex-col items-center space-y-0">
             {group.items.map((item) => (
               <SidebarItem key={item.id} item={item} />
             ))}
             {groupIdx < groups.length - 1 && (
-              <div className="w-6 h-px bg-violet-900/10 my-2" />
+              <div className="w-6 h-px bg-violet-900/10 my-0" />
             )}
           </div>
         ))}
       </div>
 
       {/* Footer Return Button */}
-      <div className="mt-auto pt-4 flex justify-center w-full pb-6">
+      <div className="mt-auto pt-2 flex justify-center w-full pb-2">
         <div className="relative group w-full flex justify-center">
           <button
             onClick={() => navigateTo("/dashboard")}
-            className="p-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white transition-all shadow-xl shadow-violet-600/20 active:scale-95 border border-violet-400/20"
+            className="p-2 bg-violet-600 hover:bg-violet-500 text-white transition-all shadow-xl shadow-violet-600/20 active:scale-95 border border-violet-400/20"
           >
             <ExternalLink className="w-5 h-5 shrink-0" />
           </button>
