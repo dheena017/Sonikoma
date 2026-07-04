@@ -29,8 +29,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
   navigateTo,
   notificationsCount,
 }) => {
-  const isDashboardOverview =
-    currentPath === "/" || currentPath === "/dashboard";
+  const isDashboardOverview = currentPath === "/" || currentPath === "/dashboard";
   const isWorkspace = currentPath.startsWith("/workspace");
   const isProjects = currentPath.startsWith("/projects");
   const isAutoCrop = currentPath.startsWith("/auto-crop");
@@ -50,12 +49,25 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
     currentPath.startsWith("/workspace/editor");
 
   const groups = [
+    
     {
       group: "Main Workspace",
       items: [
         { label: "Dashboard", icon: LayoutDashboard, active: isDashboardOverview, onClick: () => navigateTo("/dashboard") },
         { label: "Workspace", icon: Layout, active: isWorkspace, onClick: () => navigateTo("/workspace") },
         { label: "Projects", icon: FolderOpen, active: isProjects, onClick: () => navigateTo("/projects") },
+      ],
+    },
+
+    {
+      group: "Editor Tools",
+      items: [
+        { label: "Auto-Crop", icon: Scissors, active: isAutoCrop, onClick: () => navigateTo("/auto-crop") },
+        { label: "Clean-Bubbles", icon: Brain, active: isBubbleCleaner, onClick: () => navigateTo("/bubble-cleaner") },
+        { label: "Video Studio", icon: Film, active: isEditor, onClick: () => {
+          const tempId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+          navigateTo(`/workspace/editor?id=${tempId}`);
+        }},
       ],
     },
 
@@ -69,6 +81,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
         { label: "Settings", icon: Sliders, active: isSettings, onClick: () => navigateTo("/settings") },
       ],
     },
+
     {
       group: "User Area",
       items: [
@@ -77,6 +90,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
         { label: "Admin Dashboard", icon: Shield, active: isAdminPath, onClick: () => navigateTo("/admin") },
       ],
     },
+
   ];
 
   const SidebarItem: React.FC<{ item: any }> = ({ item }) => {
@@ -94,24 +108,34 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
 
     return (
       <div className="relative group w-full flex justify-center overflow-visible">
+        {/* Active Indicator Glow Pill on the far left edge */}
+        <div 
+          className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 rounded-r-full transition-all duration-300 ${
+            item.active 
+              ? "h-6 bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.7)] opacity-100" 
+              : "h-0 bg-transparent opacity-0"
+          }`} 
+        />
+
         <button
           onClick={item.onClick}
           onMouseEnter={handleEnter}
           onMouseLeave={handleLeave}
           title={item.label}
-          className={`p-2.5 rounded-xl transition-all duration-200 cursor-pointer relative flex items-center justify-center ${
+          // Added active:scale-95 for a tactile click feel
+          className={`p-2.5 rounded-xl transition-all duration-200 cursor-pointer relative flex items-center justify-center active:scale-95 ${
             item.active
-              ? "text-white bg-purple-950/20 border border-purple-900/60 shadow-inner"
-              : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 border border-transparent"
+              ? "text-white bg-purple-500/15 border border-purple-500/30 shadow-[inset_0_0_12px_rgba(168,85,247,0.1)]"
+              : "text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800/80 border border-transparent"
           }`}
         >
           <Icon
-            className={`h-5 w-5 ${
-              item.active ? "text-purple-400" : "text-neutral-500 group-hover:text-neutral-300"
+            className={`h-5 w-5 transition-transform duration-200 ${
+              item.active ? "text-purple-400 scale-110" : "text-neutral-500 group-hover:scale-110"
             }`}
           />
           {item.badge && (
-            <span className="absolute -top-1 -right-1 h-3.5 min-w-[14px] bg-purple-600 text-[9px] text-white font-bold rounded-full flex items-center justify-center px-1 border border-neutral-950">
+            <span className="absolute -top-1.5 -right-1.5 h-4 min-w-[16px] bg-purple-600 text-[10px] text-white font-bold rounded-full flex items-center justify-center px-1 border-2 border-neutral-950 shadow-sm">
               {item.badge}
             </span>
           )}
@@ -123,24 +147,31 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
 
   const [creativeHover, setCreativeHover] = useState(false);
   const [creativeRect, setCreativeRect] = useState<DOMRect | null>(null);
+  
   return (
-    <aside className={`fixed ${isProEditorPage ? "top-12" : "top-16"} bottom-4 left-4 w-20 shrink-0 bg-neutral-950/95 border border-neutral-900/60 rounded-3xl shadow-2xl hidden lg:flex flex-col items-center pb-5 z-40`}>
+    // Added backdrop-blur-2xl and opacity adjustments for a premium glass effect
+    <aside className={`fixed ${isProEditorPage ? "top-12" : "top-16"} bottom-4 left-0 w-20 shrink-0 bg-neutral-950/80 backdrop-blur-2xl border-r border-neutral-800/60 rounded-none shadow-2xl hidden lg:flex flex-col items-center pb-5 z-40`}>
       <div
-        className="flex-1 w-full overflow-y-auto overflow-x-hidden hide-scrollbar mini-sidebar-scrollbar flex flex-col items-center space-y-6 pt-3 px-2.5"
+        // Added pl-3 here to shift everything nicely to the right, leaving the left gutter empty
+        className="flex-1 w-full overflow-y-auto overflow-x-hidden hide-scrollbar mini-sidebar-scrollbar flex flex-col items-center space-y-6 pt-4 pl-3 pr-2"
         style={{ scrollbarGutter: "stable" }}
       >
         {groups.map((group, groupIdx) => (
           <div key={groupIdx} className="w-full flex flex-col items-center space-y-2">
-            <div className="w-10 h-px bg-neutral-800/50 mb-1" />
+            {/* Sleek Gradient Divider instead of a harsh solid line */}
+            {groupIdx > 0 && (
+               <div className="w-8 h-px bg-gradient-to-r from-transparent via-neutral-700/60 to-transparent mb-2" />
+            )}
+            
             {group.items.map((item) => (
               <SidebarItem key={item.label} item={item} />
             ))}
           </div>
         ))}
 
-        {/* Creative Tools Flyout menu (simplified for mini sidebar) */}
-        <div className="w-full flex flex-col items-center space-y-2">
-          <div className="w-10 h-px bg-neutral-800/50 mb-1" />
+        {/* Creative Tools Flyout menu */}
+        <div className="w-full flex flex-col items-center space-y-2 mt-2">
+          <div className="w-8 h-px bg-gradient-to-r from-transparent via-neutral-700/60 to-transparent mb-2" />
           <div className="relative group w-full flex justify-center">
             <button
               onClick={() => navigateTo("/workspace")}
@@ -150,11 +181,11 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
                 setCreativeHover(true);
               }}
               onMouseLeave={() => setCreativeHover(false)}
-              className={`p-2.5 rounded-xl transition-all duration-200 cursor-pointer relative flex items-center justify-center text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 border border-transparent`}
+              className="p-2.5 rounded-xl transition-all duration-200 cursor-pointer relative flex items-center justify-center text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800/80 border border-transparent active:scale-95"
             >
               <Sparkles className="h-5 w-5 text-neutral-500 group-hover:text-purple-400 group-hover:animate-pulse" />
-              <div className="absolute -bottom-1 -right-1 bg-neutral-800 rounded-full p-0.5 border border-neutral-900">
-                <ChevronRight className="h-2 w-2 text-neutral-400" />
+              <div className="absolute -bottom-1 -right-1 bg-neutral-900 rounded-full p-0.5 border border-neutral-700 shadow-sm">
+                <ChevronRight className="h-2.5 w-2.5 text-neutral-300" />
               </div>
             </button>
             <TooltipPortal text="Creative Suite" visible={creativeHover} anchorRect={creativeRect} />
