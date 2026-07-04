@@ -218,20 +218,7 @@ export function useAppRouter({
             path === "/login" ||
             path === "/register"
           ) {
-            const activeProjId =
-              localStorage.getItem("active_project_id") || projectId;
-            const activeSeriesSlug =
-              localStorage.getItem("active_series_slug") || seriesSlug;
-            const activeChapterSlug =
-              localStorage.getItem("active_chapter_slug") || chapterSlug;
-            let target = "/dashboard";
-            if (activeProjId) {
-              if (activeSeriesSlug && activeChapterSlug) {
-                target = `/workspace/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
-              } else {
-                target = `/workspace?id=${activeProjId}`;
-              }
-            }
+            const target = "/dashboard";
             window.history.replaceState({}, "", target);
             setCurrentPath(target);
             return;
@@ -359,24 +346,12 @@ export function useAppRouter({
         isAuthenticated &&
         (path === "/" || path === "" || path === "/index.html")
       ) {
-        const activeProjId =
-          localStorage.getItem("active_project_id") || projectId;
-        const activeSeriesSlug =
-          localStorage.getItem("active_series_slug") || seriesSlug;
-        const activeChapterSlug =
-          localStorage.getItem("active_chapter_slug") || chapterSlug;
-        if (activeProjId) {
-          if (activeSeriesSlug && activeChapterSlug) {
-            targetPath = `/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
-          } else {
-            targetPath = `/workspace?id=${activeProjId}`;
-          }
-        } else {
-          targetPath = "/dashboard";
-        }
+        targetPath = "/dashboard";
       }
 
-      if (window.location.pathname === targetPath) {
+      const currentPathWithSearch =
+        window.location.pathname + window.location.search;
+      if (currentPathWithSearch === targetPath) {
         return;
       }
 

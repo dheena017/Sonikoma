@@ -24,8 +24,11 @@ import concurrent.futures
 try:
     from wand.image import Image as WandImage
     from wand.color import Color
+    WAND_AVAILABLE = True
 except ImportError:
-    raise ImportError("wand required. Install with: pip install wand")
+    WandImage = None
+    Color = None
+    WAND_AVAILABLE = False
 
 logger = logging.getLogger("sonikoma.services.imagemagick_engine")
 
@@ -84,6 +87,11 @@ class ImageMagickEngine:
         Args:
             max_workers: Maximum parallel workers for batch operations
         """
+        if not WAND_AVAILABLE:
+            raise RuntimeError(
+                "ImageMagick/Wand is not available. Install ImageMagick and wand. "
+                "See https://docs.wand-py.org/en/latest/guide/install.html#install-imagemagick-on-windows"
+            )
         self.max_workers = max_workers
         self._verify_imagemagick()
 
@@ -479,6 +487,11 @@ _imagemagick_instance: Optional[ImageMagickEngine] = None
 
 def get_imagemagick_engine(max_workers: int = 4) -> ImageMagickEngine:
     """Get or create ImageMagick engine singleton."""
+    if not WAND_AVAILABLE:
+        raise ImportError(
+            "ImageMagick/Wand is not available. Install ImageMagick and wand. "
+            "See https://docs.wand-py.org/en/latest/guide/install.html#install-imagemagick-on-windows"
+        )
     global _imagemagick_instance
     if _imagemagick_instance is None:
         _imagemagick_instance = ImageMagickEngine(max_workers=max_workers)

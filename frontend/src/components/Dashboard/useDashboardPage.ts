@@ -158,16 +158,27 @@ export default function useDashboardPage() {
   }, []);
 
   const handleNewSeries = useCallback(() => {
-    (window as any).navigateTo?.("/workspace");
+    const nav = (window as any).navigateTo;
+    if (typeof nav === "function") {
+      nav("/workspace");
+    } else {
+      window.history.pushState({}, "", "/workspace");
+      window.dispatchEvent(new Event("popstate"));
+    }
   }, []);
 
   const handleOpenProject = useCallback((project: Project) => {
-    if (project.series_slug && project.chapter_slug) {
-      (window as any).navigateTo?.(
-        `/workspace/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
-      );
+    const nav = (window as any).navigateTo;
+    const target =
+      project.series_slug && project.chapter_slug
+        ? `/workspace/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
+        : `/workspace?id=${project.project_id}`;
+
+    if (typeof nav === "function") {
+      nav(target);
     } else {
-      (window as any).navigateTo?.(`/workspace?id=${project.project_id}`);
+      window.history.pushState({}, "", target);
+      window.dispatchEvent(new Event("popstate"));
     }
   }, []);
 
@@ -203,9 +214,14 @@ export default function useDashboardPage() {
   const handleExport = useCallback((e: React.MouseEvent, project: Project) => {
     e.stopPropagation();
     setOpenMenuId(null);
-    (window as any).navigateTo?.(
-      `/workspace?id=${project.project_id}&action=export`
-    );
+    const nav = (window as any).navigateTo;
+    const target = `/workspace?id=${project.project_id}&action=export`;
+    if (typeof nav === "function") {
+      nav(target);
+    } else {
+      window.history.pushState({}, "", target);
+      window.dispatchEvent(new Event("popstate"));
+    }
   }, []);
 
   const handleRename = useCallback((e: React.MouseEvent, project: Project) => {

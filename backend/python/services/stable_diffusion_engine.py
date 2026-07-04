@@ -79,18 +79,17 @@ class StableDiffusionEngine:
         self.cache_dir = cache_dir or os.path.expanduser("~/.cache/huggingface/hub")
         self.pipe = None
         self.inpaint_pipe = None
-        self._load_model()
 
-    def _load_model(self) -> None:
-        """Load Stable Diffusion model."""
+    def _ensure_pipe(self) -> None:
+        """Ensure the base Stable Diffusion pipeline is loaded."""
+        if self.pipe is not None:
+            return
+
         logger.info(f"Loading model: {self.model_name.value} on {self.device}...")
 
         try:
             # Use reduced memory mode for CPU
-            if self.device == "cpu":
-                enable_attention_slicing = True
-            else:
-                enable_attention_slicing = False
+            enable_attention_slicing = self.device == "cpu"
 
             self.pipe = StableDiffusionPipeline.from_pretrained(
                 self.model_name.value,
@@ -148,6 +147,8 @@ class StableDiffusionEngine:
             f"Generating {num_images} images: '{prompt[:50]}...' "
             f"({height}x{width}, guidance={guidance_scale}, steps={num_inference_steps})"
         )
+
+        self._ensure_pipe()
 
         try:
             def _generate():

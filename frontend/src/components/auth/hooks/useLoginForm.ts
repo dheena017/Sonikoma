@@ -51,7 +51,13 @@ export default function useLoginForm(props: LoginFormProps) {
     setError(null);
     try {
       await props.onLogin({ email, password, rememberMe });
-      (window as any).navigateTo?.("/dashboard");
+      const target = "/dashboard";
+      if (typeof (window as any).navigateTo === "function") {
+        (window as any).navigateTo(target);
+      } else {
+        window.history.replaceState({}, "", target);
+        window.dispatchEvent(new Event("popstate"));
+      }
     } catch (err: any) {
       setError(err.message || "Invalid credentials. Please try again.");
     } finally {

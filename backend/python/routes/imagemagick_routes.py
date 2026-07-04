@@ -8,7 +8,7 @@ import os
 import sys
 import tempfile
 import logging
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
@@ -18,11 +18,26 @@ from services.imagemagick_engine import (
     get_imagemagick_engine,
     ResizeMode,
     FilterType,
+    WAND_AVAILABLE,
 )
 
 logger = logging.getLogger("sonikoma.routes.imagemagick_routes")
 router = APIRouter()
-imagemagick = get_imagemagick_engine()
+
+try:
+    imagemagick = get_imagemagick_engine()
+except ImportError as exc:
+    logger.warning(f"ImageMagick routes disabled: {exc}")
+    imagemagick = None
+
+
+def _ensure_imagemagick() -> Any:
+    if imagemagick is None:
+        raise HTTPException(
+            status_code=503,
+            detail="ImageMagick is not installed or not available. Install ImageMagick and wand."
+        )
+    return imagemagick
 
 
 class ImagePathRequest(BaseModel):
@@ -91,7 +106,8 @@ def _default_output_path(suffix: str) -> str:
 async def resize_image(body: ResizeImageRequest):
     output_path = body.output_path or _default_output_path(".png")
     try:
-        result = await imagemagick.resize(
+        engine = _ensure_imagemagick()
+        result = await engine.resize(
             body.image_path,
             output_path,
             width=body.width,
@@ -110,7 +126,8 @@ async def resize_image(body: ResizeImageRequest):
 async def rotate_image(body: RotateImageRequest):
     output_path = body.output_path or _default_output_path(".png")
     try:
-        result = await imagemagick.rotate(body.image_path, output_path, angle=body.angle, background_color=body.background_color)
+        engine = _ensure_imagemagick()
+        result = await engine.rotate(body.image_path, output_path, angle=body.angle, background_color=body.background_color)
         return {"success": True, "output_path": result}
     except Exception as exc:
         logger.error(f"Rotate failed: {exc}", exc_info=True)
@@ -121,7 +138,8 @@ async def rotate_image(body: RotateImageRequest):
 async def enhance_image(body: EnhanceImageRequest):
     output_path = body.output_path or _default_output_path(".png")
     try:
-        result = await imagemagick.auto_enhance(
+        engine = _ensure_imagemagick()
+        result = await engine.auto_enhance(
             body.image_path,
             output_path,
             brightness=body.brightness,
@@ -138,7 +156,8 @@ async def enhance_image(body: EnhanceImageRequest):
 async def remove_background(body: RemoveBackgroundRequest):
     output_path = body.output_path or _default_output_path(".png")
     try:
-        result = await imagemagick.remove_background(body.image_path, output_path, fuzz_threshold=body.fuzz_threshold)
+        engine = _ensure_imagemagick()
+        result = await engine.remove_background(body.image_path, output_path, fuzz_threshold=body.fuzz_threshold)
         return {"success": True, "output_path": result}
     except Exception as exc:
         logger.error(f"Remove background failed: {exc}", exc_info=True)
@@ -149,7 +168,8 @@ async def remove_background(body: RemoveBackgroundRequest):
 async def add_text(body: AddTextRequest):
     output_path = body.output_path or _default_output_path(".png")
     try:
-        result = await imagemagick.add_text_overlay(
+        engine = _ensure_imagemagick()
+        result = await engine.add_text_overlay(
             body.image_path,
             output_path,
             text=body.text,
@@ -168,7 +188,8 @@ async def add_text(body: AddTextRequest):
 async def batch_resize(body: BatchResizeRequest):
     output_dir = body.output_dir or os.path.join(tempfile.gettempdir(), "imagemagick_batch")
     try:
-        results = await imagemagick.batch_resize(
+        engine = _ensure_imagemagick()
+        results = await engine.batch_resize(
             body.image_paths,
             output_dir,
             width=body.width,
@@ -186,7 +207,8 @@ async def batch_resize(body: BatchResizeRequest):
 async def composite_images(body: CompositeRequest):
     output_path = body.output_path or _default_output_path(".png")
     try:
-        result = await imagemagick.composite_images(
+        engine = _ensure_imagemagick()
+        result = await engine.composite_images(
             body.base_image_path,
             body.overlay_image_path,
             output_path,
@@ -203,7 +225,8 @@ async def composite_images(body: CompositeRequest):
 @router.post("/metadata", summary="Extract image metadata")
 async def get_metadata(body: MetadataRequest):
     try:
-        metadata = await imagemagick.get_metadata(body.image_path)
+        engine = _ensure_imagemagick()
+        metadata = await engine.get_metadata(body.image_path)
         return {"success": True, "metadata": metadata.__dict__}
     except Exception as exc:
         logger.error(f"Get metadata failed: {exc}", exc_info=True)

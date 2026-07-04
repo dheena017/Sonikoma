@@ -20,8 +20,10 @@ from enum import Enum
 
 try:
     import whisper
+    WHISPER_AVAILABLE = True
 except ImportError:
-    raise ImportError("openai-whisper required. Install with: pip install openai-whisper")
+    whisper = None
+    WHISPER_AVAILABLE = False
 
 logger = logging.getLogger("sonikoma.services.whisper_engine")
 
@@ -64,6 +66,10 @@ class WhisperEngine:
         device: str = "cpu",
         language: Optional[str] = None
     ):
+        if not WHISPER_AVAILABLE:
+            raise RuntimeError(
+                "openai-whisper is not available. Install with: pip install openai-whisper"
+            )
         """
         Initialize Whisper engine.
 
@@ -404,6 +410,11 @@ def get_whisper_engine(
     language: Optional[str] = None
 ) -> WhisperEngine:
     """Get or create Whisper engine singleton."""
+    if not WHISPER_AVAILABLE:
+        raise ImportError(
+            "openai-whisper is not available. Install with: pip install openai-whisper"
+        )
+
     global _whisper_instance
     if _whisper_instance is None:
         _whisper_instance = WhisperEngine(model_name=model_name, device=device, language=language)

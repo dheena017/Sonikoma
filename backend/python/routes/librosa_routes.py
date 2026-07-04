@@ -8,7 +8,7 @@ import os
 import sys
 import tempfile
 import logging
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
@@ -18,7 +18,21 @@ from services.librosa_engine import get_librosa_engine
 
 logger = logging.getLogger("sonikoma.routes.librosa_routes")
 router = APIRouter()
-librosa_engine = get_librosa_engine()
+
+try:
+    librosa_engine = get_librosa_engine()
+except ImportError as exc:
+    logger.warning(f"Librosa routes disabled: {exc}")
+    librosa_engine = None
+
+
+def _ensure_librosa_engine() -> Any:
+    if librosa_engine is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Librosa is not installed. Install with: pip install librosa soundfile"
+        )
+    return librosa_engine
 
 
 class AudioPathRequest(BaseModel):
@@ -42,8 +56,11 @@ class EnergySegmentRequest(AudioPathRequest):
 @router.post("/analyze", summary="Extract audio summary statistics")
 async def analyze_audio(body: AudioAnalyzeRequest):
     try:
-        stats = await librosa_engine.extract_summary_stats(body.audio_path)
+        engine = _ensure_librosa_engine()
+        stats = await engine.extract_summary_stats(body.audio_path)
         return {"success": True, "analysis": stats}
+    except HTTPException:
+        raise
     except Exception as exc:
         logger.error(f"Audio analysis failed: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(exc))
@@ -52,8 +69,11 @@ async def analyze_audio(body: AudioAnalyzeRequest):
 @router.post("/detect-silence", summary="Detect silence segments in audio")
 async def detect_silence(body: SilenceDetectRequest):
     try:
-        segments = await librosa_engine.detect_silence(body.audio_path, threshold_db=body.threshold_db, min_duration=body.min_duration)
+        engine = _ensure_librosa_engine()
+        segments = await engine.detect_silence(body.audio_path, threshold_db=body.threshold_db, min_duration=body.min_duration)
         return {"success": True, "silence_segments": [s.__dict__ for s in segments]}
+    except HTTPException:
+        raise
     except Exception as exc:
         logger.error(f"Silence detection failed: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(exc))
@@ -62,8 +82,11 @@ async def detect_silence(body: SilenceDetectRequest):
 @router.post("/segment-by-energy", summary="Segment audio by energy levels")
 async def segment_by_energy(body: EnergySegmentRequest):
     try:
-        segments = await librosa_engine.segment_by_energy(body.audio_path, num_segments=body.num_segments, energy_threshold=body.energy_threshold)
+        engine = _ensure_librosa_engine()
+        segments = await engine.segment_by_energy(body.audio_path, num_segments=body.num_segments, energy_threshold=body.energy_threshold)
         return {"success": True, "segments": [s.__dict__ for s in segments]}
+    except HTTPException:
+        raise
     except Exception as exc:
         logger.error(f"Energy segmentation failed: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(exc))
@@ -72,8 +95,11 @@ async def segment_by_energy(body: EnergySegmentRequest):
 @router.post("/load", summary="Load audio metadata and shape")
 async def load_audio(body: AudioPathRequest):
     try:
-        y, sr = await librosa_engine.load_audio(body.audio_path)
+        engine = _ensure_librosa_engine()
+        y, sr = await engine.load_audio(body.audio_path)
         return {"success": True, "duration_seconds": len(y) / sr, "sample_rate": sr, "samples": len(y)}
+    except HTTPException:
+        raise
     except Exception as exc:
         logger.error(f"Load audio failed: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(exc))
