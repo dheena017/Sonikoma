@@ -109,7 +109,14 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-1.5 text-xs font-bold text-white transition-all hover:from-purple-500 hover:to-indigo-500 hover:shadow-[0_4px_14px_rgba(168,85,247,0.4)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 cursor-pointer"
         >
           <Save className={`h-3.5 w-3.5 ${isSaving ? "animate-pulse" : ""}`} />
-          {isSaving ? "Saving..." : "Save Project"}
+          {isSaving ? (
+            "Saving..."
+          ) : (
+            <>
+              <span className="hidden sm:inline">Save Project</span>
+              <span className="sm:hidden">Save</span>
+            </>
+          )}
         </button>
 
         <button

@@ -467,7 +467,7 @@ const LiveScraperDeck = React.memo(
               )}
 
               {/* Grid list of extracted cards */}
-              <div className="flex gap-4 overflow-x-auto pb-8 pt-1.5 scrollbar-thin pl-4 sm:pl-5 lg:pl-6">
+              <div className="w-full max-w-full flex gap-4 overflow-x-auto pb-8 pt-1.5 scrollbar-thin px-4 md:px-6">
                 {scrapedImages.map((imgUrl, idx) => {
                   const isSelected = selectedScraped.includes(imgUrl);
                   return (

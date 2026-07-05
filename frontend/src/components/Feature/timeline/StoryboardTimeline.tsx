@@ -684,7 +684,7 @@ const StoryboardTimeline = React.memo(
 
         {/* Storyboard grid */}
         <div
-          className={`flex gap-3 sm:gap-4 overflow-x-auto scrollbar-thin ${
+          className={`w-full max-w-full flex gap-3 sm:gap-4 overflow-x-auto scrollbar-thin px-4 md:px-6 ${
             selectedCount > 0 ? "pb-2" : "pb-4"
           }`}
         >

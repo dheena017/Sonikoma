@@ -28,7 +28,9 @@ const EditorPage: React.FC<EditorPageProps> = ({
   const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(true);
   const [currentSection, setCurrentSection] = React.useState("timeline");
   const [isFocusMode, setIsFocusMode] = React.useState(false);
-  const [previewQuality, setPreviewQuality] = React.useState<"draft" | "high">("high");
+  const [previewQuality, setPreviewQuality] = React.useState<"draft" | "high">(
+    "high"
+  );
   const [isInitializing, setIsInitializing] = React.useState(true);
 
   const { status: backendStatus } = useBackendHealth();
@@ -226,7 +228,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
       setIsFocusMode={setIsFocusMode}
       navigateTo={navigateTo}
     >
-      <main className="flex-1 w-full relative bg-black">
+      <main className="flex-1 w-full relative bg-black min-w-0">
         {isInitializing && scrapedImages.length === 0 ? (
           <div className="w-full h-full flex flex-col items-center justify-center">
             {skeletonLoader}
@@ -236,8 +238,10 @@ const EditorPage: React.FC<EditorPageProps> = ({
             {/* Primary Canvas: Video Monitor (Sticky Background) */}
             <div
               id="section-monitor"
-              className={`sticky w-full max-w-[1600px] mx-auto flex flex-col z-0 transition-all duration-500 px-4 md:px-8 py-4 ${
-                isFocusMode ? "top-0 h-screen" : "top-16 h-[calc(100vh-64px)]"
+              className={`relative md:sticky w-full max-w-[1600px] mx-auto flex flex-col z-0 transition-all duration-500 px-4 md:px-6 py-4 ${
+                isFocusMode
+                  ? "top-0 h-screen"
+                  : "top-0 md:top-16 h-[40vh] min-h-[300px] md:h-[calc(100vh-64px)]"
               }`}
             >
               <div className="flex-1 w-full h-full relative">
@@ -256,7 +260,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
 
                 {/* Overlay Controls */}
                 {panels.length > 0 && (
-                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-4xl z-[60] bg-black/60 backdrop-blur-md rounded-2xl border border-white/10 p-2 shadow-2xl">
+                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] md:w-full max-w-4xl z-[60] bg-black/60 backdrop-blur-md rounded-2xl border border-white/10 p-2 shadow-2xl">
                     <VolumeAndProgressPanel
                       panels={panels}
                       setPanels={setPanels}
@@ -278,7 +282,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
 
             {/* Scrolling Overlay Content (Timeline, Assets, Meta) */}
             <div
-              className={`relative z-10 bg-[#070709] border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] px-4 md:px-8 py-8 flex flex-col gap-12 min-h-screen ${
+              className={`relative z-10 bg-[#070709] border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] px-4 md:px-6 py-8 flex flex-col gap-12 min-h-screen min-w-0 ${
                 isFocusMode ? "hidden" : "block"
               }`}
             >
@@ -413,4 +417,3 @@ const EditorPage: React.FC<EditorPageProps> = ({
 };
 
 export default React.memo(EditorPage);
-

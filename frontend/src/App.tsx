@@ -1609,19 +1609,6 @@ export default function App() {
               <PageNotFound onNavigateHome={() => navigateTo("/")} />
             )}
         </div>
-
-        {/* --- Global Workspace Footer --- */}
-        {!isAdminPath && (
-          <footer
-            id="footer_pane"
-            className="border-t border-neutral-900 bg-neutral-950/20 py-6 text-center text-xs text-neutral-500"
-          >
-            <p className="font-mono">
-              Webtoon-to-Video compilation dashboard &bull; Real-time Scraper
-              Integration
-            </p>
-          </footer>
-        )}
       </div>
 
       {/* --------------------------------------------------------------------------
