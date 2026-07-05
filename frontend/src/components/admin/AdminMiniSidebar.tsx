@@ -126,11 +126,10 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
       <div className="relative group w-full flex justify-center py-0.5">
         {/* Premium Floating Active Pill */}
         <div
-          className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 ${
-            active
+          className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 ${active
               ? "h-5 bg-violet-400 shadow-[0_0_12px_rgba(167,139,250,0.8)] opacity-100"
               : "h-0 bg-transparent opacity-0"
-          }`}
+            }`}
         />
 
         <button
@@ -140,16 +139,14 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
             setHover(true);
           }}
           onMouseLeave={() => setHover(false)}
-          className={`p-2.5 transition-all duration-300 rounded-xl cursor-pointer relative flex items-center justify-center group-active:scale-95 ${
-            active
+          className={`p-2.5 transition-all duration-300 rounded-xl cursor-pointer relative flex items-center justify-center group-active:scale-95 ${active
               ? "bg-violet-500/10 text-white border border-violet-500/20 shadow-[inset_0_0_12px_rgba(139,92,246,0.15)]"
               : "text-neutral-500 hover:text-neutral-200 hover:bg-white/5 border border-transparent hover:scale-105"
-          }`}
+            }`}
         >
           <Icon
-            className={`w-[18px] h-[18px] transition-transform duration-300 ${
-              active ? "text-violet-400" : "group-hover:text-neutral-200"
-            }`}
+            className={`w-[18px] h-[18px] transition-transform duration-300 ${active ? "text-violet-400" : "group-hover:text-neutral-200"
+              }`}
           />
         </button>
         <TooltipPortal text={item.label} visible={hover} anchorRect={rect} />
