@@ -128,7 +128,7 @@ const EditorMiniSidebar = ({
   return (
     // Premium Glassmorphism Container
     <aside
-      className={`fixed top-24 bottom-0 left-0 bg-[#0a0a0e]/80 backdrop-blur-xl border-r border-purple-900/10 flex flex-col items-center transition-all duration-300 z-40 py-4 shadow-[4px_0_24px_rgba(0,0,0,0.4)] ${
+      className={`fixed top-16 bottom-0 left-0 bg-[#0a0a0e]/80 backdrop-blur-xl border-r border-purple-900/10 flex flex-col items-center transition-all duration-300 z-40 py-4 shadow-[4px_0_24px_rgba(0,0,0,0.4)] ${
         isCollapsed ? "w-16" : "w-20"
       }`}
     >

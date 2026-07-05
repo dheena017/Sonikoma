@@ -235,7 +235,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
             {/* Primary Canvas: Video Monitor (Sticky Background) */}
             <div
               id="section-monitor"
-              className={`sticky w-full flex flex-col z-0 transition-all duration-500 ${
+              className={`sticky w-full max-w-[1600px] mx-auto flex flex-col z-0 transition-all duration-500 px-4 md:px-8 py-4 ${
                 isFocusMode ? "top-0 h-screen" : "top-16 h-[calc(100vh-64px)]"
               }`}
             >
