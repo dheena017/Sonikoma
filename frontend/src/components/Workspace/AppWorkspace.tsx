@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   History,
   ArrowRight,
@@ -12,10 +12,24 @@ import {
   Music,
   Settings,
   Play,
-  Loader2,
   TrendingUp,
-  Terminal,
   BookOpenCheck,
+  Search,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Layers,
+  Plus,
+  Tag,
+  User2,
+  Globe,
+  BarChart2,
+  Star,
+  Zap,
+  Keyboard,
+  RefreshCw,
+  CheckCircle2,
+  Loader,
 } from "lucide-react";
 import UrlInputPanel from "../Feature/scraper/UrlInputPanel";
 import ProjectConfirmPanel from "../confirmationmodels/ProjectConfirmPanel";
@@ -74,12 +88,76 @@ interface StoredProject {
   series_slug?: string | null;
   chapter_slug?: string | null;
   title?: string;
+  genre?: string;
+  author?: string;
+  cover_image?: string;
+  episode?: string;
+  status?: string;
+  panels_count?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
+const STATUS_COLORS: Record<string, { dot: string; text: string; label: string }> = {
+  completed:  { dot: "bg-emerald-500",               text: "text-emerald-400", label: "Completed"  },
+  processing: { dot: "bg-amber-500 animate-pulse",   text: "text-amber-400",   label: "Processing" },
+  pending:    { dot: "bg-sky-500",                   text: "text-sky-400",     label: "Pending"    },
+  failed:     { dot: "bg-red-500",                   text: "text-red-400",     label: "Failed"     },
+  ready:      { dot: "bg-emerald-500",               text: "text-emerald-400", label: "Ready"      },
+};
+
+function getStatusInfo(status?: string) {
+  const key = (status || "ready").toLowerCase();
+  return STATUS_COLORS[key] || STATUS_COLORS["ready"];
+}
+
+function formatRelativeTime(dateStr?: string): string {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  const now  = new Date();
+  const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
+  if (diff < 60)     return "just now";
+  if (diff < 3600)   return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400)  return `${Math.floor(diff / 3600)}h ago`;
+  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+  return date.toLocaleDateString();
+}
+
+const GENRE_COLORS: Record<string, string> = {
+  action:    "bg-red-500/15 text-red-400 border-red-500/20",
+  fantasy:   "bg-purple-500/15 text-purple-400 border-purple-500/20",
+  romance:   "bg-pink-500/15 text-pink-400 border-pink-500/20",
+  horror:    "bg-orange-500/15 text-orange-400 border-orange-500/20",
+  comedy:    "bg-yellow-500/15 text-yellow-400 border-yellow-500/20",
+  drama:     "bg-blue-500/15 text-blue-400 border-blue-500/20",
+  shonen:    "bg-indigo-500/15 text-indigo-400 border-indigo-500/20",
+  superhero: "bg-amber-500/15 text-amber-400 border-amber-500/20",
+};
+
+function getGenreStyle(genre?: string): string {
+  const key = (genre || "").toLowerCase().split("/")[0];
+  return GENRE_COLORS[key] || "bg-neutral-800/60 text-neutral-400 border-neutral-700/40";
+}
+
+const KEYBOARD_SHORTCUTS = [
+  { key: "⌘ + N", label: "New Project"      },
+  { key: "⌘ + K", label: "Quick Search"     },
+  { key: "⌘ + E", label: "Open Editor"      },
+  { key: "⌘ + R", label: "Reload Projects"  },
+  { key: "⌘ + /", label: "Toggle Shortcuts" },
+];
+
 const AppWorkspaceInner = (props: AppWorkspaceProps) => {
-  const [recentProjects, setRecentProjects] = useState<any[]>([]);
+  const [recentProjects, setRecentProjects] = useState<StoredProject[]>([]);
   const [loadingProjects, setLoadingProjects] = useState<boolean>(false);
   const [activeGuideTab, setActiveGuideTab] = useState<string>("general");
+  const [searchQuery,    setSearchQuery]    = useState<string>("");
+  const [showAll,        setShowAll]        = useState<boolean>(false);
+  const [statsLoading,   setStatsLoading]   = useState<boolean>(false);
+  const [stats, setStats] = useState<{ totalProjects: number; totalPanels: number; completedProjects: number }>({
+    totalProjects: 0, totalPanels: 0, completedProjects: 0,
+  });
+  const [showShortcuts, setShowShortcuts] = useState<boolean>(false);
 
   const {
     projectId,
@@ -216,40 +294,56 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
     }
   }, [targetUrl]);
 
-  useEffect(() => {
-    const fetchRecentProjects = async () => {
-      try {
-        setLoadingProjects(true);
-        const res = await fetch("/api/projects", {
-          headers: {
-            Authorization: `Bearer ${
-              localStorage.getItem("sonikoma_token") ||
-              sessionStorage.getItem("sonikoma_token") ||
-              ""
-            }`,
-          },
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.projects) {
-            const sorted = [...data.projects].sort((a: any, b: any) => {
-              return (
-                new Date(b.created_at || 0).getTime() -
-                new Date(a.created_at || 0).getTime()
-              );
-            });
-            setRecentProjects(sorted.slice(0, 3));
-          }
+  const fetchProjects = async () => {
+    try {
+      setLoadingProjects(true);
+      setStatsLoading(true);
+      const res = await fetch("/api/projects", {
+        headers: {
+          Authorization: `Bearer ${
+            localStorage.getItem("sonikoma_token") ||
+            sessionStorage.getItem("sonikoma_token") ||
+            ""
+          }`,
+        },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.projects) {
+          const sorted = [...data.projects].sort((a: any, b: any) =>
+            new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+          );
+          setRecentProjects(sorted);
+          const totalPanels  = sorted.reduce((acc: number, p: any) => acc + (p.panels_count || 0), 0);
+          const completed    = sorted.filter((p: any) => (p.status || "").toLowerCase() === "completed").length;
+          setStats({ totalProjects: sorted.length, totalPanels, completedProjects: completed });
         }
-      } catch (err) {
-        console.error("Failed to fetch projects in workspace page:", err);
-      } finally {
-        setLoadingProjects(false);
       }
-    };
+    } catch (err) {
+      console.error("Failed to fetch projects in workspace page:", err);
+    } finally {
+      setLoadingProjects(false);
+      setStatsLoading(false);
+    }
+  };
 
-    fetchRecentProjects();
-  }, []);
+  useEffect(() => { fetchProjects(); }, []);
+
+  const filteredProjects = useMemo(() => {
+    if (!searchQuery.trim()) return recentProjects;
+    const q = searchQuery.toLowerCase();
+    return recentProjects.filter((p) =>
+      (p.title  || "").toLowerCase().includes(q) ||
+      (p.genre  || "").toLowerCase().includes(q) ||
+      (p.author || "").toLowerCase().includes(q) ||
+      (p.episode|| "").toLowerCase().includes(q)
+    );
+  }, [recentProjects, searchQuery]);
+
+  const displayedProjects = useMemo(
+    () => (showAll ? filteredProjects : filteredProjects.slice(0, 6)),
+    [filteredProjects, showAll]
+  );
 
   const handleWorkspaceImport = async () => {
     if (!targetUrl.trim()) return;
@@ -352,16 +446,56 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
           </div>
         )}
 
-        {/* 1. DIRECT TOOLS LAUNCHPAD */}
-        <div className="w-full space-y-4">
-          <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-xl bg-purple-600/20 flex items-center justify-center border border-purple-500/30">
-              <Layout className="h-4 w-4 text-purple-400" />
+        {/* ── STATS BAR ── */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            { icon: <BarChart2 className="h-4 w-4 text-purple-400" />, label: "Total Projects",   value: statsLoading ? "—" : stats.totalProjects.toString(),       color: "from-purple-900/20 to-indigo-900/20 border-purple-500/20" },
+            { icon: <Layers className="h-4 w-4 text-sky-400" />,      label: "Panels Processed", value: statsLoading ? "—" : stats.totalPanels.toLocaleString(),   color: "from-sky-900/20 to-blue-900/20 border-sky-500/20"       },
+            { icon: <CheckCircle2 className="h-4 w-4 text-emerald-400" />, label: "Completed",   value: statsLoading ? "—" : stats.completedProjects.toString(),   color: "from-emerald-900/20 to-green-900/20 border-emerald-500/20" },
+            { icon: <Zap className="h-4 w-4 text-amber-400" />,       label: "Active Session",   value: projectId ? "1" : "0",                                     color: "from-amber-900/20 to-orange-900/20 border-amber-500/20"  },
+          ].map((stat) => (
+            <div key={stat.label} className={`bg-gradient-to-br ${stat.color} border rounded-2xl p-4 flex flex-col gap-2 backdrop-blur-md`}>
+              <div className="flex items-center justify-between">
+                {stat.icon}
+                {statsLoading && <Loader className="h-3 w-3 text-neutral-500 animate-spin" />}
+              </div>
+              <p className="text-xl font-black text-white font-mono">{stat.value}</p>
+              <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">{stat.label}</p>
             </div>
-            <h3 className="text-xl font-black text-white tracking-tight">
-              Direct Tools Launchpad
-            </h3>
+          ))}
+        </div>
+
+        {/* ── DIRECT TOOLS LAUNCHPAD ── */}
+        <div className="w-full space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-xl bg-purple-600/20 flex items-center justify-center border border-purple-500/30">
+                <Layout className="h-4 w-4 text-purple-400" />
+              </div>
+              <h3 className="text-xl font-black text-white tracking-tight">Direct Tools Launchpad</h3>
+            </div>
+            <button
+              onClick={() => setShowShortcuts((v) => !v)}
+              className="flex items-center gap-1.5 text-[10px] font-bold text-neutral-500 hover:text-purple-400 transition-colors cursor-pointer"
+            >
+              <Keyboard className="h-3.5 w-3.5" /> Shortcuts
+            </button>
           </div>
+
+          {showShortcuts && (
+            <div className="bg-[#111116]/80 border border-neutral-800 rounded-2xl p-4 backdrop-blur-md animate-in fade-in duration-200">
+              <p className="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-3">Keyboard Shortcuts</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {KEYBOARD_SHORTCUTS.map((s) => (
+                  <div key={s.key} className="flex items-center gap-2">
+                    <kbd className="px-1.5 py-0.5 bg-neutral-800 border border-neutral-700 rounded text-[9px] font-mono text-neutral-300">{s.key}</kbd>
+                    <span className="text-[10px] text-neutral-400 font-medium">{s.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <p className="text-xs text-neutral-400 font-medium max-w-2xl">
             Skip URL scraping and jump directly into specific editing or
             pipeline configurations.
@@ -487,6 +621,9 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
                 <span className="text-[10px] text-neutral-500 font-medium mt-1">
                   {preset.style}
                 </span>
+                <span className={`mt-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md border text-[9px] font-bold ${getGenreStyle(preset.genre)}`}>
+                  <Tag className="h-2.5 w-2.5" />{preset.genre}
+                </span>
                 <span className="absolute bottom-2.5 right-3 h-4 w-4 rounded-full bg-purple-500/10 border border-purple-500/20 group-hover:bg-purple-500/20 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100">
                   <ArrowRight className="h-2.5 w-2.5 text-purple-400" />
                 </span>
@@ -534,13 +671,13 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
 
         {/* LOADING CONTEXT BRIDGE */}
         {isScraping && (
-          <div className="bg-black/40 border border-white/5 rounded-3xl p-8 backdrop-blur-md flex flex-col items-center gap-4 text-center animate-pulse">
-            <div className="flex gap-1.5">
-              {[0, 1, 2].map((i) => (
+          <div className="bg-black/40 border border-white/5 rounded-3xl p-8 backdrop-blur-md flex flex-col items-center gap-4 text-center">
+            <div className="flex gap-2">
+              {[0, 1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="h-1.5 w-1.5 rounded-full bg-purple-500"
-                  style={{ animationDelay: `${i * 200}ms` }}
+                  className="h-1.5 w-1.5 rounded-full bg-purple-500 animate-bounce"
+                  style={{ animationDelay: `${i * 150}ms` }}
                 />
               ))}
             </div>
@@ -552,100 +689,169 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
               ...
             </p>
             <p className="text-xs text-neutral-500 max-w-sm">
-              Mindanao's upskilling project is initializing the vision pipeline.
-              We are currently scraping and optimizing your assets for the
-              workspace.
+              Initializing the vision pipeline. Scraping and optimizing your assets for the workspace.
             </p>
           </div>
         )}
 
-        {/* 3. RECENT ACTIVE PROJECTS */}
+        {/* ── RECENT PROJECTS ── */}
         <div className="w-full space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
               <div className="h-8 w-8 rounded-xl bg-purple-600/20 flex items-center justify-center border border-purple-500/30">
                 <History className="h-4 w-4 text-purple-400" />
               </div>
-              <h3 className="text-xl font-black text-white tracking-tight">
-                Recent Projects
-              </h3>
+              <h3 className="text-xl font-black text-white tracking-tight">Recent Projects</h3>
+              {!loadingProjects && (
+                <span className="px-2 py-0.5 bg-purple-500/10 border border-purple-500/20 rounded-full text-[10px] font-black text-purple-400">
+                  {filteredProjects.length}
+                </span>
+              )}
             </div>
-            <button
-              onClick={() => navigateTo?.("/projects")}
-              className="text-xs font-bold text-purple-400 hover:text-purple-300 hover:underline flex items-center gap-1 cursor-pointer"
-            >
-              View All Projects
-            </button>
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-500" />
+                <input
+                  type="text" placeholder="Search projects..." value={searchQuery}
+                  onChange={(e) => { setSearchQuery(e.target.value); setShowAll(false); }}
+                  className="pl-8 pr-3 py-1.5 bg-neutral-900/60 border border-neutral-800 rounded-xl text-xs text-neutral-300 placeholder-neutral-600 focus:outline-none focus:border-purple-500/40 w-44 transition-colors"
+                />
+              </div>
+              <button
+                onClick={fetchProjects} title="Refresh projects"
+                className="p-1.5 rounded-xl border border-neutral-800 bg-neutral-900/60 hover:border-purple-500/30 hover:bg-purple-500/10 transition-all cursor-pointer text-neutral-500 hover:text-purple-400"
+              >
+                <RefreshCw className={`h-3.5 w-3.5 ${loadingProjects ? "animate-spin" : ""}`} />
+              </button>
+              <button
+                onClick={() => navigateTo?.("/projects")}
+                className="text-xs font-bold text-purple-400 hover:text-purple-300 hover:underline flex items-center gap-1 cursor-pointer whitespace-nowrap"
+              >
+                View All <ArrowRight className="h-3 w-3" />
+              </button>
+            </div>
           </div>
 
           {loadingProjects ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {[1, 2, 3].map((n) => (
-                <div
-                  key={n}
-                  className="h-32 bg-neutral-900/50 border border-neutral-800 animate-pulse rounded-2xl"
-                />
+              {[1, 2, 3, 4, 5, 6].map((n) => (
+                <div key={n} className="h-48 bg-neutral-900/50 border border-neutral-800 animate-pulse rounded-2xl" />
               ))}
             </div>
-          ) : recentProjects.length === 0 ? (
-            <div className="bg-neutral-900/20 border border-neutral-800/60 rounded-2xl p-6 text-center">
-              <p className="text-xs font-medium text-neutral-500">
-                No active projects found. Scrape a URL or open Video Studio to
-                get started!
-              </p>
+          ) : filteredProjects.length === 0 ? (
+            <div className="bg-neutral-900/20 border border-neutral-800/60 rounded-2xl p-10 text-center flex flex-col items-center gap-4">
+              {searchQuery ? (
+                <>
+                  <Search className="h-8 w-8 text-neutral-700" />
+                  <p className="text-sm font-bold text-neutral-400">No projects match "{searchQuery}"</p>
+                  <button onClick={() => setSearchQuery("")} className="text-xs text-purple-400 hover:text-purple-300 font-bold cursor-pointer">Clear search</button>
+                </>
+              ) : (
+                <>
+                  <BookOpenCheck className="h-8 w-8 text-neutral-700" />
+                  <p className="text-sm font-bold text-neutral-400">No projects yet</p>
+                  <p className="text-xs text-neutral-600 max-w-xs">Scrape a URL above or click Video Studio to create your first webtoon project.</p>
+                  <button
+                    onClick={() => {
+                      const tempId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+                      navigateTo?.(`/workspace/editor?id=${tempId}`);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
+                  >
+                    <Plus className="h-3.5 w-3.5" /> New Project
+                  </button>
+                </>
+              )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {recentProjects.map((project) => (
-                <div
-                  key={project.project_id}
-                  className="group relative bg-[#111116]/60 border border-neutral-800 hover:border-purple-500/30 rounded-2xl p-4 flex flex-col justify-between gap-4 transition-all duration-300 hover:shadow-[0_0_15px_rgba(168,85,247,0.05)]"
-                >
-                  <div className="flex items-start gap-3">
-                    {/* Thumbnail */}
-                    <div className="h-14 w-14 rounded-xl overflow-hidden border border-neutral-800 bg-neutral-950 shrink-0 relative flex items-center justify-center">
-                      {project.cover_image ? (
-                        <img
-                          src={project.cover_image}
-                          alt=""
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <BookOpenCheck className="h-5 w-5 text-neutral-700" />
-                      )}
-                    </div>
-                    <div className="space-y-1 min-w-0">
-                      <h4 className="text-xs font-bold text-white truncate max-w-full">
-                        {project.title || "Untitled Series"}
-                      </h4>
-                      <p className="text-[10px] text-neutral-500 font-mono">
-                        ID: {project.project_id.substring(0, 12)}...
-                      </p>
-                      <div className="flex items-center gap-1.5 pt-0.5">
-                        <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                        <span className="text-[9px] font-bold text-emerald-500/80 uppercase">
-                          {project.status || "Ready"}
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {displayedProjects.map((project) => {
+                  const statusInfo = getStatusInfo(project.status);
+                  return (
+                    <div
+                      key={project.project_id}
+                      className="group relative bg-[#111116]/60 border border-neutral-800 hover:border-purple-500/30 rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 hover:shadow-[0_0_20px_rgba(168,85,247,0.08)]"
+                    >
+                      {/* Cover image strip */}
+                      <div className="relative h-24 bg-neutral-950 overflow-hidden shrink-0">
+                        {project.cover_image ? (
+                          <img
+                            src={project.cover_image} alt={project.title || ""}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <BookOpenCheck className="h-7 w-7 text-neutral-800" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#111116] via-transparent to-transparent" />
+                        {project.genre && (
+                          <span className={`absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded-md border text-[9px] font-bold ${getGenreStyle(project.genre)}`}>
+                            <Tag className="h-2.5 w-2.5" />{project.genre}
+                          </span>
+                        )}
+                        <div className="absolute top-2 right-2 flex items-center gap-1.5 px-2 py-0.5 bg-black/60 rounded-full backdrop-blur-sm">
+                          <span className={`h-1.5 w-1.5 rounded-full ${statusInfo.dot}`} />
+                          <span className={`text-[9px] font-bold uppercase ${statusInfo.text}`}>{statusInfo.label}</span>
+                        </div>
+                      </div>
+
+                      {/* Card body */}
+                      <div className="p-4 space-y-3 flex-1">
+                        <div>
+                          <h4 className="text-sm font-black text-white truncate leading-tight">{project.title || "Untitled Series"}</h4>
+                          {project.episode && <p className="text-[10px] text-purple-400 font-bold mt-0.5">{project.episode}</p>}
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                          {project.author && (
+                            <span className="flex items-center gap-1.5 text-[10px] text-neutral-500 font-medium">
+                              <User2 className="h-3 w-3 shrink-0" /><span className="truncate">{project.author}</span>
+                            </span>
+                          )}
+                          {project.created_at && (
+                            <span className="flex items-center gap-1.5 text-[10px] text-neutral-500 font-medium">
+                              <Clock className="h-3 w-3 shrink-0" />{formatRelativeTime(project.created_at)}
+                            </span>
+                          )}
+                          {project.url && (
+                            <span className="flex items-center gap-1.5 text-[10px] text-neutral-600 font-medium">
+                              <Globe className="h-3 w-3 shrink-0" />
+                              <span className="truncate">{(() => { try { return new URL(project.url).hostname; } catch { return project.url.substring(0, 30); } })()}</span>
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Card footer */}
+                      <div className="flex items-center justify-between border-t border-neutral-800/60 px-4 py-3">
+                        <span className="flex items-center gap-1 text-[10px] font-mono text-neutral-500">
+                          <Layers className="h-3 w-3" />{project.panels_count || 0} panels
                         </span>
+                        <button
+                          onClick={() => navigateTo?.(`/workspace?id=${project.project_id}`)}
+                          className="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg text-[10px] transition-all flex items-center gap-1 cursor-pointer active:scale-95"
+                        >
+                          Resume <Play className="h-2.5 w-2.5" />
+                        </button>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="flex items-center justify-between border-t border-neutral-800/60 pt-3 mt-1">
-                    <span className="text-[10px] font-mono text-neutral-500">
-                      {project.panels_count || 0} Panels
-                    </span>
-                    <button
-                      onClick={() => {
-                        navigateTo?.(`/workspace?id=${project.project_id}`);
-                      }}
-                      className="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg text-[10px] transition-all flex items-center gap-1 cursor-pointer"
-                    >
-                      Resume <Play className="h-2.5 w-2.5" />
-                    </button>
-                  </div>
+                  );
+                })}
+              </div>
+              {filteredProjects.length > 6 && (
+                <div className="flex justify-center pt-2">
+                  <button
+                    onClick={() => setShowAll((v) => !v)}
+                    className="flex items-center gap-2 px-5 py-2.5 border border-neutral-800 bg-neutral-900/60 hover:border-purple-500/30 hover:bg-purple-500/5 rounded-xl text-xs font-bold text-neutral-400 hover:text-purple-300 transition-all cursor-pointer"
+                  >
+                    {showAll
+                      ? <><ChevronUp className="h-3.5 w-3.5" /> Show Less</>
+                      : <><ChevronDown className="h-3.5 w-3.5" /> Show {filteredProjects.length - 6} More Projects</>}
+                  </button>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </div>
 
@@ -875,17 +1081,14 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center opacity-60 grayscale hover:grayscale-0 transition-all duration-700">
           {[
-            { title: "1. Scrape", desc: "Auto-fetch images from any link" },
-            { title: "2. Edit", desc: "Sync audio & panels in Pro Editor" },
-            { title: "3. Render", desc: "Export high-quality 4K videos" },
+            { title: "1. Scrape", desc: "Auto-fetch images from any link",      icon: <Globe  className="h-5 w-5 mx-auto text-sky-400 mb-1" />   },
+            { title: "2. Edit",   desc: "Sync audio & panels in Pro Editor",    icon: <Film   className="h-5 w-5 mx-auto text-purple-400 mb-1" /> },
+            { title: "3. Render", desc: "Export high-quality 4K videos",        icon: <Star   className="h-5 w-5 mx-auto text-amber-400 mb-1" />  },
           ].map((step) => (
             <div key={step.title} className="space-y-1">
-              <p className="text-[10px] font-black text-purple-500 uppercase tracking-widest">
-                {step.title}
-              </p>
-              <p className="text-xs text-neutral-400 font-medium">
-                {step.desc}
-              </p>
+              {step.icon}
+              <p className="text-[10px] font-black text-purple-500 uppercase tracking-widest">{step.title}</p>
+              <p className="text-xs text-neutral-400 font-medium">{step.desc}</p>
             </div>
           ))}
         </div>
