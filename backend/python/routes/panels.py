@@ -23,7 +23,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from services.detect_panels import run_cv_detection
+from media.image.detect_panels import run_cv_detection
 
 logger = logging.getLogger("sonikoma.routes.panels")
 router = APIRouter()

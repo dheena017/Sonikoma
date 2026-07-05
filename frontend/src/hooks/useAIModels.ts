@@ -43,7 +43,8 @@ export function useAIModels() {
         const sonikoma_token =
           localStorage.getItem("sonikoma_token") ||
           sessionStorage.getItem("sonikoma_token");
-        if (sonikoma_token) reqHeaders["Authorization"] = `Bearer ${sonikoma_token}`;
+        if (sonikoma_token)
+          reqHeaders["Authorization"] = `Bearer ${sonikoma_token}`;
 
         const gemini = localStorage.getItem("user_gemini_key");
         const openai = localStorage.getItem("user_openai_key");

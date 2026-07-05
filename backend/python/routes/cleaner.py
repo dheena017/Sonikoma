@@ -24,7 +24,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from services.cleaner import remove_speech_bubbles
+from media.image.cleaner import remove_speech_bubbles
 
 logger = logging.getLogger("sonikoma.routes.cleaner")
 router = APIRouter()

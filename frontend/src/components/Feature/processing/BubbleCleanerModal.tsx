@@ -12,7 +12,7 @@ import {
   Link2,
   Loader2,
 } from "lucide-react";
-import { BubbleCleanerTabContent } from "@/components/Feature/editor/bubble";
+import { BubbleCleanerTabContent } from "@/components/Feature/editor/Tools/BubbleClean";
 
 interface BubbleCleanerModalProps {
   onClose: () => void;

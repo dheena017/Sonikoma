@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Slice } from "@/components/Feature/editor/crop";
+import { Slice } from "@/components/Feature/editor/shared";
 
 interface UseCropEditorDragProps {
   containerRef: React.RefObject<HTMLDivElement | null>;
