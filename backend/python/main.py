@@ -94,10 +94,8 @@ if sys.platform == "win32":
 
 import uvicorn
 from fastapi import FastAPI, Request
-from starlette.middleware.base import BaseHTTPMiddleware
-from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import JSONResponse, FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 
@@ -578,108 +576,8 @@ app.add_middleware(
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
-# AUTHORIZATION MIDDLEWARE (3-tier hierarchy)
-# ─────────────────────────────────────────────────────────────────────────────
-
-# NOTE: This project already has per-route auth via routes/auth_routes.py.
-# This centralized guard enforces your mapping without needing per-route duplication.
-
-from routes.auth_routes import get_current_user, get_admin_user
-
-# Public routes (no Authorization header required)
-PUBLIC_ROUTE_SET = {
-    "/api/health",
-    "/api/py/health",
-    "/api/health/ffmpeg",
-    "/api/py/health/ffmpeg",
-    "/api/auth/register",
-    "/api/auth/login",
-    "/api/auth/forgot-password",
-    "/api/auth/google/login",
-    "/api/auth/google/callback",
-    "/api/auth/token",             # Swagger Authorize button
-    # Note: projects public endpoint uses path param
-    # We handle it via prefix match below.
-    "/api/proxy-image",
-    # ── Swagger / OpenAPI UI (must be public so the browser can load docs) ──
-    "/api/docs",
-    "/openapi.json",
-    "/api/openapi.json",
-}
-
-PUBLIC_ROUTE_PREFIXES = (
-    "/api/projects/public/",
-    "/static/",        # Swagger UI local CSS/JS assets
-    "/api/docs/",      # Swagger sub-paths (e.g. /api/docs/oauth2-redirect)
-)
-
-# Admin-only endpoints (require creator_role/admin)
-ADMIN_ROUTE_PREFIXES = (
-    "/api/auth/admin",             # Match without trailing slash to cover all subroutes cleanly
-    "/api/metrics/purge-cache",
-    "/api/py/metrics/purge-cache",
-    "/api/metrics/flush-temp",
-    "/api/py/metrics/flush-temp",
-    "/api/metrics/emergency-stop",
-    "/api/py/metrics/emergency-stop",
-    "/api/system-logs",
-    "/api/py/system-logs",
-)
-
-class AuthorizationMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        path = request.url.path
-
-        # 0) Always pass CORS preflight OPTIONS requests through — CORSMiddleware handles them.
-        if request.method == "OPTIONS":
-            return await call_next(request)
-
-        # 1) Public bypass
-        if path in PUBLIC_ROUTE_SET or any(path.startswith(p) for p in PUBLIC_ROUTE_PREFIXES):
-            return await call_next(request)
-
-        # Explicit allow: GET /api/proxy-image (public)
-        if path.startswith("/api/proxy-image"):
-            return await call_next(request)
-
-        # 2) Auth guard for everything else
-        # Use existing JWT/api-key decoder from auth_routes
-        try:
-            user = await get_current_user(request)
-        except Exception:
-            return JSONResponse(
-                status_code=401,
-                content={"success": False, "detail": "Missing or invalid Authorization token"},
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-
-        # 3) Admin role guard
-        is_admin_route = False
-        if any(path.startswith(p) for p in ADMIN_ROUTE_PREFIXES):
-            # Special exception: GET/POST/stream on /api/system-logs is standard authenticated user, only DELETE is admin.
-            if (path.startswith("/api/system-logs") or path.startswith("/api/py/system-logs")) and request.method != "DELETE":
-                is_admin_route = False
-            else:
-                is_admin_route = True
-
-        if is_admin_route:
-            if user.get("creator_role") != "admin":
-                return JSONResponse(
-                    status_code=403,
-                    content={"success": False, "detail": "Administrative privileges required."},
-                )
-
-        # attach for downstream handlers that may want it later
-        request.state.user = user
-        return await call_next(request)
-
-# Install middleware BEFORE rate-limiting so 401/403 are not rate-limited spam.
-app.add_middleware(AuthorizationMiddleware)
-
-# ─────────────────────────────────────────────────────────────────────────────
 # RATE LIMITING CONFIGURATION & MIDDLEWARE
 # ─────────────────────────────────────────────────────────────────────────────
-
 RATE_LIMIT_RPM = int(os.getenv("RATE_LIMIT_RPM", "120"))
 # In-memory sliding window request log: client_ip -> list of timestamps
 client_request_log = {}

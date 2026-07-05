@@ -23,8 +23,8 @@ from database.db import write_audit_log
 import utils.image_utils as img_utils
 from utils.cache import stitched_cache, edit_history
 from config.clients import ai_initialized, call_gemini_with_retry, genai_client
-from services.detect_panels import run_cv_detection, adjust_to_aspect_ratio
-from services.audio import generate_panel_audio
+from media.image.detect_panels import run_cv_detection, adjust_to_aspect_ratio
+from media.audio.audio import generate_panel_audio
 
 
 # AI Skills registry and models imports
@@ -1512,7 +1512,7 @@ async def get_thumbnail_visual(body: ThumbnailVisualRequest, user_api_key: str =
 
 @router.post("/skills/generate-thumbnail")
 async def generate_thumbnail_variation(body: GenerateThumbnailRequest, user_api_key: str = Depends(get_user_gemini_key)):
-    from services.thumbnail import compose_thumbnail
+    from media.image.thumbnail import compose_thumbnail
 
     # 1. Prepare panel descriptions for Gemini
     panel_descriptions = ""

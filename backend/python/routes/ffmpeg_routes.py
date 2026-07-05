@@ -14,7 +14,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from services.ffmpeg_engine import (
+from media.video.ffmpeg_engine import (
     get_ffmpeg_engine,
     CutSpec,
     TransitionSpec,

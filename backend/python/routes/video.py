@@ -14,7 +14,7 @@ import sys
 
 # Ensure the parent package is on the path for service imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from services.audio import generate_panel_audio
+from media.audio.audio import generate_panel_audio
 
 # Try importing moviepy; fallback gracefully if not installed
 try:

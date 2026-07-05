@@ -17,11 +17,11 @@ from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from enum import Enum
 
-from services.ffmpeg_engine import get_ffmpeg_engine, CutSpec, TransitionSpec
-from services.librosa_engine import get_librosa_engine, LIBROSA_AVAILABLE
-from services.whisper_engine import get_whisper_engine, WhisperModel, WHISPER_AVAILABLE
-from services.imagemagick_engine import get_imagemagick_engine, ResizeMode, WAND_AVAILABLE
-from services.stable_diffusion_engine import get_stable_diffusion_engine, StableDiffusionModel
+from media.video.ffmpeg_engine import get_ffmpeg_engine, CutSpec, TransitionSpec
+from media.audio.librosa_engine import get_librosa_engine, LIBROSA_AVAILABLE
+from media.audio.whisper_engine import get_whisper_engine, WhisperModel, WHISPER_AVAILABLE
+from media.image.imagemagick_engine import get_imagemagick_engine, ResizeMode, WAND_AVAILABLE
+from media.ai.stable_diffusion_engine import get_stable_diffusion_engine, StableDiffusionModel
 
 logger = logging.getLogger("sonikoma.services.compound_processor")
 
@@ -58,7 +58,7 @@ class CompoundProcessor:
         self.whisper = get_whisper_engine(model_name=WhisperModel.BASE) if WHISPER_AVAILABLE else None
         self.imagemagick = get_imagemagick_engine() if WAND_AVAILABLE else None
         self.stable_diffusion = get_stable_diffusion_engine(device="cpu")
-        
+
         # Workflow tracking
         self.active_workflows: Dict[str, WorkflowProgress] = {}
 
@@ -140,7 +140,7 @@ class CompoundProcessor:
             # Step 4: Mix audio (if provided) or use extracted
             self._progress(workflow_id, workflow_type, "Mixing audio", 4, total_steps)
             audio_to_mix = [audio_path] if audio_path else [extracted_audio]
-            
+
             final_output = os.path.join(output_dir, "final_edited_video.mp4")
             await self.ffmpeg.mix_audio(cut_video, audio_to_mix, output_path=final_output)
 
@@ -207,14 +207,14 @@ class CompoundProcessor:
                     )
                 step_num += 1
                 self._progress(workflow_id, workflow_type, "Transcribing audio", step_num, total_steps)
-                
+
                 transcription = await self.whisper.transcribe(audio_path)
                 results["transcription"] = transcription.text
 
                 # Generate SRT
                 step_num += 1
                 self._progress(workflow_id, workflow_type, "Generating subtitles", step_num, total_steps)
-                
+
                 srt_path = os.path.join(output_dir, "subtitles.srt")
                 await self.whisper.generate_srt(audio_path, srt_path)
                 results["srt_path"] = srt_path
@@ -228,7 +228,7 @@ class CompoundProcessor:
                     )
                 step_num += 1
                 self._progress(workflow_id, workflow_type, "Analyzing audio features", step_num, total_steps)
-                
+
                 summary_stats = await self.librosa.extract_summary_stats(audio_path)
                 results["audio_analysis"] = summary_stats
 

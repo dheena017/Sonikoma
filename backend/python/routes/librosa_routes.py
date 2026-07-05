@@ -14,7 +14,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from services.librosa_engine import get_librosa_engine
+from media.audio.librosa_engine import get_librosa_engine
 
 logger = logging.getLogger("sonikoma.routes.librosa_routes")
 router = APIRouter()

@@ -38,13 +38,6 @@ export function useAIModels() {
       try {
         // Collect custom credentials headers from local storage (BYOK)
         const reqHeaders: Record<string, string> = {};
-
-        // Attach the session JWT so the backend auth middleware accepts the request
-        const sonikoma_token =
-          localStorage.getItem("sonikoma_token") ||
-          sessionStorage.getItem("sonikoma_token");
-        if (sonikoma_token) reqHeaders["Authorization"] = `Bearer ${sonikoma_token}`;
-
         const gemini = localStorage.getItem("user_gemini_key");
         const openai = localStorage.getItem("user_openai_key");
         const anthropic = localStorage.getItem("user_anthropic_key");

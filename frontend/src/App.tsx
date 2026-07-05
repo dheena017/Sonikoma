@@ -23,7 +23,7 @@ import * as api from "./api";
 import Header from "./components/MainHeader";
 import Sidebar from "./components/MainSidebar";
 import AppWorkspace from "./components/Workspace/AppWorkspace";
-import EditorPage from "./components/Feature/editor/EditorPage";
+import { EditorPage } from "./components/Feature/editor";
 import ProjectConfirmPanel from "./components/confirmationmodels/ProjectConfirmPanel";
 import PageNotFound from "./components/PageNotFound";
 import AdvancedSettings from "./components/Feature/video/AdvancedSettings";
@@ -34,7 +34,7 @@ import AIModelsPage from "./components/Feature/ai_models/AIModelsPage";
 import ShortcutsPage from "./components/Shortcuts/ShortcutsPage";
 
 // --- Processing & Editor Modals ---
-import CropEditorModal from "./components/Feature/editor/crop/CropEditorModal";
+import CropEditorModal from "./components/Feature/editor/Tools/AutoCrop/CropEditorModal";
 import BubbleCleanerModal from "./components/Feature/processing/BubbleCleanerModal";
 import AutoCropModal from "./components/Feature/processing/AutoCropModal";
 import NotificationStack from "./components/notification/NotificationStack";
@@ -496,7 +496,6 @@ export default function App() {
     isAuthenticated,
     authLoading,
     isInitializing,
-    user,
     isDirty: isWorkspaceDirty,
     projectId,
     seriesSlug: seriesSlugState,
@@ -1568,7 +1567,6 @@ export default function App() {
           {/* PAGE VIEW 22: Admin Dashboard */}
           {isAdminPath && (
             <AdminPage
-              user={user}
               navigateTo={navigateTo}
               currentPath={currentPath}
               isAuthenticated={isAuthenticated}
