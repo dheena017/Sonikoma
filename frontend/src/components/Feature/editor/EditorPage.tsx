@@ -4,7 +4,6 @@ import StoryboardTimeline from "../timeline/StoryboardTimeline";
 import VideoMonitor from "../video/VideoMonitor";
 import VolumeAndProgressPanel from "../video/VolumeAndProgressPanel";
 import OutputMetadataPanel from "../video/OutputMetadataPanel";
-import PipelineStatusCard from "../pipeline/ProcessBar.js";
 import LayoutEditorPage from "./LayoutEditorPage.js";
 import { useBackendHealth } from "../../../hooks/useBackendHealth.js";
 
@@ -226,7 +225,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
       setIsFocusMode={setIsFocusMode}
       navigateTo={navigateTo}
     >
-      <main className="flex-1 w-full h-full relative overflow-y-auto overflow-x-hidden bg-black">
+      <main className="flex-1 w-full relative overflow-x-hidden bg-black">
         {isInitializing && scrapedImages.length === 0 ? (
           <div className="w-full h-full flex flex-col items-center justify-center">
             {skeletonLoader}
@@ -236,18 +235,10 @@ const EditorPage: React.FC<EditorPageProps> = ({
             {/* Primary Canvas: Video Monitor (Sticky Background) */}
             <div
               id="section-monitor"
-              className="sticky top-0 w-full h-full flex flex-col z-0"
+              className={`sticky w-full flex flex-col z-0 transition-all duration-500 ${
+                isFocusMode ? "top-0 h-screen" : "top-16 h-[calc(100vh-64px)]"
+              }`}
             >
-              {isScraping && (
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50">
-                  <PipelineStatusCard
-                    progressStatus={{
-                      ...progressStatus,
-                      status: "Scraping Assets...",
-                    }}
-                  />
-                </div>
-              )}
               <div className="flex-1 w-full h-full relative">
                 <VideoMonitor
                   activePreviewTab={activePreviewTab}
