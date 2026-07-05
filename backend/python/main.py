@@ -611,6 +611,9 @@ PUBLIC_ROUTE_PREFIXES = (
     "/api/projects/public/",
     "/static/",        # Swagger UI local CSS/JS assets
     "/api/docs/",      # Swagger sub-paths (e.g. /api/docs/oauth2-redirect)
+    "/api/image/cached/",
+    "/api/merge-images/cached/",
+    "/api/stitch-images/cached/",
 )
 
 # Admin-only endpoints (require creator_role/admin)

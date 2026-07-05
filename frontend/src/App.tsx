@@ -45,7 +45,7 @@ import LandingPage from "./components/landing/LandingPage";
 import { LoginPage, RegisterPage, ForgotPasswordPage } from "./components/auth";
 import ProfilePage from "./components/profile/ProfilePage";
 import LoadingPage from "./components/LoadingPage";
-import TerminalLogs from "./components/Feature/terminal/TerminalLogs";
+import { TerminalLogs, LogsPage } from "./components/Feature/terminal";
 import SeriesDetailsPage from "./components/SeriesDetailsPage";
 import DisplayPage from "./components/DisplayPage";
 import DashboardPage from "./components/Dashboard/DashboardPage";
@@ -995,7 +995,9 @@ export default function App() {
         <div
           className={`${
             !isSidebarOpen ? "lg:pl-20" : ""
-          } flex-1 flex flex-col transition-all duration-300`}
+          } ${
+            !isSidebarOpen && !isProEditorPage ? "pt-[59px]" : ""
+          } flex-grow flex-1 flex flex-col min-h-screen transition-all duration-300`}
         >
           {/* Impersonation Banner */}
           {localStorage.getItem("sonikoma_admin_token") && (
@@ -1274,11 +1276,11 @@ export default function App() {
           {/* PAGE VIEW 3: Real-Time Engine Logs Console */}
           {isLogsPath && (
             <div className="page-transition w-full flex-1 flex flex-col">
-              {/* <LogsPage
+              <LogsPage
                 consoleLogs={consoleLogs}
                 setConsoleLogs={setConsoleLogs}
                 onNavigateHome={handleNavigateHome}
-              /> */}
+              />
             </div>
           )}
 
