@@ -1,6 +1,6 @@
 import { normalizeLog } from "../types/logs";
 import React from "react";
-import { Slice } from "@/components/Feature/editor/crop";
+import { Slice } from "@/components/Feature/editor/shared";
 import { NotificationType } from "../components/notification/NotificationStack.js";
 import * as api from "../api/index.js";
 

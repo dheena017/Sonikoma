@@ -56,7 +56,9 @@ export function useThemeMode() {
 
         // Render LoadingPage into the overlay
         const root = createRoot(overlay);
-        root.render(<LoadingPage status="Switching Theme..." themeMode={next} />);
+        root.render(
+          <LoadingPage status="Switching Theme..." themeMode={next} />
+        );
 
         // 3. Fade IN — mask the old theme
         requestAnimationFrame(() => {

@@ -14,7 +14,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from services.stable_diffusion_engine import get_stable_diffusion_engine
+from media.ai.stable_diffusion_engine import get_stable_diffusion_engine
 
 logger = logging.getLogger("sonikoma.routes.stable_diffusion_routes")
 router = APIRouter()

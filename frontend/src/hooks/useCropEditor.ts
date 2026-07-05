@@ -1,6 +1,6 @@
 import { normalizeLog } from "../types/logs";
 import { useRef, useEffect, useCallback } from "react";
-import { Slice, Slot, DetectedPanel } from "@/components/Feature/editor/crop";
+import { Slice, Slot, DetectedPanel } from "@/components/Feature/editor/shared";
 import { NotificationType } from "../components/notification/NotificationStack.js";
 import { useCropEditorState } from "./useCropEditorState.js";
 import { useCropEditorHistory } from "./useCropEditorHistory.js";

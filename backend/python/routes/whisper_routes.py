@@ -14,7 +14,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from services.whisper_engine import get_whisper_engine, WhisperModel, WHISPER_AVAILABLE
+from media.audio.whisper_engine import get_whisper_engine, WhisperModel, WHISPER_AVAILABLE
 
 logger = logging.getLogger("sonikoma.routes.whisper_routes")
 router = APIRouter()

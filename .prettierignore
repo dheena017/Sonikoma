@@ -22,3 +22,7 @@ temp/
 temp_test_combos/
 skills-lock.json
 verify_fix.cjs
+.agents/
+.llm-chat-history/
+backend/database/
+data/

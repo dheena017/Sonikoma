@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Slice } from "@/components/Feature/editor/crop";
+import { Slice } from "@/components/Feature/editor/shared";
 
 interface UseCropEditorStateProps {
   scrapedImages: string[];

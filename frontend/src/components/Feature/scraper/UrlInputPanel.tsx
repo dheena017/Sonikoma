@@ -58,38 +58,37 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
   const { models: aiModels } = useAIModels();
   const {
     targetUrl,
-    setTargetUrl, 
-    selectedModel, 
-    setSelectedModel, 
+    setTargetUrl,
+    selectedModel,
+    setSelectedModel,
     isProcessing,
     isScraping = false,
     handleScrape,
     addNotification,
-    narrationStyle = "long", 
+    narrationStyle = "long",
     setNarrationStyle,
     seriesTitle = "",
-    setSeriesTitle, 
-    chapterNumber = "", 
+    setSeriesTitle,
+    chapterNumber = "",
     setChapterNumber,
-    chapterTitle = "", 
-    setChapterTitle, 
-    scrapedGenre = "", 
+    chapterTitle = "",
+    setChapterTitle,
+    scrapedGenre = "",
     setScrapedGenre,
-    seriesAuthor = "", 
-    setSeriesAuthor, 
+    seriesAuthor = "",
+    setSeriesAuthor,
     seriesCoverImage = "",
     setSeriesCoverImage,
-    seriesSynopsis = "", 
-    setSeriesSynopsis, 
-    smartSlice = true, 
+    seriesSynopsis = "",
+    setSeriesSynopsis,
+    smartSlice = true,
     setSmartSlice,
-    resetWorkspace, 
+    resetWorkspace,
     cropSensitivity = 50,
     setCropSensitivity,
     autoSplitTallStrips = true,
-    setAutoSplitTallStrips, 
-    actionSlot
-    
+    setAutoSplitTallStrips,
+    actionSlot,
   } = props;
 
   const [advancedSettingsOpen, setAdvancedSettingsOpen] = React.useState(false);
@@ -119,8 +118,8 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
     >
       {/* 1. Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div className="space-y-1">
-        <div className="flex items-center gap-2 text-purple-400">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-purple-400">
             <Sparkles className="h-4 w-4 shrink-0" />
             <span className="text-[10px] font-black tracking-[0.2em] uppercase font-mono">
               Project Constructor
@@ -133,8 +132,12 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
             Define your project parameters and source link to begin.
           </p>
         </div>
-        <h2 className="text-2xl font-bold text-white tracking-tight">Initialize New Pipeline</h2>
-        <p className="text-xs text-neutral-400 font-medium">Define your project parameters and source link to begin.</p>
+        <h2 className="text-2xl font-bold text-white tracking-tight">
+          Initialize New Pipeline
+        </h2>
+        <p className="text-xs text-neutral-400 font-medium">
+          Define your project parameters and source link to begin.
+        </p>
       </div>
 
       {/* 2. Series Metadata */}
@@ -145,35 +148,41 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
           </h3>
           <div className="space-y-3">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-neutral-500 uppercase">Series Title</label>
+              <label className="text-[10px] font-bold text-neutral-500 uppercase">
+                Series Title
+              </label>
+              <input
+                type="text"
+                value={seriesTitle}
+                onChange={(e) => setSeriesTitle?.(e.target.value)}
+                placeholder="e.g. Boundless Necromancer"
+                className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-2.5 text-sm text-neutral-200 outline-none transition-all"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-neutral-500 uppercase">
+                  Chapter #
+                </label>
                 <input
                   type="text"
-                  value={seriesTitle}
-                  onChange={(e) => setSeriesTitle?.(e.target.value)}
-                  placeholder="e.g. Boundless Necromancer"
+                  value={chapterNumber}
+                  onChange={(e) => setChapterNumber?.(e.target.value)}
+                  placeholder="72"
+                  className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-2.5 text-sm text-neutral-200 outline-none transition-all font-mono"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-neutral-500 uppercase">
+                  Genre
+                </label>
+                <input
+                  type="text"
+                  value={scrapedGenre}
+                  onChange={(e) => setScrapedGenre?.(e.target.value)}
+                  placeholder="Fantasy"
                   className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-2.5 text-sm text-neutral-200 outline-none transition-all"
                 />
-             </div>
-             <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-neutral-500 uppercase">Chapter #</label>
-                  <input
-                    type="text"
-                    value={chapterNumber}
-                    onChange={(e) => setChapterNumber?.(e.target.value)}
-                    placeholder="72"
-                    className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-2.5 text-sm text-neutral-200 outline-none transition-all font-mono"
-                  />
-            </div>
-            <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-neutral-500 uppercase">Genre</label>
-                  <input
-                    type="text"
-                    value={scrapedGenre}
-                    onChange={(e) => setScrapedGenre?.(e.target.value)}
-                    placeholder="Fantasy"
-                    className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-2.5 text-sm text-neutral-200 outline-none transition-all"
-                  />
               </div>
             </div>
           </div>
@@ -187,8 +196,12 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
           <div className="space-y-4">
             <div className="flex items-center justify-between p-3 bg-neutral-950 rounded-xl border border-neutral-800">
               <div>
-                <p className="text-[11px] font-bold text-neutral-200">Auto-Crop Sensitivity</p>
-                <p className="text-[9px] text-neutral-500 font-mono">Edge detection threshold</p>
+                <p className="text-[11px] font-bold text-neutral-200">
+                  Auto-Crop Sensitivity
+                </p>
+                <p className="text-[9px] text-neutral-500 font-mono">
+                  Edge detection threshold
+                </p>
               </div>
               <input
                 type="range"
@@ -200,9 +213,20 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
               />
             </div>
             <div className="flex items-center justify-between p-3 bg-neutral-950 rounded-xl border border-neutral-800">
-              <p className="text-[11px] font-bold text-neutral-200">Auto-Split Strips</p>
-              <button onClick={() => setAutoSplitTallStrips?.(!autoSplitTallStrips)} className={`w-10 h-5 rounded-full relative ${autoSplitTallStrips ? 'bg-purple-600' : 'bg-neutral-800'}`}>
-                <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${autoSplitTallStrips ? 'left-6' : 'left-1'}`} />
+              <p className="text-[11px] font-bold text-neutral-200">
+                Auto-Split Strips
+              </p>
+              <button
+                onClick={() => setAutoSplitTallStrips?.(!autoSplitTallStrips)}
+                className={`w-10 h-5 rounded-full relative ${
+                  autoSplitTallStrips ? "bg-purple-600" : "bg-neutral-800"
+                }`}
+              >
+                <div
+                  className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${
+                    autoSplitTallStrips ? "left-6" : "left-1"
+                  }`}
+                />
               </button>
             </div>
           </div>
@@ -240,7 +264,14 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
               disabled={isScraping || !targetUrl.trim()}
               className="relative px-8 py-4 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 rounded-2xl text-sm font-bold text-white transition-all shadow-lg active:scale-95 disabled:opacity-50 shrink-0 flex items-center gap-3"
             >
-              {isScraping ? "Initializing..." : <> <ImageIcon className="h-4 w-4" /> Import Images </>}
+              {isScraping ? (
+                "Initializing..."
+              ) : (
+                <>
+                  {" "}
+                  <ImageIcon className="h-4 w-4" /> Import Images{" "}
+                </>
+              )}
             </button>
           )}
         </div>
@@ -253,47 +284,71 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
           onClick={() => setAdvancedSettingsOpen(!advancedSettingsOpen)}
           className="flex items-center gap-2 text-xs font-bold text-neutral-500 hover:text-neutral-300 transition-colors pl-1"
         >
-          <span className={`transition-transform duration-300 ${advancedSettingsOpen ? 'rotate-90' : ''}`}>▸</span>
+          <span
+            className={`transition-transform duration-300 ${
+              advancedSettingsOpen ? "rotate-90" : ""
+            }`}
+          >
+            ▸
+          </span>
           Global Pipeline Constraints
-      </button>
+        </button>
       </div>
 
       {advancedSettingsOpen && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-neutral-800/50 animate-in fade-in slide-in-from-top-2">
           {/* Engine Select */}
           <div className="space-y-2">
-             <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Voice Engine</label>
-             <select
-              value={selectedModel} 
-              onChange={(e) => setSelectedModel(e.target.value)} 
+            <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
+              Voice Engine
+            </label>
+            <select
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
               className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-xs text-neutral-200 outline-none"
-              >
-               {aiModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-             </select>
+            >
+              {aiModels.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name}
+                </option>
+              ))}
+            </select>
           </div>
 
-           {/* Narration Strategy */}
+          {/* Narration Strategy */}
           <div className="space-y-2">
-             <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Narration Style</label>
-             <select 
-              value={narrationStyle} 
-              onChange={(e) => setNarrationStyle?.(e.target.value)} 
+            <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
+              Narration Style
+            </label>
+            <select
+              value={narrationStyle}
+              onChange={(e) => setNarrationStyle?.(e.target.value)}
               className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-xs text-neutral-200 outline-none"
-              >
-               {NARRATION_STYLES.map(opt => <option key={opt.id} value={opt.id}>{opt.label}</option>)}
-             </select>
+            >
+              {NARRATION_STYLES.map((opt) => (
+                <option key={opt.id} value={opt.id}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Layout Mode */}
           <div className="space-y-2">
-             <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Layout Mode</label>
-             <select 
+            <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
+              Layout Mode
+            </label>
+            <select
               value={smartSlice ? "separate" : "stitched"}
-              onChange={(e) => setSmartSlice?.(e.target.value === "separate")} 
+              onChange={(e) => setSmartSlice?.(e.target.value === "separate")}
               className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-xs text-neutral-200 outline-none"
-              >
-               {LAYOUT_MODES.map(opt => <option key={opt.id} value={opt.id}>{opt.label}</option>)}
-             </select>
+            >
+              {LAYOUT_MODES.map((opt) => (
+                <option key={opt.id} value={opt.id}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       )}
@@ -305,4 +360,3 @@ export default UrlInputPanel;
 function handleScrape() {
   throw new Error("Function not implemented.");
 }
-
