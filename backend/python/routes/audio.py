@@ -23,7 +23,7 @@ from pydantic import BaseModel, Field
 
 # Ensure the parent package (backend/python) is on the path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from services.audio import generate_panel_audio
+from media.audio.audio import generate_panel_audio
 
 logger = logging.getLogger("sonikoma.routes.audio")
 router = APIRouter()

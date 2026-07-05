@@ -34,15 +34,15 @@ import io
 import tempfile
 import random
 from PIL import Image
-from services.detect_panels import run_cv_detection
+from media.image.detect_panels import run_cv_detection
 from utils.url_utils import extract_webtoon_url, parse_webtoon_url
 from utils.id_utils import generate_project_id
 from utils.cache import stitched_cache, edit_history
 import utils.image_utils as img_utils
 from services.scraper import scrape_images_from_url, scraped_metadata_cache
-from services.storyboard_ai import generate_dynamic_panels
+from media.ai.storyboard_ai import generate_dynamic_panels
 from routes.ai_routes import get_all_user_keys
-from services.video import compile_video_from_panels
+from media.video.video import compile_video_from_panels
 import os
 
 logger = logging.getLogger("sonikoma.routes.scraper_routes")

@@ -59,7 +59,7 @@ SECRET_KEY = os.getenv("JWT_SECRET_KEY", "sonikoma_super_secret_key_change_me")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 365  # 1 year default
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/token", auto_error=False)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
 
 # ─── Models ───────────────────────────────────────────────────────────────────
 
@@ -111,18 +111,8 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 async def get_current_user(request: Request, token: Optional[str] = Depends(oauth2_scheme)):
-    # If called manually in middleware, token will be the Depends object.
-    # We must extract the actual token string.
-    if not token or not isinstance(token, str):
-        auth_header = request.headers.get("Authorization")
-        if auth_header:
-            scheme, _, param = auth_header.partition(" ")
-            if scheme.lower() == "bearer":
-                token = param
-            else:
-                token = auth_header
-        else:
-            token = request.query_params.get("token")
+    if not token:
+        token = request.query_params.get("token")
 
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -130,7 +120,7 @@ async def get_current_user(request: Request, token: Optional[str] = Depends(oaut
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    if not token or not isinstance(token, str):
+    if not token:
         raise credentials_exception
 
     # Authenticate via Developer API key if token starts with av_live_
@@ -162,43 +152,6 @@ async def get_admin_user(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=403, detail="Administrative privileges required.")
     return current_user
 # ─── Routes ───────────────────────────────────────────────────────────────────
-
-@router.post("/token", include_in_schema=False)
-async def login_for_swagger_access_token(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    request: Request = None,
-):
-    """Used exclusively by Swagger UI 'Authorize' button.
-
-    Swagger sends application/x-www-form-urlencoded with fields:
-    - username (mapped here to user's email)
-    - password
-    """
-    # Temporary debug (safe for dev): helps confirm Swagger form fields
-    print(f"--- SWAGGER LOGIN ATTEMPT ---")
-    print(f"Email entered: '{form_data.username}'")
-    print(f"Password entered: '{form_data.password}'")
-
-    user = get_user_by_email(form_data.username)
-    ip_addr = request.client.host if request and request.client else "127.0.0.1"
-
-    if (
-        not user
-        or not user.get("hashed_password")
-        or not verify_password(form_data.password, user["hashed_password"])
-    ):
-        if user:
-            write_audit_log(user["user_id"], "Swagger UI failed login attempt", ip_addr, "Failed")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    write_audit_log(user["user_id"], "Swagger UI Login", ip_addr, "Success")
-
-    access_token = create_access_token(data={"sub": user["user_id"]})
-    return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 async def register(user_data: UserRegister):

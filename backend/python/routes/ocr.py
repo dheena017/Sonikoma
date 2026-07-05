@@ -22,7 +22,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from services.ocr import extract_dialogue_from_panel, extract_full_ocr_data
+from media.image.ocr import extract_dialogue_from_panel, extract_full_ocr_data
 
 logger = logging.getLogger("sonikoma.routes.ocr")
 router = APIRouter()

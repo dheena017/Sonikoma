@@ -21,7 +21,7 @@ import uuid
 
 import utils.image_utils as img_utils
 from utils.cache import stitched_cache, edit_history, zip_cache
-from services.cleaner import remove_speech_bubbles
+from media.image.cleaner import remove_speech_bubbles
 from utils.supabase_storage import upload_to_supabase_bucket
 
 logger = logging.getLogger("sonikoma.routes.image_routes")
@@ -124,7 +124,7 @@ async def edit_image(body: EditImageRequest):
             if body.cropTop > 0 or body.cropBottom > 0 or body.cropLeft > 0 or body.cropRight > 0:
                 img = Image.open(io.BytesIO(img_buffer))
                 w, h = img.size
-                
+
                 top_px = int(round((body.cropTop / 100) * h))
                 bot_px = int(round((body.cropBottom / 100) * h))
                 left_px = int(round((body.cropLeft / 100) * w))
@@ -159,16 +159,16 @@ async def edit_image(body: EditImageRequest):
         # Attempt to upload to Supabase
         filename = f"edited_{uuid.uuid4().hex[:8]}.jpeg" if "jpeg" in content_type or "jpg" in content_type else f"edited_{uuid.uuid4().hex[:8]}.png"
         supabase_url = await asyncio.to_thread(
-            upload_to_supabase_bucket, 
-            img_buffer, 
-            "panels", 
-            filename, 
+            upload_to_supabase_bucket,
+            img_buffer,
+            "panels",
+            filename,
             content_type
         )
 
         unique_id = f"merged_{int(time.time() * 1000)}_cropped"
         new_url = supabase_url if supabase_url else f"/api/image/cached/{unique_id}"
-        
+
         # Always cache locally as a fallback or fast-access path
         stitched_cache.set(unique_id, {"data": img_buffer, "content_type": content_type})
         edit_history.set(new_url, body.url)
@@ -219,10 +219,10 @@ async def transform_image(body: TransformImageRequest):
 
         filename = f"transform_{uuid.uuid4().hex[:8]}.jpeg"
         supabase_url = await asyncio.to_thread(
-            upload_to_supabase_bucket, 
-            out_bytes, 
-            "panels", 
-            filename, 
+            upload_to_supabase_bucket,
+            out_bytes,
+            "panels",
+            filename,
             "image/jpeg"
         )
 
@@ -259,7 +259,7 @@ async def merge_images(body: StitchImagesRequest):
             img2 = body.imageUrl2 or body.url2
             if img1 and img2:
                 urls = [img1, img2]
-                
+
         if not urls or len(urls) < 2:
             raise HTTPException(status_code=400, detail="At least 2 image URLs are required.")
 
@@ -279,10 +279,10 @@ async def merge_images(body: StitchImagesRequest):
 
         filename = f"merged_{uuid.uuid4().hex[:8]}.png"
         supabase_url = await asyncio.to_thread(
-            upload_to_supabase_bucket, 
-            merged_bytes, 
-            "panels", 
-            filename, 
+            upload_to_supabase_bucket,
+            merged_bytes,
+            "panels",
+            filename,
             "image/png"
         )
 
@@ -452,7 +452,7 @@ async def get_cached_stitch(cache_id: str = Path(...), request: Request = None):
                     from database.db import unwrap_proxy_url
                     urls = json.loads(session_row["image_urls"])
                     unwrapped_urls = [unwrap_proxy_url(u) for u in urls if u]
-                    
+
                     if unwrapped_urls:
                         logger.info(f"[Cache Fallback] Dynamically re-stitching {len(unwrapped_urls)} panels for cache_id '{cache_id}' from Webtoon URL: {webtoon_url[:60]}...")
                         resolved_buffers_data = []
@@ -465,7 +465,7 @@ async def get_cached_stitch(cache_id: str = Path(...), request: Request = None):
                             for idx, res in enumerate(resolved_results):
                                 if not isinstance(res, Exception):
                                     resolved_buffers_data.append(res["data"])
-                        
+
                         if resolved_buffers_data:
                             stitched_bytes = await asyncio.to_thread(
                                 img_utils.stitch_images_together, resolved_buffers_data, layout="vertical"
@@ -508,11 +508,11 @@ async def execute_splits(body: SplitImagesRequest):
     try:
         resolved = await img_utils.resolve_image_to_buffer(body.url)
         image_buffer = resolved["data"]
-        
+
         def split_sync():
             img = Image.open(io.BytesIO(image_buffer))
             w, h = img.size
-            
+
             # Map percentage lines to absolute pixel y-coords
             y_coords = sorted([int(round((pct / 100.0) * h)) for pct in body.splitLines])
             # Add boundary edges
@@ -520,14 +520,14 @@ async def execute_splits(body: SplitImagesRequest):
                 y_coords.insert(0, 0)
             if h not in y_coords:
                 y_coords.append(h)
-                
+
             res_urls = []
             for i in range(len(y_coords) - 1):
                 y_top = y_coords[i]
                 y_bottom = y_coords[i+1]
                 if (y_bottom - y_top) <= 5:
                     continue # Skip micro-slices
-                    
+
                 seg = img.crop((0, y_top, w, y_bottom))
                 out = io.BytesIO()
                 seg.save(out, format="JPEG", quality=92)
@@ -552,9 +552,9 @@ async def execute_splits(body: SplitImagesRequest):
                 filename = f"split_{uuid.uuid4().hex[:8]}_{i}.jpeg"
                 # Since split_sync runs in a thread, we use upload_to_supabase_bucket directly
                 supabase_url = upload_to_supabase_bucket(
-                    seg_bytes, 
-                    "panels", 
-                    filename, 
+                    seg_bytes,
+                    "panels",
+                    filename,
                     "image/jpeg"
                 )
 
@@ -608,31 +608,31 @@ async def download_zip(body: DownloadZipRequest):
                         ext = "webp"
                     elif "gif" in ct:
                         ext = "gif"
-                        
+
                     filename = f"panel_{idx + 1:03d}.{ext}"
                     zip_file.writestr(filename, resolved["data"])
             return zip_buffer.getvalue()
 
         zip_bytes = await asyncio.to_thread(generate_zip_sync)
-        
+
         # Build custom filename
         zip_filename = "comic_panels_archive.zip"
         if body.url:
             try:
                 import re
                 from utils.url_utils import parse_webtoon_url
-                
+
                 parsed = parse_webtoon_url(body.url)
-                
+
                 def make_safe_filename(name: str) -> str:
                     cleaned = re.sub(r'[^\w\s-]', '', name)
                     cleaned = re.sub(r'[-\s]+', '_', cleaned)
                     return cleaned.strip('_')
-                
+
                 source = make_safe_filename(parsed.get("source_name", "Source"))
                 title = make_safe_filename(parsed.get("title", "Manhwa"))
                 episode = make_safe_filename(parsed.get("episode", "Chapter"))
-                
+
                 if source or title or episode:
                     parts = []
                     if source and source.lower() != "custom_source" and source.lower() != "custom":
@@ -641,7 +641,7 @@ async def download_zip(body: DownloadZipRequest):
                         parts.append(title)
                     if episode and episode.lower() != "dynamic_chapter":
                         parts.append(episode)
-                    
+
                     if parts:
                         zip_filename = "_".join(parts) + ".zip"
             except Exception as e:
@@ -662,17 +662,17 @@ async def get_download_zip(zip_id: str = Path(...)):
     cached = zip_cache.get(zip_id)
     if not cached:
         raise HTTPException(
-            status_code=404, 
+            status_code=404,
             detail="The requested ZIP archive has expired or was not found. Please package again."
         )
-        
+
     if isinstance(cached, dict):
         buffer = cached["data"]
         filename = cached.get("filename", "comic_panels_archive.zip")
     else:
         buffer = cached
         filename = "comic_panels_archive.zip"
-        
+
     return Response(
         content=buffer,
         media_type="application/zip",
@@ -689,14 +689,14 @@ async def bubble_cleaning(body: RemoveBubblesRequest):
         # 1. Resolve image
         resolved = await img_utils.resolve_image_to_buffer(body.url)
         content_type = resolved["contentType"]
-        
+
         # 2. Write to temp file
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_in:
             tmp_in.write(resolved["data"])
             tmp_in_path = tmp_in.name
-            
+
         tmp_out_path = tmp_in_path.replace(".png", "_out.png")
-        
+
         try:
             # 3. Call services/cleaner remove_speech_bubbles directly (no subprocess!)
             detected = await asyncio.to_thread(
@@ -709,22 +709,22 @@ async def bubble_cleaning(body: RemoveBubblesRequest):
                 inpaint_radius=body.inpaint_radius,
                 detection_style=body.detection_style
             )
-            
+
             with open(tmp_out_path, "rb") as f:
                 cleaned_bytes = f.read()
-                
+
             filename = f"cleaned_{uuid.uuid4().hex[:8]}.png"
             supabase_url = await asyncio.to_thread(
-                upload_to_supabase_bucket, 
-                cleaned_bytes, 
-                "panels", 
-                filename, 
+                upload_to_supabase_bucket,
+                cleaned_bytes,
+                "panels",
+                filename,
                 content_type
             )
 
             cache_id = f"merged_{int(time.time() * 1000)}_cleaned"
             new_url = supabase_url if supabase_url else f"/api/image/cached/{cache_id}"
-            
+
             stitched_cache.set(cache_id, {"data": cleaned_bytes, "content_type": content_type})
             edit_history.set(new_url, body.url)
             try:
@@ -732,7 +732,7 @@ async def bubble_cleaning(body: RemoveBubblesRequest):
                 db.save_edit_history(new_url, body.url)
             except Exception:
                 pass
-            
+
             logger.info(f"[Bubble Cleaner] Successfully cleaned bubbles. URL: {new_url}")
             return {"success": True, "url": new_url}
         finally:
@@ -750,10 +750,10 @@ async def bubble_cleaning(body: RemoveBubblesRequest):
 @router.post("/remove-speech-bubbles-batch", summary="Inpaint speech bubbles out of multiple panel images")
 async def bubble_cleaning_batch(body: RemoveBubblesBatchRequest):
     logger.info(f"[Bubble Cleaner Batch] Request received for {len(body.urls)} URLs.")
-    
+
     if not body.urls:
         raise HTTPException(status_code=400, detail="Field 'urls' must be a non-empty list.")
-    
+
     results = []
     semaphore = asyncio.Semaphore(4)
 
@@ -762,13 +762,13 @@ async def bubble_cleaning_batch(body: RemoveBubblesBatchRequest):
             try:
                 resolved = await img_utils.resolve_image_to_buffer(url)
                 content_type = resolved["contentType"]
-                
+
                 with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_in:
                     tmp_in.write(resolved["data"])
                     tmp_in_path = tmp_in.name
-                    
+
                 tmp_out_path = tmp_in_path.replace(".png", "_out.png")
-                
+
                 try:
                     detected = await asyncio.to_thread(
                         remove_speech_bubbles,
@@ -780,22 +780,22 @@ async def bubble_cleaning_batch(body: RemoveBubblesBatchRequest):
                         inpaint_radius=body.inpaint_radius,
                         detection_style=body.detection_style
                     )
-                    
+
                     with open(tmp_out_path, "rb") as f:
                         cleaned_bytes = f.read()
-                        
+
                     filename = f"cleaned_{uuid.uuid4().hex[:8]}.png"
                     supabase_url = await asyncio.to_thread(
-                        upload_to_supabase_bucket, 
-                        cleaned_bytes, 
-                        "panels", 
-                        filename, 
+                        upload_to_supabase_bucket,
+                        cleaned_bytes,
+                        "panels",
+                        filename,
                         content_type
                     )
 
                     cache_id = f"merged_{int(time.time() * 1000)}_cleaned_{hash(url) % 10000}"
                     new_url = supabase_url if supabase_url else f"/api/image/cached/{cache_id}"
-                    
+
                     stitched_cache.set(cache_id, {"data": cleaned_bytes, "content_type": content_type})
                     edit_history.set(new_url, url)
                     try:
@@ -803,7 +803,7 @@ async def bubble_cleaning_batch(body: RemoveBubblesBatchRequest):
                         db.save_edit_history(new_url, url)
                     except Exception:
                         pass
-                    
+
                     results.append({"url": url, "new_url": new_url, "success": True})
                 finally:
                     for p in (tmp_in_path, tmp_out_path):
@@ -818,7 +818,7 @@ async def bubble_cleaning_batch(body: RemoveBubblesBatchRequest):
 
     tasks = [process_one(url) for url in body.urls]
     await asyncio.gather(*tasks)
-    
+
     return {"success": True, "results": results}
 
 from fastapi import UploadFile, File
@@ -830,7 +830,7 @@ async def upload_image(file: UploadFile = File(...)):
     try:
         file_bytes = await file.read()
         content_type = file.content_type or "application/octet-stream"
-        
+
         # If no explicit content type but filename provided, try to guess
         if content_type == "application/octet-stream" and file.filename:
             guessed_type, _ = mimetypes.guess_type(file.filename)
@@ -844,17 +844,17 @@ async def upload_image(file: UploadFile = File(...)):
             ext = "webp"
         elif "gif" in content_type:
             ext = "gif"
-            
+
         filename = f"upload_{uuid.uuid4().hex[:8]}.{ext}"
-        
+
         supabase_url = await asyncio.to_thread(
-            upload_to_supabase_bucket, 
-            file_bytes, 
-            "panels", 
-            filename, 
+            upload_to_supabase_bucket,
+            file_bytes,
+            "panels",
+            filename,
             content_type
         )
-        
+
         if supabase_url:
             new_url = supabase_url
         else:
@@ -862,7 +862,7 @@ async def upload_image(file: UploadFile = File(...)):
             cache_id = f"upload_{int(time.time() * 1000)}"
             stitched_cache.set(cache_id, {"data": file_bytes, "content_type": content_type})
             new_url = f"/api/image/cached/{cache_id}"
-            
+
         return {"success": True, "url": new_url}
     except Exception as e:
         logger.error(f"[Image Upload] Failed: {e}", exc_info=True)

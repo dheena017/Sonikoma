@@ -20,7 +20,6 @@ import AdminLayout from "./AdminLayout";
 
 const AdminPage = React.memo(
   ({
-    user,
     navigateTo,
     currentPath,
     isAuthenticated,
@@ -28,7 +27,6 @@ const AdminPage = React.memo(
     addNotification,
     audioFeedback,
   }: {
-    user?: any;
     navigateTo: (path: string) => void;
     currentPath: string;
     isAuthenticated: boolean;
@@ -101,7 +99,7 @@ const AdminPage = React.memo(
     }, [activeTab]);
 
     // PREMIUM UPGRADE: High-end "Access Denied" security screen
-    if (!isAuthenticated || (user && user.creator_role !== "admin")) {
+    if (!isAuthenticated) {
       return (
         <div className="min-h-screen bg-[#050507] flex flex-col items-center justify-center p-6 selection:bg-rose-500/30">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-rose-900/20 via-[#050507] to-[#050507] pointer-events-none" />

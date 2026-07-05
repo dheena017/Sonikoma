@@ -14,7 +14,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from services.imagemagick_engine import (
+from media.image.imagemagick_engine import (
     get_imagemagick_engine,
     ResizeMode,
     FilterType,
