@@ -26,7 +26,7 @@ export default function ProjectsFilters({
   onViewModeChange,
 }: ProjectsFiltersProps) {
   return (
-    <div className="bg-[#0b0b0e] border border-neutral-800 rounded-xl p-4 mb-8 flex flex-col lg:flex-row gap-4 items-center justify-between sticky top-0 z-20">
+    <div className="bg-[#0b0b0e] border border-neutral-800 rounded-xl p-4 mb-8 flex flex-col lg:flex-row gap-4 items-center justify-between sticky top-[59px] z-20">
       <div className="flex-1 w-full relative">
         <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
         <input

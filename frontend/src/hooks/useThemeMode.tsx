@@ -34,51 +34,54 @@ export function useThemeMode() {
     setThemeMode((prev) => {
       const next: ThemeMode = prev === "dark" ? "light" : "dark";
 
-      // 1. Lock element transitions while the overlay animates
-      document.documentElement.setAttribute("data-theme-switching", "true");
+      // Defer DOM/React-root side-effects to the next macro-task to prevent triggering nested updates from render phase
+      setTimeout(() => {
+        // 1. Lock element transitions while the overlay animates
+        document.documentElement.setAttribute("data-theme-switching", "true");
 
-      // 2. Create an overlay that covers the whole page
-      const overlay = document.createElement("div");
-      overlay.id = "theme-transition-overlay";
-      overlay.style.cssText = `
-        position: fixed;
-        inset: 0;
-        z-index: 99999;
-        pointer-events: auto;
-        opacity: 0;
-        transition: opacity ${TRANSITION_MS}ms cubic-bezier(0.4, 0, 0.2, 1);
-        will-change: opacity;
-        transform: translateZ(0);
-      `;
-      document.body.appendChild(overlay);
+        // 2. Create an overlay that covers the whole page
+        const overlay = document.createElement("div");
+        overlay.id = "theme-transition-overlay";
+        overlay.style.cssText = `
+          position: fixed;
+          inset: 0;
+          z-index: 99999;
+          pointer-events: auto;
+          opacity: 0;
+          transition: opacity ${TRANSITION_MS}ms cubic-bezier(0.4, 0, 0.2, 1);
+          will-change: opacity;
+          transform: translateZ(0);
+        `;
+        document.body.appendChild(overlay);
 
-      // Render LoadingPage into the overlay
-      const root = createRoot(overlay);
-      root.render(<LoadingPage status="Switching Theme..." themeMode={next} />);
+        // Render LoadingPage into the overlay
+        const root = createRoot(overlay);
+        root.render(<LoadingPage status="Switching Theme..." themeMode={next} />);
 
-      // 3. Fade IN — mask the old theme
-      requestAnimationFrame(() => {
+        // 3. Fade IN — mask the old theme
         requestAnimationFrame(() => {
-          overlay.style.opacity = "1";
+          requestAnimationFrame(() => {
+            overlay.style.opacity = "1";
+          });
         });
-      });
 
-      // 4. At peak opacity → switch theme instantly (hidden behind overlay)
-      setTimeout(() => {
-        applyTheme(next);
-        localStorage.setItem(STORAGE_KEY, next);
-      }, TRANSITION_MS * 0.55);
-
-      // 5. Fade OUT — reveal the new theme; restore element transitions
-      setTimeout(() => {
-        overlay.style.opacity = "0";
-        document.documentElement.removeAttribute("data-theme-switching");
-        overlay.style.pointerEvents = "none";
+        // 4. At peak opacity → switch theme instantly (hidden behind overlay)
         setTimeout(() => {
-          root.unmount();
-          overlay.remove();
-        }, TRANSITION_MS + 60);
-      }, TRANSITION_MS * 0.85);
+          applyTheme(next);
+          localStorage.setItem(STORAGE_KEY, next);
+        }, TRANSITION_MS * 0.55);
+
+        // 5. Fade OUT — reveal the new theme; restore element transitions
+        setTimeout(() => {
+          overlay.style.opacity = "0";
+          document.documentElement.removeAttribute("data-theme-switching");
+          overlay.style.pointerEvents = "none";
+          setTimeout(() => {
+            root.unmount();
+            overlay.remove();
+          }, TRANSITION_MS + 60);
+        }, TRANSITION_MS * 0.85);
+      }, 0);
 
       return next;
     });

@@ -1041,7 +1041,7 @@ ${playgroundPrompt}
     return (
       <div className="flex-1 bg-neutral-955 text-neutral-100 overflow-y-auto min-h-screen">
         {/* HEADER SECTION */}
-        <div className="border-b border-neutral-905 bg-neutral-955/70 backdrop-blur-md sticky top-0 z-10 px-8 py-5 flex items-center justify-between">
+        <div className="border-b border-neutral-905 bg-neutral-955/70 backdrop-blur-md sticky top-[59px] z-10 px-8 py-5 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={onNavigateHome}
