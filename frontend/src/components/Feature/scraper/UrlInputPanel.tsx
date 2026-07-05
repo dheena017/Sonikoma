@@ -132,12 +132,6 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
             Define your project parameters and source link to begin.
           </p>
         </div>
-        <h2 className="text-2xl font-bold text-white tracking-tight">
-          Initialize New Pipeline
-        </h2>
-        <p className="text-xs text-neutral-400 font-medium">
-          Define your project parameters and source link to begin.
-        </p>
       </div>
 
       {/* 2. Series Metadata */}
