@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import DashboardHeader from "./DashboardHeader.js";
 import DashboardStats from "./DashboardStats.js";
 import DashboardQuickLinks from "./DashboardQuickLinks.js";
@@ -37,7 +37,7 @@ export default function DashboardPage() {
   } = useDashboardPage();
 
   return (
-    <div className="w-full min-h-full bg-[#070709] text-neutral-100 flex flex-col pt-20 px-4 sm:px-6 animate-fade-in relative z-10 pb-20">
+    <div className="w-full min-h-full bg-[#070709] text-neutral-100 flex flex-col pt-5 px-4 sm:px-6 animate-fade-in relative z-10 pb-20">
       <DashboardHeader
         themeMode={themeMode}
         searchQuery={searchQuery}
