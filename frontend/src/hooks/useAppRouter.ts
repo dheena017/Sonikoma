@@ -28,6 +28,7 @@ interface UseAppRouterProps {
   isAuthenticated: boolean;
   authLoading: boolean;
   isInitializing: boolean;
+  user: any;
   voiceActor: string;
   musicTheme: string;
   aspectRatio: "9:16" | "16:9";
@@ -56,6 +57,7 @@ export function useAppRouter({
   isAuthenticated,
   authLoading,
   isInitializing,
+  user,
   voiceActor,
   musicTheme,
   aspectRatio,
@@ -174,14 +176,6 @@ export function useAppRouter({
       // Root redirect logic
       if (!isInitializing && !authLoading) {
         if (!isAuthenticated) {
-          const isEditorRoute =
-            path === "/workspace/editor" ||
-            path === "/workspace/editor/" ||
-            path.startsWith("/workspace/editor/") ||
-            path === "/editor" ||
-            path === "/editor/" ||
-            path.startsWith("/editor/");
-
           const isProtectedRoute =
             path === "/dashboard" ||
             path === "/workspace" ||
@@ -209,14 +203,28 @@ export function useAppRouter({
             path === "/project-editor" ||
             path === "/admin" ||
             path.startsWith("/admin/") ||
-            path.startsWith("/series/");
+            path.startsWith("/series/") ||
+            path === "/workspace/editor" ||
+            path === "/workspace/editor/" ||
+            path.startsWith("/workspace/editor/") ||
+            path === "/editor" ||
+            path === "/editor/" ||
+            path.startsWith("/editor/");
 
-          if (isProtectedRoute && !isEditorRoute) {
+          if (isProtectedRoute) {
             window.history.replaceState({}, "", "/");
             setCurrentPath("/");
             return;
           }
         } else {
+          // If authenticated but route is admin-only and user is not admin, redirect to /dashboard
+          const isAdminRoute = path === "/admin" || path.startsWith("/admin/");
+          if (isAdminRoute && user && user.creator_role !== "admin") {
+            window.history.replaceState({}, "", "/dashboard");
+            setCurrentPath("/dashboard");
+            return;
+          }
+
           if (
             path === "/" ||
             path === "" ||
@@ -348,7 +356,7 @@ export function useAppRouter({
       window.history.replaceState = originalReplaceState;
       window.removeEventListener("popstate", handleLocationChange);
     };
-  }, [isAuthenticated, authLoading, isInitializing]);
+  }, [isAuthenticated, authLoading, isInitializing, user]);
 
   const navigateTo = React.useCallback(
     (path: string) => {

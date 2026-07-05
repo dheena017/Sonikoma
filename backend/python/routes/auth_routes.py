@@ -111,8 +111,18 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 async def get_current_user(request: Request, token: Optional[str] = Depends(oauth2_scheme)):
-    if not token:
-        token = request.query_params.get("token")
+    # If called manually in middleware, token will be the Depends object.
+    # We must extract the actual token string.
+    if not token or not isinstance(token, str):
+        auth_header = request.headers.get("Authorization")
+        if auth_header:
+            scheme, _, param = auth_header.partition(" ")
+            if scheme.lower() == "bearer":
+                token = param
+            else:
+                token = auth_header
+        else:
+            token = request.query_params.get("token")
 
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -120,7 +130,7 @@ async def get_current_user(request: Request, token: Optional[str] = Depends(oaut
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    if not token:
+    if not token or not isinstance(token, str):
         raise credentials_exception
 
     # Authenticate via Developer API key if token starts with av_live_

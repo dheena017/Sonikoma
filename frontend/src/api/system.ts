@@ -1,3 +1,11 @@
+// Helper: read the stored JWT from local/session storage and return auth headers
+const getAuthHeaders = (): Record<string, string> => {
+  const token =
+    localStorage.getItem("sonikoma_token") ||
+    sessionStorage.getItem("sonikoma_token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 export const startBackend = async () => {
   const res = await fetch("/start-backend", { method: "POST" });
   if (!res.ok) throw new Error("Failed to start backend");
@@ -12,7 +20,7 @@ export const checkHealth = async () => {
 
 export const getSystemLogs = async (since?: string) => {
   const url = since ? `/api/system-logs?since=${since}` : "/api/system-logs";
-  const res = await fetch(url);
+  const res = await fetch(url, { headers: getAuthHeaders() });
   if (!res.ok) throw new Error("Failed to fetch system logs");
   return res.json();
 };
@@ -30,7 +38,7 @@ export const getMetrics = async (fetchWithInterceptor?: any) => {
     const res = await fetchWithInterceptor("/api/metrics");
     return res.json();
   }
-  const res = await fetch("/api/metrics");
+  const res = await fetch("/api/metrics", { headers: getAuthHeaders() });
   if (!res.ok) throw new Error("Failed to fetch metrics");
   return res.json();
 };
