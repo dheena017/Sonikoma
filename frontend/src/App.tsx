@@ -496,6 +496,7 @@ export default function App() {
     isAuthenticated,
     authLoading,
     isInitializing,
+    user,
     isDirty: isWorkspaceDirty,
     projectId,
     seriesSlug: seriesSlugState,
@@ -1567,6 +1568,7 @@ export default function App() {
           {/* PAGE VIEW 22: Admin Dashboard */}
           {isAdminPath && (
             <AdminPage
+              user={user}
               navigateTo={navigateTo}
               currentPath={currentPath}
               isAuthenticated={isAuthenticated}

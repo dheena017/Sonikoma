@@ -20,11 +20,13 @@ import TooltipPortal from "../TooltipPortal";
 interface AdminMiniSidebarProps {
   currentPath: string;
   navigateTo: (path: string) => void;
+  onOpenSidebar?: () => void;
 }
 
 const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
   currentPath,
   navigateTo,
+  onOpenSidebar,
 }) => {
   const groups = [
     {
