@@ -36,15 +36,21 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
         `/workspace/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
       );
     } else {
-      (window as any).navigateTo?.(`/workspace?id=${project.project_id}`);
+      (window as any).navigateTo?.(`/workspace/editor?id=${project.project_id}`);
     }
   }, []);
 
   const handleExport = useCallback((e: MouseEvent, project: Project) => {
     e.stopPropagation();
-    (window as any).navigateTo?.(
-      `/workspace?id=${project.project_id}&action=export`
-    );
+    if (project.series_slug && project.chapter_slug) {
+      (window as any).navigateTo?.(
+        `/workspace/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
+      );
+    } else {
+      (window as any).navigateTo?.(
+        `/workspace/editor?id=${project.project_id}`
+      );
+    }
   }, []);
 
   const handleRename = useCallback(
@@ -62,7 +68,7 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
         `/workspace/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
       );
     } else {
-      (window as any).navigateTo?.(`/workspace?id=${project.project_id}`);
+      (window as any).navigateTo?.(`/workspace/editor?id=${project.project_id}`);
     }
   }, []);
 
