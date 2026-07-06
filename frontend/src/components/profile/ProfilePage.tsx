@@ -15,6 +15,7 @@ import {
   Sparkles,
   BarChart3,
   Activity,
+  ArrowLeft,
 } from "lucide-react";
 
 // Sub-components
@@ -1228,48 +1229,30 @@ export default function ProfilePage({
 
       <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 relative z-10">
         {/* HEADER SECTION */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-white/5">
-          <div className="flex items-center gap-6">
-            <div className="relative group">
-              {/* Profile Avatar Card */}
-              <div className="w-24 h-24 rounded-3xl overflow-hidden border-2 border-purple-500/30 shadow-2xl shadow-purple-500/15 bg-neutral-900 flex items-center justify-center">
-                {renderAvatarContent(
-                  profileUser.avatarUrl,
-                  profileUser.fullName
-                )}
-              </div>
-
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="absolute -bottom-2 -right-2 p-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl shadow-lg border border-white/10 transition-all scale-95 hover:scale-100 cursor-pointer"
-                title="Upload Profile Image"
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1.5">
+              <span
+                className="hover:text-purple-400 cursor-pointer"
+                onClick={onNavigateHome}
               >
-                <Camera className="w-4 h-4" />
-              </button>
+                Dashboard
+              </span>
+              <span>&gt;</span>
+              <span className="text-purple-400">Profile</span>
             </div>
-
-            <div className="space-y-1 text-left">
-              <h1 className="text-3xl font-black tracking-tight text-white flex items-center gap-2">
-                {profileUser.fullName}
-                <span className="text-[10px] font-bold tracking-wider text-purple-400 uppercase bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">
-                  {profileUser.role}
-                </span>
-              </h1>
-              <p className="text-neutral-400 flex items-center gap-2 text-sm font-medium">
-                <Mail className="w-4 h-4 text-purple-400" />
-                {profileUser.email}
-              </p>
-            </div>
+            <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+              <div className="icon-pill icon-pill--purple">
+                <User className="h-5 w-5" />
+              </div>
+              User Profile
+            </h2>
+            <p className="text-xs text-neutral-400 font-mono mt-0.5">
+              Manage your profile information, subscription tier, billing, API keys, and workspace preferences
+            </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onNavigateHome}
-              className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 border border-white/5 hover:border-white/10 rounded-xl text-sm font-bold text-neutral-400 hover:text-white transition-all cursor-pointer shadow-sm active:scale-95 duration-300"
-            >
-              Back to Dashboard
-            </button>
+          <div className="flex items-center gap-2.5">
             <button
               onClick={async () => {
                 const confirm = (window as any).confirmAsync || window.confirm;
@@ -1282,11 +1265,55 @@ export default function ProfilePage({
                   onLogout();
                 }
               }}
-              className="px-4 py-2 bg-rose-600/10 border border-rose-500/20 hover:bg-rose-600 rounded-xl text-sm font-bold text-rose-400 hover:text-white transition-all flex items-center gap-2 cursor-pointer shadow-sm active:scale-95 duration-300"
+              className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 border border-neutral-800 text-rose-455 hover:text-rose-300 rounded-xl text-xs font-mono transition-all hover:bg-neutral-850 hover:border-neutral-700 cursor-pointer"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="h-3.5 w-3.5" />
               Sign Out
             </button>
+            <button
+              onClick={onNavigateHome}
+              className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg shadow-purple-950/30"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Dashboard
+            </button>
+          </div>
+        </div>
+
+        {/* User Card & Info Section */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 bg-neutral-900/20 border border-neutral-850 p-6 rounded-3xl shadow-xl">
+          <div className="flex items-center gap-6">
+            <div className="relative group">
+              {/* Profile Avatar Card */}
+              <div className="w-20 h-20 rounded-3xl overflow-hidden border border-purple-500/20 bg-neutral-900 flex items-center justify-center">
+                {renderAvatarContent(
+                  profileUser.avatarUrl,
+                  profileUser.fullName
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute -bottom-1 -right-1 p-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl shadow-lg border border-white/10 transition-all scale-95 hover:scale-100 cursor-pointer"
+                title="Upload Profile Image"
+              >
+                <Camera className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <div className="space-y-1 text-left">
+              <h3 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                {profileUser.fullName}
+                <span className="text-[9px] font-bold tracking-wider text-purple-400 uppercase bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">
+                  {profileUser.role}
+                </span>
+              </h3>
+              <p className="text-neutral-400 flex items-center gap-2 text-xs font-mono">
+                <Mail className="w-3.5 h-3.5 text-purple-400" />
+                {profileUser.email}
+              </p>
+            </div>
           </div>
         </div>
 
