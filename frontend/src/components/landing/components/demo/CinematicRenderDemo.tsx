@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Volume2 } from "lucide-react";
+import { useThemeMode } from "../../../../hooks/useThemeMode";
 
 export function CinematicRenderDemo({
   onGetStarted,
@@ -11,20 +12,33 @@ export function CinematicRenderDemo({
   const [musicTheme, setMusicTheme] = useState("Cyberpunk Synthwave");
   const [aspect, setAspect] = useState("9:16 Vertical");
 
+  const { themeMode } = useThemeMode();
+  const isLight = themeMode === "light";
+
   return (
-    <div className="w-full rounded-3xl border border-white/10 bg-neutral-950 overflow-hidden shadow-2xl p-4 md:p-6 space-y-4 md:space-y-6">
+    <div className={`w-full rounded-3xl border overflow-hidden shadow-2xl p-4 md:p-6 space-y-4 md:space-y-6 transition-all duration-300 ${
+      isLight
+        ? "border-slate-200 bg-white"
+        : "border-white/10 bg-neutral-950"
+    }`}>
       {/* Editor Header */}
-      <div className="flex items-center justify-between border-b border-white/5 pb-4">
+      <div className={`flex items-center justify-between border-b pb-4 transition-colors ${
+        isLight ? "border-slate-100" : "border-white/5"
+      }`}>
         <div className="flex items-center gap-3">
-          <div className="w-3 h-3 rounded-full bg-rose-550" />
+          <div className="w-3 h-3 rounded-full bg-rose-500" />
           <div className="w-3 h-3 rounded-full bg-amber-500" />
           <div className="w-3 h-3 rounded-full bg-emerald-500" />
-          <span className="text-xs text-neutral-500 font-mono ml-4">
+          <span className={`text-xs font-mono ml-4 transition-colors ${
+            isLight ? "text-slate-400" : "text-neutral-500"
+          }`}>
             render_editor.tsx
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <button className="px-3 py-1 text-xs font-mono text-neutral-400 hover:text-white transition-colors cursor-pointer">
+          <button className={`px-3 py-1 text-xs font-mono transition-colors cursor-pointer ${
+            isLight ? "text-slate-500 hover:text-slate-900" : "text-neutral-400 hover:text-white"
+          }`}>
             Preview
           </button>
           <button
@@ -39,7 +53,9 @@ export function CinematicRenderDemo({
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Panels List */}
         <div className="lg:col-span-1 space-y-3">
-          <div className="text-xs font-bold uppercase tracking-wider text-neutral-400">
+          <div className={`text-xs font-bold uppercase tracking-wider transition-colors ${
+            isLight ? "text-slate-500" : "text-neutral-400"
+          }`}>
             Panels (12)
           </div>
           <div className="space-y-2 h-48 overflow-y-auto">
@@ -48,8 +64,12 @@ export function CinematicRenderDemo({
                 key={i}
                 className={`p-2 rounded border text-xs cursor-pointer transition-all ${
                   i === 0
-                    ? "bg-purple-600/20 border-purple-500 text-white"
-                    : "bg-neutral-900/50 border-white/5 text-neutral-400 hover:border-white/10"
+                    ? isLight
+                      ? "bg-purple-50 border-purple-500 text-purple-600 font-semibold"
+                      : "bg-purple-600/20 border-purple-500 text-white"
+                    : isLight
+                      ? "bg-slate-50 border-slate-100 text-slate-600 hover:border-slate-200 hover:text-slate-950"
+                      : "bg-neutral-900/50 border-white/5 text-neutral-400 hover:border-white/10"
                 }`}
               >
                 Panel {i + 1}
@@ -60,7 +80,9 @@ export function CinematicRenderDemo({
 
         {/* Preview Area */}
         <div className="lg:col-span-2 space-y-3">
-          <div className="text-xs font-bold uppercase tracking-wider text-neutral-400">
+          <div className={`text-xs font-bold uppercase tracking-wider transition-colors ${
+            isLight ? "text-slate-500" : "text-neutral-400"
+          }`}>
             Viewport
           </div>
           <div className="relative w-full aspect-video bg-gradient-to-br from-neutral-900 to-black rounded-2xl border border-white/10 flex items-center justify-center overflow-hidden">
@@ -93,13 +115,19 @@ export function CinematicRenderDemo({
         {/* Settings Panel */}
         <div className="lg:col-span-1 space-y-4">
           <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-neutral-400 block mb-2">
+            <label className={`text-xs font-bold uppercase tracking-wider block mb-2 transition-colors ${
+              isLight ? "text-slate-500" : "text-neutral-400"
+            }`}>
               Aspect Ratio
             </label>
             <select
               value={aspect}
               onChange={(e) => setAspect(e.target.value)}
-              className="w-full px-3 py-2 bg-neutral-900 border border-white/10 rounded text-xs text-white focus:border-purple-500 outline-none cursor-pointer"
+              className={`w-full px-3 py-2 border rounded text-xs focus:border-purple-500 outline-none cursor-pointer transition-all ${
+                isLight
+                  ? "bg-slate-50 border-slate-200 text-slate-900"
+                  : "bg-neutral-900 border-white/10 text-white"
+              }`}
             >
               <option>9:16 Vertical</option>
               <option>16:9 Horizontal</option>
@@ -108,13 +136,19 @@ export function CinematicRenderDemo({
           </div>
 
           <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-neutral-400 block mb-2">
+            <label className={`text-xs font-bold uppercase tracking-wider block mb-2 transition-colors ${
+              isLight ? "text-slate-500" : "text-neutral-400"
+            }`}>
               Narrator Voice
             </label>
             <select
               value={audioStyle}
               onChange={(e) => setAudioStyle(e.target.value)}
-              className="w-full px-3 py-2 bg-neutral-900 border border-white/10 rounded text-xs text-white focus:border-purple-500 outline-none cursor-pointer"
+              className={`w-full px-3 py-2 border rounded text-xs focus:border-purple-500 outline-none cursor-pointer transition-all ${
+                isLight
+                  ? "bg-slate-50 border-slate-200 text-slate-900"
+                  : "bg-neutral-900 border-white/10 text-white"
+              }`}
             >
               <option>Aiden - Epic Trailer</option>
               <option>Sofia - Dramatic</option>
@@ -123,13 +157,19 @@ export function CinematicRenderDemo({
           </div>
 
           <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-neutral-400 block mb-2">
+            <label className={`text-xs font-bold uppercase tracking-wider block mb-2 transition-colors ${
+              isLight ? "text-slate-500" : "text-neutral-400"
+            }`}>
               Music Theme
             </label>
             <select
               value={musicTheme}
               onChange={(e) => setMusicTheme(e.target.value)}
-              className="w-full px-3 py-2 bg-neutral-900 border border-white/10 rounded text-xs text-white focus:border-purple-500 outline-none cursor-pointer"
+              className={`w-full px-3 py-2 border rounded text-xs focus:border-purple-500 outline-none cursor-pointer transition-all ${
+                isLight
+                  ? "bg-slate-50 border-slate-200 text-slate-900"
+                  : "bg-neutral-900 border-white/10 text-white"
+              }`}
             >
               <option>Cyberpunk Synthwave</option>
               <option>Epic Adventure</option>
@@ -140,10 +180,16 @@ export function CinematicRenderDemo({
       </div>
 
       {/* Narrative Waveform Panel */}
-      <div className="bg-neutral-900/40 p-4 rounded-2xl border border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className={`p-4 rounded-2xl border flex flex-col md:flex-row items-center justify-between gap-4 transition-all duration-300 ${
+        isLight
+          ? "bg-slate-50 border-slate-200"
+          : "bg-neutral-900/40 border-white/5"
+      }`}>
         <div className="flex items-center gap-3">
           <Volume2 className="w-5 h-5 text-purple-400 shrink-0" />
-          <span className="text-xs font-mono text-neutral-400">
+          <span className={`text-xs font-mono transition-colors ${
+            isLight ? "text-slate-600" : "text-neutral-400"
+          }`}>
             Audio Track: {audioStyle}
           </span>
         </div>

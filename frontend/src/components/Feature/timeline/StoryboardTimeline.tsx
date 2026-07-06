@@ -10,6 +10,7 @@ import TimelineEmptyState from "./TimelineEmptyState";
 import TimelineHeader from "./TimelineHeader";
 import TimelineBulkOps from "./TimelineBulkOps";
 import TimelineCard from "./TimelineCard";
+import { TimelineSelectionBar } from "@/components/Feature/editor/seloect";
 
 interface StoryboardTimelineProps {
   panels: GeneratedPanel[];
@@ -789,6 +790,34 @@ const StoryboardTimeline = React.memo(
             </div>,
             document.body
           )}
+        {/* Floating Selection Bar — appears at bottom when panels are selected */}
+        <TimelineSelectionBar
+          selectedCount={selectedCount}
+          totalCount={panels.length}
+          isAnalyzingAll={isAnalyzingAll}
+          handleAnalyzeSelected={() => {
+            handleAnalyzeSelectedPanels(Array.from(selectedPanelIds));
+            clearSelection();
+          }}
+          selectAllPanels={selectAllPanels}
+          clearSelection={clearSelection}
+          handleDeleteSelected={handleDeleteSelected}
+          isBatchCropping={isBatchCropping}
+          isCleaningBubbles={isCleaningBubbles}
+          isBatchMerging={isBatchMerging}
+          handleAutoCropSelected={handleAutoCropSelected}
+          handleCleanBubblesSelected={handleCleanBubblesSelected}
+          handleBatchMergeSelected={handleBatchMergeSelected}
+          batchProgress={cropProgress}
+          cleanProgress={cleanProgress}
+          handleCancelAnalysis={handleCancelAnalysis}
+          handleCancelBatch={handleCancelBatch}
+          panels={panels}
+          setPanels={setPanels}
+          selectedPanelIds={selectedPanelIds}
+          fetchWithInterceptor={fetchWithInterceptor}
+          addNotification={addNotification}
+        />
       </div>
     );
   }

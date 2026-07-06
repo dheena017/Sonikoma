@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowLeft, Focus, LayoutPanelTop, Save, Menu } from "lucide-react";
+import { ArrowLeft, Focus, LayoutPanelTop, Save, Menu, Layers, Clock, Wifi, WifiOff, Share2 } from "lucide-react";
 
 interface EditorPageHeaderProps {
   title: string;
@@ -14,6 +14,8 @@ interface EditorPageHeaderProps {
   isSidebarOpen?: boolean;
   className?: string;
   style?: React.CSSProperties;
+  panelsCount?: number;
+  backendOnline?: boolean;
 }
 
 const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
@@ -29,6 +31,8 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
   isSidebarOpen = false,
   className,
   style,
+  panelsCount = 0,
+  backendOnline = true,
 }) => {
   // Smoothly slide out of view if the mobile/drawer sidebar is open
   const headerVisibilityClass = isSidebarOpen
@@ -85,6 +89,35 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
         </div>
       </div>
 
+      {/* Center: Live Stats Chips */}
+      <div className="hidden md:flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
+        {/* Backend status */}
+        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest ${
+          backendOnline
+            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+            : "bg-red-500/10 border-red-500/20 text-red-400"
+        }`}>
+          {backendOnline
+            ? <Wifi className="h-2.5 w-2.5" />
+            : <WifiOff className="h-2.5 w-2.5" />}
+          {backendOnline ? "Online" : "Offline"}
+        </div>
+
+        {/* Panel count */}
+        {panelsCount > 0 && (
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-purple-500/20 bg-purple-500/10 text-[9px] font-black uppercase tracking-widest text-purple-400">
+            <Layers className="h-2.5 w-2.5" />
+            {panelsCount} panels
+          </div>
+        )}
+
+        {/* Auto-save hint */}
+        <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-[9px] font-bold text-neutral-600">
+          <Clock className="h-2.5 w-2.5" />
+          <span className="hidden lg:inline">Ctrl+S to save</span>
+        </div>
+      </div>
+
       {/* Right Section - Action Buttons */}
       <div className="flex flex-wrap items-center gap-2">
         <button
@@ -117,6 +150,15 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
               <span className="sm:hidden">Save</span>
             </>
           )}
+        </button>
+
+        <button
+          type="button"
+          title="Share project link"
+          className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 px-3 py-1.5 text-xs font-bold text-neutral-300 transition-all hover:text-white active:scale-95 cursor-pointer"
+        >
+          <Share2 className="h-3.5 w-3.5" />
+          <span className="hidden lg:inline">Share</span>
         </button>
 
         <button

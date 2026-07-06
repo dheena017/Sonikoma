@@ -128,7 +128,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
       >
         {/* Inner container — allow overflow so the parent scrollbar handles scrolling */}
         <div className="flex-1 w-full relative min-w-0">
-          <div className="animate-[fadeIn_0.3s_ease-out] w-full flex flex-col min-w-0">
+          <div className="animate-[fadeIn_0.3s_ease-out] w-full flex flex-col min-w-0 pb-36">
             {children}
           </div>
         </div>

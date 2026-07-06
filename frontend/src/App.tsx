@@ -822,6 +822,8 @@ export default function App() {
       <LandingPage
         onGetStarted={() => navigateTo("/register")}
         onLogin={() => navigateTo("/login")}
+        themeMode={themeMode}
+        toggleThemeMode={toggleThemeMode}
       />
     );
   }

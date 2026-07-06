@@ -100,11 +100,13 @@ const TimelineCard = ({
           ? "opacity-35 border-dashed border-purple-500/50 bg-neutral-900/20 scale-98"
           : isDragOver
           ? "bg-neutral-900 border-purple-400 scale-102 ring-2 ring-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.3)]"
+          : isCurrent && isSelected
+          ? "bg-purple-950/40 border-purple-400 ring-2 ring-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.5)]"
           : isCurrent
           ? "bg-neutral-800/80 border-purple-500 shadow-lg"
           : isSelected
-          ? "bg-neutral-900 border-purple-600 shadow-md shadow-purple-900/30"
-          : "bg-neutral-950 border-neutral-800"
+          ? "bg-purple-950/30 border-purple-500 ring-2 ring-purple-500/70 shadow-[0_0_16px_rgba(168,85,247,0.35)]"
+          : "bg-neutral-950 border-neutral-800 hover:border-neutral-700"
       } cursor-grab active:cursor-grabbing`}
     >
       {/* Image Thumbnail */}
@@ -158,22 +160,31 @@ const TimelineCard = ({
           </div>
         )}
 
-        {/* Selection checkbox */}
+        {/* Selection indicator overlay when selected */}
+        {isSelected && (
+          <div className="absolute inset-0 bg-purple-600/10 border-2 border-purple-500/60 rounded-lg pointer-events-none z-[5]" />
+        )}
+
+        {/* Selection checkbox - always visible on hover, prominent when selected */}
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
             onToggleSelect();
           }}
-          className="absolute top-2 left-2 h-5 w-5 rounded flex items-center justify-center z-20 transition-all"
-          title={isSelected ? "Deselect panel" : "Select panel for analysis"}
+          className={`absolute top-2 left-2 h-6 w-6 rounded-md flex items-center justify-center z-20 transition-all duration-150 ${
+            isSelected
+              ? "bg-purple-500 border-2 border-purple-300 shadow-lg shadow-purple-500/50 scale-110"
+              : "bg-black/60 border-2 border-neutral-500 hover:border-purple-400 hover:bg-purple-900/50 opacity-0 group-hover:opacity-100"
+          }`}
+          title={isSelected ? "Deselect panel" : "Select panel"}
         >
           {isSelected ? (
-            <span className="h-4 w-4 rounded bg-purple-500 border border-purple-400 flex items-center justify-center text-white text-[9px] font-bold shadow-lg">
-              ✓
-            </span>
+            <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
           ) : (
-            <span className="h-4 w-4 rounded border border-neutral-500 bg-black/70 hover:border-purple-400 hover:bg-purple-900/30 transition-all" />
+            <span className="h-2.5 w-2.5 rounded-sm bg-neutral-600" />
           )}
         </button>
 
@@ -295,7 +306,7 @@ const TimelineCard = ({
           <select
             value={panel.motion_type ?? ""}
             onChange={(e) => handleModifyMotion(panel.id, e.target.value)}
-            className="bg-neutral-900 text-[11px] text-neutral-300 rounded border border-neutral-800 p-1 w-full outline-none no-drag"
+            className="appearance-none bg-neutral-800 text-[11px] text-white rounded-lg border border-neutral-700 hover:border-purple-500/50 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/40 p-1.5 w-full outline-none no-drag cursor-pointer transition-colors"
           >
             <option value="">None</option>
             <option value="zoom_in">Zoom In</option>
@@ -329,7 +340,7 @@ const TimelineCard = ({
               }
             }}
             placeholder="0.0"
-            className="bg-neutral-900 text-[11px] text-neutral-300 rounded border border-neutral-800 p-1 w-full outline-none text-center font-mono no-drag"
+            className="bg-neutral-800 text-[11px] text-white rounded-lg border border-neutral-700 hover:border-purple-500/50 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/40 p-1.5 w-full outline-none text-center font-mono no-drag transition-colors"
           />
         </div>
       </div>
