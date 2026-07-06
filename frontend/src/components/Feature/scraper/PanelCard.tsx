@@ -188,7 +188,7 @@ function PanelCard({
         window.dispatchEvent(new Event("popstate"));
       }}
       className={[
-        "group relative w-[200px] sm:w-[220px] shrink-0 rounded-2xl border p-4 space-y-4 transition-all duration-200 text-center cursor-pointer select-none",
+        "group relative w-[260px] sm:w-[280px] shrink-0 rounded-2xl border p-4 space-y-4 transition-all duration-200 text-center cursor-pointer select-none",
         isSelected
           ? "border-purple-500/80 bg-purple-950/25 shadow-[0_0_18px_2px_rgba(168,85,247,0.22)] ring-1 ring-purple-500/30 scale-[1.02]"
           : "border-neutral-800/70 bg-neutral-950 hover:border-purple-500/50 hover:shadow-[0_0_12px_1px_rgba(168,85,247,0.10)] hover:scale-[1.01]",
