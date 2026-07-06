@@ -202,6 +202,7 @@ export function ScraperSelectionToolbar({
 }: ScraperSelectionToolbarProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [coords, setCoords] = React.useState<{ top: number; left: number } | null>(null);
+  const [placement, setPlacement] = React.useState<"up" | "down" | null>(null);
   const buttonRef = React.useRef<HTMLButtonElement>(null);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
 
@@ -210,11 +211,31 @@ export function ScraperSelectionToolbar({
   const [rangeTo, setRangeTo] = React.useState<number>(5);
   const [isFilteringRatio, setIsFilteringRatio] = React.useState(false);
 
+  const getSmartPlacement = (rect: DOMRect): "up" | "down" => {
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    const estimatedHeight = 350;
+
+    if (align === "down") {
+      if (spaceBelow < estimatedHeight && spaceAbove > spaceBelow) {
+        return "up";
+      }
+      return "down";
+    } else {
+      if (spaceAbove < estimatedHeight && spaceBelow > spaceAbove) {
+        return "down";
+      }
+      return "up";
+    }
+  };
+
   const updateCoords = () => {
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
+      const activePlacement = getSmartPlacement(rect);
+      setPlacement(activePlacement);
       setCoords({
-        top: align === "down" ? rect.bottom + window.scrollY + 8 : rect.top + window.scrollY - 8,
+        top: activePlacement === "down" ? rect.bottom + window.scrollY + 8 : rect.top + window.scrollY - 8,
         left: rect.left + window.scrollX,
       });
     }
@@ -248,7 +269,15 @@ export function ScraperSelectionToolbar({
 
   React.useEffect(() => {
     const handleScrollOrResize = () => {
-      setIsOpen(false);
+      if (buttonRef.current) {
+        const rect = buttonRef.current.getBoundingClientRect();
+        const activePlacement = getSmartPlacement(rect);
+        setPlacement(activePlacement);
+        setCoords({
+          top: activePlacement === "down" ? rect.bottom + window.scrollY + 8 : rect.top + window.scrollY - 8,
+          left: rect.left + window.scrollX,
+        });
+      }
     };
     if (isOpen) {
       window.addEventListener("scroll", handleScrollOrResize, true);
@@ -258,7 +287,7 @@ export function ScraperSelectionToolbar({
       window.removeEventListener("scroll", handleScrollOrResize, true);
       window.removeEventListener("resize", handleScrollOrResize);
     };
-  }, [isOpen]);
+  }, [isOpen, align]);
 
   const selectEveryNth = (n: number) => {
     if (!setSelectedScraped) return;
@@ -327,7 +356,7 @@ export function ScraperSelectionToolbar({
               position: "absolute",
               top: `${coords.top}px`,
               left: `${coords.left}px`,
-              transform: align === "up" ? "translateY(-100%)" : "none",
+              transform: placement === "up" ? "translateY(-100%)" : "none",
             }}
             className="w-64 rounded-2xl bg-neutral-950/95 border border-neutral-850 shadow-[0_12px_40px_rgba(0,0,0,0.7)] p-2.5 z-[99999] flex flex-col gap-1 backdrop-blur-xl max-h-[380px] overflow-y-auto scrollbar-thin animate-in fade-in zoom-in-95 duration-200"
           >
