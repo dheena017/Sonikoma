@@ -53,6 +53,8 @@ interface StoryboardTimelineProps {
   handleSaveStoryboard?: () => void;
   handleCancelBatch?: () => void;
   audioFeedback?: any;
+  selectedPanelIds?: Set<number>;
+  setSelectedPanelIds?: React.Dispatch<React.SetStateAction<Set<number>>>;
 }
 
 const StoryboardTimeline = React.memo(
@@ -97,11 +99,15 @@ const StoryboardTimeline = React.memo(
     handleSaveStoryboard,
     handleCancelBatch,
     audioFeedback,
+    selectedPanelIds: propSelectedPanelIds,
+    setSelectedPanelIds: propSetSelectedPanelIds,
   }: StoryboardTimelineProps) => {
     // ── Panel selection state ────────────────────────────────────────────────
-    const [selectedPanelIds, setSelectedPanelIds] = useState<Set<number>>(
+    const [localSelectedPanelIds, setLocalSelectedPanelIds] = useState<Set<number>>(
       new Set()
     );
+    const selectedPanelIds = propSelectedPanelIds ?? localSelectedPanelIds;
+    const setSelectedPanelIds = propSetSelectedPanelIds ?? setLocalSelectedPanelIds;
 
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
