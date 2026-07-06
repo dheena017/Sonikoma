@@ -1,14 +1,14 @@
 import React, { useState } from "react";
-import {
-  Play,
-  Calendar,
-  Image as ImageIcon,
-  Star,
-  ThumbsUp,
-  Clock,
-  Bookmark,
+import { 
+  Calendar, 
+  Image as ImageIcon, 
+  Star, 
+  ThumbsUp, 
+  Clock, 
+  Bookmark, 
   BookmarkCheck,
   MoreVertical,
+  Download // <-- Added Download icon for the Import button
 } from "lucide-react";
 
 interface Episode {
@@ -27,13 +27,13 @@ interface Episode {
 
 interface EpisodeCardProps {
   episode: Episode;
-  onClick: (episode: Episode) => void;
+  onClick: (episode: Episode) => void; 
   onBookmark?: (episodeIndex: number) => void;
 }
 
 const getProxiedImageUrl = (url: string) => {
   if (!url) return "";
-  return `/api/proxy-image?url=${encodeURIComponent(url)}`;
+  return `/api/proxy/image?url=${encodeURIComponent(url)}`;
 };
 
 export const EpisodeCard: React.FC<EpisodeCardProps> = ({
@@ -45,7 +45,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
   const [isBookmarked, setIsBookmarked] = useState(false);
 
   const handleBookmarkClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
+    e.stopPropagation(); 
     setIsBookmarked(!isBookmarked);
     if (onBookmark) onBookmark(episode.index);
   };
@@ -53,19 +53,13 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
   const renderRating = (rating: number) => {
     return (
       <div className="flex items-center gap-0.5">
-        {Array(5)
-          .fill(0)
-          .map((_, i) => (
-            <Star
-              key={i}
-              size={12}
-              className={
-                i < Math.round(rating)
-                  ? "fill-yellow-400 text-yellow-400"
-                  : "text-gray-600"
-              }
-            />
-          ))}
+        {Array(5).fill(0).map((_, i) => (
+          <Star
+            key={i}
+            size={12}
+            className={i < Math.round(rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-600"}
+          />
+        ))}
       </div>
     );
   };
@@ -75,7 +69,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
       onClick={() => onClick(episode)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group relative w-[280px] flex-shrink-0 snap-start rounded-xl overflow-hidden cursor-pointer transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl bg-gray-800 border border-gray-700 hover:border-gray-600"
+      className="w-[280px] flex-shrink-0 snap-start group relative rounded-xl overflow-hidden cursor-pointer transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl bg-gray-800 border border-gray-700 hover:border-gray-500"
     >
       <div className="relative w-full bg-gray-900 aspect-video overflow-hidden">
         {episode.thumbnail ? (
@@ -98,17 +92,22 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80" />
 
-        <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-all duration-300">
-          <div
-            className={`transform transition-all duration-300 ${
-              isHovered ? "scale-100 opacity-100" : "scale-75 opacity-0"
-            }`}
-          >
-            <div className="bg-blue-600/90 rounded-full p-3 backdrop-blur-sm shadow-lg">
-              <Play className="w-8 h-8 text-white fill-white ml-1" />
-            </div>
+        {/* --- NEW: EXPLICIT IMPORT IMAGES BUTTON OVERLAY --- */}
+        <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/60 transition-all duration-300">
+          <div className={`transform transition-all duration-300 ${isHovered ? 'scale-100 opacity-100' : 'scale-75 opacity-0'}`}>
+            <button 
+              onClick={(e) => {
+                e.stopPropagation(); // Prevents clicking the card twice
+                onClick(episode);    // Routes to the editor just like clicking the card does
+              }}
+              className="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-5 rounded-full flex items-center gap-2 shadow-[0_0_15px_rgba(37,99,235,0.5)] transition-colors"
+            >
+              <Download size={18} />
+              Import Images
+            </button>
           </div>
         </div>
+        {/* ------------------------------------------------ */}
 
         <div className="absolute top-2 left-2 flex flex-col gap-1.5">
           {episode.isNew && (
@@ -119,20 +118,16 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
           {episode.rating && (
             <div className="bg-black/70 backdrop-blur-sm px-2 py-1 rounded flex items-center gap-1 shadow-sm border border-white/10">
               {renderRating(episode.rating)}
-              <span className="text-xs font-medium text-white">
-                {episode.rating.toFixed(1)}
-              </span>
+              <span className="text-xs font-medium text-white">{episode.rating.toFixed(1)}</span>
             </div>
           )}
         </div>
 
         <div className="absolute top-2 right-2 flex gap-2">
-          <button
+          <button 
             onClick={handleBookmarkClick}
             className={`p-1.5 rounded-full backdrop-blur-sm transition-all duration-200 ${
-              isBookmarked
-                ? "bg-blue-500 text-white"
-                : "bg-black/50 text-gray-300 hover:bg-white hover:text-black opacity-0 group-hover:opacity-100"
+              isBookmarked ? 'bg-blue-500 text-white' : 'bg-black/50 text-gray-300 hover:bg-white hover:text-black opacity-0 group-hover:opacity-100'
             }`}
           >
             {isBookmarked ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
@@ -148,9 +143,9 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
 
         {episode.progress !== undefined && (
           <div className="absolute bottom-0 left-0 w-full h-1 bg-gray-700">
-            <div
-              className="h-full bg-red-600"
-              style={{ width: `${Math.min(100, Math.max(0, episode.progress))}%` }}
+            <div 
+              className="h-full bg-red-600" 
+              style={{ width: `${Math.min(100, Math.max(0, episode.progress))}%` }} 
             />
           </div>
         )}
@@ -162,7 +157,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
             <span className="text-blue-400 mr-2">{episode.number}</span>
             {episode.title}
           </h3>
-          <button className="text-gray-400 hover:text-white transition-colors mt-0.5">
+          <button className="text-gray-400 hover:text-white transition-colors mt-0.5" onClick={(e) => e.stopPropagation()}>
             <MoreVertical size={16} />
           </button>
         </div>
@@ -175,9 +170,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
             </div>
           )}
 
-          {episode.date && episode.likes && (
-            <div className="w-1 h-1 bg-gray-600 rounded-full" />
-          )}
+          {episode.date && episode.likes && <div className="w-1 h-1 bg-gray-600 rounded-full" />}
 
           {episode.likes && (
             <div className="flex items-center gap-1.5 text-gray-300">
@@ -190,4 +183,3 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
     </div>
   );
 };
-
