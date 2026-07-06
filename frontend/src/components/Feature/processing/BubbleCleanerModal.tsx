@@ -123,8 +123,8 @@ export default function BubbleCleanerModal({
       {/* Header */}
       <div className="px-6 py-5 border-b border-neutral-800 flex items-center justify-between bg-neutral-950/40">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-purple-950/60 border border-purple-800/50 flex items-center justify-center shadow-[0_0_14px_rgba(168,85,247,0.15)]">
-            <Brain className="h-5 w-5 text-purple-400" />
+          <div className="icon-pill icon-pill--purple">
+            <Brain className="h-5 w-5" />
           </div>
         </div>
         <div className="flex items-center gap-3">

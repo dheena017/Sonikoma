@@ -388,7 +388,7 @@ const LiveScraperDeck = React.memo(
         >
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-neutral-800/60 pb-3">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-purple-500/10 border border-purple-500/15 text-purple-400 shrink-0">
+              <div className="icon-pill icon-pill--purple">
                 <ImageIcon className="h-5 w-5" />
               </div>
               <div className="flex flex-wrap items-center gap-2 min-w-0">

@@ -467,7 +467,7 @@ const HeaderInner = ({
         <div className="w-auto lg:w-20 flex items-center justify-center shrink-0">
           <button
             onClick={onToggleSidebar}
-            className="p-1.5 rounded-lg border border-neutral-800 bg-neutral-900 text-neutral-400 hover:text-white cursor-pointer"
+            className="icon-pill cursor-pointer hover:icon-pill--purple transition-all"
             title="Toggle Navigation Menu"
           >
             <Menu className="h-5 w-5" />
@@ -671,10 +671,10 @@ const HeaderInner = ({
               setShowSettings(false);
               setShowStats(false);
             }}
-            className={`p-1.5 rounded-xl border transition-all cursor-pointer relative h-[34px] w-[34px] flex items-center justify-center ${
+            className={`icon-pill cursor-pointer relative transition-all ${
               showNotifications
-                ? "bg-purple-600 border-purple-500 text-white"
-                : "bg-neutral-900 border-neutral-850 text-neutral-400 hover:text-white hover:border-neutral-750"
+                ? "icon-pill--active"
+                : ""
             }`}
             title="Notifications"
           >
@@ -719,10 +719,8 @@ const HeaderInner = ({
               setShowSettings(false);
               setShowNotifications(false);
             }}
-            className={`p-1.5 rounded-xl border transition-all cursor-pointer relative h-[34px] w-[34px] flex items-center justify-center ${
-              showStats
-                ? "bg-purple-600 border-purple-500 text-white"
-                : "bg-neutral-900 border-neutral-850 text-neutral-400 hover:text-white hover:border-neutral-750"
+            className={`icon-pill cursor-pointer transition-all ${
+              showStats ? "icon-pill--active" : ""
             }`}
             title="Timeline Analytics & Statistics"
           >
@@ -883,10 +881,8 @@ const HeaderInner = ({
               setShowStats(false);
               setShowNotifications(false);
             }}
-            className={`p-1.5 rounded-xl border transition-all cursor-pointer relative h-[34px] w-[34px] flex items-center justify-center ${
-              showSettings
-                ? "bg-purple-600 border-purple-500 text-white"
-                : "bg-neutral-900 border-neutral-850 text-neutral-400 hover:text-white hover:border-neutral-750"
+            className={`icon-pill cursor-pointer transition-all ${
+              showSettings ? "icon-pill--active" : ""
             }`}
             title="Quick Settings & Preferences"
           >

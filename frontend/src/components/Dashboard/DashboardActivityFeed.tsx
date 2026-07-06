@@ -28,8 +28,8 @@ export default function DashboardActivityFeed({
               key={idx}
               className="flex gap-4 p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group"
             >
-              <div className="h-10 w-10 rounded-xl bg-neutral-900 flex items-center justify-center shrink-0 border border-white/5">
-                <FileText className="h-5 w-5 text-neutral-500 group-hover:text-purple-400 transition-colors" />
+              <div className="icon-pill">
+                <FileText className="h-5 w-5 group-hover:text-purple-400 transition-colors" />
               </div>
               <div>
                 <h4 className="text-sm font-bold text-white mb-0.5">

@@ -56,8 +56,8 @@ const ShortcutsPageContent = React.memo(
               <span className="text-purple-400">Keyboard Shortcuts</span>
             </div>
             <h2 className="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/20">
-                <Keyboard className="h-7 w-7 text-purple-400" />
+              <div className="icon-pill icon-pill--purple">
+                <Keyboard className="h-7 w-7" />
               </div>
               Shortcuts & Macros
             </h2>

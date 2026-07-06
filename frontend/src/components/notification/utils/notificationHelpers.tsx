@@ -17,26 +17,26 @@ export const getNotificationIconBox = (type: string) => {
   switch (type) {
     case "error":
       return (
-        <div className="h-10 w-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
-          <CircleAlert className="h-5 w-5 text-rose-500" />
+        <div className="icon-pill icon-pill--rose">
+          <CircleAlert className="h-5 w-5" />
         </div>
       );
     case "warning":
       return (
-        <div className="h-10 w-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-          <AlertCircle className="h-5 w-5 text-amber-500" />
+        <div className="icon-pill icon-pill--amber">
+          <AlertCircle className="h-5 w-5" />
         </div>
       );
     case "success":
       return (
-        <div className="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-          <CheckCircle className="h-5 w-5 text-emerald-500" />
+        <div className="icon-pill icon-pill--emerald">
+          <CheckCircle className="h-5 w-5" />
         </div>
       );
     default:
       return (
-        <div className="h-10 w-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-          <Info className="h-5 w-5 text-blue-500" />
+        <div className="icon-pill icon-pill--sky">
+          <Info className="h-5 w-5" />
         </div>
       );
   }
