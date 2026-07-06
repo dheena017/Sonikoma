@@ -504,7 +504,7 @@ const LiveScraperDeck = React.memo(
         </div>
 
         {/* Floating Selection Action Bar */}
-        {isDashboardOnly && (
+        {true && (
           <FloatingSelectionBar
             selectedCount={selectedScraped.length}
             totalCount={scrapedImages.length}
@@ -536,6 +536,9 @@ const LiveScraperDeck = React.memo(
             setShowAutoCropModal={setShowAutoCropModal}
             setShowBubbleModal={setShowBubbleModal}
             handleCancelBatch={handleCancelBatch}
+            setScrapedImages={setScrapedImages}
+            fetchWithInterceptor={fetchWithInterceptor}
+            addNotification={addNotification}
           />
         )}
 
