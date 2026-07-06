@@ -982,6 +982,301 @@ body {
   border-color: rgba(0, 0, 0, 0.08) !important;
 }
 
+/* =================================================================
+   COMPREHENSIVE LIGHT MODE COVERAGE — Full-site pass
+   Covers every remaining text, button, badge, border, and bg token
+   that was still rendering dark-on-dark in light mode.
+   ================================================================= */
+
+/* ── bg-neutral scale (remaining stops) ──────────────────────── */
+[data-mode="light"] .bg-neutral-900,
+[data-mode="light"] .bg-neutral-900\/40,
+[data-mode="light"] .bg-neutral-900\/50,
+[data-mode="light"] .bg-neutral-900\/60,
+[data-mode="light"] .bg-neutral-900\/70,
+[data-mode="light"] .bg-neutral-900\/80,
+[data-mode="light"] .bg-neutral-900\/90 {
+  background-color: #f0f0f4 !important;
+}
+[data-mode="light"] .bg-neutral-800,
+[data-mode="light"] .bg-neutral-800\/40,
+[data-mode="light"] .bg-neutral-800\/50,
+[data-mode="light"] .bg-neutral-800\/60,
+[data-mode="light"] .bg-neutral-800\/80 {
+  background-color: #e4e4e7 !important;
+}
+[data-mode="light"] .bg-neutral-950,
+[data-mode="light"] .bg-neutral-950\/40,
+[data-mode="light"] .bg-neutral-950\/50,
+[data-mode="light"] .bg-neutral-950\/60,
+[data-mode="light"] .bg-neutral-950\/70,
+[data-mode="light"] .bg-neutral-950\/80,
+[data-mode="light"] .bg-neutral-950\/90 {
+  background-color: #ffffff !important;
+}
+
+/* ── White bg (solid) ────────────────────────────────────────── */
+[data-mode="light"] .bg-white {
+  background-color: #ffffff !important;
+}
+
+/* ── bg-white opacity variants (15–80) ───────────────────────── */
+[data-mode="light"] .bg-white\/15 {
+  background-color: rgba(0, 0, 0, 0.07) !important;
+}
+[data-mode="light"] .bg-white\/20 {
+  background-color: rgba(0, 0, 0, 0.09) !important;
+}
+[data-mode="light"] .bg-white\/25 {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+}
+[data-mode="light"] .bg-white\/30 {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+}
+[data-mode="light"] .bg-white\/40 {
+  background-color: rgba(255,255,255,0.9) !important;
+}
+[data-mode="light"] .bg-white\/50 {
+  background-color: rgba(255,255,255,0.95) !important;
+}
+[data-mode="light"] .bg-white\/60,
+[data-mode="light"] .bg-white\/70,
+[data-mode="light"] .bg-white\/80,
+[data-mode="light"] .bg-white\/90 {
+  background-color: #ffffff !important;
+}
+
+/* ── border-white remaining opacity variants ─────────────────── */
+[data-mode="light"] .border-white\/25,
+[data-mode="light"] .border-white\/30 {
+  border-color: rgba(0, 0, 0, 0.14) !important;
+}
+[data-mode="light"] .border-white\/40,
+[data-mode="light"] .border-white\/50 {
+  border-color: rgba(0, 0, 0, 0.18) !important;
+}
+
+/* ── text-neutral missing stops ──────────────────────────────── */
+[data-mode="light"] .text-neutral-700 {
+  color: #a1a1aa !important;
+}
+[data-mode="light"] .text-neutral-800 {
+  color: #71717a !important;
+}
+[data-mode="light"] .text-neutral-900 {
+  color: #52525b !important;
+}
+[data-mode="light"] .text-neutral-950 {
+  color: #27272a !important;
+}
+
+/* ── Extended color text families ────────────────────────────── */
+[data-mode="light"] .text-sky-400 {
+  color: #0284c7 !important;
+}
+[data-mode="light"] .text-sky-300 {
+  color: #0369a1 !important;
+}
+[data-mode="light"] .text-blue-300 {
+  color: #1d4ed8 !important;
+}
+[data-mode="light"] .text-indigo-300 {
+  color: #4338ca !important;
+}
+[data-mode="light"] .text-violet-300 {
+  color: #6d28d9 !important;
+}
+[data-mode="light"] .text-fuchsia-400 {
+  color: #a21caf !important;
+}
+[data-mode="light"] .text-pink-400 {
+  color: #be185d !important;
+}
+[data-mode="light"] .text-orange-400 {
+  color: #c2410c !important;
+}
+[data-mode="light"] .text-teal-400 {
+  color: #0f766e !important;
+}
+[data-mode="light"] .text-lime-400 {
+  color: #4d7c0f !important;
+}
+[data-mode="light"] .text-yellow-300 {
+  color: #a16207 !important;
+}
+[data-mode="light"] .text-emerald-300 {
+  color: #047857 !important;
+}
+[data-mode="light"] .text-rose-300 {
+  color: #be123c !important;
+}
+[data-mode="light"] .text-red-300 {
+  color: #b91c1c !important;
+}
+
+/* ── Gradient overlay fixes ──────────────────────────────────── */
+/* from-neutral-950 / from-black used in fade-to-transparent overlays */
+[data-mode="light"] .from-neutral-950 {
+  --tw-gradient-from: #ffffff !important;
+}
+[data-mode="light"] .from-black {
+  --tw-gradient-from: rgba(0,0,0,0.12) !important;
+}
+[data-mode="light"] .via-neutral-950 {
+  --tw-gradient-via: rgba(255,255,255,0.7) !important;
+}
+[data-mode="light"] .to-neutral-950 {
+  --tw-gradient-to: #ffffff !important;
+}
+
+/* ── Violet badge/icon families (admin sidebar) ──────────────── */
+[data-mode="light"] .bg-violet-950\/20,
+[data-mode="light"] .bg-violet-950\/15,
+[data-mode="light"] .bg-violet-950\/10 {
+  background-color: rgba(109, 40, 217, 0.07) !important;
+}
+[data-mode="light"] .border-violet-900\/20,
+[data-mode="light"] .border-violet-900\/10 {
+  border-color: rgba(109, 40, 217, 0.15) !important;
+}
+[data-mode="light"] .text-violet-400 {
+  color: #6d28d9 !important;
+}
+[data-mode="light"] .bg-violet-500\/10 {
+  background-color: rgba(109, 40, 217, 0.08) !important;
+}
+[data-mode="light"] .border-violet-500\/20 {
+  border-color: rgba(109, 40, 217, 0.2) !important;
+}
+
+/* ── Sky / indigo / fuchsia badge backgrounds ────────────────── */
+[data-mode="light"] .bg-sky-950\/40,
+[data-mode="light"] .bg-sky-950\/30,
+[data-mode="light"] .bg-sky-950\/20 {
+  background-color: rgba(224, 242, 254, 0.9) !important;
+}
+[data-mode="light"] .bg-indigo-950\/40,
+[data-mode="light"] .bg-indigo-950\/30 {
+  background-color: rgba(238, 242, 255, 0.9) !important;
+}
+[data-mode="light"] .bg-fuchsia-950\/40,
+[data-mode="light"] .bg-fuchsia-950\/30 {
+  background-color: rgba(253, 244, 255, 0.9) !important;
+}
+[data-mode="light"] .bg-violet-950\/40,
+[data-mode="light"] .bg-violet-950\/30 {
+  background-color: rgba(245, 243, 255, 0.9) !important;
+}
+[data-mode="light"] .border-sky-800\/40,
+[data-mode="light"] .border-sky-800\/30 {
+  border-color: #7dd3fc !important;
+}
+[data-mode="light"] .border-indigo-800\/40 {
+  border-color: #a5b4fc !important;
+}
+
+/* ── Button: solid neutral-900 (icon buttons, small actions) ─── */
+[data-mode="light"] button.bg-neutral-900,
+[data-mode="light"] .btn-neutral {
+  background-color: #f0f0f4 !important;
+  color: #18181b !important;
+  border-color: #d4d4d8 !important;
+}
+
+/* ── Tooltip/popover surfaces ────────────────────────────────── */
+[data-mode="light"] .bg-neutral-900.border.border-white\/10,
+[data-mode="light"] .bg-neutral-900.text-white.text-xs,
+[data-mode="light"] [class*="tooltip"] {
+  background-color: #ffffff !important;
+  color: #18181b !important;
+  border-color: #e4e4e7 !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
+}
+
+/* ── Kbd elements ────────────────────────────────────────────── */
+[data-mode="light"] kbd {
+  background-color: #e4e4e7 !important;
+  color: #3f3f46 !important;
+  border-color: #d4d4d8 !important;
+}
+
+/* ── Focus rings ─────────────────────────────────────────────── */
+[data-mode="light"] .focus\:border-purple-500:focus {
+  border-color: #9333ea !important;
+}
+[data-mode="light"] .focus\:border-neutral-700:focus {
+  border-color: #a1a1aa !important;
+}
+
+/* ── Hover border colors ─────────────────────────────────────── */
+[data-mode="light"] .hover\:border-neutral-700:hover {
+  border-color: #a1a1aa !important;
+}
+[data-mode="light"] .hover\:border-neutral-600:hover {
+  border-color: #b4b4be !important;
+}
+[data-mode="light"] .hover\:border-white\/20:hover {
+  border-color: rgba(0,0,0,0.12) !important;
+}
+[data-mode="light"] .hover\:border-white\/30:hover {
+  border-color: rgba(0,0,0,0.15) !important;
+}
+
+/* ── Text on solid colored buttons (keep white for contrast) ──── */
+/* Purple/violet/indigo/rose/emerald filled buttons keep white text */
+[data-mode="light"] .bg-purple-600 .text-white,
+[data-mode="light"] .bg-purple-500 .text-white,
+[data-mode="light"] .bg-violet-600 .text-white,
+[data-mode="light"] .bg-indigo-600 .text-white,
+[data-mode="light"] .bg-rose-600 .text-white,
+[data-mode="light"] .bg-emerald-600 .text-white,
+[data-mode="light"] .bg-gradient-to-r .text-white {
+  color: #ffffff !important;
+}
+
+/* Inline text-white inside colored gradient buttons stays white */
+[data-mode="light"] [class*="from-purple"] .text-white,
+[data-mode="light"] [class*="from-violet"] .text-white,
+[data-mode="light"] [class*="from-indigo"] .text-white {
+  color: #ffffff !important;
+}
+
+/* ── Live scraper / progress banner ─────────────────────────── */
+[data-mode="light"] .bg-purple-800\/30 {
+  background-color: rgba(168, 85, 247, 0.1) !important;
+}
+[data-mode="light"] .border-purple-800\/30 {
+  border-color: rgba(168, 85, 247, 0.2) !important;
+}
+[data-mode="light"] .border-purple-500\/15 {
+  border-color: rgba(168, 85, 247, 0.18) !important;
+}
+[data-mode="light"] .border-purple-500\/50 {
+  border-color: rgba(168, 85, 247, 0.4) !important;
+}
+
+/* ── Emerald/amber/red status badge backgrounds ──────────────── */
+[data-mode="light"] .bg-emerald-950\/20 {
+  background-color: rgba(209, 250, 229, 0.8) !important;
+}
+[data-mode="light"] .bg-red-950\/20,
+[data-mode="light"] .bg-rose-950\/20 {
+  background-color: rgba(255, 228, 230, 0.8) !important;
+}
+[data-mode="light"] .bg-amber-950\/20 {
+  background-color: rgba(254, 243, 199, 0.8) !important;
+}
+[data-mode="light"] .border-emerald-500\/20 {
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+[data-mode="light"] .border-red-500\/20,
+[data-mode="light"] .border-rose-500\/20 {
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+[data-mode="light"] .border-amber-500\/20 {
+  border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
 /* Custom scrollbars */
 
 .scrollbar-thin {
