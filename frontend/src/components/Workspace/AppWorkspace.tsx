@@ -30,8 +30,10 @@ import {
   RefreshCw,
   CheckCircle2,
   Loader,
+  Download,
 } from "lucide-react";
 import UrlInputPanel from "../Feature/scraper/UrlInputPanel";
+import { EpisodeScraper } from "../Feature/scraper";
 import ProjectConfirmPanel from "../confirmationmodels/ProjectConfirmPanel";
 
 interface AppWorkspaceProps {
@@ -82,6 +84,7 @@ interface AppWorkspaceProps {
   handleGenerateStoryboardAI?: () => Promise<void>;
   seriesSlug?: string | null;
   chapterSlug?: string | null;
+  videoUrl?: string | null;
 }
 
 interface StoredProject {
@@ -203,6 +206,7 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
     isDashboardOnly = false,
     seriesSlug,
     chapterSlug,
+    videoUrl,
   } = props;
 
   const samplePresets = [
@@ -456,6 +460,59 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
           </div>
         )}
 
+        {hasActiveProject && videoUrl && (
+          <div className="w-full bg-[#111116]/60 border border-emerald-500/30 rounded-3xl p-6 backdrop-blur-md space-y-4 shadow-xl">
+            <div className="flex items-center justify-between border-b border-emerald-950 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
+                  <Play className="h-4 w-4 text-emerald-400 fill-emerald-400 animate-pulse" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-white uppercase tracking-wider">
+                    Final Production Master Video
+                  </h3>
+                  <p className="text-[10px] text-neutral-400 font-mono">
+                    The latest compiled video for "{seriesTitle || projectId}" is ready.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col lg:flex-row gap-6 items-center">
+              <div className="w-full lg:w-2/3 aspect-video bg-black rounded-2xl overflow-hidden border border-white/5 relative">
+                <video
+                  src={videoUrl}
+                  controls
+                  className="w-full h-full"
+                  poster={seriesCoverImage || (panels.length > 0 ? panels[0].image_url : undefined)}
+                />
+              </div>
+              <div className="w-full lg:w-1/3 space-y-4 self-start lg:self-center">
+                <div className="space-y-1">
+                  <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">Series Title</span>
+                  <p className="text-sm font-bold text-white">{seriesTitle || "Untitled"}</p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">Chapter</span>
+                  <p className="text-xs font-semibold text-neutral-350">
+                    {chapterNumber ? `Chapter ${chapterNumber}` : "N/A"}{chapterTitle ? ` - ${chapterTitle}` : ""}
+                  </p>
+                </div>
+                <div className="pt-2 flex flex-col gap-2">
+                  <a
+                    href={videoUrl}
+                    download={`${seriesTitle || "webtoon"}_master.mp4`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer select-none border border-emerald-500/30 shadow-lg shadow-emerald-950/20 font-sans active:scale-95 text-center"
+                  >
+                    <Download className="h-4 w-4" /> Download Video File
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ── STATS BAR ── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
@@ -677,6 +734,24 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
           setCropSensitivity={setCropSensitivity}
           autoSplitTallStrips={autoSplitTallStrips}
           setAutoSplitTallStrips={setAutoSplitTallStrips}
+        />
+
+        {/* Episode Scraper for WEBTOON Series */}
+        <EpisodeScraper
+          addNotification={addNotification}
+          fetchWithInterceptor={fetch as any}
+          onMultipleEpisodesSelect={(episodes) => {
+            // Handle selected episodes - set the first one as the target URL
+            if (episodes.length > 0) {
+              setTargetUrl(episodes[0].url);
+              setChapterNumber(episodes[0].number);
+              setChapterTitle(episodes[0].title);
+              addNotification(
+                `Selected ${episodes.length} episodes for processing`,
+                "success"
+              );
+            }
+          }}
         />
 
         {/* LOADING CONTEXT BRIDGE */}

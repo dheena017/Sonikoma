@@ -13,6 +13,7 @@ interface UsePipelineActionsProps {
   setPlaybackTime: (time: number) => void;
   setStoryboardPlaying: (val: boolean) => void;
   playStoryboardAudio: (idx: number, forcePlay?: boolean) => void;
+  saveProject?: any;
 }
 
 export function usePipelineActions({
@@ -21,6 +22,7 @@ export function usePipelineActions({
   setPlaybackTime,
   setStoryboardPlaying,
   playStoryboardAudio,
+  saveProject,
 }: UsePipelineActionsProps) {
   const {
     panels,
@@ -134,6 +136,7 @@ export function usePipelineActions({
     seriesCoverImage: state.seriesCoverImage,
     seriesSynopsis: state.seriesSynopsis,
     audioFeedback: state.audioFeedback,
+    saveProject,
   });
 
   const {

@@ -18,6 +18,7 @@ import {
 } from "./hooks";
 import { DEFAULT_SHORTCUTS } from "./hooks/useGlobalShortcuts";
 import * as api from "./api";
+import { extractWebtoonUrl } from "./utils/url";
 
 // --- Layout & Main Workspace Components ---
 import Header from "./components/MainHeader";
@@ -446,7 +447,15 @@ export default function App() {
     accumulatedTokens,
     setAccumulatedTokens,
     audioFeedback,
+    videoUrl,
+    setVideoUrl,
   });
+
+  React.useEffect(() => {
+    if ((appLogic as any).setSaveProject) {
+      (appLogic as any).setSaveProject(saveProject);
+    }
+  }, [saveProject, appLogic]);
 
   // --- Project Details Page Save Sync State ---
   const [projectDetailsDirty, setProjectDetailsDirty] = React.useState(false);
@@ -716,10 +725,16 @@ export default function App() {
         seriesAuthor: string;
         seriesCoverImage: string;
         seriesSynopsis: string;
+        status: string;
+        aiTasks: {
+          generateScript: boolean;
+          generateVoice: boolean;
+          generateSFX: boolean;
+        };
       },
-      isTemporary: boolean
+      shouldGenerate: boolean
     ) => {
-      setShowScrapeConfirmModal(false);
+      // Update all metadata fields
       setSeriesTitle(details.seriesTitle);
       setChapterNumber(details.chapterNumber);
       setChapterTitle(details.chapterTitle);
@@ -728,16 +743,171 @@ export default function App() {
       setSeriesCoverImage(details.seriesCoverImage);
       setSeriesSynopsis(details.seriesSynopsis);
 
-      if (!isTemporary) {
-        await saveProject(undefined, {
-          savingMessage: "Saving project...",
-          successMessage: "Project saved successfully!",
-          errorMessage: "Failed to save project.",
-        });
+      // Always save full project state: metadata, timeline panels, imported images, and production details.
+      const saved = await saveProject(undefined, {
+        savingMessage: "Saving project...",
+        successMessage: "Project saved successfully!",
+        errorMessage: "Failed to save project.",
+      }, {
+        title: details.seriesTitle,
+        genre: details.scrapedGenre,
+        chapterNumber: details.chapterNumber,
+        chapterTitle: details.chapterTitle,
+        author: details.seriesAuthor,
+        cover_image: details.seriesCoverImage || null,
+        synopsis: details.seriesSynopsis || null,
+        status: details.status,
+      });
+
+      if (!saved) {
+        return false;
       }
+
+      if (shouldGenerate) {
+        setShowScrapeConfirmModal(false);
+
+        // 1) Generate storyboard panels via central handler (ensures projectId/state correctness)
+        try {
+          await handleGenerateStoryboardAI({
+            title: details.seriesTitle,
+            episode:
+              details.chapterNumber && details.chapterTitle
+                ? `Chapter ${details.chapterNumber} - ${details.chapterTitle}`
+                : details.chapterNumber
+                ? `Chapter ${details.chapterNumber}`
+                : details.chapterTitle || undefined,
+            genre: details.scrapedGenre,
+            author: details.seriesAuthor,
+            cover_image: details.seriesCoverImage,
+            synopsis: details.seriesSynopsis,
+          });
+
+          // Wait a tick to allow panels to propagate through state
+          await new Promise((res) => setTimeout(res, 50));
+
+          // Use current panels from state after generation
+          const currentPanels = panels || [];
+
+          // 2) Optionally run sequence analysis (script extraction)
+          if (details.aiTasks.generateScript && currentPanels.length > 0) {
+            try {
+              addNotification("Running script extraction...", "info");
+              const seq = await api.analyzeSequence(fetchWithInterceptor, {
+                urls: currentPanels.map((p: any) => p.image_url),
+                model: selectedModel,
+                narrationStyle,
+              });
+              if (seq.success && seq.results) {
+                const updated = currentPanels.map((p: any, i: number) => {
+                  const res = seq.results[i];
+                  return res && res.analysis
+                    ? {
+                        ...p,
+                        speech_text: res.analysis.speech_text || p.speech_text,
+                        sfx: res.analysis.sfx || p.sfx,
+                        duration: Number(res.analysis.duration) || p.duration,
+                        motion_type: res.analysis.motion_type || p.motion_type,
+                        visual_description:
+                          res.analysis.visual_description || p.visual_description,
+                        audio_url: res.audio_url || p.audio_url,
+                      }
+                    : p;
+                });
+                setPanels(updated);
+                addNotification("Script extraction completed.", "success");
+              } else {
+                throw new Error(seq.error || "Sequence analysis failed");
+              }
+            } catch (err: any) {
+              console.error("Script extraction failed:", err);
+              addNotification(
+                `Script extraction failed: ${err.message || String(err)}`,
+                "error"
+              );
+            }
+          }
+
+          // 3) Optionally generate TTS audio per panel
+          if (details.aiTasks.generateVoice) {
+            try {
+              addNotification("Generating voice audio (TTS)...", "info");
+              const panelsWithSpeech = (panels || []).filter(
+                (p: any) => p.speech_text && p.speech_text.trim()
+              );
+              const ttsPromises = panelsWithSpeech.map((p: any) =>
+                api.generateTts(fetchWithInterceptor, {
+                  project_id: projectId || undefined,
+                  panel_id: p.id,
+                  text: p.speech_text,
+                  voice: voiceActor || undefined,
+                })
+              );
+              const ttsResults = await Promise.all(ttsPromises);
+              const updated = (panels || []).map((p: any) => {
+                const res = ttsResults.find(
+                  (r: any) => r && r.panel_id === p.id
+                );
+                return res && res.success && res.audio_url
+                  ? { ...p, audio_url: res.audio_url }
+                  : p;
+              });
+              setPanels(updated);
+              addNotification("Voice generation completed.", "success");
+            } catch (err: any) {
+              console.error("TTS generation failed:", err);
+              addNotification(
+                `TTS generation failed: ${err.message || String(err)}`,
+                "error"
+              );
+            }
+          }
+
+          // 4) Optionally run SFX mapping/mix skill
+          if (details.aiTasks.generateSFX) {
+            try {
+              addNotification("Mapping SFX for panels...", "info");
+              const sfxRes = await api.runSfxAudioSkill(fetchWithInterceptor, {
+                project_id: projectId || undefined,
+                panels: (panels || []).map((p: any) => ({
+                  id: p.id,
+                  image_url: p.image_url,
+                  visual_description: p.visual_description || null,
+                })),
+              });
+              if (sfxRes.success && Array.isArray(sfxRes.panels)) {
+                const updated = (panels || []).map((p: any) => {
+                  const r = sfxRes.panels.find((x: any) => x.id === p.id);
+                  return r ? { ...p, sfx: r.sfx || p.sfx } : p;
+                });
+                setPanels(updated);
+                addNotification("SFX mapping completed.", "success");
+              } else {
+                throw new Error(sfxRes.error || "SFX skill failed");
+              }
+            } catch (err: any) {
+              console.error("SFX mapping failed:", err);
+              addNotification(
+                `SFX mapping failed: ${err.message || String(err)}`,
+                "error"
+              );
+            }
+          }
+        } catch (err: any) {
+          console.error("Timeline generation failed:", err);
+          addNotification(
+            `Timeline generation failed: ${err.message || String(err)}`,
+            "error"
+          );
+        }
+      } else {
+        setShowScrapeConfirmModal(false);
+      }
+
+      return true;
     },
     [
       saveProject,
+      handleGenerateStoryboardAI,
       setSeriesTitle,
       setChapterNumber,
       setChapterTitle,
@@ -1116,6 +1286,7 @@ export default function App() {
               panels={panels}
               setPanels={setPanels}
               saveProject={saveProject}
+              videoUrl={videoUrl}
               consoleLogs={consoleLogs}
               setConsoleLogs={setConsoleLogs}
               scrapedImages={scrapedImages}
@@ -1179,7 +1350,6 @@ export default function App() {
               handleStitchWithNext={handleStitchWithNext}
               addPanelsToStoryboard={addPanelsToStoryboard}
               progressStatus={progressStatus}
-              videoUrl={videoUrl}
               setVideoUrl={setVideoUrl}
               aspectRatio={aspectRatio}
               currentPanelIndex={currentPanelIndex}

@@ -81,3 +81,69 @@ export const generateStoryboard = async (
   });
   return res.json();
 };
+
+export const scrapeEpisodes = async (
+  fetchWithInterceptor: any,
+  data: { url?: string; title_no?: string; max_episodes?: number },
+  options?: RequestInit
+) => {
+  const res = await fetchWithInterceptor("/api/scrape-episodes", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    ...options,
+  });
+  return res.json();
+};
+
+export const scrapeEpisodesAdvanced = async (
+  fetchWithInterceptor: any,
+  data: {
+    url?: string;
+    title_no?: string;
+    max_episodes?: number;
+    page?: number;
+    include_ratings?: boolean;
+    sort_by?: 'latest' | 'oldest' | 'rating' | 'likes';
+  },
+  options?: RequestInit
+) => {
+  const res = await fetchWithInterceptor("/api/scrape-episodes-advanced", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    ...options,
+  });
+  return res.json();
+};
+
+export const scrapeEpisodesPaginated = async (
+  fetchWithInterceptor: any,
+  data: { title_no: string; max_episodes?: number },
+  options?: RequestInit
+) => {
+  const res = await fetchWithInterceptor("/api/scrape-episodes-paginated", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    ...options,
+  });
+  return res.json();
+};
+
+export const batchScrapeSeriesAPI = async (
+  fetchWithInterceptor: any,
+  data: {
+    series: Array<{ url?: string; title_no?: string }>;
+    max_episodes_per_series?: number;
+  },
+  options?: RequestInit
+) => {
+  const res = await fetchWithInterceptor("/api/batch-scrape-series", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    ...options,
+  });
+  return res.json();
+};

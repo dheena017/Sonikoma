@@ -13,11 +13,19 @@ export function useAppLogic() {
   const videoPlayerRef = useRef<HTMLVideoElement | null>(null);
   const sourceMismatchNotified = useRef(false);
   const lastScrapedUrlRef = useRef<string>("");
+  const saveProjectRef = useRef<any>(null);
 
   const [isGeneratingStoryboard, setIsGeneratingStoryboard] =
     useState<boolean>(false);
 
-  const handleGenerateStoryboardAI = useCallback(async () => {
+  const handleGenerateStoryboardAI = useCallback(async (overrides?: {
+    title?: string;
+    episode?: string;
+    genre?: string;
+    author?: string;
+    cover_image?: string;
+    synopsis?: string;
+  }) => {
     const activeUrl = targetUrl;
     const projId = state.projectId;
     if (!activeUrl || !activeUrl.trim() || !projId) {
@@ -37,30 +45,28 @@ export function useAppLogic() {
     ]);
 
     try {
-      const formattedEpisode = (() => {
-        const num = state.chapterNumber.trim();
-        const name = state.chapterTitle.trim();
-        if (num && name) return `Chapter ${num} - ${name}`;
-        if (num) return `Chapter ${num}`;
-        if (name) return name;
-        return "";
-      })();
+      const formattedEpisode = overrides?.episode
+        ? overrides.episode
+        : (() => {
+            const num = state.chapterNumber.trim();
+            const name = state.chapterTitle.trim();
+            if (num && name) return `Chapter ${num} - ${name}`;
+            if (num) return `Chapter ${num}`;
+            if (name) return name;
+            return "";
+          })();
 
       const data = await api.generateStoryboard(state.fetchWithInterceptor, {
         url: extractWebtoonUrl(activeUrl),
         project_id: projId,
         model: selectedModel,
         narrationStyle: state.narrationStyle,
-        title: state.seriesTitle ? state.seriesTitle.trim() : undefined,
+        title: overrides?.title?.trim() || (state.seriesTitle ? state.seriesTitle.trim() : undefined),
         episode: formattedEpisode || undefined,
-        genre: state.scrapedGenre ? state.scrapedGenre.trim() : undefined,
-        author: state.seriesAuthor ? state.seriesAuthor.trim() : undefined,
-        cover_image: state.seriesCoverImage
-          ? state.seriesCoverImage.trim()
-          : undefined,
-        synopsis: state.seriesSynopsis
-          ? state.seriesSynopsis.trim()
-          : undefined,
+        genre: overrides?.genre?.trim() || (state.scrapedGenre ? state.scrapedGenre.trim() : undefined),
+        author: overrides?.author?.trim() || (state.seriesAuthor ? state.seriesAuthor.trim() : undefined),
+        cover_image: overrides?.cover_image?.trim() || (state.seriesCoverImage ? state.seriesCoverImage.trim() : undefined),
+        synopsis: overrides?.synopsis?.trim() || (state.seriesSynopsis ? state.seriesSynopsis.trim() : undefined),
       });
 
       if (data.success && data.panels) {
@@ -171,6 +177,7 @@ export function useAppLogic() {
     setPlaybackTime,
     setStoryboardPlaying,
     playStoryboardAudio,
+    saveProject: (...args: any[]) => saveProjectRef.current?.(...args),
   });
 
   // --- System Logs Engine ---
@@ -673,6 +680,9 @@ export function useAppLogic() {
       scrapedTitle: state.scrapedTitle,
       scrapedGenre: state.scrapedGenre,
       resetWorkspace: state.resetWorkspace,
+      setSaveProject: (fn: any) => {
+        saveProjectRef.current = fn;
+      },
     }),
     [
       state,

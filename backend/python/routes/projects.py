@@ -64,6 +64,8 @@ class ProjectUpdateRequest(BaseModel):
     author: Optional[str] = Field(None, description="Series Author")
     cover_image: Optional[str] = Field(None, description="Series Cover Image URL")
     synopsis: Optional[str] = Field(None, description="Series Synopsis")
+    video_url: Optional[str] = Field(None, description="Video output URL")
+    status: Optional[str] = Field(None, description="Project compilation status")
     panels: Optional[List[PanelSaveItem]] = Field(None, description="Storyboard panels list")
 
 class TokenIncrementRequest(BaseModel):
@@ -412,6 +414,10 @@ async def update_project_details(
             updates['cover_image'] = unwrap_proxy_url(body.cover_image)
         if body.synopsis is not None:
             updates['synopsis'] = body.synopsis
+        if body.video_url is not None:
+            updates['video_url'] = body.video_url
+        if body.status is not None:
+            updates['status'] = body.status
 
         db_panels = None
         if body.panels is not None:

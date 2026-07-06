@@ -50,7 +50,6 @@ interface StoryboardTimelineProps {
   playStoryboardAudio?: (idx: number, forcePlay?: boolean) => void;
   autoPlayAudio?: boolean;
   saveProject?: (customPanels?: GeneratedPanel[]) => Promise<boolean>;
-  handleSaveStoryboard?: () => void;
   handleCancelBatch?: () => void;
   audioFeedback?: any;
   selectedPanelIds?: Set<number>;
@@ -96,7 +95,6 @@ const StoryboardTimeline = React.memo(
     playStoryboardAudio,
     autoPlayAudio,
     saveProject,
-    handleSaveStoryboard,
     handleCancelBatch,
     audioFeedback,
     selectedPanelIds: propSelectedPanelIds,
@@ -666,7 +664,6 @@ const StoryboardTimeline = React.memo(
           handleBatchMergeSelected={handleBatchMergeSelected}
           batchProgress={cropProgress}
           cleanProgress={cleanProgress}
-          handleSaveStoryboard={handleSaveStoryboard}
           isBatchCropping={isBatchCropping}
           isCleaningBubbles={isCleaningBubbles}
           handleCancelBatch={handleCancelBatch}
