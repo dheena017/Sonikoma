@@ -69,175 +69,55 @@ export default function TimelineHeader({
         </p>
       </div>
 
-      {(selectedCount > 0 ||
-        isAnalyzingAll ||
-        isBatchCropping ||
-        isCleaningBubbles ||
-        panelsLength > 0) && (
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-wrap items-center gap-2">
-              {selectedCount > 0 && (
-                <span className="text-xs bg-neutral-800 text-neutral-300 border border-neutral-750 px-2 py-1 rounded-full font-mono">
-                  {selectedCount} selected • {totalCount} total
-                </span>
-              )}
-              {(isAnalyzingAll || isBatchCropping || isCleaningBubbles) && (
-                <span className="text-xs text-purple-300 border border-purple-700/50 bg-purple-950/30 px-2 py-1 rounded-full font-mono">
-                  {isAnalyzingAll
-                    ? "Analyzing sequence"
-                    : isBatchCropping
-                      ? "Batch cropping"
-                      : "Cleaning bubbles"}
-                </span>
-              )}
-            </div>
+      {panelsLength > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          {handleAnalyzeAllPanels && (
+            <button
+              type="button"
+              onClick={handleAnalyzeAllPanels}
+              className="text-[10px] font-bold border border-indigo-500/50 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors shadow-md active:scale-95 cursor-pointer"
+            >
+              <Sparkles className="w-3 h-3" />
+              Analyze Full Sequence
+            </button>
+          )}
 
-            <div className="flex flex-wrap items-center gap-2">
-              {selectAllPanels && selectedCount < panelsLength && (
-                <button
-                  type="button"
-                  onClick={selectAllPanels}
-                  className="text-[10px] font-bold border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 rounded-lg px-3 py-1.5 transition-colors shadow-md active:scale-95 cursor-pointer"
-                >
-                  Select All
-                </button>
-              )}
+          {handleSaveStoryboard && (
+            <button
+              type="button"
+              onClick={handleSaveStoryboard}
+              className="text-[10px] font-bold border border-purple-500/50 bg-purple-600 hover:bg-purple-500 text-white rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors shadow-md active:scale-95 cursor-pointer"
+            >
+              Save Timeline
+            </button>
+          )}
 
-              {selectedCount > 0 && handleAnalyzeSelected && (
-                <button
-                  type="button"
-                  onClick={handleAnalyzeSelected}
-                  className="text-[10px] font-bold border border-indigo-500/50 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg px-3 py-1.5 transition-colors shadow-md active:scale-95 cursor-pointer"
-                >
-                  <Sparkles className="w-3 h-3" />
-                  Analyze Selected
-                </button>
-              )}
+          {handleDownloadZip && (
+            <button
+              type="button"
+              onClick={handleDownloadZip}
+              disabled={isZipping}
+              className="text-[10px] font-bold border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed text-neutral-300 rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors shadow-md active:scale-95 cursor-pointer"
+            >
+              {isZipping ? "Zipping..." : "Download ZIP"}
+            </button>
+          )}
 
-              {selectedCount > 0 && handleAutoCropSelected && (
-                <button
-                  type="button"
-                  onClick={handleAutoCropSelected}
-                  className="text-[10px] font-bold border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 rounded-lg px-3 py-1.5 transition-colors shadow-md active:scale-95 cursor-pointer"
-                >
-                  Auto-Crop
-                </button>
-              )}
-
-              {selectedCount > 0 && handleCleanBubblesSelected && (
-                <button
-                  type="button"
-                  onClick={handleCleanBubblesSelected}
-                  className="text-[10px] font-bold border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 rounded-lg px-3 py-1.5 transition-colors shadow-md active:scale-95 cursor-pointer"
-                >
-                  Clean Bubbles
-                </button>
-              )}
-
-              {selectedCount > 1 && handleBatchMergeSelected && (
-                <button
-                  type="button"
-                  onClick={handleBatchMergeSelected}
-                  className="text-[10px] font-bold border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 rounded-lg px-3 py-1.5 transition-colors shadow-md active:scale-95 cursor-pointer"
-                >
-                  Stitch Selected
-                </button>
-              )}
-
-              {selectedCount > 0 && clearSelection && (
-                <button
-                  type="button"
-                  onClick={clearSelection}
-                  className="text-[10px] font-bold border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 rounded-lg px-3 py-1.5 transition-colors shadow-md active:scale-95 cursor-pointer"
-                >
-                  Clear Selection
-                </button>
-              )}
-
-              {selectedCount > 0 && handleDeleteSelected && (
-                <button
-                  type="button"
-                  onClick={handleDeleteSelected}
-                  className="text-[10px] font-bold border border-rose-600 bg-rose-950 hover:bg-rose-900 text-rose-200 rounded-lg px-3 py-1.5 transition-colors shadow-md active:scale-95 cursor-pointer"
-                >
-                  Delete Selected
-                </button>
-              )}
-
-              {(isAnalyzingAll || isBatchCropping || isCleaningBubbles) && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (isAnalyzingAll && handleCancelAnalysis)
-                      handleCancelAnalysis();
-                    if (
-                      (isBatchCropping || isCleaningBubbles) &&
-                      handleCancelBatch
-                    )
-                      handleCancelBatch();
-                  }}
-                  className="text-[10px] font-bold border border-red-500/50 bg-red-600 hover:bg-red-500 text-white rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors shadow-md active:scale-95 cursor-pointer"
-                >
-                  Stop{" "}
-                  {isAnalyzingAll
-                    ? "Analyzing"
-                    : isBatchCropping
-                      ? "Cropping"
-                      : "Cleaning"}
-                </button>
-              )}
-
-              {!isAnalyzingAll &&
-                !isBatchCropping &&
-                !isCleaningBubbles &&
-                handleAnalyzeAllPanels &&
-                panelsLength > 0 && (
-                  <button
-                    type="button"
-                    onClick={handleAnalyzeAllPanels}
-                    className="text-[10px] font-bold border border-indigo-500/50 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors shadow-md active:scale-95 cursor-pointer"
-                  >
-                    <Sparkles className="w-3 h-3" />
-                    Analyze Full Sequence
-                  </button>
-                )}
-
-              {handleSaveStoryboard && panelsLength > 0 && (
-                <button
-                  type="button"
-                  onClick={handleSaveStoryboard}
-                  className="text-[10px] font-bold border border-purple-500/50 bg-purple-600 hover:bg-purple-500 text-white rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors shadow-md active:scale-95 cursor-pointer"
-                >
-                  Save Timeline
-                </button>
-              )}
-
-              {handleDownloadZip && panelsLength > 0 && (
-                <button
-                  type="button"
-                  onClick={handleDownloadZip}
-                  disabled={isZipping}
-                  className="text-[10px] font-bold border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed text-neutral-300 rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors shadow-md active:scale-95 cursor-pointer"
-                >
-                  {isZipping ? "Zipping..." : "Download ZIP"}
-                </button>
-              )}
-
-              {setShowBulkOps && panelsLength > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setShowBulkOps(!showBulkOps)}
-                  className={`text-[10px] font-bold border rounded-lg px-3 py-1.5 transition-colors shadow-md active:scale-95 cursor-pointer ${showBulkOps
-                      ? "border-purple-500/50 bg-purple-500/10 text-purple-300 shadow-[inset_0_0_12px_rgba(168,85,247,0.15)]"
-                      : "border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-300"
-                    }`}
-                >
-                  Bulk Actions
-                </button>
-              )}
-            </div>
-          </div>
-        )}
+          {setShowBulkOps && (
+            <button
+              type="button"
+              onClick={() => setShowBulkOps(!showBulkOps)}
+              className={`text-[10px] font-bold border rounded-lg px-3 py-1.5 transition-colors shadow-md active:scale-95 cursor-pointer ${
+                showBulkOps
+                  ? "border-purple-500/50 bg-purple-500/10 text-purple-300 shadow-[inset_0_0_12px_rgba(168,85,247,0.15)]"
+                  : "border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-300"
+              }`}
+            >
+              Bulk Actions
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
