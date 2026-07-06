@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Search,
   Loader,
@@ -47,6 +48,8 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
   addNotification,
   fetchWithInterceptor,
 }) => {
+  const navigate = useNavigate();
+
   const [urlInput, setUrlInput] = useState("");
   const [titleNoInput, setTitleNoInput] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
@@ -55,16 +58,17 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [filteredEpisodes, setFilteredEpisodes] = useState<Episode[]>([]);
   const [seriesMetadata, setSeriesMetadata] = useState<SeriesMetadata | null>(null);
-  const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
-  const [maxEpisodes, setMaxEpisodes] = useState<number | null>(null);  // null = get all episodes
+
+  const [maxEpisodes, setMaxEpisodes] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<"latest" | "oldest" | "rating" | "likes">("latest");
   const [searchQuery, setSearchQuery] = useState("");
+
   const [showFavorites, setShowFavorites] = useState(false);
   const [showRecent, setShowRecent] = useState(false);
+
   const [isFavorite, setIsFavorite] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Import the scrapeEpisodes function
   const scrapeEpisodes = async (data: {
     url?: string;
     title_no?: string;
@@ -72,23 +76,22 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
     sort_by?: string;
   }) => {
     const body = { ...data };
-    // Only include max_episodes if it's specified (not null)
     if (body.max_episodes === null) {
       delete body.max_episodes;
     }
+
     const res = await fetchWithInterceptor("/api/scrape-episodes-advanced", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
+
     return res.json();
   };
 
-  // Filter and sort episodes
   useEffect(() => {
     let result = [...episodes];
 
-    // Apply sorting
     if (sortBy === "oldest") {
       result = result.reverse();
     } else if (sortBy === "rating") {
@@ -101,11 +104,11 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
       });
     }
 
-    // Apply search filter
     if (searchQuery) {
-      result = result.filter((ep) =>
-        ep.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        ep.number.toLowerCase().includes(searchQuery.toLowerCase())
+      result = result.filter(
+        (ep) =>
+          ep.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          ep.number.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -122,7 +125,6 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
     setIsLoading(true);
     setError(null);
     setEpisodes([]);
-    setSelectedIndices([]);
     setSeriesMetadata(null);
 
     try {
@@ -137,7 +139,6 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
         setEpisodes(result.episodes || []);
         setSeriesMetadata(result.series || null);
 
-        // Save to favorites
         if (result.series && result.title_no) {
           FavoritesManager.addRecent({
             title_no: result.title_no,
@@ -150,10 +151,7 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
           setIsFavorite(FavoritesManager.isFavorite(result.title_no));
         }
 
-        addNotification(
-          `Found ${result.total_episodes || 0} episodes!`,
-          "success"
-        );
+        addNotification(`Found ${result.total_episodes || 0} episodes!`, "success");
       } else {
         const errorMsg = result.error || "Failed to scrape episodes";
         setError(errorMsg);
@@ -168,40 +166,11 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
     }
   };
 
-  const handleSelectEpisode = (index: number) => {
-    setSelectedIndices((prev) =>
-      prev.includes(index)
-        ? prev.filter((i) => i !== index)
-        : [...prev, index]
-    );
-  };
+  const handleEpisodeClick = (episode: Episode) => {
+    onEpisodeSelect?.(episode);
 
-  const handleSelectAll = () => {
-    setSelectedIndices(filteredEpisodes.map((_, i) => i));
-  };
-
-  const handleClearSelection = () => {
-    setSelectedIndices([]);
-  };
-
-  const handleGenerateVideos = () => {
-    if (selectedIndices.length === 0) {
-      addNotification("Please select at least one episode", "warning");
-      return;
-    }
-
-    const selectedEpisodes = selectedIndices
-      .map((i) => filteredEpisodes[i])
-      .filter(Boolean);
-
-    if (onMultipleEpisodesSelect) {
-      onMultipleEpisodesSelect(selectedEpisodes);
-    }
-
-    addNotification(
-      `Selected ${selectedEpisodes.length} episodes for video generation`,
-      "success"
-    );
+    // Instant route to editor, passing episode.url for the backend import.
+    navigate(`/editor?importUrl=${encodeURIComponent(episode.url)}`);
   };
 
   const handleAddToFavorites = () => {
@@ -234,7 +203,6 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
 
   return (
     <div className="w-full space-y-4">
-      {/* Collapsible Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full flex items-center justify-between px-4 py-3 bg-gradient-to-r from-purple-900/50 to-blue-900/50 rounded-lg hover:from-purple-800/50 hover:to-blue-800/50 transition-all duration-200 border border-purple-700/30"
@@ -242,28 +210,16 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
         <div className="flex items-center gap-2">
           <Zap className="w-5 h-5 text-purple-400" />
           <span className="font-semibold text-gray-100">WEBTOON Episode Scraper</span>
-          {seriesMetadata && (
-            <span className="text-sm text-gray-400 ml-2">
-              • {seriesMetadata.title}
-            </span>
-          )}
+          {seriesMetadata && <span className="text-sm text-gray-400 ml-2">• {seriesMetadata.title}</span>}
         </div>
-        <ChevronDown
-          className={`w-5 h-5 text-gray-400 transition-transform ${
-            isExpanded ? "rotate-180" : ""
-          }`}
-        />
+        <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
       </button>
 
-      {/* Expandable Content */}
       {isExpanded && (
         <div className="space-y-4 p-4 bg-gray-900/50 rounded-lg border border-gray-800">
-          {/* Input Section */}
           <div className="space-y-3">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                WEBTOON Series URL
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">WEBTOON Series URL</label>
               <input
                 ref={inputRef}
                 type="text"
@@ -281,9 +237,7 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
             <div className="text-center text-sm text-gray-500">— OR —</div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Series ID (title_no)
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Series ID (title_no)</label>
               <input
                 type="text"
                 value={titleNoInput}
@@ -298,13 +252,15 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Max Episodes to Load (leave empty for all)
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Max Episodes to Load (leave empty for all)</label>
               <input
                 type="number"
                 value={maxEpisodes ?? ""}
-                onChange={(e) => setMaxEpisodes(e.target.value === "" ? null : Math.max(1, parseInt(e.target.value) || 1))}
+                onChange={(e) =>
+                  setMaxEpisodes(
+                    e.target.value === "" ? null : Math.max(1, parseInt(e.target.value) || 1)
+                  )
+                }
                 min="1"
                 max="500"
                 placeholder="Leave empty to load all episodes"
@@ -313,7 +269,6 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
             </div>
           </div>
 
-          {/* Error Display */}
           {error && (
             <div className="p-3 bg-red-900/20 border border-red-800 rounded-lg flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
@@ -321,14 +276,11 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
             </div>
           )}
 
-          {/* Series Metadata Display */}
           {seriesMetadata && (
             <div className="p-3 bg-blue-900/20 border border-blue-800 rounded-lg">
               <div className="flex items-start justify-between mb-2">
                 <div>
-                  <h3 className="font-semibold text-blue-100">
-                    {seriesMetadata.title}
-                  </h3>
+                  <h3 className="font-semibold text-blue-100">{seriesMetadata.title}</h3>
                   <p className="text-xs text-blue-300 mt-1">{seriesMetadata.description}</p>
                 </div>
                 <button
@@ -347,7 +299,7 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
                 <div>
                   <span className="text-gray-400">Author: </span>
                   <span className="text-gray-200">{seriesMetadata.author}</span>
-                </div>
+                 </div>
                 <div>
                   <span className="text-gray-400">Genre: </span>
                   <span className="text-gray-200">{seriesMetadata.genre}</span>
@@ -356,7 +308,6 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
             </div>
           )}
 
-          {/* Action Buttons */}
           <div className="flex gap-2">
             <button
               onClick={handleScrape}
@@ -375,34 +326,17 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
                 </>
               )}
             </button>
-
-            {selectedIndices.length > 0 && (
-              <button
-                onClick={handleGenerateVideos}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all duration-200"
-              >
-                <Play className="w-4 h-4" />
-                Generate Videos ({selectedIndices.length})
-              </button>
-            )}
           </div>
         </div>
       )}
 
-      {/* Favorites & Recent Section */}
       {(showFavorites || showRecent) && (
         <div className="space-y-3 p-4 bg-gray-900/50 rounded-lg border border-gray-800">
-          <h3 className="text-sm font-semibold text-gray-200">
-            {showRecent ? "Recently Browsed" : "Favorite Series"}
-          </h3>
-          <FavoritesList
-            showRecent={showRecent}
-            onSelectSeries={handleSelectFromFavorites}
-          />
+          <h3 className="text-sm font-semibold text-gray-200">{showRecent ? "Recently Browsed" : "Favorite Series"}</h3>
+          <FavoritesList showRecent={showRecent} onSelectSeries={handleSelectFromFavorites} />
         </div>
       )}
 
-      {/* Episode Controls */}
       {episodes.length > 0 && (
         <EpisodeControls
           onSortChange={setSortBy}
@@ -415,52 +349,21 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
         />
       )}
 
-      {/* Episodes Grid */}
       {filteredEpisodes.length > 0 && (
         <div className="space-y-4">
-          <EpisodeGrid
-            episodes={filteredEpisodes}
-            selectedIndices={selectedIndices}
-            onSelectEpisode={handleSelectEpisode}
-            onSelectAll={handleSelectAll}
-            onClearSelection={handleClearSelection}
-          />
+          <EpisodeGrid episodes={filteredEpisodes} onEpisodeClick={handleEpisodeClick} />
 
-          {/* Batch Actions */}
-          <div className="space-y-3">
-            <div className="flex gap-2 px-4 py-3 bg-gray-800 rounded-lg">
-              <button
-                onClick={handleGenerateVideos}
-                disabled={selectedIndices.length === 0}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white font-semibold rounded-lg transition-all duration-200"
-              >
-                <Play className="w-4 h-4" />
-                Generate Videos for Selected ({selectedIndices.length})
-              </button>
-              <button
-                onClick={handleClearSelection}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-100 rounded-lg transition-all duration-200"
-              >
-                Clear Selection
-              </button>
-            </div>
-
-            {/* Batch Thumbnail Downloader */}
-            {filteredEpisodes.length > 0 && (
-              <BatchThumbnailDownloader
-                episodes={filteredEpisodes}
-                seriesTitle={seriesMetadata?.title || "episodes"}
-                onDownloadStart={() => addNotification("Starting download...", "info")}
-                onDownloadComplete={(count) =>
-                  addNotification(`Downloaded ${count} thumbnails!`, "success")
-                }
-              />
-            )}
-          </div>
+          {filteredEpisodes.length > 0 && (
+            <BatchThumbnailDownloader
+              episodes={filteredEpisodes}
+              seriesTitle={seriesMetadata?.title || "episodes"}
+              onDownloadStart={() => addNotification("Starting download...", "info")}
+              onDownloadComplete={(count) => addNotification(`Downloaded ${count} thumbnails!`, "success")}
+            />
+          )}
         </div>
       )}
 
-      {/* No Results Message */}
       {episodes.length > 0 && filteredEpisodes.length === 0 && (
         <div className="p-4 text-center text-gray-400 bg-gray-800 rounded-lg">
           <p className="text-sm">No episodes match your search or filters</p>
@@ -469,3 +372,4 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
     </div>
   );
 };
+

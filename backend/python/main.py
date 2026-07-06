@@ -601,11 +601,14 @@ PUBLIC_ROUTE_SET = {
     # Note: projects public endpoint uses path param
     # We handle it via prefix match below.
     "/api/proxy-image",
+    # Thumbnail/proxy image (frontend <img> tag requests)
+    "/api/proxy/image",
     # ── Swagger / OpenAPI UI (must be public so the browser can load docs) ──
     "/api/docs",
     "/openapi.json",
     "/api/openapi.json",
 }
+
 
 PUBLIC_ROUTE_PREFIXES = (
     "/api/projects/public/",
