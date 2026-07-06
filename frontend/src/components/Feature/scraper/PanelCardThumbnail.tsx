@@ -25,20 +25,20 @@ const getScrapedImageStatus = (url: string) => {
   if (url.includes("_cropped")) {
     return {
       text: "CROPPED",
-      bg: "bg-blue-600/90 border-blue-400/60 text-blue-100 shadow-[0_0_8px_rgba(59,130,246,0.5)]",
+      bg: "bg-gradient-to-r from-sky-600 to-blue-600 border-sky-400/50 text-sky-100 shadow-[0_4px_12px_rgba(56,189,248,0.25)]",
     };
   }
   if (url.includes("_cleaned")) {
     return {
       text: "CLEANED",
-      bg: "bg-purple-600/90 border-purple-400/60 text-purple-100 shadow-[0_0_8px_rgba(168,85,247,0.5)]",
+      bg: "bg-gradient-to-r from-fuchsia-600 to-purple-600 border-purple-400/50 text-purple-100 shadow-[0_4px_12px_rgba(168,85,247,0.25)]",
     };
   }
 
   if (url.includes("transform_")) {
     return {
       text: "EDITED",
-      bg: "bg-amber-600/90 border-amber-400/60 text-amber-100 shadow-[0_0_8px_rgba(245,158,11,0.5)]",
+      bg: "bg-gradient-to-r from-amber-500 to-orange-600 border-amber-400/50 text-amber-100 shadow-[0_4px_12px_rgba(245,158,11,0.25)]",
     };
   }
   return null;
@@ -69,14 +69,17 @@ export function PanelCardThumbnail({
   const status = getScrapedImageStatus(imgUrl);
 
   return (
-    <div className="relative h-56 sm:h-64 rounded-xl overflow-hidden bg-neutral-900 flex items-center justify-center ring-1 ring-neutral-800/60 group-hover:ring-purple-800/30 transition-all duration-200">
+    <div className="relative h-56 sm:h-64 rounded-2xl overflow-hidden bg-neutral-950 flex items-center justify-center border border-neutral-850 shadow-inner group-hover:border-purple-500/30 transition-all duration-300 ease-out select-none">
+      {/* Decorative background glow overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent z-10 pointer-events-none" />
+
       <img
         src={imgUrl}
         alt={`Panel #${idx + 1}`}
-        className={`w-full h-full object-contain transition-all duration-300 ${
+        className={`w-full h-full object-contain transition-all duration-500 ease-out ${
           isProcessing
             ? "opacity-20 scale-95 blur-[3px]"
-            : "group-hover:scale-105"
+            : "group-hover:scale-108 group-hover:rotate-[0.5deg]"
         }`}
         loading="lazy"
         decoding="async"
@@ -87,29 +90,29 @@ export function PanelCardThumbnail({
       {/* Shimmer overlay while processing */}
       {isProcessing && (
         <div
-          className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-gradient-to-b from-black/80 via-black/90 to-black/80 backdrop-blur-sm select-none"
+          className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-neutral-950/90 backdrop-blur-md select-none animate-in fade-in duration-200"
           id={`loading_overlay_${idx}`}
         >
-          <div className="relative mb-2">
+          <div className="relative mb-2.5">
             <div className="absolute inset-0 rounded-full bg-purple-500/20 animate-ping" />
-            <Loader2 className="relative h-5 w-5 text-purple-400 animate-spin drop-shadow-[0_0_6px_rgba(168,85,247,0.8)]" />
+            <Loader2 className="relative h-6 w-6 text-purple-400 animate-spin drop-shadow-[0_0_8px_rgba(168,85,247,0.7)]" />
           </div>
-          <span className="text-[9px] font-mono font-bold tracking-widest text-purple-300 uppercase">
+          <span className="text-[10px] font-mono font-extrabold tracking-widest text-purple-300 uppercase">
             {label}
           </span>
-          <span className="text-[8px] text-neutral-500 mt-0.5 font-sans">
+          <span className="text-[8px] text-neutral-500 mt-1 font-mono uppercase tracking-wider font-bold">
             Please wait…
           </span>
         </div>
       )}
 
-      {/* Index badge — purple when selected, dark when not */}
+      {/* Index badge — glassmorphic purple gradient when selected, dark when not */}
       <div
         className={[
-          "absolute top-1.5 left-1.5 backdrop-blur-sm px-1.5 py-0.5 rounded-md text-[8px] font-mono font-bold leading-none transition-all duration-200",
+          "absolute top-2 left-2 z-20 backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold leading-none border transition-all duration-300",
           isSelected
-            ? "bg-purple-600/90 border border-purple-400/60 text-white shadow-[0_0_8px_rgba(168,85,247,0.5)]"
-            : "bg-black/80 border border-purple-900/30 text-purple-400",
+            ? "bg-gradient-to-r from-purple-650 to-indigo-650 border-purple-400/50 text-white shadow-[0_4px_12px_rgba(168,85,247,0.35)]"
+            : "bg-neutral-900/85 border-neutral-800/80 text-purple-400 shadow-inner",
         ].join(" ")}
       >
         #{idx + 1}
@@ -119,8 +122,8 @@ export function PanelCardThumbnail({
       {status && (
         <div
           className={[
-            "absolute top-1.5 backdrop-blur-sm px-1.5 py-0.5 rounded-md text-[8px] font-mono font-bold leading-none border z-20 transition-all",
-            "left-11",
+            "absolute top-2 backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold leading-none border z-20 transition-all duration-300",
+            "left-12",
             status.bg,
           ].join(" ")}
         >
@@ -128,66 +131,64 @@ export function PanelCardThumbnail({
         </div>
       )}
 
-      {/* Selection check badge with animated ping ring */}
-      <div className="absolute top-1.5 right-1.5">
-        {/* Animated pulse ring — only when selected */}
+      {/* Selection checkbox circle with animated pulse ring */}
+      <div className="absolute top-2 right-2 z-20">
         {isSelected && (
           <div className="absolute inset-0 rounded-full bg-purple-500/35 animate-ping" />
         )}
-        {/* Ghost dashed ring on hover (unselected) */}
         <div
           className={[
-            "relative rounded-full p-0.5 border transition-all duration-200",
+            "relative rounded-full p-1 border transition-all duration-300 ease-out cursor-pointer active:scale-90",
             isSelected
-              ? "bg-purple-600 border-purple-400 shadow-[0_0_10px_3px_rgba(168,85,247,0.5)] scale-110"
-              : "bg-black/60 border-dashed border-neutral-600 opacity-0 group-hover:opacity-60",
+              ? "bg-gradient-to-r from-purple-600 to-indigo-600 border-purple-400 shadow-[0_4px_12px_rgba(168,85,247,0.4)] scale-110"
+              : "bg-neutral-900/60 border-neutral-600/70 hover:border-neutral-450 opacity-0 group-hover:opacity-100",
           ].join(" ")}
         >
           <Check
             className={`h-2.5 w-2.5 ${
               isSelected ? "text-white" : "text-neutral-400"
             }`}
-            strokeWidth={3}
+            strokeWidth={3.5}
           />
         </div>
       </div>
 
       {/* Shift-select hint on hover when not selected */}
       {!isSelected && (
-        <div className="absolute inset-x-0 bottom-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none">
-          <div className="bg-black/70 backdrop-blur-sm text-[7px] text-neutral-400 font-mono text-center py-0.5">
+        <div className="absolute inset-x-0 bottom-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20">
+          <div className="bg-gradient-to-t from-neutral-950 via-neutral-950/80 to-transparent text-[8px] text-neutral-400 font-mono text-center pb-2 pt-4">
             Click · Shift+Click range
           </div>
         </div>
       )}
 
-      {/* Quick-action toolbar (hover) */}
+      {/* Floating Quick-action Dock (hover) */}
       {!isProcessing && (
         <div
           onClick={(e) => e.stopPropagation()}
-          className="absolute bottom-1.5 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-200 flex gap-0.5 bg-black/90 border border-neutral-700/80 px-1.5 py-0.5 rounded-full z-30 shadow-lg backdrop-blur-sm"
+          className="absolute bottom-2.5 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 ease-out flex gap-1 bg-neutral-950/90 border border-neutral-800/80 px-2 py-1 rounded-2xl z-30 shadow-[0_8px_32px_rgba(0,0,0,0.6)] backdrop-blur-xl"
         >
           <button
             onClick={handleRotateClockwise}
             title="Rotate 90° Clockwise"
-            className="p-1 rounded-full text-neutral-400 hover:text-purple-300 hover:bg-purple-950/60 transition-all duration-150 cursor-pointer"
+            className="p-1.5 rounded-xl text-neutral-450 hover:text-purple-300 hover:bg-purple-950/60 transition-all duration-150 cursor-pointer active:scale-90"
           >
-            <RotateCw className="h-3 w-3" />
+            <RotateCw className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={handleFlipHorizontal}
             title="Flip Horizontally"
-            className="p-1 rounded-full text-neutral-400 hover:text-purple-300 hover:bg-purple-950/60 transition-all duration-150 cursor-pointer"
+            className="p-1.5 rounded-xl text-neutral-450 hover:text-purple-300 hover:bg-purple-950/60 transition-all duration-150 cursor-pointer active:scale-90"
           >
-            <FlipHorizontal className="h-3 w-3" />
+            <FlipHorizontal className="h-3.5 w-3.5" />
           </button>
           {imgUrl.includes("/cached/") && (
             <button
               onClick={handleUndo}
               title="Undo Last Edit"
-              className="p-1 rounded-full text-neutral-400 hover:text-amber-300 hover:bg-amber-950/40 transition-all duration-150 cursor-pointer"
+              className="p-1.5 rounded-xl text-neutral-450 hover:text-amber-300 hover:bg-amber-950/40 transition-all duration-150 cursor-pointer active:scale-90"
             >
-              <Undo2 className="h-3 w-3" />
+              <Undo2 className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
