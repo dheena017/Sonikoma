@@ -246,8 +246,10 @@ const StatusPage = React.memo(
               <span>&gt;</span>
               <span className="text-purple-400">Diagnostics Status</span>
             </div>
-            <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
-              <Activity className="h-6 w-6 text-emerald-450 animate-pulse" />
+            <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+              <div className="icon-pill icon-pill--emerald animate-pulse">
+                <Activity className="h-5 w-5" />
+              </div>
               Computational Node Diagnostics
             </h2>
             <p className="text-xs text-neutral-400 font-mono mt-0.5">

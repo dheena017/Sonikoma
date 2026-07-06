@@ -12,7 +12,9 @@ export default function ProjectsPageHeader({
     <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-8">
       <div>
         <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white mb-3 flex items-center gap-3">
-          <FolderOpen className="h-8 w-8 text-purple-400" />
+          <div className="icon-pill icon-pill--purple">
+            <FolderOpen className="h-6 w-6" />
+          </div>
           Projects
         </h1>
         <p className="text-neutral-400 text-sm font-mono max-w-xl">

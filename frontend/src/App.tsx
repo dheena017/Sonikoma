@@ -889,7 +889,7 @@ export default function App() {
   return (
     <div
       id="app_root"
-      className={`min-h-screen bg-[#070709] text-neutral-100 flex flex-col selection:text-white relative ${
+      className={`min-h-screen bg-neutral-955 text-neutral-100 flex flex-col selection:text-white relative ${
         isAdminPath ? "selection:bg-violet-600" : "selection:bg-purple-600"
       }`}
     >

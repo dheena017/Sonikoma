@@ -84,7 +84,7 @@ const NotificationsPage = React.memo(
     };
 
     return (
-      <div className="flex-1 flex flex-col min-h-screen bg-[#070709] animate-in fade-in duration-300">
+      <div className="flex-1 flex flex-col min-h-screen bg-neutral-955 animate-in fade-in duration-300">
         {/* Header Area */}
         <div className="sticky top-[59px] z-30 bg-neutral-950/80 backdrop-blur-xl border-b border-neutral-900 px-4 py-4 sm:px-8 sm:py-6">
           <div className="max-w-5xl mx-auto w-full">
@@ -92,9 +92,9 @@ const NotificationsPage = React.memo(
               <div className="flex items-start gap-3 sm:gap-4">
                 <button
                   onClick={onNavigateHome}
-                  className="p-2 sm:p-2.5 mt-0.5 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all cursor-pointer shrink-0"
+                  className="icon-pill cursor-pointer hover:icon-pill--purple mt-0.5"
                 >
-                  <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <ArrowLeft className="h-4 w-4" />
                 </button>
                 <div>
                   <h1 className="text-lg sm:text-2xl font-bold text-white tracking-tight flex flex-wrap items-center gap-2">
@@ -207,28 +207,23 @@ const NotificationsPage = React.memo(
                   {sortOrder === "newest" ? "Newest First" : "Oldest First"}
                 </button>
               </div>
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 custom-scrollbar">
-                <Filter className="h-4 w-4 text-neutral-500 mr-2 shrink-0" />
-                {[
-                  { id: "all", label: "All Logs" },
-                  { id: "unread", label: "Unread" },
-                  { id: "error", label: "Errors" },
-                  { id: "warning", label: "Warnings" },
-                  { id: "success", label: "Success" },
-                  { id: "info", label: "Info" },
-                ].map((f) => (
-                  <button
-                    key={f.id}
-                    onClick={() => setFilter(f.id)}
-                    className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap cursor-pointer border ${
-                      filter === f.id
-                        ? "bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-900/20"
-                        : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-800"
-                    }`}
+              <div className="flex items-center gap-2 min-w-[220px]">
+                <Filter className="h-4 w-4 text-neutral-500 shrink-0" />
+                <div className="relative w-full">
+                  <select
+                    value={filter}
+                    onChange={(e) => setFilter(e.target.value)}
+                    className="w-full appearance-none bg-neutral-900 border border-neutral-800 text-neutral-300 rounded-xl py-2.5 pl-4 pr-10 text-sm font-bold uppercase tracking-widest outline-none transition-all cursor-pointer"
                   >
-                    {f.label}
-                  </button>
-                ))}
+                    <option value="all">All Logs</option>
+                    <option value="unread">Unread</option>
+                    <option value="error">Errors</option>
+                    <option value="warning">Warnings</option>
+                    <option value="success">Success</option>
+                    <option value="info">Info</option>
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
+                </div>
               </div>
             </div>
           </div>
