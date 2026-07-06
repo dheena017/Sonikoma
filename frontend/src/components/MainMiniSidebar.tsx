@@ -193,19 +193,24 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           onMouseEnter={handleEnter}
           onMouseLeave={handleLeave}
           title={item.label}
-          className={`p-2.5 transition-all duration-300 rounded-xl cursor-pointer relative flex items-center justify-center group-active:scale-95 ${
-            item.active
-              ? "bg-purple-500/10 text-white border border-purple-500/20 shadow-[inset_0_0_12px_rgba(168,85,247,0.15)]"
-              : "text-neutral-500 hover:text-neutral-200 hover:bg-white/5 border border-transparent hover:scale-105"
-          }`}
+          className="p-1.5 transition-all duration-300 cursor-pointer relative flex items-center justify-center group-active:scale-95"
         >
-          <Icon
-            className={`w-[18px] h-[18px] transition-transform duration-300 ${
-              item.active ? "text-purple-400" : "group-hover:text-neutral-200"
+          {/* iOS-style icon pill */}
+          <div
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${
+              item.active
+                ? "bg-purple-500/20 border border-purple-500/40 shadow-[0_0_14px_rgba(168,85,247,0.25)]"
+                : "bg-neutral-800 border border-neutral-700 group-hover:bg-purple-500/10 group-hover:border-purple-500/20"
             }`}
-          />
+          >
+            <Icon
+              className={`w-[18px] h-[18px] transition-colors duration-300 ${
+                item.active ? "text-purple-400" : "text-neutral-400 group-hover:text-purple-300"
+              }`}
+            />
+          </div>
           {item.badge && (
-            <span className="absolute -top-1.5 -right-1.5 h-4 min-w-[16px] bg-purple-600 text-[10px] text-white font-bold rounded-full flex items-center justify-center px-1 border border-neutral-950 shadow-sm z-20">
+            <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] bg-purple-600 text-[10px] text-white font-bold rounded-full flex items-center justify-center px-1 border border-neutral-950 shadow-sm z-20">
               {item.badge}
             </span>
           )}
@@ -223,7 +228,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
     <aside
       className={`fixed ${
         isProEditorPage ? "top-12" : "top-[59px]"
-      } bottom-0 left-0 w-20 shrink-0 bg-[#0a0a0e]/80 backdrop-blur-xl border-r border-purple-900/10 shadow-[4px_0_24px_rgba(0,0,0,0.4)] hidden lg:flex flex-col items-center py-4 z-40`}
+      } bottom-0 left-0 w-20 shrink-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 shadow-[4px_0_24px_rgba(0,0,0,0.3)] hidden lg:flex flex-col items-center py-4 z-40`}
     >
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
@@ -244,7 +249,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
       </div>
 
       {/* Creative Tools Button - Matched to the Premium "Return" styling */}
-      <div className="mt-auto pt-4 flex justify-center w-full pb-2 border-t border-white/[0.02]">
+      <div className="mt-auto pt-4 flex justify-center w-full pb-2 border-t border-neutral-800/60">
         <div className="relative group w-full flex justify-center">
           <button
             onClick={() => navigateTo("/workspace")}
