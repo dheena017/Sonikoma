@@ -69,7 +69,7 @@ export function PanelCardThumbnail({
   const status = getScrapedImageStatus(imgUrl);
 
   return (
-    <div className="relative h-56 sm:h-64 rounded-2xl overflow-hidden bg-neutral-950 flex items-center justify-center border border-neutral-850 shadow-inner group-hover:border-purple-500/30 transition-all duration-300 ease-out select-none">
+    <div className="relative h-56 sm:h-64 rounded-2xl overflow-hidden bg-neutral-950 flex items-center justify-center border border-neutral-800 shadow-inner group-hover:border-purple-500/30 transition-all duration-300 ease-out select-none">
       {/* Decorative background glow overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent z-10 pointer-events-none" />
 
@@ -112,7 +112,7 @@ export function PanelCardThumbnail({
           "absolute top-2 left-2 z-20 backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold leading-none border transition-all duration-300",
           isSelected
             ? "bg-gradient-to-r from-purple-650 to-indigo-650 border-purple-400/50 text-white shadow-[0_4px_12px_rgba(168,85,247,0.35)]"
-            : "bg-neutral-900/85 border-neutral-800/80 text-purple-400 shadow-inner",
+            : "bg-neutral-900 border-neutral-700 text-purple-400 shadow-inner",
         ].join(" ")}
       >
         #{idx + 1}
@@ -166,7 +166,7 @@ export function PanelCardThumbnail({
       {!isProcessing && (
         <div
           onClick={(e) => e.stopPropagation()}
-          className="absolute bottom-2.5 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 ease-out flex gap-1 bg-neutral-950/90 border border-neutral-800/80 px-2 py-1 rounded-2xl z-30 shadow-[0_8px_32px_rgba(0,0,0,0.6)] backdrop-blur-xl"
+          className="absolute bottom-2.5 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 ease-out flex gap-1 bg-neutral-950 border border-neutral-800 px-2 py-1 rounded-2xl z-30 shadow-[0_8px_32px_rgba(0,0,0,0.6)] backdrop-blur-xl"
         >
           <button
             onClick={handleRotateClockwise}

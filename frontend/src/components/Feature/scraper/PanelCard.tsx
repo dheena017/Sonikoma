@@ -212,7 +212,7 @@ function PanelCard({
         "group relative w-[260px] sm:w-[280px] shrink-0 rounded-2xl border p-4 space-y-4 transition-all duration-300 ease-out text-center cursor-pointer select-none",
         isSelected
           ? "border-purple-500 bg-purple-950/15 shadow-[0_10px_30px_-5px_rgba(168,85,247,0.3)] ring-1 ring-purple-500/20 scale-[1.02]"
-          : "border-neutral-800/60 bg-neutral-950/90 hover:border-purple-500/50 hover:shadow-[0_15px_35px_-8px_rgba(168,85,247,0.15)] hover:scale-[1.03] hover:-translate-y-1.5",
+          : "border-neutral-800/60 bg-neutral-950 hover:border-purple-500/50 hover:shadow-[0_15px_35px_-8px_rgba(168,85,247,0.15)] hover:scale-[1.03] hover:-translate-y-1.5",
       ].join(" ")}
     >
       <PanelCardThumbnail
@@ -230,7 +230,7 @@ function PanelCard({
       {/* Dynamic Resolution & Aspect Ratio Badges */}
       {dimensions && (
         <div className="flex items-center justify-between gap-2 px-1 text-[9px] font-mono select-none animate-in fade-in duration-300">
-          <span className="text-neutral-450 font-bold bg-neutral-900 border border-neutral-850 px-1.5 py-0.5 rounded">
+          <span className="text-neutral-500 font-bold bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded">
             {dimensions.width} × {dimensions.height} px
           </span>
           {getAspectRatioLabel() && (
