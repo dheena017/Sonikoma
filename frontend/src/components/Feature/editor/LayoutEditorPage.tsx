@@ -21,6 +21,14 @@ interface LayoutEditorPageProps {
   isFocusMode: boolean;
   setIsFocusMode: React.Dispatch<React.SetStateAction<boolean>>;
   navigateTo?: (path: string) => void;
+  notifications?: any[];
+  markNotificationAsRead?: (id: number) => void;
+  markAllNotificationsAsRead?: () => void;
+  deleteNotification?: (id: number) => void;
+  clearAllNotifications?: () => void;
+  notificationsMuted?: boolean;
+  setNotificationsMuted?: (muted: boolean) => void;
+  onNavigateToAll?: () => void;
 }
 
 const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
@@ -41,6 +49,14 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
   isFocusMode,
   setIsFocusMode,
   navigateTo,
+  notifications,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+  deleteNotification,
+  clearAllNotifications,
+  notificationsMuted,
+  setNotificationsMuted,
+  onNavigateToAll,
 }) => {
   const isSidebarOpen = !isSidebarCollapsed && !isFocusMode;
 
@@ -113,6 +129,14 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
           onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           isSidebarCollapsed={isSidebarCollapsed}
           isSidebarOpen={isSidebarOpen}
+          notifications={notifications}
+          markNotificationAsRead={markNotificationAsRead}
+          markAllNotificationsAsRead={markAllNotificationsAsRead}
+          deleteNotification={deleteNotification}
+          clearAllNotifications={clearAllNotifications}
+          notificationsMuted={notificationsMuted}
+          setNotificationsMuted={setNotificationsMuted}
+          onNavigateToAll={onNavigateToAll}
         />
       )}
 

@@ -11,11 +11,12 @@ import {
   AlignLeft,
   Sparkles,
   CheckCircle,
-  Save,
+  Loader2,
   Wand2,
   Mic,
   Music,
   Eye,
+  Save,
 } from "lucide-react";
 
 interface ProjectConfirmPanelProps {
@@ -38,7 +39,7 @@ interface ProjectConfirmPanelProps {
       };
     },
     shouldGenerate: boolean
-  ) => void;
+  ) => Promise<boolean>;
   initialDetails: {
     seriesTitle: string;
     chapterNumber: string;
@@ -47,6 +48,7 @@ interface ProjectConfirmPanelProps {
     seriesAuthor: string;
     seriesCoverImage: string;
     seriesSynopsis: string;
+    status?: string;
   };
 }
 
@@ -72,6 +74,7 @@ export default function ProjectConfirmPanel({
     generateVoice: true,
     generateSFX: false,
   });
+  const [isSaving, setIsSaving] = useState(false);
 
   // Sync when initialDetails updates or panel opens
   useEffect(() => {
@@ -84,6 +87,7 @@ export default function ProjectConfirmPanel({
       setSeriesAuthor(initialDetails.seriesAuthor || "");
       setSeriesCoverImage(initialDetails.seriesCoverImage || "");
       setSeriesSynopsis(initialDetails.seriesSynopsis || "");
+      setProjectStatus(initialDetails.status || "Draft");
       document.body.style.overflow = "hidden";
       if (container) container.style.overflow = "hidden";
     } else {
@@ -98,21 +102,29 @@ export default function ProjectConfirmPanel({
 
   if (!isOpen) return null;
 
-  const handleConfirm = (shouldGenerate: boolean) => {
-    onConfirm(
-      {
-        seriesTitle: seriesTitle.trim(),
-        chapterNumber: chapterNumber.trim(),
-        chapterTitle: chapterTitle.trim(),
-        scrapedGenre: scrapedGenre.trim(),
-        seriesAuthor: seriesAuthor.trim(),
-        seriesCoverImage: seriesCoverImage.trim(),
-        seriesSynopsis: seriesSynopsis.trim(),
-        status: projectStatus,
-        aiTasks,
-      },
-      shouldGenerate
-    );
+  const handleConfirm = async (shouldGenerate: boolean) => {
+    setIsSaving(true);
+    try {
+      const success = await onConfirm(
+        {
+          seriesTitle: seriesTitle.trim(),
+          chapterNumber: chapterNumber.trim(),
+          chapterTitle: chapterTitle.trim(),
+          scrapedGenre: scrapedGenre.trim(),
+          seriesAuthor: seriesAuthor.trim(),
+          seriesCoverImage: seriesCoverImage.trim(),
+          seriesSynopsis: seriesSynopsis.trim(),
+          status: projectStatus,
+          aiTasks,
+        },
+        shouldGenerate
+      );
+      if (success) {
+        onClose();
+      }
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const toggleTask = (task: keyof typeof aiTasks) => {
@@ -454,22 +466,23 @@ export default function ProjectConfirmPanel({
           <button
             type="button"
             onClick={() => handleConfirm(false)}
-            disabled={!seriesTitle.trim() || !chapterNumber.trim()}
+            disabled={!seriesTitle.trim() || !chapterNumber.trim() || isSaving}
             className="px-5 py-3 sm:py-2.5 bg-neutral-800/60 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-700/60 hover:border-neutral-600 rounded-xl text-xs font-bold tracking-wide transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Save className="h-3.5 w-3.5 text-purple-400" />
-            <span>Save Details Only</span>
+            {isSaving ? (
+              <>
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-purple-400" />
+                <span>Saving...</span>
+              </>
+            ) : (
+              <>
+                <Save className="h-3.5 w-3.5 text-purple-400" />
+                <span>Save</span>
+              </>
+            )}
           </button>
 
-          <button
-            type="button"
-            onClick={() => handleConfirm(true)}
-            disabled={!seriesTitle.trim() || !chapterNumber.trim()}
-            className="px-6 py-3 sm:py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl text-xs tracking-wide transition-all shadow-[0_4px_14px_rgba(168,85,247,0.3)] hover:shadow-[0_6px_20px_rgba(168,85,247,0.5)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 flex items-center justify-center gap-2 cursor-pointer border border-purple-500/30"
-          >
-            <Sparkles className="h-4 w-4" />
-            <span>Save & Generate All</span>
-          </button>
+          {/* Generate All button removed per request */}
         </div>
       </div>
     </div>,

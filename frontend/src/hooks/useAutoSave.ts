@@ -34,6 +34,8 @@ interface AutoSaveState {
   accumulatedTokens?: number;
   setAccumulatedTokens?: (val: React.SetStateAction<number>) => void;
   audioFeedback?: any;
+  videoUrl?: string | null;
+  setVideoUrl?: (url: string | null) => void;
 }
 
 export function useAutoSave(state: AutoSaveState) {
@@ -137,6 +139,17 @@ export function useAutoSave(state: AutoSaveState) {
       successMessage?: string;
       errorMessage?: string;
       hideNotifications?: boolean;
+      overrideVideoUrl?: string | null;
+    },
+    overrides?: {
+      title?: string;
+      genre?: string;
+      chapterNumber?: string;
+      chapterTitle?: string;
+      author?: string;
+      cover_image?: string | null;
+      synopsis?: string | null;
+      status?: string;
     }
   ) => {
     if (!state.projectId) return false;
@@ -187,21 +200,30 @@ export function useAutoSave(state: AutoSaveState) {
         }));
       };
 
+      const title = overrides?.title?.trim() ?? state.seriesTitle.trim();
+      const genre = overrides?.genre?.trim() ?? state.scrapedGenre.trim();
+      const chapterNumber = overrides?.chapterNumber?.trim() ?? state.chapterNumber.trim();
+      const chapterTitle = overrides?.chapterTitle?.trim() ?? state.chapterTitle.trim();
+      const author = overrides?.author?.trim() ?? state.seriesAuthor.trim();
+      const coverImage = overrides?.cover_image?.trim() ?? state.seriesCoverImage.trim();
+      const synopsis = overrides?.synopsis?.trim() ?? state.seriesSynopsis.trim();
+      const overrideStatus = overrides?.status;
+
       const currentStateStr = JSON.stringify({
-        title: state.seriesTitle.trim(),
-        genre: state.scrapedGenre.trim(),
-        chapterNumber: state.chapterNumber.trim(),
-        chapterTitle: state.chapterTitle.trim(),
-        author: state.seriesAuthor.trim(),
-        cover_image: state.seriesCoverImage.trim(),
-        synopsis: state.seriesSynopsis.trim(),
+        title,
+        genre,
+        chapterNumber,
+        chapterTitle,
+        author,
+        cover_image: coverImage,
+        synopsis,
         scraped_images: state.scrapedImages,
         panels: serializePanels(targetPanels),
       });
 
       const formattedEpisode = (() => {
-        const num = state.chapterNumber.trim();
-        const name = state.chapterTitle.trim();
+        const num = chapterNumber;
+        const name = chapterTitle;
         if (num && name) return `Chapter ${num} - ${name}`;
         if (num) return `Chapter ${num}`;
         if (name) return name;
@@ -216,17 +238,22 @@ export function useAutoSave(state: AutoSaveState) {
         headers["Authorization"] = `Bearer ${token}`;
       }
 
+      const finalVideoUrl = options?.overrideVideoUrl !== undefined ? options.overrideVideoUrl : (state.videoUrl || null);
+      const statusValue = overrideStatus ?? (finalVideoUrl ? "completed" : "pending");
+
       const data = await api.updateProject(
         state.fetchWithInterceptor,
         targetProjectId,
         {
           url: state.targetUrl || "",
-          title: state.seriesTitle.trim() || "Untitled Project",
-          genre: state.scrapedGenre.trim() || "general",
+          title: title || "Untitled Project",
+          genre: genre || "general",
           episode: formattedEpisode || "Chapter 1",
-          author: state.seriesAuthor.trim() || "Unknown Author",
-          cover_image: state.seriesCoverImage.trim() || null,
-          synopsis: state.seriesSynopsis.trim() || null,
+          author: author || "Unknown Author",
+          cover_image: coverImage || null,
+          synopsis: synopsis || null,
+          video_url: finalVideoUrl,
+          status: statusValue,
           panels: targetPanels.map((p) => ({
             image_url: p.image_url,
             original_url: p.original_url || null,
@@ -284,13 +311,10 @@ export function useAutoSave(state: AutoSaveState) {
             console.log(
               `[Save Hook] Saving raw scraped images cache list to backend for URL: ${state.targetUrl}`
             );
-            await api.saveScrapedImages(
-              {
-                url: state.targetUrl,
-                images: state.scrapedImages,
-              },
-              token || undefined
-            );
+            await api.saveScrapedImages(state.fetchWithInterceptor, {
+              url: state.targetUrl,
+              images: state.scrapedImages,
+            });
           } catch (scrapeErr) {
             console.error(
               "[Save Hook] Error saving raw scraped images cache list:",

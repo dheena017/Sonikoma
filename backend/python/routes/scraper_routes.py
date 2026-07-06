@@ -39,7 +39,7 @@ from utils.url_utils import extract_webtoon_url, parse_webtoon_url
 from utils.id_utils import generate_project_id
 from utils.cache import stitched_cache, edit_history
 import utils.image_utils as img_utils
-from services.scraper import scrape_images_from_url, scraped_metadata_cache
+from services.scraper import scrape_images_from_url, scraped_metadata_cache, scrape_webtoon_episodes, scrape_webtoon_episodes_advanced, scrape_webtoon_episodes_paginated, batch_scrape_series
 from media.ai.storyboard_ai import generate_dynamic_panels
 from routes.ai_routes import get_all_user_keys
 from media.video.video import compile_video_from_panels
@@ -98,6 +98,22 @@ class SaveScrapedImagesRequest(BaseModel):
     url: str
     images: List[str]
 
+class ScrapeEpisodesRequest(BaseModel):
+    url: Optional[str] = None
+    title_no: Optional[str] = None
+    max_episodes: Optional[int] = None
+
+class ScrapeEpisodesAdvancedRequest(BaseModel):
+    url: Optional[str] = None
+    title_no: Optional[str] = None
+    max_episodes: Optional[int] = None
+    page: Optional[int] = 1
+    include_ratings: Optional[bool] = True
+    sort_by: Optional[str] = "latest"  # latest, oldest, rating, likes
+
+class BatchScrapeSeriesRequest(BaseModel):
+    series: List[Dict[str, Optional[str]]]
+    max_episodes_per_series: Optional[int] = 50
 
 # ─── Routes ───────────────────────────────────────────────────────────────────
 
@@ -211,6 +227,153 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
         }
     except Exception as e:
         logger.error(f"[Scraper Error] {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/scrape-episodes", summary="Scrape WEBTOON episode list and metadata")
+async def scrape_episodes(request: Request, body: ScrapeEpisodesRequest):
+    """
+    Scrapes episode list from a WEBTOON series.
+    
+    Request parameters:
+    - url: Full WEBTOON series URL (e.g., https://www.webtoons.com/en/romance/love-by-mistake/list?title_no=10411)
+    - title_no: Series ID (can use this instead of full URL)
+    - max_episodes: Maximum number of episodes to extract (optional)
+    
+    Returns:
+    - Series metadata (title, author, genre, cover image)
+    - List of episodes with number, title, date, thumbnail, and episode URL
+    """
+    try:
+        if not body.url and not body.title_no:
+            raise HTTPException(status_code=400, detail="Either 'url' or 'title_no' is required")
+        
+        logger.info(f"[Routes] Episode scrape request: url={body.url}, title_no={body.title_no}")
+        
+        result = await scrape_webtoon_episodes(
+            series_url=body.url or f"?title_no={body.title_no}",
+            title_no=body.title_no,
+            max_episodes=body.max_episodes
+        )
+        
+        if not result.get("success"):
+            raise HTTPException(status_code=500, detail=result.get("error", "Failed to scrape episodes"))
+        
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[Episode Scraper Error] {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/scrape-episodes-advanced", summary="Scrape episodes with ratings, sorting, and pagination")
+async def scrape_episodes_advanced(request: Request, body: ScrapeEpisodesAdvancedRequest):
+    """
+    Advanced episode scraper with ratings extraction, sorting, and pagination.
+    
+    Request parameters:
+    - url: Full WEBTOON series URL
+    - title_no: Series ID
+    - max_episodes: Maximum episodes to extract
+    - page: Page number for pagination
+    - include_ratings: Extract ratings and likes
+    - sort_by: Sort order (latest, oldest, rating, likes)
+    """
+    try:
+        if not body.url and not body.title_no:
+            raise HTTPException(status_code=400, detail="Either 'url' or 'title_no' is required")
+        
+        logger.info(f"[Routes] Advanced episode scrape: title_no={body.title_no}, sort_by={body.sort_by}")
+        
+        result = await scrape_webtoon_episodes_advanced(
+            series_url=body.url or f"?title_no={body.title_no}",
+            title_no=body.title_no,
+            max_episodes=body.max_episodes,
+            page=body.page or 1,
+            include_ratings=body.include_ratings,
+            sort_by=body.sort_by or "latest"
+        )
+        
+        if not result.get("success"):
+            raise HTTPException(status_code=500, detail=result.get("error", "Failed to scrape episodes"))
+        
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[Advanced Episode Scraper Error] {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/scrape-episodes-paginated", summary="Scrape all episodes with automatic pagination handling")
+async def scrape_episodes_paginated(request: Request, body: ScrapeEpisodesRequest):
+    """
+    Automatically handles pagination for large series.
+    Fetches all episodes across multiple pages if needed.
+    
+    Request parameters:
+    - title_no: Series ID (required)
+    - max_episodes: Maximum total episodes to fetch (optional)
+    """
+    try:
+        if not body.title_no:
+            raise HTTPException(status_code=400, detail="'title_no' is required for paginated scraping")
+        
+        logger.info(f"[Routes] Paginated episode scrape: title_no={body.title_no}")
+        
+        result = await scrape_webtoon_episodes_paginated(
+            title_no=body.title_no,
+            max_episodes=body.max_episodes
+        )
+        
+        if not result.get("success"):
+            raise HTTPException(status_code=500, detail=result.get("error", "Failed to scrape episodes"))
+        
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[Paginated Scraper Error] {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/batch-scrape-series", summary="Batch scrape multiple WEBTOON series")
+async def batch_scrape(request: Request, body: BatchScrapeSeriesRequest):
+    """
+    Batch scrape multiple WEBTOON series in one request.
+    
+    Request body:
+    {
+      "series": [
+        {"title_no": "10411"},
+        {"title_no": "10193"},
+        {"url": "https://www.webtoons.com/..."}
+      ],
+      "max_episodes_per_series": 50
+    }
+    
+    Returns aggregated results with success/failure counts.
+    """
+    try:
+        if not body.series or len(body.series) == 0:
+            raise HTTPException(status_code=400, detail="'series' list cannot be empty")
+        
+        logger.info(f"[Routes] Batch scrape request for {len(body.series)} series")
+        
+        result = await batch_scrape_series(
+            series_list=body.series,
+            max_episodes_per_series=body.max_episodes_per_series or 50
+        )
+        
+        return {
+            "success": True,
+            "results": result
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[Batch Scraper Error] {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/generate", summary="Generate storyboard and narrative scripts")

@@ -22,7 +22,6 @@ interface TimelineHeaderProps {
   handleBatchMergeSelected?: () => void;
   batchProgress?: { current: number; total: number } | null;
   cleanProgress?: { current: number; total: number } | null;
-  handleSaveStoryboard?: () => void;
   isBatchCropping?: boolean;
   isCleaningBubbles?: boolean;
   handleCancelBatch?: () => void;
@@ -48,7 +47,6 @@ export default function TimelineHeader({
   handleBatchMergeSelected,
   batchProgress,
   cleanProgress,
-  handleSaveStoryboard,
   isBatchCropping,
   isCleaningBubbles,
   handleCancelBatch,
@@ -79,16 +77,6 @@ export default function TimelineHeader({
             >
               <Sparkles className="w-3 h-3" />
               Analyze Full Sequence
-            </button>
-          )}
-
-          {handleSaveStoryboard && (
-            <button
-              type="button"
-              onClick={handleSaveStoryboard}
-              className="text-[10px] font-bold border border-purple-500/50 bg-purple-600 hover:bg-purple-500 text-white rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors shadow-md active:scale-95 cursor-pointer"
-            >
-              Save Timeline
             </button>
           )}
 

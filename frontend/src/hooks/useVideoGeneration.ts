@@ -27,6 +27,16 @@ interface UseVideoGenerationProps {
   seriesCoverImage?: string;
   seriesSynopsis?: string;
   audioFeedback?: any;
+  saveProject?: (
+    customPanels?: GeneratedPanel[],
+    options?: {
+      savingMessage?: string;
+      successMessage?: string;
+      errorMessage?: string;
+      hideNotifications?: boolean;
+      overrideVideoUrl?: string | null;
+    }
+  ) => Promise<boolean>;
 }
 
 export function useVideoGeneration({
@@ -52,6 +62,7 @@ export function useVideoGeneration({
   seriesCoverImage,
   seriesSynopsis,
   audioFeedback,
+  saveProject,
 }: UseVideoGenerationProps) {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [progressStatus, setProgressStatus] = useState<string>("");
@@ -428,6 +439,12 @@ export function useVideoGeneration({
             audioFeedback?.playSuccess();
             setIsRendering(false);
             setTimeout(() => setRenderProgress(0), 2000);
+            if (saveProject) {
+              saveProject(undefined, {
+                hideNotifications: true,
+                overrideVideoUrl: statusData.url,
+              });
+            }
           } else if (statusData.status === "failed") {
             clearInterval(pollInterval);
             throw new Error(statusData.error || "Render failed");
@@ -455,6 +472,7 @@ export function useVideoGeneration({
     setVideoUrl,
     setActivePreviewTab,
     audioFeedback,
+    saveProject,
   ]);
 
   return useMemo(

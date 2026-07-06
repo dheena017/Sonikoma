@@ -7,7 +7,6 @@ interface OutputMetadataPanelProps {
   musicTheme: string;
   voiceActor: string;
   videoUrl: string | null;
-  handleSaveVideo?: () => void;
 }
 
 const OutputMetadataPanel = React.memo(
@@ -15,7 +14,6 @@ const OutputMetadataPanel = React.memo(
     musicTheme,
     voiceActor,
     videoUrl,
-    handleSaveVideo,
   }: OutputMetadataPanelProps) => {
     const [isPublishing, setIsPublishing] = useState(false);
     const [youtubeUrl, setYoutubeUrl] = useState<string | null>(null);
@@ -86,14 +84,6 @@ const OutputMetadataPanel = React.memo(
         {/* Download MP4 Button */}
         {videoUrl && (
           <div className="pt-2 flex flex-col gap-2">
-            {handleSaveVideo && (
-              <button
-                onClick={handleSaveVideo}
-                className="w-full bg-purple-600 hover:bg-purple-500 text-white font-medium text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer select-none shadow-lg shadow-purple-900/30 font-sans active:scale-95 border border-purple-500/50"
-              >
-                <span>Save Final Video</span>
-              </button>
-            )}
             <a
               href={videoUrl}
               download={`webtoon_cinemamaster_${Math.random()

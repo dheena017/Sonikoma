@@ -9,6 +9,13 @@ export { ConfigHistoryDropdown } from "./ConfigHistoryDropdown";
 export { GlobalScraperConfigTool } from "./GlobalScraperConfigTool";
 export { ScraperLogStream } from "./ScraperLogStream";
 export { default as UrlInputPanel } from "./UrlInputPanel";
+export { EpisodeScraper } from "./EpisodeScraper";
+export { EpisodeGrid } from "./EpisodeGrid";
+export { EpisodeCard } from "./EpisodeCard";
+export { EpisodeControls } from "./EpisodeControls";
+export { EpisodeRatingDisplay } from "./EpisodeRatingDisplay";
+export { FavoritesList, FavoritesManager } from "./FavoritesManager";
+export { BatchThumbnailDownloader } from "./BatchThumbnailDownloader";
 export type { LiveScraperDeckProps } from "./types";
 export type {
   CustomBubblePreset,

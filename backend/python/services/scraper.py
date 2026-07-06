@@ -18,8 +18,10 @@ import zipfile
 import shutil
 import tempfile
 import uuid
+import sqlite3
 from typing import List, Dict, Any, Optional, Tuple
 from urllib.parse import urlparse, urljoin, quote, parse_qs
+from datetime import datetime, timedelta
 
 # Graceful optional imports
 try:
@@ -112,6 +114,155 @@ def parse_episode_index(title_or_url: str) -> Optional[float]:
         except ValueError:
             pass
     return None
+
+
+# ─── Episode Cache Manager ──────────────────────────────────────────────────
+
+class EpisodeCacheManager:
+    """SQLite-based caching for scraped WEBTOON episodes."""
+    
+    def __init__(self, db_path: Optional[str] = None):
+        self.db_path = db_path or os.path.join(
+            os.path.dirname(__file__), "..", "..", "database", "webtoon_episodes_cache.db"
+        )
+        self._init_db()
+    
+    def _init_db(self):
+        """Initialize SQLite database schema if needed."""
+        try:
+            os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS episode_cache (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        title_no TEXT NOT NULL,
+                        genre TEXT,
+                        cache_key TEXT UNIQUE NOT NULL,
+                        episodes_json TEXT NOT NULL,
+                        series_metadata TEXT,
+                        cached_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        expires_at DATETIME,
+                        hit_count INTEGER DEFAULT 0
+                    )
+                """)
+                cursor.execute("""
+                    CREATE INDEX IF NOT EXISTS idx_title_no_genre 
+                    ON episode_cache(title_no, genre)
+                """)
+                cursor.execute("""
+                    CREATE INDEX IF NOT EXISTS idx_expires_at 
+                    ON episode_cache(expires_at)
+                """)
+                conn.commit()
+            logger.info(f"[Cache Manager] Database initialized at {self.db_path}")
+        except Exception as e:
+            logger.warning(f"[Cache Manager] Failed to initialize: {e}")
+    
+    def _make_cache_key(self, title_no: str, genre: Optional[str] = None) -> str:
+        """Generate cache key."""
+        key_str = f"{title_no}:{genre or 'any'}"
+        return hashlib.md5(key_str.encode()).hexdigest()
+    
+    def save_episodes(
+        self,
+        title_no: str,
+        episodes: List[Dict[str, Any]],
+        series_metadata: Optional[Dict[str, Any]] = None,
+        genre: Optional[str] = None,
+        ttl_hours: int = 24
+    ) -> bool:
+        """Save episodes to cache."""
+        try:
+            cache_key = self._make_cache_key(title_no, genre)
+            expires_at = datetime.utcnow() + timedelta(hours=ttl_hours)
+            
+            episodes_json = json.dumps(episodes)
+            metadata_json = json.dumps(series_metadata) if series_metadata else None
+            
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    INSERT OR REPLACE INTO episode_cache 
+                    (title_no, genre, cache_key, episodes_json, series_metadata, expires_at)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (title_no, genre, cache_key, episodes_json, metadata_json, expires_at))
+                conn.commit()
+            
+            logger.info(f"[Cache Manager] Cached {len(episodes)} episodes for {title_no}")
+            return True
+        except Exception as e:
+            logger.warning(f"[Cache Manager] Save failed: {e}")
+            return False
+    
+    def get_episodes(self, title_no: str, genre: Optional[str] = None) -> Optional[Dict[str, Any]]:
+        """Retrieve episodes from cache if valid."""
+        try:
+            cache_key = self._make_cache_key(title_no, genre)
+            
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT episodes_json, series_metadata, hit_count, expires_at
+                    FROM episode_cache
+                    WHERE cache_key = ? AND (expires_at IS NULL OR expires_at > datetime('now'))
+                """, (cache_key,))
+                
+                row = cursor.fetchone()
+                if row:
+                    episodes_json, metadata_json, hit_count, _ = row
+                    
+                    # Update hit count
+                    cursor.execute(
+                        "UPDATE episode_cache SET hit_count = hit_count + 1 WHERE cache_key = ?",
+                        (cache_key,)
+                    )
+                    conn.commit()
+                    
+                    episodes = json.loads(episodes_json)
+                    metadata = json.loads(metadata_json) if metadata_json else None
+                    
+                    logger.info(f"[Cache Manager] Cache HIT for {title_no} ({len(episodes)} episodes, hits: {hit_count + 1})")
+                    return {
+                        "episodes": episodes,
+                        "series_metadata": metadata,
+                        "from_cache": True
+                    }
+                
+                logger.debug(f"[Cache Manager] Cache MISS for {title_no}")
+                return None
+        except Exception as e:
+            logger.warning(f"[Cache Manager] Retrieval failed: {e}")
+            return None
+    
+    def clear_expired(self) -> int:
+        """Remove expired cache entries."""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "DELETE FROM episode_cache WHERE expires_at IS NOT NULL AND expires_at < datetime('now')"
+                )
+                deleted = cursor.rowcount
+                conn.commit()
+            
+            if deleted > 0:
+                logger.info(f"[Cache Manager] Cleared {deleted} expired entries")
+            return deleted
+        except Exception as e:
+            logger.warning(f"[Cache Manager] Clear failed: {e}")
+            return 0
+
+
+# Global cache manager instance
+_episode_cache = None
+
+def get_episode_cache() -> EpisodeCacheManager:
+    """Get global episode cache manager."""
+    global _episode_cache
+    if _episode_cache is None:
+        _episode_cache = EpisodeCacheManager()
+    return _episode_cache
 
 
 # ─── Image Header Dimension Parser ───────────────────────────────────────────
@@ -898,6 +1049,453 @@ async def scrape_images_from_url(
     save_sqlite_cache(fetch_url, filtered_images)
     
     return [f"/api/proxy-image?url={quote(img)}" for img in filtered_images]
+
+
+# ─── WEBTOON Episode List Scraper ───────────────────────────────────────────
+
+async def scrape_webtoon_episodes(
+    series_url: str,
+    title_no: Optional[str] = None,
+    max_episodes: Optional[int] = None
+) -> Dict[str, Any]:
+    """
+    Scrapes episode metadata from WEBTOON series list page.
+    Extracts: episode number, title, date, thumbnail, episode URL.
+    
+    Args:
+        series_url: WEBTOON series URL or just the title_no parameter
+        title_no: Override series ID if URL doesn't contain it
+        max_episodes: Limit total episodes to scrape
+        
+    Returns:
+        Dict with series metadata and list of episodes
+    """
+    try:
+        from playwright.async_api import async_playwright
+    except ImportError:
+        logger.error("[Episode Scraper] Playwright not installed")
+        return {"success": False, "error": "Playwright not available"}
+    
+    logger.info(f"[Episode Scraper] Starting episode list scrape: {series_url}")
+    
+    # Parse URL to get title_no
+    if not title_no:
+        # Extract from URL if not provided
+        parsed = urlparse(series_url)
+        query_params = parse_qs(parsed.query)
+        if 'title_no' in query_params:
+            title_no = query_params['title_no'][0]
+        else:
+            # Try to extract from path
+            path_parts = [p for p in parsed.path.split('/') if p]
+            if len(path_parts) >= 2:
+                title_no = path_parts[1].split('?')[0]
+    
+    if not title_no:
+        return {"success": False, "error": "Could not extract title_no from URL"}
+    
+    # Check cache first
+    cache_mgr = get_episode_cache()
+    cached = cache_mgr.get_episodes(title_no)
+    if cached:
+        logger.info(f"[Episode Scraper] Returning cached episodes for {title_no}")
+        return {
+            "success": True,
+            "title_no": title_no,
+            "series": cached.get("series_metadata", {}),
+            "total_episodes": len(cached.get("episodes", [])),
+            "episodes": cached.get("episodes", []),
+            "from_cache": True
+        }
+    
+    # Use the provided URL if it's a full WEBTOON URL, otherwise construct one
+    fetch_url = series_url if series_url.startswith("http") else f"https://www.webtoons.com/en/romance/list?title_no={title_no}"
+    
+    logger.info(f"[Episode Scraper] Using URL: {fetch_url}")
+    
+    html = await try_fetch_with_playwright(
+        fetch_url,
+        user_agent=random.choice(USER_AGENTS),
+        referer="https://www.webtoons.com/",
+        interactive=True
+    )
+    
+    # If fetch fails with provided URL and it's not a full URL, try with different genres
+    if (not html or len(html) < 1000) and not series_url.startswith("http"):
+        logger.info("[Episode Scraper] Provided URL fetch failed, trying alternate genres...")
+        genres = ["action", "fantasy", "comedy", "drama", "slice-of-life", "supernatural", "sci-fi", "romance"]
+        
+        for genre in genres:
+            test_url = f"https://www.webtoons.com/en/{genre}/list?title_no={title_no}"
+            logger.info(f"[Episode Scraper] Trying genre: {genre}")
+            
+            html = await try_fetch_with_playwright(
+                test_url,
+                user_agent=random.choice(USER_AGENTS),
+                referer="https://www.webtoons.com/",
+                interactive=True
+            )
+            
+            if html and len(html) > 1000:  # Likely found the right URL
+                fetch_url = test_url
+                logger.info(f"[Episode Scraper] Successfully fetched with genre: {genre}")
+                break
+    
+    if not html:
+        logger.warning(f"[Episode Scraper] Failed to fetch episode list HTML")
+        return {"success": False, "error": "Failed to fetch episode list"}
+    
+    # Extract series metadata
+    series_metadata = extract_metadata(html, fetch_url)
+    
+    # Parse episodes from HTML
+    episodes = []
+    
+    if not BeautifulSoup:
+        logger.error("[Episode Scraper] BeautifulSoup not available")
+        return {
+            "success": False,
+            "error": "BeautifulSoup not available",
+            "series": series_metadata
+        }
+    
+    try:
+        soup = BeautifulSoup(html, 'html.parser')
+        
+        # WEBTOON episode list selectors
+        episode_selectors = [
+            '.episode_lst li',  # Main episode list item
+            '.comic_episode_lst li',
+            '.episode-item',
+            '[data-episode-no]',
+            '.ep_item'
+        ]
+        
+        episode_container = None
+        for sel in episode_selectors:
+            items = soup.select(sel)
+            if items:
+                logger.info(f"[Episode Scraper] Found {len(items)} episodes with selector: {sel}")
+                episode_container = items
+                break
+        
+        if not episode_container:
+            logger.warning("[Episode Scraper] Could not find episode container")
+            # Try to find any links that look like episodes
+            all_links = soup.find_all('a')
+            logger.info(f"[Episode Scraper] Found {len(all_links)} total links, analyzing...")
+            
+            for link in all_links:
+                href = link.get('href', '')
+                if 'episode_no=' in href or '/episode/' in href:
+                    episode_container = [link]
+                    break
+        
+        # Extract episode data
+        for idx, ep_elem in enumerate(episode_container or []):
+            if max_episodes and len(episodes) >= max_episodes:
+                break
+            
+            try:
+                # Extract episode number
+                ep_no_elem = ep_elem.find(attrs={'class': re.compile(r'ep.*no|episode.*no', re.I)})
+                ep_no = ep_no_elem.get_text(strip=True) if ep_no_elem else f"Episode {idx + 1}"
+                
+                # Extract episode title
+                title_elem = ep_elem.find(attrs={'class': re.compile(r'title|ep.*title|subject', re.I)})
+                ep_title = title_elem.get_text(strip=True) if title_elem else ep_no
+                
+                # Extract episode date
+                date_elem = ep_elem.find(attrs={'class': re.compile(r'date|time|upload', re.I)})
+                ep_date = date_elem.get_text(strip=True) if date_elem else ""
+                
+                # Extract thumbnail
+                img_elem = ep_elem.find('img')
+                thumbnail = ""
+                if img_elem:
+                    thumbnail = img_elem.get('src') or img_elem.get('data-src') or img_elem.get('data-lazy-src')
+                    if thumbnail:
+                        thumbnail = urljoin(fetch_url, thumbnail)
+                
+                # Extract episode link
+                link_elem = ep_elem.find('a')
+                ep_url = ""
+                if link_elem:
+                    ep_url = link_elem.get('href', '')
+                    if ep_url:
+                        ep_url = urljoin(fetch_url, ep_url)
+                
+                # Extract ratings (new enhancement)
+                rating = None
+                likes = None
+                rating_elem = ep_elem.find(attrs={'class': re.compile(r'rating|score|like|vote', re.I)})
+                if rating_elem:
+                    rating_text = rating_elem.get_text(strip=True)
+                    # Try to extract number (e.g., "4.5", "4.5/5", "★★★★☆")
+                    rating_match = re.search(r'(\d+(?:\.\d+)?)', rating_text)
+                    if rating_match:
+                        try:
+                            rating = float(rating_match.group(1))
+                        except ValueError:
+                            pass
+                
+                likes_elem = ep_elem.find(attrs={'class': re.compile(r'likes?|thumbs?up|favorites?', re.I)})
+                if likes_elem:
+                    likes_text = likes_elem.get_text(strip=True)
+                    likes_match = re.search(r'(\d+(?:[KMB])?)', likes_text)
+                    if likes_match:
+                        likes = likes_match.group(1)
+                
+                episode_data = {
+                    "number": ep_no,
+                    "title": ep_title,
+                    "date": ep_date,
+                    "thumbnail": thumbnail,
+                    "url": ep_url,
+                    "index": idx,
+                    "rating": rating,
+                    "likes": likes
+                }
+                
+                episodes.append(episode_data)
+                logger.debug(f"[Episode Scraper] Extracted: {ep_no} - {ep_title} (rating: {rating})")
+                
+            except Exception as e:
+                logger.debug(f"[Episode Scraper] Error parsing episode {idx}: {e}")
+                continue
+        
+        logger.info(f"[Episode Scraper] Successfully extracted {len(episodes)} episodes")
+        
+        # Cache the episodes
+        cache_mgr = get_episode_cache()
+        genre = series_metadata.get("genre") if series_metadata else None
+        cache_mgr.save_episodes(title_no, episodes, series_metadata, genre, ttl_hours=24)
+        
+        return {
+            "success": True,
+            "series": series_metadata,
+            "title_no": title_no,
+            "url": fetch_url,
+            "total_episodes": len(episodes),
+            "episodes": episodes
+        }
+        
+    except Exception as e:
+        logger.error(f"[Episode Scraper] Parsing error: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "series": series_metadata
+        }
+
+
+# ─── Enhanced Episode Scraper with Ratings & Advanced Features ─────────────
+
+async def scrape_webtoon_episodes_advanced(
+    series_url: str,
+    title_no: Optional[str] = None,
+    max_episodes: Optional[int] = None,
+    page: int = 1,
+    per_page: int = 50,
+    include_ratings: bool = True,
+    sort_by: str = "latest"  # latest, oldest, rating, likes
+) -> Dict[str, Any]:
+    """
+    Advanced episode scraper with pagination, ratings, sorting, and caching.
+    
+    Args:
+        series_url: WEBTOON series URL
+        title_no: Series ID override
+        max_episodes: Max episodes to fetch
+        page: Page number for pagination (1-indexed)
+        per_page: Episodes per page
+        include_ratings: Whether to extract ratings
+        sort_by: Sorting preference (latest, oldest, rating, likes)
+    """
+    from urllib.parse import urlparse, parse_qs, urljoin
+    
+    # First, get all episodes using base scraper
+    result = await scrape_webtoon_episodes(
+        series_url=series_url,
+        title_no=title_no,
+        max_episodes=None  # Get all first
+    )
+    
+    if not result.get("success"):
+        return result
+    
+    episodes = result.get("episodes", [])
+    title_no = result.get("title_no")
+    
+    # Apply sorting
+    if sort_by == "oldest":
+        episodes = list(reversed(episodes))
+    elif sort_by == "rating" and include_ratings:
+        episodes.sort(key=lambda e: e.get("rating") or 0, reverse=True)
+    elif sort_by == "likes" and include_ratings:
+        episodes.sort(key=lambda e: e.get("likes") or "0", reverse=True)
+    
+    # Apply max_episodes limit if specified (before pagination)
+    if max_episodes:
+        episodes = episodes[:max_episodes]
+    
+    # Apply pagination
+    total_episodes = len(episodes)
+    
+    # If no per_page specified or we want all, return all on page 1
+    if not per_page or per_page <= 0:
+        per_page = total_episodes if total_episodes > 0 else 1
+    
+    total_pages = max(1, (total_episodes + per_page - 1) // per_page)
+    
+    if page < 1:
+        page = 1
+    if page > total_pages:
+        page = total_pages
+    
+    start_idx = (page - 1) * per_page
+    end_idx = start_idx + per_page
+    paginated_episodes = episodes[start_idx:end_idx]
+    
+    result["episodes"] = paginated_episodes
+    result["pagination"] = {
+        "page": page,
+        "per_page": per_page,
+        "total_pages": total_pages,
+        "total_episodes": total_episodes,
+        "has_next": page < total_pages,
+        "has_prev": page > 1
+    }
+    result["sort_by"] = sort_by
+    
+    logger.info(f"[Episode Scraper] Pagination: page {page}/{total_pages}, returned {len(paginated_episodes)} episodes")
+    
+    return result
+
+
+async def scrape_webtoon_episodes_paginated(
+    title_no: str,
+    max_episodes: Optional[int] = None
+) -> Dict[str, Any]:
+    """
+    Scrape episodes with built-in pagination handler.
+    Automatically handles large series (100+ episodes).
+    
+    Args:
+        title_no: Series ID
+        max_episodes: Maximum episodes to fetch across all pages
+        
+    Returns:
+        All episodes from all pages, up to max_episodes limit
+    """
+    all_episodes = []
+    page = 1
+    per_page = 100
+    series_metadata = None
+    
+    logger.info(f"[Paginated Scraper] Starting multi-page scrape for title_no={title_no}")
+    
+    while True:
+        result = await scrape_webtoon_episodes_advanced(
+            series_url="",
+            title_no=title_no,
+            page=page,
+            per_page=per_page,
+            include_ratings=True
+        )
+        
+        if not result.get("success"):
+            logger.warning(f"[Paginated Scraper] Page {page} failed, stopping pagination")
+            break
+        
+        if series_metadata is None:
+            series_metadata = result.get("series")
+        
+        page_episodes = result.get("episodes", [])
+        all_episodes.extend(page_episodes)
+        
+        pagination = result.get("pagination", {})
+        logger.info(f"[Paginated Scraper] Page {page}: fetched {len(page_episodes)} episodes, total now {len(all_episodes)}")
+        
+        # Check if we've reached the limit
+        if max_episodes and len(all_episodes) >= max_episodes:
+            all_episodes = all_episodes[:max_episodes]
+            break
+        
+        # Check if there are more pages
+        if not pagination.get("has_next"):
+            break
+        
+        page += 1
+    
+    return {
+        "success": True,
+        "series": series_metadata,
+        "title_no": title_no,
+        "total_episodes": len(all_episodes),
+        "episodes": all_episodes,
+        "pages_fetched": page - 1
+    }
+
+
+async def batch_scrape_series(
+    series_list: List[Dict[str, str]],
+    max_episodes_per_series: Optional[int] = 50
+) -> Dict[str, Any]:
+    """
+    Batch scrape multiple WEBTOON series.
+    
+    Args:
+        series_list: List of {"url": "...", "title_no": "..."} or {"title_no": "..."}
+        max_episodes_per_series: Max episodes per series
+    
+    Returns:
+        Aggregated results with success/failure counts
+    """
+    results = {
+        "total": len(series_list),
+        "successful": 0,
+        "failed": 0,
+        "series": []
+    }
+    
+    logger.info(f"[Batch Scraper] Starting batch scrape of {len(series_list)} series")
+    
+    for idx, series_info in enumerate(series_list):
+        try:
+            logger.info(f"[Batch Scraper] Scraping {idx + 1}/{len(series_list)}")
+            
+            result = await scrape_webtoon_episodes(
+                series_url=series_info.get("url", ""),
+                title_no=series_info.get("title_no"),
+                max_episodes=max_episodes_per_series
+            )
+            
+            if result.get("success"):
+                results["successful"] += 1
+                results["series"].append({
+                    "title_no": result.get("title_no"),
+                    "title": result.get("series", {}).get("title"),
+                    "total_episodes": result.get("total_episodes"),
+                    "episodes": result.get("episodes", [])[:10]  # Store first 10 for summary
+                })
+            else:
+                results["failed"] += 1
+                results["series"].append({
+                    "title_no": series_info.get("title_no"),
+                    "error": result.get("error")
+                })
+                
+        except Exception as e:
+            logger.error(f"[Batch Scraper] Series {idx} failed: {e}")
+            results["failed"] += 1
+            results["series"].append({
+                "title_no": series_info.get("title_no"),
+                "error": str(e)
+            })
+    
+    logger.info(f"[Batch Scraper] Completed: {results['successful']} successful, {results['failed']} failed")
+    return results
 
 
 # ─── Standalone Command-Line Interface (CLI) ──────────────────────────────────

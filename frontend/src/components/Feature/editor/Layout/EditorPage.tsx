@@ -132,28 +132,25 @@ const EditorPage: React.FC<EditorPageProps> = ({
   // Clear timeline selection when assets are selected, and vice-versa
   const handleSetSelectedScraped = React.useCallback(
     (value: React.SetStateAction<string[]>) => {
-      setSelectedScraped((prev) => {
-        const next = typeof value === "function" ? value(prev) : value;
-        if (next.length > 0) {
-          setSelectedPanelIds(new Set());
-        }
-        return next;
-      });
+      setSelectedScraped(value);
+      if (typeof value === "function" || (Array.isArray(value) && value.length > 0)) {
+        setSelectedPanelIds(new Set());
+      }
     },
-    [setSelectedScraped]
+    [setSelectedScraped, setSelectedPanelIds]
   );
 
   const handleSetSelectedPanelIds = React.useCallback(
     (value: React.SetStateAction<Set<number>>) => {
-      setSelectedPanelIds((prev) => {
-        const next = typeof value === "function" ? value(prev) : value;
-        if (next.size > 0) {
-          setSelectedScraped([]);
-        }
-        return next;
-      });
+      setSelectedPanelIds(value);
+      if (
+        typeof value === "function" ||
+        (value instanceof Set && value.size > 0)
+      ) {
+        setSelectedScraped([]);
+      }
     },
-    [setSelectedScraped]
+    [setSelectedPanelIds, setSelectedScraped]
   );
 
   const [isSaving, setIsSaving] = React.useState(false);
@@ -258,6 +255,14 @@ const EditorPage: React.FC<EditorPageProps> = ({
       isFocusMode={isFocusMode}
       setIsFocusMode={setIsFocusMode}
       navigateTo={navigateTo}
+      notifications={appLogic.notifications}
+      markNotificationAsRead={appLogic.markNotificationAsRead}
+      markAllNotificationsAsRead={appLogic.markAllNotificationsAsRead}
+      deleteNotification={appLogic.deleteNotification}
+      clearAllNotifications={appLogic.clearAllNotifications}
+      notificationsMuted={appLogic.notificationsMuted}
+      setNotificationsMuted={appLogic.setNotificationsMuted}
+      onNavigateToAll={( ) => window.dispatchEvent(new CustomEvent('navigate', { detail: { path: '/notifications' } }))}
     >
       <main className="flex-1 w-full relative bg-neutral-950 min-w-0">
         {isInitializing && scrapedImages.length === 0 ? (
@@ -365,7 +370,6 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   cropCannyHigh={cropCannyHigh}
                   cropCloseKernelSize={cropCloseKernelSize}
                   autoSplitTallStrips={autoSplitTallStrips}
-                  handleSaveStoryboard={handleSave}
                   handleCancelBatch={handleCancelBatch}
                   audioFeedback={audioFeedback}
                   selectedPanelIds={selectedPanelIds}
@@ -438,7 +442,6 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   videoUrl={videoUrl}
                   musicTheme={musicTheme}
                   voiceActor={voiceActor}
-                  handleSaveVideo={handleSave}
                 />
               </div>
             </div>

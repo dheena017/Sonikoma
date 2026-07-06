@@ -1,5 +1,7 @@
-import React from "react";
-import { ArrowLeft, Focus, LayoutPanelTop, Save, Menu, Layers, Clock, Wifi, WifiOff, Share2 } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { ArrowLeft, Focus, LayoutPanelTop, Save, Menu, Layers, Clock, Wifi, WifiOff, Share2, Bell, BellOff } from "lucide-react";
+import NotificationDropdown from "../../notification/NotificationDropdown";
+import { Notification } from "../../notification/NotificationStack";
 
 interface EditorPageHeaderProps {
   title: string;
@@ -16,6 +18,14 @@ interface EditorPageHeaderProps {
   style?: React.CSSProperties;
   panelsCount?: number;
   backendOnline?: boolean;
+  notifications?: Notification[];
+  markNotificationAsRead?: (id: number) => void;
+  markAllNotificationsAsRead?: () => void;
+  deleteNotification?: (id: number) => void;
+  clearAllNotifications?: () => void;
+  notificationsMuted?: boolean;
+  setNotificationsMuted?: (muted: boolean) => void;
+  onNavigateToAll?: () => void;
 }
 
 const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
@@ -33,11 +43,32 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
   style,
   panelsCount = 0,
   backendOnline = true,
+  notifications = [],
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+  deleteNotification,
+  clearAllNotifications,
+  notificationsMuted = false,
+  setNotificationsMuted,
+  onNavigateToAll,
 }) => {
   // Smoothly slide out of view if the mobile/drawer sidebar is open
   const headerVisibilityClass = isSidebarOpen
     ? "-translate-y-full opacity-0 pointer-events-none"
     : "translate-y-0 opacity-100";
+
+  const [showNotifications, setShowNotifications] = useState(false);
+  const notificationsRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <header
@@ -134,6 +165,39 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
             {isFocusMode ? "Exit Focus" : "Focus Mode"}
           </span>
         </button>
+
+        {/* Notifications */}
+        <div className="relative" ref={notificationsRef}>
+          <button
+            onClick={() => setShowNotifications((v) => !v)}
+            title="Notifications"
+            className="p-2 rounded-xl border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white transition-colors cursor-pointer active:scale-95"
+          >
+            {notificationsMuted ? (
+              <BellOff className="h-4 w-4" />
+            ) : (
+              <Bell className="h-4 w-4" />
+            )}
+            {notifications.filter((n) => !n.isRead).length > 0 && (
+              <span className="absolute -top-1 -right-1 inline-flex items-center justify-center h-4 min-w-[16px] px-1 rounded-full bg-purple-600 text-white text-[10px] font-bold">
+                {notifications.filter((n) => !n.isRead).length}
+              </span>
+            )}
+          </button>
+          {showNotifications && (
+            <NotificationDropdown
+              notifications={notifications}
+              onClose={() => setShowNotifications(false)}
+              onMarkAsRead={(id: number) => markNotificationAsRead?.(id)}
+              onMarkAllAsRead={() => markAllNotificationsAsRead?.()}
+              onDelete={(id: number) => deleteNotification?.(id)}
+              onClearAll={() => clearAllNotifications?.()}
+              onNavigateToAll={() => onNavigateToAll?.()}
+              notificationsMuted={notificationsMuted}
+              onToggleMute={() => setNotificationsMuted?.(!notificationsMuted)}
+            />
+          )}
+        </div>
 
         <button
           type="button"
