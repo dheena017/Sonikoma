@@ -84,102 +84,108 @@ const NotificationsPage = React.memo(
     };
 
     return (
-      <div className="flex-1 flex flex-col min-h-screen bg-neutral-955 animate-in fade-in duration-300">
-        {/* Header Area */}
-        <div className="sticky top-[59px] z-30 bg-neutral-950/80 backdrop-blur-xl border-b border-neutral-900 px-4 py-4 sm:px-8 sm:py-6">
-          <div className="max-w-5xl mx-auto w-full">
-            <div className="flex flex-col sm:flex-row justify-between gap-4 sm:gap-6">
-              <div className="flex items-start gap-3 sm:gap-4">
-                <button
+      <div className="flex-grow flex-1 min-h-0 bg-[#0a0a0e] text-white py-6 md:py-10 px-4 sm:px-6 lg:px-8 relative overflow-x-hidden">
+        <div className="max-w-5xl mx-auto space-y-6 animate-in fade-in duration-300 relative z-10">
+          {/* Unified Page Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
+            <div>
+              <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1.5">
+                <span
+                  className="hover:text-purple-400 cursor-pointer"
                   onClick={onNavigateHome}
-                  className="icon-pill cursor-pointer hover:icon-pill--purple mt-0.5"
                 >
-                  <ArrowLeft className="h-4 w-4" />
-                </button>
-                <div>
-                  <h1 className="text-lg sm:text-2xl font-bold text-white tracking-tight flex flex-wrap items-center gap-2">
-                    Notification Hub
-                    {notifications.filter((n) => !n.isRead).length > 0 && (
-                      <span className="bg-purple-600 text-white text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm shadow-purple-900/50 mt-0.5 sm:mt-0">
-                        {notifications.filter((n) => !n.isRead).length} UNREAD
-                      </span>
-                    )}
-                  </h1>
-                  <p className="text-[10px] sm:text-xs text-neutral-500 font-mono mt-1 sm:mt-0.5 leading-snug max-w-sm">
-                    Track system activity, AI processing updates, and error logs
-                  </p>
-                </div>
+                  Dashboard
+                </span>
+                <span>&gt;</span>
+                <span className="text-purple-400">Notifications</span>
               </div>
-
-              <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto pt-1 sm:pt-0 border-t sm:border-t-0 border-neutral-800/50 sm:border-transparent">
-                <button
-                  onClick={onToggleMute}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-[10px] sm:text-[11px] font-bold uppercase tracking-widest transition-all cursor-pointer ${
-                    notificationsMuted
-                      ? "bg-rose-950/20 border-rose-900/30 text-rose-455 hover:bg-rose-900/40"
-                      : "bg-neutral-900 border-neutral-850 text-neutral-300 hover:text-white hover:border-neutral-750"
-                  }`}
-                  title={
-                    notificationsMuted
-                      ? "Unmute notification sounds"
-                      : "Mute notification sounds"
-                  }
-                >
-                  {notificationsMuted ? (
-                    <BellOff className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  ) : (
-                    <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-400" />
-                  )}
-                  <span>{notificationsMuted ? "Muted" : "Mute Sound"}</span>
-                </button>
-
-                <div className="flex items-center gap-2">
-                  {filteredNotifications.length > 0 && (
-                    <button
-                      onClick={exportLogs}
-                      className="flex items-center gap-2 px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-blue-400 hover:border-blue-900/50 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest transition-all cursor-pointer"
-                      title="Export logs as JSON"
-                    >
-                      <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                      <span className="hidden sm:inline">Export JSON</span>
-                    </button>
-                  )}
-
-                  {notifications.length > 0 && (
-                    <>
-                      <button
-                        onClick={onMarkAllAsRead}
-                        className="flex items-center gap-2 px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-emerald-400 hover:border-emerald-900/50 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest transition-all cursor-pointer"
-                        title="Mark all as read"
-                      >
-                        <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                        <span className="hidden sm:inline">Mark all read</span>
-                      </button>
-                      {notifications.some((n) => n.isRead) && (
-                        <button
-                          onClick={handleClearRead}
-                          className="flex items-center gap-2 px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-rose-400 hover:border-rose-900/50 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest transition-all cursor-pointer"
-                          title="Clear read notifications"
-                        >
-                          <Trash className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                          <span className="hidden sm:inline">Clear read</span>
-                        </button>
-                      )}
-                      <button
-                        onClick={onClearAll}
-                        className="flex items-center gap-2 px-3 py-2 rounded-xl bg-rose-950/20 border border-rose-900/30 text-rose-450 hover:bg-rose-900/40 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest transition-all cursor-pointer"
-                        title="Clear history"
-                      >
-                        <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                        <span className="hidden sm:inline">Clear all</span>
-                      </button>
-                    </>
-                  )}
+              <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+                <div className="icon-pill icon-pill--purple">
+                  <Bell className="h-5 w-5" />
                 </div>
-              </div>
+                Notification Hub
+                {notifications.filter((n) => !n.isRead).length > 0 && (
+                  <span className="bg-purple-600 text-white text-[9px] px-2.5 py-0.5 rounded-full font-bold shadow-sm shadow-purple-900/50">
+                    {notifications.filter((n) => !n.isRead).length} UNREAD
+                  </span>
+                )}
+              </h2>
+              <p className="text-xs text-neutral-400 font-mono mt-0.5">
+                Track system activity, AI processing updates, and error logs
+              </p>
             </div>
 
-            <div className="mt-6 flex flex-col md:flex-row gap-4">
+            <div className="flex items-center flex-wrap gap-2.5">
+              <button
+                onClick={onToggleMute}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-mono transition-all cursor-pointer ${
+                  notificationsMuted
+                    ? "bg-rose-950/20 border-rose-900/30 text-rose-455 hover:bg-rose-900/40"
+                    : "bg-neutral-900 border-neutral-800 text-neutral-300 hover:text-white"
+                }`}
+                title={notificationsMuted ? "Unmute sounds" : "Mute sounds"}
+              >
+                {notificationsMuted ? (
+                  <BellOff className="h-3.5 w-3.5" />
+                ) : (
+                  <Bell className="h-3.5 w-3.5 text-purple-400" />
+                )}
+                <span>{notificationsMuted ? "Muted" : "Mute Sound"}</span>
+              </button>
+
+              {filteredNotifications.length > 0 && (
+                <button
+                  onClick={exportLogs}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-blue-400 text-xs font-mono transition-all cursor-pointer"
+                  title="Export logs as JSON"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Export JSON</span>
+                </button>
+              )}
+
+              {notifications.length > 0 && (
+                <>
+                  <button
+                    onClick={onMarkAllAsRead}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-emerald-400 text-xs font-mono transition-all cursor-pointer"
+                    title="Mark all as read"
+                  >
+                    <Check className="h-3.5 w-3.5" />
+                    <span>Mark all read</span>
+                  </button>
+                  {notifications.some((n) => n.isRead) && (
+                    <button
+                      onClick={handleClearRead}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-rose-455 text-xs font-mono transition-all cursor-pointer"
+                      title="Clear read notifications"
+                    >
+                      <Trash className="h-3.5 w-3.5" />
+                      <span>Clear read</span>
+                    </button>
+                  )}
+                  <button
+                    onClick={onClearAll}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-955/20 border border-rose-900/30 text-rose-450 hover:bg-rose-900/40 text-xs font-mono transition-all cursor-pointer"
+                    title="Clear history"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    <span>Clear all</span>
+                  </button>
+                </>
+              )}
+
+              <button
+                onClick={onNavigateHome}
+                className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg shadow-purple-950/30"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                Dashboard
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-6 flex flex-col md:flex-row gap-4">
               <div className="flex-1 relative group">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500 group-focus-within:text-purple-400 transition-colors" />
                 <input
@@ -226,12 +232,7 @@ const NotificationsPage = React.memo(
                 </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Main Content Area */}
-        <div className="flex-1 p-4 sm:p-8">
-          <div className="max-w-5xl mx-auto">
             {filteredNotifications.length === 0 ? (
               <div className="py-20 flex flex-col items-center justify-center text-center">
                 <div className="h-20 w-20 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center mb-6 text-neutral-700">
@@ -496,9 +497,8 @@ const NotificationsPage = React.memo(
             )}
           </div>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 );
 
 export default NotificationsPage;
