@@ -392,7 +392,7 @@ const LiveScraperDeck = React.memo(
                 <ImageIcon className="h-5 w-5" />
               </div>
               <div className="flex flex-wrap items-center gap-2 min-w-0">
-                <h3 className="font-bold text-sm text-white truncate">
+                <h3 className="font-bold text-sm text-neutral-100 truncate">
                   Imported Images
                 </h3>
                 {scrapedImages.length > 0 && (

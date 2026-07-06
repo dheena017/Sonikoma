@@ -18,7 +18,7 @@ export default function LiveScraperDeckEmptyState({
         {icon ?? <ImageIcon className="h-6 w-6" />}
       </div>
       <div className="space-y-2 max-w-xs">
-        <p className="text-sm font-semibold text-white">{title}</p>
+        <p className="text-sm font-semibold text-neutral-100">{title}</p>
         <p className="text-xs text-neutral-400 leading-relaxed">
           {description}
         </p>
