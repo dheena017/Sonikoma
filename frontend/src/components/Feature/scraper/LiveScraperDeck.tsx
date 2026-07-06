@@ -407,6 +407,7 @@ const LiveScraperDeck = React.memo(
               {/* Inline selection toolbar in header (also available in floating bar) */}
               <div className="hidden sm:block">
                 <ScraperSelectionToolbar
+                  align="down"
                   scrapedImages={scrapedImages}
                   selectedScraped={selectedScraped}
                   handleInvertSelection={handleInvertSelection}
