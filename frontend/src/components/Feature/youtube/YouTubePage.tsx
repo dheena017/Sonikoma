@@ -186,35 +186,46 @@ const YouTubePage = React.memo(
 
     return (
       <div className="flex-grow w-full max-w-6xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in animate-duration-300">
-        <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-neutral-855 pb-5 gap-4">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onNavigateHome}
-              className="p-2.5 bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white rounded-xl transition-all hover:bg-neutral-855 cursor-pointer hover:scale-105 active:scale-95 shadow-sm"
-              title="Back to Workspace"
-            >
-              <ArrowLeft className="h-4.5 w-4.5" />
-            </button>
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-                <Youtube className="h-6 w-6 text-[#FF0000]" />
-                YouTube Publisher Studio
-              </h2>
-              <p className="text-xs text-neutral-400 font-mono mt-0.5">
-                Customize video tags, title descriptions, and configure direct
-                exports
-              </p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1.5">
+              <span
+                className="hover:text-purple-400 cursor-pointer"
+                onClick={onNavigateHome}
+              >
+                Dashboard
+              </span>
+              <span>&gt;</span>
+              <span className="text-purple-400">YouTube Publisher</span>
             </div>
+            <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+              <div className="icon-pill icon-pill--purple">
+                <Youtube className="h-5 w-5 text-[#FF0000]" />
+              </div>
+              YouTube Publisher Studio
+            </h2>
+            <p className="text-xs text-neutral-400 font-mono mt-0.5">
+              Customize video tags, title descriptions, and configure direct exports
+            </p>
           </div>
 
-          <button
-            onClick={handleClearForm}
-            className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 border border-neutral-855 text-neutral-400 hover:text-rose-455 hover:border-rose-900/50 hover:bg-rose-955/20 rounded-xl text-xs font-bold font-mono transition-all hover:scale-102 active:scale-98 shadow-sm cursor-pointer self-start md:self-center"
-            title="Clear all form fields"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-            <span>Clear Form</span>
-          </button>
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={handleClearForm}
+              className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-rose-455 rounded-xl text-xs font-mono transition-all hover:bg-neutral-850 hover:border-neutral-700 cursor-pointer"
+              title="Clear all form fields"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              <span>Clear Form</span>
+            </button>
+            <button
+              onClick={onNavigateHome}
+              className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg shadow-purple-950/30"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Dashboard
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
