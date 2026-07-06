@@ -87,9 +87,9 @@ export default function ProjectCard({
       <div className="absolute top-4 right-4 z-20">
         <button
           onClick={(e) => onToggleMenu?.(e, project.project_id)}
-          className="p-1.5 rounded-lg bg-black/40 text-neutral-400 hover:text-white hover:bg-black/60 transition-colors backdrop-blur-sm"
+          className="icon-pill w-9 h-9 rounded-xl bg-black/40 hover:bg-black/60 text-neutral-400 hover:text-white border border-white/10 transition-all shadow-md flex items-center justify-center cursor-pointer active:scale-95"
         >
-          <MoreVertical className="w-5 h-5" />
+          <MoreVertical className="w-4.5 h-4.5" />
         </button>
 
         {openMenuId === project.project_id && (

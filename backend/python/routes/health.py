@@ -243,8 +243,9 @@ async def server_metrics():
         row_u = db_conn.execute("SELECT COUNT(*) as c FROM users").fetchone()
         if row_u: db_stats["users"] = dict(row_u).get("c", 0) or dict(row_u).get("COUNT(*)", 0)
 
-        row_p = db_conn.execute("SELECT COUNT(*) as c FROM projects").fetchone()
+        row_p = db_conn.execute("SELECT COUNT(*) as c FROM chapters").fetchone()
         if row_p: db_stats["projects"] = dict(row_p).get("c", 0) or dict(row_p).get("COUNT(*)", 0)
+
 
         row_s = db_conn.execute("SELECT COUNT(*) as c FROM series").fetchone()
         if row_s: db_stats["scenes"] = dict(row_s).get("c", 0) or dict(row_s).get("COUNT(*)", 0)

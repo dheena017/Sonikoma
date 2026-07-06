@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Award, Zap } from "lucide-react";
+import { ArrowLeft, Award, Zap, Brain } from "lucide-react";
 import * as api from "@/api";
 
 import CredentialsAndTuner from "./CredentialsAndTuner.js";
@@ -1040,46 +1040,55 @@ ${playgroundPrompt}
 
     return (
       <div className="flex-1 bg-neutral-955 text-neutral-100 overflow-y-auto min-h-screen">
-        {/* HEADER SECTION */}
-        <div className="border-b border-neutral-905 bg-neutral-955/70 backdrop-blur-md sticky top-[59px] z-10 px-8 py-5 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={onNavigateHome}
-              className="p-2 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-neutral-700 hover:text-white transition-all cursor-pointer"
-              title="Back to Workspace"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </button>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10 flex flex-col space-y-8 animate-[fadeIn_0.22s_ease-out]">
+          {/* HEADER SECTION */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
             <div>
-              <h1 className="text-lg font-bold tracking-tight text-white flex items-center gap-2">
-                <Award className="h-5 w-5 text-purple-400" />
+              <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1.5">
+                <span
+                  className="hover:text-purple-400 cursor-pointer"
+                  onClick={onNavigateHome}
+                >
+                  Dashboard
+                </span>
+                <span>&gt;</span>
+                <span className="text-purple-400">AI Model Hub</span>
+              </div>
+              <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
+                <Brain className="h-6 w-6 text-purple-400" />
                 AI Model Control Hub
-              </h1>
-              <p className="text-xs text-neutral-500 font-mono">
-                Manage API keys, select global models, tune settings, and
-                benchmark latency.
+              </h2>
+              <p className="text-xs text-neutral-400 font-mono mt-0.5">
+                Manage API keys, select global models, tune settings, and benchmark latency.
               </p>
             </div>
-          </div>
 
-          {/* Currently active model pill */}
-          <div className="bg-purple-950/20 border border-purple-500/20 px-4 py-2 rounded-2xl flex items-center gap-3 font-mono text-xs shadow-inner">
-            <div>
-              <span className="text-[9px] text-purple-400 uppercase tracking-wider block font-bold">
-                Active System Model
-              </span>
-              <span className="text-white font-bold block mt-0.5">
-                {globalSelectedModel}
-              </span>
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Currently active model pill */}
+              <div className="bg-purple-950/20 border border-purple-500/20 px-4 py-2 rounded-2xl flex items-center gap-3 font-mono text-xs shadow-inner">
+                <div>
+                  <span className="text-[9px] text-purple-400 uppercase tracking-wider block font-bold">
+                    Active System Model
+                  </span>
+                  <span className="text-white font-bold block mt-0.5">
+                    {globalSelectedModel}
+                  </span>
+                </div>
+                <span className="bg-emerald-950/40 text-emerald-400 border border-emerald-800/30 text-[8px] font-bold px-2 py-0.5 rounded uppercase flex items-center gap-0.5">
+                  <Zap className="h-2.5 w-2.5 text-emerald-400 fill-emerald-400" />{" "}
+                  Active
+                </span>
+              </div>
+
+              <button
+                onClick={onNavigateHome}
+                className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-mono transition-all shadow-lg font-bold"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                Home
+              </button>
             </div>
-            <span className="bg-emerald-950/40 text-emerald-400 border border-emerald-800/30 text-[8px] font-bold px-2 py-0.5 rounded uppercase flex items-center gap-0.5">
-              <Zap className="h-2.5 w-2.5 text-emerald-400 fill-emerald-400" />{" "}
-              Active
-            </span>
           </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-8 py-8 space-y-8">
           {/* Credentials Manager & Parameter Tuner */}
           <CredentialsAndTuner
             geminiKey={geminiKey}

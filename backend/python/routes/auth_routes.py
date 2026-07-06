@@ -303,7 +303,7 @@ async def google_login(request: Request):
             client_secrets_file = cwd_secrets
 
     if not os.path.exists(client_secrets_file):
-        repo_default = os.path.join(PROJECT_ROOT, "backend", "python", "youtube_client_secrets.json")
+        repo_default = os.path.join(PROJECT_ROOT, "backend", "python", "client_secrets.json")
         if os.path.exists(repo_default):
             client_secrets_file = repo_default
 
@@ -363,7 +363,7 @@ async def google_callback(request: Request):
             client_secrets_file = cwd_secrets
 
     if not os.path.exists(client_secrets_file):
-        repo_default = os.path.join(PROJECT_ROOT, "backend", "python", "youtube_client_secrets.json")
+        repo_default = os.path.join(PROJECT_ROOT, "backend", "python", "client_secrets.json")
         if os.path.exists(repo_default):
             client_secrets_file = repo_default
 

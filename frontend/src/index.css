@@ -1140,6 +1140,36 @@ body {
   background-color: #ffffff !important;
 }
 
+/* ── Custom hex backgrounds used in cards and pages (e.g. project list) ── */
+[data-mode="light"] .bg-neutral-955,
+[data-mode="light"] .bg-\[\#070709\],
+[data-mode="light"] .bg-\[\#0a0a0f\]\/50,
+[data-mode="light"] .bg-\[\#0b0b0e\],
+[data-mode="light"] .bg-\[\#0b0b0e\]\/50,
+[data-mode="light"] .bg-\[\#0b0b0e\]\/80,
+[data-mode="light"] .bg-\[\#0c0c0e\]\/30,
+[data-mode="light"] .bg-\[\#0c0c0e\]\/40,
+[data-mode="light"] .bg-\[\#0d0d12\]\/75,
+[data-mode="light"] .bg-\[\#0f0f13\],
+[data-mode="light"] .bg-\[\#0f0f13\]\/40,
+[data-mode="light"] .bg-\[\#111115\],
+[data-mode="light"] .bg-\[\#111116\]\/60,
+[data-mode="light"] .bg-\[\#111116\]\/80,
+[data-mode="light"] .bg-\[\#16161b\] {
+  background-color: #ffffff !important;
+}
+
+[data-mode="light"] .from-\[\#111115\] {
+  --tw-gradient-from: #ffffff !important;
+}
+[data-mode="light"] .via-\[\#111115\]\/50 {
+  --tw-gradient-via: rgba(255, 255, 255, 0.5) !important;
+}
+[data-mode="light"] .to-transparent {
+  --tw-gradient-to: rgba(255, 255, 255, 0) !important;
+}
+
+
 /* ── White bg (solid) ────────────────────────────────────────── */
 [data-mode="light"] .bg-white {
   background-color: #ffffff !important;

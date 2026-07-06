@@ -163,21 +163,30 @@ async def _execute_youtube_upload_workflow(
             client_secrets_file = tmp_secrets_path
 
         if not os.path.exists(client_secrets_file):
-            repo_default = os.path.join(PROJECT_ROOT, "backend", "python", "youtube_client_secrets.json")
+            # Prefer repo's shared secrets filename used by this project.
+            repo_default = os.path.join(PROJECT_ROOT, "backend", "python", "client_secrets.json")
             if os.path.exists(repo_default):
                 logger.warning(
                     f"client_secrets.json not found; falling back to {repo_default} (dev secrets)."
                 )
                 client_secrets_file = repo_default
             else:
-                logger.warning("client_secrets.json not found (locally or via env).")
-                raise HTTPException(
-                    status_code=400,
-                    detail=(
-                        "YouTube export is not configured. Provide 'client_secrets.json' in the project root "
-                        "or set env var 'YOUTUBE_CLIENT_SECRETS_JSON' (contents of the JSON file) to enable real uploads."
-                    ),
-                )
+                # Backward-compat fallback for older setups.
+                legacy_default = os.path.join(PROJECT_ROOT, "backend", "python", "client_secrets.json")
+                if os.path.exists(legacy_default):
+                    logger.warning(
+                        f"client_secrets.json not found; falling back to {legacy_default} (legacy dev secrets)."
+                    )
+                    client_secrets_file = legacy_default
+                else:
+                    logger.warning("client_secrets.json not found (locally or via env).")
+                    raise HTTPException(
+                        status_code=400,
+                        detail=(
+                            "YouTube export is not configured. Provide 'client_secrets.json' in the project root "
+                            "or set env var 'YOUTUBE_CLIENT_SECRETS_JSON' (contents of the JSON file) to enable real uploads."
+                        ),
+                    )
 
         secrets_source = (
             "env(YOUTUBE_CLIENT_SECRETS_JSON)"
@@ -201,7 +210,7 @@ async def _execute_youtube_upload_workflow(
             # Be Smart (Auto-Detect): backend tries fallback to repo default for dev.
             # Be Professional (Human-Readable Error): returns clean, friendly guidance.
             if client_secrets_file == tmp_secrets_path:
-                repo_default = os.path.join(PROJECT_ROOT, "backend", "python", "youtube_client_secrets.json")
+                repo_default = os.path.join(PROJECT_ROOT, "backend", "python", "client_secrets.json")
                 if os.path.exists(repo_default):
                     logger.warning(
                         f"Failed to parse YOUTUBE_CLIENT_SECRETS_JSON; retrying with {repo_default}."
@@ -250,7 +259,8 @@ async def _execute_youtube_upload_workflow(
         except Exception as ve:
             # Keep existing behavior for non-JSONDecode errors.
             if client_secrets_file == tmp_secrets_path:
-                repo_default = os.path.join(PROJECT_ROOT, "backend", "python", "youtube_client_secrets.json")
+                # If env JSON parsing failed, retry with repo-local dev secrets.
+                repo_default = os.path.join(PROJECT_ROOT, "backend", "python", "client_secrets.json")
                 if os.path.exists(repo_default):
                     logger.warning(
                         f"YouTube OAuth client secrets problem detected in YOUTUBE_CLIENT_SECRETS_JSON; retrying with {repo_default}."
