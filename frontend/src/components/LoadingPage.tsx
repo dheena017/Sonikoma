@@ -24,6 +24,21 @@ export default function LoadingPage({
 }: LoadingPageProps) {
   const [tipIndex, setTipIndex] = useState(0);
   const [fadeState, setFadeState] = useState<"in" | "out">("in");
+  const [activeMode, setActiveMode] = useState<ThemeMode>(themeMode || "dark");
+
+  useEffect(() => {
+    if (themeMode) {
+      setActiveMode(themeMode);
+    } else {
+      const currentMode = document.documentElement.getAttribute("data-mode") as ThemeMode | null;
+      if (currentMode) {
+        setActiveMode(currentMode);
+      } else {
+        const mq = window.matchMedia("(prefers-color-scheme: dark)");
+        setActiveMode(mq.matches ? "dark" : "light");
+      }
+    }
+  }, [themeMode]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -41,12 +56,14 @@ export default function LoadingPage({
     ? Math.min(100, Math.max(0, progress))
     : 0;
 
+  const isLight = activeMode === "light";
+
   return (
     <div
       style={{
         position: "fixed",
         inset: 0,
-        background: "#050507",
+        background: isLight ? "#f4f4f5" : "#050507",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -66,7 +83,7 @@ export default function LoadingPage({
           width: "350px",
           height: "350px",
           borderRadius: "50%",
-          background: "rgba(168, 85, 247, 0.08)",
+          background: isLight ? "rgba(168, 85, 247, 0.05)" : "rgba(168, 85, 247, 0.08)",
           filter: "blur(80px)",
           pointerEvents: "none",
           animation: "lp-float-bg 8s infinite alternate ease-in-out",
@@ -80,7 +97,7 @@ export default function LoadingPage({
           width: "350px",
           height: "350px",
           borderRadius: "50%",
-          background: "rgba(6, 182, 212, 0.08)",
+          background: isLight ? "rgba(6, 182, 212, 0.05)" : "rgba(6, 182, 212, 0.08)",
           filter: "blur(80px)",
           pointerEvents: "none",
           animation: "lp-float-bg 8s infinite alternate-reverse ease-in-out",
@@ -95,10 +112,10 @@ export default function LoadingPage({
           alignItems: "center",
           padding: "40px",
           borderRadius: "24px",
-          background: "rgba(10, 10, 15, 0.6)",
-          border: "1px solid rgba(255, 255, 255, 0.05)",
+          background: isLight ? "rgba(255, 255, 255, 0.85)" : "rgba(10, 10, 15, 0.6)",
+          border: isLight ? "1px solid rgba(0, 0, 0, 0.08)" : "1px solid rgba(255, 255, 255, 0.05)",
           backdropFilter: "blur(12px)",
-          boxShadow: "0 20px 50px rgba(0, 0, 0, 0.3)",
+          boxShadow: isLight ? "0 20px 50px rgba(0, 0, 0, 0.06)" : "0 20px 50px rgba(0, 0, 0, 0.3)",
           width: "90%",
           maxWidth: "400px",
           position: "relative",
@@ -123,11 +140,11 @@ export default function LoadingPage({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "0 8px 24px rgba(168,85,247,0.4)",
+              boxShadow: "0 8px 24px rgba(168,85,247,0.3)",
             }}
           >
             <img
-              src={themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"}
+              src={isLight ? "/logo-light.png" : "/logo-dark.png"}
               onError={(e) => {
                 (e.currentTarget as HTMLImageElement).src = "/logo.png";
               }}
@@ -138,7 +155,7 @@ export default function LoadingPage({
                 borderRadius: "15px",
                 objectFit: "cover",
                 padding: "3px",
-                background: themeMode === "light" ? "#ffffff" : "#000000",
+                background: isLight ? "#ffffff" : "#000000",
               }}
             />
           </div>
@@ -149,10 +166,10 @@ export default function LoadingPage({
           style={{
             fontSize: "1.25rem",
             fontWeight: 800,
-            color: "#ffffff",
+            color: isLight ? "#18181b" : "#ffffff",
             letterSpacing: "-0.02em",
             marginBottom: "4px",
-            background: "linear-gradient(to right, #ffffff, #e4e4e7)",
+            background: isLight ? "linear-gradient(to right, #18181b, #3f3f46)" : "linear-gradient(to right, #ffffff, #e4e4e7)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
           }}
@@ -164,7 +181,7 @@ export default function LoadingPage({
         <div
           style={{
             fontSize: "0.75rem",
-            color: "#9ca3af",
+            color: isLight ? "#71717a" : "#9ca3af",
             letterSpacing: "0.08em",
             textTransform: "uppercase",
             fontWeight: 600,
@@ -191,7 +208,7 @@ export default function LoadingPage({
             style={{
               width: "100%",
               height: 4,
-              background: "rgba(255,255,255,0.06)",
+              background: isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.06)",
               borderRadius: 9999,
               overflow: "hidden",
               position: "relative",

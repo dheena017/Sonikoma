@@ -222,7 +222,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
     // Premium Glassmorphism Container
     <aside
       className={`fixed ${
-        isProEditorPage ? "top-12" : "top-16"
+        isProEditorPage ? "top-12" : "top-[59px]"
       } bottom-0 left-0 w-20 shrink-0 bg-[#0a0a0e]/80 backdrop-blur-xl border-r border-purple-900/10 shadow-[4px_0_24px_rgba(0,0,0,0.4)] hidden lg:flex flex-col items-center py-4 z-40`}
     >
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
