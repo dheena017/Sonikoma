@@ -157,6 +157,7 @@ export default function ScraperControls({
   const controlsContent = (
     <>
       <ScraperSelectionToolbar
+        align="down"
         scrapedImages={scrapedImages}
         selectedScraped={selectedScraped}
         handleInvertSelection={handleInvertSelection}

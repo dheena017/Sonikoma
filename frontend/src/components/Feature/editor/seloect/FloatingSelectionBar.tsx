@@ -183,6 +183,7 @@ interface ScraperSelectionToolbarProps {
   handleSelectRange: (a: number, b: number) => void;
   handleClearAll: () => void;
   setSelectedScraped?: React.Dispatch<React.SetStateAction<string[]>>;
+  align?: "up" | "down";
 }
 
 export function ScraperSelectionToolbar({
@@ -197,26 +198,67 @@ export function ScraperSelectionToolbar({
   handleSelectRange,
   handleClearAll,
   setSelectedScraped,
+  align = "up",
 }: ScraperSelectionToolbarProps) {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [coords, setCoords] = React.useState<{ top: number; left: number } | null>(null);
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
 
   const [everyN, setEveryN] = React.useState<number>(3);
   const [rangeFrom, setRangeFrom] = React.useState<number>(1);
   const [rangeTo, setRangeTo] = React.useState<number>(5);
+  const [isFilteringRatio, setIsFilteringRatio] = React.useState(false);
+
+  const updateCoords = () => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setCoords({
+        top: align === "down" ? rect.bottom + window.scrollY + 8 : rect.top + window.scrollY - 8,
+        left: rect.left + window.scrollX,
+      });
+    }
+  };
+
+  const toggleDropdown = () => {
+    if (!isOpen) {
+      updateCoords();
+    }
+    setIsOpen(!isOpen);
+  };
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
+        !dropdownRef.current.contains(event.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+
+  React.useEffect(() => {
+    const handleScrollOrResize = () => {
+      setIsOpen(false);
+    };
+    if (isOpen) {
+      window.addEventListener("scroll", handleScrollOrResize, true);
+      window.addEventListener("resize", handleScrollOrResize);
+    }
+    return () => {
+      window.removeEventListener("scroll", handleScrollOrResize, true);
+      window.removeEventListener("resize", handleScrollOrResize);
+    };
+  }, [isOpen]);
 
   const selectEveryNth = (n: number) => {
     if (!setSelectedScraped) return;
@@ -224,12 +266,49 @@ export function ScraperSelectionToolbar({
     setSelectedScraped(selected);
   };
 
+  const selectByAspectRatio = async (type: "Landscape" | "Portrait" | "Tall Strip" | "Too Tall Strip") => {
+    if (!setSelectedScraped) return;
+    setIsFilteringRatio(true);
+
+    const getRatioLabel = (url: string): Promise<string> => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.src = url;
+        img.onload = () => {
+          const ratio = img.naturalWidth / img.naturalHeight;
+          if (ratio > 1.25) resolve("Landscape");
+          else if (ratio < 0.28) resolve("Too Tall Strip");
+          else if (ratio < 0.6) resolve("Tall Strip");
+          else resolve("Portrait");
+        };
+        img.onerror = () => resolve("Portrait");
+      });
+    };
+
+    try {
+      const results = await Promise.all(
+        scrapedImages.map(async (imgUrl) => {
+          const label = await getRatioLabel(imgUrl);
+          return { imgUrl, label };
+        })
+      );
+      const matches = results.filter((r) => r.label === type).map((r) => r.imgUrl);
+      setSelectedScraped(matches);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsFilteringRatio(false);
+      setIsOpen(false);
+    }
+  };
+
   return (
-    <div className="relative inline-block text-left" ref={dropdownRef}>
+    <div className="relative inline-block text-left">
       <button
+        ref={buttonRef}
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-xl text-[10px] font-bold text-neutral-300 hover:text-white transition-all shadow-md font-mono select-none cursor-pointer"
+        onClick={toggleDropdown}
+        className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-950/80 hover:bg-neutral-900 border border-neutral-800 hover:border-purple-500/30 rounded-xl text-[10px] font-bold text-neutral-300 hover:text-white transition-all shadow-md hover:shadow-purple-500/5 font-mono select-none cursor-pointer duration-200"
       >
         <ListFilter className="h-3 w-3 text-purple-400" />
         <span>Select Filter</span>
@@ -240,170 +319,219 @@ export function ScraperSelectionToolbar({
         />
       </button>
 
-      {isOpen && (
-        <div className="absolute left-0 bottom-full mb-2 w-64 rounded-2xl bg-neutral-950 border border-neutral-850 shadow-2xl p-2.5 z-[10000] flex flex-col gap-1">
-          <div className="px-2 py-1 text-[8px] font-mono font-bold text-neutral-500 uppercase tracking-widest border-b border-neutral-900 mb-1 select-none">
-            Bulk Operations
-          </div>
-          <button
-            onClick={() => {
-              if (setSelectedScraped) setSelectedScraped(scrapedImages);
-              setIsOpen(false);
+      {isOpen && coords &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            style={{
+              position: "absolute",
+              top: `${coords.top}px`,
+              left: `${coords.left}px`,
+              transform: align === "up" ? "translateY(-100%)" : "none",
             }}
-            className="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] text-neutral-450 hover:text-white hover:bg-neutral-900 transition-colors font-sans cursor-pointer font-medium"
+            className="w-64 rounded-2xl bg-neutral-950/95 border border-neutral-850 shadow-[0_12px_40px_rgba(0,0,0,0.7)] p-2.5 z-[99999] flex flex-col gap-1 backdrop-blur-xl max-h-[380px] overflow-y-auto scrollbar-thin animate-in fade-in zoom-in-95 duration-200"
           >
-            Select All Panels ({scrapedImages.length})
-          </button>
-          <button
-            onClick={() => {
-              handleClearAll();
-              setIsOpen(false);
-            }}
-            className="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] text-neutral-455 hover:text-white hover:bg-neutral-900 transition-colors font-sans cursor-pointer font-medium"
-          >
-            Deselect All Panels
-          </button>
+            <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500 opacity-60 rounded-t-2xl pointer-events-none" />
+            <div className="px-2 py-1 text-[8px] font-mono font-bold text-neutral-500 uppercase tracking-widest border-b border-neutral-900 mb-1 select-none">
+              Bulk Operations
+            </div>
+            <button
+              onClick={() => {
+                if (setSelectedScraped) setSelectedScraped(scrapedImages);
+                setIsOpen(false);
+              }}
+              className="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] text-neutral-450 hover:text-white hover:bg-neutral-900 transition-colors font-sans cursor-pointer font-medium"
+            >
+              Select All Panels ({scrapedImages.length})
+            </button>
+            <button
+              onClick={() => {
+                handleClearAll();
+                setIsOpen(false);
+              }}
+              className="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] text-neutral-455 hover:text-white hover:bg-neutral-900 transition-colors font-sans cursor-pointer font-medium"
+            >
+              Deselect All Panels
+            </button>
 
-          <div className="px-2 py-1 text-[8px] font-mono font-bold text-neutral-500 uppercase tracking-widest border-b border-neutral-900 my-1 select-none">
-            Sequence Filters
-          </div>
-          <button
-            onClick={() => {
-              handleSelectOdd();
-              setIsOpen(false);
-            }}
-            className="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] text-neutral-455 hover:text-white hover:bg-neutral-900 transition-colors font-sans cursor-pointer font-medium"
-          >
-            Select Odd Panels
-          </button>
-          <button
-            onClick={() => {
-              handleSelectEven();
-              setIsOpen(false);
-            }}
-            className="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] text-neutral-455 hover:text-white hover:bg-neutral-900 transition-colors font-sans cursor-pointer font-medium"
-          >
-            Select Even Panels
-          </button>
+            <div className="px-2 py-1 text-[8px] font-mono font-bold text-neutral-500 uppercase tracking-widest border-b border-neutral-900 my-1 select-none">
+              Sequence Filters
+            </div>
+            <button
+              onClick={() => {
+                handleSelectOdd();
+                setIsOpen(false);
+              }}
+              className="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] text-neutral-455 hover:text-white hover:bg-neutral-900 transition-colors font-sans cursor-pointer font-medium"
+            >
+              Select Odd Panels
+            </button>
+            <button
+              onClick={() => {
+                handleSelectEven();
+                setIsOpen(false);
+              }}
+              className="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] text-neutral-455 hover:text-white hover:bg-neutral-900 transition-colors font-sans cursor-pointer font-medium"
+            >
+              Select Even Panels
+            </button>
 
-          <div className="flex items-center gap-1.5 px-2.5 py-1">
-            <span className="text-[10px] text-neutral-400 font-sans">Every</span>
-            <input
-              type="number"
-              min="1"
-              max="99"
-              value={everyN}
-              onChange={(e) =>
-                setEveryN(Math.max(1, parseInt(e.target.value) || 1))
-              }
-              className="w-8 px-1 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-white text-[10px] font-mono focus:outline-none focus:border-purple-500 text-center"
-            />
-            <span className="text-[10px] text-neutral-400 font-sans">th panel</span>
+            <div className="px-2 py-1 text-[8px] font-mono font-bold text-neutral-500 uppercase tracking-widest border-b border-neutral-900 my-1 select-none">
+              Orientation Filters
+            </div>
             <button
               type="button"
-              onClick={() => {
-                selectEveryNth(everyN);
-                setIsOpen(false);
-              }}
-              className="ml-auto px-2 py-0.5 rounded bg-purple-650 hover:bg-purple-600 text-white text-[9px] font-mono font-bold transition-all cursor-pointer border border-purple-500/20 active:scale-95"
+              disabled={isFilteringRatio}
+              onClick={() => selectByAspectRatio("Landscape")}
+              className="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] text-neutral-455 hover:text-white hover:bg-neutral-900 transition-colors font-sans cursor-pointer font-medium disabled:opacity-50"
             >
-              Apply
+              Select Landscape Panels
             </button>
-          </div>
-
-          <div className="px-2 py-1 text-[8px] font-mono font-bold text-neutral-500 uppercase tracking-widest border-b border-neutral-900 my-1 select-none">
-            Deck Actions
-          </div>
-          <button
-            onClick={() => {
-              handleInvertSelection();
-              setIsOpen(false);
-            }}
-            className="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] text-neutral-455 hover:text-white hover:bg-neutral-900 transition-colors font-sans cursor-pointer flex items-center justify-between font-medium"
-          >
-            <span>Invert Selection</span>
-            <FlipHorizontal className="h-3 w-3 text-neutral-500" />
-          </button>
-          <button
-            onClick={() => {
-              handleReverseDeckOrder();
-              setIsOpen(false);
-            }}
-            className="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] text-neutral-455 hover:text-white hover:bg-neutral-900 transition-colors font-sans cursor-pointer flex items-center justify-between font-medium"
-          >
-            <span>Reverse Deck Order</span>
-            <RotateCcw className="h-3 w-3 text-neutral-500" />
-          </button>
-
-          <div className="px-2 py-1 text-[8px] font-mono font-bold text-neutral-500 uppercase tracking-widest border-b border-neutral-900 my-1 select-none">
-            Range Selection
-          </div>
-          <div className="grid grid-cols-3 gap-1 px-1 py-1">
-            <button
-              onClick={() => {
-                handleSelectFirstN(5);
-                setIsOpen(false);
-              }}
-              className="px-2 py-1 rounded-lg bg-neutral-900 border border-neutral-850 hover:bg-neutral-800 hover:border-neutral-700 text-[10px] text-purple-400 hover:text-purple-300 font-mono transition-all font-semibold cursor-pointer text-center"
-            >
-              First 5
-            </button>
-            <button
-              onClick={() => {
-                handleSelectFirstN(10);
-                setIsOpen(false);
-              }}
-              className="px-2 py-1 rounded-lg bg-neutral-900 border border-neutral-850 hover:bg-neutral-800 hover:border-neutral-700 text-[10px] text-purple-400 hover:text-purple-300 font-mono transition-all font-semibold cursor-pointer text-center"
-            >
-              First 10
-            </button>
-            <button
-              onClick={() => {
-                handleSelectLastN(5);
-                setIsOpen(false);
-              }}
-              className="px-2 py-1 rounded-lg bg-neutral-900 border border-neutral-850 hover:bg-neutral-800 hover:border-neutral-700 text-[10px] text-purple-400 hover:text-purple-300 font-mono transition-all font-semibold cursor-pointer text-center"
-            >
-              Last 5
-            </button>
-          </div>
-
-          <div className="flex items-center gap-1.5 px-2.5 py-1.5 border-t border-neutral-900 mt-1.5">
-            <span className="text-[10px] text-neutral-400 font-sans">Range</span>
-            <input
-              type="number"
-              min="1"
-              max={scrapedImages.length}
-              value={rangeFrom}
-              onChange={(e) =>
-                setRangeFrom(Math.max(1, parseInt(e.target.value) || 1))
-              }
-              className="w-10 px-1 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-white text-[10px] font-mono focus:outline-none focus:border-purple-500 text-center"
-            />
-            <span className="text-[10px] text-neutral-400 font-sans">to</span>
-            <input
-              type="number"
-              min="1"
-              max={scrapedImages.length}
-              value={rangeTo}
-              onChange={(e) =>
-                setRangeTo(Math.max(1, parseInt(e.target.value) || 1))
-              }
-              className="w-10 px-1 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-white text-[10px] font-mono focus:outline-none focus:border-purple-500 text-center"
-            />
             <button
               type="button"
+              disabled={isFilteringRatio}
+              onClick={() => selectByAspectRatio("Portrait")}
+              className="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] text-neutral-455 hover:text-white hover:bg-neutral-900 transition-colors font-sans cursor-pointer font-medium disabled:opacity-50"
+            >
+              Select Portrait Panels
+            </button>
+            <button
+              type="button"
+              disabled={isFilteringRatio}
+              onClick={() => selectByAspectRatio("Tall Strip")}
+              className="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] text-neutral-455 hover:text-white hover:bg-neutral-900 transition-colors font-sans cursor-pointer font-medium disabled:opacity-50"
+            >
+              Select Tall Strip Panels
+            </button>
+            <button
+              type="button"
+              disabled={isFilteringRatio}
+              onClick={() => selectByAspectRatio("Too Tall Strip")}
+              className="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] text-neutral-455 hover:text-white hover:bg-neutral-900 transition-colors font-sans cursor-pointer font-medium disabled:opacity-50"
+            >
+              Select Too Tall Strip Panels
+            </button>
+
+            <div className="flex items-center gap-1.5 px-2.5 py-1">
+              <span className="text-[10px] text-neutral-400 font-sans">Every</span>
+              <input
+                type="number"
+                min="1"
+                max="99"
+                value={everyN}
+                onChange={(e) =>
+                  setEveryN(Math.max(1, parseInt(e.target.value) || 1))
+                }
+                className="w-8 px-1 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-white text-[10px] font-mono focus:outline-none focus:border-purple-500 text-center"
+              />
+              <span className="text-[10px] text-neutral-400 font-sans">th panel</span>
+              <button
+                type="button"
+                onClick={() => {
+                  selectEveryNth(everyN);
+                  setIsOpen(false);
+                }}
+                className="ml-auto px-2 py-0.5 rounded bg-purple-650 hover:bg-purple-600 text-white text-[9px] font-mono font-bold transition-all cursor-pointer border border-purple-500/20 active:scale-95"
+              >
+                Apply
+              </button>
+            </div>
+
+            <div className="px-2 py-1 text-[8px] font-mono font-bold text-neutral-500 uppercase tracking-widest border-b border-neutral-900 my-1 select-none">
+              Deck Actions
+            </div>
+            <button
               onClick={() => {
-                handleSelectRange(rangeFrom, rangeTo);
+                handleInvertSelection();
                 setIsOpen(false);
               }}
-              className="ml-auto px-2.5 py-0.5 rounded bg-purple-650 hover:bg-purple-600 text-white text-[9px] font-mono font-bold transition-all cursor-pointer border border-purple-500/20 active:scale-95"
+              className="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] text-neutral-455 hover:text-white hover:bg-neutral-900 transition-colors font-sans cursor-pointer flex items-center justify-between font-medium"
             >
-              Select
+              <span>Invert Selection</span>
+              <FlipHorizontal className="h-3 w-3 text-neutral-500" />
             </button>
-          </div>
-        </div>
-      )}
+            <button
+              onClick={() => {
+                handleReverseDeckOrder();
+                setIsOpen(false);
+              }}
+              className="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] text-neutral-455 hover:text-white hover:bg-neutral-900 transition-colors font-sans cursor-pointer flex items-center justify-between font-medium"
+            >
+              <span>Reverse Deck Order</span>
+              <RotateCcw className="h-3 w-3 text-neutral-500" />
+            </button>
+
+            <div className="px-2 py-1 text-[8px] font-mono font-bold text-neutral-500 uppercase tracking-widest border-b border-neutral-900 my-1 select-none">
+              Range Selection
+            </div>
+            <div className="grid grid-cols-3 gap-1 px-1 py-1">
+              <button
+                onClick={() => {
+                  handleSelectFirstN(5);
+                  setIsOpen(false);
+                }}
+                className="px-2 py-1 rounded-lg bg-neutral-900 border border-neutral-850 hover:bg-neutral-800 hover:border-neutral-700 text-[10px] text-purple-400 hover:text-purple-300 font-mono transition-all font-semibold cursor-pointer text-center"
+              >
+                First 5
+              </button>
+              <button
+                onClick={() => {
+                  handleSelectFirstN(10);
+                  setIsOpen(false);
+                }}
+                className="px-2 py-1 rounded-lg bg-neutral-900 border border-neutral-850 hover:bg-neutral-800 hover:border-neutral-700 text-[10px] text-purple-400 hover:text-purple-300 font-mono transition-all font-semibold cursor-pointer text-center"
+              >
+                First 10
+              </button>
+              <button
+                onClick={() => {
+                  handleSelectLastN(5);
+                  setIsOpen(false);
+                }}
+                className="px-2 py-1 rounded-lg bg-neutral-900 border border-neutral-850 hover:bg-neutral-800 hover:border-neutral-700 text-[10px] text-purple-400 hover:text-purple-300 font-mono transition-all font-semibold cursor-pointer text-center"
+              >
+                Last 5
+              </button>
+            </div>
+
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 border-t border-neutral-900 mt-1.5">
+              <span className="text-[10px] text-neutral-400 font-sans">Range</span>
+              <input
+                type="number"
+                min="1"
+                max={scrapedImages.length}
+                value={rangeFrom}
+                onChange={(e) =>
+                  setRangeFrom(Math.max(1, parseInt(e.target.value) || 1))
+                }
+                className="w-10 px-1 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-white text-[10px] font-mono focus:outline-none focus:border-purple-500 text-center"
+              />
+              <span className="text-[10px] text-neutral-400 font-sans">to</span>
+              <input
+                type="number"
+                min="1"
+                max={scrapedImages.length}
+                value={rangeTo}
+                onChange={(e) =>
+                  setRangeTo(Math.max(1, parseInt(e.target.value) || 1))
+                }
+                className="w-10 px-1 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-white text-[10px] font-mono focus:outline-none focus:border-purple-500 text-center"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  handleSelectRange(rangeFrom, rangeTo);
+                  setIsOpen(false);
+                }}
+                className="ml-auto px-2.5 py-0.5 rounded bg-purple-650 hover:bg-purple-600 text-white text-[9px] font-mono font-bold transition-all cursor-pointer border border-purple-500/20 active:scale-95"
+              >
+                Select
+              </button>
+            </div>
+          </div>,
+          document.body
+        )
+      }
     </div>
   );
 }
