@@ -172,8 +172,10 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
   const handleEpisodeClick = (episode: Episode) => {
     onEpisodeSelect?.(episode);
 
-    // Instant route to editor, passing episode.url for the backend import.
-    // Use native navigation (this app has its own router abstraction too).
+    // Instant route to the editor and pass the URL in the query string.
+
+    // NOTE: This app doesn't use react-router-dom hooks in this component; navigation
+    // is handled via the existing router abstraction.
     window.location.assign(
       `/editor?importUrl=${encodeURIComponent(episode.url)}`
     );
