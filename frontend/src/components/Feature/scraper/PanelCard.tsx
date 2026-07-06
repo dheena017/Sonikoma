@@ -70,6 +70,27 @@ function PanelCard({
   const isProcessing =
     croppingImgUrl === imgUrl || bubbleCroppingImgUrl === imgUrl || isEditing;
 
+  const [dimensions, setDimensions] = React.useState<{ width: number; height: number } | null>(null);
+
+  React.useEffect(() => {
+    if (!imgUrl) return;
+    const img = new Image();
+    img.src = imgUrl;
+    img.onload = () => {
+      setDimensions({ width: img.naturalWidth, height: img.naturalHeight });
+    };
+  }, [imgUrl]);
+
+  const getAspectRatioLabel = () => {
+    if (!dimensions) return null;
+    const { width, height } = dimensions;
+    const ratio = width / height;
+    if (ratio > 1.25) return "Landscape";
+    if (ratio < 0.28) return "Too Tall Strip";
+    if (ratio < 0.6) return "Tall Strip";
+    return "Portrait";
+  };
+
   const handleRotateClockwise = async () => {
     console.log(`[PanelCard] Rotating image #${idx + 1} clockwise`);
     setIsEditing(true);
@@ -188,10 +209,10 @@ function PanelCard({
         window.dispatchEvent(new Event("popstate"));
       }}
       className={[
-        "group relative w-[260px] sm:w-[280px] shrink-0 rounded-2xl border p-4 space-y-4 transition-all duration-200 text-center cursor-pointer select-none",
+        "group relative w-[260px] sm:w-[280px] shrink-0 rounded-2xl border p-4 space-y-4 transition-all duration-300 ease-out text-center cursor-pointer select-none",
         isSelected
-          ? "border-purple-500/80 bg-purple-950/25 shadow-[0_0_18px_2px_rgba(168,85,247,0.22)] ring-1 ring-purple-500/30 scale-[1.02]"
-          : "border-neutral-800/70 bg-neutral-950 hover:border-purple-500/50 hover:shadow-[0_0_12px_1px_rgba(168,85,247,0.10)] hover:scale-[1.01]",
+          ? "border-purple-500 bg-purple-950/15 shadow-[0_10px_30px_-5px_rgba(168,85,247,0.3)] ring-1 ring-purple-500/20 scale-[1.02]"
+          : "border-neutral-800/60 bg-neutral-950/90 hover:border-purple-500/50 hover:shadow-[0_15px_35px_-8px_rgba(168,85,247,0.15)] hover:scale-[1.03] hover:-translate-y-1.5",
       ].join(" ")}
     >
       <PanelCardThumbnail
@@ -205,6 +226,29 @@ function PanelCard({
         handleFlipHorizontal={handleFlipHorizontal}
         handleUndo={handleUndo}
       />
+
+      {/* Dynamic Resolution & Aspect Ratio Badges */}
+      {dimensions && (
+        <div className="flex items-center justify-between gap-2 px-1 text-[9px] font-mono select-none animate-in fade-in duration-300">
+          <span className="text-neutral-450 font-bold bg-neutral-900 border border-neutral-850 px-1.5 py-0.5 rounded">
+            {dimensions.width} × {dimensions.height} px
+          </span>
+          {getAspectRatioLabel() && (
+            <span className={[
+              "px-1.5 py-0.5 rounded font-bold border transition-all duration-300",
+              getAspectRatioLabel() === "Too Tall Strip"
+                ? "bg-rose-950/40 border-rose-800/40 text-rose-350 shadow-[0_0_8px_rgba(239,68,68,0.15)] animate-pulse"
+                : getAspectRatioLabel() === "Tall Strip"
+                ? "bg-purple-950/40 border-purple-800/40 text-purple-300"
+                : getAspectRatioLabel() === "Landscape"
+                ? "bg-sky-950/40 border-sky-800/40 text-sky-300"
+                : "bg-neutral-900 border-neutral-850 text-neutral-400"
+            ].join(" ")}>
+              {getAspectRatioLabel()}
+            </span>
+          )}
+        </div>
+      )}
 
       <PanelCardControls
         imgUrl={imgUrl}
