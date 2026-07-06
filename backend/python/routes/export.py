@@ -15,8 +15,9 @@ from database.db import (
     get_youtube_publications,
     save_youtube_credentials,
     get_youtube_credentials,
-    delete_youtube_credentials
+    delete_youtube_credentials,
 )
+
 try:
     import google_auth_oauthlib.flow
     import googleapiclient.discovery
@@ -84,17 +85,19 @@ async def _execute_youtube_upload_workflow(
         if user_id:
             db_creds = get_youtube_credentials(user_id)
             if db_creds:
-                custom_secrets = json.dumps({
-                    "installed": {
-                        "client_id": db_creds["client_id"],
-                        "client_secret": db_creds["client_secret"],
-                        "project_id": db_creds["project_id"],
-                        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                        "token_uri": "https://oauth2.googleapis.com/token",
-                        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-                        "redirect_uris": ["http://localhost", "urn:ietf:wg:oauth:2.0:oob"]
+                custom_secrets = json.dumps(
+                    {
+                        "installed": {
+                            "client_id": db_creds["client_id"],
+                            "client_secret": db_creds["client_secret"],
+                            "project_id": db_creds["project_id"],
+                            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                            "token_uri": "https://oauth2.googleapis.com/token",
+                            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+                            "redirect_uris": ["http://localhost", "urn:ietf:wg:oauth:2.0:oob"],
+                        }
                     }
-                })
+                )
                 logger.info(f"Using user custom credentials from database for user_id: {user_id}")
 
         # Resolve project root (3 levels up from routes/export.py)
@@ -150,10 +153,7 @@ async def _execute_youtube_upload_workflow(
                 except Exception:
                     pass
 
-            if file_content is not None:
-                env_secrets = file_content
-            else:
-                env_secrets = _try_coerce_env_json(env_secrets_raw)
+            env_secrets = file_content if file_content is not None else _try_coerce_env_json(env_secrets_raw)
 
         if env_secrets:
             fd, tmp_secrets_path = tempfile.mkstemp(suffix=".json")
@@ -179,7 +179,11 @@ async def _execute_youtube_upload_workflow(
                     ),
                 )
 
-        secrets_source = "env(YOUTUBE_CLIENT_SECRETS_JSON)" if client_secrets_file == tmp_secrets_path else f"file({client_secrets_file})"
+        secrets_source = (
+            "env(YOUTUBE_CLIENT_SECRETS_JSON)"
+            if client_secrets_file == tmp_secrets_path
+            else f"file({client_secrets_file})"
+        )
 
         try:
             with open(client_secrets_file, "r", encoding="utf-8") as f:
@@ -188,10 +192,14 @@ async def _execute_youtube_upload_workflow(
                 raise ValueError("secrets file is empty")
 
             secrets_obj = json.loads(secrets_text)
-            if not isinstance(secrets_obj, dict) or ("installed" not in secrets_obj and "web" not in secrets_obj):
+            if not isinstance(secrets_obj, dict) or (
+                "installed" not in secrets_obj and "web" not in secrets_obj
+            ):
                 raise ValueError("JSON does not look like an OAuth client secrets file (missing 'installed' or 'web')")
 
         except json.JSONDecodeError as je:
+            # Be Smart (Auto-Detect): backend tries fallback to repo default for dev.
+            # Be Professional (Human-Readable Error): returns clean, friendly guidance.
             if client_secrets_file == tmp_secrets_path:
                 repo_default = os.path.join(PROJECT_ROOT, "backend", "python", "youtube_client_secrets.json")
                 if os.path.exists(repo_default):
@@ -203,32 +211,44 @@ async def _execute_youtube_upload_workflow(
                         secrets_text = f.read()
                     secrets_obj = json.loads(secrets_text)
                 else:
-                    safe_snippet = (secrets_text or "").strip()[:40].replace("\n", "\\n")
-                    safe_starts = "" if not secrets_text else secrets_text.strip()[:1]
-                    raise HTTPException(
-                        status_code=400,
-                        detail=(
-                            f"YouTube OAuth client secrets JSON is invalid ({secrets_source}). "
-                            f"JSON parse error: {je}. "
-                            f"Env diagnostic: startsWith={safe_starts!r}, first40={safe_snippet!r}. "
-                            "Hint: set env var 'YOUTUBE_CLIENT_SECRETS_JSON' to RAW JSON (object starting with '{' or '['). "
-                            "Do not paste templates or wrap the whole JSON in quotes."
-                        ),
-                    )
+                    clean_text = (secrets_text or "").strip()
+
+                    looks_like_path = clean_text.startswith((".", "/", "\\")) or clean_text.endswith(".json")
+
+                    if looks_like_path:
+                        friendly_error = (
+                            f"Configuration Error: The YouTube client secrets variable appears to be a file path ('{clean_text[:40]}...'), "
+                            "but the server could not find a valid file at that location. "
+                            "Please provide the raw JSON content directly in your .env file, or ensure the file path is absolute and correct."
+                        )
+                    else:
+                        friendly_error = (
+                            "Configuration Error: The provided YouTube client secrets are not formatted as valid JSON. "
+                            "Please check your .env file and ensure YOUTUBE_CLIENT_SECRETS_JSON contains a properly formatted JSON object."
+                        )
+
+                    raise HTTPException(status_code=400, detail=friendly_error)
             else:
-                safe_snippet = (secrets_text or "").strip()[:40].replace("\n", "\\n")
-                safe_starts = "" if not secrets_text else secrets_text.strip()[:1]
-                raise HTTPException(
-                    status_code=400,
-                    detail=(
-                        f"YouTube OAuth client secrets JSON is invalid ({secrets_source}). "
-                        f"JSON parse error: {je}. "
-                        f"Env diagnostic: startsWith={safe_starts!r}, first40={safe_snippet!r}. "
-                        "Hint: ensure the secrets file contains raw JSON, not a template or quoted string."
-                    ),
-                )
+                clean_text = (secrets_text or "").strip()
+
+                looks_like_path = clean_text.startswith((".", "/", "\\")) or clean_text.endswith(".json")
+
+                if looks_like_path:
+                    friendly_error = (
+                        f"Configuration Error: The YouTube client secrets variable appears to be a file path ('{clean_text[:40]}...'), "
+                        "but the server could not find a valid file at that location. "
+                        "Please provide the raw JSON content directly in your .env file, or ensure the file path is absolute and correct."
+                    )
+                else:
+                    friendly_error = (
+                        "Configuration Error: The provided YouTube client secrets are not formatted as valid JSON. "
+                        "Please check your .env file and ensure YOUTUBE_CLIENT_SECRETS_JSON contains a properly formatted JSON object."
+                    )
+
+                raise HTTPException(status_code=400, detail=friendly_error)
 
         except Exception as ve:
+            # Keep existing behavior for non-JSONDecode errors.
             if client_secrets_file == tmp_secrets_path:
                 repo_default = os.path.join(PROJECT_ROOT, "backend", "python", "youtube_client_secrets.json")
                 if os.path.exists(repo_default):
@@ -240,28 +260,11 @@ async def _execute_youtube_upload_workflow(
                         secrets_text = f.read()
                     secrets_obj = json.loads(secrets_text)
                 else:
-                    safe_snippet = "" if "secrets_text" not in locals() else (secrets_text or "").strip()[:40].replace("\n", "\\n")
-                    raise HTTPException(
-                        status_code=400,
-                        detail=(
-                            f"YouTube OAuth client secrets problem ({secrets_source}): {ve}. "
-                            f"Content diagnostic: first40={safe_snippet!r}. "
-                            "Hint: verify 'client_secrets.json' contents or set YOUTUBE_CLIENT_SECRETS_JSON with the raw OAuth client secrets JSON."
-                        ),
-                    )
+                    raise HTTPException(status_code=400, detail=str(ve))
             else:
-                safe_snippet = "" if "secrets_text" not in locals() else (secrets_text or "").strip()[:40].replace("\n", "\\n")
-                raise HTTPException(
-                    status_code=400,
-                    detail=(
-                        f"YouTube OAuth client secrets problem ({secrets_source}): {ve}. "
-                        f"Content diagnostic: first40={safe_snippet!r}. "
-                        "Hint: verify 'client_secrets.json' contents or set YOUTUBE_CLIENT_SECRETS_JSON with the raw OAuth client secrets JSON."
-                    ),
-                )
+                raise HTTPException(status_code=400, detail=str(ve))
 
         scopes = ["https://www.googleapis.com/auth/youtube.upload"]
-
         flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(client_secrets_file, scopes)
 
         redirect_port = 0
@@ -279,11 +282,14 @@ async def _execute_youtube_upload_workflow(
             for uri in redirect_uris:
                 if "localhost:" in uri or "127.0.0.1:" in uri:
                     import urllib.parse
+
                     try:
                         parsed_uri = urllib.parse.urlparse(uri)
                         if parsed_uri.port:
                             redirect_port = parsed_uri.port
-                            logger.info(f"Auto-detected YouTube redirect port {redirect_port} from client secrets redirect_uris.")
+                            logger.info(
+                                f"Auto-detected YouTube redirect port {redirect_port} from client secrets redirect_uris."
+                            )
                             break
                     except Exception:
                         pass
@@ -303,10 +309,7 @@ async def _execute_youtube_upload_workflow(
                 "Hint: Ensure that 'http://localhost:<port>/' is configured as an authorized redirect URI for your client ID "
                 "in the Google Cloud Console."
             )
-            raise HTTPException(
-                status_code=400,
-                detail=f"OAuth authorization flow failed: {flow_err}. {hint_msg}"
-            )
+            raise HTTPException(status_code=400, detail=f"OAuth authorization flow failed: {flow_err}. {hint_msg}")
 
         youtube = googleapiclient.discovery.build("youtube", "v3", credentials=credentials)
 
@@ -333,22 +336,18 @@ async def _execute_youtube_upload_workflow(
                 "description": final_description,
                 "tags": final_tags,
             },
-            "status": {
-                "privacyStatus": privacy_status or "unlisted",
-            },
+            "status": {"privacyStatus": privacy_status or "unlisted"},
         }
 
         media_file = MediaFileUpload(video_path, chunksize=-1, resumable=True)
 
         logger.info("Starting YouTube upload...")
         insert_request = youtube.videos().insert(part="snippet,status", body=request_body, media_body=media_file)
-
         response = insert_request.execute()
 
         video_id = response.get("id")
         logger.info(f"Upload complete! Video ID: {video_id}")
 
-        # If custom thumbnail is provided, upload it now
         if thumbnail_path and os.path.exists(thumbnail_path):
             try:
                 logger.info(f"Uploading custom thumbnail for video {video_id}...")
@@ -364,6 +363,8 @@ async def _execute_youtube_upload_workflow(
             "message": "Successfully uploaded to YouTube!",
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"YouTube export failed: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
@@ -376,7 +377,9 @@ async def _execute_youtube_upload_workflow(
 
 
 @router.post("/youtube")
-async def export_to_youtube(request: YouTubeExportRequest, current_user: dict = Depends(get_current_user)):
+async def export_to_youtube(
+    request: YouTubeExportRequest, current_user: dict = Depends(get_current_user)
+):
     if not HAS_YOUTUBE_API:
         raise HTTPException(
             status_code=500,
@@ -407,7 +410,6 @@ async def export_to_youtube(request: YouTubeExportRequest, current_user: dict = 
                 os.remove(tmp_video_path)
             raise HTTPException(status_code=500, detail=f"Failed to fetch remote video: {e}")
 
-    # Handle optional remote thumbnail download
     tmp_thumb_path = None
     thumbnail_path = None
     if request.thumbnail_url:
@@ -436,9 +438,8 @@ async def export_to_youtube(request: YouTubeExportRequest, current_user: dict = 
             privacy_status=request.privacy_status,
             is_short=request.is_short,
             thumbnail_path=thumbnail_path,
-            user_id=current_user.get("id")
+            user_id=current_user.get("id"),
         )
-        # Log successful publication to Database
         try:
             user_id = current_user.get("id")
             log_youtube_publication(
@@ -446,7 +447,7 @@ async def export_to_youtube(request: YouTubeExportRequest, current_user: dict = 
                 chapter_id=None,
                 youtube_url=res["youtube_url"],
                 title=request.title,
-                privacy_status=request.privacy_status or "unlisted"
+                privacy_status=request.privacy_status or "unlisted",
             )
             logger.info(f"[Database] Logged publication to database: {res['youtube_url']}")
         except Exception as db_err:
@@ -475,7 +476,7 @@ async def upload_and_export_to_youtube(
     category_id: Optional[str] = Form("1"),
     is_short: Optional[bool] = Form(False),
     thumbnail: Optional[UploadFile] = File(None),
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user),
 ):
     if not HAS_YOUTUBE_API:
         raise HTTPException(
@@ -485,18 +486,16 @@ async def upload_and_export_to_youtube(
 
     logger.info(f"Received YouTube local file export request: {file.filename}")
 
-    # Save Uploaded file to a temp file
     fd, tmp_video_path = tempfile.mkstemp(suffix=".mp4")
     os.close(fd)
-    
+
     tmp_thumb_path = None
     thumbnail_path = None
-    
+
     try:
         with open(tmp_video_path, "wb") as f:
             f.write(await file.read())
-        
-        # Save custom thumbnail if uploaded
+
         if thumbnail:
             fd_t, tmp_thumb_path = tempfile.mkstemp(suffix=".jpg")
             os.close(fd_t)
@@ -505,7 +504,6 @@ async def upload_and_export_to_youtube(
             thumbnail_path = tmp_thumb_path
             logger.info(f"Received custom local thumbnail: {thumbnail.filename}")
 
-        # Parse tags
         tags_list = None
         if tags:
             tags_list = [t.strip() for t in tags.split(",") if t.strip()]
@@ -519,9 +517,8 @@ async def upload_and_export_to_youtube(
             privacy_status=privacy_status,
             is_short=is_short,
             thumbnail_path=thumbnail_path,
-            user_id=current_user.get("id")
+            user_id=current_user.get("id"),
         )
-        # Log successful publication to Database
         try:
             user_id = current_user.get("id")
             log_youtube_publication(
@@ -529,7 +526,7 @@ async def upload_and_export_to_youtube(
                 chapter_id=None,
                 youtube_url=res["youtube_url"],
                 title=title,
-                privacy_status=privacy_status or "unlisted"
+                privacy_status=privacy_status or "unlisted",
             )
             logger.info(f"[Database] Logged multipart publication to database: {res['youtube_url']}")
         except Exception as db_err:
@@ -548,8 +545,6 @@ async def upload_and_export_to_youtube(
                 pass
 
 
-# --- YouTube Database Profiles Endpoints ---
-
 @router.get("/youtube/profiles", summary="Get custom YouTube publishing profiles")
 async def api_get_youtube_profiles(current_user: dict = Depends(get_current_user)):
     user_id = current_user.get("id")
@@ -560,8 +555,11 @@ async def api_get_youtube_profiles(current_user: dict = Depends(get_current_user
         logger.error(f"[YouTube Profiles] Error fetching: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @router.post("/youtube/profiles", summary="Save or overwrite a YouTube publishing profile")
-async def api_save_youtube_profile(profile_req: YouTubeProfileRequest, current_user: dict = Depends(get_current_user)):
+async def api_save_youtube_profile(
+    profile_req: YouTubeProfileRequest, current_user: dict = Depends(get_current_user)
+):
     user_id = current_user.get("id")
     try:
         profile_data = profile_req.dict()
@@ -570,6 +568,7 @@ async def api_save_youtube_profile(profile_req: YouTubeProfileRequest, current_u
     except Exception as e:
         logger.error(f"[YouTube Profiles] Error saving: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.delete("/youtube/profiles/{name}", summary="Delete a YouTube publishing profile")
 async def api_delete_youtube_profile(name: str, current_user: dict = Depends(get_current_user)):
@@ -585,6 +584,7 @@ async def api_delete_youtube_profile(name: str, current_user: dict = Depends(get
         logger.error(f"[YouTube Profiles] Error deleting: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @router.get("/youtube/history", summary="Get YouTube video upload history")
 async def api_get_youtube_history(current_user: dict = Depends(get_current_user)):
     user_id = current_user.get("id")
@@ -596,45 +596,46 @@ async def api_get_youtube_history(current_user: dict = Depends(get_current_user)
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# --- YouTube Database Credentials Endpoints ---
-
 @router.get("/youtube/credentials", summary="Get status of YouTube custom credentials")
 async def api_get_youtube_credentials(current_user: dict = Depends(get_current_user)):
     user_id = current_user.get("id")
     try:
         creds = get_youtube_credentials(user_id)
-        # Never expose the actual client secret to the client!
         if creds:
             return {
                 "has_credentials": True,
                 "client_id": creds["client_id"],
                 "project_id": creds["project_id"],
-                "updated_at": creds["updated_at"]
+                "updated_at": creds["updated_at"],
             }
         return {"has_credentials": False}
     except Exception as e:
         logger.error(f"[YouTube Credentials] Error checking: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @router.post("/youtube/credentials", summary="Save user YouTube OAuth credentials")
-async def api_save_youtube_credentials(creds_req: YouTubeCredentialsRequest, current_user: dict = Depends(get_current_user)):
+async def api_save_youtube_credentials(
+    creds_req: YouTubeCredentialsRequest, current_user: dict = Depends(get_current_user)
+):
     user_id = current_user.get("id")
     try:
         saved = save_youtube_credentials(
             user_id=user_id,
             client_id=creds_req.client_id.strip(),
             client_secret=creds_req.client_secret.strip(),
-            project_id=creds_req.project_id.strip()
+            project_id=creds_req.project_id.strip(),
         )
         return {
             "status": "success",
             "message": "Custom credentials saved successfully",
             "client_id": saved["client_id"],
-            "project_id": saved["project_id"]
+            "project_id": saved["project_id"],
         }
     except Exception as e:
         logger.error(f"[YouTube Credentials] Error saving: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.delete("/youtube/credentials", summary="Remove user YouTube OAuth credentials")
 async def api_delete_youtube_credentials(current_user: dict = Depends(get_current_user)):
@@ -649,5 +650,4 @@ async def api_delete_youtube_credentials(current_user: dict = Depends(get_curren
     except Exception as e:
         logger.error(f"[YouTube Credentials] Error deleting: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
 
