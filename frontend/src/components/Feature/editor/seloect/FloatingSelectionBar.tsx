@@ -31,23 +31,40 @@ import * as api from "@/api";
 // ── Types ────────────────────────────────────────────────────────────
 
 interface FloatingSelectionBarProps {
+  isTimeline?: boolean;
   selectedCount: number;
   totalCount: number;
+
+  // Processing states
   isBatchCropping: boolean;
   batchProgress: { current: number; total: number } | null;
   isCleaningBubbles: boolean;
   cleanProgress: { current: number; total: number } | null;
   isBatchMerging: boolean;
+  isAnalyzingAll?: boolean;
+  isZipping?: boolean;
+  isExporting?: boolean;
+
+  // Handlers
   handleAutoCropSelected: () => void;
   handleCleanBubblesSelected: () => void;
   handleBatchMergeSelected: () => void;
-  handleAddToStoryboard: () => void;
   handleDeleteSelected: () => void;
-  handleClearAll: () => void;
-  handleSelectAllToggle: () => void;
+  handleClearAll?: () => void;
+  handleSelectAllToggle?: () => void;
   handleDownloadZip?: () => void;
-  isZipping?: boolean;
-  // Selection/filter controls
+  handleCancelBatch?: () => void;
+  handleCancelAnalysis?: () => void;
+
+  // Assets mode specific handlers
+  handleAddToStoryboard?: () => void;
+
+  // Timeline mode specific handlers
+  handleAnalyzeSelected?: () => void;
+  selectAllPanels?: () => void;
+  clearSelection?: () => void;
+
+  // Scraped images data
   scrapedImages?: string[];
   selectedScraped?: string[];
   setSelectedScraped?: React.Dispatch<React.SetStateAction<string[]>>;
@@ -58,61 +75,98 @@ interface FloatingSelectionBarProps {
   handleSelectFirstN?: (n: number) => void;
   handleSelectLastN?: (n: number) => void;
   handleSelectRange?: (a: number, b: number) => void;
-  leftDock?: boolean;
-  setShowAutoCropModal?: (v: boolean) => void;
-  setShowBubbleModal?: (v: boolean) => void;
-  handleCancelBatch?: () => void;
-  // Optional Parent overrides
-  handleFlipSelected?: () => void;
-  handleRotateSelected?: () => void;
-  handleDuplicateToTimeline?: () => void;
-  handleAnalyzeAll?: () => void;
-  isAnalyzingAll?: boolean;
-  handleSortSelected?: (order: "asc" | "desc") => void;
-  handleExportIndividual?: () => void;
-  isExporting?: boolean;
-  handleCopyMetadata?: () => void;
-  handleMoveToPosition?: (position: number) => void;
-  // State injection for direct inline operations
-  setScrapedImages?: React.Dispatch<React.SetStateAction<string[]>>;
-  fetchWithInterceptor?: any;
-  addNotification?: (message: string, type: any) => void;
-}
+  setShowAutoCropModal?: (show: boolean) => void;
+  setShowBubbleModal?: (show: boolean) => void;
 
-interface TimelineSelectionBarProps {
-  selectedCount: number;
-  totalCount: number;
-  isAnalyzingAll: boolean;
-  handleAnalyzeSelected: () => void;
-  selectAllPanels: () => void;
-  clearSelection: () => void;
-  handleDeleteSelected: () => void;
-  isBatchCropping: boolean;
-  isCleaningBubbles: boolean;
-  isBatchMerging: boolean;
-  handleAutoCropSelected: () => void;
-  handleCleanBubblesSelected: () => void;
-  handleBatchMergeSelected: () => void;
-  batchProgress?: { current: number; total: number } | null;
-  cleanProgress?: { current: number; total: number } | null;
-  handleCancelAnalysis?: () => void;
-  handleCancelBatch?: () => void;
-  // Optional Parent overrides
-  handleFlipSelected?: () => void;
-  handleRotateSelected?: () => void;
-  handleDuplicateSelected?: () => void;
-  handleAnalyzeAll?: () => void;
-  handleSortSelected?: (order: "asc" | "desc") => void;
-  handleExportIndividual?: () => void;
-  isExporting?: boolean;
-  handleCopyMetadata?: () => void;
-  handleMoveToPosition?: (position: number) => void;
-  // State injection for direct inline operations
+  // Timeline panels data
   panels?: any[];
   setPanels?: React.Dispatch<React.SetStateAction<any[]>>;
   selectedPanelIds?: Set<number>;
+
+  // Common overrides
+  handleFlipSelected?: () => void;
+  handleRotateSelected?: () => void;
+  handleDuplicateSelected?: () => void;
+  handleDuplicateToTimeline?: () => void;
+  handleAnalyzeAll?: () => void;
+  handleSortSelected?: (order: "asc" | "desc") => void;
+  handleExportIndividual?: () => void;
+  handleCopyMetadata?: () => void;
+  handleMoveToPosition?: (position: number) => void;
+
+  // UI
+  leftDock?: boolean;
   fetchWithInterceptor?: any;
   addNotification?: (message: string, type: any) => void;
+  setScrapedImages?: React.Dispatch<React.SetStateAction<string[]>>;
+}
+
+// ── Shared Helper Utilities ──────────────────────────────────────────
+
+interface ImageEditParams {
+  url: string;
+  flipHorizontal?: boolean;
+  rotate?: number;
+  autoTrim?: boolean;
+}
+
+async function editSelectedUrls(
+  urls: string[],
+  editParams: Partial<ImageEditParams>,
+  fetchWithInterceptor: any,
+  addNotification?: (msg: string, type: any) => void,
+  progressMsg?: string,
+  successMsg?: string,
+  errorPrefix?: string
+): Promise<Record<string, string>> {
+  if (urls.length === 0 || !fetchWithInterceptor) return {};
+  addNotification?.(progressMsg || "Processing images...", "info");
+  const results: Record<string, string> = {};
+  for (const url of urls) {
+    try {
+      const data = await api.editImage(fetchWithInterceptor, {
+        url,
+        autoTrim: false,
+        ...editParams,
+      });
+      if (data.url) {
+        results[url] = data.url;
+      }
+    } catch (err: any) {
+      console.error(err);
+      addNotification?.(`${errorPrefix || "Error"}: ${err.message}`, "error");
+    }
+  }
+  if (Object.keys(results).length > 0) {
+    addNotification?.(successMsg || "Processed successfully!", "success");
+  }
+  return results;
+}
+
+function exportUrls(
+  urls: { url: string; filename: string }[],
+  addNotification?: (msg: string, type: any) => void
+) {
+  if (urls.length === 0) return;
+  addNotification?.("Downloading individual assets...", "info");
+  urls.forEach(({ url, filename }) => {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.target = "_blank";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  });
+}
+
+function copyTextToClipboard(
+  text: string,
+  addNotification?: (msg: string, type: any) => void,
+  successMsg?: string
+) {
+  navigator.clipboard.writeText(text);
+  addNotification?.(successMsg || "Copied to clipboard!", "success");
 }
 
 // ── ScraperSelectionToolbar ──────────────────────────────────────────
@@ -354,9 +408,8 @@ export function ScraperSelectionToolbar({
   );
 }
 
-// ── FloatingSelectionBar (Imported Assets) ──────────────────────────
-
 export function FloatingSelectionBar({
+  isTimeline = false,
   selectedCount,
   totalCount,
   isBatchCropping,
@@ -389,6 +442,7 @@ export function FloatingSelectionBar({
   leftDock = false,
   handleFlipSelected,
   handleRotateSelected,
+  handleDuplicateSelected,
   handleDuplicateToTimeline,
   handleAnalyzeAll,
   isAnalyzingAll = false,
@@ -400,17 +454,23 @@ export function FloatingSelectionBar({
   setScrapedImages,
   fetchWithInterceptor,
   addNotification,
+  handleAnalyzeSelected,
+  selectAllPanels,
+  clearSelection,
+  handleCancelAnalysis,
+  panels = [],
+  setPanels,
+  selectedPanelIds = new Set(),
 }: FloatingSelectionBarProps) {
   const isAllSelected = totalCount > 0 && selectedCount === totalCount;
   const isAnyBusy = isBatchCropping || isCleaningBubbles || isBatchMerging;
   const [showMoreActions, setShowMoreActions] = React.useState(false);
   const [moveToPos, setMoveToPos] = React.useState<number>(1);
-  const [timelineHeight, setTimelineHeight] = React.useState(0);
+  const [assetsHeight, setAssetsHeight] = React.useState(0);
   const [busyLocal, setBusyLocal] = React.useState(false);
   const [barHeight, setBarHeight] = React.useState(0);
   const barRef = React.useRef<HTMLDivElement>(null);
 
-  // Track bar height for More-panel positioning
   React.useEffect(() => {
     if (!barRef.current) return;
     const ro = new ResizeObserver(() => {
@@ -421,16 +481,15 @@ export function FloatingSelectionBar({
     return () => ro.disconnect();
   }, []);
 
-  // mutation observer to track timeline selection bar height
   React.useEffect(() => {
     if (typeof document === "undefined") return;
     const updateHeight = () => {
-      const el = document.querySelector("#timeline-selection-bar-portal");
+      const el = document.querySelector("#scraper-selection-bar-portal");
       if (el && el.classList.contains("opacity-100")) {
         const height = el.getBoundingClientRect().height;
-        setTimelineHeight(height);
+        setAssetsHeight(height);
       } else {
-        setTimelineHeight(0);
+        setAssetsHeight(0);
       }
     };
 
@@ -446,135 +505,250 @@ export function FloatingSelectionBar({
 
   if (typeof document === "undefined") return null;
 
-  const visible = totalCount > 0 && selectedCount > 0;
+  const visible = (totalCount > 0 && selectedCount > 0) || isAnyBusy;
 
-  // Full width z-[9999] transitions bottom-0
+  const zIndexClass = isTimeline ? "z-[9998]" : "z-[9999]";
   const outerClass = leftDock
-    ? `fixed left-24 top-16 bottom-4 z-[9999] transition-all duration-300 ease-out ${
+    ? `fixed left-24 top-16 bottom-4 ${zIndexClass} transition-all duration-300 ease-out ${
         visible
           ? "translate-x-0 opacity-100 pointer-events-auto"
           : "-translate-x-1/4 opacity-0 pointer-events-none"
       }`
-    : `fixed left-0 right-0 z-[9999] transition-all duration-300 ease-out ${
+    : `fixed left-0 right-0 ${zIndexClass} transition-all duration-300 ease-out ${
         visible
           ? "translate-y-0 opacity-100 pointer-events-auto"
           : "translate-y-full opacity-0 pointer-events-none"
       }`;
 
-  // Stacking offset style when both bars are visible
   const stackStyle: React.CSSProperties =
-    !leftDock && visible && timelineHeight > 0
-      ? { bottom: `${timelineHeight}px` }
+    !leftDock && visible && isTimeline && assetsHeight > 0
+      ? { bottom: `${assetsHeight}px` }
       : { bottom: 0 };
 
-  // ── Default Operation Implementations ──────────────────────────────
-
   const flipSelected = handleFlipSelected || (async () => {
-    if (selectedScraped.length === 0 || !setScrapedImages || !fetchWithInterceptor) return;
     setBusyLocal(true);
-    addNotification?.(`Flipping ${selectedScraped.length} images...`, "info");
-    try {
-      const updatedList = [...scrapedImages];
-      for (const url of selectedScraped) {
-        const data = await api.editImage(fetchWithInterceptor, {
-          url: url,
-          flipHorizontal: true,
-          autoTrim: false,
-        });
-        if (data.url) {
-          const idx = updatedList.indexOf(url);
-          if (idx !== -1) updatedList[idx] = data.url;
+    if (isTimeline) {
+      if (selectedPanelIds && selectedPanelIds.size > 0 && setPanels && fetchWithInterceptor) {
+        const selectedPanels = panels.filter((p) => selectedPanelIds.has(p.id));
+        const urls = selectedPanels.map((p) => p.image_url);
+        const results = await editSelectedUrls(
+          urls,
+          { flipHorizontal: true },
+          fetchWithInterceptor,
+          addNotification,
+          `Flipping ${selectedPanelIds.size} panels...`,
+          "Flipped selected panels successfully!",
+          "Flip failed"
+        );
+        if (Object.keys(results).length > 0) {
+          setPanels((prev) =>
+            prev.map((p) =>
+              selectedPanelIds.has(p.id) && results[p.image_url]
+                ? { ...p, image_url: results[p.image_url] }
+                : p
+            )
+          );
         }
+        clearSelection?.();
       }
-      setScrapedImages(updatedList);
-      setSelectedScraped?.([]);
-      addNotification?.("Flipped selected frames successfully!", "success");
-    } catch (err: any) {
-      console.error(err);
-      addNotification?.(`Flip failed: ${err.message}`, "error");
-    } finally {
-      setBusyLocal(false);
+    } else {
+      if (selectedScraped && selectedScraped.length > 0 && setScrapedImages && fetchWithInterceptor) {
+        const results = await editSelectedUrls(
+          selectedScraped,
+          { flipHorizontal: true },
+          fetchWithInterceptor,
+          addNotification,
+          `Flipping ${selectedScraped.length} images...`,
+          "Flipped selected frames successfully!",
+          "Flip failed"
+        );
+        if (Object.keys(results).length > 0) {
+          setScrapedImages((prev) => prev.map((img) => results[img] ?? img));
+        }
+        setSelectedScraped?.([]);
+      }
     }
+    setBusyLocal(false);
   });
 
   const rotateSelected = handleRotateSelected || (async () => {
-    if (selectedScraped.length === 0 || !setScrapedImages || !fetchWithInterceptor) return;
     setBusyLocal(true);
-    addNotification?.(`Rotating ${selectedScraped.length} images...`, "info");
-    try {
-      const updatedList = [...scrapedImages];
-      for (const url of selectedScraped) {
-        const data = await api.editImage(fetchWithInterceptor, {
-          url: url,
-          rotate: 90,
-          autoTrim: false,
-        });
-        if (data.url) {
-          const idx = updatedList.indexOf(url);
-          if (idx !== -1) updatedList[idx] = data.url;
+    if (isTimeline) {
+      if (selectedPanelIds && selectedPanelIds.size > 0 && setPanels && fetchWithInterceptor) {
+        const selectedPanels = panels.filter((p) => selectedPanelIds.has(p.id));
+        const urls = selectedPanels.map((p) => p.image_url);
+        const results = await editSelectedUrls(
+          urls,
+          { rotate: 90 },
+          fetchWithInterceptor,
+          addNotification,
+          `Rotating ${selectedPanelIds.size} panels...`,
+          "Rotated selected panels successfully!",
+          "Rotate failed"
+        );
+        if (Object.keys(results).length > 0) {
+          setPanels((prev) =>
+            prev.map((p) =>
+              selectedPanelIds.has(p.id) && results[p.image_url]
+                ? { ...p, image_url: results[p.image_url] }
+                : p
+            )
+          );
         }
+        clearSelection?.();
       }
-      setScrapedImages(updatedList);
-      setSelectedScraped?.([]);
-      addNotification?.("Rotated selected frames successfully!", "success");
-    } catch (err: any) {
-      console.error(err);
-      addNotification?.(`Rotate failed: ${err.message}`, "error");
-    } finally {
-      setBusyLocal(false);
+    } else {
+      if (selectedScraped && selectedScraped.length > 0 && setScrapedImages && fetchWithInterceptor) {
+        const results = await editSelectedUrls(
+          selectedScraped,
+          { rotate: 90 },
+          fetchWithInterceptor,
+          addNotification,
+          `Rotating ${selectedScraped.length} images...`,
+          "Rotated selected frames successfully!",
+          "Rotate failed"
+        );
+        if (Object.keys(results).length > 0) {
+          setScrapedImages((prev) => prev.map((img) => results[img] ?? img));
+        }
+        setSelectedScraped?.([]);
+      }
+    }
+    setBusyLocal(false);
+  });
+
+  const duplicateSelected = handleDuplicateSelected || handleDuplicateToTimeline || (() => {
+    if (isTimeline) {
+      if (selectedPanelIds && selectedPanelIds.size > 0 && setPanels) {
+        setPanels((prev) => {
+          const nextList = [];
+          let maxId = Math.max(...prev.map((p) => p.id), 0);
+          for (const p of prev) {
+            nextList.push(p);
+            if (selectedPanelIds.has(p.id)) {
+              maxId += 1;
+              nextList.push({
+                ...p,
+                id: maxId,
+              });
+            }
+          }
+          return nextList;
+        });
+        clearSelection?.();
+        addNotification?.(`Duplicated ${selectedPanelIds.size} panels successfully!`, "success");
+      }
+    } else {
+      handleAddToStoryboard?.();
     }
   });
 
-  const duplicateToTimeline = handleDuplicateToTimeline || (() => {
-    handleAddToStoryboard();
-  });
-
   const sortSelected = handleSortSelected || ((order: "asc" | "desc") => {
-    if (!setSelectedScraped) return;
-    const sorted = [...selectedScraped].sort((a, b) => {
-      const idxA = scrapedImages.indexOf(a);
-      const idxB = scrapedImages.indexOf(b);
-      return order === "asc" ? idxA - idxB : idxB - idxA;
-    });
-    setSelectedScraped(sorted);
-    addNotification?.(`Selection sorted in ${order}ending order`, "success");
+    if (isTimeline) {
+      if (selectedPanelIds && selectedPanelIds.size >= 2 && setPanels) {
+        setPanels((prev) => {
+          const selectedIndices = prev
+            .map((p, idx) => (selectedPanelIds.has(p.id) ? idx : -1))
+            .filter((idx) => idx !== -1);
+          
+          const selectedItems = selectedIndices.map((idx) => prev[idx]);
+          selectedItems.sort((a, b) => {
+            return order === "asc" ? a.id - b.id : b.id - a.id;
+          });
+
+          const nextList = [...prev];
+          selectedIndices.forEach((origIdx, sortedIdx) => {
+            nextList[origIdx] = selectedItems[sortedIdx];
+          });
+          return nextList;
+        });
+        addNotification?.(`Sorted timeline panels successfully!`, "success");
+      }
+    } else {
+      if (selectedScraped && setSelectedScraped) {
+        const sorted = [...selectedScraped].sort((a, b) => {
+          const idxA = scrapedImages.indexOf(a);
+          const idxB = scrapedImages.indexOf(b);
+          return order === "asc" ? idxA - idxB : idxB - idxA;
+        });
+        setSelectedScraped(sorted);
+        addNotification?.(`Selection sorted in ${order}ending order`, "success");
+      }
+    }
   });
 
   const exportIndividual = handleExportIndividual || (() => {
-    if (selectedScraped.length === 0) return;
-    addNotification?.("Downloading individual assets...", "info");
-    selectedScraped.forEach((url, i) => {
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `imported-asset-${i + 1}.png`;
-      link.target = "_blank";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    });
+    if (isTimeline) {
+      if (selectedPanelIds && selectedPanelIds.size > 0) {
+        const items = panels
+          .filter((p) => selectedPanelIds.has(p.id))
+          .map((p) => ({
+            url: p.image_url,
+            filename: `timeline-panel-${p.id}.png`,
+          }));
+        exportUrls(items, addNotification);
+      }
+    } else {
+      if (selectedScraped && selectedScraped.length > 0) {
+        const items = selectedScraped.map((url, i) => ({
+          url,
+          filename: `imported-asset-${i + 1}.png`,
+        }));
+        exportUrls(items, addNotification);
+      }
+    }
   });
 
   const copyMetadata = handleCopyMetadata || (() => {
-    if (selectedScraped.length === 0) return;
-    const meta = selectedScraped.map((url, i) => ({
-      index: scrapedImages.indexOf(url) + 1,
-      source_url: url,
-      type: "imported_asset",
-    }));
-    navigator.clipboard.writeText(JSON.stringify(meta, null, 2));
-    addNotification?.("Copied metadata JSON to clipboard!", "success");
+    if (isTimeline) {
+      if (selectedPanelIds && selectedPanelIds.size > 0) {
+        const selected = panels.filter((p) => selectedPanelIds.has(p.id));
+        copyTextToClipboard(
+          JSON.stringify(selected, null, 2),
+          addNotification,
+          "Copied metadata JSON to clipboard!"
+        );
+      }
+    } else {
+      if (selectedScraped && selectedScraped.length > 0) {
+        const meta = selectedScraped.map((url) => ({
+          index: scrapedImages.indexOf(url) + 1,
+          source_url: url,
+          type: "imported_asset",
+        }));
+        copyTextToClipboard(
+          JSON.stringify(meta, null, 2),
+          addNotification,
+          "Copied metadata JSON to clipboard!"
+        );
+      }
+    }
   });
 
   const moveToPosition = handleMoveToPosition || ((pos: number) => {
-    if (selectedScraped.length === 0 || !setScrapedImages) return;
-    const targetIdx = Math.min(scrapedImages.length, Math.max(0, pos - 1));
-    const itemsToMove = scrapedImages.filter((img) => selectedScraped.includes(img));
-    const remaining = scrapedImages.filter((img) => !selectedScraped.includes(img));
-    
-    const nextList = [...remaining];
-    nextList.splice(targetIdx, 0, ...itemsToMove);
-    setScrapedImages(nextList);
-    addNotification?.(`Moved ${selectedScraped.length} assets to position #${pos}`, "success");
+    if (isTimeline) {
+      if (selectedPanelIds && selectedPanelIds.size > 0 && setPanels) {
+        const targetIdx = Math.min(panels.length, Math.max(0, pos - 1));
+        setPanels((prev) => {
+          const itemsToMove = prev.filter((p) => selectedPanelIds.has(p.id));
+          const remaining = prev.filter((p) => !selectedPanelIds.has(p.id));
+          const nextList = [...remaining];
+          nextList.splice(targetIdx, 0, ...itemsToMove);
+          return nextList;
+        });
+        addNotification?.(`Moved panels to position #${pos}`, "success");
+      }
+    } else {
+      if (selectedScraped && selectedScraped.length > 0 && setScrapedImages) {
+        const targetIdx = Math.min(scrapedImages.length, Math.max(0, pos - 1));
+        const itemsToMove = scrapedImages.filter((img) => selectedScraped.includes(img));
+        const remaining = scrapedImages.filter((img) => !selectedScraped.includes(img));
+        const nextList = [...remaining];
+        nextList.splice(targetIdx, 0, ...itemsToMove);
+        setScrapedImages(nextList);
+        addNotification?.(`Moved ${selectedScraped.length} assets to position #${pos}`, "success");
+      }
+    }
   });
 
   return createPortal(
@@ -582,75 +756,83 @@ export function FloatingSelectionBar({
       {/* More Actions Floating Panel — portal-rendered above the bar */}
       {showMoreActions && visible && createPortal(
         <div
-          style={{ bottom: `${timelineHeight + barHeight}px` }}
-          className="fixed left-0 right-0 z-[10001] bg-neutral-950/95 backdrop-blur-2xl border-t border-b border-neutral-800/80 px-6 py-4 shadow-2xl shadow-black/60 w-full animate-in slide-in-from-bottom-2 duration-200"
+          style={{ bottom: `${(typeof stackStyle.bottom === "number" ? stackStyle.bottom : parseInt(stackStyle.bottom || "0", 10) || 0) + barHeight}px` }}
+          className="fixed left-0 right-0 z-[10001] bg-neutral-950/90 backdrop-blur-2xl border-t border-b border-neutral-800/40 px-6 py-4 shadow-[0_-20px_50px_rgba(0,0,0,0.8)] w-full animate-in slide-in-from-bottom-2 duration-200"
         >
+          {/* Glowing Top Border Accent */}
+          <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-purple-500/10 via-fuchsia-500/40 to-purple-500/10 blur-[0.5px]" />
+
           <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-2">
-            <div className="w-full flex items-center gap-2 mb-1">
-              <span className="text-[9px] font-black text-neutral-500 uppercase tracking-widest font-mono">
-                Extended Actions — Imported Assets
-              </span>
-              <div className="flex-1 h-px bg-neutral-800/60" />
+            <div className="w-full flex items-center justify-between gap-2 mb-1.5 select-none">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-extrabold text-purple-400 uppercase tracking-widest font-mono">
+                  Extended Actions
+                </span>
+                <span className="text-[9px] text-neutral-400 font-bold font-mono px-2 py-0.5 bg-neutral-900 border border-neutral-800/80 rounded-lg shadow-inner">
+                  {isTimeline ? "Storyboard Timeline" : "Imported Assets"}
+                </span>
+              </div>
               <button
                 type="button"
                 onClick={() => setShowMoreActions(false)}
-                className="p-1 rounded-full hover:bg-neutral-800 text-neutral-500 hover:text-white transition-all cursor-pointer"
+                className="p-1 rounded-xl bg-neutral-900 border border-neutral-850 hover:bg-neutral-800 text-neutral-400 hover:text-white transition-all cursor-pointer shadow-sm active:scale-95"
               >
-                <X className="h-3.5 w-3.5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
             <button type="button" onClick={flipSelected} disabled={isAnyBusy || busyLocal}
-              className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center gap-1.5 cursor-pointer bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-sky-300 hover:border-sky-500/40">
+              className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center gap-1.5 cursor-pointer bg-neutral-900 border-neutral-800 hover:bg-sky-500/10 hover:border-sky-500/30 text-neutral-450 hover:text-sky-300 transition-all active:scale-95 disabled:opacity-40">
               <FlipHorizontal className="h-4 w-4 text-sky-400" /> Flip
             </button>
 
             <button type="button" onClick={rotateSelected} disabled={isAnyBusy || busyLocal}
-              className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center gap-1.5 cursor-pointer bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-amber-300 hover:border-amber-500/40">
+              className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center gap-1.5 cursor-pointer bg-neutral-900 border-neutral-800 hover:bg-amber-500/10 hover:border-amber-500/30 text-neutral-450 hover:text-amber-300 transition-all active:scale-95 disabled:opacity-40">
               <RotateCw className="h-4 w-4 text-amber-400" /> Rotate 90°
             </button>
 
-            <button type="button" onClick={duplicateToTimeline} disabled={isAnyBusy || busyLocal}
-              className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center gap-1.5 cursor-pointer bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-emerald-300 hover:border-emerald-500/40">
+            <button type="button" onClick={duplicateSelected} disabled={isAnyBusy || busyLocal}
+              className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center gap-1.5 cursor-pointer bg-neutral-900 border-neutral-800 hover:bg-emerald-500/10 hover:border-emerald-500/30 text-neutral-450 hover:text-emerald-300 transition-all active:scale-95 disabled:opacity-40">
               <Copy className="h-4 w-4 text-emerald-400" /> Duplicate
             </button>
 
             {handleAnalyzeAll && (
               <button type="button" onClick={handleAnalyzeAll} disabled={isAnalyzingAll || busyLocal}
-                className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center gap-1.5 cursor-pointer bg-purple-950/40 border-purple-800/50 hover:bg-purple-900/60 text-purple-300 hover:border-purple-500">
-                <Brain className="h-4 w-4 text-purple-400" /> AI Analyze
+                className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center gap-1.5 cursor-pointer bg-purple-950/20 border-purple-800/40 hover:bg-purple-600 hover:border-purple-550 text-purple-300 hover:text-white transition-all active:scale-95 disabled:opacity-40">
+                <Brain className="h-4 w-4 text-purple-400 group-hover:text-white" /> AI Analyze
               </button>
             )}
 
-            <div className="flex items-center gap-0.5">
+            <div className="flex items-center bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden">
               <button type="button" onClick={() => sortSelected("asc")}
-                className="px-3 py-2 text-xs rounded-l-xl border font-bold flex items-center gap-1 bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-indigo-300">
+                className="px-3 py-2 text-xs font-bold flex items-center gap-1 hover:bg-indigo-500/10 text-neutral-455 hover:text-indigo-300 transition-all cursor-pointer">
                 <ArrowUpDown className="h-4 w-4 text-indigo-400" /> Sort ↑
               </button>
+              <div className="w-px h-4 bg-neutral-800" />
               <button type="button" onClick={() => sortSelected("desc")}
-                className="px-3 py-2 text-xs rounded-r-xl border-t border-r border-b font-bold flex items-center gap-1 bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-indigo-300">
+                className="px-3 py-2 text-xs font-bold flex items-center gap-1 hover:bg-indigo-500/10 text-neutral-455 hover:text-indigo-300 transition-all cursor-pointer">
                 Sort ↓
               </button>
             </div>
 
             <button type="button" onClick={exportIndividual}
-              className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center gap-1.5 cursor-pointer bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-cyan-300 hover:border-cyan-500/40">
+              className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center gap-1.5 cursor-pointer bg-neutral-900 border-neutral-800 hover:bg-cyan-500/10 hover:border-cyan-500/30 text-neutral-455 hover:text-cyan-300 transition-all active:scale-95">
               <ImageIcon className="h-4 w-4 text-cyan-400" /> Export
             </button>
 
             <button type="button" onClick={copyMetadata}
-              className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center gap-1.5 cursor-pointer bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-teal-300 hover:border-teal-500/40">
+              className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center gap-1.5 cursor-pointer bg-neutral-900 border-neutral-800 hover:bg-teal-500/10 hover:border-teal-500/30 text-neutral-455 hover:text-teal-300 transition-all active:scale-95">
               <ClipboardCopy className="h-4 w-4 text-teal-400" /> Copy Metadata
             </button>
 
-            <div className="flex items-center gap-1.5">
-              <MoveRight className="h-4 w-4 text-orange-400 shrink-0" />
+            <div className="flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 rounded-xl px-2.5 py-1.5">
+              <span className="text-[10px] text-neutral-450 font-mono font-medium">Move to</span>
               <input type="number" min={1} max={totalCount} value={moveToPos}
                 onChange={(e) => setMoveToPos(Math.max(1, parseInt(e.target.value) || 1))}
-                className="w-12 px-1.5 py-1.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white text-[10px] font-mono focus:outline-none focus:border-orange-500/60 text-center" />
+                className="w-10 px-1 py-0.5 rounded bg-neutral-950 border border-neutral-800 text-white text-[10px] font-mono focus:outline-none focus:border-orange-500 text-center" />
               <button type="button" onClick={() => moveToPosition(moveToPos)} disabled={isAnyBusy || busyLocal}
-                className="px-3 py-1.5 text-xs rounded-lg bg-orange-600/20 border border-orange-500/40 hover:bg-orange-600/45 text-orange-300 font-bold transition-all cursor-pointer">
-                Move
+                className="px-2.5 py-0.5 text-[10px] rounded bg-orange-600/20 border border-orange-500/30 hover:bg-orange-600 text-orange-300 hover:text-white font-bold transition-all cursor-pointer active:scale-95 disabled:opacity-40">
+                Go
               </button>
             </div>
           </div>
@@ -659,7 +841,7 @@ export function FloatingSelectionBar({
       )}
 
       <div
-        id="scraper-selection-bar-portal"
+        id={isTimeline ? "timeline-selection-bar-portal" : "scraper-selection-bar-portal"}
         className={outerClass}
         style={leftDock ? undefined : stackStyle}
       >
@@ -671,140 +853,214 @@ export function FloatingSelectionBar({
               : "relative flex flex-col"
           }
         >
-          {/* Gradient breathing space above the bar */}
-          {!leftDock && (
-            <div className="h-10 w-full bg-gradient-to-t from-neutral-950/80 to-transparent pointer-events-none" />
-          )}
           <div className={leftDock ? "h-full flex flex-col gap-3 overflow-auto custom-scrollbar pb-1" : "bg-neutral-950/95 backdrop-blur-2xl border-t border-neutral-700/50 px-6 py-4 shadow-2xl shadow-black/60 w-full"}>
-          <div className={leftDock ? "" : "max-w-7xl mx-auto flex items-center justify-between gap-3 flex-wrap md:flex-nowrap"}>
-          {/* Left section: Header/Badge */}
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="flex items-center gap-2 bg-purple-950/60 border border-purple-700/50 rounded-xl px-3.5 py-2 shrink-0">
-              <div className="h-5 w-5 rounded bg-purple-500 flex items-center justify-center text-white text-[9px] font-bold font-mono">
-                {selectedCount}
+            <div className={leftDock ? "" : "max-w-7xl mx-auto flex items-center justify-between gap-3 flex-wrap md:flex-nowrap"}>
+              <div className="flex items-center gap-3 shrink-0">
+                <div className="flex items-center gap-2 bg-purple-950/60 border border-purple-700/50 rounded-xl px-3.5 py-2 shrink-0">
+                  <div className="h-5 w-5 rounded bg-purple-500 flex items-center justify-center text-white text-[9px] font-bold font-mono">
+                    {selectedCount}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-white leading-tight whitespace-nowrap">
+                      {isTimeline ? "Timeline Panels Selected" : "Imported Assets Selected"}
+                    </p>
+                    <p className="text-[9px] text-purple-400 font-mono leading-tight whitespace-nowrap">
+                      {selectedCount} of {totalCount} {isTimeline ? "frames" : "images"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Progress */}
+                {(isAnyBusy || busyLocal) && (
+                  <div className="flex flex-col gap-1.5 px-3.5 py-2 rounded-xl bg-purple-950/25 border border-purple-800/40 text-purple-300 text-xs font-mono shrink-0">
+                    <div className="flex items-center gap-2">
+                      <RefreshCw className="h-3.5 w-3.5 animate-spin text-purple-400" />
+                      <span className="font-bold tracking-tight whitespace-nowrap">
+                        {isBatchCropping && batchProgress
+                          ? `Cropping ${batchProgress.current}/${batchProgress.total}`
+                          : isCleaningBubbles && cleanProgress
+                          ? `Cleaning ${cleanProgress.current}/${cleanProgress.total}`
+                          : isBatchMerging
+                          ? "Stitching..."
+                          : "Processing..."}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div>
-                <p className="text-xs font-bold text-white leading-tight whitespace-nowrap">
-                  Imported Assets Selected
-                </p>
-                <p className="text-[9px] text-purple-400 font-mono leading-tight whitespace-nowrap">
-                  {selectedCount} of {totalCount} images
-                </p>
+
+              {/* Right section: Actions wrapper */}
+              <div className="flex items-center gap-2 flex-wrap shrink-0">
+                {/* Filter toolbar */}
+                {!isTimeline && !leftDock && scrapedImages && scrapedImages.length > 0 && (
+                  <ScraperSelectionToolbar
+                    scrapedImages={scrapedImages}
+                    selectedScraped={selectedScraped || []}
+                    handleInvertSelection={handleInvertSelection || (() => {})}
+                    handleSelectOdd={handleSelectOdd || (() => {})}
+                    handleSelectEven={handleSelectEven || (() => {})}
+                    handleReverseDeckOrder={handleReverseDeckOrder || (() => {})}
+                    handleSelectFirstN={handleSelectFirstN || (() => {})}
+                    handleSelectLastN={handleSelectLastN || (() => {})}
+                    handleSelectRange={handleSelectRange || (() => {})}
+                    handleClearAll={handleClearAll}
+                    setSelectedScraped={setSelectedScraped}
+                  />
+                )}
+
+                {/* Select/Deselect All */}
+                <button
+                  type="button"
+                  onClick={isTimeline ? (isAllSelected ? (clearSelection || handleClearAll) : (selectAllPanels || handleSelectAllToggle)) : handleSelectAllToggle}
+                  className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200"
+                >
+                  {isAllSelected ? (
+                    <Square className="h-4 w-4 text-neutral-400" />
+                  ) : (
+                    <CheckSquare className="h-4 w-4 text-purple-400" />
+                  )}
+                  {isAllSelected ? "Deselect All" : "Select All"}
+                </button>
+
+                {/* AI Analyze Selected */}
+                {handleAnalyzeSelected && (
+                  isAnalyzingAll ? (
+                    <button
+                      type="button"
+                      onClick={handleCancelAnalysis}
+                      className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-rose-600 border-rose-500 hover:bg-rose-500 text-white shadow-md hover:shadow-rose-500/20"
+                    >
+                      <X className="h-4 w-4 text-white" />
+                      Stop
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleAnalyzeSelected}
+                      className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-purple-650 border-purple-550 hover:bg-purple-600 text-white shadow-md hover:shadow-purple-500/20"
+                    >
+                      <Sparkles className="h-4 w-4 text-white animate-pulse" />
+                      Analyze Selected
+                    </button>
+                  )
+                )}
+
+                {/* Auto-Crop */}
+                {isBatchCropping ? (
+                  <button
+                    type="button"
+                    onClick={handleCancelBatch}
+                    className="px-3.5 py-2 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all bg-rose-900/40 border border-rose-500 hover:bg-rose-900 text-white rounded-xl"
+                  >
+                    <X className="h-4 w-4" />
+                    Stop Crop
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleAutoCropSelected}
+                    disabled={isAnyBusy || busyLocal}
+                    className="px-3.5 py-2 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 rounded-xl"
+                  >
+                    <Scissors className="h-4 w-4 text-purple-400" />
+                    Auto-Crop
+                  </button>
+                )}
+
+                {/* Clean Bubbles */}
+                {isCleaningBubbles ? (
+                  <button
+                    type="button"
+                    onClick={handleCancelBatch}
+                    className="px-3.5 py-2 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all bg-rose-900/40 border border-rose-500 hover:bg-rose-900 text-white rounded-xl"
+                  >
+                    <X className="h-4 w-4" />
+                    Stop Clean
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleCleanBubblesSelected}
+                    disabled={isAnyBusy || busyLocal}
+                    className="px-3.5 py-2 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 rounded-xl"
+                  >
+                    <Sparkles className="h-4 w-4 text-purple-400" />
+                    Clean Bubbles
+                  </button>
+                )}
+
+                {/* Stitch */}
+                <button
+                  type="button"
+                  disabled={isAnyBusy || busyLocal || selectedCount < 2}
+                  onClick={handleBatchMergeSelected}
+                  className="px-3.5 py-2 text-xs rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all disabled:opacity-40"
+                >
+                  <Link2 className="h-4 w-4 text-purple-400" />
+                  Stitch
+                </button>
+
+                {/* Add to Storyboard */}
+                {!isTimeline && handleAddToStoryboard && (
+                  <button
+                    type="button"
+                    onClick={handleAddToStoryboard}
+                    disabled={isAnyBusy || busyLocal}
+                    className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all bg-purple-650 border-purple-550 hover:bg-purple-600 text-white shadow-md hover:shadow-purple-500/20 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add to Storyboard
+                  </button>
+                )}
+
+                {/* Zip Download */}
+                {!isTimeline && handleDownloadZip && (
+                  <button
+                    type="button"
+                    onClick={handleDownloadZip}
+                    disabled={isZipping || busyLocal}
+                    className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40"
+                  >
+                    {isZipping ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Download className="h-4 w-4 text-purple-400" />
+                    )}
+                    Zip
+                  </button>
+                )}
+
+                {/* Delete */}
+                <button
+                  type="button"
+                  onClick={handleDeleteSelected}
+                  disabled={isAnyBusy || busyLocal}
+                  className="px-3.5 py-2 text-xs rounded-xl border border-rose-950/60 bg-rose-950/20 hover:bg-rose-900/40 text-rose-350 hover:text-rose-100 font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all disabled:opacity-40"
+                >
+                  <Trash2 className="h-4 w-4 text-rose-400" />
+                  Delete
+                </button>
+
+                {/* More toggle */}
+                <button
+                  type="button"
+                  onClick={() => setShowMoreActions(!showMoreActions)}
+                  className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-1 cursor-pointer transition-all bg-neutral-900 border-neutral-700 hover:border-purple-500/40 hover:bg-purple-950/20 text-neutral-400 hover:text-purple-300"
+                >
+                  {showMoreActions ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  <span>More</span>
+                </button>
+
+                {/* Clear selection */}
+                <button
+                  type="button"
+                  onClick={isTimeline ? (clearSelection || handleClearAll) : handleClearAll}
+                  className="p-2 rounded-full border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white cursor-pointer transition-all"
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </div>
             </div>
-
-            {/* Progress */}
-            {(isAnyBusy || busyLocal) && (
-              <div className="flex flex-col gap-1.5 px-3.5 py-2 rounded-xl bg-purple-950/25 border border-purple-800/40 text-purple-300 text-xs font-mono shrink-0">
-                <div className="flex items-center gap-2">
-                  <RefreshCw className="h-3.5 w-3.5 animate-spin text-purple-400" />
-                  <span className="font-bold tracking-tight whitespace-nowrap">
-                    {isBatchCropping && batchProgress
-                      ? `Cropping ${batchProgress.current}/${batchProgress.total}`
-                      : isCleaningBubbles && cleanProgress
-                      ? `Cleaning ${cleanProgress.current}/${cleanProgress.total}`
-                      : isBatchMerging
-                      ? "Stitching..."
-                      : "Processing..."}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Right section: Actions wrapper */}
-          <div className="flex items-center gap-2 flex-wrap shrink-0">
-            {/* Filter toolbar */}
-            {!leftDock && scrapedImages.length > 0 && (
-              <ScraperSelectionToolbar
-                scrapedImages={scrapedImages}
-                selectedScraped={selectedScraped}
-                handleInvertSelection={handleInvertSelection || (() => {})}
-                handleSelectOdd={handleSelectOdd || (() => {})}
-                handleSelectEven={handleSelectEven || (() => {})}
-                handleReverseDeckOrder={handleReverseDeckOrder || (() => {})}
-                handleSelectFirstN={handleSelectFirstN || (() => {})}
-                handleSelectLastN={handleSelectLastN || (() => {})}
-                handleSelectRange={handleSelectRange || (() => {})}
-                handleClearAll={handleClearAll}
-                setSelectedScraped={setSelectedScraped}
-              />
-            )}
-
-            {/* Select/Deselect All */}
-            <button
-              type="button"
-              onClick={handleSelectAllToggle}
-              className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200"
-            >
-              {isAllSelected ? (
-                <Square className="h-4 w-4 text-neutral-400" />
-              ) : (
-                <CheckSquare className="h-4 w-4 text-purple-400" />
-              )}
-              {isAllSelected ? "Deselect All" : "Select All"}
-            </button>
-
-            {/* Add to Storyboard */}
-            <button
-              type="button"
-              onClick={handleAddToStoryboard}
-              disabled={isAnyBusy || busyLocal}
-              className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all bg-purple-650 border-purple-550 hover:bg-purple-600 text-white shadow-md hover:shadow-purple-500/20 disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <Plus className="h-4 w-4" />
-              Add to Storyboard
-            </button>
-
-            {/* Zip Download */}
-            {handleDownloadZip && (
-              <button
-                type="button"
-                onClick={handleDownloadZip}
-                disabled={isZipping || busyLocal}
-                className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40"
-              >
-                {isZipping ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Download className="h-4 w-4 text-purple-400" />
-                )}
-                Zip
-              </button>
-            )}
-
-            {/* Delete */}
-            <button
-              type="button"
-              onClick={handleDeleteSelected}
-              disabled={isAnyBusy || busyLocal}
-              className="px-3.5 py-2 text-xs rounded-xl border border-rose-950/60 bg-rose-950/20 hover:bg-rose-900/40 text-rose-350 hover:text-rose-100 font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all disabled:opacity-40"
-            >
-              <Trash2 className="h-4 w-4 text-rose-400" />
-              Delete
-            </button>
-
-            {/* More toggle */}
-            <button
-              type="button"
-              onClick={() => setShowMoreActions(!showMoreActions)}
-              className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-1 cursor-pointer transition-all bg-neutral-900 border-neutral-700 hover:border-purple-500/40 hover:bg-purple-950/20 text-neutral-400 hover:text-purple-300"
-            >
-              {showMoreActions ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              <span>More</span>
-            </button>
-
-            {/* Clear selection */}
-            <button
-              type="button"
-              onClick={handleClearAll}
-              className="p-2 rounded-full border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white cursor-pointer transition-all"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-
-          </div>
           </div>
         </div>
       </div>
@@ -816,473 +1072,6 @@ export function FloatingSelectionBar({
 
 // ── TimelineSelectionBar (Timeline & Text) ──────────────────────────
 
-export function TimelineSelectionBar({
-  selectedCount,
-  totalCount,
-  isAnalyzingAll,
-  handleAnalyzeSelected,
-  selectAllPanels,
-  clearSelection,
-  handleDeleteSelected,
-  isBatchCropping,
-  isCleaningBubbles,
-  isBatchMerging,
-  handleAutoCropSelected,
-  handleCleanBubblesSelected,
-  handleBatchMergeSelected,
-  batchProgress,
-  cleanProgress,
-  handleCancelAnalysis,
-  handleCancelBatch,
-  handleFlipSelected,
-  handleRotateSelected,
-  handleDuplicateSelected,
-  handleAnalyzeAll,
-  handleSortSelected,
-  handleExportIndividual,
-  isExporting = false,
-  handleCopyMetadata,
-  handleMoveToPosition,
-  panels = [],
-  setPanels,
-  selectedPanelIds = new Set(),
-  fetchWithInterceptor,
-  addNotification,
-}: TimelineSelectionBarProps) {
-  const isProcessing = isBatchCropping || isCleaningBubbles || isBatchMerging;
-  const isVisible = selectedCount > 0 || isProcessing;
-  const [showMoreActions, setShowMoreActions] = React.useState(false);
-  const [moveToPos, setMoveToPos] = React.useState<number>(1);
-  const [busyLocal, setBusyLocal] = React.useState(false);
-  const [barHeight, setBarHeight] = React.useState(0);
-  const barRef = React.useRef<HTMLDivElement>(null);
-
-  // Track bar height for More-panel positioning
-  React.useEffect(() => {
-    if (!barRef.current) return;
-    const ro = new ResizeObserver(() => {
-      if (barRef.current) setBarHeight(barRef.current.offsetHeight);
-    });
-    ro.observe(barRef.current);
-    setBarHeight(barRef.current.offsetHeight);
-    return () => ro.disconnect();
-  }, []);
-
-  if (typeof document === "undefined") return null;
-
-  // Full width z-[9998] transition bottom-0
-  const outerClass = `fixed bottom-0 left-0 right-0 z-[9998] transition-all duration-300 ease-out ${
-    isVisible
-      ? "translate-y-0 opacity-100 pointer-events-auto"
-      : "translate-y-full opacity-0 pointer-events-none"
-  }`;
-
-  // ── Default Operation Implementations ──────────────────────────────
-
-  const flipSelected = handleFlipSelected || (async () => {
-    if (selectedPanelIds.size === 0 || !setPanels || !fetchWithInterceptor) return;
-    setBusyLocal(true);
-    addNotification?.(`Flipping ${selectedPanelIds.size} panels...`, "info");
-    try {
-      const updatedPanels = [...panels];
-      for (const p of updatedPanels) {
-        if (selectedPanelIds.has(p.id)) {
-          const data = await api.editImage(fetchWithInterceptor, {
-            url: p.image_url,
-            flipHorizontal: true,
-            autoTrim: false,
-          });
-          if (data.url) p.image_url = data.url;
-        }
-      }
-      setPanels(updatedPanels);
-      clearSelection();
-      addNotification?.("Flipped selected panels successfully!", "success");
-    } catch (err: any) {
-      console.error(err);
-      addNotification?.(`Flip failed: ${err.message}`, "error");
-    } finally {
-      setBusyLocal(false);
-    }
-  });
-
-  const rotateSelected = handleRotateSelected || (async () => {
-    if (selectedPanelIds.size === 0 || !setPanels || !fetchWithInterceptor) return;
-    setBusyLocal(true);
-    addNotification?.(`Rotating ${selectedPanelIds.size} panels...`, "info");
-    try {
-      const updatedPanels = [...panels];
-      for (const p of updatedPanels) {
-        if (selectedPanelIds.has(p.id)) {
-          const data = await api.editImage(fetchWithInterceptor, {
-            url: p.image_url,
-            rotate: 90,
-            autoTrim: false,
-          });
-          if (data.url) p.image_url = data.url;
-        }
-      }
-      setPanels(updatedPanels);
-      clearSelection();
-      addNotification?.("Rotated selected panels successfully!", "success");
-    } catch (err: any) {
-      console.error(err);
-      addNotification?.(`Rotate failed: ${err.message}`, "error");
-    } finally {
-      setBusyLocal(false);
-    }
-  });
-
-  const duplicateSelected = handleDuplicateSelected || (() => {
-    if (selectedPanelIds.size === 0 || !setPanels) return;
-    setPanels((prev) => {
-      const nextList = [];
-      let maxId = Math.max(...prev.map((p) => p.id), 0);
-      for (const p of prev) {
-        nextList.push(p);
-        if (selectedPanelIds.has(p.id)) {
-          maxId += 1;
-          nextList.push({
-            ...p,
-            id: maxId,
-          });
-        }
-      }
-      return nextList;
-    });
-    clearSelection();
-    addNotification?.(`Duplicated ${selectedPanelIds.size} panels successfully!`, "success");
-  });
-
-  const sortSelected = handleSortSelected || ((order: "asc" | "desc") => {
-    if (selectedPanelIds.size < 2 || !setPanels) return;
-    setPanels((prev) => {
-      const selectedIndices = prev
-        .map((p, idx) => (selectedPanelIds.has(p.id) ? idx : -1))
-        .filter((idx) => idx !== -1);
-      
-      const selectedItems = selectedIndices.map((idx) => prev[idx]);
-      selectedItems.sort((a, b) => {
-        return order === "asc" ? a.id - b.id : b.id - a.id;
-      });
-
-      const nextList = [...prev];
-      selectedIndices.forEach((origIdx, sortedIdx) => {
-        nextList[origIdx] = selectedItems[sortedIdx];
-      });
-      return nextList;
-    });
-    addNotification?.(`Sorted timeline panels successfully!`, "success");
-  });
-
-  const exportIndividual = handleExportIndividual || (() => {
-    if (selectedPanelIds.size === 0) return;
-    addNotification?.("Downloading individual assets...", "info");
-    panels
-      .filter((p) => selectedPanelIds.has(p.id))
-      .forEach((p, i) => {
-        const link = document.createElement("a");
-        link.href = p.image_url;
-        link.download = `timeline-panel-${p.id}.png`;
-        link.target = "_blank";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      });
-  });
-
-  const copyMetadata = handleCopyMetadata || (() => {
-    if (selectedPanelIds.size === 0) return;
-    const selected = panels.filter((p) => selectedPanelIds.has(p.id));
-    navigator.clipboard.writeText(JSON.stringify(selected, null, 2));
-    addNotification?.("Copied metadata JSON to clipboard!", "success");
-  });
-
-  const moveToPosition = handleMoveToPosition || ((pos: number) => {
-    if (selectedPanelIds.size === 0 || !setPanels) return;
-    const targetIdx = Math.min(panels.length, Math.max(0, pos - 1));
-    setPanels((prev) => {
-      const itemsToMove = prev.filter((p) => selectedPanelIds.has(p.id));
-      const remaining = prev.filter((p) => !selectedPanelIds.has(p.id));
-      const nextList = [...remaining];
-      nextList.splice(targetIdx, 0, ...itemsToMove);
-      return nextList;
-    });
-    addNotification?.(`Moved panels to position #${pos}`, "success");
-  });
-
-  return createPortal(
-    <div id="timeline-selection-bar-portal" className={outerClass}>
-      {/* Gradient breathing space above the bar */}
-      <div className="h-10 w-full bg-gradient-to-t from-neutral-950/80 to-transparent pointer-events-none" />
-      <div className="bg-neutral-950/95 backdrop-blur-2xl border-t border-neutral-700/50 px-6 py-4 shadow-2xl shadow-black/60 w-full" ref={barRef}>
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 flex-wrap md:flex-nowrap">
-          {/* Left section: Header/Badge */}
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="flex items-center gap-2 bg-purple-950/60 border border-purple-700/50 rounded-xl px-3.5 py-2 shrink-0">
-              <div className="h-5 w-5 rounded bg-purple-500 flex items-center justify-center text-white text-[9px] font-bold font-mono">
-                {selectedCount}
-              </div>
-              <div>
-                <p className="text-xs font-bold text-white leading-tight whitespace-nowrap">
-                  Timeline Panels Selected
-                </p>
-                <p className="text-[9px] text-purple-400 font-mono leading-tight whitespace-nowrap">
-                  {selectedCount} of {totalCount} frames
-                </p>
-              </div>
-            </div>
-
-            {/* Progress */}
-            {(isProcessing || busyLocal) && (
-              <div className="flex flex-col gap-1.5 px-3.5 py-2 rounded-xl bg-purple-950/25 border border-purple-800/40 text-purple-300 text-xs font-mono shrink-0">
-                <div className="flex items-center gap-2">
-                  <RefreshCw className="h-3.5 w-3.5 animate-spin text-purple-400" />
-                  <span className="font-bold tracking-tight whitespace-nowrap">
-                    {isBatchCropping && batchProgress
-                      ? `Cropping ${batchProgress.current}/${batchProgress.total}`
-                      : isCleaningBubbles && cleanProgress
-                      ? `Cleaning ${cleanProgress.current}/${cleanProgress.total}`
-                      : isBatchMerging
-                      ? "Stitching..."
-                      : "Processing..."}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Right section: Actions wrapper */}
-          <div className="flex items-center gap-2 flex-wrap shrink-0">
-            {/* Select/Deselect All */}
-            <button
-              type="button"
-              onClick={selectAllPanels}
-              className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200"
-            >
-              <CheckSquare className="h-4 w-4 text-purple-400" />
-              Select All
-            </button>
-
-            {/* AI Analyze Selected */}
-            {isAnalyzingAll ? (
-              <button
-                type="button"
-                onClick={handleCancelAnalysis}
-                className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-rose-600 border-rose-500 hover:bg-rose-500 text-white shadow-md hover:shadow-rose-500/20"
-              >
-                <X className="h-4 w-4 text-white" />
-                Stop
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleAnalyzeSelected}
-                className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-purple-650 border-purple-550 hover:bg-purple-600 text-white shadow-md hover:shadow-purple-500/20"
-              >
-                <Sparkles className="h-4 w-4 text-white animate-pulse" />
-                Analyze Selected
-              </button>
-            )}
-
-            {/* Auto-Crop */}
-            {isBatchCropping ? (
-              <button
-                type="button"
-                onClick={handleCancelBatch}
-                className="px-3.5 py-2 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all bg-rose-900/40 border border-rose-500 hover:bg-rose-900 text-white rounded-xl"
-              >
-                <X className="h-4 w-4" />
-                Stop Crop
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleAutoCropSelected}
-                disabled={isProcessing || busyLocal}
-                className="px-3.5 py-2 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 rounded-xl"
-              >
-                <Scissors className="h-4 w-4 text-purple-400" />
-                Auto-Crop
-              </button>
-            )}
-
-            {/* Clean Bubbles */}
-            {isCleaningBubbles ? (
-              <button
-                type="button"
-                onClick={handleCancelBatch}
-                className="px-3.5 py-2 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all bg-rose-900/40 border border-rose-500 hover:bg-rose-900 text-white rounded-xl"
-              >
-                <X className="h-4 w-4" />
-                Stop Clean
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleCleanBubblesSelected}
-                disabled={isProcessing || busyLocal}
-                className="px-3.5 py-2 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 rounded-xl"
-              >
-                <Sparkles className="h-4 w-4 text-purple-400" />
-                Clean Bubbles
-              </button>
-            )}
-
-            {/* Stitch */}
-            <button
-              type="button"
-              disabled={isProcessing || busyLocal || selectedCount < 2}
-              onClick={handleBatchMergeSelected}
-              className="px-3.5 py-2 text-xs rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all disabled:opacity-40"
-            >
-              <Link2 className="h-4 w-4 text-purple-400" />
-              Stitch
-            </button>
-
-            {/* Delete Selected */}
-            <button
-              type="button"
-              onClick={handleDeleteSelected}
-              disabled={isProcessing || busyLocal}
-              className="px-3.5 py-2 text-xs rounded-xl border border-rose-950/60 bg-rose-950/20 hover:bg-rose-900/40 text-rose-350 hover:text-rose-100 font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all disabled:opacity-40"
-            >
-              <Trash className="h-4 w-4 text-rose-400" />
-              Delete
-            </button>
-
-            {/* More toggle */}
-            <button
-              type="button"
-              onClick={() => setShowMoreActions(!showMoreActions)}
-              className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-1 cursor-pointer transition-all bg-neutral-900 border-neutral-700 hover:border-purple-500/40 hover:bg-purple-950/20 text-neutral-400 hover:text-purple-300"
-            >
-              {showMoreActions ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              <span>More</span>
-            </button>
-
-            {/* Clear Selection */}
-            <button
-              type="button"
-              onClick={clearSelection}
-              className="p-2 rounded-full border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white cursor-pointer transition-all"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-
-          {/* Extended Actions Panel */}
-          {showMoreActions && (
-            <div className="w-full flex flex-wrap items-center gap-2 border-t border-neutral-800/60 pt-3 mt-1.5">
-              <div className="w-full flex items-center gap-2 mb-1">
-                <span className="text-[9px] font-black text-neutral-500 uppercase tracking-widest font-mono">
-                  Extended Actions
-                </span>
-                <div className="flex-1 h-px bg-neutral-800/60" />
-              </div>
-
-              <button
-                type="button"
-                onClick={flipSelected}
-                disabled={isProcessing || busyLocal}
-                className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-1.5 cursor-pointer bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-sky-300 hover:border-sky-500/40"
-              >
-                <FlipHorizontal className="h-4 w-4 text-sky-400" />
-                Flip
-              </button>
-
-              <button
-                type="button"
-                onClick={rotateSelected}
-                disabled={isProcessing || busyLocal}
-                className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-1.5 cursor-pointer bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-amber-300 hover:border-amber-500/40"
-              >
-                <RotateCw className="h-4 w-4 text-amber-400" />
-                Rotate 90°
-              </button>
-
-              <button
-                type="button"
-                onClick={duplicateSelected}
-                disabled={isProcessing || busyLocal}
-                className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-1.5 cursor-pointer bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-emerald-300 hover:border-emerald-500/40"
-              >
-                <Copy className="h-4 w-4 text-emerald-400" />
-                Duplicate
-              </button>
-
-              {handleAnalyzeAll && (
-                <button
-                  type="button"
-                  onClick={handleAnalyzeAll}
-                  disabled={isAnalyzingAll || busyLocal}
-                  className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-1.5 cursor-pointer bg-purple-950/40 border-purple-800/50 hover:bg-purple-900/60 text-purple-300 hover:border-purple-500"
-                >
-                  <Brain className="h-4 w-4 text-purple-400" />
-                  AI Analyze All
-                </button>
-              )}
-
-              <div className="flex items-center gap-0.5">
-                <button
-                  type="button"
-                  onClick={() => sortSelected("asc")}
-                  className="px-3 py-2 text-xs rounded-l-xl border font-bold flex items-center justify-center gap-1 bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-indigo-300"
-                >
-                  <ArrowUpDown className="h-4 w-4 text-indigo-400" />
-                  Sort ↑
-                </button>
-                <button
-                  type="button"
-                  onClick={() => sortSelected("desc")}
-                  className="px-3 py-2 text-xs rounded-r-xl border-t border-r border-b font-bold flex items-center justify-center gap-1 bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-indigo-300"
-                >
-                  Sort ↓
-                </button>
-              </div>
-
-              <button
-                type="button"
-                onClick={exportIndividual}
-                className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-1.5 cursor-pointer bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-cyan-300 hover:border-cyan-500/40"
-              >
-                <ImageIcon className="h-4 w-4 text-cyan-400" />
-                Export
-              </button>
-
-              <button
-                type="button"
-                onClick={copyMetadata}
-                className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-1.5 cursor-pointer bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-teal-300 hover:border-teal-500/40"
-              >
-                <ClipboardCopy className="h-4 w-4 text-teal-400" />
-                Copy Metadata
-              </button>
-
-              <div className="flex items-center gap-1.5">
-                <MoveRight className="h-4 w-4 text-orange-400 shrink-0" />
-                <input
-                  type="number"
-                  min={1}
-                  max={totalCount}
-                  value={moveToPos}
-                  onChange={(e) => setMoveToPos(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-12 px-1.5 py-1.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white text-[10px] font-mono focus:outline-none focus:border-orange-500/60 text-center"
-                />
-                <button
-                  type="button"
-                  onClick={() => moveToPosition(moveToPos)}
-                  disabled={isProcessing || busyLocal}
-                  className="px-3 py-1.5 text-xs rounded-lg bg-orange-600/20 border border-orange-500/40 hover:bg-orange-600/45 text-orange-300 font-bold transition-all cursor-pointer"
-                >
-                  Move
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>,
-    document.body
-  );
+export function TimelineSelectionBar(props: FloatingSelectionBarProps) {
+  return <FloatingSelectionBar {...props} isTimeline={true} />;
 }

@@ -125,6 +125,37 @@ const EditorPage: React.FC<EditorPageProps> = ({
     handleRenderFinalVideo,
   } = appLogic;
 
+  const [selectedPanelIds, setSelectedPanelIds] = React.useState<Set<number>>(
+    new Set()
+  );
+
+  // Clear timeline selection when assets are selected, and vice-versa
+  const handleSetSelectedScraped = React.useCallback(
+    (value: React.SetStateAction<string[]>) => {
+      setSelectedScraped((prev) => {
+        const next = typeof value === "function" ? value(prev) : value;
+        if (next.length > 0) {
+          setSelectedPanelIds(new Set());
+        }
+        return next;
+      });
+    },
+    [setSelectedScraped]
+  );
+
+  const handleSetSelectedPanelIds = React.useCallback(
+    (value: React.SetStateAction<Set<number>>) => {
+      setSelectedPanelIds((prev) => {
+        const next = typeof value === "function" ? value(prev) : value;
+        if (next.size > 0) {
+          setSelectedScraped([]);
+        }
+        return next;
+      });
+    },
+    [setSelectedScraped]
+  );
+
   const [isSaving, setIsSaving] = React.useState(false);
 
   React.useEffect(() => {
@@ -337,6 +368,8 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   handleSaveStoryboard={handleSave}
                   handleCancelBatch={handleCancelBatch}
                   audioFeedback={audioFeedback}
+                  selectedPanelIds={selectedPanelIds}
+                  setSelectedPanelIds={handleSetSelectedPanelIds}
                 />
               </div>
 
@@ -356,7 +389,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                     scrapedImages={scrapedImages}
                     isScraping={isScraping}
                     selectedScraped={selectedScraped}
-                    setSelectedScraped={setSelectedScraped}
+                    setSelectedScraped={handleSetSelectedScraped}
                     setScrapedImages={setScrapedImages}
                     mergingIndices={mergingIndices}
                     setConsoleLogs={() => {}}
