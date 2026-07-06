@@ -5,7 +5,7 @@
 // --- React & State Hooks ---
 import React from "react";
 import { createPortal } from "react-dom";
-import { AlertTriangle, X } from "lucide-react";
+import { AlertTriangle, X, ArrowLeft, Sliders } from "lucide-react";
 
 // --- Custom Logic Hooks ---
 import {
@@ -1109,6 +1109,8 @@ export default function App() {
             <AppWorkspace
               isDashboardOnly={isWorkspaceOnly}
               projectId={projectId}
+              seriesSlug={seriesSlugState}
+              chapterSlug={chapterSlugState}
               isGeneratingStoryboard={isGeneratingStoryboard}
               handleGenerateStoryboardAI={handleGenerateStoryboardAI}
               panels={panels}
@@ -1239,21 +1241,34 @@ export default function App() {
           {/* PAGE VIEW 2: Advanced System Configuration Settings */}
           {isSettingsPath && (
             <div className="page-transition w-full flex-1 flex flex-col max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6">
-              <div className="flex items-center justify-between border-b border-neutral-800 pb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
                 <div>
-                  <h2 className="text-2xl font-bold text-white tracking-tight">
+                  <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1.5">
+                    <span
+                      className="hover:text-purple-400 cursor-pointer"
+                      onClick={handleNavigateHome}
+                    >
+                      Dashboard
+                    </span>
+                    <span>&gt;</span>
+                    <span className="text-purple-400">Settings</span>
+                  </div>
+                  <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+                    <div className="icon-pill icon-pill--purple">
+                      <Sliders className="h-5 w-5" />
+                    </div>
                     System Configuration Settings
                   </h2>
-                  <p className="text-xs text-neutral-400 font-mono">
-                    Manage voice synthesis, music composition, and output
-                    rendering profiles
+                  <p className="text-xs text-neutral-400 font-mono mt-0.5">
+                    Manage voice synthesis, music composition, and output rendering profiles
                   </p>
                 </div>
                 <button
                   onClick={handleNavigateHome}
-                  className="px-4 py-2 bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-xl text-xs font-mono transition-all hover:bg-neutral-800/80 cursor-pointer"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg shadow-purple-950/30"
                 >
-                  ← Dashboard
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                  Dashboard
                 </button>
               </div>
               <AdvancedSettings

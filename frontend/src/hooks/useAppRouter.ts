@@ -298,10 +298,12 @@ export function useAppRouter({
       ) {
         const params = new URLSearchParams(window.location.search);
         const hasProjId = params.has("id") || params.has("project_id");
+        const hasSlugs = /^\/workspace\/editor\/series\/[^\/]+\/chapters\/[^\/]+\/?$/.test(path);
         if (
           scrapedImagesRef.current.length === 0 &&
           panelsRef.current.length === 0 &&
-          !hasProjId
+          !hasProjId &&
+          !hasSlugs
         ) {
           window.history.replaceState({}, "", "/dashboard");
           setCurrentPath("/dashboard");

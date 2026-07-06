@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { UserCheck } from "lucide-react";
+import { UserCheck, ArrowLeft } from "lucide-react";
 import type { GeneratedPanel, CharacterBio } from "@/types";
 import CharacterProfileCard from "./CharacterProfileCard.js";
 import CharacterAutoDetector from "./CharacterAutoDetector.js";
@@ -82,22 +82,34 @@ const CharacterProfilePage = React.memo(
 
     return (
       <div className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in">
-        <div className="flex items-center justify-between border-b border-neutral-850 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-              <UserCheck className="h-5 w-5 text-purple-400" />
+            <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1.5">
+              <span
+                className="hover:text-purple-400 cursor-pointer"
+                onClick={onNavigateHome}
+              >
+                Dashboard
+              </span>
+              <span>&gt;</span>
+              <span className="text-purple-400">Character DB</span>
+            </div>
+            <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+              <div className="icon-pill icon-pill--purple">
+                <UserCheck className="h-5 w-5" />
+              </div>
               AI Character Database Profile Manager
             </h2>
             <p className="text-xs text-neutral-400 font-mono mt-0.5">
-              Compile visual biography stats and character assets from
-              storyboard scripts
+              Compile visual biography stats and character assets from storyboard scripts
             </p>
           </div>
           <button
             onClick={onNavigateHome}
-            className="px-4 py-2 bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-xl text-xs font-mono transition-all hover:bg-neutral-850 cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg shadow-purple-950/30"
           >
-            ← Dashboard
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Dashboard
           </button>
         </div>
 
