@@ -1,6 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+
+// NOTE: This project uses a custom route/navigation system (see useAppRouter).
+// Avoid react-router-dom here to prevent runtime errors like:
+// "useNavigate() may be used only in the context of a <Router> component".
+
 import {
+
   Search,
   Loader,
   AlertCircle,
@@ -48,8 +53,6 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
   addNotification,
   fetchWithInterceptor,
 }) => {
-  const navigate = useNavigate();
-
   const [urlInput, setUrlInput] = useState("");
   const [titleNoInput, setTitleNoInput] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
@@ -170,7 +173,10 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
     onEpisodeSelect?.(episode);
 
     // Instant route to editor, passing episode.url for the backend import.
-    navigate(`/editor?importUrl=${encodeURIComponent(episode.url)}`);
+    // Use native navigation (this app has its own router abstraction too).
+    window.location.assign(
+      `/editor?importUrl=${encodeURIComponent(episode.url)}`
+    );
   };
 
   const handleAddToFavorites = () => {
