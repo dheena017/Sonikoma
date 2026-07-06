@@ -140,6 +140,7 @@ body {
 
 /* ── Neutral background opacity variants ─────────────────── */
 [data-mode="light"] .bg-neutral-950,
+[data-mode="light"] .bg-neutral-955,
 [data-mode="light"] .bg-neutral-955\/40,
 [data-mode="light"] .bg-neutral-950\/95,
 [data-mode="light"] .bg-neutral-950\/90,
@@ -180,20 +181,35 @@ body {
 
 /* ── Hardcoded near-black hex backgrounds ─────────────────
    Every distinct dark hex found across components:          */
+[data-mode="light"] .bg-\[\#040406\],
+[data-mode="light"] .bg-\[\#050507\],
 [data-mode="light"] .bg-\[\#070709\],
 [data-mode="light"] .bg-\[\#09090b\],
 [data-mode="light"] .bg-\[\#060608\],
 [data-mode="light"] .bg-\[\#08080c\],
 [data-mode="light"] .bg-\[\#0a0a0b\],
+[data-mode="light"] .bg-\[\#0a0a0e\],
+[data-mode="light"] .bg-\[\#0a0a0e\]\/90,
+[data-mode="light"] .bg-\[\#0a0a0e\]\/80,
+[data-mode="light"] .bg-\[\#0a0a0e\]\/60,
+[data-mode="light"] .bg-\[\#0a0a0e\]\/50,
 [data-mode="light"] .bg-\[\#0a0a0f\],
+[data-mode="light"] .bg-\[\#0a0a0f\]\/50,
 [data-mode="light"] .bg-\[\#0b0b0e\],
 [data-mode="light"] .bg-\[\#0c0c0e\],
+[data-mode="light"] .bg-\[\#0c0c0e\]\/30,
 [data-mode="light"] .bg-\[\#0c0c10\],
+[data-mode="light"] .bg-\[\#0c0c14\],
 [data-mode="light"] .bg-\[\#0d0d0f\],
 [data-mode="light"] .bg-\[\#0d0d10\],
 [data-mode="light"] .bg-\[\#0e0e13\],
 [data-mode="light"] .bg-\[\#0f0f13\],
 [data-mode="light"] .bg-\[\#111113\],
+[data-mode="light"] .bg-\[\#111115\],
+[data-mode="light"] .bg-\[\#111116\],
+[data-mode="light"] .bg-\[\#111116\]\/85,
+[data-mode="light"] .bg-\[\#111116\]\/80,
+[data-mode="light"] .bg-\[\#111116\]\/60,
 [data-mode="light"] .bg-\[\#121217\],
 [data-mode="light"] .bg-\[\#141416\] {
   background-color: #f9f9fb !important;
@@ -239,7 +255,8 @@ body {
   color: #18181b !important;
 }
 [data-mode="light"] .text-neutral-150,
-[data-mode="light"] .text-neutral-200 {
+[data-mode="light"] .text-neutral-200,
+[data-mode="light"] .text-neutral-205 {
   color: #27272a !important;
 }
 [data-mode="light"] .text-neutral-250,
@@ -248,8 +265,47 @@ body {
 }
 [data-mode="light"] .text-neutral-350,
 [data-mode="light"] .text-neutral-400,
-[data-mode="light"] .text-neutral-450 {
+[data-mode="light"] .text-neutral-450,
+[data-mode="light"] .text-neutral-455 {
   color: #52525b !important;
+}
+[data-mode="light"] .text-purple-455 {
+  color: #6d28d9 !important;
+}
+[data-mode="light"] .text-purple-400 {
+  color: #7c3aed !important;
+}
+[data-mode="light"] .text-purple-300 {
+  color: #6d28d9 !important;
+}
+[data-mode="light"] .text-indigo-400 {
+  color: #4f46e5 !important;
+}
+[data-mode="light"] .text-violet-400 {
+  color: #7c3aed !important;
+}
+[data-mode="light"] .text-cyan-400 {
+  color: #0891b2 !important;
+}
+[data-mode="light"] .text-amber-400 {
+  color: #d97706 !important;
+}
+[data-mode="light"] .text-yellow-400 {
+  color: #ca8a04 !important;
+}
+[data-mode="light"] .text-red-400 {
+  color: #dc2626 !important;
+}
+[data-mode="light"] .text-rose-455,
+[data-mode="light"] .text-rose-400 {
+  color: #e11d48 !important;
+}
+[data-mode="light"] .text-emerald-455,
+[data-mode="light"] .text-emerald-400 {
+  color: #059669 !important;
+}
+[data-mode="light"] .text-green-400 {
+  color: #16a34a !important;
 }
 [data-mode="light"] .text-neutral-500 {
   color: #71717a !important;
@@ -270,7 +326,8 @@ body {
 [data-mode="light"] .border-neutral-900 {
   border-color: #e4e4e7 !important;
 }
-[data-mode="light"] .border-neutral-850 {
+[data-mode="light"] .border-neutral-850,
+[data-mode="light"] .border-neutral-855 {
   border-color: #d4d4d8 !important;
 }
 [data-mode="light"] .border-neutral-800 {
@@ -345,6 +402,49 @@ body {
 /* Range / slider track */
 [data-mode="light"] input[type="range"] {
   background-color: #e0e0e6 !important;
+}
+
+/* ── Hover Overrides in Light Mode ────────────────────────── */
+[data-mode="light"] .hover\:bg-neutral-950:hover,
+[data-mode="light"] .hover\:bg-neutral-955:hover {
+  background-color: #e4e4e7 !important;
+}
+[data-mode="light"] .hover\:bg-neutral-900:hover {
+  background-color: #ebebef !important;
+}
+[data-mode="light"] .hover\:bg-neutral-850:hover {
+  background-color: #d4d4d8 !important;
+}
+[data-mode="light"] .hover\:bg-neutral-800:hover {
+  background-color: #c8c8cf !important;
+}
+[data-mode="light"] .hover\:bg-neutral-700:hover {
+  background-color: #b4b4be !important;
+}
+[data-mode="light"] .hover\:bg-white\/5:hover {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+}
+[data-mode="light"] .hover\:bg-white\/10:hover {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+[data-mode="light"] .hover\:bg-white\/20:hover {
+  background-color: rgba(0, 0, 0, 0.12) !important;
+}
+[data-mode="light"] .hover\:bg-black\/60:hover {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+}
+[data-mode="light"] .hover\:bg-black\/80:hover {
+  background-color: rgba(0, 0, 0, 0.25) !important;
+}
+[data-mode="light"] .hover\:text-white:hover,
+[data-mode="light"] .hover\:text-neutral-50:hover,
+[data-mode="light"] .hover\:text-neutral-100:hover {
+  color: #18181b !important;
+}
+[data-mode="light"] .hover\:text-neutral-200:hover,
+[data-mode="light"] .hover\:text-neutral-300:hover,
+[data-mode="light"] .hover\:text-neutral-400:hover {
+  color: #27272a !important;
 }
 
 /* ── Scrollbars ───────────────────────────────────────────── */

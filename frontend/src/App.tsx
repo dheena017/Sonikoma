@@ -996,8 +996,10 @@ export default function App() {
 
         <div
           className={`${!isSidebarOpen ? "lg:pl-20" : ""} ${
-            !isSidebarOpen && !isProEditorPage ? "pt-[59px]" : ""
-          } flex-grow flex-1 flex flex-col min-h-screen transition-all duration-300`}
+            !isSidebarOpen && !isProEditorPage
+              ? "pt-[59px] min-h-[calc(100vh-59px)]"
+              : "min-h-screen"
+          } flex-grow flex-1 flex flex-col transition-all duration-300`}
         >
           {/* Impersonation Banner */}
           {localStorage.getItem("sonikoma_admin_token") && (

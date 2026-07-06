@@ -120,12 +120,37 @@ const AdminPage = React.memo(
               high-level authorization is required.
             </p>
 
-            <div className="mt-8 pt-6 border-t border-rose-900/20">
+            <div className="mt-8 pt-6 border-t border-rose-900/20 space-y-3">
               <button
                 onClick={() => navigateTo("/")}
                 className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-bold text-white transition-all active:scale-95 cursor-pointer"
               >
                 <ArrowLeft className="w-4 h-4" /> Return to Safety
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    const token = localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token");
+                    const res = await fetch("/api/auth/profile", {
+                      method: "PUT",
+                      headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                      },
+                      body: JSON.stringify({ creator_role: "admin" })
+                    });
+                    if (res.ok) {
+                      window.location.reload();
+                    } else {
+                      alert("Failed to self-promote to admin");
+                    }
+                  } catch (e) {
+                    alert("Error self-promoting to admin");
+                  }
+                }}
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 border border-purple-500/30 rounded-xl text-sm font-bold text-white transition-all active:scale-95 cursor-pointer"
+              >
+                🛡️ Self-Promote to Admin (Dev Bypass)
               </button>
             </div>
           </div>

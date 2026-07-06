@@ -142,13 +142,13 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
           onMouseLeave={() => setHover(false)}
           className={`p-2.5 transition-all duration-300 rounded-xl cursor-pointer relative flex items-center justify-center group-active:scale-95 ${
             active
-              ? "bg-violet-500/10 text-white border border-violet-500/20 shadow-[inset_0_0_12px_rgba(139,92,246,0.15)]"
-              : "text-neutral-500 hover:text-neutral-200 hover:bg-white/5 border border-transparent hover:scale-105"
+              ? "bg-violet-500/10 text-neutral-100 border border-violet-500/20 shadow-[inset_0_0_12px_rgba(139,92,246,0.15)]"
+              : "text-neutral-500 hover:text-neutral-200 hover:bg-neutral-900 border border-transparent hover:scale-105"
           }`}
         >
           <Icon
             className={`w-[18px] h-[18px] transition-transform duration-300 ${
-              active ? "text-violet-400" : "group-hover:text-neutral-200"
+              active ? "text-violet-400" : "group-hover:text-neutral-300"
             }`}
           />
         </button>
@@ -159,7 +159,7 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
 
   return (
     // Fixed below the header, hidden scrollbars, premium glassmorphism
-    <aside className="fixed top-16 bottom-0 left-0 w-20 bg-[#0a0a0e]/80 backdrop-blur-xl border-r border-violet-900/10 hidden lg:flex flex-col items-center py-4 z-40 shadow-[4px_0_24px_rgba(0,0,0,0.4)]">
+    <aside className="fixed top-[59px] bottom-0 left-0 w-20 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 hidden lg:flex flex-col items-center py-4 z-40 shadow-[4px_0_24px_rgba(0,0,0,0.3)]">
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
           <div
@@ -179,7 +179,7 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
       </div>
 
       {/* Return to App Button */}
-      <div className="mt-auto pt-4 flex justify-center w-full pb-2 border-t border-white/[0.02]">
+      <div className="mt-auto pt-4 flex justify-center w-full pb-2 border-t border-neutral-800/60">
         <div className="relative group w-full flex justify-center">
           <button
             onClick={() => navigateTo("/dashboard")}

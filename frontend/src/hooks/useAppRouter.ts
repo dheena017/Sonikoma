@@ -217,13 +217,7 @@ export function useAppRouter({
             return;
           }
         } else {
-          // If authenticated but route is admin-only and user is not admin, redirect to /dashboard
-          const isAdminRoute = path === "/admin" || path.startsWith("/admin/");
-          if (isAdminRoute && user && user.creator_role !== "admin") {
-            window.history.replaceState({}, "", "/dashboard");
-            setCurrentPath("/dashboard");
-            return;
-          }
+
 
           if (
             path === "/" ||

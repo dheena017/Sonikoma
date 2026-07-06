@@ -259,7 +259,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
       setIsFocusMode={setIsFocusMode}
       navigateTo={navigateTo}
     >
-      <main className="flex-1 w-full relative bg-black min-w-0">
+      <main className="flex-1 w-full relative bg-neutral-950 min-w-0">
         {isInitializing && scrapedImages.length === 0 ? (
           <div className="w-full h-full flex flex-col items-center justify-center">
             {skeletonLoader}

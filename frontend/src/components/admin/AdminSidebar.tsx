@@ -138,15 +138,15 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
   };
 
   const sidebarContent = (
-    <div className="flex h-full flex-col bg-[#0a0a0e]/95 backdrop-blur-3xl border-r border-violet-900/20 shadow-[8px_0_32px_rgba(0,0,0,0.6)]">
+    <div className="flex h-full flex-col bg-neutral-950 backdrop-blur-3xl border-r border-neutral-800 shadow-[8px_0_32px_rgba(0,0,0,0.4)]">
       {/* Sidebar Header */}
-      <div className="h-16 flex items-center justify-between px-6 border-b border-violet-900/10 shrink-0">
+      <div className="h-16 flex items-center justify-between px-6 border-b border-neutral-800/60 shrink-0">
         <div className="flex items-center gap-3">
           <div className="p-1.5 bg-violet-600 rounded-lg shadow-lg shadow-violet-600/30">
             <Shield className="w-5 h-5 text-white" />
           </div>
           <div>
-            <span className="font-black text-white tracking-tight block leading-none text-sm">
+            <span className="font-black text-neutral-100 tracking-tight block leading-none text-sm">
               Command
             </span>
             <span className="text-[9px] text-violet-400 font-mono uppercase tracking-widest block mt-0.5 leading-none">
@@ -156,7 +156,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
         </div>
         <button
           onClick={onClose}
-          className="p-1.5 rounded-lg border border-white/10 bg-white/5 text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer active:scale-95"
+          className="p-1.5 rounded-lg border border-neutral-800 bg-neutral-900 text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800 transition-all cursor-pointer active:scale-95"
         >
           <X className="w-4 h-4" />
         </button>
@@ -190,15 +190,15 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                       }}
                       className={`w-full flex items-center gap-3.5 px-4 py-2.5 rounded-2xl transition-all duration-300 group relative cursor-pointer active:scale-[0.98] ${
                         active
-                          ? "bg-violet-500/10 text-white shadow-[inset_0_0_16px_rgba(139,92,246,0.1)] border border-violet-500/20"
-                          : "text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent"
+                          ? "bg-violet-500/10 text-neutral-100 shadow-[inset_0_0_16px_rgba(139,92,246,0.1)] border border-violet-500/20"
+                          : "text-neutral-500 hover:text-neutral-200 hover:bg-neutral-900 border border-transparent"
                       }`}
                     >
                       <item.icon
                         className={`w-[18px] h-[18px] shrink-0 transition-transform duration-300 ${
                           active
                             ? "text-violet-400"
-                            : "text-neutral-500 group-hover:scale-110 group-hover:text-neutral-300"
+                            : "text-neutral-500 group-hover:scale-110 group-hover:text-neutral-400"
                         }`}
                       />
                       <span className="text-sm font-bold tracking-wide">
@@ -214,7 +214,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       </div>
 
       {/* Sidebar Footer */}
-      <div className="p-5 border-t border-white/[0.02] bg-gradient-to-t from-black/20 to-transparent">
+      <div className="p-5 border-t border-neutral-800/60">
         <button
           onClick={() => {
             navigateTo("/dashboard");
