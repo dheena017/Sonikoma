@@ -15,7 +15,7 @@ export default function DashboardAIPipeline() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="flex gap-4">
-          <div className="h-10 w-10 rounded-xl bg-purple-950/40 border border-purple-800/30 flex items-center justify-center shrink-0 text-purple-400">
+          <div className="icon-pill icon-pill--purple">
             <Scissors className="h-5 w-5" />
           </div>
           <div>
@@ -30,7 +30,7 @@ export default function DashboardAIPipeline() {
         </div>
 
         <div className="flex gap-4">
-          <div className="h-10 w-10 rounded-xl bg-indigo-950/40 border border-indigo-800/30 flex items-center justify-center shrink-0 text-indigo-400">
+          <div className="icon-pill icon-pill--indigo">
             <Sliders className="h-5 w-5" />
           </div>
           <div>
@@ -46,7 +46,7 @@ export default function DashboardAIPipeline() {
         </div>
 
         <div className="flex gap-4">
-          <div className="h-10 w-10 rounded-xl bg-cyan-950/40 border border-cyan-800/30 flex items-center justify-center shrink-0 text-cyan-400">
+          <div className="icon-pill icon-pill--cyan">
             <Volume2 className="h-5 w-5" />
           </div>
           <div>
@@ -61,7 +61,7 @@ export default function DashboardAIPipeline() {
         </div>
 
         <div className="flex gap-4">
-          <div className="h-10 w-10 rounded-xl bg-pink-950/40 border border-pink-800/30 flex items-center justify-center shrink-0 text-pink-400">
+          <div className="icon-pill icon-pill--pink">
             <Cpu className="h-5 w-5" />
           </div>
           <div>

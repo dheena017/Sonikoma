@@ -27,6 +27,131 @@
   border-color: #27272a !important;
 }
 
+/* ================================================================
+   GLOBAL ICON PILL SYSTEM
+   iOS-style rounded container for all icons across the full site.
+   Use .icon-pill on any icon wrapper div, or colour variants like
+   .icon-pill--purple / --indigo / --cyan etc.
+   ================================================================ */
+
+/* ── Base utility class ─────────────────────────────────────── */
+.icon-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.875rem;
+  background-color: #262629;
+  border: 1px solid #3f3f46;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  transition: background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+  flex-shrink: 0;
+}
+.icon-pill svg { width: 18px; height: 18px; color: #a1a1aa; transition: color 200ms ease; }
+
+/* Active state */
+.icon-pill.active, .icon-pill--active {
+  background-color: rgba(168,85,247,0.20);
+  border-color: rgba(168,85,247,0.40);
+  box-shadow: 0 0 14px rgba(168,85,247,0.22);
+}
+.icon-pill.active svg, .icon-pill--active svg { color: #c084fc; }
+
+/* Hover via group */
+.group:hover .icon-pill:not(.active):not(.icon-pill--active) {
+  background-color: rgba(168,85,247,0.10);
+  border-color: rgba(168,85,247,0.20);
+}
+.group:hover .icon-pill:not(.active):not(.icon-pill--active) svg { color: #c084fc; }
+
+/* ── Colour variants ─────────────────────────────────────────── */
+.icon-pill--purple  { background-color: rgba(168,85,247,0.10);  border-color: rgba(168,85,247,0.22); }
+.icon-pill--purple svg  { color: #c084fc; }
+.icon-pill--violet  { background-color: rgba(139,92,246,0.10);  border-color: rgba(139,92,246,0.22); }
+.icon-pill--violet svg  { color: #a78bfa; }
+.icon-pill--indigo  { background-color: rgba(99,102,241,0.10);  border-color: rgba(99,102,241,0.22); }
+.icon-pill--indigo svg  { color: #818cf8; }
+.icon-pill--cyan    { background-color: rgba(6,182,212,0.10);   border-color: rgba(6,182,212,0.22); }
+.icon-pill--cyan svg    { color: #22d3ee; }
+.icon-pill--emerald { background-color: rgba(16,185,129,0.10);  border-color: rgba(16,185,129,0.22); }
+.icon-pill--emerald svg { color: #34d399; }
+.icon-pill--rose    { background-color: rgba(244,63,94,0.10);   border-color: rgba(244,63,94,0.22); }
+.icon-pill--rose svg    { color: #fb7185; }
+.icon-pill--amber   { background-color: rgba(245,158,11,0.10);  border-color: rgba(245,158,11,0.22); }
+.icon-pill--amber svg   { color: #fbbf24; }
+.icon-pill--pink    { background-color: rgba(236,72,153,0.10);  border-color: rgba(236,72,153,0.22); }
+.icon-pill--pink svg    { color: #f472b6; }
+.icon-pill--red     { background-color: rgba(239,68,68,0.10);   border-color: rgba(239,68,68,0.22); }
+.icon-pill--red svg     { color: #f87171; }
+.icon-pill--sky     { background-color: rgba(14,165,233,0.10);  border-color: rgba(14,165,233,0.22); }
+.icon-pill--sky svg     { color: #38bdf8; }
+
+/* ── Light mode overrides ────────────────────────────────────── */
+[data-mode="light"] .icon-pill {
+  background-color: #f4f4f5;
+  border-color: #e4e4e7;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+[data-mode="light"] .icon-pill svg { color: #52525b; }
+[data-mode="light"] .icon-pill.active,
+[data-mode="light"] .icon-pill--active {
+  background-color: rgba(147,51,234,0.10);
+  border-color: rgba(147,51,234,0.25);
+  box-shadow: 0 0 10px rgba(147,51,234,0.12);
+}
+[data-mode="light"] .icon-pill.active svg,
+[data-mode="light"] .icon-pill--active svg { color: #7c3aed; }
+[data-mode="light"] .group:hover .icon-pill:not(.active):not(.icon-pill--active) {
+  background-color: rgba(147,51,234,0.08);
+  border-color: rgba(147,51,234,0.18);
+}
+[data-mode="light"] .group:hover .icon-pill:not(.active):not(.icon-pill--active) svg { color: #7c3aed; }
+[data-mode="light"] .icon-pill--purple  { background-color: rgba(147,51,234,0.08);  border-color: rgba(147,51,234,0.20); }
+[data-mode="light"] .icon-pill--purple svg  { color: #7c3aed; }
+[data-mode="light"] .icon-pill--violet  { background-color: rgba(109,40,217,0.08);  border-color: rgba(109,40,217,0.20); }
+[data-mode="light"] .icon-pill--violet svg  { color: #6d28d9; }
+[data-mode="light"] .icon-pill--indigo  { background-color: rgba(79,70,229,0.08);   border-color: rgba(79,70,229,0.20); }
+[data-mode="light"] .icon-pill--indigo svg  { color: #4f46e5; }
+[data-mode="light"] .icon-pill--cyan    { background-color: rgba(8,145,178,0.08);   border-color: rgba(8,145,178,0.20); }
+[data-mode="light"] .icon-pill--cyan svg    { color: #0891b2; }
+[data-mode="light"] .icon-pill--emerald { background-color: rgba(5,150,105,0.08);   border-color: rgba(5,150,105,0.20); }
+[data-mode="light"] .icon-pill--emerald svg { color: #059669; }
+[data-mode="light"] .icon-pill--rose    { background-color: rgba(225,29,72,0.08);   border-color: rgba(225,29,72,0.20); }
+[data-mode="light"] .icon-pill--rose svg    { color: #e11d48; }
+[data-mode="light"] .icon-pill--amber   { background-color: rgba(217,119,6,0.08);   border-color: rgba(217,119,6,0.20); }
+[data-mode="light"] .icon-pill--amber svg   { color: #d97706; }
+[data-mode="light"] .icon-pill--pink    { background-color: rgba(190,24,93,0.08);   border-color: rgba(190,24,93,0.20); }
+[data-mode="light"] .icon-pill--pink svg    { color: #be185d; }
+[data-mode="light"] .icon-pill--red     { background-color: rgba(220,38,38,0.08);   border-color: rgba(220,38,38,0.20); }
+[data-mode="light"] .icon-pill--red svg     { color: #dc2626; }
+[data-mode="light"] .icon-pill--sky     { background-color: rgba(2,132,199,0.08);   border-color: rgba(2,132,199,0.20); }
+[data-mode="light"] .icon-pill--sky svg     { color: #0284c7; }
+
+/* ── Global upgrade: existing rounded icon containers ──────────
+   The most common icon wrapper pattern: h-10 w-10 rounded-xl.
+   Ensure consistent flex, shrink, and transitions.              */
+div.h-10.w-10.rounded-xl, div.h-11.w-11.rounded-xl,
+div.h-10.w-10.rounded-2xl, div.h-11.w-11.rounded-2xl {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background-color 200ms ease, border-color 200ms ease,
+              box-shadow 200ms ease, transform 200ms ease;
+}
+
+/* ── Icon-only action buttons: subtle lift on hover ─────────── */
+button.bg-neutral-900.rounded-xl,
+button.bg-neutral-800.rounded-xl {
+  transition: background-color 150ms ease, border-color 150ms ease,
+              color 150ms ease, transform 150ms ease;
+}
+button.bg-neutral-900.rounded-xl:hover,
+button.bg-neutral-800.rounded-xl:hover { transform: scale(1.05); }
+button.bg-neutral-900.rounded-xl:active,
+button.bg-neutral-800.rounded-xl:active { transform: scale(0.95); }
+
 select,
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
     [type="color"]

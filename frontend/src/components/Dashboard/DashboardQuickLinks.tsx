@@ -20,7 +20,7 @@ export default function DashboardQuickLinks({
         onClick={onGoToWorkspace}
         className="bg-white/5 hover:bg-white/10 border border-white/5 p-4 rounded-2xl flex items-center gap-4 transition-all group cursor-pointer"
       >
-        <div className="h-10 w-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+        <div className="icon-pill icon-pill--purple group-hover:scale-110 transition-transform">
           <Sparkles className="h-5 w-5" />
         </div>
         <div className="text-left">
@@ -33,7 +33,7 @@ export default function DashboardQuickLinks({
         onClick={onGoToAudioLab}
         className="bg-white/5 hover:bg-white/10 border border-white/5 p-4 rounded-2xl flex items-center gap-4 transition-all group cursor-pointer"
       >
-        <div className="h-10 w-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+        <div className="icon-pill icon-pill--indigo group-hover:scale-110 transition-transform">
           <Volume2 className="h-5 w-5" />
         </div>
         <div className="text-left">
@@ -48,7 +48,7 @@ export default function DashboardQuickLinks({
         onClick={onGoToCharacters}
         className="bg-white/5 hover:bg-white/10 border border-white/5 p-4 rounded-2xl flex items-center gap-4 transition-all group cursor-pointer"
       >
-        <div className="h-10 w-10 rounded-xl bg-pink-500/20 text-pink-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+        <div className="icon-pill icon-pill--pink group-hover:scale-110 transition-transform">
           <Plus className="h-5 w-5" />
         </div>
         <div className="text-left">
@@ -63,7 +63,7 @@ export default function DashboardQuickLinks({
         onClick={onGoToSettings}
         className="bg-white/5 hover:bg-white/10 border border-white/5 p-4 rounded-2xl flex items-center gap-4 transition-all group cursor-pointer"
       >
-        <div className="h-10 w-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+        <div className="icon-pill icon-pill--cyan group-hover:scale-110 transition-transform">
           <Settings className="h-5 w-5" />
         </div>
         <div className="text-left">

@@ -13,7 +13,7 @@ export default function TimelineEmptyState({
         id="panels_timeline_section_empty"
         className="bg-neutral-900/30 rounded-2xl border border-purple-500/20 border-dashed p-10 text-center space-y-4 max-w-4xl mx-auto"
       >
-        <div className="mx-auto h-12 w-12 rounded-xl bg-purple-950/40 border border-purple-500/35 flex items-center justify-center text-purple-400 font-mono text-xl animate-pulse">
+        <div className="icon-pill icon-pill--purple mx-auto animate-pulse h-12 w-12 text-xl font-mono">
           ✦
         </div>
         <div className="space-y-1">
@@ -42,7 +42,7 @@ export default function TimelineEmptyState({
       id="panels_timeline_section_empty"
       className="bg-neutral-900/30 rounded-2xl border border-neutral-800/60 border-dashed p-8 text-center space-y-4"
     >
-      <div className="mx-auto h-12 w-12 rounded-xl bg-neutral-900/80 border border-neutral-800 flex items-center justify-center text-neutral-500 font-mono text-lg">
+      <div className="icon-pill mx-auto h-12 w-12 text-lg font-mono">
         #
       </div>
       <div className="space-y-1">
