@@ -80,6 +80,8 @@ interface AppWorkspaceProps {
   isDashboardOnly?: boolean;
   isGeneratingStoryboard?: boolean;
   handleGenerateStoryboardAI?: () => Promise<void>;
+  seriesSlug?: string | null;
+  chapterSlug?: string | null;
 }
 
 interface StoredProject {
@@ -199,6 +201,8 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
     navigateTo,
     panels = [],
     isDashboardOnly = false,
+    seriesSlug,
+    chapterSlug,
   } = props;
 
   const samplePresets = [
@@ -436,7 +440,13 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
             <button
               onClick={() => {
                 if (!projectId) return;
-                navigateTo?.(`/workspace?id=${projectId}`);
+                if (seriesSlug && chapterSlug) {
+                  navigateTo?.(
+                    `/workspace/editor/series/${seriesSlug}/chapters/${chapterSlug}`
+                  );
+                } else {
+                  navigateTo?.(`/workspace/editor?id=${projectId}`);
+                }
               }}
               className="w-full md:w-auto px-8 py-4 bg-white text-purple-950 font-black rounded-2xl text-xs uppercase tracking-[0.15em] hover:bg-purple-50 transition-all flex items-center justify-center gap-3 shadow-xl active:scale-95 group-hover:shadow-[0_0_30px_rgba(168,85,247,0.2)]"
             >
