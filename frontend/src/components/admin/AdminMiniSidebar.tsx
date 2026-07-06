@@ -140,17 +140,22 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
             setHover(true);
           }}
           onMouseLeave={() => setHover(false)}
-          className={`p-2.5 transition-all duration-300 rounded-xl cursor-pointer relative flex items-center justify-center group-active:scale-95 ${
-            active
-              ? "bg-violet-500/10 text-neutral-100 border border-violet-500/20 shadow-[inset_0_0_12px_rgba(139,92,246,0.15)]"
-              : "text-neutral-500 hover:text-neutral-200 hover:bg-neutral-900 border border-transparent hover:scale-105"
-          }`}
+          className="p-1.5 transition-all duration-300 cursor-pointer relative flex items-center justify-center group-active:scale-95"
         >
-          <Icon
-            className={`w-[18px] h-[18px] transition-transform duration-300 ${
-              active ? "text-violet-400" : "group-hover:text-neutral-300"
+          {/* iOS-style icon pill */}
+          <div
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${
+              active
+                ? "bg-violet-500/20 border border-violet-500/40 shadow-[0_0_14px_rgba(139,92,246,0.25)]"
+                : "bg-neutral-800 border border-neutral-700 group-hover:bg-violet-500/10 group-hover:border-violet-500/20"
             }`}
-          />
+          >
+            <Icon
+              className={`w-[18px] h-[18px] transition-colors duration-300 ${
+                active ? "text-violet-400" : "text-neutral-400 group-hover:text-violet-300"
+              }`}
+            />
+          </div>
         </button>
         <TooltipPortal text={item.label} visible={hover} anchorRect={rect} />
       </div>
