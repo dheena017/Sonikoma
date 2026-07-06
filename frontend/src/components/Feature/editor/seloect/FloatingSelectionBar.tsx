@@ -234,9 +234,12 @@ export function ScraperSelectionToolbar({
       const rect = buttonRef.current.getBoundingClientRect();
       const activePlacement = getSmartPlacement(rect);
       setPlacement(activePlacement);
+      const isRightSide = rect.left + rect.width / 2 > window.innerWidth / 2;
       setCoords({
         top: activePlacement === "down" ? rect.bottom + window.scrollY + 8 : rect.top + window.scrollY - 8,
-        left: rect.left + window.scrollX,
+        left: isRightSide
+          ? rect.right + window.scrollX - 256
+          : rect.left + window.scrollX,
       });
     }
   };
@@ -271,11 +274,27 @@ export function ScraperSelectionToolbar({
     const handleScrollOrResize = () => {
       if (buttonRef.current) {
         const rect = buttonRef.current.getBoundingClientRect();
+        
+        // Auto-close if the button scrolls off-screen in any direction
+        const isOffscreen =
+          rect.bottom < 0 ||
+          rect.top > window.innerHeight ||
+          rect.right < 0 ||
+          rect.left > window.innerWidth;
+
+        if (isOffscreen) {
+          setIsOpen(false);
+          return;
+        }
+
         const activePlacement = getSmartPlacement(rect);
         setPlacement(activePlacement);
+        const isRightSide = rect.left + rect.width / 2 > window.innerWidth / 2;
         setCoords({
           top: activePlacement === "down" ? rect.bottom + window.scrollY + 8 : rect.top + window.scrollY - 8,
-          left: rect.left + window.scrollX,
+          left: isRightSide
+            ? rect.right + window.scrollX - 256
+            : rect.left + window.scrollX,
         });
       }
     };
