@@ -26,7 +26,7 @@ export default function LiveScraperHeader({
         </div>
         <div className="space-y-0.5">
           <div className="flex items-center gap-3">
-            <h3 className="font-bold text-sm text-white">
+            <h3 className="font-bold text-sm text-neutral-100">
               Live Asset Extraction
             </h3>
             {imagesCount > 0 && (
@@ -46,7 +46,7 @@ export default function LiveScraperHeader({
           type="button"
           onClick={handleDownloadZip}
           disabled={imagesCount === 0 || isZipping}
-          className="text-[10px] font-mono border border-neutral-800/70 bg-neutral-950/60 hover:bg-neutral-900 text-neutral-300 hover:text-white rounded-lg px-3.5 py-1.5 flex items-center gap-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="text-[10px] font-mono border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-100 rounded-lg px-3.5 py-1.5 flex items-center gap-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <Download className="h-3.5 w-3.5" />
           <span>{isZipping ? "Downloading..." : "Download"}</span>

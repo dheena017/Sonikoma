@@ -55,7 +55,7 @@ export function PanelCardControls({
             "w-full flex items-center justify-center gap-1.5 text-[9px] py-1.5 rounded-lg font-mono font-medium tracking-wide transition-all duration-150 cursor-pointer border",
             isMerging
               ? "bg-indigo-950/30 border-indigo-900/30 text-indigo-400 opacity-70 cursor-wait"
-              : "bg-indigo-950/40 hover:bg-indigo-900/60 border-indigo-800/40 hover:border-indigo-600/50 text-indigo-200 hover:text-white hover:shadow-[0_0_8px_rgba(99,102,241,0.25)]",
+              : "bg-indigo-950/40 hover:bg-indigo-900/60 border-indigo-800/40 hover:border-indigo-600/50 text-indigo-400 hover:text-indigo-300 hover:shadow-[0_0_8px_rgba(99,102,241,0.25)]",
           ].join(" ")}
         >
           {isMerging ? (
