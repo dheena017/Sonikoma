@@ -16,7 +16,10 @@ import os
 import jwt
 import database.db as db
 
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "sonikoma_super_secret_key_change_me")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+if not SECRET_KEY:
+    raise ValueError("FATAL: JWT_SECRET_KEY environment variable is not set.")
+
 ALGORITHM = "HS256"
 
 def get_optional_user_id(request: Request) -> Optional[str]:
