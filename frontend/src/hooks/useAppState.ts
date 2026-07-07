@@ -562,14 +562,9 @@ export function useAppState() {
             localStorage.removeItem("active_chapter_slug");
           }
           if (data.project.series_slug && data.project.chapter_slug) {
-            const isEditor =
-              window.location.pathname.startsWith("/editor") ||
-              window.location.pathname === "/project-editor";
-            if (!isEditor) {
-              const newPath = `/workspace/editor/series/${data.project.series_slug}/chapters/${data.project.chapter_slug}`;
-              if (window.location.pathname !== newPath) {
-                window.history.replaceState(null, "", newPath);
-              }
+            const newPath = `/workspace/editor/series/${data.project.series_slug}/chapters/${data.project.chapter_slug}`;
+            if (window.location.pathname !== newPath) {
+              window.history.replaceState(null, "", newPath);
             }
           }
           setTargetUrl(data.project.url || "");

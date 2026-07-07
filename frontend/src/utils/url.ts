@@ -232,8 +232,37 @@ export function getSourceIcon(urlStr: string) {
 
 export function getProxiedImageUrl(url?: string): string {
   if (!url) return "";
+  if (url.includes("/api/proxy-image") || url.includes("/api/proxy/image")) {
+    return url;
+  }
   if (url.startsWith("http") && !url.startsWith("/api/")) {
     return `/api/proxy-image?url=${encodeURIComponent(url)}`;
   }
   return url;
 }
+
+export function convertToViewerUrl(url: string, chapterNum: string): string {
+  if (!url || !chapterNum) return url;
+  try {
+    const cleanUrl = url.trim();
+    if ((cleanUrl.includes("webtoons.com") || cleanUrl.includes("webtoon.com")) && cleanUrl.includes("title_no=")) {
+      const urlObj = new URL(cleanUrl.startsWith("http") ? cleanUrl : "https://" + cleanUrl);
+      const titleNo = urlObj.searchParams.get("title_no");
+      const hasEpisodeNo = urlObj.searchParams.has("episode_no") || urlObj.searchParams.has("episode");
+      
+      if (titleNo && !hasEpisodeNo) {
+        if (urlObj.pathname.endsWith("/list")) {
+          urlObj.pathname = urlObj.pathname.substring(0, urlObj.pathname.length - 5) + "/viewer";
+        } else if (!urlObj.pathname.endsWith("/viewer")) {
+          urlObj.pathname = urlObj.pathname.replace(/\/$/, "") + "/viewer";
+        }
+        urlObj.searchParams.set("episode_no", chapterNum);
+        return urlObj.toString();
+      }
+    }
+  } catch (e) {
+    console.error("Error converting Webtoon URL:", e);
+  }
+  return url;
+}
+

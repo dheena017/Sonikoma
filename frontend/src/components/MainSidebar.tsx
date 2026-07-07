@@ -19,6 +19,7 @@ import {
   FolderOpen,
   Award,
   Menu,
+  Zap,
 } from "lucide-react";
 
 import { useThemeMode } from "../hooks/useThemeMode";
@@ -170,6 +171,13 @@ const SidebarInner = ({
           onClick: () => navigateTo("/projects"),
           enabled: true,
         },
+        {
+          label: "WEBTOON Scraper",
+          icon: Zap,
+          active: currentPath === "/episode-scraper",
+          onClick: () => navigateTo("/episode-scraper"),
+          enabled: true,
+        },
       ],
     },
 
@@ -258,7 +266,7 @@ const SidebarInner = ({
   const sidebarContent = (
     <div className="flex h-full flex-col justify-between p-5 space-y-6">
       {/* BRANDING LOGO */}
-      <div className="space-y-6">
+      <div className="space-y-6 flex flex-col flex-grow min-h-0">
         <div className="flex items-center justify-between">
           <div
             className="flex items-center gap-3 cursor-pointer select-none hover:opacity-90 transition-opacity"
@@ -297,7 +305,7 @@ const SidebarInner = ({
         </div>
 
         {/* NAVIGATION MENUS */}
-        <div className="space-y-6 overflow-y-auto max-h-[calc(100vh-220px)] scrollbar-thin pr-1">
+        <div className="space-y-6 overflow-y-auto flex-grow min-h-0 scrollbar-thin custom-sidebar-scrollbar pr-1">
           {menuItems.map((group) => (
             <div key={group.group} className="space-y-2">
               <h4 className="text-[9px] font-bold text-neutral-500 uppercase tracking-widest font-mono pl-2">

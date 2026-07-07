@@ -5,7 +5,7 @@
 // --- React & State Hooks ---
 import React from "react";
 import { createPortal } from "react-dom";
-import { AlertTriangle, X, ArrowLeft, Sliders } from "lucide-react";
+import { AlertTriangle, X, ArrowLeft, Sliders, Zap } from "lucide-react";
 
 // --- Custom Logic Hooks ---
 import {
@@ -65,7 +65,7 @@ import CTRAnalyticsPage from "./components/Feature/analytics/CTRAnalyticsPage";
 import NotificationsPage from "./components/notification/NotificationsPage";
 import { AdminPage, AdminSidebar, AdminMiniSidebar } from "./components/admin";
 import MiniSidebar from "./components/MainMiniSidebar";
-import YouTubePage from "./components/Feature/youtube/YouTubePage.js";
+import { EpisodeScraperPage } from "./components/Feature/episode-scraper/EpisodeScraperPage";
 
 // ============================================================================
 // SECTION 2: MAIN APP COMPONENT
@@ -512,6 +512,32 @@ export default function App() {
     chapterSlug: chapterSlugState,
   });
 
+  // Trigger automatic scraping if ?importUrl=... is present in the URL on mount or path change
+  React.useEffect(() => {
+    if (!isAuthenticated || authLoading || isInitializing) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const importUrl = params.get("importUrl");
+    const projId = params.get("id") || params.get("project_id");
+
+    if (importUrl && projId && projId.startsWith("temp_")) {
+      console.log(`[Auto Scrape] Triggering import for URL: ${importUrl} on project: ${projId}`);
+      
+      // Clean up the URL parameters so it doesn't trigger again on reload/navigation
+      const newParams = new URLSearchParams(window.location.search);
+      newParams.delete("importUrl");
+      const newSearch = newParams.toString();
+      const newUrl = window.location.pathname + (newSearch ? "?" + newSearch : "");
+      window.history.replaceState(null, "", newUrl);
+
+      // Run the scraping
+      setTargetUrl(importUrl);
+      scrapeImages(importUrl, projId).catch((err) => {
+        console.error("[Auto Scrape] Failed to scrape images:", err);
+      });
+    }
+  }, [isAuthenticated, authLoading, isInitializing, scrapeImages, setTargetUrl]);
+
   const handleNavigateHome = React.useCallback(() => {
     if (projectId) {
       if (seriesSlugState && chapterSlugState) {
@@ -592,6 +618,7 @@ export default function App() {
       isSettingsPath: currentPath === "/settings",
       isAutoCropPath: currentPath === "/auto-crop",
       isBubbleCleanerPath: currentPath === "/bubble-cleaner",
+      isEpisodeScraperPath: currentPath === "/episode-scraper",
       isEditorPath:
         currentPath.startsWith("/editor") ||
         currentPath === "/workspace/editor" ||
@@ -641,6 +668,7 @@ export default function App() {
     isSettingsPath,
     isAutoCropPath,
     isBubbleCleanerPath,
+    isEpisodeScraperPath,
     isEditorPath,
     isLogsPath,
     isStatusPath,
@@ -1641,6 +1669,15 @@ export default function App() {
             />
           )}
 
+          {/* PAGE VIEW 16.5: Dedicated WEBTOON Episode Scraper Page */}
+          {isEpisodeScraperPath && (
+            <EpisodeScraperPage
+              addNotification={addNotification}
+              fetchWithInterceptor={fetchWithInterceptor}
+              navigateTo={navigateTo}
+            />
+          )}
+
           {/* PAGE VIEW 17.5: Series Landing Page */}
           {isSeriesDetailsPath && (
             <SeriesDetailsPage
@@ -1794,7 +1831,8 @@ export default function App() {
             !isNotificationsPath &&
             !isAdminPath &&
             !isChapterDetailsPath &&
-            !isSeriesDetailsPath && (
+            !isSeriesDetailsPath &&
+            !isEpisodeScraperPath && (
               <PageNotFound onNavigateHome={() => navigateTo("/")} />
             )}
         </div>

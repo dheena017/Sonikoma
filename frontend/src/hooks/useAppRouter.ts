@@ -201,6 +201,7 @@ export function useAppRouter({
             path === "/projects" ||
             path === "/project-details" ||
             path === "/project-editor" ||
+            path === "/episode-scraper" ||
             path === "/admin" ||
             path.startsWith("/admin/") ||
             path.startsWith("/series/") ||
@@ -262,6 +263,7 @@ export function useAppRouter({
         path === "/project-details" ||
         path === "/dashboard" ||
         path === "/admin" ||
+        path === "/episode-scraper" ||
         path.startsWith("/admin/") ||
         path.startsWith("/display") ||
         isChapterDetails
@@ -297,6 +299,19 @@ export function useAppRouter({
         path.startsWith("/workspace/editor")
       ) {
         const params = new URLSearchParams(window.location.search);
+
+        // Redirect /editor?importUrl=... to /workspace/editor?id=temp_...&importUrl=...
+        if (params.has("importUrl") && !params.has("id")) {
+          const importUrl = params.get("importUrl");
+          const temporaryProjectId = `temp_${Date.now()}_${Math.random()
+            .toString(36)
+            .substring(2, 10)}`;
+          const newUrl = `/workspace/editor?id=${temporaryProjectId}&importUrl=${encodeURIComponent(importUrl || "")}`;
+          window.history.replaceState({}, "", newUrl);
+          setCurrentPath("/workspace/editor");
+          return;
+        }
+
         const hasProjId = params.has("id") || params.has("project_id");
         const hasSlugs = /^\/workspace\/editor\/series\/[^\/]+\/chapters\/[^\/]+\/?$/.test(path);
         if (

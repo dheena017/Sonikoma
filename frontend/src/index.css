@@ -1696,3 +1696,22 @@ body {
     transform: translateY(0);
   }
 }
+
+/* Custom Thin Scrollbar for Sidebar/Mini-Sidebar */
+.custom-sidebar-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-sidebar-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.2); /* Soft purple thumb */
+  border-radius: 9999px;
+}
+.custom-sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 85, 247, 0.4); /* Brighter purple thumb on hover */
+}
+.custom-sidebar-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(168, 85, 247, 0.2) transparent;
+}

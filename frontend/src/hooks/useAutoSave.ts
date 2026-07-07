@@ -286,10 +286,7 @@ export function useAutoSave(state: AutoSaveState) {
           }
           if (data.series_slug && data.chapter_slug) {
             const newPath = `/workspace/editor/series/${data.series_slug}/chapters/${data.chapter_slug}`;
-            const isEditor =
-              window.location.pathname.startsWith("/editor") ||
-              window.location.pathname === "/project-editor";
-            if (window.location.pathname !== newPath && !isEditor) {
+            if (window.location.pathname !== newPath) {
               window.history.pushState(null, "", newPath);
             }
           } else {

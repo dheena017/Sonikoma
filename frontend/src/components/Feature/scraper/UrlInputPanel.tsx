@@ -1,8 +1,9 @@
 import React from "react";
-import { Sparkles, Image as ImageIcon, Layout, ArrowRight } from "lucide-react";
+import { Sparkles, Image as ImageIcon, Layout, ArrowRight, Book } from "lucide-react";
 import { useAIModels } from "@/hooks/useAIModels";
 import { NotificationType } from "../../notification/NotificationStack";
-import { extractWebtoonUrl } from "../../../utils/url";
+import { extractWebtoonUrl, parseWebtoonUrl } from "../../../utils/url";
+import { FavoritesManager } from "../episode-scraper/FavoritesManager";
 
 // Configuration Constants (Removed hardcoding from JSX)
 const NARRATION_STYLES = [
@@ -92,6 +93,91 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
   } = props;
 
   const [advancedSettingsOpen, setAdvancedSettingsOpen] = React.useState(false);
+  const [showSuggestions, setShowSuggestions] = React.useState(false);
+  const [suggestions, setSuggestions] = React.useState<any[]>([]);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  const [showTitleSuggestions, setShowTitleSuggestions] = React.useState(false);
+  const [showGenreSuggestions, setShowGenreSuggestions] = React.useState(false);
+  const titleContainerRef = React.useRef<HTMLDivElement>(null);
+  const genreContainerRef = React.useRef<HTMLDivElement>(null);
+
+  const titleSuggestions = React.useMemo(() => {
+    try {
+      const recents = FavoritesManager.getRecent();
+      const favorites = FavoritesManager.getFavorites();
+      const merged = [...recents, ...favorites];
+      const uniqueMap = new Map();
+      merged.forEach(item => {
+        if (item.title) {
+          uniqueMap.set(item.title, item);
+        }
+      });
+      return Array.from(uniqueMap.values()).slice(0, 8);
+    } catch (e) {
+      console.warn("Failed to load title suggestions:", e);
+      return [];
+    }
+  }, [showTitleSuggestions]);
+
+  const genreSuggestions = React.useMemo(() => {
+    try {
+      const recents = FavoritesManager.getRecent();
+      const favorites = FavoritesManager.getFavorites();
+      const merged = [...recents, ...favorites];
+      const genres = new Set<string>();
+      merged.forEach(item => {
+        if (item.genre) {
+          genres.add(item.genre.trim());
+        }
+      });
+      if (genres.size === 0) {
+        ['Action', 'Fantasy', 'Romance', 'Comedy', 'Drama', 'Thriller', 'Slice of Life'].forEach(g => genres.add(g));
+      }
+      return Array.from(genres).slice(0, 8);
+    } catch (e) {
+      console.warn("Failed to load genre suggestions:", e);
+      return [];
+    }
+  }, [showGenreSuggestions]);
+
+  React.useEffect(() => {
+    try {
+      const bookmarks = FavoritesManager.getBookmarks();
+      const reads = FavoritesManager.getReadEpisodes();
+      const merged = [...bookmarks, ...reads];
+      const uniqueUrls = Array.from(new Set(merged));
+      const suggestionsData = uniqueUrls.map(url => {
+        const parsed = parseWebtoonUrl(url);
+        return {
+          url: url,
+          title: parsed.episode || parsed.title || "Webtoon Episode",
+          genre: parsed.genre || "general",
+        };
+      });
+      setSuggestions(suggestionsData.slice(0, 8));
+    } catch (e) {
+      console.warn("Failed to load autocomplete suggestions:", e);
+    }
+  }, [showSuggestions]);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+      if (titleContainerRef.current && !titleContainerRef.current.contains(event.target as Node)) {
+        setShowTitleSuggestions(false);
+      }
+      if (genreContainerRef.current && !genreContainerRef.current.contains(event.target as Node)) {
+        setShowGenreSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -114,7 +200,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
   return (
     <div
       id="dynamic_input_box"
-      className="bg-neutral-900/40 rounded-3xl border border-neutral-800/80 p-6 sm:p-8 backdrop-blur-md shadow-2xl space-y-8 min-w-0 w-full overflow-hidden animate-in fade-in zoom-in-95 duration-500"
+      className="relative z-20 bg-neutral-900/40 rounded-3xl border border-neutral-800/80 p-6 sm:p-8 backdrop-blur-md shadow-2xl space-y-8 min-w-0 w-full overflow-visible animate-in fade-in zoom-in-95 duration-500"
     >
       {/* 1. Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -141,17 +227,58 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
             <Layout className="w-3.5 h-3.5 text-purple-500" /> Series Identity
           </h3>
           <div className="space-y-3">
-            <div className="space-y-1">
+            <div className="space-y-1 relative" ref={titleContainerRef}>
               <label className="text-[10px] font-bold text-neutral-500 uppercase">
                 Series Title
               </label>
               <input
                 type="text"
+                autoComplete="off"
                 value={seriesTitle}
-                onChange={(e) => setSeriesTitle?.(e.target.value)}
+                onFocus={() => setShowTitleSuggestions(true)}
+                onChange={(e) => {
+                  setSeriesTitle?.(e.target.value);
+                  setShowTitleSuggestions(false);
+                }}
                 placeholder="e.g. Boundless Necromancer"
                 className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-2.5 text-sm text-neutral-200 outline-none transition-all"
               />
+              {showTitleSuggestions && titleSuggestions.length > 0 && (
+                <div className="absolute left-0 right-0 top-full mt-1 bg-neutral-950 border border-neutral-850 rounded-xl shadow-2xl z-30 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150 max-h-48 overflow-y-auto divide-y divide-neutral-900/50">
+                  {titleSuggestions.map((series, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setSeriesTitle?.(series.title);
+                        if (setScrapedGenre && series.genre) setScrapedGenre(series.genre);
+                        if (setTargetUrl && series.url) setTargetUrl(series.url);
+                        if (setSeriesCoverImage && series.cover_image) setSeriesCoverImage(series.cover_image);
+                        if (setSeriesAuthor && series.author) setSeriesAuthor(series.author);
+                        if (setSeriesSynopsis && series.synopsis) setSeriesSynopsis(series.synopsis);
+                        setShowTitleSuggestions(false);
+                      }}
+                      className="w-full px-4 py-2.5 hover:bg-neutral-900/60 flex items-center gap-2 transition-colors text-left text-xs font-bold text-neutral-350"
+                    >
+                      {series.cover_image && (
+                        <img
+                          src={series.cover_image.startsWith("http") ? `/api/proxy-image?url=${encodeURIComponent(series.cover_image)}` : series.cover_image}
+                          alt=""
+                          className="w-6 h-6 object-cover rounded border border-neutral-850"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src =
+                              "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23374151' width='100' height='100'/%3E%3C/svg%3E";
+                          }}
+                        />
+                      )}
+                      <div className="flex-grow min-w-0">
+                        <div className="truncate">{series.title}</div>
+                        {series.genre && <div className="text-[9px] text-neutral-500 font-mono">{series.genre}</div>}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
@@ -166,17 +293,39 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
                   className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-2.5 text-sm text-neutral-200 outline-none transition-all font-mono"
                 />
               </div>
-              <div className="space-y-1">
+              <div className="space-y-1 relative" ref={genreContainerRef}>
                 <label className="text-[10px] font-bold text-neutral-500 uppercase">
                   Genre
                 </label>
                 <input
                   type="text"
+                  autoComplete="off"
                   value={scrapedGenre}
-                  onChange={(e) => setScrapedGenre?.(e.target.value)}
+                  onFocus={() => setShowGenreSuggestions(true)}
+                  onChange={(e) => {
+                    setScrapedGenre?.(e.target.value);
+                    setShowGenreSuggestions(false);
+                  }}
                   placeholder="Fantasy"
                   className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-2.5 text-sm text-neutral-200 outline-none transition-all"
                 />
+                {showGenreSuggestions && genreSuggestions.length > 0 && (
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-neutral-950 border border-neutral-850 rounded-xl shadow-2xl z-30 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150 max-h-48 overflow-y-auto divide-y divide-neutral-900/50">
+                    {genreSuggestions.map((genre, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          setScrapedGenre?.(genre);
+                          setShowGenreSuggestions(false);
+                        }}
+                        className="w-full px-4 py-2 hover:bg-neutral-900/60 transition-colors text-left text-xs font-bold text-neutral-350"
+                      >
+                        {genre}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -233,13 +382,18 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
           Source Link
         </label>
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative group flex-grow">
+          <div className="relative group flex-grow z-30" ref={containerRef}>
             <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 opacity-20 blur group-focus-within:opacity-40 transition-opacity duration-500" />
             <input
               id="target_url_input"
               type="url"
+              autoComplete="off"
               value={targetUrl}
-              onChange={(e) => setTargetUrl(e.target.value)}
+              onFocus={() => setShowSuggestions(true)}
+              onChange={(e) => {
+                setTargetUrl(e.target.value);
+                setShowSuggestions(false);
+              }}
               onPaste={handlePaste}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !isProcessing && targetUrl.trim()) {
@@ -249,6 +403,51 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
               placeholder="Paste any comic or manga viewer URL..."
               className="relative w-full bg-neutral-950 border border-neutral-800 rounded-2xl px-6 py-4 text-sm text-neutral-200 outline-none placeholder:text-neutral-700 focus:border-purple-500 transition-all shadow-inner"
             />
+
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute left-0 right-0 top-full mt-2 bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="px-3 py-2 border-b border-neutral-800/80 bg-neutral-950/40">
+                  <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                    Recent & Bookmarked Episodes
+                  </span>
+                </div>
+                <div className="max-h-60 overflow-y-auto divide-y divide-neutral-800/50">
+                  {suggestions.map((series, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        if (series.url) {
+                          setTargetUrl(series.url);
+                          const parsed = parseWebtoonUrl(series.url);
+                          if (setSeriesTitle) setSeriesTitle(parsed.title);
+                          if (setScrapedGenre) setScrapedGenre(parsed.genre);
+                          if (setChapterNumber) setChapterNumber(parsed.chapterNumber);
+                          if (setChapterTitle && parsed.chapterTitle) setChapterTitle(parsed.chapterTitle);
+                        }
+                        setShowSuggestions(false);
+                      }}
+                      className="w-full px-4 py-2.5 hover:bg-neutral-800/60 flex items-center gap-3 transition-colors text-left"
+                    >
+                      <div className="w-9 h-9 bg-neutral-850 rounded-lg flex items-center justify-center border border-neutral-800 flex-shrink-0">
+                        <Book className="w-4 h-4 text-purple-400" />
+                      </div>
+                      <div className="flex-grow min-w-0">
+                        <p className="text-xs font-bold text-neutral-200 truncate">
+                          {parseWebtoonUrl(series.url).title}
+                        </p>
+                        <p className="text-[10px] text-neutral-400 truncate">
+                          {series.title}
+                        </p>
+                        <p className="text-[9px] text-neutral-600 font-mono truncate select-all">
+                          {series.url}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {actionSlot || (
