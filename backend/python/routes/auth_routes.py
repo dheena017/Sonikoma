@@ -55,9 +55,20 @@ router = APIRouter()
 
 # ─── Configuration ────────────────────────────────────────────────────────────
 
+# JWT_SECRET_KEY is required for signing JWTs.
+# For local development, load backend/.env (and optionally project .env) before failing.
+try:
+    from dotenv import load_dotenv
+    PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+    load_dotenv(os.path.join(PROJECT_ROOT, ".env"), override=False)
+    load_dotenv(os.path.join(PROJECT_ROOT, "backend", ".env"), override=False)
+except Exception:
+    pass
+
 SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 if not SECRET_KEY:
-    raise ValueError("FATAL: JWT_SECRET_KEY environment variable is not set.")
+    raise ValueError("FATAL: JWT_SECRET_KEY environment variable is not set (and not found in .env files).")
+
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 365  # 1 year default

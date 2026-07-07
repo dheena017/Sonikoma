@@ -1,15 +1,0 @@
-[A[2K[A[2K[A[2K[90m19:27:40[0m [35m[FRONTEND][0m [36m[INFO][0m [94m[run-frontend.js][0m sonikoma@0.0.0 start
-[90m19:27:40[0m [35m[FRONTEND][0m [36m[INFO][0m [94m[run-frontend.js][0m node scripts/run-frontend.js
-[90m19:27:40[0m [35m[FRONTEND][0m [36m[INFO][0m [94m[run-frontend.js][0m Backend is not running. Launching backend in background...
-[90m19:27:40[0m [35m[FRONTEND][0m [36m[INFO][0m [94m[run-frontend.js][0m Waiting for backend to initialize...
-[90m19:27:40[0m [35m[FRONTEND][0m [31m[ERROR][0m [94m[run-frontend.js][0m Failed to start backend process: Error: spawn /app/.venv/Scripts/python.exe ENOENT
-    at ChildProcess._handle.onexit (node:internal/child_process:285:19)
-    at onErrorNT (node:internal/child_process:483:16)
-    at process.processTicksAndRejections (node:internal/process/task_queues:89:21) {
-  errno: -2,
-  code: 'ENOENT',
-  syscall: 'spawn /app/.venv/Scripts/python.exe',
-  path: '/app/.venv/Scripts/python.exe',
-  spawnargs: [ 'main.py' ]
-}
-[90m19:27:40[0m [35m[FRONTEND][0m [36m[INFO][0m [94m[run-frontend.js][0m Stopping backend process...
