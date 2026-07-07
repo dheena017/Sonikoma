@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Focus, LayoutPanelTop, Save, Menu, Layers, Clock, Wifi, WifiOff, Share2, Bell, BellOff } from "lucide-react";
+import { Focus, LayoutPanelTop, Save, Menu, Layers, Clock, Wifi, WifiOff, Share2, Bell, BellOff } from "lucide-react";
 import NotificationDropdown from "../../notification/NotificationDropdown";
 import { Notification } from "../../notification/NotificationStack";
 
 interface EditorPageHeaderProps {
   title: string;
   subtitle?: string;
-  onBackToApp: () => void;
+
   onSave: () => void;
   isSaving: boolean;
   isFocusMode: boolean;
@@ -26,6 +26,7 @@ interface EditorPageHeaderProps {
   notificationsMuted?: boolean;
   setNotificationsMuted?: (muted: boolean) => void;
   onNavigateToAll?: () => void;
+  onBackToApp?: () => void;
 }
 
 const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
@@ -225,14 +226,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           <span className="hidden lg:inline">Share</span>
         </button>
 
-        <button
-          type="button"
-          onClick={onBackToApp}
-          className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-neutral-900/60 hover:bg-neutral-800 px-3 py-1.5 text-xs font-bold text-neutral-300 transition-all hover:text-white active:scale-95 cursor-pointer"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Back</span>
-        </button>
+
       </div>
     </header>
   );

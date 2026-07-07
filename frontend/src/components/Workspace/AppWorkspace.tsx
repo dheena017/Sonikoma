@@ -33,7 +33,6 @@ import {
   Download,
 } from "lucide-react";
 import UrlInputPanel from "../Feature/scraper/UrlInputPanel";
-import { EpisodeScraper } from "../Feature/scraper";
 import ProjectConfirmPanel from "../confirmationmodels/ProjectConfirmPanel";
 
 interface AppWorkspaceProps {
@@ -371,6 +370,39 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
 
     try {
       await scrapeImages(targetUrl, temporaryProjectId);
+    } catch (err: any) {
+      console.error(err);
+      addNotification(
+        `Failed to import images: ${err.message || "Unknown error"}`,
+        "error"
+      );
+    }
+  };
+
+  const handleEpisodeSelect = async (episode: any) => {
+    if (!episode.url) return;
+
+    setTargetUrl(episode.url);
+    const numMatch = episode.number.match(/\d+/);
+    const num = numMatch ? numMatch[0] : episode.number;
+    setChapterNumber(num || "");
+    setChapterTitle(episode.title || "");
+
+    const temporaryProjectId = `temp_${Date.now()}_${Math.random()
+      .toString(36)
+      .substring(2, 10)}`;
+
+    const nav = navigateTo || (window as any).navigateTo;
+    const targetPath = `/workspace/editor?id=${temporaryProjectId}`;
+    if (typeof nav === "function") {
+      nav(targetPath);
+    } else {
+      window.history.pushState({}, "", targetPath);
+      window.dispatchEvent(new Event("popstate"));
+    }
+
+    try {
+      await scrapeImages(episode.url, temporaryProjectId);
     } catch (err: any) {
       console.error(err);
       addNotification(
@@ -736,23 +768,7 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
           setAutoSplitTallStrips={setAutoSplitTallStrips}
         />
 
-        {/* Episode Scraper for WEBTOON Series */}
-        <EpisodeScraper
-          addNotification={addNotification}
-          fetchWithInterceptor={fetch as any}
-          onMultipleEpisodesSelect={(episodes) => {
-            // Handle selected episodes - set the first one as the target URL
-            if (episodes.length > 0) {
-              setTargetUrl(episodes[0].url);
-              setChapterNumber(episodes[0].number);
-              setChapterTitle(episodes[0].title);
-              addNotification(
-                `Selected ${episodes.length} episodes for processing`,
-                "success"
-              );
-            }
-          }}
-        />
+
 
         {/* LOADING CONTEXT BRIDGE */}
         {isScraping && (

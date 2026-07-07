@@ -1,12 +1,10 @@
 import React from "react";
+
 import {
   Layout,
   Scissors,
-  Brain,
   Film,
   ArrowLeft,
-  ChevronLeft,
-  ChevronRight,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -16,7 +14,7 @@ interface EditorSidebarProps {
   setIsCollapsed: (v: boolean) => void;
   currentSection: string;
   setCurrentSection: (section: string) => void;
-  onBackToApp: () => void;
+  onBackToApp?: () => void; // Made optional since we are handling navigation internally now
   scrapedCount: number;
   panelsCount: number;
   isBatchCropping: boolean;
@@ -38,13 +36,16 @@ const EditorSidebar = ({
   setIsCollapsed,
   currentSection,
   setCurrentSection,
-  onBackToApp,
   scrapedCount,
   panelsCount,
   isBatchCropping,
   isCleaningBubbles,
-  navigateTo,
 }: EditorSidebarProps) => {
+  // Navigation is handled via window/history in App via useAppRouter.
+  // This component should not depend on react-router context.
+
+
+
   const menuItems: SidebarMenuItem[] = [
     {
       id: "monitor",
@@ -71,7 +72,7 @@ const EditorSidebar = ({
         isCollapsed ? "w-20" : "w-[280px]"
       }`}
     >
-      {/* Top Header / Close Area (This perfectly replaces the space where the main header used to be) */}
+      {/* Top Header / Close Area */}
       <div
         className={`flex items-center border-b border-white/[0.02] transition-all duration-300 shrink-0 ${
           isCollapsed ? "p-4 justify-center" : "h-16 px-4 justify-between"
@@ -93,24 +94,6 @@ const EditorSidebar = ({
             <X className="w-4 h-4" />
           </button>
         )}
-      </div>
-
-      {/* Exit Button - Styled as a Premium Action */}
-      <div className="p-4 border-b border-white/[0.02]">
-        <button
-          onClick={onBackToApp}
-          className={`flex items-center justify-center rounded-2xl bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white transition-all active:scale-95 border border-white/10 cursor-pointer ${
-            isCollapsed ? "h-12 w-12" : "w-full py-3 gap-3"
-          }`}
-          title="Back to Dashboard"
-        >
-          <ArrowLeft className="w-5 h-5 shrink-0" />
-          {!isCollapsed && (
-            <span className="text-xs font-bold tracking-wide">
-              Return to App
-            </span>
-          )}
-        </button>
       </div>
 
       {/* Navigation Groups */}
@@ -197,21 +180,22 @@ const EditorSidebar = ({
         })}
       </div>
 
-      {/* Collapse Toggle Footer */}
+      {/* Bottom Action Footer - Return to Workspace */}
       <div className="p-4 border-t border-white/[0.02] bg-gradient-to-t from-black/20 to-transparent">
         <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className={`flex items-center justify-center p-3 rounded-2xl bg-neutral-900/60 border border-white/5 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all active:scale-95 cursor-pointer ${
-            isCollapsed ? "w-12 h-12" : "w-full gap-2"
+          // Route directly to the workspace page
+          onClick={() => window.history.pushState({}, "", "/workspace")}
+
+          className={`flex items-center justify-center rounded-2xl bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white transition-all active:scale-95 border border-white/10 cursor-pointer ${
+            isCollapsed ? "h-12 w-12 p-0" : "w-full py-3 gap-3"
           }`}
+          title="Return to Workspace"
         >
-          {isCollapsed ? (
-            <ChevronRight className="w-[18px] h-[18px]" />
-          ) : (
-            <>
-              <ChevronLeft className="w-[18px] h-[18px]" />
-              <span className="text-xs font-bold tracking-wide">Collapse</span>
-            </>
+          <ArrowLeft className="w-[18px] h-[18px] shrink-0" />
+          {!isCollapsed && (
+            <span className="text-sm font-bold tracking-wide">
+              Return to Workspace
+            </span>
           )}
         </button>
       </div>

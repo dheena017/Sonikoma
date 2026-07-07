@@ -4,7 +4,7 @@ import * as api from "../api/index.js";
 import { usePlaybackEngine } from "./usePlaybackEngine.js";
 import { usePipelineActions } from "./usePipelineActions.js";
 import { parseWebtoonUrl } from "../utils.js";
-import { extractWebtoonUrl } from "../utils/url.js";
+import { extractWebtoonUrl, convertToViewerUrl } from "../utils/url.js";
 
 export function useAppLogic() {
   const state = useAppState();
@@ -56,8 +56,9 @@ export function useAppLogic() {
             return "";
           })();
 
+      const resolvedUrl = convertToViewerUrl(activeUrl, state.chapterNumber.trim());
       const data = await api.generateStoryboard(state.fetchWithInterceptor, {
-        url: extractWebtoonUrl(activeUrl),
+        url: extractWebtoonUrl(resolvedUrl),
         project_id: projId,
         model: selectedModel,
         narrationStyle: state.narrationStyle,
@@ -327,7 +328,8 @@ export function useAppLogic() {
       const activeUrl = typeof customUrl === "string" ? customUrl : targetUrl;
       if (!activeUrl || !activeUrl.trim()) return;
 
-      const normalizedTargetUrl = extractWebtoonUrl(activeUrl);
+      const resolvedUrl = convertToViewerUrl(activeUrl, state.chapterNumber.trim());
+      const normalizedTargetUrl = extractWebtoonUrl(resolvedUrl);
 
       const currentHost = (() => {
         try {

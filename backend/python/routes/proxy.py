@@ -104,6 +104,7 @@ async def fetch_with_retry(
 # ─── Routes ───────────────────────────────────────────────────────────────────
 
 @router.get("/proxy-image", summary="Spoofed referrer image bypass proxy")
+@router.get("/proxy/image", include_in_schema=False)
 async def proxy_image(
     request: Request,
     url: str = Query(..., description="Target image URL to fetch")
