@@ -4,7 +4,6 @@
 
 // --- React & State Hooks ---
 import React from "react";
-import { createPortal } from "react-dom";
 import { AlertTriangle, X, ArrowLeft, Sliders, Zap } from "lucide-react";
 
 // --- Custom Logic Hooks ---
@@ -18,7 +17,6 @@ import {
 } from "./hooks";
 import { DEFAULT_SHORTCUTS } from "./hooks/useGlobalShortcuts";
 import * as api from "./api";
-import { extractWebtoonUrl } from "./utils/url";
 
 // --- Layout & Main Workspace Components ---
 import Header from "./components/MainHeader";
@@ -28,9 +26,7 @@ import { EditorPage } from "./components/Feature/editor";
 import ProjectConfirmPanel from "./components/confirmationmodels/ProjectConfirmPanel";
 import PageNotFound from "./components/PageNotFound";
 import AdvancedSettings from "./components/Feature/video/AdvancedSettings";
-// import LogsPage from "./components/terminal/LogsPage"; // REMOVED: file doesn't exist
 import StatusPage from "./components/Status/StatusPage";
-// import TerminalLogs from "./components/Feature/terminal/TerminalLogs"; // REMOVED: file doesn't exist
 import AIModelsPage from "./components/Feature/ai_models/AIModelsPage";
 import ShortcutsPage from "./components/Shortcuts/ShortcutsPage";
 
@@ -47,7 +43,6 @@ import { LoginPage, RegisterPage, ForgotPasswordPage } from "./components/auth";
 import ProfilePage from "./components/profile/ProfilePage";
 import LoadingPage from "./components/LoadingPage";
 import { TerminalLogs, LogsPage } from "./components/Feature/terminal";
-import SeriesDetailsPage from "./components/SeriesDetailsPage";
 import DisplayPage from "./components/DisplayPage";
 import DashboardPage from "./components/Dashboard/DashboardPage";
 import { ProjectsPage } from "./components/Project";
@@ -67,6 +62,7 @@ import { AdminPage, AdminSidebar, AdminMiniSidebar } from "./components/admin";
 import MiniSidebar from "./components/MainMiniSidebar";
 import { EpisodeScraperPage } from "./components/Feature/episode-scraper/EpisodeScraperPage";
 import YouTubePage from "./components/Feature/youtube/YouTubePage";
+import SeriesDetailsPage from "./components/SeriesDetailsPage";
 
 // ============================================================================
 // SECTION 2: MAIN APP COMPONENT
@@ -303,7 +299,6 @@ export default function App() {
     autoSplitTallStrips,
     setAutoSplitTallStrips,
     processingStrategy,
-    setProcessingStrategy,
     aspectRatioLock,
     setAspectRatioLock,
     minPanelAreaPct,
