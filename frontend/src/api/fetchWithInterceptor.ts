@@ -21,23 +21,29 @@ export interface FetchInterceptorHandlers {
 // The interceptor is actually created via `createFetchWithInterceptor(...)`.
 // This default implementation prevents runtime crashes if the interceptor instance
 // hasn't been wired yet.
-export const fetchWithInterceptor = async (
-  input: RequestInfo,
+export const fetchWithInterceptor: typeof fetch = async (
+  input: RequestInfo | URL,
   init?: RequestInit
 ): Promise<Response> => {
   return fetch(input, init);
 };
+
 
 export function createFetchWithInterceptor({
   addNotification,
   setErrorPopup,
   onUnauthorized,
 }: FetchInterceptorHandlers) {
-  return async (input: RequestInfo, init?: RequestInit): Promise<Response> => {
+  return async (
+    input: RequestInfo | URL,
+    init?: RequestInit
+  ): Promise<Response> => {
     console.log(`[API Interceptor] Fetching: ${input}`);
+
     return new Promise<Response>((resolve, reject) => {
       const executeFetch = async () => {
         try {
+
           const token =
             localStorage.getItem("sonikoma_token") ||
             sessionStorage.getItem("sonikoma_token");

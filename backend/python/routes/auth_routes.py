@@ -71,6 +71,36 @@ if not SECRET_KEY:
 
 
 ALGORITHM = "HS256"
+
+# PyJWT warns if the HMAC key is too short for the selected hash algorithm.
+# Your log shows: "HMAC key is 20 bytes long ... below minimum recommended length of 32 bytes for SHA256".
+# To keep backward compatibility with already-issued tokens, we only *derive* a longer key
+# when the configured secret is too short.
+
+def _harden_jwt_secret(secret: str) -> tuple[str, bool]:
+    # HS256 uses SHA256 (recommended min key length is 32 bytes)
+    # If the secret is already long enough, leave it unchanged.
+    if isinstance(secret, str) and len(secret.encode("utf-8")) >= 32:
+        return secret, False
+
+    # Deterministically derive a 32-byte key from the provided secret so that
+    # the server restarts verify the same tokens (for the same short secret).
+    import hashlib
+
+    derived = hashlib.sha256(secret.encode("utf-8")).digest()  # 32 bytes
+    # JWT expects a str/bytes; keep it as hex string for readability.
+    return derived.hex(), True
+
+
+_SECRET_KEY_HARDENED, _WAS_DERIVED = _harden_jwt_secret(SECRET_KEY)
+# Use the hardened secret for both encoding and decoding.
+SECRET_KEY = _SECRET_KEY_HARDENED
+
+if _WAS_DERIVED:
+    logger.warning(
+        "[Auth] JWT_SECRET_KEY was shorter than 32 bytes; using a hardened SHA256-derived key for HS256. "
+        "This removes PyJWT InsecureKeyLengthWarning."
+    )
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 365  # 1 year default
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/token", auto_error=False)

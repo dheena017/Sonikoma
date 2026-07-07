@@ -28,17 +28,7 @@ import { BatchThumbnailDownloader } from "./BatchThumbnailDownloader";
 import { EpisodePreviewModal } from "./EpisodePreviewModal";
 import { AnalyticsDashboard } from "./AnalyticsDashboard";
 import { NotificationType } from "@/components/notification/NotificationStack";
-
-interface Episode {
-  number: string;
-  title: string;
-  date: string;
-  thumbnail: string;
-  url: string;
-  index: number;
-  rating?: number;
-  likes?: string;
-}
+import type { Episode } from "./EpisodeTypes";
 
 interface SeriesMetadata {
   title: string;
@@ -890,9 +880,11 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
           episode={previewEpisode}
           onClose={() => setPreviewEpisode(null)}
           onImport={(ep) => {
+            // Preview modal uses the shared Episode type; safe to forward
             setPreviewEpisode(null);
             handleEpisodeClick(ep);
           }}
+
           fetchWithInterceptor={fetchWithInterceptor}
         />
       )}

@@ -2,11 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, Play, Loader, AlertTriangle, ArrowRight, Minimize2, Maximize2 } from 'lucide-react';
 import { getProxiedImageUrl } from "@/utils/url";
 
-interface Episode {
-  number: string;
-  title: string;
-  url: string;
-}
+import type { Episode } from "./EpisodeTypes";
+
 
 interface EpisodePreviewModalProps {
   episode: Episode | null;
@@ -14,6 +11,7 @@ interface EpisodePreviewModalProps {
   onImport: (episode: Episode) => void;
   fetchWithInterceptor: typeof fetch;
 }
+
 
 export const EpisodePreviewModal: React.FC<EpisodePreviewModalProps> = ({
   episode,

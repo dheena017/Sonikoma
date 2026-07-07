@@ -1,16 +1,8 @@
 import React from "react";
 import { EpisodeCard } from "./EpisodeCard";
 
-interface Episode {
-  number: string;
-  title: string;
-  date: string;
-  thumbnail: string;
-  url: string;
-  index: number;
-  rating?: number;
-  likes?: string;
-}
+import type { Episode } from "./EpisodeTypes";
+
 
 interface EpisodeGridProps {
   episodes: Episode[];

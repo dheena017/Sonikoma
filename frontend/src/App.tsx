@@ -66,6 +66,7 @@ import NotificationsPage from "./components/notification/NotificationsPage";
 import { AdminPage, AdminSidebar, AdminMiniSidebar } from "./components/admin";
 import MiniSidebar from "./components/MainMiniSidebar";
 import { EpisodeScraperPage } from "./components/Feature/episode-scraper/EpisodeScraperPage";
+import YouTubePage from "./components/Feature/youtube/YouTubePage";
 
 // ============================================================================
 // SECTION 2: MAIN APP COMPONENT
