@@ -168,11 +168,11 @@ def render_pipeline_sync(video_id: str, panels_data: List[Dict[str, Any]], outpu
 
         clip = ImageClip(img_path).set_duration(safe_duration)
         
-        # CRITICAL FIX: Downscale to 720p before animation.
-        # Rendering 4K images with zoom/crop is extremely slow. 
-        # 720p is visually indistinguishable in a 1080p final video but 60% faster to render.
-        if clip.h > 720 or clip.w > 720:
-            clip = clip.resize(height=720) # Resizes width proportionally
+        # OPTIMIZATION: Downscale to 1080p before animation to ensure high quality.
+        # Downscaling to 1080p matches the standard HD output, avoiding the lag of 4K/8K images
+        # while keeping the visuals crisp and detailed.
+        if clip.h > 1080 or clip.w > 1080:
+            clip = clip.resize(height=1080) # Resizes width proportionally
 
         # Attach audio to this visual clip
         if audio_path and os.path.exists(audio_path):
@@ -197,14 +197,50 @@ def render_pipeline_sync(video_id: str, panels_data: List[Dict[str, Any]], outpu
                 except Exception as e:
                     logger.error(f"Failed to load SFX {sfx_name}: {e}")
 
-        # Basic Motion
+        # Basic Motion (Optimized with high-performance OpenCV bilinear transformations)
         motion_type = p.get("motion_type")
         w, h = clip.size
-        if motion_type == "zoom_in":
-            clip = clip.resize(lambda t: 1 + 0.08 * (t / safe_duration))
-        elif motion_type in ["pan_left", "pan_right", "pan_up", "pan_down"]:
-            # Simple constant zoom for pans to avoid edge bleed
-            clip = clip.resize(1.15)
+        if motion_type in ["zoom_in", "pan_left", "pan_right", "pan_up", "pan_down"]:
+            import cv2
+            def apply_motion(get_frame, t):
+                frame = get_frame(t)
+                if motion_type == "zoom_in":
+                    scale = 1 + 0.08 * (t / safe_duration)
+                    nw, nh = int(w * scale), int(h * scale)
+                    resized = cv2.resize(frame, (max(1, nw), max(1, nh)), interpolation=cv2.INTER_LINEAR)
+                    x1 = (nw - w) // 2
+                    y1 = (nh - h) // 2
+                    return resized[y1:y1+h, x1:x1+w]
+                elif motion_type in ["pan_left", "pan_right", "pan_up", "pan_down"]:
+                    nw, nh = int(w * 1.15), int(h * 1.15)
+                    resized = cv2.resize(frame, (nw, nh), interpolation=cv2.INTER_LINEAR)
+                    max_x_offset = (nw - w) // 2
+                    max_y_offset = (nh - h) // 2
+                    progress = t / safe_duration
+                    
+                    if motion_type == "pan_left":
+                        x_offset = int(max_x_offset * (2 * progress - 1))
+                        y_offset = 0
+                    elif motion_type == "pan_right":
+                        x_offset = int(max_x_offset * (1 - 2 * progress))
+                        y_offset = 0
+                    elif motion_type == "pan_down":
+                        x_offset = 0
+                        y_offset = int(max_y_offset * (1 - 2 * progress))
+                    elif motion_type == "pan_up":
+                        x_offset = 0
+                        y_offset = int(max_y_offset * (2 * progress - 1))
+                    else:
+                        x_offset = 0
+                        y_offset = 0
+                        
+                    x_center = (nw - w) // 2 + x_offset
+                    y_center = (nh - h) // 2 + y_offset
+                    x1 = max(0, min(nw - w, x_center))
+                    y1 = max(0, min(nh - h, y_center))
+                    return resized[y1:y1+h, x1:x1+w]
+                return frame
+            clip = clip.fl(apply_motion, apply_to=[])
 
         # Flatten layers (subtitles are pre-baked into the image in process_render_job)
         panel_composite = CompositeVideoClip([clip.set_position(('center', 'center'))], size=(w, h)).set_duration(safe_duration)
@@ -254,14 +290,15 @@ def render_pipeline_sync(video_id: str, panels_data: List[Dict[str, Any]], outpu
     # Render to disk
     progress_logger = MoviePyProgressLogger(video_id) if HAS_MOVIEPY else None
     final_video.write_videofile(
-        output_path, 
-        fps=24, 
-        codec="libx264", 
-        audio_codec="aac", 
-        logger=progress_logger,
-        threads=4,
-        preset="ultrafast"
-    )
+            output_path, 
+            fps=24, 
+            codec="libx264", 
+            audio_codec="aac", 
+            logger=progress_logger,
+            threads=4,
+            preset="ultrafast",
+            bitrate="10000k"
+        )
     
     # Cleanup memory
     for c in clips:

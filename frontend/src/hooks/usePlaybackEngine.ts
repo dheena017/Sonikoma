@@ -24,6 +24,8 @@ interface UsePlaybackEngineProps {
   autoPlayAudio: boolean;
   sfxEnabled: boolean;
   sfxVolume: number;
+  activePreviewTab?: "video" | "timeline";
+  videoPlayerRef?: React.RefObject<HTMLVideoElement | null>;
 }
 
 export function usePlaybackEngine({
@@ -35,6 +37,8 @@ export function usePlaybackEngine({
   autoPlayAudio,
   sfxEnabled,
   sfxVolume,
+  activePreviewTab = "timeline",
+  videoPlayerRef,
 }: UsePlaybackEngineProps) {
   const [currentPanelIndex, setCurrentPanelIndex] = useState<number>(0);
   const [playbackTime, setPlaybackTime] = useState<number>(0);
@@ -199,7 +203,7 @@ export function usePlaybackEngine({
   }, [storyboardPlaying, musicTheme, volume, isMuted]);
 
   useEffect(() => {
-    if (storyboardPlaying && panels.length > 0) {
+    if (storyboardPlaying && panels.length > 0 && activePreviewTab !== "video") {
       const activePanel = panels[currentPanelIndex];
       const stepMs = 100;
 
@@ -233,6 +237,7 @@ export function usePlaybackEngine({
     panels,
     playStoryboardAudio,
     playbackTime,
+    activePreviewTab,
   ]);
 
   const toggleStoryboardPlayback = useCallback(() => {
@@ -244,15 +249,26 @@ export function usePlaybackEngine({
       if (activeAudioRef.current) {
         activeAudioRef.current.pause();
       }
+      if (activePreviewTab === "video" && videoPlayerRef?.current) {
+        videoPlayerRef.current.pause();
+      }
     } else {
       setStoryboardPlaying(true);
-      playStoryboardAudio(currentPanelIndex, true);
+      if (activePreviewTab === "video" && videoPlayerRef?.current) {
+        videoPlayerRef.current.play().catch((err) => {
+          console.error("[Playback] Failed to play video element:", err);
+        });
+      } else {
+        playStoryboardAudio(currentPanelIndex, true);
+      }
     }
   }, [
     panels.length,
     storyboardPlaying,
     playStoryboardAudio,
     currentPanelIndex,
+    activePreviewTab,
+    videoPlayerRef,
   ]);
 
   const resetStoryboardPlayback = useCallback(() => {
@@ -265,8 +281,12 @@ export function usePlaybackEngine({
       activeAudioRef.current.pause();
       activeAudioRef.current = null;
     }
+    if (activePreviewTab === "video" && videoPlayerRef?.current) {
+      videoPlayerRef.current.currentTime = 0;
+      videoPlayerRef.current.pause();
+    }
     stopAmbientBackgroundMusic();
-  }, []);
+  }, [activePreviewTab, videoPlayerRef]);
 
   return useMemo(
     () => ({

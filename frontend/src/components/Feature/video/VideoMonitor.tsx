@@ -14,6 +14,9 @@ interface VideoMonitorProps {
   playbackTime: number;
   reprocessingPanelId: number | null;
   quality?: "draft" | "high";
+  setCurrentPanelIndex: (idx: number) => void;
+  setPlaybackTime: (time: number) => void;
+  setStoryboardPlaying: (playing: boolean) => void;
 }
 
 const VideoMonitor = React.memo(
@@ -28,6 +31,9 @@ const VideoMonitor = React.memo(
     playbackTime,
     reprocessingPanelId,
     quality,
+    setCurrentPanelIndex,
+    setPlaybackTime,
+    setStoryboardPlaying,
   }: VideoMonitorProps) => {
     return (
       <div className="relative w-full h-full flex flex-col items-center justify-center">
@@ -57,6 +63,9 @@ const VideoMonitor = React.memo(
             currentPanelIndex={currentPanelIndex}
             playbackTime={playbackTime}
             reprocessingPanelId={reprocessingPanelId}
+            setCurrentPanelIndex={setCurrentPanelIndex}
+            setPlaybackTime={setPlaybackTime}
+            setStoryboardPlaying={setStoryboardPlaying}
           />
         </div>
       </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import {
   History,
   ArrowRight,
@@ -12,6 +12,7 @@ import {
   Music,
   Settings,
   Play,
+  Pause,
   TrendingUp,
   BookOpenCheck,
   Search,
@@ -162,6 +163,20 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
     totalProjects: 0, totalPanels: 0, completedProjects: 0,
   });
   const [showShortcuts, setShowShortcuts] = useState<boolean>(false);
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isVideoPlaying, setIsVideoPlaying] = useState<boolean>(false);
+
+  const toggleVideoPlay = () => {
+    if (!videoRef.current) return;
+    if (isVideoPlaying) {
+      videoRef.current.pause();
+    } else {
+      videoRef.current.play().catch((err) => {
+        console.error("Failed to play video:", err);
+      });
+    }
+  };
 
   const {
     projectId,
@@ -496,9 +511,17 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
           <div className="w-full bg-[#111116]/60 border border-emerald-500/30 rounded-3xl p-6 backdrop-blur-md space-y-4 shadow-xl">
             <div className="flex items-center justify-between border-b border-emerald-950 pb-3">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
-                  <Play className="h-4 w-4 text-emerald-400 fill-emerald-400 animate-pulse" />
-                </div>
+                <button
+                  onClick={toggleVideoPlay}
+                  className="h-8 w-8 rounded-xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30 hover:bg-emerald-500/35 hover:scale-105 active:scale-95 transition-all text-emerald-400 cursor-pointer"
+                  title={isVideoPlaying ? "Pause Video" : "Play Video"}
+                >
+                  {isVideoPlaying ? (
+                    <Pause className="h-4 w-4 text-emerald-400 fill-emerald-400 animate-pulse" />
+                  ) : (
+                    <Play className="h-4 w-4 text-emerald-400 fill-emerald-400" />
+                  )}
+                </button>
                 <div>
                   <h3 className="text-sm font-black text-white uppercase tracking-wider">
                     Final Production Master Video
@@ -512,24 +535,68 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
             <div className="flex flex-col lg:flex-row gap-6 items-center">
               <div className="w-full lg:w-2/3 aspect-video bg-black rounded-2xl overflow-hidden border border-white/5 relative">
                 <video
+                  ref={videoRef}
                   src={videoUrl}
                   controls
-                  className="w-full h-full"
-                  poster={seriesCoverImage || (panels.length > 0 ? panels[0].image_url : undefined)}
+                  className="w-full h-full cursor-pointer"
+                  poster={seriesCoverImage || (panels && panels.length > 0 ? panels[0].image_url : undefined)}
+                  onPlay={() => setIsVideoPlaying(true)}
+                  onPause={() => setIsVideoPlaying(false)}
+                  onEnded={() => setIsVideoPlaying(false)}
                 />
               </div>
-              <div className="w-full lg:w-1/3 space-y-4 self-start lg:self-center">
-                <div className="space-y-1">
-                  <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">Series Title</span>
-                  <p className="text-sm font-bold text-white">{seriesTitle || "Untitled"}</p>
+              <div className="w-full lg:w-1/3 space-y-4 self-start lg:self-center bg-neutral-900/30 border border-neutral-800/40 rounded-2xl p-5">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">Series Title</span>
+                    <p className="text-xs font-bold text-white line-clamp-1">{seriesTitle || "Untitled"}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">Chapter</span>
+                    <p className="text-xs font-semibold text-neutral-300 line-clamp-1">
+                      {chapterNumber ? `Chapter ${chapterNumber}` : "N/A"}{chapterTitle ? ` - ${chapterTitle}` : ""}
+                    </p>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">Chapter</span>
-                  <p className="text-xs font-semibold text-neutral-350">
-                    {chapterNumber ? `Chapter ${chapterNumber}` : "N/A"}{chapterTitle ? ` - ${chapterTitle}` : ""}
-                  </p>
+
+                <div className="grid grid-cols-2 gap-4 border-t border-neutral-800/30 pt-3">
+                  {seriesAuthor && (
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">Author</span>
+                      <p className="text-xs font-medium text-neutral-350 line-clamp-1">{seriesAuthor}</p>
+                    </div>
+                  )}
+                  {scrapedGenre && (
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">Genre</span>
+                      <div className="pt-0.5">
+                        <span className={`text-[9px] font-black px-2 py-0.5 rounded border uppercase tracking-wider ${getGenreStyle(scrapedGenre)}`}>
+                          {scrapedGenre.split('/')[0]}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="pt-2 flex flex-col gap-2">
+
+                {panels && panels.length > 0 && (
+                  <div className="space-y-1 border-t border-neutral-800/30 pt-3">
+                    <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">Structure</span>
+                    <p className="text-xs font-medium text-neutral-350">
+                      {panels.length} panels compiled
+                    </p>
+                  </div>
+                )}
+
+                {seriesSynopsis && (
+                  <div className="space-y-1 border-t border-neutral-800/30 pt-3">
+                    <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">Synopsis</span>
+                    <p className="text-[11px] text-neutral-400 leading-relaxed line-clamp-2" title={seriesSynopsis}>
+                      {seriesSynopsis}
+                    </p>
+                  </div>
+                )}
+
+                <div className="pt-3 border-t border-neutral-800/30 flex flex-col gap-2.5">
                   <a
                     href={videoUrl}
                     download={`${seriesTitle || "webtoon"}_master.mp4`}
@@ -539,6 +606,27 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
                   >
                     <Download className="h-4 w-4" /> Download Video File
                   </a>
+                  
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(videoUrl || "");
+                      addNotification?.("Video link copied to clipboard!", "success");
+                    }}
+                    className="w-full bg-neutral-900 hover:bg-neutral-850 text-neutral-300 hover:text-white font-bold text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer border border-neutral-800 active:scale-95 text-center"
+                    title="Copy public link"
+                  >
+                    Copy Video Link
+                  </button>
+
+                  <div className="flex items-center gap-1.5 justify-center text-[9px] text-neutral-500 font-mono pt-1">
+                    <span>MP4</span>
+                    <span>•</span>
+                    <span>1080p</span>
+                    <span>•</span>
+                    <span>24 FPS</span>
+                    <span>•</span>
+                    <span>AAC Stereo</span>
+                  </div>
                 </div>
               </div>
             </div>

@@ -14,7 +14,6 @@ import {
   Bell,
   Sparkles,
   Shield,
-  ChevronRight,
   Zap,
 } from "lucide-react";
 import TooltipPortal from "./TooltipPortal";
@@ -268,9 +267,6 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
             className="p-3 rounded-2xl bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 text-white transition-all shadow-[0_4px_14px_rgba(168,85,247,0.4)] hover:shadow-[0_6px_20px_rgba(168,85,247,0.6)] active:scale-90 border border-purple-400/30 cursor-pointer flex items-center justify-center"
           >
             <Sparkles className="w-[18px] h-[18px] shrink-0" />
-            <div className="absolute -bottom-1 -right-1 bg-[#0a0a0e] rounded-full p-0.5 border border-purple-900/50 shadow-sm">
-              <ChevronRight className="h-2.5 w-2.5 text-neutral-300" />
-            </div>
           </button>
           <TooltipPortal
             text="Creative Suite"

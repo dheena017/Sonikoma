@@ -617,6 +617,7 @@ PUBLIC_ROUTE_PREFIXES = (
     "/api/image/cached/",
     "/api/merge-images/cached/",
     "/api/stitch-images/cached/",
+    "/videos/",        # Generated videos serving
 )
 
 # Admin-only endpoints (require creator_role/admin)

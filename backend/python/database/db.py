@@ -18,6 +18,7 @@ except ImportError:
     psycopg2 = None
 
 DB_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'database'))
+_BACKEND_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 DB_PATH = os.path.join(DB_DIR, 'webtoon_local.db')
 SCHEMA_PATH = os.path.join(DB_DIR, 'schema.sql')
 SCHEMA_PG_PATH = os.path.join(DB_DIR, 'schema_postgres.sql')
@@ -1430,6 +1431,13 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
 
             # 4. Update panels if provided
             if panels is not None:
+                # 4a. Fetch existing panel URLs before deleting
+                rows = conn.execute('SELECT image_url, audio_url FROM panels WHERE chapter_id = ?', (project_id,)).fetchall()
+                old_urls = set()
+                for r in rows:
+                    if r['image_url']: old_urls.add(r['image_url'])
+                    if r['audio_url']: old_urls.add(r['audio_url'])
+
                 # Delete existing panels for this chapter
                 conn.execute('DELETE FROM panels WHERE chapter_id = ?', (project_id,))
 
@@ -1473,25 +1481,102 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
 
                 # Sync panel count
                 conn.execute("UPDATE chapters SET panels_count = ?, updated_at = datetime('now') WHERE id = ?", (len(panels), project_id))
+
+                # 4b. Find which old URLs are not in the new list, and clean them up
+                new_urls = set()
+                for p in panels:
+                    if p.get('image_url'): new_urls.add(unwrap_proxy_url(p.get('image_url')))
+                    if p.get('audio_url'): new_urls.add(unwrap_proxy_url(p.get('audio_url')))
+                
+                deleted_urls = old_urls - new_urls
+                for url in deleted_urls:
+                    cleanup_cached_url(url)
     finally:
         conn.close()
 
 
+def cleanup_cached_url(url: Optional[str]) -> None:
+    """Extract cache ID from URL and delete the corresponding file from disk cache."""
+    if not url:
+        return
+    import re
+    match = re.search(r'/cached/([^/?#\s]+)', url)
+    if match:
+        cache_id = match.group(1)
+        try:
+            from utils.cache import stitched_cache
+            logger.info(f"[Database] Deleting cached panel asset file from disk: {cache_id}")
+            stitched_cache.delete(cache_id)
+        except Exception as e:
+            logger.error(f"[Database] Failed to delete cache file {cache_id}: {e}")
+
+
 def delete_project(project_id: str) -> None:
-    """Delete a project and all its panels (via SQL CASCADE)."""
+    """Delete a project and all its panels (via SQL CASCADE), removing associated files from cache."""
     conn = get_db_connection()
     try:
+        # Fetch all panel URLs and compiled video URL before deleting
+        rows = conn.execute('SELECT image_url, audio_url FROM panels WHERE chapter_id = ?', (project_id,)).fetchall()
+        panel_urls = []
+        for r in rows:
+            if r['image_url']: panel_urls.append(r['image_url'])
+            if r['audio_url']: panel_urls.append(r['audio_url'])
+            
+        chap = conn.execute('SELECT video_url FROM chapters WHERE id = ?', (project_id,)).fetchone()
+        
         conn.execute('DELETE FROM chapters WHERE id = ?', (project_id,))
         conn.commit()
+        
+        # Clean up cached panel files
+        for url in panel_urls:
+            cleanup_cached_url(url)
+            
+        # Clean up compiled video file
+        if chap and chap['video_url']:
+            video_path = os.path.abspath(os.path.join(_BACKEND_ROOT, 'public', chap['video_url'].lstrip('/')))
+            if os.path.exists(video_path):
+                try:
+                    logger.info(f"[Database] Deleting project compiled video file from disk: {video_path}")
+                    os.remove(video_path)
+                except Exception as e:
+                    logger.error(f"[Database] Failed to delete video file {video_path}: {e}")
     finally:
         conn.close()
 
 def delete_series(series_id: str) -> None:
-    """Delete a series and all its chapters & panels (via SQL CASCADE)."""
+    """Delete a series and all its chapters & panels (via SQL CASCADE), removing associated files."""
     conn = get_db_connection()
     try:
+        # Fetch all panel URLs and compiled video URLs under this series
+        rows = conn.execute("""
+            SELECT image_url, audio_url 
+            FROM panels 
+            WHERE chapter_id IN (SELECT id FROM chapters WHERE series_id = ?)
+        """, (series_id,)).fetchall()
+        panel_urls = []
+        for r in rows:
+            if r['image_url']: panel_urls.append(r['image_url'])
+            if r['audio_url']: panel_urls.append(r['audio_url'])
+            
+        chaps = conn.execute('SELECT video_url FROM chapters WHERE series_id = ?', (series_id,)).fetchall()
+        
         conn.execute('DELETE FROM series WHERE id = ?', (series_id,))
         conn.commit()
+        
+        # Clean up cached panel files
+        for url in panel_urls:
+            cleanup_cached_url(url)
+            
+        # Clean up compiled video files
+        for c in chaps:
+            if c['video_url']:
+                video_path = os.path.abspath(os.path.join(_BACKEND_ROOT, 'public', c['video_url'].lstrip('/')))
+                if os.path.exists(video_path):
+                    try:
+                        logger.info(f"[Database] Deleting series compiled video file from disk: {video_path}")
+                        os.remove(video_path)
+                    except Exception as e:
+                        logger.error(f"[Database] Failed to delete video file {video_path}: {e}")
     finally:
         conn.close()
 
@@ -1546,11 +1631,15 @@ def get_panels(project_id: str) -> List[Dict[str, Any]]:
         conn.close()
 
 def delete_panels(project_id: str) -> None:
-    """Delete all panels belonging to a project."""
+    """Delete all panels belonging to a project, removing associated files."""
     conn = get_db_connection()
     try:
+        rows = conn.execute('SELECT image_url, audio_url FROM panels WHERE chapter_id = ?', (project_id,)).fetchall()
         conn.execute('DELETE FROM panels WHERE chapter_id = ?', (project_id,))
         conn.commit()
+        for r in rows:
+            cleanup_cached_url(r['image_url'])
+            cleanup_cached_url(r['audio_url'])
     finally:
         conn.close()
 

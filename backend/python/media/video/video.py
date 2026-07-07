@@ -152,7 +152,8 @@ async def compile_video_from_panels(
                 audio_codec="aac",
                 threads=4,
                 preset="ultrafast",
-                logger=None
+                logger=None,
+                bitrate="10000k"
             )
 
         await asyncio.to_thread(render_video)

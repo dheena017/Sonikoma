@@ -2,7 +2,6 @@ import React from "react";
 import LiveScraperDeck from "../../scraper/LiveScraperDeck";
 import StoryboardTimeline from "../../timeline/StoryboardTimeline";
 import VideoMonitor from "../../video/VideoMonitor";
-import VolumeAndProgressPanel from "../../video/VolumeAndProgressPanel";
 import OutputMetadataPanel from "../../video/OutputMetadataPanel";
 import PipelineStatusCard from "../../pipeline/ProcessBar.js";
 import LayoutEditorPage from "../LayoutEditorPage.js";
@@ -88,6 +87,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
     setPlaybackTime,
     reprocessingPanelId,
     storyboardPlaying,
+    setStoryboardPlaying,
     toggleStoryboardPlayback,
     resetStoryboardPlayback,
     isMuted,
@@ -292,27 +292,12 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   playbackTime={playbackTime}
                   reprocessingPanelId={reprocessingPanelId}
                   quality={previewQuality}
+                  setCurrentPanelIndex={setCurrentPanelIndex}
+                  setPlaybackTime={setPlaybackTime}
+                  setStoryboardPlaying={setStoryboardPlaying}
                 />
 
-                {/* Overlay Controls */}
-                {panels.length > 0 && (
-                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] md:w-full max-w-4xl z-[60] bg-black/60 backdrop-blur-md rounded-2xl border border-white/10 p-2 shadow-2xl">
-                    <VolumeAndProgressPanel
-                      panels={panels}
-                      setPanels={setPanels}
-                      currentPanelIndex={currentPanelIndex}
-                      playbackTime={playbackTime}
-                      storyboardPlaying={storyboardPlaying}
-                      toggleStoryboardPlayback={toggleStoryboardPlayback}
-                      resetStoryboardPlayback={resetStoryboardPlayback}
-                      isMuted={isMuted}
-                      setIsMuted={setIsMuted}
-                      volume={volume}
-                      setVolume={setVolume}
-                      addNotification={addNotification}
-                    />
-                  </div>
-                )}
+
               </div>
             </div>
 

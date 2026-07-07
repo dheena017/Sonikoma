@@ -144,6 +144,8 @@ export function useAppLogic() {
     autoPlayAudio: state.autoPlayAudio,
     sfxEnabled: state.sfxEnabled,
     sfxVolume: state.sfxVolume,
+    activePreviewTab: state.activePreviewTab,
+    videoPlayerRef,
   });
 
   const {
@@ -641,6 +643,7 @@ export function useAppLogic() {
       playbackTime,
       setPlaybackTime,
       storyboardPlaying,
+      setStoryboardPlaying,
       toggleStoryboardPlayback,
       resetStoryboardPlayback,
       playStoryboardAudio,
@@ -693,6 +696,7 @@ export function useAppLogic() {
       playbackTime,
       setPlaybackTime,
       storyboardPlaying,
+      setStoryboardPlaying,
       toggleStoryboardPlayback,
       resetStoryboardPlayback,
       playStoryboardAudio,

@@ -4,8 +4,14 @@ export const getProjectTokenAnalytics = async (fetchWithInterceptor: any) => {
 };
 
 export const getCreatorAnalytics = async (fetchWithInterceptor: any) => {
-  const res = await fetchWithInterceptor("/api/auth/analytics");
+  const fetcher =
+    typeof fetchWithInterceptor === "function"
+      ? fetchWithInterceptor
+      : (fetch as any);
+
+  const res = await fetcher("/api/auth/analytics");
   return res.json();
 };
 
 export const getAnalytics = getCreatorAnalytics;
+

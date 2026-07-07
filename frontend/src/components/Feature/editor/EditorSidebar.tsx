@@ -122,6 +122,7 @@ const EditorSidebar = ({
                   setCurrentSection(item.id);
                   const el = document.getElementById(`section-${item.id}`);
                   if (el) el.scrollIntoView({ behavior: "smooth" });
+                  setIsCollapsed(true);
                 }}
                 className={`w-full flex items-center ${
                   isCollapsed
@@ -184,7 +185,10 @@ const EditorSidebar = ({
       <div className="p-4 border-t border-white/[0.02] bg-gradient-to-t from-black/20 to-transparent">
         <button
           // Route directly to the workspace page
-          onClick={() => window.history.pushState({}, "", "/workspace")}
+          onClick={() => {
+            window.history.pushState({}, "", "/workspace");
+            setIsCollapsed(true);
+          }}
 
           className={`flex items-center justify-center rounded-2xl bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white transition-all active:scale-95 border border-white/10 cursor-pointer ${
             isCollapsed ? "h-12 w-12 p-0" : "w-full py-3 gap-3"

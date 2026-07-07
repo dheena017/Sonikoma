@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 
 // Sub-components
-import ProfileProjectsTab from "./ProfileProjectsTab.js";
 import ProfileAccountTab from "./ProfileAccountTab.js";
 import ProfileSecurityTab from "./ProfileSecurityTab.js";
 import ProfileBillingTab from "./ProfileBillingTab.js";
@@ -53,7 +52,6 @@ export default function ProfilePage({
 
   // Navigation tabs
   const [activeTab, setActiveTab] = React.useState<
-    | "projects"
     | "account"
     | "security"
     | "billing"
@@ -61,7 +59,7 @@ export default function ProfilePage({
     | "analytics"
     | "preferences"
     | "stats"
-  >("projects");
+  >("analytics");
 
   // Local state for profile values
   const [profileUser, setProfileUser] = React.useState({
@@ -533,16 +531,21 @@ export default function ProfilePage({
         );
       }
       return (
-        <div className="w-full h-full relative bg-neutral-900">
+        <div className="w-full h-full relative bg-gradient-to-br from-purple-600/30 to-indigo-600/30 flex items-center justify-center">
           <img
             src={url}
             alt="Profile"
             className="w-full h-full object-cover relative z-10"
             onError={(e) => {
               e.currentTarget.style.display = "none";
+              const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+              if (fallback) fallback.style.display = "flex";
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white font-extrabold text-3xl select-none">
+          <div
+            className="absolute inset-0 bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white font-extrabold text-3xl select-none"
+            style={{ display: "none" }}
+          >
             {name.charAt(0).toUpperCase()}
           </div>
         </div>
@@ -1283,23 +1286,22 @@ export default function ProfilePage({
         {/* User Card & Info Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 bg-neutral-900/20 border border-neutral-850 p-6 rounded-3xl shadow-xl">
           <div className="flex items-center gap-6">
-            <div className="relative group">
+            <div 
+              className="relative w-28 h-28 rounded-3xl border border-purple-500/20 bg-neutral-900 cursor-pointer select-none hover:scale-105 hover:border-purple-500/50 transition-all duration-200 active:scale-95 group"
+              onClick={() => fileInputRef.current?.click()}
+              title="Upload Profile Image"
+            >
               {/* Profile Avatar Card */}
-              <div className="w-20 h-20 rounded-3xl overflow-hidden border border-purple-500/20 bg-neutral-900 flex items-center justify-center">
+              <div className="w-full h-full rounded-3xl overflow-hidden flex items-center justify-center">
                 {renderAvatarContent(
                   profileUser.avatarUrl,
                   profileUser.fullName
                 )}
               </div>
-
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="absolute -bottom-1 -right-1 p-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl shadow-lg border border-white/10 transition-all scale-95 hover:scale-100 cursor-pointer"
-                title="Upload Profile Image"
-              >
-                <Camera className="w-3.5 h-3.5" />
-              </button>
+              {/* Camera Badge */}
+              <div className="absolute -bottom-1 -right-1 bg-purple-600 text-white p-2 rounded-xl border border-neutral-950 shadow-lg shadow-purple-950/50 transition-all duration-200 group-hover:scale-110 group-hover:bg-purple-500 z-20">
+                <Camera className="w-4 h-4" />
+              </div>
             </div>
 
             <div className="space-y-1 text-left">
@@ -1357,20 +1359,6 @@ export default function ProfilePage({
         <div className="space-y-6">
           {/* HORIZONTAL TAB BAR */}
           <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-none snap-x snap-mandatory">
-            <button
-              onClick={() => setActiveTab("projects")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
-                activeTab === "projects"
-                  ? "bg-purple-600/10 border border-purple-500/20 text-purple-400"
-                  : "bg-neutral-900/40 border border-white/5 text-neutral-400 hover:text-white hover:bg-white/5"
-              }`}
-            >
-              <LayoutGrid className="w-4 h-4" />
-              Recent Projects
-              <span className="text-[10px] bg-neutral-900 border border-white/5 px-2 py-0.5 rounded-full font-mono ml-1">
-                {localProjects.length}
-              </span>
-            </button>
             <button
               onClick={() => setActiveTab("analytics")}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
@@ -1518,18 +1506,6 @@ export default function ProfilePage({
 
             {/* TAB 0: CREATOR PERFORMANCE ANALYTICS */}
             {activeTab === "analytics" && <ProfileAnalyticsTab />}
-
-            {/* TAB 1: RECENT PROJECTS */}
-            {activeTab === "projects" && (
-              <ProfileProjectsTab
-                projects={localProjects}
-                onNavigateHome={onNavigateHome}
-                onBatchDelete={handleBatchDeleteProjects}
-                onDeleteChapter={handleDeleteChapter}
-                onDeleteSeries={handleDeleteSeries}
-                onRefreshProjects={fetchProjects}
-              />
-            )}
 
             {/* TAB 2: ACCOUNT SETTINGS EDIT FORM */}
             {activeTab === "account" && (

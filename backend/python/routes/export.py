@@ -1,5 +1,6 @@
 import os
 import logging
+import asyncio
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends
 from pydantic import BaseModel
 import tempfile
@@ -306,9 +307,29 @@ async def _execute_youtube_upload_workflow(
 
         logger.info(f"Starting local server for OAuth flow on port {redirect_port}...")
         try:
-            credentials = flow.run_local_server(port=redirect_port)
+            # Run the blocking local server in a separate thread to keep the FastAPI event loop responsive
+            # and set a 120-second (2-minute) timeout.
+            credentials = await asyncio.to_thread(
+                flow.run_local_server,
+                port=redirect_port,
+                timeout_seconds=120
+            )
         except Exception as flow_err:
-            logger.error(f"OAuth flow failed to start: {flow_err}")
+            logger.error(f"OAuth flow failed to start or timed out: {flow_err}")
+            
+            # Check if this is the library-specific AttributeError raised when run_local_server times out
+            is_timeout = (
+                isinstance(flow_err, AttributeError) and 
+                "NoneType" in str(flow_err) and 
+                "replace" in str(flow_err)
+            )
+            
+            if is_timeout:
+                raise HTTPException(
+                    status_code=408,
+                    detail="YouTube authorization timed out (no response received within 120 seconds). Please try again and complete the authorization in your browser tab."
+                )
+            
             is_web_client = "secrets_obj" in locals() and isinstance(secrets_obj, dict) and "web" in secrets_obj
             hint_msg = (
                 "Hint: You are using a 'Web Application' client ID. For local development, it is highly recommended to "

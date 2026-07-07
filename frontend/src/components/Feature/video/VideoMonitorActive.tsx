@@ -12,6 +12,9 @@ interface VideoMonitorActiveProps {
   currentPanelIndex: number;
   playbackTime: number;
   reprocessingPanelId: number | null;
+  setCurrentPanelIndex: (idx: number) => void;
+  setPlaybackTime: (time: number) => void;
+  setStoryboardPlaying: (playing: boolean) => void;
 }
 
 export function VideoMonitorActive({
@@ -23,6 +26,9 @@ export function VideoMonitorActive({
   currentPanelIndex,
   playbackTime,
   reprocessingPanelId,
+  setCurrentPanelIndex,
+  setPlaybackTime,
+  setStoryboardPlaying,
 }: VideoMonitorActiveProps) {
   const [videoCurrentTime, setVideoCurrentTime] = React.useState(0);
   const activeStoryboardPanel = panels[currentPanelIndex] || null;
@@ -124,9 +130,33 @@ export function VideoMonitorActive({
             autoPlay
             playsInline
             className="w-full h-full object-contain bg-black"
-            onTimeUpdate={(e) =>
-              setVideoCurrentTime(e.currentTarget.currentTime)
-            }
+            onPlay={() => setStoryboardPlaying(true)}
+            onPause={() => setStoryboardPlaying(false)}
+            onTimeUpdate={(e) => {
+              const curTime = e.currentTarget.currentTime;
+              setVideoCurrentTime(curTime);
+              
+              // Find matching panel and relative time to keep timeline in sync
+              let accumulatedTime = 0;
+              let panelIdx = 0;
+              let relativeTime = curTime;
+              for (let i = 0; i < panels.length; i++) {
+                const pDur = panels[i].duration || 4.5;
+                if (curTime >= accumulatedTime && curTime < accumulatedTime + pDur) {
+                  panelIdx = i;
+                  relativeTime = curTime - accumulatedTime;
+                  break;
+                }
+                accumulatedTime += pDur;
+              }
+              if (curTime >= accumulatedTime && panels.length > 0) {
+                panelIdx = panels.length - 1;
+                relativeTime = (panels[panelIdx].duration || 4.5) - 0.01;
+              }
+              
+              setCurrentPanelIndex(panelIdx);
+              setPlaybackTime(relativeTime);
+            }}
           />
         </div>
       )}
