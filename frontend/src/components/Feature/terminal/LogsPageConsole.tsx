@@ -23,7 +23,7 @@ interface LogsPageConsoleProps {
   historyPage: number;
   historyLimit: number;
   historicalLogs: LogEntry[];
-  scrollRef: React.RefObject<HTMLDivElement>;
+  scrollRef: React.RefObject<HTMLDivElement | null>;
   expandedLogId: number | string | null;
   setExpandedLogId: (id: number | string | null) => void;
   highlightPattern: string;
