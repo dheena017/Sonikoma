@@ -398,7 +398,230 @@ def check_sqlite_cache(url: str) -> Optional[List[str]]:
                 return urls
         except Exception as e:
             logger.warning(f"[Scraper] SQLite cache read failed: {e}")
+
+
+# ---------------------------------------------------------------------------
+# Episode extraction & HTML compare helpers (CLI-friendly)
+# ---------------------------------------------------------------------------
+
+import csv
+
+
+def _fetch_source(source: str) -> Optional[str]:
+    """Fetches HTML from a URL or reads a local file path. Returns HTML string."""
+    # local file
+    if os.path.exists(source):
+        with open(source, 'r', encoding='utf-8') as f:
+            return f.read()
+    # try HTTP GET via requests or httpx
+    if requests:
+        try:
+            resp = requests.get(source, headers={'User-Agent': random.choice(USER_AGENTS)}, timeout=10)
+            if resp.status_code == 200:
+                return resp.text
+        except Exception:
+            return None
+    elif httpx:
+        try:
+            resp = httpx.get(source, headers={'User-Agent': random.choice(USER_AGENTS)}, timeout=10)
+            if resp.status_code == 200:
+                return resp.text
+        except Exception:
+            return None
     return None
+
+
+def _parse_date_string(s: str) -> Optional[datetime]:
+    """Normalize human-readable date strings to datetime. Handles "Jul 7, 2026" etc."""
+    if not s:
+        return None
+    s = s.strip()
+    # try common formats
+    fmts = ["%b %d, %Y", "%B %d, %Y", "%Y-%m-%d", "%d %b %Y", "%d %B %Y"]
+    for fmt in fmts:
+        try:
+            return datetime.strptime(s, fmt)
+        except Exception:
+            pass
+
+    # fallback: search for Month Day, Year inside string
+    m = re.search(r'\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2},\s+\d{4}\b', s, re.IGNORECASE)
+    if m:
+        try:
+            return datetime.strptime(m.group(0), "%b %d, %Y")
+        except Exception:
+            try:
+                return datetime.strptime(m.group(0), "%B %d, %Y")
+            except Exception:
+                pass
+
+    # last-resort: find YYYY and numbers
+    m = re.search(r'(\d{4})', s)
+    if m:
+        try:
+            y = int(m.group(1))
+            return datetime(y, 1, 1)
+        except Exception:
+            pass
+    return None
+
+
+def extract_episode_date_pairs_from_html(html: str) -> List[Tuple[int, Optional[datetime], str]]:
+    """Extract (episode_number, date, raw_text_context) tuples from HTML.
+
+    Returns list ordered by appearance.
+    """
+    results: List[Tuple[int, Optional[datetime], str]] = []
+    if not html:
+        return results
+
+    # If BeautifulSoup is available, use it to better localize dates near episode labels
+    if BeautifulSoup:
+        try:
+            soup = BeautifulSoup(html, 'html.parser')
+            text_nodes = []
+
+            # find nodes that include the word 'Episode' or 'Episode #'
+            for tag in soup.find_all(text=re.compile(r'episode\s*\d+', re.IGNORECASE)):
+                text_nodes.append(tag)
+
+            # additionally, search for numeric "Episode X" inside headings/buttons
+            for node in text_nodes:
+                container = node.parent
+                txt = container.get_text(separator=' ', strip=True)
+                # episode number
+                m = re.search(r'episode\s*(\d+)', txt, re.IGNORECASE)
+                if not m:
+                    continue
+                try:
+                    ep = int(m.group(1))
+                except Exception:
+                    continue
+
+                # try to find a nearby date: search the container and nearby siblings
+                date_candidate = None
+                # check container first
+                date_candidate = re.search(r'\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+\d{1,2},\s+\d{4}\b', txt, re.IGNORECASE)
+                if not date_candidate:
+                    # look at siblings text
+                    for sib in container.find_next_siblings(limit=3):
+                        stext = sib.get_text(separator=' ', strip=True)
+                        date_candidate = re.search(r'\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+\d{1,2},\s+\d{4}\b', stext, re.IGNORECASE)
+                        if date_candidate:
+                            date_raw = date_candidate.group(0)
+                            break
+                else:
+                    date_raw = date_candidate.group(0)
+
+                if date_candidate:
+                    date_raw = date_candidate.group(0)
+                    parsed = _parse_date_string(date_raw)
+                else:
+                    parsed = None
+
+                results.append((ep, parsed, txt))
+            return results
+        except Exception:
+            pass
+
+    # Fallback: regex over raw HTML
+    for m in re.finditer(r'episode\s*(\d+)', html, re.IGNORECASE):
+        try:
+            ep = int(m.group(1))
+        except Exception:
+            continue
+        # look around match for a date
+        span_start = max(0, m.start() - 200)
+        span_end = min(len(html), m.end() + 200)
+        context = html[span_start:span_end]
+        date_m = re.search(r'\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+\d{1,2},\s+\d{4}\b', context, re.IGNORECASE)
+        parsed = _parse_date_string(date_m.group(0)) if date_m else None
+        results.append((ep, parsed, context))
+
+    return results
+
+
+def compare_two_sources(source_a: str, source_b: str, name_a: str = 'A', name_b: str = 'B') -> Dict[str, Any]:
+    """Fetch/Read two HTML sources, extract episodes, and produce comparison dict.
+
+    Returns a dict with lists and mismatches.
+    """
+    html_a = _fetch_source(source_a)
+    html_b = _fetch_source(source_b)
+
+    a_list = extract_episode_date_pairs_from_html(html_a or '')
+    b_list = extract_episode_date_pairs_from_html(html_b or '')
+
+    def to_rows(lst, name):
+        rows = []
+        for ep, dt, ctx in lst:
+            rows.append({
+                'view': name,
+                'episode': ep,
+                'date': dt.isoformat() if dt else '',
+                'raw': ctx[:180].replace('\n', ' ')
+            })
+        return rows
+
+    rows_a = to_rows(a_list, name_a)
+    rows_b = to_rows(b_list, name_b)
+
+    # Build maps by date string (ISO) for quick cross-checks
+    by_date = {}
+    for r in rows_a:
+        key = r['date'] or f"A_ep{r['episode']}"
+        by_date.setdefault(key, []).append(r)
+    for r in rows_b:
+        key = r['date'] or f"B_ep{r['episode']}"
+        by_date.setdefault(key, []).append(r)
+
+    # Simple mismatch detection: dates that appear in only one view
+    only_in_a = [r for r in rows_a if r['date'] and not any(rb['date'] == r['date'] for rb in rows_b)]
+    only_in_b = [r for r in rows_b if r['date'] and not any(ra['date'] == r['date'] for ra in rows_a)]
+
+    return {
+        'rows_a': rows_a,
+        'rows_b': rows_b,
+        'only_in_a': only_in_a,
+        'only_in_b': only_in_b,
+        'by_date': by_date
+    }
+
+
+def write_csv(rows: List[Dict[str, Any]], outpath: str) -> None:
+    keys = ['view', 'episode', 'date', 'raw']
+    with open(outpath, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=keys)
+        writer.writeheader()
+        for r in rows:
+            writer.writerow({k: r.get(k, '') for k in keys})
+
+
+if __name__ == '__main__':
+    # Simple CLI: python scraper.py <source_a> <source_b> [out.csv]
+    if len(sys.argv) < 3:
+        print("Usage: python scraper.py <source_a> <source_b> [out.csv]")
+        sys.exit(1)
+    src_a = sys.argv[1]
+    src_b = sys.argv[2]
+    outcsv = sys.argv[3] if len(sys.argv) > 3 else None
+
+    comp = compare_two_sources(src_a, src_b, name_a='ViewTop', name_b='ViewGrid')
+    all_rows = comp['rows_a'] + comp['rows_b']
+    if outcsv:
+        write_csv(all_rows, outcsv)
+        print(f"Wrote CSV to {outcsv}")
+    else:
+        # Print concise report
+        print("Summary:\n")
+        print(f"Top view rows: {len(comp['rows_a'])}")
+        print(f"Grid view rows: {len(comp['rows_b'])}\n")
+        print("Dates only in Top view:")
+        for r in comp['only_in_a']:
+            print(f" - Ep{r['episode']} @ {r['date']}")
+        print("\nDates only in Grid view:")
+        for r in comp['only_in_b']:
+            print(f" - Ep{r['episode']} @ {r['date']}")
 
 
 def save_sqlite_cache(url: str, images: List[str]) -> None:

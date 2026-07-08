@@ -13,8 +13,14 @@ export interface FavoriteSeries {
 const STORAGE_KEY = 'sonikoma_favorite_series';
 const RECENT_KEY = 'sonikoma_recent_series';
 const MAX_RECENT = 10;
+export const FAVORITES_UPDATED_EVENT = 'sonikoma-favorites-updated';
 
 export class FavoritesManager {
+  static notifyUpdated() {
+    if (typeof window === 'undefined') return;
+    window.dispatchEvent(new Event(FAVORITES_UPDATED_EVENT));
+  }
+
   static getFavorites(): FavoriteSeries[] {
     try {
       const data = localStorage.getItem(STORAGE_KEY);
@@ -33,12 +39,14 @@ export class FavoritesManager {
         timestamp: Date.now(),
       });
       localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites));
+      this.notifyUpdated();
     }
   }
 
   static removeFavorite(title_no: string) {
     const favorites = this.getFavorites().filter((f) => f.title_no !== title_no);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites));
+    this.notifyUpdated();
   }
 
   static isFavorite(title_no: string): boolean {
@@ -63,15 +71,18 @@ export class FavoritesManager {
     });
     recent = recent.slice(0, MAX_RECENT);
     localStorage.setItem(RECENT_KEY, JSON.stringify(recent));
+    this.notifyUpdated();
   }
 
   static clearRecent() {
     localStorage.setItem(RECENT_KEY, JSON.stringify([]));
+    this.notifyUpdated();
   }
 
   static removeRecent(title_no: string) {
     const recent = this.getRecent().filter((r) => r.title_no !== title_no);
     localStorage.setItem(RECENT_KEY, JSON.stringify(recent));
+    this.notifyUpdated();
   }
 
   static getBookmarks(): string[] {
@@ -88,12 +99,14 @@ export class FavoritesManager {
     if (!bookmarks.includes(url)) {
       bookmarks.push(url);
       localStorage.setItem('sonikoma_bookmarked_episodes', JSON.stringify(bookmarks));
+      this.notifyUpdated();
     }
   }
 
   static removeBookmark(url: string) {
     const bookmarks = this.getBookmarks().filter((u) => u !== url);
     localStorage.setItem('sonikoma_bookmarked_episodes', JSON.stringify(bookmarks));
+    this.notifyUpdated();
   }
 
   static isBookmarked(url: string): boolean {
@@ -114,12 +127,14 @@ export class FavoritesManager {
     if (!readUrls.includes(url)) {
       readUrls.push(url);
       localStorage.setItem('sonikoma_read_episodes', JSON.stringify(readUrls));
+      this.notifyUpdated();
     }
   }
 
   static markAsUnread(url: string) {
     const readUrls = this.getReadEpisodes().filter((u) => u !== url);
     localStorage.setItem('sonikoma_read_episodes', JSON.stringify(readUrls));
+    this.notifyUpdated();
   }
 
   static isRead(url: string): boolean {
@@ -139,8 +154,21 @@ export const FavoritesList: React.FC<FavoritesListProps> = ({
   const [items, setItems] = useState<FavoriteSeries[]>([]);
 
   useEffect(() => {
-    const data = showRecent ? FavoritesManager.getRecent() : FavoritesManager.getFavorites();
-    setItems(data);
+    const refreshItems = () => {
+      const data = showRecent ? FavoritesManager.getRecent() : FavoritesManager.getFavorites();
+      setItems(data);
+    };
+
+    refreshItems();
+
+    const handleFavoritesChanged = () => refreshItems();
+    window.addEventListener(FAVORITES_UPDATED_EVENT, handleFavoritesChanged);
+    window.addEventListener('storage', handleFavoritesChanged);
+
+    return () => {
+      window.removeEventListener(FAVORITES_UPDATED_EVENT, handleFavoritesChanged);
+      window.removeEventListener('storage', handleFavoritesChanged);
+    };
   }, [showRecent]);
 
   const handleRemove = (title_no: string, e: React.MouseEvent) => {

@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { EpisodeGrid } from "./EpisodeGrid";
 import { EpisodeControls } from "./EpisodeControls";
-import { FavoritesManager, FavoritesList, FavoriteSeries } from "./FavoritesManager";
+import { FavoritesManager, FavoritesList, FavoriteSeries, FAVORITES_UPDATED_EVENT } from "./FavoritesManager";
 import { BatchThumbnailDownloader } from "./BatchThumbnailDownloader";
 import { EpisodePreviewModal } from "./EpisodePreviewModal";
 import { AnalyticsDashboard } from "./AnalyticsDashboard";
@@ -123,19 +123,32 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
 
   // Suggestions listing from favorites/recent
   useEffect(() => {
-    try {
-      const recents = FavoritesManager.getRecent();
-      const favorites = FavoritesManager.getFavorites();
-      const merged = [...recents, ...favorites];
-      const uniqueMap = new Map();
-      merged.forEach(item => {
-        if (item.url) uniqueMap.set(item.url, item);
-      });
-      setSuggestions(Array.from(uniqueMap.values()).slice(0, 8));
-    } catch (e) {
-      console.warn("Failed to load autocomplete suggestions:", e);
-    }
-  }, [showSuggestions]);
+    const refreshSuggestions = () => {
+      try {
+        const recents = FavoritesManager.getRecent();
+        const favorites = FavoritesManager.getFavorites();
+        const merged = [...recents, ...favorites];
+        const uniqueMap = new Map();
+        merged.forEach(item => {
+          if (item.url) uniqueMap.set(item.url, item);
+        });
+        setSuggestions(Array.from(uniqueMap.values()).slice(0, 8));
+      } catch (e) {
+        console.warn("Failed to load autocomplete suggestions:", e);
+      }
+    };
+
+    refreshSuggestions();
+
+    const handleFavoritesChanged = () => refreshSuggestions();
+    window.addEventListener(FAVORITES_UPDATED_EVENT, handleFavoritesChanged);
+    window.addEventListener('storage', handleFavoritesChanged);
+
+    return () => {
+      window.removeEventListener(FAVORITES_UPDATED_EVENT, handleFavoritesChanged);
+      window.removeEventListener('storage', handleFavoritesChanged);
+    };
+  }, []);
 
   useEffect(() => {
     if (!showSuggestions) return;
