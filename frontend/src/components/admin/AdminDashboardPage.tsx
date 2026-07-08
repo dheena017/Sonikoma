@@ -277,6 +277,24 @@ const AdminDashboardPage = React.memo(
       }
     };
 
+    // Format ISO/SQLite date strings into a readable local date+time
+    const formatDate = (raw: string | undefined | null): string => {
+      if (!raw) return "—";
+      try {
+        const d = new Date(raw.includes("T") ? raw : raw.replace(" ", "T") + "Z");
+        if (isNaN(d.getTime())) return raw;
+        return d.toLocaleString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      } catch {
+        return raw;
+      }
+    };
+
     // Filters and search logic
     const filteredUsers = useMemo(() => {
       if (!userSearch.trim()) return users.slice(0, 5);
@@ -803,13 +821,17 @@ const AdminDashboardPage = React.memo(
                   ) : (
                     filteredUsers.map((u) => (
                       <div key={u.id} className="p-3 bg-[#040406] border border-neutral-800 rounded-xl flex items-center justify-between group hover:border-neutral-700 transition-all">
-                        <div>
+                        <div className="space-y-0.5 min-w-0 flex-1 pr-2">
                           <div className="font-bold text-xs text-neutral-200">{u.full_name || "Anonymous"}</div>
-                          <div className="text-[10px] text-neutral-500 font-mono">{u.email}</div>
+                          <div className="text-[10px] text-neutral-500 font-mono truncate">{u.email}</div>
+                          <div className="text-[9px] text-neutral-600 font-mono flex items-center gap-1">
+                            <Clock className="w-2.5 h-2.5" />
+                            Joined {formatDate(u.created_at)}
+                          </div>
                         </div>
                         <button
                           onClick={() => handleImpersonate(u.id)}
-                          className="flex items-center gap-1.5 px-3 py-1 bg-violet-600/10 hover:bg-violet-600 text-violet-400 hover:text-white rounded-lg text-[10px] font-bold transition-all cursor-pointer active:scale-95 border border-violet-500/25"
+                          className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1 bg-violet-600/10 hover:bg-violet-600 text-violet-400 hover:text-white rounded-lg text-[10px] font-bold transition-all cursor-pointer active:scale-95 border border-violet-500/25"
                         >
                           Impersonate <ArrowRight className="w-3 h-3" />
                         </button>
@@ -833,14 +855,18 @@ const AdminDashboardPage = React.memo(
                     </div>
                   ) : (
                     recentLogs.map((log) => (
-                      <div key={log.id} className="p-3 bg-[#040406] border border-neutral-800/80 rounded-xl flex items-center justify-between text-xs hover:border-neutral-700 transition-all">
-                        <div className="space-y-0.5">
+                      <div key={log.id} className="p-3 bg-[#040406] border border-neutral-800/80 rounded-xl flex items-start justify-between text-xs hover:border-neutral-700 transition-all gap-2">
+                        <div className="space-y-0.5 min-w-0 flex-1">
                           <div className="font-bold text-neutral-200 text-xs">{log.action}</div>
                           <div className="text-[10px] text-neutral-500">
-                            Creator: {log.email || "System"} | IP: {log.ip_address}
+                            {log.email || "System"} · {log.ip_address}
+                          </div>
+                          <div className="text-[9px] text-neutral-600 font-mono flex items-center gap-1">
+                            <Clock className="w-2.5 h-2.5 inline" />
+                            {formatDate(log.created_at)}
                           </div>
                         </div>
-                        <span className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase ${
+                        <span className={`flex-shrink-0 px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase ${
                           log.status === "Success" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/10" : "bg-rose-500/10 text-rose-400 border border-rose-500/10"
                         }`}>
                           {log.status}

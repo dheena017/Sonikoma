@@ -946,7 +946,32 @@ async def analyze_sequence(body: AnalyzeSequenceRequest, user_api_key: str = Dep
                     config=types.GenerateContentConfig(response_mime_type="application/json")
                 )
             )
-            raw_text = response.text
+
+            # Gemini SDK response handling can vary; response.text may be empty.
+            raw_text = getattr(response, "text", None)
+            if not raw_text:
+                # Try common alternative shapes (best-effort, non-breaking)
+                try:
+                    candidates = getattr(response, "candidates", None) or []
+                    if candidates and getattr(candidates[0], "content", None):
+                        parts = getattr(candidates[0].content, "parts", None) or []
+                        # parts items often have `.text`
+                        part_texts = []
+                        for p in parts:
+                            t = getattr(p, "text", None)
+                            if t:
+                                part_texts.append(t)
+                        raw_text = "\n".join(part_texts) if part_texts else raw_text
+                except Exception:
+                    pass
+
+            if not raw_text:
+                try:
+                    # Last resort for debugging (do not expose to client)
+                    raw_text = str(response)
+                except Exception:
+                    raw_text = None
+
         elif provider == "openai":
             import requests
             import base64
@@ -1045,11 +1070,17 @@ async def analyze_sequence(body: AnalyzeSequenceRequest, user_api_key: str = Dep
         if not raw_text:
             raise HTTPException(
                 status_code=500,
-                detail="AI model returned an empty response."
+                detail="AI model returned an empty response (no retrievable text payload)."
             )
 
         from skills.base import extract_json
-        sequence_data = json.loads(extract_json(raw_text))
+        try:
+            sequence_data = json.loads(extract_json(raw_text))
+        except Exception:
+            # Surface a more helpful error when JSON extraction fails.
+            logger.error(f"[Sequence] Failed to parse JSON from Gemini response. Raw_text head: {(raw_text or '')[:500]}")
+            raise
+
 
         if len(sequence_data) != len(body.urls):
             logger.warning(f"[Sequence] AI returned {len(sequence_data)} items, expected {len(body.urls)}")
