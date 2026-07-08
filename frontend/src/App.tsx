@@ -656,6 +656,10 @@ export default function App() {
         currentPath === "/landing" ||
         currentPath === "" ||
         currentPath === "/index.html",
+      isCreativeSuiteDashboardPath:
+        currentPath === "/creative-suite" ||
+        currentPath === "/creative-suite/" ||
+        currentPath === "/creative-suite-dashboard",
       isCreativeSuitePath: 
         currentPath === "/creative-suite" || 
         currentPath === "/creative-suite/" || 
@@ -712,6 +716,7 @@ export default function App() {
     isSeriesDetailsPath,
     isLandingPath,
     isCreativeSuitePath,
+    isCreativeSuiteDashboardPath,
     isLoginPath,
     isRegisterPath,
     isForgotPasswordPath,
@@ -1108,104 +1113,7 @@ export default function App() {
   // SUB-SECTION 2.4: APPLICATION WORKSPACE AND PAGE RENDERING (JSX)
   // --------------------------------------------------------------------------
   
-  if (isCreativeSuitePath) {
-    return (
-      <CreativeSuiteLayout
-        currentPath={currentPath}
-        navigateTo={navigateTo}
-        fetchWithInterceptor={fetchWithInterceptor}
-        notifications={notifications}
-        markNotificationAsRead={markNotificationAsRead}
-        markAllNotificationsAsRead={markAllNotificationsAsRead}
-        deleteNotification={deleteNotification}
-        clearAllNotifications={clearAllNotifications}
-        notificationsMuted={notificationsMuted}
-        setNotificationsMuted={setNotificationsMuted}
-        panels={panels}
-      >
-        {isDashboardOverviewPath || currentPath === "/creative-suite" || currentPath === "/creative-suite/" || currentPath === "/creative-suite-dashboard" ? (
-          <CreativeSuiteDashboardPage navigateTo={navigateTo} />
-        ) : isOptimizerPath ? (
-          <AIOptimizerPage
-            panels={panels}
-            onNavigateHome={handleNavigateHome}
-            addNotification={addNotification}
-            scrapedTitle={scrapedTitle}
-            scrapedGenre={scrapedGenre}
-            videoUrl={videoUrl}
-          />
-        ) : isPanelAssistantPath ? (
-          <PanelAssistantPage
-            panels={panels}
-            setPanels={setPanels}
-            onNavigateHome={handleNavigateHome}
-            addNotification={addNotification}
-          />
-        ) : isCharacterPath ? (
-          <CharacterProfilePage
-            panels={panels}
-            characters={appLogic.characters}
-            setCharacters={appLogic.setCharacters}
-            onNavigateHome={handleNavigateHome}
-            addNotification={addNotification}
-          />
-        ) : isTranslationPath ? (
-          <TranslationStudioPage
-            panels={panels}
-            setPanels={setPanels}
-            onNavigateHome={handleNavigateHome}
-            addNotification={addNotification}
-          />
-        ) : isAudioLabPath ? (
-          <AudioLabPage
-            panels={panels}
-            setMusicTheme={setMusicTheme}
-            onNavigateHome={handleNavigateHome}
-            addNotification={addNotification}
-          />
-        ) : isThumbnailPath ? (
-          <ThumbnailStudioPage
-            panels={panels}
-            onNavigateHome={handleNavigateHome}
-            addNotification={addNotification}
-            scrapedTitle={scrapedTitle}
-            scrapedGenre={scrapedGenre}
-          />
-        ) : isEngagementPath ? (
-          <EngagementPage
-            onNavigateHome={handleNavigateHome}
-            scrapedTitle={scrapedTitle}
-          />
-        ) : isVoicePath ? (
-          <VoiceStudioPage
-            panels={panels}
-            setPanels={setPanels}
-            onNavigateHome={handleNavigateHome}
-            addNotification={addNotification}
-            scrapedGenre={scrapedGenre}
-          />
-        ) : isAnalyticsPath ? (
-          <CTRAnalyticsPage
-            onNavigateHome={handleNavigateHome}
-            addNotification={addNotification}
-            scrapedTitle={scrapedTitle}
-            panels={panels}
-          />
-        ) : isYouTubePath ? (
-          <YouTubePage
-            panels={panels}
-            videoUrl={videoUrl}
-            scrapedTitle={scrapedTitle}
-            scrapedGenre={scrapedGenre}
-            onNavigateHome={handleNavigateHome}
-            addNotification={addNotification}
-          />
-        ) : (
-          <CreativeSuiteDashboardPage navigateTo={navigateTo} />
-        )}
-      </CreativeSuiteLayout>
-    );
-  }
+
 
   return (
     <div
@@ -1227,6 +1135,24 @@ export default function App() {
             <AdminMiniSidebar
               currentPath={currentPath}
               navigateTo={navigateTo}
+              onOpenSidebar={() => setIsSidebarOpen(true)}
+            />
+          )}
+        </>
+      ) : isCreativeSuitePath ? (
+        <>
+          <CreativeSuiteSidebar
+            currentPath={currentPath}
+            navigateTo={navigateTo}
+            isOpen={isSidebarOpen}
+            onClose={() => setIsSidebarOpen(false)}
+            panels={panels}
+          />
+          {!isSidebarOpen && (
+            <CreativeSuiteMiniSidebar
+              currentPath={currentPath}
+              navigateTo={navigateTo}
+              panels={panels}
               onOpenSidebar={() => setIsSidebarOpen(true)}
             />
           )}
@@ -1271,48 +1197,65 @@ export default function App() {
       >
         {/* Top Header */}
         {!isSidebarOpen && !isProEditorPage && !isAnyAdmin && (
-          <Header
-            isProcessing={isProcessing}
-            panels={panels}
-            totalCalculatedDuration={totalCalculatedDuration}
-            currentPath={currentPath}
-            editingImageIdx={editingImageIdx}
-            lastEditorPath={lastEditorPath}
-            isBatchCropping={isBatchCropping}
-            isCleaningBubbles={isCleaningBubbles}
-            onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-            isSidebarOpen={isSidebarOpen}
-            backendStatus={backendStatus}
-            narrationStyle={narrationStyle}
-            setNarrationStyle={setNarrationStyle}
-            selectedModel={selectedModel}
-            setSelectedModel={setSelectedModel}
-            volume={volume}
-            setVolume={setVolume}
-            isMuted={isMuted}
-            setIsMuted={setIsMuted}
-            autoPlayAudio={autoPlayAudio}
-            setAutoPlayAudio={setAutoPlayAudio}
-            sfxVolume={appLogic.sfxVolume}
-            setSfxVolume={appLogic.setSfxVolume}
-            sfxEnabled={appLogic.sfxEnabled}
-            setSfxEnabled={appLogic.setSfxEnabled}
-            user={user}
-            notifications={notifications}
-            markNotificationAsRead={markNotificationAsRead}
-            markAllNotificationsAsRead={markAllNotificationsAsRead}
-            deleteNotification={deleteNotification}
-            clearAllNotifications={clearAllNotifications}
-            projectId={headerProjectId}
-            saveStatus={headerSaveStatus}
-            isDirty={headerIsDirty}
-            onSave={headerOnSave}
-            navigateTo={navigateTo}
-            notificationsMuted={notificationsMuted}
-            setNotificationsMuted={setNotificationsMuted}
-            themeMode={themeMode}
-            toggleThemeMode={toggleThemeMode}
-          />
+          isCreativeSuitePath ? (
+            <CreativeSuiteHeader
+              currentPath={currentPath}
+              navigateTo={navigateTo}
+              fetchWithInterceptor={fetchWithInterceptor}
+              onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+              notifications={notifications}
+              markNotificationAsRead={markNotificationAsRead}
+              markAllNotificationsAsRead={markAllNotificationsAsRead}
+              deleteNotification={deleteNotification}
+              clearAllNotifications={clearAllNotifications}
+              notificationsMuted={notificationsMuted}
+              setNotificationsMuted={setNotificationsMuted}
+              isSidebarOpen={isSidebarOpen}
+            />
+          ) : (
+            <Header
+              isProcessing={isProcessing}
+              panels={panels}
+              totalCalculatedDuration={totalCalculatedDuration}
+              currentPath={currentPath}
+              editingImageIdx={editingImageIdx}
+              lastEditorPath={lastEditorPath}
+              isBatchCropping={isBatchCropping}
+              isCleaningBubbles={isCleaningBubbles}
+              onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+              isSidebarOpen={isSidebarOpen}
+              backendStatus={backendStatus}
+              narrationStyle={narrationStyle}
+              setNarrationStyle={setNarrationStyle}
+              selectedModel={selectedModel}
+              setSelectedModel={setSelectedModel}
+              volume={volume}
+              setVolume={setVolume}
+              isMuted={isMuted}
+              setIsMuted={setIsMuted}
+              autoPlayAudio={autoPlayAudio}
+              setAutoPlayAudio={setAutoPlayAudio}
+              sfxVolume={appLogic.sfxVolume}
+              setSfxVolume={appLogic.setSfxVolume}
+              sfxEnabled={appLogic.sfxEnabled}
+              setSfxEnabled={appLogic.setSfxEnabled}
+              user={user}
+              notifications={notifications}
+              markNotificationAsRead={markNotificationAsRead}
+              markAllNotificationsAsRead={markAllNotificationsAsRead}
+              deleteNotification={deleteNotification}
+              clearAllNotifications={clearAllNotifications}
+              projectId={headerProjectId}
+              saveStatus={headerSaveStatus}
+              isDirty={headerIsDirty}
+              onSave={headerOnSave}
+              navigateTo={navigateTo}
+              notificationsMuted={notificationsMuted}
+              setNotificationsMuted={setNotificationsMuted}
+              themeMode={themeMode}
+              toggleThemeMode={toggleThemeMode}
+            />
+          )
         )}
 
         <div
@@ -1660,109 +1603,94 @@ export default function App() {
             </div>
           )}
 
-          {/* PAGE VIEW 6: AI Video Optimizer */}
-          {isOptimizerPath && (
-            <AIOptimizerPage
+          {/* PAGE VIEW 6: Creative Suite Unified Views */}
+          {isCreativeSuitePath && (
+            <CreativeSuiteLayout
+              hideSidebarAndHeader={true}
+              currentPath={currentPath}
+              navigateTo={navigateTo}
+              fetchWithInterceptor={fetchWithInterceptor}
               panels={panels}
-              onNavigateHome={handleNavigateHome}
-              addNotification={addNotification}
-              scrapedTitle={scrapedTitle}
-              scrapedGenre={scrapedGenre}
-              videoUrl={videoUrl}
-            />
-          )}
-
-          {/* PAGE VIEW 7: AI Panel Editing Assistant */}
-          {isPanelAssistantPath && (
-            <PanelAssistantPage
-              panels={panels}
-              setPanels={setPanels}
-              onNavigateHome={handleNavigateHome}
-              addNotification={addNotification}
-            />
-          )}
-
-          {/* PAGE VIEW 8: AI Character Database */}
-          {isCharacterPath && (
-            <CharacterProfilePage
-              panels={panels}
-              characters={appLogic.characters}
-              setCharacters={appLogic.setCharacters}
-              onNavigateHome={handleNavigateHome}
-              addNotification={addNotification}
-            />
-          )}
-
-          {/* PAGE VIEW 9: AI Translation Studio */}
-          {isTranslationPath && (
-            <TranslationStudioPage
-              panels={panels}
-              setPanels={setPanels}
-              onNavigateHome={handleNavigateHome}
-              addNotification={addNotification}
-            />
-          )}
-
-          {/* PAGE VIEW 10: AI Audio Production Lab */}
-          {isAudioLabPath && (
-            <AudioLabPage
-              panels={panels}
-              setMusicTheme={setMusicTheme}
-              onNavigateHome={handleNavigateHome}
-              addNotification={addNotification}
-            />
-          )}
-
-          {/* PAGE VIEW 11: AI Video Thumbnail Studio */}
-          {isThumbnailPath && (
-            <ThumbnailStudioPage
-              panels={panels}
-              onNavigateHome={handleNavigateHome}
-              addNotification={addNotification}
-              scrapedTitle={scrapedTitle}
-              scrapedGenre={scrapedGenre}
-            />
-          )}
-
-          {/* PAGE VIEW 12: AI Community Engagement Studio */}
-          {isEngagementPath && (
-            <EngagementPage
-              onNavigateHome={handleNavigateHome}
-              scrapedTitle={scrapedTitle}
-            />
-          )}
-
-          {/* PAGE VIEW 13: AI Voice Casting & Synthesizer */}
-          {isVoicePath && (
-            <VoiceStudioPage
-              panels={panels}
-              setPanels={setPanels}
-              onNavigateHome={handleNavigateHome}
-              addNotification={addNotification}
-              scrapedGenre={scrapedGenre}
-            />
-          )}
-
-          {/* PAGE VIEW 14: AI CTR Performance & Analytics */}
-          {isAnalyticsPath && (
-            <CTRAnalyticsPage
-              onNavigateHome={handleNavigateHome}
-              addNotification={addNotification}
-              scrapedTitle={scrapedTitle}
-              panels={panels}
-            />
-          )}
-
-          {/* PAGE VIEW 14.5: YouTube Publisher Studio */}
-          {isYouTubePath && (
-            <YouTubePage
-              panels={panels}
-              videoUrl={videoUrl}
-              scrapedTitle={scrapedTitle}
-              scrapedGenre={scrapedGenre}
-              onNavigateHome={handleNavigateHome}
-              addNotification={addNotification}
-            />
+            >
+              {isCreativeSuiteDashboardPath ? (
+                <CreativeSuiteDashboardPage navigateTo={navigateTo} />
+              ) : isOptimizerPath ? (
+                <AIOptimizerPage
+                  panels={panels}
+                  onNavigateHome={handleNavigateHome}
+                  addNotification={addNotification}
+                  scrapedTitle={scrapedTitle}
+                  scrapedGenre={scrapedGenre}
+                  videoUrl={videoUrl}
+                />
+              ) : isPanelAssistantPath ? (
+                <PanelAssistantPage
+                  panels={panels}
+                  setPanels={setPanels}
+                  onNavigateHome={handleNavigateHome}
+                  addNotification={addNotification}
+                />
+              ) : isCharacterPath ? (
+                <CharacterProfilePage
+                  panels={panels}
+                  characters={appLogic.characters}
+                  setCharacters={appLogic.setCharacters}
+                  onNavigateHome={handleNavigateHome}
+                  addNotification={addNotification}
+                />
+              ) : isTranslationPath ? (
+                <TranslationStudioPage
+                  panels={panels}
+                  setPanels={setPanels}
+                  onNavigateHome={handleNavigateHome}
+                  addNotification={addNotification}
+                />
+              ) : isAudioLabPath ? (
+                <AudioLabPage
+                  panels={panels}
+                  setMusicTheme={setMusicTheme}
+                  onNavigateHome={handleNavigateHome}
+                  addNotification={addNotification}
+                />
+              ) : isThumbnailPath ? (
+                <ThumbnailStudioPage
+                  panels={panels}
+                  onNavigateHome={handleNavigateHome}
+                  addNotification={addNotification}
+                  scrapedTitle={scrapedTitle}
+                  scrapedGenre={scrapedGenre}
+                />
+              ) : isEngagementPath ? (
+                <EngagementPage
+                  onNavigateHome={handleNavigateHome}
+                  scrapedTitle={scrapedTitle}
+                />
+              ) : isVoicePath ? (
+                <VoiceStudioPage
+                  panels={panels}
+                  setPanels={setPanels}
+                  onNavigateHome={handleNavigateHome}
+                  addNotification={addNotification}
+                  scrapedGenre={scrapedGenre}
+                />
+              ) : isAnalyticsPath ? (
+                <CTRAnalyticsPage
+                  onNavigateHome={handleNavigateHome}
+                  addNotification={addNotification}
+                  scrapedTitle={scrapedTitle}
+                  panels={panels}
+                />
+              ) : isYouTubePath ? (
+                <YouTubePage
+                  panels={panels}
+                  videoUrl={videoUrl}
+                  scrapedTitle={scrapedTitle}
+                  scrapedGenre={scrapedGenre}
+                  onNavigateHome={handleNavigateHome}
+                  addNotification={addNotification}
+                />
+              ) : null}
+            </CreativeSuiteLayout>
           )}
 
           {/* PAGE VIEW 15: User Profile & Account Settings */}
@@ -1968,7 +1896,8 @@ export default function App() {
             !isAdminDashboardPath &&
             !isChapterDetailsPath &&
             !isSeriesDetailsPath &&
-            !isEpisodeScraperPath && (
+            !isEpisodeScraperPath &&
+            !isCreativeSuiteDashboardPath && (
               <PageNotFound onNavigateHome={() => navigateTo("/")} />
             )}
         </div>

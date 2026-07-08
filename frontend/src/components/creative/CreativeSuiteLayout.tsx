@@ -17,6 +17,7 @@ interface CreativeSuiteLayoutProps {
   notificationsMuted?: boolean;
   setNotificationsMuted?: (muted: boolean) => void;
   panels?: any[];
+  hideSidebarAndHeader?: boolean;
 }
 
 const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
@@ -32,6 +33,7 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
   notificationsMuted,
   setNotificationsMuted,
   panels = [],
+  hideSidebarAndHeader = false,
 }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -66,6 +68,53 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
   };
 
   const activeBreadcrumb = getBreadcrumbName();
+
+  if (hideSidebarAndHeader) {
+    return (
+      <div className="flex-grow w-full max-w-7xl mx-auto px-6 py-6 md:px-8 md:py-8 flex flex-col min-h-full">
+        {/* Standard layout header for all Creative Suite pages */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-900 pb-5 mb-6">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1.5">
+              <span
+                className="hover:text-purple-400 cursor-pointer"
+                onClick={() => navigateTo("/dashboard")}
+              >
+                Main Dashboard
+              </span>
+              <span>&gt;</span>
+              <span
+                className="hover:text-purple-400 cursor-pointer"
+                onClick={() => navigateTo("/creative-suite")}
+              >
+                Creative Suite
+              </span>
+              <span>&gt;</span>
+              <span className="text-purple-400">{activeBreadcrumb}</span>
+            </div>
+            <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+              <div className="p-2 bg-purple-500/10 border border-purple-500/20 rounded-xl text-purple-400">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              Creative Tools Workspace
+            </h2>
+            <p className="text-xs text-neutral-400 font-mono mt-0.5">
+              Access AI-assisted video editing, audio composition, translations, and publisher tools
+            </p>
+          </div>
+
+          <button
+            onClick={() => navigateTo("/dashboard")}
+            className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 border border-neutral-800 rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-md self-start sm:self-center active:scale-95"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Main App
+          </button>
+        </div>
+        {children}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#050507] text-white flex flex-col selection:bg-purple-500/30">
