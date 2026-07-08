@@ -9,6 +9,13 @@ import {
   Clock,
 } from "lucide-react";
 
+const formatAvgDuration = (sec: number) => {
+  if (!sec) return "0s";
+  const m = Math.floor(sec / 60);
+  const s = Math.round(sec % 60);
+  return m > 0 ? `${m}m ${s}s` : `${s}s`;
+};
+
 export function AdminAnalyticsTab({
   fetchWithInterceptor,
 }: {
@@ -27,11 +34,7 @@ export function AdminAnalyticsTab({
       if (res.ok) {
         const data = await res.json();
         if (data.success && data.analytics) {
-          setAnalytics({
-            success_rate: 98.5,
-            pending_tasks: 0,
-            ...data.analytics,
-          });
+          setAnalytics(data.analytics);
         }
       }
     } catch (err) {
@@ -277,39 +280,34 @@ export function AdminAnalyticsTab({
             <Users className="w-5 h-5 text-purple-400" /> Top Creators
           </h3>
           <div className="space-y-4">
-            <div className="flex justify-between items-center bg-[#0b0b0e] p-3 rounded-lg border border-neutral-800">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">
-                  1
-                </div>
-                <span className="text-neutral-200">Alex Johnson</span>
-              </div>
-              <span className="text-sm font-medium text-purple-400">
-                42 Projects
-              </span>
-            </div>
-            <div className="flex justify-between items-center bg-[#0b0b0e] p-3 rounded-lg border border-neutral-800">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">
-                  2
-                </div>
-                <span className="text-neutral-200">Maria Garcia</span>
-              </div>
-              <span className="text-sm font-medium text-blue-400">
-                38 Projects
-              </span>
-            </div>
-            <div className="flex justify-between items-center bg-[#0b0b0e] p-3 rounded-lg border border-neutral-800">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
-                  3
-                </div>
-                <span className="text-neutral-200">James Smith</span>
-              </div>
-              <span className="text-sm font-medium text-emerald-400">
-                27 Projects
-              </span>
-            </div>
+            {analytics.top_creators && analytics.top_creators.length > 0 ? (
+              analytics.top_creators.map((creator: any, idx: number) => {
+                const name = creator.full_name || creator.username || "Unknown User";
+                const colors = [
+                  "bg-purple-500/20 text-purple-400",
+                  "bg-blue-500/20 text-blue-400",
+                  "bg-emerald-500/20 text-emerald-400",
+                  "bg-amber-500/20 text-amber-400",
+                  "bg-rose-500/20 text-rose-400"
+                ];
+                const badgeColor = colors[idx % colors.length];
+                return (
+                  <div key={idx} className="flex justify-between items-center bg-[#0b0b0e] p-3 rounded-lg border border-neutral-800">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full ${badgeColor} flex items-center justify-center font-bold`}>
+                        {idx + 1}
+                      </div>
+                      <span className="text-neutral-200">{name}</span>
+                    </div>
+                    <span className={`text-sm font-medium ${badgeColor.split(" ")[1]}`}>
+                      {creator.count} Projects
+                    </span>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="text-xs text-neutral-500 py-4 text-center">No creator data available</div>
+            )}
           </div>
         </div>
 
@@ -321,15 +319,15 @@ export function AdminAnalyticsTab({
           <div className="space-y-4">
             <div className="flex justify-between items-center p-4 bg-[#0b0b0e] border border-neutral-800 rounded-lg">
               <span className="text-neutral-400">Avg Render Time</span>
-              <span className="font-mono text-white text-lg">2m 14s</span>
+              <span className="font-mono text-white text-lg">{formatAvgDuration(analytics.avg_duration_sec)}</span>
             </div>
             <div className="flex justify-between items-center p-4 bg-[#0b0b0e] border border-neutral-800 rounded-lg">
               <span className="text-neutral-400">Avg Scenes per Project</span>
-              <span className="font-mono text-white text-lg">12.5</span>
+              <span className="font-mono text-white text-lg">{(analytics.avg_scenes_per_project || 0).toFixed(1)}</span>
             </div>
             <div className="flex justify-between items-center p-4 bg-[#0b0b0e] border border-neutral-800 rounded-lg">
               <span className="text-neutral-400">Avg Credit Spend / User</span>
-              <span className="font-mono text-white text-lg">450</span>
+              <span className="font-mono text-white text-lg">{Math.round(analytics.avg_credit_spend || 0)}</span>
             </div>
           </div>
         </div>
@@ -337,7 +335,7 @@ export function AdminAnalyticsTab({
         <div className="bg-[#111115] border border-neutral-800 rounded-xl p-6 lg:col-span-2">
           <h3 className="font-bold text-white mb-4 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-amber-400" /> Revenue &
-            Subscriptions (Mock)
+            Subscriptions
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="p-4 bg-[#0b0b0e] border border-neutral-800 rounded-lg border-l-2 border-l-emerald-500">

@@ -127,7 +127,6 @@ export function VideoMonitorActive({
             ref={videoPlayerRef}
             src={videoUrl}
             controls
-            autoPlay
             playsInline
             className="w-full h-full object-contain bg-black"
             onPlay={() => setStoryboardPlaying(true)}

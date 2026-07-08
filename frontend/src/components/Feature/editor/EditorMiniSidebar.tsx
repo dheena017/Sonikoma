@@ -1,5 +1,15 @@
 import React, { useState } from "react";
-import { Scissors, Brain, ArrowLeft, type LucideIcon } from "lucide-react";
+import {
+  Layout,
+  Scissors,
+  Film,
+  Layers,
+  Brain,
+  Download,
+  Settings,
+  ArrowLeft,
+  type LucideIcon,
+} from "lucide-react";
 import TooltipPortal from "../../TooltipPortal";
 
 interface EditorMiniSidebarProps {
@@ -19,7 +29,6 @@ interface SidebarMenuItem {
   id: string;
   label: string;
   icon: LucideIcon;
-  path?: string;
   badge?: string | number;
   isProcessing?: boolean;
 }
@@ -35,22 +44,45 @@ const EditorMiniSidebarInner = ({
   isCleaningBubbles,
   navigateTo,
 }: EditorMiniSidebarProps) => {
-
   const menuItems: SidebarMenuItem[] = [
     {
-      id: "autocrop",
-      label: "Auto-Crop",
-      icon: Scissors,
-      path: "/auto-crop",
+      id: "monitor",
+      label: "Video Monitor",
+      icon: Film,
+    },
+    {
+      id: "assets",
+      label: "Imported Assets",
+      icon: Layout,
       badge: scrapedCount > 0 ? scrapedCount : undefined,
+    },
+    {
+      id: "timeline",
+      label: "Storyboard Timeline",
+      icon: Layers,
+      badge: panelsCount > 0 ? panelsCount : undefined,
+    },
+    {
+      id: "production",
+      label: "Export & Publish",
+      icon: Download,
+    },
+    {
+      id: "autocrop",
+      label: "Auto-Crop Panels",
+      icon: Scissors,
       isProcessing: isBatchCropping,
     },
     {
       id: "bubbles",
-      label: "Clean-Bubbles",
+      label: "Clean Text Bubbles",
       icon: Brain,
-      path: "/bubble-cleaner",
       isProcessing: isCleaningBubbles,
+    },
+    {
+      id: "settings",
+      label: "Editor Settings",
+      icon: Settings,
     },
   ];
 
@@ -61,8 +93,7 @@ const EditorMiniSidebarInner = ({
     const pathname = window.location.pathname;
     const isActive =
       currentSection === item.id ||
-      pathname === item.path ||
-      (item.path && pathname.startsWith(`${item.path}/`));
+      (item.id === "settings" && pathname === "/settings");
 
     const Icon = item.icon;
 
@@ -79,16 +110,19 @@ const EditorMiniSidebarInner = ({
 
         <button
           onClick={() => {
-            const nextSection =
-              item.id === "autocrop"
-                ? "autocrop"
-                : item.id === "bubbles"
-                ? "bubbles"
-                : item.id;
-            setCurrentSection(nextSection);
-            
-            if (item.path && navigateTo) {
-              navigateTo(item.path);
+            if (item.id === "autocrop" || item.id === "bubbles") {
+              setCurrentSection(item.id);
+            } else if (item.id === "settings") {
+              if (navigateTo) {
+                navigateTo("/settings");
+              } else {
+                window.history.pushState({}, "", "/settings");
+                window.dispatchEvent(new Event("popstate"));
+              }
+            } else {
+              setCurrentSection(item.id);
+              const el = document.getElementById(`section-${item.id}`);
+              if (el) el.scrollIntoView({ behavior: "smooth" });
             }
           }}
           onMouseEnter={(e) => {
@@ -109,8 +143,8 @@ const EditorMiniSidebarInner = ({
             <Icon
               strokeWidth={isActive ? 2.5 : 2}
               className={`w-[18px] h-[18px] transition-all duration-300 ${
-                isActive 
-                  ? "text-purple-300 drop-shadow-[0_0_8px_rgba(216,180,254,0.5)]" 
+                isActive
+                  ? "text-purple-300 drop-shadow-[0_0_8px_rgba(216,180,254,0.5)]"
                   : "text-neutral-400 group-hover:text-purple-300 group-hover:scale-110"
               }`}
             />
@@ -155,7 +189,6 @@ const EditorMiniSidebarInner = ({
         <div className="relative group w-full flex justify-center">
           <button
             onClick={() => window.history.pushState({}, "", "/workspace")}
-
             className="p-3 rounded-2xl bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 text-white transition-all duration-300 shadow-[0_4px_14px_rgba(168,85,247,0.4)] hover:shadow-[0_6px_20px_rgba(168,85,247,0.6)] active:scale-90 border border-purple-400/30 outline-none focus:outline-none"
           >
             <ArrowLeft className="w-[18px] h-[18px] shrink-0" strokeWidth={2.5} />

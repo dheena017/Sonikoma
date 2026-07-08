@@ -71,8 +71,10 @@ const SidebarInner = ({
   );
   const isWorkspace = currentPath === "/workspace";
   const isDashboardOverview = currentPath === "/dashboard";
+  const isAdminDashboardPath =
+    currentPath === "/admin" || currentPath === "/admin/" || currentPath === "/admin-dashboard";
   const isAdminPath =
-    currentPath === "/admin" || currentPath.startsWith("/admin/");
+    currentPath.startsWith("/admin/") && currentPath !== "/admin/";
   const isSettings = currentPath === "/settings";
   const isAutoCrop = currentPath === "/auto-crop";
   const isBubbleCleaner = currentPath === "/bubble-cleaner";
@@ -242,7 +244,7 @@ const SidebarInner = ({
         {
           label: "Admin Dashboard",
           icon: Shield,
-          active: isAdminPath,
+          active: isAdminDashboardPath || isAdminPath,
           onClick: () => navigateTo("/admin"),
           enabled: true,
         },

@@ -18,6 +18,8 @@ export function AdminSettingsTab({
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const [purging, setPurging] = useState(false);
 
   useEffect(() => {
     fetchSettings();
@@ -57,6 +59,48 @@ export function AdminSettingsTab({
       addNotification("Error saving settings", "error");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleReset = async () => {
+    if (!window.confirm("Are you sure you want to reset all settings to defaults?")) return;
+    setResetting(true);
+    try {
+      const res = await fetchWithInterceptor("/api/auth/admin/settings/reset", {
+        method: "POST",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.settings) {
+          setSettings(data.settings);
+          addNotification("All settings reset to defaults", "success");
+        }
+      } else {
+        addNotification("Failed to reset settings", "error");
+      }
+    } catch (err) {
+      addNotification("Error resetting settings", "error");
+    } finally {
+      setResetting(false);
+    }
+  };
+
+  const handlePurgeCache = async () => {
+    if (!window.confirm("Are you sure you want to purge the global scraped image cache?")) return;
+    setPurging(true);
+    try {
+      const res = await fetchWithInterceptor("/api/auth/admin/settings/purge-cache", {
+        method: "POST",
+      });
+      if (res.ok) {
+        addNotification("Global scraped image cache purged successfully", "success");
+      } else {
+        addNotification("Failed to purge global cache", "error");
+      }
+    } catch (err) {
+      addNotification("Error purging global cache", "error");
+    } finally {
+      setPurging(false);
     }
   };
 
@@ -244,11 +288,19 @@ export function AdminSettingsTab({
               Actions here are permanent and affect the entire platform.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
-              <button className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg text-sm font-medium border border-red-500/20 transition-colors flex items-center gap-2">
-                <RotateCcw className="w-4 h-4" /> Reset All Settings
+              <button
+                onClick={handleReset}
+                disabled={resetting}
+                className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 disabled:opacity-50 rounded-lg text-sm font-medium border border-red-500/20 transition-colors flex items-center gap-2"
+              >
+                <RotateCcw className="w-4 h-4" /> {resetting ? "Resetting..." : "Reset All Settings"}
               </button>
-              <button className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg text-sm font-medium border border-red-500/20 transition-colors flex items-center gap-2">
-                <Trash2 className="w-4 h-4" /> Purge Global Cache
+              <button
+                onClick={handlePurgeCache}
+                disabled={purging}
+                className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 disabled:opacity-50 rounded-lg text-sm font-medium border border-red-500/20 transition-colors flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" /> {purging ? "Purging..." : "Purge Global Cache"}
               </button>
             </div>
           </div>

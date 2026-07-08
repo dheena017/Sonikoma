@@ -103,6 +103,7 @@ from dotenv import load_dotenv
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 load_dotenv(dotenv_path=os.path.join(PROJECT_ROOT, ".env"))
+load_dotenv(dotenv_path=os.path.join(PROJECT_ROOT, "backend", ".env"))
 
 # Initialize global logging interceptor immediately
 import utils.log_interceptor

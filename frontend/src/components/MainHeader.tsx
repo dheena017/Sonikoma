@@ -22,6 +22,7 @@ import {
   FileText,
   Sun,
   Moon,
+  Cloud,
 } from "lucide-react";
 import { GeneratedPanel } from "../types";
 import NotificationDropdown from "./notification/NotificationDropdown";
@@ -475,7 +476,7 @@ const HeaderInner = ({
         </div>
 
         <div
-          className="flex items-center gap-2 cursor-pointer select-none transition-all duration-300"
+          className="flex items-center gap-3 cursor-pointer select-none transition-all duration-300 group/brand"
           onClick={() => navigateTo("/dashboard")}
         >
           <img
@@ -484,13 +485,13 @@ const HeaderInner = ({
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).src = "/logo.png";
             }}
-            className="h-8 w-8 rounded-full shadow-lg shadow-purple-900/40 shrink-0 object-cover transition-all duration-300 animate-[fadeIn_0.3s_ease-out]"
+            className="h-10 w-10 rounded-full shadow-lg shadow-purple-900/40 shrink-0 object-cover transition-all duration-300 animate-[fadeIn_0.3s_ease-out] group-hover/brand:scale-105 group-hover/brand:rotate-[6deg]"
             style={{
               background: themeMode === "light" ? "#ffffff" : "#000000",
             }}
             alt="Sonikoma Logo"
           />
-          <span className="font-bold text-sm tracking-tight text-white font-sans hidden sm:inline">
+          <span className="font-black text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-white group-hover/brand:brightness-110 transition-all duration-300 font-sans hidden sm:inline-block">
             Sonikoma
           </span>
         </div>
@@ -630,6 +631,73 @@ const HeaderInner = ({
 
       {/* Right side: Volume, Notifications, Settings, Stats, Profile */}
       <div className="flex items-center gap-2 lg:gap-3 shrink-0">
+        {/* Server Status Pill */}
+        <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-850 text-[10px] font-medium font-sans select-none hover:border-neutral-750 transition-all">
+          <span className="relative flex h-2 w-2">
+            <span className={`absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping ${
+              backendStatus === "online"
+                ? "bg-emerald-400"
+                : backendStatus === "offline"
+                ? "bg-rose-450"
+                : "bg-amber-400"
+            }`} />
+            <span className={`relative inline-flex rounded-full h-2 w-2 ${
+              backendStatus === "online"
+                ? "bg-emerald-500"
+                : backendStatus === "offline"
+                ? "bg-rose-500"
+                : "bg-amber-500"
+            }`} />
+          </span>
+          <span className="text-neutral-400">Server:</span>
+          <span className={`font-bold uppercase tracking-wider ${
+            backendStatus === "online"
+              ? "text-emerald-400"
+              : backendStatus === "offline"
+              ? "text-rose-400"
+              : "text-amber-400"
+          }`}>
+            {backendStatus}
+          </span>
+        </div>
+
+        {/* Save Action Button */}
+        {onSave && (
+          <button
+            onClick={onSave}
+            disabled={saveStatus === "saving"}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold font-sans transition-all cursor-pointer select-none ${
+              isDirty
+                ? "bg-purple-600/10 border-purple-500/40 text-purple-300 hover:bg-purple-600/20 hover:border-purple-500/60 shadow-[0_0_12px_rgba(168,85,247,0.15)] animate-[pulse_2s_infinite]"
+                : "bg-neutral-900 border-neutral-850 text-neutral-400 hover:text-neutral-200 hover:border-neutral-750"
+            }`}
+            title={isDirty ? "Unsaved changes: click to save project" : "Project saved to cloud"}
+          >
+            {saveStatus === "saving" ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-purple-400" />
+            ) : saveStatus === "success" ? (
+              <Check className="h-3.5 w-3.5 text-emerald-400" />
+            ) : (
+              <Cloud className="h-3.5 w-3.5" />
+            )}
+            <span className="hidden sm:inline">
+              {saveStatus === "saving"
+                ? "Saving..."
+                : saveStatus === "success"
+                ? "Saved"
+                : saveStatus === "error"
+                ? "Save Error"
+                : isDirty
+                ? "Save Work"
+                : "Saved"}
+            </span>
+            {isDirty && saveStatus !== "saving" && (
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse shrink-0" />
+            )}
+          </button>
+        )}
+
+
         {/* Playback Volume Widget */}
         <div className="flex items-center gap-1.5 bg-neutral-900 border border-neutral-850 px-2.5 py-1.5 rounded-xl hover:border-neutral-750 transition-all select-none group h-[34px]">
           <button

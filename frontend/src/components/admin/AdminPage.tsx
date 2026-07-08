@@ -164,6 +164,7 @@ const AdminPage = React.memo(
           return (
             <AdminOverviewTab
               stats={stats}
+              analytics={analytics}
               fetchWithInterceptor={fetchWithInterceptor}
               addNotification={addNotification}
               setActiveTab={(tab) => navigateTo(`/admin/${tab}`)}
@@ -237,6 +238,7 @@ const AdminPage = React.memo(
           return (
             <AdminOverviewTab
               stats={stats}
+              analytics={analytics}
               fetchWithInterceptor={fetchWithInterceptor}
               addNotification={addNotification}
               setActiveTab={(tab) => navigateTo(`/admin/${tab}`)}

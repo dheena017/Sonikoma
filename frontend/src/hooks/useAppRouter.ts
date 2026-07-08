@@ -203,6 +203,7 @@ export function useAppRouter({
             path === "/project-editor" ||
             path === "/episode-scraper" ||
             path === "/admin" ||
+            path === "/admin-dashboard" ||
             path.startsWith("/admin/") ||
             path.startsWith("/series/") ||
             path === "/workspace/editor" ||
@@ -263,6 +264,7 @@ export function useAppRouter({
         path === "/project-details" ||
         path === "/dashboard" ||
         path === "/admin" ||
+        path === "/admin-dashboard" ||
         path === "/episode-scraper" ||
         path.startsWith("/admin/") ||
         path.startsWith("/display") ||

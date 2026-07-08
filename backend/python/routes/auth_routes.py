@@ -46,7 +46,8 @@ from database.db import (
     get_user_by_api_key, create_user_invoice, get_user_achievements_and_points,
     get_all_users, delete_user,
     get_platform_settings, update_platform_settings, get_global_audit_logs,
-    get_announcements, create_announcement, delete_announcement
+    get_announcements, create_announcement, delete_announcement,
+    reset_platform_settings, purge_global_cache
 )
 
 logger = logging.getLogger("sonikoma.auth")
@@ -988,6 +989,20 @@ async def admin_update_settings(body: AdminUpdateSettings, request: Request, cur
     update_platform_settings(body.settings)
     write_audit_log(current_user['user_id'], 'Admin updated global platform settings', ip_addr, 'Success')
     return {'success': True, 'message': 'Settings updated successfully.'}
+
+@router.post('/admin/settings/reset')
+async def admin_reset_settings(request: Request, current_user: dict = Depends(get_admin_user)):
+    ip_addr = request.client.host if request.client else '127.0.0.1'
+    defaults = reset_platform_settings()
+    write_audit_log(current_user['user_id'], 'Admin reset global platform settings to defaults', ip_addr, 'Success')
+    return {'success': True, 'settings': defaults, 'message': 'Settings reset successfully.'}
+
+@router.post('/admin/settings/purge-cache')
+async def admin_purge_cache(request: Request, current_user: dict = Depends(get_admin_user)):
+    ip_addr = request.client.host if request.client else '127.0.0.1'
+    purge_global_cache()
+    write_audit_log(current_user['user_id'], 'Admin purged global scraped image cache', ip_addr, 'Success')
+    return {'success': True, 'message': 'Global scraped image cache purged successfully.'}
 
 @router.get('/admin/audit-logs')
 async def admin_get_global_audit_logs(limit: int = 50, current_user: dict = Depends(get_admin_user)):

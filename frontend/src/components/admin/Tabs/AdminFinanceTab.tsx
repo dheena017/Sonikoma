@@ -122,12 +122,12 @@ export function AdminFinanceTab({ fetchWithInterceptor, analytics }: any) {
                   <td className="px-6 py-4 text-right">
                     <span
                       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                        inv.status === "paid"
+                        inv.status.toLowerCase() === "paid"
                           ? "text-emerald-400 bg-emerald-500/10"
                           : "text-amber-400 bg-amber-500/10"
                       }`}
                     >
-                      {inv.status === "paid" ? (
+                      {inv.status.toLowerCase() === "paid" ? (
                         <CheckCircle className="w-3 h-3" />
                       ) : (
                         <Clock className="w-3 h-3" />

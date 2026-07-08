@@ -174,11 +174,11 @@ const EditorPage: React.FC<EditorPageProps> = ({
   React.useEffect(() => {
     if (currentSection === "autocrop") {
       setShowAutoCropModal(true);
-      setCurrentSection("images");
+      setCurrentSection("assets");
     }
     if (currentSection === "bubbles") {
       setShowBubbleModal(true);
-      setCurrentSection("images");
+      setCurrentSection("assets");
     }
   }, [currentSection]);
 
@@ -421,7 +421,10 @@ const EditorPage: React.FC<EditorPageProps> = ({
               </div>
 
               {/* Final Production panel and metadata below timeline */}
-              <div className="w-full max-w-[1600px] mx-auto mt-12 space-y-6 pt-8 border-t border-white/5">
+              <div
+                id="section-production"
+                className="w-full max-w-[1600px] mx-auto mt-12 space-y-6 pt-8 border-t border-white/5"
+              >
                 <FinalProductionPanel />
                 <OutputMetadataPanel
                   videoUrl={videoUrl}

@@ -53,7 +53,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
     {
       name: "Core",
       items: [
-        { id: "overview", label: "Overview", icon: LayoutGrid, path: "/admin" },
+        { id: "dashboard", label: "Dashboard", icon: LayoutGrid, path: "/admin" },
         {
           id: "announcements",
           label: "Announcements",
@@ -132,7 +132,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
   const isActive = (path: string) => {
     if (path === "/admin") {
-      return currentPath === "/admin" || currentPath === "/admin/";
+      return currentPath === "/admin" || currentPath === "/admin/" || currentPath === "/admin-dashboard";
     }
     return currentPath.startsWith(path);
   };

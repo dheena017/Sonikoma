@@ -58,7 +58,7 @@ import EngagementPage from "./components/Feature/engagement/EngagementPage";
 import VoiceStudioPage from "./components/Feature/voice/VoiceStudioPage";
 import CTRAnalyticsPage from "./components/Feature/analytics/CTRAnalyticsPage";
 import NotificationsPage from "./components/notification/NotificationsPage";
-import { AdminPage, AdminSidebar, AdminMiniSidebar } from "./components/admin";
+import { AdminPage, AdminSidebar, AdminMiniSidebar, AdminDashboardPage } from "./components/admin";
 import MiniSidebar from "./components/MainMiniSidebar";
 import { EpisodeScraperPage } from "./components/Feature/episode-scraper/EpisodeScraperPage";
 import YouTubePage from "./components/Feature/youtube/YouTubePage";
@@ -636,8 +636,10 @@ export default function App() {
       isYouTubePath: currentPath === "/youtube",
       isProfilePath: currentPath === "/profile",
       isNotificationsPath: currentPath === "/notifications",
+      isAdminDashboardPath:
+        currentPath === "/admin" || currentPath === "/admin/" || currentPath === "/admin-dashboard",
       isAdminPath:
-        currentPath === "/admin" || currentPath.startsWith("/admin/"),
+        currentPath.startsWith("/admin/") && currentPath !== "/admin/",
       isChapterDetailsPath: false,
       isProjectEditorPath: false,
       isSeriesDetailsPath:
@@ -683,6 +685,7 @@ export default function App() {
     isProfilePath,
     isNotificationsPath,
     isAdminPath,
+    isAdminDashboardPath,
     isChapterDetailsPath,
     isProjectEditorPath,
     isSeriesDetailsPath,
@@ -1800,6 +1803,18 @@ export default function App() {
             />
           )}
 
+          {/* PAGE VIEW 23: New Standalone Admin Dashboard Page */}
+          {isAdminDashboardPath && (
+            <AdminDashboardPage
+              user={user}
+              navigateTo={navigateTo}
+              isAuthenticated={isAuthenticated}
+              fetchWithInterceptor={fetchWithInterceptor}
+              addNotification={addNotification}
+              audioFeedback={audioFeedback}
+            />
+          )}
+
           {/* FALLBACK VIEW: 404 Route Not Found */}
           {!isWorkspacePath &&
             !isDashboardOverviewPath &&
@@ -1826,6 +1841,7 @@ export default function App() {
             !isProfilePath &&
             !isNotificationsPath &&
             !isAdminPath &&
+            !isAdminDashboardPath &&
             !isChapterDetailsPath &&
             !isSeriesDetailsPath &&
             !isEpisodeScraperPath && (

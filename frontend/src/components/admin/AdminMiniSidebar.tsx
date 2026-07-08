@@ -14,6 +14,7 @@ import {
   Server,
   ActivitySquare,
   ExternalLink,
+  Shield,
 } from "lucide-react";
 import TooltipPortal from "../TooltipPortal";
 
@@ -32,7 +33,7 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
     {
       name: "Core",
       items: [
-        { id: "overview", label: "Overview", icon: LayoutGrid, path: "/admin" },
+        { id: "dashboard", label: "Dashboard", icon: LayoutGrid, path: "/admin" },
         {
           id: "announcements",
           label: "Announcements",
@@ -112,6 +113,9 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
   const isActive = (path: string) => {
     if (path === "/admin") {
       return currentPath === "/admin" || currentPath === "/admin/";
+    }
+    if (path === "/admin-dashboard") {
+      return currentPath === "/admin-dashboard";
     }
     return currentPath.startsWith(path);
   };

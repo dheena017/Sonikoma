@@ -1514,27 +1514,13 @@ body {
   background: rgba(100, 100, 120, 0.75);
 }
 
-/* Mini sidebar scrollbar is even thinner */
+/* Mini sidebar scrollbar is completely hidden */
 .mini-sidebar-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(63, 63, 70, 0.45) transparent;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
 }
 .mini-sidebar-scrollbar::-webkit-scrollbar {
-  width: 4px;
-  background: transparent;
-}
-.mini-sidebar-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.mini-sidebar-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(63, 63, 70, 0.45);
-  border-radius: 9999px;
-  border: 1px solid transparent;
-}
-.mini-sidebar-scrollbar:hover::-webkit-scrollbar-thumb,
-.mini-sidebar-scrollbar:focus-within::-webkit-scrollbar-thumb,
-.mini-sidebar-scrollbar:active::-webkit-scrollbar-thumb {
-  background: rgba(63, 63, 70, 0.65);
+  display: none; /* Chrome, Safari and Opera */
 }
 
 @keyframes pulse-glow {

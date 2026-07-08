@@ -236,7 +236,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
         isProEditorPage ? "top-12" : "top-[59px]"
       } bottom-0 left-0 w-20 shrink-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 shadow-[4px_0_24px_rgba(0,0,0,0.3)] hidden lg:flex flex-col items-center py-4 z-40`}
     >
-      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 custom-sidebar-scrollbar pt-2">
+      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 mini-sidebar-scrollbar pt-2">
         {groups.map((group, groupIdx) => (
           <div
             key={groupIdx}

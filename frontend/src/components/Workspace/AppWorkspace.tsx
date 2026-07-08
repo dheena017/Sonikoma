@@ -101,6 +101,8 @@ interface StoredProject {
   panels_count?: number;
   created_at?: string;
   updated_at?: string;
+  video_url?: string | null;
+  synopsis?: string | null;
 }
 
 const STATUS_COLORS: Record<string, { dot: string; text: string; label: string }> = {
@@ -427,9 +429,29 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
     }
   };
 
-  const hasActiveProject =
-    (projectId && panels.length > 0) ||
-    (projectId && projectId.startsWith("proj_"));
+  const normalizeUrl = (u: string) => {
+    let s = u.trim().toLowerCase();
+    if (s.startsWith("http://")) {
+      s = s.substring(7);
+    } else if (s.startsWith("https://")) {
+      s = s.substring(8);
+    }
+    if (s.startsWith("www.")) {
+      s = s.substring(4);
+    }
+    if (s.endsWith("/")) {
+      s = s.slice(0, -1);
+    }
+    return s;
+  };
+
+  const matchingProject = useMemo(() => {
+    if (!targetUrl || !targetUrl.trim()) return null;
+    const targetUrlNormalized = normalizeUrl(targetUrl);
+    return recentProjects.find(
+      (p) => p.url && normalizeUrl(p.url) === targetUrlNormalized
+    ) || null;
+  }, [recentProjects, targetUrl]);
 
   return (
     <main
@@ -438,22 +460,16 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
     >
       <div className="w-full space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
         {/* RESUME CARD (Optimized UX with Thumbnail) */}
-        {hasActiveProject && (
+        {matchingProject && (
           <div className="group bg-gradient-to-br from-purple-900/40 to-indigo-900/40 border border-purple-500/30 rounded-[32px] p-6 backdrop-blur-xl flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl transition-all hover:border-purple-400/50">
             <div className="flex flex-col md:flex-row items-center gap-6 w-full">
               {/* Visual Anchor / Thumbnail */}
               <div className="relative h-28 w-48 rounded-2xl overflow-hidden border border-white/10 bg-black/40 shadow-inner shrink-0 group-hover:scale-[1.02] transition-transform duration-500">
-                {seriesCoverImage ? (
+                {matchingProject.cover_image ? (
                   <img
-                    src={seriesCoverImage}
+                    src={matchingProject.cover_image}
                     className="w-full h-full object-cover"
                     alt="Series Cover"
-                  />
-                ) : panels.length > 0 ? (
-                  <img
-                    src={panels[0].image_url}
-                    className="w-full h-full object-cover"
-                    alt="Latest Panel"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-purple-600/10">
@@ -481,7 +497,7 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
                 <p className="text-xs text-purple-200/60 font-medium max-w-sm">
                   Pick up exactly where you left off with{" "}
                   <span className="text-purple-300 font-bold">
-                    "{seriesTitle || projectId}"
+                    "{matchingProject.title || matchingProject.project_id}"
                   </span>
                   . Your assets and timeline are ready.
                 </p>
@@ -490,13 +506,14 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
 
             <button
               onClick={() => {
-                if (!projectId) return;
-                if (seriesSlug && chapterSlug) {
+                const pid = matchingProject.project_id;
+                if (!pid) return;
+                if (matchingProject.series_slug && matchingProject.chapter_slug) {
                   navigateTo?.(
-                    `/workspace/editor/series/${seriesSlug}/chapters/${chapterSlug}`
+                    `/workspace/editor/series/${matchingProject.series_slug}/chapters/${matchingProject.chapter_slug}`
                   );
                 } else {
-                  navigateTo?.(`/workspace/editor?id=${projectId}`);
+                  navigateTo?.(`/workspace/editor?id=${pid}`);
                 }
               }}
               className="w-full md:w-auto px-8 py-4 bg-white text-purple-950 font-black rounded-2xl text-xs uppercase tracking-[0.15em] hover:bg-purple-50 transition-all flex items-center justify-center gap-3 shadow-xl active:scale-95 group-hover:shadow-[0_0_30px_rgba(168,85,247,0.2)]"
@@ -507,7 +524,7 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
           </div>
         )}
 
-        {hasActiveProject && videoUrl && (
+        {matchingProject && matchingProject.video_url && (
           <div className="w-full bg-[#111116]/60 border border-emerald-500/30 rounded-3xl p-6 backdrop-blur-md space-y-4 shadow-xl">
             <div className="flex items-center justify-between border-b border-emerald-950 pb-3">
               <div className="flex items-center gap-2">
@@ -527,7 +544,7 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
                     Final Production Master Video
                   </h3>
                   <p className="text-[10px] text-neutral-400 font-mono">
-                    The latest compiled video for "{seriesTitle || projectId}" is ready.
+                    The latest compiled video for "{matchingProject.title || matchingProject.project_id}" is ready.
                   </p>
                 </div>
               </div>
@@ -536,10 +553,10 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
               <div className="w-full lg:w-2/3 aspect-video bg-black rounded-2xl overflow-hidden border border-white/5 relative">
                 <video
                   ref={videoRef}
-                  src={videoUrl}
+                  src={matchingProject.video_url}
                   controls
                   className="w-full h-full cursor-pointer"
-                  poster={seriesCoverImage || (panels && panels.length > 0 ? panels[0].image_url : undefined)}
+                  poster={matchingProject.cover_image || undefined}
                   onPlay={() => setIsVideoPlaying(true)}
                   onPause={() => setIsVideoPlaying(false)}
                   onEnded={() => setIsVideoPlaying(false)}
@@ -549,57 +566,57 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">Series Title</span>
-                    <p className="text-xs font-bold text-white line-clamp-1">{seriesTitle || "Untitled"}</p>
+                    <p className="text-xs font-bold text-white line-clamp-1">{matchingProject.title || "Untitled"}</p>
                   </div>
                   <div className="space-y-1">
                     <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">Chapter</span>
                     <p className="text-xs font-semibold text-neutral-300 line-clamp-1">
-                      {chapterNumber ? `Chapter ${chapterNumber}` : "N/A"}{chapterTitle ? ` - ${chapterTitle}` : ""}
+                      {matchingProject.episode || "N/A"}
                     </p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 border-t border-neutral-800/30 pt-3">
-                  {seriesAuthor && (
+                  {matchingProject.author && (
                     <div className="space-y-1">
                       <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">Author</span>
-                      <p className="text-xs font-medium text-neutral-350 line-clamp-1">{seriesAuthor}</p>
+                      <p className="text-xs font-medium text-neutral-350 line-clamp-1">{matchingProject.author}</p>
                     </div>
                   )}
-                  {scrapedGenre && (
+                  {matchingProject.genre && (
                     <div className="space-y-1">
                       <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">Genre</span>
                       <div className="pt-0.5">
-                        <span className={`text-[9px] font-black px-2 py-0.5 rounded border uppercase tracking-wider ${getGenreStyle(scrapedGenre)}`}>
-                          {scrapedGenre.split('/')[0]}
+                        <span className={`text-[9px] font-black px-2 py-0.5 rounded border uppercase tracking-wider ${getGenreStyle(matchingProject.genre)}`}>
+                          {matchingProject.genre.split('/')[0]}
                         </span>
                       </div>
                     </div>
                   )}
                 </div>
 
-                {panels && panels.length > 0 && (
+                {matchingProject.panels_count !== undefined && matchingProject.panels_count > 0 && (
                   <div className="space-y-1 border-t border-neutral-800/30 pt-3">
                     <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">Structure</span>
                     <p className="text-xs font-medium text-neutral-350">
-                      {panels.length} panels compiled
+                      {matchingProject.panels_count} panels compiled
                     </p>
                   </div>
                 )}
 
-                {seriesSynopsis && (
+                {matchingProject.synopsis && (
                   <div className="space-y-1 border-t border-neutral-800/30 pt-3">
                     <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">Synopsis</span>
-                    <p className="text-[11px] text-neutral-400 leading-relaxed line-clamp-2" title={seriesSynopsis}>
-                      {seriesSynopsis}
+                    <p className="text-[11px] text-neutral-400 leading-relaxed line-clamp-2" title={matchingProject.synopsis}>
+                      {matchingProject.synopsis}
                     </p>
                   </div>
                 )}
 
                 <div className="pt-3 border-t border-neutral-800/30 flex flex-col gap-2.5">
                   <a
-                    href={videoUrl}
-                    download={`${seriesTitle || "webtoon"}_master.mp4`}
+                    href={matchingProject.video_url}
+                    download={`${matchingProject.title || "webtoon"}_master.mp4`}
                     target="_blank"
                     rel="noreferrer"
                     className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer select-none border border-emerald-500/30 shadow-lg shadow-emerald-950/20 font-sans active:scale-95 text-center"
@@ -609,7 +626,7 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
                   
                   <button
                     onClick={() => {
-                      navigator.clipboard.writeText(videoUrl || "");
+                      navigator.clipboard.writeText(matchingProject.video_url || "");
                       addNotification?.("Video link copied to clipboard!", "success");
                     }}
                     className="w-full bg-neutral-900 hover:bg-neutral-850 text-neutral-300 hover:text-white font-bold text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer border border-neutral-800 active:scale-95 text-center"
