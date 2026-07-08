@@ -2,6 +2,7 @@ import React from "react";
 import { Zap, ArrowLeft } from "lucide-react";
 import { EpisodeScraper } from "./EpisodeScraper";
 import { NotificationType } from "@/components/notification/NotificationStack";
+import { resolveWorkspaceReturnPath } from "../../../utils/workspaceNavigation";
 
 interface EpisodeScraperPageProps {
   addNotification: (message: string, type: NotificationType) => void;
@@ -17,6 +18,12 @@ export const EpisodeScraperPage: React.FC<EpisodeScraperPageProps> = ({
   lastEditorPath,
 }) => {
   const handleNavigateHome = () => navigateTo("/");
+  const handleReturnToWorkspace = () => {
+    const path = resolveWorkspaceReturnPath({
+      searchParams: window.location.search,
+    });
+    navigateTo(path);
+  };
 
   return (
     <div className="page-transition w-full flex-1 flex flex-col max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6">
@@ -54,15 +61,13 @@ export const EpisodeScraperPage: React.FC<EpisodeScraperPageProps> = ({
           </p>
         </div>
         <div className="flex gap-3">
-          {lastEditorPath && (
-            <button
-              onClick={() => navigateTo(lastEditorPath)}
-              className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 hover:bg-neutral-850 text-neutral-200 border border-neutral-800 rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              Return to Workspace
-            </button>
-          )}
+          <button
+            onClick={handleReturnToWorkspace}
+            className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 hover:bg-neutral-850 text-neutral-200 border border-neutral-800 rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Return to Workspace
+          </button>
           <button
             onClick={handleNavigateHome}
             className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg shadow-purple-950/30"

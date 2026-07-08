@@ -1108,38 +1108,34 @@ async def scrape_webtoon_episodes(
             "from_cache": True
         }
     
-    # Use the provided URL if it's a full WEBTOON URL, otherwise construct one
-    fetch_url = series_url if series_url.startswith("http") else f"https://www.webtoons.com/en/romance/list?title_no={title_no}"
-    
-    logger.info(f"[Episode Scraper] Using URL: {fetch_url}")
-    
-    html = await try_fetch_with_playwright(
-        fetch_url,
-        user_agent=random.choice(USER_AGENTS),
-        referer="https://www.webtoons.com/",
-        interactive=True
-    )
-    
-    # If fetch fails with provided URL and it's not a full URL, try with different genres
-    if (not html or len(html) < 1000) and not series_url.startswith("http"):
-        logger.info("[Episode Scraper] Provided URL fetch failed, trying alternate genres...")
+    # Determine candidate fetch URLs. If a full URL provided, use it directly.
+    candidate_urls = []
+    if series_url and series_url.startswith("http"):
+        candidate_urls = [series_url]
+    else:
+        # If title_no provided, try multiple possible genre listing pages instead of defaulting to one hardcoded genre.
         genres = ["action", "fantasy", "comedy", "drama", "slice-of-life", "supernatural", "sci-fi", "romance"]
-        
-        for genre in genres:
-            test_url = f"https://www.webtoons.com/en/{genre}/list?title_no={title_no}"
-            logger.info(f"[Episode Scraper] Trying genre: {genre}")
-            
-            html = await try_fetch_with_playwright(
-                test_url,
-                user_agent=random.choice(USER_AGENTS),
-                referer="https://www.webtoons.com/",
-                interactive=True
-            )
-            
-            if html and len(html) > 1000:  # Likely found the right URL
-                fetch_url = test_url
-                logger.info(f"[Episode Scraper] Successfully fetched with genre: {genre}")
-                break
+        candidate_urls = [f"https://www.webtoons.com/en/{g}/list?title_no={title_no}" for g in genres]
+
+    logger.info(f"[Episode Scraper] Candidate URLs count: {len(candidate_urls)}")
+
+    html = None
+    fetch_url = None
+    # Try candidate URLs sequentially until a valid HTML payload is returned.
+    for test_url in candidate_urls:
+        logger.info(f"[Episode Scraper] Attempting fetch: {test_url}")
+        html = await try_fetch_with_playwright(
+            test_url,
+            user_agent=random.choice(USER_AGENTS),
+            referer="https://www.webtoons.com/",
+            interactive=True
+        )
+        if html and len(html) > 1000:
+            fetch_url = test_url
+            logger.info(f"[Episode Scraper] Successfully fetched URL: {fetch_url}")
+            break
+        else:
+            logger.info(f"[Episode Scraper] Fetch returned no/short HTML for: {test_url}")
     
     if not html:
         logger.warning(f"[Episode Scraper] Failed to fetch episode list HTML")

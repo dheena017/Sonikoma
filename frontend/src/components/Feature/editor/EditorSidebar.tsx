@@ -1,4 +1,5 @@
 import React from "react";
+import { resolveWorkspaceReturnPath } from "../../../utils/workspaceNavigation";
 import {
   Layout,
   Scissors,
@@ -117,20 +118,10 @@ const EditorSidebar = ({
   ];
 
   const handleReturnToWorkspace = () => {
-    const activeProjId = projectId || localStorage.getItem("active_project_id");
-    const activeSeriesSlug = localStorage.getItem("active_series_slug");
-    const activeChapterSlug = localStorage.getItem("active_chapter_slug");
-
-    let path = "/workspace";
-    if (activeProjId) {
-      if (activeSeriesSlug && activeChapterSlug) {
-        path = `/workspace/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
-      } else if (activeProjId.startsWith("temp_")) {
-        path = `/workspace/editor?id=${activeProjId}`;
-      } else {
-        path = `/workspace?id=${activeProjId}`;
-      }
-    }
+    const path = resolveWorkspaceReturnPath({
+      projectId,
+      searchParams: window.location.search,
+    });
 
     if (navigateTo) {
       navigateTo(path);
