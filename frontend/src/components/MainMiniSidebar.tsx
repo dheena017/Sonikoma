@@ -22,12 +22,18 @@ interface MiniSidebarProps {
   currentPath: string;
   navigateTo: (path: string) => void;
   notificationsCount: number;
+  projectId?: string | null;
+  seriesSlug?: string | null;
+  chapterSlug?: string | null;
 }
 
 const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
   currentPath,
   navigateTo,
   notificationsCount,
+  projectId = null,
+  seriesSlug = null,
+  chapterSlug = null,
 }) => {
   const isDashboardOverview =
     currentPath === "/" || currentPath === "/dashboard";
@@ -51,6 +57,28 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
     currentPath.startsWith("/editor/") ||
     currentPath.startsWith("/workspace/editor");
 
+  const handleNavigateToWorkspace = () => {
+    const activeProjId = projectId || localStorage.getItem("active_project_id");
+    const activeSeriesSlug =
+      seriesSlug || localStorage.getItem("active_series_slug");
+    const activeChapterSlug =
+      chapterSlug || localStorage.getItem("active_chapter_slug");
+
+    if (activeProjId) {
+      if (activeSeriesSlug && activeChapterSlug) {
+        navigateTo(
+          `/workspace/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`
+        );
+      } else if (activeProjId.startsWith("temp_")) {
+        navigateTo(`/workspace/editor?id=${activeProjId}`);
+      } else {
+        navigateTo(`/workspace?id=${activeProjId}`);
+      }
+    } else {
+      navigateTo("/workspace");
+    }
+  };
+
   const groups = [
     {
       group: "Main Workspace",
@@ -65,7 +93,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           label: "Workspace",
           icon: Layout,
           active: isWorkspace,
-          onClick: () => navigateTo("/workspace"),
+          onClick: handleNavigateToWorkspace,
         },
         {
           label: "Projects",

@@ -125,6 +125,8 @@ const SidebarInner = ({
         navigateTo(
           `/workspace/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`
         );
+      } else if (activeProjId.startsWith("temp_")) {
+        navigateTo(`/workspace/editor?id=${activeProjId}`);
       } else {
         navigateTo(`/workspace?id=${activeProjId}`);
       }

@@ -1186,6 +1186,9 @@ export default function App() {
               currentPath={currentPath}
               navigateTo={navigateTo}
               notificationsCount={notifications.filter((n) => !n.isRead).length}
+              projectId={projectId}
+              seriesSlug={seriesSlugState}
+              chapterSlug={chapterSlugState}
             />
           )}
         </>
@@ -1729,6 +1732,7 @@ export default function App() {
               addNotification={addNotification}
               fetchWithInterceptor={fetchWithInterceptor}
               navigateTo={navigateTo}
+              lastEditorPath={lastEditorPath}
             />
           )}
 

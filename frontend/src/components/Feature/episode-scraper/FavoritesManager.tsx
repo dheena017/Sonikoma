@@ -69,6 +69,11 @@ export class FavoritesManager {
     localStorage.setItem(RECENT_KEY, JSON.stringify([]));
   }
 
+  static removeRecent(title_no: string) {
+    const recent = this.getRecent().filter((r) => r.title_no !== title_no);
+    localStorage.setItem(RECENT_KEY, JSON.stringify(recent));
+  }
+
   static getBookmarks(): string[] {
     try {
       const data = localStorage.getItem('sonikoma_bookmarked_episodes');
@@ -140,8 +145,12 @@ export const FavoritesList: React.FC<FavoritesListProps> = ({
 
   const handleRemove = (title_no: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    FavoritesManager.removeFavorite(title_no);
-    setItems(items.filter((item) => item.title_no !== title_no));
+    if (showRecent) {
+      FavoritesManager.removeRecent(title_no);
+    } else {
+      FavoritesManager.removeFavorite(title_no);
+    }
+    setItems((prev) => prev.filter((item) => item.title_no !== title_no));
   };
 
   if (items.length === 0) {

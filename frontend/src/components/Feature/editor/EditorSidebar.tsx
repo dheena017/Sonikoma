@@ -116,17 +116,40 @@ const EditorSidebar = ({
     },
   ];
 
+  const handleReturnToWorkspace = () => {
+    const activeProjId = projectId || localStorage.getItem("active_project_id");
+    const activeSeriesSlug = localStorage.getItem("active_series_slug");
+    const activeChapterSlug = localStorage.getItem("active_chapter_slug");
+
+    let path = "/workspace";
+    if (activeProjId) {
+      if (activeSeriesSlug && activeChapterSlug) {
+        path = `/workspace/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
+      } else if (activeProjId.startsWith("temp_")) {
+        path = `/workspace/editor?id=${activeProjId}`;
+      } else {
+        path = `/workspace?id=${activeProjId}`;
+      }
+    }
+
+    if (navigateTo) {
+      navigateTo(path);
+    } else {
+      window.history.pushState({}, "", path);
+      window.dispatchEvent(new Event("popstate"));
+    }
+    setIsCollapsed(true);
+  };
+
   return (
     <aside
-      className={`fixed top-0 bottom-0 left-0 h-screen bg-[#0a0a0e]/95 backdrop-blur-2xl border-r border-purple-900/10 flex flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-50 shadow-[8px_0_32px_rgba(0,0,0,0.6)] overflow-hidden ${
-        isCollapsed ? "w-20" : "w-[280px]"
-      }`}
+      className={`fixed top-0 bottom-0 left-0 h-screen bg-[#0a0a0e]/95 backdrop-blur-2xl border-r border-purple-900/10 flex flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-50 shadow-[8px_0_32px_rgba(0,0,0,0.6)] overflow-hidden ${isCollapsed ? "w-20" : "w-[280px]"
+        }`}
     >
       {/* Top Header / Close Area */}
       <div
-        className={`flex items-center border-b border-white/[0.02] transition-all duration-300 shrink-0 ${
-          isCollapsed ? "p-4 justify-center" : "h-16 px-4 justify-between"
-        }`}
+        className={`flex items-center border-b border-white/[0.02] transition-all duration-300 shrink-0 ${isCollapsed ? "p-4 justify-center" : "h-16 px-4 justify-between"
+          }`}
       >
         {!isCollapsed && (
           <span className="text-[10px] font-black text-purple-400/50 uppercase tracking-[0.25em] font-mono ml-2">
@@ -167,11 +190,10 @@ const EditorSidebar = ({
                   <div key={item.id} className="relative flex justify-center">
                     {/* Premium Floating Active Pill */}
                     <div
-                      className={`absolute left-1 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
-                        isActive
+                      className={`absolute left-1 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${isActive
                           ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] opacity-100"
                           : "h-0 bg-transparent opacity-0"
-                      }`}
+                        }`}
                     />
 
                     <button
@@ -192,24 +214,21 @@ const EditorSidebar = ({
                         }
                         setIsCollapsed(true);
                       }}
-                      className={`w-full flex items-center ${
-                        isCollapsed
+                      className={`w-full flex items-center ${isCollapsed
                           ? "justify-center p-3"
                           : "justify-between px-4 py-3"
-                      } rounded-2xl transition-all duration-300 group relative cursor-pointer active:scale-[0.98] ${
-                        isActive
+                        } rounded-2xl transition-all duration-300 group relative cursor-pointer active:scale-[0.98] ${isActive
                           ? "bg-purple-500/10 text-white shadow-[inset_0_0_16px_rgba(168,85,247,0.15)] border border-purple-500/20"
                           : "text-neutral-500 hover:text-white hover:bg-white/5 border border-transparent"
-                      }`}
+                        }`}
                       title={isCollapsed ? item.label : undefined}
                     >
                       <div className="flex items-center gap-3.5">
                         <Icon
-                          className={`w-[18px] h-[18px] shrink-0 transition-transform duration-300 ${
-                            isActive
+                          className={`w-[18px] h-[18px] shrink-0 transition-transform duration-300 ${isActive
                               ? "text-purple-400"
                               : "group-hover:scale-110 group-hover:text-neutral-300"
-                          }`}
+                            }`}
                         />
                         {!isCollapsed && (
                           <span className="text-sm font-bold tracking-wide">
@@ -221,13 +240,11 @@ const EditorSidebar = ({
                       {/* Badge Logic */}
                       {item.badge !== undefined && (
                         <span
-                          className={`absolute ${
-                            isCollapsed ? "-top-1 -right-1" : "relative top-0 right-0"
-                          } flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-lg text-[10px] font-bold font-mono transition-colors border ${
-                            isActive
+                          className={`absolute ${isCollapsed ? "-top-1 -right-1" : "relative top-0 right-0"
+                            } flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-lg text-[10px] font-bold font-mono transition-colors border ${isActive
                               ? "bg-purple-500/20 text-purple-300 border-purple-500/30"
                               : "bg-neutral-900 text-neutral-500 border-white/5"
-                          }`}
+                            }`}
                         >
                           {item.badge}
                         </span>
@@ -236,11 +253,10 @@ const EditorSidebar = ({
                       {/* Processing Ping */}
                       {item.isProcessing && (
                         <span
-                          className={`absolute ${
-                            isCollapsed
+                          className={`absolute ${isCollapsed
                               ? "top-1 right-1"
                               : "top-1/2 -translate-y-1/2 right-3"
-                          } h-2 w-2 rounded-full bg-purple-500 animate-ping`}
+                            } h-2 w-2 rounded-full bg-purple-500 animate-ping`}
                         />
                       )}
                     </button>
@@ -255,19 +271,9 @@ const EditorSidebar = ({
       {/* Bottom Action Footer - Return to Workspace */}
       <div className="p-4 border-t border-white/[0.02] bg-gradient-to-t from-black/20 to-transparent">
         <button
-          onClick={() => {
-            const path = projectId ? `/workspace?id=${projectId}` : "/workspace";
-            if (navigateTo) {
-              navigateTo(path);
-            } else {
-              window.history.pushState({}, "", path);
-              window.dispatchEvent(new Event("popstate"));
-            }
-            setIsCollapsed(true);
-          }}
-          className={`flex items-center justify-center rounded-2xl bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white transition-all active:scale-95 border border-white/10 cursor-pointer ${
-            isCollapsed ? "h-12 w-12 p-0" : "w-full py-3 gap-3"
-          }`}
+          onClick={handleReturnToWorkspace}
+          className={`flex items-center justify-center rounded-2xl bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white transition-all active:scale-95 border border-white/10 cursor-pointer ${isCollapsed ? "h-12 w-12 p-0" : "w-full py-3 gap-3"
+            }`}
           title="Return to Workspace"
         >
           <ArrowLeft className="w-[18px] h-[18px] shrink-0" />

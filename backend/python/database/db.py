@@ -1187,6 +1187,38 @@ def unwrap_proxy_url(url_str: str) -> str:
             break
     return current
 
+
+def ensure_user_exists(conn: sqlite3.Connection, user_id: Optional[str], fallback_username: Optional[str] = None) -> str:
+    """
+    Ensure a user row exists so foreign-key references from series/chapters remain valid.
+    For anonymous scraper requests, a lightweight fallback user is created automatically.
+    """
+    normalized_user_id = (user_id or 'system_default').strip() or 'system_default'
+    if not normalized_user_id:
+        normalized_user_id = 'system_default'
+
+    existing = conn.execute("SELECT id FROM users WHERE id = ? LIMIT 1", (normalized_user_id,)).fetchone()
+    if existing:
+        return normalized_user_id
+
+    username = (fallback_username or normalized_user_id).strip() or normalized_user_id
+    email = f"{normalized_user_id}@local.invalid"
+    conn.execute("""
+        INSERT INTO users (id, username, email, password_hash, preferences, avatar_url, full_name, google_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        normalized_user_id,
+        username,
+        email,
+        'system_generated',
+        '{}',
+        None,
+        None,
+        None,
+    ))
+    return normalized_user_id
+
+
 def insert_project(data: Dict[str, Any]) -> None:
     """
     Inserts a project by mapping it to the Series/Chapters relational structure.
@@ -1195,6 +1227,7 @@ def insert_project(data: Dict[str, Any]) -> None:
     try:
         user_id = data.get('user_id') or 'system_default'
         title = data.get('title') or 'Untitled Webtoon'
+        user_id = ensure_user_exists(conn, user_id, title)
         genre = data.get('genre') or 'general'
         author = data.get('author') or 'Unknown Author'
         cover_image = unwrap_proxy_url(data.get('cover_image'))

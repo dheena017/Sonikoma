@@ -7,12 +7,14 @@ interface EpisodeScraperPageProps {
   addNotification: (message: string, type: NotificationType) => void;
   fetchWithInterceptor: typeof fetch;
   navigateTo: (path: string) => void;
+  lastEditorPath?: string;
 }
 
 export const EpisodeScraperPage: React.FC<EpisodeScraperPageProps> = ({
   addNotification,
   fetchWithInterceptor,
   navigateTo,
+  lastEditorPath,
 }) => {
   const handleNavigateHome = () => navigateTo("/");
 
@@ -27,6 +29,17 @@ export const EpisodeScraperPage: React.FC<EpisodeScraperPageProps> = ({
             >
               Dashboard
             </span>
+            {lastEditorPath && (
+              <>
+                <span>&gt;</span>
+                <span
+                  className="hover:text-purple-400 cursor-pointer"
+                  onClick={() => navigateTo(lastEditorPath)}
+                >
+                  Workspace Editor
+                </span>
+              </>
+            )}
             <span>&gt;</span>
             <span className="text-purple-400 font-bold">WEBTOON Scraper</span>
           </div>
@@ -40,13 +53,23 @@ export const EpisodeScraperPage: React.FC<EpisodeScraperPageProps> = ({
             Browse episodes, manage bookmarks, filter by likes/rating/date, and batch import panels
           </p>
         </div>
-        <button
-          onClick={handleNavigateHome}
-          className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg shadow-purple-950/30"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Dashboard
-        </button>
+        <div className="flex gap-3">
+          {lastEditorPath && (
+            <button
+              onClick={() => navigateTo(lastEditorPath)}
+              className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 hover:bg-neutral-850 text-neutral-200 border border-neutral-800 rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Return to Workspace
+            </button>
+          )}
+          <button
+            onClick={handleNavigateHome}
+            className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg shadow-purple-950/30"
+          >
+            Dashboard
+          </button>
+        </div>
       </div>
 
       <div className="bg-neutral-900/20 border border-neutral-800/80 rounded-3xl p-6 sm:p-8 backdrop-blur-md">
