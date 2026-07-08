@@ -127,184 +127,251 @@ class MoviePyProgressLogger(ProgressBarLogger):
                 if self.video_id in RENDER_JOBS:
                     RENDER_JOBS[self.video_id]["progress"] = progress
 
+def _get_audio_duration_ffprobe(audio_path: str) -> float:
+    """Fast audio duration probe via ffprobe — avoids opening a full AudioFileClip."""
+    try:
+        import subprocess, json
+        result = subprocess.run(
+            ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+             "-of", "json", audio_path],
+            capture_output=True, text=True, timeout=5
+        )
+        data = json.loads(result.stdout)
+        return float(data["format"]["duration"])
+    except Exception:
+        return 0.0
+
+
+def _build_zoompan_filter(motion_type: str, w: int, h: int, duration: float, fps: int = 24) -> str:
+    """Return an FFmpeg zoompan/crop filter string for the given motion type."""
+    frames = max(1, int(duration * fps))
+    if motion_type == "zoom_in":
+        # Slow zoom from 1.0x → 1.08x, always centred
+        return (
+            f"zoompan=z='min(zoom+0.08/{frames},1.08)':"
+            f"x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={frames}:s={w}x{h}:fps={fps}"
+        )
+    elif motion_type == "pan_left":
+        return (
+            f"zoompan=z=1.15:x='(iw-iw/zoom)*(on/{frames})':y='(ih-ih/zoom)/2':"
+            f"d={frames}:s={w}x{h}:fps={fps}"
+        )
+    elif motion_type == "pan_right":
+        return (
+            f"zoompan=z=1.15:x='(iw-iw/zoom)*(1-on/{frames})':y='(ih-ih/zoom)/2':"
+            f"d={frames}:s={w}x{h}:fps={fps}"
+        )
+    elif motion_type == "pan_up":
+        return (
+            f"zoompan=z=1.15:x='(iw-iw/zoom)/2':y='(ih-ih/zoom)*(on/{frames})':"
+            f"d={frames}:s={w}x{h}:fps={fps}"
+        )
+    elif motion_type == "pan_down":
+        return (
+            f"zoompan=z=1.15:x='(iw-iw/zoom)/2':y='(ih-ih/zoom)*(1-on/{frames})':"
+            f"d={frames}:s={w}x{h}:fps={fps}"
+        )
+    return ""
+
+
+def _render_panel_segment_ffmpeg(
+    img_path: str,
+    audio_path: str | None,
+    duration: float,
+    out_path: str,
+    w: int,
+    h: int,
+    motion_type: str | None,
+    fps: int = 24,
+) -> None:
+    """
+    Render a single panel as a self-contained .mp4 segment using pure ffmpeg.
+    Runs in a subprocess — no Python frame-by-frame processing.
+    """
+    import subprocess
+
+    vf_parts = []
+
+    # Scale / pad to target canvas
+    vf_parts.append(f"scale={w}:{h}:force_original_aspect_ratio=decrease")
+    vf_parts.append(f"pad={w}:{h}:(ow-iw)/2:(oh-ih)/2:black")
+
+    # Motion via zoompan (only for clips with motion)
+    if motion_type in ("zoom_in", "pan_left", "pan_right", "pan_up", "pan_down"):
+        vf_parts.append(_build_zoompan_filter(motion_type, w, h, duration, fps))
+
+    # Crossfade: add a 0.5 s fade-in on every clip (ffmpeg acrossfade is handled at concat stage)
+    vf_parts.append("fade=t=in:st=0:d=0.5")
+
+    vf = ",".join(vf_parts)
+
+    cmd = [
+        "ffmpeg", "-y",
+        "-loop", "1",           # loop the still image
+        "-i", img_path,
+        "-t", str(duration),
+        "-vf", vf,
+        "-r", str(fps),
+        "-c:v", "libx264",
+        "-preset", "ultrafast",
+        "-tune", "stillimage",
+        "-pix_fmt", "yuv420p",
+    ]
+
+    if audio_path and os.path.exists(audio_path):
+        cmd += ["-i", audio_path, "-c:a", "aac", "-b:a", "192k",
+                "-shortest", "-af", "apad"]
+    else:
+        # Silent audio track so every segment has the same stream count
+        cmd += ["-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo",
+                "-c:a", "aac", "-b:a", "128k", "-shortest"]
+
+    cmd.append(out_path)
+
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+    if result.returncode != 0:
+        raise RuntimeError(f"ffmpeg panel render failed:\n{result.stderr[-800:]}")
+
+
 def render_pipeline_sync(video_id: str, panels_data: List[Dict[str, Any]], output_path: str):
     """
     Stitches panels together into a final video file.
+
+    Strategy (panel-count agnostic, fast for 160+ panels):
+      1. Render each panel as an individual .mp4 segment via ffmpeg (no Python loops per frame).
+      2. Concatenate all segments with the ffmpeg concat demuxer.
+      3. Optionally mix in BGM with a final ffmpeg pass.
+
+    Falls back to MoviePy only if ffmpeg is unavailable.
     """
-    if not HAS_MOVIEPY:
-        raise Exception("moviepy is not installed.")
-        
-    clips = []
-    sfx_clips = []
-    current_global_time = 0.0
-    
+    import subprocess
+
+    # ── Determine canvas size from first valid panel ──────────────────────────
+    first_img = next((p["local_img"] for p in panels_data if os.path.exists(p["local_img"])), None)
+    if first_img is None:
+        raise Exception("No valid panel images found.")
+
+    with Image.open(first_img) as img:
+        raw_w, raw_h = img.size
+    # Pick 1080p portrait or landscape based on image orientation
+    if raw_h > raw_w:
+        canvas_w, canvas_h = 1080, 1920
+    else:
+        canvas_w, canvas_h = 1920, 1080
+
+    total = len(panels_data)
+    segment_paths: list[str] = []
+    durations: list[float] = []
+
+    # Use a segments subdir alongside the other temp assets for this job
+    seg_dir = os.path.join(os.getcwd(), "temp", f"render_{video_id}", "_segments")
+    os.makedirs(seg_dir, exist_ok=True)
+
+    # ── Step 1: Render each panel segment ────────────────────────────────────
     for i, p in enumerate(panels_data):
-        img_path = p["local_img"]
+        img_path   = p["local_img"]
         audio_path = p.get("local_audio")
-        # Start with requested duration, but audio will override if present
-        duration = p["duration"]
-        sfx_name = p.get("sfx")
 
         if not os.path.exists(img_path):
-            logger.warning(f"Image not found for panel {i}: {img_path}")
+            logger.warning(f"Panel {i}: image not found, skipping.")
             continue
 
-        # CRITICAL: Match visual duration to natural audio duration
+        # Determine duration from audio (fast probe) or panel metadata
         if audio_path and os.path.exists(audio_path):
-            try:
-                audio_clip_temp = AudioFileClip(audio_path)
-                duration = audio_clip_temp.duration
-                audio_clip_temp.close()
-                logger.info(f"Panel {i}: Synced duration to audio length: {duration:.2f}s")
-            except Exception as e:
-                logger.error(f"Failed to read audio duration for panel {i}: {e}")
+            duration = _get_audio_duration_ffprobe(audio_path) or p.get("duration", 3.0)
+        else:
+            duration = p.get("duration", 3.0)
 
-        safe_duration = max(duration, 0.2) # Minimum duration safety
-        # Avoid overlapping voices: MoviePy overlaps clips by 0.5s on concatenation.
-        # To prevent the voice audio from overlapping with the next panel's voice,
-        # we extend the visual duration of all non-last panels by 0.5s.
-        if i < len(panels_data) - 1:
-            safe_duration += 0.5
+        duration = max(duration, 0.5)
 
-        clip = ImageClip(img_path).set_duration(safe_duration)
-        
-        # OPTIMIZATION: Downscale to 1080p before animation to ensure high quality.
-        # Downscaling to 1080p matches the standard HD output, avoiding the lag of 4K/8K images
-        # while keeping the visuals crisp and detailed.
-        if clip.h > 1080 or clip.w > 1080:
-            clip = clip.resize(height=1080) # Resizes width proportionally
+        seg_path = os.path.join(seg_dir, f"seg_{i:04d}.mp4")
+        try:
+            _render_panel_segment_ffmpeg(
+                img_path   = img_path,
+                audio_path = audio_path,
+                duration   = duration,
+                out_path   = seg_path,
+                w          = canvas_w,
+                h          = canvas_h,
+                motion_type= p.get("motion_type"),
+            )
+            segment_paths.append(seg_path)
+            durations.append(duration)
+            logger.info(f"[Render] [{i+1}/{total}] Panel segment rendered ({duration:.2f}s)")
+        except Exception as e:
+            logger.error(f"[Render] Panel {i} segment failed: {e}")
 
-        # Attach audio to this visual clip
-        if audio_path and os.path.exists(audio_path):
-            try:
-                # set_audio returns a copy
-                raw_audio = AudioFileClip(audio_path)
-                if safe_duration > raw_audio.duration:
-                    panel_audio = CompositeAudioClip([raw_audio]).set_duration(safe_duration)
-                else:
-                    panel_audio = raw_audio.set_duration(safe_duration)
-                clip = clip.set_audio(panel_audio)
-            except Exception as e:
-                logger.error(f"Failed to attach audio to clip {i}: {e}")
+        # Update progress (50% → 90%)
+        if total > 0 and video_id in RENDER_JOBS:
+            RENDER_JOBS[video_id]["progress"] = 50 + int(((i + 1) / total) * 40)
 
-        # Schedule SFX
-        if sfx_name and sfx_name.strip():
-            sfx_path = os.path.join(os.getcwd(), "public", "audio", "sfx", f"{sfx_name.strip()}.mp3")
-            if os.path.exists(sfx_path):
-                try:
-                    sfx_clip = AudioFileClip(sfx_path).volumex(0.4).set_start(current_global_time)
-                    sfx_clips.append(sfx_clip)
-                except Exception as e:
-                    logger.error(f"Failed to load SFX {sfx_name}: {e}")
+    if not segment_paths:
+        raise Exception("No valid segments were rendered.")
 
-        # Basic Motion (Optimized with high-performance OpenCV bilinear transformations)
-        motion_type = p.get("motion_type")
-        w, h = clip.size
-        if motion_type in ["zoom_in", "pan_left", "pan_right", "pan_up", "pan_down"]:
-            import cv2
-            def apply_motion(get_frame, t):
-                frame = get_frame(t)
-                if motion_type == "zoom_in":
-                    scale = 1 + 0.08 * (t / safe_duration)
-                    nw, nh = int(w * scale), int(h * scale)
-                    resized = cv2.resize(frame, (max(1, nw), max(1, nh)), interpolation=cv2.INTER_LINEAR)
-                    x1 = (nw - w) // 2
-                    y1 = (nh - h) // 2
-                    return resized[y1:y1+h, x1:x1+w]
-                elif motion_type in ["pan_left", "pan_right", "pan_up", "pan_down"]:
-                    nw, nh = int(w * 1.15), int(h * 1.15)
-                    resized = cv2.resize(frame, (nw, nh), interpolation=cv2.INTER_LINEAR)
-                    max_x_offset = (nw - w) // 2
-                    max_y_offset = (nh - h) // 2
-                    progress = t / safe_duration
-                    
-                    if motion_type == "pan_left":
-                        x_offset = int(max_x_offset * (2 * progress - 1))
-                        y_offset = 0
-                    elif motion_type == "pan_right":
-                        x_offset = int(max_x_offset * (1 - 2 * progress))
-                        y_offset = 0
-                    elif motion_type == "pan_down":
-                        x_offset = 0
-                        y_offset = int(max_y_offset * (1 - 2 * progress))
-                    elif motion_type == "pan_up":
-                        x_offset = 0
-                        y_offset = int(max_y_offset * (2 * progress - 1))
-                    else:
-                        x_offset = 0
-                        y_offset = 0
-                        
-                    x_center = (nw - w) // 2 + x_offset
-                    y_center = (nh - h) // 2 + y_offset
-                    x1 = max(0, min(nw - w, x_center))
-                    y1 = max(0, min(nh - h, y_center))
-                    return resized[y1:y1+h, x1:x1+w]
-                return frame
-            clip = clip.fl(apply_motion, apply_to=[])
+    # ── Step 2: Concatenate via concat demuxer ────────────────────────────────
+    concat_list = os.path.join(seg_dir, "concat.txt")
+    with open(concat_list, "w", encoding="utf-8") as f:
+        for sp in segment_paths:
+            f.write(f"file '{sp.replace(chr(92), '/')}'\n")
 
-        # Flatten layers (subtitles are pre-baked into the image in process_render_job)
-        panel_composite = CompositeVideoClip([clip.set_position(('center', 'center'))], size=(w, h)).set_duration(safe_duration)
+    # Intermediate concat (stream-copy — near instant)
+    concat_out = os.path.join(seg_dir, "concat_raw.mp4")
+    concat_cmd = [
+        "ffmpeg", "-y",
+        "-f", "concat", "-safe", "0",
+        "-i", concat_list,
+        "-c", "copy",
+        concat_out,
+    ]
+    r = subprocess.run(concat_cmd, capture_output=True, text=True, timeout=600)
+    if r.returncode != 0:
+        raise RuntimeError(f"ffmpeg concat failed:\n{r.stderr[-800:]}")
 
-        # Crossfade transition (except first)
-        if i > 0:
-            panel_composite = panel_composite.crossfadein(0.5)
+    if video_id in RENDER_JOBS:
+        RENDER_JOBS[video_id]["progress"] = 92
 
-        clips.append(panel_composite)
-        
-        # Time tracking for global audio (SFX/BGM)
-        # Note: concatenate_videoclips with padding -0.5 overlaps them
-        current_global_time += safe_duration
-        if i < len(panels_data) - 1:
-            current_global_time -= 0.5
-
-    if not clips:
-        raise Exception("No valid clips were generated for rendering.")
-
-    # Stitch video sequence
-    final_video = concatenate_videoclips(clips, padding=-0.5, method="compose")
-    
-    # Mix Audio
-    audio_tracks = []
-    if final_video.audio:
-        audio_tracks.append(final_video.audio)
-    
-    # BGM loop
+    # ── Step 3: Mix in BGM (optional final pass) ──────────────────────────────
     bgm_path = os.path.join(os.getcwd(), "public", "audio", "bgm", "theme.mp3")
     if os.path.exists(bgm_path):
         try:
-            import moviepy.audio.fx.all as afx
-            bgm_clip = AudioFileClip(bgm_path).volumex(0.1)
-            audio_tracks.append(afx.audio_loop(bgm_clip, duration=final_video.duration))
+            bgm_out = os.path.join(seg_dir, "with_bgm.mp4")
+            bgm_cmd = [
+                "ffmpeg", "-y",
+                "-i", concat_out,
+                "-stream_loop", "-1", "-i", bgm_path,
+                "-filter_complex",
+                "[0:a]volume=1.0[va];[1:a]volume=0.10[bgm];[va][bgm]amix=inputs=2:duration=first[aout]",
+                "-map", "0:v", "-map", "[aout]",
+                "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+                "-shortest",
+                bgm_out,
+            ]
+            rb = subprocess.run(bgm_cmd, capture_output=True, text=True, timeout=300)
+            if rb.returncode == 0:
+                concat_out = bgm_out
+            else:
+                logger.warning(f"[Render] BGM mix failed (skipped): {rb.stderr[-400:]}")
         except Exception as e:
-            logger.error(f"BGM Error: {e}")
-            
-    audio_tracks.extend(sfx_clips)
-    
-    if audio_tracks:
-        try:
-            final_audio = CompositeAudioClip(audio_tracks).set_duration(final_video.duration)
-            final_video = final_video.set_audio(final_audio)
-        except Exception as e:
-            logger.error(f"Final audio mix error: {e}")
-            
-    # Render to disk
-    progress_logger = MoviePyProgressLogger(video_id) if HAS_MOVIEPY else None
-    final_video.write_videofile(
-            output_path, 
-            fps=24, 
-            codec="libx264", 
-            audio_codec="aac", 
-            logger=progress_logger,
-            threads=4,
-            preset="ultrafast",
-            bitrate="10000k"
-        )
-    
-    # Cleanup memory
-    for c in clips:
-        try: c.close()
-        except: pass
-    final_video.close()
+            logger.warning(f"[Render] BGM error (skipped): {e}")
+
+    if video_id in RENDER_JOBS:
+        RENDER_JOBS[video_id]["progress"] = 95
+
+    # ── Step 4: Final re-encode to target bitrate / output path ──────────────
+    final_cmd = [
+        "ffmpeg", "-y",
+        "-i", concat_out,
+        "-c:v", "libx264", "-preset", "ultrafast",
+        "-b:v", "8000k", "-maxrate", "10000k", "-bufsize", "20000k",
+        "-c:a", "aac", "-b:a", "192k",
+        "-movflags", "+faststart",
+        output_path,
+    ]
+    rf = subprocess.run(final_cmd, capture_output=True, text=True, timeout=600)
+    if rf.returncode != 0:
+        raise RuntimeError(f"ffmpeg final encode failed:\n{rf.stderr[-800:]}")
+
+    logger.info(f"[Render] Done — {len(segment_paths)} panels → {output_path}")
 
 async def process_render_job(video_id: str, panels: List[PanelData], voice: Optional[str]):
     work_dir = os.path.join(os.getcwd(), "temp", f"render_{video_id}")
@@ -422,7 +489,7 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
         RENDER_JOBS[video_id]["progress"] = 50
 
         # 4. Rendering (50% to 95%)
-        logger.info(f"[Render] Starting MoviePy pipeline for {video_id}")
+        logger.info(f"[Render] Starting FFmpeg pipeline for {video_id}")
         await asyncio.to_thread(render_pipeline_sync, video_id, panels_data, output_path)
 
         final_video_url = f"/videos/{output_filename}"
@@ -458,8 +525,6 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
 
 @router.post("/render")
 async def render_video(request: RenderRequest, background_tasks: BackgroundTasks):
-    if not HAS_MOVIEPY:
-        raise HTTPException(status_code=500, detail="moviepy not installed on server.")
     if not request.panels:
         raise HTTPException(status_code=400, detail="Panel list is empty.")
 

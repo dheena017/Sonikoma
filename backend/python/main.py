@@ -87,6 +87,7 @@ if sys.platform == "win32":
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning, module="pkg_resources")
+warnings.filterwarnings("ignore", category=UserWarning, module="moviepy")
 
 # Fix Windows asyncio subprocess NotImplementedError
 if sys.platform == "win32":
