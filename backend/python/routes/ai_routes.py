@@ -946,31 +946,57 @@ async def analyze_sequence(body: AnalyzeSequenceRequest, user_api_key: str = Dep
                     config=types.GenerateContentConfig(response_mime_type="application/json")
                 )
             )
-
-            # Gemini SDK response handling can vary; response.text may be empty.
             raw_text = getattr(response, "text", None)
+
+            # Gemini may return empty text when the JSON mime_type constraint interacts
+            # badly with large multimodal payloads or triggers safety filters.
+            # Retry once without the constraint to get a plain-text response containing JSON.
             if not raw_text:
-                # Try common alternative shapes (best-effort, non-breaking)
+                finish_reason = "UNKNOWN"
+                safety_info = ""
                 try:
-                    candidates = getattr(response, "candidates", None) or []
-                    if candidates and getattr(candidates[0], "content", None):
-                        parts = getattr(candidates[0].content, "parts", None) or []
-                        # parts items often have `.text`
-                        part_texts = []
-                        for p in parts:
-                            t = getattr(p, "text", None)
-                            if t:
-                                part_texts.append(t)
-                        raw_text = "\n".join(part_texts) if part_texts else raw_text
+                    cand = response.candidates[0] if response.candidates else None
+                    if cand:
+                        finish_reason = str(getattr(cand, "finish_reason", "UNKNOWN"))
+                        ratings = getattr(cand, "safety_ratings", [])
+                        blocked = [
+                            f"{r.category}={r.probability}"
+                            for r in ratings
+                            if str(getattr(r, "probability", "")) not in ("NEGLIGIBLE", "LOW")
+                        ]
+                        if blocked:
+                            safety_info = " | Safety blocks: " + ", ".join(blocked)
                 except Exception:
                     pass
 
-            if not raw_text:
-                try:
-                    # Last resort for debugging (do not expose to client)
-                    raw_text = str(response)
-                except Exception:
-                    raw_text = None
+                logger.warning(
+                    f"[Sequence] Gemini returned empty text (finish_reason={finish_reason}{safety_info}). "
+                    f"Retrying without JSON mime-type constraint."
+                )
+
+                response2 = await call_gemini_with_retry(
+                    lambda: client.models.generate_content(
+                        model=clean_model,
+                        contents=contents,
+                    )
+                )
+                raw_text = getattr(response2, "text", None)
+
+                if not raw_text:
+                    finish_reason2 = "UNKNOWN"
+                    try:
+                        cand2 = response2.candidates[0] if response2.candidates else None
+                        if cand2:
+                            finish_reason2 = str(getattr(cand2, "finish_reason", "UNKNOWN"))
+                    except Exception:
+                        pass
+                    detail = (
+                        f"AI model returned an empty response after retry "
+                        f"(finish_reason={finish_reason2}{safety_info}). "
+                        f"Try fewer panels at once or switch to a different model."
+                    )
+                    raise HTTPException(status_code=500, detail=detail)
+
 
         elif provider == "openai":
             import requests
