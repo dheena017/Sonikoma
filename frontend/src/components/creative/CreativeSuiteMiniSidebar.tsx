@@ -169,7 +169,7 @@ const CreativeSuiteMiniSidebarInner: React.FC<CreativeSuiteMiniSidebarProps> = (
     const [hover, setHover] = useState(false);
     const [rect, setRect] = useState<DOMRect | null>(null);
     const active = isActive(item.path);
-    const isLocked = item.requiresPanels && panels.length === 0;
+    const isLocked = false;
     const Icon = item.icon;
 
     const handleEnter = (e: React.MouseEvent<HTMLButtonElement>) => {

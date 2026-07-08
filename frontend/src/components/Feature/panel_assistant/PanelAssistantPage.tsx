@@ -48,21 +48,7 @@ const PanelAssistantPage = React.memo(
       );
     };
 
-    if (panels.length === 0) {
-      return (
-        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-          <p className="text-sm text-neutral-400 font-mono">
-            No storyboard panels found. Scrape a Webtoon page first.
-          </p>
-          <button
-            onClick={onNavigateHome}
-            className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-xl text-xs font-mono font-bold cursor-pointer"
-          >
-            Go to Workspace
-          </button>
-        </div>
-      );
-    }
+
 
     return (
       <div className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in">

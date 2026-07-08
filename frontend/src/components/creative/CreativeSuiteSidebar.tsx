@@ -196,7 +196,7 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
             <ul className="space-y-1">
               {group.items.map((item) => {
                 const active = isActive(item.path);
-                const isLocked = item.requiresPanels && panels.length === 0;
+                const isLocked = false;
 
                 return (
                   <li key={item.id} className="relative">
