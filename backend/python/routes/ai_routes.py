@@ -891,13 +891,15 @@ async def analyze_sequence(body: AnalyzeSequenceRequest, user_api_key: str = Dep
     for url in body.urls:
         try:
             res = await img_utils.resolve_image_to_buffer(url)
+            # Downscale sequence images to max 800x800 to prevent large payload issues/token limits.
+            resized = img_utils.resize_fit(res["data"], max_w=800, max_h=800, output_format="jpeg", quality=85)
             image_parts.append({
-                "mime_type": res.get("contentType", "image/jpeg"),
-                "data": res["data"]
+                "mime_type": "image/jpeg",
+                "data": resized["data"]
             })
         except Exception as e:
             logger.warning(f"[Sequence] Failed to load image {url}: {e}")
-            raise HTTPException(status_code=400, detail=f"Failed to load image: {url}")
+            raise HTTPException(status_code=400, detail=f"Failed to load/resize image: {url}")
 
     # 2. Ask model to look at ALL images together
     try:
