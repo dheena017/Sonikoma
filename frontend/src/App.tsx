@@ -697,6 +697,8 @@ export default function App() {
     editorRouteMatch,
   } = pathFlags;
 
+  const isAnyAdmin = isAdminPath || isAdminDashboardPath;
+
   const memoizedAppLogic = React.useMemo(
     () => ({
       ...appLogic,
@@ -1087,11 +1089,11 @@ export default function App() {
     <div
       id="app_root"
       className={`min-h-screen bg-neutral-955 text-neutral-100 flex flex-col selection:text-white relative ${
-        isAdminPath ? "selection:bg-violet-600" : "selection:bg-purple-600"
+        isAnyAdmin ? "selection:bg-violet-600" : "selection:bg-purple-600"
       }`}
     >
       {/* --- Page Navigation Sidebar --- */}
-      {isAdminPath ? (
+      {isAnyAdmin ? (
         <>
           <AdminSidebar
             currentPath={currentPath}
@@ -1142,11 +1144,11 @@ export default function App() {
       <div
         id="main-scroll-container"
         className={`flex-grow flex-1 flex flex-col min-h-screen lg:max-h-screen justify-between transition-all duration-300 ${
-          !isAdminPath ? "lg:overflow-y-auto" : "overflow-y-auto"
-        } ${!isAdminPath && isSidebarOpen ? "overflow-hidden" : ""}`}
+          !isAnyAdmin ? "lg:overflow-y-auto" : "overflow-y-auto"
+        } ${!isAnyAdmin && isSidebarOpen ? "overflow-hidden" : ""}`}
       >
         {/* Top Header */}
-        {!isSidebarOpen && !isProEditorPage && (
+        {!isSidebarOpen && !isProEditorPage && !isAnyAdmin && (
           <Header
             isProcessing={isProcessing}
             panels={panels}
