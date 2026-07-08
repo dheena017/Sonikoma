@@ -515,12 +515,12 @@ export default function App() {
     chapterSlug: chapterSlugState,
   });
 
-  // Trigger automatic scraping if ?importUrl=... is present in the URL on mount or path change
+  // Trigger automatic scraping if ?importUrl=... is present in the URL on mount or path change, or if auto_import_url exists in localStorage
   React.useEffect(() => {
     if (!isAuthenticated || authLoading || isInitializing) return;
 
     const params = new URLSearchParams(window.location.search);
-    const importUrl = params.get("importUrl");
+    const importUrl = params.get("importUrl") || localStorage.getItem("auto_import_url");
     const projId = params.get("id") || params.get("project_id");
 
     if (importUrl && projId && projId.startsWith("temp_")) {
@@ -533,13 +533,16 @@ export default function App() {
       const newUrl = window.location.pathname + (newSearch ? "?" + newSearch : "");
       window.history.replaceState(null, "", newUrl);
 
+      // Clean up localStorage
+      localStorage.removeItem("auto_import_url");
+
       // Run the scraping
       setTargetUrl(importUrl);
       scrapeImages(importUrl, projId).catch((err) => {
         console.error("[Auto Scrape] Failed to scrape images:", err);
       });
     }
-  }, [isAuthenticated, authLoading, isInitializing, scrapeImages, setTargetUrl]);
+  }, [isAuthenticated, authLoading, isInitializing, scrapeImages, setTargetUrl, currentPath]);
 
   const handleNavigateHome = React.useCallback(() => {
     if (projectId) {

@@ -308,13 +308,16 @@ export function useAppRouter({
       ) {
         const params = new URLSearchParams(window.location.search);
 
-        // Redirect /editor?importUrl=... to /workspace/editor?id=temp_...&importUrl=...
+        // Redirect /editor?importUrl=... to /workspace/editor?id=temp_...
         if (params.has("importUrl") && !params.has("id")) {
           const importUrl = params.get("importUrl");
+          if (importUrl) {
+            localStorage.setItem("auto_import_url", importUrl);
+          }
           const temporaryProjectId = `temp_${Date.now()}_${Math.random()
             .toString(36)
             .substring(2, 10)}`;
-          const newUrl = `/workspace/editor?id=${temporaryProjectId}&importUrl=${encodeURIComponent(importUrl || "")}`;
+          const newUrl = `/workspace/editor?id=${temporaryProjectId}`;
           window.history.replaceState({}, "", newUrl);
           setCurrentPath("/workspace/editor");
           return;

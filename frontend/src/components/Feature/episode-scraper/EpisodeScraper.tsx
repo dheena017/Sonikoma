@@ -314,9 +314,11 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
       return;
     }
 
-    window.location.assign(
-      `/workspace/editor?importUrl=${encodeURIComponent(episode.url)}`
-    );
+    const temporaryProjectId = `temp_${Date.now()}_${Math.random()
+      .toString(36)
+      .substring(2, 10)}`;
+    localStorage.setItem("auto_import_url", episode.url);
+    window.location.assign(`/workspace/editor?id=${temporaryProjectId}`);
   };
 
   const handleAddToFavorites = () => {

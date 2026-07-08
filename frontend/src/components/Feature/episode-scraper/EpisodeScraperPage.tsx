@@ -58,14 +58,16 @@ export const EpisodeScraperPage: React.FC<EpisodeScraperPageProps> = ({
             const temporaryProjectId = `temp_${Date.now()}_${Math.random()
               .toString(36)
               .substring(2, 10)}`;
-            navigateTo(`/workspace/editor?id=${temporaryProjectId}&importUrl=${encodeURIComponent(episode.url)}`);
+            localStorage.setItem("auto_import_url", episode.url);
+            navigateTo(`/workspace/editor?id=${temporaryProjectId}`);
           }}
           onMultipleEpisodesSelect={(episodes) => {
             if (episodes.length > 0) {
               const temporaryProjectId = `temp_${Date.now()}_${Math.random()
                 .toString(36)
                 .substring(2, 10)}`;
-              navigateTo(`/workspace/editor?id=${temporaryProjectId}&importUrl=${encodeURIComponent(episodes[0].url)}`);
+              localStorage.setItem("auto_import_url", episodes[0].url);
+              navigateTo(`/workspace/editor?id=${temporaryProjectId}`);
             }
           }}
         />
