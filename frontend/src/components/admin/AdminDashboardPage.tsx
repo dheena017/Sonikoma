@@ -33,6 +33,7 @@ const AdminDashboardPage = React.memo(
     fetchWithInterceptor,
     addNotification,
     audioFeedback,
+    isTab = false,
   }: {
     user?: any;
     navigateTo: (path: string) => void;
@@ -40,6 +41,7 @@ const AdminDashboardPage = React.memo(
     fetchWithInterceptor: (url: string, options?: RequestInit) => Promise<Response>;
     addNotification?: any;
     audioFeedback?: any;
+    isTab?: boolean;
   }) => {
     // States
     const [stats, setStats] = useState<any>({});
@@ -483,9 +485,8 @@ const AdminDashboardPage = React.memo(
       );
     }
 
-    return (
-      <AdminLayout currentPath="/admin-dashboard" navigateTo={navigateTo} fetchWithInterceptor={fetchWithInterceptor}>
-        <div className="w-full space-y-6">
+    const dashboardContent = (
+      <div className="w-full space-y-6">
           
           {/* Header Banner */}
           {cpuLoad > 85 && (
@@ -852,7 +853,16 @@ const AdminDashboardPage = React.memo(
             </div>
 
           </div>
-        </div>
+      </div>
+    );
+
+    if (isTab) {
+      return dashboardContent;
+    }
+
+    return (
+      <AdminLayout currentPath="/admin" navigateTo={navigateTo} fetchWithInterceptor={fetchWithInterceptor}>
+        {dashboardContent}
       </AdminLayout>
     );
   }

@@ -6,7 +6,6 @@ export { AdminContentTab } from "./AdminContentTab.js";
 export { AdminExplorerTab } from "./AdminExplorerTab.js";
 export { AdminFinanceTab } from "./AdminFinanceTab.js";
 export { AdminHealthTab } from "./AdminHealthTab.js";
-export { AdminOverviewTab } from "./AdminOverviewTab.js";
 export { AdminScrapersTab } from "./AdminScrapersTab.js";
 export { AdminSettingsTab } from "./AdminSettingsTab.js";
 export { AdminUsageTab } from "./AdminUsageTab.js";

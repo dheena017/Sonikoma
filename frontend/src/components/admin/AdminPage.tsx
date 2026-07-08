@@ -10,13 +10,13 @@ import {
   AdminExplorerTab,
   AdminFinanceTab,
   AdminHealthTab,
-  AdminOverviewTab,
   AdminScrapersTab,
   AdminSettingsTab,
   AdminUsageTab,
   AdminUsersTab,
 } from "./Tabs";
 import AdminLayout from "./AdminLayout";
+import AdminDashboardPage from "./AdminDashboardPage";
 
 const AdminPage = React.memo(
   ({
@@ -162,12 +162,14 @@ const AdminPage = React.memo(
       switch (activeTab) {
         case "overview":
           return (
-            <AdminOverviewTab
-              stats={stats}
-              analytics={analytics}
+            <AdminDashboardPage
+              user={user}
+              navigateTo={navigateTo}
+              isAuthenticated={isAuthenticated}
               fetchWithInterceptor={fetchWithInterceptor}
               addNotification={addNotification}
-              setActiveTab={(tab) => navigateTo(`/admin/${tab}`)}
+              audioFeedback={audioFeedback}
+              isTab={true}
             />
           );
         case "announcements":
@@ -236,12 +238,14 @@ const AdminPage = React.memo(
           return <AdminConsoleTab />;
         default:
           return (
-            <AdminOverviewTab
-              stats={stats}
-              analytics={analytics}
+            <AdminDashboardPage
+              user={user}
+              navigateTo={navigateTo}
+              isAuthenticated={isAuthenticated}
               fetchWithInterceptor={fetchWithInterceptor}
               addNotification={addNotification}
-              setActiveTab={(tab) => navigateTo(`/admin/${tab}`)}
+              audioFeedback={audioFeedback}
+              isTab={true}
             />
           );
       }
