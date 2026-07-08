@@ -110,6 +110,17 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
       ],
     },
     {
+      group: "Creative Tools",
+      items: [
+        {
+          label: "Creative Suite",
+          icon: Sparkles,
+          active: false,
+          onClick: () => navigateTo("/creative-suite"),
+        },
+      ],
+    },
+    {
       group: "System & Tools",
       items: [
         {

@@ -92,16 +92,7 @@ const SidebarInner = ({
     return params.get("id") || params.get("project_id") || projectId;
   }, [currentPath, projectId]);
 
-  const isAiSuiteActive =
-    currentPath.startsWith("/ai-") || currentPath === "/panel-assistant";
-  const [aiSuiteExpanded, setAiSuiteExpanded] = useState(isAiSuiteActive);
 
-  // Automatically expand AI Suite if active route is an AI page
-  useEffect(() => {
-    if (isAiSuiteActive) {
-      setAiSuiteExpanded(true);
-    }
-  }, [isAiSuiteActive]);
 
   const navigateTo = async (path: string) => {
     if (routerNavigateTo) {
@@ -252,18 +243,8 @@ const SidebarInner = ({
     },
   ];
 
-  const creativeSuiteItems = [
-    { label: "Video Optimizer", path: "/ai-optimizer" },
-    { label: "Panel Assistant", path: "/panel-assistant" },
-    { label: "Character DB", path: "/ai-characters" },
-    { label: "Translation Studio", path: "/ai-translation" },
-    { label: "Sound Design Lab", path: "/ai-audio-lab" },
-    { label: "Thumbnail Studio", path: "/ai-thumbnails" },
-    { label: "Community Coach", path: "/ai-engagement" },
-    { label: "Voice Studio", path: "/ai-voice" },
-    { label: "CTR Predictor", path: "/ai-analytics" },
-    { label: "YouTube Publisher", path: "/youtube" },
-  ];
+  const isCreativeSuitePath =
+    currentPath === "/creative-suite" || currentPath.startsWith("/creative-suite/") || currentPath.startsWith("/ai-") || currentPath === "/panel-assistant" || currentPath === "/youtube";
 
   const sidebarContent = (
     <div className="flex h-full flex-col justify-between p-5 space-y-6">
@@ -368,79 +349,32 @@ const SidebarInner = ({
             </div>
           ))}
 
-          {/* Creative Suite Dropdown/Accordion */}
+          {/* Creative Suite Navigation */}
           <div className="space-y-2">
             <h4 className="text-[9px] font-bold text-neutral-500 uppercase tracking-widest font-mono pl-2">
               Creative Tools
             </h4>
             <div className="space-y-1">
               <button
-                onClick={() => setAiSuiteExpanded(!aiSuiteExpanded)}
+                onClick={() => navigateTo("/creative-suite")}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold font-mono transition-all duration-200 cursor-pointer text-left border ${
-                  isAiSuiteActive
-                    ? "text-purple-300 bg-purple-950/10 border-purple-900/40"
+                  isCreativeSuitePath
+                    ? "text-purple-300 bg-purple-950/10 border-purple-900/40 shadow-inner"
                     : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 border-transparent"
                 }`}
-                title="Creative Suite"
+                title="Open Creative Suite"
               >
                 <div className="flex items-center gap-2.5">
                   <Sparkles
                     className={`h-4 w-4 ${
-                      isAiSuiteActive
-                        ? "text-purple-400 animate-pulse"
-                        : "text-neutral-500"
+                      isCreativeSuitePath
+                        ? "text-purple-400"
+                        : "text-neutral-500 group-hover:text-neutral-300"
                     }`}
                   />
                   <span>Creative Suite</span>
                 </div>
-                {aiSuiteExpanded ? (
-                  <ChevronUp className="h-3.5 w-3.5 text-neutral-500" />
-                ) : (
-                  <ChevronDown className="h-3.5 w-3.5 text-neutral-500" />
-                )}
               </button>
-
-              {aiSuiteExpanded && (
-                <div className="pl-4 pr-1 py-1.5 space-y-1 bg-neutral-950/40 rounded-xl border border-neutral-900/40 mt-1">
-                  {creativeSuiteItems.map((subItem) => {
-                    const isSubActive = currentPath === subItem.path;
-                    const requiresPanels = [
-                      "/ai-optimizer",
-                      "/panel-assistant",
-                      "/ai-translation",
-                      "/ai-audio-lab",
-                      "/ai-voice",
-                    ].includes(subItem.path);
-                    const isLocked = requiresPanels && panels.length === 0;
-
-                    return (
-                      <button
-                        key={subItem.label}
-                        onClick={() => navigateTo(subItem.path)}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-[11px] font-mono hover:bg-neutral-900 hover:text-white transition-all cursor-pointer flex items-center justify-between ${
-                          isSubActive
-                            ? "text-purple-300 font-bold bg-neutral-900/60"
-                            : isLocked
-                            ? "text-neutral-500 hover:text-neutral-350"
-                            : "text-neutral-400"
-                        }`}
-                        title={
-                          isLocked
-                            ? "Requires timeline panels (Click to view details)"
-                            : undefined
-                        }
-                      >
-                        <span>✦ {subItem.label}</span>
-                        {isLocked && (
-                          <span className="text-[9px] text-neutral-600 bg-neutral-950 px-1 py-0.5 rounded border border-neutral-900 font-mono scale-90">
-                            🔒 LCK
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
             </div>
           </div>
         </div>
