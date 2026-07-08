@@ -29,6 +29,7 @@ interface LayoutEditorPageProps {
   notificationsMuted?: boolean;
   setNotificationsMuted?: (muted: boolean) => void;
   onNavigateToAll?: () => void;
+  projectId?: string | null;
 }
 
 const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
@@ -57,6 +58,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
   notificationsMuted,
   setNotificationsMuted,
   onNavigateToAll,
+  projectId,
 }) => {
   const isSidebarOpen = !isSidebarCollapsed && !isFocusMode;
 
@@ -90,6 +92,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
       {!isFocusMode &&
         (isSidebarCollapsed ? (
           <EditorMiniSidebar
+            projectId={projectId}
             isCollapsed={isSidebarCollapsed}
             setIsCollapsed={setIsSidebarCollapsed}
             currentSection={currentSection}
@@ -103,6 +106,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
           />
         ) : (
           <EditorSidebar
+            projectId={projectId}
             isCollapsed={isSidebarCollapsed}
             setIsCollapsed={setIsSidebarCollapsed}
             currentSection={currentSection}

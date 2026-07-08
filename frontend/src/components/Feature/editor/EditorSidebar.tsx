@@ -23,6 +23,7 @@ interface EditorSidebarProps {
   isBatchCropping: boolean;
   isCleaningBubbles: boolean;
   navigateTo?: (path: string) => void;
+  projectId?: string | null;
 }
 
 interface SidebarMenuItem {
@@ -49,6 +50,7 @@ const EditorSidebar = ({
   isBatchCropping,
   isCleaningBubbles,
   navigateTo,
+  projectId,
 }: EditorSidebarProps) => {
   const menuGroups: SidebarGroup[] = [
     {
@@ -254,7 +256,13 @@ const EditorSidebar = ({
       <div className="p-4 border-t border-white/[0.02] bg-gradient-to-t from-black/20 to-transparent">
         <button
           onClick={() => {
-            window.history.pushState({}, "", "/workspace");
+            const path = projectId ? `/workspace?id=${projectId}` : "/workspace";
+            if (navigateTo) {
+              navigateTo(path);
+            } else {
+              window.history.pushState({}, "", path);
+              window.dispatchEvent(new Event("popstate"));
+            }
             setIsCollapsed(true);
           }}
           className={`flex items-center justify-center rounded-2xl bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white transition-all active:scale-95 border border-white/10 cursor-pointer ${

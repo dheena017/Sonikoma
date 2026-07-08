@@ -23,6 +23,7 @@ interface EditorMiniSidebarProps {
   isBatchCropping: boolean;
   isCleaningBubbles: boolean;
   navigateTo?: (path: string) => void;
+  projectId?: string | null;
 }
 
 interface SidebarMenuItem {
@@ -43,6 +44,7 @@ const EditorMiniSidebarInner = ({
   isBatchCropping,
   isCleaningBubbles,
   navigateTo,
+  projectId,
 }: EditorMiniSidebarProps) => {
   const menuItems: SidebarMenuItem[] = [
     {
@@ -188,7 +190,15 @@ const EditorMiniSidebarInner = ({
       <div className="mt-auto pt-4 flex justify-center w-full pb-2 border-t border-neutral-800/60 relative">
         <div className="relative group w-full flex justify-center">
           <button
-            onClick={() => window.history.pushState({}, "", "/workspace")}
+            onClick={() => {
+              const path = projectId ? `/workspace?id=${projectId}` : "/workspace";
+              if (navigateTo) {
+                navigateTo(path);
+              } else {
+                window.history.pushState({}, "", path);
+                window.dispatchEvent(new Event("popstate"));
+              }
+            }}
             className="p-3 rounded-2xl bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 text-white transition-all duration-300 shadow-[0_4px_14px_rgba(168,85,247,0.4)] hover:shadow-[0_6px_20px_rgba(168,85,247,0.6)] active:scale-90 border border-purple-400/30 outline-none focus:outline-none"
           >
             <ArrowLeft className="w-[18px] h-[18px] shrink-0" strokeWidth={2.5} />

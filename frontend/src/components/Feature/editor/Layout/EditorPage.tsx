@@ -231,6 +231,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
 
   return (
     <LayoutEditorPage
+      projectId={projectId}
       isSidebarCollapsed={isSidebarCollapsed}
       setIsSidebarCollapsed={setIsSidebarCollapsed}
       currentSection={currentSection}
