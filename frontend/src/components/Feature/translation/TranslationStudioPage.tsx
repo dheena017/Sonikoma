@@ -88,36 +88,7 @@ const TranslationStudioPage = React.memo(
 
     return (
       <div className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1.5">
-              <span
-                className="hover:text-purple-400 cursor-pointer"
-                onClick={onNavigateHome}
-              >
-                Dashboard
-              </span>
-              <span>&gt;</span>
-              <span className="text-purple-400">Translation Studio</span>
-            </div>
-            <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
-              <div className="icon-pill icon-pill--purple">
-                <Globe className="h-5 w-5" />
-              </div>
-              Translation Studio & Script Editor
-            </h2>
-            <p className="text-xs text-neutral-400 font-mono mt-0.5">
-              Manage translations, sanitize dialogues, and scrub scripts in bulk
-            </p>
-          </div>
-          <button
-            onClick={onNavigateHome}
-            className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg shadow-purple-950/30"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Dashboard
-          </button>
-        </div>
+
 
         {/* Bulk Scrubber */}
         <BulkScrubberControl
