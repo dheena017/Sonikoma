@@ -112,10 +112,7 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
 
   const isActive = (path: string) => {
     if (path === "/admin") {
-      return currentPath === "/admin" || currentPath === "/admin/";
-    }
-    if (path === "/admin-dashboard") {
-      return currentPath === "/admin-dashboard";
+      return currentPath === "/admin" || currentPath === "/admin/" || currentPath === "/admin-dashboard";
     }
     return currentPath.startsWith(path);
   };
