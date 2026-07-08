@@ -178,6 +178,9 @@ export function useAppRouter({
         if (!isAuthenticated) {
           const isProtectedRoute =
             path === "/dashboard" ||
+            path === "/creative-suite" ||
+            path === "/creative-suite/" ||
+            path === "/creative-suite-dashboard" ||
             path === "/workspace" ||
             path === "/settings" ||
             path === "/logs" ||
@@ -244,6 +247,9 @@ export function useAppRouter({
 
       if (
         path === "/settings" ||
+        path === "/creative-suite" ||
+        path === "/creative-suite/" ||
+        path === "/creative-suite-dashboard" ||
         path === "/logs" ||
         path === "/status" ||
         path === "/ai-models" ||
