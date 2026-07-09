@@ -1,5 +1,4 @@
 import React from "react";
-import { useSearchParams } from "react-router-dom";
 import * as api from "../../api/index.js";
 import {
   User,
@@ -46,37 +45,50 @@ export default function ProfilePage({
   themeMode,
   toggleThemeMode,
 }: ProfilePageProps) {
-  const [searchParams, setSearchParams] = useSearchParams();
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
   const [showConfirmModal, setShowConfirmModal] = React.useState(false);
   const [tempAvatarUrl, setTempAvatarUrl] = React.useState<string | null>(null);
 
-  // Navigation tabs - initialize from URL query parameter
+  // Navigation tabs - initialize from URL query parameter using browser location API
   const validTabs = ["account", "security", "billing", "api", "analytics", "preferences", "stats"] as const;
   type TabType = (typeof validTabs)[number];
   
-  const tabFromUrl = (searchParams.get("tab") || "analytics") as TabType;
-  const isValidTab = validTabs.includes(tabFromUrl);
-  
-  const [activeTab, setActiveTabState] = React.useState<TabType>(
-    isValidTab ? tabFromUrl : "analytics"
-  );
+  // Helper function to get tab from URL
+  const getTabFromUrl = (): TabType => {
+    const params = new URLSearchParams(window.location.search);
+    const tabFromUrl = (params.get("tab") || "analytics") as TabType;
+    return validTabs.includes(tabFromUrl) ? tabFromUrl : "analytics";
+  };
+
+  // Helper function to update URL with new tab
+  const updateUrlWithTab = (tab: TabType) => {
+    const params = new URLSearchParams(window.location.search);
+    params.set("tab", tab);
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState({ tab }, "", newUrl);
+  };
+
+  const [activeTab, setActiveTabState] = React.useState<TabType>(getTabFromUrl());
 
   // Wrapper function that updates both state and URL
   const setActiveTab = (tab: TabType) => {
     setActiveTabState(tab);
-    setSearchParams({ tab }, { replace: true });
+    updateUrlWithTab(tab);
   };
 
   // Sync activeTab with URL on mount and when URL changes
   React.useEffect(() => {
-    const tabFromUrl = (searchParams.get("tab") || "analytics") as TabType;
-    const isValidTab = validTabs.includes(tabFromUrl);
-    if (isValidTab && tabFromUrl !== activeTab) {
-      setActiveTabState(tabFromUrl);
-    }
-  }, [searchParams]);
+    const handlePopState = () => {
+      const tabFromUrl = getTabFromUrl();
+      if (tabFromUrl !== activeTab) {
+        setActiveTabState(tabFromUrl);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [activeTab]);
 
   // Local state for profile values
   const [profileUser, setProfileUser] = React.useState({
