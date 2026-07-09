@@ -105,7 +105,6 @@ def init_db() -> None:
     global _db_initialized
     if _db_initialized:
         return
-    _db_initialized = True
 
     if _is_postgres:
         logger.info(f"[Database] Connecting to PostgreSQL (Supabase)...")
@@ -213,11 +212,15 @@ def init_db() -> None:
         finally:
             conn.close()
         logger.info("[Database] PostgreSQL ready [OK]")
+        _db_initialized = True
         return
 
     logger.info(f"[Database] Opening local SQLite database at: {DB_PATH}")
     os.makedirs(DB_DIR, exist_ok=True)
-    conn = get_db_connection()
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    conn.execute('PRAGMA journal_mode = WAL')
+    conn.execute('PRAGMA foreign_keys = ON')
     try:
         cursor = conn.cursor()
 
@@ -468,9 +471,11 @@ def init_db() -> None:
         logger.info("[Database] Migration: verified credit_transactions table.")
 
         conn.commit()
+        _db_initialized = True
 
     except sqlite3.Error as e:
         logger.error(f"[Database] Error checking or applying schema: {e}")
+        raise
     finally:
         conn.close()
     logger.info("[Database] SQLite database ready [OK]")
