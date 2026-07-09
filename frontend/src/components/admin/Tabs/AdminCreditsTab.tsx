@@ -31,6 +31,8 @@ export function AdminCreditsTab({
   const [userSearchQuery, setUserSearchQuery] = useState("");
   const [ledgerSearchQuery, setLedgerSearchQuery] = useState("");
   const [ledgerFilterType, setLedgerFilterType] = useState("all"); // 'all' | 'additions' | 'deductions'
+  const [ledgerStartDate, setLedgerStartDate] = useState("");
+  const [ledgerEndDate, setLedgerEndDate] = useState("");
   
   // Grant Form state
   const [selectedUserId, setSelectedUserId] = useState("");
@@ -132,6 +134,8 @@ export function AdminCreditsTab({
   const resetLedgerFilters = () => {
     setLedgerSearchQuery("");
     setLedgerFilterType("all");
+    setLedgerStartDate("");
+    setLedgerEndDate("");
     setShowSelectedUserOnly(false);
   };
 
@@ -210,7 +214,14 @@ export function AdminCreditsTab({
       !selectedUserId ||
       tx.user_id === selectedUserId;
 
-    return matchesSearch && matchesType && matchesSelectedUser;
+    const transactionTime = new Date(tx.created_at).getTime();
+    const startTime = ledgerStartDate ? new Date(ledgerStartDate).getTime() : null;
+    const endTime = ledgerEndDate ? new Date(ledgerEndDate).getTime() + 24 * 60 * 60 * 1000 - 1 : null;
+    const matchesDateRange =
+      (!startTime || transactionTime >= startTime) &&
+      (!endTime || transactionTime <= endTime);
+
+    return matchesSearch && matchesType && matchesSelectedUser && matchesDateRange;
   });
 
   const sortedTransactions = React.useMemo(() => {
@@ -408,6 +419,20 @@ export function AdminCreditsTab({
                   <option value="additions">Additions</option>
                   <option value="deductions">Deductions</option>
                 </select>
+
+                <input
+                  type="date"
+                  value={ledgerStartDate}
+                  onChange={(e) => setLedgerStartDate(e.target.value)}
+                  className="bg-[#111115] border border-neutral-800 text-[11px] text-neutral-200 rounded-lg px-2 py-1 focus:outline-none focus:border-purple-500/50"
+                />
+
+                <input
+                  type="date"
+                  value={ledgerEndDate}
+                  onChange={(e) => setLedgerEndDate(e.target.value)}
+                  className="bg-[#111115] border border-neutral-800 text-[11px] text-neutral-200 rounded-lg px-2 py-1 focus:outline-none focus:border-purple-500/50"
+                />
 
                 <label className="inline-flex items-center gap-2 text-[11px] text-neutral-300 px-2 py-1 rounded-lg border border-neutral-800 bg-[#111115] cursor-pointer">
                   <input
