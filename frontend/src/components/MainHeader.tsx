@@ -1226,15 +1226,23 @@ const HeaderInner = ({
           <button
             onClick={() => navigateTo("/profile?tab=billing")}
             title={`${credits} AI credits remaining — click to top up`}
-            className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-[11px] font-bold transition-all cursor-pointer ${
-              credits < 50
+            className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-[11px] font-bold transition-all cursor-pointer relative ${
+              credits < 10
+                ? "bg-red-500/10 border-red-500/50 text-red-400 hover:bg-red-500/20 animate-pulse"
+                : credits < 50
                 ? "bg-amber-500/10 border-amber-500/40 text-amber-400 hover:bg-amber-500/20"
                 : "bg-neutral-900 border-neutral-850 text-purple-400 hover:border-purple-500/50 hover:bg-neutral-850"
             }`}
           >
+            {credits < 10 && (
+              <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+              </span>
+            )}
             <Zap
               className={`w-3.5 h-3.5 ${
-                credits < 50 ? "text-amber-400" : "text-purple-400"
+                credits < 10 ? "text-red-400" : credits < 50 ? "text-amber-400" : "text-purple-400"
               }`}
             />
             <span>{credits.toLocaleString()}</span>

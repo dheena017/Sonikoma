@@ -1002,12 +1002,18 @@ async def get_credits(current_user: dict = Depends(get_current_user)):
     return {"success": True, "credits": balance}
 
 @router.get("/transactions")
-async def get_transactions(current_user: dict = Depends(get_current_user)):
+async def get_transactions(
+    limit: int = 100,
+    current_user: dict = Depends(get_current_user)
+):
     """
-    Return the transaction ledger history list for the authenticated user.
+    Return up to `limit` (default 100, max 500) credit transactions for the
+    authenticated user, newest first.  Each transaction includes a
+    `balance_after` field showing the running balance after that event.
     """
-    txs = get_credit_transactions(current_user["user_id"])
-    return {"success": True, "transactions": txs}
+    limit = min(max(1, limit), 500)
+    txs = get_credit_transactions(current_user["user_id"], limit=limit)
+    return {"success": True, "transactions": txs, "count": len(txs)}
 
 
 # --- Ultimate Admin Features -----------------------------------------------

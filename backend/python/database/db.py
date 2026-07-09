@@ -616,19 +616,32 @@ def record_credit_transaction(user_id: str, amount: int, feature_name: str) -> i
     """
     Record a credit change (positive = addition, negative = deduction).
     Atomically:
-      1. Validates sufficient balance for deductions.
-      2. Updates both `credits` and `credit_balance` on the users row.
-      3. Inserts a row in the credit_transactions ledger.
+      1. Locks the row to prevent race conditions.
+      2. Validates sufficient balance for deductions (admins bypass validation).
+      3. Updates both `credits` and `credit_balance` on the users row.
+      4. Inserts a row in the credit_transactions ledger.
     Returns the new balance.
     Raises ValueError when a deduction exceeds the current balance.
     """
     conn = get_db_connection()
     try:
-        row = conn.execute(
-            'SELECT credits, credit_balance FROM users WHERE id = ?', (user_id,)
-        ).fetchone()
+        # SQLite transaction lock
+        if not _is_postgres:
+            try:
+                conn.execute("BEGIN IMMEDIATE")
+            except Exception:
+                pass
+
+        # Locking query for PostgreSQL / standard SELECT for SQLite
+        query = 'SELECT credits, credit_balance, creator_role FROM users WHERE id = ?'
+        if _is_postgres:
+            query += ' FOR UPDATE'
+
+        row = conn.execute(query, (user_id,)).fetchone()
         if row is None:
             raise ValueError("User not found")
+
+        is_admin = row['creator_role'] == 'admin'
 
         try:
             current = row['credit_balance'] if row['credit_balance'] is not None else row['credits']
@@ -636,8 +649,8 @@ def record_credit_transaction(user_id: str, amount: int, feature_name: str) -> i
             current = row['credits']
         current = current if current is not None else 840
 
-        # Validate deductions
-        if amount < 0 and current < abs(amount):
+        # Validate deductions (admins bypass checking)
+        if amount < 0 and current < abs(amount) and not is_admin:
             raise ValueError(
                 f"Insufficient credits: need {abs(amount)}, have {current}"
             )
@@ -670,6 +683,7 @@ def record_credit_transaction(user_id: str, amount: int, feature_name: str) -> i
         return new_balance
     finally:
         conn.close()
+
 
 
 # ─── Backward-compatible aliases ──────────────────────────────────────────────
@@ -1152,11 +1166,29 @@ def get_user_invoices(user_id: str) -> List[Dict[str, Any]]:
     finally:
         conn.close()
 
-def get_credit_transactions(user_id: str) -> List[Dict[str, Any]]:
+def get_credit_transactions(user_id: str, limit: int = 100) -> List[Dict[str, Any]]:
+    """
+    Return up to `limit` credit transactions for user, newest first.
+    Each row is enriched with a `balance_after` field representing the
+    running account balance immediately after that transaction was applied.
+    """
     conn = get_db_connection()
     try:
-        rows = conn.execute("SELECT * FROM credit_transactions WHERE user_id = ? ORDER BY created_at DESC", (user_id,)).fetchall()
-        return [dict(r) for r in rows]
+        rows = conn.execute(
+            "SELECT * FROM credit_transactions WHERE user_id = ? ORDER BY created_at DESC LIMIT ?",
+            (user_id, limit)
+        ).fetchall()
+        txs = [dict(r) for r in rows]
+
+        # Compute running balance_after by replaying transactions oldest→newest.
+        # current balance is the starting point; we subtract amounts in reverse order.
+        current_balance = get_available_credits(user_id)
+        # txs is sorted newest→oldest; iterate and build balance_after for each
+        for tx in txs:
+            tx["balance_after"] = current_balance
+            current_balance -= tx["amount"]   # go backwards in time
+
+        return txs
     finally:
         conn.close()
 

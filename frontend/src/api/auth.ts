@@ -224,13 +224,16 @@ export interface CreditTransaction {
   amount: number;
   feature_name: string;
   created_at: string;
+  /** Running balance immediately after this transaction was applied (server-computed) */
+  balance_after?: number;
 }
 
 export const getTransactions = async (
-  fetchWithInterceptor: any
+  fetchWithInterceptor: any,
+  limit = 100
 ): Promise<CreditTransaction[]> => {
   try {
-    const res = await fetchWithInterceptor("/api/auth/transactions");
+    const res = await fetchWithInterceptor(`/api/auth/transactions?limit=${limit}`);
     const data = await res.json();
     if (data.success && Array.isArray(data.transactions)) {
       return data.transactions;

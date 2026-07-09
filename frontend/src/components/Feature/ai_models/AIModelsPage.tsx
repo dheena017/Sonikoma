@@ -1204,6 +1204,7 @@ ${playgroundPrompt}
           <div className="bg-neutral-950/40 border border-neutral-900 rounded-3xl p-6 relative overflow-hidden">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-24 bg-purple-500/5 blur-[85px] rounded-full pointer-events-none" />
             <div className="space-y-4">
+              {/* Header */}
               <div className="flex items-center justify-between border-b border-neutral-900 pb-4">
                 <div className="flex items-center gap-3">
                   <div className="bg-purple-500/10 border border-purple-500/20 p-2.5 rounded-2xl">
@@ -1218,76 +1219,158 @@ ${playgroundPrompt}
                   onClick={fetchCreditTransactions}
                   disabled={loadingCreditTxs}
                   className="p-2 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-neutral-700 hover:text-white transition-all cursor-pointer disabled:opacity-50"
-                  title="Refresh"
+                  title="Refresh transaction history"
                 >
-                  <Brain className={`h-4 w-4 text-neutral-450 ${loadingCreditTxs ? "animate-spin text-purple-400" : ""}`} />
+                  <Award className={`h-4 w-4 text-neutral-450 ${loadingCreditTxs ? "animate-spin text-purple-400" : ""}`} />
                 </button>
               </div>
 
               {loadingCreditTxs ? (
                 <div className="flex flex-col items-center justify-center py-12 text-neutral-500 font-mono text-xs">
-                  <Brain className="h-8 w-8 animate-spin mb-3 text-purple-400" />
+                  <Zap className="h-8 w-8 animate-spin mb-3 text-purple-400" />
                   <span>Loading transaction history...</span>
                 </div>
               ) : creditTransactions.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 text-neutral-600 font-mono text-xs text-center">
-                  <Zap className="h-12 w-12 mb-3 text-neutral-850 stroke-[1.5]" />
+                  <Zap className="h-12 w-12 mb-3 text-neutral-800 stroke-[1.5]" />
                   <p className="font-bold text-neutral-500">No credit transactions yet.</p>
                   <p className="text-neutral-600 mt-1">Credits spent on AI features will appear here.</p>
                 </div>
-              ) : (
-                <div className="space-y-4 font-mono text-xs">
-                  {/* Summary row */}
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="bg-neutral-900/30 border border-neutral-900 p-4 rounded-2xl">
-                      <p className="text-[9px] uppercase text-neutral-500 font-bold mb-1">Total Spent</p>
-                      <p className="text-2xl font-black text-red-400">
-                        {Math.abs(creditTransactions.filter(t => t.amount < 0).reduce((s, t) => s + t.amount, 0))}
-                      </p>
+              ) : (() => {
+                const totalSpent = Math.abs(creditTransactions.filter(t => t.amount < 0).reduce((s, t) => s + t.amount, 0));
+                const totalEarned = creditTransactions.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0);
+                const netChange = totalEarned - totalSpent;
+                // Lowest balance_after across all transactions
+                const minBalance = creditTransactions
+                  .map(t => t.balance_after ?? Infinity)
+                  .filter(b => b !== Infinity)
+                  .reduce((min, b) => Math.min(min, b), Infinity);
+                const currentBalance = creditTransactions[0]?.balance_after ?? null;
+                const isLowBalance = currentBalance !== null && currentBalance < 20;
+
+                return (
+                  <div className="space-y-4 font-mono text-xs">
+                    {/* Low-balance warning banner */}
+                    {isLowBalance && (
+                      <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl px-4 py-3">
+                        <Zap className="h-4 w-4 text-amber-400 shrink-0 fill-amber-400/20" />
+                        <div>
+                          <p className="text-amber-300 font-bold text-[11px]">Low Credit Balance — {currentBalance} credits remaining</p>
+                          <p className="text-amber-400/70 text-[10px] mt-0.5">
+                            Video export requires 20 credits. Visit <span className="underline cursor-pointer">Billing</span> to top up.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Summary Cards */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      <div className="bg-neutral-900/30 border border-neutral-900 p-4 rounded-2xl">
+                        <p className="text-[9px] uppercase text-neutral-500 font-bold mb-1">Total Spent</p>
+                        <p className="text-2xl font-black text-red-400">{totalSpent.toLocaleString()}</p>
+                      </div>
+                      <div className="bg-neutral-900/30 border border-neutral-900 p-4 rounded-2xl">
+                        <p className="text-[9px] uppercase text-neutral-500 font-bold mb-1">Total Earned</p>
+                        <p className="text-2xl font-black text-emerald-400">{totalEarned.toLocaleString()}</p>
+                      </div>
+                      <div className={`border p-4 rounded-2xl ${netChange >= 0 ? "bg-emerald-950/20 border-emerald-900/40" : "bg-red-950/20 border-red-900/40"}`}>
+                        <p className="text-[9px] uppercase text-neutral-500 font-bold mb-1">Net Change</p>
+                        <p className={`text-2xl font-black ${netChange >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                          {netChange >= 0 ? "+" : ""}{netChange.toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="bg-neutral-900/30 border border-neutral-900 p-4 rounded-2xl">
+                        <p className="text-[9px] uppercase text-neutral-500 font-bold mb-1">Transactions</p>
+                        <p className="text-2xl font-black text-purple-400">{creditTransactions.length}</p>
+                        {minBalance !== Infinity && (
+                          <p className="text-[8px] text-neutral-600 mt-1">
+                            Low: <span className="text-amber-500 font-bold">{minBalance}</span>
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <div className="bg-neutral-900/30 border border-neutral-900 p-4 rounded-2xl">
-                      <p className="text-[9px] uppercase text-neutral-500 font-bold mb-1">Total Earned</p>
-                      <p className="text-2xl font-black text-emerald-400">
-                        {creditTransactions.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0)}
-                      </p>
-                    </div>
-                    <div className="bg-neutral-900/30 border border-neutral-900 p-4 rounded-2xl">
-                      <p className="text-[9px] uppercase text-neutral-500 font-bold mb-1">Transactions</p>
-                      <p className="text-2xl font-black text-purple-400">{creditTransactions.length}</p>
-                    </div>
-                  </div>
-                  {/* Table */}
-                  <div className="border border-neutral-900 rounded-2xl overflow-hidden max-h-[300px] overflow-y-auto scrollbar-thin">
-                    <table className="w-full text-left text-[10px] border-collapse">
-                      <thead>
-                        <tr className="bg-neutral-900 border-b border-neutral-850 text-neutral-500 font-bold uppercase text-[8px] tracking-wider sticky top-0 z-[5]">
-                          <th className="p-3">Date</th>
-                          <th className="p-3">Feature</th>
-                          <th className="p-3 text-right">Amount</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {creditTransactions.map((tx) => (
-                          <tr key={tx.id} className="border-b border-neutral-900/60 hover:bg-neutral-900/10 transition-all">
-                            <td className="p-3 text-neutral-500 whitespace-nowrap">
-                              {new Date(tx.created_at).toLocaleDateString()}{" "}
-                              {new Date(tx.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                            </td>
-                            <td className="p-3 text-white font-bold capitalize">
-                              {tx.feature_name.replace(/_/g, " ")}
-                            </td>
-                            <td className={`p-3 text-right font-black ${
-                              tx.amount < 0 ? "text-red-400" : "text-emerald-400"
-                            }`}>
-                              {tx.amount > 0 ? "+" : ""}{tx.amount}
-                            </td>
+
+                    {/* Transaction Table */}
+                    <div className="border border-neutral-900 rounded-2xl overflow-hidden max-h-[340px] overflow-y-auto scrollbar-thin">
+                      <table className="w-full text-left text-[10px] border-collapse">
+                        <thead>
+                          <tr className="bg-neutral-900 border-b border-neutral-800 text-neutral-500 font-bold uppercase text-[8px] tracking-wider sticky top-0 z-[5]">
+                            <th className="p-3 whitespace-nowrap">Date & Time</th>
+                            <th className="p-3">Feature</th>
+                            <th className="p-3 text-right">Amount</th>
+                            <th className="p-3 text-right whitespace-nowrap">Balance After</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {creditTransactions.map((tx) => {
+                            const balAfter = tx.balance_after;
+                            const isLow = balAfter !== undefined && balAfter < 20;
+                            const isCritical = balAfter !== undefined && balAfter < 5;
+                            return (
+                              <tr key={tx.id} className="border-b border-neutral-900/60 hover:bg-neutral-900/20 transition-all">
+                                <td className="p-3 text-neutral-500 whitespace-nowrap">
+                                  {new Date(tx.created_at).toLocaleDateString()}{" "}
+                                  {new Date(tx.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                </td>
+                                <td className="p-3 text-white font-bold capitalize max-w-[200px]">
+                                  {(() => {
+                                    const name = tx.feature_name;
+                                    if (name.startsWith("admin_grant")) {
+                                      const reason = name.replace("admin_grant:", "").replace("admin_grant", "").trim();
+                                      return (
+                                        <div className="flex flex-col">
+                                          <span className="text-purple-400 font-extrabold">Admin Adjustment</span>
+                                          {reason && <span className="text-[9px] text-neutral-500 font-normal normal-case mt-0.5">{reason}</span>}
+                                        </div>
+                                      );
+                                    }
+                                    const mappings: Record<string, string> = {
+                                      daily_claim: "Daily Streak Reward",
+                                      points_redemption: "Points Exchange",
+                                      purchase: "Credit Package Purchase",
+                                      deduction: "Feature Usage",
+                                      analyze_image: "Single Panel Narration",
+                                      analyze_sequence: "Sequence Context Analysis",
+                                      ai_smart_crop: "Smart Panel Detection",
+                                      ai_smart_crop_batch: "Batch Panel Auto-Slicing",
+                                      sd_generate: "AI Image Generation",
+                                      sd_inpaint: "AI Mask Inpainting",
+                                      sd_upscale: "AI Super Resolution",
+                                      sd_style_transfer: "AI Style Transfer",
+                                      sd_batch_generate: "Batch Image Generation",
+                                      video_render: "Video Render Compilation",
+                                      sfx_mix: "SFX Mix Suggestion",
+                                    };
+                                    return <span className="truncate block">{mappings[name] || name.replace(/_/g, " ")}</span>;
+                                  })()}
+                                </td>
+                                <td className={`p-3 text-right font-black ${tx.amount < 0 ? "text-red-400" : "text-emerald-400"}`}>
+                                  {tx.amount > 0 ? "+" : ""}{tx.amount}
+                                </td>
+                                <td className="p-3 text-right">
+                                  {balAfter !== undefined ? (
+                                    <span className={`inline-block px-2 py-0.5 rounded-lg text-[9px] font-black border ${
+                                      isCritical
+                                        ? "bg-red-950/40 border-red-800/50 text-red-400"
+                                        : isLow
+                                        ? "bg-amber-950/40 border-amber-800/50 text-amber-400"
+                                        : "bg-neutral-900 border-neutral-800 text-neutral-300"
+                                    }`}>
+                                      {balAfter.toLocaleString()}
+                                    </span>
+                                  ) : (
+                                    <span className="text-neutral-700">—</span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
           </div>
 
