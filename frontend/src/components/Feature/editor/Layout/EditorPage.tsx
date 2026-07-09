@@ -6,6 +6,8 @@ import OutputMetadataPanel from "../../video/OutputMetadataPanel";
 import PipelineStatusCard from "../../pipeline/ProcessBar.js";
 import LayoutEditorPage from "../LayoutEditorPage.js";
 import { useBackendHealth } from "../../../../hooks/useBackendHealth.js";
+import { getUserCredits } from "../../../../api/auth";
+
 
 interface EditorPageProps {
   appLogic: any;
@@ -154,6 +156,27 @@ const EditorPage: React.FC<EditorPageProps> = ({
   );
 
   const [isSaving, setIsSaving] = React.useState(false);
+  const [userCredits, setUserCredits] = React.useState<number | null>(
+    appLogic.user?.credit_balance ?? appLogic.user?.credits ?? null
+  );
+
+  React.useEffect(() => {
+    let active = true;
+    const fetchCredits = async () => {
+      try {
+        const balance = await getUserCredits(fetchWithInterceptor);
+        if (active && balance !== null) {
+          setUserCredits(balance);
+        }
+      } catch (e) {
+        console.error("Failed to fetch user credits in EditorPage:", e);
+      }
+    };
+    fetchCredits();
+    return () => {
+      active = false;
+    };
+  }, [fetchWithInterceptor]);
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
@@ -161,6 +184,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
     }, 2000);
     return () => clearTimeout(timer);
   }, []);
+
 
   const handleSave = () => {
     onRequestProjectConfirmation();
@@ -190,44 +214,50 @@ const EditorPage: React.FC<EditorPageProps> = ({
     </div>
   );
 
-  const FinalProductionPanel: React.FC = () => (
-    <div className="space-y-6">
-      <div className="bg-[#111115] border border-white/5 rounded-3xl p-6 flex flex-col gap-4 relative overflow-hidden shadow-2xl">
-        {isRendering && (
-          <div
-            className="absolute left-0 top-0 bottom-0 bg-purple-600/20 transition-all duration-300"
-            style={{ width: `${renderProgress}%` }}
-          />
-        )}
-        <div className="relative z-10 space-y-1">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider">
-            Final Production
-          </h3>
-          <p className="text-[10px] text-neutral-500 font-mono">
-            Compile all storyboard panels into a high-res video.
-          </p>
-        </div>
-        <button
-          onClick={handleRenderFinalVideo}
-          disabled={isRendering}
-          className={`relative z-10 w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg transition-all flex items-center justify-center gap-3 ${
-            isRendering
-              ? "bg-purple-900/50 text-purple-200 cursor-not-allowed border border-purple-500/30"
-              : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border border-white/10"
-          }`}
-        >
-          {isRendering ? (
-            <>
-              <div className="h-4 w-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-              Rendering {Math.round(renderProgress)}%
-            </>
-          ) : (
-            <>🎬 Export Master Video</>
+  const FinalProductionPanel: React.FC = () => {
+    const hasEnoughCredits = userCredits === null || userCredits >= 20;
+
+    return (
+      <div className="space-y-6">
+        <div className="bg-[#111115] border border-white/5 rounded-3xl p-6 flex flex-col gap-4 relative overflow-hidden shadow-2xl">
+          {isRendering && (
+            <div
+              className="absolute left-0 top-0 bottom-0 bg-purple-600/20 transition-all duration-300"
+              style={{ width: `${renderProgress}%` }}
+            />
           )}
-        </button>
+          <div className="relative z-10 space-y-1">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+              Final Production
+            </h3>
+            <p className="text-[10px] text-neutral-500 font-mono">
+              Compile all storyboard panels into a high-res video. <span className="text-purple-400 font-bold">(Cost: 20 Credits)</span>
+            </p>
+          </div>
+          <button
+            onClick={handleRenderFinalVideo}
+            disabled={isRendering || !hasEnoughCredits}
+            className={`relative z-10 w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg transition-all flex items-center justify-center gap-3 ${
+              isRendering || !hasEnoughCredits
+                ? "bg-neutral-900/50 text-neutral-500 cursor-not-allowed border border-neutral-800"
+                : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border border-white/10"
+            }`}
+          >
+            {isRendering ? (
+              <>
+                <div className="h-4 w-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                Rendering {Math.round(renderProgress)}%
+              </>
+            ) : !hasEnoughCredits ? (
+              <>⚠️ Insufficient Credits (20 required)</>
+            ) : (
+              <>🎬 Export Master Video</>
+            )}
+          </button>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <LayoutEditorPage
