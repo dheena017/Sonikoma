@@ -1,4 +1,5 @@
 import React from "react";
+import { useSearchParams } from "react-router-dom";
 import * as api from "../../api/index.js";
 import {
   User,
@@ -45,57 +46,71 @@ export default function ProfilePage({
   themeMode,
   toggleThemeMode,
 }: ProfilePageProps) {
+  const [searchParams, setSearchParams] = useSearchParams();
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
   const [showConfirmModal, setShowConfirmModal] = React.useState(false);
   const [tempAvatarUrl, setTempAvatarUrl] = React.useState<string | null>(null);
 
-  // Navigation tabs
-  const [activeTab, setActiveTab] = React.useState<
-    | "account"
-    | "security"
-    | "billing"
-    | "api"
-    | "analytics"
-    | "preferences"
-    | "stats"
-  >("analytics");
+  // Navigation tabs - initialize from URL query parameter
+  const validTabs = ["account", "security", "billing", "api", "analytics", "preferences", "stats"] as const;
+  type TabType = (typeof validTabs)[number];
+  
+  const tabFromUrl = (searchParams.get("tab") || "analytics") as TabType;
+  const isValidTab = validTabs.includes(tabFromUrl);
+  
+  const [activeTab, setActiveTabState] = React.useState<TabType>(
+    isValidTab ? tabFromUrl : "analytics"
+  );
+
+  // Wrapper function that updates both state and URL
+  const setActiveTab = (tab: TabType) => {
+    setActiveTabState(tab);
+    setSearchParams({ tab }, { replace: true });
+  };
+
+  // Sync activeTab with URL on mount and when URL changes
+  React.useEffect(() => {
+    const tabFromUrl = (searchParams.get("tab") || "analytics") as TabType;
+    const isValidTab = validTabs.includes(tabFromUrl);
+    if (isValidTab && tabFromUrl !== activeTab) {
+      setActiveTabState(tabFromUrl);
+    }
+  }, [searchParams]);
 
   // Local state for profile values
   const [profileUser, setProfileUser] = React.useState({
-    fullName: user?.full_name || "Sonikoma Creator",
-    email: user?.email || "creator@sonikoma.com",
+    fullName: user?.full_name || "",
+    email: user?.email || "",
     avatarUrl: user?.avatar_url || "",
-    role: user?.creator_role || "creator",
-    bio:
-      user?.bio ||
-      "Comic visual director and anime fan editing high-quality cinematic stories.",
-    newsletter: user?.newsletter !== undefined ? user.newsletter : true,
+    role: user?.creator_role || "",
+    bio: user?.bio || "",
+    newsletter: user?.newsletter !== undefined ? user.newsletter : false,
     language: user?.language || "en",
   });
 
   const [saveSuccess, setSaveSuccess] = React.useState(false);
 
-  // Preferences State
+  // Preferences State - Initialize empty, load from API
   const [notificationPrefs, setNotificationPrefs] = React.useState({
-    newsletter: true,
-    productUpdates: true,
-    securityAlerts: true,
-    billingReceipts: true,
+    newsletter: false,
+    productUpdates: false,
+    securityAlerts: false,
+    billingReceipts: false,
     pushNotifications: false,
   });
   const [workspacePrefs, setWorkspacePrefs] = React.useState({
-    hardwareAcceleration: true,
+    hardwareAcceleration: false,
     compactMode: false,
     autoSaveInterval: "5m",
   });
   const [privacyPrefs, setPrivacyPrefs] = React.useState({
-    analyticsTelemetry: true,
+    analyticsTelemetry: false,
     publicProfile: false,
   });
   const [aiPrefs, setAiPrefs] = React.useState({
-    defaultModel: "gemini-1.5-flash",
-    defaultVoice: "google-tts-en-US-Standard-D",
+    defaultModel: "",
+    defaultVoice: "",
     autoCropSensitivity: "medium",
   });
   const [exportPrefs, setExportPrefs] = React.useState({
@@ -103,11 +118,11 @@ export default function ProfilePage({
     framerate: "30fps",
     audioFormat: "mp3",
   });
-  const [themePrefs, setThemePrefs] = React.useState("dark");
-  const [accentColor, setAccentColor] = React.useState("purple");
+  const [themePrefs, setThemePrefs] = React.useState("");
+  const [accentColor, setAccentColor] = React.useState("");
   const [fontScale, setFontScale] = React.useState("medium");
   const [reduceMotion, setReduceMotion] = React.useState(false);
-  const [cornerRadius, setCornerRadius] = React.useState("rounded");
+  const [cornerRadius, setCornerRadius] = React.useState("");
   const [prefsSaveSuccess, setPrefsSaveSuccess] = React.useState(false);
 
   // Password Update Fields
@@ -123,13 +138,11 @@ export default function ProfilePage({
   const [sessions, setSessions] = React.useState<any[]>([]);
 
   // Credit claiming states
-  const [credits, setCredits] = React.useState(
-    user?.credits !== undefined ? user.credits : 840
-  );
+  const [credits, setCredits] = React.useState(0);
   const [hasClaimedToday, setHasClaimedToday] = React.useState(false);
   const [claimNotification, setClaimNotification] = React.useState(false);
-  const [streakDays, setStreakDays] = React.useState(1);
-  const [subscriptionTier, setSubscriptionTier] = React.useState("free");
+  const [streakDays, setStreakDays] = React.useState(0);
+  const [subscriptionTier, setSubscriptionTier] = React.useState("");
   const [cardInfo, setCardInfo] = React.useState<any>(null);
 
   // API token creator state
@@ -144,18 +157,18 @@ export default function ProfilePage({
 
   // Lifted state from ProfileAccountTab
   const [connections, setConnections] = React.useState({
-    google: true,
+    google: false,
     github: false,
     discord: false,
   });
-  const [achievementPoints, setAchievementPoints] = React.useState(380);
+  const [achievementPoints, setAchievementPoints] = React.useState(0);
   const [unlockedRewards, setUnlockedRewards] = React.useState<string[]>([]);
   const [unlockedAchievements, setUnlockedAchievements] = React.useState<
     string[]
   >([]);
   const [portfolios, setPortfolios] = React.useState<any[]>([]);
-  const [cacheUsed, setCacheUsed] = React.useState<number>(134637568); // 128.4 MB fallback
-  const [cacheLimit, setCacheLimit] = React.useState<number>(5368709120); // 5 GB fallback
+  const [cacheUsed, setCacheUsed] = React.useState<number>(0);
+  const [cacheLimit, setCacheLimit] = React.useState<number>(5368709120); // 5 GB default
 
   const formatBytes = (bytes: number) => {
     if (bytes === 0) return "0 Bytes";
@@ -388,14 +401,12 @@ export default function ProfilePage({
           setPortfolios(loadedPortfolios);
 
           const loadedUser = {
-            fullName: data.full_name || "Sonikoma Creator",
-            email: data.email || "creator@sonikoma.com",
+            fullName: data.full_name || "",
+            email: data.email || "",
             avatarUrl: data.avatar_url || "",
-            role: data.creator_role || "creator",
-            bio:
-              data.bio ||
-              "Comic visual director and anime fan editing high-quality cinematic stories.",
-            newsletter: data.newsletter !== undefined ? data.newsletter : true,
+            role: data.creator_role || "",
+            bio: data.bio || "",
+            newsletter: data.newsletter !== undefined ? data.newsletter : false,
             language: data.language || "en",
           };
           setProfileUser(loadedUser);
@@ -404,7 +415,42 @@ export default function ProfilePage({
           setHasClaimedToday(!!data.has_claimed_today);
           setStreakDays(data.streak_days || 1);
           setSubscriptionTier(data.subscription_tier || "free");
-          setCardInfo(data.preferences?.card_info || null);
+          setCardInfo(data.card_info || null);
+
+          // Load preferences from API
+          if (data.preferences) {
+            setNotificationPrefs({
+              newsletter: data.preferences.newsletter || false,
+              productUpdates: data.preferences.product_updates || false,
+              securityAlerts: data.preferences.security_alerts || false,
+              billingReceipts: data.preferences.billing_receipts || false,
+              pushNotifications: data.preferences.push_notifications || false,
+            });
+            setWorkspacePrefs({
+              hardwareAcceleration: data.preferences.hardware_acceleration !== false,
+              compactMode: data.preferences.compact_mode || false,
+              autoSaveInterval: data.preferences.auto_save_interval || "5m",
+            });
+            setPrivacyPrefs({
+              analyticsTelemetry: data.preferences.analytics_telemetry !== false,
+              publicProfile: data.preferences.public_profile || false,
+            });
+            setAiPrefs({
+              defaultModel: data.preferences.default_model || "",
+              defaultVoice: data.preferences.default_voice || "",
+              autoCropSensitivity: data.preferences.auto_crop_sensitivity || "medium",
+            });
+            setExportPrefs({
+              resolution: data.preferences.resolution || "1080p",
+              framerate: data.preferences.framerate || "30fps",
+              audioFormat: data.preferences.audio_format || "mp3",
+            });
+            setThemePrefs(data.preferences.theme || "dark");
+            setAccentColor(data.preferences.accent_color || "purple");
+            setFontScale(data.preferences.font_scale || "medium");
+            setReduceMotion(data.preferences.reduce_motion || false);
+            setCornerRadius(data.preferences.corner_radius || "rounded");
+          }
 
           // Update last saved ref with loaded data
           lastSavedProfileRef.current = getSerializedProfile(
