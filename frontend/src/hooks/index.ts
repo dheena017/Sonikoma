@@ -12,6 +12,7 @@ export { useBubbleCleanerPresets } from "./useBubbleCleanerPresets";
 export { useBulkOperations } from "./useBulkOperations";
 export { useCompileActions } from "./useCompileActions";
 export { useConfigHistory } from "./useConfigHistory";
+export { useCredits } from "./useCredits";
 export { useCropEditor } from "./useCropEditor";
 export { useCropEditorDrag } from "./useCropEditorDrag";
 export { useCropEditorHistory } from "./useCropEditorHistory";
@@ -31,3 +32,4 @@ export { useStoryboardOperations } from "./useStoryboardOperations";
 export { useThemeMode } from "./useThemeMode";
 export { useVideoGeneration } from "./useVideoGeneration";
 export { useYouTubePublisher } from "./useYouTubePublisher";
+

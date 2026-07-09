@@ -48,7 +48,8 @@ from database.db import (
     get_platform_settings, update_platform_settings, get_global_audit_logs,
     get_announcements, create_announcement, delete_announcement,
     reset_platform_settings, purge_global_cache,
-    check_credits, get_available_credits, record_credit_transaction, get_credit_transactions
+    check_credits, get_available_credits, record_credit_transaction, get_credit_transactions,
+    LOW_BALANCE_THRESHOLD, LowCreditBalanceError
 )
 
 logger = logging.getLogger("sonikoma.auth")
@@ -997,9 +998,16 @@ async def get_credits(current_user: dict = Depends(get_current_user)):
     """
     Return the current credit balance for the authenticated user.
     This lightweight endpoint is polled by the header to keep the UI in sync.
+    Includes a `low_balance` flag so the frontend can trigger a warning toast
+    without a second request.
     """
     balance = get_available_credits(current_user["user_id"])
-    return {"success": True, "credits": balance}
+    return {
+        "success": True,
+        "credits": balance,
+        "low_balance": balance < LOW_BALANCE_THRESHOLD,
+        "threshold": LOW_BALANCE_THRESHOLD,
+    }
 
 @router.get("/transactions")
 async def get_transactions(

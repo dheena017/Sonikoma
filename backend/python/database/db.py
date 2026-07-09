@@ -611,28 +611,43 @@ def get_available_credits(user_id: str) -> int:
     finally:
         conn.close()
 
+# Credit threshold below which callers should warn users to top up
+LOW_BALANCE_THRESHOLD = 20
+
+class LowCreditBalanceError(ValueError):
+    """Raised when credit balance falls below LOW_BALANCE_THRESHOLD."""
+    def __init__(self, message, balance):
+        super().__init__(message)
+        self.balance = balance
 
 def record_credit_transaction(user_id: str, amount: int, feature_name: str) -> int:
     """
     Record a credit change (positive = addition, negative = deduction).
+
     Atomically:
-      1. Locks the row to prevent race conditions.
+      1. Acquires a write lock on the users row (BEGIN IMMEDIATE for SQLite,
+         SELECT … FOR UPDATE for PostgreSQL) to prevent double-spending.
       2. Validates sufficient balance for deductions (admins bypass validation).
       3. Updates both `credits` and `credit_balance` on the users row.
-      4. Inserts a row in the credit_transactions ledger.
-    Returns the new balance.
-    Raises ValueError when a deduction exceeds the current balance.
+      4. Inserts a ledger row in `credit_transactions` **within the same
+         transaction** — if the insert fails the balance update is rolled back
+         too, preventing silent audit-trail loss.
+
+    Returns:
+        int: The new balance after the transaction.
+
+    Raises:
+        ValueError: When a deduction exceeds the current balance (non-admin).
     """
     conn = get_db_connection()
     try:
-        # SQLite transaction lock
+        # ── Write lock ────────────────────────────────────────────────────────
         if not _is_postgres:
             try:
                 conn.execute("BEGIN IMMEDIATE")
             except Exception:
-                pass
+                pass  # already in a transaction
 
-        # Locking query for PostgreSQL / standard SELECT for SQLite
         query = 'SELECT credits, credit_balance, creator_role FROM users WHERE id = ?'
         if _is_postgres:
             query += ' FOR UPDATE'
@@ -649,38 +664,50 @@ def record_credit_transaction(user_id: str, amount: int, feature_name: str) -> i
             current = row['credits']
         current = current if current is not None else 840
 
-        # Validate deductions (admins bypass checking)
+        # ── Balance validation ────────────────────────────────────────────────
         if amount < 0 and current < abs(amount) and not is_admin:
             raise ValueError(
                 f"Insufficient credits: need {abs(amount)}, have {current}"
             )
 
-        new_balance = current + amount  # amount is negative for deductions
+        new_balance = current + amount
 
+        # ── Balance update ────────────────────────────────────────────────────
         try:
             conn.execute(
                 "UPDATE users SET credits = ?, credit_balance = ?, updated_at = datetime('now') WHERE id = ?",
                 (new_balance, new_balance, user_id)
             )
         except Exception:
-            # Fallback if credit_balance column doesn't exist yet
+            # Fallback: credit_balance column may not yet exist on older DBs
             conn.execute(
                 "UPDATE users SET credits = ?, updated_at = datetime('now') WHERE id = ?",
                 (new_balance, user_id)
             )
 
-        # Insert ledger row
-        try:
-            tx_id = str(uuid.uuid4())
-            conn.execute(
-                "INSERT INTO credit_transactions (id, user_id, amount, feature_name) VALUES (?, ?, ?, ?)",
-                (tx_id, user_id, amount, feature_name)
-            )
-        except Exception as e:
-            logger.warning(f"[Credits] Could not write transaction ledger row: {e}")
+        # ── Ledger insert (same atomic boundary as the balance update) ─────────
+        # No try/except here: if this INSERT fails the exception propagates to
+        # the outer except block which calls conn.rollback(), ensuring the balance
+        # update above is also undone.  No credits are ever lost without a trail.
+        tx_id = str(uuid.uuid4())
+        conn.execute(
+            "INSERT INTO credit_transactions (id, user_id, amount, feature_name) VALUES (?, ?, ?, ?)",
+            (tx_id, user_id, amount, feature_name)
+        )
 
         conn.commit()
+        logger.debug(
+            f"[Credits] user={user_id} amount={amount:+d} "
+            f"feature={feature_name} new_balance={new_balance}"
+        )
         return new_balance
+
+    except Exception:
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        raise
     finally:
         conn.close()
 

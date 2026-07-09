@@ -29,7 +29,7 @@ import { GeneratedPanel } from "../types";
 import NotificationDropdown from "./notification/NotificationDropdown";
 import { Notification } from "./notification/NotificationStack";
 import { useAIModels } from "@/hooks/useAIModels";
-import { getUserCredits } from "../api/auth";
+import { getUserCredits, getUserCreditsPayload } from "../api/auth";
 
 interface HeaderProps {
   isProcessing: boolean;
@@ -73,6 +73,7 @@ interface HeaderProps {
   autoPlayAudio?: boolean;
   setAutoPlayAudio?: (val: boolean) => void;
   fetchWithInterceptor?: any;
+  addNotification?: (message: string, type?: string) => void;
 }
 
 /** Format seconds into a readable "Xm Ys" string */
@@ -126,6 +127,7 @@ const HeaderInner = ({
   autoPlayAudio: autoPlayAudioProp,
   setAutoPlayAudio,
   fetchWithInterceptor,
+  addNotification,
 }: HeaderProps) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -133,26 +135,43 @@ const HeaderInner = ({
   const { models: aiModels } = useAIModels();
 
   // Credits state — polled from server every 30 s and on mount
+  // Uses getUserCreditsPayload to also receive the low_balance flag.
   const [credits, setCredits] = useState<number | null>(
     user?.credits !== undefined ? user.credits : null
   );
+  // Tracks whether we've already shown the low-balance toast this browser session.
+  const sessionWarningFiredRef = useRef(false);
 
   useEffect(() => {
     if (!fetchWithInterceptor) return;
     const pollCredits = async () => {
       try {
-        const result = await getUserCredits(fetchWithInterceptor);
-        if (result !== null) setCredits(result);
+        const payload = await getUserCreditsPayload(fetchWithInterceptor);
+        if (payload !== null) {
+          setCredits(payload.credits);
+          // Fire a one-shot low-balance warning toast per session
+          if (
+            payload.low_balance &&
+            !sessionWarningFiredRef.current &&
+            addNotification
+          ) {
+            sessionWarningFiredRef.current = true;
+            addNotification(
+              `⚡ Low credits: ${payload.credits} remaining. Top up to keep generating.`,
+              "warning"
+            );
+          }
+        }
       } catch {
-        // silent
+        // silent — polling errors should not break the header
       }
     };
     pollCredits();
     const interval = setInterval(pollCredits, 30_000);
     return () => clearInterval(interval);
-  }, [fetchWithInterceptor]);
+  }, [fetchWithInterceptor, addNotification]);
 
-  // Also sync with user prop when it changes (e.g., after claim)
+  // Also sync with user prop when it changes (e.g., after daily claim)
   useEffect(() => {
     if (user?.credits !== undefined) {
       setCredits(user.credits);

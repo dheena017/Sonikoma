@@ -1261,6 +1261,7 @@ export default function App() {
               themeMode={themeMode}
               toggleThemeMode={toggleThemeMode}
               fetchWithInterceptor={fetchWithInterceptor}
+              addNotification={addNotification}
             />
           )
         )}

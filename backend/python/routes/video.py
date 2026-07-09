@@ -8,7 +8,7 @@ import tempfile
 import shutil
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 from routes.auth_routes import get_current_user
-from database.db import deduct_credits, get_available_credits, record_credit_transaction
+from database.db import deduct_credits, get_available_credits, record_credit_transaction, LOW_BALANCE_THRESHOLD
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from PIL import Image
@@ -539,11 +539,11 @@ async def render_video(request: RenderRequest, background_tasks: BackgroundTasks
     RENDER_JOBS[video_id] = {"status": "processing", "progress": 0, "url": None}
 
     # Record the deduction atomically before dispatching the background task
-    record_credit_transaction(current_user["user_id"], -COST, "video_render")
+    new_balance = record_credit_transaction(current_user["user_id"], -COST, "video_render")
 
     background_tasks.add_task(process_render_job, video_id, request.panels, request.voice)
 
-    return {"success": True, "job_id": video_id}
+    return {"success": True, "job_id": video_id, "low_balance": new_balance < LOW_BALANCE_THRESHOLD}
 
 @router.get("/status/{job_id}")
 async def get_render_status(job_id: str):

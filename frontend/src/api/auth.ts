@@ -205,12 +205,40 @@ export const deleteAccount = async (fetchWithInterceptor: any) => {
   return res.json();
 };
 
-export const getUserCredits = async (fetchWithInterceptor: any): Promise<number | null> => {
+export interface CreditsPayload {
+  credits: number;
+  low_balance: boolean;
+  threshold: number;
+}
+
+export const getUserCredits = async (
+  fetchWithInterceptor: any
+): Promise<number | null> => {
   try {
     const res = await fetchWithInterceptor("/api/auth/credits");
     const data = await res.json();
     if (data.success && typeof data.credits === "number") {
       return data.credits;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+/** Full credits payload including low_balance flag. */
+export const getUserCreditsPayload = async (
+  fetchWithInterceptor: any
+): Promise<CreditsPayload | null> => {
+  try {
+    const res = await fetchWithInterceptor("/api/auth/credits");
+    const data = await res.json();
+    if (data.success && typeof data.credits === "number") {
+      return {
+        credits: data.credits,
+        low_balance: data.low_balance ?? data.credits < 20,
+        threshold: data.threshold ?? 20,
+      };
     }
     return null;
   } catch {

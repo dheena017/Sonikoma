@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from media.ai.stable_diffusion_engine import get_stable_diffusion_engine
 from routes.auth_routes import get_current_user
-from database.db import get_available_credits, record_credit_transaction
+from database.db import get_available_credits, record_credit_transaction, LOW_BALANCE_THRESHOLD
 
 logger = logging.getLogger("sonikoma.routes.stable_diffusion_routes")
 router = APIRouter()
@@ -93,8 +93,8 @@ async def generate_ai(body: GenerateAIRequest, current_user: dict = Depends(get_
             seed=body.seed,
             output_dir=output_dir,
         )
-        record_credit_transaction(current_user["user_id"], -COST, "sd_generate")
-        return {"success": True, "images": [img.image_path for img in results]}
+        new_balance = record_credit_transaction(current_user["user_id"], -COST, "sd_generate")
+        return {"success": True, "images": [img.image_path for img in results], "low_balance": new_balance < LOW_BALANCE_THRESHOLD}
     except Exception as exc:
         logger.error(f"Generate AI failed: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(exc))
@@ -118,8 +118,8 @@ async def inpaint(body: InpaintRequest, current_user: dict = Depends(get_current
             num_inference_steps=body.num_inference_steps,
             strength=body.strength,
         )
-        record_credit_transaction(current_user["user_id"], -COST, "sd_inpaint")
-        return {"success": True, "output_path": result.image_path}
+        new_balance = record_credit_transaction(current_user["user_id"], -COST, "sd_inpaint")
+        return {"success": True, "output_path": result.image_path, "low_balance": new_balance < LOW_BALANCE_THRESHOLD}
     except Exception as exc:
         logger.error(f"Inpaint failed: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(exc))
@@ -134,8 +134,8 @@ async def upscale(body: UpscaleRequest, current_user: dict = Depends(get_current
     output_path = body.output_path or _default_output_path(".png")
     try:
         result = await stable_diffusion.upscale(body.image_path, output_path=output_path, scale_factor=body.scale_factor)
-        record_credit_transaction(current_user["user_id"], -COST, "sd_upscale")
-        return {"success": True, "output_path": result}
+        new_balance = record_credit_transaction(current_user["user_id"], -COST, "sd_upscale")
+        return {"success": True, "output_path": result, "low_balance": new_balance < LOW_BALANCE_THRESHOLD}
     except Exception as exc:
         logger.error(f"Upscale failed: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(exc))
@@ -156,8 +156,8 @@ async def style_transfer(body: StyleTransferRequest, current_user: dict = Depend
             guidance_scale=body.guidance_scale,
             num_inference_steps=body.num_inference_steps,
         )
-        record_credit_transaction(current_user["user_id"], -COST, "sd_style_transfer")
-        return {"success": True, "output_path": result.image_path}
+        new_balance = record_credit_transaction(current_user["user_id"], -COST, "sd_style_transfer")
+        return {"success": True, "output_path": result.image_path, "low_balance": new_balance < LOW_BALANCE_THRESHOLD}
     except Exception as exc:
         logger.error(f"Style transfer failed: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(exc))
@@ -184,8 +184,8 @@ async def batch_generate(body: BatchGenerateRequest, current_user: dict = Depend
                 output_dir=output_dir,
             )
             images.extend([img.image_path for img in results])
-        record_credit_transaction(current_user["user_id"], -COST, "sd_batch_generate")
-        return {"success": True, "images": images}
+        new_balance = record_credit_transaction(current_user["user_id"], -COST, "sd_batch_generate")
+        return {"success": True, "images": images, "low_balance": new_balance < LOW_BALANCE_THRESHOLD}
     except Exception as exc:
         logger.error(f"Batch generate failed: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(exc))
