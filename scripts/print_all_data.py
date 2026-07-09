@@ -21,9 +21,11 @@ def _open_db():
     return conn
 
 
-def print_table_data(title, query, params=(), is_json_fields=None):
+def print_table_data(title, query, params=(), is_json_fields=None, is_masked_fields=None):
     if is_json_fields is None:
         is_json_fields = []
+    if is_masked_fields is None:
+        is_masked_fields = []
 
     logger.info("=" * 80)
     logger.info(f"📋 {title.upper()}")
@@ -46,7 +48,9 @@ def print_table_data(title, query, params=(), is_json_fields=None):
             logger.info(f"--- Record #{i + 1} ---")
             row_dict = dict(row)
             for k, v in row_dict.items():
-                if k in is_json_fields and v:
+                if k in is_masked_fields and v:
+                    v = "***"
+                elif k in is_json_fields and v:
                     try:
                         parsed = json.loads(v)
                         v = json.dumps(parsed, ensure_ascii=False)
@@ -125,7 +129,9 @@ def main():
 
     print_table_data("Invoices", "SELECT * FROM user_invoices ORDER BY created_at DESC")
 
-    print_table_data("Developer API Keys", "SELECT * FROM user_api_keys")
+    print_table_data("Developer API Keys", "SELECT * FROM user_api_keys", is_masked_fields=["api_key"])
+
+    print_table_data("Credit Transactions", "SELECT * FROM credit_transactions ORDER BY created_at DESC")
 
     print_table_data("Token Usage Logs", "SELECT * FROM token_usage_logs ORDER BY created_at DESC LIMIT 50")
 
@@ -140,10 +146,16 @@ def main():
         "SELECT * FROM youtube_publications ORDER BY published_at DESC",
     )
 
-    # youtube_credentials — mask the sensitive token fields
+    # youtube_credentials — query correct columns and mask the client_secret
     print_table_data(
         "YouTube Credentials",
-        "SELECT id, user_id, channel_id, channel_name, email, expires_at, created_at FROM youtube_credentials",
+        "SELECT user_id, client_id, client_secret, project_id, updated_at FROM youtube_credentials",
+        is_masked_fields=["client_secret"],
+    )
+
+    print_table_data(
+        "System Logs",
+        "SELECT * FROM system_logs ORDER BY created_at DESC LIMIT 100",
     )
 
 

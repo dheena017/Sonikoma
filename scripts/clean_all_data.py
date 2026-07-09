@@ -10,6 +10,8 @@ logger = logging.getLogger("clean_all_data")
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 DB_PATH = os.path.join(PROJECT_ROOT, "backend", "database", "webtoon_local.db")
 SCRAPED_HTML_DIR = os.path.join(PROJECT_ROOT, "data", "scraped_html")
+PERSISTENT_CACHE_DIR = os.path.join(PROJECT_ROOT, "backend", "database", "image_cache")
+PUBLIC_VIDEOS_DIR = os.path.join(PROJECT_ROOT, "public", "videos")
 
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -140,6 +142,35 @@ def clean_temp_directories():
             logger.info(f"  Does not exist: {temp_dir}")
 
 
+def clean_persistent_caches():
+    logger.info(f"Cleaning persistent cache: {PERSISTENT_CACHE_DIR}...")
+    if os.path.exists(PERSISTENT_CACHE_DIR):
+        try:
+            shutil.rmtree(PERSISTENT_CACHE_DIR, ignore_errors=True)
+            logger.info(f"  Cleaned: {PERSISTENT_CACHE_DIR}")
+        except Exception as e:
+            logger.error(f"  Failed to clean {PERSISTENT_CACHE_DIR}: {e}")
+    else:
+        logger.info(f"  Does not exist: {PERSISTENT_CACHE_DIR}")
+
+
+def clean_generated_videos():
+    logger.info(f"Cleaning generated videos: {PUBLIC_VIDEOS_DIR}...")
+    if os.path.exists(PUBLIC_VIDEOS_DIR):
+        for item in os.listdir(PUBLIC_VIDEOS_DIR):
+            item_path = os.path.join(PUBLIC_VIDEOS_DIR, item)
+            try:
+                if os.path.isfile(item_path):
+                    os.remove(item_path)
+                elif os.path.isdir(item_path):
+                    shutil.rmtree(item_path, ignore_errors=True)
+                logger.info(f"  Deleted video/folder: {item_path}")
+            except Exception as e:
+                logger.error(f"  Failed to delete {item_path}: {e}")
+    else:
+        logger.info(f"  Does not exist: {PUBLIC_VIDEOS_DIR}")
+
+
 # ─── Entry point ──────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -147,5 +178,7 @@ if __name__ == "__main__":
     clean_svg_fallbacks()   # targeted — safe while server is running
     clean_database()        # full wipe (or table truncate if locked)
     clean_scraped_html()
+    clean_persistent_caches()
+    clean_generated_videos()
     clean_temp_directories()
     logger.info("=== Cleanup Process Completed ===")
