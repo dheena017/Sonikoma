@@ -11,7 +11,6 @@ import {
   AlertTriangle,
   ArrowRight,
   Download,
-  Filter,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
@@ -62,6 +61,11 @@ export function AdminCreditsTab({
   });
 
   const [monthSummary, setMonthSummary] = useState({
+    added: 0,
+    deducted: 0,
+    net: 0,
+  });
+  const [dailySummary, setDailySummary] = useState({
     added: 0,
     deducted: 0,
     net: 0,
@@ -126,6 +130,19 @@ export function AdminCreditsTab({
               ? acc + (tx.amount < 0 ? Math.abs(tx.amount) : 0)
               : acc;
           }, 0);
+          const today = new Date();
+          const dayAdded = data.data.reduce((acc: number, tx: any) => {
+            const created = new Date(tx.created_at);
+            return created.toDateString() === today.toDateString()
+              ? acc + (tx.amount > 0 ? tx.amount : 0)
+              : acc;
+          }, 0);
+          const dayDeducted = data.data.reduce((acc: number, tx: any) => {
+            const created = new Date(tx.created_at);
+            return created.toDateString() === today.toDateString()
+              ? acc + (tx.amount < 0 ? Math.abs(tx.amount) : 0)
+              : acc;
+          }, 0);
           setStats((prev) => ({
             ...prev,
             totalTransactions: data.data.length,
@@ -136,6 +153,11 @@ export function AdminCreditsTab({
             added: monthAdded,
             deducted: monthDeducted,
             net: monthAdded - monthDeducted,
+          });
+          setDailySummary({
+            added: dayAdded,
+            deducted: dayDeducted,
+            net: dayAdded - dayDeducted,
           });
         }
       }
@@ -377,6 +399,36 @@ export function AdminCreditsTab({
     document.body.removeChild(link);
   };
 
+  const exportTodayCSV = () => {
+    const todayStr = new Date().toDateString();
+    const todayRows = sortedTransactions.filter(
+      (tx) => new Date(tx.created_at).toDateString() === todayStr
+    );
+    if (todayRows.length === 0) return;
+
+    const headers = ["Transaction ID", "User ID", "Feature / Reason", "Amount", "Timestamp"];
+    const rows = todayRows.map((tx) => [
+      tx.id,
+      tx.user_id,
+      tx.feature_name,
+      tx.amount,
+      new Date(tx.created_at).toISOString(),
+    ]);
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute(
+      "download",
+      `credit_ledger_today_${new Date().toISOString().split("T")[0]}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-300 text-left">
       
@@ -394,7 +446,7 @@ export function AdminCreditsTab({
       </div>
 
       {/* ── Statistics Summary Cards ── */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div className="bg-[#111115] border border-neutral-800 rounded-xl p-5 relative overflow-hidden">
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400">
@@ -446,6 +498,21 @@ export function AdminCreditsTab({
           </div>
           <p className="text-[10px] text-neutral-500 mt-1">
             +{monthSummary.added.toLocaleString()} / -{monthSummary.deducted.toLocaleString()}
+          </p>
+        </div>
+
+        <div className="bg-[#111115] border border-neutral-800 rounded-xl p-5 relative overflow-hidden">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2 bg-sky-500/10 rounded-lg text-sky-400">
+              <Coins className="w-5 h-5" />
+            </div>
+            <h3 className="text-neutral-400 font-medium text-sm">Today</h3>
+          </div>
+          <div className="text-2xl font-black text-white">
+            {dailySummary.net >= 0 ? "+" : ""}{dailySummary.net.toLocaleString()} <span className="text-xs text-neutral-500 font-normal">Credits</span>
+          </div>
+          <p className="text-[10px] text-neutral-500 mt-1">
+            +{dailySummary.added.toLocaleString()} / -{dailySummary.deducted.toLocaleString()}
           </p>
         </div>
       </div>
@@ -528,9 +595,18 @@ export function AdminCreditsTab({
                   onClick={exportToCSV}
                   disabled={sortedTransactions.length === 0}
                   className="p-1 px-2.5 bg-neutral-800 hover:bg-neutral-700 text-white disabled:opacity-50 disabled:cursor-not-allowed rounded text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer"
-                  title="Export to CSV"
+                  title="Export filtered ledger to CSV"
                 >
                   <Download className="w-3 h-3" /> Export
+                </button>
+
+                <button
+                  onClick={exportTodayCSV}
+                  disabled={sortedTransactions.filter((tx) => new Date(tx.created_at).toDateString() === new Date().toDateString()).length === 0}
+                  className="p-1 px-2.5 bg-sky-700 hover:bg-sky-600 text-white disabled:opacity-50 disabled:cursor-not-allowed rounded text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer"
+                  title="Export today's transactions to CSV"
+                >
+                  <Download className="w-3 h-3" /> Today
                 </button>
               </div>
             </div>
