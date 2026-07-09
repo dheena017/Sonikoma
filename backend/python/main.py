@@ -461,20 +461,27 @@ async def lifespan(app: FastAPI):
         logging.getLogger(logger_name).addFilter(EndpointFilter())
     logging.getLogger().addFilter(EndpointFilter())
 
-    # Initialize database and load skills inside the worker process
-    from database.db import init_db, prune_system_logs
+    # Initialize database inside the worker process and defer some maintenance work
+    from database.db import init_db
     init_db()
 
-    # Run initial log pruning to keep DB healthy
-    try:
-        pruned = prune_system_logs()
-        if pruned > 0:
-            logger.info(f"[System] Startup maintenance: Pruned {pruned} old log entries.")
-    except Exception as e:
-        logger.warning(f"[System] Log pruning failed during startup: {e}")
+    # Run startup maintenance asynchronously so the API can start responding quickly
+    async def _startup_maintenance():
+        try:
+            from database.db import prune_system_logs
+            pruned = prune_system_logs()
+            if pruned > 0:
+                logger.info(f"[System] Startup maintenance: Pruned {pruned} old log entries.")
+        except Exception as e:
+            logger.warning(f"[System] Log pruning failed during startup: {e}")
 
-    from skills.registry import registry
-    registry.load_skills()
+        try:
+            from skills.registry import registry
+            registry.load_skills()
+        except Exception as e:
+            logger.warning(f"[System] Skill registry initialization failed during startup: {e}")
+
+    asyncio.create_task(_startup_maintenance())
 
     # Purge stale temporary workspace directories
     _clean_temp_workspace()

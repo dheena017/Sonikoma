@@ -10,6 +10,7 @@ import os
 import json
 import sqlite3
 import logging
+import threading
 from typing import List, Dict, Any, Optional
 
 try:
@@ -30,6 +31,10 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 _is_postgres = bool(DATABASE_URL and (DATABASE_URL.startswith("postgresql://") or DATABASE_URL.startswith("postgres://")))
 
 _db_initialized = False
+_db_init_lock = threading.Lock()
+_db_init_in_progress = False
+_db_init_complete = threading.Event()
+_system_log_persist_in_progress = False
 
 class PostgresCursorWrapper:
     def __init__(self, cursor):
@@ -84,31 +89,53 @@ class PostgresConnectionWrapper:
     def close(self):
         self.conn.close()
 
-def get_db_connection():
-    if not _db_initialized:
-        init_db()
-
+def _create_db_connection():
     if _is_postgres:
         if not psycopg2:
             raise RuntimeError("psycopg2-binary is required for PostgreSQL support. Please install it.")
         conn = psycopg2.connect(DATABASE_URL, cursor_factory=DictCursor)
-        # Postgres connections must be committed or set to autocommit. Let's use the wrapper.
         return PostgresConnectionWrapper(conn)
-    else:
-        conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = sqlite3.Row
-        conn.execute('PRAGMA journal_mode = WAL')
-        conn.execute('PRAGMA foreign_keys = ON')
-        return conn
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    conn.execute('PRAGMA journal_mode = WAL')
+    conn.execute('PRAGMA foreign_keys = ON')
+    return conn
+
+
+def get_db_connection():
+    if not _db_initialized:
+        init_db()
+    return _create_db_connection()
+
+
+def _should_skip_system_log_persistence() -> bool:
+    return _db_init_in_progress or not _db_init_complete.is_set() and not _db_initialized
+
 
 def init_db() -> None:
-    global _db_initialized
+    global _db_initialized, _db_init_in_progress
+
     if _db_initialized:
+        return
+
+    with _db_init_lock:
+        if _db_initialized:
+            return
+        if _db_init_in_progress:
+            wait_for_init = True
+        else:
+            _db_init_in_progress = True
+            _db_init_complete.clear()
+            wait_for_init = False
+
+    if wait_for_init:
+        _db_init_complete.wait(timeout=60)
         return
 
     if _is_postgres:
         logger.info(f"[Database] Connecting to PostgreSQL (Supabase)...")
-        conn = get_db_connection()
+        conn = _create_db_connection()
         try:
             # Check if tables exist
             row = conn.execute("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'users') as exists").fetchone()
@@ -212,15 +239,15 @@ def init_db() -> None:
         finally:
             conn.close()
         logger.info("[Database] PostgreSQL ready [OK]")
-        _db_initialized = True
+        with _db_init_lock:
+            _db_initialized = True
+            _db_init_in_progress = False
+            _db_init_complete.set()
         return
 
     logger.info(f"[Database] Opening local SQLite database at: {DB_PATH}")
     os.makedirs(DB_DIR, exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    conn.execute('PRAGMA journal_mode = WAL')
-    conn.execute('PRAGMA foreign_keys = ON')
+    conn = _create_db_connection()
     try:
         cursor = conn.cursor()
 
@@ -471,13 +498,19 @@ def init_db() -> None:
         logger.info("[Database] Migration: verified credit_transactions table.")
 
         conn.commit()
-        _db_initialized = True
 
     except sqlite3.Error as e:
         logger.error(f"[Database] Error checking or applying schema: {e}")
+        with _db_init_lock:
+            _db_init_in_progress = False
+            _db_init_complete.set()
         raise
     finally:
         conn.close()
+    with _db_init_lock:
+        _db_initialized = True
+        _db_init_in_progress = False
+        _db_init_complete.set()
     logger.info("[Database] SQLite database ready [OK]")
 
 # Database initialization is deferred and handled by the app lifespan or on first query.
@@ -2453,21 +2486,36 @@ def insert_system_log(level: str, module: str, message: str, details: Optional[s
     """
     Inserts a log entry into the database.
     """
-    import datetime
-    conn = get_db_connection()
-    try:
-        now = datetime.datetime.now()
-        timestamp = now.strftime("%H:%M:%S")
+    global _system_log_persist_in_progress
 
-        conn.execute("""
-            INSERT INTO system_logs (timestamp, message, level, module, details, correlation_id, user_id, snapshot)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (timestamp, message, level, module, details, correlation_id, user_id, snapshot))
-        conn.commit()
-    except Exception as e:
-        logger.error(f"[Database] Failed to insert system log: {e}")
+    if _should_skip_system_log_persistence():
+        return
+
+    import datetime
+
+    with _db_init_lock:
+        if _should_skip_system_log_persistence():
+            return
+        _system_log_persist_in_progress = True
+
+    try:
+        conn = get_db_connection()
+        try:
+            now = datetime.datetime.now()
+            timestamp = now.strftime("%H:%M:%S")
+
+            conn.execute("""
+                INSERT INTO system_logs (timestamp, message, level, module, details, correlation_id, user_id, snapshot)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (timestamp, message, level, module, details, correlation_id, user_id, snapshot))
+            conn.commit()
+        except Exception as e:
+            logger.error(f"[Database] Failed to insert system log: {e}")
+        finally:
+            conn.close()
     finally:
-        conn.close()
+        with _db_init_lock:
+            _system_log_persist_in_progress = False
 
 def get_system_logs(limit: int = 200, offset: int = 0, level: Optional[str] = None, module: Optional[str] = None, search: Optional[str] = None) -> List[Dict[str, Any]]:
     """
