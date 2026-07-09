@@ -46,6 +46,7 @@ const EditorSidebar = ({
   setIsCollapsed,
   currentSection,
   setCurrentSection,
+  onBackToApp,
   scrapedCount,
   panelsCount,
   isBatchCropping,
@@ -118,6 +119,11 @@ const EditorSidebar = ({
   ];
 
   const handleReturnToWorkspace = () => {
+    if (onBackToApp) {
+      onBackToApp();
+      setIsCollapsed(true);
+      return;
+    }
     const path = resolveWorkspaceReturnPath({
       projectId,
       searchParams: window.location.search,

@@ -30,6 +30,7 @@ interface LayoutEditorPageProps {
   setNotificationsMuted?: (muted: boolean) => void;
   onNavigateToAll?: () => void;
   projectId?: string | null;
+  fetchWithInterceptor?: any;
 }
 
 const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
@@ -59,6 +60,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
   setNotificationsMuted,
   onNavigateToAll,
   projectId,
+  fetchWithInterceptor,
 }) => {
   const isSidebarOpen = !isSidebarCollapsed && !isFocusMode;
 
@@ -141,6 +143,8 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
           notificationsMuted={notificationsMuted}
           setNotificationsMuted={setNotificationsMuted}
           onNavigateToAll={onNavigateToAll}
+          fetchWithInterceptor={fetchWithInterceptor}
+          navigateTo={navigateTo}
         />
       )}
 

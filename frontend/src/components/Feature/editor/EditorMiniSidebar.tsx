@@ -42,6 +42,7 @@ const EditorMiniSidebarInner = ({
   setIsCollapsed,
   currentSection,
   setCurrentSection,
+  onBackToApp,
   scrapedCount,
   panelsCount,
   isBatchCropping,
@@ -94,6 +95,10 @@ const EditorMiniSidebarInner = ({
   ];
 
   const handleReturnToWorkspace = () => {
+    if (onBackToApp) {
+      onBackToApp();
+      return;
+    }
     const path = resolveWorkspaceReturnPath({
       projectId,
       searchParams: window.location.search,

@@ -711,6 +711,22 @@ const HeaderInner = ({
           </span>
         </div>
 
+        {/* ⚡ Credits Pill */}
+        {credits !== null && (
+          <button
+            onClick={() => navigateTo("/profile?tab=billing")}
+            title="Your credit balance — click to top up"
+            className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${
+              credits < 20
+                ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 animate-pulse"
+                : "bg-neutral-900 border-neutral-850 text-purple-400 hover:border-purple-500/40 hover:bg-purple-500/5"
+            }`}
+          >
+            <Zap className="h-3.5 w-3.5 shrink-0" />
+            {credits.toLocaleString()}
+          </button>
+        )}
+
         {/* Save Action Button */}
         {onSave && (
           <button

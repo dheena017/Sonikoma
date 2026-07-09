@@ -13,6 +13,8 @@ import {
   Download,
   ChevronDown,
   ChevronUp,
+  BarChart2,
+  Users,
 } from "lucide-react";
 
 interface AdminCreditsTabProps {
@@ -38,6 +40,7 @@ export function AdminCreditsTab({
   const [amount, setAmount] = useState<number>(100);
   const [reason, setReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [bulkMode, setBulkMode] = useState(false);
 
   // Pagination state
   const [limit] = useState(50);
@@ -192,12 +195,49 @@ export function AdminCreditsTab({
 
   const handleGrantCredits = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedUserId) {
-      addNotification("Please select a target user", "warning");
-      return;
-    }
     if (amount === 0) {
       addNotification("Adjustment amount cannot be zero", "warning");
+      return;
+    }
+
+    if (bulkMode) {
+      if (filteredUsers.length === 0) {
+        addNotification("No users match the search filters for bulk adjustment", "warning");
+        return;
+      }
+      if (!confirm(`Apply this credit adjustment to ${filteredUsers.length} users?`)) {
+        return;
+      }
+      setIsSubmitting(true);
+      let successCount = 0;
+      for (const u of filteredUsers) {
+        try {
+          const res = await fetchWithInterceptor(
+            `/api/auth/admin/users/${u.id}/add-credits`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                amount,
+                reason: reason.trim() || "Bulk admin credit adjustment",
+              }),
+            }
+          );
+          if (res.ok) successCount++;
+        } catch (err) {
+          console.error("Failed bulk grant for", u.email, err);
+        }
+      }
+      addNotification(`Bulk adjustment complete: ${successCount}/${filteredUsers.length} succeeded`, "success");
+      setReason("");
+      fetchUsers();
+      fetchTransactions();
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!selectedUserId) {
+      addNotification("Please select a target user", "warning");
       return;
     }
 
@@ -219,7 +259,6 @@ export function AdminCreditsTab({
         const data = await res.json();
         addNotification(data.message || `Successfully adjusted user balance.`, "success");
         setReason("");
-        // Refresh local stats & transaction logs
         fetchUsers();
         fetchTransactions();
       } else {
@@ -308,6 +347,34 @@ export function AdminCreditsTab({
       { totalAdded: 0, totalDeducted: 0, addedCount: 0, deductedCount: 0 }
     );
   }, [filteredTransactions]);
+
+  // Dynamic Credits Consumption breakdown calculations
+  const creditUsageBreakdown = React.useMemo(() => {
+    const usageMap: { [key: string]: number } = {};
+    let totalUsage = 0;
+    transactions.forEach((tx) => {
+      if (tx.amount < 0) {
+        const absVal = Math.abs(tx.amount);
+        // group by prefix or exact name
+        const key = tx.feature_name.split(":")[0];
+        usageMap[key] = (usageMap[key] || 0) + absVal;
+        totalUsage += absVal;
+      }
+    });
+
+    return Object.entries(usageMap)
+      .map(([name, value]) => ({
+        name,
+        value,
+        percentage: totalUsage > 0 ? Math.round((value / totalUsage) * 100) : 0,
+      }))
+      .sort((a, b) => b.value - a.value);
+  }, [transactions]);
+
+  // At risk users (balance < 20)
+  const lowBalanceUsers = React.useMemo(() => {
+    return users.filter((u) => (u.credits !== undefined ? u.credits : u.credit_balance) < 20);
+  }, [users]);
 
   // Filtered transactions specific to the currently selected user
   const selectedUserTransactions = transactions.filter(
@@ -465,12 +532,12 @@ export function AdminCreditsTab({
             <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
               <Coins className="w-5 h-5" />
             </div>
-            <h3 className="text-neutral-400 font-medium text-sm">Total Distributed Balance</h3>
+            <h3 className="text-neutral-400 font-medium text-sm">Total Balance</h3>
           </div>
           <div className="text-2xl font-black text-white">
             {stats.totalBalance.toLocaleString()} <span className="text-xs text-neutral-500 font-normal">Credits</span>
           </div>
-          <p className="text-[10px] text-neutral-500 mt-1">Sum of all users' current balances</p>
+          <p className="text-[10px] text-neutral-500 mt-1">Sum of all current user balances</p>
         </div>
 
         <div className="bg-[#111115] border border-neutral-800 rounded-xl p-5 relative overflow-hidden">
@@ -483,7 +550,7 @@ export function AdminCreditsTab({
           <div className="text-2xl font-black text-white">
             {transactions.length}
           </div>
-          <p className="text-[10px] text-neutral-500 mt-1">Audit log records loaded in page</p>
+          <p className="text-[10px] text-neutral-500 mt-1">Audit logs loaded in memory</p>
         </div>
 
         <div className="bg-[#111115] border border-neutral-800 rounded-xl p-5 relative overflow-hidden">
@@ -494,7 +561,7 @@ export function AdminCreditsTab({
             <h3 className="text-neutral-400 font-medium text-sm">This Month</h3>
           </div>
           <div className="text-2xl font-black text-white">
-            {monthSummary.net >= 0 ? "+" : ""}{monthSummary.net.toLocaleString()} <span className="text-xs text-neutral-500 font-normal">Credits</span>
+            {monthSummary.net >= 0 ? "+" : ""}{monthSummary.net.toLocaleString()}
           </div>
           <p className="text-[10px] text-neutral-500 mt-1">
             +{monthSummary.added.toLocaleString()} / -{monthSummary.deducted.toLocaleString()}
@@ -509,11 +576,75 @@ export function AdminCreditsTab({
             <h3 className="text-neutral-400 font-medium text-sm">Today</h3>
           </div>
           <div className="text-2xl font-black text-white">
-            {dailySummary.net >= 0 ? "+" : ""}{dailySummary.net.toLocaleString()} <span className="text-xs text-neutral-500 font-normal">Credits</span>
+            {dailySummary.net >= 0 ? "+" : ""}{dailySummary.net.toLocaleString()}
           </div>
           <p className="text-[10px] text-neutral-500 mt-1">
             +{dailySummary.added.toLocaleString()} / -{dailySummary.deducted.toLocaleString()}
           </p>
+        </div>
+      </div>
+
+      {/* ── Two-Column High-Level Analytics: Breakdown & At Risk ── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Credit Consumption Breakdown Panel */}
+        <div className="bg-[#111115] border border-neutral-800 rounded-xl p-5 shadow-xl space-y-4">
+          <h3 className="font-bold text-white text-sm flex items-center gap-2 border-b border-neutral-800 pb-3">
+            <BarChart2 className="w-4 h-4 text-purple-400" />
+            Credit Consumption Breakdown (by Feature)
+          </h3>
+          <div className="space-y-3">
+            {creditUsageBreakdown.length === 0 ? (
+              <p className="text-xs text-neutral-500 italic text-center py-6">No usage logs loaded.</p>
+            ) : (
+              creditUsageBreakdown.map((item) => (
+                <div key={item.name} className="space-y-1.5">
+                  <div className="flex justify-between text-xs font-semibold text-neutral-350">
+                    <span>{item.name}</span>
+                    <span className="font-mono text-neutral-400">
+                      {item.value.toLocaleString()} credits ({item.percentage}%)
+                    </span>
+                  </div>
+                  <div className="w-full bg-neutral-900 rounded-full h-1.5 overflow-hidden border border-neutral-850">
+                    <div
+                      className="bg-gradient-to-r from-purple-500 to-indigo-500 h-full rounded-full"
+                      style={{ width: `${item.percentage}%` }}
+                    />
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* At-Risk Users Panel */}
+        <div className="bg-[#111115] border border-neutral-800 rounded-xl p-5 shadow-xl space-y-4">
+          <h3 className="font-bold text-white text-sm flex items-center gap-2 border-b border-neutral-800 pb-3">
+            <Users className="w-4 h-4 text-rose-450" />
+            At-Risk Users (Credits Below Threshold)
+          </h3>
+          <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+            {lowBalanceUsers.length === 0 ? (
+              <p className="text-xs text-neutral-500 italic text-center py-6">No at-risk users detected!</p>
+            ) : (
+              lowBalanceUsers.map((u) => (
+                <div
+                  key={u.id}
+                  onClick={() => setSelectedUserId(u.id)}
+                  className={`flex justify-between items-center bg-[#0b0b0e] border border-neutral-850 rounded-lg p-2.5 hover:bg-neutral-900 transition-all cursor-pointer ${
+                    selectedUserId === u.id ? "ring-1 ring-purple-500/50 border-purple-500/50" : ""
+                  }`}
+                >
+                  <div>
+                    <p className="text-xs font-bold text-neutral-200">{u.full_name || "Anonymous"}</p>
+                    <p className="text-[10px] text-neutral-500">{u.email}</p>
+                  </div>
+                  <span className="px-2 py-1 rounded bg-rose-500/10 text-rose-400 text-xs font-mono font-black border border-rose-500/20">
+                    {u.credits !== undefined ? u.credits : u.credit_balance} credits
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
 
@@ -755,43 +886,77 @@ export function AdminCreditsTab({
         {/* ── Column 3: Manual adjustment panel ── */}
         <div className="bg-[#111115] border border-neutral-800 rounded-xl p-5 shadow-xl space-y-5 flex flex-col justify-between">
           <div className="space-y-4">
-            <h3 className="font-bold text-white text-sm flex items-center gap-2 border-b border-neutral-800 pb-3">
-              <Coins className="w-4 h-4 text-purple-400" />
-              Manual Adjustment Console
-            </h3>
-
-            {/* Target User Search & Selection */}
-            <div className="space-y-2">
-              <label className="text-[10px] text-neutral-400 uppercase tracking-wider font-bold">
-                Select target user
-              </label>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-500" />
+            <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
+              <h3 className="font-bold text-white text-sm flex items-center gap-2">
+                <Coins className="w-4 h-4 text-purple-400" />
+                {bulkMode ? "Bulk Adjustment Console" : "Manual Adjustment Console"}
+              </h3>
+              
+              {/* Bulk Mode Toggle */}
+              <label className="inline-flex items-center gap-2 text-[10px] text-neutral-400 uppercase tracking-wider font-bold cursor-pointer bg-neutral-900 border border-neutral-850 px-2 py-1 rounded-lg hover:text-white transition-all">
                 <input
-                  type="text"
-                  placeholder="Search user email/name..."
-                  value={userSearchQuery}
-                  onChange={(e) => setUserSearchQuery(e.target.value)}
-                  className="w-full bg-[#0b0b0e] border border-neutral-800 text-xs text-neutral-200 rounded-lg pl-8 pr-3 py-2.5 focus:outline-none focus:border-purple-500/50"
+                  type="checkbox"
+                  checked={bulkMode}
+                  onChange={(e) => setBulkMode(e.target.checked)}
+                  className="form-checkbox h-3.5 w-3.5 text-purple-500 bg-[#111115] border-neutral-700 rounded"
                 />
-              </div>
-
-              <select
-                value={selectedUserId}
-                onChange={(e) => setSelectedUserId(e.target.value)}
-                className="w-full bg-[#0b0b0e] border border-neutral-800 text-xs text-neutral-200 rounded-lg p-2.5 focus:outline-none focus:border-purple-500/50"
-              >
-                <option value="">-- Choose User --</option>
-                {filteredUsers.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.email} ({u.full_name || "No Name"})
-                  </option>
-                ))}
-              </select>
+                <span>Bulk Mode</span>
+              </label>
             </div>
 
+            {/* Target User Search & Selection */}
+            {!bulkMode ? (
+              <div className="space-y-2">
+                <label className="text-[10px] text-neutral-400 uppercase tracking-wider font-bold">
+                  Select target user
+                </label>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-500" />
+                  <input
+                    type="text"
+                    placeholder="Search user email/name..."
+                    value={userSearchQuery}
+                    onChange={(e) => setUserSearchQuery(e.target.value)}
+                    className="w-full bg-[#0b0b0e] border border-neutral-800 text-xs text-neutral-200 rounded-lg pl-8 pr-3 py-2.5 focus:outline-none focus:border-purple-500/50"
+                  />
+                </div>
+
+                <select
+                  value={selectedUserId}
+                  onChange={(e) => setSelectedUserId(e.target.value)}
+                  className="w-full bg-[#0b0b0e] border border-neutral-800 text-xs text-neutral-200 rounded-lg p-2.5 focus:outline-none focus:border-purple-500/50"
+                >
+                  <option value="">-- Choose User --</option>
+                  {filteredUsers.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.email} ({u.full_name || "No Name"})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div className="bg-[#0b0b0e] border border-neutral-850 rounded-lg p-3 text-xs space-y-2">
+                <p className="text-[10px] uppercase font-bold text-neutral-400">
+                  Bulk Mode Active
+                </p>
+                <div className="text-neutral-350 text-[11px] leading-relaxed">
+                  Adjustments will apply to all <strong>{filteredUsers.length} users</strong> currently matching the left-hand search filter.
+                </div>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-500" />
+                  <input
+                    type="text"
+                    placeholder="Filter target users..."
+                    value={userSearchQuery}
+                    onChange={(e) => setUserSearchQuery(e.target.value)}
+                    className="w-full bg-[#111115] border border-neutral-800 text-[11px] text-neutral-250 rounded-lg pl-8 pr-3 py-2 focus:outline-none focus:border-purple-500/50"
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Selection display */}
-            {selectedUserObj && (
+            {!bulkMode && selectedUserObj && (
               <div className="bg-[#0b0b0e] border border-neutral-800/80 rounded-lg p-3.5 text-xs space-y-2 relative">
                 <div className="absolute top-2 right-2 text-[9px] uppercase font-bold tracking-widest text-neutral-500 bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded">
                   Current Bal
@@ -829,9 +994,9 @@ export function AdminCreditsTab({
                         <button
                           type="button"
                           onClick={exportSelectedUserCSV}
-                          className="px-2.5 py-1 bg-neutral-800 hover:bg-neutral-700 text-white rounded text-[10px] font-bold transition-all"
+                          className="px-2 py-0.5 bg-neutral-800 hover:bg-neutral-700 text-white rounded text-[9px] font-bold transition-all"
                         >
-                          Export User CSV
+                          Export CSV
                         </button>
                       </div>
                       <div className="space-y-1">
@@ -950,8 +1115,7 @@ export function AdminCreditsTab({
 
             <button
               onClick={handleGrantCredits}
-              disabled={isSubmitting || !selectedUserId || amount === 0}
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:from-neutral-800 disabled:to-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-purple-900/10"
+              disabled={isSubmitting || (!bulkMode && !selectedUserId) || amount === 0}              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:from-neutral-800 disabled:to-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-purple-900/10"
             >
               {isSubmitting ? "Processing..." : `Execute Adjustment (${amount >= 0 ? "+" : ""}${amount})`}
               <ArrowRight className="w-3.5 h-3.5" />

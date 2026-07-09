@@ -13,6 +13,7 @@ import {
   Activity,
 } from "lucide-react";
 import * as api from "@/api";
+import { getUserCreditsPayload } from "@/api/auth";
 import NotificationDropdown from "../notification/NotificationDropdown";
 
 export interface CreativeSuiteHeaderProps {
@@ -57,6 +58,7 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [volume, setVolume] = useState(80);
   const [isMuted, setIsMuted] = useState(false);
+  const [credits, setCredits] = useState<number | null>(null);
 
   const notificationsRef = useRef<HTMLDivElement>(null);
   const telemetryRef = useRef<HTMLDivElement>(null);
@@ -82,6 +84,21 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
     const interval = setInterval(fetchStats, 12000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (!fetchWithInterceptor) return;
+    const pollCredits = async () => {
+      try {
+        const payload = await getUserCreditsPayload(fetchWithInterceptor);
+        if (payload !== null) setCredits(payload.credits);
+      } catch {
+        // silent
+      }
+    };
+    pollCredits();
+    const interval = setInterval(pollCredits, 30_000);
+    return () => clearInterval(interval);
+  }, [fetchWithInterceptor]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -225,6 +242,22 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
           <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
           <span>AI Engine: ACTIVE</span>
         </div>
+
+        {/* ⚡ Credits Pill */}
+        {credits !== null && (
+          <button
+            onClick={() => navigateTo("/profile?tab=billing")}
+            title="Your credit balance — click to top up"
+            className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${
+              credits < 20
+                ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 animate-pulse"
+                : "bg-neutral-900 border-neutral-850 text-purple-400 hover:border-purple-500/40 hover:bg-purple-500/5"
+            }`}
+          >
+            <Zap className="h-3.5 w-3.5 shrink-0" />
+            {credits.toLocaleString()}
+          </button>
+        )}
 
         {/* Volume Controller */}
         <div className="hidden xl:flex items-center gap-2 bg-neutral-900/50 border border-neutral-850/40 px-3 py-1 rounded-full">

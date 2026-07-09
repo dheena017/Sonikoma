@@ -191,7 +191,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
   };
 
   const handleBackToApp = () => {
-    navigateTo("/dashboard");
+    navigateTo("/creative-suite");
   };
 
   // Sync section with modals if needed
@@ -294,6 +294,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
       notificationsMuted={appLogic.notificationsMuted}
       setNotificationsMuted={appLogic.setNotificationsMuted}
       onNavigateToAll={( ) => window.dispatchEvent(new CustomEvent('navigate', { detail: { path: '/notifications' } }))}
+      fetchWithInterceptor={fetchWithInterceptor}
     >
       <main className="flex-1 w-full relative bg-neutral-950 min-w-0">
         {isInitializing && scrapedImages.length === 0 ? (

@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Focus, LayoutPanelTop, Save, Menu, Layers, Clock, Wifi, WifiOff, Share2, Bell, BellOff } from "lucide-react";
+import { Focus, LayoutPanelTop, Save, Menu, Layers, Clock, Wifi, WifiOff, Share2, Bell, BellOff, Zap } from "lucide-react";
 import NotificationDropdown from "../../notification/NotificationDropdown";
 import { Notification } from "../../notification/NotificationStack";
+import { getUserCreditsPayload } from "../../../api/auth";
 
 interface EditorPageHeaderProps {
   title: string;
@@ -27,6 +28,8 @@ interface EditorPageHeaderProps {
   setNotificationsMuted?: (muted: boolean) => void;
   onNavigateToAll?: () => void;
   onBackToApp?: () => void;
+  fetchWithInterceptor?: any;
+  navigateTo?: (path: string) => void;
 }
 
 const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
@@ -52,6 +55,8 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
   notificationsMuted = false,
   setNotificationsMuted,
   onNavigateToAll,
+  fetchWithInterceptor,
+  navigateTo,
 }) => {
   // Smoothly slide out of view if the mobile/drawer sidebar is open
   const headerVisibilityClass = isSidebarOpen
@@ -60,6 +65,22 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationsRef = useRef<HTMLDivElement | null>(null);
+  const [credits, setCredits] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!fetchWithInterceptor) return;
+    const pollCredits = async () => {
+      try {
+        const payload = await getUserCreditsPayload(fetchWithInterceptor);
+        if (payload !== null) setCredits(payload.credits);
+      } catch {
+        // silent
+      }
+    };
+    pollCredits();
+    const interval = setInterval(pollCredits, 30_000);
+    return () => clearInterval(interval);
+  }, [fetchWithInterceptor]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -152,6 +173,21 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
       {/* Right Section - Action Buttons */}
       <div className="flex flex-wrap items-center gap-2">
+        {/* ⚡ Credits Pill */}
+        {credits !== null && (
+          <button
+            onClick={() => navigateTo?.("/profile?tab=billing")}
+            title="Your credit balance — click to top up"
+            className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${
+              credits < 20
+                ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 animate-pulse"
+                : "bg-white/5 border-white/10 text-purple-400 hover:border-purple-500/40 hover:bg-purple-500/5"
+            }`}
+          >
+            <Zap className="h-3.5 w-3.5 shrink-0" />
+            {credits.toLocaleString()}
+          </button>
+        )}
         <button
           type="button"
           onClick={() => setIsFocusMode((value) => !value)}
