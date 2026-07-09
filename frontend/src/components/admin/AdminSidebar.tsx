@@ -16,6 +16,7 @@ import {
   ActivitySquare,
   X,
   ExternalLink,
+  Coins,
 } from "lucide-react";
 import { useThemeMode } from "../../hooks/useThemeMode";
 
@@ -102,6 +103,12 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           label: "Analytics",
           icon: BarChart3,
           path: "/admin/analytics",
+        },
+        {
+          id: "credits",
+          label: "Credits",
+          icon: Coins,
+          path: "/admin/credits",
         },
       ],
     },

@@ -15,6 +15,7 @@ import {
   ActivitySquare,
   ExternalLink,
   Shield,
+  Coins,
 } from "lucide-react";
 import TooltipPortal from "../TooltipPortal";
 
@@ -82,6 +83,12 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
           label: "Analytics",
           icon: BarChart3,
           path: "/admin/analytics",
+        },
+        {
+          id: "credits",
+          label: "Credits",
+          icon: Coins,
+          path: "/admin/credits",
         },
       ],
     },

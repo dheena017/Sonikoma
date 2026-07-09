@@ -14,6 +14,7 @@ import {
   AdminSettingsTab,
   AdminUsageTab,
   AdminUsersTab,
+  AdminCreditsTab,
 } from "./Tabs";
 import AdminLayout from "./AdminLayout";
 import AdminDashboardPage from "./AdminDashboardPage";
@@ -181,6 +182,13 @@ const AdminPage = React.memo(
         case "users":
           return (
             <AdminUsersTab
+              fetchWithInterceptor={fetchWithInterceptor}
+              addNotification={addNotification}
+            />
+          );
+        case "credits":
+          return (
+            <AdminCreditsTab
               fetchWithInterceptor={fetchWithInterceptor}
               addNotification={addNotification}
             />

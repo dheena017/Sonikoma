@@ -2692,7 +2692,7 @@ def delete_youtube_credentials(user_id: str) -> bool:
 
 
 def admin_query_db(table: str, limit: int = 100, offset: int = 0) -> list[dict]:
-    allowed_tables = ['users', 'series', 'chapters', 'panels', 'user_audit_logs', 'platform_settings', 'system_announcements', 'user_invoices', 'scrape_sessions', 'user_api_keys', 'token_usage_logs']
+    allowed_tables = ['users', 'series', 'chapters', 'panels', 'user_audit_logs', 'platform_settings', 'system_announcements', 'user_invoices', 'scrape_sessions', 'user_api_keys', 'token_usage_logs', 'credit_transactions']
     if table not in allowed_tables:
         raise ValueError("Table not allowed")
 
