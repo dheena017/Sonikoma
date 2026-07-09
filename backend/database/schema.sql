@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS users (
   language        TEXT    NOT NULL DEFAULT 'en',
   portfolio_links TEXT    NOT NULL DEFAULT '[]',
   credits         INTEGER NOT NULL DEFAULT 840,
+  credit_balance  INTEGER NOT NULL DEFAULT 840,
   last_claimed_date TEXT,
   unlocked_rewards TEXT   NOT NULL DEFAULT '[]',
   mfa_enabled     INTEGER NOT NULL DEFAULT 0,
@@ -179,6 +180,19 @@ CREATE TABLE IF NOT EXISTS token_usage_logs (
 
 CREATE INDEX IF NOT EXISTS idx_token_logs_project_id ON token_usage_logs(project_id);
 CREATE INDEX IF NOT EXISTS idx_token_logs_created_at ON token_usage_logs(created_at);
+
+-- 11b. Credit Transactions Ledger
+CREATE TABLE IF NOT EXISTS credit_transactions (
+  id              TEXT PRIMARY KEY,
+  user_id         TEXT NOT NULL,
+  amount          INTEGER NOT NULL,
+  feature_name    TEXT NOT NULL,
+  created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_credit_transactions_user ON credit_transactions(user_id);
+
 
 -- 12. System Announcements
 CREATE TABLE IF NOT EXISTS system_announcements (

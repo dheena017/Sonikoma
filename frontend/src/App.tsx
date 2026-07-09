@@ -1260,6 +1260,7 @@ export default function App() {
               setNotificationsMuted={setNotificationsMuted}
               themeMode={themeMode}
               toggleThemeMode={toggleThemeMode}
+              fetchWithInterceptor={fetchWithInterceptor}
             />
           )
         )}

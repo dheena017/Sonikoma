@@ -18,7 +18,7 @@ from fastapi import APIRouter, Header, HTTPException, HTTPException, Body, Depen
 from pydantic import BaseModel, Field
 from PIL import Image
 from routes.auth_routes import get_current_user
-from database.db import write_audit_log
+from database.db import write_audit_log, deduct_credits, check_credits, get_available_credits, record_credit_transaction
 
 import utils.image_utils as img_utils
 from utils.cache import stitched_cache, edit_history
@@ -661,9 +661,13 @@ async def api_list_models(body: Optional[ListModelsRequest] = None, user_keys: d
         }
 
 @router.post("/analyze-image", summary="Generate narration script and SFX for a single panel")
-async def analyze_image(body: AnalyzeImageRequest, user_api_key: str = Depends(get_user_gemini_key)):
+async def analyze_image(body: AnalyzeImageRequest, user_api_key: str = Depends(get_user_gemini_key), current_user: dict = Depends(get_current_user)):
     start_time = time.time()
     logger.info(f"[Model] Received analysis request for model: {body.model}")
+
+    COST = 5
+    if get_available_credits(current_user["user_id"]) < COST:
+        raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
 
     # 1. Resolve image
     try:
@@ -747,6 +751,9 @@ async def analyze_image(body: AnalyzeImageRequest, user_api_key: str = Depends(g
             logger.error(f"[analyze_image] Failed to pre-generate panel audio: {audio_err}", exc_info=True)
 
         elapsed = int((time.time() - start_time) * 1000)
+
+        # Success: record credit transaction in the ledger
+        record_credit_transaction(current_user["user_id"], -COST, "analyze_image")
 
         return {
             "success": True,
@@ -871,12 +878,17 @@ async def analyze_batch(body: AnalyzeBatchRequest, user_api_key: str = Depends(g
     }
 
 @router.post("/analyze-sequence", summary="Analyze multiple panels together for context-aware narrative")
-async def analyze_sequence(body: AnalyzeSequenceRequest, user_api_key: str = Depends(get_user_gemini_key)):
+async def analyze_sequence(body: AnalyzeSequenceRequest, user_api_key: str = Depends(get_user_gemini_key), current_user: dict = Depends(get_current_user)):
     start_time = time.time()
     logger.info(f"[Sequence] Received sequence analysis for {len(body.urls)} panels.")
 
     if not body.urls:
         raise HTTPException(status_code=400, detail="Urls list cannot be empty")
+
+    # Credit check: 5 credits per panel, capped at 50 per batch
+    COST = min(50, len(body.urls) * 5)
+    if get_available_credits(current_user["user_id"]) < COST:
+        raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
 
     target_model = body.model or MODEL_FALLBACKS[0]
     if target_model.lower().startswith("gemini") and "gemini-3.5" in target_model.lower():
@@ -1166,6 +1178,10 @@ async def analyze_sequence(body: AnalyzeSequenceRequest, user_api_key: str = Dep
         final_results = [r for r in results if r is not None]
 
         elapsed = int((time.time() - start_time) * 1000)
+        
+        # Success: record credit transaction in the ledger
+        record_credit_transaction(current_user["user_id"], -COST, "analyze_sequence")
+
         return {
             "success": True,
             "results": final_results,
@@ -1182,8 +1198,11 @@ async def analyze_sequence(body: AnalyzeSequenceRequest, user_api_key: str = Dep
 @router.post("/ai-smart-crop", summary="Crop panels automatically using local CV or Gemini")
 @router.post("/detect-panels")
 @router.post("/ai-detect-panels")
-async def ai_smart_crop(body: SmartCropRequest, user_api_key: str = Depends(get_user_gemini_key)):
+async def ai_smart_crop(body: SmartCropRequest, user_api_key: str = Depends(get_user_gemini_key), current_user: dict = Depends(get_current_user)):
     logger.info(f"[AI Smart Crop] Request received. Strategy: {body.strategy}, Model: {body.model}")
+    COST = 5
+    if get_available_credits(current_user["user_id"]) < COST:
+        raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
     try:
         resolved = await img_utils.resolve_image_to_buffer(body.url)
         image_buffer = resolved["data"]
@@ -1384,6 +1403,8 @@ async def ai_smart_crop(body: SmartCropRequest, user_api_key: str = Depends(get_
             cropped_panels.append(panel_res)
 
         logger.info(f"[AI Smart Crop] Successfully processed {len(cropped_panels)} panels.")
+        # Success: record credit transaction in the ledger
+        record_credit_transaction(current_user["user_id"], -COST, "ai_smart_crop")
         return {
             "success": True,
             "panels": cropped_panels,
@@ -1398,15 +1419,20 @@ async def ai_smart_crop(body: SmartCropRequest, user_api_key: str = Depends(get_
 
 @router.post("/ai-smart-crop-batch", summary="Batch crop panels automatically using local CV or Gemini")
 @router.post("/detect-panels-batch")
-async def ai_smart_crop_batch(body: SmartCropBatchRequest, user_api_key: str = Depends(get_user_gemini_key)):
+async def ai_smart_crop_batch(body: SmartCropBatchRequest, user_api_key: str = Depends(get_user_gemini_key), current_user: dict = Depends(get_current_user)):
     logger.info(f"[AI Smart Crop Batch] Request received for {len(body.urls)} URLs.")
     if not body.urls:
         raise HTTPException(status_code=400, detail="Field 'urls' must be a non-empty list.")
 
+    # Credit check: 5 credits per URL, capped at 50
+    COST = min(50, len(body.urls) * 5)
+    if get_available_credits(current_user["user_id"]) < COST:
+        raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
+
     results = []
     semaphore = asyncio.Semaphore(4)
 
-    # We can just reuse the existing endpoint logic by calling its function manually
+    # Delegate to single-crop helper (skipping per-call credit check by passing a mock user)
     async def process_one(url: str):
         async with semaphore:
             try:
@@ -1429,7 +1455,10 @@ async def ai_smart_crop_batch(body: SmartCropBatchRequest, user_api_key: str = D
                     guidanceInstructions=body.guidanceInstructions,
                     focusMode=body.focusMode
                 )
-                res = await ai_smart_crop(single_request, user_api_key)
+                # Pass a mock user with very high credits so the per-item check always passes;
+                # the batch-level check above is the authoritative gate.
+                mock_user = {"user_id": current_user["user_id"], "credits": 99999, "credit_balance": 99999}
+                res = await ai_smart_crop(single_request, user_api_key, mock_user)
                 results.append({"url": url, "success": True, "data": res})
             except Exception as e:
                 logger.warning(f"[Smart Crop Batch] Failed for URL {url[:50]}: {e}")
@@ -1438,6 +1467,8 @@ async def ai_smart_crop_batch(body: SmartCropBatchRequest, user_api_key: str = D
     tasks = [process_one(url) for url in body.urls]
     await asyncio.gather(*tasks)
 
+    # Record one batch transaction after all items complete
+    record_credit_transaction(current_user["user_id"], -COST, "ai_smart_crop_batch")
     return {"success": True, "results": results}
 
 

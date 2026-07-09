@@ -184,6 +184,30 @@ def init_db() -> None:
                 );
                 """)
                 conn.commit()
+
+            # Check and initialize credit_transactions table
+            row_tx = conn.execute("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'credit_transactions') as exists").fetchone()
+            if not row_tx or not row_tx.get('exists'):
+                logger.info("[Database] Initializing PostgreSQL credit_transactions schema...")
+                conn.executescript("""
+                CREATE TABLE IF NOT EXISTS credit_transactions (
+                  id              TEXT PRIMARY KEY,
+                  user_id         TEXT NOT NULL,
+                  amount          INTEGER NOT NULL,
+                  feature_name    TEXT NOT NULL,
+                  created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                );
+                CREATE INDEX IF NOT EXISTS idx_credit_transactions_user ON credit_transactions(user_id);
+                """)
+                conn.commit()
+
+            # Check and add credit_balance column to users table if missing
+            row_col = conn.execute("SELECT EXISTS (SELECT FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'credit_balance') as exists").fetchone()
+            if not row_col or not row_col.get('exists'):
+                logger.info("[Database] Migration: adding 'credit_balance' column to 'users' table...")
+                conn.execute("ALTER TABLE users ADD COLUMN credit_balance INTEGER NOT NULL DEFAULT 840")
+                conn.commit()
         except Exception as e:
             logger.error(f"[Database] Error checking PostgreSQL schema: {e}")
         finally:
@@ -420,8 +444,31 @@ def init_db() -> None:
                 ('log_max_entries', '5000')
             ]
             cursor.executemany("INSERT INTO platform_settings (key, value) VALUES (?, ?)", defaults)
+        # Migration: add credit_balance column to users table
+        try:
+            cursor.execute("ALTER TABLE users ADD COLUMN credit_balance INTEGER NOT NULL DEFAULT 840")
+            # Sync credit_balance with existing credits balances
+            cursor.execute("UPDATE users SET credit_balance = credits WHERE credit_balance = 840 AND credits != 840")
+            logger.info("[Database] Migration: added 'credit_balance' column to 'users' table.")
+        except Exception:
+            pass  # Column already exists
+
+        # Migration: ensure credit_transactions ledger table exists
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS credit_transactions (
+          id              TEXT PRIMARY KEY,
+          user_id         TEXT NOT NULL,
+          amount          INTEGER NOT NULL,
+          feature_name    TEXT NOT NULL,
+          created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+        """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_credit_transactions_user ON credit_transactions(user_id)")
+        logger.info("[Database] Migration: verified credit_transactions table.")
 
         conn.commit()
+
     except sqlite3.Error as e:
         logger.error(f"[Database] Error checking or applying schema: {e}")
     finally:
@@ -537,6 +584,112 @@ def update_user(user_id: str, updates: Dict[str, Any]) -> None:
             conn.commit()
     finally:
         conn.close()
+
+def get_available_credits(user_id: str) -> int:
+    """
+    Return the current credit balance for a user.
+    Reads from credit_balance first; falls back to credits for legacy rows
+    that pre-date the credit_balance column.
+    """
+    conn = get_db_connection()
+    try:
+        row = conn.execute(
+            'SELECT credits, credit_balance FROM users WHERE id = ?', (user_id,)
+        ).fetchone()
+        if row is None:
+            return 0
+        # credit_balance is authoritative; fall back to credits for old rows
+        bal = row['credit_balance'] if row['credit_balance'] is not None else row['credits']
+        return bal if bal is not None else 840
+    except Exception:
+        # Graceful fallback: credit_balance column may not yet exist on older SQLite DBs
+        try:
+            row = conn.execute('SELECT credits FROM users WHERE id = ?', (user_id,)).fetchone()
+            return (row['credits'] if row and row['credits'] is not None else 840)
+        except Exception:
+            return 0
+    finally:
+        conn.close()
+
+
+def record_credit_transaction(user_id: str, amount: int, feature_name: str) -> int:
+    """
+    Record a credit change (positive = addition, negative = deduction).
+    Atomically:
+      1. Validates sufficient balance for deductions.
+      2. Updates both `credits` and `credit_balance` on the users row.
+      3. Inserts a row in the credit_transactions ledger.
+    Returns the new balance.
+    Raises ValueError when a deduction exceeds the current balance.
+    """
+    conn = get_db_connection()
+    try:
+        row = conn.execute(
+            'SELECT credits, credit_balance FROM users WHERE id = ?', (user_id,)
+        ).fetchone()
+        if row is None:
+            raise ValueError("User not found")
+
+        try:
+            current = row['credit_balance'] if row['credit_balance'] is not None else row['credits']
+        except Exception:
+            current = row['credits']
+        current = current if current is not None else 840
+
+        # Validate deductions
+        if amount < 0 and current < abs(amount):
+            raise ValueError(
+                f"Insufficient credits: need {abs(amount)}, have {current}"
+            )
+
+        new_balance = current + amount  # amount is negative for deductions
+
+        try:
+            conn.execute(
+                "UPDATE users SET credits = ?, credit_balance = ?, updated_at = datetime('now') WHERE id = ?",
+                (new_balance, new_balance, user_id)
+            )
+        except Exception:
+            # Fallback if credit_balance column doesn't exist yet
+            conn.execute(
+                "UPDATE users SET credits = ?, updated_at = datetime('now') WHERE id = ?",
+                (new_balance, user_id)
+            )
+
+        # Insert ledger row
+        try:
+            tx_id = str(uuid.uuid4())
+            conn.execute(
+                "INSERT INTO credit_transactions (id, user_id, amount, feature_name) VALUES (?, ?, ?, ?)",
+                (tx_id, user_id, amount, feature_name)
+            )
+        except Exception as e:
+            logger.warning(f"[Credits] Could not write transaction ledger row: {e}")
+
+        conn.commit()
+        return new_balance
+    finally:
+        conn.close()
+
+
+# ─── Backward-compatible aliases ──────────────────────────────────────────────
+
+def check_credits(user_id: str) -> int:
+    """Alias for get_available_credits for backward compatibility."""
+    return get_available_credits(user_id)
+
+
+def deduct_credits(user_id: str, amount: int) -> int:
+    """
+    Atomically deduct credits. Backward-compatible wrapper around
+    record_credit_transaction.
+    Raises ValueError if the user does not have enough credits.
+    Returns the new balance after deduction.
+    """
+    return record_credit_transaction(user_id, -amount, "deduction")
+
+
+
 
 def delete_user(user_id: str) -> None:
     """
@@ -998,6 +1151,15 @@ def get_user_invoices(user_id: str) -> List[Dict[str, Any]]:
         return [dict(r) for r in rows]
     finally:
         conn.close()
+
+def get_credit_transactions(user_id: str) -> List[Dict[str, Any]]:
+    conn = get_db_connection()
+    try:
+        rows = conn.execute("SELECT * FROM credit_transactions WHERE user_id = ? ORDER BY created_at DESC", (user_id,)).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
 
 def seed_default_invoices_if_empty(user_id: str) -> None:
     conn = get_db_connection()

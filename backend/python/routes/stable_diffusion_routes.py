@@ -10,11 +10,13 @@ import tempfile
 import logging
 from typing import List, Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from media.ai.stable_diffusion_engine import get_stable_diffusion_engine
+from routes.auth_routes import get_current_user
+from database.db import get_available_credits, record_credit_transaction
 
 logger = logging.getLogger("sonikoma.routes.stable_diffusion_routes")
 router = APIRouter()
@@ -72,7 +74,12 @@ def _default_output_path(suffix: str) -> str:
 
 
 @router.post("/generate-ai", summary="Generate image(s) from text prompt")
-async def generate_ai(body: GenerateAIRequest):
+async def generate_ai(body: GenerateAIRequest, current_user: dict = Depends(get_current_user)):
+    # 10 credits per image
+    COST = 10 * (body.num_images or 1)
+    if get_available_credits(current_user["user_id"]) < COST:
+        raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
+
     output_dir = body.output_dir or tempfile.gettempdir()
     try:
         results = await stable_diffusion.generate_images(
@@ -86,6 +93,7 @@ async def generate_ai(body: GenerateAIRequest):
             seed=body.seed,
             output_dir=output_dir,
         )
+        record_credit_transaction(current_user["user_id"], -COST, "sd_generate")
         return {"success": True, "images": [img.image_path for img in results]}
     except Exception as exc:
         logger.error(f"Generate AI failed: {exc}", exc_info=True)
@@ -93,7 +101,11 @@ async def generate_ai(body: GenerateAIRequest):
 
 
 @router.post("/inpaint", summary="Inpaint an image based on a mask")
-async def inpaint(body: InpaintRequest):
+async def inpaint(body: InpaintRequest, current_user: dict = Depends(get_current_user)):
+    COST = 10
+    if get_available_credits(current_user["user_id"]) < COST:
+        raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
+
     output_path = body.output_path or _default_output_path(".png")
     try:
         result = await stable_diffusion.inpaint(
@@ -106,6 +118,7 @@ async def inpaint(body: InpaintRequest):
             num_inference_steps=body.num_inference_steps,
             strength=body.strength,
         )
+        record_credit_transaction(current_user["user_id"], -COST, "sd_inpaint")
         return {"success": True, "output_path": result.image_path}
     except Exception as exc:
         logger.error(f"Inpaint failed: {exc}", exc_info=True)
@@ -113,10 +126,15 @@ async def inpaint(body: InpaintRequest):
 
 
 @router.post("/upscale", summary="Upscale an image")
-async def upscale(body: UpscaleRequest):
+async def upscale(body: UpscaleRequest, current_user: dict = Depends(get_current_user)):
+    COST = 5
+    if get_available_credits(current_user["user_id"]) < COST:
+        raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
+
     output_path = body.output_path or _default_output_path(".png")
     try:
         result = await stable_diffusion.upscale(body.image_path, output_path=output_path, scale_factor=body.scale_factor)
+        record_credit_transaction(current_user["user_id"], -COST, "sd_upscale")
         return {"success": True, "output_path": result}
     except Exception as exc:
         logger.error(f"Upscale failed: {exc}", exc_info=True)
@@ -124,7 +142,11 @@ async def upscale(body: UpscaleRequest):
 
 
 @router.post("/style-transfer", summary="Apply style transfer to an image")
-async def style_transfer(body: StyleTransferRequest):
+async def style_transfer(body: StyleTransferRequest, current_user: dict = Depends(get_current_user)):
+    COST = 15
+    if get_available_credits(current_user["user_id"]) < COST:
+        raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
+
     output_path = body.output_path or _default_output_path(".png")
     try:
         result = await stable_diffusion.style_transfer(
@@ -134,6 +156,7 @@ async def style_transfer(body: StyleTransferRequest):
             guidance_scale=body.guidance_scale,
             num_inference_steps=body.num_inference_steps,
         )
+        record_credit_transaction(current_user["user_id"], -COST, "sd_style_transfer")
         return {"success": True, "output_path": result.image_path}
     except Exception as exc:
         logger.error(f"Style transfer failed: {exc}", exc_info=True)
@@ -141,7 +164,12 @@ async def style_transfer(body: StyleTransferRequest):
 
 
 @router.post("/batch-generate", summary="Generate a batch of images from multiple prompts")
-async def batch_generate(body: BatchGenerateRequest):
+async def batch_generate(body: BatchGenerateRequest, current_user: dict = Depends(get_current_user)):
+    # 10 credits per prompt in the batch
+    COST = min(100, len(body.prompts) * 10)
+    if get_available_credits(current_user["user_id"]) < COST:
+        raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
+
     output_dir = body.output_dir or tempfile.gettempdir()
     try:
         images = []
@@ -156,6 +184,7 @@ async def batch_generate(body: BatchGenerateRequest):
                 output_dir=output_dir,
             )
             images.extend([img.image_path for img in results])
+        record_credit_transaction(current_user["user_id"], -COST, "sd_batch_generate")
         return {"success": True, "images": images}
     except Exception as exc:
         logger.error(f"Batch generate failed: {exc}", exc_info=True)

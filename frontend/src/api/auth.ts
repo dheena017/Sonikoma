@@ -204,3 +204,39 @@ export const deleteAccount = async (fetchWithInterceptor: any) => {
 
   return res.json();
 };
+
+export const getUserCredits = async (fetchWithInterceptor: any): Promise<number | null> => {
+  try {
+    const res = await fetchWithInterceptor("/api/auth/credits");
+    const data = await res.json();
+    if (data.success && typeof data.credits === "number") {
+      return data.credits;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+export interface CreditTransaction {
+  id: string;
+  user_id: string;
+  amount: number;
+  feature_name: string;
+  created_at: string;
+}
+
+export const getTransactions = async (
+  fetchWithInterceptor: any
+): Promise<CreditTransaction[]> => {
+  try {
+    const res = await fetchWithInterceptor("/api/auth/transactions");
+    const data = await res.json();
+    if (data.success && Array.isArray(data.transactions)) {
+      return data.transactions;
+    }
+    return [];
+  } catch {
+    return [];
+  }
+};

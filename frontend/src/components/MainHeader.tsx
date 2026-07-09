@@ -23,11 +23,13 @@ import {
   Sun,
   Moon,
   Cloud,
+  Zap,
 } from "lucide-react";
 import { GeneratedPanel } from "../types";
 import NotificationDropdown from "./notification/NotificationDropdown";
 import { Notification } from "./notification/NotificationStack";
 import { useAIModels } from "@/hooks/useAIModels";
+import { getUserCredits } from "../api/auth";
 
 interface HeaderProps {
   isProcessing: boolean;
@@ -70,6 +72,7 @@ interface HeaderProps {
   toggleThemeMode?: () => void;
   autoPlayAudio?: boolean;
   setAutoPlayAudio?: (val: boolean) => void;
+  fetchWithInterceptor?: any;
 }
 
 /** Format seconds into a readable "Xm Ys" string */
@@ -122,11 +125,39 @@ const HeaderInner = ({
   toggleThemeMode,
   autoPlayAudio: autoPlayAudioProp,
   setAutoPlayAudio,
+  fetchWithInterceptor,
 }: HeaderProps) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const { models: aiModels } = useAIModels();
+
+  // Credits state — polled from server every 30 s and on mount
+  const [credits, setCredits] = useState<number | null>(
+    user?.credits !== undefined ? user.credits : null
+  );
+
+  useEffect(() => {
+    if (!fetchWithInterceptor) return;
+    const pollCredits = async () => {
+      try {
+        const result = await getUserCredits(fetchWithInterceptor);
+        if (result !== null) setCredits(result);
+      } catch {
+        // silent
+      }
+    };
+    pollCredits();
+    const interval = setInterval(pollCredits, 30_000);
+    return () => clearInterval(interval);
+  }, [fetchWithInterceptor]);
+
+  // Also sync with user prop when it changes (e.g., after claim)
+  useEffect(() => {
+    if (user?.credits !== undefined) {
+      setCredits(user.credits);
+    }
+  }, [user?.credits]);
 
   // Search & Navigation Palette states
   const [searchQuery, setSearchQuery] = useState("");
@@ -1189,6 +1220,26 @@ const HeaderInner = ({
             </div>
           )}
         </div>
+
+        {/* Credits Badge */}
+        {credits !== null && (
+          <button
+            onClick={() => navigateTo("/profile?tab=billing")}
+            title={`${credits} AI credits remaining — click to top up`}
+            className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-[11px] font-bold transition-all cursor-pointer ${
+              credits < 50
+                ? "bg-amber-500/10 border-amber-500/40 text-amber-400 hover:bg-amber-500/20"
+                : "bg-neutral-900 border-neutral-850 text-purple-400 hover:border-purple-500/50 hover:bg-neutral-850"
+            }`}
+          >
+            <Zap
+              className={`w-3.5 h-3.5 ${
+                credits < 50 ? "text-amber-400" : "text-purple-400"
+              }`}
+            />
+            <span>{credits.toLocaleString()}</span>
+          </button>
+        )}
 
         {/* User Profile */}
         <button

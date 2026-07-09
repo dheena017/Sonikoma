@@ -164,6 +164,28 @@ export function createFetchWithInterceptor({
 
               handled = true;
               return;
+            } else if (response.status === 402) {
+              const errorData = await response
+                .clone()
+                .json()
+                .catch(() => ({}));
+              const detail =
+                errorData.detail ||
+                "You don't have enough credits to perform this action.";
+              errMsg = `Insufficient Credits: ${detail}`;
+              addNotification(
+                `⚡ Out of Credits! ${detail} Visit your profile to top up.`,
+                "error"
+              );
+              setErrorPopup({
+                title: "Insufficient Credits (402)",
+                message: detail,
+                type: "warning",
+                technicalDetails: `HTTP 402 Payment Required\nEndpoint: ${input}`,
+                suggestion:
+                  "Purchase more AI credits or claim your daily bonus in your Profile → Billing page.",
+              });
+              handled = true;
             } else if (response.status === 500) {
               let backendError = "";
               if (contentType.includes("application/json")) {

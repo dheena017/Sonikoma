@@ -47,7 +47,8 @@ from database.db import (
     get_all_users, delete_user,
     get_platform_settings, update_platform_settings, get_global_audit_logs,
     get_announcements, create_announcement, delete_announcement,
-    reset_platform_settings, purge_global_cache
+    reset_platform_settings, purge_global_cache,
+    check_credits, get_available_credits, record_credit_transaction, get_credit_transactions
 )
 
 logger = logging.getLogger("sonikoma.auth")
@@ -752,14 +753,13 @@ async def claim_credits(request: Request, current_user: dict = Depends(get_curre
     REWARDS = {1: 50, 2: 60, 3: 75, 4: 90, 5: 110, 6: 130, 7: 150}
     reward = REWARDS.get(current_streak_day, 50)
     
-    current_credits = current_user.get("credits") if current_user.get("credits") is not None else 840
-    new_credits = min(5000, current_credits + reward)
+    # Record daily claim transaction in ledger and update balances
+    new_credits = record_credit_transaction(current_user["user_id"], reward, "daily_claim")
     
     next_streak_day = (current_streak_day % 7) + 1
     prefs["claim_streak"] = next_streak_day
     
     update_user(current_user["user_id"], {
-        "credits": new_credits,
         "last_claimed_date": today_str,
         "preferences": json.dumps(prefs)
     })
@@ -784,8 +784,8 @@ async def redeem_points(body: RedeemPointsRequest, request: Request, current_use
     
     if body.reward_type == "credits":
         credits_to_add = int(body.reward_value)
-        current_credits = current_user.get("credits") if current_user.get("credits") is not None else 840
-        new_credits = min(5000, current_credits + credits_to_add)
+        # Record points exchange transaction
+        new_credits = record_credit_transaction(current_user["user_id"], credits_to_add, "points_redemption")
         
         try:
             rewards = json.loads(current_user.get("unlocked_rewards") or "[]")
@@ -797,7 +797,6 @@ async def redeem_points(body: RedeemPointsRequest, request: Request, current_use
             rewards.append(reward_name)
             
         update_user(current_user["user_id"], {
-            "credits": new_credits,
             "unlocked_rewards": json.dumps(rewards)
         })
         write_audit_log(current_user["user_id"], f"Exchanged points for +{credits_to_add} compute credits", ip_addr, "Success")
@@ -958,13 +957,7 @@ async def purchase_credits(body: PurchaseCreditsRequest, request: Request, curre
     import json
     ip_addr = request.client.host if request.client else "127.0.0.1"
     
-    current_credits = current_user.get("credits") if current_user.get("credits") is not None else 840
-    new_credits = min(5000, current_credits + body.credits)
-    
-    update_user(current_user["user_id"], {
-        "credits": new_credits
-    })
-    
+    new_credits = record_credit_transaction(current_user["user_id"], body.credits, "purchase")
     create_user_invoice(current_user["user_id"], body.amount, "Paid")
     
     write_audit_log(current_user["user_id"], f"Purchased {body.credits} compute credits", ip_addr, "Success")
@@ -973,6 +966,24 @@ async def purchase_credits(body: PurchaseCreditsRequest, request: Request, curre
         "credits": new_credits, 
         "message": f"Successfully purchased {body.credits} credits."
     }
+
+@router.get("/credits")
+async def get_credits(current_user: dict = Depends(get_current_user)):
+    """
+    Return the current credit balance for the authenticated user.
+    This lightweight endpoint is polled by the header to keep the UI in sync.
+    """
+    balance = get_available_credits(current_user["user_id"])
+    return {"success": True, "credits": balance}
+
+@router.get("/transactions")
+async def get_transactions(current_user: dict = Depends(get_current_user)):
+    """
+    Return the transaction ledger history list for the authenticated user.
+    """
+    txs = get_credit_transactions(current_user["user_id"])
+    return {"success": True, "transactions": txs}
+
 
 # --- Ultimate Admin Features -----------------------------------------------
 

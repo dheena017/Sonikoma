@@ -6,7 +6,9 @@ import asyncio
 import aiohttp
 import tempfile
 import shutil
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
+from routes.auth_routes import get_current_user
+from database.db import deduct_credits, get_available_credits, record_credit_transaction
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from PIL import Image
@@ -524,12 +526,21 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
                 except: pass
 
 @router.post("/render")
-async def render_video(request: RenderRequest, background_tasks: BackgroundTasks):
+async def render_video(request: RenderRequest, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user)):
     if not request.panels:
         raise HTTPException(status_code=400, detail="Panel list is empty.")
 
+    # Credit check-first, deduct on dispatch (render runs as background task)
+    COST = 20
+    if get_available_credits(current_user["user_id"]) < COST:
+        raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST} for video render.")
+
     video_id = str(uuid.uuid4())[:8]
     RENDER_JOBS[video_id] = {"status": "processing", "progress": 0, "url": None}
+
+    # Record the deduction atomically before dispatching the background task
+    record_credit_transaction(current_user["user_id"], -COST, "video_render")
+
     background_tasks.add_task(process_render_job, video_id, request.panels, request.voice)
 
     return {"success": True, "job_id": video_id}

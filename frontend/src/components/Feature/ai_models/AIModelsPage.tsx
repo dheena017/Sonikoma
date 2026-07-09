@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ArrowLeft, Award, Zap, Brain } from "lucide-react";
 import * as api from "@/api";
+import { getTransactions, CreditTransaction } from "../../../api/auth";
 
 import CredentialsAndTuner from "./CredentialsAndTuner.js";
 import ModelRegistryExplorer from "./ModelRegistryExplorer.js";
@@ -106,6 +107,22 @@ const AIModelsPage = React.memo(
     const [tokenLogs, setTokenLogs] = useState<any[]>([]);
     const [loadingTokenLogs, setLoadingTokenLogs] = useState(true);
     const [tokenLogsError, setTokenLogsError] = useState<string | null>(null);
+
+    // Credit Transaction Ledger States
+    const [creditTransactions, setCreditTransactions] = useState<CreditTransaction[]>([]);
+    const [loadingCreditTxs, setLoadingCreditTxs] = useState(true);
+
+    const fetchCreditTransactions = async () => {
+      try {
+        setLoadingCreditTxs(true);
+        const txs = await getTransactions(activeFetch);
+        setCreditTransactions(txs);
+      } catch {
+        setCreditTransactions([]);
+      } finally {
+        setLoadingCreditTxs(false);
+      }
+    };
 
     // Calculate session statistics from runHistory
     const successfulRuns = runHistory.filter((r) => r.success);
@@ -229,6 +246,7 @@ const AIModelsPage = React.memo(
 
     useEffect(() => {
       fetchTokenLogs();
+      fetchCreditTransactions();
     }, []);
 
     // Fetch models for the active tab
@@ -1181,6 +1199,97 @@ ${playgroundPrompt}
             fetchTokenLogs={fetchTokenLogs}
             addNotification={addNotification}
           />
+
+          {/* Credit Transaction Ledger */}
+          <div className="bg-neutral-950/40 border border-neutral-900 rounded-3xl p-6 relative overflow-hidden">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-24 bg-purple-500/5 blur-[85px] rounded-full pointer-events-none" />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-neutral-900 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="bg-purple-500/10 border border-purple-500/20 p-2.5 rounded-2xl">
+                    <Zap className="h-5 w-5 text-purple-400" />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-bold text-white uppercase tracking-wider font-mono">Credit Transaction History</h2>
+                    <p className="text-[10px] text-neutral-500 font-mono mt-0.5">All credit deductions and additions across features</p>
+                  </div>
+                </div>
+                <button
+                  onClick={fetchCreditTransactions}
+                  disabled={loadingCreditTxs}
+                  className="p-2 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-neutral-700 hover:text-white transition-all cursor-pointer disabled:opacity-50"
+                  title="Refresh"
+                >
+                  <Brain className={`h-4 w-4 text-neutral-450 ${loadingCreditTxs ? "animate-spin text-purple-400" : ""}`} />
+                </button>
+              </div>
+
+              {loadingCreditTxs ? (
+                <div className="flex flex-col items-center justify-center py-12 text-neutral-500 font-mono text-xs">
+                  <Brain className="h-8 w-8 animate-spin mb-3 text-purple-400" />
+                  <span>Loading transaction history...</span>
+                </div>
+              ) : creditTransactions.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-neutral-600 font-mono text-xs text-center">
+                  <Zap className="h-12 w-12 mb-3 text-neutral-850 stroke-[1.5]" />
+                  <p className="font-bold text-neutral-500">No credit transactions yet.</p>
+                  <p className="text-neutral-600 mt-1">Credits spent on AI features will appear here.</p>
+                </div>
+              ) : (
+                <div className="space-y-4 font-mono text-xs">
+                  {/* Summary row */}
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="bg-neutral-900/30 border border-neutral-900 p-4 rounded-2xl">
+                      <p className="text-[9px] uppercase text-neutral-500 font-bold mb-1">Total Spent</p>
+                      <p className="text-2xl font-black text-red-400">
+                        {Math.abs(creditTransactions.filter(t => t.amount < 0).reduce((s, t) => s + t.amount, 0))}
+                      </p>
+                    </div>
+                    <div className="bg-neutral-900/30 border border-neutral-900 p-4 rounded-2xl">
+                      <p className="text-[9px] uppercase text-neutral-500 font-bold mb-1">Total Earned</p>
+                      <p className="text-2xl font-black text-emerald-400">
+                        {creditTransactions.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0)}
+                      </p>
+                    </div>
+                    <div className="bg-neutral-900/30 border border-neutral-900 p-4 rounded-2xl">
+                      <p className="text-[9px] uppercase text-neutral-500 font-bold mb-1">Transactions</p>
+                      <p className="text-2xl font-black text-purple-400">{creditTransactions.length}</p>
+                    </div>
+                  </div>
+                  {/* Table */}
+                  <div className="border border-neutral-900 rounded-2xl overflow-hidden max-h-[300px] overflow-y-auto scrollbar-thin">
+                    <table className="w-full text-left text-[10px] border-collapse">
+                      <thead>
+                        <tr className="bg-neutral-900 border-b border-neutral-850 text-neutral-500 font-bold uppercase text-[8px] tracking-wider sticky top-0 z-[5]">
+                          <th className="p-3">Date</th>
+                          <th className="p-3">Feature</th>
+                          <th className="p-3 text-right">Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {creditTransactions.map((tx) => (
+                          <tr key={tx.id} className="border-b border-neutral-900/60 hover:bg-neutral-900/10 transition-all">
+                            <td className="p-3 text-neutral-500 whitespace-nowrap">
+                              {new Date(tx.created_at).toLocaleDateString()}{" "}
+                              {new Date(tx.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                            </td>
+                            <td className="p-3 text-white font-bold capitalize">
+                              {tx.feature_name.replace(/_/g, " ")}
+                            </td>
+                            <td className={`p-3 text-right font-black ${
+                              tx.amount < 0 ? "text-red-400" : "text-emerald-400"
+                            }`}>
+                              {tx.amount > 0 ? "+" : ""}{tx.amount}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Metrics Dashboard & Run History */}
           <BenchmarkRunHistory
