@@ -46,6 +46,13 @@ export function AdminUsersTab({
   const [loadingLogs, setLoadingLogs] = useState(false);
   const [justificationReason, setJustificationReason] = useState("");
 
+  // Grant Credits Modal State
+  const [grantCreditsUser, setGrantCreditsUser] = useState<any | null>(null);
+  const [grantAmount, setGrantAmount] = useState<number>(100);
+  const [grantReason, setGrantReason] = useState("");
+  const [isGranting, setIsGranting] = useState(false);
+
+
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -380,6 +387,17 @@ export function AdminUsersTab({
                           <History className="w-4 h-4" />
                         </button>
                         <button
+                          onClick={() => {
+                            setGrantCreditsUser(u);
+                            setGrantAmount(100);
+                            setGrantReason("Manual admin credit grant");
+                          }}
+                          className="p-1.5 hover:bg-purple-500/10 text-purple-400 rounded-md"
+                          title="Grant Credits"
+                        >
+                          <Coins className="w-4 h-4" />
+                        </button>
+                        <button
                           onClick={() => setEditingUser(u)}
                           className="p-1.5 hover:bg-neutral-800 text-neutral-300 rounded-md"
                           title="Edit"
@@ -561,6 +579,94 @@ export function AdminUsersTab({
                 className="flex-1 p-2 bg-rose-600 rounded"
               >
                 Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {grantCreditsUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#111115] border border-neutral-800 rounded-xl w-full max-w-md p-6">
+            <div className="flex items-center gap-3 text-purple-400 mb-4">
+              <Coins className="w-6 h-6" />
+              <h3 className="font-bold text-white">Grant / Adjust Credits</h3>
+            </div>
+            <p className="text-sm text-neutral-400 mb-4">
+              Adjust credits for <strong>{grantCreditsUser.email}</strong>. Use positive numbers to add, or negative numbers to deduct.
+            </p>
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs text-neutral-500 block mb-1">
+                  Amount
+                </label>
+                <input
+                  type="number"
+                  value={grantAmount}
+                  onChange={(e) => setGrantAmount(parseInt(e.target.value) || 0)}
+                  className="w-full bg-[#0b0b0e] border border-neutral-800 rounded p-2 text-white text-sm focus:border-purple-500/50 outline-none"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-neutral-500 block mb-1">
+                  Reason / Justification
+                </label>
+                <textarea
+                  value={grantReason}
+                  onChange={(e) => setGrantReason(e.target.value)}
+                  placeholder="Reason for manual adjustment..."
+                  className="w-full bg-[#0b0b0e] border border-neutral-800 rounded p-2 text-white text-sm h-20 focus:border-purple-500/50 outline-none"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2 mt-6">
+              <button
+                onClick={() => {
+                  setGrantCreditsUser(null);
+                  setGrantReason("");
+                }}
+                className="flex-1 p-2 bg-neutral-800 rounded"
+                disabled={isGranting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  if (grantAmount === 0) {
+                    addNotification("Amount cannot be zero", "warning");
+                    return;
+                  }
+                  setIsGranting(true);
+                  try {
+                    const res = await fetchWithInterceptor(
+                      `/api/auth/admin/users/${grantCreditsUser.id}/add-credits`,
+                      {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          amount: grantAmount,
+                          reason: grantReason,
+                        }),
+                      }
+                    );
+                    if (res.ok) {
+                      addNotification("Credits updated successfully", "success");
+                      setGrantCreditsUser(null);
+                      fetchUsers();
+                    } else {
+                      const err = await res.json();
+                      addNotification(err.detail || "Failed to update credits", "error");
+                    }
+                  } catch (err) {
+                    addNotification("Failed to update credits", "error");
+                  } finally {
+                    setIsGranting(false);
+                  }
+                }}
+                className="flex-1 p-2 bg-purple-650 hover:bg-purple-600 text-white rounded transition-all shadow-lg shadow-purple-500/20"
+                disabled={isGranting}
+              >
+                {isGranting ? "Updating..." : "Grant"}
               </button>
             </div>
           </div>

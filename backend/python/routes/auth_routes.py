@@ -598,6 +598,31 @@ async def admin_update_user(user_id: str, body: AdminUpdateUser, request: Reques
         
     return {"success": True, "message": "User updated successfully."}
 
+class AdminAddCreditsRequest(BaseModel):
+    amount: int
+    reason: Optional[str] = "Manual admin credit grant"
+
+@router.post("/admin/users/{user_id}/add-credits")
+async def admin_add_credits(user_id: str, body: AdminAddCreditsRequest, request: Request, current_user: dict = Depends(get_admin_user)):
+    ip_addr = request.client.host if request.client else "127.0.0.1"
+    try:
+        new_balance = record_credit_transaction(
+            user_id,
+            body.amount,
+            f"admin_grant: {body.reason}" if body.reason else "admin_grant"
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+        
+    log_msg = f"Admin granted {body.amount} credits to user {user_id}. New balance: {new_balance}"
+    write_audit_log(current_user["user_id"], log_msg, ip_addr, "Success")
+    
+    return {
+        "success": True,
+        "new_balance": new_balance,
+        "message": f"Successfully updated user credits by {body.amount}."
+    }
+
 @router.delete("/admin/users/{user_id}")
 async def admin_delete_user(user_id: str, request: Request, current_user: dict = Depends(get_admin_user)):
     ip_addr = request.client.host if request.client else "127.0.0.1"
