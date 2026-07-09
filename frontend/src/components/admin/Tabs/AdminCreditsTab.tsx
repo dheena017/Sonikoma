@@ -61,6 +61,12 @@ export function AdminCreditsTab({
     totalDeducted: 0,
   });
 
+  const [monthSummary, setMonthSummary] = useState({
+    added: 0,
+    deducted: 0,
+    net: 0,
+  });
+
   useEffect(() => {
     fetchUsers();
     fetchTransactions();
@@ -107,12 +113,30 @@ export function AdminCreditsTab({
             (acc: number, tx: any) => acc + (tx.amount < 0 ? Math.abs(tx.amount) : 0),
             0
           );
+          const now = new Date();
+          const monthAdded = data.data.reduce((acc: number, tx: any) => {
+            const created = new Date(tx.created_at);
+            return created.getFullYear() === now.getFullYear() && created.getMonth() === now.getMonth()
+              ? acc + (tx.amount > 0 ? tx.amount : 0)
+              : acc;
+          }, 0);
+          const monthDeducted = data.data.reduce((acc: number, tx: any) => {
+            const created = new Date(tx.created_at);
+            return created.getFullYear() === now.getFullYear() && created.getMonth() === now.getMonth()
+              ? acc + (tx.amount < 0 ? Math.abs(tx.amount) : 0)
+              : acc;
+          }, 0);
           setStats((prev) => ({
             ...prev,
             totalTransactions: data.data.length,
             totalAdded: pageAdded,
             totalDeducted: pageDeducted,
           }));
+          setMonthSummary({
+            added: monthAdded,
+            deducted: monthDeducted,
+            net: monthAdded - monthDeducted,
+          });
         }
       }
     } catch (err) {
@@ -328,6 +352,31 @@ export function AdminCreditsTab({
     document.body.removeChild(link);
   };
 
+  const exportSelectedUserCSV = () => {
+    if (!selectedUserId || selectedUserTransactions.length === 0) return;
+    const headers = ["Transaction ID", "User ID", "Feature / Reason", "Amount", "Timestamp"];
+    const rows = selectedUserTransactions.map((tx) => [
+      tx.id,
+      tx.user_id,
+      tx.feature_name,
+      tx.amount,
+      new Date(tx.created_at).toISOString(),
+    ]);
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute(
+      "download",
+      `credit_ledger_${selectedUserId}_${new Date().toISOString().split("T")[0]}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-300 text-left">
       
@@ -345,7 +394,7 @@ export function AdminCreditsTab({
       </div>
 
       {/* ── Statistics Summary Cards ── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-[#111115] border border-neutral-800 rounded-xl p-5 relative overflow-hidden">
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400">
@@ -383,6 +432,21 @@ export function AdminCreditsTab({
             {transactions.length}
           </div>
           <p className="text-[10px] text-neutral-500 mt-1">Audit log records loaded in page</p>
+        </div>
+
+        <div className="bg-[#111115] border border-neutral-800 rounded-xl p-5 relative overflow-hidden">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2 bg-cyan-500/10 rounded-lg text-cyan-400">
+              <TrendingUp className="w-5 h-5" />
+            </div>
+            <h3 className="text-neutral-400 font-medium text-sm">This Month</h3>
+          </div>
+          <div className="text-2xl font-black text-white">
+            {monthSummary.net >= 0 ? "+" : ""}{monthSummary.net.toLocaleString()} <span className="text-xs text-neutral-500 font-normal">Credits</span>
+          </div>
+          <p className="text-[10px] text-neutral-500 mt-1">
+            +{monthSummary.added.toLocaleString()} / -{monthSummary.deducted.toLocaleString()}
+          </p>
         </div>
       </div>
 
@@ -682,9 +746,18 @@ export function AdminCreditsTab({
                       </div>
                     </div>
                     <div className="border-t border-neutral-800 pt-2.5 mt-2 space-y-1">
-                      <p className="text-[9px] uppercase font-black text-neutral-500 tracking-wider">
-                        Recent Activity For User
-                      </p>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-[9px] uppercase font-black text-neutral-500 tracking-wider">
+                          Recent Activity For User
+                        </p>
+                        <button
+                          type="button"
+                          onClick={exportSelectedUserCSV}
+                          className="px-2.5 py-1 bg-neutral-800 hover:bg-neutral-700 text-white rounded text-[10px] font-bold transition-all"
+                        >
+                          Export User CSV
+                        </button>
+                      </div>
                       <div className="space-y-1">
                         {selectedUserTransactions.slice(0, 3).map((tx) => (
                           <div key={tx.id} className="flex justify-between text-[10px] text-neutral-400 font-mono">
