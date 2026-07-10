@@ -123,12 +123,12 @@ const ImageEditorModal = React.memo(
     }, [setEditingImageIdx]);
 
 
-    // Sync store state back to appLogic so other components stay in sync
-    useEffect(() => {
-      if (appLogic.setEditingImageIdx && editingImageIdx !== appLogic.editingImageIdx) {
-        appLogic.setEditingImageIdx(editingImageIdx);
-      }
-    }, [editingImageIdx, appLogic]);
+    // IMPORTANT: Zustand is the single source of truth for modal open/close.
+    // Keeping a two-way sync between Zustand <-> appLogic can create a feedback loop
+    // that repeatedly triggers state updates and can freeze the tab.
+    //
+    // (Intentionally removed the previous effect that synced Zustand back into appLogic.)
+
 
     const {
       containerRef,

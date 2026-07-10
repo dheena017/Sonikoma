@@ -222,13 +222,18 @@ export default function App() {
   // --- Main Application Logic & Hook ---
   const appLogic = useAppLogic();
 
-  // --- Sync Zustand store with appLogic (so Edit button opens modal) ---
+  // --- Sync Zustand store → appLogic (ONE-WAY: store is the single source of truth) ---
+  // IMPORTANT: `appLogic` must NOT be in the dependency array. It is a new object
+  // reference on every render, so including it causes an infinite loop:
+  //   setEditingImageIdx() → state update → re-render → new appLogic ref → effect fires again.
+  // We only react to the store value changing.
   const storeEditingIdx = useImageEditorStore((state) => state.editingImageIdx);
   React.useEffect(() => {
     if (appLogic.setEditingImageIdx && storeEditingIdx !== appLogic.editingImageIdx) {
       appLogic.setEditingImageIdx(storeEditingIdx);
     }
-  }, [storeEditingIdx, appLogic]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storeEditingIdx]); // ← intentionally omitting `appLogic` to break the feedback loop
 
   // --- Destructuring Logic Fields & Callbacks ---
   const {

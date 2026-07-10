@@ -206,9 +206,8 @@ function PanelCard({
       onClick={(e) => onCardClick(idx, imgUrl, e.shiftKey)}
       onDoubleClick={(e) => {
         e.stopPropagation();
-        // Open editor via global state without modifying the browser URL
-        setEditingImageIdx?.(idx);
-        useImageEditorStore.setState({ activeTool: "adjust" });
+        // Open editor via Zustand store (single source of truth)
+        useImageEditorStore.setState({ activeTool: "adjust", editingImageIdx: idx });
       }}
       className={[
         "group relative w-[260px] sm:w-[280px] shrink-0 rounded-2xl border p-4 space-y-4 transition-all duration-300 ease-out text-center cursor-pointer select-none",
@@ -265,7 +264,6 @@ function PanelCard({
         idx={idx}
         imgUrl={imgUrl}
         openEditingImageIdx={openEditingImageIdx}
-        setEditingImageIdx={setEditingImageIdx}
         setScrapedImages={setScrapedImages}
         setSelectedScraped={setSelectedScraped}
         setConsoleLogs={setConsoleLogs}

@@ -8,7 +8,6 @@ interface PanelCardActionsProps {
   idx: number;
   imgUrl: string;
   openEditingImageIdx?: (index: number | null) => void;
-  setEditingImageIdx: (index: number | null) => void;
   setScrapedImages: React.Dispatch<React.SetStateAction<string[]>>;
   setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
   setConsoleLogs: React.Dispatch<React.SetStateAction<any[]>>;
@@ -19,7 +18,6 @@ export function PanelCardActions({
   idx,
   imgUrl,
   openEditingImageIdx,
-  setEditingImageIdx,
   setScrapedImages,
   setSelectedScraped,
   setConsoleLogs,
@@ -31,21 +29,17 @@ export function PanelCardActions({
     event.stopPropagation();
     console.log(`[PanelCardActions] Entering edit mode for image #${idx + 1}`);
 
-    // 1. Update Zustand store (This triggers the modal if it's subscribed)
+    // Update Zustand store — single source of truth for the editor.
+    // App.tsx syncs this one-way into appLogic via a stable useEffect.
     useImageEditorStore.setState({
       activeTool: "adjust",
       editingImageIdx: idx,
     });
 
-    // 2. Update URL safely without refreshing the page
+    // Update URL safely without refreshing the page
     const url = new URL(window.location.href);
     url.searchParams.set("idx", idx.toString());
     window.history.pushState({}, "", url.toString());
-
-    // 3. Back-compat: Keep legacy state in sync
-    if (setEditingImageIdx) {
-      setEditingImageIdx(idx);
-    }
   };
 
   const handleDeleteClick = (event: React.MouseEvent<HTMLButtonElement>) => {
