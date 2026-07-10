@@ -109,6 +109,20 @@ const ImageEditorModal = React.memo(
     const editingImageIdx = useImageEditorStore((state) => state.editingImageIdx);
     const setEditingImageIdx = useImageEditorStore((state) => state.setEditingImageIdx);
 
+    const handleCloseEditor = React.useCallback(() => {
+      // 1) Clear the store
+      setEditingImageIdx(null);
+
+      // 2) Clean the URL (remove ?idx=...)
+      const url = new URL(window.location.href);
+      url.searchParams.delete("idx");
+      window.history.replaceState({}, "", url.toString());
+
+      // 3) Keep any listeners (route sync) up to date
+      window.dispatchEvent(new Event("popstate"));
+    }, [setEditingImageIdx]);
+
+
     // Sync store state back to appLogic so other components stay in sync
     useEffect(() => {
       if (appLogic.setEditingImageIdx && editingImageIdx !== appLogic.editingImageIdx) {
@@ -251,11 +265,10 @@ const ImageEditorModal = React.memo(
             break;
           case "CLOSE":
             if (editingImageIdx !== null) {
-              setEditingImageIdx(null);
-              window.history.pushState({}, "", "/");
-              window.dispatchEvent(new Event("popstate"));
+              handleCloseEditor();
             }
             break;
+
           case "ZOOM_IN":
             setZoom((z) => Math.min(5, z + 0.1));
             break;
@@ -368,103 +381,6 @@ const ImageEditorModal = React.memo(
           <div className="absolute top-2 right-2 bg-purple-600 text-white text-[9px] font-bold font-mono px-2 py-0.5 rounded-md shadow-md z-50">
             PIP ACTIVE
           </div>
-          <ImageEditorCanvasContainer
-            key={imageUrl || undefined}
-            handleAiCrop={handleAiCrop}
-            isAiDetecting={isAiDetecting}
-            editingImageIdx={editingImageIdx}
-            scrapedImages={scrapedImages}
-            containerRef={containerRef}
-            editCropTop={editCropTop}
-            editCropBottom={editCropBottom}
-            editCropLeft={editCropLeft}
-            editCropRight={editCropRight}
-            slices={slices}
-            selectedSliceId={selectedSliceId}
-            showSplitPosition={showSplitPosition}
-            splitPosition={splitPosition}
-            splitLines={splitLines}
-            handleStart={handleStart}
-            handleMove={handleMove}
-            handleEnd={handleEnd}
-            isPointInsideSelection={isPointInsideSelection}
-            handleSelectSlice={handleSelectSlice}
-            handleDeleteSlice={handleDeleteSlice}
-            handleRemoveSplitLine={handleRemoveSplitLine}
-            dragType={dragType}
-            onResizeStart={onResizeStart}
-            handleSelectAndDragSlice={handleSelectAndDragSlice}
-            zoom={0.4}
-            editMode={editMode}
-            detectedBubbles={detectedBubbles}
-            selectedBubbleIdx={selectedBubbleIdx}
-            setSelectedBubbleIdx={setSelectedBubbleIdx}
-            brushSize={brushSize}
-            brushAction={brushAction}
-            canvasMaskRef={canvasMaskRef}
-            setSplitPosition={setSplitPosition}
-            setShowSplitPosition={setShowSplitPosition}
-            setEditCropTop={setEditCropTop}
-            setEditCropBottom={setEditCropBottom}
-            setEditCropLeft={setEditCropLeft}
-            setEditCropRight={setEditCropRight}
-            setSelectedSliceId={setSelectedSliceId}
-            activeTab={activeTab}
-            aspectRatio={aspectRatio}
-            fillColor={""}
-            textBgColor={textBgColor}
-          />
-        </div>
-      );
-    }
-
-    return (
-      <div className="fixed inset-0 w-screen h-screen bg-[#0B0F19] text-white flex flex-col overflow-hidden z-[100]">
-        
-        {/* Full-width Header */}
-        <ImageEditorHeader
-          editingImageIdx={editingImageIdx}
-          scrapedImages={scrapedImages}
-          handlePrevImage={handlePrevImage}
-          handleNextImage={handleNextImage}
-          handleUndo={handleUndo}
-          historyLength={history.length}
-          handleRedo={handleRedo}
-          redoHistoryLength={redoHistory.length}
-          handleDeleteCurrentImage={handleDeleteCurrentImage}
-          setEditingImageIdx={setEditingImageIdx}
-          activeTab={activeTab}
-          isPipMode={isPipMode}
-          setIsPipMode={setIsPipMode}
-          slices={slices}
-          isToolsPanelOpen={isToolsPanelOpen}
-          setIsToolsPanelOpen={setIsToolsPanelOpen}
-        />
-
-        {/* Main Body */}
-        <div className="flex-1 flex flex-row overflow-hidden w-full">
-          
-          {/* Left Column: Mini Sidebar */}
-          <aside className="w-[72px] h-full bg-[#121826] border-r border-gray-800 flex-shrink-0 z-20">
-            <EditorMiniSidebar
-              isCollapsed={true}
-              setIsCollapsed={() => {}}
-              currentSection="autocrop"
-              setCurrentSection={() => {}}
-              scrapedCount={scrapedImages.length}
-              panelsCount={panels?.length || 0}
-              isBatchCropping={false}
-              isCleaningBubbles={false}
-              topOffsetPx={0}
-            />
-          </aside>
-
-          {/* Center Column: The Interactive Canvas */}
-          <main className="flex-1 h-full relative overflow-hidden bg-black/50 flex items-center justify-center">
-            <div className="absolute inset-0 opacity-20 pointer-events-none" 
-                 style={{ backgroundImage: "radial-gradient(#374151 1px, transparent 0)", backgroundSize: "20px 20px" }} />
-            
-            <div className="relative w-full h-full z-10 flex items-center justify-center p-4">
               <ImageEditorCanvasContainer
                 key={imageUrl || undefined}
                 handleAiCrop={handleAiCrop}
@@ -491,7 +407,7 @@ const ImageEditorModal = React.memo(
                 dragType={dragType}
                 onResizeStart={onResizeStart}
                 handleSelectAndDragSlice={handleSelectAndDragSlice}
-                zoom={zoom}
+                zoom={0.4}
                 editMode={editMode}
                 detectedBubbles={detectedBubbles}
                 selectedBubbleIdx={selectedBubbleIdx}
@@ -508,9 +424,160 @@ const ImageEditorModal = React.memo(
                 setSelectedSliceId={setSelectedSliceId}
                 activeTab={activeTab}
                 aspectRatio={aspectRatio}
-                fillColor={fillColor}
+                fillColor={""}
                 textBgColor={textBgColor}
               />
+        </div>
+      );
+    }
+
+    return (
+      <div className="fixed inset-0 w-screen h-screen bg-[#0B0F19] text-white flex flex-col overflow-hidden z-[100]">
+        
+        {/* Full-width Header */}
+        <ImageEditorHeader
+          editingImageIdx={editingImageIdx}
+          scrapedImages={scrapedImages}
+          handlePrevImage={handlePrevImage}
+          handleNextImage={handleNextImage}
+          handleUndo={handleUndo}
+          historyLength={history.length}
+          handleRedo={handleRedo}
+          redoHistoryLength={redoHistory.length}
+          handleDeleteCurrentImage={handleDeleteCurrentImage}
+          setEditingImageIdx={(idx) => {
+            // Header's Cancel button only knows about the store;
+            // we still must clean the URL.
+            if (idx === null) handleCloseEditor();
+            else setEditingImageIdx(idx);
+          }}
+          activeTab={activeTab}
+          isPipMode={isPipMode}
+          setIsPipMode={setIsPipMode}
+          slices={slices}
+          isToolsPanelOpen={isToolsPanelOpen}
+          setIsToolsPanelOpen={setIsToolsPanelOpen}
+        />
+
+
+        {/* Main Body */}
+        <div className="flex-1 flex flex-row overflow-hidden w-full">
+          
+          {/* Left Column: Mini Sidebar */}
+          <aside className="w-[72px] h-full bg-[#121826] border-r border-gray-800 flex-shrink-0 z-20">
+            <EditorMiniSidebar
+              isCollapsed={true}
+              setIsCollapsed={() => {}}
+              currentSection="autocrop"
+              setCurrentSection={() => {}}
+              scrapedCount={scrapedImages.length}
+              panelsCount={panels?.length || 0}
+              isBatchCropping={false}
+              isCleaningBubbles={false}
+              topOffsetPx={0}
+            />
+          </aside>
+
+          {/* Center Column: The Interactive Canvas */}
+          <main className="flex-1 h-full relative overflow-hidden bg-black/50 flex items-center justify-center">
+            <div className="absolute inset-0 opacity-20 pointer-events-none" 
+                 style={{ backgroundImage: "radial-gradient(#374151 1px, transparent 0)", backgroundSize: "20px 20px" }} />
+            
+            <div className="relative w-full h-full z-10 flex items-center justify-center p-4">
+              {React.useMemo(() => (
+                <ImageEditorCanvasContainer
+                  key={imageUrl || undefined}
+                  handleAiCrop={handleAiCrop}
+                  isAiDetecting={isAiDetecting}
+                  editingImageIdx={editingImageIdx}
+                  scrapedImages={scrapedImages}
+                  containerRef={containerRef}
+                  editCropTop={editCropTop}
+                  editCropBottom={editCropBottom}
+                  editCropLeft={editCropLeft}
+                  editCropRight={editCropRight}
+                  slices={slices}
+                  selectedSliceId={selectedSliceId}
+                  showSplitPosition={showSplitPosition}
+                  splitPosition={splitPosition}
+                  splitLines={splitLines}
+                  handleStart={handleStart}
+                  handleMove={handleMove}
+                  handleEnd={handleEnd}
+                  isPointInsideSelection={isPointInsideSelection}
+                  handleSelectSlice={handleSelectSlice}
+                  handleDeleteSlice={handleDeleteSlice}
+                  handleRemoveSplitLine={handleRemoveSplitLine}
+                  dragType={dragType}
+                  onResizeStart={onResizeStart}
+                  handleSelectAndDragSlice={handleSelectAndDragSlice}
+                  zoom={zoom}
+                  editMode={editMode}
+                  detectedBubbles={detectedBubbles}
+                  selectedBubbleIdx={selectedBubbleIdx}
+                  setSelectedBubbleIdx={setSelectedBubbleIdx}
+                  brushSize={brushSize}
+                  brushAction={brushAction}
+                  canvasMaskRef={canvasMaskRef}
+                  setSplitPosition={setSplitPosition}
+                  setShowSplitPosition={setShowSplitPosition}
+                  setEditCropTop={setEditCropTop}
+                  setEditCropBottom={setEditCropBottom}
+                  setEditCropLeft={setEditCropLeft}
+                  setEditCropRight={setEditCropRight}
+                  setSelectedSliceId={setSelectedSliceId}
+                  activeTab={activeTab}
+                  aspectRatio={aspectRatio}
+                  fillColor={fillColor}
+                  textBgColor={textBgColor}
+                />
+              ), [
+                imageUrl,
+                editingImageIdx,
+                activeTab,
+                scrapedImages,
+                containerRef,
+                editCropTop,
+                editCropBottom,
+                editCropLeft,
+                editCropRight,
+                slices,
+                selectedSliceId,
+                showSplitPosition,
+                splitPosition,
+                splitLines,
+                zoom,
+                editMode,
+                detectedBubbles,
+                selectedBubbleIdx,
+                setSelectedBubbleIdx,
+                brushSize,
+                brushAction,
+                canvasMaskRef,
+                selectedSliceId,
+                setSplitPosition,
+                setShowSplitPosition,
+                setEditCropTop,
+                setEditCropBottom,
+                setEditCropLeft,
+                setEditCropRight,
+                setSelectedSliceId,
+                isAiDetecting,
+                handleAiCrop,
+                handleStart,
+                handleMove,
+                handleEnd,
+                isPointInsideSelection,
+                handleSelectSlice,
+                handleDeleteSlice,
+                handleRemoveSplitLine,
+                dragType,
+                onResizeStart,
+                handleSelectAndDragSlice,
+                fillColor,
+                textBgColor,
+                aspectRatio,
+              ])}
             </div>
           </main>
 
