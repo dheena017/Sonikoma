@@ -8,10 +8,17 @@ import {
   Download,
   Settings,
   ArrowLeft,
+  Sparkles,
+  Edit2,
+  Brush,
+  Eraser,
+  Crop,
+  Link2,
   type LucideIcon,
 } from "lucide-react";
 import TooltipPortal from "../../TooltipPortal";
 import { resolveWorkspaceReturnPath } from "../../../utils/workspaceNavigation";
+import { useCropEditorStore, CropTool } from "../../../hooks/useCropEditorState";
 
 interface EditorMiniSidebarProps {
   isCollapsed: boolean;
@@ -52,6 +59,97 @@ const EditorMiniSidebarInner = ({
   settingsPath = "/settings",
   topOffsetPx = 59,
 }: EditorMiniSidebarProps) => {
+  const params = new URLSearchParams(window.location.search);
+  const isEditing = window.location.pathname.startsWith("/editor") && params.get("idx") !== null;
+
+  const activeTool = useCropEditorStore((state) => state.activeTool);
+  const setActiveTool = useCropEditorStore((state) => state.setActiveTool);
+  const slicesCount = useCropEditorStore((state) => state.slicesCount);
+
+  const [hoveredTool, setHoveredTool] = useState<string | null>(null);
+  const [hoveredRect, setHoveredRect] = useState<DOMRect | null>(null);
+
+  if (isEditing) {
+    const cropTools = [
+      { key: "adjust", label: "Adjust", icon: Sparkles },
+      { key: "edit", label: "Edit", icon: Edit2 },
+      { key: "draw", label: "Draw", icon: Brush },
+      { key: "eraser", label: "Erase", icon: Eraser },
+      { key: "slice", label: "Cut", icon: Scissors },
+      { key: "crop", label: "Crop", icon: Crop },
+      { key: "merge", label: "Merge", icon: Link2 },
+    ] as const;
+
+    return (
+      <aside
+        style={{ top: `${topOffsetPx}px` }}
+        className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950/95 backdrop-blur-2xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[60] py-6 shadow-[4px_0_32px_rgba(0,0,0,0.4)] ${
+          isCollapsed ? "w-16" : "w-20"
+        }`}
+      >
+        <div className="flex-1 w-full flex flex-col items-center space-y-4 pt-4">
+          {cropTools.map((tool) => {
+            const isActive = activeTool === tool.key;
+            const Icon = tool.icon;
+            const isHovered = hoveredTool === tool.key;
+
+            return (
+              <div key={tool.key} className="relative group w-full flex justify-center py-1">
+                {/* Premium Floating Active Pill */}
+                <div
+                  className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-500 ease-out z-10 ${
+                    isActive
+                      ? "h-6 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.9)] opacity-100"
+                      : "h-0 bg-transparent opacity-0"
+                  }`}
+                />
+
+                <button
+                  onClick={() => {
+                    console.log(`[EditorMiniSidebar] Selecting tool: ${tool.key}`);
+                    setActiveTool(tool.key);
+                  }}
+                  onMouseEnter={(e) => {
+                    setHoveredRect(e.currentTarget.getBoundingClientRect());
+                    setHoveredTool(tool.key);
+                  }}
+                  onMouseLeave={() => setHoveredTool(null)}
+                  className="p-1.5 transition-all duration-300 cursor-pointer relative flex items-center justify-center outline-none focus:outline-none"
+                >
+                  {/* iOS-style icon pill container with inner shadow */}
+                  <div
+                    className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 group-active:scale-90 ${
+                      isActive
+                        ? "bg-purple-500/20 border border-purple-500/50 shadow-[inset_0_0_12px_rgba(168,85,247,0.2),0_0_14px_rgba(168,85,247,0.3)]"
+                        : "bg-neutral-800/80 border border-neutral-700/50 shadow-sm group-hover:bg-purple-500/10 group-hover:border-purple-500/30 group-hover:shadow-[0_0_10px_rgba(168,85,247,0.15)]"
+                    }`}
+                  >
+                    <Icon
+                      strokeWidth={isActive ? 2.5 : 2}
+                      className={`w-[18px] h-[18px] transition-all duration-300 ${
+                        isActive
+                          ? "text-purple-300 drop-shadow-[0_0_8px_rgba(216,180,254,0.5)]"
+                          : "text-neutral-400 group-hover:text-purple-300 group-hover:scale-110"
+                      }`}
+                    />
+                  </div>
+
+                  {/* Crop Slices Count Badge */}
+                  {tool.key === "crop" && slicesCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] bg-gradient-to-br from-purple-500 to-purple-700 text-[10px] text-white font-black rounded-full flex items-center justify-center px-1 border border-neutral-950 shadow-md z-20">
+                      {slicesCount}
+                    </span>
+                  )}
+                </button>
+                <TooltipPortal text={tool.label} visible={isHovered} anchorRect={hoveredRect} />
+              </div>
+            );
+          })}
+        </div>
+      </aside>
+    );
+  }
+
   const menuItems: SidebarMenuItem[] = [
     {
       id: "monitor",
@@ -197,7 +295,7 @@ const EditorMiniSidebarInner = ({
     // Premium Glassmorphism Container
     <aside
       style={{ top: `${topOffsetPx}px` }}
-      className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950/95 backdrop-blur-2xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-40 py-4 shadow-[4px_0_32px_rgba(0,0,0,0.4)] ${isCollapsed ? "w-16" : "w-20"
+      className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950/95 backdrop-blur-2xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[60] py-4 shadow-[4px_0_32px_rgba(0,0,0,0.4)] ${isCollapsed ? "w-16" : "w-20"
         }`}
     >
       {/* Scrollable Tools Area */}

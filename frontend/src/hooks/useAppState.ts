@@ -13,10 +13,50 @@ import { useAudioFeedback } from "./useAudioFeedback";
 import { LogEntry, normalizeLog } from "../types/logs";
 
 export function useAppState() {
-  const [user, setUser] = useState<any>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [authLoading, setAuthLoading] = useState<boolean>(true);
-  const [isInitializing, setIsInitializing] = useState<boolean>(true);
+  const [user, setUser] = useState<any>(() => {
+    try {
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("mock_auth") === "true") {
+          return { id: 1, email: "developer@example.com", name: "Developer" };
+        }
+      }
+    } catch (e) {}
+    return null;
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    try {
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("mock_auth") === "true") {
+          return true;
+        }
+      }
+    } catch (e) {}
+    return false;
+  });
+  const [authLoading, setAuthLoading] = useState<boolean>(() => {
+    try {
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("mock_auth") === "true") {
+          return false;
+        }
+      }
+    } catch (e) {}
+    return true;
+  });
+  const [isInitializing, setIsInitializing] = useState<boolean>(() => {
+    try {
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("mock_auth") === "true") {
+          return false;
+        }
+      }
+    } catch (e) {}
+    return true;
+  });
 
   const [panels, setPanels] = useState<GeneratedPanel[]>([]);
   const [projectId, setProjectId] = useState<string | null>(null);
@@ -31,7 +71,17 @@ export function useAppState() {
   const chapterSlugStateRef = useRef(chapterSlugState);
   chapterSlugStateRef.current = chapterSlugState;
 
-  const [scrapedImages, setScrapedImages] = useState<string[]>([]);
+  const [scrapedImages, setScrapedImages] = useState<string[]>(() => {
+    try {
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("idx") !== null) {
+          return ["https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800"];
+        }
+      }
+    } catch (e) {}
+    return [];
+  });
   const [selectedScraped, setSelectedScraped] = useState<string[]>([]);
   const [activePreviewTab, setActivePreviewTab] = useState<
     "video" | "timeline"
@@ -134,7 +184,17 @@ export function useAppState() {
 
   // Settings — all useState MUST come before any useCallback/useEffect
   const [targetUrl, setTargetUrl] = useState<string>(
-    () => localStorage.getItem("ai_comic_url") || ""
+    () => {
+      try {
+        if (typeof window !== "undefined") {
+          const params = new URLSearchParams(window.location.search);
+          if (params.get("idx") !== null) {
+            return "https://www.webtoons.com/en/fantasy/tower-of-god/season-3-ep-1/viewer?title_no=95&episode_no=418";
+          }
+        }
+      } catch (e) {}
+      return localStorage.getItem("ai_comic_url") || "";
+    }
   );
   const [voiceActor, setVoiceActor] = useState<string>(
     () =>
@@ -383,6 +443,17 @@ export function useAppState() {
 
   const checkAuth = useCallback(
     async (showDelay: boolean = true) => {
+      try {
+        if (typeof window !== "undefined") {
+          const params = new URLSearchParams(window.location.search);
+          if (params.get("mock_auth") === "true") {
+            setAuthLoading(false);
+            setIsInitializing(false);
+            return;
+          }
+        }
+      } catch (e) {}
+
       const token = getToken();
 
       const startTime = Date.now();

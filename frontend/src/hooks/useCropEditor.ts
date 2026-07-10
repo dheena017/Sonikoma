@@ -2,7 +2,7 @@ import { normalizeLog } from "../types/logs";
 import { useRef, useEffect, useCallback } from "react";
 import { Slice, Slot, DetectedPanel } from "@/components/Feature/editor/shared";
 import { NotificationType } from "../components/notification/NotificationStack.js";
-import { useCropEditorState } from "./useCropEditorState.js";
+import { useCropEditorState, useCropEditorStore } from "./useCropEditorState.js";
 import { useCropEditorHistory } from "./useCropEditorHistory.js";
 import { useCropEditorDrag } from "./useCropEditorDrag.js";
 import { useCropEditorPipelines } from "./useCropEditorPipelines.js";
@@ -50,6 +50,23 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
     editingImageIdx,
     imageEditStates,
   });
+
+  const { activeTool } = useCropEditorStore();
+
+  useEffect(() => {
+    if (activeTool === "slice") {
+      state.setEditMode("crop");
+      state.setShowSplitPosition(true);
+    } else if (activeTool === "crop") {
+      state.setEditMode("crop");
+      state.setShowSplitPosition(false);
+    } else if (activeTool === "eraser") {
+      state.setEditMode("clean_manual");
+    } else {
+      state.setEditMode("crop");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTool]);
 
   const {
     history,

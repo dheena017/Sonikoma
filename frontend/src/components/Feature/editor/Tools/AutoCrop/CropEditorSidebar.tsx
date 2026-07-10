@@ -229,81 +229,8 @@ function CropEditorSidebar({
   handleClearDetectedBoxes,
   handleExecuteSave,
 }: CropEditorSidebarProps) {
-  const handleTabClick = useCallback(
-    (
-      tab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw"
-    ) => {
-      console.log(`[CropEditorSidebar] Switching to tab: ${tab}`);
-      setActiveTab(tab);
-
-      // Set the correct editMode based on which tab was clicked
-      if (tab === "slice") {
-        setEditMode("crop");
-        setShowSplitPosition(true);
-        // We don't reset crop bounds here to allow switching between slice and crop tabs
-      } else if (tab === "crop") {
-        setEditMode("crop");
-        setShowSplitPosition(false);
-      } else if (tab === "eraser") {
-        setEditMode("clean_manual");
-      } else {
-        setEditMode("crop"); // For adjust, edit, merge
-      }
-    },
-    [
-      setActiveTab,
-      setEditMode,
-      setShowSplitPosition,
-      setEditCropTop,
-      setEditCropBottom,
-      setEditCropLeft,
-      setEditCropRight,
-      setSelectedSliceId,
-    ]
-  );
-
   return (
     <div className="lg:col-span-5 flex flex-col space-y-3 lg:h-full lg:min-h-0 overflow-hidden pr-0 sm:pr-1.5 scrollbar-thin overscroll-contain shrink-0 max-h-[45vh] lg:max-h-none pb-4 lg:pb-0">
-      {/* Sidebar Navigation Tabs */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-black/50 backdrop-blur-sm p-2 rounded-3xl border border-white/10 shadow-[inset_0_0_20px_rgba(0,0,0,0.35)] md:flex md:items-center md:gap-1">
-        {(
-          [
-            { key: "adjust", label: "Adjust", emoji: "✨" },
-            { key: "edit", label: "Edit", emoji: "✏️" },
-            { key: "draw", label: "Draw", emoji: "🖌️" },
-            { key: "eraser", label: "Erase", emoji: "🧼" },
-            { key: "slice", label: "Cut", emoji: "✂️" },
-            { key: "crop", label: `Crop (${slices.length})`, emoji: "🎯" },
-            { key: "merge", label: "Merge", emoji: "🔗" },
-          ] as {
-            key:
-              | "adjust"
-              | "edit"
-              | "eraser"
-              | "slice"
-              | "crop"
-              | "merge"
-              | "draw";
-            label: string;
-            emoji: string;
-          }[]
-        ).map((tab) => (
-          <button
-            key={tab.key}
-            type="button"
-            onClick={() => handleTabClick(tab.key)}
-            className={`w-full min-w-0 flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-2xl text-[10px] font-bold font-mono transition-colors duration-150 cursor-pointer ${
-              activeTab === tab.key
-                ? "bg-purple-600 text-white shadow-lg shadow-purple-900/50"
-                : "text-neutral-400 hover:text-neutral-200 hover:bg-white/10"
-            }`}
-          >
-            <span className="hidden sm:inline">{tab.emoji}</span>
-            <span>{tab.label}</span>
-          </button>
-        ))}
-      </div>
-
       {/* Tab Contents */}
       <div className="flex-1 min-h-0 overflow-y-auto space-y-4 scrollbar-thin pr-0 sm:pr-1">
         {activeTab === "merge" && (

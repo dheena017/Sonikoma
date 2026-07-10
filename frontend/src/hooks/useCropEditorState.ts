@@ -1,5 +1,40 @@
 import { useState, useEffect } from "react";
 import { Slice } from "@/components/Feature/editor/shared";
+import { create } from "zustand";
+
+export type CropTool = "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw";
+
+interface CropEditorGlobalState {
+  activeTool: CropTool;
+  setActiveTool: (tool: CropTool) => void;
+  slicesCount: number;
+  setSlicesCount: (count: number) => void;
+}
+
+const getTabFromPathName = () => {
+  const segments = window.location.pathname.split("/");
+  const tabSegment = segments[2];
+  const validTabs = ["adjust", "edit", "eraser", "slice", "crop", "merge", "draw"];
+  if (tabSegment && validTabs.includes(tabSegment)) {
+    return tabSegment as CropTool;
+  }
+  return null;
+};
+
+export const useCropEditorStore = create<CropEditorGlobalState>((set) => ({
+  activeTool: getTabFromPathName() || "adjust",
+  setActiveTool: (tool) => {
+    set({ activeTool: tool });
+    const params = new URLSearchParams(window.location.search);
+    const idx = params.get("idx") || "0";
+    const newPath = `/editor/${tool}?idx=${idx}`;
+    if (window.location.pathname + window.location.search !== newPath) {
+      window.history.pushState({}, "", newPath);
+    }
+  },
+  slicesCount: 0,
+  setSlicesCount: (count) => set({ slicesCount: count }),
+}));
 
 interface UseCropEditorStateProps {
   scrapedImages: string[];
@@ -101,59 +136,24 @@ export function useCropEditorState({
   const [isDetecting, setIsDetecting] = useState<boolean>(false);
   const [isAiDetecting, setIsAiDetecting] = useState<boolean>(false);
 
-  // Sidebar Tab Configuration
-  const getTabFromPathName = () => {
-    const segments = window.location.pathname.split("/");
-    const tabSegment = segments[2];
-    const validTabs = ["adjust", "edit", "eraser", "slice", "crop", "merge"];
-    if (tabSegment && validTabs.includes(tabSegment)) {
-      return tabSegment as any;
-    }
-    return null;
+  // Sidebar Tab Configuration using Global Zustand Store
+  const { activeTool, setActiveTool } = useCropEditorStore();
+  const activeTab = activeTool;
+  const setActiveTab = (newTab: CropTool) => {
+    setActiveTool(newTab);
   };
-
-  const savedActiveTab = savedState?.activeTab;
-  const [activeTab, setActiveTabState] = useState<
-    "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge"
-  >(() => {
-    const pathTab = getTabFromPathName();
-    if (pathTab) return pathTab;
-    if (
-      savedActiveTab === "adjust" ||
-      savedActiveTab === "slice" ||
-      savedActiveTab === "crop" ||
-      savedActiveTab === "edit" ||
-      savedActiveTab === "merge" ||
-      savedActiveTab === "eraser"
-    ) {
-      return savedActiveTab;
-    }
-    return "adjust";
-  });
 
   // Keep state in sync with back/forward history navigation
   useEffect(() => {
     const handleRouteSync = () => {
       const pathTab = getTabFromPathName();
-      if (pathTab && pathTab !== activeTab) {
-        setActiveTabState(pathTab);
+      if (pathTab && pathTab !== activeTool) {
+        useCropEditorStore.setState({ activeTool: pathTab });
       }
     };
     window.addEventListener("popstate", handleRouteSync);
     return () => window.removeEventListener("popstate", handleRouteSync);
-  }, [activeTab]);
-
-  const setActiveTab = (
-    newTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge"
-  ) => {
-    setActiveTabState(newTab);
-    const params = new URLSearchParams(window.location.search);
-    const idx = params.get("idx") || "0";
-    const newPath = `/editor/${newTab}?idx=${idx}`;
-    if (window.location.pathname + window.location.search !== newPath) {
-      window.history.pushState({}, "", newPath);
-    }
-  };
+  }, [activeTool]);
 
   // Zoom & Transform
   const [zoom, setZoom] = useState<number>(1);
@@ -164,6 +164,11 @@ export function useCropEditorState({
 
   // Multiple Cut List
   const [slices, setSlices] = useState<Slice[]>(savedState?.slices || []);
+
+  // Sync slicesCount to store
+  useEffect(() => {
+    useCropEditorStore.setState({ slicesCount: slices.length });
+  }, [slices.length]);
   const [selectedSliceId, setSelectedSliceId] = useState<string | null>(
     savedState?.selectedSliceId || null
   );
@@ -243,6 +248,8 @@ export function useCropEditorState({
     setIsAiDetecting,
     activeTab,
     setActiveTab,
+    activeTool,
+    setActiveTool,
     zoom,
     setZoom,
     isTransforming,

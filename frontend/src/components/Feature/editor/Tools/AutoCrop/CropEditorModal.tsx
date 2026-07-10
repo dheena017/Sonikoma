@@ -9,6 +9,7 @@ import {
   CropEditorCanvasContainer,
   CropEditorSidebar,
 } from "./index";
+import EditorMiniSidebar from "../../EditorMiniSidebar";
 
 import { useCropEditor } from "../../../../../hooks/useCropEditor.js";
 import { useAppLogic } from "../../../../../hooks/useAppLogic.js";
@@ -643,9 +644,22 @@ const CropEditorModal = React.memo(
 
     if (isPage) {
       return (
-        <div className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10 flex flex-col space-y-6 animate-[fadeIn_0.22s_ease-out]">
-          <div className="flex-grow min-h-0">{mainCard}</div>
-        </div>
+        <>
+          <EditorMiniSidebar
+            isCollapsed={true}
+            setIsCollapsed={() => {}}
+            currentSection="autocrop"
+            setCurrentSection={() => {}}
+            scrapedCount={scrapedImages.length}
+            panelsCount={panels?.length || 0}
+            isBatchCropping={false}
+            isCleaningBubbles={false}
+            topOffsetPx={0}
+          />
+          <div className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10 flex flex-col space-y-6 animate-[fadeIn_0.22s_ease-out]">
+            <div className="flex-grow min-h-0">{mainCard}</div>
+          </div>
+        </>
       );
     }
 
@@ -655,6 +669,17 @@ const CropEditorModal = React.memo(
         onWheel={(event) => event.stopPropagation()}
         onTouchMove={(event) => event.stopPropagation()}
       >
+        <EditorMiniSidebar
+          isCollapsed={true}
+          setIsCollapsed={() => {}}
+          currentSection="autocrop"
+          setCurrentSection={() => {}}
+          scrapedCount={scrapedImages.length}
+          panelsCount={panels?.length || 0}
+          isBatchCropping={false}
+          isCleaningBubbles={false}
+          topOffsetPx={0}
+        />
         {mainCard}
       </div>
     );

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useCropEditorStore } from "../../../../../hooks/useCropEditorState";
 import {
   RotateCcw,
   RotateCw,
@@ -115,6 +116,7 @@ export default function CropToolsPanel({
   onReset,
   handleNudge,
 }: CropToolsPanelProps) {
+  const activeTool = useCropEditorStore((state) => state.activeTool);
   const [aspectLocked, setAspectLocked] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState<string>("Free");
 
@@ -165,169 +167,173 @@ export default function CropToolsPanel({
 
   return (
     <div className="space-y-4 bg-white/[0.01] p-4 rounded-2xl border border-white/[0.05]">
-      {/* ── Rotate & Flip ── */}
-      <div className="space-y-2.5">
-        <div className="flex items-center gap-2">
-          <div className="p-1 rounded-lg bg-cyan-500/10 border border-cyan-500/15">
-            <RotateCw className="h-3 w-3 text-cyan-400" />
-          </div>
-          <span className="text-[10px] uppercase font-mono font-bold text-neutral-400 tracking-widest">
-            Rotate &amp; Flip
-          </span>
-          {isTransforming && (
-            <span className="ml-auto text-[8px] font-mono text-cyan-400 animate-pulse">
-              Applying…
-            </span>
-          )}
-        </div>
-
-        <div className="grid grid-cols-5 gap-1.5">
-          {/* Rotate CCW 90 */}
-          <button
-            type="button"
-            onClick={() => {
-              console.log("[CropToolsPanel] Rotating -90°");
-              onRotate(-90);
-            }}
-            disabled={isTransforming}
-            title="Rotate 90° Counter-Clockwise"
-            className="flex flex-col items-center justify-center gap-1 py-2.5 bg-black/30 hover:bg-cyan-500/10 border border-white/6 hover:border-cyan-500/30 rounded-xl text-neutral-500 hover:text-cyan-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
-          >
-            <RotateCcw className="h-4 w-4" />
-            <span className="text-[7px] font-mono">-90°</span>
-          </button>
-
-          {/* Rotate 180 */}
-          <button
-            type="button"
-            onClick={() => {
-              console.log("[CropToolsPanel] Rotating 180°");
-              onRotate(180);
-            }}
-            disabled={isTransforming}
-            title="Rotate 180°"
-            className="flex flex-col items-center justify-center gap-1 py-2.5 bg-black/30 hover:bg-cyan-500/10 border border-white/6 hover:border-cyan-500/30 rounded-xl text-neutral-500 hover:text-cyan-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
-          >
-            <ChevronsUpDown className="h-4 w-4" />
-            <span className="text-[7px] font-mono">180°</span>
-          </button>
-
-          {/* Rotate CW 90 */}
-          <button
-            type="button"
-            onClick={() => {
-              console.log("[CropToolsPanel] Rotating +90°");
-              onRotate(90);
-            }}
-            disabled={isTransforming}
-            title="Rotate 90° Clockwise"
-            className="flex flex-col items-center justify-center gap-1 py-2.5 bg-black/30 hover:bg-cyan-500/10 border border-white/6 hover:border-cyan-500/30 rounded-xl text-neutral-500 hover:text-cyan-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
-          >
-            <RotateCw className="h-4 w-4" />
-            <span className="text-[7px] font-mono">+90°</span>
-          </button>
-
-          {/* Flip H */}
-          <button
-            type="button"
-            onClick={() => {
-              console.log("[CropToolsPanel] Flipping Horizontally");
-              onFlip("h");
-            }}
-            disabled={isTransforming}
-            title="Flip Horizontal"
-            className="flex flex-col items-center justify-center gap-1 py-2.5 bg-black/30 hover:bg-violet-500/10 border border-white/6 hover:border-violet-500/30 rounded-xl text-neutral-500 hover:text-violet-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
-          >
-            <FlipHorizontal className="h-4 w-4" />
-            <span className="text-[7px] font-mono">Flip H</span>
-          </button>
-
-          {/* Flip V */}
-          <button
-            type="button"
-            onClick={() => {
-              console.log("[CropToolsPanel] Flipping Vertically");
-              onFlip("v");
-            }}
-            disabled={isTransforming}
-            title="Flip Vertical"
-            className="flex flex-col items-center justify-center gap-1 py-2.5 bg-black/30 hover:bg-violet-500/10 border border-white/6 hover:border-violet-500/30 rounded-xl text-neutral-500 hover:text-violet-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
-          >
-            <FlipVertical className="h-4 w-4" />
-            <span className="text-[7px] font-mono">Flip V</span>
-          </button>
-        </div>
-      </div>
-
-      {/* ── Divider ── */}
-      <div className="flex items-center gap-2">
-        <div className="h-px flex-1 bg-white/5" />
-        <div className="p-1 rounded-lg bg-purple-500/10 border border-purple-500/15">
-          <Crop className="h-3 w-3 text-purple-400" />
-        </div>
-        <span className="text-[10px] uppercase font-mono font-bold text-neutral-400 tracking-widest">
-          Crop Bounds
-        </span>
-        <div className="h-px flex-1 bg-white/5" />
-      </div>
-
-      {/* ── Numeric Crop Inputs ── */}
-      <div className="space-y-2.5">
-        <div className="grid grid-cols-2 gap-2">
-          <NumericCropInput
-            label="Top %"
-            value={editCropTop}
-            onChange={setEditCropTop}
-          />
-          <NumericCropInput
-            label="Bottom %"
-            value={editCropBottom}
-            onChange={setEditCropBottom}
-          />
-          <NumericCropInput
-            label="Left %"
-            value={editCropLeft}
-            onChange={setEditCropLeft}
-            color="emerald"
-          />
-          <NumericCropInput
-            label="Right %"
-            value={editCropRight}
-            onChange={setEditCropRight}
-            color="emerald"
-          />
-        </div>
-
-        {/* Live size readout */}
-        <div className="flex items-center justify-between bg-black/30 border border-white/5 rounded-xl px-3 py-2">
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => setAspectLocked(!aspectLocked)}
-              title={aspectLocked ? "Unlock aspect ratio" : "Lock aspect ratio"}
-              className={`p-1 rounded-lg border transition-all cursor-pointer ${
-                aspectLocked
-                  ? "bg-amber-500/15 border-amber-600/40 text-amber-400"
-                  : "bg-neutral-800/50 border-neutral-700/50 text-neutral-500 hover:text-neutral-300"
-              }`}
-            >
-              {aspectLocked ? (
-                <Lock className="h-2.5 w-2.5" />
-              ) : (
-                <Unlock className="h-2.5 w-2.5" />
+      {activeTool === "edit" && (
+        <>
+          {/* ── Rotate & Flip ── */}
+          <div className="space-y-2.5">
+            <div className="flex items-center gap-2">
+              <div className="p-1 rounded-lg bg-cyan-500/10 border border-cyan-500/15">
+                <RotateCw className="h-3 w-3 text-cyan-400" />
+              </div>
+              <span className="text-[10px] uppercase font-mono font-bold text-neutral-400 tracking-widest">
+                Rotate &amp; Flip
+              </span>
+              {isTransforming && (
+                <span className="ml-auto text-[8px] font-mono text-cyan-400 animate-pulse">
+                  Applying…
+                </span>
               )}
-            </button>
-            <span className="text-[9px] text-neutral-500 font-mono">
-              {aspectLocked ? "Ratio locked" : "Free ratio"}
-            </span>
+            </div>
+
+            <div className="grid grid-cols-5 gap-1.5">
+              {/* Rotate CCW 90 */}
+              <button
+                type="button"
+                onClick={() => {
+                  console.log("[CropToolsPanel] Rotating -90°");
+                  onRotate(-90);
+                }}
+                disabled={isTransforming}
+                title="Rotate 90° Counter-Clockwise"
+                className="flex flex-col items-center justify-center gap-1 py-2.5 bg-black/30 hover:bg-cyan-500/10 border border-white/6 hover:border-cyan-500/30 rounded-xl text-neutral-500 hover:text-cyan-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+              >
+                <RotateCcw className="h-4 w-4" />
+                <span className="text-[7px] font-mono">-90°</span>
+              </button>
+
+              {/* Rotate 180 */}
+              <button
+                type="button"
+                onClick={() => {
+                  console.log("[CropToolsPanel] Rotating 180°");
+                  onRotate(180);
+                }}
+                disabled={isTransforming}
+                title="Rotate 180°"
+                className="flex flex-col items-center justify-center gap-1 py-2.5 bg-black/30 hover:bg-cyan-500/10 border border-white/6 hover:border-cyan-500/30 rounded-xl text-neutral-500 hover:text-cyan-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+              >
+                <ChevronsUpDown className="h-4 w-4" />
+                <span className="text-[7px] font-mono">180°</span>
+              </button>
+
+              {/* Rotate CW 90 */}
+              <button
+                type="button"
+                onClick={() => {
+                  console.log("[CropToolsPanel] Rotating +90°");
+                  onRotate(90);
+                }}
+                disabled={isTransforming}
+                title="Rotate 90° Clockwise"
+                className="flex flex-col items-center justify-center gap-1 py-2.5 bg-black/30 hover:bg-cyan-500/10 border border-white/6 hover:border-cyan-500/30 rounded-xl text-neutral-500 hover:text-cyan-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+              >
+                <RotateCw className="h-4 w-4" />
+                <span className="text-[7px] font-mono">+90°</span>
+              </button>
+
+              {/* Flip H */}
+              <button
+                type="button"
+                onClick={() => {
+                  console.log("[CropToolsPanel] Flipping Horizontally");
+                  onFlip("h");
+                }}
+                disabled={isTransforming}
+                title="Flip Horizontal"
+                className="flex flex-col items-center justify-center gap-1 py-2.5 bg-black/30 hover:bg-violet-500/10 border border-white/6 hover:border-violet-500/30 rounded-xl text-neutral-500 hover:text-violet-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+              >
+                <FlipHorizontal className="h-4 w-4" />
+                <span className="text-[7px] font-mono">Flip H</span>
+              </button>
+
+              {/* Flip V */}
+              <button
+                type="button"
+                onClick={() => {
+                  console.log("[CropToolsPanel] Flipping Vertically");
+                  onFlip("v");
+                }}
+                disabled={isTransforming}
+                title="Flip Vertical"
+                className="flex flex-col items-center justify-center gap-1 py-2.5 bg-black/30 hover:bg-violet-500/10 border border-white/6 hover:border-violet-500/30 rounded-xl text-neutral-500 hover:text-violet-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+              >
+                <FlipVertical className="h-4 w-4" />
+                <span className="text-[7px] font-mono">Flip V</span>
+              </button>
+            </div>
           </div>
-          <span className="text-[10px] font-mono font-bold text-neutral-300">
-            <span className="text-purple-400">{cropWidth}%</span>
-            <span className="text-neutral-600 mx-1">×</span>
-            <span className="text-emerald-400">{cropHeight}%</span>
-          </span>
-        </div>
-      </div>
+
+          {/* ── Divider ── */}
+          <div className="flex items-center gap-2">
+            <div className="h-px flex-1 bg-white/5" />
+            <div className="p-1 rounded-lg bg-purple-500/10 border border-purple-500/15">
+              <Crop className="h-3 w-3 text-purple-400" />
+            </div>
+            <span className="text-[10px] uppercase font-mono font-bold text-neutral-400 tracking-widest">
+              Crop Bounds
+            </span>
+            <div className="h-px flex-1 bg-white/5" />
+          </div>
+
+          {/* ── Numeric Crop Inputs ── */}
+          <div className="space-y-2.5">
+            <div className="grid grid-cols-2 gap-2">
+              <NumericCropInput
+                label="Top %"
+                value={editCropTop}
+                onChange={setEditCropTop}
+              />
+              <NumericCropInput
+                label="Bottom %"
+                value={editCropBottom}
+                onChange={setEditCropBottom}
+              />
+              <NumericCropInput
+                label="Left %"
+                value={editCropLeft}
+                onChange={setEditCropLeft}
+                color="emerald"
+              />
+              <NumericCropInput
+                label="Right %"
+                value={editCropRight}
+                onChange={setEditCropRight}
+                color="emerald"
+              />
+            </div>
+
+            {/* Live size readout */}
+            <div className="flex items-center justify-between bg-black/30 border border-white/5 rounded-xl px-3 py-2">
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setAspectLocked(!aspectLocked)}
+                  title={aspectLocked ? "Unlock aspect ratio" : "Lock aspect ratio"}
+                  className={`p-1 rounded-lg border transition-all cursor-pointer ${
+                    aspectLocked
+                      ? "bg-amber-500/15 border-amber-600/40 text-amber-400"
+                      : "bg-neutral-800/50 border-neutral-700/50 text-neutral-500 hover:text-neutral-300"
+                  }`}
+                >
+                  {aspectLocked ? (
+                    <Lock className="h-2.5 w-2.5" />
+                  ) : (
+                    <Unlock className="h-2.5 w-2.5" />
+                  )}
+                </button>
+                <span className="text-[9px] text-neutral-500 font-mono">
+                  {aspectLocked ? "Ratio locked" : "Free ratio"}
+                </span>
+              </div>
+              <span className="text-[10px] font-mono font-bold text-neutral-300">
+                <span className="text-purple-400">{cropWidth}%</span>
+                <span className="text-neutral-600 mx-1">×</span>
+                <span className="text-emerald-400">{cropHeight}%</span>
+              </span>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* ── Crop Presets ── */}
       <div className="space-y-2">
