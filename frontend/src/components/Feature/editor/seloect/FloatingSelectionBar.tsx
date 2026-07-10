@@ -657,29 +657,69 @@ export function FloatingSelectionBar({
   }, []);
 
   React.useEffect(() => {
+    if (!isTimeline) return;
     if (typeof document === "undefined") return;
-    const updateHeight = () => {
-      const selector = isTimeline ? "#timeline-selection-bar-portal" : "#scraper-selection-bar-portal";
-      const el = document.querySelector(selector);
-      const nextHeight = (el && el.classList.contains("opacity-100"))
-        ? el.getBoundingClientRect().height
-        : 0;
 
-      setAssetsHeight((prev) => {
-        if (prev !== nextHeight) {
-          return nextHeight;
+    let resizeObserver: ResizeObserver | null = null;
+    let elementMutationObserver: MutationObserver | null = null;
+    let bodyMutationObserver: MutationObserver | null = null;
+
+    const observeTarget = (el: Element) => {
+      if (resizeObserver) resizeObserver.disconnect();
+      resizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const rect = entry.target.getBoundingClientRect();
+          const isVisible = entry.target.classList.contains("opacity-100");
+          const nextHeight = isVisible ? Math.round(rect.height) : 0;
+          setAssetsHeight((prev) => (prev !== nextHeight ? nextHeight : prev));
         }
-        return prev;
       });
+      resizeObserver.observe(el);
+
+      if (elementMutationObserver) elementMutationObserver.disconnect();
+      elementMutationObserver = new MutationObserver(() => {
+        const isVisible = el.classList.contains("opacity-100");
+        const nextHeight = isVisible ? Math.round(el.getBoundingClientRect().height) : 0;
+        setAssetsHeight((prev) => (prev !== nextHeight ? nextHeight : prev));
+      });
+      elementMutationObserver.observe(el, { attributes: true, attributeFilter: ["class"] });
     };
 
-    updateHeight();
-    const observer = new MutationObserver(updateHeight);
-    observer.observe(document.body, { childList: true, subtree: true });
-    window.addEventListener("resize", updateHeight);
+    const checkAndObserve = () => {
+      const el = document.querySelector("#scraper-selection-bar-portal");
+      if (el) {
+        observeTarget(el);
+        const isVisible = el.classList.contains("opacity-100");
+        const nextHeight = isVisible ? Math.round(el.getBoundingClientRect().height) : 0;
+        setAssetsHeight((prev) => (prev !== nextHeight ? nextHeight : prev));
+      } else {
+        setAssetsHeight(0);
+      }
+    };
+
+    checkAndObserve();
+
+    bodyMutationObserver = new MutationObserver((mutations) => {
+      let shouldCheck = false;
+      for (const mutation of mutations) {
+        if (mutation.type === "childList") {
+          shouldCheck = true;
+          break;
+        }
+      }
+      if (shouldCheck) {
+        checkAndObserve();
+      }
+    });
+
+    bodyMutationObserver.observe(document.body, { childList: true });
+    window.addEventListener("resize", checkAndObserve);
+
     return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", updateHeight);
+      if (resizeObserver) resizeObserver.disconnect();
+      if (elementMutationObserver) elementMutationObserver.disconnect();
+      if (bodyMutationObserver) bodyMutationObserver.disconnect();
+      window.removeEventListener("resize", checkAndObserve);
     };
   }, [isTimeline]);
 

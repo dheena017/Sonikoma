@@ -3,8 +3,8 @@ import LiveScraperDeck from "../../scraper/LiveScraperDeck";
 import StoryboardTimeline from "../../timeline/StoryboardTimeline";
 import VideoMonitor from "../../video/VideoMonitor";
 import OutputMetadataPanel from "../../video/OutputMetadataPanel";
-import PipelineStatusCard from "../../pipeline/ProcessBar.js";
 import LayoutEditorPage from "../EditorPageLayout.js";
+import ImageEditorPage from "../Tools/ImageEditor/ImageEditorPage";
 import { useBackendHealth } from "../../../../hooks/useBackendHealth.js";
 import { getUserCredits } from "../../../../api/auth";
 

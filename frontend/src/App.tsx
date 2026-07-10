@@ -31,7 +31,6 @@ import AIModelsPage from "./components/Feature/ai_models/AIModelsPage";
 import ShortcutsPage from "./components/Shortcuts/ShortcutsPage";
 
 // --- Processing & Editor Modals ---
-import ImageEditorModal from "./components/Feature/editor/Tools/ImageEditor/ImageEditorModal";
 import { useImageEditorStore } from "./hooks/useImageEditorState";
 import AutoCropModal from "./components/Feature/processing/AutoCropModal";
 import NotificationStack from "./components/notification/NotificationStack";
@@ -70,6 +69,7 @@ import {
   CreativeSuiteLayout,
   CreativeSuiteDashboardPage,
 } from "./components/creative";
+import ImageEditorPage from "./components/Feature/editor/Tools/ImageEditor/ImageEditorPage";
 
 // ============================================================================
 // SECTION 2: MAIN APP COMPONENT
@@ -1831,7 +1831,7 @@ export default function App() {
                 </p>
               </div>
             ) : (
-              <ImageEditorModal isPage={true} appLogic={memoizedAppLogic} />
+              <ImageEditorPage appLogic={memoizedAppLogic} />
             ))}
 
           {/* PAGE VIEW 21: Admin Dashboard */}
@@ -1954,26 +1954,6 @@ export default function App() {
         />
       )}
 
-      {/* Modal: Advanced Crop & Trim Editor (Modal Mode - Works from any page) */}
-      {!isPipMode && storeEditingIdx !== null && (
-        <ImageEditorModal isPage={false} appLogic={memoizedAppLogic} />
-      )}
-
-
-      {/* Modal: Advanced Crop & Trim Editor (PIP Mode only) */}
-      {isPipMode && storeEditingIdx !== null && (
-        <div
-          className="fixed bottom-6 right-6 w-96 h-56 rounded-3xl border border-white/10 shadow-2xl z-50 overflow-hidden bg-neutral-950/95 backdrop-blur-xl animate-fade-in cursor-pointer"
-          onClick={React.useCallback(() => {
-            setIsPipMode(false);
-            navigateTo(lastEditorPath);
-          }, [setIsPipMode, navigateTo, lastEditorPath])}
-        >
-          <ImageEditorModal appLogic={memoizedAppLogic} />
-        </div>
-      )}
-
-
       {alertDialog && alertDialog.isOpen && (
         <ConfirmModal
           title={alertDialog.title}
@@ -1987,22 +1967,6 @@ export default function App() {
           onCancel={() => {
             alertDialog.resolve();
             setAlertDialog(null);
-          }}
-        />
-      )}
-
-      {confirmDialog && confirmDialog.isOpen && (
-        <ConfirmModal
-          title={confirmDialog.title}
-          message={confirmDialog.message}
-          accentColor={confirmDialog.accentColor}
-          onConfirm={() => {
-            confirmDialog.resolve(true);
-            setConfirmDialog(null);
-          }}
-          onCancel={() => {
-            confirmDialog.resolve(false);
-            setConfirmDialog(null);
           }}
         />
       )}

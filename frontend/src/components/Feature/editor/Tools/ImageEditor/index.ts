@@ -3,7 +3,6 @@ export { default as ImageEditorCanvasContainer } from "./ImageEditorCanvasContai
 export { default as ImageEditorFooter } from "./ImageEditorFooter";
 export { ImageEditorHeader } from "./ImageEditorHeader";
 export { default as ImageEditorSidebar } from "./ImageEditorSidebar";
-export { default as ImageEditorModal } from "./ImageEditorModal";
 export { default as ImageEditorPanel } from "./ImageEditorPanel";
 export { default as FreehandPanel } from "./FreehandPanel";
 
@@ -11,7 +10,6 @@ export { default as CropEditorCanvasContainer } from "./ImageEditorCanvasContain
 export { default as CropEditorFooter } from "./ImageEditorFooter";
 export { ImageEditorHeader as CropEditorHeader } from "./ImageEditorHeader";
 export { default as CropEditorSidebar } from "./ImageEditorSidebar";
-export { default as CropEditorModal } from "./ImageEditorModal";
 export { default as CropToolsPanel } from "./ImageEditorPanel";
 
 // Enhancement Components

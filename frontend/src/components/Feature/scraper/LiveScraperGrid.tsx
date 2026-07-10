@@ -69,13 +69,6 @@ export default function LiveScraperGrid({
             scrapedImages={scrapedImages}
             mergingIndices={mergingIndices}
             handleMergeWithNext={handleMergeWithNext}
-            setEditingImageIdx={setEditingImageIdx}
-            openEditingImageIdx={openEditingImageIdx}
-            setEditCropTop={setEditCropTop}
-            setEditCropBottom={setEditCropBottom}
-            setEditCropLeft={setEditCropLeft}
-            setEditCropRight={setEditCropRight}
-            setEditAutoTrim={setEditAutoTrim}
             setScrapedImages={setScrapedImages}
             setSelectedScraped={setSelectedScraped}
             setConsoleLogs={setConsoleLogs}
