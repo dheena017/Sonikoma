@@ -246,7 +246,7 @@ export function useImageTransform({
 
     setIsCroppingSlice(slice.id);
     try {
-      const data = await api.editImage(activeFetch, {
+      const data = await api.submitImageEdits(activeFetch, {
         url: originalUrl,
         cropTop: slice.cropTop,
         cropBottom: slice.cropBottom,

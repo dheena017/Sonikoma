@@ -50,7 +50,7 @@ export function useSingleImageEdits({
     const originalUrl = scrapedImages[editingImageIdx];
     setIsSavingEdit(true);
     setConsoleLogs((prev) => [
-      `[Image Editor] Processing Crop & Auto-Trim operations on Frame #${
+      `[Image Editor] Processing image edits & auto-trim on Frame #${
         editingImageIdx + 1
       }...`,
       `[Image Editor] Crop values → Top: ${editCropTop}% | Bottom: ${editCropBottom}% | Left: ${editCropLeft}% | Right: ${editCropRight}% | AutoTrim: ${editAutoTrim}`,
@@ -58,7 +58,7 @@ export function useSingleImageEdits({
     ]);
 
     try {
-      const data = await api.editImage(fetchWithInterceptor, {
+      const data = await api.submitImageEdits(fetchWithInterceptor, {
         url: originalUrl,
         cropTop: editCropTop,
         cropBottom: editCropBottom,
@@ -73,7 +73,7 @@ export function useSingleImageEdits({
       addPanelsToStoryboard([croppedUrl]);
 
       setConsoleLogs((prev) => [
-        `[Image Editor] [SUCCESS] Successfully cropped Frame #${
+        `[Image Editor] [SUCCESS] Successfully edited Frame #${
           editingImageIdx + 1
         } and added to Timeline!`,
         `[Image Editor]   - Sent (Original): ${originalUrl.substring(
@@ -164,7 +164,7 @@ export function useSingleImageEdits({
               }...`,
               ...prev,
             ]);
-            const data = await api.editImage(fetchWithInterceptor, {
+            const data = await api.submitImageEdits(fetchWithInterceptor, {
               url: originalUrl,
               cropTop: cut.cropTop,
               cropBottom: cut.cropBottom,
@@ -184,7 +184,7 @@ export function useSingleImageEdits({
         addPanelsToStoryboard(croppedUrls);
 
         setConsoleLogs((prev) => [
-          `[Image Editor] Successfully added ${cuts.length} cropped/trimmed frames to Timeline!`,
+          `[Image Editor] Successfully added ${cuts.length} edited/trimmed frames to Timeline!`,
           ...prev,
         ]);
         console.log(

@@ -1035,7 +1035,7 @@ def get_creator_analytics(user_id: str) -> Dict[str, Any]:
         for edit in edit_list:
             activities.append({
                 "title": f"Cleaned panels via {edit['edit_type']}",
-                "desc": f"Applied {edit['edit_type']} filter / panel crop modification",
+                "desc": f"Applied {edit['edit_type']} filter / image enhancement modification",
                 "time": edit['created_at']
             })
 
@@ -1985,7 +1985,7 @@ def get_latest_scrape_session(url: str) -> Optional[Dict[str, Any]]:
     finally:
         conn.close()
 
-def save_edit_history(edited_url: str, original_url: str, edit_type: str = 'crop') -> None:
+def save_edit_history(edited_url: str, original_url: str, edit_type: str = 'edit') -> None:
     """Persist an edit history entry (for undo support across restarts)."""
     conn = get_db_connection()
     try:

@@ -124,7 +124,7 @@ async function editSelectedUrls(
   const results: Record<string, string> = {};
   for (const url of urls) {
     try {
-      const data = await api.editImage(fetchWithInterceptor, {
+      const data = await api.submitImageEdits(fetchWithInterceptor, {
         url,
         autoTrim: false,
         ...editParams,

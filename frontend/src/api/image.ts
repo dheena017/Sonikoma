@@ -1,4 +1,4 @@
-export const editImage = async (
+export const submitImageEdits = async (
   fetchWithInterceptor: any,
   data: any,
   options?: RequestInit
@@ -11,6 +11,8 @@ export const editImage = async (
   });
   return res.json();
 };
+
+export const editImage = submitImageEdits;
 
 export const removeSpeechBubblesBatch = async (
   fetchWithInterceptor: any,
@@ -99,12 +101,12 @@ export const downloadZip = async (
   return res.json();
 };
 
-export const undoCrop = async (
+export const undoImageEdit = async (
   fetchWithInterceptor: any,
   data: any,
   options?: RequestInit
 ) => {
-  const res = await fetchWithInterceptor("/api/image/undo-crop", {
+  const res = await fetchWithInterceptor("/api/image/undo-edit", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -112,6 +114,8 @@ export const undoCrop = async (
   });
   return res.json();
 };
+
+export const undoCrop = undoImageEdit;
 
 export const getProxyImageUrl = (url: string) => {
   if (isProxyUrl(url)) {

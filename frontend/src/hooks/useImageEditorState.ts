@@ -25,7 +25,10 @@ const getTabFromPathName = () => {
 
 
 
-export const useImageEditorStore = create<ImageEditorGlobalState>((set) => ({
+export const useImageEditorStore = create<ImageEditorGlobalState & {
+  editingImageIdx: number | null;
+  setEditingImageIdx: (idx: number | null) => void;
+}>((set) => ({
   activeTool: getTabFromPathName() || "adjust",
   setActiveTool: (tool) => {
     set({ activeTool: tool });
@@ -44,6 +47,9 @@ export const useImageEditorStore = create<ImageEditorGlobalState>((set) => ({
   },
   slicesCount: 0,
   setSlicesCount: (count) => set({ slicesCount: count }),
+
+  editingImageIdx: null,
+  setEditingImageIdx: (idx) => set({ editingImageIdx: idx }),
 }));
 
 export const useCropEditorStore = useImageEditorStore;

@@ -58,7 +58,7 @@ class RotateImageRequest(ImagePathRequest):
     background_color: Optional[str] = "white"
 
 
-class EnhanceImageRequest(ImagePathRequest):
+class ImageEnhancementRequest(ImagePathRequest):
     brightness: Optional[float] = Field(1.0, ge=0.1, le=3.0)
     contrast: Optional[float] = Field(1.0, ge=0.1, le=3.0)
     saturation: Optional[float] = Field(1.0, ge=0.1, le=3.0)
@@ -135,7 +135,7 @@ async def rotate_image(body: RotateImageRequest):
 
 
 @router.post("/enhance", summary="Auto-enhance image color")
-async def enhance_image(body: EnhanceImageRequest):
+async def apply_image_enhancements(body: ImageEnhancementRequest):
     output_path = body.output_path or _default_output_path(".png")
     try:
         engine = _ensure_imagemagick()

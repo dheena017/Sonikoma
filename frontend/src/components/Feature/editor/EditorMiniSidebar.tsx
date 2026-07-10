@@ -76,7 +76,7 @@ const EditorMiniSidebarInner = ({
       { key: "draw", label: "Draw", icon: Brush },
       { key: "eraser", label: "Erase", icon: Eraser },
       { key: "slice", label: "Cut", icon: Scissors },
-      { key: "crop", label: "Crop", icon: Crop },
+      { key: "crop", label: "Edit", icon: Crop },
       { key: "merge", label: "Merge", icon: Link2 },
     ] as const;
 

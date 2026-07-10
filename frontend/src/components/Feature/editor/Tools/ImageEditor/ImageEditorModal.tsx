@@ -4,6 +4,8 @@ import { Slot } from "../../shared/index.js";
 
 import EditorMiniSidebar from "../../EditorMiniSidebar.js";
 
+import { useImageEditorStore } from "@/hooks/useImageEditorState";
+
 import { useImageEditor } from "../../../../../hooks/useImageEditor.js";
 import { useAppLogic } from "../../../../../hooks/useAppLogic.js";
 import { ImageEditorHeader } from "./ImageEditorHeader.js";
@@ -21,8 +23,6 @@ interface ImageEditorModalProps {
 const ImageEditorModal = React.memo(
   ({ appLogic, isPage = false }: ImageEditorModalProps) => {
     const {
-      editingImageIdx,
-      setEditingImageIdx,
       editCropTop,
       setEditCropTop,
       editCropBottom,
@@ -104,6 +104,17 @@ const ImageEditorModal = React.memo(
       appLogic.setScrapedImages,
       appLogic.addNotification,
     ]);
+
+    // Read from Zustand store (source of truth for modal open/close)
+    const editingImageIdx = useImageEditorStore((state) => state.editingImageIdx);
+    const setEditingImageIdx = useImageEditorStore((state) => state.setEditingImageIdx);
+
+    // Sync store state back to appLogic so other components stay in sync
+    useEffect(() => {
+      if (appLogic.setEditingImageIdx && editingImageIdx !== appLogic.editingImageIdx) {
+        appLogic.setEditingImageIdx(editingImageIdx);
+      }
+    }, [editingImageIdx, appLogic]);
 
     const {
       containerRef,
@@ -278,9 +289,10 @@ const ImageEditorModal = React.memo(
       setEditingImageIdx,
     ]);
 
-    const activeStoryboardPanel = panels?.find(
-      (p) => p.image_url === scrapedImages[editingImageIdx!]
-    );
+    const activeStoryboardPanel =
+      panels?.find(
+        (p) => p.image_url === scrapedImages[editingImageIdx!]
+      ) || null;
 
     const handleModifyBrightness = (panelId: number, val: number) => {
       console.log(`[ImageEditor] Modifying brightness for panel #${panelId}: ${val}`);

@@ -100,7 +100,7 @@ function PanelCard({
       ...prev,
     ]);
     try {
-      const data = await api.editImage(fetch, {
+      const data = await api.submitImageEdits(fetch, {
         url: imgUrl,
         rotate: 90,
         autoTrim: false,
@@ -135,7 +135,7 @@ function PanelCard({
       ...prev,
     ]);
     try {
-      const data = await api.editImage(fetch, {
+      const data = await api.submitImageEdits(fetch, {
         url: imgUrl,
         flipHorizontal: true,
         autoTrim: false,
@@ -170,7 +170,7 @@ function PanelCard({
       ...prev,
     ]);
     try {
-      const data = await api.undoCrop(fetch, { url: imgUrl });
+      const data = await api.undoImageEdit(fetch, { url: imgUrl });
 
       if (data.success && data.previous_url) {
         setScrapedImages?.((prev: any[]) =>

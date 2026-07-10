@@ -338,7 +338,7 @@ export function useBatchImageActions({
                   if (box.croppedUrl) {
                     croppedUrls.push(box.croppedUrl);
                   } else {
-                    const cropData = await api.editImage(fetchWithInterceptor, {
+                    const cropData = await api.submitImageEdits(fetchWithInterceptor, {
                       url: url,
                       cropTop: box.cropTop,
                       cropBottom: box.cropBottom,

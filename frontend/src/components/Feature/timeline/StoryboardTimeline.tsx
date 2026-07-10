@@ -400,7 +400,7 @@ const StoryboardTimeline = React.memo(
                       let croppedUrl = box.croppedUrl;
 
                       if (!croppedUrl) {
-                        const cropData = await api.editImage(activeFetch, {
+                        const cropData = await api.submitImageEdits(activeFetch, {
                           url: originalPanel.image_url,
                           cropTop: box.cropTop,
                           cropBottom: box.cropBottom,

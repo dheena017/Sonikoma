@@ -32,6 +32,7 @@ import ShortcutsPage from "./components/Shortcuts/ShortcutsPage";
 
 // --- Processing & Editor Modals ---
 import ImageEditorModal from "./components/Feature/editor/Tools/ImageEditor/ImageEditorModal";
+import { useImageEditorStore } from "./hooks/useImageEditorState";
 import AutoCropModal from "./components/Feature/processing/AutoCropModal";
 import NotificationStack from "./components/notification/NotificationStack";
 import ConfirmModal from "./components/confirmationmodels/ConfirmModal";
@@ -220,6 +221,14 @@ export default function App() {
 
   // --- Main Application Logic & Hook ---
   const appLogic = useAppLogic();
+
+  // --- Sync Zustand store with appLogic (so Edit button opens modal) ---
+  const storeEditingIdx = useImageEditorStore((state) => state.editingImageIdx);
+  React.useEffect(() => {
+    if (appLogic.setEditingImageIdx && storeEditingIdx !== appLogic.editingImageIdx) {
+      appLogic.setEditingImageIdx(storeEditingIdx);
+    }
+  }, [storeEditingIdx, appLogic]);
 
   // --- Destructuring Logic Fields & Callbacks ---
   const {
@@ -1940,13 +1949,14 @@ export default function App() {
         />
       )}
 
-      {/* Dashboard Modal: Advanced Crop & Trim Editor */}
-      {isWorkspacePath && !isPipMode && editingImageIdx !== null && (
+      {/* Modal: Advanced Crop & Trim Editor (Modal Mode - Works from any page) */}
+      {!isPipMode && storeEditingIdx !== null && (
         <ImageEditorModal isPage={false} appLogic={memoizedAppLogic} />
       )}
 
+
       {/* Modal: Advanced Crop & Trim Editor (PIP Mode only) */}
-      {isPipMode && editingImageIdx !== null && (
+      {isPipMode && storeEditingIdx !== null && (
         <div
           className="fixed bottom-6 right-6 w-96 h-56 rounded-3xl border border-white/10 shadow-2xl z-50 overflow-hidden bg-neutral-950/95 backdrop-blur-xl animate-fade-in cursor-pointer"
           onClick={React.useCallback(() => {
@@ -1957,6 +1967,7 @@ export default function App() {
           <ImageEditorModal appLogic={memoizedAppLogic} />
         </div>
       )}
+
 
       {alertDialog && alertDialog.isOpen && (
         <ConfirmModal

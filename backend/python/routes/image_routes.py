@@ -45,7 +45,7 @@ class EditImageRequest(BaseModel):
     outputFormat: Optional[str] = "jpeg"
     cropQuality: Optional[int] = 90
 
-class UndoCropRequest(BaseModel):
+class UndoEditRequest(BaseModel):
     url: str
 
 class TransformImageRequest(BaseModel):
@@ -93,8 +93,8 @@ class RemoveBubblesBatchRequest(BaseModel):
 
 # ─── Image Editing & Transform Routes ──────────────────────────────────────────
 
-@router.post("/edit", summary="Crop, rotate, and auto-trim an image panel")
-async def edit_image(body: EditImageRequest):
+@router.post("/edit", summary="Edit, rotate, and auto-trim an image panel")
+async def apply_image_edits(body: EditImageRequest):
     logger.info(f"[Image Edit] Request received for URL: {body.url[:60]}...")
     try:
         resolved = await img_utils.resolve_image_to_buffer(body.url)
@@ -166,7 +166,7 @@ async def edit_image(body: EditImageRequest):
             content_type
         )
 
-        unique_id = f"merged_{int(time.time() * 1000)}_cropped"
+        unique_id = f"merged_{int(time.time() * 1000)}_edited"
         new_url = supabase_url if supabase_url else f"/api/image/cached/{unique_id}"
 
         # Always cache locally as a fallback or fast-access path
@@ -185,12 +185,22 @@ async def edit_image(body: EditImageRequest):
         raise HTTPException(status_code=500, detail=f"Image frame editing failed: {e}")
 
 
-@router.post("/undo-crop", summary="Restore previous crop state of an edited image")
-async def undo_crop(body: UndoCropRequest):
+@router.post("/undo-edit", summary="Restore previous edit state of an edited image")
+async def undo_image_edit(body: UndoEditRequest):
     prev = edit_history.get(body.url)
     if not prev:
-        raise HTTPException(status_code=404, detail="No previous crop state found in session history.")
+        raise HTTPException(status_code=404, detail="No previous edit state found in session history.")
     return {"success": True, "previous_url": prev}
+
+
+@router.post("/crop", include_in_schema=False, summary="Backward-compatible alias for image edits")
+async def apply_image_edit_alias(body: EditImageRequest):
+    return await apply_image_edits(body)
+
+
+@router.post("/undo-crop", include_in_schema=False, summary="Backward-compatible alias for undoing image edits")
+async def undo_image_edit_alias(body: UndoEditRequest):
+    return await undo_image_edit(body)
 
 
 @router.post("/transform", summary="Rotate or flip image frame")
