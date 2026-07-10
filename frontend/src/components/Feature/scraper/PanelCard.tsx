@@ -206,7 +206,6 @@ function PanelCard({
       onClick={(e) => onCardClick(idx, imgUrl, e.shiftKey)}
       onDoubleClick={(e) => {
         e.stopPropagation();
-        // Open editor via Zustand store (single source of truth)
         useImageEditorStore.setState({ activeTool: "adjust", editingImageIdx: idx });
       }}
       className={[
@@ -263,7 +262,6 @@ function PanelCard({
       <PanelCardActions
         idx={idx}
         imgUrl={imgUrl}
-        openEditingImageIdx={openEditingImageIdx}
         setScrapedImages={setScrapedImages}
         setSelectedScraped={setSelectedScraped}
         setConsoleLogs={setConsoleLogs}
