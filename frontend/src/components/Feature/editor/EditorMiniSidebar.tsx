@@ -185,6 +185,12 @@ const EditorMiniSidebarInner = ({
       icon: Brain,
       isProcessing: isCleaningBubbles,
     },
+    // Added Image Editor Tool
+    {
+      id: "image-editor",
+      label: "Image Editor",
+      icon: Edit2,
+    },
     {
       id: "settings",
       label: "Editor Settings",
@@ -225,15 +231,16 @@ const EditorMiniSidebarInner = ({
       <div className="relative group w-full flex justify-center py-1">
         {/* Premium Floating Active Pill */}
         <div
-          className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-500 ease-out z-10 ${isActive
+          className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-500 ease-out z-10 ${
+            isActive
               ? "h-6 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.9)] opacity-100"
               : "h-0 bg-transparent opacity-0"
-            }`}
+          }`}
         />
 
         <button
           onClick={() => {
-            if (item.id === "autocrop" || item.id === "bubbles") {
+            if (item.id === "autocrop" || item.id === "bubbles" || item.id === "image-editor") {
               setCurrentSection(item.id);
             } else if (item.id === "settings") {
               if (navigateTo) {
@@ -257,17 +264,19 @@ const EditorMiniSidebarInner = ({
         >
           {/* iOS-style icon pill container with inner shadow */}
           <div
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 group-active:scale-90 ${isActive
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 group-active:scale-90 ${
+              isActive
                 ? "bg-purple-500/20 border border-purple-500/50 shadow-[inset_0_0_12px_rgba(168,85,247,0.2),0_0_14px_rgba(168,85,247,0.3)]"
                 : "bg-neutral-800/80 border border-neutral-700/50 shadow-sm group-hover:bg-purple-500/10 group-hover:border-purple-500/30 group-hover:shadow-[0_0_10px_rgba(168,85,247,0.15)]"
-              }`}
+            }`}
           >
             <Icon
               strokeWidth={isActive ? 2.5 : 2}
-              className={`w-[18px] h-[18px] transition-all duration-300 ${isActive
+              className={`w-[18px] h-[18px] transition-all duration-300 ${
+                isActive
                   ? "text-purple-300 drop-shadow-[0_0_8px_rgba(216,180,254,0.5)]"
                   : "text-neutral-400 group-hover:text-purple-300 group-hover:scale-110"
-                }`}
+              }`}
             />
           </div>
 
@@ -295,8 +304,9 @@ const EditorMiniSidebarInner = ({
     // Premium Glassmorphism Container
     <aside
       style={{ top: `${topOffsetPx}px` }}
-      className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950/95 backdrop-blur-2xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[60] py-4 shadow-[4px_0_32px_rgba(0,0,0,0.4)] ${isCollapsed ? "w-16" : "w-20"
-        }`}
+      className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950/95 backdrop-blur-2xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[60] py-4 shadow-[4px_0_32px_rgba(0,0,0,0.4)] ${
+        isCollapsed ? "w-16" : "w-20"
+      }`}
     >
       {/* Scrollable Tools Area */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
