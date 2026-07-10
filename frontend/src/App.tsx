@@ -31,7 +31,7 @@ import AIModelsPage from "./components/Feature/ai_models/AIModelsPage";
 import ShortcutsPage from "./components/Shortcuts/ShortcutsPage";
 
 // --- Processing & Editor Modals ---
-import CropEditorModal from "./components/Feature/editor/Tools/ImageEditor/CropEditorModal";
+import CropEditorModal from "./components/Feature/editor/Tools/ImageEditor/ImageEditorModal";
 import AutoCropModal from "./components/Feature/processing/AutoCropModal";
 import NotificationStack from "./components/notification/NotificationStack";
 import ConfirmModal from "./components/confirmationmodels/ConfirmModal";

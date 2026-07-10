@@ -1,10 +1,10 @@
 import React, { useCallback } from "react";
 import { RefreshCw, Layers } from "lucide-react";
 import MergePanel from "./MergePanel/MergePanel";
-import { CropToolsPanel, FreehandPanel } from "./";
+import { CropToolsPanel, FreehandPanel } from ".";
 import EnhancementsPanel from "./EnhancementsPanel";
 import HorizontalSplitter from "./HorizontalSplitter/HorizontalSplitter";
-import CutsRegistry from "../ImageEditor/CutsRegistry/CutsRegistry";
+import CutsRegistry from "./CutsRegistry/CutsRegistry";
 import AutoSlicer from "./AutoCrop/AutoSlicer";
 
 interface CropEditorSidebarProps {

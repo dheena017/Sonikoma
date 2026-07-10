@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { NotificationType } from "@/components/notification/NotificationStack";
 import { ErrorPopupDetail } from "@/components/confirmationmodels/ErrorPopupModal";
-import { Slot } from "../../shared";
+import { Slot } from "../../shared/index.js";
 
 import {
   CropEditorHeader,
@@ -9,7 +9,7 @@ import {
   CropEditorCanvasContainer,
   CropEditorSidebar,
 } from "./index";
-import EditorMiniSidebar from "../../EditorMiniSidebar";
+import EditorMiniSidebar from "../../EditorMiniSidebar.js";
 
 import { useCropEditor } from "../../../../../hooks/useCropEditor.js";
 import { useAppLogic } from "../../../../../hooks/useAppLogic.js";
