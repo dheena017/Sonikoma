@@ -60,6 +60,7 @@ const CropEditorModal = React.memo(
     } = appLogic;
 
     const [textBgColor, setTextBgColor] = React.useState("#ffffff");
+    const [isToolsPanelOpen, setIsToolsPanelOpen] = React.useState(true);
 
     useEffect(() => {
       if (isPipMode || isPage) {
@@ -456,14 +457,16 @@ const CropEditorModal = React.memo(
           isPipMode={isPipMode}
           setIsPipMode={setIsPipMode}
           slices={slices}
+          isToolsPanelOpen={isToolsPanelOpen}
+          setIsToolsPanelOpen={setIsToolsPanelOpen}
         />
 
         {/* Main Content Pane */}
         <div className="flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden select-none items-stretch p-4 sm:p-5 gap-4 sm:gap-5">
           {/* Left thumbnail deck removed per request */}
 
-          {/* Center Canvas & Right Sidebar Grid */}
-          <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4 sm:gap-5 flex-1 min-h-0 items-stretch">
+          {/* Center Canvas & Right Sidebar Container */}
+          <div className="flex flex-col lg:flex-row flex-1 min-h-0 items-stretch overflow-hidden relative transition-all duration-300">
             <CropEditorCanvasContainer
               key={imageUrl || undefined}
               handleAiCrop={handleAiCrop}
@@ -511,118 +514,126 @@ const CropEditorModal = React.memo(
               textBgColor={textBgColor}
             />
 
-            <CropEditorSidebar
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              slices={slices}
-              setSlices={setSlices}
-              editingImageIdx={editingImageIdx}
-              scrapedImages={scrapedImages}
-              isMerging={isMerging}
-              handleMergeWithNext={handleMergeWithNext}
-              editCropTop={editCropTop}
-              editCropBottom={editCropBottom}
-              editCropLeft={editCropLeft}
-              editCropRight={editCropRight}
-              setEditCropTop={setEditCropTop}
-              setEditCropBottom={setEditCropBottom}
-              setEditCropLeft={setEditCropLeft}
-              setEditCropRight={setEditCropRight}
-              zoom={zoom}
-              setZoom={setZoom}
-              isTransforming={isTransforming}
-              handleTransform={(action, param) =>
-                handleTransform(action as "rotate" | "flip", param)
-              }
-              handleResetCropBounds={handleResetCropBounds}
-              activeStoryboardPanel={activeStoryboardPanel}
-              handleModifyBrightness={handleModifyBrightness}
-              handleModifyContrast={handleModifyContrast}
-              handleModifySaturation={handleModifySaturation}
-              handleModifyFilterPreset={handleModifyFilterPreset}
-              handleModifyGrayscale={handleModifyGrayscale}
-              handleModifyDuration={handleModifyDuration}
-              handleModifyMotionType={handleModifyMotionType}
-              handleModifySpeechText={handleModifySpeechText}
-              handleModifySfx={handleModifySfx}
-              handleModifyCropPadding={handleModifyCropPadding}
-              setScrapedImages={setScrapedImages}
-              setPanels={setPanels}
-              addNotification={addNotification}
-              fetchWithInterceptor={fetchWithInterceptor}
-              setConsoleLogs={setConsoleLogs}
-              editMode={editMode}
-              setEditMode={setEditMode}
-              brushSize={brushSize}
-              setBrushSize={setBrushSize}
-              brushAction={brushAction}
-              setBrushAction={setBrushAction}
-              handleClearBrushMask={handleClearBrushMask}
-              detectionStyle={detectionStyle}
-              setDetectionStyle={setDetectionStyle}
-              eraseMethod={eraseMethod}
-              setEraseMethod={setEraseMethod}
-              sensitivity={sensitivity}
-              setSensitivity={setSensitivity}
-              dilation={dilation}
-              setDilation={setDilation}
-              inpaintRadius={inpaintRadius}
-              setInpaintRadius={setInpaintRadius}
-              debugMode={debugMode}
-              setDebugMode={setDebugMode}
-              fillColor={fillColor}
-              setFillColor={setFillColor}
-              textBgColor={textBgColor}
-              setTextBgColor={setTextBgColor}
-              ocrLang={ocrLang}
-              setOcrLang={setOcrLang}
-              gpu={gpu}
-              setGpu={setGpu}
-              morphKernelSize={morphKernelSize}
-              setMorphKernelSize={setMorphKernelSize}
-              morphShape={morphShape}
-              setMorphShape={setMorphShape}
-              useCustomColorTarget={useCustomColorTarget}
-              setUseCustomColorTarget={setUseCustomColorTarget}
-              customColorTarget={customColorTarget}
-              setCustomColorTarget={setCustomColorTarget}
-              customColorTolerance={customColorTolerance}
-              setCustomColorTolerance={setCustomColorTolerance}
-              splitPosition={splitPosition}
-              setSplitPosition={setSplitPosition}
-              splitLines={splitLines}
-              setSplitLines={setSplitLines}
-              showSplitPosition={showSplitPosition}
-              setShowSplitPosition={setShowSplitPosition}
-              setSelectedSliceId={setSelectedSliceId}
-              handleAddSplitLine={handleAddSplitLine}
-              handleRemoveSplitLine={handleRemoveSplitLine}
-              handleExecuteHorizontalSplit={handleExecuteHorizontalSplit}
-              isSavingEdit={isSavingEdit}
-              imageUrl={imageUrl}
-              magneticSnap={magneticSnap}
-              setMagneticSnap={setMagneticSnap}
-              detectedGutters={detectedGutters}
-              setDetectedGutters={setDetectedGutters}
-              selectedSliceId={selectedSliceId}
-              editAutoTrim={editAutoTrim}
-              handlePushToSlices={handlePushToSlices}
-              autoPushOnDraw={autoPushOnDraw}
-              setAutoPushOnDraw={setAutoPushOnDraw}
-              handleClearAllSlices={handleClearAllSlices}
-              handleNudge={handleNudge}
-              handleSelectSlice={handleSelectSlice}
-              handleDeleteSlice={handleDeleteSlice}
-              handleCropSingleSlice={handleCropSingleSlice}
-              isCroppingSlice={isCroppingSlice}
-              handleDetectPanels={handleDetectPanels}
-              handleCancelDetect={handleCancelDetect}
-              isDetecting={isDetecting}
-              handleCommitDetectedBoxes={handleCommitDetectedBoxes}
-              detectedBoxes={detectedBoxes}
-              handleClearDetectedBoxes={handleClearDetectedBoxes}
-              handleExecuteSave={handleExecuteSave}
-            />
+            <div
+              className={`flex flex-col transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] shrink-0 ${
+                isToolsPanelOpen
+                  ? "w-full lg:w-[420px] opacity-100 mt-4 lg:mt-0 lg:ml-5 pointer-events-auto"
+                  : "w-0 lg:w-0 h-0 lg:h-full opacity-0 pointer-events-none overflow-hidden"
+              }`}
+            >
+              <CropEditorSidebar
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                slices={slices}
+                setSlices={setSlices}
+                editingImageIdx={editingImageIdx}
+                scrapedImages={scrapedImages}
+                isMerging={isMerging}
+                handleMergeWithNext={handleMergeWithNext}
+                editCropTop={editCropTop}
+                editCropBottom={editCropBottom}
+                editCropLeft={editCropLeft}
+                editCropRight={editCropRight}
+                setEditCropTop={setEditCropTop}
+                setEditCropBottom={setEditCropBottom}
+                setEditCropLeft={setEditCropLeft}
+                setEditCropRight={setEditCropRight}
+                zoom={zoom}
+                setZoom={setZoom}
+                isTransforming={isTransforming}
+                handleTransform={(action, param) =>
+                  handleTransform(action as "rotate" | "flip", param)
+                }
+                handleResetCropBounds={handleResetCropBounds}
+                activeStoryboardPanel={activeStoryboardPanel}
+                handleModifyBrightness={handleModifyBrightness}
+                handleModifyContrast={handleModifyContrast}
+                handleModifySaturation={handleModifySaturation}
+                handleModifyFilterPreset={handleModifyFilterPreset}
+                handleModifyGrayscale={handleModifyGrayscale}
+                handleModifyDuration={handleModifyDuration}
+                handleModifyMotionType={handleModifyMotionType}
+                handleModifySpeechText={handleModifySpeechText}
+                handleModifySfx={handleModifySfx}
+                handleModifyCropPadding={handleModifyCropPadding}
+                setScrapedImages={setScrapedImages}
+                setPanels={setPanels}
+                addNotification={addNotification}
+                fetchWithInterceptor={fetchWithInterceptor}
+                setConsoleLogs={setConsoleLogs}
+                editMode={editMode}
+                setEditMode={setEditMode}
+                brushSize={brushSize}
+                setBrushSize={setBrushSize}
+                brushAction={brushAction}
+                setBrushAction={setBrushAction}
+                handleClearBrushMask={handleClearBrushMask}
+                detectionStyle={detectionStyle}
+                setDetectionStyle={setDetectionStyle}
+                eraseMethod={eraseMethod}
+                setEraseMethod={setEraseMethod}
+                sensitivity={sensitivity}
+                setSensitivity={setSensitivity}
+                dilation={dilation}
+                setDilation={setDilation}
+                inpaintRadius={inpaintRadius}
+                setInpaintRadius={setInpaintRadius}
+                debugMode={debugMode}
+                setDebugMode={setDebugMode}
+                fillColor={fillColor}
+                setFillColor={setFillColor}
+                textBgColor={textBgColor}
+                setTextBgColor={setTextBgColor}
+                ocrLang={ocrLang}
+                setOcrLang={setOcrLang}
+                gpu={gpu}
+                setGpu={setGpu}
+                morphKernelSize={morphKernelSize}
+                setMorphKernelSize={setMorphKernelSize}
+                morphShape={morphShape}
+                setMorphShape={setMorphShape}
+                useCustomColorTarget={useCustomColorTarget}
+                setUseCustomColorTarget={setUseCustomColorTarget}
+                customColorTarget={customColorTarget}
+                setCustomColorTarget={setCustomColorTarget}
+                customColorTolerance={customColorTolerance}
+                setCustomColorTolerance={setCustomColorTolerance}
+                splitPosition={splitPosition}
+                setSplitPosition={setSplitPosition}
+                splitLines={splitLines}
+                setSplitLines={setSplitLines}
+                showSplitPosition={showSplitPosition}
+                setShowSplitPosition={setShowSplitPosition}
+                setSelectedSliceId={setSelectedSliceId}
+                handleAddSplitLine={handleAddSplitLine}
+                handleRemoveSplitLine={handleRemoveSplitLine}
+                handleExecuteHorizontalSplit={handleExecuteHorizontalSplit}
+                isSavingEdit={isSavingEdit}
+                imageUrl={imageUrl}
+                magneticSnap={magneticSnap}
+                setMagneticSnap={setMagneticSnap}
+                detectedGutters={detectedGutters}
+                setDetectedGutters={setDetectedGutters}
+                selectedSliceId={selectedSliceId}
+                editAutoTrim={editAutoTrim}
+                handlePushToSlices={handlePushToSlices}
+                autoPushOnDraw={autoPushOnDraw}
+                setAutoPushOnDraw={setAutoPushOnDraw}
+                handleClearAllSlices={handleClearAllSlices}
+                handleNudge={handleNudge}
+                handleSelectSlice={handleSelectSlice}
+                handleDeleteSlice={handleDeleteSlice}
+                handleCropSingleSlice={handleCropSingleSlice}
+                isCroppingSlice={isCroppingSlice}
+                handleDetectPanels={handleDetectPanels}
+                handleCancelDetect={handleCancelDetect}
+                isDetecting={isDetecting}
+                handleCommitDetectedBoxes={handleCommitDetectedBoxes}
+                detectedBoxes={detectedBoxes}
+                handleClearDetectedBoxes={handleClearDetectedBoxes}
+                handleExecuteSave={handleExecuteSave}
+              />
+            </div>
           </div>
         </div>
 

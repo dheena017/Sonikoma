@@ -20,35 +20,7 @@ from database.db import get_available_credits, record_credit_transaction, LOW_BA
 
 logger = logging.getLogger("sonikoma.routes.stable_diffusion_routes")
 router = APIRouter()
-
-# Lazy-load Stable Diffusion so missing ML deps/models don't crash the whole backend at import-time.
-_stable_diffusion = None
-_stable_diffusion_init_error: Optional[str] = None
-
-
-def _get_stable_diffusion():
-    global _stable_diffusion, _stable_diffusion_init_error
-    if _stable_diffusion is not None or _stable_diffusion_init_error is not None:
-        return _stable_diffusion
-
-    try:
-        # Default to CPU; callers can still override via get_stable_diffusion_engine if needed.
-        _stable_diffusion = get_stable_diffusion_engine()
-        return _stable_diffusion
-    except Exception as e:
-        _stable_diffusion_init_error = str(e)
-        logger.warning(
-            "Stable Diffusion unavailable - endpoints will return 503. "
-            f"Reason: {e}"
-        )
-        return None
-
-
-def _sd_unavailable_http_detail():
-    if _stable_diffusion_init_error:
-        return _stable_diffusion_init_error
-    return "Stable Diffusion is not available."
-
+stable_diffusion = get_stable_diffusion_engine()
 
 
 class GenerateAIRequest(BaseModel):
@@ -110,14 +82,8 @@ async def generate_ai(body: GenerateAIRequest, current_user: dict = Depends(get_
 
     output_dir = body.output_dir or tempfile.gettempdir()
     try:
-        stable_diffusion = _get_stable_diffusion()
-        if stable_diffusion is None:
-            raise HTTPException(status_code=503, detail=_sd_unavailable_http_detail())
-
         results = await stable_diffusion.generate_images(
             prompt=body.prompt,
-
-
             negative_prompt=body.negative_prompt,
             num_images=body.num_images,
             height=body.height,
@@ -142,12 +108,7 @@ async def inpaint(body: InpaintRequest, current_user: dict = Depends(get_current
 
     output_path = body.output_path or _default_output_path(".png")
     try:
-        stable_diffusion = _get_stable_diffusion()
-        if stable_diffusion is None:
-            raise HTTPException(status_code=503, detail=_sd_unavailable_http_detail())
-
         result = await stable_diffusion.inpaint(
-
             body.image_path,
             body.mask_path,
             body.prompt,
@@ -172,12 +133,7 @@ async def upscale(body: UpscaleRequest, current_user: dict = Depends(get_current
 
     output_path = body.output_path or _default_output_path(".png")
     try:
-        stable_diffusion = _get_stable_diffusion()
-        if stable_diffusion is None:
-            raise HTTPException(status_code=503, detail=_sd_unavailable_http_detail())
-
         result = await stable_diffusion.upscale(body.image_path, output_path=output_path, scale_factor=body.scale_factor)
-
         new_balance = record_credit_transaction(current_user["user_id"], -COST, "sd_upscale")
         return {"success": True, "output_path": result, "low_balance": new_balance < LOW_BALANCE_THRESHOLD}
     except Exception as exc:
@@ -193,12 +149,7 @@ async def style_transfer(body: StyleTransferRequest, current_user: dict = Depend
 
     output_path = body.output_path or _default_output_path(".png")
     try:
-        stable_diffusion = _get_stable_diffusion()
-        if stable_diffusion is None:
-            raise HTTPException(status_code=503, detail=_sd_unavailable_http_detail())
-
         result = await stable_diffusion.style_transfer(
-
             body.image_path,
             style_prompt=body.style_prompt,
             output_path=output_path,
@@ -223,13 +174,8 @@ async def batch_generate(body: BatchGenerateRequest, current_user: dict = Depend
     try:
         images = []
         for prompt in body.prompts:
-            stable_diffusion = _get_stable_diffusion()
-            if stable_diffusion is None:
-                raise HTTPException(status_code=503, detail=_sd_unavailable_http_detail())
-
             results = await stable_diffusion.generate_images(
                 prompt=prompt,
-
                 num_images=1,
                 height=body.height,
                 width=body.width,
@@ -243,4 +189,3 @@ async def batch_generate(body: BatchGenerateRequest, current_user: dict = Depend
     except Exception as exc:
         logger.error(f"Batch generate failed: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(exc))
-    

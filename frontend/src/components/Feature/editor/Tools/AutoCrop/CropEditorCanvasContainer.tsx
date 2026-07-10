@@ -115,7 +115,7 @@ export default function CropEditorCanvasContainer({
 
   return (
     <div
-      className="lg:col-span-7 flex flex-col space-y-2 lg:h-full flex-1 lg:flex-auto min-h-[350px] lg:min-h-0 overflow-hidden"
+      className="flex flex-col space-y-2 lg:h-full flex-1 min-h-[350px] lg:min-h-0 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
       style={{
         pointerEvents: "auto",
       }}

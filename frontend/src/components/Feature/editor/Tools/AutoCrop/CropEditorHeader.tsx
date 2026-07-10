@@ -8,6 +8,8 @@ import {
   Redo2,
   Trash2,
   Minimize2,
+  PanelRightClose,
+  PanelRightOpen,
 } from "lucide-react";
 
 interface CropEditorHeaderProps {
@@ -25,6 +27,8 @@ interface CropEditorHeaderProps {
   isPipMode?: boolean;
   setIsPipMode?: (val: boolean) => void;
   slices?: any[];
+  isToolsPanelOpen?: boolean;
+  setIsToolsPanelOpen?: (val: boolean) => void;
 }
 
 export default function CropEditorHeader({
@@ -42,6 +46,8 @@ export default function CropEditorHeader({
   isPipMode = false,
   setIsPipMode,
   slices = [],
+  isToolsPanelOpen = true,
+  setIsToolsPanelOpen,
 }: CropEditorHeaderProps) {
   const handleCloseClick = async () => {
     if (historyLength > 0 || slices.length > 0) {
@@ -190,6 +196,27 @@ export default function CropEditorHeader({
                 }
               >
                 <Minimize2 className="h-4 w-4" />
+              </button>
+            )}
+            {setIsToolsPanelOpen && (
+              <button
+                type="button"
+                onClick={() => {
+                  console.log(`[CropEditorHeader] Toggling tools panel visibility to ${!isToolsPanelOpen}`);
+                  setIsToolsPanelOpen(!isToolsPanelOpen);
+                }}
+                className={`inline-flex items-center justify-center rounded-2xl p-2 transition-all cursor-pointer ${
+                  isToolsPanelOpen
+                    ? "bg-purple-600/20 hover:bg-purple-600/35 text-purple-300 border border-purple-500/30"
+                    : "bg-neutral-950/60 hover:bg-neutral-800/90 text-neutral-300 hover:text-white border border-white/5"
+                }`}
+                title={isToolsPanelOpen ? "Close Tools Panel" : "Open Tools Panel"}
+              >
+                {isToolsPanelOpen ? (
+                  <PanelRightClose className="h-4 w-4" />
+                ) : (
+                  <PanelRightOpen className="h-4 w-4" />
+                )}
               </button>
             )}
             <div className="w-px h-6 bg-white/10" />
