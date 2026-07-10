@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import TooltipPortal from "../../TooltipPortal";
 import { resolveWorkspaceReturnPath } from "../../../utils/workspaceNavigation";
-import { useCropEditorStore, CropTool } from "../../../hooks/useImageEditorState";
+import { useImageEditorStore } from "../../../hooks/useImageEditorState";
 
 interface EditorMiniSidebarProps {
   isCollapsed: boolean;
@@ -62,9 +62,9 @@ const EditorMiniSidebarInner = ({
   const params = new URLSearchParams(window.location.search);
   const isEditing = window.location.pathname.startsWith("/editor") && params.get("idx") !== null;
 
-  const activeTool = useCropEditorStore((state) => state.activeTool);
-  const setActiveTool = useCropEditorStore((state) => state.setActiveTool);
-  const slicesCount = useCropEditorStore((state) => state.slicesCount);
+  const activeTool = useImageEditorStore((state) => state.activeTool);
+  const setActiveTool = useImageEditorStore((state) => state.setActiveTool);
+  const slicesCount = useImageEditorStore((state) => state.slicesCount);
 
   const [hoveredTool, setHoveredTool] = useState<string | null>(null);
   const [hoveredRect, setHoveredRect] = useState<DOMRect | null>(null);

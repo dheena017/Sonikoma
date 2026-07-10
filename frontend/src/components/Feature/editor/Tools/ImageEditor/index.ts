@@ -1,11 +1,18 @@
 // Main Components
+export { default as ImageEditorCanvasContainer } from "./ImageEditorCanvasContainer";
+export { default as ImageEditorFooter } from "./ImageEditorFooter";
+export { ImageEditorHeader } from "./ImageEditorHeader";
+export { default as ImageEditorSidebar } from "./ImageEditorSidebar";
+export { default as ImageEditorModal } from "./ImageEditorModal";
+export { default as ImageEditorPanel } from "./ImageEditorPanel";
+export { default as FreehandPanel } from "./FreehandPanel";
+
 export { default as CropEditorCanvasContainer } from "./ImageEditorCanvasContainer";
 export { default as CropEditorFooter } from "./ImageEditorFooter";
-export { default as CropEditorHeader } from "./ImageEditorHeader";
+export { ImageEditorHeader as CropEditorHeader } from "./ImageEditorHeader";
 export { default as CropEditorSidebar } from "./ImageEditorSidebar";
 export { default as CropEditorModal } from "./ImageEditorModal";
 export { default as CropToolsPanel } from "./ImageEditorPanel";
-export { default as FreehandPanel } from "./FreehandPanel";
 
 // Enhancement Components
 export { default as EnhancementsPanel } from "./EnhancementsPanel";

@@ -1,13 +1,13 @@
 import React, { useCallback } from "react";
 import { RefreshCw, Layers } from "lucide-react";
 import MergePanel from "./MergePanel/MergePanel";
-import { CropToolsPanel, FreehandPanel } from ".";
+import { ImageEditorPanel, FreehandPanel } from ".";
 import EnhancementsPanel from "./EnhancementsPanel";
 import HorizontalSplitter from "./HorizontalSplitter/HorizontalSplitter";
 import CutsRegistry from "./CutsRegistry/CutsRegistry";
 import AutoSlicer from "./AutoCrop/AutoSlicer";
 
-interface CropEditorSidebarProps {
+interface ImageEditorSidebarProps {
   activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw";
   setActiveTab: (tab: any) => void;
   slices: any[];
@@ -118,7 +118,7 @@ interface CropEditorSidebarProps {
   handleExecuteSave: any;
 }
 
-function CropEditorSidebar({
+function ImageEditorSidebar({
   activeTab,
   setActiveTab,
   slices,
@@ -227,7 +227,7 @@ function CropEditorSidebar({
   detectedBoxes,
   handleClearDetectedBoxes,
   handleExecuteSave,
-}: CropEditorSidebarProps) {
+}: ImageEditorSidebarProps) {
   return (
     <div className="w-full h-full flex flex-col space-y-3 lg:h-full lg:min-h-0 overflow-hidden pr-0 sm:pr-1.5 scrollbar-thin overscroll-contain shrink-0 max-h-[45vh] lg:max-h-none pb-4 lg:pb-0">
       {/* Tab Contents */}
@@ -260,7 +260,7 @@ function CropEditorSidebar({
 
         {activeTab === "edit" && (
           <div className="rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
-            <CropToolsPanel
+            <ImageEditorPanel
               editCropTop={editCropTop}
               editCropBottom={editCropBottom}
               editCropLeft={editCropLeft}
@@ -412,4 +412,4 @@ function CropEditorSidebar({
   );
 }
 
-export default React.memo(CropEditorSidebar);
+export default React.memo(ImageEditorSidebar);

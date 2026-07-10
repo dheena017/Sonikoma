@@ -1,8 +1,7 @@
 import { normalizeLog } from "../types/logs";
 import { useRef, useEffect, useCallback } from "react";
 import { Slice, Slot, DetectedPanel } from "@/components/Feature/editor/shared";
-import { NotificationType } from "../components/notification/NotificationStack.js";
-import { useCropEditorState, useCropEditorStore } from "./useImageEditorState.js";
+import { useImageEditorState, useImageEditorStore } from "./useImageEditorState.js";
 import { useCropEditorHistory } from "./useCropEditorHistory.js";
 import { useCropEditorDrag } from "./useCropEditorDrag.js";
 import { useCropEditorPipelines } from "./useCropEditorPipelines.js";
@@ -13,7 +12,7 @@ interface UseCropEditorProps {
   appLogic: ReturnType<typeof useAppLogic>;
 }
 
-export function useCropEditor({ appLogic }: UseCropEditorProps) {
+export function useImageEditor({ appLogic }: UseCropEditorProps) {
   const {
     editingImageIdx,
     setEditingImageIdx,
@@ -45,13 +44,13 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasMaskRef = useRef<HTMLCanvasElement>(null);
 
-  const state = useCropEditorState({
+  const state = useImageEditorState({
     scrapedImages,
     editingImageIdx,
     imageEditStates,
   });
 
-  const { activeTool } = useCropEditorStore();
+  const { activeTool } = useImageEditorStore();
 
   useEffect(() => {
     if (activeTool === "slice") {
@@ -358,8 +357,9 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
   };
 
   const handleResetCropBounds = () => {
+    const currentImageNumber = editingImageIdx !== null ? editingImageIdx + 1 : 1;
     console.log(
-      `[Image Editor] Resetting crop bounds for image #${editingImageIdx + 1}`
+      `[Image Editor] Resetting crop bounds for image #${currentImageNumber}`
     );
     setEditCropTop(0);
     setEditCropBottom(0);
@@ -416,7 +416,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
     const currentUrl = scrapedImages[editingImageIdx];
     console.log(
       `[Split] Executing horizontal splits on image #${
-        editingImageIdx + 1
+        editingImageIdx !== null ? editingImageIdx + 1 : 1
       } with lines:`,
       state.splitLines
     );
@@ -447,7 +447,7 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
   const handleExecuteSave = async () => {
     console.log(
       `[Image Editor] Executing save for image #${
-        editingImageIdx + 1
+        editingImageIdx !== null ? editingImageIdx + 1 : 1
       }. Slices: ${state.slices.length}, Selected: ${state.selectedSliceId}`
     );
     if (state.selectedSliceId) {
@@ -592,3 +592,5 @@ export function useCropEditor({ appLogic }: UseCropEditorProps) {
     handleClearBrushMask: handleClearBrushMaskCallback,
   };
 }
+
+export const useCropEditor = useImageEditor;

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useCropEditorStore } from "../../../../../hooks/useImageEditorState";
+import { useImageEditorStore } from "../../../../../hooks/useImageEditorState";
 import {
   RotateCcw,
   RotateCw,
@@ -14,7 +14,7 @@ import {
   Crop,
 } from "lucide-react";
 
-interface CropToolsPanelProps {
+interface ImageEditorPanelProps {
   editCropTop: number;
   editCropBottom: number;
   editCropLeft: number;
@@ -99,7 +99,7 @@ function NumericCropInput({
   );
 }
 
-export default function CropToolsPanel({
+export default function ImageEditorPanel({
   editCropTop,
   editCropBottom,
   editCropLeft,
@@ -115,8 +115,8 @@ export default function CropToolsPanel({
   onFlip,
   onReset,
   handleNudge,
-}: CropToolsPanelProps) {
-  const activeTool = useCropEditorStore((state) => state.activeTool);
+}: ImageEditorPanelProps) {
+  const activeTool = useImageEditorStore((state) => state.activeTool);
   const [aspectLocked, setAspectLocked] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState<string>("Free");
 
@@ -190,7 +190,7 @@ export default function CropToolsPanel({
               <button
                 type="button"
                 onClick={() => {
-                  console.log("[CropToolsPanel] Rotating -90°");
+                  console.log("[ImageEditorPanel] Rotating -90°");
                   onRotate(-90);
                 }}
                 disabled={isTransforming}
@@ -205,7 +205,7 @@ export default function CropToolsPanel({
               <button
                 type="button"
                 onClick={() => {
-                  console.log("[CropToolsPanel] Rotating 180°");
+                  console.log("[ImageEditorPanel] Rotating 180°");
                   onRotate(180);
                 }}
                 disabled={isTransforming}
@@ -220,7 +220,7 @@ export default function CropToolsPanel({
               <button
                 type="button"
                 onClick={() => {
-                  console.log("[CropToolsPanel] Rotating +90°");
+                  console.log("[ImageEditorPanel] Rotating +90°");
                   onRotate(90);
                 }}
                 disabled={isTransforming}
@@ -235,7 +235,7 @@ export default function CropToolsPanel({
               <button
                 type="button"
                 onClick={() => {
-                  console.log("[CropToolsPanel] Flipping Horizontally");
+                  console.log("[ImageEditorPanel] Flipping Horizontally");
                   onFlip("h");
                 }}
                 disabled={isTransforming}
@@ -250,7 +250,7 @@ export default function CropToolsPanel({
               <button
                 type="button"
                 onClick={() => {
-                  console.log("[CropToolsPanel] Flipping Vertically");
+                  console.log("[ImageEditorPanel] Flipping Vertically");
                   onFlip("v");
                 }}
                 disabled={isTransforming}
@@ -493,7 +493,7 @@ export default function CropToolsPanel({
       <button
         type="button"
         onClick={() => {
-          console.log("[CropToolsPanel] Resetting all crop bounds");
+          console.log("[ImageEditorPanel] Resetting all crop bounds");
           onReset();
         }}
         className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-red-900/30 bg-red-950/15 hover:bg-red-950/30 text-red-400/70 hover:text-red-300 text-[10px] font-bold font-mono transition-all cursor-pointer active:scale-95"

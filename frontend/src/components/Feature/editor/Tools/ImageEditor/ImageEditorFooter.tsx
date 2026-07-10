@@ -2,21 +2,22 @@ import React from "react";
 import { Undo2, Trash2, RefreshCw, Scissors } from "lucide-react";
 import { Slice } from "../../shared";
 
-interface CropEditorFooterProps {
+interface ImageEditorFooterProps {
   slices: Slice[];
   historyLength: number;
   handleUndo: () => void;
   isSavingEdit: boolean;
   setEditingImageIdx: (idx: number | null) => void;
   handleDeleteCurrentImage: () => void;
-  activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw";
+  activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw" | "separate";
+
   isTransforming: boolean;
   addNotification: (msg: string, type: any) => void;
   handleExecuteHorizontalSplit: () => void;
   handleExecuteSave: () => void;
 }
 
-export default function CropEditorFooter({
+export default function ImageEditorFooter({
   slices,
   historyLength,
   handleUndo,
@@ -28,7 +29,7 @@ export default function CropEditorFooter({
   addNotification,
   handleExecuteHorizontalSplit,
   handleExecuteSave,
-}: CropEditorFooterProps) {
+}: ImageEditorFooterProps) {
   return (
     <div className="px-5 py-4 bg-gradient-to-r from-neutral-950/95 via-neutral-950 to-purple-950/10 border-t border-white/5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex flex-col gap-1 text-left sm:max-w-[45%]">
@@ -53,7 +54,7 @@ export default function CropEditorFooter({
         <button
           type="button"
           onClick={() => {
-            console.log("[CropEditorFooter] Undo action triggered");
+            console.log("[ImageEditorFooter] Undo action triggered");
             handleUndo();
           }}
           disabled={historyLength === 0 || isSavingEdit}
@@ -71,7 +72,7 @@ export default function CropEditorFooter({
         <button
           type="button"
           onClick={() => {
-            console.log("[CropEditorFooter] Closing editor");
+            console.log("[ImageEditorFooter] Closing editor");
             window.history.pushState({}, "", "/");
             window.dispatchEvent(new Event("popstate"));
           }}
@@ -83,7 +84,7 @@ export default function CropEditorFooter({
         <button
           type="button"
           onClick={() => {
-            console.log("[CropEditorFooter] Delete current image requested");
+            console.log("[ImageEditorFooter] Delete current image requested");
             handleDeleteCurrentImage();
           }}
           disabled={isSavingEdit}

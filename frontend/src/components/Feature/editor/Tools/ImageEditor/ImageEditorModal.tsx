@@ -1,20 +1,16 @@
 import React, { useEffect } from "react";
-import { NotificationType } from "@/components/notification/NotificationStack";
 import { ErrorPopupDetail } from "@/components/confirmationmodels/ErrorPopupModal";
 import { Slot } from "../../shared/index.js";
 
-import {
-  CropEditorHeader,
-  CropEditorFooter,
-  CropEditorCanvasContainer,
-  CropEditorSidebar,
-} from "./index";
 import EditorMiniSidebar from "../../EditorMiniSidebar.js";
 
-import { useCropEditor } from "../../../../../hooks/useCropEditor.js";
+import { useImageEditor } from "../../../../../hooks/useImageEditor.js";
 import { useAppLogic } from "../../../../../hooks/useAppLogic.js";
+import { ImageEditorHeader } from "./ImageEditorHeader.js";
+import ImageEditorCanvasContainer from "./ImageEditorCanvasContainer.js";
+import ImageEditorSidebar from "./ImageEditorSidebar.js";
 
-interface CropEditorModalProps {
+interface ImageEditorModalProps {
   appLogic: ReturnType<typeof useAppLogic> & {
     isPipMode?: boolean;
     setIsPipMode?: (val: boolean) => void;
@@ -22,8 +18,8 @@ interface CropEditorModalProps {
   isPage?: boolean;
 }
 
-const CropEditorModal = React.memo(
-  ({ appLogic, isPage = false }: CropEditorModalProps) => {
+const ImageEditorModal = React.memo(
+  ({ appLogic, isPage = false }: ImageEditorModalProps) => {
     const {
       editingImageIdx,
       setEditingImageIdx,
@@ -214,7 +210,7 @@ const CropEditorModal = React.memo(
       handleExecuteSave,
       imageUrl,
       handleClearBrushMask,
-    } = useCropEditor({
+    } = useImageEditor({
       appLogic,
     });
 
@@ -287,33 +283,25 @@ const CropEditorModal = React.memo(
     );
 
     const handleModifyBrightness = (panelId: number, val: number) => {
-      console.log(
-        `[CropEditor] Modifying brightness for panel #${panelId}: ${val}`
-      );
+      console.log(`[ImageEditor] Modifying brightness for panel #${panelId}: ${val}`);
       setPanels?.((prev) =>
         prev.map((p) => (p.id === panelId ? { ...p, brightness: val } : p))
       );
     };
     const handleModifyContrast = (panelId: number, val: number) => {
-      console.log(
-        `[CropEditor] Modifying contrast for panel #${panelId}: ${val}`
-      );
+      console.log(`[ImageEditor] Modifying contrast for panel #${panelId}: ${val}`);
       setPanels?.((prev) =>
         prev.map((p) => (p.id === panelId ? { ...p, contrast: val } : p))
       );
     };
     const handleModifySaturation = (panelId: number, val: number) => {
-      console.log(
-        `[CropEditor] Modifying saturation for panel #${panelId}: ${val}`
-      );
+      console.log(`[ImageEditor] Modifying saturation for panel #${panelId}: ${val}`);
       setPanels?.((prev) =>
         prev.map((p) => (p.id === panelId ? { ...p, saturation: val } : p))
       );
     };
     const handleModifyFilterPreset = (panelId: number, preset: string) => {
-      console.log(
-        `[CropEditor] Modifying filter preset for panel #${panelId}: ${preset}`
-      );
+      console.log(`[ImageEditor] Modifying filter preset for panel #${panelId}: ${preset}`);
       setPanels?.((prev) =>
         prev.map((p) =>
           p.id === panelId ? { ...p, filter_preset: preset } : p
@@ -321,45 +309,37 @@ const CropEditorModal = React.memo(
       );
     };
     const handleModifyGrayscale = (panelId: number, val: boolean) => {
-      console.log(
-        `[CropEditor] Modifying grayscale for panel #${panelId}: ${val}`
-      );
+      console.log(`[ImageEditor] Modifying grayscale for panel #${panelId}: ${val}`);
       setPanels?.((prev) =>
         prev.map((p) => (p.id === panelId ? { ...p, grayscale: val } : p))
       );
     };
     const handleModifyDuration = (panelId: number, val: number) => {
-      console.log(
-        `[CropEditor] Modifying duration for panel #${panelId}: ${val}`
-      );
+      console.log(`[ImageEditor] Modifying duration for panel #${panelId}: ${val}`);
       setPanels?.((prev) =>
         prev.map((p) => (p.id === panelId ? { ...p, duration: val } : p))
       );
     };
     const handleModifyMotionType = (panelId: number, val: string) => {
-      console.log(
-        `[CropEditor] Modifying motion type for panel #${panelId}: ${val}`
-      );
+      console.log(`[ImageEditor] Modifying motion type for panel #${panelId}: ${val}`);
       setPanels?.((prev) =>
         prev.map((p) => (p.id === panelId ? { ...p, motion_type: val } : p))
       );
     };
     const handleModifySpeechText = (panelId: number, val: string) => {
-      console.log(`[CropEditor] Modifying speech text for panel #${panelId}`);
+      console.log(`[ImageEditor] Modifying speech text for panel #${panelId}`);
       setPanels?.((prev) =>
         prev.map((p) => (p.id === panelId ? { ...p, speech_text: val } : p))
       );
     };
     const handleModifySfx = (panelId: number, val: string) => {
-      console.log(`[CropEditor] Modifying sfx for panel #${panelId}: ${val}`);
+      console.log(`[ImageEditor] Modifying sfx for panel #${panelId}: ${val}`);
       setPanels?.((prev) =>
         prev.map((p) => (p.id === panelId ? { ...p, sfx: val } : p))
       );
     };
     const handleModifyCropPadding = (panelId: number, val: number) => {
-      console.log(
-        `[CropEditor] Modifying crop padding for panel #${panelId}: ${val}`
-      );
+      console.log(`[ImageEditor] Modifying crop padding for panel #${panelId}: ${val}`);
       setPanels?.((prev) =>
         prev.map((p) => (p.id === panelId ? { ...p, crop_padding: val } : p))
       );
@@ -376,7 +356,7 @@ const CropEditorModal = React.memo(
           <div className="absolute top-2 right-2 bg-purple-600 text-white text-[9px] font-bold font-mono px-2 py-0.5 rounded-md shadow-md z-50">
             PIP ACTIVE
           </div>
-          <CropEditorCanvasContainer
+          <ImageEditorCanvasContainer
             key={imageUrl || undefined}
             handleAiCrop={handleAiCrop}
             isAiDetecting={isAiDetecting}
@@ -426,23 +406,11 @@ const CropEditorModal = React.memo(
       );
     }
 
-    const mainCard = (
-      <div
-        className={`relative bg-neutral-950/95 border border-white/5 rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden shadow-2xl flex flex-col w-full ${
-          isPage
-            ? "h-[750px] lg:h-[820px] min-h-[650px]"
-            : "max-w-7xl h-[min(100dvh-1.5rem,980px)] max-h-[calc(100vh-4rem)] my-auto"
-        }`}
-        style={{
-          boxShadow:
-            "0 0 0 1px rgba(255,255,255,0.02), 0 0 70px rgba(139,92,246,0.14), 0 30px 60px rgba(0,0,0,0.78)",
-        }}
-      >
-        {/* Subtle top-edge glow line */}
-        <div className="absolute top-0 left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-purple-500/70 to-transparent" />
-        <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-purple-500/10 to-transparent pointer-events-none" />
-
-        <CropEditorHeader
+    return (
+      <div className="fixed inset-0 w-screen h-screen bg-[#0B0F19] text-white flex flex-col overflow-hidden z-[100]">
+        
+        {/* Full-width Header */}
+        <ImageEditorHeader
           editingImageIdx={editingImageIdx}
           scrapedImages={scrapedImages}
           handlePrevImage={handlePrevImage}
@@ -461,68 +429,88 @@ const CropEditorModal = React.memo(
           setIsToolsPanelOpen={setIsToolsPanelOpen}
         />
 
-        {/* Main Content Pane */}
-        <div className="flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden select-none items-stretch p-4 sm:p-5 gap-4 sm:gap-5">
-          {/* Left thumbnail deck removed per request */}
-
-          {/* Center Canvas & Right Sidebar Container */}
-          <div className="flex flex-col lg:flex-row flex-1 min-h-0 items-stretch overflow-hidden relative transition-all duration-300">
-            <CropEditorCanvasContainer
-              key={imageUrl || undefined}
-              handleAiCrop={handleAiCrop}
-              isAiDetecting={isAiDetecting}
-              editingImageIdx={editingImageIdx}
-              scrapedImages={scrapedImages}
-              containerRef={containerRef}
-              editCropTop={editCropTop}
-              editCropBottom={editCropBottom}
-              editCropLeft={editCropLeft}
-              editCropRight={editCropRight}
-              slices={slices}
-              selectedSliceId={selectedSliceId}
-              showSplitPosition={showSplitPosition}
-              splitPosition={splitPosition}
-              splitLines={splitLines}
-              handleStart={handleStart}
-              handleMove={handleMove}
-              handleEnd={handleEnd}
-              isPointInsideSelection={isPointInsideSelection}
-              handleSelectSlice={handleSelectSlice}
-              handleDeleteSlice={handleDeleteSlice}
-              handleRemoveSplitLine={handleRemoveSplitLine}
-              dragType={dragType}
-              onResizeStart={onResizeStart}
-              handleSelectAndDragSlice={handleSelectAndDragSlice}
-              zoom={zoom}
-              editMode={editMode}
-              detectedBubbles={detectedBubbles}
-              selectedBubbleIdx={selectedBubbleIdx}
-              setSelectedBubbleIdx={setSelectedBubbleIdx}
-              brushSize={brushSize}
-              brushAction={brushAction}
-              canvasMaskRef={canvasMaskRef}
-              setSplitPosition={setSplitPosition}
-              setShowSplitPosition={setShowSplitPosition}
-              setEditCropTop={setEditCropTop}
-              setEditCropBottom={setEditCropBottom}
-              setEditCropLeft={setEditCropLeft}
-              setEditCropRight={setEditCropRight}
-              setSelectedSliceId={setSelectedSliceId}
-              activeTab={activeTab}
-              aspectRatio={aspectRatio}
-              fillColor={fillColor}
-              textBgColor={textBgColor}
+        {/* Main Body */}
+        <div className="flex-1 flex flex-row overflow-hidden w-full">
+          
+          {/* Left Column: Mini Sidebar */}
+          <aside className="w-[72px] h-full bg-[#121826] border-r border-gray-800 flex-shrink-0 z-20">
+            <EditorMiniSidebar
+              isCollapsed={true}
+              setIsCollapsed={() => {}}
+              currentSection="autocrop"
+              setCurrentSection={() => {}}
+              scrapedCount={scrapedImages.length}
+              panelsCount={panels?.length || 0}
+              isBatchCropping={false}
+              isCleaningBubbles={false}
+              topOffsetPx={0}
             />
+          </aside>
 
-            <div
-              className={`flex flex-col transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] shrink-0 ${
-                isToolsPanelOpen
-                  ? "w-full lg:w-[420px] opacity-100 mt-4 lg:mt-0 lg:ml-5 pointer-events-auto"
-                  : "w-0 lg:w-0 h-0 lg:h-full opacity-0 pointer-events-none overflow-hidden"
-              }`}
-            >
-              <CropEditorSidebar
+          {/* Center Column: The Interactive Canvas */}
+          <main className="flex-1 h-full relative overflow-hidden bg-black/50 flex items-center justify-center">
+            <div className="absolute inset-0 opacity-20 pointer-events-none" 
+                 style={{ backgroundImage: "radial-gradient(#374151 1px, transparent 0)", backgroundSize: "20px 20px" }} />
+            
+            <div className="relative w-full h-full z-10 flex items-center justify-center p-4">
+              <ImageEditorCanvasContainer
+                key={imageUrl || undefined}
+                handleAiCrop={handleAiCrop}
+                isAiDetecting={isAiDetecting}
+                editingImageIdx={editingImageIdx}
+                scrapedImages={scrapedImages}
+                containerRef={containerRef}
+                editCropTop={editCropTop}
+                editCropBottom={editCropBottom}
+                editCropLeft={editCropLeft}
+                editCropRight={editCropRight}
+                slices={slices}
+                selectedSliceId={selectedSliceId}
+                showSplitPosition={showSplitPosition}
+                splitPosition={splitPosition}
+                splitLines={splitLines}
+                handleStart={handleStart}
+                handleMove={handleMove}
+                handleEnd={handleEnd}
+                isPointInsideSelection={isPointInsideSelection}
+                handleSelectSlice={handleSelectSlice}
+                handleDeleteSlice={handleDeleteSlice}
+                handleRemoveSplitLine={handleRemoveSplitLine}
+                dragType={dragType}
+                onResizeStart={onResizeStart}
+                handleSelectAndDragSlice={handleSelectAndDragSlice}
+                zoom={zoom}
+                editMode={editMode}
+                detectedBubbles={detectedBubbles}
+                selectedBubbleIdx={selectedBubbleIdx}
+                setSelectedBubbleIdx={setSelectedBubbleIdx}
+                brushSize={brushSize}
+                brushAction={brushAction}
+                canvasMaskRef={canvasMaskRef}
+                setSplitPosition={setSplitPosition}
+                setShowSplitPosition={setShowSplitPosition}
+                setEditCropTop={setEditCropTop}
+                setEditCropBottom={setEditCropBottom}
+                setEditCropLeft={setEditCropLeft}
+                setEditCropRight={setEditCropRight}
+                setSelectedSliceId={setSelectedSliceId}
                 activeTab={activeTab}
+                aspectRatio={aspectRatio}
+                fillColor={fillColor}
+                textBgColor={textBgColor}
+              />
+            </div>
+          </main>
+
+          {/* Right Column: Properties Panel (Collapsible) */}
+          <aside
+            className={`h-full bg-[#121826] border-l border-gray-800 flex-shrink-0 z-20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+              isToolsPanelOpen ? "w-[360px] lg:w-[420px] opacity-100" : "w-0 opacity-0 border-none"
+            }`}
+          >
+            {/* Inner fixed-width container prevents content squishing during transition */}
+            <div className="w-[360px] lg:w-[420px] h-full overflow-y-auto custom-scrollbar p-5">
+              <ImageEditorSidebar
                 setActiveTab={setActiveTab}
                 slices={slices}
                 setSlices={setSlices}
@@ -541,9 +529,7 @@ const CropEditorModal = React.memo(
                 zoom={zoom}
                 setZoom={setZoom}
                 isTransforming={isTransforming}
-                handleTransform={(action, param) =>
-                  handleTransform(action as "rotate" | "flip", param)
-                }
+                handleTransform={(action, param) => handleTransform(action as "rotate" | "flip", param)}
                 handleResetCropBounds={handleResetCropBounds}
                 activeStoryboardPanel={activeStoryboardPanel}
                 handleModifyBrightness={handleModifyBrightness}
@@ -632,69 +618,14 @@ const CropEditorModal = React.memo(
                 detectedBoxes={detectedBoxes}
                 handleClearDetectedBoxes={handleClearDetectedBoxes}
                 handleExecuteSave={handleExecuteSave}
+                activeTab={"adjust"}              
               />
             </div>
-          </div>
+          </aside>
         </div>
-
-        <CropEditorFooter
-          slices={slices}
-          historyLength={history.length}
-          handleUndo={handleUndo}
-          isSavingEdit={isSavingEdit}
-          setEditingImageIdx={setEditingImageIdx}
-          handleDeleteCurrentImage={handleDeleteCurrentImage}
-          activeTab={activeTab}
-          isTransforming={isTransforming}
-          addNotification={addNotification}
-          handleExecuteHorizontalSplit={handleExecuteHorizontalSplit}
-          handleExecuteSave={handleExecuteSave}
-        />
-      </div>
-    );
-
-    if (isPage) {
-      return (
-        <>
-          <EditorMiniSidebar
-            isCollapsed={true}
-            setIsCollapsed={() => {}}
-            currentSection="autocrop"
-            setCurrentSection={() => {}}
-            scrapedCount={scrapedImages.length}
-            panelsCount={panels?.length || 0}
-            isBatchCropping={false}
-            isCleaningBubbles={false}
-            topOffsetPx={0}
-          />
-          <div className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10 flex flex-col space-y-6 animate-[fadeIn_0.22s_ease-out]">
-            <div className="flex-grow min-h-0">{mainCard}</div>
-          </div>
-        </>
-      );
-    }
-
-    return (
-      <div
-        className="fixed inset-0 z-50 bg-[radial-gradient(circle_at_top,rgba(139,92,246,0.18),transparent_42%),linear-gradient(180deg,rgba(3,3,8,0.84),rgba(3,3,8,0.94))] backdrop-blur-xl flex items-center justify-center p-3 sm:p-4 md:p-6 animate-[fadeIn_0.2s_ease-out] overflow-hidden overscroll-contain"
-        onWheel={(event) => event.stopPropagation()}
-        onTouchMove={(event) => event.stopPropagation()}
-      >
-        <EditorMiniSidebar
-          isCollapsed={true}
-          setIsCollapsed={() => {}}
-          currentSection="autocrop"
-          setCurrentSection={() => {}}
-          scrapedCount={scrapedImages.length}
-          panelsCount={panels?.length || 0}
-          isBatchCropping={false}
-          isCleaningBubbles={false}
-          topOffsetPx={0}
-        />
-        {mainCard}
       </div>
     );
   }
 );
 
-export default CropEditorModal;
+export default ImageEditorModal;

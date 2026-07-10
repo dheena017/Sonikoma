@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { Scissors, Trash2, X } from "lucide-react";
-import { useCropEditorStore } from "../../../hooks/useImageEditorState";
+import { useImageEditorStore } from "../../../hooks/useImageEditorState";
 import { NotificationType } from "../../notification/NotificationStack";
 
 interface PanelCardActionsProps {
@@ -32,7 +32,7 @@ export function PanelCardActions({
     console.log(`[PanelCardActions] Entering edit mode for image #${idx + 1}`);
     // Open editor via global state without modifying the browser URL
     setEditingImageIdx?.(idx);
-    useCropEditorStore.setState({ activeTool: "adjust" });
+    useImageEditorStore.setState({ activeTool: "adjust" });
   };
 
   const handleDeleteClick = (event: React.MouseEvent<HTMLButtonElement>) => {

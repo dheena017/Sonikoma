@@ -4,7 +4,7 @@ import StoryboardTimeline from "../../timeline/StoryboardTimeline";
 import VideoMonitor from "../../video/VideoMonitor";
 import OutputMetadataPanel from "../../video/OutputMetadataPanel";
 import PipelineStatusCard from "../../pipeline/ProcessBar.js";
-import LayoutEditorPage from "../LayoutEditorPage.js";
+import LayoutEditorPage from "../EditorPageLayout.js";
 import { useBackendHealth } from "../../../../hooks/useBackendHealth.js";
 import { getUserCredits } from "../../../../api/auth";
 

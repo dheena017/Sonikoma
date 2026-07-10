@@ -40,7 +40,7 @@ interface CropCanvasProps {
     clientY: number
   ) => void;
   zoom?: number;
-  activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw";
+  activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw" | "separate";
 
   // Phase 4 Props
   editMode?: "crop" | "clean_auto" | "clean_manual" | "typeset" | "slices";

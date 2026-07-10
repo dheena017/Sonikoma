@@ -52,7 +52,7 @@ export function useCropEditorHistory({
   const [redoHistory, setRedoHistory] = useState<HistorySnapshot[]>([]);
 
   const pushHistory = useCallback(() => {
-    console.log("[CropEditorHistory] Pushing state to history");
+    console.log("[ImageEditorHistory] Pushing state to history");
     setHistory((prev) => [
       ...prev.slice(-30),
       {
@@ -77,7 +77,7 @@ export function useCropEditorHistory({
   ]);
 
   const handleUndo = useCallback(() => {
-    console.log("[CropEditorHistory] Undo triggered");
+    console.log("[ImageEditorHistory] Undo triggered");
     setHistory((prev) => {
       if (prev.length === 0) return prev;
       const snap = prev[prev.length - 1];
@@ -122,7 +122,7 @@ export function useCropEditorHistory({
   ]);
 
   const handleRedo = useCallback(() => {
-    console.log("[CropEditorHistory] Redo triggered");
+    console.log("[ImageEditorHistory] Redo triggered");
     setRedoHistory((prevRedo) => {
       if (prevRedo.length === 0) return prevRedo;
       const snap = prevRedo[prevRedo.length - 1];

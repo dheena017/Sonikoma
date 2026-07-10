@@ -162,7 +162,7 @@ export function useCropEditorDrag({
 
   const handleStart = (clientX: number, clientY: number) => {
     console.log(
-      `[CropEditorDrag] Drag started at client coordinates: (${clientX}, ${clientY})`
+      `[ImageEditorDrag] Drag started at client coordinates: (${clientX}, ${clientY})`
     );
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
@@ -403,7 +403,7 @@ export function useCropEditorDrag({
   };
 
   const handleEnd = () => {
-    console.log(`[CropEditorDrag] Drag ended. Final type: ${dragType}`);
+    console.log(`[ImageEditorDrag] Drag ended. Final type: ${dragType}`);
     // Only push history if state has actually changed
     const cropChanged =
       originalCropBounds &&

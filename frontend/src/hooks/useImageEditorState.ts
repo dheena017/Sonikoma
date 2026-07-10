@@ -2,29 +2,39 @@ import { useState, useEffect } from "react";
 import { Slice } from "@/components/Feature/editor/shared";
 import { create } from "zustand";
 
-export type CropTool = "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw";
+export type ImageTool = "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw" | "separate";
 
-interface CropEditorGlobalState {
-  activeTool: CropTool;
-  setActiveTool: (tool: CropTool) => void;
+interface ImageEditorGlobalState {
+  activeTool: ImageTool;
+  setActiveTool: (tool: ImageTool) => void;
   slicesCount: number;
   setSlicesCount: (count: number) => void;
 }
 
+
 const getTabFromPathName = () => {
   const segments = window.location.pathname.split("/");
   const tabSegment = segments[2];
-  const validTabs = ["adjust", "edit", "eraser", "slice", "crop", "merge", "draw"];
+  const validTabs = ["adjust", "edit", "eraser", "slice", "crop", "merge", "draw", "separate"];
+
   if (tabSegment && validTabs.includes(tabSegment)) {
-    return tabSegment as CropTool;
+    return tabSegment as ImageTool;
   }
   return null;
 };
 
-export const useCropEditorStore = create<CropEditorGlobalState>((set) => ({
+
+
+export const useImageEditorStore = create<ImageEditorGlobalState>((set) => ({
   activeTool: getTabFromPathName() || "adjust",
   setActiveTool: (tool) => {
     set({ activeTool: tool });
+
+    // Preserve the current workspace URL.
+    // Only update the browser URL when we're already inside the legacy /editor/* routes.
+    const isLegacyEditorRoute = window.location.pathname.startsWith("/editor/");
+    if (!isLegacyEditorRoute) return;
+
     const params = new URLSearchParams(window.location.search);
     const idx = params.get("idx") || "0";
     const newPath = `/editor/${tool}?idx=${idx}`;
@@ -36,17 +46,20 @@ export const useCropEditorStore = create<CropEditorGlobalState>((set) => ({
   setSlicesCount: (count) => set({ slicesCount: count }),
 }));
 
-interface UseCropEditorStateProps {
+export const useCropEditorStore = useImageEditorStore;
+export const useCropEditorState = useImageEditorState;
+
+interface UseImageEditorStateProps {
   scrapedImages: string[];
   editingImageIdx: number | null;
   imageEditStates?: Record<string, any>;
 }
 
-export function useCropEditorState({
+export function useImageEditorState({
   scrapedImages,
   editingImageIdx,
   imageEditStates,
-}: UseCropEditorStateProps) {
+}: UseImageEditorStateProps) {
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(
     null
   );
@@ -137,9 +150,10 @@ export function useCropEditorState({
   const [isAiDetecting, setIsAiDetecting] = useState<boolean>(false);
 
   // Sidebar Tab Configuration using Global Zustand Store
-  const { activeTool, setActiveTool } = useCropEditorStore();
-  const activeTab = activeTool;
-  const setActiveTab = (newTab: CropTool) => {
+  const { activeTool, setActiveTool } = useImageEditorStore();
+  const activeTab = activeTool as ImageTool;
+
+  const setActiveTab = (newTab: ImageTool) => {
     setActiveTool(newTab);
   };
 
@@ -148,7 +162,7 @@ export function useCropEditorState({
     const handleRouteSync = () => {
       const pathTab = getTabFromPathName();
       if (pathTab && pathTab !== activeTool) {
-        useCropEditorStore.setState({ activeTool: pathTab });
+        useImageEditorStore.setState({ activeTool: pathTab });
       }
     };
     window.addEventListener("popstate", handleRouteSync);
@@ -167,7 +181,7 @@ export function useCropEditorState({
 
   // Sync slicesCount to store
   useEffect(() => {
-    useCropEditorStore.setState({ slicesCount: slices.length });
+    useImageEditorStore.setState({ slicesCount: slices.length });
   }, [slices.length]);
   const [selectedSliceId, setSelectedSliceId] = useState<string | null>(
     savedState?.selectedSliceId || null

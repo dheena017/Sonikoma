@@ -2,7 +2,7 @@ import React from "react";
 import { Move, RefreshCw, Layers } from "lucide-react";
 import { CropCanvas } from "../../Workspace";
 
-interface CropEditorCanvasContainerProps {
+interface ImageEditorCanvasContainerProps {
   handleAiCrop: () => void;
   isAiDetecting: boolean;
   editingImageIdx: number;
@@ -48,11 +48,12 @@ interface CropEditorCanvasContainerProps {
   setEditCropLeft: (val: number) => void;
   setEditCropRight: (val: number) => void;
   setSelectedSliceId: (id: string | null) => void;
-  activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw";
+  activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw" | "separate";
+
   aspectRatio?: any;
 }
 
-export default function CropEditorCanvasContainer({
+export default function ImageEditorCanvasContainer({
   handleAiCrop,
   isAiDetecting,
   editingImageIdx,
@@ -96,7 +97,7 @@ export default function CropEditorCanvasContainer({
   setSelectedSliceId,
   activeTab,
   aspectRatio,
-}: CropEditorCanvasContainerProps) {
+}: ImageEditorCanvasContainerProps) {
   // Safe handlers that only allow crop drawing when in the correct tabs
   const safeHandleStart = (clientX: number, clientY: number) => {
     if (!["slice", "crop"].includes(activeTab)) return;

@@ -1,10 +1,10 @@
-import React from 'react';
-import { ImageEditorHeader } from './ImageEditorHeader';
-import { ImageEditorMiniSidebar } from './ImageEditorMiniSidebar';
-import { ImageEditorRightSidebar } from './ImageEditorRightSidebar';
+import React from "react";
+import { ImageEditorHeader } from "./ImageEditorHeader";
+import { ImageEditorMiniSidebar } from "./ImageEditorMiniSidebar";
+import { ImageEditorRightSidebar } from "./ImageEditorRightSidebar";
 
 interface ImageEditorLayoutProps {
-  children: React.ReactNode; // Your Canvas goes here
+  children: React.ReactNode; 
   onClose: () => void;
   onApply: () => void;
 }
@@ -15,13 +15,7 @@ export const ImageEditorLayout: React.FC<ImageEditorLayoutProps> = ({
   onApply 
 }) => {
   return (
-    // Outer container: Fixed to viewport, blocks scrolling, highest z-index
     <div className="fixed inset-0 w-screen h-screen bg-[#0B0F19] text-white flex flex-col overflow-hidden z-[100]">
-      
-      {/* Top Header */}
-      <ImageEditorHeader onClose={onClose} onApply={onApply} />
-
-      {/* Main Body */}
       <div className="flex-1 flex flex-row overflow-hidden w-full">
         
         {/* Left Column: Mini Sidebar */}
@@ -31,9 +25,8 @@ export const ImageEditorLayout: React.FC<ImageEditorLayoutProps> = ({
 
         {/* Center Column: The Interactive Canvas */}
         <main className="flex-1 h-full relative overflow-hidden bg-black/50 flex items-center justify-center">
-          {/* A checkerboard background pattern is great for transparent images */}
           <div className="absolute inset-0 opacity-20 pointer-events-none" 
-               style={{ backgroundImage: 'radial-gradient(#374151 1px, transparent 0)', backgroundSize: '20px 20px' }} />
+               style={{ backgroundImage: "radial-gradient(#374151 1px, transparent 0)", backgroundSize: "20px 20px" }} />
           
           <div className="relative w-full h-full z-10">
             {children}

@@ -1,5 +1,5 @@
 import React from "react";
-import { useCropEditorStore } from "../../../hooks/useImageEditorState";
+import { useImageEditorStore } from "../../../hooks/useImageEditorState";
 import { ScraperDeckProps } from "./types";
 import * as api from "@/api";
 import { PanelCardThumbnail } from "./PanelCardThumbnail";
@@ -208,7 +208,7 @@ function PanelCard({
         e.stopPropagation();
         // Open editor via global state without modifying the browser URL
         setEditingImageIdx?.(idx);
-        useCropEditorStore.setState({ activeTool: "adjust" });
+        useImageEditorStore.setState({ activeTool: "adjust" });
       }}
       className={[
         "group relative w-[260px] sm:w-[280px] shrink-0 rounded-2xl border p-4 space-y-4 transition-all duration-300 ease-out text-center cursor-pointer select-none",

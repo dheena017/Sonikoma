@@ -31,7 +31,7 @@ import AIModelsPage from "./components/Feature/ai_models/AIModelsPage";
 import ShortcutsPage from "./components/Shortcuts/ShortcutsPage";
 
 // --- Processing & Editor Modals ---
-import CropEditorModal from "./components/Feature/editor/Tools/ImageEditor/ImageEditorModal";
+import ImageEditorModal from "./components/Feature/editor/Tools/ImageEditor/ImageEditorModal";
 import AutoCropModal from "./components/Feature/processing/AutoCropModal";
 import NotificationStack from "./components/notification/NotificationStack";
 import ConfirmModal from "./components/confirmationmodels/ConfirmModal";
@@ -1817,7 +1817,7 @@ export default function App() {
                 </p>
               </div>
             ) : (
-              <CropEditorModal isPage={true} appLogic={memoizedAppLogic} />
+              <ImageEditorModal isPage={true} appLogic={memoizedAppLogic} />
             ))}
 
           {/* PAGE VIEW 21: Admin Dashboard */}
@@ -1942,7 +1942,7 @@ export default function App() {
 
       {/* Dashboard Modal: Advanced Crop & Trim Editor */}
       {isWorkspacePath && !isPipMode && editingImageIdx !== null && (
-        <CropEditorModal isPage={false} appLogic={memoizedAppLogic} />
+        <ImageEditorModal isPage={false} appLogic={memoizedAppLogic} />
       )}
 
       {/* Modal: Advanced Crop & Trim Editor (PIP Mode only) */}
@@ -1954,7 +1954,7 @@ export default function App() {
             navigateTo(lastEditorPath);
           }, [setIsPipMode, navigateTo, lastEditorPath])}
         >
-          <CropEditorModal appLogic={memoizedAppLogic} />
+          <ImageEditorModal appLogic={memoizedAppLogic} />
         </div>
       )}
 
