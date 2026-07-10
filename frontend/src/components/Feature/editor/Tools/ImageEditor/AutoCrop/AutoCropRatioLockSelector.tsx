@@ -1,6 +1,6 @@
 import React from "react";
 import { Maximize2 } from "lucide-react";
-import SectionTitle from "../../shared/SectionTitle";
+import SectionTitle from "../../../shared/SectionTitle";
 import { ASPECT_RATIO_OPTIONS } from "./autoCropConfig";
 
 interface Props {

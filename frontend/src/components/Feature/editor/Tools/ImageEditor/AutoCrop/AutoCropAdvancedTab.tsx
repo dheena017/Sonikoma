@@ -1,5 +1,5 @@
 import React from "react";
-import { AutoCropSharedProps } from "../../../scraper/tabTypes";
+import { AutoCropSharedProps } from "../../../../scraper/tabTypes";
 import { AutoCropParameterSlider } from "./AutoCropParameterSlider";
 import { AutoCropCannyControls } from "./AutoCropCannyControls";
 import { AutoCropJsonDebugger } from "./AutoCropJsonDebugger";

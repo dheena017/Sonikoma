@@ -1,12 +1,12 @@
 import React, { useCallback } from "react";
 import { RefreshCw, Layers } from "lucide-react";
-import MergePanel from "./MergePanel";
+import MergePanel from "./MergePanel/MergePanel";
 import { CropToolsPanel, FreehandPanel } from "./";
 import EnhancementsPanel from "./EnhancementsPanel";
 import CleanBubblesPanel from "../BubbleClean/CleanBubblesPanel";
-import HorizontalSplitter from "./HorizontalSplitter";
+import HorizontalSplitter from "./HorizontalSplitter/HorizontalSplitter";
 import CutsRegistry from "../CutsRegistry/CutsRegistry";
-import AutoSlicer from "./AutoSlicer";
+import AutoSlicer from "./AutoCrop/AutoSlicer";
 
 interface CropEditorSidebarProps {
   activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw";

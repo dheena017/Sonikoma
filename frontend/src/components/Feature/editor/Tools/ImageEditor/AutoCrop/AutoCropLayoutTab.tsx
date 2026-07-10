@@ -1,8 +1,8 @@
 import React from "react";
-import { AutoCropSharedProps } from "../../../scraper/tabTypes";
+import { AutoCropSharedProps } from "../../../../scraper/tabTypes";
 import { AutoCropRatioLockSelector } from "./AutoCropRatioLockSelector";
 import { AutoCropGutterModeToggle } from "./AutoCropGutterModeToggle";
-import { AutoCropMarginPadding } from "./AutoCropMarginPadding";
+import { AutoCropMarginPadding } from "../AutoCropMarginPadding";
 import { AutoCropVisualGuide } from "./AutoCropVisualGuide";
 
 interface AutoCropLayoutTabProps

@@ -13,7 +13,7 @@ import {
   ArrowUp,
   ArrowDown,
 } from "lucide-react";
-import { detectHorizontalGutters } from "./utils/gutterScanner";
+import { detectHorizontalGutters } from "../utils/gutterScanner";
 import HorizontalSplitterPresets from "./HorizontalSplitterPresets";
 import HorizontalSplitterControls from "./HorizontalSplitterControls";
 import HorizontalSplitterPreview from "./HorizontalSplitterPreview";

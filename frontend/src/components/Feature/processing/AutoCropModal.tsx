@@ -10,7 +10,7 @@ import {
   Sliders,
   HelpCircle,
 } from "lucide-react";
-import { AutoCropTabContent } from "@/components/Feature/editor/Tools/AutoCrop";
+import { AutoCropTabContent } from "@/components/Feature/editor/Tools/ImageEditor";
 
 interface AutoCropModalProps {
   onClose: () => void;

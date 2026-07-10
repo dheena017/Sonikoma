@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Settings, Save, RefreshCw } from "lucide-react";
-import SectionTitle from "../../shared/SectionTitle";
-import { CustomCropPreset } from "../../../scraper/tabTypes";
+import SectionTitle from "../../../shared/SectionTitle";
+import { CustomCropPreset } from "../../../../scraper/tabTypes";
 
 interface Props {
   customPresets: Record<string, CustomCropPreset>;
