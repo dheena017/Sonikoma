@@ -16,7 +16,7 @@ export { useCropEditor } from "./useCropEditor";
 export { useCropEditorDrag } from "./useCropEditorDrag";
 export { useCropEditorHistory } from "./useCropEditorHistory";
 export { useCropEditorPipelines } from "./useCropEditorPipelines";
-export { useCropEditorState } from "./useCropEditorState";
+export { useCropEditorState } from "./useImageEditorState";
 export { useGlobalShortcuts } from "./useGlobalShortcuts";
 export { useImageTransform } from "./useImageTransform";
 export { useLiveScraperActions } from "./useLiveScraperActions";

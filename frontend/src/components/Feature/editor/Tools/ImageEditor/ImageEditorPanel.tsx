@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useCropEditorStore } from "../../../../../hooks/useCropEditorState";
+import { useCropEditorStore } from "../../../../../hooks/useImageEditorState";
 import {
   RotateCcw,
   RotateCw,

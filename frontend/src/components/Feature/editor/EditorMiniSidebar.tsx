@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import TooltipPortal from "../../TooltipPortal";
 import { resolveWorkspaceReturnPath } from "../../../utils/workspaceNavigation";
-import { useCropEditorStore, CropTool } from "../../../hooks/useCropEditorState";
+import { useCropEditorStore, CropTool } from "../../../hooks/useImageEditorState";
 
 interface EditorMiniSidebarProps {
   isCollapsed: boolean;
