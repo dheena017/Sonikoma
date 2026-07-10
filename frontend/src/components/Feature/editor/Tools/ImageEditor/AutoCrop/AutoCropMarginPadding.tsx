@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Settings, Zap } from "lucide-react";
-import SectionTitle from "../../shared/SectionTitle";
+import SectionTitle from "../../../shared/SectionTitle";
 
 interface Props {
   cropPaddingPx: number;

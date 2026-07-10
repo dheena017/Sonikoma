@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Layers, Wand2, Loader2 } from "lucide-react";
-import SectionTitle from "../../shared/SectionTitle";
+import SectionTitle from "../../../shared/SectionTitle";
 import { BG_MODE_OPTIONS } from "./autoCropConfig";
 
 interface Props {

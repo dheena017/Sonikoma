@@ -3,9 +3,8 @@ import { RefreshCw, Layers } from "lucide-react";
 import MergePanel from "./MergePanel/MergePanel";
 import { CropToolsPanel, FreehandPanel } from "./";
 import EnhancementsPanel from "./EnhancementsPanel";
-import CleanBubblesPanel from "../BubbleClean/CleanBubblesPanel";
 import HorizontalSplitter from "./HorizontalSplitter/HorizontalSplitter";
-import CutsRegistry from "../CutsRegistry/CutsRegistry";
+import CutsRegistry from "../ImageEditor/CutsRegistry/CutsRegistry";
 import AutoSlicer from "./AutoCrop/AutoSlicer";
 
 interface CropEditorSidebarProps {
@@ -295,55 +294,6 @@ function CropEditorSidebar({
               handleModifySpeechText={handleModifySpeechText}
               handleModifySfx={handleModifySfx}
               handleModifyCropPadding={handleModifyCropPadding}
-            />
-          </div>
-        )}
-
-        {activeTab === "eraser" && (
-          <div className="space-y-4 rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
-            <CleanBubblesPanel
-              imgUrl={scrapedImages[editingImageIdx]}
-              editingImageIdx={editingImageIdx}
-              setScrapedImages={setScrapedImages}
-              setPanels={setPanels}
-              addNotification={addNotification}
-              fetchWithInterceptor={fetchWithInterceptor}
-              setConsoleLogs={setConsoleLogs}
-              editMode={editMode}
-              setEditMode={setEditMode}
-              brushSize={brushSize}
-              setBrushSize={setBrushSize}
-              brushAction={brushAction}
-              setBrushAction={setBrushAction}
-              handleClearBrushMask={handleClearBrushMask}
-              detectionStyle={detectionStyle}
-              setDetectionStyle={setDetectionStyle}
-              eraseMethod={eraseMethod}
-              setEraseMethod={setEraseMethod}
-              sensitivity={sensitivity}
-              setSensitivity={setSensitivity}
-              dilation={dilation}
-              setDilation={setDilation}
-              inpaintRadius={inpaintRadius}
-              setInpaintRadius={setInpaintRadius}
-              debugMode={debugMode}
-              setDebugMode={setDebugMode}
-              fillColor={fillColor}
-              setFillColor={setFillColor}
-              ocrLang={ocrLang}
-              setOcrLang={setOcrLang}
-              gpu={gpu}
-              setGpu={setGpu}
-              morphKernelSize={morphKernelSize}
-              setMorphKernelSize={setMorphKernelSize}
-              morphShape={morphShape}
-              setMorphShape={setMorphShape}
-              useCustomColorTarget={useCustomColorTarget}
-              setUseCustomColorTarget={setUseCustomColorTarget}
-              customColorTarget={customColorTarget}
-              setCustomColorTarget={setCustomColorTarget}
-              customColorTolerance={customColorTolerance}
-              setCustomColorTolerance={setCustomColorTolerance}
             />
           </div>
         )}

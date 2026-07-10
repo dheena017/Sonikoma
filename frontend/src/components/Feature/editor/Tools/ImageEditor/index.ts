@@ -17,9 +17,6 @@ export { EnhancementsAudio } from "./EnhancementsAudio";
 // AutoCrop Module
 export * from "./AutoCrop";
 
-// Bubble Cleaner Module
-export * from "./BubbleClean";
-
 // Cuts Registry Module
 export * from "./CutsRegistry";
 

@@ -10,7 +10,7 @@ export { AutoCropMarginPadding } from "./AutoCropMarginPadding";
 export { AutoCropRatioLockSelector } from "./AutoCropRatioLockSelector";
 export { AutoCropPresetGrid } from "./AutoCropPresetGrid";
 export { AutoCropHelpTab } from "./AutoCropHelpTab";
-export { AutoCropSettingsPanel } from "./AutoCropSettingsPanel";
+export { default as AutoCropSettingsPanel } from "./AutoCropSettingsPanel";
 export { AutoCropGutterModeToggle } from "./AutoCropGutterModeToggle";
 export { AutoCropLayoutTab } from "./AutoCropLayoutTab";
 export { AutoCropGeneralTab } from "./AutoCropGeneralTab";

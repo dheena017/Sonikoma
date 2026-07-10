@@ -32,7 +32,6 @@ import ShortcutsPage from "./components/Shortcuts/ShortcutsPage";
 
 // --- Processing & Editor Modals ---
 import CropEditorModal from "./components/Feature/editor/Tools/ImageEditor/CropEditorModal";
-import BubbleCleanerModal from "./components/Feature/processing/BubbleCleanerModal";
 import AutoCropModal from "./components/Feature/processing/AutoCropModal";
 import NotificationStack from "./components/notification/NotificationStack";
 import ConfirmModal from "./components/confirmationmodels/ConfirmModal";
@@ -1261,7 +1260,6 @@ export default function App() {
               themeMode={themeMode}
               toggleThemeMode={toggleThemeMode}
               fetchWithInterceptor={fetchWithInterceptor}
-              addNotification={addNotification}
             />
           )
         )}
@@ -1795,36 +1793,7 @@ export default function App() {
             />
           )}
 
-          {/* PAGE VIEW 19: Batch Speech Bubble Cleaner Page */}
-          {isBubbleCleanerPath && (
-            <BubbleCleanerModal
-              isPage={true}
-              onClose={handleBubbleCleanerClose}
-              onApply={handleBubbleCleanerApply}
-              detectionStyle={bubbleDetectionStyle}
-              setDetectionStyle={setBubbleDetectionStyle}
-              eraseMethod={bubbleEraseMethod}
-              setEraseMethod={setBubbleEraseMethod}
-              sensitivity={bubbleSensitivity}
-              setSensitivity={setBubbleSensitivity}
-              bubbleDilation={bubbleDilation}
-              setBubbleDilation={setBubbleDilation}
-              bubbleInpaintRadius={bubbleInpaintRadius}
-              setBubbleInpaintRadius={setBubbleInpaintRadius}
-              activeTab={activeBubbleTab}
-              setActiveTab={setActiveBubbleTab}
-              selectedCount={selectedScraped.length}
-              isApplying={isCleaningBubbles}
-              scrapedImages={scrapedImages}
-              selectedScraped={selectedScraped}
-              setSelectedScraped={setSelectedScraped}
-              addNotification={addNotification}
-              handleMergeWithNext={handleStitchWithNext}
-              mergingIndices={mergingIndices}
-            />
-          )}
-
-          {/* PAGE VIEW 20: Full Editor Page */}
+          {/* PAGE VIEW 19: Full Editor Page */}
           {isEditorPath && !isPipMode && isProEditorPage && (
             <EditorPage
               appLogic={memoizedAppLogic}
@@ -1835,7 +1804,7 @@ export default function App() {
             />
           )}
 
-          {/* PAGE VIEW 21: Advanced Crop & Trim Editor Page */}
+          {/* PAGE VIEW 20: Advanced Crop & Trim Editor Page */}
           {isEditorPath &&
             !isPipMode &&
             !isProEditorPage &&
@@ -1851,7 +1820,7 @@ export default function App() {
               <CropEditorModal isPage={true} appLogic={memoizedAppLogic} />
             ))}
 
-          {/* PAGE VIEW 22: Admin Dashboard */}
+          {/* PAGE VIEW 21: Admin Dashboard */}
           {isAdminPath && (
             <AdminPage
               user={user}
@@ -1864,7 +1833,7 @@ export default function App() {
             />
           )}
 
-          {/* PAGE VIEW 23: New Standalone Admin Dashboard Page */}
+          {/* PAGE VIEW 22: New Standalone Admin Dashboard Page */}
           {isAdminDashboardPath && (
             <AdminDashboardPage
               user={user}
@@ -1968,35 +1937,6 @@ export default function App() {
           setCropGuidance={setCropGuidance}
           cropFocusMode={cropFocusMode}
           setCropFocusMode={setCropFocusMode}
-        />
-      )}
-
-      {/* Dashboard / Editor Modal: Batch Speech Bubble Cleaner */}
-      {(isWorkspacePath || isEditorPath) && showBubbleModal && (
-        <BubbleCleanerModal
-          isPage={false}
-          onClose={handleBubbleCleanerClose}
-          onApply={handleBubbleCleanerApply}
-          detectionStyle={bubbleDetectionStyle}
-          setDetectionStyle={setBubbleDetectionStyle}
-          eraseMethod={bubbleEraseMethod}
-          setEraseMethod={setBubbleEraseMethod}
-          sensitivity={bubbleSensitivity}
-          setSensitivity={setBubbleSensitivity}
-          bubbleDilation={bubbleDilation}
-          setBubbleDilation={setBubbleDilation}
-          bubbleInpaintRadius={bubbleInpaintRadius}
-          setBubbleInpaintRadius={setBubbleInpaintRadius}
-          activeTab={activeBubbleTab}
-          setActiveTab={setActiveBubbleTab}
-          selectedCount={selectedScraped.length}
-          isApplying={isCleaningBubbles}
-          scrapedImages={scrapedImages}
-          selectedScraped={selectedScraped}
-          setSelectedScraped={setSelectedScraped}
-          addNotification={addNotification}
-          handleMergeWithNext={handleStitchWithNext}
-          mergingIndices={mergingIndices}
         />
       )}
 

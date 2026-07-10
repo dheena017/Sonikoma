@@ -8,7 +8,6 @@ export { useAutoCropPresets } from "./useAutoCropPresets";
 export { useAutoSave } from "./useAutoSave";
 export { useBackendHealth } from "./useBackendHealth";
 export { useBatchImageActions } from "./useBatchImageActions";
-export { useBubbleCleanerPresets } from "./useBubbleCleanerPresets";
 export { useBulkOperations } from "./useBulkOperations";
 export { useCompileActions } from "./useCompileActions";
 export { useConfigHistory } from "./useConfigHistory";

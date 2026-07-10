@@ -1,5 +1,5 @@
 import React from "react";
-import { Slice } from "../../shared";
+import { Slice } from "../../../shared";
 import {
   CutsRegistryHeader,
   CutsRegistrySelector,

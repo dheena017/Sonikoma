@@ -1,6 +1,6 @@
 import React from "react";
 import { Layers, RefreshCw, Crop as CropIcon, Trash2 } from "lucide-react";
-import { Slice } from "../../shared";
+import { Slice } from "../../../shared";
 
 interface CutsRegistryListProps {
   slices: Slice[];

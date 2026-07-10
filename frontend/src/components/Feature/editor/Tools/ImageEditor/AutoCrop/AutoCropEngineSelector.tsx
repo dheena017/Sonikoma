@@ -15,7 +15,7 @@ import {
   Compass,
   Clock,
 } from "lucide-react";
-import SectionTitle from "../../shared/SectionTitle";
+import SectionTitle from "../../../shared/SectionTitle";
 import { useAIModels } from "@/hooks/useAIModels";
 
 interface Props {

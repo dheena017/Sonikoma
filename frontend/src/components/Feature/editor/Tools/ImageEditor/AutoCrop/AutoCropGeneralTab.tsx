@@ -1,6 +1,6 @@
 import React from "react";
 import { useAutoCropPresets } from "@/hooks/useAutoCropPresets";
-import { AutoCropSharedProps } from "../../../scraper/tabTypes";
+import { AutoCropSharedProps } from "../../../../scraper/tabTypes";
 import { AutoCropPresetGrid } from "./AutoCropPresetGrid";
 import { AutoCropEngineSelector } from "./AutoCropEngineSelector";
 

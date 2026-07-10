@@ -1,6 +1,6 @@
 import React from "react";
 import { Sparkles, Wand2 } from "lucide-react";
-import SectionTitle from "../../shared/SectionTitle";
+import SectionTitle from "../../../shared/SectionTitle";
 
 interface Props {
   activeSlot: string | null;

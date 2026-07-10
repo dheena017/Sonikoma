@@ -1,6 +1,6 @@
 import React from "react";
 import { LayoutGrid, Trash2 } from "lucide-react";
-import { Slice } from "../../shared";
+import { Slice } from "../../../shared";
 
 interface CutsRegistryHeaderProps {
   slices: Slice[];
