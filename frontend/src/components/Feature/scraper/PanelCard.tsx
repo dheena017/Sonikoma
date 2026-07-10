@@ -1,20 +1,14 @@
 import React from "react";
-import { useImageEditorStore } from "../../../hooks/useImageEditorState";
 import { ScraperDeckProps } from "./types";
 import * as api from "@/api";
 import { PanelCardThumbnail } from "./PanelCardThumbnail";
 import { PanelCardControls } from "./PanelCardControls";
 import { PanelCardActions } from "./PanelCardActions";
 
+// 1. Cleaned up all unused Editor-related props
 interface PanelCardProps
   extends Pick<
     ScraperDeckProps,
-    | "setEditingImageIdx"
-    | "setEditCropTop"
-    | "setEditCropBottom"
-    | "setEditCropLeft"
-    | "setEditCropRight"
-    | "setEditAutoTrim"
     | "setScrapedImages"
     | "setSelectedScraped"
     | "setConsoleLogs"
@@ -28,7 +22,6 @@ interface PanelCardProps
   isSelected: boolean;
   isBatchCropping: boolean;
   croppingImgUrl: string | null;
-  openEditingImageIdx?: (idx: number | null) => void;
   addPanelsToStoryboard: (
     urls: string[],
     currentScrapedList?: string[],
@@ -53,16 +46,9 @@ function PanelCard({
   scrapedImages,
   mergingIndices,
   handleMergeWithNext,
-  setEditingImageIdx,
-  setEditCropTop,
-  setEditCropBottom,
-  setEditCropLeft,
-  setEditCropRight,
-  setEditAutoTrim,
   setScrapedImages,
   setSelectedScraped,
   setConsoleLogs,
-  openEditingImageIdx,
   addPanelsToStoryboard,
   addNotification,
   onCardClick,
@@ -204,10 +190,7 @@ function PanelCard({
   return (
     <div
       onClick={(e) => onCardClick(idx, imgUrl, e.shiftKey)}
-      onDoubleClick={(e) => {
-        e.stopPropagation();
-        useImageEditorStore.setState({ activeTool: "adjust", editingImageIdx: idx });
-      }}
+      // 2. REMOVED the onDoubleClick handler entirely so users can't accidentally trigger the crash
       className={[
         "group relative w-[260px] sm:w-[280px] shrink-0 rounded-2xl border p-4 space-y-4 transition-all duration-300 ease-out text-center cursor-pointer select-none",
         isSelected
@@ -259,6 +242,7 @@ function PanelCard({
         addPanelsToStoryboard={addPanelsToStoryboard}
       />
 
+      {/* 3. PanelCardActions now only renders the Delete button (based on our previous step) */}
       <PanelCardActions
         idx={idx}
         imgUrl={imgUrl}
