@@ -274,7 +274,7 @@ export function ScraperSelectionToolbar({
     const handleScrollOrResize = () => {
       if (buttonRef.current) {
         const rect = buttonRef.current.getBoundingClientRect();
-        
+
         // Auto-close if the button scrolls off-screen in any direction
         const isOffscreen =
           rect.bottom < 0 ||
@@ -361,9 +361,8 @@ export function ScraperSelectionToolbar({
         <ListFilter className="h-3 w-3 text-purple-400" />
         <span>Select Filter</span>
         <ChevronDown
-          className={`h-3 w-3 transition-transform duration-200 text-neutral-500 ${
-            isOpen ? "rotate-180 text-white" : ""
-          }`}
+          className={`h-3 w-3 transition-transform duration-200 text-neutral-500 ${isOpen ? "rotate-180 text-white" : ""
+            }`}
         />
       </button>
 
@@ -660,13 +659,18 @@ export function FloatingSelectionBar({
   React.useEffect(() => {
     if (typeof document === "undefined") return;
     const updateHeight = () => {
-      const el = document.querySelector("#scraper-selection-bar-portal");
-      if (el && el.classList.contains("opacity-100")) {
-        const height = el.getBoundingClientRect().height;
-        setAssetsHeight(height);
-      } else {
-        setAssetsHeight(0);
-      }
+      const selector = isTimeline ? "#timeline-selection-bar-portal" : "#scraper-selection-bar-portal";
+      const el = document.querySelector(selector);
+      const nextHeight = (el && el.classList.contains("opacity-100"))
+        ? el.getBoundingClientRect().height
+        : 0;
+
+      setAssetsHeight((prev) => {
+        if (prev !== nextHeight) {
+          return nextHeight;
+        }
+        return prev;
+      });
     };
 
     updateHeight();
@@ -677,7 +681,7 @@ export function FloatingSelectionBar({
       observer.disconnect();
       window.removeEventListener("resize", updateHeight);
     };
-  }, []);
+  }, [isTimeline]);
 
   if (typeof document === "undefined") return null;
 
@@ -685,16 +689,14 @@ export function FloatingSelectionBar({
 
   const zIndexClass = isTimeline ? "z-[9998]" : "z-[9999]";
   const outerClass = leftDock
-    ? `fixed left-24 top-16 bottom-4 ${zIndexClass} transition-all duration-300 ease-out ${
-        visible
-          ? "translate-x-0 opacity-100 pointer-events-auto"
-          : "-translate-x-1/4 opacity-0 pointer-events-none"
-      }`
-    : `fixed left-0 right-0 ${zIndexClass} transition-all duration-300 ease-out ${
-        visible
-          ? "translate-y-0 opacity-100 pointer-events-auto"
-          : "translate-y-full opacity-0 pointer-events-none"
-      }`;
+    ? `fixed left-24 top-16 bottom-4 ${zIndexClass} transition-all duration-300 ease-out ${visible
+      ? "translate-x-0 opacity-100 pointer-events-auto"
+      : "-translate-x-1/4 opacity-0 pointer-events-none"
+    }`
+    : `fixed left-0 right-0 ${zIndexClass} transition-all duration-300 ease-out ${visible
+      ? "translate-y-0 opacity-100 pointer-events-auto"
+      : "translate-y-full opacity-0 pointer-events-none"
+    }`;
 
   const stackStyle: React.CSSProperties =
     !leftDock && visible && isTimeline && assetsHeight > 0
@@ -826,7 +828,7 @@ export function FloatingSelectionBar({
           const selectedIndices = prev
             .map((p, idx) => (selectedPanelIds.has(p.id) ? idx : -1))
             .filter((idx) => idx !== -1);
-          
+
           const selectedItems = selectedIndices.map((idx) => prev[idx]);
           selectedItems.sort((a, b) => {
             return order === "asc" ? a.id - b.id : b.id - a.id;
@@ -1055,10 +1057,10 @@ export function FloatingSelectionBar({
                         {isBatchCropping && batchProgress
                           ? `Cropping ${batchProgress.current}/${batchProgress.total}`
                           : isCleaningBubbles && cleanProgress
-                          ? `Cleaning ${cleanProgress.current}/${cleanProgress.total}`
-                          : isBatchMerging
-                          ? "Stitching..."
-                          : "Processing..."}
+                            ? `Cleaning ${cleanProgress.current}/${cleanProgress.total}`
+                            : isBatchMerging
+                              ? "Stitching..."
+                              : "Processing..."}
                       </span>
                     </div>
                   </div>
@@ -1072,13 +1074,13 @@ export function FloatingSelectionBar({
                   <ScraperSelectionToolbar
                     scrapedImages={scrapedImages}
                     selectedScraped={selectedScraped || []}
-                    handleInvertSelection={handleInvertSelection || (() => {})}
-                    handleSelectOdd={handleSelectOdd || (() => {})}
-                    handleSelectEven={handleSelectEven || (() => {})}
-                    handleReverseDeckOrder={handleReverseDeckOrder || (() => {})}
-                    handleSelectFirstN={handleSelectFirstN || (() => {})}
-                    handleSelectLastN={handleSelectLastN || (() => {})}
-                    handleSelectRange={handleSelectRange || (() => {})}
+                    handleInvertSelection={handleInvertSelection || (() => { })}
+                    handleSelectOdd={handleSelectOdd || (() => { })}
+                    handleSelectEven={handleSelectEven || (() => { })}
+                    handleReverseDeckOrder={handleReverseDeckOrder || (() => { })}
+                    handleSelectFirstN={handleSelectFirstN || (() => { })}
+                    handleSelectLastN={handleSelectLastN || (() => { })}
+                    handleSelectRange={handleSelectRange || (() => { })}
                     handleClearAll={handleClearAll}
                     setSelectedScraped={setSelectedScraped}
                   />
