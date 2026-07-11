@@ -14,7 +14,8 @@ def adjust_to_aspect_ratio(
 ) -> Tuple[int, int, int, int]:
     """
     Expands or adjusts a panel bounding box to match a target aspect ratio,
-    ensuring it does not exceed the boundaries of the image.
+    allowing coordinates to go out of bounds for smart letterboxing/pillarboxing
+    without shrinking or clipping the artwork.
     """
     if not aspect_ratio_str or aspect_ratio_str == "free":
         return x, y, w_box, h_box
@@ -39,30 +40,14 @@ def adjust_to_aspect_ratio(
         # Need to expand width
         new_w = int(h_box * target_ratio)
         delta = new_w - w_box
-        new_x = x - delta // 2
-        if new_x < 0:
-            new_x = 0
-        if new_x + new_w > w_img:
-            new_w = w_img - new_x
-            new_h = int(new_w / target_ratio)
-            y = y + (h_box - new_h) // 2
-            h_box = new_h
+        x = x - delta // 2
         w_box = new_w
-        x = new_x
     elif curr_ratio > target_ratio:
         # Need to expand height
         new_h = int(w_box / target_ratio)
         delta = new_h - h_box
-        new_y = y - delta // 2
-        if new_y < 0:
-            new_y = 0
-        if new_y + new_h > h_img:
-            new_h = h_img - new_y
-            new_w = int(new_h * target_ratio)
-            x = x + (w_box - new_w) // 2
-            w_box = new_w
+        y = y - delta // 2
         h_box = new_h
-        y = new_y
         
     return x, y, w_box, h_box
 
@@ -178,12 +163,35 @@ def _detect_bg_color_and_threshold(
     return is_white_bg, threshold_val
 
 
+def _detect_text_boxes_ocr(image_path: str) -> List[Tuple[int, int]]:
+    """
+    Helper to detect vertical coordinate bounds of text/balloons to prevent slicing them in half.
+    """
+    try:
+        from media.image.ocr import has_easyocr, get_reader
+        if not has_easyocr:
+            return []
+        reader = get_reader(['en'])
+        if reader is None:
+            return []
+        raw_results = reader.readtext(image_path)
+        y_ranges = []
+        for res in raw_results:
+            box = res[0]
+            ys = [p[1] for p in box]
+            y_ranges.append((int(min(ys)), int(max(ys))))
+        return y_ranges
+    except Exception as e:
+        logger.warning(f"[Speech Bubble Protection] Failed to load text boundaries via OCR: {e}")
+        return []
+
 def _detect_panels_webtoon(
     gray_arr: np.ndarray,
     is_white_bg: bool,
     threshold_val: int,
     min_height_px: int,
-    min_width_pct: float
+    min_width_pct: float,
+    image_path: Optional[str] = None
 ) -> List[Dict[str, int]]:
     """
     Webtoon gutter slicing strategy for tall strips.
@@ -232,6 +240,28 @@ def _detect_panels_webtoon(
         end_y = h
         if end_y - start_y >= min_height_px:
             panels.append((start_y, end_y))
+
+    # Speech Bubble protection adjustments
+    if image_path and os.path.exists(image_path):
+        text_boxes = _detect_text_boxes_ocr(image_path)
+        if text_boxes:
+            logger.info(f"[Speech Bubble Protection] Scanning {len(text_boxes)} text bubbles to protect split points.")
+            adjusted_panels = []
+            for sy, ey in panels:
+                # If any text bubble boundary covers sy or ey, shift them to keep bubbles uncut
+                for ty_min, ty_max in text_boxes:
+                    # Let's add a buffer around the text box
+                    ty_min_padded = max(0, ty_min - 6)
+                    ty_max_padded = min(h, ty_max + 6)
+
+                    if ty_min_padded <= sy <= ty_max_padded:
+                        logger.info(f"[Speech Bubble Protection] Shifted panel start_y from {sy} to {ty_min_padded} to protect bubble.")
+                        sy = ty_min_padded
+                    if ty_min_padded <= ey <= ty_max_padded:
+                        logger.info(f"[Speech Bubble Protection] Shifted panel end_y from {ey} to {ty_max_padded} to protect bubble.")
+                        ey = ty_max_padded
+                adjusted_panels.append((sy, ey))
+            panels = adjusted_panels
 
     raw_boxes: List[Dict[str, int]] = []
     for start_y, end_y in panels:
@@ -332,6 +362,22 @@ def _detect_panels_grid_cv(
     if contours:
         for contour in contours:
             x_box, y_box, w_box, h_box = cv2.boundingRect(contour)
+
+            # Angled/Diagonal panel resilience:
+            # If contour is rotated/angled (detected via minAreaRect), pad box slightly so angled visual corners aren't clipped.
+            try:
+                rect = cv2.minAreaRect(contour)
+                angle = rect[2]
+                if 2.0 < abs(angle) < 88.0:
+                    h_img, w_img = gray.shape
+                    # Expand bounding box slightly (angled panel)
+                    x_box = max(0, x_box - int(w_box * 0.05))
+                    y_box = max(0, y_box - int(h_box * 0.05))
+                    w_box = min(w_img - x_box, int(w_box * 1.10))
+                    h_box = min(h_img - y_box, int(h_box * 1.10))
+            except Exception:
+                pass
+
             raw_boxes.append({"x": x_box, "y": y_box, "w": w_box, "h": h_box})
             
     return raw_boxes
@@ -500,29 +546,87 @@ def run_cv_detection(
     if gray_arr is None:
         return []
 
+    # Dynamic scaling check for smaller/already-cropped images (e.g. h < 1500 and w < 1500)
+    is_small_image = (h < 1500 and w < 1500)
+    orig_min_height_px = min_height_px
+    orig_min_width_pct = min_width_pct
+    orig_close_kernel_size = close_kernel_size
+
+    if is_small_image:
+        logger.info(f"[Panel Detection] Detected small/cropped image ({w}x{h}). Dynamically adjusting parameters.")
+        # Dynamically scale down limits to be context-aware
+        min_height_px = max(10, min(min_height_px, int(h * 0.05)))
+        min_width_pct = max(0.01, min(min_width_pct, 0.03))
+        close_kernel_size = max(3, min(close_kernel_size, int(min(w, h) * 0.03)))
+        if close_kernel_size % 2 == 0:
+            close_kernel_size = max(3, close_kernel_size - 1)
+
     # 2. Detect background characteristics
     is_white_bg, threshold_val = _detect_bg_color_and_threshold(gray_arr, bg_mode, sensitivity)
     is_tall_strip = (h / w > 1.2)
 
-    # 3. Route to the appropriate detection strategy
-    raw_boxes: List[Dict[str, int]] = []
-    if auto_split and is_tall_strip:
-        logger.info(f"[Panel Detection] Using Webtoon Slicing strategy for tall strip ({'OpenCV' if has_cv else 'PIL fallback'})")
-        raw_boxes = _detect_panels_webtoon(gray_arr, is_white_bg, threshold_val, min_height_px, min_width_pct)
-    else:
-        logger.info(f"[Panel Detection] Using Grid strategy ({'OpenCV Contours' if has_cv else 'PIL Fallback'})")
-        if has_cv:
-            raw_boxes = _detect_panels_grid_cv(gray_arr, is_white_bg, threshold_val, canny_low, canny_high, close_kernel_size)
-        else:
-            raw_boxes = _detect_panels_grid_pil(gray_arr, is_white_bg, sensitivity, min_height_px)
+    # Helper function for a single pass of detection & merging
+    def run_detection_pass(
+        curr_sensitivity, curr_canny_low, curr_canny_high, curr_close_kernel, curr_min_h, curr_min_w_pct
+    ) -> List[Dict[str, int]]:
+        curr_is_white, curr_thresh = _detect_bg_color_and_threshold(gray_arr, bg_mode, curr_sensitivity)
 
-    # 4. Filter out solid background noise
-    min_w = w * min_width_pct
-    filtered_boxes = _filter_solid_noise(raw_boxes, gray_arr, min_w, min_height_px, auto_split)
+        # Determine strategy
+        if auto_split and is_tall_strip:
+            pass_boxes = _detect_panels_webtoon(gray_arr, curr_is_white, curr_thresh, curr_min_h, curr_min_w_pct, image_path=image_path)
+        else:
+            if has_cv:
+                pass_boxes = _detect_panels_grid_cv(gray_arr, curr_is_white, curr_thresh, curr_canny_low, curr_canny_high, curr_close_kernel)
+            else:
+                pass_boxes = _detect_panels_grid_pil(gray_arr, curr_is_white, curr_sensitivity, curr_min_h)
+
+        # Filter noise with standard deviation
+        curr_min_w = w * curr_min_w_pct
+        # Make the standard deviation noise filter more lenient on smaller/flat images (2.0 std dev threshold instead of 5.0)
+        std_threshold = 2.0 if is_small_image else 5.0
+
+        # Inline filter noise to customize std_threshold
+        filtered = []
+        for box in pass_boxes:
+            bx, by, bw, bh = box["x"], box["y"], box["w"], box["h"]
+            if auto_split:
+                if bh < curr_min_h:
+                    continue
+            else:
+                if bw < curr_min_w or bh < curr_min_h:
+                    continue
+            try:
+                box_slice = gray_arr[by:by+bh, bx:bx+bw]
+                if np.std(box_slice) < std_threshold:
+                    continue
+            except Exception:
+                pass
+            filtered.append(box)
             
-    # 5. Merge overlapping or stacked panel bounding boxes
-    merged_boxes = merge_overlapping_boxes(filtered_boxes, w, h, merge_threshold)
-    
+        return merge_overlapping_boxes(filtered, w, h, merge_threshold)
+
+    # Pass 1
+    logger.info(f"[Panel Detection] Running Pass 1 (low={canny_low}, high={canny_high}, kernel={close_kernel_size}, min_h={min_height_px}, min_w_pct={min_width_pct})")
+    merged_boxes = run_detection_pass(
+        sensitivity, canny_low, canny_high, close_kernel_size, min_height_px, min_width_pct
+    )
+
+    # Pass 2: Dual-pass edge detection if zero panels are found
+    if len(merged_boxes) == 0:
+        logger.info("[Panel Detection] Pass 1 returned 0 panels. Retrying Pass 2 with lower thresholds / more sensitive settings.")
+        sens_p2 = min(95.0, sensitivity + 15.0)
+        canny_low_p2 = max(5, canny_low // 2)
+        canny_high_p2 = max(15, canny_high // 2)
+        kernel_p2 = max(3, close_kernel_size - 4)
+        if kernel_p2 % 2 == 0:
+            kernel_p2 = max(3, kernel_p2 - 1)
+        min_h_p2 = max(10, min_height_px // 2)
+        min_w_pct_p2 = max(0.01, min_width_pct / 2.0)
+
+        merged_boxes = run_detection_pass(
+            sens_p2, canny_low_p2, canny_high_p2, kernel_p2, min_h_p2, min_w_pct_p2
+        )
+
     # 6. Apply post-merge vertical padding for tall webtoon strips, then format & scale to percent
     final_panels = []
     logger.info(f"[Panel Detection] Found {len(merged_boxes)} panels after merging and filtering.")
@@ -530,10 +634,10 @@ def run_cv_detection(
     for box in merged_boxes:
         bx, by, bw, bh = box["x"], box["y"], box["w"], box["h"]
         
-        # Apply 8px vertical padding to sliced panels (helps framing and prevents borders from being cut)
+        # Apply 24px vertical padding to sliced panels (helps framing, prevents borders or protruding speech bubbles from being cut)
         if auto_split and is_tall_strip:
-            pad_by = max(0, by - 8)
-            pad_ey = min(h, by + bh + 8)
+            pad_by = max(0, by - 24)
+            pad_ey = min(h, by + bh + 24)
             by = pad_by
             bh = pad_ey - pad_by
             
@@ -553,7 +657,9 @@ def run_cv_detection(
             "cropRight": round(max(0.0, min(100.0, crop_right)), 2),
             "width": int(w_box),
             "height": int(h_box),
-            "area": int(w_box * h_box)
+            "area": int(w_box * h_box),
+            "splitTopY": int(y),
+            "splitBottomY": int(y + h_box)
         })
         
     return sorted(final_panels, key=lambda b: b["cropTop"])
