@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import ReactDOM from "react-dom";
 
 interface TooltipPortalProps {
@@ -12,14 +12,9 @@ const TooltipPortal: React.FC<TooltipPortalProps> = ({
   visible,
   anchorRect,
 }) => {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    return () => setMounted(false);
-  }, []);
-
-  if (!mounted || !visible || !anchorRect) return null;
+  // Avoid extra state updates that can contribute to render loops.
+  if (typeof document === "undefined") return null;
+  if (!visible || !anchorRect) return null;
 
   const style: React.CSSProperties = {
     position: "fixed",
@@ -30,16 +25,16 @@ const TooltipPortal: React.FC<TooltipPortalProps> = ({
     zIndex: 9999,
   };
 
-  const node = (
+  return ReactDOM.createPortal(
     <div
       style={style}
       className="pointer-events-none transition-opacity bg-neutral-900 border border-neutral-800 text-white text-xs px-2.5 py-1.5 rounded-lg whitespace-nowrap z-50 shadow-2xl font-mono"
     >
       {text}
-    </div>
+    </div>,
+    document.body
   );
-
-  return ReactDOM.createPortal(node, document.body);
 };
 
 export default TooltipPortal;
+
