@@ -1210,9 +1210,9 @@ export default function App() {
       {/* --- Main Contents Controller & Router --- */}
       <div
         id="main-scroll-container"
-        className={`flex-grow flex-1 flex flex-col min-h-screen lg:max-h-screen justify-between transition-all duration-300 ${
-          !isAnyAdmin ? "lg:overflow-y-auto" : "overflow-y-auto"
-        } ${!isAnyAdmin && isSidebarOpen ? "overflow-hidden" : ""}`}
+        className={`flex-1 flex flex-col h-full relative justify-between transition-colors duration-300 ${
+          !isAnyAdmin && isSidebarOpen ? "overflow-hidden" : "overflow-y-auto"
+        }`}
       >
         {/* Top Header */}
         {!isSidebarOpen && !isProEditorPage && !isAnyAdmin && (
@@ -1282,8 +1282,8 @@ export default function App() {
           className={`${!isSidebarOpen ? "lg:pl-20" : ""} ${
             !isSidebarOpen && !isProEditorPage
               ? "pt-[59px] min-h-[calc(100vh-59px)]"
-              : "min-h-screen"
-          } flex-grow flex-1 flex flex-col transition-all duration-300`}
+              : "h-full"
+          } flex-1 flex flex-col transition-colors duration-300`}
         >
           {/* Impersonation Banner */}
           {localStorage.getItem("sonikoma_admin_token") && (

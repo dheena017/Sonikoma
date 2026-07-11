@@ -9,9 +9,7 @@ import {
   Trash2, 
   PanelRightClose, 
   PanelRightOpen,
-  Minimize2,
-  Search,
-  Menu
+  Minimize2
 } from "lucide-react";
 import { ImageTool } from "@/hooks/useImageEditorState"; // Adjust path if needed
 
@@ -32,8 +30,6 @@ interface ImageEditorHeaderProps {
   slices: any[];
   isToolsPanelOpen: boolean;
   setIsToolsPanelOpen: (val: boolean | ((prev: boolean) => boolean)) => void;
-  isLeftSidebarOpen?: boolean;
-  onToggleLeftSidebar?: () => void;
 }
 
 export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({ 
@@ -52,36 +48,17 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
   setIsPipMode,
   slices,
   isToolsPanelOpen,
-  setIsToolsPanelOpen,
-  isLeftSidebarOpen,
-  onToggleLeftSidebar,
+  setIsToolsPanelOpen
 }) => {
   const hasMultipleImages = scrapedImages.length > 1;
 
   return (
-    <header className="w-full h-[60px] bg-neutral-950/80 backdrop-blur-md border-b border-neutral-900 flex items-center justify-between px-4 z-50">
-      
-      {/* 1. Left: Branding & Navigation */}
-      <div className="flex items-center gap-4">
-        {/* Left: hamburger toggle for mini sidebar */}
-        <div className="w-auto flex items-center justify-center shrink-0 pr-2 border-r border-neutral-800/60">
-          <button
-            onClick={onToggleLeftSidebar ?? (() => {})}
-            className="p-1.5 text-neutral-400 hover:text-white rounded-lg hover:bg-neutral-800 transition-colors cursor-pointer active:scale-95"
-            title="Toggle Tools Menu"
-            type="button"
-          >
-            <Menu className="h-5 w-5" />
-          </button>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <img src="/logo-dark.png" className="h-8 w-8 rounded-full object-cover" alt="Sonikoma" />
-          <div className="hidden lg:block">
-            <h1 className="text-[11px] font-black tracking-wider text-white">SONIKOMA</h1>
-            <p className="text-[9px] text-purple-400 font-mono">IMAGE EDITOR</p>
-          </div>
-        </div>
+    <header className="h-16 w-full bg-[#0B0F19] border-b border-gray-800 flex items-center justify-between px-6 flex-shrink-0 z-50">
+      {/* Left: Title, Badge & Navigation */}
+      <div className="flex items-center space-x-4">
+        <span className="px-3 py-1 text-[10px] font-bold tracking-wider text-purple-400 bg-purple-900/30 rounded-full border border-purple-700/50">
+          IMAGE EDITOR
+        </span>
 
         {hasMultipleImages && (
           <div className="flex items-center space-x-1 bg-gray-900/50 rounded-lg p-1 border border-gray-800">
@@ -110,23 +87,51 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
         </div>
       </div>
 
-      {/* 3. Right: Status, History, & Actions */}
-      <div className="flex items-center gap-3">
-        {/* Server Status */}
-        <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-850 text-[10px]">
-           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-           <span className="text-emerald-400 font-bold uppercase">Online</span>
-        </div>
+      {/* Center: History & Canvas Tools */}
+      <div className="flex items-center space-x-2 bg-gray-900/50 p-1 rounded-lg border border-gray-800">
+        <button
+          onClick={handleUndo}
+          disabled={historyLength === 0}
+          className={`p-2 rounded-md transition ${historyLength > 0 ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 cursor-not-allowed'}`}
+          title="Undo"
+        >
+          <Undo className="w-4 h-4" />
+        </button>
+        <button
+          onClick={handleRedo}
+          disabled={redoHistoryLength === 0}
+          className={`p-2 rounded-md transition ${redoHistoryLength > 0 ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 cursor-not-allowed'}`}
+          title="Redo"
+        >
+          <Redo className="w-4 h-4" />
+        </button>
+        <div className="w-px h-4 bg-gray-700 mx-1"></div>
+        <button
+          onClick={handleDeleteCurrentImage}
+          className="p-2 text-red-400 hover:text-red-300 rounded-md hover:bg-red-900/20 transition"
+          title="Delete Image"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+        {setIsPipMode && (
+          <button
+            onClick={() => setIsPipMode(true)}
+            className="p-2 text-gray-400 hover:text-white rounded-md hover:bg-gray-800 transition"
+            title="Picture-in-Picture Mode"
+          >
+            <Minimize2 className="w-4 h-4" />
+          </button>
+        )}
+      </div>
 
-        {/* History Tools */}
-        <div className="flex items-center gap-1 bg-neutral-900 p-0.5 rounded-lg border border-neutral-850">
-           <button onClick={handleUndo} disabled={historyLength === 0} className="p-1.5 text-neutral-400 hover:text-white disabled:opacity-30"><Undo className="w-4 h-4" /></button>
-           <button onClick={handleRedo} disabled={redoHistoryLength === 0} className="p-1.5 text-neutral-400 hover:text-white disabled:opacity-30"><Redo className="w-4 h-4" /></button>
-        </div>
-
-        {/* Panel Toggles */}
-        <button onClick={() => setIsToolsPanelOpen((prev) => !prev)} className="p-2 text-neutral-400 hover:text-white rounded-lg hover:bg-neutral-800 border border-neutral-850">
-          {isToolsPanelOpen ? <PanelRightClose className="w-4 h-4" /> : <PanelRightOpen className="w-4 h-4" />}
+      {/* Right: Toggle Sidebar & Exit Actions */}
+      <div className="flex items-center space-x-3">
+        <button
+          onClick={() => setIsToolsPanelOpen((prev) => !prev)}
+          className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800 transition border border-transparent hover:border-gray-700"
+          title={isToolsPanelOpen ? "Close Properties Panel" : "Open Properties Panel"}
+        >
+          {isToolsPanelOpen ? <PanelRightClose className="w-5 h-5" /> : <PanelRightOpen className="w-5 h-5" />}
         </button>
 
         <div className="w-px h-6 bg-gray-800 mx-2"></div>
@@ -144,7 +149,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
             window.dispatchEvent(new Event("FABRIC_REQUEST_SAVE"));
             setEditingImageIdx(null);
           }}
-          className="px-4 py-1.5 text-[11px] font-bold text-white bg-purple-600 hover:bg-purple-500 rounded-xl shadow-lg shadow-purple-900/20"
+          className="px-4 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-500 rounded-lg transition flex items-center shadow-lg shadow-purple-900/20"
         >
           <Check className="w-4 h-4 mr-2" /> Apply Changes
         </button>

@@ -19,9 +19,7 @@ export const ImageEditorLayout: React.FC<ImageEditorLayoutProps> = ({
       <div className="flex-1 flex flex-row overflow-hidden w-full">
 
         {/* Left Column: Mini Sidebar */}
-        <aside className="w-20 h-full bg-[#121826] border-r border-gray-800 flex-shrink-0 z-10">
-          <ImageEditorMiniSidebar />
-        </aside>
+        <ImageEditorMiniSidebar />
 
         {/* Center Column: The Interactive Canvas */}
         <main className="flex-1 h-full relative overflow-hidden bg-black/50 flex items-center justify-center">

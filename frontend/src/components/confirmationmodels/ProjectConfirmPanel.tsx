@@ -91,12 +91,12 @@ export default function ProjectConfirmPanel({
       document.body.style.overflow = "hidden";
       if (container) container.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = "unset";
-      if (container) container.style.overflow = "unset";
+      document.body.style.overflow = "";
+      if (container) container.style.overflow = "";
     }
     return () => {
-      document.body.style.overflow = "unset";
-      if (container) container.style.overflow = "unset";
+      document.body.style.overflow = "";
+      if (container) container.style.overflow = "";
     };
   }, [isOpen, initialDetails]);
 
