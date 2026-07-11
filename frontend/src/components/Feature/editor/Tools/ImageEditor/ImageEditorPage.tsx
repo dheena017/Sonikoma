@@ -3,10 +3,8 @@ import { useCropEditorStore } from "@/hooks/useImageEditorState";
 import { useImageEditor } from "../../../../../hooks/useImageEditor";
 import { useAppLogic } from "../../../../../hooks/useAppLogic";
 import { ImageEditorHeader } from "./ImageEditorHeader";
-import { ImageEditorMiniSidebar } from "./ImageEditorMiniSidebar";
 import ImageEditorCanvasContainer from "./ImageEditorCanvasContainer";
 import ImageEditorSidebar from "./ImageEditorSidebar";
-import { ImageEditorLayout } from "./ImageEditorLayout";
 
 interface ImageEditorPageProps {
   appLogic: ReturnType<typeof useAppLogic>;
@@ -26,16 +24,23 @@ const ImageEditorPage = React.memo(({ appLogic }: ImageEditorPageProps) => {
   // Load the editor logic
   const editorProps = useImageEditor({ appLogic });
 
+  const activeStoryboardPanel = useMemo(() => {
+    if (editingImageIdx === null) return null;
+    return appLogic.panels?.find((p: any) => p.image_url === appLogic.scrapedImages[editingImageIdx]) || null;
+  }, [appLogic.panels, appLogic.scrapedImages, editingImageIdx]);
+
   // Memoize the Heavy Canvas to prevent lag
   const canvasSubtree = useMemo(() => {
     if (editingImageIdx === null) return null;
     return (
       <ImageEditorCanvasContainer
         key={editorProps.imageUrl || undefined}
+        activeStoryboardPanel={activeStoryboardPanel}
         handleAiCrop={editorProps.handleAiCrop}
         isAiDetecting={editorProps.isAiDetecting}
         editingImageIdx={editingImageIdx}
         scrapedImages={appLogic.scrapedImages}
+        setPanels={appLogic.setPanels}
         containerRef={editorProps.containerRef}
         editCropTop={appLogic.editCropTop}
         editCropBottom={appLogic.editCropBottom}
@@ -98,10 +103,7 @@ const ImageEditorPage = React.memo(({ appLogic }: ImageEditorPageProps) => {
 
   // Render standard inline layout (No Modal/Fixed overlays!)
   return (
-    <ImageEditorLayout
-      onClose={() => setEditingImageIdx(null)}
-      onApply={() => {window.dispatchEvent(new Event("FABRIC_REQUEST_SAVE")); setEditingImageIdx(null);}}
-      header={
+    <div className="w-full h-full bg-[#0B0F19] text-white flex flex-col overflow-hidden relative">
       <ImageEditorHeader
         editingImageIdx={editingImageIdx ?? 0}
         scrapedImages={appLogic.scrapedImages}
@@ -120,20 +122,33 @@ const ImageEditorPage = React.memo(({ appLogic }: ImageEditorPageProps) => {
         isToolsPanelOpen={isToolsPanelOpen}
         setIsToolsPanelOpen={setIsToolsPanelOpen}
       />
-      }
-      sidebar={
+
+      <div className="flex-1 flex flex-row overflow-hidden w-full relative">
+        {/* Center Canvas */}
+        <main className="flex-1 h-full relative overflow-hidden bg-black/50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 opacity-20 pointer-events-none"
+            style={{ backgroundImage: "radial-gradient(#374151 1px, transparent 0)", backgroundSize: "20px 20px" }}
+          />
+          <div className="relative w-full h-full z-10 flex items-center justify-center p-4">
+            {canvasSubtree}
+          </div>
+        </main>
+
+        {/* Right Tools Sidebar */}
         <aside
           className={`h-full bg-[#121826] border-l border-gray-800 flex-shrink-0 z-20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
             isToolsPanelOpen ? "w-[360px] lg:w-[420px] opacity-100" : "w-0 opacity-0 border-none"
           }`}
         >
           <div className="w-[360px] lg:w-[420px] h-full overflow-y-auto custom-scrollbar p-5">
-            <ImageEditorSidebar
+              <ImageEditorSidebar
               setActiveTab={editorProps.setActiveTab}
               slices={editorProps.slices}
               setSlices={editorProps.setSlices}
               editingImageIdx={editingImageIdx ?? 0}
               scrapedImages={appLogic.scrapedImages}
+
               isMerging={editorProps.isMerging}
               handleMergeWithNext={editorProps.handleMergeWithNext}
               editCropTop={appLogic.editCropTop}
@@ -239,13 +254,12 @@ const ImageEditorPage = React.memo(({ appLogic }: ImageEditorPageProps) => {
               handleClearDetectedBoxes={editorProps.handleClearDetectedBoxes}
               handleExecuteSave={editorProps.handleExecuteSave}
               activeTab={editorProps.activeTab as any}
+
             />
           </div>
         </aside>
-      }
-    >
-      {canvasSubtree}
-    </ImageEditorLayout>
+      </div>
+    </div>
   );
 });
 

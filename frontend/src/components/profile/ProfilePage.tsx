@@ -1275,7 +1275,7 @@ export default function ProfilePage({
       : "No finished compiles yet";
 
   return (
-    <div className="flex-1 min-h-0 bg-neutral-955 text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-x-hidden">
+    <div className="flex-grow flex-1 min-h-0 bg-neutral-955 text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-x-hidden">
       {/* Hidden file input for custom profile image upload */}
       <input
         type="file"

@@ -1,18 +1,22 @@
 import React, { useEffect, useRef } from "react";
 import * as fabric from "fabric";
-import { PanelLayers, PanelSyncMap } from "@/types";
+import { PanelLayers, PanelSyncMap, GeneratedPanel } from "@/types";
 import { useDialogueSync } from "@/hooks/useDialogueSync";
 
 interface CanvasMultiLayerProps {
   layers: PanelLayers;
   syncMap?: PanelSyncMap;
   isActive: boolean;
+  panelId: number;
+  setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
 }
 
 export default function CanvasMultiLayer({
   layers,
   syncMap,
   isActive,
+  panelId,
+  setPanels,
 }: CanvasMultiLayerProps) {
   const canvasEl = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -73,12 +77,13 @@ export default function CanvasMultiLayer({
 
       // Create Character layer (draggable & resizable)
       const fabChar = await fabric.Image.fromURL(layers.character_url, { crossOrigin: "anonymous" });
-      // Scale to match background dimensions initially
-      const charScaleX = canvasWidth / fabChar.width!;
-      const charScaleY = canvasHeight / fabChar.height!;
+      // Scale to match background dimensions initially or restore saved coordinates
+      const hasSavedChar = layers.char_x !== undefined && layers.char_y !== undefined;
+      const charScaleX = hasSavedChar ? layers.char_scale_x! : (canvasWidth / fabChar.width!);
+      const charScaleY = hasSavedChar ? layers.char_scale_y! : (canvasHeight / fabChar.height!);
       fabChar.set({
-        left: 0,
-        top: 0,
+        left: hasSavedChar ? layers.char_x! : 0,
+        top: hasSavedChar ? layers.char_y! : 0,
         scaleX: charScaleX,
         scaleY: charScaleY,
         selectable: true,
@@ -95,12 +100,13 @@ export default function CanvasMultiLayer({
 
       // Create Text layer (draggable & resizable)
       const fabText = await fabric.Image.fromURL(layers.text_url, { crossOrigin: "anonymous" });
-      // Scale to match background dimensions initially
-      const textScaleX = canvasWidth / fabText.width!;
-      const textScaleY = canvasHeight / fabText.height!;
+      // Scale to match background dimensions initially or restore saved coordinates
+      const hasSavedText = layers.text_x !== undefined && layers.text_y !== undefined;
+      const textScaleX = hasSavedText ? layers.text_scale_x! : (canvasWidth / fabText.width!);
+      const textScaleY = hasSavedText ? layers.text_scale_y! : (canvasHeight / fabText.height!);
       fabText.set({
-        left: 0,
-        top: 0,
+        left: hasSavedText ? layers.text_x! : 0,
+        top: hasSavedText ? layers.text_y! : 0,
         scaleX: textScaleX,
         scaleY: textScaleY,
         selectable: true,
@@ -114,6 +120,35 @@ export default function CanvasMultiLayer({
       });
       fCanvas.add(fabText);
       textImgRef.current = fabText;
+
+      // Persist modifications back to parent panel state
+      fCanvas.on("object:modified", (opt) => {
+        const obj = opt.target;
+        if (!obj) return;
+
+        const isChar = obj === fabChar;
+        const isText = obj === fabText;
+
+        if (isChar || isText) {
+          const prefix = isChar ? "char" : "text";
+          setPanels((prev) =>
+            prev.map((p) =>
+              p.id === panelId
+                ? {
+                    ...p,
+                    layers: {
+                      ...p.layers!,
+                      [`${prefix}_x`]: obj.left,
+                      [`${prefix}_y`]: obj.top,
+                      [`${prefix}_scale_x`]: obj.scaleX,
+                      [`${prefix}_scale_y`]: obj.scaleY,
+                    },
+                  }
+                : p
+            )
+          );
+        }
+      });
 
       fCanvas.renderAll();
     };

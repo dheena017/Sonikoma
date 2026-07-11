@@ -84,7 +84,7 @@ const NotificationsPage = React.memo(
     };
 
     return (
-      <div className="flex-1 min-h-0 bg-[#0a0a0e] text-white py-6 md:py-10 px-4 sm:px-6 lg:px-8 relative overflow-x-hidden">
+      <div className="flex-grow flex-1 min-h-0 bg-[#0a0a0e] text-white py-6 md:py-10 px-4 sm:px-6 lg:px-8 relative overflow-x-hidden">
         <div className="max-w-5xl mx-auto space-y-6 animate-in fade-in duration-300 relative z-10">
           {/* Unified Page Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">

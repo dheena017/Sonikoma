@@ -5,6 +5,14 @@ export interface PanelLayers {
   bg_visible?: boolean;
   char_visible?: boolean;
   text_visible?: boolean;
+  char_x?: number;
+  char_y?: number;
+  char_scale_x?: number;
+  char_scale_y?: number;
+  text_x?: number;
+  text_y?: number;
+  text_scale_x?: number;
+  text_scale_y?: number;
 }
 
 export interface DialogueSegment {
@@ -47,6 +55,7 @@ export interface GeneratedPanel {
   audio_url?: string;
   layers?: PanelLayers;
   syncMap?: PanelSyncMap;
+  audio_reactive_shake?: boolean;
 }
 
 export interface CharacterBio {

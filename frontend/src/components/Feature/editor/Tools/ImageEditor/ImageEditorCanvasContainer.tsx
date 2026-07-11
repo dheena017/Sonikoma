@@ -9,6 +9,7 @@ interface ImageEditorCanvasContainerProps {
   isAiDetecting: boolean;
   editingImageIdx: number;
   scrapedImages: string[];
+  setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
   containerRef: React.RefObject<HTMLDivElement | null>;
   editCropTop: number;
   editCropBottom: number;
@@ -62,6 +63,7 @@ export default function ImageEditorCanvasContainer({
   editingImageIdx,
   scrapedImages,
   containerRef,
+  setPanels,
   editCropTop,
   editCropBottom,
   editCropLeft,
@@ -165,6 +167,8 @@ export default function ImageEditorCanvasContainer({
               layers={activeStoryboardPanel.layers}
               syncMap={activeStoryboardPanel.syncMap}
               isActive={true}
+              panelId={activeStoryboardPanel.id}
+              setPanels={setPanels}
             />
           </div>
         </div>

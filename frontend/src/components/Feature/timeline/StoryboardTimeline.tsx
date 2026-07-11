@@ -196,12 +196,12 @@ const StoryboardTimeline = React.memo(
         document.body.style.overflow = "hidden";
         if (container) container.style.overflow = "hidden";
       } else {
-        document.body.style.overflow = "";
-        if (container) container.style.overflow = "";
+        document.body.style.overflow = "unset";
+        if (container) container.style.overflow = "unset";
       }
       return () => {
-        document.body.style.overflow = "";
-        if (container) container.style.overflow = "";
+        document.body.style.overflow = "unset";
+        if (container) container.style.overflow = "unset";
       };
     }, [showDeleteConfirm]);
 
@@ -724,6 +724,7 @@ const StoryboardTimeline = React.memo(
               isDragging={draggedIndex === idx}
               isDragOver={dragOverIndex === idx}
               setPanels={setPanels}
+              fetchWithInterceptor={fetchWithInterceptor}
             />
           ))}
         </div>

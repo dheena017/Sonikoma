@@ -81,7 +81,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
   }, [isSidebarOpen]);
 
   return (
-    <div className="flex  bg-[#050507] text-white selection:bg-purple-500/30">
+    <div className="flex min-h-screen bg-[#050507] text-white selection:bg-purple-500/30">
       {/* Blurred Background Overlay when expanded sidebar is open */}
       {isSidebarOpen && (
         <div
@@ -154,7 +154,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
           - pl-20 (80px) clears the fixed mini sidebar so content doesn't hide underneath.
       */}
       <div
-        className={`flex flex-1 flex-col min-w-0 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]  ${
+        className={`flex flex-1 flex-col min-w-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] min-h-screen ${
           isFocusMode ? "pt-0 pl-0 pr-0" : "pt-16 pl-0 pr-0 md:pl-16 md:pr-16"
         }`}
       >

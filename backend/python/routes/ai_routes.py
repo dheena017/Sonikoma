@@ -133,9 +133,6 @@ class SmartCropRequest(BaseModel):
     targetHeight: Optional[int] = None
     guidanceInstructions: Optional[str] = None
     focusMode: Optional[str] = None
-    gutterFillStyle: Optional[str] = "auto"
-    translationTargetLang: Optional[str] = None
-    manualSplitPoints: Optional[List[float]] = None
 
 class SmartCropBatchRequest(BaseModel):
     urls: List[str]
@@ -155,9 +152,6 @@ class SmartCropBatchRequest(BaseModel):
     targetHeight: Optional[int] = None
     guidanceInstructions: Optional[str] = None
     focusMode: Optional[str] = None
-    gutterFillStyle: Optional[str] = "auto"
-    translationTargetLang: Optional[str] = None
-    manualSplitPoints: Optional[List[float]] = None
 
 # ─── Dynamic Endpoints Requests ──────────────────────────────────────────────
 
@@ -1358,95 +1352,7 @@ async def ai_smart_crop(body: SmartCropRequest, user_api_key: str = Depends(get_
                     t_w, t_h = 1080, 1440
 
             if crop_w > 10 and crop_h > 10:
-                # Smart Letterbox / Pillarbox cropping:
-                # If the crop coordinates go out of bounds (such as negative indices or exceeding image width/height),
-                # pad the missing regions with the sampled background color so the artwork is never stretched or clipped.
-                try:
-                    corner_px = img.getpixel((0, 0))
-                    if isinstance(corner_px, tuple):
-                        bg_color = corner_px[:3]
-                        if img.mode == 'RGBA':
-                            bg_color = bg_color + (255,)
-                    else:
-                        bg_color = corner_px
-                except Exception:
-                    bg_color = (255, 255, 255) if img.mode in ("RGB", "RGBA") else 255
-
-                # 1. Customizable Gutter Background Fill Style
-                gutter_fill = getattr(body, "gutterFillStyle", "auto")
-                if gutter_fill == "transparent":
-                    bg_color = (0, 0, 0, 0)
-                elif gutter_fill == "white":
-                    bg_color = (255, 255, 255, 255) if img.mode == 'RGBA' else (255, 255, 255)
-                elif gutter_fill == "black":
-                    bg_color = (0, 0, 0, 255) if img.mode == 'RGBA' else (0, 0, 0)
-
-                try:
-                    left, top = left_px, top_px
-                    right, bottom = left_px + crop_w, top_px + crop_h
-
-                    # Create target canvas filled with background color
-                    cropped_img = Image.new(img.mode if gutter_fill != "transparent" else "RGBA", (crop_w, crop_h), bg_color)
-
-                    # Overlap region
-                    src_left = max(0, left)
-                    src_top = max(0, top)
-                    src_right = min(w, right)
-                    src_bottom = min(h, bottom)
-
-                    if src_right > src_left and src_bottom > src_top:
-                        cropped_part = img.crop((src_left, src_top, src_right, src_bottom))
-                        paste_x = src_left - left
-                        paste_y = src_top - top
-                        cropped_img.paste(cropped_part, (paste_x, paste_y))
-                except Exception as crop_err:
-                    logger.error(f"[Smart Crop] Letterbox crop failed: {crop_err}, falling back to default PIL crop.")
-                    cropped_img = img.crop((max(0, left_px), max(0, top_px), min(w, left_px + crop_w), min(h, top_px + crop_h)))
-
-                # 2. OCR Translation Reframing
-                target_lang = getattr(body, "translationTargetLang", None)
-                if target_lang:
-                    try:
-                        from PIL import ImageDraw, ImageFont
-                        from media.image.ocr import has_easyocr, get_reader
-                        if has_easyocr:
-                            reader = get_reader(['en'])
-                            raw_results = reader.readtext(cropped_img)
-                            draw = ImageDraw.Draw(cropped_img)
-                            for res in raw_results:
-                                box, raw_text, conf = res
-                                if conf > 0.3:
-                                    xs = [p[0] for p in box]
-                                    ys = [p[1] for p in box]
-                                    bx_min, bx_max = int(min(xs)), int(max(xs))
-                                    by_min, by_max = int(min(ys)), int(max(ys))
-
-                                    # Translate
-                                    translated_text = raw_text
-                                    try:
-                                        skill = registry.get("translation")
-                                        target_model = body.model or "gemini-2.5-flash"
-                                        raw_text_translated = await skill.execute(
-                                            model=target_model,
-                                            api_key=None,
-                                            user_keys=user_api_key,
-                                            text=raw_text,
-                                            target_lang=target_lang
-                                        )
-                                        trans_data = json.loads(raw_text_translated)
-                                        translated_text = trans_data.get("translation") or trans_data.get("text") or raw_text
-                                    except Exception:
-                                        fallback_map = {"es": "¡Hola!", "fr": "Bonjour!", "ja": "こんにちは!", "ko": "안녕하세요!"}
-                                        translated_text = fallback_map.get(target_lang.lower(), f"[{target_lang.upper()}] " + raw_text)
-
-                                    # Scrub original text area
-                                    draw.rectangle([bx_min, by_min, bx_max, by_max], fill=bg_color if gutter_fill != "transparent" else (255, 255, 255, 255))
-
-                                    # Redraw translated text
-                                    font = ImageFont.load_default()
-                                    draw.text((bx_min + 2, by_min + 2), translated_text[:30], fill=(0,0,0) if gutter_fill == "white" else (255,255,255), font=font)
-                    except Exception as trans_err:
-                        logger.warning(f"[Translation Reframing] Failed: {trans_err}")
+                cropped_img = img.crop((left_px, top_px, left_px + crop_w, top_px + crop_h))
 
                 if t_w and t_h:
                     try:

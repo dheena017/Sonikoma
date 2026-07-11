@@ -16,6 +16,7 @@ interface EnhancementsPanelProps {
   handleModifySpeechText: (panelId: number, val: string) => void;
   handleModifySfx: (panelId: number, val: string) => void;
   handleModifyCropPadding: (panelId: number, val: number) => void;
+  setPanels?: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
 export default function EnhancementsPanel({
@@ -30,6 +31,7 @@ export default function EnhancementsPanel({
   handleModifySpeechText,
   handleModifySfx,
   handleModifyCropPadding,
+  setPanels,
 }: EnhancementsPanelProps) {
   return (
     <div className="space-y-4 bg-white/[0.01] p-4 rounded-2xl border border-white/[0.05]">
@@ -69,6 +71,7 @@ export default function EnhancementsPanel({
         activeStoryboardPanel={activeStoryboardPanel}
         handleModifySpeechText={handleModifySpeechText}
         handleModifySfx={handleModifySfx}
+        setPanels={setPanels}
       />
     </div>
   );

@@ -236,15 +236,96 @@ def _render_panel_segment_ffmpeg(
     fps: int = 24,
     layers: dict | None = None,
     sync_map: list | None = None,
+    audio_peaks: list | None = None,
+    audio_reactive_shake: bool = False,
 ) -> None:
     """
     Render a single panel as a self-contained .mp4 segment using pure ffmpeg.
     Supports multi-layer compositing and dialogue alignment.
     """
     import subprocess
+    from PIL import Image
+
+    # Determine camera shake if active
+    shake_filter = ""
+    if audio_reactive_shake and audio_peaks and len(audio_peaks) > 0:
+        peaks_fps = 10.0
+        spikes = []
+        last_spike_time = -1.0
+        for i, val in enumerate(audio_peaks):
+            t_spike = i / peaks_fps
+            if val > 0.85:
+                if t_spike - last_spike_time >= 0.8:
+                    spikes.append(t_spike)
+                    last_spike_time = t_spike
+
+        if len(spikes) > 0:
+            between_conditions = [f"between(t,{s},{s+0.4})" for s in spikes]
+            shake_active = "+".join(between_conditions)
+            shake_filter = f",crop=w='iw-32':h='ih-32':x='16+16*sin(80*t)*({shake_active})':y='16+16*cos(80*t)*({shake_active})',scale={w}:{h}"
 
     if layers:
-        # Construct multi-layer composite filter complex
+        # Load background layout size to align scaled layer offsets
+        with Image.open(layers["background"]) as bg_img:
+            bg_w, bg_h = bg_img.size
+        with Image.open(layers["character"]) as char_img:
+            char_w, char_h = char_img.size
+        with Image.open(layers["text"]) as text_img:
+            text_w, text_h = text_img.size
+
+        scale_ratio = min(w / bg_w, h / bg_h)
+        offset_x = (w - bg_w * scale_ratio) / 2
+        offset_y = (h - bg_h * scale_ratio) / 2
+
+        # 1. Background layout
+        bg_scale_filter = f"scale={w}:{h}:force_original_aspect_ratio=decrease,pad={w}:{h}:(ow-iw)/2:(oh-ih)/2:black"
+
+        # 2. Character layout
+        char_x = layers.get("char_x")
+        char_y = layers.get("char_y")
+        char_scale_x = layers.get("char_scale_x")
+        char_scale_y = layers.get("char_scale_y")
+
+        if char_x is not None and char_y is not None:
+            char_x_px = int(offset_x + char_x * scale_ratio)
+            char_y_px = int(offset_y + char_y * scale_ratio)
+            char_target_w = int(char_w * char_scale_x * scale_ratio)
+            char_target_h = int(char_h * char_scale_y * scale_ratio)
+        else:
+            char_x_px = int(offset_x)
+            char_y_px = int(offset_y)
+            char_target_w = int(bg_w * scale_ratio)
+            char_target_h = int(bg_h * scale_ratio)
+
+        # Make character bounds even for x264 alignment
+        char_target_w = max(2, char_target_w - char_target_w % 2)
+        char_target_h = max(2, char_target_h - char_target_h % 2)
+
+        char_scale_filter = f"scale={char_target_w}:{char_target_h},pad={w}:{h}:{char_x_px}:{char_y_px}:black@0"
+
+        # 3. Text layout
+        text_x = layers.get("text_x")
+        text_y = layers.get("text_y")
+        text_scale_x = layers.get("text_scale_x")
+        text_scale_y = layers.get("text_scale_y")
+
+        if text_x is not None and text_y is not None:
+            text_x_px = int(offset_x + text_x * scale_ratio)
+            text_y_px = int(offset_y + text_y * scale_ratio)
+            text_target_w = int(text_w * text_scale_x * scale_ratio)
+            text_target_h = int(text_h * text_scale_y * scale_ratio)
+        else:
+            text_x_px = int(offset_x)
+            text_y_px = int(offset_y)
+            text_target_w = int(bg_w * scale_ratio)
+            text_target_h = int(bg_h * scale_ratio)
+
+        text_target_w = max(2, text_target_w - text_target_w % 2)
+        text_target_h = max(2, text_target_h - text_target_h % 2)
+
+        text_scale_filter = f"scale={text_target_w}:{text_target_h},pad={w}:{h}:{text_x_px}:{text_y_px}:black@0"
+
+        # Timed overlay condition
         text_enable = "1"
         if sync_map and len(sync_map) > 0:
             between_conditions = []
@@ -255,13 +336,13 @@ def _render_panel_segment_ffmpeg(
             text_enable = "+".join(between_conditions)
 
         filter_complex = (
-            f"[0:v]scale={w}:{h}:force_original_aspect_ratio=decrease,pad={w}:{h}:(ow-iw)/2:(oh-ih)/2:black[bg_scaled];"
+            f"[0:v]{bg_scale_filter}[bg_scaled];"
             f"[bg_scaled]{_get_bg_zoompan(motion_type, w, h, duration, fps)}[bg_motion];"
-            f"[1:v]scale={w}:{h}:force_original_aspect_ratio=decrease,pad={w}:{h}:(ow-iw)/2:(oh-ih)/2:black@0[char_scaled];"
+            f"[1:v]{char_scale_filter}[char_scaled];"
             f"[char_scaled]{_get_char_zoompan(motion_type, w, h, duration, fps)}[char_motion];"
-            f"[2:v]scale={w}:{h}:force_original_aspect_ratio=decrease,pad={w}:{h}:(ow-iw)/2:(oh-ih)/2:black@0[text_scaled];"
+            f"[2:v]{text_scale_filter}[text_scaled];"
             f"[bg_motion][char_motion]overlay=0:0[bg_char_comp];"
-            f"[bg_char_comp][text_scaled]overlay=0:0:enable='{text_enable}',fade=t=in:st=0:d=0.5[final_comp]"
+            f"[bg_char_comp][text_scaled]overlay=0:0:enable='{text_enable}'{shake_filter},fade=t=in:st=0:d=0.5[final_comp]"
         )
 
         cmd = [
@@ -303,6 +384,10 @@ def _render_panel_segment_ffmpeg(
 
         if motion_type in ("zoom_in", "pan_left", "pan_right", "pan_up", "pan_down"):
             vf_parts.append(_build_zoompan_filter(motion_type, w, h, duration, fps))
+
+        # Append shake filter if active
+        if shake_filter:
+            vf_parts.append(shake_filter.lstrip(","))
 
         vf_parts.append("fade=t=in:st=0:d=0.5")
         vf = ",".join(vf_parts)
@@ -397,6 +482,8 @@ def render_pipeline_sync(video_id: str, panels_data: List[Dict[str, Any]], outpu
                 motion_type= p.get("motion_type"),
                 layers     = p.get("layers"),
                 sync_map   = p.get("sync_map"),
+                audio_peaks = p.get("audio_peaks"),
+                audio_reactive_shake = p.get("audio_reactive_shake", False),
             )
             segment_paths.append(seg_path)
             durations.append(duration)
@@ -506,7 +593,9 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
                 "motion_type": panel.motion_type,
                 "sfx": panel.sfx,
                 "layers": None,
-                "sync_map": None
+                "sync_map": None,
+                "audio_peaks": None,
+                "audio_reactive_shake": panel.audio_reactive_shake or False
             }
             
             if panel.layers:
@@ -522,17 +611,28 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
                     p_dict["layers"] = {
                         "background": bg_path,
                         "character": char_path,
-                        "text": text_path
+                        "text": text_path,
+                        "char_x": panel.layers.char_x,
+                        "char_y": panel.layers.char_y,
+                        "char_scale_x": panel.layers.char_scale_x,
+                        "char_scale_y": panel.layers.char_scale_y,
+                        "text_x": panel.layers.text_x,
+                        "text_y": panel.layers.text_y,
+                        "text_scale_x": panel.layers.text_scale_x,
+                        "text_scale_y": panel.layers.text_scale_y,
                     }
                     # Set background as raw image for size validations
                     raw_img_path = bg_path
                     p_dict["raw_img"] = bg_path
 
-                    if panel.syncMap and panel.syncMap.dialogue_map:
-                        p_dict["sync_map"] = [
-                            {"start_time": s.start_time, "end_time": s.end_time}
-                            for s in panel.syncMap.dialogue_map
-                        ]
+                    if panel.syncMap:
+                        if panel.syncMap.audio_peaks:
+                            p_dict["audio_peaks"] = panel.syncMap.audio_peaks
+                        if panel.syncMap.dialogue_map:
+                            p_dict["sync_map"] = [
+                                {"start_time": s.start_time, "end_time": s.end_time}
+                                for s in panel.syncMap.dialogue_map
+                            ]
                 else:
                     # Fallback to single raw image if any layer fails to download
                     await download_asset(panel.image_url, raw_img_path)

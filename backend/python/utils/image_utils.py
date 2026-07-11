@@ -31,13 +31,13 @@ class ImageMeta:
         self.channels = channels
         self.hasAlpha = has_alpha
         self.sizeBytes = size_bytes
-        
+
         # GCD calculation
         def gcd(a: int, b: int) -> int:
             while b:
                 a, b = b, a % b
             return a
-            
+
         d = gcd(width, height) or 1
         self.aspectRatio = f"{width // d}:{height // d}"
         self.orientation = 'landscape' if width > height else ('square' if width == height else 'portrait')
@@ -77,7 +77,7 @@ def spoof_referer(url: str) -> str:
             return "https://manhwatop.com/"
         if "manhuato" in host or "manhua" in host:
             return "https://manhuato.com/"
-        
+
         # Remove common CDN subdomains to construct a clean fallback base domain referer
         clean_host = host
         for prefix in ["cdn.", "img.", "images.", "pic.", "pics.", "static.", "assets.", "media.", "uploads.", "files.", "storage."]:
@@ -291,7 +291,7 @@ async def resolve_image_to_buffer(url_str: str, client: Optional[httpx.AsyncClie
             else:
                 async with httpx.AsyncClient(follow_redirects=True, timeout=30.0) as new_client:
                     response = await new_client.get(working_url, headers=headers)
-            
+
             # Retry on 5xx or server disconnect codes
             if response.status_code >= 500 and attempt < max_retries - 1:
                 delay = base_delay * (2 ** attempt)
@@ -340,16 +340,16 @@ def convert_format(image_bytes: bytes, output_format: str = 'jpeg', quality: int
     fmt = output_format.upper()
     if fmt == 'JPG':
         fmt = 'JPEG'
-        
+
     out = io.BytesIO()
     if fmt == 'JPEG' and img.mode in ('RGBA', 'LA'):
         img = img.convert('RGB')
-        
+
     img.save(out, format=fmt, quality=quality)
     mime = f"image/{output_format.lower()}"
     if output_format.lower() == 'jpg':
         mime = 'image/jpeg'
-        
+
     return {"data": out.getvalue(), "content_type": mime}
 
 
@@ -357,33 +357,33 @@ def resize_fit(image_bytes: bytes, max_w: int, max_h: int, output_format: str = 
     """Resize image to fit within max_w x max_h while preserving aspect ratio."""
     img = Image.open(io.BytesIO(image_bytes))
     img.thumbnail((max_w, max_h), Image.Resampling.LANCZOS)
-    
+
     out = io.BytesIO()
     fmt = output_format.upper()
     if fmt == 'JPG':
         fmt = 'JPEG'
     if fmt == 'JPEG' and img.mode in ('RGBA', 'LA'):
         img = img.convert('RGB')
-        
+
     img.save(out, format=fmt, quality=quality)
     mime = f"image/{output_format.lower()}"
     if output_format.lower() == 'jpg':
         mime = 'image/jpeg'
-        
+
     return {"data": out.getvalue(), "content_type": mime}
 
 
 def make_thumbnail(image_bytes: bytes, size: int = 256) -> bytes:
     """Generate a high speed thumbnail (JPEG)."""
     img = Image.open(io.BytesIO(image_bytes))
-    
+
     # Calculate aspect-ratio cropping
     w, h = img.size
     min_dim = min(w, h)
     left = (w - min_dim) // 2
     top = (h - min_dim) // 2
     img_cropped = img.crop((left, top, left + min_dim, top + min_dim))
-    
+
     img_cropped.thumbnail((size, size), Image.Resampling.LANCZOS)
     out = io.BytesIO()
     img_cropped.convert('RGB').save(out, format='JPEG', quality=70)
@@ -440,7 +440,7 @@ def crop_auto_borders(
         img_rgb = img.convert('RGB')
         bg_rgb = Image.new('RGB', img.size, bg_color)
         diff = ImageChops.difference(img_rgb, bg_rgb).convert('L')
-        
+
         diff = diff.point(lambda p: 255 if p > threshold_val else 0)
         bbox = diff.getbbox()
 
@@ -486,20 +486,20 @@ def crop_auto_borders(
             bg_color_mode = bg_color
 
         extended = ImageOps.expand(trimmed, border=(e_l, e_t, e_r, e_b), fill=bg_color_mode)
-        
+
         out = io.BytesIO()
         fmt = output_format.upper()
         if fmt == 'JPG':
             fmt = 'JPEG'
-            
+
         if fmt == 'JPEG' and extended.mode in ('RGBA', 'LA'):
             extended = extended.convert('RGB')
-            
+
         extended.save(out, format=fmt, quality=crop_quality)
         mime = f"image/{output_format.lower()}"
         if output_format.lower() == 'jpg':
             mime = 'image/jpeg'
-            
+
         logger.info(f"[Image Utils] Auto-trim successful. New size: {extended.size[0]}x{extended.size[1]}")
         return {"data": out.getvalue(), "content_type": mime}
     except Exception as e:
@@ -652,7 +652,7 @@ def stack_vertical(buffers: List[bytes], gap: int = 0, background: str = '#fffff
         raise ValueError('No buffers provided to stack_vertical')
     if len(buffers) == 1:
         return {"data": buffers[0], "content_type": "image/jpeg"}
-    
+
     # Re-use our new robust stitcher
     res_bytes = stitch_images_together(
         buffers,
@@ -707,37 +707,37 @@ def add_watermark(image_bytes: bytes, text: str = 'Sonikoma') -> bytes:
     """Adds a stylish semi-transparent watermark badge to the bottom-right of the image."""
     img = Image.open(io.BytesIO(image_bytes)).convert("RGBA")
     w, h = img.size
-    
+
     # SVG-like box rendering
     f_size = max(12, int(w * 0.025))
     font = ImageFont.load_default() # Use default system font
-    
+
     pad_x = 10
     pad_y = 10
-    
+
     # Calculate text width/height
     # draw text bounding box estimate
     char_w = int(f_size * 0.6)
     b_w = len(text) * char_w + pad_x * 2
     b_h = f_size + pad_y * 2
-    
+
     # Create overlay
     overlay = Image.new('RGBA', img.size, (0,0,0,0))
     draw = ImageDraw.Draw(overlay)
-    
+
     # Box position
     bx1 = w - b_w - 15
     by1 = h - b_h - 15
     bx2 = w - 15
     by2 = h - 15
-    
+
     # Draw dark translucent rectangle
     draw.rectangle([bx1, by1, bx2, by2], fill=(0, 0, 0, 115))
     # Draw white text
     tx = bx1 + pad_x
     ty = by1 + pad_y
     draw.text((tx, ty), text, fill=(255, 255, 255, 230), font=font)
-    
+
     final_img = Image.alpha_composite(img, overlay)
     out = io.BytesIO()
     final_img.convert("RGB").save(out, format='JPEG', quality=92)

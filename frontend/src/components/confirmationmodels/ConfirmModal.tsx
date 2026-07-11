@@ -26,8 +26,8 @@ export default function ConfirmModal({
     const container = document.getElementById("main-scroll-container");
     if (container) container.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = "";
-      if (container) container.style.overflow = "";
+      document.body.style.overflow = "unset";
+      if (container) container.style.overflow = "unset";
     };
   }, []);
 

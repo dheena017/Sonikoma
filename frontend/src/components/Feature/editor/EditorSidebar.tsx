@@ -1,4 +1,3 @@
-import { useLocation, useNavigate } from "react-router-dom";
 import React from "react";
 import { resolveWorkspaceReturnPath } from "../../../utils/workspaceNavigation";
 import {
@@ -56,8 +55,6 @@ const EditorSidebar = ({
   navigateTo,
   projectId,
 }: EditorSidebarProps) => {
-  const navigate = useNavigate();
-  const location = useLocation();
   const menuGroups: SidebarGroup[] = [
     {
       title: "Workspace Navigation",
@@ -208,12 +205,7 @@ const EditorSidebar = ({
 
                     <button
                       onClick={() => {
-                        if (item.id === "image-editor") {
-                          const newPath = location.pathname.endsWith('/image-editor')
-                            ? location.pathname
-                            : location.pathname + '/image-editor';
-                          navigate(newPath + location.search);
-                        } else if (item.type === "tool") {
+                        if (item.type === "tool") {
                           setCurrentSection(item.id);
                         } else if (item.type === "link") {
                           if (navigateTo) {

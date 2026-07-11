@@ -306,6 +306,7 @@ function ImageEditorSidebar({
               handleModifySpeechText={handleModifySpeechText}
               handleModifySfx={handleModifySfx}
               handleModifyCropPadding={handleModifyCropPadding}
+              setPanels={setPanels}
             />
           </div>
         )}

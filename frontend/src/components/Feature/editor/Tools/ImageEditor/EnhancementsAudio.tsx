@@ -5,13 +5,29 @@ interface EnhancementsAudioProps {
   activeStoryboardPanel: any;
   handleModifySpeechText: (panelId: number, val: string) => void;
   handleModifySfx: (panelId: number, val: string) => void;
+  setPanels?: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
 export function EnhancementsAudio({
   activeStoryboardPanel,
   handleModifySpeechText,
   handleModifySfx,
+  setPanels,
 }: EnhancementsAudioProps) {
+  const handleToggleShake = () => {
+    if (!activeStoryboardPanel || !setPanels) return;
+    setPanels((prev) =>
+      prev.map((p) =>
+        p.id === activeStoryboardPanel.id
+          ? {
+              ...p,
+              audio_reactive_shake: !p.audio_reactive_shake,
+            }
+          : p
+      )
+    );
+  };
+
   return (
     <div className="space-y-3 pt-2">
       <div className="flex items-center gap-2">
@@ -60,6 +76,39 @@ export function EnhancementsAudio({
           <Volume2 className="absolute left-2.5 h-3 w-3 text-neutral-500 pointer-events-none" />
         </div>
       </div>
+
+      {/* Audio Reactive Shake Toggle */}
+      {setPanels && (
+        <div className="space-y-1.5 pt-1">
+          <div className="flex items-center justify-between bg-black/25 border border-white/5 p-3 rounded-xl">
+            <div className="space-y-0.5">
+              <span className="text-[10px] font-mono font-bold text-neutral-300 block">
+                Audio-Reactive Shake
+              </span>
+              <p className="text-[8px] text-neutral-500 font-sans leading-relaxed max-w-[220px]">
+                Violently shakes the camera/subtitles for dramatic effect during loud shouts (&gt;0.85 peak threshold).
+              </p>
+            </div>
+            <button
+              onClick={handleToggleShake}
+              disabled={!activeStoryboardPanel}
+              className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 outline-none cursor-pointer ${
+                activeStoryboardPanel?.audio_reactive_shake
+                  ? "bg-purple-600"
+                  : "bg-neutral-800"
+              }`}
+            >
+              <div
+                className={`w-4 h-4 rounded-full bg-white transition-transform duration-200 ${
+                  activeStoryboardPanel?.audio_reactive_shake
+                    ? "translate-x-4"
+                    : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

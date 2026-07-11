@@ -2,6 +2,7 @@ import React from "react";
 import { Sparkles, RefreshCw, X, Eye, EyeOff, ChevronDown, ChevronUp, Layers } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import { getPanelFilterStyle } from "@/utils";
+import { generateTts } from "../../../api";
 
 let autoPlayHintShown = false;
 
@@ -35,6 +36,7 @@ interface TimelineCardProps {
   isDragging?: boolean;
   isDragOver?: boolean;
   setPanels?: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
+  fetchWithInterceptor?: any;
 }
 
 const TimelineCard = ({
@@ -67,10 +69,105 @@ const TimelineCard = ({
   isDragging,
   isDragOver,
   setPanels,
+  fetchWithInterceptor,
 }: TimelineCardProps) => {
   const [isTracksExpanded, setIsTracksExpanded] = React.useState(false);
+  const [isMagicProcessing, setIsMagicProcessing] = React.useState(false);
   const isCurrent =
     idx === currentPanelIndex && activePreviewTab === "timeline";
+
+  const handleMagicMotion = async () => {
+    if (!panel.speech_text?.trim()) {
+      addNotification?.("Dialogue text is required for Dialogue Sync alignment. Please type some text first.", "warning");
+      return;
+    }
+
+    setIsMagicProcessing(true);
+    addNotification?.("Starting Magic Motion Macro...", "info");
+
+    try {
+      // 1. Separate Layers
+      addNotification?.("Step 1/3: Running AI Layer Separation...", "info");
+      const layerRes = await fetchWithInterceptor(`/api/image/process-layers/${panel.id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: panel.image_url }),
+      });
+      const layerData = await layerRes.json();
+
+      let layersObj = null;
+      if (layerData.success && layerData.layers) {
+        layersObj = {
+          background_url: layerData.layers.background_url,
+          character_url: layerData.layers.character_url,
+          text_url: layerData.layers.text_url,
+          bg_visible: true,
+          char_visible: true,
+          text_visible: true,
+        };
+      }
+
+      // 2. Generate Audio TTS
+      addNotification?.("Step 2/3: Generating speech audio...", "info");
+      const ttsRes = await generateTts(fetchWithInterceptor, {
+        panel_id: panel.id,
+        text: panel.speech_text,
+      });
+
+      let audioUrl = null;
+      if (ttsRes && ttsRes.success && ttsRes.audio_url) {
+        audioUrl = ttsRes.audio_url;
+      }
+
+      // 3. Dialogue Sync Alignment (only if audio succeeded)
+      let syncMapObj = null;
+      if (audioUrl) {
+        addNotification?.("Step 3/3: Aligning dialogue to audio playhead...", "info");
+        const ocr_texts = panel.speech_text.split("\n").map((s) => s.trim()).filter(Boolean);
+        const alignRes = await fetchWithInterceptor(`/api/audio/align-dialogue/${panel.id}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            audio_url: audioUrl,
+            ocr_texts: ocr_texts.length > 0 ? ocr_texts : [panel.speech_text],
+          }),
+        });
+        const alignData = await alignRes.json();
+
+        if (alignData.success && alignData.dialogue_map) {
+          syncMapObj = {
+            dialogue_map: alignData.dialogue_map,
+            audio_peaks: alignData.audio_peaks || [],
+            peaks_fps: alignData.peaks_fps,
+          };
+        }
+      }
+
+      // 4. Update the panel state atomically with all results + default Zoom preset
+      if (setPanels) {
+        setPanels((prev: any[]) =>
+          prev.map((p) =>
+            p.id === panel.id
+              ? {
+                  ...p,
+                  motion_type: "zoom_in",
+                  audio_url: audioUrl || p.audio_url,
+                  layers: layersObj || p.layers,
+                  syncMap: syncMapObj || p.syncMap,
+                }
+              : p
+          )
+        );
+      }
+
+      addNotification?.("✓ Magic Motion successfully fully configured for this panel!", "success");
+    } catch (err: any) {
+      console.error("[Magic Motion] macro failed:", err);
+      addNotification?.(`Magic Motion macro failed: ${err.message || String(err)}`, "error");
+    } finally {
+      setIsMagicProcessing(false);
+    }
+  };
 
   const handleDragStartLocal = (e: React.DragEvent) => {
     const target = e.target as HTMLElement;
@@ -395,6 +492,24 @@ const TimelineCard = ({
           <span>Panel Assistant</span>
         </button>
       </div>
+
+      {setPanels && fetchWithInterceptor && (
+        <div className="pt-1.5">
+          <button
+            type="button"
+            disabled={isMagicProcessing}
+            onClick={handleMagicMotion}
+            className="w-full py-1.5 rounded-lg border border-purple-900/60 bg-purple-950/20 hover:bg-purple-900/40 text-purple-300 hover:text-purple-200 text-[10px] font-mono font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {isMagicProcessing ? (
+              <RefreshCw className="h-3 w-3 animate-spin text-purple-400" />
+            ) : (
+              <Sparkles className="h-3 w-3 text-purple-400 animate-pulse" />
+            )}
+            <span>{isMagicProcessing ? "Applying Magic..." : "Magic Motion"}</span>
+          </button>
+        </div>
+      )}
 
       {/* Accordion Layer Tracks (Motion Comic Mode) */}
       {panel.layers && setPanels && (
