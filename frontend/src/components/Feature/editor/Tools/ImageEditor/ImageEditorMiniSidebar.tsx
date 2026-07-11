@@ -15,6 +15,8 @@ import {
 import TooltipPortal from "@/components/TooltipPortal";
 
 export const ImageEditorMiniSidebar: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const activeTool = useImageEditorStore((state) => state.activeTool);
   const setActiveTool = useImageEditorStore((state) => state.setActiveTool);
   const slicesCount = useImageEditorStore((state) => state.slicesCount);
