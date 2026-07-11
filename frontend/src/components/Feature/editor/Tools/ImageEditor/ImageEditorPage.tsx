@@ -3,8 +3,6 @@ import { useCropEditorStore } from "@/hooks/useImageEditorState";
 import { useImageEditor } from "../../../../../hooks/useImageEditor";
 import { useAppLogic } from "../../../../../hooks/useAppLogic";
 import { ImageEditorHeader } from "./ImageEditorHeader";
-import { ImageEditorLayout } from "./ImageEditorLayout";
-import { ImageEditorMiniSidebar } from "./ImageEditorMiniSidebar";
 import ImageEditorCanvasContainer from "./ImageEditorCanvasContainer";
 import ImageEditorSidebar from "./ImageEditorSidebar";
 
@@ -96,13 +94,48 @@ const ImageEditorPage = React.memo(({ appLogic }: ImageEditorPageProps) => {
     );
   }
 
-  // Render standard inline layout using ImageEditorLayout
+  // Render standard inline layout (No Modal/Fixed overlays!)
   return (
-    <ImageEditorLayout
-      onClose={() => {}}
-      onApply={() => {}}
-      rightSidebar={
-<ImageEditorSidebar
+    <div className="w-full h-full bg-[#0B0F19] text-white flex flex-col overflow-hidden relative">
+      <ImageEditorHeader
+        editingImageIdx={editingImageIdx ?? 0}
+        scrapedImages={appLogic.scrapedImages}
+        handlePrevImage={editorProps.handlePrevImage}
+        handleNextImage={editorProps.handleNextImage}
+        handleUndo={editorProps.handleUndo}
+        historyLength={editorProps.history.length}
+        handleRedo={editorProps.handleRedo}
+        redoHistoryLength={editorProps.redoHistory.length}
+        handleDeleteCurrentImage={editorProps.handleDeleteCurrentImage}
+        setEditingImageIdx={setEditingImageIdx}
+        activeTab={editorProps.activeTab}
+        isPipMode={false}
+        setIsPipMode={() => {}}
+        slices={editorProps.slices}
+        isToolsPanelOpen={isToolsPanelOpen}
+        setIsToolsPanelOpen={setIsToolsPanelOpen}
+      />
+
+      <div className="flex-1 flex flex-row overflow-hidden w-full relative">
+        {/* Center Canvas */}
+        <main className="flex-1 h-full relative overflow-hidden bg-black/50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 opacity-20 pointer-events-none"
+            style={{ backgroundImage: "radial-gradient(#374151 1px, transparent 0)", backgroundSize: "20px 20px" }}
+          />
+          <div className="relative w-full h-full z-10 flex items-center justify-center p-4">
+            {canvasSubtree}
+          </div>
+        </main>
+
+        {/* Right Tools Sidebar */}
+        <aside
+          className={`h-full bg-[#121826] border-l border-gray-800 flex-shrink-0 z-20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            isToolsPanelOpen ? "w-[360px] lg:w-[420px] opacity-100" : "w-0 opacity-0 border-none"
+          }`}
+        >
+          <div className="w-[360px] lg:w-[420px] h-full overflow-y-auto custom-scrollbar p-5">
+              <ImageEditorSidebar
               setActiveTab={editorProps.setActiveTab}
               slices={editorProps.slices}
               setSlices={editorProps.setSlices}
@@ -216,35 +249,10 @@ const ImageEditorPage = React.memo(({ appLogic }: ImageEditorPageProps) => {
               activeTab={editorProps.activeTab as any}
 
             />
-      }
-    >
-      <div className="absolute inset-0 flex flex-col z-10">
-        <ImageEditorHeader
-          editingImageIdx={editingImageIdx ?? 0}
-          scrapedImages={appLogic.scrapedImages}
-          handlePrevImage={editorProps.handlePrevImage}
-          handleNextImage={editorProps.handleNextImage}
-          handleUndo={editorProps.handleUndo}
-          historyLength={editorProps.history.length}
-          handleRedo={editorProps.handleRedo}
-          redoHistoryLength={editorProps.redoHistory.length}
-          handleDeleteCurrentImage={editorProps.handleDeleteCurrentImage}
-          setEditingImageIdx={setEditingImageIdx}
-          activeTab={editorProps.activeTab}
-          isPipMode={false}
-          setIsPipMode={() => {}}
-          slices={editorProps.slices}
-          isToolsPanelOpen={isToolsPanelOpen}
-          setIsToolsPanelOpen={setIsToolsPanelOpen}
-        />
-        <div className="flex-1 w-full h-full relative flex items-center justify-center p-4">
-          {canvasSubtree}
-        </div>
+          </div>
+        </aside>
       </div>
-
-
-
-    </ImageEditorLayout>
+    </div>
   );
 });
 

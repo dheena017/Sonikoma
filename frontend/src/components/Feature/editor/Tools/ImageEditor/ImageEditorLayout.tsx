@@ -4,7 +4,6 @@ import { ImageEditorMiniSidebar } from "./ImageEditorMiniSidebar";
 import { ImageEditorRightSidebar } from "./ImageEditorRightSidebar";
 
 interface ImageEditorLayoutProps {
-  rightSidebar?: React.ReactNode;
   children: React.ReactNode;
   onClose: () => void;
   onApply: () => void;
@@ -13,11 +12,10 @@ interface ImageEditorLayoutProps {
 export const ImageEditorLayout: React.FC<ImageEditorLayoutProps> = ({
   children,
   onClose,
-  onApply,
-  rightSidebar
+  onApply
 }) => {
   return (
-    <div className="fixed inset-0 w-screen h-screen bg-[#0B0F19] text-white flex flex-col overflow-hidden z-[100]">
+    <div className="fixed inset-0 w-full h-full bg-[#0B0F19] text-white flex flex-col overflow-hidden z-[100]">
       <div className="flex-1 flex flex-row overflow-hidden w-full">
 
         {/* Left Column: Mini Sidebar */}
@@ -37,7 +35,7 @@ export const ImageEditorLayout: React.FC<ImageEditorLayoutProps> = ({
 
         {/* Right Column: Properties Panel */}
         <aside className="w-80 lg:w-96 h-full bg-[#121826] border-l border-gray-800 overflow-y-auto flex-shrink-0 z-10 custom-scrollbar">
-          {rightSidebar || <ImageEditorRightSidebar />}
+          <ImageEditorRightSidebar />
         </aside>
 
       </div>

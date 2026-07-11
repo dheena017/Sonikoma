@@ -283,7 +283,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
   // THE EARLY RETURN
   if (currentSection === "image-editor") {
     return (
-      <div className="w-screen h-screen overflow-hidden bg-[#0B0F19]">
+      <div className="w-full h-full overflow-hidden bg-[#0B0F19]">
         <ImageEditorPage appLogic={appLogic} />
       </div>
     );
