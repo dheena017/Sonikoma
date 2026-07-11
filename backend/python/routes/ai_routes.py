@@ -1213,77 +1213,7 @@ async def ai_smart_crop(body: SmartCropRequest, user_api_key: str = Depends(get_
         ai_error_msg = ""
 
         # Strategy 1: Try AI crop box model first if not local-cv
-        is_hybrid = (body.strategy == "hybrid")
-        if is_hybrid:
-            logger.info("[AI Smart Crop] Executing Hybrid Strategy...")
-            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_in:
-                tmp_in.write(image_buffer)
-                temp_in_path = tmp_in.name
-            try:
-                min_area_pct = body.minAreaPct if body.minAreaPct is not None else 0.15
-                if min_area_pct > 1.0:
-                    min_area_pct = min_area_pct / 100.0
-                cv_panels = run_cv_detection(
-                    image_path=temp_in_path,
-                    sensitivity=body.sensitivity,
-                    bg_mode=body.backgroundColorMode,
-                    min_width_pct=min_area_pct,
-                    min_height_px=body.minHeightPx,
-                    merge_threshold=body.mergeThreshold,
-                    aspect_ratio_str=body.aspectRatio,
-                    canny_low=body.cannyLow,
-                    canny_high=body.cannyHigh,
-                    close_kernel_size=body.closeKernelSize,
-                    auto_split=body.autoSplit if body.autoSplit is not None else True
-                )
-                logger.info(f"[AI Smart Crop] Hybrid mode: got {len(cv_panels)} CV rough panels.")
-
-                if cv_panels:
-                    try:
-                        skill = registry.get("smart_crop")
-                        target_model = body.model or "gemini-2.5-flash"
-                        guidance = (
-                            f"Refine the following {len(cv_panels)} rough panel bounding boxes to be pixel-perfect. "
-                            f"Rough CV coordinates: {json.dumps(cv_panels)}. "
-                            f"Focus Mode: Tight illustration framing. Eliminate speech bubbles or text boxes if they exceed the borders."
-                        )
-                        raw_text = await skill.execute(
-                            model=target_model,
-                            image_bytes=image_buffer,
-                            user_keys=user_api_key,
-                            guidance_instructions=guidance
-                        )
-                        data = json.loads(raw_text)
-                        refined_raw = data.get("panels", [])
-                        if refined_raw:
-                            margins_panels = []
-                            for box in refined_raw:
-                                y1 = max(0.0, min(100.0, float(box.get("cropTop", 0))))
-                                y2 = max(0.0, min(100.0, float(box.get("cropBottom", 0))))
-                                x1 = max(0.0, min(100.0, float(box.get("cropLeft", 0))))
-                                x2 = max(0.0, min(100.0, float(box.get("cropRight", 0))))
-                                if y1 > y2: y1, y2 = y2, y1
-                                if x1 > x2: x1, x2 = x2, x1
-                                margins_panels.append({
-                                    "cropTop": y1,
-                                    "cropBottom": 100.0 - y2,
-                                    "cropLeft": x1,
-                                    "cropRight": 100.0 - x2
-                                })
-                            coord_panels = margins_panels
-                            logger.info(f"[AI Smart Crop] Hybrid mode: successfully refined to {len(coord_panels)} panels.")
-                        else:
-                            coord_panels = cv_panels
-                    except Exception as refine_err:
-                        logger.warning(f"[AI Smart Crop] Hybrid refinement failed: {refine_err}. Falling back to OpenCV raw cuts.")
-                        coord_panels = cv_panels
-                else:
-                    coord_panels = []
-            finally:
-                if os.path.exists(temp_in_path):
-                    os.remove(temp_in_path)
-
-        elif body.strategy != "local-cv" and body.model != "local-cv":
+        if body.strategy != "local-cv" and body.model != "local-cv":
             target_model = body.model or "gemini-2.5-flash"
             from skills.base import get_provider_and_model
             provider, clean_model = get_provider_and_model(target_model)
@@ -1352,7 +1282,7 @@ async def ai_smart_crop(body: SmartCropRequest, user_api_key: str = Depends(get_
                 ai_error_msg = "Gemini client not initialized"
 
         # Strategy 2: Local CV panel detection (Pillow/OpenCV)
-        if (body.strategy == "local-cv" or body.model == "local-cv" or ai_failed) and not is_hybrid:
+        if body.strategy == "local-cv" or body.model == "local-cv" or ai_failed:
             with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_in:
                 tmp_in.write(image_buffer)
                 temp_in_path = tmp_in.name
@@ -1422,41 +1352,7 @@ async def ai_smart_crop(body: SmartCropRequest, user_api_key: str = Depends(get_
                     t_w, t_h = 1080, 1440
 
             if crop_w > 10 and crop_h > 10:
-                # Smart Letterbox / Pillarbox cropping:
-                # If the crop coordinates go out of bounds (such as negative indices or exceeding image width/height),
-                # pad the missing regions with the sampled background color so the artwork is never stretched or clipped.
-                try:
-                    corner_px = img.getpixel((0, 0))
-                    if isinstance(corner_px, tuple):
-                        bg_color = corner_px[:3]
-                        if img.mode == 'RGBA':
-                            bg_color = bg_color + (255,)
-                    else:
-                        bg_color = corner_px
-                except Exception:
-                    bg_color = (255, 255, 255) if img.mode in ("RGB", "RGBA") else 255
-
-                try:
-                    left, top = left_px, top_px
-                    right, bottom = left_px + crop_w, top_px + crop_h
-
-                    # Create target canvas filled with background color
-                    cropped_img = Image.new(img.mode, (crop_w, crop_h), bg_color)
-
-                    # Overlap region
-                    src_left = max(0, left)
-                    src_top = max(0, top)
-                    src_right = min(w, right)
-                    src_bottom = min(h, bottom)
-
-                    if src_right > src_left and src_bottom > src_top:
-                        cropped_part = img.crop((src_left, src_top, src_right, src_bottom))
-                        paste_x = src_left - left
-                        paste_y = src_top - top
-                        cropped_img.paste(cropped_part, (paste_x, paste_y))
-                except Exception as crop_err:
-                    logger.error(f"[Smart Crop] Letterbox crop failed: {crop_err}, falling back to default PIL crop.")
-                    cropped_img = img.crop((max(0, left_px), max(0, top_px), min(w, left_px + crop_w), min(h, top_px + crop_h)))
+                cropped_img = img.crop((left_px, top_px, left_px + crop_w, top_px + crop_h))
 
                 if t_w and t_h:
                     try:

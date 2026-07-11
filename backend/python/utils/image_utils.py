@@ -299,7 +299,7 @@ def crop_auto_borders(
         img = Image.open(io.BytesIO(image_bytes))
         w, h = img.size
 
-        if w < 10 or h < 10:
+        if w < 80 or h < 80:
             return {"data": image_bytes, "content_type": f"image/{img.format.lower() if img.format else 'jpeg'}"}
 
         # Background color

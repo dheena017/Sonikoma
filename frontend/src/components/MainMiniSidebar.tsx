@@ -56,6 +56,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
     currentPath === "/editor/" ||
     currentPath.startsWith("/editor/") ||
     currentPath.startsWith("/workspace/editor");
+  const isImageEditorRoute = currentPath.endsWith("/image-editor");
 
   const handleNavigateToWorkspace = () => {
     const activeProjId = projectId || localStorage.getItem("active_project_id");
@@ -272,7 +273,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
     // Premium Glassmorphism Container
     <aside
       className={`fixed ${
-        isProEditorPage ? "top-12" : "top-[59px]"
+        isImageEditorRoute ? "top-0 h-screen" : (isProEditorPage ? "top-12" : "top-[59px]")
       } bottom-0 left-0 w-20 shrink-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 shadow-[4px_0_24px_rgba(0,0,0,0.3)] hidden lg:flex flex-col items-center py-4 z-40`}
     >
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 mini-sidebar-scrollbar pt-2">

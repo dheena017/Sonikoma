@@ -1,4 +1,6 @@
 import React from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import MainMiniSidebar from "@/components/MainMiniSidebar";
 import { ImageEditorHeader } from "./ImageEditorHeader";
 import { ImageEditorMiniSidebar } from "./ImageEditorMiniSidebar";
 import { ImageEditorRightSidebar } from "./ImageEditorRightSidebar";
@@ -18,27 +20,39 @@ export const ImageEditorLayout: React.FC<ImageEditorLayoutProps> = ({
   header,
   sidebar
 }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
   return (
-    <div className="fixed inset-0 w-full h-full bg-[#0B0F19] text-white flex flex-col overflow-hidden z-[100]">
-      {header}
-      <div className="flex-1 flex flex-row overflow-hidden w-full">
+    <div className="flex h-screen w-screen overflow-hidden bg-[#0B0F19] text-white !p-0 !m-0 z-[100] fixed inset-0">
+      {/* Global Far-Left Sidebar */}
+      <MainMiniSidebar
+        currentPath={location.pathname}
+        navigateTo={(path) => navigate(path)}
+        notificationsCount={0}
+      />
 
-        {/* Left Column: Mini Sidebar */}
-        <ImageEditorMiniSidebar />
+      <div className="flex-1 flex flex-col h-full overflow-hidden relative">
+        {header}
+        <div className="flex-1 flex flex-row overflow-hidden w-full">
 
-        {/* Center Column: The Interactive Canvas */}
-        <main className="flex-1 h-full relative overflow-hidden bg-black/50 flex items-center justify-center">
-          <div className="absolute inset-0 opacity-20 pointer-events-none"
-               style={{ backgroundImage: "radial-gradient(#374151 1px, transparent 0)", backgroundSize: "20px 20px" }} />
+          {/* Left Column: Image Editor Mini Sidebar */}
+          <ImageEditorMiniSidebar />
 
-          <div className="relative w-full h-full z-10 flex items-center justify-center p-4">
-            {children}
-          </div>
-        </main>
+          {/* Center Column: The Interactive Canvas */}
+          <main className="flex-1 h-full relative overflow-hidden bg-black/50 flex items-center justify-center">
+            <div className="absolute inset-0 opacity-20 pointer-events-none"
+                 style={{ backgroundImage: "radial-gradient(#374151 1px, transparent 0)", backgroundSize: "20px 20px" }} />
 
-        {/* Right Column: Properties Panel */}
-        {sidebar}
+            <div className="relative w-full h-full z-10 flex items-center justify-center p-4">
+              {children}
+            </div>
+          </main>
 
+          {/* Right Column: Properties Panel */}
+          {sidebar}
+
+        </div>
       </div>
     </div>
   );
