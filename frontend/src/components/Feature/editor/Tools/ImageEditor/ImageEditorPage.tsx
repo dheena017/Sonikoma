@@ -99,7 +99,9 @@ const ImageEditorPage = React.memo(({ appLogic }: ImageEditorPageProps) => {
   // Render standard inline layout (No Modal/Fixed overlays!)
   return (
     <div className="w-full h-full bg-[#0B0F19] text-white flex flex-col overflow-hidden relative">
-      <ImageEditorHeader
+
+
+      <ImageEditorLayout
         editingImageIdx={editingImageIdx ?? 0}
         scrapedImages={appLogic.scrapedImages}
         handlePrevImage={editorProps.handlePrevImage}
@@ -116,11 +118,15 @@ const ImageEditorPage = React.memo(({ appLogic }: ImageEditorPageProps) => {
         slices={editorProps.slices}
         isToolsPanelOpen={isToolsPanelOpen}
         setIsToolsPanelOpen={setIsToolsPanelOpen}
-      />
-
-      <ImageEditorLayout onClose={() => setEditingImageIdx(null)} onApply={() => {window.dispatchEvent(new Event("FABRIC_REQUEST_SAVE")); setEditingImageIdx(null);}}>
+        onClose={() => setEditingImageIdx(null)}
+        onApply={() => {
+          window.dispatchEvent(new Event("FABRIC_REQUEST_SAVE"));
+          setEditingImageIdx(null);
+        }}
+      >
         {canvasSubtree}
       </ImageEditorLayout>
+
 
       {/* Legacy Right Sidebar code removed, handled by ImageEditorLayout */}
       <div className="hidden">
