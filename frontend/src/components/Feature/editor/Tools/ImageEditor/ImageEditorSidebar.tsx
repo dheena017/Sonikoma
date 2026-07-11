@@ -230,11 +230,11 @@ function ImageEditorSidebar({
   handleExecuteSave,
 }: ImageEditorSidebarProps) {
   return (
-    <div className="w-full h-full flex flex-col space-y-3 lg:h-full lg:min-h-0 overflow-hidden pr-0 sm:pr-1.5 scrollbar-thin overscroll-contain shrink-0 max-h-[45vh] lg:max-h-none pb-4 lg:pb-0">
+    <div className="w-full h-full flex flex-col space-y-0 lg:h-full lg:min-h-0 overflow-hidden pr-0 sm:pr-0 scrollbar-thin overscroll-contain shrink-0 max-h-[45vh] lg:max-h-none pb-4 lg:pb-0">
       {/* Tab Contents */}
-      <div className="flex-1 min-h-0 overflow-y-auto space-y-4 scrollbar-thin pr-0 sm:pr-1">
+      <div className="flex-1 min-h-0 overflow-y-auto space-y-0 scrollbar-thin pr-0 sm:pr-0">
         {activeTab === "merge" && (
-          <div className="rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
+          <div className="w-full bg-transparent border-b border-neutral-800 p-5 rounded-none space-y-4">
             <MergePanel
               editingImageIdx={editingImageIdx}
               scrapedImages={scrapedImages}
@@ -245,7 +245,7 @@ function ImageEditorSidebar({
         )}
 
         {activeTab === "separate" && (
-          <div className="rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
+          <div className="w-full bg-transparent border-b border-neutral-800 p-5 rounded-none space-y-4">
             <LayerSeparationPanel
               activeStoryboardPanel={activeStoryboardPanel}
               setPanels={setPanels}
@@ -256,7 +256,7 @@ function ImageEditorSidebar({
         )}
 
         {activeTab === "draw" && (
-          <div className="rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
+          <div className="w-full bg-transparent border-b border-neutral-800 p-5 rounded-none space-y-4">
             <FreehandPanel
               brushSize={brushSize}
               setBrushSize={setBrushSize}
@@ -271,7 +271,7 @@ function ImageEditorSidebar({
         )}
 
         {activeTab === "edit" && (
-          <div className="rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
+          <div className="w-full bg-transparent border-b border-neutral-800 p-5 rounded-none space-y-4">
             <ImageEditorPanel
               editCropTop={editCropTop}
               editCropBottom={editCropBottom}
@@ -293,7 +293,7 @@ function ImageEditorSidebar({
         )}
 
         {activeTab === "adjust" && (
-          <div className="space-y-4 rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
+          <div className="w-full bg-transparent border-b border-neutral-800 p-5 rounded-none space-y-4">
             <EnhancementsPanel
               activeStoryboardPanel={activeStoryboardPanel}
               handleModifyBrightness={handleModifyBrightness}
@@ -312,7 +312,7 @@ function ImageEditorSidebar({
         )}
 
         {activeTab === "slice" && (
-          <div className="space-y-4 rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
+          <div className="w-full bg-transparent border-b border-neutral-800 p-5 rounded-none space-y-4">
             <HorizontalSplitter
               splitPosition={splitPosition}
               setSplitPosition={setSplitPosition}
@@ -339,7 +339,7 @@ function ImageEditorSidebar({
         )}
 
         {activeTab === "crop" && (
-          <div className="space-y-4 rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
+          <div className="w-full bg-transparent border-b border-neutral-800 p-5 rounded-none space-y-4">
             <CutsRegistry
               slices={slices}
               setSlices={setSlices}

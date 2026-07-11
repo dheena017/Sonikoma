@@ -8,7 +8,8 @@ import {
   Crop,
   Layers,
   Brush,
-  Link2
+  Link2,
+  ArrowLeft
 } from "lucide-react";
 import TooltipPortal from "@/components/TooltipPortal";
 
@@ -16,6 +17,16 @@ export const ImageEditorMiniSidebar: React.FC = () => {
   const activeTool = useImageEditorStore((state) => state.activeTool);
   const setActiveTool = useImageEditorStore((state) => state.setActiveTool);
   const slicesCount = useImageEditorStore((state) => state.slicesCount);
+
+  const [returnHover, setReturnHover] = useState(false);
+  const [returnRect, setReturnRect] = useState<DOMRect | null>(null);
+
+  const handleReturnToWorkspace = () => {
+    // Route fallback: most apps store workspace/projects under /projects.
+    // If your app uses a different path, update this string.
+    window.location.assign("/projects");
+  };
+
 
   // Grouping the tools to utilize the dot separator design from the Admin sidebar
   const groups: { name: string; items: { id: ImageTool; label: string; icon: React.ElementType }[] }[] = [
@@ -104,7 +115,7 @@ export const ImageEditorMiniSidebar: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col items-center py-4 bg-neutral-950">
+    <aside className="w-20 shrink-0 bg-neutral-950 border-r border-neutral-800 hidden lg:flex flex-col items-center py-4 z-40 h-full rounded-none !m-0 relative">
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
           <div key={group.name} className="w-full flex flex-col items-center pb-2">
@@ -120,6 +131,27 @@ export const ImageEditorMiniSidebar: React.FC = () => {
           </div>
         ))}
       </div>
-    </div>
+
+      <div className="mt-auto pt-4 flex justify-center w-full pb-2 border-t border-neutral-800">
+        <div className="relative group w-full flex justify-center">
+          <button
+            onClick={handleReturnToWorkspace}
+            onMouseEnter={(e) => {
+              setReturnRect(e.currentTarget.getBoundingClientRect());
+              setReturnHover(true);
+            }}
+            onMouseLeave={() => setReturnHover(false)}
+            className="p-3 rounded-2xl bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 text-white shadow-[0_4px_14px_rgba(168,85,247,0.4)] hover:shadow-[0_6px_20px_rgba(168,85,247,0.6)] active:scale-90 transition-all border border-purple-400/30 cursor-pointer flex items-center justify-center outline-none focus:outline-none"
+          >
+            <ArrowLeft className="w-[18px] h-[18px] shrink-0" strokeWidth={2.5} />
+          </button>
+          <TooltipPortal
+            text="Return to Workspace"
+            visible={returnHover}
+            anchorRect={returnRect}
+          />
+        </div>
+      </div>
+    </aside>
   );
 };

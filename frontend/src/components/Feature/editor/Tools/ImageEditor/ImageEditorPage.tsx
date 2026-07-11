@@ -137,12 +137,12 @@ const ImageEditorPage = React.memo(({ appLogic }: ImageEditorPageProps) => {
 
         {/* Right Tools Sidebar */}
         <aside
-          className={`h-full bg-[#121826] border-l border-gray-800 flex-shrink-0 z-20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          className={`h-full bg-[#121826] border-l border-neutral-800 flex-shrink-0 z-20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] rounded-none !m-0 ${
             isToolsPanelOpen ? "w-[360px] lg:w-[420px] opacity-100" : "w-0 opacity-0 border-none"
           }`}
         >
-          <div className="w-[360px] lg:w-[420px] h-full overflow-y-auto custom-scrollbar p-5">
-              <ImageEditorSidebar
+          <div className="w-[360px] lg:w-[420px] h-full overflow-y-auto custom-scrollbar p-0">
+            <ImageEditorSidebar
               setActiveTab={editorProps.setActiveTab}
               slices={editorProps.slices}
               setSlices={editorProps.setSlices}
