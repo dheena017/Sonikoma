@@ -24,12 +24,18 @@ const ImageEditorPage = React.memo(({ appLogic }: ImageEditorPageProps) => {
   // Load the editor logic
   const editorProps = useImageEditor({ appLogic });
 
+  const activeStoryboardPanel = useMemo(() => {
+    if (editingImageIdx === null) return null;
+    return appLogic.panels?.find((p: any) => p.image_url === appLogic.scrapedImages[editingImageIdx]) || null;
+  }, [appLogic.panels, appLogic.scrapedImages, editingImageIdx]);
+
   // Memoize the Heavy Canvas to prevent lag
   const canvasSubtree = useMemo(() => {
     if (editingImageIdx === null) return null;
     return (
       <ImageEditorCanvasContainer
         key={editorProps.imageUrl || undefined}
+        activeStoryboardPanel={activeStoryboardPanel}
         handleAiCrop={editorProps.handleAiCrop}
         isAiDetecting={editorProps.isAiDetecting}
         editingImageIdx={editingImageIdx}

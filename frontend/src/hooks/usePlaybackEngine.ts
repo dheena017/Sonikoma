@@ -203,6 +203,10 @@ export function usePlaybackEngine({
   }, [storyboardPlaying, musicTheme, volume, isMuted]);
 
   useEffect(() => {
+    window.dispatchEvent(new CustomEvent("storyboard-time-update", { detail: playbackTime }));
+  }, [playbackTime]);
+
+  useEffect(() => {
     if (storyboardPlaying && panels.length > 0 && activePreviewTab !== "video") {
       const activePanel = panels[currentPanelIndex];
       const stepMs = 100;
