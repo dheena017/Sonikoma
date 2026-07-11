@@ -8,6 +8,7 @@ import {
   RefreshCw,
   Ruler,
   Trash2,
+  GripHorizontal,
 } from "lucide-react";
 
 interface Props {
@@ -42,6 +43,7 @@ export function AutoCropVisualGuide({
   const [detectedPanels, setDetectedPanels] = useState<any[]>([]);
   const [isDetecting, setIsDetecting] = useState(false);
   const [manualSplits, setManualSplits] = useState<number[]>([]);
+  const [activeDragIdx, setActiveDragIdx] = useState<number | null>(null);
   const previewContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -93,10 +95,27 @@ export function AutoCropVisualGuide({
   };
 
   const handlePreviewClick = (e: React.MouseEvent) => {
+    if (activeDragIdx !== null) return;
     if (!previewContainerRef.current) return;
     const rect = previewContainerRef.current.getBoundingClientRect();
     const yPct = ((e.clientY - rect.top) / rect.height) * 100;
     setManualSplits((prev) => [...prev, yPct]);
+  };
+
+  // Drag handlers
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (activeDragIdx === null || !previewContainerRef.current) return;
+    const rect = previewContainerRef.current.getBoundingClientRect();
+    const yPct = Math.max(0, min(100, ((e.clientY - rect.top) / rect.height) * 100));
+    setManualSplits((prev) => {
+      const copy = [...prev];
+      copy[activeDragIdx] = yPct;
+      return copy;
+    });
+  };
+
+  const handleMouseUp = () => {
+    setActiveDragIdx(null);
   };
 
   const clearSplits = (e: React.MouseEvent) => {
@@ -139,8 +158,12 @@ export function AutoCropVisualGuide({
   };
   const rec = getRecommendation();
 
+  function min(a: number, b: number) {
+    return a < b ? a : b;
+  }
+
   return (
-    <div className="lg:col-span-5 space-y-4">
+    <div className="lg:col-span-5 space-y-4" onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
       <div className="bg-neutral-950/60 border border-neutral-800 rounded-2xl p-4.5 space-y-2 font-mono relative overflow-hidden">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-indigo-400 text-[10px] font-bold">
@@ -195,6 +218,7 @@ export function AutoCropVisualGuide({
         <div
           ref={previewContainerRef}
           onClick={handlePreviewClick}
+          onMouseMove={handleMouseMove}
           className="relative border border-neutral-700/60 rounded-lg overflow-hidden transition-all duration-300 w-full max-w-[150px] aspect-[3/4] bg-cover bg-center cursor-crosshair group"
           style={{
             backgroundColor:
@@ -210,11 +234,15 @@ export function AutoCropVisualGuide({
           {manualSplits.map((y, i) => (
             <div
               key={i}
-              className="absolute w-full h-[2px] bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.6)] z-30"
+              className="absolute w-full h-[2px] bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.6)] z-30 group/split cursor-row-resize"
               style={{ top: `${y}%` }}
+              onMouseDown={(e) => {
+                e.stopPropagation();
+                setActiveDragIdx(i);
+              }}
             >
-              <div className="absolute right-0 -top-3 flex items-center gap-1 bg-indigo-600 text-white text-[5px] px-1 rounded-sm font-bold shadow-lg">
-                <Ruler className="h-2 w-2" /> SPLIT_{i + 1}
+              <div className="absolute right-0 -top-3 flex items-center gap-1 bg-indigo-600 text-white text-[5px] px-1 rounded-sm font-bold shadow-lg select-none">
+                <GripHorizontal className="h-2 w-2" /> SPLIT_{i + 1}
               </div>
             </div>
           ))}
@@ -277,9 +305,9 @@ export function AutoCropVisualGuide({
           />
         </div>
         <div className="flex flex-col items-center mt-2 space-y-1">
-          <span className="text-[8px] text-neutral-600 font-mono text-center">
+          <span className="text-[8px] text-neutral-600 font-mono text-center select-none">
             {manualSplits.length > 0
-              ? `Active rulers: ${manualSplits.length}. Tap to add more.`
+              ? `Active rulers: ${manualSplits.length}. Drag handles to adjust, tap to add.`
               : "Tap on preview to place manual split rulers."}
           </span>
           {autoSplit && (
