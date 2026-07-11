@@ -32,6 +32,7 @@ export function VideoMonitorActive({
 }: VideoMonitorActiveProps) {
   const [videoCurrentTime, setVideoCurrentTime] = React.useState(0);
   const activeStoryboardPanel = panels[currentPanelIndex] || null;
+  const textLayerRef = React.useRef<HTMLImageElement>(null);
 
   // Helper to split and chunk long subtitle dialogues
   const getSubtitleChunk = (
@@ -86,6 +87,45 @@ export function VideoMonitorActive({
       relativeVideoTime = (activeVideoPanel.duration || 4.5) - 0.01;
     }
   }
+
+  const activePanelForCurrentTab = activePreviewTab === "video" ? activeVideoPanel : activeStoryboardPanel;
+  const currentTimeForCurrentTab = activePreviewTab === "video" ? relativeVideoTime : playbackTime;
+
+  React.useEffect(() => {
+    const handleTimeUpdate = (e: Event) => {
+      const time = (e as CustomEvent).detail;
+      if (!textLayerRef.current || !activePanelForCurrentTab?.layers) return;
+
+      if (activePanelForCurrentTab.layers.text_visible === false) {
+        textLayerRef.current.style.opacity = "0";
+        return;
+      }
+
+      const dialogueMap = activePanelForCurrentTab.syncMap?.dialogue_map;
+      if (!dialogueMap || dialogueMap.length === 0) {
+        textLayerRef.current.style.opacity = "1";
+        return;
+      }
+
+      const isAnyBubbleActive = dialogueMap.some(
+        (seg) => time >= seg.start_time && time <= seg.end_time
+      );
+
+      textLayerRef.current.style.opacity = isAnyBubbleActive ? "1" : "0";
+    };
+
+    window.addEventListener("storyboard-time-update", handleTimeUpdate);
+    return () => window.removeEventListener("storyboard-time-update", handleTimeUpdate);
+  }, [activePreviewTab, activePanelForCurrentTab]);
+
+  const getInitialTextOpacity = (panel: GeneratedPanel | null, time: number): number => {
+    if (!panel || !panel.layers) return 1;
+    if (panel.layers.text_visible === false) return 0;
+    const dialogueMap = panel.syncMap?.dialogue_map;
+    if (!dialogueMap || dialogueMap.length === 0) return 1;
+    const isAnyActive = dialogueMap.some(seg => time >= seg.start_time && time <= seg.end_time);
+    return isAnyActive ? 1 : 0;
+  };
 
   return (
     <div
@@ -174,28 +214,97 @@ export function VideoMonitorActive({
           >
             {/* Image under cinematic pan animations */}
             <div className="absolute inset-0 overflow-hidden flex items-center justify-center bg-black">
-              <img
-                src={activeStoryboardPanel.image_url}
-                alt="Active Frame"
-                className="w-full h-full object-contain"
-                referrerPolicy="no-referrer"
-                style={{
-                  transform:
-                    activeStoryboardPanel.motion_type === "zoom_in"
-                      ? `scale(${1 + playbackTime * 0.02})`
-                      : activeStoryboardPanel.motion_type === "zoom_out"
-                      ? `scale(${1.15 - playbackTime * 0.02})`
-                      : activeStoryboardPanel.motion_type === "pan_right"
-                      ? `translateX(${playbackTime * 4}px)`
-                      : activeStoryboardPanel.motion_type === "pan_left"
-                      ? `translateX(${-playbackTime * 4}px)`
-                      : activeStoryboardPanel.motion_type === "pan_down"
-                      ? `translateY(${playbackTime * 4}px)`
-                      : "",
-                  transition: "transform 100ms linear",
-                  filter: getPanelFilterStyle(activeStoryboardPanel),
-                }}
-              />
+              {activeStoryboardPanel.layers ? (
+                <div className="relative w-full h-full flex items-center justify-center">
+                  {/* Background Layer */}
+                  {activeStoryboardPanel.layers.bg_visible !== false && (
+                    <img
+                      src={activeStoryboardPanel.layers.background_url}
+                      alt="Background Layer"
+                      className="absolute w-full h-full object-contain z-10"
+                      referrerPolicy="no-referrer"
+                      style={{
+                        transform:
+                          activeStoryboardPanel.motion_type === "zoom_in"
+                            ? `scale(${1 + playbackTime * 0.015})`
+                            : activeStoryboardPanel.motion_type === "zoom_out"
+                            ? `scale(${1.1 - playbackTime * 0.015})`
+                            : activeStoryboardPanel.motion_type === "pan_right"
+                            ? `translateX(${playbackTime * 3}px)`
+                            : activeStoryboardPanel.motion_type === "pan_left"
+                            ? `translateX(${-playbackTime * 3}px)`
+                            : activeStoryboardPanel.motion_type === "pan_down"
+                            ? `translateY(${playbackTime * 3}px)`
+                            : "",
+                        transition: "transform 100ms linear",
+                        filter: getPanelFilterStyle(activeStoryboardPanel),
+                      }}
+                    />
+                  )}
+
+                  {/* Character Layer */}
+                  {activeStoryboardPanel.layers.char_visible !== false && (
+                    <img
+                      src={activeStoryboardPanel.layers.character_url}
+                      alt="Character Layer"
+                      className="absolute w-full h-full object-contain z-20 pointer-events-none"
+                      referrerPolicy="no-referrer"
+                      style={{
+                        transform:
+                          activeStoryboardPanel.motion_type === "zoom_in"
+                            ? `scale(${1 + playbackTime * 0.035})`
+                            : activeStoryboardPanel.motion_type === "zoom_out"
+                            ? `scale(${1.25 - playbackTime * 0.035})`
+                            : activeStoryboardPanel.motion_type === "pan_right"
+                            ? `translateX(${playbackTime * 6}px)`
+                            : activeStoryboardPanel.motion_type === "pan_left"
+                            ? `translateX(${-playbackTime * 6}px)`
+                            : activeStoryboardPanel.motion_type === "pan_down"
+                            ? `translateY(${playbackTime * 6}px)`
+                            : "",
+                        transition: "transform 100ms linear",
+                        filter: getPanelFilterStyle(activeStoryboardPanel),
+                      }}
+                    />
+                  )}
+
+                  {/* Text Bubbles Layer */}
+                  <img
+                    ref={textLayerRef}
+                    src={activeStoryboardPanel.layers.text_url}
+                    alt="Text Bubbles Layer"
+                    className="absolute w-full h-full object-contain z-30 pointer-events-none transition-opacity duration-150"
+                    referrerPolicy="no-referrer"
+                    style={{
+                      opacity: getInitialTextOpacity(activeStoryboardPanel, playbackTime),
+                      filter: getPanelFilterStyle(activeStoryboardPanel),
+                    }}
+                  />
+                </div>
+              ) : (
+                <img
+                  src={activeStoryboardPanel.image_url}
+                  alt="Active Frame"
+                  className="w-full h-full object-contain"
+                  referrerPolicy="no-referrer"
+                  style={{
+                    transform:
+                      activeStoryboardPanel.motion_type === "zoom_in"
+                        ? `scale(${1 + playbackTime * 0.02})`
+                        : activeStoryboardPanel.motion_type === "zoom_out"
+                        ? `scale(${1.15 - playbackTime * 0.02})`
+                        : activeStoryboardPanel.motion_type === "pan_right"
+                        ? `translateX(${playbackTime * 4}px)`
+                        : activeStoryboardPanel.motion_type === "pan_left"
+                        ? `translateX(${-playbackTime * 4}px)`
+                        : activeStoryboardPanel.motion_type === "pan_down"
+                        ? `translateY(${playbackTime * 4}px)`
+                        : "",
+                    transition: "transform 100ms linear",
+                    filter: getPanelFilterStyle(activeStoryboardPanel),
+                  }}
+                />
+              )}
             </div>
 
             {/* Reprocessing OCR/CV Recalculation overlay */}

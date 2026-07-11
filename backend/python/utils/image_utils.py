@@ -31,13 +31,13 @@ class ImageMeta:
         self.channels = channels
         self.hasAlpha = has_alpha
         self.sizeBytes = size_bytes
-
+        
         # GCD calculation
         def gcd(a: int, b: int) -> int:
             while b:
                 a, b = b, a % b
             return a
-
+            
         d = gcd(width, height) or 1
         self.aspectRatio = f"{width // d}:{height // d}"
         self.orientation = 'landscape' if width > height else ('square' if width == height else 'portrait')
@@ -77,7 +77,7 @@ def spoof_referer(url: str) -> str:
             return "https://manhwatop.com/"
         if "manhuato" in host or "manhua" in host:
             return "https://manhuato.com/"
-
+        
         # Remove common CDN subdomains to construct a clean fallback base domain referer
         clean_host = host
         for prefix in ["cdn.", "img.", "images.", "pic.", "pics.", "static.", "assets.", "media.", "uploads.", "files.", "storage."]:
@@ -87,6 +87,112 @@ def spoof_referer(url: str) -> str:
         return f"{parsed.scheme}://{clean_host}/"
     except Exception:
         return "https://www.webtoons.com/"
+
+
+async def resolve_url_to_buffer(url_str: str, client: Optional[httpx.AsyncClient] = None) -> Dict[str, Any]:
+    """
+    Resolve ANY URL (absolute, relative, /api/merge-images/cached, proxied)
+    into a raw bytes + contentType. Can be used for images or audio files.
+    """
+    if not url_str:
+        raise ValueError('Empty URL provided')
+
+    working_url = url_str.strip()
+
+    # 1. Check in-memory merged/stitch cache first (zero-cost retrieval)
+    if '/api/image/cached/' in working_url or '/api/merge-images/cached/' in working_url or '/api/stitch-images/cached/' in working_url:
+        match = re.search(r'/(?:image|merge|stitch)-images?/cached/([^/?&]+)', working_url)
+        if match:
+            cache_id = match.group(1)
+            cached = stitched_cache.get(cache_id)
+            if cached:
+                mime = cached.get("content_type", "application/octet-stream")
+                return {"data": cached["data"], "content_type": mime, "contentType": mime}
+
+    # 2. Unwrap any double-proxied URLs
+    if '/api/proxy' in working_url:
+        parsed = urlparse(working_url)
+        query = parse_qs(parsed.query)
+        if "url" in query:
+            working_url = query["url"][0]
+
+    # 3. Base64 data-URL shortcut — decode inline without any HTTP
+    if working_url.startswith('data:'):
+        header, rest = working_url.split(',', 1)
+        buf = base64.b64decode(rest)
+        mime_match = re.match(r'^data:([^;]+);base64', header)
+        mime = mime_match.group(1) if mime_match else "application/octet-stream"
+        return {"data": buf, "content_type": mime, "contentType": mime}
+
+    # 4. Support local file:// URLs
+    if working_url.startswith('file://'):
+        from urllib.parse import unquote
+        file_path = working_url[7:]
+        # On Windows, a URL like file:///C:/... might have a leading slash
+        if file_path.startswith('/') and len(file_path) > 2 and file_path[2] == ':':
+            file_path = file_path[1:]
+        file_path = unquote(file_path)
+        with open(file_path, 'rb') as f:
+            buf = f.read()
+        ext = os.path.splitext(file_path)[1].lower()
+        import mimetypes
+        mime = mimetypes.guess_type(file_path)[0] or 'application/octet-stream'
+        return {"data": buf, "content_type": mime, "contentType": mime}
+
+    # 5. Normalize internal hostnames → relative paths to call localhost directly
+    if re.match(r'^https?://', working_url, re.IGNORECASE):
+        try:
+            parsed = urlparse(working_url)
+            host = parsed.hostname or ""
+            if "run.app" in host or "localhost" in host or host == "127.0.0.1":
+                working_url = parsed.path
+                if parsed.query:
+                    working_url += "?" + parsed.query
+        except Exception:
+            pass
+
+    # 6. Relative paths
+    if working_url.startswith('/'):
+        # Re-route to loopback port
+        port = os.getenv("BACKEND_PORT", "5173")
+        working_url = f"http://127.0.0.1:{port}{working_url}"
+
+    # 7. Remote fetch with referrer-bypass headers & retry logic
+    import asyncio
+    logger.info(f"[Utils] Fetching data from remote URL: {working_url[:60]}...")
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Referer':    spoof_referer(working_url),
+        'Accept':     '*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+    }
+
+    max_retries = 3
+    base_delay = 0.5
+    response = None
+    last_error = None
+
+    for attempt in range(max_retries):
+        try:
+            if client:
+                response = await client.get(working_url, headers=headers)
+            else:
+                async with httpx.AsyncClient(follow_redirects=True, timeout=30.0) as new_client:
+                    response = await new_client.get(working_url, headers=headers)
+
+            response.raise_for_status()
+            content_type = response.headers.get('content-type', 'application/octet-stream')
+            return {"data": response.content, "content_type": content_type, "contentType": content_type}
+
+        except Exception as e:
+            last_error = str(e)
+            if attempt < max_retries - 1:
+                delay = base_delay * (2 ** attempt)
+                logger.warning(f"[Utils] Fetch attempt {attempt+1} failed for {working_url[:30]}... retrying in {delay}s. Error: {last_error}")
+                await asyncio.sleep(delay)
+
+    logger.error(f"[Utils] Failed to resolve URL after {max_retries} attempts: {working_url[:60]}... Error: {last_error}")
+    raise ValueError(f"Failed to fetch data from URL: {last_error}")
 
 
 async def resolve_image_to_buffer(url_str: str, client: Optional[httpx.AsyncClient] = None) -> Dict[str, Any]:
@@ -185,7 +291,7 @@ async def resolve_image_to_buffer(url_str: str, client: Optional[httpx.AsyncClie
             else:
                 async with httpx.AsyncClient(follow_redirects=True, timeout=30.0) as new_client:
                     response = await new_client.get(working_url, headers=headers)
-
+            
             # Retry on 5xx or server disconnect codes
             if response.status_code >= 500 and attempt < max_retries - 1:
                 delay = base_delay * (2 ** attempt)
@@ -234,16 +340,16 @@ def convert_format(image_bytes: bytes, output_format: str = 'jpeg', quality: int
     fmt = output_format.upper()
     if fmt == 'JPG':
         fmt = 'JPEG'
-
+        
     out = io.BytesIO()
     if fmt == 'JPEG' and img.mode in ('RGBA', 'LA'):
         img = img.convert('RGB')
-
+        
     img.save(out, format=fmt, quality=quality)
     mime = f"image/{output_format.lower()}"
     if output_format.lower() == 'jpg':
         mime = 'image/jpeg'
-
+        
     return {"data": out.getvalue(), "content_type": mime}
 
 
@@ -251,33 +357,33 @@ def resize_fit(image_bytes: bytes, max_w: int, max_h: int, output_format: str = 
     """Resize image to fit within max_w x max_h while preserving aspect ratio."""
     img = Image.open(io.BytesIO(image_bytes))
     img.thumbnail((max_w, max_h), Image.Resampling.LANCZOS)
-
+    
     out = io.BytesIO()
     fmt = output_format.upper()
     if fmt == 'JPG':
         fmt = 'JPEG'
     if fmt == 'JPEG' and img.mode in ('RGBA', 'LA'):
         img = img.convert('RGB')
-
+        
     img.save(out, format=fmt, quality=quality)
     mime = f"image/{output_format.lower()}"
     if output_format.lower() == 'jpg':
         mime = 'image/jpeg'
-
+        
     return {"data": out.getvalue(), "content_type": mime}
 
 
 def make_thumbnail(image_bytes: bytes, size: int = 256) -> bytes:
     """Generate a high speed thumbnail (JPEG)."""
     img = Image.open(io.BytesIO(image_bytes))
-
+    
     # Calculate aspect-ratio cropping
     w, h = img.size
     min_dim = min(w, h)
     left = (w - min_dim) // 2
     top = (h - min_dim) // 2
     img_cropped = img.crop((left, top, left + min_dim, top + min_dim))
-
+    
     img_cropped.thumbnail((size, size), Image.Resampling.LANCZOS)
     out = io.BytesIO()
     img_cropped.convert('RGB').save(out, format='JPEG', quality=70)
@@ -334,7 +440,7 @@ def crop_auto_borders(
         img_rgb = img.convert('RGB')
         bg_rgb = Image.new('RGB', img.size, bg_color)
         diff = ImageChops.difference(img_rgb, bg_rgb).convert('L')
-
+        
         diff = diff.point(lambda p: 255 if p > threshold_val else 0)
         bbox = diff.getbbox()
 
@@ -380,20 +486,20 @@ def crop_auto_borders(
             bg_color_mode = bg_color
 
         extended = ImageOps.expand(trimmed, border=(e_l, e_t, e_r, e_b), fill=bg_color_mode)
-
+        
         out = io.BytesIO()
         fmt = output_format.upper()
         if fmt == 'JPG':
             fmt = 'JPEG'
-
+            
         if fmt == 'JPEG' and extended.mode in ('RGBA', 'LA'):
             extended = extended.convert('RGB')
-
+            
         extended.save(out, format=fmt, quality=crop_quality)
         mime = f"image/{output_format.lower()}"
         if output_format.lower() == 'jpg':
             mime = 'image/jpeg'
-
+            
         logger.info(f"[Image Utils] Auto-trim successful. New size: {extended.size[0]}x{extended.size[1]}")
         return {"data": out.getvalue(), "content_type": mime}
     except Exception as e:
@@ -546,7 +652,7 @@ def stack_vertical(buffers: List[bytes], gap: int = 0, background: str = '#fffff
         raise ValueError('No buffers provided to stack_vertical')
     if len(buffers) == 1:
         return {"data": buffers[0], "content_type": "image/jpeg"}
-
+    
     # Re-use our new robust stitcher
     res_bytes = stitch_images_together(
         buffers,
@@ -601,37 +707,37 @@ def add_watermark(image_bytes: bytes, text: str = 'Sonikoma') -> bytes:
     """Adds a stylish semi-transparent watermark badge to the bottom-right of the image."""
     img = Image.open(io.BytesIO(image_bytes)).convert("RGBA")
     w, h = img.size
-
+    
     # SVG-like box rendering
     f_size = max(12, int(w * 0.025))
     font = ImageFont.load_default() # Use default system font
-
+    
     pad_x = 10
     pad_y = 10
-
+    
     # Calculate text width/height
     # draw text bounding box estimate
     char_w = int(f_size * 0.6)
     b_w = len(text) * char_w + pad_x * 2
     b_h = f_size + pad_y * 2
-
+    
     # Create overlay
     overlay = Image.new('RGBA', img.size, (0,0,0,0))
     draw = ImageDraw.Draw(overlay)
-
+    
     # Box position
     bx1 = w - b_w - 15
     by1 = h - b_h - 15
     bx2 = w - 15
     by2 = h - 15
-
+    
     # Draw dark translucent rectangle
     draw.rectangle([bx1, by1, bx2, by2], fill=(0, 0, 0, 115))
     # Draw white text
     tx = bx1 + pad_x
     ty = by1 + pad_y
     draw.text((tx, ty), text, fill=(255, 255, 255, 230), font=font)
-
+    
     final_img = Image.alpha_composite(img, overlay)
     out = io.BytesIO()
     final_img.convert("RGB").save(out, format='JPEG', quality=92)

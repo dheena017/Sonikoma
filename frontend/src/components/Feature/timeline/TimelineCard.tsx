@@ -1,5 +1,5 @@
 import React from "react";
-import { Sparkles, RefreshCw, X } from "lucide-react";
+import { Sparkles, RefreshCw, X, Eye, EyeOff, ChevronDown, ChevronUp, Layers } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import { getPanelFilterStyle } from "@/utils";
 
@@ -34,6 +34,7 @@ interface TimelineCardProps {
   onDrop?: (e: React.DragEvent, index: number) => void;
   isDragging?: boolean;
   isDragOver?: boolean;
+  setPanels?: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
 }
 
 const TimelineCard = ({
@@ -65,7 +66,9 @@ const TimelineCard = ({
   addNotification,
   isDragging,
   isDragOver,
+  setPanels,
 }: TimelineCardProps) => {
+  const [isTracksExpanded, setIsTracksExpanded] = React.useState(false);
   const isCurrent =
     idx === currentPanelIndex && activePreviewTab === "timeline";
 
@@ -393,7 +396,115 @@ const TimelineCard = ({
         </button>
       </div>
 
-      <div className="flex items-center justify-end text-[9px] text-neutral-500 pt-1 font-mono">
+      {/* Accordion Layer Tracks (Motion Comic Mode) */}
+      {panel.layers && setPanels && (
+        <div className="pt-2 border-t border-neutral-900 space-y-2 no-drag">
+          <button
+            type="button"
+            onClick={() => setIsTracksExpanded(!isTracksExpanded)}
+            className="w-full flex items-center justify-between text-[10px] font-mono font-bold text-purple-400 hover:text-purple-300 py-1 transition-all cursor-pointer outline-none focus:outline-none"
+          >
+            <div className="flex items-center gap-1.5">
+              <Layers className="h-3.5 w-3.5" />
+              <span>Multi-Layer Tracks</span>
+            </div>
+            {isTracksExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+          </button>
+
+          {isTracksExpanded && (
+            <div className="space-y-1.5 pl-1 animate-in fade-in slide-in-from-top-1 duration-150">
+              {/* BG Track */}
+              <div className="flex items-center justify-between bg-neutral-900 border border-neutral-850 px-2 py-1.5 rounded-lg">
+                <span className="text-[10px] font-mono text-neutral-300">Background</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPanels((prev) =>
+                      prev.map((p) =>
+                        p.id === panel.id
+                          ? {
+                              ...p,
+                              layers: {
+                                ...p.layers!,
+                                bg_visible: p.layers!.bg_visible !== false ? false : true,
+                              },
+                            }
+                          : p
+                      )
+                    );
+                  }}
+                  className={`p-1 rounded hover:bg-neutral-800 transition-colors cursor-pointer ${
+                    panel.layers.bg_visible !== false ? "text-purple-400" : "text-neutral-600"
+                  }`}
+                >
+                  {panel.layers.bg_visible !== false ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                </button>
+              </div>
+
+              {/* Character Track */}
+              <div className="flex items-center justify-between bg-neutral-900 border border-neutral-850 px-2 py-1.5 rounded-lg">
+                <span className="text-[10px] font-mono text-neutral-300">Character</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPanels((prev) =>
+                      prev.map((p) =>
+                        p.id === panel.id
+                          ? {
+                              ...p,
+                              layers: {
+                                ...p.layers!,
+                                char_visible: p.layers!.char_visible !== false ? false : true,
+                              },
+                            }
+                          : p
+                      )
+                    );
+                  }}
+                  className={`p-1 rounded hover:bg-neutral-800 transition-colors cursor-pointer ${
+                    panel.layers.char_visible !== false ? "text-purple-400" : "text-neutral-600"
+                  }`}
+                >
+                  {panel.layers.char_visible !== false ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                </button>
+              </div>
+
+              {/* Text Track */}
+              <div className="flex items-center justify-between bg-neutral-900 border border-neutral-850 px-2 py-1.5 rounded-lg">
+                <span className="text-[10px] font-mono text-neutral-300">Text Bubbles</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPanels((prev) =>
+                      prev.map((p) =>
+                        p.id === panel.id
+                          ? {
+                              ...p,
+                              layers: {
+                                ...p.layers!,
+                                text_visible: p.layers!.text_visible !== false ? false : true,
+                              },
+                            }
+                          : p
+                      )
+                    );
+                  }}
+                  className={`p-1 rounded hover:bg-neutral-800 transition-colors cursor-pointer ${
+                    panel.layers.text_visible !== false ? "text-purple-400" : "text-neutral-600"
+                  }`}
+                >
+                  {panel.layers.text_visible !== false ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="flex items-center justify-between text-[9px] text-neutral-500 pt-1 font-mono">
+        <span>
+          {panel.layers ? "Motion Comic" : "Standard Panel"}
+        </span>
         <span>
           {idx + 1} / {panelsLength}
         </span>

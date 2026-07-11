@@ -723,6 +723,7 @@ const StoryboardTimeline = React.memo(
               onDrop={handleDrop}
               isDragging={draggedIndex === idx}
               isDragOver={dragOverIndex === idx}
+              setPanels={setPanels}
             />
           ))}
         </div>
