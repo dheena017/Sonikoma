@@ -14,7 +14,11 @@ import {
 } from "lucide-react";
 import TooltipPortal from "@/components/TooltipPortal";
 
-export const ImageEditorMiniSidebar: React.FC = () => {
+interface ImageEditorMiniSidebarProps {
+  isOpen?: boolean;
+}
+
+export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({ isOpen = true }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const activeTool = useImageEditorStore((state) => state.activeTool);
@@ -121,8 +125,12 @@ export const ImageEditorMiniSidebar: React.FC = () => {
     navigate(parentPath);
   };
 
-  return (
-    <aside className="fixed top-0 bottom-0 left-0 w-20 shrink-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 shadow-[4px_0_24px_rgba(0,0,0,0.3)] hidden lg:flex flex-col items-center py-4 z-40">
+return (
+    <aside
+      className={`fixed top-0 bottom-0 left-0 shrink-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 shadow-[4px_0_24px_rgba(0,0,0,0.3)] hidden lg:flex flex-col items-center py-4 z-40 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-hidden ${
+        isOpen ? "w-16 md:w-20" : "w-0 opacity-0 border-none"
+      }`}
+    >
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
           <div key={group.name} className="w-full flex flex-col items-center pb-2">

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom"; // 🚀 Added Router hooks
 import {
   LayoutDashboard,
   Layout,
@@ -15,6 +16,7 @@ import {
   Sparkles,
   Shield,
   Zap,
+  Image as ImageIcon
 } from "lucide-react";
 import TooltipPortal from "./TooltipPortal";
 
@@ -35,15 +37,19 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
   seriesSlug = null,
   chapterSlug = null,
 }) => {
-  const isDashboardOverview =
-    currentPath === "/" || currentPath === "/dashboard";
+  // 🚀 Initialize Router Hooks
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const isDashboardOverview = 
+  currentPath === "/" || currentPath === "/dashboard";
   const isWorkspace = currentPath.startsWith("/workspace");
   const isProjects = currentPath.startsWith("/projects");
   const isAutoCrop = currentPath.startsWith("/auto-crop");
   const isBubbleCleaner = currentPath.startsWith("/bubble-cleaner");
-  const isEditor =
-    currentPath.startsWith("/editor") ||
-    currentPath.startsWith("/workspace/editor");
+  const isEditor = 
+  currentPath.startsWith("/editor") ||
+  currentPath.startsWith("/workspace/editor");
 
   const isLogs = currentPath.startsWith("/logs");
   const isStatus = currentPath.startsWith("/status");
@@ -56,7 +62,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
     currentPath === "/editor/" ||
     currentPath.startsWith("/editor/") ||
     currentPath.startsWith("/workspace/editor");
-
+  const isImageEditorActive = location.pathname.endsWith('/image-editor');
   const handleNavigateToWorkspace = () => {
     const activeProjId = projectId || localStorage.getItem("active_project_id");
     const activeSeriesSlug =
@@ -76,6 +82,30 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
       }
     } else {
       navigateTo("/workspace");
+    }
+  };
+
+  const handleOpenImageEditor = () => {
+    if (!location.pathname.endsWith('/image-editor')) {
+      // If we are already in the editor workspace, simply append the sub-route
+      if (location.pathname.includes('/workspace/editor')) {
+        navigate(`${location.pathname}/image-editor${location.search}`);
+      } else {
+        // Fallback: If clicked from Dashboard, construct the path to the active project first
+        const activeProjId = projectId || localStorage.getItem("active_project_id");
+        const activeSeriesSlug = seriesSlug || localStorage.getItem("active_series_slug");
+        const activeChapterSlug = chapterSlug || localStorage.getItem("active_chapter_slug");
+
+        if (activeProjId) {
+          if (activeSeriesSlug && activeChapterSlug) {
+            navigate(`/workspace/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}/image-editor`);
+          } else {
+            navigate(`/workspace/editor/image-editor?id=${activeProjId}`);
+          }
+        } else {
+          navigateTo("/workspace");
+        }
+      }
     }
   };
 
@@ -112,6 +142,12 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
     {
       group: "Editor Tools",
       items: [
+        {
+          label: "Image Editor",
+          icon: ImageIcon,
+          active: isImageEditorActive,
+          onClick: handleOpenImageEditor,
+        },
         {
           label: "Auto-Crop",
           icon: Scissors,
@@ -211,11 +247,11 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
 
   const SidebarItem: React.FC<{ item: any }> = ({ item }) => {
     const [hover, setHover] = useState(false);
-    const [rect, setRect] = useState<DOMRect | null>(null);
+    const [rect, setRect] = useState({ top: 0, left: 0, width: 0, height: 0 });
 
     const handleEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
       const r = e.currentTarget.getBoundingClientRect();
-      setRect(r);
+      setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
       setHover(true);
     };
     const handleLeave = () => setHover(false);
@@ -260,13 +296,23 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
             </span>
           )}
         </button>
-        <TooltipPortal text={item.label} visible={hover} anchorRect={rect} />
+
+        {/* 🚀 TOOLTIP FIX: Pass primitives */}
+        <TooltipPortal 
+          text={item.label} 
+          visible={hover} 
+          top={rect.top}
+          left={rect.left}
+          width={rect.width}
+          height={rect.height}
+        />
       </div>
     );
   };
 
   const [creativeHover, setCreativeHover] = useState(false);
-  const [creativeRect, setCreativeRect] = useState<DOMRect | null>(null);
+  // 🚀 TOOLTIP FIX: Store primitives
+  const [creativeRect, setCreativeRect] = useState({ top: 0, left: 0, width: 0, height: 0 });
 
   return (
     // Premium Glassmorphism Container
@@ -293,13 +339,13 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
         ))}
       </div>
 
-      {/* Creative Tools Button - Matched to the Premium "Return" styling */}
       <div className="mt-auto pt-4 flex justify-center w-full pb-2 border-t border-neutral-800/60">
         <div className="relative group w-full flex justify-center">
           <button
             onClick={() => navigateTo("/workspace")}
             onMouseEnter={(e) => {
-              setCreativeRect(e.currentTarget.getBoundingClientRect());
+              const r = e.currentTarget.getBoundingClientRect();
+              setCreativeRect({ top: r.top, left: r.left, width: r.width, height: r.height });
               setCreativeHover(true);
             }}
             onMouseLeave={() => setCreativeHover(false)}
@@ -307,10 +353,15 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           >
             <Sparkles className="w-[18px] h-[18px] shrink-0" />
           </button>
+          
+          {/* 🚀 TOOLTIP FIX: Pass primitives */}
           <TooltipPortal
             text="Creative Suite"
             visible={creativeHover}
-            anchorRect={creativeRect}
+            top={creativeRect.top}
+            left={creativeRect.left}
+            width={creativeRect.width}
+            height={creativeRect.height}
           />
         </div>
       </div>
