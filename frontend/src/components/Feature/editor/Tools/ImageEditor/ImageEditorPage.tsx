@@ -6,6 +6,7 @@ import { ImageEditorHeader } from "./ImageEditorHeader";
 import { ImageEditorMiniSidebar } from "./ImageEditorMiniSidebar";
 import ImageEditorCanvasContainer from "./ImageEditorCanvasContainer";
 import ImageEditorSidebar from "./ImageEditorSidebar";
+import { ImageEditorLayout } from "./ImageEditorLayout";
 
 interface ImageEditorPageProps {
   appLogic: ReturnType<typeof useAppLogic>;
@@ -117,29 +118,13 @@ const ImageEditorPage = React.memo(({ appLogic }: ImageEditorPageProps) => {
         setIsToolsPanelOpen={setIsToolsPanelOpen}
       />
 
-      <div className="flex-1 flex flex-row overflow-hidden w-full relative">
-        {/* Left Column: Mini Sidebar */}
-        <ImageEditorMiniSidebar />
+      <ImageEditorLayout onClose={() => setEditingImageIdx(null)} onApply={() => {window.dispatchEvent(new Event("FABRIC_REQUEST_SAVE")); setEditingImageIdx(null);}}>
+        {canvasSubtree}
+      </ImageEditorLayout>
 
-        {/* Center Canvas */}
-        <main className="flex-1 h-full relative overflow-hidden bg-black/50 flex items-center justify-center">
-          <div
-            className="absolute inset-0 opacity-20 pointer-events-none"
-            style={{ backgroundImage: "radial-gradient(#374151 1px, transparent 0)", backgroundSize: "20px 20px" }}
-          />
-          <div className="relative w-full h-full z-10 flex items-center justify-center p-4">
-            {canvasSubtree}
-          </div>
-        </main>
-
-        {/* Right Tools Sidebar */}
-        <aside
-          className={`h-full bg-[#121826] border-l border-gray-800 flex-shrink-0 z-20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-            isToolsPanelOpen ? "w-[360px] lg:w-[420px] opacity-100" : "w-0 opacity-0 border-none"
-          }`}
-        >
-          <div className="w-[360px] lg:w-[420px] h-full overflow-y-auto custom-scrollbar p-5">
-              <ImageEditorSidebar
+      {/* Legacy Right Sidebar code removed, handled by ImageEditorLayout */}
+      <div className="hidden">
+        <ImageEditorSidebar
               setActiveTab={editorProps.setActiveTab}
               slices={editorProps.slices}
               setSlices={editorProps.setSlices}
@@ -253,8 +238,6 @@ const ImageEditorPage = React.memo(({ appLogic }: ImageEditorPageProps) => {
               activeTab={editorProps.activeTab as any}
 
             />
-          </div>
-        </aside>
       </div>
     </div>
   );

@@ -255,32 +255,38 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
 
   const lastImageUrlRef = useRef<string | null>(null);
 
-  // Handle resetting and loading states when the active image changes.
-  // NOTE: Keep dependencies minimal. Including whole objects/functions that
-  // change on every render can cause an infinite update loop.
+  // Handle resetting and loading states when the active image changes
   useEffect(() => {
-    if (!state.imageUrl) return;
+    if (state.imageUrl) {
+      const saved = imageEditStates?.[state.imageUrl];
+      state.setSlices(saved?.slices || []);
+      state.setSelectedSliceId(saved?.selectedSliceId || null);
+      state.setSplitLines(saved?.splitLines || []);
+      state.setDetectedBoxes(saved?.detectedBoxes || []);
+      state.setZoom(1);
 
-    const saved = imageEditStates?.[state.imageUrl];
+      // Reset history
+      setHistory(saved?.history || []);
+      setRedoHistory([]);
 
-    state.setSlices(saved?.slices || []);
-    state.setSelectedSliceId(saved?.selectedSliceId || null);
-    state.setSplitLines(saved?.splitLines || []);
-    state.setDetectedBoxes(saved?.detectedBoxes || []);
-    state.setZoom(1);
-
-    // Reset history
-    setHistory(saved?.history || []);
-    setRedoHistory([]);
-
-    // Reset active crop bounds in parent
-    setEditCropTop(0);
-    setEditCropBottom(0);
-    setEditCropLeft(0);
-    setEditCropRight(0);
-    setEditAutoTrim(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.imageUrl]);
+      // Reset active crop bounds in parent
+      setEditCropTop(0);
+      setEditCropBottom(0);
+      setEditCropLeft(0);
+      setEditCropRight(0);
+      setEditAutoTrim(true);
+    }
+  }, [
+    state.imageUrl,
+    imageEditStates,
+    setEditCropTop,
+    setEditCropBottom,
+    setEditCropLeft,
+    setEditCropRight,
+    setEditAutoTrim,
+    setHistory,
+    setRedoHistory,
+  ]);
 
   // Sync state back to parent container if needed
   useEffect(() => {
