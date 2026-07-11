@@ -5,6 +5,8 @@ import { useAppLogic } from "../../../../../hooks/useAppLogic";
 import { ImageEditorHeader } from "./ImageEditorHeader";
 import ImageEditorCanvasContainer from "./ImageEditorCanvasContainer";
 import ImageEditorSidebar from "./ImageEditorSidebar";
+import { ImageEditorMiniSidebar } from "./ImageEditorMiniSidebar";
+
 
 interface ImageEditorPageProps {
   appLogic: ReturnType<typeof useAppLogic>;
@@ -13,6 +15,9 @@ interface ImageEditorPageProps {
 const ImageEditorPage = React.memo(({ appLogic }: ImageEditorPageProps) => {
   const { editingImageIdx, setEditingImageIdx } = useCropEditorStore();
   const [isToolsPanelOpen, setIsToolsPanelOpen] = useState(true);
+
+  // Left mini sidebar open/close
+  const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
 
   // Auto-select the first image if the user opens the editor but hasn't picked one yet
   useEffect(() => {
@@ -114,11 +119,19 @@ const ImageEditorPage = React.memo(({ appLogic }: ImageEditorPageProps) => {
         slices={editorProps.slices}
         isToolsPanelOpen={isToolsPanelOpen}
         setIsToolsPanelOpen={setIsToolsPanelOpen}
+        isLeftSidebarOpen={isLeftSidebarOpen}
+        onToggleLeftSidebar={() => setIsToolsPanelOpen((v) => !v)}
       />
 
-      <div className="flex-1 flex flex-row overflow-hidden w-full relative">
-        {/* Center Canvas */}
+      {/* 3. MAIN WORKSPACE ROW */}
+      <div className="flex flex-1 overflow-hidden w-full relative">
+        {/* LEFT COLUMN: Drawing & Crop Tools */}
+        {/* Left mini sidebar (always visible); hamburger toggles the right properties panel */}
+        <ImageEditorMiniSidebar isOpen={true} />
+
+        {/* CENTER COLUMN: Canvas Area */}
         <main className="flex-1 h-full relative overflow-hidden bg-black/50 flex items-center justify-center">
+
           <div
             className="absolute inset-0 opacity-20 pointer-events-none"
             style={{ backgroundImage: "radial-gradient(#374151 1px, transparent 0)", backgroundSize: "20px 20px" }}

@@ -9,10 +9,15 @@ import {
   Layers, 
   Brush, 
   Link2 
-} from "lucide-react"; 
+} from "lucide-react";
 import TooltipPortal from "@/components/TooltipPortal";
 
-export const ImageEditorMiniSidebar: React.FC = () => {
+interface Props {
+  isOpen?: boolean;
+}
+
+export const ImageEditorMiniSidebar: React.FC<Props> = ({ isOpen = true }) => {
+
   const activeTool = useImageEditorStore((state) => state.activeTool);
   const setActiveTool = useImageEditorStore((state) => state.setActiveTool);
   const slicesCount = useImageEditorStore((state) => state.slicesCount);
@@ -104,7 +109,12 @@ export const ImageEditorMiniSidebar: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col items-center py-4 bg-neutral-950">
+    // THE FIX + NEW ANIMATION
+    <aside
+      className={`h-full bg-neutral-950 border-r border-neutral-900 z-40 relative shadow-[4px_0_24px_rgba(0,0,0,0.4)] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex-shrink-0 overflow-hidden flex flex-col items-center py-4 ${
+        isOpen ? "w-16 md:w-20 opacity-100" : "w-0 opacity-0 border-none"
+      }`}
+    >
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
           <div key={group.name} className="w-full flex flex-col items-center pb-2">
@@ -120,6 +130,6 @@ export const ImageEditorMiniSidebar: React.FC = () => {
           </div>
         ))}
       </div>
-    </div>
+    </aside>
   );
 };
