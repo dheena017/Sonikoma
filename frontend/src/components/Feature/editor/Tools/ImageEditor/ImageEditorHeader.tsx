@@ -31,11 +31,6 @@ interface ImageEditorHeaderProps {
   slices: any[];
   isToolsPanelOpen: boolean;
   setIsToolsPanelOpen: (val: boolean | ((prev: boolean) => boolean)) => void;
-  isLeftSidebarOpen?: boolean;
-  onToggleLeftSidebar?: () => void;
-  onClose?: () => void;
-  onExit?: () => void;
-  onApply?: () => void;
 }
 
 export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({ 

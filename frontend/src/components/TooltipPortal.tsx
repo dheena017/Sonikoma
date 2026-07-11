@@ -4,21 +4,13 @@ import ReactDOM from "react-dom";
 interface TooltipPortalProps {
   text: string;
   visible: boolean;
-  anchorRect?: DOMRect | null;
-  top?: number;                
-  left?: number;               
-  width?: number;              
-  height?: number;             
+  anchorRect: DOMRect | null;
 }
 
 const TooltipPortal: React.FC<TooltipPortalProps> = ({
   text,
   visible,
   anchorRect,
-  top = 0,
-  left = 0,
-  width = 0,
-  height = 0
 }) => {
   const [mounted, setMounted] = useState(false);
 
@@ -27,18 +19,12 @@ const TooltipPortal: React.FC<TooltipPortalProps> = ({
     return () => setMounted(false);
   }, []);
 
-  if (!mounted || !visible) return null;
-  if (!anchorRect && width === 0 && height === 0) return null;
-
-  const finalTop = anchorRect ? anchorRect.top : top;
-  const finalLeft = anchorRect ? anchorRect.left : left;
-  const finalWidth = anchorRect ? anchorRect.width : width;
-  const finalHeight = anchorRect ? anchorRect.height : height;
+  if (!mounted || !visible || !anchorRect) return null;
 
   const style: React.CSSProperties = {
     position: "fixed",
-    left: finalLeft + finalWidth + 12,
-    top: finalTop + (finalHeight / 2),
+    left: anchorRect.right + 12,
+    top: anchorRect.top + anchorRect.height / 2,
     transform: "translateY(-50%)",
     pointerEvents: "none",
     zIndex: 9999,

@@ -98,10 +98,11 @@ const ImageEditorPage = React.memo(({ appLogic }: ImageEditorPageProps) => {
 
   // Render standard inline layout (No Modal/Fixed overlays!)
   return (
-    <div className="w-full h-full bg-[#0B0F19] text-white flex flex-col overflow-hidden relative">
-
-
-      <ImageEditorLayout
+    <ImageEditorLayout
+      onClose={() => setEditingImageIdx(null)}
+      onApply={() => {window.dispatchEvent(new Event("FABRIC_REQUEST_SAVE")); setEditingImageIdx(null);}}
+      header={
+      <ImageEditorHeader
         editingImageIdx={editingImageIdx ?? 0}
         scrapedImages={appLogic.scrapedImages}
         handlePrevImage={editorProps.handlePrevImage}
@@ -118,25 +119,21 @@ const ImageEditorPage = React.memo(({ appLogic }: ImageEditorPageProps) => {
         slices={editorProps.slices}
         isToolsPanelOpen={isToolsPanelOpen}
         setIsToolsPanelOpen={setIsToolsPanelOpen}
-        onClose={() => setEditingImageIdx(null)}
-        onApply={() => {
-          window.dispatchEvent(new Event("FABRIC_REQUEST_SAVE"));
-          setEditingImageIdx(null);
-        }}
-      >
-        {canvasSubtree}
-      </ImageEditorLayout>
-
-
-      {/* Legacy Right Sidebar code removed, handled by ImageEditorLayout */}
-      <div className="hidden">
-        <ImageEditorSidebar
+      />
+      }
+      sidebar={
+        <aside
+          className={`h-full bg-[#121826] border-l border-gray-800 flex-shrink-0 z-20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            isToolsPanelOpen ? "w-[360px] lg:w-[420px] opacity-100" : "w-0 opacity-0 border-none"
+          }`}
+        >
+          <div className="w-[360px] lg:w-[420px] h-full overflow-y-auto custom-scrollbar p-5">
+            <ImageEditorSidebar
               setActiveTab={editorProps.setActiveTab}
               slices={editorProps.slices}
               setSlices={editorProps.setSlices}
               editingImageIdx={editingImageIdx ?? 0}
               scrapedImages={appLogic.scrapedImages}
-
               isMerging={editorProps.isMerging}
               handleMergeWithNext={editorProps.handleMergeWithNext}
               editCropTop={appLogic.editCropTop}
@@ -242,10 +239,13 @@ const ImageEditorPage = React.memo(({ appLogic }: ImageEditorPageProps) => {
               handleClearDetectedBoxes={editorProps.handleClearDetectedBoxes}
               handleExecuteSave={editorProps.handleExecuteSave}
               activeTab={editorProps.activeTab as any}
-
             />
-      </div>
-    </div>
+          </div>
+        </aside>
+      }
+    >
+      {canvasSubtree}
+    </ImageEditorLayout>
   );
 });
 
