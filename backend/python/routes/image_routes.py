@@ -22,6 +22,7 @@ import uuid
 import utils.image_utils as img_utils
 from utils.cache import stitched_cache, edit_history, zip_cache
 from media.image.cleaner import remove_speech_bubbles
+from media.image.layer_segmentation import process_layers
 from utils.supabase_storage import upload_to_supabase_bucket
 
 logger = logging.getLogger("sonikoma.routes.image_routes")
@@ -81,6 +82,9 @@ class RemoveBubblesRequest(BaseModel):
     dilation: Optional[int] = -1
     inpaint_radius: Optional[int] = 3
     detection_style: Optional[str] = "all"
+
+class ProcessLayersRequest(BaseModel):
+    url: str
 
 class RemoveBubblesBatchRequest(BaseModel):
     urls: List[str]
@@ -690,6 +694,37 @@ async def get_download_zip(zip_id: str = Path(...)):
             "Content-Disposition": f"attachment; filename={filename}"
         }
     )
+# ─── Layer Segmentation Route ──────────────────────────────────────────────────
+
+@router.post("/process-layers/{panel_id}", summary="Separate image into background, character, and text layers")
+async def extract_panel_layers(panel_id: str, body: ProcessLayersRequest):
+    logger.info(f"[Layer Segmentation] Request received for panel_id {panel_id}, url: {body.url[:60]}...")
+    try:
+        # Resolve image
+        resolved = await img_utils.resolve_image_to_buffer(body.url)
+
+        # Write to temp file
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_in:
+            tmp_in.write(resolved["data"])
+            tmp_in_path = tmp_in.name
+
+        try:
+            layers = await process_layers(tmp_in_path, panel_id)
+            return {
+                "success": True,
+                "panel_id": panel_id,
+                "layers": layers
+            }
+        finally:
+            try:
+                if os.path.exists(tmp_in_path):
+                    os.remove(tmp_in_path)
+            except OSError:
+                pass
+    except Exception as e:
+        logger.error(f"[Layer Segmentation API Error] failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Layer segmentation failed: {e}")
+
 # ─── Speech Bubble Removal Route (migrated from Express image/cleanup.ts) ──────
 
 @router.post("/remove-speech-bubbles", summary="Inpaint speech bubbles out of a panel image")
