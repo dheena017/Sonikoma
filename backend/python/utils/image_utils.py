@@ -89,6 +89,112 @@ def spoof_referer(url: str) -> str:
         return "https://www.webtoons.com/"
 
 
+async def resolve_url_to_buffer(url_str: str, client: Optional[httpx.AsyncClient] = None) -> Dict[str, Any]:
+    """
+    Resolve ANY URL (absolute, relative, /api/merge-images/cached, proxied)
+    into a raw bytes + contentType. Can be used for images or audio files.
+    """
+    if not url_str:
+        raise ValueError('Empty URL provided')
+
+    working_url = url_str.strip()
+
+    # 1. Check in-memory merged/stitch cache first (zero-cost retrieval)
+    if '/api/image/cached/' in working_url or '/api/merge-images/cached/' in working_url or '/api/stitch-images/cached/' in working_url:
+        match = re.search(r'/(?:image|merge|stitch)-images?/cached/([^/?&]+)', working_url)
+        if match:
+            cache_id = match.group(1)
+            cached = stitched_cache.get(cache_id)
+            if cached:
+                mime = cached.get("content_type", "application/octet-stream")
+                return {"data": cached["data"], "content_type": mime, "contentType": mime}
+
+    # 2. Unwrap any double-proxied URLs
+    if '/api/proxy' in working_url:
+        parsed = urlparse(working_url)
+        query = parse_qs(parsed.query)
+        if "url" in query:
+            working_url = query["url"][0]
+
+    # 3. Base64 data-URL shortcut — decode inline without any HTTP
+    if working_url.startswith('data:'):
+        header, rest = working_url.split(',', 1)
+        buf = base64.b64decode(rest)
+        mime_match = re.match(r'^data:([^;]+);base64', header)
+        mime = mime_match.group(1) if mime_match else "application/octet-stream"
+        return {"data": buf, "content_type": mime, "contentType": mime}
+
+    # 4. Support local file:// URLs
+    if working_url.startswith('file://'):
+        from urllib.parse import unquote
+        file_path = working_url[7:]
+        # On Windows, a URL like file:///C:/... might have a leading slash
+        if file_path.startswith('/') and len(file_path) > 2 and file_path[2] == ':':
+            file_path = file_path[1:]
+        file_path = unquote(file_path)
+        with open(file_path, 'rb') as f:
+            buf = f.read()
+        ext = os.path.splitext(file_path)[1].lower()
+        import mimetypes
+        mime = mimetypes.guess_type(file_path)[0] or 'application/octet-stream'
+        return {"data": buf, "content_type": mime, "contentType": mime}
+
+    # 5. Normalize internal hostnames → relative paths to call localhost directly
+    if re.match(r'^https?://', working_url, re.IGNORECASE):
+        try:
+            parsed = urlparse(working_url)
+            host = parsed.hostname or ""
+            if "run.app" in host or "localhost" in host or host == "127.0.0.1":
+                working_url = parsed.path
+                if parsed.query:
+                    working_url += "?" + parsed.query
+        except Exception:
+            pass
+
+    # 6. Relative paths
+    if working_url.startswith('/'):
+        # Re-route to loopback port
+        port = os.getenv("BACKEND_PORT", "5173")
+        working_url = f"http://127.0.0.1:{port}{working_url}"
+
+    # 7. Remote fetch with referrer-bypass headers & retry logic
+    import asyncio
+    logger.info(f"[Utils] Fetching data from remote URL: {working_url[:60]}...")
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Referer':    spoof_referer(working_url),
+        'Accept':     '*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+    }
+
+    max_retries = 3
+    base_delay = 0.5
+    response = None
+    last_error = None
+
+    for attempt in range(max_retries):
+        try:
+            if client:
+                response = await client.get(working_url, headers=headers)
+            else:
+                async with httpx.AsyncClient(follow_redirects=True, timeout=30.0) as new_client:
+                    response = await new_client.get(working_url, headers=headers)
+
+            response.raise_for_status()
+            content_type = response.headers.get('content-type', 'application/octet-stream')
+            return {"data": response.content, "content_type": content_type, "contentType": content_type}
+
+        except Exception as e:
+            last_error = str(e)
+            if attempt < max_retries - 1:
+                delay = base_delay * (2 ** attempt)
+                logger.warning(f"[Utils] Fetch attempt {attempt+1} failed for {working_url[:30]}... retrying in {delay}s. Error: {last_error}")
+                await asyncio.sleep(delay)
+
+    logger.error(f"[Utils] Failed to resolve URL after {max_retries} attempts: {working_url[:60]}... Error: {last_error}")
+    raise ValueError(f"Failed to fetch data from URL: {last_error}")
+
+
 async def resolve_image_to_buffer(url_str: str, client: Optional[httpx.AsyncClient] = None) -> Dict[str, Any]:
     """
     Resolve ANY image URL (absolute, relative, /api/merge-images/cached, proxied)

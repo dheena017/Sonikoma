@@ -44,6 +44,16 @@ export const runSkill = async (
   return res.json();
 };
 
+export const alignDialogue = async (fetchWithInterceptor: any, panelId: string, data: any) => {
+  const res = await fetchWithInterceptor(`/api/audio/align-dialogue/${panelId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  return res.json();
+};
+
 export const getVoices = async (fetchWithInterceptor: any) => {
   const res = await fetchWithInterceptor("/api/audio/voices");
   return res.json();

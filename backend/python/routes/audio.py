@@ -24,6 +24,8 @@ from pydantic import BaseModel, Field
 # Ensure the parent package (backend/python) is on the path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from media.audio.audio import generate_panel_audio
+from media.audio.dialogue_aligner import align_dialogue_and_extract_peaks
+import utils.image_utils as img_utils
 
 logger = logging.getLogger("sonikoma.routes.audio")
 router = APIRouter()
@@ -32,6 +34,10 @@ router = APIRouter()
 # ─────────────────────────────────────────────────────────────────────────────
 # SCHEMAS
 # ─────────────────────────────────────────────────────────────────────────────
+class AlignDialogueRequest(BaseModel):
+    audio_url: str = Field(..., description="URL of the audio file to analyze")
+    ocr_texts: List[str] = Field(..., description="Array of OCR text strings detected in the panel")
+
 class AudioGenerateRequest(BaseModel):
     dialogue_list: List[str] = Field(
         ..., description="Ordered list of dialogue strings to synthesize"
@@ -53,6 +59,38 @@ class AudioGenerateRequest(BaseModel):
 # ─────────────────────────────────────────────────────────────────────────────
 # ROUTES
 # ─────────────────────────────────────────────────────────────────────────────
+@router.post("/align-dialogue/{panel_id}", summary="Align OCR text to Whisper transcript and extract audio peaks")
+async def align_dialogue(panel_id: str, body: AlignDialogueRequest):
+    logger.info(f"[Dialogue Alignment] Request received for panel {panel_id}")
+    try:
+        # Resolve audio URL to a local temp file
+        resolved = await img_utils.resolve_url_to_buffer(body.audio_url)
+
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_in:
+            tmp_in.write(resolved["data"])
+            tmp_audio_path = tmp_in.name
+
+        try:
+            result = await align_dialogue_and_extract_peaks(
+                audio_path=tmp_audio_path,
+                ocr_texts=body.ocr_texts
+            )
+            return {
+                "success": True,
+                "panel_id": panel_id,
+                **result
+            }
+        finally:
+            try:
+                if os.path.exists(tmp_audio_path):
+                    os.remove(tmp_audio_path)
+            except OSError:
+                pass
+
+    except Exception as e:
+        logger.error(f"[Dialogue Alignment API Error] failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Dialogue alignment failed: {e}")
+
 @router.post("/generate", summary="Generate TTS panel audio")
 async def generate_audio(body: AudioGenerateRequest):
     """
