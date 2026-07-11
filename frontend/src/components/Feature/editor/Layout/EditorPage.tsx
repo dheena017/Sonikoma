@@ -1,3 +1,5 @@
+import { useLocation, useNavigate } from "react-router-dom";
+
 import React from "react";
 import LiveScraperDeck from "../../scraper/LiveScraperDeck";
 import StoryboardTimeline from "../../timeline/StoryboardTimeline";
@@ -24,6 +26,8 @@ const EditorPage: React.FC<EditorPageProps> = ({
   seriesSlug,
   chapterSlug,
 }: EditorPageProps) => {
+  const location = useLocation();
+  const isImageEditorRoute = location.pathname.endsWith("/image-editor");
   void seriesSlug;
   void chapterSlug;
   const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(true);
@@ -195,18 +199,24 @@ const EditorPage: React.FC<EditorPageProps> = ({
   };
 
   // LISTEN FOR THE EDIT BUTTON CLICK (tab switching via CustomEvent)
+  const navigate = useNavigate();
+
   React.useEffect(() => {
     const handleSwitchTab = (e: Event) => {
       const customEvent = e as CustomEvent;
       const detail = customEvent?.detail;
       if (!detail) return;
 
-      // keep current behavior for other tabs if any are added later
-      setCurrentSection(detail);
-
-      // Auto-collapse sidebar when opening Image Editor for more canvas space
       if (detail === "image-editor") {
         setIsSidebarCollapsed(true);
+        // Navigate by appending /image-editor to current path, preserving search params
+        const newPath = location.pathname.endsWith('/image-editor')
+          ? location.pathname
+          : location.pathname + '/image-editor';
+        navigate(newPath + location.search);
+      } else {
+        // keep current behavior for other tabs if any are added later
+        setCurrentSection(detail);
       }
     };
 
@@ -280,10 +290,11 @@ const EditorPage: React.FC<EditorPageProps> = ({
   };
 
 
-  // THE EARLY RETURN
-  if (currentSection === "image-editor") {
+
+
+  if (isImageEditorRoute) {
     return (
-      <div className="w-full h-full overflow-hidden bg-[#0B0F19]">
+      <div className="w-screen h-screen overflow-hidden bg-[#0B0F19]">
         <ImageEditorPage appLogic={appLogic} />
       </div>
     );

@@ -1,3 +1,4 @@
+import { useLocation, useNavigate } from "react-router-dom";
 import React, { useState } from "react";
 import {
   Layout,
@@ -59,6 +60,8 @@ const EditorMiniSidebarInner = ({
   settingsPath = "/settings",
   topOffsetPx = 59,
 }: EditorMiniSidebarProps) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const params = new URLSearchParams(window.location.search);
   const isEditing = window.location.pathname.startsWith("/editor") && params.get("idx") !== null;
 
@@ -240,7 +243,12 @@ const EditorMiniSidebarInner = ({
 
         <button
           onClick={() => {
-            if (item.id === "autocrop" || item.id === "bubbles" || item.id === "image-editor") {
+            if (item.id === "image-editor") {
+              const newPath = location.pathname.endsWith('/image-editor')
+                ? location.pathname
+                : location.pathname + '/image-editor';
+              navigate(newPath + location.search);
+            } else if (item.id === "autocrop" || item.id === "bubbles") {
               setCurrentSection(item.id);
             } else if (item.id === "settings") {
               if (navigateTo) {

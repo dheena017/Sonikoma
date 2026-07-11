@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { 
   X, 
   Check, 
@@ -50,7 +51,15 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
   isToolsPanelOpen,
   setIsToolsPanelOpen
 }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const hasMultipleImages = scrapedImages.length > 1;
+
+  const handleExit = () => {
+    setEditingImageIdx(null);
+    const parentPath = location.pathname.replace('/image-editor', '') + location.search;
+    navigate(parentPath);
+  };
 
   return (
     <header className="h-16 w-full bg-[#0B0F19] border-b border-gray-800 flex items-center justify-between px-6 flex-shrink-0 z-50">
@@ -137,7 +146,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
         <div className="w-px h-6 bg-gray-800 mx-2"></div>
 
         <button 
-          onClick={() => setEditingImageIdx(null)}
+          onClick={handleExit}
           className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white bg-transparent hover:bg-gray-800 rounded-lg transition flex items-center"
         >
           <X className="w-4 h-4 mr-2" /> Cancel
@@ -147,7 +156,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
           onClick={() => {
             // Trigger your global save event here
             window.dispatchEvent(new Event("FABRIC_REQUEST_SAVE"));
-            setEditingImageIdx(null);
+            handleExit();
           }}
           className="px-4 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-500 rounded-lg transition flex items-center shadow-lg shadow-purple-900/20"
         >

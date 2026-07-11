@@ -1,3 +1,4 @@
+import { useNavigate, useLocation } from "react-router-dom";
 import React, { useState } from "react";
 import { useImageEditorStore, ImageTool } from "@/hooks/useImageEditorState";
 import {
@@ -114,7 +115,8 @@ export const ImageEditorMiniSidebar: React.FC = () => {
   const [returnRect, setReturnRect] = useState<DOMRect | null>(null);
 
   const handleReturnToWorkspace = () => {
-    window.dispatchEvent(new CustomEvent('SWITCH_TAB', { detail: 'assets' }));
+    const parentPath = location.pathname.replace('/image-editor', '') + location.search;
+    navigate(parentPath);
   };
 
   return (
