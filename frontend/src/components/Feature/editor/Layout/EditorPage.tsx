@@ -279,6 +279,16 @@ const EditorPage: React.FC<EditorPageProps> = ({
     );
   };
 
+
+  // THE EARLY RETURN
+  if (currentSection === "image-editor") {
+    return (
+      <div className="w-screen h-screen overflow-hidden bg-[#0B0F19]">
+        <ImageEditorPage appLogic={appLogic} />
+      </div>
+    );
+  }
+
   return (
     <LayoutEditorPage
       projectId={projectId}
@@ -359,12 +369,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                 isFocusMode ? "hidden" : "block"
               }`}
             >
-              {currentSection === "image-editor" ? (
-                <div id="section-image-editor" className="w-full">
-                  <ImageEditorPage appLogic={appLogic} />
-                </div>
-              ) : (
-                <>
+
                   {/* MIDDLE: Storyboard Timeline */}
                   <div
                     id="section-timeline"
@@ -490,8 +495,6 @@ const EditorPage: React.FC<EditorPageProps> = ({
                       voiceActor={voiceActor}
                     />
                   </div>
-                </>
-              )}
             </div>
           </>
         )}
