@@ -548,9 +548,6 @@ def run_cv_detection(
 
     # Dynamic scaling check for smaller/already-cropped images (e.g. h < 1500 and w < 1500)
     is_small_image = (h < 1500 and w < 1500)
-    orig_min_height_px = min_height_px
-    orig_min_width_pct = min_width_pct
-    orig_close_kernel_size = close_kernel_size
 
     if is_small_image:
         logger.info(f"[Panel Detection] Detected small/cropped image ({w}x{h}). Dynamically adjusting parameters.")
