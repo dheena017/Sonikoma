@@ -33,6 +33,8 @@ export function VideoMonitorActive({
   const [videoCurrentTime, setVideoCurrentTime] = React.useState(0);
   const activeStoryboardPanel = panels[currentPanelIndex] || null;
   const textLayerRef = React.useRef<HTMLImageElement>(null);
+  const outerWrapperRef = React.useRef<HTMLDivElement>(null);
+  const shakeTimeoutRef = React.useRef<any>(null);
 
   // Helper to split and chunk long subtitle dialogues
   const getSubtitleChunk = (
@@ -94,7 +96,28 @@ export function VideoMonitorActive({
   React.useEffect(() => {
     const handleTimeUpdate = (e: Event) => {
       const time = (e as CustomEvent).detail;
-      if (!textLayerRef.current || !activePanelForCurrentTab?.layers) return;
+      if (!activePanelForCurrentTab) return;
+
+      // Real-time camera shake visual rendering
+      if (activePanelForCurrentTab.audio_reactive_shake && outerWrapperRef.current) {
+        const frameIdx = Math.floor(time * 10.0);
+        const peaks = activePanelForCurrentTab.syncMap?.audio_peaks;
+        const peakVal = peaks ? peaks[frameIdx] : 0.0;
+
+        if (peakVal > 0.85) {
+          if (!outerWrapperRef.current.classList.contains("camera-shake-active")) {
+            outerWrapperRef.current.classList.add("camera-shake-active");
+            if (shakeTimeoutRef.current) {
+              clearTimeout(shakeTimeoutRef.current);
+            }
+            shakeTimeoutRef.current = setTimeout(() => {
+              outerWrapperRef.current?.classList.remove("camera-shake-active");
+            }, 200);
+          }
+        }
+      }
+
+      if (!textLayerRef.current || !activePanelForCurrentTab.layers) return;
 
       if (activePanelForCurrentTab.layers.text_visible === false) {
         textLayerRef.current.style.opacity = "0";
@@ -115,7 +138,12 @@ export function VideoMonitorActive({
     };
 
     window.addEventListener("storyboard-time-update", handleTimeUpdate);
-    return () => window.removeEventListener("storyboard-time-update", handleTimeUpdate);
+    return () => {
+      window.removeEventListener("storyboard-time-update", handleTimeUpdate);
+      if (shakeTimeoutRef.current) {
+        clearTimeout(shakeTimeoutRef.current);
+      }
+    };
   }, [activePreviewTab, activePanelForCurrentTab]);
 
   const getInitialTextOpacity = (panel: GeneratedPanel | null, time: number): number => {
@@ -129,9 +157,29 @@ export function VideoMonitorActive({
 
   return (
     <div
+      ref={outerWrapperRef}
       id="video_monitor_outer_wrapper"
       className="relative bg-neutral-950/40 border border-neutral-800/80 rounded-3xl overflow-hidden shadow-inner flex items-center justify-center p-0 w-full h-full"
     >
+      {/* Dynamic style tag for high-performance monitor camera shake keyframes */}
+      <style>{`
+        @keyframes monitorShake {
+          0% { transform: translate(2px, 2px) rotate(0deg); }
+          10% { transform: translate(-2px, -3px) rotate(-1deg); }
+          20% { transform: translate(-4px, 0px) rotate(1deg); }
+          30% { transform: translate(0px, 3px) rotate(0deg); }
+          40% { transform: translate(2px, -2px) rotate(1deg); }
+          50% { transform: translate(-2px, 3px) rotate(-1deg); }
+          60% { transform: translate(-4px, 2px) rotate(0deg); }
+          70% { transform: translate(3px, 2px) rotate(-1deg); }
+          80% { transform: translate(-2px, -2px) rotate(1deg); }
+          90% { transform: translate(3px, 3px) rotate(0deg); }
+          100% { transform: translate(2px, -3px) rotate(-1deg); }
+        }
+        .camera-shake-active {
+          animation: monitorShake 0.12s infinite;
+        }
+      `}</style>
       {/* Ambient Background Glow */}
       <div className="absolute h-56 w-56 rounded-full bg-purple-600/10 blur-3xl" />
 

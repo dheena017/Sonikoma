@@ -65,6 +65,7 @@ export default function EnhancementsPanel({
         handleModifyDuration={handleModifyDuration}
         handleModifyMotionType={handleModifyMotionType}
         handleModifyCropPadding={handleModifyCropPadding}
+        setPanels={setPanels}
       />
 
       <EnhancementsAudio

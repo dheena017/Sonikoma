@@ -36,6 +36,15 @@ class PanelLayersData(BaseModel):
     background_url: str
     character_url: str
     text_url: str
+    char_x: Optional[float] = 0.0
+    char_y: Optional[float] = 0.0
+    char_scale_x: Optional[float] = 1.0
+    char_scale_y: Optional[float] = 1.0
+    text_x: Optional[float] = 0.0
+    text_y: Optional[float] = 0.0
+    text_scale_x: Optional[float] = 1.0
+    text_scale_y: Optional[float] = 1.0
+    parallax_intensity: Optional[float] = 30.0
 
 class DialogueSegmentData(BaseModel):
     start_time: float
@@ -55,6 +64,7 @@ class PanelData(BaseModel):
     motion_type: Optional[str] = None
     layers: Optional[PanelLayersData] = None
     syncMap: Optional[PanelSyncMapData] = None
+    audio_reactive_shake: Optional[bool] = False
 
 class RenderRequest(BaseModel):
     panels: List[PanelData]
@@ -208,20 +218,27 @@ def _get_bg_zoompan(motion_type: str, w: int, h: int, duration: float, fps: int 
     return f"zoompan=z=1.0:d={frames}:s={w}x{h}:fps={fps}"
 
 
-def _get_char_zoompan(motion_type: str, w: int, h: int, duration: float, fps: int = 24) -> str:
+def _get_char_zoompan(motion_type: str, w: int, h: int, duration: float, fps: int = 24, parallax_intensity: float = 30.0) -> str:
     frames = max(1, int(duration * fps))
+    mult = 1.0 + (parallax_intensity / 100.0) * 2.0
+    pan_mult = 1.0 + (parallax_intensity / 100.0) * 0.8
+
+    char_zoom_in_rate = 0.0015 * mult
+    char_zoom_out_rate = 0.0015 * mult
+    char_pan_scale = 1.15 * pan_mult
+
     if motion_type == "zoom_in":
-        return f"zoompan=z='min(zoom+0.0035,1.5)':d={frames}:s={w}x{h}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':fps={fps}:pix_fmt=yuva420p"
+        return f"zoompan=z='min(zoom+{char_zoom_in_rate:.5f},1.5)':d={frames}:s={w}x{h}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':fps={fps}:pix_fmt=yuva420p"
     elif motion_type == "zoom_out":
-        return f"zoompan=z='max(1.5-0.0035*on,1.0)':d={frames}:s={w}x{h}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':fps={fps}:pix_fmt=yuva420p"
+        return f"zoompan=z='max(1.5-{char_zoom_out_rate:.5f}*on,1.0)':d={frames}:s={w}x{h}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':fps={fps}:pix_fmt=yuva420p"
     elif motion_type == "pan_left":
-        return f"zoompan=z=1.25:x='(iw-iw/zoom)*(on/{frames})*1.3':y='(ih-ih/zoom)/2':d={frames}:s={w}x{h}:fps={fps}:pix_fmt=yuva420p"
+        return f"zoompan=z={char_pan_scale:.3f}:x='(iw-iw/zoom)*(on/{frames})*1.3':y='(ih-ih/zoom)/2':d={frames}:s={w}x{h}:fps={fps}:pix_fmt=yuva420p"
     elif motion_type == "pan_right":
-        return f"zoompan=z=1.25:x='(iw-iw/zoom)*(1-on/{frames})*1.3':y='(ih-ih/zoom)/2':d={frames}:s={w}x{h}:fps={fps}:pix_fmt=yuva420p"
+        return f"zoompan=z={char_pan_scale:.3f}:x='(iw-iw/zoom)*(1-on/{frames})*1.3':y='(ih-ih/zoom)/2':d={frames}:s={w}x{h}:fps={fps}:pix_fmt=yuva420p"
     elif motion_type == "pan_up":
-        return f"zoompan=z=1.25:x='(iw-iw/zoom)/2':y='(ih-ih/zoom)*(on/{frames})*1.3':d={frames}:s={w}x{h}:fps={fps}:pix_fmt=yuva420p"
+        return f"zoompan=z={char_pan_scale:.3f}:x='(iw-iw/zoom)/2':y='(ih-ih/zoom)*(on/{frames})*1.3':d={frames}:s={w}x{h}:fps={fps}:pix_fmt=yuva420p"
     elif motion_type == "pan_down":
-        return f"zoompan=z=1.25:x='(iw-iw/zoom)/2':y='(ih-ih/zoom)*(1-on/{frames})*1.3':d={frames}:s={w}x{h}:fps={fps}:pix_fmt=yuva420p"
+        return f"zoompan=z={char_pan_scale:.3f}:x='(iw-iw/zoom)/2':y='(ih-ih/zoom)*(1-on/{frames})*1.3':d={frames}:s={w}x{h}:fps={fps}:pix_fmt=yuva420p"
     return f"zoompan=z=1.0:d={frames}:s={w}x{h}:fps={fps}:pix_fmt=yuva420p"
 
 
@@ -335,11 +352,13 @@ def _render_panel_segment_ffmpeg(
                 between_conditions.append(f"between(t,{s_time},{e_time})")
             text_enable = "+".join(between_conditions)
 
+        parallax_intensity = layers.get("parallax_intensity", 30.0) if layers else 30.0
+
         filter_complex = (
             f"[0:v]{bg_scale_filter}[bg_scaled];"
             f"[bg_scaled]{_get_bg_zoompan(motion_type, w, h, duration, fps)}[bg_motion];"
             f"[1:v]{char_scale_filter}[char_scaled];"
-            f"[char_scaled]{_get_char_zoompan(motion_type, w, h, duration, fps)}[char_motion];"
+            f"[char_scaled]{_get_char_zoompan(motion_type, w, h, duration, fps, parallax_intensity)}[char_motion];"
             f"[2:v]{text_scale_filter}[text_scaled];"
             f"[bg_motion][char_motion]overlay=0:0[bg_char_comp];"
             f"[bg_char_comp][text_scaled]overlay=0:0:enable='{text_enable}'{shake_filter},fade=t=in:st=0:d=0.5[final_comp]"
@@ -620,6 +639,7 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
                         "text_y": panel.layers.text_y,
                         "text_scale_x": panel.layers.text_scale_x,
                         "text_scale_y": panel.layers.text_scale_y,
+                        "parallax_intensity": panel.layers.parallax_intensity if panel.layers.parallax_intensity is not None else 30.0,
                     }
                     # Set background as raw image for size validations
                     raw_img_path = bg_path

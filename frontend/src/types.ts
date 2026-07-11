@@ -13,6 +13,7 @@ export interface PanelLayers {
   text_y?: number;
   text_scale_x?: number;
   text_scale_y?: number;
+  parallax_intensity?: number;
 }
 
 export interface DialogueSegment {

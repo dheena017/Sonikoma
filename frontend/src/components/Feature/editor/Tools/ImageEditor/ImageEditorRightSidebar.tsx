@@ -5,7 +5,7 @@ export const ImageEditorRightSidebar: React.FC = () => {
   const { activeTool } = useImageEditorStore();
 
   return (
-    <div className="w-full h-full p-5 flex flex-col space-y-6 bg-[#121826] rounded-none border-none !m-0">
+    <div className="w-full h-full p-5 flex flex-col space-y-6">
 
       {activeTool === "edit" && (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
