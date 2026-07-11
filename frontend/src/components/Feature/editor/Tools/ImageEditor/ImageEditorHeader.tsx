@@ -62,7 +62,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
   };
 
   return (
-    <header className="h-16 w-full bg-[#0B0F19] border-b border-gray-800 flex items-center justify-between px-6 flex-shrink-0 z-50">
+    <header className="h-16 w-full bg-neutral-950 border-b border-neutral-800 flex items-center justify-between px-6 flex-shrink-0 z-50 rounded-none !m-0">
       {/* Left: Title, Badge & Navigation */}
       <div className="flex items-center space-x-4">
         <span className="px-3 py-1 text-[10px] font-bold tracking-wider text-purple-400 bg-purple-900/30 rounded-full border border-purple-700/50">
@@ -70,7 +70,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
         </span>
 
         {hasMultipleImages && (
-          <div className="flex items-center space-x-1 bg-gray-900/50 rounded-lg p-1 border border-gray-800">
+          <div className="flex items-center space-x-1 bg-gray-900/50 rounded-lg p-1 border border-neutral-800">
             <button 
               onClick={handlePrevImage}
               className="p-1.5 text-gray-400 hover:text-white rounded-md hover:bg-gray-800 transition"
@@ -97,7 +97,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
       </div>
 
       {/* Center: History & Canvas Tools */}
-      <div className="flex items-center space-x-2 bg-gray-900/50 p-1 rounded-lg border border-gray-800">
+      <div className="flex items-center space-x-2 bg-gray-900/50 p-1 rounded-lg border border-neutral-800">
         <button
           onClick={handleUndo}
           disabled={historyLength === 0}
@@ -143,11 +143,11 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
           {isToolsPanelOpen ? <PanelRightClose className="w-5 h-5" /> : <PanelRightOpen className="w-5 h-5" />}
         </button>
 
-        <div className="w-px h-6 bg-gray-800 mx-2"></div>
+        <div className="w-px h-6 bg-neutral-800 mx-2"></div>
 
         <button 
           onClick={handleExit}
-          className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white bg-transparent hover:bg-gray-800 rounded-lg transition flex items-center"
+          className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white bg-transparent hover:bg-neutral-800 rounded-lg transition flex items-center"
         >
           <X className="w-4 h-4 mr-2" /> Cancel
         </button>

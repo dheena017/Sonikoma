@@ -122,7 +122,7 @@ export const ImageEditorMiniSidebar: React.FC = () => {
   };
 
   return (
-    <aside className="fixed top-0 bottom-0 left-0 w-20 shrink-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 shadow-[4px_0_24px_rgba(0,0,0,0.3)] hidden lg:flex flex-col items-center py-4 z-40">
+    <aside className="w-20 shrink-0 bg-neutral-950 border-r border-neutral-800 hidden lg:flex flex-col items-center py-4 z-40 h-full rounded-none !m-0 relative">
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
           <div key={group.name} className="w-full flex flex-col items-center pb-2">
@@ -139,7 +139,7 @@ export const ImageEditorMiniSidebar: React.FC = () => {
         ))}
       </div>
 
-      <div className="mt-auto pt-4 flex justify-center w-full pb-2 border-t border-neutral-800/60">
+      <div className="mt-auto pt-4 flex justify-center w-full pb-2 border-t border-neutral-800">
         <div className="relative group w-full flex justify-center">
           <button
             onClick={handleReturnToWorkspace}
