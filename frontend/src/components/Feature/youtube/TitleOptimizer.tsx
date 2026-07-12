@@ -42,11 +42,11 @@ export default function TitleOptimizer({
   const isShortTooLong = title.length > 100;
 
   return (
-    <div className="space-y-3.5 animate-fade-in">
+    <div className="space-y-4 animate-fade-in">
       {/* Title field */}
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         <div className="flex justify-between items-center text-xs font-mono">
-          <label className="text-neutral-400 font-bold flex items-center gap-1">
+          <label className="text-neutral-300 font-bold flex items-center gap-1.5">
             <span>Video Title</span>
             {isShortOverOptimal && (
               <span className="text-[10px] text-amber-400 font-normal italic flex items-center gap-0.5 animate-pulse">
@@ -56,12 +56,12 @@ export default function TitleOptimizer({
             )}
           </label>
           <span
-            className={`font-semibold ${
+            className={`font-semibold text-[11px] font-mono ${
               isShortTooLong
-                ? "text-red-400"
+                ? "text-red-400 font-bold"
                 : isShortOverOptimal
                 ? "text-amber-400"
-                : "text-neutral-500"
+                : "text-neutral-400"
             }`}
           >
             {title.length}/100
@@ -74,12 +74,12 @@ export default function TitleOptimizer({
           onChange={(e) => setTitle(e.target.value)}
           maxLength={120}
           placeholder="Write a catchy, high-CTR title..."
-          className="w-full bg-black/40 border border-neutral-850 rounded-xl px-4 py-3 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-purple-500/80 transition-all font-sans font-bold"
+          className="w-full bg-neutral-950/40 hover:bg-neutral-900/10 border border-neutral-900 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 rounded-xl px-4 py-3 text-xs text-white placeholder-neutral-600 focus:outline-none transition-all duration-200 font-sans font-bold shadow-inner"
         />
 
         {/* Title Power Words suggestions */}
-        <div className="flex flex-wrap gap-1.5 pt-1 font-mono text-[9px] text-neutral-450 items-center">
-          <span className="font-bold text-neutral-550 block">
+        <div className="flex flex-wrap gap-1.5 pt-1 font-mono text-[10px] text-neutral-400 items-center">
+          <span className="font-bold text-neutral-500 block mr-1">
             💡 Power Tags:
           </span>
           {[
@@ -96,10 +96,10 @@ export default function TitleOptimizer({
                 key={word}
                 onClick={() => !isPresent && onInjectPowerWord(word)}
                 disabled={isPresent}
-                className={`px-2 py-0.5 rounded border transition-all cursor-pointer ${
+                className={`px-2.5 py-1 rounded-lg border text-[10px] font-medium font-mono transition-all duration-200 cursor-pointer ${
                   isPresent
-                    ? "bg-neutral-950 border-neutral-900 text-neutral-600 cursor-not-allowed opacity-50"
-                    : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-850"
+                    ? "bg-neutral-950/20 border-neutral-900/40 text-neutral-600 cursor-not-allowed opacity-50"
+                    : "bg-neutral-900/30 border-neutral-850/60 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 hover:bg-purple-950/10"
                 }`}
               >
                 +{word}
@@ -110,21 +110,21 @@ export default function TitleOptimizer({
       </div>
 
       {/* Clickbait Slogans / Variants tool */}
-      <div className="p-3 bg-neutral-950/60 rounded-xl border border-neutral-900 space-y-2.5 font-mono text-[10px] text-neutral-400">
-        <div className="flex items-center justify-between border-b border-neutral-900 pb-1.5">
-          <span className="text-neutral-300 font-bold flex items-center gap-1">
-            ⚡ Clickbait Title Generator
+      <div className="p-4 bg-neutral-950/40 backdrop-blur-sm rounded-2xl border border-neutral-900 space-y-3 font-mono text-[11px] text-neutral-400">
+        <div className="flex items-center justify-between border-b border-neutral-900 pb-2">
+          <span className="text-neutral-200 font-bold flex items-center gap-1.5">
+            <Sparkles className="h-4 w-4 text-purple-400" />
+            Clickbait Title Generator
           </span>
           <button
             onClick={handleGenerateVariants}
-            className="text-[9px] text-purple-400 hover:text-purple-300 flex items-center gap-0.5 cursor-pointer bg-purple-950/20 px-2 py-0.5 rounded border border-purple-900/30"
+            className="text-[10px] text-purple-400 hover:text-purple-300 flex items-center gap-1 cursor-pointer bg-purple-950/20 px-3 py-1 rounded-lg border border-purple-900/30 hover:bg-purple-900/20 transition-all duration-200"
           >
-            <Sparkles className="h-3 w-3" />
             Re-Roll Titles
           </button>
         </div>
 
-        <div className="space-y-1.5 font-sans">
+        <div className="space-y-2 font-sans">
           {variants.map((v, i) => (
             <button
               key={i}
@@ -133,7 +133,7 @@ export default function TitleOptimizer({
                   setTitle(v);
                 }
               }}
-              className="w-full text-left bg-neutral-900 hover:bg-purple-950/20 border border-neutral-850 hover:border-purple-900/40 rounded-lg p-2 text-[10.5px] text-neutral-300 hover:text-purple-300 transition-all cursor-pointer leading-relaxed"
+              className="w-full text-left bg-neutral-900/40 hover:bg-purple-950/10 border border-neutral-900 hover:border-purple-500/30 rounded-xl p-3 text-[11px] text-neutral-300 hover:text-purple-200 transition-all duration-200 cursor-pointer leading-relaxed shadow-sm"
             >
               {v}
             </button>

@@ -7,7 +7,6 @@ import {
   Sliders,
   Key,
   FileText,
-  Trash2,
 } from "lucide-react";
 import { GeneratedPanel } from "../../../types.js";
 
@@ -195,72 +194,72 @@ const YouTubePage = React.memo(
             <SeoAuditor seoScore={seoScore} seoChecks={seoChecks} />
 
             {/* Premium Glassmorphic Tab Selector */}
-            <div className="flex bg-neutral-950/80 p-1.5 rounded-2xl border border-neutral-850 gap-1.5 shadow-inner">
+            <div className="flex bg-neutral-950/40 backdrop-blur-md p-1.5 rounded-2xl border border-neutral-900/60 gap-1.5 shadow-inner">
               <button
                 onClick={() => setActiveTab("details")}
-                className={`flex-grow flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold font-mono transition-all duration-305 cursor-pointer select-none ${
+                className={`flex-grow flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold font-mono transition-all duration-300 cursor-pointer select-none ${
                   activeTab === "details"
-                    ? "bg-purple-605 text-white shadow-lg shadow-purple-950/50 scale-[1.02]"
-                    : "text-neutral-400 hover:text-neutral-205 hover:bg-neutral-900/40"
+                    ? "bg-purple-600 text-white shadow-lg shadow-purple-950/40 scale-[1.01]"
+                    : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/30"
                 }`}
               >
-                <FileText className="h-3.5 w-3.5" />
+                <FileText className="h-4 w-4" />
                 <span>Details & Content</span>
               </button>
 
               <button
                 onClick={() => setActiveTab("settings")}
-                className={`flex-grow flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold font-mono transition-all duration-305 cursor-pointer select-none ${
+                className={`flex-grow flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold font-mono transition-all duration-300 cursor-pointer select-none ${
                   activeTab === "settings"
-                    ? "bg-purple-650 text-white shadow-lg shadow-purple-950/50 scale-[1.02]"
-                    : "text-neutral-400 hover:text-neutral-205 hover:bg-neutral-900/40"
+                    ? "bg-purple-600 text-white shadow-lg shadow-purple-950/40 scale-[1.01]"
+                    : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/30"
                 }`}
               >
-                <Sliders className="h-3.5 w-3.5" />
+                <Sliders className="h-4 w-4" />
                 <span>Publish Settings</span>
               </button>
 
               <button
                 onClick={() => setActiveTab("integrations")}
-                className={`flex-grow flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold font-mono transition-all duration-305 cursor-pointer select-none ${
+                className={`flex-grow flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold font-mono transition-all duration-300 cursor-pointer select-none ${
                   activeTab === "integrations"
-                    ? "bg-purple-650 text-white shadow-lg shadow-purple-950/50 scale-[1.02]"
-                    : "text-neutral-400 hover:text-neutral-205 hover:bg-neutral-900/40"
+                    ? "bg-purple-600 text-white shadow-lg shadow-purple-950/40 scale-[1.01]"
+                    : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/30"
                 }`}
               >
-                <Key className="h-3.5 w-3.5" />
+                <Key className="h-4 w-4" />
                 <span>Profiles & Keys</span>
               </button>
             </div>
 
             {/* Tab Content Container */}
-            <div className="bg-neutral-900/20 border border-neutral-850 rounded-3xl p-6 shadow-xl relative min-h-[420px] transition-all duration-300">
+            <div className="bg-neutral-950/10 backdrop-blur-sm border border-neutral-900 rounded-3xl p-6 shadow-xl relative min-h-[420px] transition-all duration-300">
               {activeTab === "details" && (
                 <div className="space-y-6 animate-fade-in animate-duration-300">
-                  <div className="flex items-center justify-between border-b border-neutral-850/60 pb-3">
-                    <h3 className="text-sm font-bold text-white tracking-wider uppercase font-mono">
+                  <div className="flex items-center justify-between border-b border-neutral-900 pb-3">
+                    <h3 className="text-xs font-bold text-neutral-300 tracking-wider uppercase font-mono">
                       Video Details
                     </h3>
                     <button
                       onClick={handleGenerateMetadata}
                       disabled={isAiGenerating || isPublishing}
-                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-purple-950/40 border border-purple-850 text-purple-300 hover:text-purple-200 hover:bg-purple-900/40 text-[11px] font-mono font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-950/25 border border-purple-900/40 text-purple-400 hover:text-purple-300 hover:bg-purple-900/20 text-xs font-mono font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer active:scale-98 shadow-sm"
                     >
                       {isAiGenerating ? (
                         <>
-                          <Loader2 className="h-3 w-3 animate-spin" />
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-purple-400" />
                           <span>Generating...</span>
                         </>
                       ) : (
                         <>
-                          <Sparkles className="h-3 w-3 animate-pulse" />
+                          <Sparkles className="h-3.5 w-3.5 animate-pulse text-purple-400" />
                           <span>Generate with AI</span>
                         </>
                       )}
                     </button>
                   </div>
 
-                  <div className="space-y-5">
+                  <div className="space-y-6">
                     {/* Title field with Clickbait Power Words & Title Optimizer suggestions */}
                     <TitleOptimizer
                       title={title}
@@ -337,47 +336,47 @@ const YouTubePage = React.memo(
 
               {activeTab === "settings" && (
                 <div className="space-y-6 animate-fade-in animate-duration-300">
-                  <div className="border-b border-neutral-850/60 pb-3">
-                    <h3 className="text-sm font-bold text-white tracking-wider uppercase font-mono">
+                  <div className="border-b border-neutral-900 pb-3.5">
+                    <h3 className="text-xs font-bold text-neutral-300 tracking-wider uppercase font-mono">
                       Publish & Audience Settings
                     </h3>
                   </div>
 
-                  <div className="space-y-5">
+                  <div className="space-y-6">
                     {/* Category and Privacy Selectors */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div className="space-y-2">
                         <label className="text-xs font-mono text-neutral-400 font-bold block">
                           Video Category
                         </label>
                         <select
                           value={category}
                           onChange={(e) => setCategory(e.target.value)}
-                          className="w-full bg-black/50 border border-neutral-855 rounded-xl px-4 py-3 text-xs text-neutral-305 focus:outline-none focus:border-purple-500/80 transition-all cursor-pointer"
+                          className="w-full bg-neutral-955/40 border border-neutral-900 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 rounded-xl px-4 py-3 text-xs text-neutral-300 focus:outline-none transition-all cursor-pointer shadow-inner"
                         >
-                          <option value="1">Film & Animation</option>
-                          <option value="24">Entertainment</option>
-                          <option value="20">Gaming</option>
-                          <option value="23">Comedy</option>
-                          <option value="22">People & Blogs</option>
-                          <option value="27">Education</option>
+                          <option value="1" className="bg-neutral-950">Film & Animation</option>
+                          <option value="24" className="bg-neutral-950">Entertainment</option>
+                          <option value="20" className="bg-neutral-950">Gaming</option>
+                          <option value="23" className="bg-neutral-950">Comedy</option>
+                          <option value="22" className="bg-neutral-950">People & Blogs</option>
+                          <option value="27" className="bg-neutral-950">Education</option>
                         </select>
                       </div>
 
-                      <div className="space-y-1.5">
+                      <div className="space-y-2">
                         <label className="text-xs font-mono text-neutral-400 font-bold block">
                           Privacy Status
                         </label>
                         <select
                           value={privacy}
                           onChange={(e) => setPrivacy(e.target.value)}
-                          className="w-full bg-black/50 border border-neutral-855 rounded-xl px-4 py-3 text-xs text-neutral-305 focus:outline-none focus:border-purple-500/80 transition-all cursor-pointer"
+                          className="w-full bg-neutral-955/40 border border-neutral-900 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 rounded-xl px-4 py-3 text-xs text-neutral-300 focus:outline-none transition-all cursor-pointer shadow-inner"
                         >
-                          <option value="unlisted">
+                          <option value="unlisted" className="bg-neutral-950">
                             Unlisted (Review First)
                           </option>
-                          <option value="private">Private</option>
-                          <option value="public">
+                          <option value="private" className="bg-neutral-950">Private</option>
+                          <option value="public" className="bg-neutral-950">
                             Public (Immediate Publish)
                           </option>
                         </select>
@@ -385,29 +384,29 @@ const YouTubePage = React.memo(
                     </div>
 
                     {/* Shorts Toggle */}
-                    <div className="flex items-center justify-between p-4 bg-neutral-950/60 rounded-xl border border-neutral-900/60 transition-all hover:border-neutral-800">
-                      <div className="space-y-0.5 pr-4">
+                    <div className="flex items-center justify-between p-4.5 bg-neutral-950/20 backdrop-blur-sm rounded-2xl border border-neutral-900 transition-all hover:border-neutral-800">
+                      <div className="space-y-1 pr-4">
                         <div className="text-xs font-bold text-white flex items-center gap-1.5 font-mono">
                           <span>YouTube Shorts Format</span>
-                          <span className="text-[9px] font-bold px-1.5 py-0.5 bg-red-955 text-red-400 rounded border border-red-900/60 uppercase">
+                          <span className="text-[9px] font-bold px-2 py-0.5 bg-red-950/25 text-red-400 rounded-md border border-red-900/40 uppercase">
                             Beta
                           </span>
                         </div>
-                        <p className="text-[10px] text-neutral-450 leading-relaxed font-sans">
+                        <p className="text-[10px] text-neutral-500 leading-relaxed font-sans">
                           Optimize video format description and hashtag
                           indicators suited for vertical mobile feeds.
                         </p>
                       </div>
                       <button
                         onClick={() => setIsShort(!isShort)}
-                        className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-all duration-300 ${
+                        className={`w-11 h-6 flex items-center rounded-full p-1 cursor-pointer transition-all duration-300 shrink-0 ${
                           isShort ? "bg-[#FF0000]" : "bg-neutral-800"
                         }`}
                       >
                         <div
-                          className={`bg-white w-4.5 h-4.5 rounded-full shadow-md transform transition-transform duration-300 ${
-                            isShort ? "translate-x-6" : "translate-x-0"
-                          }`}
+                          className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${
+                            isShort ? "translate-x-5" : "translate-x-0"
+              }`}
                         />
                       </button>
                     </div>
@@ -455,13 +454,13 @@ const YouTubePage = React.memo(
 
               {activeTab === "integrations" && (
                 <div className="space-y-6 animate-fade-in animate-duration-300">
-                  <div className="border-b border-neutral-850/60 pb-3">
-                    <h3 className="text-sm font-bold text-white tracking-wider uppercase font-mono">
+                  <div className="border-b border-neutral-900 pb-3.5">
+                    <h3 className="text-xs font-bold text-neutral-300 tracking-wider uppercase font-mono">
                       Profiles, Keys & Integrations
                     </h3>
                   </div>
 
-                  <div className="space-y-5">
+                  <div className="space-y-6">
                     {/* Profile Manager defaults saver */}
                     <ProfileManager
                       currentProfileName={currentProfileName}

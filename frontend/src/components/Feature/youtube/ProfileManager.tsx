@@ -56,30 +56,30 @@ export default function ProfileManager({
   };
 
   return (
-    <div className="bg-neutral-950/60 p-4 border border-neutral-850 rounded-xl space-y-3.5 font-mono text-xs text-neutral-450 animate-fade-in">
-      <div className="flex items-center justify-between border-b border-neutral-900 pb-1.5">
-        <span className="text-neutral-300 font-bold flex items-center gap-1.5">
+    <div className="bg-neutral-950/40 backdrop-blur-sm p-5 border border-neutral-900 rounded-2xl space-y-4 font-mono text-xs text-neutral-400 animate-fade-in transition-all duration-305 hover:border-neutral-800">
+      <div className="flex items-center justify-between border-b border-neutral-900 pb-2">
+        <span className="text-neutral-200 font-bold flex items-center gap-2">
           <FolderOpen className="h-4 w-4 text-purple-400" />
           Settings Profile Manager
         </span>
-        <span className="text-[10px] text-purple-400 font-bold">
+        <span className="text-[10px] text-purple-400 font-bold bg-purple-950/30 border border-purple-900/30 rounded-md px-2 py-0.5">
           Active: {currentProfileName || "None"}
         </span>
       </div>
 
-      <div className="flex gap-2.5 items-center flex-wrap">
-        <div className="flex-1 min-w-[200px] space-y-1">
-          <span className="text-[9.5px] text-neutral-500 font-bold block">
+      <div className="flex gap-3 items-center flex-wrap">
+        <div className="flex-grow min-w-[200px] space-y-1.5">
+          <span className="text-[10px] text-neutral-500 font-bold block">
             LOAD SETTINGS PROFILE:
           </span>
           <select
             value={currentProfileName}
             onChange={(e) => onLoadProfile(e.target.value)}
-            className="w-full bg-neutral-900 border border-neutral-850 rounded px-2.5 py-1.5 text-xs text-neutral-300 focus:outline-none cursor-pointer"
+            className="w-full bg-neutral-955/40 border border-neutral-900 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 rounded-xl px-3 py-2.5 text-xs text-neutral-300 focus:outline-none cursor-pointer shadow-inner"
           >
-            <option value="">-- Choose Profile --</option>
+            <option value="" className="bg-neutral-950">-- Choose Profile --</option>
             {profiles.map((p) => (
-              <option key={p.name} value={p.name}>
+              <option key={p.name} value={p.name} className="bg-neutral-950">
                 {p.name}
               </option>
             ))}
@@ -89,7 +89,7 @@ export default function ProfileManager({
         {currentProfileName && (
           <button
             onClick={() => onDeleteProfile(currentProfileName)}
-            className="px-2.5 py-1.5 bg-red-950/20 hover:bg-red-950/50 border border-red-900/30 text-red-400 hover:text-red-300 rounded-lg text-[9.5px] font-bold self-end transition-colors cursor-pointer flex items-center gap-1"
+            className="px-3.5 py-2.5 bg-red-950/10 hover:bg-red-950/30 border border-red-900/30 text-red-400 hover:text-red-300 rounded-xl text-[10px] font-bold self-end transition-all duration-200 cursor-pointer flex items-center gap-1.5 active:scale-98"
             title="Delete this profile"
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -100,9 +100,9 @@ export default function ProfileManager({
 
       <form
         onSubmit={handleSave}
-        className="pt-2 border-t border-neutral-900/60 space-y-2"
+        className="pt-3 border-t border-neutral-900 space-y-2.5"
       >
-        <span className="text-[9.5px] text-neutral-500 font-bold block">
+        <span className="text-[10px] text-neutral-500 font-bold block">
           SAVE CURRENT CONFIG AS PROFILE:
         </span>
         <div className="flex gap-2">
@@ -111,15 +111,15 @@ export default function ProfileManager({
             value={newProfileName}
             onChange={(e) => setNewProfileName(e.target.value)}
             placeholder="e.g. Action Recap Shorts, Romance Promo..."
-            className="flex-1 bg-neutral-900 border border-neutral-850 rounded px-2.5 py-1.5 text-xs text-white focus:outline-none"
+            className="flex-1 bg-neutral-955/30 border border-neutral-900 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none shadow-inner"
           />
           <button
             type="submit"
             disabled={!newProfileName.trim()}
-            className="px-3 bg-purple-650 hover:bg-purple-550 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg text-[10.5px] font-bold flex items-center gap-1 transition-colors cursor-pointer"
+            className="px-4 bg-purple-650 hover:bg-purple-550 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-[11px] font-bold flex items-center gap-1.5 transition-all duration-200 cursor-pointer active:scale-98 shadow-md"
           >
-            <Save className="h-3.5 w-3.5" />
-            Save Profile
+            <Save className="h-4 w-4" />
+            Save
           </button>
         </div>
       </form>

@@ -32,12 +32,12 @@ export default function TagManager({
   return (
     <div className="space-y-2 animate-fade-in">
       <div className="flex justify-between items-center text-xs font-mono">
-        <label className="text-neutral-400 font-bold flex items-center gap-1">
-          <Tag className="h-3.5 w-3.5 text-purple-400" />
+        <label className="text-neutral-300 font-bold flex items-center gap-1.5">
+          <Tag className="h-4 w-4 text-purple-400" />
           Video Tags ({tags.length})
         </label>
         <span
-          className={`font-semibold ${
+          className={`font-semibold text-[11px] font-mono ${
             tagsCharactersCount > 500 ? "text-red-400" : "text-neutral-500"
           }`}
         >
@@ -45,23 +45,23 @@ export default function TagManager({
         </span>
       </div>
 
-      <div className="bg-black/40 border border-neutral-850 rounded-xl p-3.5 space-y-3">
+      <div className="bg-neutral-950/40 backdrop-blur-sm border border-neutral-900 rounded-2xl p-4.5 space-y-4 shadow-sm">
         {/* Render Tag Badges */}
-        <div className="flex flex-wrap gap-1.5 max-h-[120px] overflow-y-auto scrollbar-thin">
+        <div className="flex flex-wrap gap-1.5 max-h-[120px] overflow-y-auto scrollbar-thin pr-1">
           {tags.length === 0 ? (
-            <span className="text-[10px] text-neutral-600 font-mono italic">
+            <span className="text-[11px] text-neutral-550 font-mono italic py-1 pl-1">
               No tags added yet. Enter a keyword below.
             </span>
           ) : (
             tags.map((tag) => (
               <div
                 key={tag}
-                className="flex items-center gap-1 bg-purple-950/40 border border-purple-900/60 text-purple-300 rounded-lg px-2.5 py-1 text-[10px] font-mono select-none hover:bg-purple-900/40 transition-colors animate-fade-in"
+                className="flex items-center gap-1 bg-purple-950/20 border border-purple-900/40 text-purple-300 rounded-lg px-3 py-1 text-[10.5px] font-mono select-none hover:bg-purple-900/20 transition-all duration-200 animate-fade-in"
               >
                 <span>{tag}</span>
                 <button
                   onClick={() => onRemoveTag(tag)}
-                  className="text-purple-400 hover:text-purple-200 cursor-pointer"
+                  className="text-purple-400 hover:text-purple-200 cursor-pointer transition-colors"
                   title={`Remove tag: ${tag}`}
                 >
                   <X className="h-3 w-3" />
@@ -79,20 +79,20 @@ export default function TagManager({
             onChange={(e) => setTagInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Enter tag and press Enter or comma..."
-            className="flex-1 bg-neutral-950 border border-neutral-850 rounded-lg px-3 py-1.5 text-xs text-white placeholder-neutral-650 focus:outline-none focus:border-purple-500/60 font-mono"
+            className="flex-1 bg-neutral-950/30 border border-neutral-900 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 rounded-xl px-4 py-2.5 text-xs text-white placeholder-neutral-600 focus:outline-none font-mono shadow-inner"
           />
           <button
             onClick={onAddTag}
-            className="px-3 bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-300 hover:text-white rounded-lg flex items-center justify-center cursor-pointer transition-colors"
+            className="px-4.5 bg-neutral-900 hover:bg-purple-955/20 border border-neutral-850 hover:border-purple-500/35 text-neutral-300 hover:text-purple-300 rounded-xl flex items-center justify-center cursor-pointer transition-all duration-200"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4.5 w-4.5" />
           </button>
         </div>
 
         {/* Suggested tags bank based on genre */}
         {suggestedTags.length > 0 && (
-          <div className="pt-2 border-t border-neutral-900/40 space-y-1">
-            <span className="text-[9.5px] font-mono text-neutral-550 block font-bold">
+          <div className="pt-3 border-t border-neutral-900/60 space-y-2">
+            <span className="text-[10px] font-mono text-neutral-500 block font-bold">
               🏷️ AI Suggest Tags (Click to add):
             </span>
             <div className="flex flex-wrap gap-1.5">
@@ -103,10 +103,10 @@ export default function TagManager({
                     key={tag}
                     onClick={() => !isAdded && onAddSuggestedTag(tag)}
                     disabled={isAdded}
-                    className={`px-2 py-0.5 rounded font-mono text-[9px] border transition-all cursor-pointer ${
+                    className={`px-3 py-1 rounded-lg font-mono text-[9.5px] font-medium border transition-all duration-200 cursor-pointer ${
                       isAdded
-                        ? "bg-neutral-955 text-neutral-650 border-neutral-900 cursor-not-allowed opacity-40"
-                        : "bg-neutral-900/50 hover:bg-purple-950/20 text-neutral-450 hover:text-purple-300 border-neutral-800 hover:border-purple-900/40"
+                        ? "bg-neutral-950/20 text-neutral-650 border-neutral-900/40 cursor-not-allowed opacity-40"
+                        : "bg-neutral-900/30 hover:bg-purple-950/10 text-neutral-450 hover:text-purple-300 border-neutral-850/60 hover:border-purple-900/35"
                     }`}
                   >
                     +{tag}
