@@ -106,16 +106,29 @@ def pyramid_guided_inpaint(original_img: np.ndarray, mask: np.ndarray, radius: i
 async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
     """
     Main orchestration logic for separating a panel into Background, Character, and Text layers.
-    Returns a dictionary mapping layer type to public URLs.
+    Follows a strict "Detect First, Extract Text First" sequence:
 
-    ENVIRONMENT toggle:
-      - development: write WebP layers to disk and return local URL paths
-      - production: upload WebP layers to Supabase and return Supabase public URLs
+    Phase 1: Global Detection
+    1. Scan initial image using EasyOCR to detect if any text or sound effects exist.
+    2. Scan initial image using rembg (U-2-Net session) to identify the bounding box of the main character/subject.
+
+    Phase 2: Text Separation (Conditional)
+    3. IF text exists:
+       - Extract text and speech bubbles into their own transparent WebP layer (text.webp)
+         using adaptive thresholding and contour refinement logic.
+       - Immediately use cv2.INPAINT_TELEA to erase that text from the working image, creating a clean textless_img.
+    4. IF no text exists:
+       - Return a blank/empty transparent image for text.webp.
+       - Proceed using the original image as the textless_img.
+
+    Phase 3: Character & Background Separation
+    5. Run character extraction (rembg) strictly on the textless_img to generate char.webp and accurate char_mask.
+    6. Erase character from the textless_img using Pyramidal Guided Inpainting (cv2.INPAINT_NS) to generate the final bg.webp.
     """
     if not os.path.exists(image_path):
         raise FileNotFoundError(f"Source image not found: {image_path}")
 
-    logger.info(f"Starting layer segmentation for panel: {panel_id}")
+    logger.info(f"Starting chronological layer segmentation for panel: {panel_id}")
 
     original_img = cv2.imread(image_path)
     if original_img is None:
@@ -123,32 +136,49 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
 
     height, width = original_img.shape[:2]
 
-    # 1. Initialize masks
-    # Both masks are single channel (grayscale)
+    # Initialize masks and layer containers
     text_mask = np.zeros((height, width), dtype=np.uint8)
     char_mask = np.zeros((height, width), dtype=np.uint8)
+    global_char_mask = np.zeros((height, width), dtype=np.uint8)
 
     # =========================================================================
-    # Step 1: Text & Speech Bubble Segmentation (Refined to solve "Boxy Bubbles")
+    # Phase 1: Global Detection
+    # =========================================================================
+    # 1. OCR text detection scan
+    ocr_results = []
+    try:
+        ocr_results = await extract_full_ocr_data(image_path, langs=['en'])
+    except Exception as e:
+        logger.error(f"[Global Detection] EasyOCR scan failed: {e}", exc_info=True)
+
+    # 2. rembg character scan on original image (for localizing subject/bounding box)
+    try:
+        if has_rembg:
+            session = get_rembg_session()
+            pil_orig = Image.fromarray(cv2.cvtColor(original_img, cv2.COLOR_BGR2RGB))
+            char_pil_scan = rembg_remove(pil_orig, session=session)
+            char_np_scan = np.array(char_pil_scan)
+            if char_np_scan.shape[2] == 4:
+                global_char_mask = char_np_scan[:, :, 3]
+    except Exception as e:
+        logger.error(f"[Global Detection] Character pre-detection scan failed: {e}", exc_info=True)
+
+    # =========================================================================
+    # Phase 2: Text Separation (Conditional)
     # =========================================================================
     text_layer_bytes = None
-    try:
-        # Get bounding boxes from OCR
-        ocr_results = await extract_full_ocr_data(image_path, langs=['en'])
+    textless_img = original_img.copy()
 
-        if not ocr_results:
-            logger.info("No text detected. Creating blank text layer.")
-            text_layer_bytes = create_blank_webp(width, height)
-        else:
-            # We use OpenCV contouring around the bounding boxes to catch speech bubbles
+    if ocr_results:
+        logger.info(f"[Text Separation] {len(ocr_results)} text regions detected. Performing extraction.")
+        try:
             for res in ocr_results:
-                # box is [[x1,y1], [x2,y1], [x2,y2], [x1,y2]]
                 pts = np.array(res["box"], dtype=np.int32)
                 x, y, w, h_box = cv2.boundingRect(pts)
                 if w <= 0 or h_box <= 0:
                     continue
 
-                # Create a local ROI slightly larger than the bounding box to search for bubble contours
+                # Local ROI with extra padding
                 pad = max(w, h_box) // 2
                 x1, y1 = max(0, x - pad), max(0, y - pad)
                 x2, y2 = min(width, x + w + pad), min(height, y + h_box + pad)
@@ -159,7 +189,7 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
 
                 roi_gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
 
-                # Generate thresholded images
+                # Generate adaptive and simple thresholds
                 thresh_bin = cv2.adaptiveThreshold(
                     roi_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
                 )
@@ -168,40 +198,35 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
                 )
                 _, simple_thresh = cv2.threshold(roi_gray, 200, 255, cv2.THRESH_BINARY)
 
-                # Find contours on thresholded versions
+                # Find contours across thresholds
                 contours_bin, _ = cv2.findContours(thresh_bin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
                 contours_inv, _ = cv2.findContours(thresh_inv, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
                 contours_simple, _ = cv2.findContours(simple_thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
                 all_contours = list(contours_bin) + list(contours_inv) + list(contours_simple)
 
-                # Center of the text bounding box in the ROI coordinate system
                 cx, cy = (x + w // 2) - x1, (y + h_box // 2) - y1
                 roi_box_area = w * h_box
 
                 bubble_found = False
-                # Sort contours by area descending to check largest first
                 all_contours = sorted(all_contours, key=cv2.contourArea, reverse=True)
 
                 for cnt in all_contours:
                     area = cv2.contourArea(cnt)
                     if area > 0.4 * roi_box_area:
-                        # Check if the OCR bounding box center is inside this contour
                         if cv2.pointPolygonTest(cnt, (cx, cy), False) >= 0:
-                            # Calculate solidity
                             hull = cv2.convexHull(cnt)
                             hull_area = cv2.contourArea(hull)
                             solidity = float(area) / hull_area if hull_area > 0 else 0
 
                             if solidity > 0.7:
-                                # Smooth and close the speech bubble contour (Solves "Smooth Speech Bubbles")
                                 closed_cnt = smooth_contour(cnt)
                                 cnt_offset = closed_cnt + [x1, y1]
 
-                                # Draw speech bubble mask
+                                # Draw onto global text mask
                                 cv2.drawContours(text_mask, [cnt_offset], -1, 255, -1)
 
-                                # Apply Morphological Closing to clean jagged edges inside speech bubble
+                                # Clean edges inside localized mask using Morphological Closing
                                 local_mask = np.zeros_like(roi_gray)
                                 cv2.drawContours(local_mask, [closed_cnt], -1, 255, -1)
                                 kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
@@ -212,8 +237,7 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
                                 break
 
                 if not bubble_found:
-                    # Fallback: float text, mask only the thresholded text pixels themselves
-                    # Enhance with connected components filtering (Solves "Floating Text Connected Components")
+                    # Fallback: Float text, mask only thresholded pixels
                     tx1, ty1 = max(0, x), max(0, y)
                     tx2, ty2 = min(width, x + w), min(height, y + h_box)
                     exact_roi = original_img[ty1:ty2, tx1:tx2]
@@ -228,11 +252,10 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
                         mean_val = np.mean(exact_roi_gray)
                         raw_text_pixels = exact_thresh_inv if mean_val > 127 else exact_thresh_bin
 
-                        # Filter connected components to eliminate background noise/screentones
+                        # Filter screentones and background textures
                         num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(raw_text_pixels, connectivity=8)
                         filtered_text_pixels = np.zeros_like(raw_text_pixels)
 
-                        # Calculate ROI bounds dimensions
                         roi_w, roi_h = tx2 - tx1, ty2 - ty1
                         min_pixel_area = max(2, int((roi_w * roi_h) * 0.0005))
                         max_pixel_area = int((roi_w * roi_h) * 0.2)
@@ -242,7 +265,6 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
                             comp_w = stats[label_idx, cv2.CC_STAT_WIDTH]
                             comp_h = stats[label_idx, cv2.CC_STAT_HEIGHT]
 
-                            # Clean textures and screentones based on area and extreme aspect ratios
                             if min_pixel_area <= comp_area <= max_pixel_area:
                                 aspect_ratio = float(comp_w) / comp_h if comp_h > 0 else 0
                                 if 0.05 < aspect_ratio < 20.0:
@@ -250,32 +272,28 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
 
                         text_mask[ty1:ty2, tx1:tx2] = cv2.bitwise_or(text_mask[ty1:ty2, tx1:tx2], filtered_text_pixels)
 
-            # Extract the text layer (original image colors, but only where mask is 255, else transparent)
+            # Extract final text layer
             text_layer = cv2.cvtColor(original_img, cv2.COLOR_BGR2BGRA)
-            text_layer[text_mask == 0] = [0, 0, 0, 0] # Make background transparent
-
-            # Encode to webp
+            text_layer[text_mask == 0] = [0, 0, 0, 0]
             _, buffer = cv2.imencode('.webp', text_layer)
             text_layer_bytes = buffer.tobytes()
 
-    except Exception as e:
-        logger.error(f"Error extracting text layer: {e}", exc_info=True)
+            # Clean text/bubbles out of working image immediately to prevent "Sticky Text"
+            text_dilate_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+            dilated_text_mask = cv2.dilate(text_mask, text_dilate_kernel, iterations=1)
+            textless_img = cv2.inpaint(original_img, dilated_text_mask, inpaintRadius=5, flags=cv2.INPAINT_TELEA)
+
+        except Exception as e:
+            logger.error(f"Error during conditional text separation: {e}", exc_info=True)
+            text_layer_bytes = create_blank_webp(width, height)
+            textless_img = original_img.copy()
+    else:
+        logger.info("[Text Separation] No text regions detected. Creating blank placeholder text layer.")
         text_layer_bytes = create_blank_webp(width, height)
+        textless_img = original_img.copy()
 
     # =========================================================================
-    # Step 1.5: Erase Text to create Textless Image (Solves "Sticky Text" Step B)
-    # =========================================================================
-    textless_img = original_img.copy()
-    try:
-        # Dilate text_mask slightly to cover the text/bubble borders perfectly
-        text_dilate_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-        dilated_text_mask = cv2.dilate(text_mask, text_dilate_kernel, iterations=1)
-        textless_img = cv2.inpaint(original_img, dilated_text_mask, inpaintRadius=5, flags=cv2.INPAINT_TELEA)
-    except Exception as e:
-        logger.error(f"Error generating textless image: {e}", exc_info=True)
-
-    # =========================================================================
-    # Step 2: Character Segmentation (Solves "Sticky Text" Step C)
+    # Phase 3: Character & Background Separation
     # =========================================================================
     char_layer_bytes = None
     try:
@@ -283,51 +301,39 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
             char_layer_bytes = create_blank_webp(width, height)
         else:
             session = get_rembg_session()
-            # rembg expects a PIL Image or bytes. We pass PIL Image of textless_img (not original_img)
-            pil_img = Image.fromarray(cv2.cvtColor(textless_img, cv2.COLOR_BGR2RGB))
+            # rembg run STRICTLY on textless_img to guarantee character is fully clean
+            pil_textless = Image.fromarray(cv2.cvtColor(textless_img, cv2.COLOR_BGR2RGB))
+            char_pil = rembg_remove(pil_textless, session=session)
 
-            # rembg returns a PIL Image with transparent background
-            char_pil = rembg_remove(pil_img, session=session)
-
-            # Generate the character mask for inpainting later
-            char_np = np.array(char_pil) # RGBA
+            char_np = np.array(char_pil)
             if char_np.shape[2] == 4:
-                char_mask = char_np[:,:,3] # Extract alpha channel
+                char_mask = char_np[:, :, 3]
             else:
                 char_mask = np.zeros((height, width), dtype=np.uint8)
 
-            # Encode character layer to webp
             buffer = io.BytesIO()
             char_pil.save(buffer, format="WEBP")
             char_layer_bytes = buffer.getvalue()
 
     except Exception as e:
-        logger.error(f"Error extracting character layer: {e}", exc_info=True)
+        logger.error(f"Error during character segmentation: {e}", exc_info=True)
         char_layer_bytes = create_blank_webp(width, height)
         char_mask = np.zeros((height, width), dtype=np.uint8)
 
-    # =========================================================================
-    # Step 3: Background Inpainting (Solves "Ghosting Blob")
-    # =========================================================================
+    # 6. Generate final background by erasing character/text holes from the original image
     bg_layer_bytes = None
     try:
-        # Combine masks to find all holes
         combined_mask = cv2.bitwise_or(text_mask, char_mask)
-
-        # Dilate mask slightly to prevent artifacts at the edges
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
         combined_mask = cv2.dilate(combined_mask, kernel, iterations=1)
 
-        # Inpaint using Pyramidal Guided Inpainting (Solves "Better Background Inpainting")
+        # Pyramidal Guided Inpainting to generate pristine backgrounds
         inpainted_bg = pyramid_guided_inpaint(original_img, combined_mask, radius=20)
-
-        # Convert BGR to BGRA and encode to WebP
         _, buffer = cv2.imencode('.webp', inpainted_bg)
         bg_layer_bytes = buffer.tobytes()
 
     except Exception as e:
-        logger.error(f"Error inpainting background layer: {e}", exc_info=True)
-        # Fallback to original image if inpainting completely fails
+        logger.error(f"Error generating background layer: {e}", exc_info=True)
         _, buffer = cv2.imencode('.webp', original_img)
         bg_layer_bytes = buffer.tobytes()
 
