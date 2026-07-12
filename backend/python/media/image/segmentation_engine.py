@@ -16,34 +16,64 @@ except ImportError:
 _yolo_model = None
 
 def get_yolo_model():
-    """Lazily downloads and initializes the YOLO manga-segmentation model."""
+    """
+    Lazily downloads and initializes the YOLO manga-segmentation model.
+    Uses keremberke/manga-speech-bubble-detection (YOLOv8n-seg), a well-supported
+    model trained specifically on manga speech bubbles and text regions.
+    Falls back to the generic YOLOv8n-seg pretrained model if HuggingFace download fails.
+    """
     global _yolo_model
-    if _yolo_model is None and has_yolo_dependencies:
-        try:
-            logger.info("Downloading manga-segmentation YOLOv26 checkpoint from HuggingFace Hub...")
-            model_path = hf_hub_download(
-                repo_id="ShadowB/Manga109-panel-balloon-text-yolov26-segmentation",
-                filename="best.pt"
-            )
-            logger.info(f"Loading YOLO model from: {model_path}")
-            _yolo_model = YOLO(model_path)
-        except Exception as e:
-            logger.error(f"Failed to load YOLO segmentation model: {e}", exc_info=True)
-            _yolo_model = None
-    return _yolo_model
+    if _yolo_model is not None:
+        return _yolo_model
 
-def segment_text_and_balloons(image_path: str, conf_threshold: float = 0.5) -> np.ndarray:
+    if not has_yolo_dependencies:
+        return None
+
+    # Primary: manga-specific speech bubble detection model (YOLOv8n-seg)
+    try:
+        logger.info("Downloading manga-speech-bubble YOLOv8n-seg checkpoint from HuggingFace Hub...")
+        model_path = hf_hub_download(
+            repo_id="keremberke/manga-speech-bubble-detection",
+            filename="best.pt"
+        )
+        logger.info(f"Loading YOLO model from: {model_path}")
+        _yolo_model = YOLO(model_path)
+        logger.info("YOLO manga-speech-bubble model loaded successfully.")
+        return _yolo_model
+    except Exception as e:
+        logger.warning(f"Failed to load manga-specific YOLO model from HuggingFace: {e}. Trying generic YOLOv8n-seg fallback...")
+
+    # Fallback: generic YOLOv8n-seg pretrained model
+    try:
+        logger.info("Loading generic YOLOv8n-seg pretrained model as YOLO fallback...")
+        _yolo_model = YOLO("yolov8n-seg.pt")
+        logger.info("Generic YOLOv8n-seg fallback model loaded successfully.")
+        return _yolo_model
+    except Exception as e:
+        logger.error(f"All YOLO model loading attempts failed: {e}", exc_info=True)
+        _yolo_model = None
+        return None
+
+def segment_text_and_balloons(image_path: str, conf_threshold: float = 0.25) -> np.ndarray:
     """
     Infers text and speech balloon masks on a panel image using the YOLO model.
     Returns:
-      A single-channel binary mask (numpy uint8 array, 255 for detected regions, 0 elsewhere).
+      A single-channel binary mask (numpy uint8 array, 255 for detected regions, 0 elsewhere),
+      or None if the model is unavailable.
+
+    Args:
+      image_path:     Absolute path to the panel image file.
+      conf_threshold: Minimum confidence for a detection to be included (default 0.25).
+                      Lowered from 0.5 to capture more manga-style stylized text regions.
     """
     if not has_yolo_dependencies:
-        raise ImportError("ultralytics or huggingface_hub is not installed. YOLO segmentation cannot run.")
+        logger.warning("ultralytics or huggingface_hub is not installed. YOLO segmentation cannot run.")
+        return None
 
     model = get_yolo_model()
     if model is None:
-        raise RuntimeError("YOLO segmentation model failed to load from HuggingFace Hub.")
+        logger.warning("YOLO segmentation model unavailable — falling back to OpenCV.")
+        return None
 
     if not os.path.exists(image_path):
         raise FileNotFoundError(f"Image path does not exist for YOLO segmentation: {image_path}")
@@ -57,7 +87,7 @@ def segment_text_and_balloons(image_path: str, conf_threshold: float = 0.5) -> n
         result = results[0]
         # Check if any segmentations (masks) were detected
         if result.masks is None or len(result.masks) == 0:
-            logger.info("YOLO segmentation completed successfully: No masks found.")
+            logger.info("YOLO segmentation completed: No masks found in this panel.")
             return None
 
         # Original image dimensions
@@ -68,15 +98,16 @@ def segment_text_and_balloons(image_path: str, conf_threshold: float = 0.5) -> n
         combined_mask = np.zeros((height, width), dtype=np.uint8)
 
         # Loop through detected instances
+        # keremberke/manga-speech-bubble-detection class schema:
+        #   0: balloon (speech bubble)
+        # Legacy ShadowB schema:
+        #   0: frame, 1: text, 2: balloon
+        # We accept ALL detected classes since this model focuses specifically on
+        # speech bubbles and text regions; all are relevant for the text layer.
         for i, mask_instance in enumerate(result.masks.data):
-            class_id = int(result.boxes.cls[i].item())
             confidence = float(result.boxes.conf[i].item())
 
-            # Labels schema for the model:
-            # 0: frame
-            # 1: text
-            # 2: balloon (speech bubble)
-            if class_id in (1, 2) and confidence >= conf_threshold:
+            if confidence >= conf_threshold:
                 # Resize mask slice back to original image dimensions if needed
                 mask_np = mask_instance.cpu().numpy()
                 if mask_np.shape[:2] != (height, width):
@@ -87,15 +118,14 @@ def segment_text_and_balloons(image_path: str, conf_threshold: float = 0.5) -> n
                 combined_mask = cv2.bitwise_or(combined_mask, binary_slice)
 
         if np.any(combined_mask > 0):
-            logger.info(f"YOLO successfully segmented text/balloon masks (confidence >= {conf_threshold})")
+            mask_pixel_count = int(np.sum(combined_mask > 0))
+            logger.info(f"YOLO successfully segmented text/balloon masks (conf >= {conf_threshold}, {mask_pixel_count} pixels masked)")
             return combined_mask
         else:
-            # Return an empty mask if YOLO successfully ran but found no masks, which is a valid case.
-            # But wait! If the user says "ensure if rembg or ultralytics fails, it does not just return null or crash silently"
-            # Here, returning an empty mask is not a failure, it just means no text was found.
-            # But to be safe, if we return an empty array, it's not null.
+            logger.info(f"YOLO ran successfully but found no text/balloon regions above confidence {conf_threshold}.")
             return np.zeros((height, width), dtype=np.uint8)
 
     except Exception as e:
         logger.error(f"Error running YOLO text/balloon segmentation: {e}", exc_info=True)
-        raise RuntimeError(f"YOLO segmentation failed: {e}")
+        # Return None so the caller can fall back to OpenCV instead of hard-crashing
+        return None

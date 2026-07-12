@@ -253,8 +253,8 @@ const ImageEditorPage = React.memo(({ appLogic }: ImageEditorPageProps) => {
               detectedBoxes={editorProps.detectedBoxes}
               handleClearDetectedBoxes={editorProps.handleClearDetectedBoxes}
               handleExecuteSave={editorProps.handleExecuteSave}
+              handleSaveTrainingData={editorProps.handleSaveTrainingData}
               activeTab={editorProps.activeTab as any}
-
             />
           </div>
         </aside>

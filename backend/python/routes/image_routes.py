@@ -729,8 +729,6 @@ async def extract_panel_layers(panel_id: str, body: ProcessLayersRequest):
             img = Image.open(tmp_in_path)
             w, h = img.size
             
-            results = []
-            
             # If no panels detected, fallback to the entire page as a single panel
             if not detected_panels:
                 logger.info("[Layer Segmentation] No individual panels detected. Processing entire page as a single panel.")
@@ -754,44 +752,68 @@ async def extract_panel_layers(panel_id: str, body: ProcessLayersRequest):
                     }]
                 }
                 
-            logger.info(f"[Layer Segmentation] Sliced manga page into {len(detected_panels)} panels.")
-            
-            for idx, box in enumerate(detected_panels):
-                # Calculate pixel-based crop box from percentages
-                top_px = int(round((box["cropTop"] / 100) * h))
-                bot_px = int(round((box["cropBottom"] / 100) * h))
-                left_px = int(round((box["cropLeft"] / 100) * w))
-                right_px = int(round((box["cropRight"] / 100) * w))
-                
-                crop_w = w - left_px - right_px
-                crop_h = h - top_px - bot_px
-                
-                # Check for out of bounds bounds
-                if left_px < 0 or top_px < 0 or crop_w <= 0 or crop_h <= 0 or (left_px + crop_w) > w or (top_px + crop_h) > h:
-                    raise ValueError(f"Cropped box is out of bounds of the original image: left={left_px}, top={top_px}, width={crop_w}, height={crop_h} for image size {w}x{h}")
-                
-                if crop_w > 10 and crop_h > 10:
+            logger.info(f"[Layer Segmentation] Sliced manga page into {len(detected_panels)} panels — processing in parallel.")
+
+            # Cap concurrency at 3 simultaneous panels (rembg U-2-Net is memory intensive)
+            panel_semaphore = asyncio.Semaphore(3)
+
+            async def process_one_panel(idx: int, box: dict):
+                """Crop, segment, and clean up a single detected panel concurrently."""
+                async with panel_semaphore:
+                    top_px = int(round((box["cropTop"] / 100) * h))
+                    bot_px = int(round((box["cropBottom"] / 100) * h))
+                    left_px = int(round((box["cropLeft"] / 100) * w))
+                    right_px = int(round((box["cropRight"] / 100) * w))
+
+                    crop_w = w - left_px - right_px
+                    crop_h = h - top_px - bot_px
+
+                    if left_px < 0 or top_px < 0 or crop_w <= 0 or crop_h <= 0 or (left_px + crop_w) > w or (top_px + crop_h) > h:
+                        logger.warning(
+                            f"[Layer Segmentation] Panel {idx} has out-of-bounds crop box: "
+                            f"left={left_px}, top={top_px}, w={crop_w}, h={crop_h} (image {w}x{h}) — skipping."
+                        )
+                        return None
+
+                    if crop_w <= 10 or crop_h <= 10:
+                        logger.warning(f"[Layer Segmentation] Panel {idx} is too small ({crop_w}x{crop_h}) — skipping.")
+                        return None
+
                     img_cropped = img.crop((left_px, top_px, left_px + crop_w, top_px + crop_h))
-                    
-                    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_panel:
-                        img_cropped.save(tmp_panel, format="PNG")
-                        tmp_panel_path = tmp_panel.name
-                        
+
+                    tmp_panel_path = None
                     try:
-                        # Pass each individual cropped panel into layer separation
+                        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_panel:
+                            img_cropped.save(tmp_panel, format="PNG")
+                            tmp_panel_path = tmp_panel.name
+
+                        logger.info(f"[Layer Segmentation] Processing panel {idx}/{len(detected_panels)-1} (panel_id={panel_id}_{idx})...")
                         panel_layers = await process_layers(tmp_panel_path, f"{panel_id}_{idx}")
-                        results.append({
+                        return {
                             "panel_index": idx,
                             "box": box,
                             "layers": panel_layers
-                        })
+                        }
+                    except Exception as panel_err:
+                        logger.error(f"[Layer Segmentation] Panel {idx} failed: {panel_err}", exc_info=True)
+                        return None
                     finally:
-                        if os.path.exists(tmp_panel_path):
+                        if tmp_panel_path and os.path.exists(tmp_panel_path):
                             try:
                                 os.remove(tmp_panel_path)
                             except OSError:
                                 pass
-                                
+
+            # Run all panel tasks concurrently and collect results
+            panel_tasks = [process_one_panel(idx, box) for idx, box in enumerate(detected_panels)]
+            panel_results = await asyncio.gather(*panel_tasks)
+
+            # Filter out None (skipped/failed panels) and sort by panel_index
+            results = sorted(
+                [r for r in panel_results if r is not None],
+                key=lambda r: r["panel_index"]
+            )
+
             first_layers = results[0]["layers"] if results else None
             return {
                 "success": True,
@@ -805,6 +827,7 @@ async def extract_panel_layers(panel_id: str, body: ProcessLayersRequest):
                     os.remove(tmp_in_path)
                 except OSError:
                     pass
+
 
     except Exception as e:
         logger.error(
@@ -1000,6 +1023,20 @@ async def upload_image(file: UploadFile = File(...)):
     except Exception as e:
         logger.error(f"[Image Upload] Failed: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/training-data-count", summary="Get the total count of training pairs in the local training_data folder")
+async def get_training_data_count():
+    try:
+        training_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "training_data"))
+        if not os.path.exists(training_dir):
+            return {"count": 0}
+        files = os.listdir(training_dir)
+        original_files = [f for f in files if f.startswith("original_")]
+        return {"count": len(original_files)}
+    except Exception as e:
+        logger.error(f"Failed to get training data count: {e}", exc_info=True)
+        return {"count": 0}
 
 
 @router.post("/save-training-data", summary="Save human-corrected text masks and original panels for future training (Data Flywheel)")

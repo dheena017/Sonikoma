@@ -200,7 +200,8 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
                 text_mask[labels == label_idx] = 255
 
     # 1. Attempt Primary YOLO-based Manga Text & Balloon Segmentation (AI-native Pivot)
-    yolo_text_mask = segment_text_and_balloons(image_path, conf_threshold=0.5)
+    # Confidence lowered to 0.25 to capture stylized manga text regions that sit below 0.5
+    yolo_text_mask = segment_text_and_balloons(image_path, conf_threshold=0.25)
 
     if yolo_text_mask is not None and np.any(yolo_text_mask > 0):
         logger.info("[Text Separation] YOLO model successfully segmented text and balloon layers.")

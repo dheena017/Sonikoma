@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { RefreshCw, Layers } from "lucide-react";
+import { RefreshCw, Layers, Database, Brush, Eraser, Trash2, Save } from "lucide-react";
 import MergePanel from "./MergePanel/MergePanel";
 import { ImageEditorPanel, FreehandPanel } from ".";
 import EnhancementsPanel from "./EnhancementsPanel";
@@ -11,6 +11,7 @@ import AutoSlicer from "./AutoCrop/AutoSlicer";
 interface ImageEditorSidebarProps {
   activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw" | "separate";
   setActiveTab: (tab: any) => void;
+  handleSaveTrainingData: () => Promise<void>;
   slices: any[];
   setSlices: any;
   editingImageIdx: number;
@@ -228,7 +229,27 @@ function ImageEditorSidebar({
   detectedBoxes,
   handleClearDetectedBoxes,
   handleExecuteSave,
+  handleSaveTrainingData,
 }: ImageEditorSidebarProps) {
+  const [sampleCount, setSampleCount] = React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    if (activeTab === "eraser") {
+      const fetchCount = async () => {
+        try {
+          const res = await fetchWithInterceptor("/api/image/training-data-count");
+          const data = await res.json();
+          if (data && typeof data.count === "number") {
+            setSampleCount(data.count);
+          }
+        } catch (err) {
+          console.error("Failed to load training count:", err);
+        }
+      };
+      fetchCount();
+    }
+  }, [activeTab, fetchWithInterceptor]);
+
   return (
     <div className="w-full h-full flex flex-col space-y-3 lg:h-full lg:min-h-0 overflow-hidden pr-0 sm:pr-1.5 scrollbar-thin overscroll-contain shrink-0 max-h-[45vh] lg:max-h-none pb-4 lg:pb-0">
       {/* Tab Contents */}
@@ -255,6 +276,136 @@ function ImageEditorSidebar({
           </div>
         )}
 
+        {activeTab === "eraser" && (
+          <div className="space-y-4 rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)] animate-in fade-in slide-in-from-right-4 duration-300">
+            {/* Header */}
+            <div className="flex items-center gap-2 pb-2 border-b border-white/5">
+              <div className="p-1.5 rounded-lg bg-purple-500/10">
+                <Database className="h-4 w-4 text-purple-400" />
+              </div>
+              <div>
+                <h4 className="text-xs font-mono font-bold text-white uppercase">
+                  AI Mask Correction
+                </h4>
+                <p className="text-[9px] text-purple-300/80 font-mono">
+                  YOLO Data Flywheel Loop
+                </p>
+              </div>
+            </div>
+
+            <p className="text-[10px] text-neutral-400 font-sans leading-relaxed">
+              Brush over hair, panels, or speech bubbles that the model missed or incorrectly segmented. Hitting save generates a perfect binary training pair to fine-tune your custom model.
+            </p>
+
+            {/* Brush Tool Toggles */}
+            <div className="space-y-1.5 pt-2">
+              <label className="text-[9px] font-mono text-neutral-500 uppercase font-bold tracking-wider block">
+                Brush Mode
+              </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setBrushAction("paint")}
+                  className={`flex-1 py-2 rounded-xl flex items-center justify-center gap-2 text-[10px] font-mono font-bold transition-all cursor-pointer ${brushAction === "paint"
+                      ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
+                      : "bg-neutral-900 text-neutral-400 border border-neutral-800 hover:bg-neutral-800"
+                    }`}
+                >
+                  <Brush className="h-3.5 w-3.5" />
+                  Highlight
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBrushAction("erase")}
+                  className={`flex-1 py-2 rounded-xl flex items-center justify-center gap-2 text-[10px] font-mono font-bold transition-all cursor-pointer ${brushAction === "erase"
+                      ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
+                      : "bg-neutral-900 text-neutral-400 border border-neutral-800 hover:bg-neutral-800"
+                    }`}
+                >
+                  <Eraser className="h-3.5 w-3.5" />
+                  Erase Strokes
+                </button>
+              </div>
+            </div>
+
+            {/* Brush Size Slider */}
+            <div className="space-y-1.5 pt-1">
+              <div className="flex justify-between items-center text-[9px] font-mono text-neutral-500 uppercase font-bold tracking-wider">
+                <span>Brush Size</span>
+                <span className="text-purple-400">{brushSize}px</span>
+              </div>
+              <input
+                type="range"
+                min="5"
+                max="120"
+                value={brushSize}
+                onChange={(e) => setBrushSize(Number(e.target.value))}
+                className="w-full h-1 bg-neutral-900 rounded-lg appearance-none cursor-pointer accent-purple-500"
+              />
+            </div>
+
+            {/* Stats / Flywheel Card */}
+            <div className="bg-[#111115] border border-white/5 rounded-2xl p-3.5 flex items-center justify-between">
+              <div className="space-y-0.5">
+                <span className="text-[9px] font-mono text-neutral-500 uppercase font-bold tracking-wider block">
+                  Training Dataset
+                </span>
+                <span className="text-[10px] text-neutral-300 font-sans">
+                  Total saved correction pairs:
+                </span>
+              </div>
+              <div className="bg-purple-500/10 border border-purple-500/20 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+                <span className="text-xs font-mono font-black text-purple-400">
+                  {sampleCount !== null ? sampleCount : "..."}
+                </span>
+                <span className="text-[8px] font-mono text-purple-300 uppercase font-bold">
+                  pairs
+                </span>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="pt-3 border-t border-white/10 flex gap-2">
+              <button
+                type="button"
+                onClick={handleClearBrushMask}
+                className="flex-1 py-2 bg-neutral-900 hover:bg-red-950/40 text-neutral-400 hover:text-red-400 border border-neutral-800 hover:border-red-900/50 rounded-xl flex items-center justify-center gap-1.5 text-[10px] font-mono font-bold transition-all cursor-pointer"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Clear
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  await handleSaveTrainingData();
+                  // Refresh count
+                  try {
+                    const res = await fetchWithInterceptor("/api/image/training-data-count");
+                    const data = await res.json();
+                    if (data && typeof data.count === "number") {
+                      setSampleCount(data.count);
+                    }
+                  } catch (e) { }
+                }}
+                disabled={isSavingEdit}
+                className="flex-[2] py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl flex items-center justify-center gap-1.5 text-[10px] font-mono font-bold transition-all shadow-lg shadow-emerald-900/40 cursor-pointer disabled:opacity-40"
+              >
+                {isSavingEdit ? (
+                  <>
+                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-3.5 w-3.5" />
+                    <span>Save Correction</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
         {activeTab === "draw" && (
           <div className="rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
             <FreehandPanel
@@ -265,7 +416,7 @@ function ImageEditorSidebar({
               fillColor={fillColor}
               setFillColor={setFillColor}
               textBgColor={textBgColor || "#ffffff"}
-              setTextBgColor={setTextBgColor || (() => {})}
+              setTextBgColor={setTextBgColor || (() => { })}
             />
           </div>
         )}
@@ -378,19 +529,17 @@ function ImageEditorSidebar({
               type="button"
               onClick={handleExecuteSave}
               disabled={isSavingEdit}
-              className={`w-full relative px-6 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center justify-center gap-2 shadow-lg ${
-                selectedSliceId
+              className={`w-full relative px-6 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center justify-center gap-2 shadow-lg ${selectedSliceId
                   ? "bg-emerald-600 hover:bg-emerald-500 shadow-emerald-900/50"
                   : "bg-purple-600 hover:bg-purple-500 shadow-purple-900/50"
-              } disabled:opacity-40 disabled:cursor-not-allowed text-white`}
+                } disabled:opacity-40 disabled:cursor-not-allowed text-white`}
               style={{
                 boxShadow: isSavingEdit
                   ? undefined
-                  : `0 0 20px ${
-                      selectedSliceId
-                        ? "rgba(16,185,129,0.25)"
-                        : "rgba(139,92,246,0.25)"
-                    }, 0 4px 12px rgba(0,0,0,0.4)`,
+                  : `0 0 20px ${selectedSliceId
+                    ? "rgba(16,185,129,0.25)"
+                    : "rgba(139,92,246,0.25)"
+                  }, 0 4px 12px rgba(0,0,0,0.4)`,
               }}
             >
               {isSavingEdit ? (

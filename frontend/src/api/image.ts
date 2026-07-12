@@ -149,3 +149,32 @@ export const isProxyUrl = (url: string) => {
 export const isApiUrl = (url: string) => {
   return url && typeof url === "string" && url.includes("/api/");
 };
+
+export const saveTrainingData = async (
+  fetchWithInterceptor: any,
+  originalPanel: Blob,
+  correctedTextMask: Blob,
+  options?: RequestInit
+) => {
+  const formData = new FormData();
+  formData.append("original_panel", originalPanel, "original_panel.png");
+  formData.append("corrected_text_mask", correctedTextMask, "corrected_text_mask.png");
+
+  const res = await fetchWithInterceptor("/api/image/save-training-data", {
+    method: "POST",
+    body: formData,
+    ...options,
+  });
+  return res.json();
+};
+
+export const getTrainingDataCount = async (
+  fetchWithInterceptor: any,
+  options?: RequestInit
+) => {
+  const res = await fetchWithInterceptor("/api/image/training-data-count", {
+    method: "GET",
+    ...options,
+  });
+  return res.json();
+};

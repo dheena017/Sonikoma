@@ -482,6 +482,19 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.warning(f"[System] Skill registry initialization failed during startup: {e}")
 
+        # Pre-warm rembg U-2-Net and YOLO segmentation models so the first
+        # /process-layers request does not pay the cold-start model-loading penalty.
+        try:
+            from media.image.layer_segmentation import get_rembg_session
+            from media.image.segmentation_engine import get_yolo_model
+            logger.info("[Startup] Pre-warming rembg U-2-Net session...")
+            await asyncio.to_thread(get_rembg_session)
+            logger.info("[Startup] Pre-warming YOLO manga-segmentation model...")
+            await asyncio.to_thread(get_yolo_model)
+            logger.info("[Startup] rembg U-2-Net and YOLO models pre-warmed successfully — first request will be fast.")
+        except Exception as e:
+            logger.warning(f"[Startup] Model pre-warm failed (non-critical, will lazy-load on first request): {e}")
+
     asyncio.create_task(_startup_maintenance())
 
     # Purge stale temporary workspace directories

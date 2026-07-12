@@ -444,12 +444,131 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
     }
   };
 
+  const handleSaveTrainingData = async () => {
+    if (editingImageIdx === null) return;
+    const canvas = canvasMaskRef.current;
+    if (!canvas) {
+      addNotification("Eraser canvas not initialized.", "error");
+      return;
+    }
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      addNotification("Failed to get 2D context from canvas.", "error");
+      return;
+    }
+
+    const canvasData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let hasDrawing = false;
+    for (let i = 3; i < canvasData.data.length; i += 4) {
+      if (canvasData.data[i] > 10) {
+        hasDrawing = true;
+        break;
+      }
+    }
+
+    if (!hasDrawing) {
+      addNotification("Please highlight text or speech bubbles on the image first.", "warning");
+      return;
+    }
+
+    appLogic.setIsSavingEdit(true);
+    if (setConsoleLogs) {
+      setConsoleLogs((prev) => [
+        `[Data Flywheel] Extracting original image and human-corrected mask...`,
+        ...prev,
+      ]);
+    }
+
+    try {
+      const originalUrl = scrapedImages[editingImageIdx];
+
+      // Fetch original panel as blob via proxy to avoid CORS
+      const proxyUrl = api.getProxyImageUrl(originalUrl);
+      const imgRes = await fetch(proxyUrl);
+      if (!imgRes.ok) throw new Error(`Failed to fetch original panel: ${imgRes.statusText}`);
+      const originalBlob = await imgRes.blob();
+
+      // Determine natural dimensions from alt='Preview' image
+      const imgElement = document.querySelector("img[alt='Preview']") as HTMLImageElement;
+      const naturalWidth = imgElement?.naturalWidth || canvas.width;
+      const naturalHeight = imgElement?.naturalHeight || canvas.height;
+
+      // Generate binary mask scaled to natural dimensions
+      const offscreen = document.createElement("canvas");
+      offscreen.width = naturalWidth;
+      offscreen.height = naturalHeight;
+      const offCtx = offscreen.getContext("2d");
+      if (!offCtx) throw new Error("Could not create offscreen canvas context");
+
+      // Draw mask on offscreen canvas
+      offCtx.drawImage(canvas, 0, 0, naturalWidth, naturalHeight);
+
+      const offData = offCtx.getImageData(0, 0, naturalWidth, naturalHeight);
+      const px = offData.data;
+      for (let i = 0; i < px.length; i += 4) {
+        const alpha = px[i + 3];
+        if (alpha > 10) {
+          px[i] = 255;
+          px[i + 1] = 255;
+          px[i + 2] = 255;
+          px[i + 3] = 255;
+        } else {
+          px[i] = 0;
+          px[i + 1] = 0;
+          px[i + 2] = 0;
+          px[i + 3] = 255;
+        }
+      }
+      offCtx.putImageData(offData, 0, 0);
+
+      const maskBlob = await new Promise<Blob>((resolve, reject) => {
+        offscreen.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error("Failed to convert offscreen canvas to blob"));
+        }, "image/png");
+      });
+
+      // Submit to backend
+      const res = await api.saveTrainingData(activeFetch, originalBlob, maskBlob);
+      if (res.success) {
+        addNotification("Correction pair successfully saved to the dataset inside training_data/!", "success");
+        if (setConsoleLogs) {
+          setConsoleLogs((prev) => [
+            `[Data Flywheel] [SUCCESS] Saved correction pair!`,
+            `  - Original: ${res.original_panel_url}`,
+            `  - Mask: ${res.corrected_text_mask_url}`,
+            ...prev,
+          ]);
+        }
+        handleClearBrushMaskCallback();
+      } else {
+        throw new Error(res.message || "Failed to save pair");
+      }
+    } catch (err: any) {
+      console.error("[Data Flywheel] Error saving training pair:", err);
+      addNotification(`Failed to save correction: ${err.message}`, "error");
+      if (setConsoleLogs) {
+        setConsoleLogs((prev) => [
+          `[Data Flywheel] [ERROR] Failed: ${err.message}`,
+          ...prev,
+        ]);
+      }
+    } finally {
+      appLogic.setIsSavingEdit(false);
+    }
+  };
+
   const handleExecuteSave = async () => {
     console.log(
       `[Image Editor] Executing save for image #${
         editingImageIdx !== null ? editingImageIdx + 1 : 1
       }. Slices: ${state.slices.length}, Selected: ${state.selectedSliceId}`
     );
+    if (activeTool === "eraser") {
+      await handleSaveTrainingData();
+      return;
+    }
     if (state.selectedSliceId) {
       // If a specific slice is selected, only execute that one
       const selectedSlice = state.slices.find(
@@ -589,6 +708,7 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
     handleRemoveSplitLine,
     handleExecuteHorizontalSplit,
     handleExecuteSave,
+    handleSaveTrainingData,
     handleClearBrushMask: handleClearBrushMaskCallback,
   };
 }
