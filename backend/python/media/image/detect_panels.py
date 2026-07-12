@@ -178,17 +178,55 @@ def _detect_bg_color_and_threshold(
     return is_white_bg, threshold_val
 
 
+def protect_slice_y(y: int, ocr_boxes: List[Dict[str, int]], h_img: int) -> int:
+    """
+    Shifts the horizontal slice line 'y' to the nearest outer edge of any intersecting speech bubble
+    bounding box to prevent slicing a speech bubble or text in half.
+    """
+    for box in ocr_boxes:
+        by1 = box["y"]
+        by2 = box["y"] + box["h"]
+        # Check if y intersects vertically
+        if by1 < y < by2:
+            # Shift to nearest edge
+            if abs(y - by1) < abs(y - by2):
+                y = max(0, by1)
+            else:
+                y = min(h_img, by2)
+    return y
+
+
+def protect_slice_x(x: int, ocr_boxes: List[Dict[str, int]], w_img: int) -> int:
+    """
+    Shifts the vertical slice line 'x' to the nearest outer edge of any intersecting speech bubble
+    bounding box to prevent slicing a speech bubble or text in half.
+    """
+    for box in ocr_boxes:
+        bx1 = box["x"]
+        bx2 = box["x"] + box["w"]
+        # Check if x intersects horizontally
+        if bx1 < x < bx2:
+            # Shift to nearest edge
+            if abs(x - bx1) < abs(x - bx2):
+                x = max(0, bx1)
+            else:
+                x = min(w_img, bx2)
+    return x
+
+
 def _detect_panels_webtoon(
     gray_arr: np.ndarray,
     is_white_bg: bool,
     threshold_val: int,
     min_height_px: int,
-    min_width_pct: float
+    min_width_pct: float,
+    ocr_boxes: Optional[List[Dict[str, int]]] = None
 ) -> List[Dict[str, int]]:
     """
     Webtoon gutter slicing strategy for tall strips.
     Identifies horizontal gaps (gutters) containing mostly background pixels,
     then checks within each horizontal panel row slice for vertical subdivisions.
+    Includes Speech Bubble Protection to prevent splitting dialog bubbles.
     """
     h, w = gray_arr.shape
     margin = max(4, min(40, int(w * 0.05)))
@@ -223,13 +261,21 @@ def _detect_panels_webtoon(
         if smoothed_content[i] and not in_panel:
             in_panel = True
             start_y = i
+            # Apply Speech Bubble Protection to start_y
+            if ocr_boxes:
+                start_y = protect_slice_y(start_y, ocr_boxes, h)
         elif not smoothed_content[i] and in_panel:
             in_panel = False
             end_y = i
+            # Apply Speech Bubble Protection to end_y
+            if ocr_boxes:
+                end_y = protect_slice_y(end_y, ocr_boxes, h)
             if end_y - start_y >= min_height_px:
                 panels.append((start_y, end_y))
     if in_panel:
         end_y = h
+        if ocr_boxes:
+            end_y = protect_slice_y(end_y, ocr_boxes, h)
         if end_y - start_y >= min_height_px:
             panels.append((start_y, end_y))
 
@@ -266,13 +312,21 @@ def _detect_panels_webtoon(
             if smoothed_col[j] and not in_sub:
                 in_sub = True
                 start_x = j
+                # Apply Speech Bubble Protection to start_x
+                if ocr_boxes:
+                    start_x = protect_slice_x(start_x, ocr_boxes, w)
             elif not smoothed_col[j] and in_sub:
                 in_sub = False
                 end_x = j
+                # Apply Speech Bubble Protection to end_x
+                if ocr_boxes:
+                    end_x = protect_slice_x(end_x, ocr_boxes, w)
                 if end_x - start_x >= max(10, int(w * min_width_pct * 0.5)):
                     sub_panels.append((start_x, end_x))
         if in_sub:
             end_x = w
+            if ocr_boxes:
+                end_x = protect_slice_x(end_x, ocr_boxes, w)
             if end_x - start_x >= max(10, int(w * min_width_pct * 0.5)):
                 sub_panels.append((start_x, end_x))
 
@@ -309,16 +363,25 @@ def _detect_panels_grid_cv(
     threshold_val: int,
     canny_low: int,
     canny_high: int,
-    close_kernel_size: int
+    close_kernel_size: int,
+    high_sensitivity: bool = False
 ) -> List[Dict[str, int]]:
     """
     Standard contour detection strategy using OpenCV for grid layout pages.
     """
     import cv2
-    if is_white_bg:
-        _, thresh = cv2.threshold(gray, threshold_val, 255, cv2.THRESH_BINARY_INV)
+    if high_sensitivity:
+        # Use adaptive thresholding for highly stylized/sensitive pages
+        thresh = cv2.adaptiveThreshold(
+            gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+            cv2.THRESH_BINARY_INV if is_white_bg else cv2.THRESH_BINARY,
+            25, 5
+        )
     else:
-        _, thresh = cv2.threshold(gray, threshold_val, 255, cv2.THRESH_BINARY)
+        if is_white_bg:
+            _, thresh = cv2.threshold(gray, threshold_val, 255, cv2.THRESH_BINARY_INV)
+        else:
+            _, thresh = cv2.threshold(gray, threshold_val, 255, cv2.THRESH_BINARY)
         
     edges = cv2.Canny(gray, canny_low, canny_high)
     merged_mask = cv2.bitwise_or(thresh, edges)
@@ -415,6 +478,106 @@ def _detect_panels_grid_pil(
     return raw_boxes
 
 
+def trim_solid_borders(
+    gray_arr: np.ndarray,
+    x: int,
+    y: int,
+    w_box: int,
+    h_box: int,
+    bg_mode: str,
+    global_bg_val: Optional[float] = None
+) -> Tuple[int, int, int, int]:
+    """
+    Trims solid-color padding/margins (black, white, or neutral) from the edges
+    of a single panel bounding box, prioritizing art content boundaries pixel-by-pixel.
+    """
+    h_img, w_img = gray_arr.shape
+
+    # Ensure coordinates are within image bounds
+    x1 = max(0, min(w_img - 1, x))
+    y1 = max(0, min(h_img - 1, y))
+    x2 = max(0, min(w_img, x + w_box))
+    y2 = max(0, min(h_img, y + h_box))
+
+    # If the box is too small, don't trim
+    if (x2 - x1) < 15 or (y2 - y1) < 15:
+        return x1, y1, x2 - x1, y2 - y1
+
+    # Extract local ROI
+    roi = gray_arr[y1:y2, x1:x2]
+
+    # Determine local or global background reference
+    if bg_mode == "white":
+        bg_val = 255.0
+    elif bg_mode == "black":
+        bg_val = 0.0
+    elif global_bg_val is not None:
+        bg_val = global_bg_val
+    else:
+        # Fallback to corner median to estimate background color of this ROI
+        corners = np.concatenate([
+            roi[:3, :3].flatten(),
+            roi[-3:, :3].flatten(),
+            roi[:3, -3:].flatten(),
+            roi[-3:, -3:].flatten()
+        ])
+        bg_val = np.median(corners) if len(corners) > 0 else 255.0
+
+    # Build exact pixel-by-pixel content mask
+    # We consider pixels that deviate sufficiently from the background color as content.
+    if bg_val >= 200.0:
+        # For very light backgrounds, any darker pixel is content
+        content_mask = (roi < 235)
+    elif bg_val <= 55.0:
+        # For very dark backgrounds, any brighter pixel is content
+        content_mask = (roi > 30)
+    else:
+        # For intermediate backgrounds (gray, neutral), any significant deviation is content
+        content_mask = (np.abs(roi.astype(float) - bg_val) > 15)
+
+    # Clean up single-pixel sensor noise/speckles using morphological opening
+    try:
+        import cv2
+        kernel = np.ones((2, 2), dtype=np.uint8)
+        content_mask_cleaned = cv2.morphologyEx(content_mask.astype(np.uint8), cv2.MORPH_OPEN, kernel)
+    except ImportError:
+        content_mask_cleaned = content_mask.astype(np.uint8)
+
+    # If opening emptied the mask completely (e.g., extremely thin/faint lines), fallback to original mask
+    if not np.any(content_mask_cleaned > 0):
+        content_mask_cleaned = content_mask.astype(np.uint8)
+
+    # Find row and col indices containing content pixels
+    # We require at least 1 content pixel in the row/col (pure pixel-by-pixel snapping)
+    row_sums = np.sum(content_mask_cleaned > 0, axis=1)
+    col_sums = np.sum(content_mask_cleaned > 0, axis=0)
+
+    row_indices = np.where(row_sums >= 1)[0]
+    col_indices = np.where(col_sums >= 1)[0]
+
+    if len(row_indices) > 0 and len(col_indices) > 0:
+        trim_y1 = y1 + int(row_indices[0])
+        trim_y2 = y1 + int(row_indices[-1]) + 1
+        trim_x1 = x1 + int(col_indices[0])
+        trim_x2 = x1 + int(col_indices[-1]) + 1
+
+        # Enforce maximum trim safety constraint (45% from each outer edge)
+        # to prevent catastrophic over-cropping on complex panels
+        max_trim_x = int((x2 - x1) * 0.45)
+        max_trim_y = int((y2 - y1) * 0.45)
+
+        new_x1 = max(x1, min(trim_x1, x1 + max_trim_x))
+        new_y1 = max(y1, min(trim_y1, y1 + max_trim_y))
+        new_x2 = min(x2, max(trim_x2, x2 - max_trim_x))
+        new_y2 = min(y2, max(trim_y2, y2 - max_trim_y))
+
+        # Ensure we don't collapse the box below a minimum size
+        if (new_x2 - new_x1) >= 15 and (new_y2 - new_y1) >= 15:
+            return new_x1, new_y1, new_x2 - new_x1, new_y2 - new_y1
+
+    return x1, y1, x2 - x1, y2 - y1
+
+
 def _filter_solid_noise(
     raw_boxes: List[Dict[str, int]],
     gray_arr: np.ndarray,
@@ -465,6 +628,9 @@ def run_cv_detection(
     Main orchestration function for panel detection. Loads the image, runs background
     detection, routes to the appropriate detection strategy (Webtoon Slicing vs. Grid Contours),
     performs noise filtering, overlap merging, padding, and scales back to percentages.
+
+    Includes Speech Bubble Protection, Dynamic scale-aware parameter adjustments,
+    automatic global border trimming, and robust Dual-Pass high-sensitivity fallback.
     """
     logger.info(f"[Panel Detection] Starting local panel detection on {image_path}")
     
@@ -476,15 +642,15 @@ def run_cv_detection(
         has_cv = False
 
     gray_arr: Optional[np.ndarray] = None
-    w: int = 0
-    h: int = 0
+    orig_w: int = 0
+    orig_h: int = 0
 
     if has_cv:
         img = cv2.imread(image_path)
         if img is None:
             return []
-        h, w, c = img.shape
-        if h == 0 or w == 0:
+        orig_h, orig_w, c = img.shape
+        if orig_h == 0 or orig_w == 0:
             return []
         gray_arr = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     else:
@@ -492,38 +658,147 @@ def run_cv_detection(
             pil_img = Image.open(image_path)
         except Exception:
             return []
-        w, h = pil_img.size
-        if w == 0 or h == 0:
+
+        orig_w, orig_h = pil_img.size
+        if orig_w == 0 or orig_h == 0:
             return []
         gray_arr = np.array(pil_img.convert("L"))
 
     if gray_arr is None:
         return []
 
+    # 1b. Dynamic Parameter Scaling based on image resolution
+    # Standard reference: 1500 x 1500
+    ref_area = 1500.0 * 1500.0
+    img_area = float(orig_w * orig_h)
+    scale_factor = (img_area / ref_area) ** 0.5
+
+    scaled_min_height_px = max(15, min(120, int(min_height_px * scale_factor)))
+    scaled_min_width_pct = max(0.05, min(0.25, min_width_pct * (0.5 + 0.5 * scale_factor)))
+    scaled_close_kernel = max(3, min(40, int(close_kernel_size * scale_factor)))
+
+    # 1c. Load OCR Bounds (Speech Bubble Protection) asynchronously or synchronously
+    ocr_boxes: List[Dict[str, int]] = []
+    try:
+        import asyncio
+        from media.image.ocr import extract_full_ocr_data
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+        if loop.is_running():
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(lambda: asyncio.run(extract_full_ocr_data(image_path)))
+                ocr_results = future.result()
+        else:
+            ocr_results = loop.run_until_complete(extract_full_ocr_data(image_path))
+
+        for res in ocr_results:
+            pts = np.array(res["box"], dtype=np.int32)
+            if has_cv:
+                bx, by, bw, bh = cv2.boundingRect(pts)
+            else:
+                xs = [pt[0] for pt in res["box"]]
+                ys = [pt[1] for pt in res["box"]]
+                bx, by, bw, bh = min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)
+            ocr_boxes.append({"x": bx, "y": by, "w": bw, "h": bh})
+    except Exception as e:
+        logger.warning(f"[Panel Detection] Failed to retrieve OCR bounds for speech bubble protection: {e}")
+
+    # 1d. Global Pre-processing step: Detect and trim uniform black/dark/light borders/margins from entire page
+    crop_x, crop_y, crop_w, crop_h = trim_solid_borders(gray_arr, 0, 0, orig_w, orig_h, bg_mode)
+
+    w, h = orig_w, orig_h
+    if crop_w > 0 and crop_h > 0 and (crop_w < orig_w or crop_h < orig_h):
+        logger.info(f"[Panel Detection] Trimming global solid margins: x={crop_x}, y={crop_y}, w={crop_w}, h={crop_h}")
+        gray_arr_processed = gray_arr[crop_y : crop_y + crop_h, crop_x : crop_x + crop_w]
+        w, h = crop_w, crop_h
+
+        # Adjust OCR bounds relative to cropped coordinate space
+        shifted_ocr_boxes = []
+        for box in ocr_boxes:
+            shifted_ocr_boxes.append({
+                "x": max(0, box["x"] - crop_x),
+                "y": max(0, box["y"] - crop_y),
+                "w": box["w"],
+                "h": box["h"]
+            })
+        ocr_boxes = shifted_ocr_boxes
+    else:
+        gray_arr_processed = gray_arr
+
     # 2. Detect background characteristics
-    is_white_bg, threshold_val = _detect_bg_color_and_threshold(gray_arr, bg_mode, sensitivity)
+    is_white_bg, threshold_val = _detect_bg_color_and_threshold(gray_arr_processed, bg_mode, sensitivity)
     is_tall_strip = (h / w > 1.2)
 
-    # 3. Route to the appropriate detection strategy
+    # 3. Dual-Pass Detection Orchestrator
+    passes = [False, True] if has_cv else [False] # Pass 1: Standard, Pass 2: High Sensitivity (adaptive)
     raw_boxes: List[Dict[str, int]] = []
-    if auto_split and is_tall_strip:
-        logger.info(f"[Panel Detection] Using Webtoon Slicing strategy for tall strip ({'OpenCV' if has_cv else 'PIL fallback'})")
-        raw_boxes = _detect_panels_webtoon(gray_arr, is_white_bg, threshold_val, min_height_px, min_width_pct)
-    else:
-        logger.info(f"[Panel Detection] Using Grid strategy ({'OpenCV Contours' if has_cv else 'PIL Fallback'})")
-        if has_cv:
-            raw_boxes = _detect_panels_grid_cv(gray_arr, is_white_bg, threshold_val, canny_low, canny_high, close_kernel_size)
+
+    for high_sensitivity in passes:
+        if auto_split and is_tall_strip:
+            logger.info(f"[Panel Detection] Running Webtoon Slicing strategy (high_sensitivity={high_sensitivity})")
+            raw_boxes = _detect_panels_webtoon(gray_arr_processed, is_white_bg, threshold_val, scaled_min_height_px, scaled_min_width_pct, ocr_boxes)
         else:
-            raw_boxes = _detect_panels_grid_pil(gray_arr, is_white_bg, sensitivity, min_height_px)
+            logger.info(f"[Panel Detection] Running Grid strategy (high_sensitivity={high_sensitivity})")
+            if has_cv:
+                raw_boxes = _detect_panels_grid_cv(gray_arr_processed, is_white_bg, threshold_val, canny_low, canny_high, scaled_close_kernel, high_sensitivity)
+            else:
+                raw_boxes = _detect_panels_grid_pil(gray_arr_processed, is_white_bg, sensitivity, scaled_min_height_px)
 
-    # 4. Filter out solid background noise
-    min_w = w * min_width_pct
-    filtered_boxes = _filter_solid_noise(raw_boxes, gray_arr, min_w, min_height_px, auto_split)
+        # 4. Filter out solid background noise
+        min_w = w * scaled_min_width_pct
+        filtered_boxes = _filter_solid_noise(raw_boxes, gray_arr_processed, min_w, scaled_min_height_px, auto_split)
 
-    # 5. Merge overlapping or stacked panel bounding boxes
-    merged_boxes = merge_overlapping_boxes(filtered_boxes, w, h, merge_threshold)
+        # 5. Merge overlapping or stacked panel bounding boxes
+        merged_boxes = merge_overlapping_boxes(filtered_boxes, w, h, merge_threshold)
 
-    # 6. Apply post-merge vertical padding for tall webtoon strips, then format & scale to percent
+        # 5b. Content-aware border trimming step on individual boxes
+        if bg_mode == "white":
+            median_bg = 255.0
+        elif bg_mode == "black":
+            median_bg = 0.0
+        else:
+            inset_y = max(1, int(h * 0.02))
+            inset_x = max(1, int(w * 0.02))
+            edge_samples = np.concatenate([
+                gray_arr_processed[inset_y, :],
+                gray_arr_processed[-inset_y - 1, :],
+                gray_arr_processed[:, inset_x],
+                gray_arr_processed[:, -inset_x - 1]
+            ])
+            median_bg = float(np.median(edge_samples))
+
+        trimmed_boxes = []
+        for box in merged_boxes:
+            bx, by, bw, bh = box["x"], box["y"], box["w"], box["h"]
+            tx, ty, tw, th = trim_solid_borders(gray_arr_processed, bx, by, bw, bh, bg_mode, median_bg)
+            # Only retain panels that still contain actual art content size (>= 15px)
+            if tw >= 15 and th >= 15:
+                trimmed_boxes.append({"x": tx, "y": ty, "w": tw, "h": th})
+        merged_boxes = trimmed_boxes
+
+        # Validation check for Dual Pass fallback:
+        # If we found some panels, and none of them are highly irregular (extremely tall/wide mistakes, e.g., > 5.0 aspect ratio),
+        # then we accept the result and break. Otherwise, we retry with high sensitivity.
+        if len(merged_boxes) > 0:
+            has_irregular = False
+            for box in merged_boxes:
+                aspect = float(box["w"]) / float(box["h"]) if box["h"] > 0 else 1.0
+                if aspect > 5.0 or aspect < 0.2:
+                    has_irregular = True
+                    break
+            if not has_irregular:
+                break
+            else:
+                logger.info("[Panel Detection] Irregular panels detected; re-running with high sensitivity fallback.")
+        else:
+            logger.info("[Panel Detection] 0 panels detected; re-running with high sensitivity fallback.")
+
+    # 6. Apply post-merge vertical padding for tall webtoon strips, map coordinates back to original size, format & scale to percent
     final_panels = []
     logger.info(f"[Panel Detection] Found {len(merged_boxes)} panels after merging and filtering.")
     
@@ -537,20 +812,24 @@ def run_cv_detection(
             by = pad_by
             bh = pad_ey - pad_by
             
+        # Map processed/trimmed coordinates back to original uncropped image space
+        bx += crop_x
+        by += crop_y
+
         x, y, w_box, h_box = adjust_to_aspect_ratio(
-            bx, by, bw, bh, w, h, aspect_ratio_str
+            bx, by, bw, bh, orig_w, orig_h, aspect_ratio_str
         )
         
-        # Validate coordinates are within image boundaries
-        if x < 0 or y < 0 or w_box <= 0 or h_box <= 0 or (x + w_box) > w or (y + h_box) > h:
+        # Validate coordinates are within uncropped original image boundaries
+        if x < 0 or y < 0 or w_box <= 0 or h_box <= 0 or (x + w_box) > orig_w or (y + h_box) > orig_h:
             raise ValueError(
-                f"Panel coordinates out of bounds: x={x}, y={y}, w_box={w_box}, h_box={h_box} for image of size {w}x{h}"
+                f"Panel coordinates out of bounds: x={x}, y={y}, w_box={w_box}, h_box={h_box} for image of size {orig_w}x{orig_h}"
             )
         
-        crop_top = (y / h) * 100
-        crop_bottom = ((h - (y + h_box)) / h) * 100
-        crop_left = (x / w) * 100
-        crop_right = ((w - (x + w_box)) / w) * 100
+        crop_top = (y / orig_h) * 100
+        crop_bottom = ((orig_h - (y + h_box)) / orig_h) * 100
+        crop_left = (x / orig_w) * 100
+        crop_right = ((orig_w - (x + w_box)) / orig_w) * 100
         
         final_panels.append({
             "cropTop": round(max(0.0, min(100.0, crop_top)), 2),
