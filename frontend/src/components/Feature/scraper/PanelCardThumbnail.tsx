@@ -65,6 +65,7 @@ export function PanelCardThumbnail({
   handleRotateClockwise,
   handleFlipHorizontal,
   handleUndo,
+  onCheckboxClick,
 }: PanelCardThumbnailProps) {
   const label = processingLabel(isBatchCropping, bubbleCroppingImgUrl, imgUrl);
   const status = getScrapedImageStatus(imgUrl);
