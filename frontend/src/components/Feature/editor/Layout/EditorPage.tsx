@@ -358,39 +358,43 @@ const EditorPage: React.FC<EditorPageProps> = ({
         ) : (
           <>
             {/* Primary Canvas: Video Monitor (Sticky Background) */}
-            <div
-              id="section-monitor"
-              className={`relative md:sticky w-full max-w-[1600px] mx-auto flex flex-col z-0 transition-all duration-500 px-4 md:px-6 py-4 ${
-                isFocusMode
-                  ? "top-0 h-screen"
-                  : "top-0 md:top-16 h-[40vh] min-h-[300px] md:h-[calc(100vh-64px)]"
-              }`}
-            >
-              <div className="flex-1 w-full h-full relative">
-                <VideoMonitor
-                  activePreviewTab={activePreviewTab}
-                  setActivePreviewTab={setActivePreviewTab}
-                  videoUrl={videoUrl}
-                  panels={panels}
-                  aspectRatio={aspectRatio}
-                  videoPlayerRef={videoPlayerRef}
-                  currentPanelIndex={currentPanelIndex}
-                  playbackTime={playbackTime}
-                  reprocessingPanelId={reprocessingPanelId}
-                  quality={previewQuality}
-                  setCurrentPanelIndex={setCurrentPanelIndex}
-                  setPlaybackTime={setPlaybackTime}
-                  setStoryboardPlaying={setStoryboardPlaying}
-                />
-
-
+            {activeTab !== "settings" && (
+              <div
+                id="section-monitor"
+                className={`relative md:sticky w-full max-w-[1600px] mx-auto flex flex-col z-0 transition-all duration-500 px-4 md:px-6 py-4 ${
+                  isFocusMode
+                    ? "top-0 h-screen"
+                    : "top-0 md:top-16 h-[40vh] min-h-[300px] md:h-[calc(100vh-64px)]"
+                }`}
+              >
+                <div className="flex-1 w-full h-full relative">
+                  <VideoMonitor
+                    activePreviewTab={activePreviewTab}
+                    setActivePreviewTab={setActivePreviewTab}
+                    videoUrl={videoUrl}
+                    panels={panels}
+                    aspectRatio={aspectRatio}
+                    videoPlayerRef={videoPlayerRef}
+                    currentPanelIndex={currentPanelIndex}
+                    playbackTime={playbackTime}
+                    reprocessingPanelId={reprocessingPanelId}
+                    quality={previewQuality}
+                    setCurrentPanelIndex={setCurrentPanelIndex}
+                    setPlaybackTime={setPlaybackTime}
+                    setStoryboardPlaying={setStoryboardPlaying}
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Scrolling Overlay Content (Timeline, Assets, Meta) */}
             <div
-              className={`relative z-10 bg-[#070709] border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] px-4 md:px-6 py-8 flex flex-col gap-12 min-h-screen min-w-0 ${
-                isFocusMode ? "hidden" : "block"
+              className={`relative z-10 bg-[#070709] min-h-screen min-w-0 ${
+                activeTab === "settings"
+                  ? "px-4 md:px-8 py-8 flex flex-col gap-8"
+                  : `border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] px-4 md:px-6 py-8 flex flex-col gap-12 ${
+                      isFocusMode ? "hidden" : "block"
+                    }`
               }`}
             >
               {currentSection === "image-editor" ? (
