@@ -69,7 +69,7 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
     char_mask = np.zeros((height, width), dtype=np.uint8)
 
     # =========================================================================
-    # Step 1: Text & Speech Bubble Segmentation
+    # Step 1: Text & Speech Bubble Segmentation (Refined to solve "Boxy Bubbles")
     # =========================================================================
     text_layer_bytes = None
     try:
@@ -81,39 +81,81 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
             text_layer_bytes = create_blank_webp(width, height)
         else:
             # We use OpenCV contouring around the bounding boxes to catch speech bubbles
-            gray = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
-            # Find bright areas (assuming white bubbles)
-            _, bright_mask = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY)
-
             for res in ocr_results:
                 # box is [[x1,y1], [x2,y1], [x2,y2], [x1,y2]]
                 pts = np.array(res["box"], dtype=np.int32)
                 x, y, w, h_box = cv2.boundingRect(pts)
+                if w <= 0 or h_box <= 0:
+                    continue
 
                 # Create a local ROI slightly larger than the bounding box to search for bubble contours
                 pad = max(w, h_box) // 2
                 x1, y1 = max(0, x - pad), max(0, y - pad)
                 x2, y2 = min(width, x + w + pad), min(height, y + h_box + pad)
 
-                roi_bright = bright_mask[y1:y2, x1:x2]
+                roi = original_img[y1:y2, x1:x2]
+                if roi.size == 0:
+                    continue
 
-                # Find contours in the local bright mask
-                contours, _ = cv2.findContours(roi_bright, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                roi_gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+
+                # Generate thresholded images
+                thresh_bin = cv2.adaptiveThreshold(
+                    roi_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
+                )
+                thresh_inv = cv2.adaptiveThreshold(
+                    roi_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2
+                )
+                _, simple_thresh = cv2.threshold(roi_gray, 200, 255, cv2.THRESH_BINARY)
+
+                # Find contours on thresholded versions
+                contours_bin, _ = cv2.findContours(thresh_bin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                contours_inv, _ = cv2.findContours(thresh_inv, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                contours_simple, _ = cv2.findContours(simple_thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+                all_contours = list(contours_bin) + list(contours_inv) + list(contours_simple)
+
+                # Center of the text bounding box in the ROI coordinate system
+                cx, cy = (x + w // 2) - x1, (y + h_box // 2) - y1
+                roi_box_area = w * h_box
 
                 bubble_found = False
-                for cnt in contours:
-                    # Offset contour back to global coordinates
-                    cnt += [x1, y1]
-                    # If the OCR bounding box center is inside this contour, we assume it's the bubble
-                    cx, cy = x + w//2, y + h_box//2
-                    if cv2.pointPolygonTest(cnt, (cx, cy), False) >= 0:
-                        cv2.drawContours(text_mask, [cnt], -1, 255, -1)
-                        bubble_found = True
-                        break
+                # Sort contours by area descending to check largest first
+                all_contours = sorted(all_contours, key=cv2.contourArea, reverse=True)
 
-                # Fallback: if no bubble contour found, just mask the bounding box with some padding
+                for cnt in all_contours:
+                    area = cv2.contourArea(cnt)
+                    if area > 0.4 * roi_box_area:
+                        # Check if the OCR bounding box center is inside this contour
+                        if cv2.pointPolygonTest(cnt, (cx, cy), False) >= 0:
+                            # Calculate solidity
+                            hull = cv2.convexHull(cnt)
+                            hull_area = cv2.contourArea(hull)
+                            solidity = float(area) / hull_area if hull_area > 0 else 0
+
+                            if solidity > 0.7:
+                                # Assume it's a speech bubble and mask the entire contour
+                                cnt_offset = cnt + [x1, y1]
+                                cv2.drawContours(text_mask, [cnt_offset], -1, 255, -1)
+                                bubble_found = True
+                                break
+
                 if not bubble_found:
-                    cv2.rectangle(text_mask, (max(0, x-10), max(0, y-10)), (min(width, x+w+10), min(height, y+h_box+10)), 255, -1)
+                    # Fallback: float text, mask only the thresholded text pixels themselves
+                    tx1, ty1 = max(0, x), max(0, y)
+                    tx2, ty2 = min(width, x + w), min(height, y + h_box)
+                    exact_roi = original_img[ty1:ty2, tx1:tx2]
+                    if exact_roi.size > 0:
+                        exact_roi_gray = cv2.cvtColor(exact_roi, cv2.COLOR_BGR2GRAY)
+                        exact_thresh_inv = cv2.adaptiveThreshold(
+                            exact_roi_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2
+                        )
+                        exact_thresh_bin = cv2.adaptiveThreshold(
+                            exact_roi_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
+                        )
+                        mean_val = np.mean(exact_roi_gray)
+                        text_pixels = exact_thresh_inv if mean_val > 127 else exact_thresh_bin
+                        text_mask[ty1:ty2, tx1:tx2] = cv2.bitwise_or(text_mask[ty1:ty2, tx1:tx2], text_pixels)
 
             # Extract the text layer (original image colors, but only where mask is 255, else transparent)
             text_layer = cv2.cvtColor(original_img, cv2.COLOR_BGR2BGRA)
@@ -128,7 +170,19 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
         text_layer_bytes = create_blank_webp(width, height)
 
     # =========================================================================
-    # Step 2: Character Segmentation
+    # Step 1.5: Erase Text to create Textless Image (Solves "Sticky Text" Step B)
+    # =========================================================================
+    textless_img = original_img.copy()
+    try:
+        # Dilate text_mask slightly to cover the text/bubble borders perfectly
+        text_dilate_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+        dilated_text_mask = cv2.dilate(text_mask, text_dilate_kernel, iterations=1)
+        textless_img = cv2.inpaint(original_img, dilated_text_mask, inpaintRadius=5, flags=cv2.INPAINT_TELEA)
+    except Exception as e:
+        logger.error(f"Error generating textless image: {e}", exc_info=True)
+
+    # =========================================================================
+    # Step 2: Character Segmentation (Solves "Sticky Text" Step C)
     # =========================================================================
     char_layer_bytes = None
     try:
@@ -136,8 +190,8 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
             char_layer_bytes = create_blank_webp(width, height)
         else:
             session = get_rembg_session()
-            # rembg expects a PIL Image or bytes. We can pass the raw file bytes or PIL image
-            pil_img = Image.fromarray(cv2.cvtColor(original_img, cv2.COLOR_BGR2RGB))
+            # rembg expects a PIL Image or bytes. We pass PIL Image of textless_img (not original_img)
+            pil_img = Image.fromarray(cv2.cvtColor(textless_img, cv2.COLOR_BGR2RGB))
 
             # rembg returns a PIL Image with transparent background
             char_pil = rembg_remove(pil_img, session=session)
@@ -146,6 +200,8 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
             char_np = np.array(char_pil) # RGBA
             if char_np.shape[2] == 4:
                 char_mask = char_np[:,:,3] # Extract alpha channel
+            else:
+                char_mask = np.zeros((height, width), dtype=np.uint8)
 
             # Encode character layer to webp
             buffer = io.BytesIO()
@@ -158,7 +214,7 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
         char_mask = np.zeros((height, width), dtype=np.uint8)
 
     # =========================================================================
-    # Step 3: Background Inpainting
+    # Step 3: Background Inpainting (Solves "Ghosting Blob")
     # =========================================================================
     bg_layer_bytes = None
     try:
@@ -169,11 +225,10 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
         combined_mask = cv2.dilate(combined_mask, kernel, iterations=1)
 
-        # Inpaint using Telea algorithm
-        inpainted_bg = cv2.inpaint(original_img, combined_mask, inpaintRadius=5, flags=cv2.INPAINT_TELEA)
+        # Inpaint using cv2.INPAINT_NS with a large radius (radius=20) for background
+        inpainted_bg = cv2.inpaint(original_img, combined_mask, inpaintRadius=20, flags=cv2.INPAINT_NS)
 
         # Convert BGR to BGRA and encode to WebP
-        # (Though BG can be opaque, keeping it WebP ensures consistency)
         _, buffer = cv2.imencode('.webp', inpainted_bg)
         bg_layer_bytes = buffer.tobytes()
 
