@@ -708,6 +708,30 @@ def run_cv_detection(
     except Exception as e:
         logger.warning(f"[Panel Detection] Failed to retrieve OCR bounds for speech bubble protection: {e}")
 
+    # 1c-2. Load YOLO Bounds (Speech Bubble Protection) if YOLO is available
+    try:
+        from media.image.segmentation_engine import get_yolo_model
+        yolo_model = get_yolo_model()
+        if yolo_model is not None:
+            results = yolo_model.predict(image_path, conf=0.25, verbose=False)
+            if results and len(results) > 0:
+                result = results[0]
+                if result.boxes is not None:
+                    yolo_count = 0
+                    for box_instance in result.boxes:
+                        coords = box_instance.xyxy[0].cpu().numpy()
+                        bx1, by1, bx2, by2 = coords
+                        ocr_boxes.append({
+                            "x": int(bx1),
+                            "y": int(by1),
+                            "w": int(bx2 - bx1),
+                            "h": int(by2 - by1)
+                        })
+                        yolo_count += 1
+                    logger.info(f"[Panel Detection] Successfully extracted {yolo_count} YOLO speech bubble bounds for Speech Bubble Protection.")
+    except Exception as e:
+        logger.warning(f"[Panel Detection] Failed to retrieve YOLO bounds for speech bubble protection: {e}")
+
     # 1d. Global Pre-processing step: Detect and trim uniform black/dark/light borders/margins from entire page
     crop_x, crop_y, crop_w, crop_h = trim_solid_borders(gray_arr, 0, 0, orig_w, orig_h, bg_mode)
 
