@@ -166,9 +166,9 @@ const HeaderInner = ({
         // silent — polling errors should not break the header
       }
     };
-
-    // One-shot fetch only (no polling).
     pollCredits();
+    const interval = setInterval(pollCredits, 30_000);
+    return () => clearInterval(interval);
   }, [fetchWithInterceptor, addNotification]);
 
   // Also sync with user prop when it changes (e.g., after daily claim)

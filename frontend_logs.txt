@@ -1654,3 +1654,5 @@
 [Vite Middleware] Incoming request: GET /api/proxy-image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1579783900882-c0d3dad7b119%3Fw%3D800
 [31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
 [90m5:24:21 PM[0m [35m[Vite][0m [32mGET[0m [36m/api/proxy-image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1579783900882-c0d3dad7b119%3Fw%3D800[0m [31m502[0m [90m(1ms)[0m
+3:29:26 AM [vite] (client) hmr update /src/components/Feature/timeline/TimelineCard.tsx, /src/index.css
+3:31:14 AM [vite] (client) hmr update /src/components/Feature/timeline/TimelineCard.tsx, /src/index.css

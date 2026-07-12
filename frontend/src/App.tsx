@@ -906,14 +906,12 @@ export default function App() {
               const panelsWithSpeech = (panels || []).filter(
                 (p: any) => p.speech_text && p.speech_text.trim()
               );
-                  const ttsPromises = panelsWithSpeech.map((p: any) =>
+              const ttsPromises = panelsWithSpeech.map((p: any) =>
                 api.generateTts(fetchWithInterceptor, {
                   project_id: projectId || undefined,
                   panel_id: p.id,
-                  dialogue_list: [p.speech_text],
-                  target_duration: 4.5,
+                  text: p.speech_text,
                   voice: voiceActor || undefined,
-                  return_base64: true,
                 })
               );
               const ttsResults = await Promise.all(ttsPromises);

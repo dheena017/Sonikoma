@@ -50,28 +50,26 @@ export function useBackendHealth() {
   }, []);
 
   useEffect(() => {
+    let timeout: any;
     let isMounted = true;
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
     const poll = async () => {
       if (!isMounted) return;
 
       const shouldContinueNormalPolling = await checkHealth();
+
       if (!isMounted) return;
 
       // If we got a 429, wait 60s for penalty box to clear, otherwise 30s
       const delay = shouldContinueNormalPolling ? 30000 : 60000;
-
-      // Avoid stacking multiple pending timeouts if the effect is re-rendered quickly.
-      if (timeoutId) clearTimeout(timeoutId);
-      timeoutId = setTimeout(poll, delay);
+      timeout = setTimeout(poll, delay);
     };
 
     poll();
 
     return () => {
       isMounted = false;
-      if (timeoutId) clearTimeout(timeoutId);
+      if (timeout) clearTimeout(timeout);
     };
   }, [checkHealth]);
 

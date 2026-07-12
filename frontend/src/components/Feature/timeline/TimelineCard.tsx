@@ -39,6 +39,168 @@ interface TimelineCardProps {
   fetchWithInterceptor?: any;
 }
 
+interface DialogueClipSliderProps {
+  panel: GeneratedPanel;
+  setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
+}
+
+const DialogueClipSlider: React.FC<DialogueClipSliderProps> = ({ panel, setPanels }) => {
+  const duration = panel.duration || 3.0;
+
+  const dialogueMap = panel.syncMap?.dialogue_map || [];
+  const currentSegment = dialogueMap[0] || {
+    ocr_index: 0,
+    ocr_text: panel.speech_text || "",
+    whisper_text: panel.speech_text || "",
+    start_time: 0.0,
+    end_time: duration,
+    confidence: 1.0
+  };
+
+  const startTime = currentSegment.start_time;
+  const endTime = currentSegment.end_time;
+
+  const trackRef = React.useRef<HTMLDivElement>(null);
+  const [dragState, setDragState] = React.useState<{
+    type: "center" | "left" | "right" | null;
+    startX: number;
+    initialStart: number;
+    initialEnd: number;
+  }>({ type: null, startX: 0, initialStart: 0, initialEnd: 0 });
+
+  const handleMouseDown = (
+    e: React.MouseEvent,
+    type: "center" | "left" | "right"
+  ) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setDragState({
+      type,
+      startX: e.clientX,
+      initialStart: startTime,
+      initialEnd: endTime
+    });
+  };
+
+  React.useEffect(() => {
+    if (!dragState.type) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!trackRef.current) return;
+      const rect = trackRef.current.getBoundingClientRect();
+      const trackWidth = rect.width;
+      if (trackWidth <= 0) return;
+
+      const deltaX = e.clientX - dragState.startX;
+      const deltaT = (deltaX / trackWidth) * duration;
+
+      let newStart = dragState.initialStart;
+      let newEnd = dragState.initialEnd;
+
+      if (dragState.type === "center") {
+        const clipDuration = dragState.initialEnd - dragState.initialStart;
+        newStart = Math.max(0, Math.min(duration - clipDuration, dragState.initialStart + deltaT));
+        newEnd = newStart + clipDuration;
+      } else if (dragState.type === "left") {
+        newStart = Math.max(0, Math.min(dragState.initialEnd - 0.1, dragState.initialStart + deltaT));
+      } else if (dragState.type === "right") {
+        newEnd = Math.max(dragState.initialStart + 0.1, Math.min(duration, dragState.initialEnd + deltaT));
+      }
+
+      setPanels((prev) =>
+        prev.map((p) => {
+          if (p.id !== panel.id) return p;
+
+          const currentSyncMap = p.syncMap || { dialogue_map: [], audio_peaks: [] };
+          const currentMap = currentSyncMap.dialogue_map || [];
+
+          let updatedMap = [...currentMap];
+          if (updatedMap.length === 0) {
+            updatedMap = [
+              {
+                ocr_index: 0,
+                ocr_text: p.speech_text || "",
+                whisper_text: p.speech_text || "",
+                start_time: Number(newStart.toFixed(2)),
+                end_time: Number(newEnd.toFixed(2)),
+                confidence: 1.0
+              }
+            ];
+          } else {
+            updatedMap[0] = {
+              ...updatedMap[0],
+              start_time: Number(newStart.toFixed(2)),
+              end_time: Number(newEnd.toFixed(2))
+            };
+          }
+
+          return {
+            ...p,
+            syncMap: {
+              ...currentSyncMap,
+              dialogue_map: updatedMap
+            }
+          };
+        })
+      );
+    };
+
+    const handleMouseUp = () => {
+      setDragState({ type: null, startX: 0, initialStart: 0, initialEnd: 0 });
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [dragState, duration, panel.id, setPanels]);
+
+  const leftPct = (startTime / duration) * 100;
+  const widthPct = ((endTime - startTime) / duration) * 100;
+
+  return (
+    <div className="flex-1 max-w-[130px] flex flex-col gap-1 select-none" onClick={(e) => e.stopPropagation()}>
+      <div
+        ref={trackRef}
+        className="h-4 bg-neutral-950 border border-neutral-800 rounded relative overflow-hidden"
+      >
+        <div className="absolute inset-0 flex justify-between opacity-15 pointer-events-none">
+          <div className="w-[1px] h-full bg-white"></div>
+          <div className="w-[1px] h-full bg-white"></div>
+          <div className="w-[1px] h-full bg-white"></div>
+          <div className="w-[1px] h-full bg-white"></div>
+          <div className="w-[1px] h-full bg-white"></div>
+        </div>
+
+        <div
+          style={{
+            left: `${leftPct}%`,
+            width: `${widthPct}%`
+          }}
+          className="absolute top-0 bottom-0 bg-purple-600 hover:bg-purple-500/90 border-l border-r border-purple-400 rounded flex items-center justify-between group cursor-grab active:cursor-grabbing"
+          onMouseDown={(e) => handleMouseDown(e, "center")}
+        >
+          <div
+            className="w-1.5 h-full bg-purple-400/70 hover:bg-white cursor-ew-resize flex-shrink-0"
+            onMouseDown={(e) => handleMouseDown(e, "left")}
+          />
+
+          <span className="text-[7px] font-mono font-bold text-white leading-none truncate pointer-events-none px-0.5">
+            {startTime.toFixed(1)}s-{endTime.toFixed(1)}s
+          </span>
+
+          <div
+            className="w-1.5 h-full bg-purple-400/70 hover:bg-white cursor-ew-resize flex-shrink-0"
+            onMouseDown={(e) => handleMouseDown(e, "right")}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const TimelineCard = ({
   panel,
   idx,
@@ -529,8 +691,18 @@ const TimelineCard = ({
           {isTracksExpanded && (
             <div className="space-y-1.5 pl-1 animate-in fade-in slide-in-from-top-1 duration-150">
               {/* BG Track */}
-              <div className="flex items-center justify-between bg-neutral-900 border border-neutral-850 px-2 py-1.5 rounded-lg">
-                <span className="text-[10px] font-mono text-neutral-300">Background</span>
+              <div className="flex items-center justify-between bg-neutral-900 border border-neutral-850 px-2 py-1 rounded-lg gap-2">
+                <div className="flex items-center gap-2">
+                  <img
+                    src={panel.layers.background_url}
+                    alt="Background Thumbnail"
+                    className="h-8 w-8 object-contain rounded border border-neutral-850 bg-neutral-950 flex-shrink-0"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = 'none';
+                    }}
+                  />
+                  <span className="text-[10px] font-mono text-neutral-300">Background</span>
+                </div>
                 <button
                   type="button"
                   onClick={() => {
@@ -557,8 +729,18 @@ const TimelineCard = ({
               </div>
 
               {/* Character Track */}
-              <div className="flex items-center justify-between bg-neutral-900 border border-neutral-850 px-2 py-1.5 rounded-lg">
-                <span className="text-[10px] font-mono text-neutral-300">Character</span>
+              <div className="flex items-center justify-between bg-neutral-900 border border-neutral-850 px-2 py-1 rounded-lg gap-2">
+                <div className="flex items-center gap-2">
+                  <img
+                    src={panel.layers.character_url}
+                    alt="Character Thumbnail"
+                    className="h-8 w-8 object-contain rounded border border-neutral-850 bg-neutral-950 flex-shrink-0"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = 'none';
+                    }}
+                  />
+                  <span className="text-[10px] font-mono text-neutral-300">Character</span>
+                </div>
                 <button
                   type="button"
                   onClick={() => {
@@ -585,8 +767,19 @@ const TimelineCard = ({
               </div>
 
               {/* Text Track */}
-              <div className="flex items-center justify-between bg-neutral-900 border border-neutral-850 px-2 py-1.5 rounded-lg">
-                <span className="text-[10px] font-mono text-neutral-300">Text Bubbles</span>
+              <div className="flex items-center justify-between bg-neutral-900 border border-neutral-850 px-2 py-1 rounded-lg gap-2">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <img
+                    src={panel.layers.text_url}
+                    alt="Text Thumbnail"
+                    className="h-8 w-8 object-contain rounded border border-neutral-850 bg-neutral-950 flex-shrink-0"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = 'none';
+                    }}
+                  />
+                  <span className="text-[10px] font-mono text-neutral-300 flex-shrink-0">Text Bubbles</span>
+                  <DialogueClipSlider panel={panel} setPanels={setPanels} />
+                </div>
                 <button
                   type="button"
                   onClick={() => {
