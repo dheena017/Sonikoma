@@ -333,6 +333,18 @@ def _detect_panels_webtoon(
         if not sub_panels:
             sub_panels = [(0, w)]
 
+        # Identify if this horizontal slice represents a top header/banner to prevent vertical subdivision
+        slice_h = end_y - start_y
+        is_header = False
+        if start_y < int(h * 0.15):
+            is_header = True
+        elif float(w) / float(slice_h) > 3.0 if slice_h > 0 else False:
+            is_header = True
+
+        if is_header:
+            logger.info(f"[Panel Detection] Slicing protected: horizontal slice {start_y}-{end_y} identified as header/banner. Disabling vertical subdivision.")
+            sub_panels = [(0, w)]
+
         for sx, ex in sub_panels:
             pad_sx = max(0, sx - 8)
             pad_ex = min(w, ex + 8)
