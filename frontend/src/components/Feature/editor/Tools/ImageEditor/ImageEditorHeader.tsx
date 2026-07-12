@@ -141,8 +141,12 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
         <button 
           onClick={() => {
             const params = new URLSearchParams(window.location.search);
-            const series = params.get("series");
-            const chapter = params.get("chapter");
+            const path = window.location.pathname;
+            const match = path.match(
+              /^\/workspace\/editor\/series\/([^\/]+)\/chapters\/([^\/]+)(?:\/image-editor)?\/?$/
+            );
+            const series = match ? match[1] : params.get("series");
+            const chapter = match ? match[2] : params.get("chapter");
             if (series && chapter) {
               const target = `/workspace/editor/series/${series}/chapters/${chapter}`;
               if ((window as any).navigateTo) {

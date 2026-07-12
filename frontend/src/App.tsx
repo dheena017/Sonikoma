@@ -615,7 +615,7 @@ export default function App() {
       /\/series\/[^\/]+\/chapters\/([^\/]+)/
     );
     const editorRouteMatch = currentPath.match(
-      /^\/workspace\/editor\/series\/([^\/]+)\/chapters\/([^\/]+)\/?$/
+      /^\/workspace\/editor\/series\/([^\/]+)\/chapters\/([^\/]+)(?:\/image-editor)?\/?$/
     );
     const isDetailsMode = currentPath.endsWith("/details");
     const isWorkspaceEditorRoot =
@@ -640,7 +640,6 @@ export default function App() {
       isEpisodeScraperPath: currentPath === "/episode-scraper",
       isEditorPath:
         currentPath.startsWith("/editor") ||
-        currentPath.startsWith("/image-editor") ||
         currentPath === "/workspace/editor" ||
         currentPath === "/workspace/editor/" ||
         currentPath.startsWith("/workspace/editor/"),
