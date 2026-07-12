@@ -7,6 +7,7 @@ interface EnhancementsCinematicProps {
   handleModifyDuration: (panelId: number, val: number) => void;
   handleModifyMotionType: (panelId: number, val: string) => void;
   handleModifyCropPadding: (panelId: number, val: number) => void;
+  setPanels?: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
 export function EnhancementsCinematic({
@@ -14,6 +15,7 @@ export function EnhancementsCinematic({
   handleModifyDuration,
   handleModifyMotionType,
   handleModifyCropPadding,
+  setPanels,
 }: EnhancementsCinematicProps) {
   return (
     <div className="space-y-3 pt-2">
@@ -84,6 +86,34 @@ export function EnhancementsCinematic({
           handleModifyCropPadding(activeStoryboardPanel.id, val)
         }
       />
+
+      {/* Parallax Intensity */}
+      {activeStoryboardPanel?.layers && setPanels && (
+        <SliderRow
+          label="Parallax 3D Intensity"
+          value={activeStoryboardPanel.layers.parallax_intensity ?? 30}
+          min={0}
+          max={100}
+          step={5}
+          unit="%"
+          disabled={!activeStoryboardPanel}
+          onChange={(val) => {
+            setPanels((prev) =>
+              prev.map((p) =>
+                p.id === activeStoryboardPanel.id
+                  ? {
+                      ...p,
+                      layers: {
+                        ...p.layers!,
+                        parallax_intensity: val,
+                      },
+                    }
+                  : p
+              )
+            );
+          }}
+        />
+      )}
     </div>
   );
 }

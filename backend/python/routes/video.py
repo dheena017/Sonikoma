@@ -32,6 +32,28 @@ logger = logging.getLogger("sonikoma.api.video")
 # In-memory job tracking
 RENDER_JOBS = {}
 
+class PanelLayersData(BaseModel):
+    background_url: str
+    character_url: str
+    text_url: str
+    char_x: Optional[float] = 0.0
+    char_y: Optional[float] = 0.0
+    char_scale_x: Optional[float] = 1.0
+    char_scale_y: Optional[float] = 1.0
+    text_x: Optional[float] = 0.0
+    text_y: Optional[float] = 0.0
+    text_scale_x: Optional[float] = 1.0
+    text_scale_y: Optional[float] = 1.0
+    parallax_intensity: Optional[float] = 30.0
+
+class DialogueSegmentData(BaseModel):
+    start_time: float
+    end_time: float
+
+class PanelSyncMapData(BaseModel):
+    dialogue_map: List[DialogueSegmentData]
+    audio_peaks: Optional[List[float]] = None
+
 class PanelData(BaseModel):
     id: int
     image_url: str
@@ -40,6 +62,9 @@ class PanelData(BaseModel):
     sfx: Optional[str] = None
     audio_url: Optional[str] = None
     motion_type: Optional[str] = None
+    layers: Optional[PanelLayersData] = None
+    syncMap: Optional[PanelSyncMapData] = None
+    audio_reactive_shake: Optional[bool] = False
 
 class RenderRequest(BaseModel):
     panels: List[PanelData]
@@ -176,6 +201,47 @@ def _build_zoompan_filter(motion_type: str, w: int, h: int, duration: float, fps
     return ""
 
 
+def _get_bg_zoompan(motion_type: str, w: int, h: int, duration: float, fps: int = 24) -> str:
+    frames = max(1, int(duration * fps))
+    if motion_type == "zoom_in":
+        return f"zoompan=z='min(zoom+0.0015,1.5)':d={frames}:s={w}x{h}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':fps={fps}"
+    elif motion_type == "zoom_out":
+        return f"zoompan=z='max(1.5-0.0015*on,1.0)':d={frames}:s={w}x{h}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':fps={fps}"
+    elif motion_type == "pan_left":
+        return f"zoompan=z=1.15:x='(iw-iw/zoom)*(on/{frames})':y='(ih-ih/zoom)/2':d={frames}:s={w}x{h}:fps={fps}"
+    elif motion_type == "pan_right":
+        return f"zoompan=z=1.15:x='(iw-iw/zoom)*(1-on/{frames})':y='(ih-ih/zoom)/2':d={frames}:s={w}x{h}:fps={fps}"
+    elif motion_type == "pan_up":
+        return f"zoompan=z=1.15:x='(iw-iw/zoom)/2':y='(ih-ih/zoom)*(on/{frames})':d={frames}:s={w}x{h}:fps={fps}"
+    elif motion_type == "pan_down":
+        return f"zoompan=z=1.15:x='(iw-iw/zoom)/2':y='(ih-ih/zoom)*(1-on/{frames})':d={frames}:s={w}x{h}:fps={fps}"
+    return f"zoompan=z=1.0:d={frames}:s={w}x{h}:fps={fps}"
+
+
+def _get_char_zoompan(motion_type: str, w: int, h: int, duration: float, fps: int = 24, parallax_intensity: float = 30.0) -> str:
+    frames = max(1, int(duration * fps))
+    mult = 1.0 + (parallax_intensity / 100.0) * 2.0
+    pan_mult = 1.0 + (parallax_intensity / 100.0) * 0.8
+
+    char_zoom_in_rate = 0.0015 * mult
+    char_zoom_out_rate = 0.0015 * mult
+    char_pan_scale = 1.15 * pan_mult
+
+    if motion_type == "zoom_in":
+        return f"zoompan=z='min(zoom+{char_zoom_in_rate:.5f},1.5)':d={frames}:s={w}x{h}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':fps={fps}:pix_fmt=yuva420p"
+    elif motion_type == "zoom_out":
+        return f"zoompan=z='max(1.5-{char_zoom_out_rate:.5f}*on,1.0)':d={frames}:s={w}x{h}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':fps={fps}:pix_fmt=yuva420p"
+    elif motion_type == "pan_left":
+        return f"zoompan=z={char_pan_scale:.3f}:x='(iw-iw/zoom)*(on/{frames})*1.3':y='(ih-ih/zoom)/2':d={frames}:s={w}x{h}:fps={fps}:pix_fmt=yuva420p"
+    elif motion_type == "pan_right":
+        return f"zoompan=z={char_pan_scale:.3f}:x='(iw-iw/zoom)*(1-on/{frames})*1.3':y='(ih-ih/zoom)/2':d={frames}:s={w}x{h}:fps={fps}:pix_fmt=yuva420p"
+    elif motion_type == "pan_up":
+        return f"zoompan=z={char_pan_scale:.3f}:x='(iw-iw/zoom)/2':y='(ih-ih/zoom)*(on/{frames})*1.3':d={frames}:s={w}x{h}:fps={fps}:pix_fmt=yuva420p"
+    elif motion_type == "pan_down":
+        return f"zoompan=z={char_pan_scale:.3f}:x='(iw-iw/zoom)/2':y='(ih-ih/zoom)*(1-on/{frames})*1.3':d={frames}:s={w}x{h}:fps={fps}:pix_fmt=yuva420p"
+    return f"zoompan=z=1.0:d={frames}:s={w}x{h}:fps={fps}:pix_fmt=yuva420p"
+
+
 def _render_panel_segment_ffmpeg(
     img_path: str,
     audio_path: str | None,
@@ -185,50 +251,187 @@ def _render_panel_segment_ffmpeg(
     h: int,
     motion_type: str | None,
     fps: int = 24,
+    layers: dict | None = None,
+    sync_map: list | None = None,
+    audio_peaks: list | None = None,
+    audio_reactive_shake: bool = False,
 ) -> None:
     """
     Render a single panel as a self-contained .mp4 segment using pure ffmpeg.
-    Runs in a subprocess — no Python frame-by-frame processing.
+    Supports multi-layer compositing and dialogue alignment.
     """
     import subprocess
+    from PIL import Image
 
-    vf_parts = []
+    # Determine camera shake if active
+    shake_filter = ""
+    if audio_reactive_shake and audio_peaks and len(audio_peaks) > 0:
+        peaks_fps = 10.0
+        spikes = []
+        last_spike_time = -1.0
+        for i, val in enumerate(audio_peaks):
+            t_spike = i / peaks_fps
+            if val > 0.85:
+                if t_spike - last_spike_time >= 0.8:
+                    spikes.append(t_spike)
+                    last_spike_time = t_spike
 
-    # Scale / pad to target canvas
-    vf_parts.append(f"scale={w}:{h}:force_original_aspect_ratio=decrease")
-    vf_parts.append(f"pad={w}:{h}:(ow-iw)/2:(oh-ih)/2:black")
+        if len(spikes) > 0:
+            between_conditions = [f"between(t,{s},{s+0.4})" for s in spikes]
+            shake_active = "+".join(between_conditions)
+            shake_filter = f",crop=w='iw-32':h='ih-32':x='16+16*sin(80*t)*({shake_active})':y='16+16*cos(80*t)*({shake_active})',scale={w}:{h}"
 
-    # Motion via zoompan (only for clips with motion)
-    if motion_type in ("zoom_in", "pan_left", "pan_right", "pan_up", "pan_down"):
-        vf_parts.append(_build_zoompan_filter(motion_type, w, h, duration, fps))
+    if layers:
+        # Load background layout size to align scaled layer offsets
+        with Image.open(layers["background"]) as bg_img:
+            bg_w, bg_h = bg_img.size
+        with Image.open(layers["character"]) as char_img:
+            char_w, char_h = char_img.size
+        with Image.open(layers["text"]) as text_img:
+            text_w, text_h = text_img.size
 
-    # Crossfade: add a 0.5 s fade-in on every clip (ffmpeg acrossfade is handled at concat stage)
-    vf_parts.append("fade=t=in:st=0:d=0.5")
+        scale_ratio = min(w / bg_w, h / bg_h)
+        offset_x = (w - bg_w * scale_ratio) / 2
+        offset_y = (h - bg_h * scale_ratio) / 2
 
-    vf = ",".join(vf_parts)
+        # 1. Background layout
+        bg_scale_filter = f"scale={w}:{h}:force_original_aspect_ratio=decrease,pad={w}:{h}:(ow-iw)/2:(oh-ih)/2:black"
 
-    cmd = [
-        "ffmpeg", "-y",
-        "-loop", "1",           # loop the still image
-        "-i", img_path,
-        "-t", str(duration),
-        "-vf", vf,
-        "-r", str(fps),
-        "-c:v", "libx264",
-        "-preset", "ultrafast",
-        "-tune", "stillimage",
-        "-pix_fmt", "yuv420p",
-    ]
+        # 2. Character layout
+        char_x = layers.get("char_x")
+        char_y = layers.get("char_y")
+        char_scale_x = layers.get("char_scale_x")
+        char_scale_y = layers.get("char_scale_y")
 
-    if audio_path and os.path.exists(audio_path):
-        cmd += ["-i", audio_path, "-c:a", "aac", "-b:a", "192k",
-                "-shortest", "-af", "apad"]
+        if char_x is not None and char_y is not None:
+            char_x_px = int(offset_x + char_x * scale_ratio)
+            char_y_px = int(offset_y + char_y * scale_ratio)
+            char_target_w = int(char_w * char_scale_x * scale_ratio)
+            char_target_h = int(char_h * char_scale_y * scale_ratio)
+        else:
+            char_x_px = int(offset_x)
+            char_y_px = int(offset_y)
+            char_target_w = int(bg_w * scale_ratio)
+            char_target_h = int(bg_h * scale_ratio)
+
+        # Make character bounds even for x264 alignment
+        char_target_w = max(2, char_target_w - char_target_w % 2)
+        char_target_h = max(2, char_target_h - char_target_h % 2)
+
+        char_scale_filter = f"scale={char_target_w}:{char_target_h},pad={w}:{h}:{char_x_px}:{char_y_px}:black@0"
+
+        # 3. Text layout
+        text_x = layers.get("text_x")
+        text_y = layers.get("text_y")
+        text_scale_x = layers.get("text_scale_x")
+        text_scale_y = layers.get("text_scale_y")
+
+        if text_x is not None and text_y is not None:
+            text_x_px = int(offset_x + text_x * scale_ratio)
+            text_y_px = int(offset_y + text_y * scale_ratio)
+            text_target_w = int(text_w * text_scale_x * scale_ratio)
+            text_target_h = int(text_h * text_scale_y * scale_ratio)
+        else:
+            text_x_px = int(offset_x)
+            text_y_px = int(offset_y)
+            text_target_w = int(bg_w * scale_ratio)
+            text_target_h = int(bg_h * scale_ratio)
+
+        text_target_w = max(2, text_target_w - text_target_w % 2)
+        text_target_h = max(2, text_target_h - text_target_h % 2)
+
+        text_scale_filter = f"scale={text_target_w}:{text_target_h},pad={w}:{h}:{text_x_px}:{text_y_px}:black@0"
+
+        # Timed overlay condition
+        text_enable = "1"
+        if sync_map and len(sync_map) > 0:
+            between_conditions = []
+            for segment in sync_map:
+                s_time = segment.get("start_time", 0.0)
+                e_time = segment.get("end_time", duration)
+                between_conditions.append(f"between(t,{s_time},{e_time})")
+            text_enable = "+".join(between_conditions)
+
+        parallax_intensity = layers.get("parallax_intensity", 30.0) if layers else 30.0
+
+        filter_complex = (
+            f"[0:v]{bg_scale_filter}[bg_scaled];"
+            f"[bg_scaled]{_get_bg_zoompan(motion_type, w, h, duration, fps)}[bg_motion];"
+            f"[1:v]{char_scale_filter}[char_scaled];"
+            f"[char_scaled]{_get_char_zoompan(motion_type, w, h, duration, fps, parallax_intensity)}[char_motion];"
+            f"[2:v]{text_scale_filter}[text_scaled];"
+            f"[bg_motion][char_motion]overlay=0:0[bg_char_comp];"
+            f"[bg_char_comp][text_scaled]overlay=0:0:enable='{text_enable}'{shake_filter},fade=t=in:st=0:d=0.5[final_comp]"
+        )
+
+        cmd = [
+            "ffmpeg", "-y",
+            "-loop", "1", "-t", str(duration), "-i", layers["background"],
+            "-loop", "1", "-t", str(duration), "-i", layers["character"],
+            "-loop", "1", "-t", str(duration), "-i", layers["text"],
+        ]
+
+        if audio_path and os.path.exists(audio_path):
+            cmd += ["-i", audio_path]
+            audio_input_idx = 3
+        else:
+            cmd += ["-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo"]
+            audio_input_idx = 3
+
+        cmd += [
+            "-filter_complex", filter_complex,
+            "-map", "[final_comp]",
+            "-map", f"{audio_input_idx}:a",
+            "-t", str(duration),
+            "-r", str(fps),
+            "-c:v", "libx264",
+            "-preset", "ultrafast",
+            "-pix_fmt", "yuv420p",
+        ]
+
+        if audio_path and os.path.exists(audio_path):
+            cmd += ["-c:a", "aac", "-b:a", "192k", "-shortest", "-af", "apad"]
+        else:
+            cmd += ["-c:a", "aac", "-b:a", "128k", "-shortest"]
+
+        cmd.append(out_path)
     else:
-        # Silent audio track so every segment has the same stream count
-        cmd += ["-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo",
-                "-c:a", "aac", "-b:a", "128k", "-shortest"]
+        # Fallback to single raw image rendering
+        vf_parts = []
+        vf_parts.append(f"scale={w}:{h}:force_original_aspect_ratio=decrease")
+        vf_parts.append(f"pad={w}:{h}:(ow-iw)/2:(oh-ih)/2:black")
 
-    cmd.append(out_path)
+        if motion_type in ("zoom_in", "pan_left", "pan_right", "pan_up", "pan_down"):
+            vf_parts.append(_build_zoompan_filter(motion_type, w, h, duration, fps))
+
+        # Append shake filter if active
+        if shake_filter:
+            vf_parts.append(shake_filter.lstrip(","))
+
+        vf_parts.append("fade=t=in:st=0:d=0.5")
+        vf = ",".join(vf_parts)
+
+        cmd = [
+            "ffmpeg", "-y",
+            "-loop", "1",
+            "-i", img_path,
+            "-t", str(duration),
+            "-vf", vf,
+            "-r", str(fps),
+            "-c:v", "libx264",
+            "-preset", "ultrafast",
+            "-tune", "stillimage",
+            "-pix_fmt", "yuv420p",
+        ]
+
+        if audio_path and os.path.exists(audio_path):
+            cmd += ["-i", audio_path, "-c:a", "aac", "-b:a", "192k",
+                    "-shortest", "-af", "apad"]
+        else:
+            cmd += ["-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo",
+                    "-c:a", "aac", "-b:a", "128k", "-shortest"]
+
+        cmd.append(out_path)
 
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
     if result.returncode != 0:
@@ -296,6 +499,10 @@ def render_pipeline_sync(video_id: str, panels_data: List[Dict[str, Any]], outpu
                 w          = canvas_w,
                 h          = canvas_h,
                 motion_type= p.get("motion_type"),
+                layers     = p.get("layers"),
+                sync_map   = p.get("sync_map"),
+                audio_peaks = p.get("audio_peaks"),
+                audio_reactive_shake = p.get("audio_reactive_shake", False),
             )
             segment_paths.append(seg_path)
             durations.append(duration)
@@ -403,10 +610,55 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
                 "local_audio": None,
                 "speech_text": panel.speech_text,
                 "motion_type": panel.motion_type,
-                "sfx": panel.sfx
+                "sfx": panel.sfx,
+                "layers": None,
+                "sync_map": None,
+                "audio_peaks": None,
+                "audio_reactive_shake": panel.audio_reactive_shake or False
             }
             
-            await download_asset(panel.image_url, raw_img_path)
+            if panel.layers:
+                bg_path = os.path.join(work_dir, f"panel_{idx}_bg.webp")
+                char_path = os.path.join(work_dir, f"panel_{idx}_char.webp")
+                text_path = os.path.join(work_dir, f"panel_{idx}_text.webp")
+
+                bg_ok = await download_asset(panel.layers.background_url, bg_path)
+                char_ok = await download_asset(panel.layers.character_url, char_path)
+                text_ok = await download_asset(panel.layers.text_url, text_path)
+
+                if bg_ok and char_ok and text_ok:
+                    p_dict["layers"] = {
+                        "background": bg_path,
+                        "character": char_path,
+                        "text": text_path,
+                        "char_x": panel.layers.char_x,
+                        "char_y": panel.layers.char_y,
+                        "char_scale_x": panel.layers.char_scale_x,
+                        "char_scale_y": panel.layers.char_scale_y,
+                        "text_x": panel.layers.text_x,
+                        "text_y": panel.layers.text_y,
+                        "text_scale_x": panel.layers.text_scale_x,
+                        "text_scale_y": panel.layers.text_scale_y,
+                        "parallax_intensity": panel.layers.parallax_intensity if panel.layers.parallax_intensity is not None else 30.0,
+                    }
+                    # Set background as raw image for size validations
+                    raw_img_path = bg_path
+                    p_dict["raw_img"] = bg_path
+
+                    if panel.syncMap:
+                        if panel.syncMap.audio_peaks:
+                            p_dict["audio_peaks"] = panel.syncMap.audio_peaks
+                        if panel.syncMap.dialogue_map:
+                            p_dict["sync_map"] = [
+                                {"start_time": s.start_time, "end_time": s.end_time}
+                                for s in panel.syncMap.dialogue_map
+                            ]
+                else:
+                    # Fallback to single raw image if any layer fails to download
+                    await download_asset(panel.image_url, raw_img_path)
+            else:
+                await download_asset(panel.image_url, raw_img_path)
+
             if panel.audio_url:
                 audio_path = os.path.join(work_dir, f"audio_{idx}.mp3")
                 if await download_asset(panel.audio_url, audio_path):

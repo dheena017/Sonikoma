@@ -1,13 +1,13 @@
 import React from "react";
-import { 
-  X, 
-  Check, 
-  Undo, 
-  Redo, 
-  ChevronLeft, 
-  ChevronRight, 
-  Trash2, 
-  PanelRightClose, 
+import {
+  X,
+  Check,
+  Undo,
+  Redo,
+  ChevronLeft,
+  ChevronRight,
+  Trash2,
+  PanelRightClose,
   PanelRightOpen,
   Minimize2
 } from "lucide-react";
@@ -59,7 +59,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
         <span className="px-3 py-1 text-[10px] font-bold tracking-wider text-purple-400 bg-purple-900/30 rounded-full border border-purple-700/50">
           IMAGE EDITOR
         </span>
-        
+
         {hasMultipleImages && (
           <div className="flex items-center space-x-1 bg-gray-900/50 rounded-lg p-1 border border-gray-800">
             <button 
@@ -89,7 +89,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
 
       {/* Center: History & Canvas Tools */}
       <div className="flex items-center space-x-2 bg-gray-900/50 p-1 rounded-lg border border-gray-800">
-        <button 
+        <button
           onClick={handleUndo}
           disabled={historyLength === 0}
           className={`p-2 rounded-md transition ${historyLength > 0 ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 cursor-not-allowed'}`}
@@ -97,7 +97,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
         >
           <Undo className="w-4 h-4" />
         </button>
-        <button 
+        <button
           onClick={handleRedo}
           disabled={redoHistoryLength === 0}
           className={`p-2 rounded-md transition ${redoHistoryLength > 0 ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 cursor-not-allowed'}`}
@@ -106,7 +106,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
           <Redo className="w-4 h-4" />
         </button>
         <div className="w-px h-4 bg-gray-700 mx-1"></div>
-        <button 
+        <button
           onClick={handleDeleteCurrentImage}
           className="p-2 text-red-400 hover:text-red-300 rounded-md hover:bg-red-900/20 transition"
           title="Delete Image"
@@ -114,7 +114,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
           <Trash2 className="w-4 h-4" />
         </button>
         {setIsPipMode && (
-          <button 
+          <button
             onClick={() => setIsPipMode(true)}
             className="p-2 text-gray-400 hover:text-white rounded-md hover:bg-gray-800 transition"
             title="Picture-in-Picture Mode"
@@ -133,7 +133,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
         >
           {isToolsPanelOpen ? <PanelRightClose className="w-5 h-5" /> : <PanelRightOpen className="w-5 h-5" />}
         </button>
-        
+
         <div className="w-px h-6 bg-gray-800 mx-2"></div>
 
         <button 

@@ -1,3 +1,36 @@
+export interface PanelLayers {
+  background_url: string;
+  character_url: string;
+  text_url: string;
+  bg_visible?: boolean;
+  char_visible?: boolean;
+  text_visible?: boolean;
+  char_x?: number;
+  char_y?: number;
+  char_scale_x?: number;
+  char_scale_y?: number;
+  text_x?: number;
+  text_y?: number;
+  text_scale_x?: number;
+  text_scale_y?: number;
+  parallax_intensity?: number;
+}
+
+export interface DialogueSegment {
+  ocr_index: number;
+  ocr_text: string;
+  whisper_text: string;
+  start_time: number;
+  end_time: number;
+  confidence: number;
+}
+
+export interface PanelSyncMap {
+  dialogue_map: DialogueSegment[];
+  audio_peaks: number[];
+  peaks_fps?: number;
+}
+
 export interface GeneratedPanel {
   id: number;
   image_url: string;
@@ -21,6 +54,9 @@ export interface GeneratedPanel {
   detection_style?: string;
   bubble_method?: string;
   audio_url?: string;
+  layers?: PanelLayers;
+  syncMap?: PanelSyncMap;
+  audio_reactive_shake?: boolean;
 }
 
 export interface CharacterBio {

@@ -9,6 +9,11 @@ from PIL import Image
 
 logger = logging.getLogger("sonikoma.services.layer_segmentation")
 
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development").lower().strip()
+LOCAL_MEDIA_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "local_media"))
+# Matches main.py mount: /media -> <LOCAL_MEDIA_ROOT>
+LOCAL_MEDIA_URL_PREFIX = "/media"
+
 # Try importing dependencies safely
 try:
     from rembg import remove as rembg_remove
@@ -42,6 +47,10 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
     """
     Main orchestration logic for separating a panel into Background, Character, and Text layers.
     Returns a dictionary mapping layer type to public URLs.
+
+    ENVIRONMENT toggle:
+      - development: write WebP layers to disk and return local URL paths
+      - production: upload WebP layers to Supabase and return Supabase public URLs
     """
     if not os.path.exists(image_path):
         raise FileNotFoundError(f"Source image not found: {image_path}")
@@ -175,17 +184,68 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
         bg_layer_bytes = buffer.tobytes()
 
     # =========================================================================
-    # Step 4: Upload to Supabase
+    # Step 4: Storage (Supabase vs Local)
     # =========================================================================
     folder_prefix = f"layers/{panel_id}/"
 
-    # Run uploads concurrently if needed, but sequential is fine for now
-    bg_url = upload_to_supabase_bucket(bg_layer_bytes, "panels", f"{folder_prefix}bg.webp", "image/webp")
-    char_url = upload_to_supabase_bucket(char_layer_bytes, "panels", f"{folder_prefix}char.webp", "image/webp")
-    text_url = upload_to_supabase_bucket(text_layer_bytes, "panels", f"{folder_prefix}text.webp", "image/webp")
+    if ENVIRONMENT == "production":
+        logger.info(f"[Layer Segmentation] ENVIRONMENT=production — uploading layers to Supabase for panel_id={panel_id}")
+
+        try:
+            bg_url = upload_to_supabase_bucket(bg_layer_bytes, "panels", f"{folder_prefix}bg.webp", "image/webp")
+            char_url = upload_to_supabase_bucket(char_layer_bytes, "panels", f"{folder_prefix}char.webp", "image/webp")
+            text_url = upload_to_supabase_bucket(text_layer_bytes, "panels", f"{folder_prefix}text.webp", "image/webp")
+        except Exception as e:
+            logger.error(f"[Layer Segmentation] Supabase upload failed for panel_id={panel_id}: {e}", exc_info=True)
+            raise
+
+        # Eliminate "null" silently returning; surface the real issue.
+        missing = {k: v for k, v in {"background_url": bg_url, "character_url": char_url, "text_url": text_url}.items() if not v}
+        if missing:
+            raise RuntimeError(f"Supabase upload returned empty URLs for panel_id={panel_id}: {missing}")
+
+        return {
+            "background_url": bg_url,
+            "character_url": char_url,
+            "text_url": text_url,
+        }
+
+    # Development/local bypass
+    local_panel_dir = os.path.join(LOCAL_MEDIA_ROOT, "panels", "layers", panel_id)
+    try:
+        os.makedirs(local_panel_dir, exist_ok=True)
+    except Exception as e:
+        logger.error(f"[Layer Segmentation] Failed to create local media directory: {local_panel_dir} : {e}", exc_info=True)
+        raise
+
+    logger.info(f"[Layer Segmentation] ENVIRONMENT={ENVIRONMENT} — saving layers locally for panel_id={panel_id} at {local_panel_dir}")
+
+    local_files = {
+        "bg.webp": bg_layer_bytes,
+        "char.webp": char_layer_bytes,
+        "text.webp": text_layer_bytes,
+    }
+
+    for fname, b in local_files.items():
+        if b is None:
+            raise RuntimeError(f"Local layer bytes is None for {fname} (panel_id={panel_id})")
+
+    try:
+        for fname, b in local_files.items():
+            out_path = os.path.join(local_panel_dir, fname)
+            with open(out_path, "wb") as f:
+                f.write(b)
+    except Exception as e:
+        logger.error(f"[Layer Segmentation] Failed writing local WebP files for panel_id={panel_id}: {e}", exc_info=True)
+        raise
+
+    # Return paths frontend can load via FastAPI static mount (/media)
+    bg_url = f"{LOCAL_MEDIA_URL_PREFIX}/panels/layers/{panel_id}/bg.webp"
+    char_url = f"{LOCAL_MEDIA_URL_PREFIX}/panels/layers/{panel_id}/char.webp"
+    text_url = f"{LOCAL_MEDIA_URL_PREFIX}/panels/layers/{panel_id}/text.webp"
 
     return {
         "background_url": bg_url,
         "character_url": char_url,
-        "text_url": text_url
+        "text_url": text_url,
     }

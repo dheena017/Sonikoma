@@ -6,7 +6,7 @@ export const ImageEditorRightSidebar: React.FC = () => {
 
   return (
     <div className="w-full h-full p-5 flex flex-col space-y-6">
-      
+
       {activeTool === "edit" && (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
           <div>

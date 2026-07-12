@@ -1,0 +1,1658 @@
+
+  VITE v6.4.3  ready in 658 ms
+
+  ➜  Local:   http://localhost:3000/
+  ➜  Network: use --host to expose
+[Vite Middleware] Incoming request: GET /workspace/editor/series/tower-of-god/chapters/season-3-ep-1?mock_auth=true
+[90m5:24:10 PM[0m [35m[Vite][0m [32mGET[0m [36m/index.html[0m [32m200[0m [90m(60ms)[0m
+[Vite Middleware] Incoming request: GET /@vite/client
+[Vite Middleware] Incoming request: GET /src/main.tsx
+[Vite Middleware] Incoming request: GET /@react-refresh
+[90m5:24:10 PM[0m [35m[Vite][0m [32mGET[0m [36m/@react-refresh[0m [32m200[0m [90m(31ms)[0m
+[90m5:24:10 PM[0m [35m[Vite][0m [32mGET[0m [36m/@vite/client[0m [32m200[0m [90m(61ms)[0m
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/vite/dist/client/env.mjs
+[90m5:24:10 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/vite/dist/client/env.mjs[0m [32m200[0m [90m(2ms)[0m
+[90m5:24:10 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/main.tsx[0m [32m200[0m [90m(562ms)[0m
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=a0532477
+[90m5:24:10 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=a0532477[0m [32m200[0m [90m(4ms)[0m
+[Vite Middleware] Incoming request: GET /src/utils/authFetch.ts
+[Vite Middleware] Incoming request: GET /src/utils/logger.ts
+[Vite Middleware] Incoming request: GET /src/components/ErrorBoundary.tsx
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/react.js?v=a0532477
+[90m5:24:11 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/react.js?v=a0532477[0m [32m200[0m [90m(1ms)[0m
+[90m5:24:11 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/utils/authFetch.ts[0m [32m200[0m [90m(130ms)[0m
+[90m5:24:11 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/utils/logger.ts[0m [32m200[0m [90m(147ms)[0m
+[90m5:24:11 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/ErrorBoundary.tsx[0m [32m200[0m [90m(145ms)[0m
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/react-dom_client.js?v=a0532477
+[90m5:24:11 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/react-dom_client.js?v=a0532477[0m [32m200[0m [90m(16ms)[0m
+[Vite Middleware] Incoming request: GET /src/index.css
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/chunk-F73QCPJP.js?v=a0532477
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/chunk-2TUXWMP5.js?v=a0532477
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/lucide-react.js?v=a0532477
+[Vite Middleware] Incoming request: GET /src/App.tsx
+[90m5:24:11 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/App.tsx[0m [32m200[0m [90m(4ms)[0m
+[90m5:24:11 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/chunk-2TUXWMP5.js?v=a0532477[0m [32m200[0m [90m(10ms)[0m
+[90m5:24:11 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/chunk-F73QCPJP.js?v=a0532477[0m [32m200[0m [90m(13ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/index.ts
+[Vite Middleware] Incoming request: GET /src/hooks/useGlobalShortcuts.ts
+[Vite Middleware] Incoming request: GET /src/api/index.ts
+[Vite Middleware] Incoming request: GET /src/components/MainHeader.tsx
+[90m5:24:12 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/lucide-react.js?v=a0532477[0m [32m200[0m [90m(1353ms)[0m
+[90m5:24:12 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/MainHeader.tsx[0m [32m200[0m [90m(991ms)[0m
+[90m5:24:12 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/index.ts[0m [32m200[0m [90m(1024ms)[0m
+[90m5:24:12 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useGlobalShortcuts.ts[0m [32m200[0m [90m(1024ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/MainSidebar.tsx
+[90m5:24:12 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/MainSidebar.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Workspace/AppWorkspace.tsx
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/index.ts
+[Vite Middleware] Incoming request: GET /src/components/confirmationmodels/ProjectConfirmPanel.tsx
+[Vite Middleware] Incoming request: GET /src/components/PageNotFound.tsx
+[90m5:24:12 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/PageNotFound.tsx[0m [32m200[0m [90m(1ms)[0m
+[90m5:24:13 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/index.ts[0m [32m200[0m [90m(1403ms)[0m
+[90m5:24:13 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Workspace/AppWorkspace.tsx[0m [32m200[0m [90m(371ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/video/AdvancedSettings.tsx
+[Vite Middleware] Incoming request: GET /src/components/Status/StatusPage.tsx
+[Vite Middleware] Incoming request: GET /src/components/Feature/ai_models/AIModelsPage.tsx
+[90m5:24:13 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/index.css[0m [32m200[0m [90m(2161ms)[0m
+[90m5:24:13 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Status/StatusPage.tsx[0m [32m200[0m [90m(398ms)[0m
+[90m5:24:13 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/index.ts[0m [32m200[0m [90m(898ms)[0m
+[90m5:24:13 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/confirmationmodels/ProjectConfirmPanel.tsx[0m [32m200[0m [90m(903ms)[0m
+[90m5:24:13 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/video/AdvancedSettings.tsx[0m [32m200[0m [90m(561ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Shortcuts/ShortcutsPage.tsx
+[90m5:24:13 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Shortcuts/ShortcutsPage.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useImageEditorState.ts
+[90m5:24:13 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useImageEditorState.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/processing/AutoCropModal.tsx
+[90m5:24:13 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/processing/AutoCropModal.tsx[0m [32m200[0m [90m(1ms)[0m
+[90m5:24:13 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/ai_models/AIModelsPage.tsx[0m [32m200[0m [90m(606ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/LandingPage.tsx
+[90m5:24:13 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/LandingPage.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/index.ts
+[90m5:24:13 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/notification/NotificationStack.tsx
+[90m5:24:13 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/notification/NotificationStack.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/confirmationmodels/ConfirmModal.tsx
+[90m5:24:13 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/confirmationmodels/ConfirmModal.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/index.ts
+[90m5:24:13 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/DisplayPage.tsx
+[90m5:24:13 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/DisplayPage.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Dashboard/DashboardPage.tsx
+[90m5:24:13 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Dashboard/DashboardPage.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/ProfilePage.tsx
+[90m5:24:13 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/ProfilePage.tsx[0m [32m200[0m [90m(4ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/LoadingPage.tsx
+[90m5:24:13 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/LoadingPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/optimizer/AIOptimizerPage.tsx
+[90m5:24:13 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/optimizer/AIOptimizerPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/panel_assistant/PanelAssistantPage.tsx
+[90m5:24:13 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/panel_assistant/PanelAssistantPage.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/characters/CharacterProfilePage.tsx
+[90m5:24:13 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/characters/CharacterProfilePage.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/index.ts
+[90m5:24:13 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/thumbnails/ThumbnailStudioPage.tsx
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/thumbnails/ThumbnailStudioPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/engagement/EngagementPage.tsx
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/engagement/EngagementPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/voice/VoiceStudioPage.tsx
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/voice/VoiceStudioPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/translation/TranslationStudioPage.tsx
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/translation/TranslationStudioPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/audio_lab/AudioLabPage.tsx
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/audio_lab/AudioLabPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/notification/NotificationsPage.tsx
+[Vite Middleware] Incoming request: GET /src/components/admin/index.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/index.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/MainMiniSidebar.tsx
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/MainMiniSidebar.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/analytics/CTRAnalyticsPage.tsx
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/analytics/CTRAnalyticsPage.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/SeriesDetailsPage.tsx
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/SeriesDetailsPage.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/creative/index.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/creative/index.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/episode-scraper/EpisodeScraperPage.tsx
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/episode-scraper/EpisodeScraperPage.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/YouTubePage.tsx
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/YouTubePage.tsx[0m [32m200[0m [90m(1ms)[0m
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/notification/NotificationsPage.tsx[0m [32m200[0m [90m(41ms)[0m
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/chunk-3XYMS4SN.js?v=a0532477
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/chunk-3XYMS4SN.js?v=a0532477[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/notification/NotificationDropdown.tsx
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/notification/NotificationDropdown.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useAIModels.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useAIModels.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/auth.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/auth.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/ImageEditorPage.tsx
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/ImageEditorPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useAppLogic.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useAppLogic.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useAppRouter.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useAppRouter.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useAppState.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useAppState.ts[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useAudioFeedback.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useAudioFeedback.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useAutoAnalysis.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useAutoAnalysis.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useAutoCropPresets.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useAutoCropPresets.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useAutoSave.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useAutoSave.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useBackendHealth.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useBackendHealth.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useBatchImageActions.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useBatchImageActions.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useBulkOperations.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useBulkOperations.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useCompileActions.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useCompileActions.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useConfigHistory.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useConfigHistory.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useCredits.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useCredits.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useImageEditor.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useImageEditor.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useCropEditorDrag.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useCropEditorDrag.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useCropEditorHistory.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useCropEditorHistory.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useLiveScraperActions.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useLiveScraperActions.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/usePanelDetection.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/usePanelDetection.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useCropEditorPipelines.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useCropEditorPipelines.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useImageTransform.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useImageTransform.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/usePlaybackEngine.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/usePlaybackEngine.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useSandboxLogic.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useSandboxLogic.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/usePersistedState.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/usePersistedState.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/usePipelineActions.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/usePipelineActions.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useStoryboardOperations.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useStoryboardOperations.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useThemeMode.tsx
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useThemeMode.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useVideoGeneration.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useVideoGeneration.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useSceneModifier.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useSceneModifier.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useSingleImageEdits.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useSingleImageEdits.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/projects.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/projects.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/image.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/image.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/ai.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/ai.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/scraper.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/scraper.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useYouTubePublisher.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useYouTubePublisher.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/video.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/video.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/system.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/system.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/admin.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/admin.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/skills.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/skills.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/export.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/export.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/analytics.ts
+[90m5:24:14 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/analytics.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/fetchWithInterceptor.ts
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/fetchWithInterceptor.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/scraper/UrlInputPanel.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/scraper/UrlInputPanel.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Layout/EditorPage.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Layout/EditorPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Layout/ToolSidebar.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Layout/ToolSidebar.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/react-dom.js?v=a0532477
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/react-dom.js?v=a0532477[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Shortcuts/ShortcutsPageContent.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Shortcuts/ShortcutsPageContent.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/index.ts
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/ai_models/CredentialsAndTuner.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/ai_models/CredentialsAndTuner.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/ai_models/ModelRegistryExplorer.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/ai_models/ModelRegistryExplorer.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/zustand.js?v=a0532477
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/zustand.js?v=a0532477[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/ai_models/BenchmarkRunHistory.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/ai_models/BenchmarkRunHistory.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/ai_models/ModelPlaygroundAndSkills.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/ai_models/ModelPlaygroundAndSkills.tsx[0m [32m200[0m [90m(3ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/ai_models/APITokenLedgerAndCosts.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/ai_models/APITokenLedgerAndCosts.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/ForgotPasswordPage.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/ForgotPasswordPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/AuthFooter.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/AuthFooter.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/AuthPageShell.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/AuthPageShell.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/AuthShowcase.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/AuthShowcase.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/RegisterPage.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/RegisterPage.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/ThemeSwitcher.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/ThemeSwitcher.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/hooks/index.ts
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/hooks/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/LoginPage.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/LoginPage.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/RegisterForm.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/RegisterForm.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/notification/hooks/index.ts
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/notification/hooks/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/notification/utils/index.ts
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/notification/utils/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/TerminalLogs.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/TerminalLogs.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/LogsPage.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/LogsPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/index.ts
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/LogsPageStats.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/LogsPageStats.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/LogsPageToolbar.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/LogsPageToolbar.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/LogsPageConsole.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/LogsPageConsole.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/LogsPageHelpBanner.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/LogsPageHelpBanner.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/LogsPageHeader.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/LogsPageHeader.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/utils/index.ts
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/utils/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/hooks/index.ts
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/hooks/index.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Dashboard/DashboardActivityFeed.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Dashboard/DashboardActivityFeed.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Dashboard/DashboardHeader.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Dashboard/DashboardHeader.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Dashboard/DashboardStats.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Dashboard/DashboardStats.tsx[0m [32m200[0m [90m(7ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Dashboard/DashboardQuickLinks.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Dashboard/DashboardQuickLinks.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Dashboard/DashboardProjectSection.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Dashboard/DashboardProjectSection.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Dashboard/DashboardSidebar.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Dashboard/DashboardSidebar.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Dashboard/useDashboardPage.ts
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Dashboard/useDashboardPage.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/ProfileAccountTab.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/ProfileAccountTab.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/ProfileSecurityTab.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/ProfileSecurityTab.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Dashboard/DashboardAIPipeline.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Dashboard/DashboardAIPipeline.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/ProfileApiTab.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/ProfileApiTab.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/ProfileAnalyticsTab.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/ProfileAnalyticsTab.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/ProfileBillingTab.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/ProfileBillingTab.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/optimizer/SoundOutroTab.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/optimizer/SoundOutroTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/ProfilePreferencesTab.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/ProfilePreferencesTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/optimizer/SeoOptimizationTab.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/optimizer/SeoOptimizationTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/optimizer/ShortsScriptTab.tsx
+[90m5:24:15 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/optimizer/ShortsScriptTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/panel_assistant/PanelTranslationTool.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/panel_assistant/PanelTranslationTool.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/optimizer/AdPlacementTab.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/optimizer/AdPlacementTab.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/optimizer/EngagementTab.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/optimizer/EngagementTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/characters/CharacterProfileCard.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/characters/CharacterProfileCard.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/characters/CharacterAutoDetector.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/characters/CharacterAutoDetector.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/panel_assistant/PanelAudioTool.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/panel_assistant/PanelAudioTool.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/panel_assistant/PanelCreativeTool.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/panel_assistant/PanelCreativeTool.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/panel_assistant/PanelPacingTool.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/panel_assistant/PanelPacingTool.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/ProjectCard.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/ProjectCard.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/ProjectsFilters.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/ProjectsFilters.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/characters/CharacterEditModal.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/characters/CharacterEditModal.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/ProjectsPage.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/ProjectsPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/ProjectsStats.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/ProjectsStats.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/hooks/ProjectsTable.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/hooks/ProjectsTable.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/BulkActionFooter.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/BulkActionFooter.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/thumbnails/ThumbnailLayoutForm.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/thumbnails/ThumbnailLayoutForm.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/thumbnails/ThumbnailCompositionGuide.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/thumbnails/ThumbnailCompositionGuide.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/ProjectsPageContent.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/ProjectsPageContent.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/thumbnails/ThumbnailGenerator.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/thumbnails/ThumbnailGenerator.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/voice/VoiceSettingsPanel.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/voice/VoiceSettingsPanel.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/audio_lab/SfxOverlayMixer.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/audio_lab/SfxOverlayMixer.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/engagement/CommentReplier.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/engagement/CommentReplier.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/voice/ScriptDramatizerForm.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/voice/ScriptDramatizerForm.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/translation/BulkScrubberControl.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/translation/BulkScrubberControl.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/AdminLayout.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/AdminLayout.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/AdminHeaderPage.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/AdminHeaderPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/audio_lab/AmbientSoundPicker.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/audio_lab/AmbientSoundPicker.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/translation/TimelineScriptTable.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/translation/TimelineScriptTable.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/AdminSidebar.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/AdminSidebar.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/AdminMiniSidebar.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/AdminMiniSidebar.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/AdminDashboardPage.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/AdminDashboardPage.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/AdminPage.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/AdminPage.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/analytics/TitleABValidator.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/analytics/TitleABValidator.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/analytics/OutroCliffhangerAnalyzer.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/analytics/OutroCliffhangerAnalyzer.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/analytics/TokenUsageDashboard.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/analytics/TokenUsageDashboard.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/index.ts
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/TooltipPortal.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/TooltipPortal.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/creative/CreativeSuiteHeader.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/creative/CreativeSuiteHeader.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/creative/CreativeSuiteSidebar.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/creative/CreativeSuiteSidebar.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/creative/CreativeSuiteLayout.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/creative/CreativeSuiteLayout.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/utils/workspaceNavigation.ts
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/utils/workspaceNavigation.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/creative/CreativeSuiteMiniSidebar.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/creative/CreativeSuiteMiniSidebar.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/creative/CreativeSuiteDashboardPage.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/creative/CreativeSuiteDashboardPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/episode-scraper/EpisodeScraper.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/episode-scraper/EpisodeScraper.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/SeoAuditor.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/SeoAuditor.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/ProfileManager.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/ProfileManager.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/ChaptersTuner.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/ChaptersTuner.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/SocialsCustomizer.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/SocialsCustomizer.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/CredentialsConfig.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/CredentialsConfig.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/TitleOptimizer.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/TitleOptimizer.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/TagManager.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/TagManager.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/DescriptionEditor.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/DescriptionEditor.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/SelfRatingForm.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/SelfRatingForm.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/AdvancedSettings.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/AdvancedSettings.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/PublishMonitor.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/PublishMonitor.tsx[0m [32m200[0m [90m(3ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/UploadHistory.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/UploadHistory.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/SubtitleConfig.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/SubtitleConfig.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/hooks/useYouTubePublisher.ts
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/hooks/useYouTubePublisher.ts[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/PlaylistSelector.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/PlaylistSelector.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/WebtoonMetadata.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/WebtoonMetadata.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/ImageEditorHeader.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/ImageEditorHeader.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/ImageEditorCanvasContainer.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/ImageEditorCanvasContainer.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/date-fns.js?v=a0532477
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/date-fns.js?v=a0532477[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/models.ts
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/models.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/utils/url.ts
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/utils/url.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/ImageEditorSidebar.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/ImageEditorSidebar.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/utils.ts
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/utils.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/audio.ts
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/audio.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/episode-scraper/FavoritesManager.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/episode-scraper/FavoritesManager.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/types/logs.ts
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/types/logs.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/utils/batchUtils.ts
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/utils/batchUtils.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/scraper/hooks/useLiveScraperActions.ts
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/scraper/hooks/useLiveScraperActions.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/timeline/StoryboardTimeline.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/timeline/StoryboardTimeline.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/video/VideoMonitor.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/video/VideoMonitor.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/video/OutputMetadataPanel.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/video/OutputMetadataPanel.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/EditorPageLayout.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/EditorPageLayout.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/scraper/LiveScraperDeck.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/scraper/LiveScraperDeck.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Shortcuts/ShortcutFilters.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Shortcuts/ShortcutFilters.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Shortcuts/ShortcutList.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Shortcuts/ShortcutList.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Shortcuts/ShortcutRecordingModal.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Shortcuts/ShortcutRecordingModal.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/hooks/useEditorState.ts
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/hooks/useEditorState.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/ImageEditorFooter.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/ImageEditorFooter.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/ImageEditorPanel.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/ImageEditorPanel.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/FreehandPanel.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/FreehandPanel.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Shortcuts/shortcutUtils.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Shortcuts/shortcutUtils.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Shortcuts/useShortcutsPage.ts
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Shortcuts/useShortcutsPage.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/EnhancementsPresets.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/EnhancementsPresets.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/EnhancementsPanel.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/EnhancementsPanel.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/CutsRegistry/index.ts
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/CutsRegistry/index.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/HorizontalSplitter/index.ts
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/HorizontalSplitter/index.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/EnhancementsColors.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/EnhancementsColors.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/EnhancementsCinematic.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/EnhancementsCinematic.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/EnhancementsAudio.tsx
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/EnhancementsAudio.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/index.ts
+[90m5:24:16 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/index.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/MergePanel/index.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/MergePanel/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/utils/index.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/utils/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/bubblePresets.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/bubblePresets.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/ForgotPasswordForm.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/ForgotPasswordForm.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/hooks/useNewsletterForm.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/hooks/useNewsletterForm.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/LoginForm.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/LoginForm.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/constants.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/constants.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/hooks/useLandingPage.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/hooks/useLandingPage.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/notification/hooks/useNotificationExpand.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/notification/hooks/useNotificationExpand.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/notification/hooks/useNotificationFiltering.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/notification/hooks/useNotificationFiltering.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/notification/utils/notificationHelpers.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/notification/utils/notificationHelpers.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/hooks/index.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/hooks/index.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/notification/hooks/useNotificationCountdown.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/notification/hooks/useNotificationCountdown.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/TerminalLogsFilter.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/TerminalLogsFilter.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/TerminalLogsOutput.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/TerminalLogsOutput.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/TerminalLogsHeader.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/TerminalLogsHeader.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/TestimonialCard.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/TestimonialCard.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/LandingFooter.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/LandingFooter.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/demo/index.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/demo/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/FeatureCard.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/FeatureCard.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/Step.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/Step.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/PricingCard.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/PricingCard.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/utils/logStyles.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/utils/logStyles.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/utils/logRenderers.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/utils/logRenderers.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/hooks/useTerminalLogs.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/hooks/useTerminalLogs.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/ai_models/AIProviderKeysConfig.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/ai_models/AIProviderKeysConfig.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/hooks/index.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/hooks/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/ProjectsPageView.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/ProjectsPageView.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/billing/index.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/billing/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminConsoleTab.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminConsoleTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminContentTab.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminContentTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/hooks/useProjectsPage.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/hooks/useProjectsPage.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminActivityTab.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminActivityTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminAnalyticsTab.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminAnalyticsTab.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminAnnouncementsTab.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminAnnouncementsTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminCreditsTab.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminCreditsTab.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminExplorerTab.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminExplorerTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminFinanceTab.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminFinanceTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminHealthTab.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminHealthTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminScrapersTab.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminScrapersTab.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminSettingsTab.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminSettingsTab.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/episode-scraper/EpisodeGrid.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/episode-scraper/EpisodeGrid.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminUsageTab.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminUsageTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminUsersTab.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminUsersTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/episode-scraper/EpisodeControls.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/episode-scraper/EpisodeControls.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/episode-scraper/BatchThumbnailDownloader.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/episode-scraper/BatchThumbnailDownloader.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/episode-scraper/EpisodePreviewModal.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/episode-scraper/EpisodePreviewModal.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/episode-scraper/AnalyticsDashboard.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/episode-scraper/AnalyticsDashboard.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/services/youtubePublisherService.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/services/youtubePublisherService.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoSlicer.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoSlicer.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/CutsRegistry/CutsRegistry.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/CutsRegistry/CutsRegistry.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Workspace/index.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Workspace/index.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/MergePanel/MergePanel.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/MergePanel/MergePanel.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/LayerSeparationPanel.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/LayerSeparationPanel.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/HorizontalSplitter/HorizontalSplitter.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/HorizontalSplitter/HorizontalSplitter.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/utils/filter.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/utils/filter.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/file-saver.js?v=a0532477
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/file-saver.js?v=a0532477[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/scraper/hooks/useLiveScraperZip.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/scraper/hooks/useLiveScraperZip.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/timeline/TimelineEmptyState.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/timeline/TimelineEmptyState.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/timeline/TimelineHeader.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/timeline/TimelineHeader.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/timeline/TimelineBulkOps.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/timeline/TimelineBulkOps.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/timeline/TimelineCard.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/timeline/TimelineCard.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/seloect/index.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/seloect/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/video/VideoMonitorTabs.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/video/VideoMonitorTabs.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/jszip.js?v=a0532477
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/jszip.js?v=a0532477[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/EditorPageHeader.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/EditorPageHeader.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/video/VideoMonitorActive.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/video/VideoMonitorActive.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/EditorSidebar.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/EditorSidebar.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/EditorMiniSidebar.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/EditorMiniSidebar.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/scraper/PanelCard.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/scraper/PanelCard.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/scraper/LiveScraperDeckEmptyState.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/scraper/LiveScraperDeckEmptyState.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Shortcuts/ShortcutItem.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Shortcuts/ShortcutItem.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Shortcuts/hooks/useShortcutFilters.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Shortcuts/hooks/useShortcutFilters.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Shortcuts/hooks/useShortcutRecording.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Shortcuts/hooks/useShortcutRecording.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Shortcuts/hooks/useShortcutPersistence.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Shortcuts/hooks/useShortcutPersistence.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/CutsRegistry/CutsRegistryFineTune.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/CutsRegistry/CutsRegistryFineTune.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/CutsRegistry/CutsRegistryHeader.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/CutsRegistry/CutsRegistryHeader.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/CutsRegistry/CutsRegistryList.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/CutsRegistry/CutsRegistryList.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/CutsRegistry/CutsRegistrySelector.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/CutsRegistry/CutsRegistrySelector.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/HorizontalSplitter/HorizontalSplitterControls.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/HorizontalSplitter/HorizontalSplitterControls.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/HorizontalSplitter/HorizontalSplitterPresets.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/HorizontalSplitter/HorizontalSplitterPresets.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/HorizontalSplitter/HorizontalSplitterPreview.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/HorizontalSplitter/HorizontalSplitterPreview.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropTabContent.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropTabContent.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoSlicerSettings.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoSlicerSettings.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoSlicerCanny.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoSlicerCanny.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropJsonDebugger.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropJsonDebugger.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropParameterSlider.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropParameterSlider.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropMarginPadding.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropMarginPadding.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropVisualGuide.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropVisualGuide.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropRatioLockSelector.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropRatioLockSelector.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropPresetGrid.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropPresetGrid.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropHelpTab.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropHelpTab.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropSettingsPanel.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropSettingsPanel.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropGutterModeToggle.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropGutterModeToggle.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropLayoutTab.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropLayoutTab.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropGeneralTab.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropGeneralTab.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropAdvancedTab.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropAdvancedTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropEngineSelector.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropEngineSelector.tsx[0m [32m200[0m [90m(3ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropCannyControls.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropCannyControls.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/MergePanel/MergePanelList.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/MergePanel/MergePanelList.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropEngineComparison.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropEngineComparison.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropCustomProfileManager.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropCustomProfileManager.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropComplexityAnalysis.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropComplexityAnalysis.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/utils/gutterScanner.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/utils/gutterScanner.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/hooks/useLoginForm.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/hooks/useLoginForm.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/MergePanel/MergePanelOptions.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/MergePanel/MergePanelOptions.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/hooks/useRegisterForm.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/hooks/useRegisterForm.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/hooks/useForgotPasswordForm.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/hooks/useForgotPasswordForm.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/demo/SlicingBefore.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/demo/SlicingBefore.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/demo/SlicingAfter.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/demo/SlicingAfter.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/demo/BubblesBefore.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/demo/BubblesBefore.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/demo/BubblesAfter.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/demo/BubblesAfter.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/demo/TranslationBefore.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/demo/TranslationBefore.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/demo/CinematicRenderDemo.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/demo/CinematicRenderDemo.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/demo/TranslationAfter.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/demo/TranslationAfter.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/hooks/useBillingState.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/hooks/useBillingState.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/hooks/useCurrencyFormatter.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/hooks/useCurrencyFormatter.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/hooks/useCouponCode.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/hooks/useCouponCode.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/hooks/useCardInfo.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/hooks/useCardInfo.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/ProjectsPageHeader.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/ProjectsPageHeader.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/ProjectsPageResultView.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/ProjectsPageResultView.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/billing/SubscriptionPlanHeader.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/billing/SubscriptionPlanHeader.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/billing/CreditCalculator.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/billing/CreditCalculator.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/billing/DailyStreakTracker.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/billing/DailyStreakTracker.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/billing/SubscriptionPlansGrid.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/billing/SubscriptionPlansGrid.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/billing/CardPaymentForm.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/billing/CardPaymentForm.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/billing/CardPreview.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/billing/CardPreview.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/hooks/index.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/hooks/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/episode-scraper/EpisodeCard.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/episode-scraper/EpisodeCard.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Workspace/CropCanvas.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Workspace/CropCanvas.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Workspace/CanvasMultiLayer.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Workspace/CanvasMultiLayer.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/scraper/PanelCardControls.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/scraper/PanelCardControls.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/scraper/PanelCardActions.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/scraper/PanelCardActions.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/shared/SectionTitle.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/shared/SectionTitle.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/seloect/FloatingSelectionBar.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/seloect/FloatingSelectionBar.tsx[0m [32m200[0m [90m(3ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/scraper/PanelCardThumbnail.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/scraper/PanelCardThumbnail.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/hooks/useProjectsSelection.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/hooks/useProjectsSelection.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/hooks/useProjectsFilters.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/hooks/useProjectsFilters.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/hooks/useProjectsData.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/hooks/useProjectsData.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/autoCropConfig.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/autoCropConfig.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/hooks/useProjectsMenu.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/hooks/useProjectsMenu.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/hooks/useProjectsActions.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/hooks/useProjectsActions.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/hooks/useProjectsComputed.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/hooks/useProjectsComputed.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Workspace/CanvasBrushLayer.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Workspace/CanvasBrushLayer.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/fabric.js?v=a0532477
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/fabric.js?v=a0532477[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useDialogueSync.ts
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useDialogueSync.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Workspace/CanvasBubbleBoxes.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Workspace/CanvasBubbleBoxes.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Workspace/CanvasSplitLines.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Workspace/CanvasSplitLines.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Workspace/CanvasCropSelection.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Workspace/CanvasCropSelection.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Workspace/CanvasFabricLayer.tsx
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Workspace/CanvasFabricLayer.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /logo-light.png
+[Vite Middleware] Incoming request: GET /logo.png
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/logo.png[0m [32m200[0m [90m(29ms)[0m
+[90m5:24:17 PM[0m [35m[Vite][0m [32mGET[0m [36m/logo-light.png[0m [32m200[0m [90m(32ms)[0m
+[Vite Middleware] Incoming request: GET /api/projects
+[Vite Middleware] Incoming request: GET /api/auth/credits
+[Vite Middleware] Incoming request: GET /api/auth/credits
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[90m5:24:18 PM[0m [35m[Vite][0m [32mGET[0m [36m/api/projects[0m [31m502[0m [90m(7ms)[0m
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[90m5:24:18 PM[0m [35m[Vite][0m [32mGET[0m [36m/api/auth/credits[0m [31m502[0m [90m(7ms)[0m
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[90m5:24:18 PM[0m [35m[Vite][0m [32mGET[0m [36m/api/auth/credits[0m [31m502[0m [90m(6ms)[0m
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[Vite Middleware] Incoming request: GET /api/projects
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[90m5:24:18 PM[0m [35m[Vite][0m [32mGET[0m [36m/api/projects[0m [31m502[0m [90m(3ms)[0m
+[Vite Middleware] Incoming request: GET /api/auth/credits
+[Vite Middleware] Incoming request: GET /api/auth/credits
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[90m5:24:18 PM[0m [35m[Vite][0m [32mGET[0m [36m/api/auth/credits[0m [31m502[0m [90m(7ms)[0m
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[90m5:24:18 PM[0m [35m[Vite][0m [32mGET[0m [36m/api/auth/credits[0m [31m502[0m [90m(5ms)[0m
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[Vite Middleware] Incoming request: GET /workspace/editor/series/tower-of-god/chapters/season-3-ep-1?mock_auth=true
+[90m5:24:18 PM[0m [35m[Vite][0m [32mGET[0m [36m/index.html[0m [32m200[0m [90m(18ms)[0m
+[Vite Middleware] Incoming request: GET /api/proxy-image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1579783900882-c0d3dad7b119%3Fw%3D800
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/api/proxy-image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1579783900882-c0d3dad7b119%3Fw%3D800[0m [31m502[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /@vite/client
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/@vite/client[0m [32m200[0m [90m(16ms)[0m
+[Vite Middleware] Incoming request: GET /src/main.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/main.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /@react-refresh
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/@react-refresh[0m [32m200[0m [90m(8ms)[0m
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=a0532477
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=a0532477[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/utils/authFetch.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/utils/authFetch.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/utils/logger.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/utils/logger.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/react.js?v=a0532477
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/react.js?v=a0532477[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/react-dom_client.js?v=a0532477
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/react-dom_client.js?v=a0532477[0m [32m200[0m [90m(27ms)[0m
+[Vite Middleware] Incoming request: GET /src/App.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/App.tsx[0m [32m200[0m [90m(16ms)[0m
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/chunk-F73QCPJP.js?v=a0532477
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/chunk-F73QCPJP.js?v=a0532477[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/ErrorBoundary.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/ErrorBoundary.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/index.css
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/index.css[0m [32m200[0m [90m(6ms)[0m
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/vite/dist/client/env.mjs
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/vite/dist/client/env.mjs[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/chunk-2TUXWMP5.js?v=a0532477
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/chunk-2TUXWMP5.js?v=a0532477[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/lucide-react.js?v=a0532477
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/lucide-react.js?v=a0532477[0m [32m200[0m [90m(4ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/index.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useGlobalShortcuts.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useGlobalShortcuts.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/index.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/index.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/MainHeader.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/MainHeader.tsx[0m [32m200[0m [90m(3ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/MainSidebar.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/MainSidebar.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Workspace/AppWorkspace.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Workspace/AppWorkspace.tsx[0m [32m200[0m [90m(4ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/confirmationmodels/ProjectConfirmPanel.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/confirmationmodels/ProjectConfirmPanel.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/PageNotFound.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/PageNotFound.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/index.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/video/AdvancedSettings.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/video/AdvancedSettings.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Status/StatusPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Status/StatusPage.tsx[0m [32m200[0m [90m(3ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/ai_models/AIModelsPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/ai_models/AIModelsPage.tsx[0m [32m200[0m [90m(4ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Shortcuts/ShortcutsPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Shortcuts/ShortcutsPage.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useImageEditorState.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useImageEditorState.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/processing/AutoCropModal.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/processing/AutoCropModal.tsx[0m [32m200[0m [90m(4ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/notification/NotificationStack.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/notification/NotificationStack.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/confirmationmodels/ConfirmModal.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/confirmationmodels/ConfirmModal.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/LandingPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/LandingPage.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/index.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/index.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/ProfilePage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/ProfilePage.tsx[0m [32m200[0m [90m(15ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/LoadingPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/LoadingPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/index.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/index.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/DisplayPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/DisplayPage.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Dashboard/DashboardPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Dashboard/DashboardPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/index.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/optimizer/AIOptimizerPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/optimizer/AIOptimizerPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/panel_assistant/PanelAssistantPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/panel_assistant/PanelAssistantPage.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/characters/CharacterProfilePage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/characters/CharacterProfilePage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/translation/TranslationStudioPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/translation/TranslationStudioPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/audio_lab/AudioLabPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/audio_lab/AudioLabPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/thumbnails/ThumbnailStudioPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/thumbnails/ThumbnailStudioPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/engagement/EngagementPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/engagement/EngagementPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/voice/VoiceStudioPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/voice/VoiceStudioPage.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/analytics/CTRAnalyticsPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/analytics/CTRAnalyticsPage.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/notification/NotificationsPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/notification/NotificationsPage.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/index.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/MainMiniSidebar.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/MainMiniSidebar.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/YouTubePage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/YouTubePage.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/episode-scraper/EpisodeScraperPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/episode-scraper/EpisodeScraperPage.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/SeriesDetailsPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/SeriesDetailsPage.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/creative/index.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/creative/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/ImageEditorPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/ImageEditorPage.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/chunk-3XYMS4SN.js?v=a0532477
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/chunk-3XYMS4SN.js?v=a0532477[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useAIModels.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useAIModels.ts[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useAppLogic.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useAppLogic.ts[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useAppRouter.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useAppRouter.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useAppState.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useAppState.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useAudioFeedback.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useAudioFeedback.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useAutoAnalysis.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useAutoAnalysis.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useAutoCropPresets.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useAutoCropPresets.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useAutoSave.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useAutoSave.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useBackendHealth.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useBackendHealth.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useBatchImageActions.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useBatchImageActions.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useBulkOperations.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useBulkOperations.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useCompileActions.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useCompileActions.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useConfigHistory.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useConfigHistory.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useCredits.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useCredits.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useImageEditor.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useImageEditor.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useCropEditorPipelines.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useCropEditorPipelines.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useImageTransform.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useImageTransform.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useLiveScraperActions.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useLiveScraperActions.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useCropEditorDrag.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useCropEditorDrag.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useCropEditorHistory.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useCropEditorHistory.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/usePanelDetection.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/usePanelDetection.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/usePersistedState.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/usePersistedState.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/usePipelineActions.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/usePipelineActions.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/usePlaybackEngine.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/usePlaybackEngine.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useSandboxLogic.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useSandboxLogic.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useSceneModifier.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useSceneModifier.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useSingleImageEdits.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useSingleImageEdits.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useStoryboardOperations.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useStoryboardOperations.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useThemeMode.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useThemeMode.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useVideoGeneration.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useVideoGeneration.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/projects.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/projects.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useYouTubePublisher.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useYouTubePublisher.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/auth.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/auth.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/image.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/image.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/ai.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/ai.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/scraper.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/scraper.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/video.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/video.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/system.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/system.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/admin.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/admin.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/skills.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/skills.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/export.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/export.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/analytics.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/analytics.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/api/fetchWithInterceptor.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/api/fetchWithInterceptor.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/notification/NotificationDropdown.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/notification/NotificationDropdown.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/react-dom.js?v=a0532477
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/react-dom.js?v=a0532477[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Layout/EditorPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Layout/EditorPage.tsx[0m [32m200[0m [90m(3ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Layout/ToolSidebar.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Layout/ToolSidebar.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/scraper/UrlInputPanel.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/scraper/UrlInputPanel.tsx[0m [32m200[0m [90m(3ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Shortcuts/ShortcutsPageContent.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Shortcuts/ShortcutsPageContent.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/ai_models/ModelPlaygroundAndSkills.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/ai_models/ModelPlaygroundAndSkills.tsx[0m [32m200[0m [90m(10ms)[0m
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/zustand.js?v=a0532477
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/zustand.js?v=a0532477[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/ai_models/CredentialsAndTuner.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/ai_models/CredentialsAndTuner.tsx[0m [32m200[0m [90m(3ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/ai_models/ModelRegistryExplorer.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/ai_models/ModelRegistryExplorer.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/index.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/notification/hooks/index.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/notification/hooks/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/notification/utils/index.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/notification/utils/index.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/ai_models/APITokenLedgerAndCosts.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/ai_models/APITokenLedgerAndCosts.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/ai_models/BenchmarkRunHistory.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/ai_models/BenchmarkRunHistory.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/AuthPageShell.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/AuthPageShell.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/AuthShowcase.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/AuthShowcase.tsx[0m [32m200[0m [90m(5ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/ForgotPasswordPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/ForgotPasswordPage.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/AuthFooter.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/AuthFooter.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/RegisterPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/RegisterPage.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/LoginPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/LoginPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/RegisterForm.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/RegisterForm.tsx[0m [32m200[0m [90m(4ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/ThemeSwitcher.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/ThemeSwitcher.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/LogsPageStats.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/LogsPageStats.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/hooks/index.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/hooks/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/index.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/index.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/TerminalLogs.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/TerminalLogs.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/LogsPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/LogsPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/LogsPageHeader.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/LogsPageHeader.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/LogsPageToolbar.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/LogsPageToolbar.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/LogsPageConsole.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/LogsPageConsole.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/LogsPageHelpBanner.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/LogsPageHelpBanner.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/hooks/index.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/hooks/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/utils/index.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/utils/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/ProjectCard.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/ProjectCard.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/ProjectsFilters.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/ProjectsFilters.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/ProjectsStats.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/ProjectsStats.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/hooks/ProjectsTable.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/hooks/ProjectsTable.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/BulkActionFooter.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/BulkActionFooter.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/ProjectsPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/ProjectsPage.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/ProjectsPageContent.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/ProjectsPageContent.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/ProfileAccountTab.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/ProfileAccountTab.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/ProfileSecurityTab.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/ProfileSecurityTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/ProfileBillingTab.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/ProfileBillingTab.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/ProfileApiTab.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/ProfileApiTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Dashboard/DashboardHeader.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Dashboard/DashboardHeader.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/ProfileAnalyticsTab.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/ProfileAnalyticsTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/ProfilePreferencesTab.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/ProfilePreferencesTab.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Dashboard/DashboardStats.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Dashboard/DashboardStats.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Dashboard/DashboardQuickLinks.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Dashboard/DashboardQuickLinks.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Dashboard/DashboardProjectSection.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Dashboard/DashboardProjectSection.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Dashboard/DashboardActivityFeed.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Dashboard/DashboardActivityFeed.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Dashboard/DashboardAIPipeline.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Dashboard/DashboardAIPipeline.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Dashboard/DashboardSidebar.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Dashboard/DashboardSidebar.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Dashboard/useDashboardPage.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Dashboard/useDashboardPage.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/optimizer/SeoOptimizationTab.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/optimizer/SeoOptimizationTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/optimizer/ShortsScriptTab.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/optimizer/ShortsScriptTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/optimizer/SoundOutroTab.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/optimizer/SoundOutroTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/optimizer/AdPlacementTab.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/optimizer/AdPlacementTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/panel_assistant/PanelAudioTool.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/panel_assistant/PanelAudioTool.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/panel_assistant/PanelCreativeTool.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/panel_assistant/PanelCreativeTool.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/optimizer/EngagementTab.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/optimizer/EngagementTab.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/panel_assistant/PanelTranslationTool.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/panel_assistant/PanelTranslationTool.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/translation/BulkScrubberControl.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/translation/BulkScrubberControl.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/audio_lab/SfxOverlayMixer.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/audio_lab/SfxOverlayMixer.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/panel_assistant/PanelPacingTool.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/panel_assistant/PanelPacingTool.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/translation/TimelineScriptTable.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/translation/TimelineScriptTable.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/characters/CharacterAutoDetector.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/characters/CharacterAutoDetector.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/audio_lab/AmbientSoundPicker.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/audio_lab/AmbientSoundPicker.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/characters/CharacterProfileCard.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/characters/CharacterProfileCard.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/thumbnails/ThumbnailCompositionGuide.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/thumbnails/ThumbnailCompositionGuide.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/characters/CharacterEditModal.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/characters/CharacterEditModal.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/thumbnails/ThumbnailGenerator.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/thumbnails/ThumbnailGenerator.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/thumbnails/ThumbnailLayoutForm.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/thumbnails/ThumbnailLayoutForm.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/voice/VoiceSettingsPanel.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/voice/VoiceSettingsPanel.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/analytics/TitleABValidator.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/analytics/TitleABValidator.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/engagement/CommentReplier.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/engagement/CommentReplier.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/voice/ScriptDramatizerForm.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/voice/ScriptDramatizerForm.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/AdminLayout.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/AdminLayout.tsx[0m [32m200[0m [90m(3ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/analytics/OutroCliffhangerAnalyzer.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/analytics/OutroCliffhangerAnalyzer.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/analytics/TokenUsageDashboard.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/analytics/TokenUsageDashboard.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/AdminMiniSidebar.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/AdminMiniSidebar.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/AdminHeaderPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/AdminHeaderPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/AdminPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/AdminPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/AdminSidebar.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/AdminSidebar.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/AdminDashboardPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/AdminDashboardPage.tsx[0m [32m200[0m [90m(3ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/index.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/index.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/date-fns.js?v=a0532477
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/date-fns.js?v=a0532477[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/TooltipPortal.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/TooltipPortal.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/episode-scraper/EpisodeScraper.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/episode-scraper/EpisodeScraper.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/utils/workspaceNavigation.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/utils/workspaceNavigation.ts[0m [32m200[0m [90m(3ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/SeoAuditor.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/SeoAuditor.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/ProfileManager.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/ProfileManager.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/CredentialsConfig.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/CredentialsConfig.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/TitleOptimizer.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/TitleOptimizer.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/TagManager.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/TagManager.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/DescriptionEditor.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/DescriptionEditor.tsx[0m [32m200[0m [90m(3ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/ChaptersTuner.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/ChaptersTuner.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/SocialsCustomizer.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/SocialsCustomizer.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/SelfRatingForm.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/SelfRatingForm.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/AdvancedSettings.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/AdvancedSettings.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/PublishMonitor.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/PublishMonitor.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/UploadHistory.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/UploadHistory.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/WebtoonMetadata.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/WebtoonMetadata.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/PlaylistSelector.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/PlaylistSelector.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/SubtitleConfig.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/SubtitleConfig.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/youtube/hooks/useYouTubePublisher.ts
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/youtube/hooks/useYouTubePublisher.ts[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/creative/CreativeSuiteDashboardPage.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/creative/CreativeSuiteDashboardPage.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/creative/CreativeSuiteLayout.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/creative/CreativeSuiteLayout.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/creative/CreativeSuiteHeader.tsx
+[90m5:24:19 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/creative/CreativeSuiteHeader.tsx[0m [32m200[0m [90m(3ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/creative/CreativeSuiteSidebar.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/creative/CreativeSuiteSidebar.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/creative/CreativeSuiteMiniSidebar.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/creative/CreativeSuiteMiniSidebar.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/ImageEditorCanvasContainer.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/ImageEditorCanvasContainer.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/ImageEditorSidebar.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/ImageEditorSidebar.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/models.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/models.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/utils.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/utils.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/ImageEditorHeader.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/ImageEditorHeader.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/types/logs.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/types/logs.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/utils/batchUtils.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/utils/batchUtils.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/scraper/hooks/useLiveScraperActions.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/scraper/hooks/useLiveScraperActions.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/utils/url.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/utils/url.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/scraper/LiveScraperDeck.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/scraper/LiveScraperDeck.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/timeline/StoryboardTimeline.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/timeline/StoryboardTimeline.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/video/VideoMonitor.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/video/VideoMonitor.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/audio.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/audio.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/hooks/useEditorState.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/hooks/useEditorState.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/EditorPageLayout.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/EditorPageLayout.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Shortcuts/ShortcutFilters.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Shortcuts/ShortcutFilters.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/video/OutputMetadataPanel.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/video/OutputMetadataPanel.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Shortcuts/ShortcutList.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Shortcuts/ShortcutList.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Shortcuts/ShortcutRecordingModal.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Shortcuts/ShortcutRecordingModal.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Shortcuts/shortcutUtils.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Shortcuts/shortcutUtils.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Shortcuts/useShortcutsPage.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Shortcuts/useShortcutsPage.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/episode-scraper/FavoritesManager.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/episode-scraper/FavoritesManager.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/ImageEditorFooter.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/ImageEditorFooter.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/FreehandPanel.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/FreehandPanel.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/EnhancementsPanel.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/EnhancementsPanel.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/ImageEditorPanel.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/ImageEditorPanel.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/EnhancementsPresets.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/EnhancementsPresets.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/EnhancementsColors.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/EnhancementsColors.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/EnhancementsCinematic.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/EnhancementsCinematic.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/EnhancementsAudio.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/EnhancementsAudio.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/bubblePresets.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/bubblePresets.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/index.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/CutsRegistry/index.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/CutsRegistry/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/HorizontalSplitter/index.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/HorizontalSplitter/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/MergePanel/index.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/MergePanel/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/utils/index.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/utils/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/notification/hooks/useNotificationCountdown.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/notification/hooks/useNotificationCountdown.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/notification/hooks/useNotificationExpand.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/notification/hooks/useNotificationExpand.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/notification/hooks/useNotificationFiltering.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/notification/hooks/useNotificationFiltering.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/notification/utils/notificationHelpers.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/notification/utils/notificationHelpers.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/constants.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/constants.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/ForgotPasswordForm.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/ForgotPasswordForm.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/LoginForm.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/LoginForm.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/hooks/index.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/hooks/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/hooks/useLandingPage.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/hooks/useLandingPage.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/hooks/useNewsletterForm.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/hooks/useNewsletterForm.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/FeatureCard.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/FeatureCard.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/Step.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/Step.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/PricingCard.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/PricingCard.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/TestimonialCard.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/TestimonialCard.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/TerminalLogsHeader.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/TerminalLogsHeader.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/TerminalLogsFilter.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/TerminalLogsFilter.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/TerminalLogsOutput.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/TerminalLogsOutput.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/hooks/useTerminalLogs.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/hooks/useTerminalLogs.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/LandingFooter.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/LandingFooter.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/demo/index.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/demo/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/utils/logStyles.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/utils/logStyles.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/terminal/utils/logRenderers.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/terminal/utils/logRenderers.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/ProjectsPageView.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/ProjectsPageView.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/hooks/useProjectsPage.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/hooks/useProjectsPage.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/hooks/index.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/hooks/index.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/billing/index.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/billing/index.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminAnalyticsTab.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminAnalyticsTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/ai_models/AIProviderKeysConfig.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/ai_models/AIProviderKeysConfig.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminActivityTab.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminActivityTab.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminAnnouncementsTab.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminAnnouncementsTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminConsoleTab.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminConsoleTab.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminContentTab.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminContentTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminCreditsTab.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminCreditsTab.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminExplorerTab.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminExplorerTab.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminFinanceTab.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminFinanceTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminHealthTab.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminHealthTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminScrapersTab.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminScrapersTab.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminUsageTab.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminUsageTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminUsersTab.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminUsersTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/admin/Tabs/AdminSettingsTab.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/admin/Tabs/AdminSettingsTab.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/episode-scraper/EpisodeGrid.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/episode-scraper/EpisodeGrid.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/episode-scraper/EpisodeControls.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/episode-scraper/EpisodeControls.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/episode-scraper/BatchThumbnailDownloader.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/episode-scraper/BatchThumbnailDownloader.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/episode-scraper/EpisodePreviewModal.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/episode-scraper/EpisodePreviewModal.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/episode-scraper/AnalyticsDashboard.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/episode-scraper/AnalyticsDashboard.tsx[0m [32m200[0m [90m(3ms)[0m
+[Vite Middleware] Incoming request: GET /src/services/youtubePublisherService.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/services/youtubePublisherService.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Workspace/index.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Workspace/index.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/MergePanel/MergePanel.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/MergePanel/MergePanel.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/LayerSeparationPanel.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/LayerSeparationPanel.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/HorizontalSplitter/HorizontalSplitter.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/HorizontalSplitter/HorizontalSplitter.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/CutsRegistry/CutsRegistry.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/CutsRegistry/CutsRegistry.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoSlicer.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoSlicer.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/utils/filter.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/utils/filter.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/file-saver.js?v=a0532477
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/file-saver.js?v=a0532477[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/scraper/hooks/useLiveScraperZip.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/scraper/hooks/useLiveScraperZip.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/jszip.js?v=a0532477
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/jszip.js?v=a0532477[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/scraper/LiveScraperDeckEmptyState.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/scraper/LiveScraperDeckEmptyState.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/timeline/TimelineEmptyState.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/timeline/TimelineEmptyState.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/scraper/PanelCard.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/scraper/PanelCard.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/seloect/index.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/seloect/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/timeline/TimelineBulkOps.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/timeline/TimelineBulkOps.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/video/VideoMonitorTabs.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/video/VideoMonitorTabs.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/timeline/TimelineHeader.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/timeline/TimelineHeader.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/timeline/TimelineCard.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/timeline/TimelineCard.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/EditorMiniSidebar.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/EditorMiniSidebar.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/EditorPageHeader.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/EditorPageHeader.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Shortcuts/ShortcutItem.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Shortcuts/ShortcutItem.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/video/VideoMonitorActive.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/video/VideoMonitorActive.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/EditorSidebar.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/EditorSidebar.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Shortcuts/hooks/useShortcutRecording.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Shortcuts/hooks/useShortcutRecording.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Shortcuts/hooks/useShortcutPersistence.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Shortcuts/hooks/useShortcutPersistence.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Shortcuts/hooks/useShortcutFilters.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Shortcuts/hooks/useShortcutFilters.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropJsonDebugger.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropJsonDebugger.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropTabContent.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropTabContent.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoSlicerSettings.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoSlicerSettings.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoSlicerCanny.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoSlicerCanny.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropMarginPadding.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropMarginPadding.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropRatioLockSelector.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropRatioLockSelector.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropVisualGuide.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropVisualGuide.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropParameterSlider.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropParameterSlider.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropPresetGrid.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropPresetGrid.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropHelpTab.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropHelpTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropSettingsPanel.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropSettingsPanel.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropGutterModeToggle.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropGutterModeToggle.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropLayoutTab.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropLayoutTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropGeneralTab.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropGeneralTab.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropAdvancedTab.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropAdvancedTab.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropEngineSelector.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropEngineSelector.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropEngineComparison.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropEngineComparison.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropCustomProfileManager.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropCustomProfileManager.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropComplexityAnalysis.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropComplexityAnalysis.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropCannyControls.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/AutoCropCannyControls.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/CutsRegistry/CutsRegistryFineTune.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/CutsRegistry/CutsRegistryFineTune.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/CutsRegistry/CutsRegistryHeader.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/CutsRegistry/CutsRegistryHeader.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/CutsRegistry/CutsRegistryList.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/CutsRegistry/CutsRegistryList.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/CutsRegistry/CutsRegistrySelector.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/CutsRegistry/CutsRegistrySelector.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/HorizontalSplitter/HorizontalSplitterControls.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/HorizontalSplitter/HorizontalSplitterControls.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/HorizontalSplitter/HorizontalSplitterPresets.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/HorizontalSplitter/HorizontalSplitterPresets.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/HorizontalSplitter/HorizontalSplitterPreview.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/HorizontalSplitter/HorizontalSplitterPreview.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/MergePanel/MergePanelOptions.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/MergePanel/MergePanelOptions.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/utils/gutterScanner.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/utils/gutterScanner.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/MergePanel/MergePanelList.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/MergePanel/MergePanelList.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/hooks/useLoginForm.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/hooks/useLoginForm.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/hooks/useRegisterForm.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/hooks/useRegisterForm.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/auth/hooks/useForgotPasswordForm.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/auth/hooks/useForgotPasswordForm.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/demo/SlicingBefore.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/demo/SlicingBefore.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/demo/SlicingAfter.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/demo/SlicingAfter.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/demo/BubblesBefore.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/demo/BubblesBefore.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/demo/BubblesAfter.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/demo/BubblesAfter.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/demo/TranslationBefore.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/demo/TranslationBefore.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/demo/TranslationAfter.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/demo/TranslationAfter.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/landing/components/demo/CinematicRenderDemo.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/landing/components/demo/CinematicRenderDemo.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/hooks/useCardInfo.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/hooks/useCardInfo.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/ProjectsPageHeader.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/ProjectsPageHeader.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/ProjectsPageResultView.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/ProjectsPageResultView.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/hooks/useBillingState.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/hooks/useBillingState.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/hooks/useCurrencyFormatter.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/hooks/useCurrencyFormatter.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/hooks/useCouponCode.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/hooks/useCouponCode.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/hooks/index.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/hooks/index.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/billing/SubscriptionPlanHeader.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/billing/SubscriptionPlanHeader.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/billing/CardPreview.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/billing/CardPreview.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/episode-scraper/EpisodeCard.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/episode-scraper/EpisodeCard.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/billing/DailyStreakTracker.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/billing/DailyStreakTracker.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/billing/SubscriptionPlansGrid.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/billing/SubscriptionPlansGrid.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/billing/CreditCalculator.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/billing/CreditCalculator.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/profile/billing/CardPaymentForm.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/profile/billing/CardPaymentForm.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Workspace/CropCanvas.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Workspace/CropCanvas.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Workspace/CanvasMultiLayer.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Workspace/CanvasMultiLayer.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/scraper/PanelCardThumbnail.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/scraper/PanelCardThumbnail.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/scraper/PanelCardControls.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/scraper/PanelCardControls.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/scraper/PanelCardActions.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/scraper/PanelCardActions.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/seloect/FloatingSelectionBar.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/seloect/FloatingSelectionBar.tsx[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/hooks/useProjectsFilters.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/hooks/useProjectsFilters.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/hooks/useProjectsSelection.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/hooks/useProjectsSelection.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/shared/SectionTitle.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/shared/SectionTitle.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Tools/ImageEditor/AutoCrop/autoCropConfig.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Tools/ImageEditor/AutoCrop/autoCropConfig.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/hooks/useProjectsData.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/hooks/useProjectsData.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/hooks/useProjectsMenu.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/hooks/useProjectsMenu.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/hooks/useProjectsActions.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/hooks/useProjectsActions.ts[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Project/hooks/useProjectsComputed.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Project/hooks/useProjectsComputed.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Workspace/CanvasBrushLayer.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Workspace/CanvasBrushLayer.tsx[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Workspace/CanvasBubbleBoxes.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Workspace/CanvasBubbleBoxes.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Workspace/CanvasSplitLines.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Workspace/CanvasSplitLines.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Workspace/CanvasCropSelection.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Workspace/CanvasCropSelection.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /src/components/Feature/editor/Workspace/CanvasFabricLayer.tsx
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/components/Feature/editor/Workspace/CanvasFabricLayer.tsx[0m [32m200[0m [90m(0ms)[0m
+[Vite Middleware] Incoming request: GET /@fs/app/node_modules/.vite/deps/fabric.js?v=a0532477
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/@fs/app/node_modules/.vite/deps/fabric.js?v=a0532477[0m [32m200[0m [90m(2ms)[0m
+[Vite Middleware] Incoming request: GET /src/hooks/useDialogueSync.ts
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/src/hooks/useDialogueSync.ts[0m [32m200[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /logo-light.png
+[Vite Middleware] Incoming request: GET /logo.png
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/logo.png[0m [32m200[0m [90m(10ms)[0m
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/logo-light.png[0m [32m200[0m [90m(12ms)[0m
+[Vite Middleware] Incoming request: GET /api/projects
+[Vite Middleware] Incoming request: GET /api/auth/credits
+[Vite Middleware] Incoming request: GET /api/auth/credits
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/api/projects[0m [31m502[0m [90m(7ms)[0m
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/api/auth/credits[0m [31m502[0m [90m(6ms)[0m
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/api/auth/credits[0m [31m502[0m [90m(5ms)[0m
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[Vite Middleware] Incoming request: GET /api/projects
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/api/projects[0m [31m502[0m [90m(3ms)[0m
+[Vite Middleware] Incoming request: GET /api/auth/credits
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/api/auth/credits[0m [31m502[0m [90m(3ms)[0m
+[Vite Middleware] Incoming request: GET /api/auth/credits
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[90m5:24:20 PM[0m [35m[Vite][0m [32mGET[0m [36m/api/auth/credits[0m [31m502[0m [90m(3ms)[0m
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[Vite Middleware] Incoming request: GET /api/proxy-image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1579783900882-c0d3dad7b119%3Fw%3D800
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[90m5:24:21 PM[0m [35m[Vite][0m [32mGET[0m [36m/api/proxy-image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1579783900882-c0d3dad7b119%3Fw%3D800[0m [31m502[0m [90m(1ms)[0m
+[Vite Middleware] Incoming request: GET /api/proxy-image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1579783900882-c0d3dad7b119%3Fw%3D800
+[31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+[90m5:24:21 PM[0m [35m[Vite][0m [32mGET[0m [36m/api/proxy-image?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1579783900882-c0d3dad7b119%3Fw%3D800[0m [31m502[0m [90m(1ms)[0m
+3:29:26 AM [vite] (client) hmr update /src/components/Feature/timeline/TimelineCard.tsx, /src/index.css
+3:31:14 AM [vite] (client) hmr update /src/components/Feature/timeline/TimelineCard.tsx, /src/index.css

@@ -24,16 +24,23 @@ const ImageEditorPage = React.memo(({ appLogic }: ImageEditorPageProps) => {
   // Load the editor logic
   const editorProps = useImageEditor({ appLogic });
 
+  const activeStoryboardPanel = useMemo(() => {
+    if (editingImageIdx === null) return null;
+    return appLogic.panels?.find((p: any) => p.image_url === appLogic.scrapedImages[editingImageIdx]) || null;
+  }, [appLogic.panels, appLogic.scrapedImages, editingImageIdx]);
+
   // Memoize the Heavy Canvas to prevent lag
   const canvasSubtree = useMemo(() => {
     if (editingImageIdx === null) return null;
     return (
       <ImageEditorCanvasContainer
         key={editorProps.imageUrl || undefined}
+        activeStoryboardPanel={activeStoryboardPanel}
         handleAiCrop={editorProps.handleAiCrop}
         isAiDetecting={editorProps.isAiDetecting}
         editingImageIdx={editingImageIdx}
         scrapedImages={appLogic.scrapedImages}
+        setPanels={appLogic.setPanels}
         containerRef={editorProps.containerRef}
         editCropTop={appLogic.editCropTop}
         editCropBottom={appLogic.editCropBottom}
@@ -119,9 +126,9 @@ const ImageEditorPage = React.memo(({ appLogic }: ImageEditorPageProps) => {
       <div className="flex-1 flex flex-row overflow-hidden w-full relative">
         {/* Center Canvas */}
         <main className="flex-1 h-full relative overflow-hidden bg-black/50 flex items-center justify-center">
-          <div 
-            className="absolute inset-0 opacity-20 pointer-events-none" 
-            style={{ backgroundImage: "radial-gradient(#374151 1px, transparent 0)", backgroundSize: "20px 20px" }} 
+          <div
+            className="absolute inset-0 opacity-20 pointer-events-none"
+            style={{ backgroundImage: "radial-gradient(#374151 1px, transparent 0)", backgroundSize: "20px 20px" }}
           />
           <div className="relative w-full h-full z-10 flex items-center justify-center p-4">
             {canvasSubtree}

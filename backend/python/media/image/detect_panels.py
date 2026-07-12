@@ -519,10 +519,10 @@ def run_cv_detection(
     # 4. Filter out solid background noise
     min_w = w * min_width_pct
     filtered_boxes = _filter_solid_noise(raw_boxes, gray_arr, min_w, min_height_px, auto_split)
-            
+
     # 5. Merge overlapping or stacked panel bounding boxes
     merged_boxes = merge_overlapping_boxes(filtered_boxes, w, h, merge_threshold)
-    
+
     # 6. Apply post-merge vertical padding for tall webtoon strips, then format & scale to percent
     final_panels = []
     logger.info(f"[Panel Detection] Found {len(merged_boxes)} panels after merging and filtering.")

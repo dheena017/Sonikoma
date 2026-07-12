@@ -699,6 +699,8 @@ async def get_download_zip(zip_id: str = Path(...)):
 @router.post("/process-layers/{panel_id}", summary="Separate image into background, character, and text layers")
 async def extract_panel_layers(panel_id: str, body: ProcessLayersRequest):
     logger.info(f"[Layer Segmentation] Request received for panel_id {panel_id}, url: {body.url[:60]}...")
+    tmp_in_path = None
+
     try:
         # Resolve image
         resolved = await img_utils.resolve_image_to_buffer(body.url)
@@ -716,13 +718,17 @@ async def extract_panel_layers(panel_id: str, body: ProcessLayersRequest):
                 "layers": layers
             }
         finally:
-            try:
-                if os.path.exists(tmp_in_path):
+            if tmp_in_path and os.path.exists(tmp_in_path):
+                try:
                     os.remove(tmp_in_path)
-            except OSError:
-                pass
+                except OSError:
+                    pass
+
     except Exception as e:
-        logger.error(f"[Layer Segmentation API Error] failed: {e}", exc_info=True)
+        logger.error(
+            f"[Layer Segmentation API Error] panel_id={panel_id} url={body.url[:80]} failed: {e}",
+            exc_info=True
+        )
         raise HTTPException(status_code=500, detail=f"Layer segmentation failed: {e}")
 
 # ─── Speech Bubble Removal Route (migrated from Express image/cleanup.ts) ──────

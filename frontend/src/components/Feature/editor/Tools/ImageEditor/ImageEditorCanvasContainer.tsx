@@ -1,12 +1,15 @@
 import React from "react";
 import { Move, RefreshCw, Layers } from "lucide-react";
-import { CropCanvas } from "../../Workspace";
+import { CropCanvas, CanvasMultiLayer } from "../../Workspace";
+import { GeneratedPanel } from "@/types";
 
 interface ImageEditorCanvasContainerProps {
+  activeStoryboardPanel?: GeneratedPanel | null;
   handleAiCrop: () => void;
   isAiDetecting: boolean;
   editingImageIdx: number;
   scrapedImages: string[];
+  setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
   containerRef: React.RefObject<HTMLDivElement | null>;
   editCropTop: number;
   editCropBottom: number;
@@ -54,11 +57,13 @@ interface ImageEditorCanvasContainerProps {
 }
 
 export default function ImageEditorCanvasContainer({
+  activeStoryboardPanel,
   handleAiCrop,
   isAiDetecting,
   editingImageIdx,
   scrapedImages,
   containerRef,
+  setPanels,
   editCropTop,
   editCropBottom,
   editCropLeft,
@@ -152,50 +157,67 @@ export default function ImageEditorCanvasContainer({
         </div>
       </div>
 
-      <CropCanvas
-        imgUrl={scrapedImages[editingImageIdx]}
-        containerRef={containerRef}
-        editCropTop={editCropTop}
-        editCropBottom={editCropBottom}
-        editCropLeft={editCropLeft}
-        editCropRight={editCropRight}
-        slices={slices}
-        selectedSliceId={selectedSliceId}
-        showSplitPosition={showSplitPosition}
-        splitPosition={splitPosition}
-        splitLines={splitLines}
-        handleStart={safeHandleStart}
-        handleMove={safeHandleMove}
-        handleEnd={safeHandleEnd}
-        isPointInsideSelection={isPointInsideSelection}
-        handleSelectSlice={handleSelectSlice}
-        handleDeleteSlice={handleDeleteSlice}
-        handleRemoveSplitLine={handleRemoveSplitLine}
-        dragType={dragType}
-        onResizeStart={onResizeStart}
-        handleSelectAndDragSlice={handleSelectAndDragSlice}
-        zoom={zoom}
-        editMode={editMode}
-        detectedBubbles={detectedBubbles}
-        selectedBubbleIdx={selectedBubbleIdx}
-        setSelectedBubbleIdx={setSelectedBubbleIdx}
-        brushSize={brushSize}
-        brushAction={brushAction}
-        fillColor={fillColor}
-        textBgColor={textBgColor}
-        canvasMaskRef={canvasMaskRef}
-        setSplitPosition={setSplitPosition}
-        setShowSplitPosition={setShowSplitPosition}
-        setEditCropTop={setEditCropTop}
-        setEditCropBottom={setEditCropBottom}
-        setEditCropLeft={setEditCropLeft}
-        setEditCropRight={setEditCropRight}
-        setSelectedSliceId={setSelectedSliceId}
-        activeTab={activeTab}
-        aspectRatio={
-          aspectRatio === "9:16" ? 9 / 16 : aspectRatio === "16:9" ? 16 / 9 : 0
-        }
-      />
+      {activeStoryboardPanel?.layers && activeTab === "separate" ? (
+        <div
+          className="relative border border-white/5 hover:border-purple-500/20 rounded-2xl bg-black overflow-hidden flex-1 h-0 flex items-center justify-center select-none transition-colors"
+          style={{ boxShadow: "inset 0 0 30px rgba(0,0,0,0.5)" }}
+        >
+          <div className="relative w-full h-full max-h-full max-w-full z-10 flex items-center justify-center p-4">
+            <CanvasMultiLayer
+              layers={activeStoryboardPanel.layers}
+              syncMap={activeStoryboardPanel.syncMap}
+              isActive={true}
+              panelId={activeStoryboardPanel.id}
+              setPanels={setPanels}
+            />
+          </div>
+        </div>
+      ) : (
+        <CropCanvas
+          imgUrl={scrapedImages[editingImageIdx]}
+          containerRef={containerRef}
+          editCropTop={editCropTop}
+          editCropBottom={editCropBottom}
+          editCropLeft={editCropLeft}
+          editCropRight={editCropRight}
+          slices={slices}
+          selectedSliceId={selectedSliceId}
+          showSplitPosition={showSplitPosition}
+          splitPosition={splitPosition}
+          splitLines={splitLines}
+          handleStart={safeHandleStart}
+          handleMove={safeHandleMove}
+          handleEnd={safeHandleEnd}
+          isPointInsideSelection={isPointInsideSelection}
+          handleSelectSlice={handleSelectSlice}
+          handleDeleteSlice={handleDeleteSlice}
+          handleRemoveSplitLine={handleRemoveSplitLine}
+          dragType={dragType}
+          onResizeStart={onResizeStart}
+          handleSelectAndDragSlice={handleSelectAndDragSlice}
+          zoom={zoom}
+          editMode={editMode}
+          detectedBubbles={detectedBubbles}
+          selectedBubbleIdx={selectedBubbleIdx}
+          setSelectedBubbleIdx={setSelectedBubbleIdx}
+          brushSize={brushSize}
+          brushAction={brushAction}
+          fillColor={fillColor}
+          textBgColor={textBgColor}
+          canvasMaskRef={canvasMaskRef}
+          setSplitPosition={setSplitPosition}
+          setShowSplitPosition={setShowSplitPosition}
+          setEditCropTop={setEditCropTop}
+          setEditCropBottom={setEditCropBottom}
+          setEditCropLeft={setEditCropLeft}
+          setEditCropRight={setEditCropRight}
+          setSelectedSliceId={setSelectedSliceId}
+          activeTab={activeTab}
+          aspectRatio={
+            aspectRatio === "9:16" ? 9 / 16 : aspectRatio === "16:9" ? 16 / 9 : 0
+          }
+        />
+      )}
 
       <span className="text-[10px] text-neutral-500 text-center italic font-sans block pt-1">
         Draw to create panels · Drag to move · Drag corners/edges to resize ·

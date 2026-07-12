@@ -162,6 +162,122 @@ const StoryboardTimeline = React.memo(
     const [isCleaningBubbles, setIsCleaningBubbles] = useState(false);
     const [isBatchMerging, setIsBatchMerging] = useState(false);
 
+    const [isBatchMagicProcessing, setIsBatchMagicProcessing] = useState(false);
+    const [batchMagicProgress, setBatchMagicProgress] = useState<{ current: number; total: number } | null>(null);
+
+    const handleBatchMagicMotion = async () => {
+      if (selectedPanelIds.size === 0) {
+        addNotification?.("Please select at least one panel to apply Batch Magic Motion.", "info");
+        return;
+      }
+
+      const selectedIds = Array.from(selectedPanelIds);
+      const targetPanels = panels.filter((p) => selectedPanelIds.has(p.id));
+
+      const missingText = targetPanels.some(p => !p.speech_text?.trim());
+      if (missingText) {
+        addNotification?.("Some selected panels are missing Dialogue Subtitle text. All panels must have text to align audio sync.", "warning");
+        return;
+      }
+
+      setIsBatchMagicProcessing(true);
+      setBatchMagicProgress({ current: 0, total: targetPanels.length });
+      addNotification?.(`Starting Batch Magic Motion on ${selectedIds.length} panels...`, "info");
+
+      let completed = 0;
+      const chunks = chunkArray(targetPanels, 3); // process in chunks of 3 max to prevent rate-limiting or memory issues
+      const activeFetch = fetchWithInterceptor || fetch;
+
+      try {
+        for (const chunk of chunks) {
+          await Promise.all(
+            chunk.map(async (panel) => {
+              try {
+                // 1. Separate Layers
+                const layerRes = await activeFetch(`/api/image/process-layers/${panel.id}`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ url: panel.image_url }),
+                });
+                const layerData = await layerRes.json();
+                let layersObj = null;
+                if (layerData.success && layerData.layers) {
+                  layersObj = {
+                    background_url: layerData.layers.background_url,
+                    character_url: layerData.layers.character_url,
+                    text_url: layerData.layers.text_url,
+                    bg_visible: true,
+                    char_visible: true,
+                    text_visible: true,
+                  };
+                }
+
+                // 2. Generate Audio TTS
+                const ttsRes = await api.generateTts(activeFetch, {
+                  panel_id: panel.id,
+                  text: panel.speech_text,
+                });
+                let audioUrl = null;
+                if (ttsRes && ttsRes.success && ttsRes.audio_url) {
+                  audioUrl = ttsRes.audio_url;
+                }
+
+                // 3. Dialogue Sync Alignment
+                let syncMapObj = null;
+                if (audioUrl) {
+                  const ocr_texts = panel.speech_text.split("\n").map((s) => s.trim()).filter(Boolean);
+                  const alignRes = await activeFetch(`/api/audio/align-dialogue/${panel.id}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      audio_url: audioUrl,
+                      ocr_texts: ocr_texts.length > 0 ? ocr_texts : [panel.speech_text],
+                    }),
+                  });
+                  const alignData = await alignRes.json();
+                  if (alignData.success && alignData.dialogue_map) {
+                    syncMapObj = {
+                      dialogue_map: alignData.dialogue_map,
+                      audio_peaks: alignData.audio_peaks || [],
+                      peaks_fps: alignData.peaks_fps,
+                    };
+                  }
+                }
+
+                // Update this panel state incrementally
+                setPanels((prev) =>
+                  prev.map((p) =>
+                    p.id === panel.id
+                      ? {
+                          ...p,
+                          motion_type: "zoom_in",
+                          audio_url: audioUrl || p.audio_url,
+                          layers: layersObj || p.layers,
+                          syncMap: syncMapObj || p.syncMap,
+                        }
+                      : p
+                  )
+                );
+              } catch (err) {
+                console.error(`[Batch Magic] Failed for panel #${panel.id}:`, err);
+              } finally {
+                completed++;
+                setBatchMagicProgress({ current: completed, total: targetPanels.length });
+              }
+            })
+          );
+        }
+
+        addNotification?.(`Batch Magic Motion successfully completed on ${targetPanels.length} panels!`, "success");
+      } catch (err: any) {
+        console.error("[Batch Magic] Critical error:", err);
+      } finally {
+        setIsBatchMagicProcessing(false);
+        setBatchMagicProgress(null);
+        clearSelection();
+      }
+    };
+
     const [cropProgress, setCropProgress] = useState<{
       current: number;
       total: number;
@@ -683,6 +799,10 @@ const StoryboardTimeline = React.memo(
             setBulkPreset={setBulkPreset}
             handleBulkSetPreset={handleBulkSetPreset}
             handleClearTimeline={handleClearTimeline}
+            selectedCount={selectedCount}
+            isBatchMagicProcessing={isBatchMagicProcessing}
+            batchMagicProgress={batchMagicProgress}
+            handleBatchMagicMotion={handleBatchMagicMotion}
           />
         )}
 
@@ -723,6 +843,8 @@ const StoryboardTimeline = React.memo(
               onDrop={handleDrop}
               isDragging={draggedIndex === idx}
               isDragOver={dragOverIndex === idx}
+              setPanels={setPanels}
+              fetchWithInterceptor={fetchWithInterceptor}
             />
           ))}
         </div>

@@ -32,6 +32,9 @@ export function VideoMonitorActive({
 }: VideoMonitorActiveProps) {
   const [videoCurrentTime, setVideoCurrentTime] = React.useState(0);
   const activeStoryboardPanel = panels[currentPanelIndex] || null;
+  const textLayerRef = React.useRef<HTMLImageElement>(null);
+  const outerWrapperRef = React.useRef<HTMLDivElement>(null);
+  const shakeTimeoutRef = React.useRef<any>(null);
 
   // Helper to split and chunk long subtitle dialogues
   const getSubtitleChunk = (
@@ -87,11 +90,96 @@ export function VideoMonitorActive({
     }
   }
 
+  const activePanelForCurrentTab = activePreviewTab === "video" ? activeVideoPanel : activeStoryboardPanel;
+  const currentTimeForCurrentTab = activePreviewTab === "video" ? relativeVideoTime : playbackTime;
+
+  React.useEffect(() => {
+    const handleTimeUpdate = (e: Event) => {
+      const time = (e as CustomEvent).detail;
+      if (!activePanelForCurrentTab) return;
+
+      // Real-time camera shake visual rendering
+      if (activePanelForCurrentTab.audio_reactive_shake && outerWrapperRef.current) {
+        const frameIdx = Math.floor(time * 10.0);
+        const peaks = activePanelForCurrentTab.syncMap?.audio_peaks;
+        const peakVal = peaks ? peaks[frameIdx] : 0.0;
+
+        if (peakVal > 0.85) {
+          if (!outerWrapperRef.current.classList.contains("camera-shake-active")) {
+            outerWrapperRef.current.classList.add("camera-shake-active");
+            if (shakeTimeoutRef.current) {
+              clearTimeout(shakeTimeoutRef.current);
+            }
+            shakeTimeoutRef.current = setTimeout(() => {
+              outerWrapperRef.current?.classList.remove("camera-shake-active");
+            }, 200);
+          }
+        }
+      }
+
+      if (!textLayerRef.current || !activePanelForCurrentTab.layers) return;
+
+      if (activePanelForCurrentTab.layers.text_visible === false) {
+        textLayerRef.current.style.opacity = "0";
+        return;
+      }
+
+      const dialogueMap = activePanelForCurrentTab.syncMap?.dialogue_map;
+      if (!dialogueMap || dialogueMap.length === 0) {
+        textLayerRef.current.style.opacity = "1";
+        return;
+      }
+
+      const isAnyBubbleActive = dialogueMap.some(
+        (seg) => time >= seg.start_time && time <= seg.end_time
+      );
+
+      textLayerRef.current.style.opacity = isAnyBubbleActive ? "1" : "0";
+    };
+
+    window.addEventListener("storyboard-time-update", handleTimeUpdate);
+    return () => {
+      window.removeEventListener("storyboard-time-update", handleTimeUpdate);
+      if (shakeTimeoutRef.current) {
+        clearTimeout(shakeTimeoutRef.current);
+      }
+    };
+  }, [activePreviewTab, activePanelForCurrentTab]);
+
+  const getInitialTextOpacity = (panel: GeneratedPanel | null, time: number): number => {
+    if (!panel || !panel.layers) return 1;
+    if (panel.layers.text_visible === false) return 0;
+    const dialogueMap = panel.syncMap?.dialogue_map;
+    if (!dialogueMap || dialogueMap.length === 0) return 1;
+    const isAnyActive = dialogueMap.some(seg => time >= seg.start_time && time <= seg.end_time);
+    return isAnyActive ? 1 : 0;
+  };
+
   return (
     <div
+      ref={outerWrapperRef}
       id="video_monitor_outer_wrapper"
       className="relative bg-neutral-950/40 border border-neutral-800/80 rounded-3xl overflow-hidden shadow-inner flex items-center justify-center p-0 w-full h-full"
     >
+      {/* Dynamic style tag for high-performance monitor camera shake keyframes */}
+      <style>{`
+        @keyframes monitorShake {
+          0% { transform: translate(2px, 2px) rotate(0deg); }
+          10% { transform: translate(-2px, -3px) rotate(-1deg); }
+          20% { transform: translate(-4px, 0px) rotate(1deg); }
+          30% { transform: translate(0px, 3px) rotate(0deg); }
+          40% { transform: translate(2px, -2px) rotate(1deg); }
+          50% { transform: translate(-2px, 3px) rotate(-1deg); }
+          60% { transform: translate(-4px, 2px) rotate(0deg); }
+          70% { transform: translate(3px, 2px) rotate(-1deg); }
+          80% { transform: translate(-2px, -2px) rotate(1deg); }
+          90% { transform: translate(3px, 3px) rotate(0deg); }
+          100% { transform: translate(2px, -3px) rotate(-1deg); }
+        }
+        .camera-shake-active {
+          animation: monitorShake 0.12s infinite;
+        }
+      `}</style>
       {/* Ambient Background Glow */}
       <div className="absolute h-56 w-56 rounded-full bg-purple-600/10 blur-3xl" />
 
@@ -174,28 +262,97 @@ export function VideoMonitorActive({
           >
             {/* Image under cinematic pan animations */}
             <div className="absolute inset-0 overflow-hidden flex items-center justify-center bg-black">
-              <img
-                src={activeStoryboardPanel.image_url}
-                alt="Active Frame"
-                className="w-full h-full object-contain"
-                referrerPolicy="no-referrer"
-                style={{
-                  transform:
-                    activeStoryboardPanel.motion_type === "zoom_in"
-                      ? `scale(${1 + playbackTime * 0.02})`
-                      : activeStoryboardPanel.motion_type === "zoom_out"
-                      ? `scale(${1.15 - playbackTime * 0.02})`
-                      : activeStoryboardPanel.motion_type === "pan_right"
-                      ? `translateX(${playbackTime * 4}px)`
-                      : activeStoryboardPanel.motion_type === "pan_left"
-                      ? `translateX(${-playbackTime * 4}px)`
-                      : activeStoryboardPanel.motion_type === "pan_down"
-                      ? `translateY(${playbackTime * 4}px)`
-                      : "",
-                  transition: "transform 100ms linear",
-                  filter: getPanelFilterStyle(activeStoryboardPanel),
-                }}
-              />
+              {activeStoryboardPanel.layers ? (
+                <div className="relative w-full h-full flex items-center justify-center">
+                  {/* Background Layer */}
+                  {activeStoryboardPanel.layers.bg_visible !== false && (
+                    <img
+                      src={activeStoryboardPanel.layers.background_url}
+                      alt="Background Layer"
+                      className="absolute w-full h-full object-contain z-10"
+                      referrerPolicy="no-referrer"
+                      style={{
+                        transform:
+                          activeStoryboardPanel.motion_type === "zoom_in"
+                            ? `scale(${1 + playbackTime * 0.015})`
+                            : activeStoryboardPanel.motion_type === "zoom_out"
+                            ? `scale(${1.1 - playbackTime * 0.015})`
+                            : activeStoryboardPanel.motion_type === "pan_right"
+                            ? `translateX(${playbackTime * 3}px)`
+                            : activeStoryboardPanel.motion_type === "pan_left"
+                            ? `translateX(${-playbackTime * 3}px)`
+                            : activeStoryboardPanel.motion_type === "pan_down"
+                            ? `translateY(${playbackTime * 3}px)`
+                            : "",
+                        transition: "transform 100ms linear",
+                        filter: getPanelFilterStyle(activeStoryboardPanel),
+                      }}
+                    />
+                  )}
+
+                  {/* Character Layer */}
+                  {activeStoryboardPanel.layers.char_visible !== false && (
+                    <img
+                      src={activeStoryboardPanel.layers.character_url}
+                      alt="Character Layer"
+                      className="absolute w-full h-full object-contain z-20 pointer-events-none"
+                      referrerPolicy="no-referrer"
+                      style={{
+                        transform:
+                          activeStoryboardPanel.motion_type === "zoom_in"
+                            ? `scale(${1 + playbackTime * 0.035})`
+                            : activeStoryboardPanel.motion_type === "zoom_out"
+                            ? `scale(${1.25 - playbackTime * 0.035})`
+                            : activeStoryboardPanel.motion_type === "pan_right"
+                            ? `translateX(${playbackTime * 6}px)`
+                            : activeStoryboardPanel.motion_type === "pan_left"
+                            ? `translateX(${-playbackTime * 6}px)`
+                            : activeStoryboardPanel.motion_type === "pan_down"
+                            ? `translateY(${playbackTime * 6}px)`
+                            : "",
+                        transition: "transform 100ms linear",
+                        filter: getPanelFilterStyle(activeStoryboardPanel),
+                      }}
+                    />
+                  )}
+
+                  {/* Text Bubbles Layer */}
+                  <img
+                    ref={textLayerRef}
+                    src={activeStoryboardPanel.layers.text_url}
+                    alt="Text Bubbles Layer"
+                    className="absolute w-full h-full object-contain z-30 pointer-events-none transition-opacity duration-150"
+                    referrerPolicy="no-referrer"
+                    style={{
+                      opacity: getInitialTextOpacity(activeStoryboardPanel, playbackTime),
+                      filter: getPanelFilterStyle(activeStoryboardPanel),
+                    }}
+                  />
+                </div>
+              ) : (
+                <img
+                  src={activeStoryboardPanel.image_url}
+                  alt="Active Frame"
+                  className="w-full h-full object-contain"
+                  referrerPolicy="no-referrer"
+                  style={{
+                    transform:
+                      activeStoryboardPanel.motion_type === "zoom_in"
+                        ? `scale(${1 + playbackTime * 0.02})`
+                        : activeStoryboardPanel.motion_type === "zoom_out"
+                        ? `scale(${1.15 - playbackTime * 0.02})`
+                        : activeStoryboardPanel.motion_type === "pan_right"
+                        ? `translateX(${playbackTime * 4}px)`
+                        : activeStoryboardPanel.motion_type === "pan_left"
+                        ? `translateX(${-playbackTime * 4}px)`
+                        : activeStoryboardPanel.motion_type === "pan_down"
+                        ? `translateY(${playbackTime * 4}px)`
+                        : "",
+                    transition: "transform 100ms linear",
+                    filter: getPanelFilterStyle(activeStoryboardPanel),
+                  }}
+                />
+              )}
             </div>
 
             {/* Reprocessing OCR/CV Recalculation overlay */}

@@ -1,4 +1,5 @@
 import React from "react";
+import { Sparkles, RefreshCw } from "lucide-react";
 
 interface TimelineBulkOpsProps {
   bulkDuration: number;
@@ -11,6 +12,10 @@ interface TimelineBulkOpsProps {
   setBulkPreset: (val: string) => void;
   handleBulkSetPreset: () => void;
   handleClearTimeline: () => void;
+  selectedCount?: number;
+  isBatchMagicProcessing?: boolean;
+  batchMagicProgress?: { current: number; total: number } | null;
+  handleBatchMagicMotion?: () => void;
 }
 
 export default function TimelineBulkOps({
@@ -24,9 +29,13 @@ export default function TimelineBulkOps({
   setBulkPreset,
   handleBulkSetPreset,
   handleClearTimeline,
+  selectedCount = 0,
+  isBatchMagicProcessing = false,
+  batchMagicProgress = null,
+  handleBatchMagicMotion = () => {},
 }: TimelineBulkOpsProps) {
   return (
-    <div className="bg-neutral-950/70 p-3 sm:p-4 rounded-xl border border-purple-900/30 grid grid-cols-1 md:grid-cols-4 gap-3 sm:gap-4 animate-fadeIn">
+    <div className="bg-neutral-950/70 p-3 sm:p-4 rounded-xl border border-purple-900/30 grid grid-cols-1 md:grid-cols-5 gap-3 sm:gap-4 animate-fadeIn">
       {/* Duration */}
       <div className="space-y-2">
         <label className="text-[10px] font-bold text-neutral-400 uppercase font-mono tracking-wider block">
@@ -114,6 +123,37 @@ export default function TimelineBulkOps({
             Apply All
           </button>
         </div>
+      </div>
+
+      {/* Batch Magic Motion */}
+      <div className="space-y-2">
+        <label className="text-[10px] font-bold text-neutral-400 uppercase font-mono tracking-wider block">
+          AI Automations
+        </label>
+        <button
+          type="button"
+          disabled={isBatchMagicProcessing || selectedCount === 0}
+          onClick={handleBatchMagicMotion}
+          className={`w-full py-2 rounded text-[10px] font-mono font-bold flex items-center justify-center gap-1.5 border transition-all cursor-pointer h-7 ${
+            isBatchMagicProcessing
+              ? "bg-purple-900/10 text-purple-400 border-purple-800/20 cursor-not-allowed"
+              : selectedCount > 0
+              ? "bg-purple-600 hover:bg-purple-500 text-white border-purple-500/20 shadow-md shadow-purple-900/20"
+              : "bg-neutral-900/40 text-neutral-500 border-neutral-800/40 cursor-not-allowed"
+          }`}
+        >
+          {isBatchMagicProcessing ? (
+            <>
+              <RefreshCw className="h-3 w-3 animate-spin" />
+              <span>{batchMagicProgress?.current}/{batchMagicProgress?.total}</span>
+            </>
+          ) : (
+            <>
+              <Sparkles className="h-3 w-3" />
+              <span>Apply Magic ({selectedCount})</span>
+            </>
+          )}
+        </button>
       </div>
 
       {/* Reset / Actions */}

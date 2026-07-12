@@ -3,12 +3,13 @@ import { RefreshCw, Layers } from "lucide-react";
 import MergePanel from "./MergePanel/MergePanel";
 import { ImageEditorPanel, FreehandPanel } from ".";
 import EnhancementsPanel from "./EnhancementsPanel";
+import LayerSeparationPanel from "./LayerSeparationPanel";
 import HorizontalSplitter from "./HorizontalSplitter/HorizontalSplitter";
 import CutsRegistry from "./CutsRegistry/CutsRegistry";
 import AutoSlicer from "./AutoCrop/AutoSlicer";
 
 interface ImageEditorSidebarProps {
-  activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw";
+  activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw" | "separate";
   setActiveTab: (tab: any) => void;
   slices: any[];
   setSlices: any;
@@ -243,6 +244,17 @@ function ImageEditorSidebar({
           </div>
         )}
 
+        {activeTab === "separate" && (
+          <div className="rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
+            <LayerSeparationPanel
+              activeStoryboardPanel={activeStoryboardPanel}
+              setPanels={setPanels}
+              addNotification={addNotification}
+              fetchWithInterceptor={fetchWithInterceptor}
+            />
+          </div>
+        )}
+
         {activeTab === "draw" && (
           <div className="rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
             <FreehandPanel
@@ -294,6 +306,7 @@ function ImageEditorSidebar({
               handleModifySpeechText={handleModifySpeechText}
               handleModifySfx={handleModifySfx}
               handleModifyCropPadding={handleModifyCropPadding}
+              setPanels={setPanels}
             />
           </div>
         )}

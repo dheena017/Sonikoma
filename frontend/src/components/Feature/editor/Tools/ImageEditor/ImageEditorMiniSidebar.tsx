@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { useImageEditorStore, ImageTool } from "@/hooks/useImageEditorState";
-import { 
-  Sparkles, 
-  Settings2, 
-  Eraser, 
-  Scissors, 
-  Crop, 
-  Layers, 
-  Brush, 
-  Link2 
-} from "lucide-react"; 
+import {
+  Sparkles,
+  Settings2,
+  Eraser,
+  Scissors,
+  Crop,
+  Layers,
+  Brush,
+  Link2
+} from "lucide-react";
 import TooltipPortal from "@/components/TooltipPortal";
 
 export const ImageEditorMiniSidebar: React.FC = () => {
@@ -108,7 +108,7 @@ export const ImageEditorMiniSidebar: React.FC = () => {
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
           <div key={group.name} className="w-full flex flex-col items-center pb-2">
-            
+
             {/* Soft, premium gradient dot separator between groups */}
             {groupIdx > 0 && (
               <div className="w-1 h-1 rounded-full bg-violet-900/50 shadow-[0_0_4px_rgba(139,92,246,0.3)] my-2" />

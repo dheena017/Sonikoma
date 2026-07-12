@@ -853,6 +853,12 @@ videos_path = os.path.join(os.getcwd(), "public", "videos")
 os.makedirs(videos_path, exist_ok=True)
 app.mount("/videos", StaticFiles(directory=videos_path), name="videos")
 
+# 4. Serve locally generated panel layer WebPs (development bypass)
+# layer_segmentation.py writes to backend/python/local_media/...
+local_media_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "local_media"))
+os.makedirs(local_media_dir, exist_ok=True)
+app.mount("/media", StaticFiles(directory=local_media_dir), name="media")
+
 # ─────────────────────────────────────────────────────────────────────────────
 # STATIC FRONTEND SERVING (Production Only)
 # ─────────────────────────────────────────────────────────────────────────────
