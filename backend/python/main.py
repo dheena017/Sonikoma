@@ -466,6 +466,18 @@ async def lifespan(app: FastAPI):
     from database.db import init_db
     init_db()
 
+    # Clean up stale training lock file on startup (safely using local paths)
+    try:
+        base_dir = os.path.dirname(os.path.abspath(__file__)) # backend/python
+        project_root = os.path.abspath(os.path.join(base_dir, "..", ".."))
+        training_dir = os.path.join(project_root, "training_data")
+        lock_file = os.path.join(training_dir, "training.lock")
+        if os.path.exists(lock_file):
+            os.remove(lock_file)
+            logger.info("[Startup] Cleaned up stale training.lock file from previous run.")
+    except Exception as e:
+        logger.warning(f"[Startup] Failed to clean up stale training lock file: {e}")
+
     # Run startup maintenance asynchronously so the API can start responding quickly
     async def _startup_maintenance():
         try:
@@ -494,6 +506,13 @@ async def lifespan(app: FastAPI):
             logger.info("[Startup] rembg U-2-Net and YOLO models pre-warmed successfully — first request will be fast.")
         except Exception as e:
             logger.warning(f"[Startup] Model pre-warm failed (non-critical, will lazy-load on first request): {e}")
+
+        # Start automatic training background monitor service
+        try:
+            from services.training_monitor import start_background_monitor
+            start_background_monitor()
+        except Exception as e:
+            logger.warning(f"[Startup] Failed to start training data monitor service: {e}")
 
     asyncio.create_task(_startup_maintenance())
 

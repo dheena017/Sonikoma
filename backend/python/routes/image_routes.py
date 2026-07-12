@@ -1210,6 +1210,13 @@ async def save_training_data(
         else:
             logger.info(f"[Data Flywheel] Successfully saved training pair in Supabase.")
 
+        # Trigger an immediate check for automatic training
+        try:
+            from services.training_monitor import check_and_trigger_training
+            await asyncio.to_thread(check_and_trigger_training)
+        except Exception as monitor_err:
+            logger.warning(f"[Data Flywheel] Failed to run automatic training check: {monitor_err}")
+
         return {
             "success": True,
             "message": "Successfully saved training pair.",
@@ -1283,8 +1290,54 @@ async def delete_training_data_pair(pair_id: str):
 @router.get("/training-status", summary="Get status of current YOLO fine-tuning run")
 async def get_training_status():
     """
-    Returns real-time metrics, epoch progress, and elapsed time for the current training run.
+    Returns real-time metrics, epoch progress, elapsed time, and auto-trigger stats.
     """
-    from media.image.train_yolo import status
-    return status.to_dict()
+    from media.image.train_yolo import status, is_training_locked, get_lock_pid
+    from services.training_monitor import get_current_original_count, load_metadata, TRAINING_DATA_DIR
+    import os
+
+    status_dict = status.to_dict()
+
+    # 1. Fetch persistent metadata
+    try:
+        meta = load_metadata()
+        last_trained_count = meta.get("last_trained_count", 0)
+    except Exception:
+        last_trained_count = 0
+
+    # 2. Count current files
+    try:
+        current_count = get_current_original_count()
+    except Exception:
+        current_count = 0
+
+    new_samples_count = max(0, current_count - last_trained_count)
+
+    # 3. Lock file stats
+    lock_file_path = os.path.join(TRAINING_DATA_DIR, "training.lock")
+    lock_file_exists = os.path.exists(lock_file_path)
+    lock_file_pid = get_lock_pid(lock_file_path) if lock_file_exists else None
+    lock_file_active = is_training_locked(lock_file_path) if lock_file_exists else False
+
+    # 4. Hardware status
+    gpu_available = False
+    try:
+        import torch
+        gpu_available = torch.cuda.is_available()
+    except Exception:
+        pass
+
+    # Add extra fields to the status dictionary
+    status_dict.update({
+        "last_trained_count": last_trained_count,
+        "current_count": current_count,
+        "new_samples_count": new_samples_count,
+        "auto_trigger_threshold": 20,
+        "lock_file_exists": lock_file_exists,
+        "lock_file_pid": lock_file_pid,
+        "lock_file_active": lock_file_active,
+        "gpu_available": gpu_available
+    })
+
+    return status_dict
 
