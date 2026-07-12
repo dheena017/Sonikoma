@@ -205,7 +205,7 @@ const EditorSidebar = ({
                     <button
                       onClick={() => {
                         if (item.id === "image-editor") {
-                          const target = `/editor/adjust?idx=${editingImageIdx ?? 0}&series=${seriesSlug || ""}&chapter=${chapterSlug || ""}`;
+                          const target = `/image-editor?idx=${editingImageIdx ?? 0}&series=${seriesSlug || ""}&chapter=${chapterSlug || ""}`;
                           if (navigateTo) {
                             navigateTo(target);
                           } else {

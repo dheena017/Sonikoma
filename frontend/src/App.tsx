@@ -640,6 +640,7 @@ export default function App() {
       isEpisodeScraperPath: currentPath === "/episode-scraper",
       isEditorPath:
         currentPath.startsWith("/editor") ||
+        currentPath.startsWith("/image-editor") ||
         currentPath === "/workspace/editor" ||
         currentPath === "/workspace/editor/" ||
         currentPath.startsWith("/workspace/editor/"),

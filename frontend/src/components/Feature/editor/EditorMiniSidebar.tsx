@@ -63,7 +63,7 @@ const EditorMiniSidebarInner = ({
   topOffsetPx = 59,
 }: EditorMiniSidebarProps) => {
   const params = new URLSearchParams(window.location.search);
-  const isEditing = window.location.pathname.startsWith("/editor") && params.get("idx") !== null;
+  const isEditing = (window.location.pathname.startsWith("/editor") || window.location.pathname.startsWith("/image-editor")) && params.get("idx") !== null;
 
   const activeTool = useImageEditorStore((state) => state.activeTool);
   const setActiveTool = useImageEditorStore((state) => state.setActiveTool);
@@ -238,7 +238,7 @@ const EditorMiniSidebarInner = ({
         <button
           onClick={() => {
             if (item.id === "image-editor") {
-              const target = `/editor/adjust?idx=${editingImageIdx ?? 0}&series=${seriesSlug || ""}&chapter=${chapterSlug || ""}`;
+              const target = `/image-editor?idx=${editingImageIdx ?? 0}&series=${seriesSlug || ""}&chapter=${chapterSlug || ""}`;
               if (navigateTo) {
                 navigateTo(target);
               } else {
