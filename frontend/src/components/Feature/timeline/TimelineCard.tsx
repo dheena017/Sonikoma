@@ -26,6 +26,8 @@ interface TimelineCardProps {
   handleCancelAnalysis?: () => void;
   isSelected: boolean;
   onToggleSelect: () => void;
+  onPanelClick?: (idx: number, panelId: number, shiftKey: boolean, ctrlOrMeta: boolean) => void;
+  onPanelDoubleClick?: (idx: number, panelId: number) => void;
   playStoryboardAudio?: (idx: number, forcePlay?: boolean) => void;
   autoPlayAudio?: boolean;
   addNotification?: (message: string, type: any) => void;
@@ -221,6 +223,8 @@ const TimelineCard = ({
   handleCancelAnalysis,
   isSelected,
   onToggleSelect,
+  onPanelClick,
+  onPanelDoubleClick,
   playStoryboardAudio,
   onDragStart,
   onDragOver,
@@ -350,6 +354,57 @@ const TimelineCard = ({
     }
   };
 
+  const clickTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  React.useEffect(() => {
+    return () => {
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleThumbnailClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const shiftKey = e.shiftKey;
+    const ctrlOrMeta = e.ctrlKey || e.metaKey;
+
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current);
+      clickTimeoutRef.current = null;
+      onPanelDoubleClick?.(idx, panel.id);
+    } else {
+      clickTimeoutRef.current = setTimeout(() => {
+        clickTimeoutRef.current = null;
+        console.log(
+          `[TimelineCard] Selecting panel #${panel.id} at index ${idx}`
+        );
+        setCurrentPanelIndex(idx);
+        setActivePreviewTab("timeline");
+        setPlaybackTime(0);
+        if (onPanelClick) {
+          onPanelClick(idx, panel.id, shiftKey, ctrlOrMeta);
+        } else {
+          onToggleSelect();
+        }
+        if (playStoryboardAudio) {
+          // Delay voice synthesis slightly so the UI state change and outline render instantly
+          setTimeout(() => {
+            playStoryboardAudio(idx);
+            if (!autoPlayAudio && !autoPlayHintShown) {
+              autoPlayHintShown = true;
+              addNotification?.(
+                "Auto-play is off. Enable Auto-play TTS Audios in settings to hear this panel automatically.",
+                "info"
+              );
+            }
+          }, 50);
+        }
+      }, 250);
+    };
+  };
+
   return (
     <div
       draggable={true}
@@ -373,28 +428,7 @@ const TimelineCard = ({
     >
       {/* Image Thumbnail */}
       <div
-        onClick={() => {
-          console.log(
-            `[TimelineCard] Selecting panel #${panel.id} at index ${idx}`
-          );
-          setCurrentPanelIndex(idx);
-          setActivePreviewTab("timeline");
-          setPlaybackTime(0);
-          onToggleSelect();
-          if (playStoryboardAudio) {
-            // Delay voice synthesis slightly so the UI state change and outline render instantly
-            setTimeout(() => {
-              playStoryboardAudio(idx);
-              if (!autoPlayAudio && !autoPlayHintShown) {
-                autoPlayHintShown = true;
-                addNotification?.(
-                  "Auto-play is off. Enable Auto-play TTS Audios in settings to hear this panel automatically.",
-                  "info"
-                );
-              }
-            }, 50);
-          }
-        }}
+        onClick={handleThumbnailClick}
         className="relative h-28 sm:h-32 rounded-lg overflow-hidden cursor-pointer select-none bg-neutral-950 border border-neutral-800 flex items-center justify-center group"
       >
         <img

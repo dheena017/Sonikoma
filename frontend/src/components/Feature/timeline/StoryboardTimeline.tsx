@@ -5,6 +5,7 @@ import { GeneratedPanel } from "@/types";
 import { useStoryboardOperations } from "@/hooks/useStoryboardOperations";
 import { processWithConcurrency, chunkArray } from "@/utils/batchUtils";
 import * as api from "@/api";
+import { updateSelection } from "@/utils/selection";
 
 import TimelineEmptyState from "./TimelineEmptyState";
 import TimelineHeader from "./TimelineHeader";
@@ -106,6 +107,42 @@ const StoryboardTimeline = React.memo(
     );
     const selectedPanelIds = propSelectedPanelIds ?? localSelectedPanelIds;
     const setSelectedPanelIds = propSetSelectedPanelIds ?? setLocalSelectedPanelIds;
+
+    const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
+
+    const handlePanelClick = useCallback(
+      (idx: number, panelId: number, shiftKey: boolean, ctrlOrMeta: boolean) => {
+        if (shiftKey && lastSelectedIndex !== null) {
+          const lo = Math.min(lastSelectedIndex, idx);
+          const hi = Math.max(lastSelectedIndex, idx);
+          const rangeIds = panels.slice(lo, hi + 1).map((p) => p.id);
+          setSelectedPanelIds((prev) =>
+            updateSelection(prev, { type: "range", items: rangeIds }) as Set<number>
+          );
+        } else if (ctrlOrMeta) {
+          setSelectedPanelIds((prev) =>
+            updateSelection(prev, { type: "toggle", item: panelId }) as Set<number>
+          );
+          setLastSelectedIndex(idx);
+        } else {
+          setSelectedPanelIds((prev) =>
+            updateSelection(prev, { type: "single", item: panelId }) as Set<number>
+          );
+          setLastSelectedIndex(idx);
+        }
+      },
+      [lastSelectedIndex, panels, setSelectedPanelIds]
+    );
+
+    const handlePanelDoubleClick = useCallback(
+      (idx: number, panelId: number) => {
+        setSelectedPanelIds((prev) =>
+          updateSelection(prev, { type: "double", item: panelId }) as Set<number>
+        );
+        setLastSelectedIndex(idx);
+      },
+      [setSelectedPanelIds]
+    );
 
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -294,7 +331,7 @@ const StoryboardTimeline = React.memo(
         else next.add(id);
         return next;
       });
-    }, []);
+    }, [setSelectedPanelIds]);
 
     const selectAllPanels = useCallback(() => {
       setSelectedPanelIds(new Set(panels.map((p) => p.id)));
@@ -834,6 +871,8 @@ const StoryboardTimeline = React.memo(
               handleCancelAnalysis={handleCancelAnalysis}
               isSelected={selectedPanelIds.has(panel.id)}
               onToggleSelect={() => togglePanelSelection(panel.id)}
+              onPanelClick={handlePanelClick}
+              onPanelDoubleClick={handlePanelDoubleClick}
               playStoryboardAudio={playStoryboardAudio}
               autoPlayAudio={autoPlayAudio}
               addNotification={addNotification}

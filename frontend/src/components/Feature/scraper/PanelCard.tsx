@@ -32,7 +32,8 @@ interface PanelCardProps
     type: "error" | "success" | "info" | "warning"
   ) => void;
   /** Called when the card is clicked. Parent handles selection + shift-range logic. */
-  onCardClick: (idx: number, imgUrl: string, shiftKey: boolean) => void;
+  onCardClick: (idx: number, imgUrl: string, shiftKey: boolean, ctrlOrMeta: boolean) => void;
+  onCardDoubleClick?: (idx: number, imgUrl: string) => void;
   key?: React.Key;
 }
 
@@ -52,6 +53,7 @@ function PanelCard({
   addPanelsToStoryboard,
   addNotification,
   onCardClick,
+  onCardDoubleClick,
 }: PanelCardProps) {
   const [isEditing, setIsEditing] = React.useState<boolean>(false);
   const isProcessing =
@@ -187,10 +189,37 @@ function PanelCard({
     }
   };
 
+  const clickTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  React.useEffect(() => {
+    return () => {
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const shiftKey = e.shiftKey;
+    const ctrlOrMeta = e.ctrlKey || e.metaKey;
+
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current);
+      clickTimeoutRef.current = null;
+      onCardDoubleClick?.(idx, imgUrl);
+    } else {
+      clickTimeoutRef.current = setTimeout(() => {
+        clickTimeoutRef.current = null;
+        onCardClick(idx, imgUrl, shiftKey, ctrlOrMeta);
+      }, 250);
+    }
+  };
+
   return (
     <div
-      onClick={(e) => onCardClick(idx, imgUrl, e.shiftKey)}
-      // 2. REMOVED the onDoubleClick handler entirely so users can't accidentally trigger the crash
+      onClick={handleClick}
       className={[
         "group relative w-[260px] sm:w-[280px] shrink-0 rounded-2xl border p-4 space-y-4 transition-all duration-300 ease-out text-center cursor-pointer select-none",
         isSelected

@@ -28,7 +28,8 @@ interface LiveScraperGridProps {
     message: string,
     type: "error" | "success" | "info" | "warning"
   ) => void;
-  onCardClick: (idx: number, imgUrl: string, shiftKey: boolean) => void;
+  onCardClick: (idx: number, imgUrl: string, shiftKey: boolean, ctrlOrMeta: boolean) => void;
+  onCardDoubleClick?: (idx: number, imgUrl: string) => void;
 }
 
 export default function LiveScraperGrid({
@@ -52,6 +53,7 @@ export default function LiveScraperGrid({
   addPanelsToStoryboard,
   addNotification,
   onCardClick,
+  onCardDoubleClick,
 }: LiveScraperGridProps) {
   return (
     <div className="flex gap-4 overflow-x-auto pb-6 pt-1.5 scrollbar-thin">
@@ -75,6 +77,7 @@ export default function LiveScraperGrid({
             addPanelsToStoryboard={addPanelsToStoryboard}
             addNotification={addNotification}
             onCardClick={onCardClick}
+            onCardDoubleClick={onCardDoubleClick}
           />
         );
       })}

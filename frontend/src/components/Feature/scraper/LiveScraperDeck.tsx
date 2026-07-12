@@ -20,6 +20,7 @@ import {
 } from "@/components/Feature/editor/seloect";
 import LiveScraperDeckEmptyState from "./LiveScraperDeckEmptyState.js";
 import { parseWebtoonUrl, getSourceName } from "../../../utils.js";
+import { updateSelection } from "@/utils/selection";
 
 const LiveScraperDeck = React.memo(
   ({
@@ -68,26 +69,37 @@ const LiveScraperDeck = React.memo(
 
     /** Core card click handler — supports shift-range selection */
     const handleCardClick = useCallback(
-      (idx: number, imgUrl: string, shiftKey: boolean) => {
+      (idx: number, imgUrl: string, shiftKey: boolean, ctrlOrMeta: boolean) => {
         if (shiftKey && lastSelectedIndex !== null) {
-          // Build inclusive range and merge into the selection set
           const lo = Math.min(lastSelectedIndex, idx);
           const hi = Math.max(lastSelectedIndex, idx);
           const rangeUrls = scrapedImages.slice(lo, hi + 1);
           setSelectedScraped((prev) =>
-            Array.from(new Set([...prev, ...rangeUrls]))
+            updateSelection(prev, { type: "range", items: rangeUrls }) as string[]
           );
-          // Do NOT update lastSelectedIndex on shift-click — anchor stays put
+        } else if (ctrlOrMeta) {
+          setSelectedScraped((prev) =>
+            updateSelection(prev, { type: "toggle", item: imgUrl }) as string[]
+          );
+          setLastSelectedIndex(idx);
         } else {
           setSelectedScraped((prev) =>
-            prev.includes(imgUrl)
-              ? prev.filter((u) => u !== imgUrl)
-              : [...prev, imgUrl]
+            updateSelection(prev, { type: "single", item: imgUrl }) as string[]
           );
           setLastSelectedIndex(idx);
         }
       },
       [lastSelectedIndex, scrapedImages, setSelectedScraped]
+    );
+
+    const handleCardDoubleClick = useCallback(
+      (idx: number, imgUrl: string) => {
+        setSelectedScraped((prev) =>
+          updateSelection(prev, { type: "double", item: imgUrl }) as string[]
+        );
+        setLastSelectedIndex(idx);
+      },
+      [setSelectedScraped]
     );
 
     const makeSafeFilename = (name: string) => {
@@ -489,6 +501,7 @@ const LiveScraperDeck = React.memo(
                       addPanelsToStoryboard={addPanelsToStoryboard}
                       addNotification={addNotification}
                       onCardClick={handleCardClick}
+                      onCardDoubleClick={handleCardDoubleClick}
                     />
                   );
                 })}
