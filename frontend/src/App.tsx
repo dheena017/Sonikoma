@@ -748,8 +748,10 @@ export default function App() {
       ...appLogic,
       isPipMode,
       setIsPipMode,
+      activeTheme,
+      setActiveTheme,
     }),
-    [appLogic, isPipMode]
+    [appLogic, isPipMode, activeTheme, setActiveTheme]
   );
 
   const isWorkspaceEditorRoot =
