@@ -40,7 +40,8 @@ class AlignDialogueRequest(BaseModel):
 
 class AudioGenerateRequest(BaseModel):
     dialogue_list: List[str] = Field(
-        ..., description="Ordered list of dialogue strings to synthesize"
+        default_factory=list,
+        description="Ordered list of dialogue strings to synthesize"
     )
     target_duration: float = Field(
         default=4.5, ge=0.1, le=600.0,

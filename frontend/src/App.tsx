@@ -910,8 +910,11 @@ export default function App() {
                 api.generateTts(fetchWithInterceptor, {
                   project_id: projectId || undefined,
                   panel_id: p.id,
-                  text: p.speech_text,
+                  dialogue_list: [p.speech_text],
+                  target_duration: 4.5,
                   voice: voiceActor || undefined,
+                  return_base64: true,
+
                 })
               );
               const ttsResults = await Promise.all(ttsPromises);

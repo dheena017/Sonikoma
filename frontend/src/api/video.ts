@@ -40,7 +40,7 @@ export const generateTts = async (
   data: any,
   options?: RequestInit
 ) => {
-  const res = await fetchWithInterceptor("/api/audio/generate-tts", {
+  const res = await fetchWithInterceptor("/api/audio/generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -48,3 +48,4 @@ export const generateTts = async (
   });
   return res.json();
 };
+
