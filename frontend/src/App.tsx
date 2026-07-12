@@ -1552,6 +1552,7 @@ export default function App() {
                 selectedModel={selectedModel}
                 selectedSource={selectedSource}
                 addNotification={addNotification}
+                fetchWithInterceptor={fetchWithInterceptor}
               />
             </div>
           )}

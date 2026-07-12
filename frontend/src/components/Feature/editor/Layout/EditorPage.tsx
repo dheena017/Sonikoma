@@ -410,7 +410,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                         <Sliders className="h-5 w-5" />
                       </div>
                       <div>
-                        <h2 className="text-lg font-bold text-white tracking-wide">Editor Configuration Settings</h2>
+                        <h2 className="text-lg font-bold text-white tracking-wide">Video Settings</h2>
                         <p className="text-xs text-neutral-400 font-mono mt-0.5">
                           Configure synthesis voice, compose soundtrack loops, and set rendering formats
                         </p>
@@ -442,6 +442,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                       selectedModel={selectedModel}
                       selectedSource={selectedSource}
                       addNotification={addNotification}
+                      fetchWithInterceptor={fetchWithInterceptor}
                     />
                   </div>
                 </div>
