@@ -30,6 +30,8 @@ interface LayoutEditorPageProps {
   setNotificationsMuted?: (muted: boolean) => void;
   onNavigateToAll?: () => void;
   projectId?: string | null;
+  seriesSlug?: string | null;
+  chapterSlug?: string | null;
   fetchWithInterceptor?: any;
   locationSearch?: string;
 }
@@ -61,6 +63,8 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
   setNotificationsMuted,
   onNavigateToAll,
   projectId,
+  seriesSlug,
+  chapterSlug,
   fetchWithInterceptor,
   locationSearch,
 }) => {
@@ -97,6 +101,8 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
         (isSidebarCollapsed ? (
           <EditorMiniSidebar
             projectId={projectId}
+            seriesSlug={seriesSlug}
+            chapterSlug={chapterSlug}
             isCollapsed={isSidebarCollapsed}
             setIsCollapsed={setIsSidebarCollapsed}
             currentSection={currentSection}
@@ -112,6 +118,8 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
         ) : (
           <EditorSidebar
             projectId={projectId}
+            seriesSlug={seriesSlug}
+            chapterSlug={chapterSlug}
             isCollapsed={isSidebarCollapsed}
             setIsCollapsed={setIsSidebarCollapsed}
             currentSection={currentSection}

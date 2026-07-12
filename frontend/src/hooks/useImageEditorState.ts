@@ -35,12 +35,14 @@ export const useImageEditorStore = create<ImageEditorGlobalState & {
 
     // Preserve the current workspace URL.
     // Only update the browser URL when we're already inside the legacy /editor/* routes.
-    const isLegacyEditorRoute = window.location.pathname.startsWith("/editor/");
+    const isLegacyEditorRoute = window.location.pathname.startsWith("/editor/") || window.location.pathname.startsWith("/image-editor");
     if (!isLegacyEditorRoute) return;
 
     const params = new URLSearchParams(window.location.search);
     const idx = params.get("idx") || "0";
-    const newPath = `/editor/${tool}?idx=${idx}`;
+    const newPath = window.location.pathname.startsWith("/image-editor")
+      ? `/image-editor?idx=${idx}&series=${params.get("series") || ""}&chapter=${params.get("chapter") || ""}`
+      : `/editor/${tool}?idx=${idx}`;
     if (window.location.pathname + window.location.search !== newPath) {
       window.history.pushState({}, "", newPath);
     }

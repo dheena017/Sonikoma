@@ -578,8 +578,22 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
       // Default single frame crop
       await handleSaveEditedImageCallback();
     }
-    window.history.pushState({}, "");
-    window.dispatchEvent(new Event("popstate"));
+
+    const params = new URLSearchParams(window.location.search);
+    const series = params.get("series");
+    const chapter = params.get("chapter");
+    if (series && chapter) {
+      const target = `/workspace/editor/series/${series}/chapters/${chapter}`;
+      if ((window as any).navigateTo) {
+        (window as any).navigateTo(target);
+      } else {
+        window.history.pushState({}, "", target);
+        window.dispatchEvent(new Event("popstate"));
+      }
+    } else {
+      window.history.pushState({}, "");
+      window.dispatchEvent(new Event("popstate"));
+    }
   };
 
   const handleDeleteCurrentImage = async () => {

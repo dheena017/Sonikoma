@@ -567,7 +567,7 @@ export function useAppState() {
       const match = path.match(
         /(?:\/workspace\/editor)?\/series\/[^\/]+\/chapters\/([^\/]+)/
       );
-      const chapterSlug = match ? match[1] : null;
+      const chapterSlug = match ? match[1] : (params.get("chapter") || null);
 
       if (!urlProjectId && !chapterSlug) {
         // If we cleared the state (navigated to clean /workspace), reset workspace

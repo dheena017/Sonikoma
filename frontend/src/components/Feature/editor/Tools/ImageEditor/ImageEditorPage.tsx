@@ -121,6 +121,7 @@ const ImageEditorPage = React.memo(({ appLogic }: ImageEditorPageProps) => {
         slices={editorProps.slices}
         isToolsPanelOpen={isToolsPanelOpen}
         setIsToolsPanelOpen={setIsToolsPanelOpen}
+        handleExecuteSave={editorProps.handleExecuteSave}
       />
 
       <div className="flex-1 flex flex-row overflow-hidden w-full relative">

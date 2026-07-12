@@ -31,6 +31,8 @@ interface EditorMiniSidebarProps {
   isCleaningBubbles: boolean;
   navigateTo?: (path: string) => void;
   projectId?: string | null;
+  seriesSlug?: string | null;
+  chapterSlug?: string | null;
   settingsPath?: string;
   topOffsetPx?: number;
   locationSearch?: string;
@@ -56,16 +58,19 @@ const EditorMiniSidebarInner = ({
   isCleaningBubbles,
   navigateTo,
   projectId,
+  seriesSlug,
+  chapterSlug,
   settingsPath = "/settings",
   topOffsetPx = 59,
   locationSearch,
 }: EditorMiniSidebarProps) => {
   const params = new URLSearchParams(locationSearch || window.location.search);
-  const isEditing = window.location.pathname.startsWith("/editor") && params.get("idx") !== null;
+  const isEditing = (window.location.pathname.startsWith("/editor") || window.location.pathname.startsWith("/image-editor")) && params.get("idx") !== null;
 
   const activeTool = useImageEditorStore((state) => state.activeTool);
   const setActiveTool = useImageEditorStore((state) => state.setActiveTool);
   const slicesCount = useImageEditorStore((state) => state.slicesCount);
+  const editingImageIdx = useImageEditorStore((state) => state.editingImageIdx);
 
   const [hoveredTool, setHoveredTool] = useState<string | null>(null);
   const [hoveredRect, setHoveredRect] = useState<DOMRect | null>(null);
@@ -252,7 +257,15 @@ const EditorMiniSidebarInner = ({
               }
             }
 
-            if (item.id === "autocrop" || item.id === "bubbles" || item.id === "image-editor") {
+            if (item.id === "image-editor") {
+              const target = `/image-editor?idx=${editingImageIdx ?? 0}&series=${seriesSlug || ""}&chapter=${chapterSlug || ""}`;
+              if (navigateTo) {
+                navigateTo(target);
+              } else {
+                window.history.pushState({}, "", target);
+                window.dispatchEvent(new Event("popstate"));
+              }
+            } else if (item.id === "autocrop" || item.id === "bubbles") {
               setCurrentSection(item.id);
             } else if (item.id === "settings") {
               const p = new URLSearchParams(window.location.search);

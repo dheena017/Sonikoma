@@ -13,6 +13,7 @@ import {
   Edit2,
   type LucideIcon,
 } from "lucide-react";
+import { useImageEditorStore } from "../../../hooks/useImageEditorState";
 
 interface EditorSidebarProps {
   isCollapsed: boolean;
@@ -27,6 +28,8 @@ interface EditorSidebarProps {
   navigateTo?: (path: string) => void;
   projectId?: string | null;
   locationSearch?: string;
+  seriesSlug?: string | null;
+  chapterSlug?: string | null;
 }
 
 interface SidebarMenuItem {
@@ -56,7 +59,10 @@ const EditorSidebar = ({
   navigateTo,
   projectId,
   locationSearch,
+  seriesSlug,
+  chapterSlug,
 }: EditorSidebarProps) => {
+  const editingImageIdx = useImageEditorStore((state) => state.editingImageIdx);
   const menuGroups: SidebarGroup[] = [
     {
       title: "Workspace Navigation",
@@ -218,8 +224,14 @@ const EditorSidebar = ({
                           }
                         }
 
-                        if (item.type === "tool") {
-                          setCurrentSection(item.id);
+                        if (item.id === "image-editor") {
+                          const target = `/image-editor?idx=${editingImageIdx ?? 0}&series=${seriesSlug || ""}&chapter=${chapterSlug || ""}`;
+                          if (navigateTo) {
+                            navigateTo(target);
+                          } else {
+                            window.history.pushState({}, "", target);
+                            window.dispatchEvent(new Event("popstate"));
+                          }
                         } else if (item.id === "settings") {
                           const p = new URLSearchParams(window.location.search);
                           p.set("tab", "settings");
@@ -227,7 +239,7 @@ const EditorSidebar = ({
                           if (navigateTo) {
                             navigateTo(newPath);
                           } else {
-                            window.history.pushState({}, "", newPath);
+                            window.history.pushState({}, "", newPath); // Corrected: This was inside the `if (item.type === "tool")` block
                             window.dispatchEvent(new Event("popstate"));
                           }
                         } else {
