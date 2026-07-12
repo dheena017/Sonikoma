@@ -59,10 +59,9 @@ export function useCredits(fetchWithInterceptor: any): UseCreditsResult {
   useEffect(() => {
     mountedRef.current = true;
     fetchCredits();
-    const id = setInterval(fetchCredits, POLL_INTERVAL_MS);
+
     return () => {
       mountedRef.current = false;
-      clearInterval(id);
     };
   }, [fetchCredits]);
 
