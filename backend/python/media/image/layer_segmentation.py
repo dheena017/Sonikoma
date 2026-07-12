@@ -24,6 +24,7 @@ except ImportError:
     logger.warning("rembg is not installed. Character segmentation will return a blank layer.")
 
 from media.image.ocr import extract_full_ocr_data
+from media.image.detect_panels import _detect_bg_color_and_threshold
 from utils.supabase_storage import upload_to_supabase_bucket
 
 # Initialize a global rembg session for U-2-Net model to prevent reloading it per request
@@ -249,8 +250,10 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
                         exact_thresh_bin = cv2.adaptiveThreshold(
                             exact_roi_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
                         )
-                        mean_val = np.mean(exact_roi_gray)
-                        raw_text_pixels = exact_thresh_inv if mean_val > 127 else exact_thresh_bin
+
+                        # Leverage _detect_bg_color_and_threshold from detect_panels.py to stay DRY and robust
+                        is_white, _ = _detect_bg_color_and_threshold(exact_roi_gray, bg_mode="auto", sensitivity=30.0)
+                        raw_text_pixels = exact_thresh_inv if is_white else exact_thresh_bin
 
                         # Filter screentones and background textures
                         num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(raw_text_pixels, connectivity=8)
