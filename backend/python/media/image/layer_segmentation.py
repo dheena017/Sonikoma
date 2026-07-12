@@ -275,6 +275,13 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
 
                         text_mask[ty1:ty2, tx1:tx2] = cv2.bitwise_or(text_mask[ty1:ty2, tx1:tx2], filtered_text_pixels)
 
+            # Subtract character bounding mask from the text layer so speech bubbles never clip the main character details (Step 1 Integration)
+            if np.any(global_char_mask > 0):
+                # Subtract character pixels with a slight safety margin (erosion) to prevent overlaps
+                char_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+                eroded_char_mask = cv2.erode(global_char_mask, char_kernel, iterations=1)
+                text_mask = cv2.bitwise_and(text_mask, cv2.bitwise_not(eroded_char_mask))
+
             # Extract final text layer
             text_layer = cv2.cvtColor(original_img, cv2.COLOR_BGR2BGRA)
             text_layer[text_mask == 0] = [0, 0, 0, 0]
