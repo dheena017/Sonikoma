@@ -25,6 +25,7 @@ except ImportError:
 
 from media.image.ocr import extract_full_ocr_data
 from media.image.detect_panels import _detect_bg_color_and_threshold
+from media.image.segmentation_engine import segment_text_and_balloons
 from utils.supabase_storage import upload_to_supabase_bucket
 
 # Initialize a global rembg session for U-2-Net model to prevent reloading it per request
@@ -170,8 +171,15 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
     text_layer_bytes = None
     textless_img = original_img.copy()
 
-    if ocr_results:
-        logger.info(f"[Text Separation] {len(ocr_results)} text regions detected. Performing extraction.")
+    # 1. Attempt Primary YOLO-based Manga Text & Balloon Segmentation (AI-native Pivot)
+    yolo_text_mask = segment_text_and_balloons(image_path, conf_threshold=0.5)
+
+    if yolo_text_mask is not None and np.any(yolo_text_mask > 0):
+        logger.info("[Text Separation] YOLO model successfully segmented text and balloon layers.")
+        text_mask = yolo_text_mask
+    elif ocr_results:
+        # Fallback to improved OpenCV Bilateral + Canny edge-contour logic (for cases where YOLO confidence < 0.5 or unavailable)
+        logger.info(f"[Text Separation] YOLO did not yield high-confidence masks. Falling back to refined Canny/OpenCV on {len(ocr_results)} OCR regions.")
         try:
             for res in ocr_results:
                 pts = np.array(res["box"], dtype=np.int32)
@@ -238,8 +246,7 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
                                 break
 
                 if not bubble_found:
-                    # Fallback: Isolate Text/SFX cleanly (Solves "Better Text/SFX Isolation")
-                    # Step 1: Smooth out background textures using a Bilateral Filter while keeping text edges sharp
+                    # Fallback: Isolate Text/SFX cleanly
                     tx1, ty1 = max(0, x), max(0, y)
                     tx2, ty2 = min(width, x + w), min(height, y + h_box)
                     exact_roi = original_img[ty1:ty2, tx1:tx2]
@@ -248,17 +255,17 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
                         smoothed_roi = cv2.bilateralFilter(exact_roi, d=9, sigmaColor=75, sigmaSpace=75)
                         smoothed_roi_gray = cv2.cvtColor(smoothed_roi, cv2.COLOR_BGR2GRAY)
 
-                        # Step 2: Use Canny Edge Detection to capture character and text outlines cleanly
+                        # Use Canny Edge Detection to capture character and text outlines cleanly
                         canny_edges = cv2.Canny(smoothed_roi_gray, 50, 150)
 
-                        # Step 3: Dilate Canny edges slightly to close individual character boundary loops
+                        # Dilate Canny edges slightly to close individual character boundary loops
                         edge_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
                         dilated_edges = cv2.dilate(canny_edges, edge_kernel, iterations=1)
 
-                        # Step 4: Find contours on the dilated edge mask
+                        # Find contours on the dilated edge mask
                         roi_contours, _ = cv2.findContours(dilated_edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-                        # Step 5: Draw filled contours to isolate the text/SFX characters cleanly
+                        # Draw filled contours to isolate the text/SFX characters cleanly
                         filled_text_mask = np.zeros_like(smoothed_roi_gray)
                         roi_w, roi_h = tx2 - tx1, ty2 - ty1
                         min_pixel_area = max(2, int((roi_w * roi_h) * 0.0005))
@@ -269,13 +276,12 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
                             if min_pixel_area <= c_area <= max_pixel_area:
                                 # Smooth contour to ensure high-fidelity boundaries
                                 smoothed_c = smooth_contour(c, factor=0.005)
-                                # Obtain bounding box properties to filter out extreme border lines
                                 _, _, cw, ch = cv2.boundingRect(smoothed_c)
                                 aspect_ratio = float(cw) / ch if ch > 0 else 0
                                 if 0.05 < aspect_ratio < 20.0:
                                     cv2.drawContours(filled_text_mask, [smoothed_c], -1, 255, -1)
 
-                        # Clean isolated text mask using statistical component analysis to completely bypass screentone noise
+                        # Clean isolated text mask using statistical component analysis
                         num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(filled_text_mask, connectivity=8)
                         final_roi_mask = np.zeros_like(filled_text_mask)
                         for label_idx in range(1, num_labels):
@@ -284,10 +290,14 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
                                 final_roi_mask[labels == label_idx] = 255
 
                         text_mask[ty1:ty2, tx1:tx2] = cv2.bitwise_or(text_mask[ty1:ty2, tx1:tx2], final_roi_mask)
+        except Exception as e:
+            logger.error(f"Error during fallback text separation: {e}", exc_info=True)
 
+    # If any text mask is present (from YOLO or Canny fallback)
+    if np.any(text_mask > 0):
+        try:
             # Subtract character bounding mask from the text layer so speech bubbles never clip the main character details (Step 1 Integration)
             if np.any(global_char_mask > 0):
-                # Subtract character pixels with a slight safety margin (erosion) to prevent overlaps
                 char_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
                 eroded_char_mask = cv2.erode(global_char_mask, char_kernel, iterations=1)
                 text_mask = cv2.bitwise_and(text_mask, cv2.bitwise_not(eroded_char_mask))
@@ -299,12 +309,10 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
             text_layer_bytes = buffer.tobytes()
 
             # Clean text/bubbles out of working image immediately to prevent "Sticky Text" (Solves "Dilate Before Inpainting")
-            # Dilate the text_mask heavily to completely cover outer letter borders and black outlines
             dilated_text_mask = cv2.dilate(text_mask, np.ones((5, 5), np.uint8), iterations=2)
             textless_img = cv2.inpaint(original_img, dilated_text_mask, inpaintRadius=5, flags=cv2.INPAINT_TELEA)
-
         except Exception as e:
-            logger.error(f"Error during conditional text separation: {e}", exc_info=True)
+            logger.error(f"Error compiling text layer or inpainting textless image: {e}", exc_info=True)
             text_layer_bytes = create_blank_webp(width, height)
             textless_img = original_img.copy()
     else:

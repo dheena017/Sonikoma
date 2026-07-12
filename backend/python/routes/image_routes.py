@@ -918,3 +918,48 @@ async def upload_image(file: UploadFile = File(...)):
     except Exception as e:
         logger.error(f"[Image Upload] Failed: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/save-training-data", summary="Save human-corrected text masks and original panels for future training (Data Flywheel)")
+async def save_training_data(
+    original_panel: UploadFile = File(...),
+    corrected_text_mask: UploadFile = File(...)
+):
+    logger.info(f"[Data Flywheel] Received human-corrected training sample pairs.")
+    try:
+        # Define local directory inside the container/sandbox
+        training_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "training_data"))
+        os.makedirs(training_dir, exist_ok=True)
+
+        unique_pair_id = uuid.uuid4().hex[:12]
+
+        # Read files to bytes
+        orig_bytes = await original_panel.read()
+        mask_bytes = await corrected_text_mask.read()
+
+        # Deduce file extensions or default to .webp
+        orig_ext = mimetypes.guess_extension(original_panel.content_type or "") or ".webp"
+        mask_ext = mimetypes.guess_extension(corrected_text_mask.content_type or "") or ".webp"
+
+        orig_filename = f"original_{unique_pair_id}{orig_ext}"
+        mask_filename = f"mask_{unique_pair_id}{mask_ext}"
+
+        orig_dest = os.path.join(training_dir, orig_filename)
+        mask_dest = os.path.join(training_dir, mask_filename)
+
+        # Save files locally
+        with open(orig_dest, "wb") as f_orig:
+            f_orig.write(orig_bytes)
+
+        with open(mask_dest, "wb") as f_mask:
+            f_mask.write(mask_bytes)
+
+        logger.info(f"[Data Flywheel] Successfully saved original panel ({orig_filename}) and corrected mask ({mask_filename}) inside {training_dir}")
+        return {
+            "success": True,
+            "message": "Successfully saved training pair.",
+            "pair_id": unique_pair_id
+        }
+    except Exception as e:
+        logger.error(f"[Data Flywheel] Failed to save training data: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to save training data: {e}")
