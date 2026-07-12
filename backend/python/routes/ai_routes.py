@@ -1405,6 +1405,15 @@ async def ai_smart_crop(body: SmartCropRequest, user_api_key: str = Depends(get_
         logger.info(f"[AI Smart Crop] Successfully processed {len(cropped_panels)} panels.")
         # Success: record credit transaction in the ledger
         record_credit_transaction(current_user["user_id"], -COST, "ai_smart_crop")
+
+        # Trigger automatic training check
+        try:
+            from services.training_monitor import check_and_trigger_training
+            import asyncio
+            await asyncio.to_thread(check_and_trigger_training)
+        except Exception:
+            pass
+
         return {
             "success": True,
             "panels": cropped_panels,
