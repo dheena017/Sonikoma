@@ -400,53 +400,81 @@ def crop_auto_borders(
     output_format: str = 'jpeg',
     crop_quality: int = 90
 ) -> Dict[str, Any]:
-    """Auto crops uniform margins (whitespace/black gutters) using PIL difference analysis."""
+    """Auto crops uniform margins (whitespace/black gutters) using pixel-by-pixel content snapping analysis."""
     try:
         img = Image.open(io.BytesIO(image_bytes))
         w, h = img.size
 
-        if w < 80 or h < 80:
+        if w < 10 or h < 10:
             return {"data": image_bytes, "content_type": f"image/{img.format.lower() if img.format else 'jpeg'}"}
 
-        # Background color
+        # Convert to gray array for fast, precise pixel-by-pixel snapping
+        gray = np.array(img.convert('L'))
+
+        # Background value estimation
         if background_color_mode == 'white':
+            bg_val = 255.0
             bg_color = (255, 255, 255)
         elif background_color_mode == 'black':
+            bg_val = 0.0
             bg_color = (0, 0, 0)
         else:
             # Corner sampling
-            corners = [
-                img.getpixel((0, 0)),
-                img.getpixel((w - 1, 0)),
-                img.getpixel((0, h - 1)),
-                img.getpixel((w - 1, h - 1))
+            corners = np.concatenate([
+                gray[:3, :3].flatten(),
+                gray[-3:, :3].flatten(),
+                gray[:3, -3:].flatten(),
+                gray[-3:, -3:].flatten()
+            ])
+            bg_val = np.median(corners) if len(corners) > 0 else 255.0
+
+            # Form standard background RGB tuple
+            img_rgb_sample = img.convert('RGB')
+            corner_pixels = [
+                img_rgb_sample.getpixel((0, 0)),
+                img_rgb_sample.getpixel((w - 1, 0)),
+                img_rgb_sample.getpixel((0, h - 1)),
+                img_rgb_sample.getpixel((w - 1, h - 1))
             ]
-            corners_rgb = []
-            for c in corners:
-                if isinstance(c, tuple):
-                    corners_rgb.append(c[:3])
-                else:
-                    corners_rgb.append((c, c, c))
-            avg_r = int(np.mean([c[0] for c in corners_rgb]))
-            avg_g = int(np.mean([c[1] for c in corners_rgb]))
-            avg_b = int(np.mean([c[2] for c in corners_rgb]))
+            avg_r = int(np.mean([c[0] for c in corner_pixels]))
+            avg_g = int(np.mean([c[1] for c in corner_pixels]))
+            avg_b = int(np.mean([c[2] for c in corner_pixels]))
             bg_color = (avg_r, avg_g, avg_b)
 
-        # Threshold
-        threshold_val = sensitivity if sensitivity is not None else (50.0 if tighter else 25.0)
+        # Build exact pixel-by-pixel content mask
+        tol = sensitivity if sensitivity is not None else (15.0 if tighter else 20.0)
+        if bg_val >= 200.0:
+            content_mask = (gray < (255.0 - tol))
+        elif bg_val <= 55.0:
+            content_mask = (gray > tol)
+        else:
+            content_mask = (np.abs(gray.astype(float) - bg_val) > tol)
 
-        # To avoid ValueError: color must be a 4-tuple for RGBA or mode mismatch in ImageChops.difference,
-        # we calculate diff using RGB mode copies.
-        img_rgb = img.convert('RGB')
-        bg_rgb = Image.new('RGB', img.size, bg_color)
-        diff = ImageChops.difference(img_rgb, bg_rgb).convert('L')
+        # Morphological-like opening filter using OpenCV or NumPy fallback
+        try:
+            import cv2
+            kernel = np.ones((2, 2), dtype=np.uint8)
+            content_mask_cleaned = cv2.morphologyEx(content_mask.astype(np.uint8), cv2.MORPH_OPEN, kernel)
+        except ImportError:
+            content_mask_cleaned = content_mask.astype(np.uint8)
 
-        diff = diff.point(lambda p: 255 if p > threshold_val else 0)
-        bbox = diff.getbbox()
+        if not np.any(content_mask_cleaned > 0):
+            content_mask_cleaned = content_mask.astype(np.uint8)
 
-        if bbox:
-            left, top, right, bottom = bbox
-            if (right - left) >= 15 and (bottom - top) >= 15:
+        row_sums = np.sum(content_mask_cleaned > 0, axis=1)
+        col_sums = np.sum(content_mask_cleaned > 0, axis=0)
+
+        row_indices = np.where(row_sums >= 1)[0]
+        col_indices = np.where(col_sums >= 1)[0]
+
+        if len(row_indices) > 0 and len(col_indices) > 0:
+            left = int(col_indices[0])
+            top = int(row_indices[0])
+            right = int(col_indices[-1]) + 1
+            bottom = int(row_indices[-1]) + 1
+
+            # Enforce minimum size limit of 10x10 pixels
+            if (right - left) >= 10 and (bottom - top) >= 10:
                 trimmed = img.crop((left, top, right, bottom))
             else:
                 trimmed = img
