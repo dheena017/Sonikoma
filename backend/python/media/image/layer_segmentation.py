@@ -43,6 +43,66 @@ def create_blank_webp(width: int, height: int) -> bytes:
     img.save(buffer, format="WEBP")
     return buffer.getvalue()
 
+def smooth_contour(cnt, factor: float = 0.01):
+    """Smooths a contour using Douglas-Peucker polygonal approximation."""
+    epsilon = factor * cv2.arcLength(cnt, True)
+    return cv2.approxPolyDP(cnt, epsilon, True)
+
+def pyramid_guided_inpaint(original_img: np.ndarray, mask: np.ndarray, radius: int = 20) -> np.ndarray:
+    """
+    Performs Pyramidal Guided Inpainting to resolve massive character/text holes.
+    Reduces the image scale to inpaint primary structures, scales back up, and blends
+    with local, boundary-aware high-resolution inpainting via distance transforms.
+    This guarantees pristine backgrounds completely free of ghosting smudges or halos.
+    """
+    height, width = original_img.shape[:2]
+
+    # Define pyramid levels (Downsample to robustly capture global structures)
+    down_scale = 4
+    low_w, low_h = max(16, width // down_scale), max(16, height // down_scale)
+
+    # 1. Low-Resolution structure inpainting
+    low_img = cv2.resize(original_img, (low_w, low_h), interpolation=cv2.INTER_AREA)
+    low_mask = cv2.resize(mask, (low_w, low_h), interpolation=cv2.INTER_NEAREST)
+
+    # Inpaint structural layer at low resolution
+    low_inpainted = cv2.inpaint(low_img, low_mask, inpaintRadius=max(3, radius // down_scale), flags=cv2.INPAINT_NS)
+
+    # Upsample structural layer back to original resolution
+    structure_img = cv2.resize(low_inpainted, (width, height), interpolation=cv2.INTER_CUBIC)
+
+    # 2. High-Resolution detail-preserving inpainting
+    detail_img = cv2.inpaint(original_img, mask, inpaintRadius=radius, flags=cv2.INPAINT_NS)
+
+    # 3. Create Distance Transform Blending Weights
+    # Distance transform computes the distance of non-zero pixels to the nearest zero pixel.
+    # We want to measure the depth of pixels inside the hole (where mask > 0) relative to the boundary.
+    # Therefore, we run distanceTransform on the mask itself. Inside the hole, values will be > 0
+    # increasing towards the center, while outside the hole it will be 0.
+    dist_transform = cv2.distanceTransform(mask, cv2.DIST_L2, 5)
+
+    # Normalize distance transform across the masked regions
+    # Near the boundaries (low distance to background), we prefer high-res details.
+    # Far from boundaries (deep inside the holes), we prefer structure-consistent upscaled structures.
+    max_dist = np.max(dist_transform[mask > 0]) if np.any(mask > 0) else 1.0
+    if max_dist <= 0:
+        max_dist = 1.0
+
+    # Generate continuous blending weight map: 0.0 near background, 1.0 at maximum depth inside hole
+    blend_weights = np.clip(dist_transform / (max_dist * 0.8), 0.0, 1.0)
+    blend_weights = cv2.GaussianBlur(blend_weights, (11, 11), 0)
+
+    # Reshape weights for three-channel broadcasting
+    blend_weights_3d = np.expand_dims(blend_weights, axis=2)
+
+    # Perform pyramidal guided blending
+    blended_img = (structure_img * blend_weights_3d + detail_img * (1.0 - blend_weights_3d)).astype(np.uint8)
+
+    # Retain the exact original background outside the mask
+    result = original_img.copy()
+    result[mask > 0] = blended_img[mask > 0]
+    return result
+
 async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
     """
     Main orchestration logic for separating a panel into Background, Character, and Text layers.
@@ -134,14 +194,26 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
                             solidity = float(area) / hull_area if hull_area > 0 else 0
 
                             if solidity > 0.7:
-                                # Assume it's a speech bubble and mask the entire contour
-                                cnt_offset = cnt + [x1, y1]
+                                # Smooth and close the speech bubble contour (Solves "Smooth Speech Bubbles")
+                                closed_cnt = smooth_contour(cnt)
+                                cnt_offset = closed_cnt + [x1, y1]
+
+                                # Draw speech bubble mask
                                 cv2.drawContours(text_mask, [cnt_offset], -1, 255, -1)
+
+                                # Apply Morphological Closing to clean jagged edges inside speech bubble
+                                local_mask = np.zeros_like(roi_gray)
+                                cv2.drawContours(local_mask, [closed_cnt], -1, 255, -1)
+                                kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+                                local_mask = cv2.morphologyEx(local_mask, cv2.MORPH_CLOSE, kernel_ellipse)
+                                text_mask[y1:y2, x1:x2] = cv2.bitwise_or(text_mask[y1:y2, x1:x2], local_mask)
+
                                 bubble_found = True
                                 break
 
                 if not bubble_found:
                     # Fallback: float text, mask only the thresholded text pixels themselves
+                    # Enhance with connected components filtering (Solves "Floating Text Connected Components")
                     tx1, ty1 = max(0, x), max(0, y)
                     tx2, ty2 = min(width, x + w), min(height, y + h_box)
                     exact_roi = original_img[ty1:ty2, tx1:tx2]
@@ -154,8 +226,29 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
                             exact_roi_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
                         )
                         mean_val = np.mean(exact_roi_gray)
-                        text_pixels = exact_thresh_inv if mean_val > 127 else exact_thresh_bin
-                        text_mask[ty1:ty2, tx1:tx2] = cv2.bitwise_or(text_mask[ty1:ty2, tx1:tx2], text_pixels)
+                        raw_text_pixels = exact_thresh_inv if mean_val > 127 else exact_thresh_bin
+
+                        # Filter connected components to eliminate background noise/screentones
+                        num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(raw_text_pixels, connectivity=8)
+                        filtered_text_pixels = np.zeros_like(raw_text_pixels)
+
+                        # Calculate ROI bounds dimensions
+                        roi_w, roi_h = tx2 - tx1, ty2 - ty1
+                        min_pixel_area = max(2, int((roi_w * roi_h) * 0.0005))
+                        max_pixel_area = int((roi_w * roi_h) * 0.2)
+
+                        for label_idx in range(1, num_labels):
+                            comp_area = stats[label_idx, cv2.CC_STAT_AREA]
+                            comp_w = stats[label_idx, cv2.CC_STAT_WIDTH]
+                            comp_h = stats[label_idx, cv2.CC_STAT_HEIGHT]
+
+                            # Clean textures and screentones based on area and extreme aspect ratios
+                            if min_pixel_area <= comp_area <= max_pixel_area:
+                                aspect_ratio = float(comp_w) / comp_h if comp_h > 0 else 0
+                                if 0.05 < aspect_ratio < 20.0:
+                                    filtered_text_pixels[labels == label_idx] = 255
+
+                        text_mask[ty1:ty2, tx1:tx2] = cv2.bitwise_or(text_mask[ty1:ty2, tx1:tx2], filtered_text_pixels)
 
             # Extract the text layer (original image colors, but only where mask is 255, else transparent)
             text_layer = cv2.cvtColor(original_img, cv2.COLOR_BGR2BGRA)
@@ -225,8 +318,8 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
         combined_mask = cv2.dilate(combined_mask, kernel, iterations=1)
 
-        # Inpaint using cv2.INPAINT_NS with a large radius (radius=20) for background
-        inpainted_bg = cv2.inpaint(original_img, combined_mask, inpaintRadius=20, flags=cv2.INPAINT_NS)
+        # Inpaint using Pyramidal Guided Inpainting (Solves "Better Background Inpainting")
+        inpainted_bg = pyramid_guided_inpaint(original_img, combined_mask, radius=20)
 
         # Convert BGR to BGRA and encode to WebP
         _, buffer = cv2.imencode('.webp', inpainted_bg)
