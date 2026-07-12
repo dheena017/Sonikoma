@@ -627,6 +627,8 @@ PUBLIC_ROUTE_PREFIXES = (
     "/api/merge-images/cached/",
     "/api/stitch-images/cached/",
     "/videos/",        # Generated videos serving
+    "/media/",         # Local processed panel layers served via <img src="/media/...">
+    "/media",          # Defensive: allow the exact mount path too
 )
 
 # Admin-only endpoints (require creator_role/admin)
