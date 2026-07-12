@@ -5,8 +5,10 @@ import VideoMonitor from "../../video/VideoMonitor";
 import OutputMetadataPanel from "../../video/OutputMetadataPanel";
 import LayoutEditorPage from "../EditorPageLayout.js";
 import ImageEditorPage from "../Tools/ImageEditor/ImageEditorPage";
+import AdvancedSettings from "../../video/AdvancedSettings";
 import { useBackendHealth } from "../../../../hooks/useBackendHealth.js";
 import { getUserCredits } from "../../../../api/auth";
+import { Sliders, X } from "lucide-react";
 
 
 interface EditorPageProps {
@@ -33,6 +35,36 @@ const EditorPage: React.FC<EditorPageProps> = ({
     "high"
   );
   const [isInitializing, setIsInitializing] = React.useState(true);
+
+  const [activeTab, setActiveTab] = React.useState(() => {
+    return new URLSearchParams(window.location.search).get("tab") || "";
+  });
+
+  React.useEffect(() => {
+    const handleLocationChange = () => {
+      const tab = new URLSearchParams(window.location.search).get("tab") || "";
+      setActiveTab(tab);
+    };
+    window.addEventListener("popstate", handleLocationChange);
+    window.addEventListener("locationchange", handleLocationChange);
+    return () => {
+      window.removeEventListener("popstate", handleLocationChange);
+      window.removeEventListener("locationchange", handleLocationChange);
+    };
+  }, []);
+
+  const handleCloseSettings = () => {
+    const params = new URLSearchParams(window.location.search);
+    params.delete("tab");
+    const searchStr = params.toString();
+    const newPath = `${window.location.pathname}${searchStr ? "?" + searchStr : ""}`;
+    if (navigateTo) {
+      navigateTo(newPath);
+    } else {
+      window.history.pushState({}, "", newPath);
+      window.dispatchEvent(new Event("popstate"));
+    }
+  };
 
   const { status: backendStatus } = useBackendHealth();
 
@@ -73,6 +105,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
     targetUrl,
     selectedSource,
     selectedModel,
+    frameRate,
     isProcessing,
     handleGenerateVideo,
     isScraping,
@@ -315,6 +348,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
       setNotificationsMuted={appLogic.setNotificationsMuted}
       onNavigateToAll={( ) => window.dispatchEvent(new CustomEvent('navigate', { detail: { path: '/notifications' } }))}
       fetchWithInterceptor={fetchWithInterceptor}
+      locationSearch={window.location.search}
     >
       <main className="flex-1 w-full relative bg-neutral-950 min-w-0">
         {isInitializing && scrapedImages.length === 0 ? (
@@ -362,6 +396,50 @@ const EditorPage: React.FC<EditorPageProps> = ({
               {currentSection === "image-editor" ? (
                 <div id="section-image-editor" className="w-full">
                   <ImageEditorPage appLogic={appLogic} />
+                </div>
+              ) : activeTab === "settings" ? (
+                <div className="w-full max-w-[1600px] mx-auto space-y-6">
+                  {/* Settings Header */}
+                  <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20">
+                        <Sliders className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-bold text-white tracking-wide">Editor Configuration Settings</h2>
+                        <p className="text-xs text-neutral-400 font-mono mt-0.5">
+                          Configure synthesis voice, compose soundtrack loops, and set rendering formats
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleCloseSettings}
+                      className="p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-all flex items-center gap-2 cursor-pointer text-xs font-bold font-mono active:scale-95 shadow-sm"
+                    >
+                      <X className="h-4 w-4" />
+                      Close Settings
+                    </button>
+                  </div>
+
+                  {/* Render AdvancedSettings */}
+                  <div className="pt-2">
+                    <AdvancedSettings
+                      voiceActor={voiceActor}
+                      setVoiceActor={appLogic.setVoiceActor}
+                      musicTheme={musicTheme}
+                      setMusicTheme={appLogic.setMusicTheme}
+                      aspectRatio={aspectRatio}
+                      setAspectRatio={appLogic.setAspectRatio}
+                      frameRate={frameRate}
+                      setFrameRate={appLogic.setFrameRate}
+                      activeTheme={appLogic.activeTheme || "obsidian"}
+                      setActiveTheme={appLogic.setActiveTheme || (() => {})}
+                      targetUrl={targetUrl}
+                      selectedModel={selectedModel}
+                      selectedSource={selectedSource}
+                      addNotification={addNotification}
+                    />
+                  </div>
                 </div>
               ) : (
                 <>

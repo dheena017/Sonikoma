@@ -26,6 +26,7 @@ interface EditorSidebarProps {
   isCleaningBubbles: boolean;
   navigateTo?: (path: string) => void;
   projectId?: string | null;
+  locationSearch?: string;
 }
 
 interface SidebarMenuItem {
@@ -54,6 +55,7 @@ const EditorSidebar = ({
   isCleaningBubbles,
   navigateTo,
   projectId,
+  locationSearch,
 }: EditorSidebarProps) => {
   const menuGroups: SidebarGroup[] = [
     {
@@ -180,10 +182,12 @@ const EditorSidebar = ({
             <div className="space-y-1">
               {group.items.map((item) => {
                 const Icon = item.icon;
-                const pathname = window.location.pathname;
+                const params = new URLSearchParams(locationSearch || window.location.search);
+                const isSettingsActive = params.get("tab") === "settings";
                 const isActive =
-                  currentSection === item.id ||
-                  (item.id === "settings" && pathname === "/settings");
+                  item.id === "settings"
+                    ? isSettingsActive
+                    : !isSettingsActive && currentSection === item.id;
 
                 return (
                   <div key={item.id} className="relative flex justify-center">
@@ -198,13 +202,32 @@ const EditorSidebar = ({
 
                     <button
                       onClick={() => {
+                        // Remove ?tab query param if navigating to a different section
+                        if (item.id !== "settings") {
+                          const p = new URLSearchParams(window.location.search);
+                          if (p.has("tab")) {
+                            p.delete("tab");
+                            const searchStr = p.toString();
+                            const newPath = `${window.location.pathname}${searchStr ? "?" + searchStr : ""}`;
+                            if (navigateTo) {
+                              navigateTo(newPath);
+                            } else {
+                              window.history.pushState({}, "", newPath);
+                              window.dispatchEvent(new Event("popstate"));
+                            }
+                          }
+                        }
+
                         if (item.type === "tool") {
                           setCurrentSection(item.id);
-                        } else if (item.type === "link") {
+                        } else if (item.id === "settings") {
+                          const p = new URLSearchParams(window.location.search);
+                          p.set("tab", "settings");
+                          const newPath = `${window.location.pathname}?${p.toString()}`;
                           if (navigateTo) {
-                            navigateTo("/settings");
+                            navigateTo(newPath);
                           } else {
-                            window.history.pushState({}, "", "/settings");
+                            window.history.pushState({}, "", newPath);
                             window.dispatchEvent(new Event("popstate"));
                           }
                         } else {

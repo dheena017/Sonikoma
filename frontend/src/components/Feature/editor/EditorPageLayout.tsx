@@ -31,6 +31,7 @@ interface LayoutEditorPageProps {
   onNavigateToAll?: () => void;
   projectId?: string | null;
   fetchWithInterceptor?: any;
+  locationSearch?: string;
 }
 
 const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
@@ -61,6 +62,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
   onNavigateToAll,
   projectId,
   fetchWithInterceptor,
+  locationSearch,
 }) => {
   const isSidebarOpen = !isSidebarCollapsed && !isFocusMode;
 
@@ -105,6 +107,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
             isBatchCropping={isBatchCropping}
             isCleaningBubbles={isCleaningBubbles}
             navigateTo={navigateTo}
+            locationSearch={locationSearch}
           />
         ) : (
           <EditorSidebar
@@ -119,6 +122,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
             isBatchCropping={isBatchCropping}
             isCleaningBubbles={isCleaningBubbles}
             navigateTo={navigateTo}
+            locationSearch={locationSearch}
           />
         ))}
 

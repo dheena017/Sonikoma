@@ -33,6 +33,7 @@ interface EditorMiniSidebarProps {
   projectId?: string | null;
   settingsPath?: string;
   topOffsetPx?: number;
+  locationSearch?: string;
 }
 
 interface SidebarMenuItem {
@@ -57,8 +58,9 @@ const EditorMiniSidebarInner = ({
   projectId,
   settingsPath = "/settings",
   topOffsetPx = 59,
+  locationSearch,
 }: EditorMiniSidebarProps) => {
-  const params = new URLSearchParams(window.location.search);
+  const params = new URLSearchParams(locationSearch || window.location.search);
   const isEditing = window.location.pathname.startsWith("/editor") && params.get("idx") !== null;
 
   const activeTool = useImageEditorStore((state) => state.activeTool);
@@ -212,10 +214,12 @@ const EditorMiniSidebarInner = ({
     const [hover, setHover] = useState(false);
     const [rect, setRect] = useState<DOMRect | null>(null);
 
-    const pathname = window.location.pathname;
+    const params = new URLSearchParams(locationSearch || window.location.search);
+    const isSettingsActive = params.get("tab") === "settings";
     const isActive =
-      currentSection === item.id ||
-      (item.id === "settings" && pathname === settingsPath);
+      item.id === "settings"
+        ? isSettingsActive
+        : !isSettingsActive && currentSection === item.id;
 
     const Icon = item.icon;
 
@@ -232,13 +236,32 @@ const EditorMiniSidebarInner = ({
 
         <button
           onClick={() => {
+            // Remove ?tab query param if navigating to a different section
+            if (item.id !== "settings") {
+              const p = new URLSearchParams(window.location.search);
+              if (p.has("tab")) {
+                p.delete("tab");
+                const searchStr = p.toString();
+                const newPath = `${window.location.pathname}${searchStr ? "?" + searchStr : ""}`;
+                if (navigateTo) {
+                  navigateTo(newPath);
+                } else {
+                  window.history.pushState({}, "", newPath);
+                  window.dispatchEvent(new Event("popstate"));
+                }
+              }
+            }
+
             if (item.id === "autocrop" || item.id === "bubbles" || item.id === "image-editor") {
               setCurrentSection(item.id);
             } else if (item.id === "settings") {
+              const p = new URLSearchParams(window.location.search);
+              p.set("tab", "settings");
+              const newPath = `${window.location.pathname}?${p.toString()}`;
               if (navigateTo) {
-                navigateTo(settingsPath);
+                navigateTo(newPath);
               } else {
-                window.history.pushState({}, "", settingsPath);
+                window.history.pushState({}, "", newPath);
                 window.dispatchEvent(new Event("popstate"));
               }
             } else {
