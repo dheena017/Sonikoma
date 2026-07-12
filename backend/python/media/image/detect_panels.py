@@ -541,6 +541,12 @@ def run_cv_detection(
             bx, by, bw, bh, w, h, aspect_ratio_str
         )
         
+        # Validate coordinates are within image boundaries
+        if x < 0 or y < 0 or w_box <= 0 or h_box <= 0 or (x + w_box) > w or (y + h_box) > h:
+            raise ValueError(
+                f"Panel coordinates out of bounds: x={x}, y={y}, w_box={w_box}, h_box={h_box} for image of size {w}x{h}"
+            )
+        
         crop_top = (y / h) * 100
         crop_bottom = ((h - (y + h_box)) / h) * 100
         crop_left = (x / w) * 100

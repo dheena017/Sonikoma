@@ -13,6 +13,7 @@ import os
 import tempfile
 import zipfile
 import asyncio
+import mimetypes
 from typing import List, Optional, Literal, Dict, Any
 from fastapi import APIRouter, HTTPException, Response, Query, Body, Path, Request
 from pydantic import BaseModel, Field
@@ -23,6 +24,7 @@ import utils.image_utils as img_utils
 from utils.cache import stitched_cache, edit_history, zip_cache
 from media.image.cleaner import remove_speech_bubbles
 from media.image.layer_segmentation import process_layers
+from media.image.detect_panels import run_cv_detection
 from utils.supabase_storage import upload_to_supabase_bucket
 
 logger = logging.getLogger("sonikoma.routes.image_routes")
@@ -711,11 +713,91 @@ async def extract_panel_layers(panel_id: str, body: ProcessLayersRequest):
             tmp_in_path = tmp_in.name
 
         try:
-            layers = await process_layers(tmp_in_path, panel_id)
+            # 1. Detect and slice panels from full manga page
+            logger.info(f"[Layer Segmentation] Slicing page for panel_id {panel_id}...")
+            detected_panels = run_cv_detection(
+                image_path=tmp_in_path,
+                sensitivity=30.0,
+                bg_mode="auto",
+                min_width_pct=0.15,
+                min_height_px=60,
+                merge_threshold=20,
+                aspect_ratio_str="free",
+                auto_split=True
+            )
+            
+            img = Image.open(tmp_in_path)
+            w, h = img.size
+            
+            results = []
+            
+            # If no panels detected, fallback to the entire page as a single panel
+            if not detected_panels:
+                logger.info("[Layer Segmentation] No individual panels detected. Processing entire page as a single panel.")
+                layers = await process_layers(tmp_in_path, panel_id)
+                return {
+                    "success": True,
+                    "panel_id": panel_id,
+                    "layers": layers,
+                    "panels": [{
+                        "panel_index": 0,
+                        "box": {
+                            "cropTop": 0.0,
+                            "cropBottom": 0.0,
+                            "cropLeft": 0.0,
+                            "cropRight": 0.0,
+                            "width": w,
+                            "height": h,
+                            "area": w * h
+                        },
+                        "layers": layers
+                    }]
+                }
+                
+            logger.info(f"[Layer Segmentation] Sliced manga page into {len(detected_panels)} panels.")
+            
+            for idx, box in enumerate(detected_panels):
+                # Calculate pixel-based crop box from percentages
+                top_px = int(round((box["cropTop"] / 100) * h))
+                bot_px = int(round((box["cropBottom"] / 100) * h))
+                left_px = int(round((box["cropLeft"] / 100) * w))
+                right_px = int(round((box["cropRight"] / 100) * w))
+                
+                crop_w = w - left_px - right_px
+                crop_h = h - top_px - bot_px
+                
+                # Check for out of bounds bounds
+                if left_px < 0 or top_px < 0 or crop_w <= 0 or crop_h <= 0 or (left_px + crop_w) > w or (top_px + crop_h) > h:
+                    raise ValueError(f"Cropped box is out of bounds of the original image: left={left_px}, top={top_px}, width={crop_w}, height={crop_h} for image size {w}x{h}")
+                
+                if crop_w > 10 and crop_h > 10:
+                    img_cropped = img.crop((left_px, top_px, left_px + crop_w, top_px + crop_h))
+                    
+                    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_panel:
+                        img_cropped.save(tmp_panel, format="PNG")
+                        tmp_panel_path = tmp_panel.name
+                        
+                    try:
+                        # Pass each individual cropped panel into layer separation
+                        panel_layers = await process_layers(tmp_panel_path, f"{panel_id}_{idx}")
+                        results.append({
+                            "panel_index": idx,
+                            "box": box,
+                            "layers": panel_layers
+                        })
+                    finally:
+                        if os.path.exists(tmp_panel_path):
+                            try:
+                                os.remove(tmp_panel_path)
+                            except OSError:
+                                pass
+                                
+            first_layers = results[0]["layers"] if results else None
             return {
                 "success": True,
                 "panel_id": panel_id,
-                "layers": layers
+                "layers": first_layers,
+                "panels": results
             }
         finally:
             if tmp_in_path and os.path.exists(tmp_in_path):
@@ -944,21 +1026,58 @@ async def save_training_data(
         orig_filename = f"original_{unique_pair_id}{orig_ext}"
         mask_filename = f"mask_{unique_pair_id}{mask_ext}"
 
-        orig_dest = os.path.join(training_dir, orig_filename)
-        mask_dest = os.path.join(training_dir, mask_filename)
+        # Check environment
+        env_mode = os.getenv("ENVIRONMENT", "development").lower().strip()
+        
+        orig_url = None
+        mask_url = None
 
-        # Save files locally
-        with open(orig_dest, "wb") as f_orig:
-            f_orig.write(orig_bytes)
+        if env_mode == "production":
+            logger.info(f"[Data Flywheel] ENVIRONMENT=production — uploading training pair to Supabase.")
+            try:
+                # Upload using asyncio.to_thread since upload_to_supabase_bucket is synchronous
+                orig_url = await asyncio.to_thread(
+                    upload_to_supabase_bucket,
+                    orig_bytes,
+                    "panels",
+                    f"training_data/{orig_filename}",
+                    original_panel.content_type or "image/webp"
+                )
+                mask_url = await asyncio.to_thread(
+                    upload_to_supabase_bucket,
+                    mask_bytes,
+                    "panels",
+                    f"training_data/{mask_filename}",
+                    corrected_text_mask.content_type or "image/webp"
+                )
+            except Exception as e:
+                logger.error(f"[Data Flywheel] Supabase upload failed, falling back to local storage: {e}", exc_info=True)
 
-        with open(mask_dest, "wb") as f_mask:
-            f_mask.write(mask_bytes)
+        # Fallback to local storage if URLs are not populated (either dev mode or upload failed)
+        if not orig_url or not mask_url:
+            orig_dest = os.path.join(training_dir, orig_filename)
+            mask_dest = os.path.join(training_dir, mask_filename)
 
-        logger.info(f"[Data Flywheel] Successfully saved original panel ({orig_filename}) and corrected mask ({mask_filename}) inside {training_dir}")
+            # Save files locally
+            with open(orig_dest, "wb") as f_orig:
+                f_orig.write(orig_bytes)
+
+            with open(mask_dest, "wb") as f_mask:
+                f_mask.write(mask_bytes)
+            
+            logger.info(f"[Data Flywheel] Successfully saved training pair locally inside {training_dir}")
+            
+            orig_url = f"/training_data/{orig_filename}"
+            mask_url = f"/training_data/{mask_filename}"
+        else:
+            logger.info(f"[Data Flywheel] Successfully saved training pair in Supabase.")
+
         return {
             "success": True,
             "message": "Successfully saved training pair.",
-            "pair_id": unique_pair_id
+            "pair_id": unique_pair_id,
+            "original_panel_url": orig_url,
+            "corrected_text_mask_url": mask_url
         }
     except Exception as e:
         logger.error(f"[Data Flywheel] Failed to save training data: {e}", exc_info=True)

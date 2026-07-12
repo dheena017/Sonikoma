@@ -53,8 +53,10 @@ async def extract_full_ocr_data(panel_image_path: str, langs: List[str] = ['en']
         width, height = img.size
 
         import asyncio
+        # Convert PIL Image to numpy array to avoid EasyOCR filepath-loading issues
+        img_np = np.array(img)
         # EasyOCR readtext
-        raw_results = await asyncio.to_thread(reader.readtext, panel_image_path)
+        raw_results = await asyncio.to_thread(reader.readtext, img_np)
         
         # Results format: [([[x, y], [x, y], [x, y], [x, y]], text, confidence), ...]
         structured_results = []
@@ -75,5 +77,5 @@ async def extract_full_ocr_data(panel_image_path: str, langs: List[str] = ['en']
         return structured_results
 
     except Exception as e:
-        logger.error(f"[OCR] Error in extract_full_ocr_data from {panel_image_path}: {str(e)}")
+        logger.error(f"[OCR] Error in extract_full_ocr_data from {panel_image_path}: {str(e)}", exc_info=True)
         return []

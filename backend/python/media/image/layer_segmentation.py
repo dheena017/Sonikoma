@@ -10,7 +10,8 @@ from PIL import Image
 logger = logging.getLogger("sonikoma.services.layer_segmentation")
 
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development").lower().strip()
-LOCAL_MEDIA_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "local_media"))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+LOCAL_MEDIA_ROOT = os.path.abspath(os.path.join(BASE_DIR, "local_media"))
 # Matches main.py mount: /media -> <LOCAL_MEDIA_ROOT>
 LOCAL_MEDIA_URL_PREFIX = "/media"
 
@@ -21,7 +22,10 @@ try:
     has_rembg = True
 except ImportError:
     has_rembg = False
-    logger.warning("rembg is not installed. Character segmentation will return a blank layer.")
+    logger.warning(
+        "rembg is not installed. Character segmentation will return a blank layer. "
+        "To enable character segmentation, install rembg: `pip install rembg`"
+    )
 
 from media.image.ocr import extract_full_ocr_data
 from media.image.detect_panels import _detect_bg_color_and_threshold
@@ -35,7 +39,13 @@ def get_rembg_session():
     global _rembg_session
     if _rembg_session is None and has_rembg:
         logger.info("Initializing rembg session (U-2-Net)")
-        _rembg_session = new_session("u2net")
+        try:
+            import torch
+            use_gpu = torch.cuda.is_available()
+        except ImportError:
+            use_gpu = False
+        providers = ["CUDAExecutionProvider", "CPUExecutionProvider"] if use_gpu else ["CPUExecutionProvider"]
+        _rembg_session = new_session("u2net", providers=providers)
     return _rembg_session
 
 def create_blank_webp(width: int, height: int) -> bytes:
@@ -138,6 +148,11 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
 
     height, width = original_img.shape[:2]
 
+    # Detect dominant background color and threshold
+    gray_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
+    is_white_bg, threshold_val = _detect_bg_color_and_threshold(gray_img, bg_mode="auto", sensitivity=30.0)
+    logger.info(f"[Background Context] Detected background is {'white/light' if is_white_bg else 'black/dark'} (threshold_val={threshold_val})")
+
     # Initialize masks and layer containers
     text_mask = np.zeros((height, width), dtype=np.uint8)
     char_mask = np.zeros((height, width), dtype=np.uint8)
@@ -171,12 +186,25 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
     text_layer_bytes = None
     textless_img = original_img.copy()
 
+    # Pre-segment speech bubbles if background is dark
+    if not is_white_bg:
+        logger.info("[Text Separation] Dark background detected. Pre-segmenting bright speech bubbles.")
+        _, bright_mask = cv2.threshold(gray_img, 200, 255, cv2.THRESH_BINARY)
+        close_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
+        cleaned_bright = cv2.morphologyEx(bright_mask, cv2.MORPH_CLOSE, close_kernel)
+        
+        num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(cleaned_bright, connectivity=8)
+        for label_idx in range(1, num_labels):
+            area = stats[label_idx, cv2.CC_STAT_AREA]
+            if 100 < area < (height * width * 0.5):
+                text_mask[labels == label_idx] = 255
+
     # 1. Attempt Primary YOLO-based Manga Text & Balloon Segmentation (AI-native Pivot)
     yolo_text_mask = segment_text_and_balloons(image_path, conf_threshold=0.5)
 
     if yolo_text_mask is not None and np.any(yolo_text_mask > 0):
         logger.info("[Text Separation] YOLO model successfully segmented text and balloon layers.")
-        text_mask = yolo_text_mask
+        text_mask = cv2.bitwise_or(text_mask, yolo_text_mask)
     elif ocr_results:
         # Fallback to improved OpenCV Bilateral + Canny edge-contour logic (for cases where YOLO confidence < 0.5 or unavailable)
         logger.info(f"[Text Separation] YOLO did not yield high-confidence masks. Falling back to refined Canny/OpenCV on {len(ocr_results)} OCR regions.")
@@ -205,7 +233,12 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
                 thresh_inv = cv2.adaptiveThreshold(
                     roi_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2
                 )
-                _, simple_thresh = cv2.threshold(roi_gray, 200, 255, cv2.THRESH_BINARY)
+                
+                # Refine simple threshold based on dominant background color
+                if is_white_bg:
+                    _, simple_thresh = cv2.threshold(roi_gray, min(220, threshold_val), 255, cv2.THRESH_BINARY)
+                else:
+                    _, simple_thresh = cv2.threshold(roi_gray, max(180, threshold_val), 255, cv2.THRESH_BINARY)
 
                 # Find contours across thresholds
                 contours_bin, _ = cv2.findContours(thresh_bin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -326,7 +359,7 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
     char_layer_bytes = None
     try:
         if not has_rembg:
-            char_layer_bytes = create_blank_webp(width, height)
+            raise RuntimeError("rembg is not installed or failed to initialize. Character segmentation cannot proceed.")
         else:
             session = get_rembg_session()
             # rembg run STRICTLY on textless_img to guarantee character is fully clean
@@ -345,8 +378,7 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
 
     except Exception as e:
         logger.error(f"Error during character segmentation: {e}", exc_info=True)
-        char_layer_bytes = create_blank_webp(width, height)
-        char_mask = np.zeros((height, width), dtype=np.uint8)
+        raise RuntimeError(f"Character segmentation (rembg) failed: {e}")
 
     # 6. Generate final background by erasing character/text holes from the original image
     bg_layer_bytes = None
@@ -357,6 +389,20 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
 
         # Pyramidal Guided Inpainting to generate pristine backgrounds
         inpainted_bg = pyramid_guided_inpaint(original_img, combined_mask, radius=20)
+        
+        # Smooth and flood-fill inpainting artifacts using background color context
+        bg_color = [255, 255, 255] if is_white_bg else [0, 0, 0]
+        smooth_mask = cv2.dilate(combined_mask, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)))
+        
+        dist_transform = cv2.distanceTransform(smooth_mask, cv2.DIST_L2, 5)
+        max_dist = np.max(dist_transform) if np.any(dist_transform > 0) else 1.0
+        if max_dist > 0:
+            # Deep inside the masked regions, blend towards the solid background color to eliminate ghosting artifacts
+            blend_factor = np.clip(dist_transform / max_dist, 0.0, 1.0)
+            blend_factor = cv2.GaussianBlur(blend_factor, (5, 5), 0)
+            for c in range(3):
+                inpainted_bg[:, :, c] = (inpainted_bg[:, :, c] * (1.0 - 0.7 * blend_factor) + bg_color[c] * (0.7 * blend_factor)).astype(np.uint8)
+                
         _, buffer = cv2.imencode('.webp', inpainted_bg)
         bg_layer_bytes = buffer.tobytes()
 
@@ -369,8 +415,9 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
     # Step 4: Storage (Supabase vs Local)
     # =========================================================================
     folder_prefix = f"layers/{panel_id}/"
+    env_mode = os.getenv("ENVIRONMENT", "development").lower().strip()
 
-    if ENVIRONMENT == "production":
+    if env_mode == "production":
         logger.info(f"[Layer Segmentation] ENVIRONMENT=production — uploading layers to Supabase for panel_id={panel_id}")
 
         try:
@@ -400,7 +447,7 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
         logger.error(f"[Layer Segmentation] Failed to create local media directory: {local_panel_dir} : {e}", exc_info=True)
         raise
 
-    logger.info(f"[Layer Segmentation] ENVIRONMENT={ENVIRONMENT} — saving layers locally for panel_id={panel_id} at {local_panel_dir}")
+    logger.info(f"[Layer Segmentation] ENVIRONMENT={env_mode} — saving layers locally for panel_id={panel_id} at {local_panel_dir}")
 
     local_files = {
         "bg.webp": bg_layer_bytes,

@@ -88,6 +88,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning, module="pkg_resources")
 warnings.filterwarnings("ignore", category=UserWarning, module="moviepy")
+warnings.filterwarnings("ignore", category=UserWarning, message=".*pin_memory.*")
 
 # Fix Windows asyncio subprocess NotImplementedError
 if sys.platform == "win32":
@@ -857,9 +858,14 @@ app.mount("/videos", StaticFiles(directory=videos_path), name="videos")
 
 # 4. Serve locally generated panel layer WebPs (development bypass)
 # layer_segmentation.py writes to backend/python/local_media/...
-local_media_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "local_media"))
+local_media_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "local_media"))
 os.makedirs(local_media_dir, exist_ok=True)
 app.mount("/media", StaticFiles(directory=local_media_dir), name="media")
+
+# 5. Serve locally saved training data (Data Flywheel)
+training_data_dir = os.path.abspath(os.path.join(PROJECT_ROOT, "training_data"))
+os.makedirs(training_data_dir, exist_ok=True)
+app.mount("/training_data", StaticFiles(directory=training_data_dir), name="training_data")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # STATIC FRONTEND SERVING (Production Only)

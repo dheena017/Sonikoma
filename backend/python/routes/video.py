@@ -75,7 +75,7 @@ async def download_asset(url: str, dest_path: str) -> bool:
         return False
     # Handle local API routes
     if url.startswith("/"):
-        backend_port = os.getenv("PORT", "5173")
+        backend_port = os.getenv("PORT", os.getenv("BACKEND_PORT", "5173"))
         url = f"http://127.0.0.1:{backend_port}{url}"
     try:
         async with aiohttp.ClientSession() as session:
@@ -314,6 +314,10 @@ def _render_panel_segment_ffmpeg(
             char_target_w = int(bg_w * scale_ratio)
             char_target_h = int(bg_h * scale_ratio)
 
+        # Clamp offsets to prevent FFmpeg pad crash on negative values
+        char_x_px = max(0, char_x_px)
+        char_y_px = max(0, char_y_px)
+
         # Make character bounds even for x264 alignment
         char_target_w = max(2, char_target_w - char_target_w % 2)
         char_target_h = max(2, char_target_h - char_target_h % 2)
@@ -336,6 +340,10 @@ def _render_panel_segment_ffmpeg(
             text_y_px = int(offset_y)
             text_target_w = int(bg_w * scale_ratio)
             text_target_h = int(bg_h * scale_ratio)
+
+        # Clamp offsets to prevent FFmpeg pad crash on negative values
+        text_x_px = max(0, text_x_px)
+        text_y_px = max(0, text_y_px)
 
         text_target_w = max(2, text_target_w - text_target_w % 2)
         text_target_h = max(2, text_target_h - text_target_h % 2)

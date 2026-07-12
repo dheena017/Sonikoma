@@ -338,6 +338,14 @@ export default defineConfig(({ mode }) => {
           proxyTimeout: 0,
           timeout: 0,
         },
+        "/training_data": {
+          target: backendTarget,
+          changeOrigin: true,
+          secure: false,
+          ws: false,
+          proxyTimeout: 0,
+          timeout: 0,
+        },
       },
     },
   };

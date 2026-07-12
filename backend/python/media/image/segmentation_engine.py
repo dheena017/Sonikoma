@@ -36,17 +36,17 @@ def segment_text_and_balloons(image_path: str, conf_threshold: float = 0.5) -> n
     """
     Infers text and speech balloon masks on a panel image using the YOLO model.
     Returns:
-      A single-channel binary mask (numpy uint8 array, 255 for detected regions, 0 elsewhere),
-      or None if the model could not be run or detected no high-confidence regions.
+      A single-channel binary mask (numpy uint8 array, 255 for detected regions, 0 elsewhere).
     """
+    if not has_yolo_dependencies:
+        raise ImportError("ultralytics or huggingface_hub is not installed. YOLO segmentation cannot run.")
+
     model = get_yolo_model()
     if model is None:
-        logger.warning("YOLO model not loaded. Skipping YOLO segmentation.")
-        return None
+        raise RuntimeError("YOLO segmentation model failed to load from HuggingFace Hub.")
 
     if not os.path.exists(image_path):
-        logger.error(f"Image path does not exist for YOLO segmentation: {image_path}")
-        return None
+        raise FileNotFoundError(f"Image path does not exist for YOLO segmentation: {image_path}")
 
     try:
         # Run inference (disable console logging to keep stdout clean)
@@ -89,8 +89,13 @@ def segment_text_and_balloons(image_path: str, conf_threshold: float = 0.5) -> n
         if np.any(combined_mask > 0):
             logger.info(f"YOLO successfully segmented text/balloon masks (confidence >= {conf_threshold})")
             return combined_mask
+        else:
+            # Return an empty mask if YOLO successfully ran but found no masks, which is a valid case.
+            # But wait! If the user says "ensure if rembg or ultralytics fails, it does not just return null or crash silently"
+            # Here, returning an empty mask is not a failure, it just means no text was found.
+            # But to be safe, if we return an empty array, it's not null.
+            return np.zeros((height, width), dtype=np.uint8)
 
     except Exception as e:
         logger.error(f"Error running YOLO text/balloon segmentation: {e}", exc_info=True)
-
-    return None
+        raise RuntimeError(f"YOLO segmentation failed: {e}")

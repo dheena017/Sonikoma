@@ -31,10 +31,15 @@ export function VideoMonitorActive({
   setStoryboardPlaying,
 }: VideoMonitorActiveProps) {
   const [videoCurrentTime, setVideoCurrentTime] = React.useState(0);
+  const [bgDims, setBgDims] = React.useState<{ w: number; h: number } | null>(null);
   const activeStoryboardPanel = panels[currentPanelIndex] || null;
   const textLayerRef = React.useRef<HTMLImageElement>(null);
   const outerWrapperRef = React.useRef<HTMLDivElement>(null);
   const shakeTimeoutRef = React.useRef<any>(null);
+
+  React.useEffect(() => {
+    setBgDims(null);
+  }, [currentPanelIndex]);
 
   // Helper to split and chunk long subtitle dialogues
   const getSubtitleChunk = (
@@ -263,71 +268,119 @@ export function VideoMonitorActive({
             {/* Image under cinematic pan animations */}
             <div className="absolute inset-0 overflow-hidden flex items-center justify-center bg-black">
               {activeStoryboardPanel.layers ? (
-                <div className="relative w-full h-full flex items-center justify-center">
-                  {/* Background Layer */}
-                  {activeStoryboardPanel.layers.bg_visible !== false && (
-                    <img
-                      src={activeStoryboardPanel.layers.background_url}
-                      alt="Background Layer"
-                      className="absolute w-full h-full object-contain z-10"
-                      referrerPolicy="no-referrer"
-                      style={{
-                        transform:
-                          activeStoryboardPanel.motion_type === "zoom_in"
-                            ? `scale(${1 + playbackTime * 0.015})`
-                            : activeStoryboardPanel.motion_type === "zoom_out"
-                            ? `scale(${1.1 - playbackTime * 0.015})`
-                            : activeStoryboardPanel.motion_type === "pan_right"
-                            ? `translateX(${playbackTime * 3}px)`
-                            : activeStoryboardPanel.motion_type === "pan_left"
-                            ? `translateX(${-playbackTime * 3}px)`
-                            : activeStoryboardPanel.motion_type === "pan_down"
-                            ? `translateY(${playbackTime * 3}px)`
-                            : "",
-                        transition: "transform 100ms linear",
-                        filter: getPanelFilterStyle(activeStoryboardPanel),
-                      }}
-                    />
-                  )}
-
-                  {/* Character Layer */}
-                  {activeStoryboardPanel.layers.char_visible !== false && (
-                    <img
-                      src={activeStoryboardPanel.layers.character_url}
-                      alt="Character Layer"
-                      className="absolute w-full h-full object-contain z-20 pointer-events-none"
-                      referrerPolicy="no-referrer"
-                      style={{
-                        transform:
-                          activeStoryboardPanel.motion_type === "zoom_in"
-                            ? `scale(${1 + playbackTime * 0.035})`
-                            : activeStoryboardPanel.motion_type === "zoom_out"
-                            ? `scale(${1.25 - playbackTime * 0.035})`
-                            : activeStoryboardPanel.motion_type === "pan_right"
-                            ? `translateX(${playbackTime * 6}px)`
-                            : activeStoryboardPanel.motion_type === "pan_left"
-                            ? `translateX(${-playbackTime * 6}px)`
-                            : activeStoryboardPanel.motion_type === "pan_down"
-                            ? `translateY(${playbackTime * 6}px)`
-                            : "",
-                        transition: "transform 100ms linear",
-                        filter: getPanelFilterStyle(activeStoryboardPanel),
-                      }}
-                    />
-                  )}
-
-                  {/* Text Bubbles Layer */}
-                  <img
-                    ref={textLayerRef}
-                    src={activeStoryboardPanel.layers.text_url}
-                    alt="Text Bubbles Layer"
-                    className="absolute w-full h-full object-contain z-30 pointer-events-none transition-opacity duration-150"
-                    referrerPolicy="no-referrer"
+                <div 
+                  className="relative flex items-center justify-center"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                  }}
+                >
+                  <div
                     style={{
-                      opacity: getInitialTextOpacity(activeStoryboardPanel, playbackTime),
-                      filter: getPanelFilterStyle(activeStoryboardPanel),
+                      position: "relative",
+                      aspectRatio: bgDims ? `${bgDims.w} / ${bgDims.h}` : "auto",
+                      width: bgDims ? (aspectRatio === "9:16" ? (bgDims.w / bgDims.h > 9 / 16 ? "100%" : "auto") : (bgDims.w / bgDims.h > 16 / 9 ? "100%" : "auto")) : "100%",
+                      height: bgDims ? (aspectRatio === "9:16" ? (bgDims.w / bgDims.h > 9 / 16 ? "auto" : "100%") : (bgDims.w / bgDims.h > 16 / 9 ? "auto" : "100%")) : "100%",
+                      maxWidth: "100%",
+                      maxHeight: "100%",
                     }}
-                  />
+                  >
+                    {/* Background Layer */}
+                    {activeStoryboardPanel.layers.bg_visible !== false && (
+                      <img
+                        src={activeStoryboardPanel.layers.background_url}
+                        alt="Background Layer"
+                        className="absolute w-full h-full z-10"
+                        referrerPolicy="no-referrer"
+                        onLoad={(e) => {
+                          const img = e.currentTarget;
+                          setBgDims({ w: img.naturalWidth, h: img.naturalHeight });
+                        }}
+                        style={{
+                          objectFit: "fill",
+                          transform:
+                            activeStoryboardPanel.motion_type === "zoom_in"
+                              ? `scale(${1 + playbackTime * 0.015})`
+                              : activeStoryboardPanel.motion_type === "zoom_out"
+                              ? `scale(${1.1 - playbackTime * 0.015})`
+                              : activeStoryboardPanel.motion_type === "pan_right"
+                              ? `translateX(${playbackTime * 3}px)`
+                              : activeStoryboardPanel.motion_type === "pan_left"
+                              ? `translateX(${-playbackTime * 3}px)`
+                              : activeStoryboardPanel.motion_type === "pan_down"
+                              ? `translateY(${playbackTime * 3}px)`
+                              : "",
+                          transition: "transform 100ms linear",
+                          filter: getPanelFilterStyle(activeStoryboardPanel),
+                        }}
+                      />
+                    )}
+
+                    {/* Character Layer */}
+                    {activeStoryboardPanel.layers.char_visible !== false && (
+                      <img
+                        src={activeStoryboardPanel.layers.character_url}
+                        alt="Character Layer"
+                        className="absolute z-20 pointer-events-none"
+                        referrerPolicy="no-referrer"
+                        style={{
+                          left: activeStoryboardPanel.layers.char_x !== undefined && bgDims
+                            ? `${(activeStoryboardPanel.layers.char_x / bgDims.w) * 100}%`
+                            : "0%",
+                          top: activeStoryboardPanel.layers.char_y !== undefined && bgDims
+                            ? `${(activeStoryboardPanel.layers.char_y / bgDims.h) * 100}%`
+                            : "0%",
+                          width: activeStoryboardPanel.layers.char_scale_x !== undefined
+                            ? `${activeStoryboardPanel.layers.char_scale_x * 100}%`
+                            : "100%",
+                          height: activeStoryboardPanel.layers.char_scale_y !== undefined
+                            ? `${activeStoryboardPanel.layers.char_scale_y * 100}%`
+                            : "100%",
+                          objectFit: "fill",
+                          transform:
+                            activeStoryboardPanel.motion_type === "zoom_in"
+                              ? `scale(${1 + playbackTime * 0.035})`
+                              : activeStoryboardPanel.motion_type === "zoom_out"
+                              ? `scale(${1.25 - playbackTime * 0.035})`
+                              : activeStoryboardPanel.motion_type === "pan_right"
+                              ? `translateX(${playbackTime * 6}px)`
+                              : activeStoryboardPanel.motion_type === "pan_left"
+                              ? `translateX(${-playbackTime * 6}px)`
+                              : activeStoryboardPanel.motion_type === "pan_down"
+                              ? `translateY(${playbackTime * 6}px)`
+                              : "",
+                          transition: "transform 100ms linear",
+                          filter: getPanelFilterStyle(activeStoryboardPanel),
+                        }}
+                      />
+                    )}
+
+                    {/* Text Bubbles Layer */}
+                    <img
+                      ref={textLayerRef}
+                      src={activeStoryboardPanel.layers.text_url}
+                      alt="Text Bubbles Layer"
+                      className="absolute z-30 pointer-events-none transition-opacity duration-150"
+                      referrerPolicy="no-referrer"
+                      style={{
+                        left: activeStoryboardPanel.layers.text_x !== undefined && bgDims
+                          ? `${(activeStoryboardPanel.layers.text_x / bgDims.w) * 100}%`
+                          : "0%",
+                        top: activeStoryboardPanel.layers.text_y !== undefined && bgDims
+                          ? `${(activeStoryboardPanel.layers.text_y / bgDims.h) * 100}%`
+                          : "0%",
+                        width: activeStoryboardPanel.layers.text_scale_x !== undefined
+                          ? `${activeStoryboardPanel.layers.text_scale_x * 100}%`
+                          : "100%",
+                        height: activeStoryboardPanel.layers.text_scale_y !== undefined
+                          ? `${activeStoryboardPanel.layers.text_scale_y * 100}%`
+                          : "100%",
+                        objectFit: "fill",
+                        opacity: getInitialTextOpacity(activeStoryboardPanel, playbackTime),
+                        filter: getPanelFilterStyle(activeStoryboardPanel),
+                      }}
+                    />
+                  </div>
                 </div>
               ) : (
                 <img
