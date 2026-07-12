@@ -15,6 +15,7 @@ coverage/
 # Persistent scraped panel image cache (binary blobs — do not commit)
 backend/database/image_cache/
 .llm-chat-history/
+local_media
 
 # Python cache & bytecode
 __pycache__/
