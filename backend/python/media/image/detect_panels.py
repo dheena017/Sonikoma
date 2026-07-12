@@ -426,7 +426,7 @@ def trim_solid_borders(
 ) -> Tuple[int, int, int, int]:
     """
     Trims solid-color padding/margins (black, white, or neutral) from the edges
-    of a single panel bounding box, prioritizing art content boundaries.
+    of a single panel bounding box, prioritizing art content boundaries pixel-by-pixel.
     """
     h_img, w_img = gray_arr.shape
 
@@ -437,67 +437,76 @@ def trim_solid_borders(
     y2 = max(0, min(h_img, y + h_box))
 
     # If the box is too small, don't trim
-    if (x2 - x1) < 20 or (y2 - y1) < 20:
+    if (x2 - x1) < 15 or (y2 - y1) < 15:
         return x1, y1, x2 - x1, y2 - y1
 
-    def is_solid_padding(slice_pixels: np.ndarray) -> bool:
-        if len(slice_pixels) == 0:
-            return True
-        std = np.std(slice_pixels)
-        # Low standard deviation indicates uniform solid color/padding
-        if std > 8.0:
-            return False
+    # Extract local ROI
+    roi = gray_arr[y1:y2, x1:x2]
 
-        mean = np.mean(slice_pixels)
-        # Black/dark padding
-        if mean < 45:
-            return True
-        # White/light padding
-        if mean > 210:
-            return True
-        # Neutral background gray padding matching the image background
-        if global_bg_val is not None:
-            if abs(mean - global_bg_val) < 15:
-                return True
-        return False
+    # Determine local or global background reference
+    if bg_mode == "white":
+        bg_val = 255.0
+    elif bg_mode == "black":
+        bg_val = 0.0
+    elif global_bg_val is not None:
+        bg_val = global_bg_val
+    else:
+        # Fallback to corner median to estimate background color of this ROI
+        corners = np.concatenate([
+            roi[:3, :3].flatten(),
+            roi[-3:, :3].flatten(),
+            roi[:3, -3:].flatten(),
+            roi[-3:, -3:].flatten()
+        ])
+        bg_val = np.median(corners) if len(corners) > 0 else 255.0
 
-    max_trim_x = int((x2 - x1) * 0.45)
-    max_trim_y = int((y2 - y1) * 0.45)
+    # Build exact pixel-by-pixel content mask
+    # We consider pixels that deviate sufficiently from the background color as content.
+    if bg_val >= 200.0:
+        # For very light backgrounds, any darker pixel is content
+        content_mask = (roi < 235)
+    elif bg_val <= 55.0:
+        # For very dark backgrounds, any brighter pixel is content
+        content_mask = (roi > 30)
+    else:
+        # For intermediate backgrounds (gray, neutral), any significant deviation is content
+        content_mask = (np.abs(roi.astype(float) - bg_val) > 15)
 
-    orig_x1, orig_y1 = x1, y1
-    orig_x2, orig_y2 = x2, y2
+    # Clean up single-pixel sensor noise/speckles using morphological opening
+    kernel = np.ones((2, 2), dtype=np.uint8)
+    content_mask_cleaned = cv2.morphologyEx(content_mask.astype(np.uint8), cv2.MORPH_OPEN, kernel)
 
-    # Trim Top Edge
-    while y1 < orig_y1 + max_trim_y and y1 < y2 - 15:
-        row = gray_arr[y1, x1:x2]
-        if is_solid_padding(row):
-            y1 += 1
-        else:
-            break
+    # If opening emptied the mask completely (e.g., extremely thin/faint lines), fallback to original mask
+    if not np.any(content_mask_cleaned > 0):
+        content_mask_cleaned = content_mask.astype(np.uint8)
 
-    # Trim Bottom Edge
-    while y2 > orig_y2 - max_trim_y and y2 > y1 + 15:
-        row = gray_arr[y2 - 1, x1:x2]
-        if is_solid_padding(row):
-            y2 -= 1
-        else:
-            break
+    # Find row and col indices containing content pixels
+    # We require at least 1 content pixel in the row/col (pure pixel-by-pixel snapping)
+    row_sums = np.sum(content_mask_cleaned > 0, axis=1)
+    col_sums = np.sum(content_mask_cleaned > 0, axis=0)
 
-    # Trim Left Edge
-    while x1 < orig_x1 + max_trim_x and x1 < x2 - 15:
-        col = gray_arr[y1:y2, x1]
-        if is_solid_padding(col):
-            x1 += 1
-        else:
-            break
+    row_indices = np.where(row_sums >= 1)[0]
+    col_indices = np.where(col_sums >= 1)[0]
 
-    # Trim Right Edge
-    while x2 > orig_x2 - max_trim_x and x2 > x1 + 15:
-        col = gray_arr[y1:y2, x2 - 1]
-        if is_solid_padding(col):
-            x2 -= 1
-        else:
-            break
+    if len(row_indices) > 0 and len(col_indices) > 0:
+        trim_y1 = y1 + int(row_indices[0])
+        trim_y2 = y1 + int(row_indices[-1]) + 1
+        trim_x1 = x1 + int(col_indices[0])
+        trim_x2 = x1 + int(col_indices[-1]) + 1
+
+        # Enforce maximum trim safety constraint (45% from each outer edge)
+        # to prevent catastrophic over-cropping on complex panels
+        max_trim_x = int((x2 - x1) * 0.45)
+        max_trim_y = int((y2 - y1) * 0.45)
+
+        new_x1 = max(x1, min(trim_x1, x1 + max_trim_x))
+        new_y1 = max(y1, min(trim_y1, y1 + max_trim_y))
+        new_x2 = min(x2, max(trim_x2, x2 - max_trim_x))
+        new_y2 = min(y2, max(trim_y2, y2 - max_trim_y))
+
+        # Ensure we don't collapse the box below a minimum size
+        if (new_x2 - new_x1) >= 15 and (new_y2 - new_y1) >= 15:
+            return new_x1, new_y1, new_x2 - new_x1, new_y2 - new_y1
 
     return x1, y1, x2 - x1, y2 - y1
 
