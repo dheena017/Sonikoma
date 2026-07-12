@@ -23,13 +23,13 @@ export default function SeoAuditor({ seoScore, seoChecks }: SeoAuditorProps) {
       case "titleHook":
         return "CTR Hook";
       case "descLength":
-        return "Description Length";
+        return "Desc Length";
       case "descChapters":
         return "Chapters";
       case "descSocials":
         return "Socials";
       case "tagsVolume":
-        return "Tag Volume";
+        return "Tag Vol";
       case "metadataConsistency":
         return "Consistency";
       default:
@@ -38,24 +38,24 @@ export default function SeoAuditor({ seoScore, seoChecks }: SeoAuditorProps) {
   };
 
   return (
-    <div className="bg-neutral-950/40 backdrop-blur-md p-5 border border-neutral-900 rounded-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-5 transition-all duration-300 hover:border-neutral-800/80 hover:shadow-xl hover:shadow-purple-950/5">
-      <div className="space-y-1.5 flex-1">
-        <div className="text-xs font-mono font-bold text-neutral-200 flex items-center gap-2">
+    <div className="bg-neutral-950/40 backdrop-blur-md p-4 border border-neutral-900 rounded-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 transition-all duration-300 hover:border-neutral-800/80 hover:shadow-xl hover:shadow-purple-950/5">
+      <div className="space-y-1 flex-1">
+        <div className="text-xs font-mono font-bold text-neutral-200 flex items-center gap-1.5">
           <TrendingUp className="h-4 w-4 text-purple-400" />
           Real-Time SEO Auditor
         </div>
-        <p className="text-[11px] text-neutral-400 leading-relaxed max-w-lg">
-          Optimizes key metrics like CTR title hooks, description length, chapters layout, and tag volume to elevate organic search traffic.
+        <p className="text-[10px] text-neutral-450 leading-relaxed max-w-lg">
+          Optimizes key metrics like CTR title hooks, description chapters, and tag volume to elevate organic search traffic.
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-4 shrink-0 border-t md:border-t-0 md:border-l border-neutral-900 pt-4 md:pt-0 md:pl-5">
-        <div className="text-left flex md:flex-col items-baseline md:items-start gap-2 md:gap-0.5 min-w-[80px]">
-          <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider">
+      <div className="flex flex-wrap items-center gap-3.5 shrink-0 border-t md:border-t-0 md:border-l border-neutral-900 pt-3 md:pt-0 md:pl-4">
+        <div className="text-left flex md:flex-col items-baseline md:items-start gap-1.5 md:gap-0.5 min-w-[70px]">
+          <span className="text-[9px] font-mono text-neutral-500 uppercase tracking-wider font-bold">
             SEO SCORE
           </span>
           <div
-            className={`text-2xl font-black font-mono transition-colors duration-300 ${
+            className={`text-xl font-black font-mono transition-colors duration-300 ${
               seoScore >= 80
                 ? "text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.15)]"
                 : seoScore >= 50
@@ -67,22 +67,22 @@ export default function SeoAuditor({ seoScore, seoChecks }: SeoAuditorProps) {
           </div>
         </div>
 
-        {/* Beautiful tags representation */}
-        <div className="flex flex-wrap gap-1.5 max-w-[340px]">
+        {/* Beautiful compact tags representation */}
+        <div className="flex flex-wrap gap-1 max-w-[340px]">
           {Object.entries(seoChecks).map(([key, val]) => (
             <div
               key={key}
-              className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-mono font-medium transition-all duration-300 border ${
+              className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[8.5px] font-mono font-medium transition-all duration-300 border ${
                 val
-                  ? "bg-emerald-950/30 border-emerald-800/40 text-emerald-400"
+                  ? "bg-emerald-950/20 border-emerald-800/30 text-emerald-400"
                   : "bg-neutral-900/40 border-neutral-850/60 text-neutral-500 hover:border-neutral-800"
               }`}
               title={`${getCheckLabel(key)}: ${val ? "Passed" : "Action Required"}`}
             >
               {val ? (
-                <CheckCircle2 className="h-2.5 w-2.5 text-emerald-400 shrink-0" />
+                <CheckCircle2 className="h-2 w-2 text-emerald-400 shrink-0" />
               ) : (
-                <AlertCircle className="h-2.5 w-2.5 text-neutral-500 shrink-0" />
+                <AlertCircle className="h-2 w-2 text-neutral-550 shrink-0" />
               )}
               <span>{getCheckLabel(key)}</span>
             </div>

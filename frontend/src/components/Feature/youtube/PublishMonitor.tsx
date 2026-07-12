@@ -156,8 +156,8 @@ export default function PublishMonitor({
     isShort && videoAspectRatio && videoAspectRatio !== "9:16";
 
   return (
-    <div className="bg-neutral-950/40 backdrop-blur-md border border-neutral-900 rounded-3xl p-6 space-y-5 animate-fade-in transition-all duration-300 hover:border-neutral-800/80">
-      <h3 className="text-xs font-bold text-neutral-300 tracking-wider uppercase font-mono flex items-center gap-1.5 justify-between border-b border-neutral-900 pb-3">
+    <div className="bg-neutral-950/40 backdrop-blur-md border border-neutral-900 rounded-2xl p-5 space-y-4 animate-fade-in transition-all duration-300 hover:border-neutral-800/80">
+      <h3 className="text-xs font-bold text-neutral-300 tracking-wider uppercase font-mono flex items-center gap-1.5 justify-between border-b border-neutral-900 pb-2.5">
         <span className="flex items-center gap-2">
           <Video className="h-4.5 w-4.5 text-purple-400" />
           Active Media Monitor
@@ -175,7 +175,7 @@ export default function PublishMonitor({
 
       {/* Video Player or Drag & Drop Uploader */}
       {activeVideoUrl ? (
-        <div className="relative aspect-video bg-black rounded-2xl overflow-hidden border border-neutral-900 group">
+        <div className="relative aspect-video bg-black rounded-xl overflow-hidden border border-neutral-900 group">
           <video
             src={activeVideoUrl}
             controls
@@ -186,9 +186,9 @@ export default function PublishMonitor({
       ) : (
         <div
           onClick={() => fileInputRef.current?.click()}
-          className="aspect-video bg-neutral-955/20 hover:bg-neutral-955/40 border-2 border-dashed border-neutral-850 hover:border-purple-500/50 rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all duration-300 space-y-2 group shadow-inner"
+          className="aspect-video bg-neutral-955/20 hover:bg-neutral-955/45 border-2 border-dashed border-neutral-850 hover:border-purple-500/50 rounded-2xl flex flex-col items-center justify-center p-5 text-center cursor-pointer transition-all duration-300 space-y-2 group shadow-inner"
         >
-          <div className="p-3.5 bg-neutral-950 rounded-2xl border border-neutral-900 text-neutral-500 group-hover:text-purple-400 group-hover:border-purple-500/30 transition-all duration-300">
+          <div className="p-3 bg-neutral-950 rounded-2xl border border-neutral-900 text-neutral-500 group-hover:text-purple-400 group-hover:border-purple-500/30 transition-all duration-300">
             <Upload className="h-5 w-5" />
           </div>
           <div className="space-y-0.5">
@@ -212,7 +212,7 @@ export default function PublishMonitor({
       />
 
       {/* Custom Thumbnail Picker & Preview with Custom Overlay Frame, Filters, Slogan, and Pointer Arrow */}
-      <div className="border-t border-neutral-905 pt-4.5 space-y-4">
+      <div className="border-t border-neutral-905 pt-4 space-y-3.5">
         <div className="flex justify-between items-center text-xs font-mono">
           <span className="text-neutral-300 font-bold flex items-center gap-2">
             <ImageIcon className="h-4.5 w-4.5 text-purple-400" />
@@ -326,7 +326,7 @@ export default function PublishMonitor({
         ) : (
           <div
             onClick={() => thumbnailInputRef.current?.click()}
-            className="py-8 rounded-2xl bg-neutral-955/20 hover:bg-neutral-955/40 border border-neutral-900 hover:border-purple-500/40 cursor-pointer flex flex-col items-center justify-center space-y-1.5 transition-all duration-300 text-center group shadow-inner"
+            className="py-6 rounded-2xl bg-neutral-955/20 hover:bg-neutral-955/40 border border-neutral-900 hover:border-purple-500/40 cursor-pointer flex flex-col items-center justify-center space-y-1.5 transition-all duration-300 text-center group shadow-inner"
           >
             <Upload className="h-4.5 w-4.5 text-neutral-500 group-hover:text-purple-400 transition-colors duration-300" />
             <span className="text-[10px] font-mono text-neutral-450">
@@ -337,12 +337,12 @@ export default function PublishMonitor({
 
         {/* Project AI Thumbnails Carousel */}
         {projectThumbnails.length > 0 && !selectedThumbnail && (
-          <div className="space-y-2 pt-1">
-            <span className="text-[10px] font-mono text-neutral-500 uppercase flex items-center gap-1">
+          <div className="space-y-1.5 pt-0.5">
+            <span className="text-[10px] font-mono text-neutral-500 uppercase flex items-center gap-1 font-bold">
               <Sparkles className="h-3.5 w-3.5 text-purple-400" />
               Generated AI Thumbnails
             </span>
-            <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-thin pr-1">
+            <div className="flex gap-2 overflow-x-auto pb-1.5 scrollbar-thin pr-1">
               {projectThumbnails.map((url, idx) => (
                 <div
                   key={idx}
@@ -374,28 +374,28 @@ export default function PublishMonitor({
 
         {/* Thumbnail Clickbait Overlay Editor tools */}
         {thumbnailPreviewUrl && (
-          <div className="p-4 bg-neutral-950/40 backdrop-blur-sm rounded-2xl border border-neutral-900 space-y-4 font-mono text-[11px] text-neutral-450 animate-slide-down">
-            <div className="flex items-center justify-between border-b border-neutral-900 pb-2.5">
+          <div className="p-3.5 bg-neutral-950/40 backdrop-blur-sm rounded-xl border border-neutral-900 space-y-3 font-mono text-[10.5px] text-neutral-450 animate-slide-down">
+            <div className="flex items-center justify-between border-b border-neutral-900 pb-2">
               <span className="text-neutral-200 font-bold flex items-center gap-1.5">
                 🎨 CTR Customizer Suite
               </span>
               <button
                 onClick={handleGenerateSlogans}
-                className="text-[9.5px] text-purple-400 hover:text-purple-300 flex items-center gap-0.5 cursor-pointer bg-purple-950/20 px-2.5 py-1 rounded-lg border border-purple-900/30 transition-all hover:bg-purple-900/10"
+                className="text-[9px] text-purple-405 hover:text-purple-300 flex items-center gap-0.5 cursor-pointer bg-purple-950/20 px-2 py-0.5 rounded border border-purple-900/30 transition-all hover:bg-purple-900/10"
               >
-                <Sparkles className="h-3.5 w-3.5" />
+                <Sparkles className="h-3 w-3" />
                 Suggestions
               </button>
             </div>
 
-            <div className="space-y-2">
-              <span className="text-neutral-500 font-bold">QUICK SLOGANS:</span>
-              <div className="flex flex-wrap gap-1.5">
+            <div className="space-y-1.5">
+              <span className="text-neutral-500 font-bold text-[10px]">QUICK SLOGANS:</span>
+              <div className="flex flex-wrap gap-1">
                 {suggestedSlogans.map((s) => (
                   <button
                     key={s}
                     onClick={() => setClickbaitText(s)}
-                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border cursor-pointer transition-all duration-200 ${
+                    className={`px-2 py-0.5 rounded text-[9.5px] font-bold border cursor-pointer transition-all duration-200 ${
                       clickbaitText === s
                         ? "bg-purple-950/40 border-purple-500 text-purple-300"
                         : "bg-neutral-900 border-neutral-850 text-neutral-400 hover:text-white hover:bg-neutral-800"
@@ -413,12 +413,12 @@ export default function PublishMonitor({
                 value={clickbaitText}
                 onChange={(e) => setClickbaitText(e.target.value)}
                 placeholder="Or type custom slogan..."
-                className="flex-1 bg-neutral-955/30 border border-neutral-900 focus:border-purple-500/50 rounded-xl px-3.5 py-2 text-[11px] text-white outline-none shadow-inner"
+                className="flex-1 bg-neutral-950/30 border border-neutral-900 focus:border-purple-500/50 rounded-lg px-2.5 py-1.5 text-[10.5px] text-white outline-none shadow-inner"
               />
               {clickbaitText && (
                 <button
                   onClick={() => setClickbaitText("")}
-                  className="px-3 bg-neutral-900 border border-neutral-850 hover:bg-neutral-800 text-neutral-400 rounded-xl cursor-pointer transition-colors duration-200"
+                  className="px-2.5 bg-neutral-900 border border-neutral-850 hover:bg-neutral-800 text-neutral-400 rounded-lg cursor-pointer transition-colors duration-200"
                 >
                   Clear
                 </button>
@@ -426,39 +426,39 @@ export default function PublishMonitor({
             </div>
 
             {/* Visual Customization Toggles */}
-            <div className="flex gap-2.5 border-t border-neutral-900 pt-3">
+            <div className="flex gap-2 border-t border-neutral-900 pt-2.5">
               <button
                 onClick={() => {
                   setShowStyleControls(!showStyleControls);
                   setShowFilterControls(false);
                 }}
-                className={`flex-1 py-1.5 rounded-xl border text-center transition-colors duration-250 cursor-pointer ${
+                className={`flex-1 py-1 rounded-lg border text-center transition-colors duration-250 cursor-pointer ${
                   showStyleControls
                     ? "bg-purple-950/40 border-purple-800 text-purple-300"
                     : "bg-neutral-900/40 border-neutral-855"
                 }`}
               >
-                Text Slogan Styles
+                Slogan Style
               </button>
               <button
                 onClick={() => {
                   setShowFilterControls(!showFilterControls);
                   setShowStyleControls(false);
                 }}
-                className={`flex-1 py-1.5 rounded-xl border text-center transition-colors duration-250 cursor-pointer ${
+                className={`flex-1 py-1 rounded-lg border text-center transition-colors duration-250 cursor-pointer ${
                   showFilterControls
                     ? "bg-purple-950/40 border-purple-800 text-purple-300"
                     : "bg-neutral-900/40 border-neutral-855"
                 }`}
               >
-                Filters & Arrow
+                Arrow & Filters
               </button>
             </div>
 
             {/* Tab 1: Slogan Text Customization Controls */}
             {showStyleControls && clickbaitText && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-[10.5px] animate-slide-down">
-                <div className="space-y-1.5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[10px] animate-slide-down">
+                <div className="space-y-1">
                   <div className="flex justify-between text-neutral-550">
                     <span>FONT SIZE:</span>
                     <span className="text-white font-bold">{fontSize}px</span>
@@ -473,9 +473,9 @@ export default function PublishMonitor({
                   />
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   <div className="flex justify-between text-neutral-555">
-                    <span>TILT TENSION:</span>
+                    <span>TILT:</span>
                     <span className="text-white font-bold">{textAngle}°</span>
                   </div>
                   <input
@@ -488,9 +488,9 @@ export default function PublishMonitor({
                   />
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   <div className="flex justify-between text-neutral-555">
-                    <span>HEIGHT POS:</span>
+                    <span>POS Y:</span>
                     <span className="text-white font-bold">
                       {textPosition}%
                     </span>
@@ -505,9 +505,9 @@ export default function PublishMonitor({
                   />
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   <div className="flex justify-between text-neutral-555">
-                    <span>OUTLINE STROKE:</span>
+                    <span>OUTLINE:</span>
                     <span className="text-white font-bold">
                       {outlineSize}px
                     </span>
@@ -522,12 +522,12 @@ export default function PublishMonitor({
                   />
                 </div>
 
-                <div className="space-y-1.5 md:col-span-2">
+                <div className="space-y-1 md:col-span-2">
                   <span className="text-neutral-500 block font-bold">FONT STYLE:</span>
                   <select
                     value={fontFamily}
                     onChange={(e) => setFontFamily(e.target.value)}
-                    className="w-full bg-neutral-955/40 border border-neutral-900 rounded-xl px-3 py-2 text-[10.5px] text-neutral-300 focus:outline-none cursor-pointer"
+                    className="w-full bg-neutral-955/40 border border-neutral-900 rounded-lg px-2.5 py-1.5 text-[10px] text-neutral-300 focus:outline-none cursor-pointer"
                   >
                     <option value="Impact, Arial Black, sans-serif" className="bg-neutral-950">
                       Impact (YouTube Classic)
@@ -542,12 +542,12 @@ export default function PublishMonitor({
                   </select>
                 </div>
 
-                <div className="md:col-span-2 border-t border-neutral-900 pt-3 flex justify-between items-center flex-wrap gap-2">
-                  <div className="flex gap-2.5 items-center">
+                <div className="md:col-span-2 border-t border-neutral-900 pt-2 flex justify-between items-center flex-wrap gap-2">
+                  <div className="flex gap-2 items-center">
                     <span className="text-neutral-500 font-bold">
-                      TEXT COLOR:
+                      COLOR:
                     </span>
-                    <div className="flex gap-1.5">
+                    <div className="flex gap-1">
                       {[
                         "#FFFF00",
                         "#FFFFFF",
@@ -559,7 +559,7 @@ export default function PublishMonitor({
                         <button
                           key={c}
                           onClick={() => setTextColor(c)}
-                          className={`h-4 w-4 rounded-full border cursor-pointer transition-transform hover:scale-110 ${
+                          className={`h-3.5 w-3.5 rounded-full border cursor-pointer transition-transform hover:scale-110 ${
                             textColor === c
                               ? "border-white ring-1 ring-purple-500"
                               : "border-neutral-900"
@@ -570,21 +570,21 @@ export default function PublishMonitor({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <span className="text-neutral-500 font-bold">BG BOX:</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-neutral-500 font-bold">BOX:</span>
                     <button
                       onClick={() => setUseBackgroundBox(!useBackgroundBox)}
-                      className={`px-2.5 py-0.5 rounded-md text-[9px] font-bold border cursor-pointer transition-colors ${
+                      className={`px-2 py-0.5 rounded text-[8.5px] font-bold border cursor-pointer transition-colors ${
                         useBackgroundBox
                           ? "bg-purple-950/40 border-purple-850 text-purple-300"
                           : "bg-neutral-900 border-neutral-850"
                       }`}
                     >
-                      {useBackgroundBox ? "ACTIVE" : "INACTIVE"}
+                      {useBackgroundBox ? "ON" : "OFF"}
                     </button>
 
                     {useBackgroundBox && (
-                      <div className="flex gap-1.5 pl-2 border-l border-neutral-900">
+                      <div className="flex gap-1 pl-1.5 border-l border-neutral-900">
                         {[
                           "rgba(0,0,0,0.85)",
                           "rgba(255,0,0,0.85)",
@@ -593,7 +593,7 @@ export default function PublishMonitor({
                           <button
                             key={c}
                             onClick={() => setBackgroundBoxColor(c)}
-                            className={`h-3.5 w-3.5 rounded border cursor-pointer ${
+                            className={`h-3 w-3 rounded border cursor-pointer ${
                               backgroundBoxColor === c
                                 ? "border-white ring-1 ring-purple-500"
                                 : "border-neutral-900"
@@ -614,12 +614,12 @@ export default function PublishMonitor({
 
             {/* Tab 2: Visual Frame Border / Color Filters / Red Pointer Arrow Controls */}
             {showFilterControls && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-[10.5px] animate-slide-down border-t border-neutral-900 pt-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[10px] animate-slide-down border-t border-neutral-900 pt-2.5">
                 {/* Visual Filters */}
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   <div className="flex justify-between text-neutral-550">
-                    <span>SATURATION POP:</span>
-                    <span className="text-white font-bold">
+                    <span>SATURATION:</span>
+                    <span className="text-white font-bold font-mono">
                       {saturationFilter - 100}%
                     </span>
                   </div>
@@ -635,10 +635,10 @@ export default function PublishMonitor({
                   />
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   <div className="flex justify-between text-neutral-555">
                     <span>BRIGHTNESS:</span>
-                    <span className="text-white font-bold">
+                    <span className="text-white font-bold font-mono">
                       {brightnessFilter}%
                     </span>
                   </div>
@@ -655,18 +655,18 @@ export default function PublishMonitor({
                 </div>
 
                 {/* Custom Border Frame */}
-                <div className="space-y-1.5 md:col-span-2 flex justify-between items-center border-b border-neutral-900 pb-3">
-                  <div className="flex gap-2.5 items-center">
-                    <span className="text-neutral-500 font-bold">
-                      BORDER FRAME:
+                <div className="space-y-1 md:col-span-2 flex justify-between items-center border-b border-neutral-900 pb-2">
+                  <div className="flex gap-2 items-center">
+                    <span className="text-neutral-505 font-bold uppercase text-[9.5px]">
+                      BORDER:
                     </span>
-                    <div className="flex gap-1.5">
+                    <div className="flex gap-1">
                       {["none", "#FF0000", "#FFFF00", "#FF00FF", "#00FF00"].map(
                         (c) => (
                           <button
                             key={c}
                             onClick={() => setFrameColor(c)}
-                            className={`h-4 w-4 rounded-xl border cursor-pointer ${
+                            className={`h-3.5 w-3.5 rounded border cursor-pointer ${
                               frameColor === c
                                 ? "border-white ring-1 ring-purple-500"
                                 : "border-neutral-900"
@@ -687,14 +687,14 @@ export default function PublishMonitor({
                   </div>
 
                   {frameColor !== "none" && (
-                    <div className="flex gap-2 items-center font-mono">
+                    <div className="flex gap-1.5 items-center font-mono text-[9.5px]">
                       <span className="text-neutral-500 font-bold">WIDTH:</span>
                       <select
                         value={frameWidth}
                         onChange={(e) =>
                           setFrameWidth(parseInt(e.target.value))
                         }
-                        className="bg-neutral-900 border border-neutral-850 rounded-lg px-2 py-1 text-[10px] text-white cursor-pointer"
+                        className="bg-neutral-900 border border-neutral-850 rounded-lg px-1.5 py-0.5 text-white cursor-pointer focus:outline-none"
                       >
                         <option value="2">2px</option>
                         <option value="4">4px</option>
@@ -706,33 +706,30 @@ export default function PublishMonitor({
                 </div>
 
                 {/* Clickbait Pointer Red Arrow Toggles */}
-                <div className="space-y-2.5 md:col-span-2">
+                <div className="space-y-2 md:col-span-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-neutral-205 font-bold flex items-center gap-1.5">
-                      <Navigation className="h-4 w-4 text-purple-405 rotate-45" />
-                      Clickbait Red Pointer Arrow
+                    <span className="text-neutral-250 font-bold flex items-center gap-1 text-[9.5px]">
+                      Clickbait Red Arrow
                     </span>
                     <button
                       onClick={() => setShowArrow(!showArrow)}
-                      className={`px-2.5 py-0.5 rounded-md text-[9px] font-bold border cursor-pointer transition-colors ${
+                      className={`px-2 py-0.5 rounded-md text-[8.5px] font-bold border cursor-pointer transition-colors ${
                         showArrow
-                          ? "bg-purple-950/40 border-purple-850 text-purple-300"
+                          ? "bg-purple-950/40 border-purple-850 text-purple-305"
                           : "bg-neutral-900 border-neutral-850"
                       }`}
                     >
-                      {showArrow ? "VISIBLE" : "HIDDEN"}
+                      {showArrow ? "ON" : "OFF"}
                     </button>
                   </div>
 
                   {showArrow && (
-                    <div className="grid grid-cols-2 gap-4 pt-1.5 animate-slide-down">
+                    <div className="grid grid-cols-2 gap-3 pt-1 animate-slide-down">
                       {/* Arrow Pos X */}
-                      <div className="space-y-1.5">
+                      <div className="space-y-1">
                         <div className="flex justify-between text-neutral-555">
-                          <span>HORIZONTAL (X):</span>
-                          <span className="text-white font-bold">
-                            {arrowLeft}%
-                          </span>
+                          <span>HORIZ X:</span>
+                          <span className="text-white font-bold">{arrowLeft}%</span>
                         </div>
                         <input
                           type="range"
@@ -747,12 +744,10 @@ export default function PublishMonitor({
                       </div>
 
                       {/* Arrow Pos Y */}
-                      <div className="space-y-1.5">
+                      <div className="space-y-1">
                         <div className="flex justify-between text-neutral-555">
-                          <span>VERTICAL (Y):</span>
-                          <span className="text-white font-bold">
-                            {arrowTop}%
-                          </span>
+                          <span>VERT Y:</span>
+                          <span className="text-white font-bold">{arrowTop}%</span>
                         </div>
                         <input
                           type="range"
@@ -767,12 +762,10 @@ export default function PublishMonitor({
                       </div>
 
                       {/* Arrow size */}
-                      <div className="space-y-1.5">
+                      <div className="space-y-1">
                         <div className="flex justify-between text-neutral-555">
-                          <span>ARROW SIZE:</span>
-                          <span className="text-white font-bold">
-                            {arrowSize}px
-                          </span>
+                          <span>SIZE:</span>
+                          <span className="text-white font-bold">{arrowSize}px</span>
                         </div>
                         <input
                           type="range"
@@ -787,12 +780,10 @@ export default function PublishMonitor({
                       </div>
 
                       {/* Arrow angle */}
-                      <div className="space-y-1.5">
+                      <div className="space-y-1">
                         <div className="flex justify-between text-neutral-555">
-                          <span>ROTATION ANGLE:</span>
-                          <span className="text-white font-bold">
-                            {arrowAngle}°
-                          </span>
+                          <span>ROTATION:</span>
+                          <span className="text-white font-bold">{arrowAngle}°</span>
                         </div>
                         <input
                           type="range"
@@ -816,10 +807,10 @@ export default function PublishMonitor({
 
       {/* Scheduling publishing inputs (visible if Unlisted or Private) */}
       {(privacy === "unlisted" || privacy === "private") && (
-        <div className="p-4 bg-neutral-950/20 backdrop-blur-sm border border-neutral-900 rounded-2xl space-y-3.5 animate-slide-down">
+        <div className="p-3.5 bg-neutral-950/20 backdrop-blur-sm border border-neutral-900 rounded-2xl space-y-3 animate-slide-down">
           <div className="flex items-center justify-between">
-            <span className="flex items-center gap-2 text-neutral-200 font-bold font-mono text-[11px]">
-              <Calendar className="h-4.5 w-4.5 text-purple-400" />
+            <span className="flex items-center gap-1.5 text-neutral-200 font-bold font-mono text-[10.5px]">
+              <Calendar className="h-4 w-4 text-purple-400" />
               Schedule Publishing Date
             </span>
             <button
@@ -837,28 +828,28 @@ export default function PublishMonitor({
           </div>
 
           {isScheduled && (
-            <div className="grid grid-cols-2 gap-3.5 pt-1.5 animate-slide-down">
-              <div className="space-y-1.5">
-                <span className="text-[10px] text-neutral-500 font-bold block uppercase">
+            <div className="grid grid-cols-2 gap-3 pt-1 animate-slide-down">
+              <div className="space-y-1">
+                <span className="text-[9.5px] text-neutral-550 font-bold block uppercase">
                   DATE
                 </span>
                 <input
                   type="date"
                   value={scheduleDate}
                   onChange={(e) => setScheduleDate(e.target.value)}
-                  className="w-full bg-neutral-955/40 border border-neutral-900 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 rounded-xl px-3 py-2 text-xs text-neutral-300 focus:outline-none shadow-inner"
+                  className="w-full bg-neutral-955/40 border border-neutral-900 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/10 rounded-xl px-2.5 py-1.5 text-xs text-neutral-300 focus:outline-none shadow-inner"
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <span className="text-[10px] text-neutral-500 font-bold block uppercase">
+              <div className="space-y-1">
+                <span className="text-[9.5px] text-neutral-550 font-bold block uppercase">
                   TIME
                 </span>
                 <input
                   type="time"
                   value={scheduleTime}
                   onChange={(e) => setScheduleTime(e.target.value)}
-                  className="w-full bg-neutral-955/40 border border-neutral-900 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 rounded-xl px-3 py-2 text-xs text-neutral-300 focus:outline-none shadow-inner"
+                  className="w-full bg-neutral-955/40 border border-neutral-900 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/10 rounded-xl px-2.5 py-1.5 text-xs text-neutral-300 focus:outline-none shadow-inner"
                 />
               </div>
             </div>
@@ -868,14 +859,14 @@ export default function PublishMonitor({
 
       {/* Video properties diagnostics */}
       {activeVideoUrl && (
-        <div className="bg-neutral-950/20 backdrop-blur-sm p-4 rounded-2xl border border-neutral-900 text-[11px] font-mono space-y-2.5 text-neutral-400 animate-fade-in shadow-inner">
-          <div className="flex items-center justify-between border-b border-neutral-900/60 pb-2">
+        <div className="bg-neutral-950/20 backdrop-blur-sm p-3.5 rounded-2xl border border-neutral-900 text-[10.5px] font-mono space-y-2 text-neutral-450 animate-fade-in shadow-inner">
+          <div className="flex items-center justify-between border-b border-neutral-900/60 pb-1.5">
             <span className="text-neutral-500 font-bold">Source Mode:</span>
             <span className="font-bold text-neutral-300">
               {selectedFile ? "Local File Upload" : "Workspace Compiled Video"}
             </span>
           </div>
-          <div className="flex items-center justify-between border-b border-neutral-900/60 pb-2">
+          <div className="flex items-center justify-between border-b border-neutral-900/60 pb-1.5">
             <span className="text-neutral-500 font-bold">Estimated Duration:</span>
             <span className="font-bold text-neutral-300">
               {videoDuration
@@ -883,7 +874,7 @@ export default function PublishMonitor({
                 : "Calculating..."}
             </span>
           </div>
-          <div className="flex items-center justify-between border-b border-neutral-900/60 pb-2">
+          <div className="flex items-center justify-between border-b border-neutral-900/60 pb-1.5">
             <span className="text-neutral-500 font-bold">Layout Aspect Ratio:</span>
             <span className="font-bold text-neutral-300">
               {videoAspectRatio || "Detecting..."}
@@ -892,9 +883,9 @@ export default function PublishMonitor({
           <div className="flex items-center justify-between">
             <span className="text-neutral-500 font-bold">Output Mode:</span>
             <span
-              className={`font-bold px-2.5 py-0.5 rounded-lg text-[10px] ${
+              className={`font-bold px-2 py-0.5 rounded-md text-[9.5px] ${
                 isShort
-                  ? "bg-red-950/25 text-red-400 border border-red-900/30"
+                  ? "bg-red-955 text-red-400 border border-red-900/30"
                   : "bg-purple-950/20 text-purple-400 border border-purple-900/30"
               }`}
             >
@@ -908,13 +899,13 @@ export default function PublishMonitor({
       {isShort &&
         activeVideoUrl &&
         (isTooLongForShort || isWrongRatioForShort) && (
-          <div className="p-3.5 bg-amber-955/10 border border-amber-900/30 rounded-2xl flex items-start gap-2.5 animate-pulse">
-            <AlertCircle className="h-4.5 w-4.5 text-amber-500 shrink-0 mt-0.5" />
-            <div className="space-y-1">
-              <div className="text-[11px] font-bold text-amber-300 font-mono">
+          <div className="p-3 bg-amber-955/10 border border-amber-900/30 rounded-2xl flex items-start gap-2 animate-pulse">
+            <AlertCircle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <div className="text-[10.5px] font-bold text-amber-300 font-mono">
                 Shorts Compliance Warning
               </div>
-              <ul className="list-disc pl-4 text-[10px] text-neutral-450 leading-relaxed space-y-0.5 font-mono">
+              <ul className="list-disc pl-4.5 text-[9.5px] text-neutral-450 leading-relaxed space-y-0.5 font-mono">
                 {isTooLongForShort && (
                   <li>
                     YouTube Shorts must be under 60 seconds (Current:{" "}
@@ -934,11 +925,11 @@ export default function PublishMonitor({
 
       {/* Log Output Window */}
       {publishLogs.length > 0 && (
-        <div className="bg-neutral-950/60 backdrop-blur-sm rounded-2xl p-4 border border-neutral-900 font-mono text-[10px] space-y-2 max-h-[160px] overflow-y-auto scrollbar-thin shadow-inner pr-1">
-          <div className="text-neutral-500 border-b border-neutral-900/60 pb-1.5 flex justify-between">
+        <div className="bg-neutral-950/60 backdrop-blur-sm rounded-2xl p-3.5 border border-neutral-900 font-mono text-[9.5px] space-y-1.5 max-h-[150px] overflow-y-auto scrollbar-thin shadow-inner pr-1">
+          <div className="text-neutral-500 border-b border-neutral-900/60 pb-1 flex justify-between">
             <span>Publish Process Monitor</span>
             {isPublishing && (
-              <span className="animate-pulse text-purple-400 font-bold">ACTIVE</span>
+              <span className="animate-pulse text-purple-405 font-bold">ACTIVE</span>
             )}
           </div>
           {publishLogs.map((log, idx) => {
@@ -970,7 +961,7 @@ export default function PublishMonitor({
             !title.trim() ||
             isTooLongForShort === true
           }
-          className={`w-full text-white font-bold text-xs py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all select-none border font-mono ${
+          className={`w-full text-white font-bold text-xs py-3 rounded-xl flex items-center justify-center gap-1.5 transition-all select-none border font-mono ${
             isPublishing ||
             !activeVideoUrl ||
             !title.trim() ||
@@ -981,21 +972,21 @@ export default function PublishMonitor({
         >
           {isPublishing ? (
             <>
-              <Loader2 className="h-4.5 w-4.5 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
               <span>Transmitting to YouTube API...</span>
             </>
           ) : (
             <>
-              <Youtube className="h-5 w-5" />
+              <Youtube className="h-4.5 w-4.5" />
               <span>Publish Video to Channel</span>
             </>
           )}
         </button>
       ) : (
-        <div className="space-y-4 pt-1">
-          <div className="p-4 bg-emerald-950/10 border border-emerald-900/30 rounded-2xl flex items-center gap-2.5">
-            <CheckCircle2 className="h-4.5 w-4.5 text-emerald-400" />
-            <span className="text-[11px] font-mono font-bold text-emerald-300">
+        <div className="space-y-3 pt-0.5">
+          <div className="p-3 bg-emerald-950/10 border border-emerald-900/30 rounded-2xl flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+            <span className="text-[10.5px] font-mono font-bold text-emerald-300">
               Video Upload Successfully Initiated!
             </span>
           </div>
@@ -1003,9 +994,9 @@ export default function PublishMonitor({
             href={youtubeUrl}
             target="_blank"
             rel="noreferrer"
-            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer select-none border border-emerald-500/50 shadow-lg shadow-emerald-950/20 font-mono active:scale-98"
+            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer select-none border border-emerald-500/50 shadow-lg shadow-emerald-950/20 font-mono active:scale-98"
           >
-            <ExternalLink className="h-5 w-5" />
+            <ExternalLink className="h-4.5 w-4.5" />
             <span>View Video on YouTube</span>
           </a>
         </div>
