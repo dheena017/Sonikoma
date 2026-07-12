@@ -1210,6 +1210,13 @@ async def save_training_data(
         else:
             logger.info(f"[Data Flywheel] Successfully saved training pair in Supabase.")
 
+        # Trigger an immediate check for automatic training
+        try:
+            from services.training_monitor import check_and_trigger_training
+            await asyncio.to_thread(check_and_trigger_training)
+        except Exception as monitor_err:
+            logger.warning(f"[Data Flywheel] Failed to run automatic training check: {monitor_err}")
+
         return {
             "success": True,
             "message": "Successfully saved training pair.",

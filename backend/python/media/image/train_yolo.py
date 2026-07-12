@@ -63,6 +63,43 @@ class TrainingStatus:
 status = TrainingStatus()
 
 
+def is_process_running(pid: int) -> bool:
+    """Returns True if a process with given PID is currently active on the OS level."""
+    try:
+        import psutil
+        return psutil.pid_exists(pid)
+    except ImportError:
+        try:
+            os.kill(pid, 0)
+            return True
+        except OSError:
+            return False
+
+
+def get_lock_pid(lock_file_path: str) -> int:
+    """Reads and parses the PID from the lock file."""
+    try:
+        if os.path.exists(lock_file_path):
+            with open(lock_file_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            match = re.search(r"PID:\s*(\d+)", content)
+            if match:
+                return int(match.group(1))
+    except Exception as e:
+        logger.warning(f"[Training] Failed to read PID from lock file: {e}")
+    return None
+
+
+def is_training_locked(lock_file_path: str) -> bool:
+    """Returns True if training is locked by an active running OS process."""
+    if not os.path.exists(lock_file_path):
+        return False
+    pid = get_lock_pid(lock_file_path)
+    if pid is None:
+        return False
+    return is_process_running(pid)
+
+
 def convert_mask_to_yolo_txt(mask_path: str, txt_output_path: str):
     """Reads a binary mask PNG, finds contours, normalizes, and writes YOLO segment line."""
     mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
@@ -167,13 +204,42 @@ def prepare_dataset(training_data_dir: str, dataset_dir: str) -> int:
 
 def _train_worker(epochs: int, batch_size: int = 4):
     """Background training runner."""
+    # Standardize path resolution:
+    # __file__ is backend/python/media/image/train_yolo.py
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) # backend/python
+    project_root = os.path.abspath(os.path.join(base_dir, "..", "..")) # project root
+    training_data_dir = os.path.join(project_root, "training_data")
+    dataset_dir = os.path.abspath(os.path.join(base_dir, "temp", "yolo_dataset"))
+    lock_file_path = os.path.join(training_data_dir, "training.lock")
+
+    lock_acquired = False
+
     try:
+        # Lock file mechanism to prevent concurrent runs (OS process-safe)
+        os.makedirs(training_data_dir, exist_ok=True)
+        if os.path.exists(lock_file_path):
+            if is_training_locked(lock_file_path):
+                logger.error("[Training] Training is already running under an active OS process. Aborting worker.")
+                return
+            else:
+                logger.warning("[Training] Stale lock file detected (PID not running). Removing and proceeding.")
+                try:
+                    os.remove(lock_file_path)
+                except Exception:
+                    pass
+
+        try:
+            with open(lock_file_path, "w", encoding="utf-8") as f:
+                f.write(f"PID: {os.getpid()}\nStarted: {time.time()}\n")
+            lock_acquired = True
+            logger.info(f"[Training] Created lock file: {lock_file_path}")
+        except Exception as e:
+            logger.error(f"[Training] Failed to create lock file: {e}")
+            raise
+
+        # Now do the required lazy-imports to prevent NameError
         from ultralytics import YOLO
         from media.image.segmentation_engine import get_yolo_model
-
-        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        training_data_dir = os.path.abspath(os.path.join(base_dir, "..", "training_data"))
-        dataset_dir = os.path.abspath(os.path.join(base_dir, "temp", "yolo_dataset"))
 
         # Cleanup old run dataset if exists
         if os.path.exists(dataset_dir):
@@ -216,7 +282,19 @@ def _train_worker(epochs: int, batch_size: int = 4):
 
         model.add_callback("on_fit_epoch_end", on_fit_epoch_end)
 
-        logger.info(f"[Training] Beginning YOLO segmentation training for {epochs} epochs (batch={batch_size})...")
+        # Detect device automatically: GPU if available, else CPU
+        device = 'cpu'
+        try:
+            import torch
+            if torch.cuda.is_available():
+                device = 0
+                logger.info("[Training] CUDA GPU is available. Training on GPU (device=0).")
+            else:
+                logger.info("[Training] CUDA GPU is not available. Training on CPU.")
+        except Exception as e:
+            logger.warning(f"[Training] Error checking CUDA GPU status, defaulting to CPU: {e}")
+
+        logger.info(f"[Training] Beginning YOLO segmentation training for {epochs} epochs (batch={batch_size}) on device={device}...")
         # Train!
         results = model.train(
             data=os.path.join(dataset_dir, "dataset.yaml"),
@@ -224,7 +302,7 @@ def _train_worker(epochs: int, batch_size: int = 4):
             imgsz=640,
             batch=batch_size,
             workers=1,
-            device='cpu',  # default to CPU for safe multi-platform compatibility
+            device=device,
             project=os.path.join(dataset_dir, "runs"),
             name="manga_train",
             verbose=False
@@ -262,16 +340,31 @@ def _train_worker(epochs: int, batch_size: int = 4):
 
     finally:
         # Clean up temp dataset
-        if status.dataset_dir and os.path.exists(status.dataset_dir):
+        if dataset_dir and os.path.exists(dataset_dir):
             try:
-                shutil.rmtree(status.dataset_dir, ignore_errors=True)
+                shutil.rmtree(dataset_dir, ignore_errors=True)
             except Exception:
                 pass
+
+        # Clean up lock file (Guaranteed to execute on any worker crash/OOM)
+        if lock_acquired:
+            try:
+                if os.path.exists(lock_file_path):
+                    os.remove(lock_file_path)
+                    logger.info(f"[Training] Cleaned up lock file: {lock_file_path}")
+            except Exception as e:
+                logger.error(f"[Training] Failed to clean up lock file: {e}")
 
 
 def trigger_fine_tuning(epochs: int = 20, batch_size: int = 4) -> bool:
     """Spawns a new training run background worker thread if not already running."""
-    if status.to_dict()["is_training"]:
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) # backend/python
+    project_root = os.path.abspath(os.path.join(base_dir, "..", "..")) # project root
+    training_data_dir = os.path.join(project_root, "training_data")
+    lock_file_path = os.path.join(training_data_dir, "training.lock")
+
+    if status.to_dict()["is_training"] or is_training_locked(lock_file_path):
+        logger.warning("[Training] Fine-tuning is already running (status says active or lock file is held by running process).")
         return False
 
     status.reset()
