@@ -415,6 +415,93 @@ def _detect_panels_grid_pil(
     return raw_boxes
 
 
+def trim_solid_borders(
+    gray_arr: np.ndarray,
+    x: int,
+    y: int,
+    w_box: int,
+    h_box: int,
+    bg_mode: str,
+    global_bg_val: Optional[float] = None
+) -> Tuple[int, int, int, int]:
+    """
+    Trims solid-color padding/margins (black, white, or neutral) from the edges
+    of a single panel bounding box, prioritizing art content boundaries.
+    """
+    h_img, w_img = gray_arr.shape
+
+    # Ensure coordinates are within image bounds
+    x1 = max(0, min(w_img - 1, x))
+    y1 = max(0, min(h_img - 1, y))
+    x2 = max(0, min(w_img, x + w_box))
+    y2 = max(0, min(h_img, y + h_box))
+
+    # If the box is too small, don't trim
+    if (x2 - x1) < 20 or (y2 - y1) < 20:
+        return x1, y1, x2 - x1, y2 - y1
+
+    def is_solid_padding(slice_pixels: np.ndarray) -> bool:
+        if len(slice_pixels) == 0:
+            return True
+        std = np.std(slice_pixels)
+        # Low standard deviation indicates uniform solid color/padding
+        if std > 8.0:
+            return False
+
+        mean = np.mean(slice_pixels)
+        # Black/dark padding
+        if mean < 45:
+            return True
+        # White/light padding
+        if mean > 210:
+            return True
+        # Neutral background gray padding matching the image background
+        if global_bg_val is not None:
+            if abs(mean - global_bg_val) < 15:
+                return True
+        return False
+
+    max_trim_x = int((x2 - x1) * 0.45)
+    max_trim_y = int((y2 - y1) * 0.45)
+
+    orig_x1, orig_y1 = x1, y1
+    orig_x2, orig_y2 = x2, y2
+
+    # Trim Top Edge
+    while y1 < orig_y1 + max_trim_y and y1 < y2 - 15:
+        row = gray_arr[y1, x1:x2]
+        if is_solid_padding(row):
+            y1 += 1
+        else:
+            break
+
+    # Trim Bottom Edge
+    while y2 > orig_y2 - max_trim_y and y2 > y1 + 15:
+        row = gray_arr[y2 - 1, x1:x2]
+        if is_solid_padding(row):
+            y2 -= 1
+        else:
+            break
+
+    # Trim Left Edge
+    while x1 < orig_x1 + max_trim_x and x1 < x2 - 15:
+        col = gray_arr[y1:y2, x1]
+        if is_solid_padding(col):
+            x1 += 1
+        else:
+            break
+
+    # Trim Right Edge
+    while x2 > orig_x2 - max_trim_x and x2 > x1 + 15:
+        col = gray_arr[y1:y2, x2 - 1]
+        if is_solid_padding(col):
+            x2 -= 1
+        else:
+            break
+
+    return x1, y1, x2 - x1, y2 - y1
+
+
 def _filter_solid_noise(
     raw_boxes: List[Dict[str, int]],
     gray_arr: np.ndarray,
@@ -522,6 +609,31 @@ def run_cv_detection(
 
     # 5. Merge overlapping or stacked panel bounding boxes
     merged_boxes = merge_overlapping_boxes(filtered_boxes, w, h, merge_threshold)
+
+    # 5b. Content-aware border trimming pre-processing step
+    if bg_mode == "white":
+        median_bg = 255.0
+    elif bg_mode == "black":
+        median_bg = 0.0
+    else:
+        inset_y = max(1, int(h * 0.02))
+        inset_x = max(1, int(w * 0.02))
+        edge_samples = np.concatenate([
+            gray_arr[inset_y, :],
+            gray_arr[-inset_y - 1, :],
+            gray_arr[:, inset_x],
+            gray_arr[:, -inset_x - 1]
+        ])
+        median_bg = float(np.median(edge_samples))
+
+    trimmed_boxes = []
+    for box in merged_boxes:
+        bx, by, bw, bh = box["x"], box["y"], box["w"], box["h"]
+        tx, ty, tw, th = trim_solid_borders(gray_arr, bx, by, bw, bh, bg_mode, median_bg)
+        # Only retain panels that still contain some actual art content size (>= 15px)
+        if tw >= 15 and th >= 15:
+            trimmed_boxes.append({"x": tx, "y": ty, "w": tw, "h": th})
+    merged_boxes = trimmed_boxes
 
     # 6. Apply post-merge vertical padding for tall webtoon strips, then format & scale to percent
     final_panels = []
