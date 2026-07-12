@@ -59,8 +59,6 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
     } else if (activeTool === "crop") {
       state.setEditMode("crop");
       state.setShowSplitPosition(false);
-    } else if (activeTool === "eraser") {
-      state.setEditMode("clean_manual");
     } else {
       state.setEditMode("crop");
     }
@@ -565,10 +563,6 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
         editingImageIdx !== null ? editingImageIdx + 1 : 1
       }. Slices: ${state.slices.length}, Selected: ${state.selectedSliceId}`
     );
-    if (activeTool === "eraser") {
-      await handleSaveTrainingData();
-      return;
-    }
     if (state.selectedSliceId) {
       // If a specific slice is selected, only execute that one
       const selectedSlice = state.slices.find(

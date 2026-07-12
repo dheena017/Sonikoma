@@ -23,15 +23,7 @@ export const ImageEditorRightSidebar: React.FC = () => {
         </div>
       )}
 
-      {activeTool === "eraser" && (
-        <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-           <h3 className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-4">Eraser Settings</h3>
-           {/* Plug in your eraseMethod and sensitivity states here */}
-           <div className="h-32 bg-gray-800/30 border border-gray-800 rounded-xl flex items-center justify-center text-gray-500 text-sm">
-               AI Bubble Cleaner Controls
-            </div>
-        </div>
-      )}
+
 
       {(activeTool as unknown) === "layers" && (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">

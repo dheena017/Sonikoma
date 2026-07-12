@@ -14,6 +14,8 @@ import tempfile
 import zipfile
 import asyncio
 import mimetypes
+import glob
+
 from typing import List, Optional, Literal, Dict, Any
 from fastapi import APIRouter, HTTPException, Response, Query, Body, Path, Request
 from pydantic import BaseModel, Field
@@ -836,6 +838,55 @@ async def extract_panel_layers(panel_id: str, body: ProcessLayersRequest):
         )
         raise HTTPException(status_code=500, detail=f"Layer segmentation failed: {e}")
 
+# ─── YOLO Debug Visualization ───────────────────────────────────────────────
+
+@router.get("/debug-yolo", summary="Return panel image with YOLO speech-bubble detections drawn as overlays")
+async def debug_yolo_detections(
+    url: str,
+    conf: float = 0.25
+):
+    """
+    Runs the kitsumed YOLOv8m-seg model on the given panel image URL and returns
+    a PNG with all detected speech bubbles highlighted (masks + bounding boxes + labels).
+
+    Query params:
+    - url  : absolute URL or /api/image/cached/<key> of the panel image
+    - conf : confidence threshold (default 0.25)
+    """
+    logger.info(f"[Debug YOLO] Visualizing detections for url={url[:80]} conf={conf}")
+    tmp_path = None
+    try:
+        # Resolve image to a local temp file
+        resolved = await img_utils.resolve_image_to_buffer(url)
+        suffix = ".png"
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp_f:
+            tmp_f.write(resolved["buffer"])
+            tmp_path = tmp_f.name
+
+        # Draw detections
+        from media.image.debug_visualizer import draw_yolo_detections
+        annotated_bytes = await asyncio.to_thread(draw_yolo_detections, tmp_path, conf)
+
+        if annotated_bytes is None:
+            raise HTTPException(status_code=503, detail="YOLO model is not available.")
+
+        return Response(
+            content=annotated_bytes,
+            media_type="image/png",
+            headers={"Cache-Control": "no-store"}
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[Debug YOLO] Failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Debug YOLO failed: {e}")
+    finally:
+        if tmp_path and os.path.exists(tmp_path):
+            try:
+                os.remove(tmp_path)
+            except OSError:
+                pass
+
 # ─── Speech Bubble Removal Route (migrated from Express image/cleanup.ts) ──────
 
 @router.post("/remove-speech-bubbles", summary="Inpaint speech bubbles out of a panel image")
@@ -1039,6 +1090,56 @@ async def get_training_data_count():
         return {"count": 0}
 
 
+@router.get("/training-data-list", summary="List all training sample pairs saved locally")
+async def get_training_data_list():
+    try:
+        training_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "training_data"))
+        if not os.path.exists(training_dir):
+            return []
+        files = os.listdir(training_dir)
+        original_files = [f for f in files if f.startswith("original_")]
+        
+        pairs = []
+        for orig in sorted(original_files):
+            # Extract the unique pair ID, e.g. "original_abc123.png" -> "abc123"
+            name_part, ext = os.path.splitext(orig)
+            pair_id = name_part.replace("original_", "")
+            
+            # Find the corresponding mask file
+            mask_filename = f"mask_{pair_id}{ext}"
+            if not os.path.exists(os.path.join(training_dir, mask_filename)):
+                found = glob.glob(os.path.join(training_dir, f"mask_{pair_id}.*"))
+                if found:
+                    mask_filename = os.path.basename(found[0])
+                else:
+                    mask_filename = None
+                    
+            if mask_filename:
+                pairs.append({
+                    "pair_id": pair_id,
+                    "original_url": f"/api/image/training-data-file/{orig}",
+                    "mask_url": f"/api/image/training-data-file/{mask_filename}"
+                })
+        return pairs
+    except Exception as e:
+        logger.error(f"Failed to list training data: {e}", exc_info=True)
+        return []
+
+
+@router.get("/training-data-file/{filename}", summary="Get a training file directly from training_data folder")
+async def get_training_data_file(filename: str):
+    from fastapi.responses import FileResponse
+    training_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "training_data"))
+    file_path = os.path.join(training_dir, filename)
+    if not os.path.abspath(file_path).startswith(training_dir):
+        raise HTTPException(status_code=400, detail="Invalid path")
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+    return FileResponse(file_path)
+
+
+
+
 @router.post("/save-training-data", summary="Save human-corrected text masks and original panels for future training (Data Flywheel)")
 async def save_training_data(
     original_panel: UploadFile = File(...),
@@ -1119,3 +1220,71 @@ async def save_training_data(
     except Exception as e:
         logger.error(f"[Data Flywheel] Failed to save training data: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to save training data: {e}")
+
+# ─── YOLO Fine-Tuning Routes ────────────────────────────────────────────────
+
+@router.post("/start-training", summary="Trigger YOLO fine-tuning on the collected training data")
+async def start_training(epochs: int = 20, batch_size: int = 4):
+    """
+    Triggers the YOLO fine-tuning pipeline as a background thread.
+    Returns 409 Conflict if training is already running.
+    """
+    from media.image.train_yolo import trigger_fine_tuning
+    
+    # Check if we have any training data to train on
+    training_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "training_data"))
+    orig_files = glob.glob(os.path.join(training_dir, "original_*.*"))
+    if len(orig_files) == 0:
+        raise HTTPException(
+            status_code=400, 
+            detail="Cannot start training: No human-corrected samples have been saved to training_data/ yet. Use the brush to save corrections first."
+        )
+
+    success = trigger_fine_tuning(epochs, batch_size)
+    if not success:
+        raise HTTPException(status_code=409, detail="A training run is already in progress.")
+    
+    return {"success": True, "message": f"Training started in background for {epochs} epochs (batch={batch_size})."}
+
+
+@router.delete("/training-data-pair/{pair_id}", summary="Delete a human-corrected training pair by ID")
+async def delete_training_data_pair(pair_id: str):
+    try:
+        training_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "training_data"))
+        if not os.path.exists(training_dir):
+            raise HTTPException(status_code=404, detail="Training directory does not exist")
+        
+        original_pattern = os.path.join(training_dir, f"original_{pair_id}.*")
+        mask_pattern = os.path.join(training_dir, f"mask_{pair_id}.*")
+        
+        orig_matches = glob.glob(original_pattern)
+        mask_matches = glob.glob(mask_pattern)
+        
+        deleted = False
+        for f in orig_matches + mask_matches:
+            if os.path.exists(f):
+                os.remove(f)
+                deleted = True
+                
+        if not deleted:
+            raise HTTPException(status_code=404, detail=f"No files found for training pair ID {pair_id}")
+            
+        logger.info(f"[Data Flywheel] Successfully deleted training pair ID: {pair_id}")
+        return {"success": True, "message": f"Successfully deleted training pair ID: {pair_id}"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to delete training pair {pair_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
+
+@router.get("/training-status", summary="Get status of current YOLO fine-tuning run")
+async def get_training_status():
+    """
+    Returns real-time metrics, epoch progress, and elapsed time for the current training run.
+    """
+    from media.image.train_yolo import status
+    return status.to_dict()
+

@@ -2,6 +2,7 @@ import React from "react";
 import { Move, RefreshCw, Layers } from "lucide-react";
 import { CropCanvas, CanvasMultiLayer } from "../../Workspace";
 import { GeneratedPanel } from "@/types";
+import { ImageTool } from "@/hooks/useImageEditorState";
 
 interface ImageEditorCanvasContainerProps {
   activeStoryboardPanel?: GeneratedPanel | null;
@@ -51,7 +52,7 @@ interface ImageEditorCanvasContainerProps {
   setEditCropLeft: (val: number) => void;
   setEditCropRight: (val: number) => void;
   setSelectedSliceId: (id: string | null) => void;
-  activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw" | "separate";
+  activeTab: ImageTool;
 
   aspectRatio?: any;
 }

@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { Trash2 } from "lucide-react";
 import { Slice } from "../shared";
+import { ImageTool } from "@/hooks/useImageEditorState";
 import CanvasBrushLayer from "./CanvasBrushLayer";
 import CanvasBubbleBoxes from "./CanvasBubbleBoxes";
 import CanvasSplitLines from "./CanvasSplitLines";
@@ -40,7 +41,7 @@ interface CropCanvasProps {
     clientY: number
   ) => void;
   zoom?: number;
-  activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw" | "separate";
+  activeTab: ImageTool;
 
   // Phase 4 Props
   editMode?: "crop" | "clean_auto" | "clean_manual" | "typeset" | "slices";
@@ -133,8 +134,7 @@ export default function CropCanvas({
     null
   );
   const [isDrawing, setIsDrawing] = useState(false);
-  const isManualBrushActive =
-    editMode === "clean_manual" && activeTab === "eraser";
+  const isManualBrushActive = activeTab === "draw";
 
   const [naturalAspect, setNaturalAspect] = useState<number | null>(null);
   const imgRef = React.useRef<HTMLImageElement>(null);
@@ -289,11 +289,6 @@ export default function CropCanvas({
   };
 
   const handleCanvasMouseUp = () => setIsDrawing(false);
-
-  useEffect(() => {
-    const canvas = canvasMaskRef?.current;
-    if (isManualBrushActive && canvas) initCanvas(canvas);
-  }, [brushSize, brushAction, canvasMaskRef, isManualBrushActive]);
 
   // Hardened Global Event Listeners for Drag Robustness
   useEffect(() => {

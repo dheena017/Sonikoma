@@ -11,7 +11,6 @@ import {
   Sparkles,
   Edit2,
   Brush,
-  Eraser,
   Crop,
   Link2,
   type LucideIcon,
@@ -74,7 +73,6 @@ const EditorMiniSidebarInner = ({
       { key: "adjust", label: "Adjust", icon: Sparkles },
       { key: "edit", label: "Edit", icon: Edit2 },
       { key: "draw", label: "Draw", icon: Brush },
-      { key: "eraser", label: "Erase", icon: Eraser },
       { key: "slice", label: "Cut", icon: Scissors },
       { key: "crop", label: "Edit", icon: Crop },
       { key: "merge", label: "Merge", icon: Link2 },
@@ -178,12 +176,6 @@ const EditorMiniSidebarInner = ({
       label: "Auto-Crop Panels",
       icon: Scissors,
       isProcessing: isBatchCropping,
-    },
-    {
-      id: "bubbles",
-      label: "Clean Text Bubbles",
-      icon: Brain,
-      isProcessing: isCleaningBubbles,
     },
     // Added Image Editor Tool
     {

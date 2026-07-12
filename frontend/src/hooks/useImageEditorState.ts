@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Slice } from "@/components/Feature/editor/shared";
 import { create } from "zustand";
 
-export type ImageTool = "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw" | "separate";
+export type ImageTool = "adjust" | "edit" | "slice" | "crop" | "merge" | "draw" | "separate" | "train";
 
 interface ImageEditorGlobalState {
   activeTool: ImageTool;

@@ -446,11 +446,7 @@ const HeaderInner = ({
       path: "/auto-crop",
       desc: "Slice webtoon sheets into individual images",
     },
-    {
-      name: "Clean-Bubbles Editor",
-      path: "/bubble-cleaner",
-      desc: "Smart text bubble erasing and clearing",
-    },
+
     {
       name: "Audio Design Lab",
       path: "/ai-audio-lab",

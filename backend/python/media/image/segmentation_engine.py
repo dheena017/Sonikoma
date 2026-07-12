@@ -33,7 +33,20 @@ def get_yolo_model():
     if not has_yolo_dependencies:
         return None
 
+    # Priority 0: Custom locally fine-tuned model (if exists)
+    try:
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        custom_model_path = os.path.join(base_dir, "local_media", "models", "manga_finetuned.pt")
+        if os.path.exists(custom_model_path):
+            logger.info(f"Loading custom fine-tuned YOLO model from: {custom_model_path}")
+            _yolo_model = YOLO(custom_model_path)
+            logger.info("Custom fine-tuned YOLO model loaded successfully.")
+            return _yolo_model
+    except Exception as e:
+        logger.warning(f"Failed to load custom fine-tuned model: {e}. Falling back to public models...")
+
     # Priority 1: kitsumed YOLOv8m-seg — produces pixel-level masks (best for our use case)
+
     try:
         logger.info("Downloading kitsumed/yolov8m_seg-speech-bubble (YOLOv8m-seg, manga/comic) from HuggingFace...")
         model_path = hf_hub_download(

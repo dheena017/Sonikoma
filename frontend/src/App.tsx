@@ -28,6 +28,7 @@ import PageNotFound from "./components/PageNotFound";
 import AdvancedSettings from "./components/Feature/video/AdvancedSettings";
 import StatusPage from "./components/Status/StatusPage";
 import AIModelsPage from "./components/Feature/ai_models/AIModelsPage";
+import ModelTrainingPage from "./components/Feature/training/ModelTrainingPage";
 import ShortcutsPage from "./components/Shortcuts/ShortcutsPage";
 
 // --- Processing & Editor Modals ---
@@ -636,7 +637,6 @@ export default function App() {
       isProjectsPath: currentPath === "/projects",
       isSettingsPath: currentPath === "/settings",
       isAutoCropPath: currentPath === "/auto-crop",
-      isBubbleCleanerPath: currentPath === "/bubble-cleaner",
       isEpisodeScraperPath: currentPath === "/episode-scraper",
       isEditorPath:
         currentPath.startsWith("/editor") ||
@@ -646,6 +646,7 @@ export default function App() {
       isLogsPath: currentPath === "/logs",
       isStatusPath: currentPath === "/status",
       isAIModelsPath: currentPath === "/ai-models",
+      isModelTrainingPath: currentPath === "/model-training",
       isShortcutsPath: currentPath === "/shortcuts",
       isOptimizerPath: currentPath === "/ai-optimizer",
       isPanelAssistantPath: currentPath.startsWith("/panel-assistant"),
@@ -706,12 +707,12 @@ export default function App() {
     isProjectsPath,
     isSettingsPath,
     isAutoCropPath,
-    isBubbleCleanerPath,
     isEpisodeScraperPath,
     isEditorPath,
     isLogsPath,
     isStatusPath,
     isAIModelsPath,
+    isModelTrainingPath,
     isShortcutsPath,
     isOptimizerPath,
     isPanelAssistantPath,
@@ -1023,31 +1024,7 @@ export default function App() {
     }
   }, [isAutoCropPath, handleNavigateHome, setShowAutoCropModal]);
 
-  const handleBubbleCleanerApply = React.useCallback(() => {
-    console.log("App: Applying BubbleCleaner configuration parameter changes");
-    addNotification(
-      "Speech bubble cleanup configurations applied successfully!",
-      "success"
-    );
-    if (isBubbleCleanerPath) {
-      handleNavigateHome();
-    } else {
-      setShowBubbleModal(false);
-    }
-  }, [
-    addNotification,
-    isBubbleCleanerPath,
-    handleNavigateHome,
-    setShowBubbleModal,
-  ]);
 
-  const handleBubbleCleanerClose = React.useCallback(() => {
-    if (isBubbleCleanerPath) {
-      handleNavigateHome();
-    } else {
-      setShowBubbleModal(false);
-    }
-  }, [isBubbleCleanerPath, handleNavigateHome, setShowBubbleModal]);
 
   // --------------------------------------------------------------------------
   // SUB-SECTION 2.3: AUTHENTICATION GUARDS & EARLY RETURNS
@@ -1612,6 +1589,17 @@ export default function App() {
             </div>
           )}
 
+          {/* PAGE VIEW 4.2: YOLO Model Fine-Tuning Hub */}
+          {isModelTrainingPath && (
+            <div className="page-transition w-full flex-1 flex flex-col">
+              <ModelTrainingPage
+                onNavigateHome={handleNavigateHome}
+                fetchWithInterceptor={fetchWithInterceptor}
+                addNotification={addNotification}
+              />
+            </div>
+          )}
+
           {/* PAGE VIEW 5: Global Shortcuts Configuration */}
           {isShortcutsPath && (
             <div className="page-transition w-full flex-1 flex flex-col">
@@ -1868,12 +1856,12 @@ export default function App() {
             !isProjectsPath &&
             !isSettingsPath &&
             !isAutoCropPath &&
-            !isBubbleCleanerPath &&
             !isEditorPath &&
             !isProjectEditorPath &&
             !isLogsPath &&
             !isStatusPath &&
             !isAIModelsPath &&
+            !isModelTrainingPath &&
             !isShortcutsPath &&
             !isOptimizerPath &&
             !isPanelAssistantPath &&

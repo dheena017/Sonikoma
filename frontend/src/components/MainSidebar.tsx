@@ -20,6 +20,7 @@ import {
   Award,
   Menu,
   Zap,
+  Database,
 } from "lucide-react";
 
 import { useThemeMode } from "../hooks/useThemeMode";
@@ -77,7 +78,6 @@ const SidebarInner = ({
     currentPath.startsWith("/admin/") && currentPath !== "/admin/";
   const isSettings = currentPath === "/settings";
   const isAutoCrop = currentPath === "/auto-crop";
-  const isBubbleCleaner = currentPath === "/bubble-cleaner";
   const isEditor =
     currentPath.startsWith("/editor") ||
     currentPath.startsWith("/workspace/editor");
@@ -198,6 +198,13 @@ const SidebarInner = ({
           icon: Award,
           active: isAIModels,
           onClick: () => navigateTo("/ai-models"),
+          enabled: true,
+        },
+        {
+          label: "Model Training",
+          icon: Database,
+          active: currentPath === "/model-training",
+          onClick: () => navigateTo("/model-training"),
           enabled: true,
         },
         {

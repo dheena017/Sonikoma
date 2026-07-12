@@ -7,10 +7,13 @@ import LayerSeparationPanel from "./LayerSeparationPanel";
 import HorizontalSplitter from "./HorizontalSplitter/HorizontalSplitter";
 import CutsRegistry from "./CutsRegistry/CutsRegistry";
 import AutoSlicer from "./AutoCrop/AutoSlicer";
+import * as api from "@/api";
+import { ImageTool } from "@/hooks/useImageEditorState";
 
 interface ImageEditorSidebarProps {
-  activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw" | "separate";
-  setActiveTab: (tab: any) => void;
+  activeTab: ImageTool;
+  setActiveTab: (tab: ImageTool) => void;
+
   handleSaveTrainingData: () => Promise<void>;
   slices: any[];
   setSlices: any;
@@ -232,9 +235,16 @@ function ImageEditorSidebar({
   handleSaveTrainingData,
 }: ImageEditorSidebarProps) {
   const [sampleCount, setSampleCount] = React.useState<number | null>(null);
+  const [isTraining, setIsTraining] = React.useState(false);
+  const [trainingEpoch, setTrainingEpoch] = React.useState(0);
+  const [totalTrainingEpochs, setTotalTrainingEpochs] = React.useState(0);
+  const [trainingElapsed, setTrainingElapsed] = React.useState(0);
+  const [trainingMetrics, setTrainingMetrics] = React.useState<any>({});
+  const [trainingError, setTrainingError] = React.useState<string | null>(null);
+  const [epochsToTrain, setEpochsToTrain] = React.useState(20);
 
   React.useEffect(() => {
-    if (activeTab === "eraser") {
+    if (activeTab === "train") {
       const fetchCount = async () => {
         try {
           const res = await fetchWithInterceptor("/api/image/training-data-count");
@@ -249,6 +259,45 @@ function ImageEditorSidebar({
       fetchCount();
     }
   }, [activeTab, fetchWithInterceptor]);
+
+  React.useEffect(() => {
+    let intervalId: any = null;
+
+    const checkStatus = async () => {
+      try {
+        const data = await api.getYoloTrainingStatus(fetchWithInterceptor);
+        setIsTraining(data.is_training);
+        setTrainingEpoch(data.epoch);
+        setTotalTrainingEpochs(data.total_epochs);
+        setTrainingElapsed(data.elapsed_seconds);
+        setTrainingMetrics(data.metrics || {});
+        setTrainingError(data.error);
+
+        // If training just stopped, refresh the sample count too
+        if (!data.is_training && isTraining) {
+          const countRes = await fetchWithInterceptor("/api/image/training-data-count");
+          const countData = await countRes.json();
+          if (countData && typeof countData.count === "number") {
+            setSampleCount(countData.count);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to check training status:", err);
+      }
+    };
+
+    // Check status immediately
+    checkStatus();
+
+    // Poll every 3 seconds if active or training tab is open
+    if (activeTab === "train" || isTraining) {
+      intervalId = setInterval(checkStatus, 3000);
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [fetchWithInterceptor, isTraining, activeTab]);
 
   return (
     <div className="w-full h-full flex flex-col space-y-3 lg:h-full lg:min-h-0 overflow-hidden pr-0 sm:pr-1.5 scrollbar-thin overscroll-contain shrink-0 max-h-[45vh] lg:max-h-none pb-4 lg:pb-0">
@@ -276,7 +325,8 @@ function ImageEditorSidebar({
           </div>
         )}
 
-        {activeTab === "eraser" && (
+
+        {activeTab === "train" && (
           <div className="space-y-4 rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)] animate-in fade-in slide-in-from-right-4 duration-300">
             {/* Header */}
             <div className="flex items-center gap-2 pb-2 border-b border-white/5">
@@ -285,63 +335,12 @@ function ImageEditorSidebar({
               </div>
               <div>
                 <h4 className="text-xs font-mono font-bold text-white uppercase">
-                  AI Mask Correction
+                  AI Model Fine-Tuning
                 </h4>
                 <p className="text-[9px] text-purple-300/80 font-mono">
-                  YOLO Data Flywheel Loop
+                  YOLO v8 Segment Fine-Tuner
                 </p>
               </div>
-            </div>
-
-            <p className="text-[10px] text-neutral-400 font-sans leading-relaxed">
-              Brush over hair, panels, or speech bubbles that the model missed or incorrectly segmented. Hitting save generates a perfect binary training pair to fine-tune your custom model.
-            </p>
-
-            {/* Brush Tool Toggles */}
-            <div className="space-y-1.5 pt-2">
-              <label className="text-[9px] font-mono text-neutral-500 uppercase font-bold tracking-wider block">
-                Brush Mode
-              </label>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setBrushAction("paint")}
-                  className={`flex-1 py-2 rounded-xl flex items-center justify-center gap-2 text-[10px] font-mono font-bold transition-all cursor-pointer ${brushAction === "paint"
-                      ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
-                      : "bg-neutral-900 text-neutral-400 border border-neutral-800 hover:bg-neutral-800"
-                    }`}
-                >
-                  <Brush className="h-3.5 w-3.5" />
-                  Highlight
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setBrushAction("erase")}
-                  className={`flex-1 py-2 rounded-xl flex items-center justify-center gap-2 text-[10px] font-mono font-bold transition-all cursor-pointer ${brushAction === "erase"
-                      ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
-                      : "bg-neutral-900 text-neutral-400 border border-neutral-800 hover:bg-neutral-800"
-                    }`}
-                >
-                  <Eraser className="h-3.5 w-3.5" />
-                  Erase Strokes
-                </button>
-              </div>
-            </div>
-
-            {/* Brush Size Slider */}
-            <div className="space-y-1.5 pt-1">
-              <div className="flex justify-between items-center text-[9px] font-mono text-neutral-500 uppercase font-bold tracking-wider">
-                <span>Brush Size</span>
-                <span className="text-purple-400">{brushSize}px</span>
-              </div>
-              <input
-                type="range"
-                min="5"
-                max="120"
-                value={brushSize}
-                onChange={(e) => setBrushSize(Number(e.target.value))}
-                className="w-full h-1 bg-neutral-900 rounded-lg appearance-none cursor-pointer accent-purple-500"
-              />
             </div>
 
             {/* Stats / Flywheel Card */}
@@ -364,44 +363,95 @@ function ImageEditorSidebar({
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="pt-3 border-t border-white/10 flex gap-2">
-              <button
-                type="button"
-                onClick={handleClearBrushMask}
-                className="flex-1 py-2 bg-neutral-900 hover:bg-red-950/40 text-neutral-400 hover:text-red-400 border border-neutral-800 hover:border-red-900/50 rounded-xl flex items-center justify-center gap-1.5 text-[10px] font-mono font-bold transition-all cursor-pointer"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                Clear
-              </button>
-              <button
-                type="button"
-                onClick={async () => {
-                  await handleSaveTrainingData();
-                  // Refresh count
-                  try {
-                    const res = await fetchWithInterceptor("/api/image/training-data-count");
-                    const data = await res.json();
-                    if (data && typeof data.count === "number") {
-                      setSampleCount(data.count);
-                    }
-                  } catch (e) { }
-                }}
-                disabled={isSavingEdit}
-                className="flex-[2] py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl flex items-center justify-center gap-1.5 text-[10px] font-mono font-bold transition-all shadow-lg shadow-emerald-900/40 cursor-pointer disabled:opacity-40"
-              >
-                {isSavingEdit ? (
-                  <>
-                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                    <span>Saving...</span>
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-3.5 w-3.5" />
-                    <span>Save Correction</span>
-                  </>
+            {/* Fine-Tuning Controller */}
+            <div className="bg-[#111115] border border-white/5 rounded-2xl p-3.5 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] font-mono text-purple-400 uppercase font-bold tracking-wider block">
+                  Fine-Tuning Controls
+                </span>
+                {isTraining && (
+                  <span className="flex h-2 w-2 relative">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+                  </span>
                 )}
-              </button>
+              </div>
+
+              {isTraining ? (
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-[10px] text-neutral-300">
+                    <span className="font-mono">Epoch {trainingEpoch} / {totalTrainingEpochs}</span>
+                    <span className="font-mono text-neutral-500">{Math.floor(trainingElapsed / 60)}m {trainingElapsed % 60}s</span>
+                  </div>
+                  {/* Progress bar */}
+                  <div className="w-full bg-neutral-900 h-1.5 rounded-full overflow-hidden">
+                    <div
+                      className="bg-purple-500 h-full rounded-full transition-all duration-500"
+                      style={{ width: `${(trainingEpoch / (totalTrainingEpochs || 1)) * 100}%` }}
+                    ></div>
+                  </div>
+                  {/* Metrics if any */}
+                  {Object.keys(trainingMetrics).length > 0 && (
+                    <div className="grid grid-cols-2 gap-1 text-[8px] font-mono text-neutral-500 bg-neutral-950 p-2 rounded-xl border border-white/5">
+                      {Object.entries(trainingMetrics).map(([k, v]: [string, any]) => (
+                        <div key={k} className="flex justify-between">
+                          <span>{k}:</span>
+                          <span className="text-purple-400 font-bold">{v.toFixed(4)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-[9px] text-neutral-400 leading-relaxed font-sans">
+                    Fine-tune the YOLO segmentation model directly on your corrected dataset. The server will hot-swap the fine-tuned weights automatically.
+                  </p>
+
+                  {trainingError && (
+                    <div className="text-[9px] text-red-400 bg-red-950/20 border border-red-900/30 p-2.5 rounded-xl font-mono leading-relaxed">
+                      ⚠️ Error: {trainingError}
+                    </div>
+                  )}
+
+                  {(!sampleCount || sampleCount === 0) ? (
+                    <div className="text-[9px] text-purple-300/80 bg-purple-950/10 border border-purple-900/20 p-2.5 rounded-xl leading-relaxed">
+                      💡 <strong>Get started:</strong> Save at least 1 mask correction in the <strong>Eraser</strong> tool to unlock fine-tuning.
+                    </div>
+                  ) : (
+                    <div className="flex gap-2 items-center">
+                      <div className="flex-1 flex flex-col space-y-1">
+                        <label className="text-[8px] font-mono text-neutral-500 uppercase font-bold">Epochs</label>
+                        <select
+                          value={epochsToTrain}
+                          onChange={(e) => setEpochsToTrain(Number(e.target.value))}
+                          className="bg-neutral-900 border border-neutral-800 text-neutral-300 rounded-xl px-2 py-1.5 text-[10px] font-mono cursor-pointer focus:outline-none focus:border-purple-500"
+                        >
+                          <option value={5}>5 epochs (Fast)</option>
+                          <option value={10}>10 epochs</option>
+                          <option value={20}>20 epochs (Recommended)</option>
+                          <option value={50}>50 epochs (Deep)</option>
+                        </select>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            addNotification("Starting YOLO fine-tuning...", "info");
+                            await api.startYoloTraining(fetchWithInterceptor, epochsToTrain);
+                            setIsTraining(true);
+                          } catch (err: any) {
+                            addNotification(`Failed to start training: ${err.message}`, "error");
+                          }
+                        }}
+                        className="flex-1 self-end py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-[10px] font-mono font-bold transition-all shadow-md shadow-purple-900/30 cursor-pointer"
+                      >
+                        Start Fine-Tuning
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}

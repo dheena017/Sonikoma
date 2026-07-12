@@ -12,6 +12,7 @@ DB_PATH = os.path.join(PROJECT_ROOT, "backend", "database", "webtoon_local.db")
 SCRAPED_HTML_DIR = os.path.join(PROJECT_ROOT, "data", "scraped_html")
 PERSISTENT_CACHE_DIR = os.path.join(PROJECT_ROOT, "backend", "database", "image_cache")
 PUBLIC_VIDEOS_DIR = os.path.join(PROJECT_ROOT, "public", "videos")
+TRAINING_DATA_DIR = os.path.join(PROJECT_ROOT, "training_data")
 
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -173,6 +174,21 @@ def clean_generated_videos():
 
 # ─── Entry point ──────────────────────────────────────────────────────────────
 
+def clean_training_data():
+    logger.info(f"Cleaning training data directory: {TRAINING_DATA_DIR}...")
+    if os.path.exists(TRAINING_DATA_DIR):
+        for item in os.listdir(TRAINING_DATA_DIR):
+            if item.startswith("original_") or item.startswith("mask_"):
+                item_path = os.path.join(TRAINING_DATA_DIR, item)
+                try:
+                    os.remove(item_path)
+                    logger.info(f"  Deleted training sample: {item_path}")
+                except Exception as e:
+                    logger.error(f"  Failed to delete {item_path}: {e}")
+    else:
+        logger.info(f"  Does not exist: {TRAINING_DATA_DIR}")
+
+
 if __name__ == "__main__":
     logger.info("=== Sonikoma Webtoon-to-Video Complete Data Cleanup Started ===")
     clean_svg_fallbacks()   # targeted — safe while server is running
@@ -181,4 +197,5 @@ if __name__ == "__main__":
     clean_persistent_caches()
     clean_generated_videos()
     clean_temp_directories()
+    clean_training_data()
     logger.info("=== Cleanup Process Completed ===")

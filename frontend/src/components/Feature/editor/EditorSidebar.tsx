@@ -98,13 +98,6 @@ const EditorSidebar = ({
           type: "tool",
         },
         {
-          id: "bubbles",
-          label: "Clean Text Bubbles",
-          icon: Brain,
-          isProcessing: isCleaningBubbles,
-          type: "tool",
-        },
-        {
           id: "image-editor",
           label: "Image Editor",
           icon: Edit2,

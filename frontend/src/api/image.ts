@@ -178,3 +178,89 @@ export const getTrainingDataCount = async (
   });
   return res.json();
 };
+
+/**
+ * Calls the /debug-yolo endpoint and returns a blob URL for the annotated PNG.
+ * The caller is responsible for calling URL.revokeObjectURL() when done.
+ */
+export const debugYolo = async (
+  fetchWithInterceptor: any,
+  imageUrl: string,
+  conf: number = 0.25
+): Promise<string> => {
+  const params = new URLSearchParams({ url: imageUrl, conf: String(conf) });
+  const res = await fetchWithInterceptor(`/api/image/debug-yolo?${params}`, {
+    method: "GET",
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Unknown error" }));
+    throw new Error(err.detail ?? "Debug YOLO request failed");
+  }
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);
+};
+
+export const startYoloTraining = async (
+  fetchWithInterceptor: any,
+  epochs: number = 20,
+  batchSize: number = 4,
+  options?: RequestInit
+) => {
+  const res = await fetchWithInterceptor(`/api/image/start-training?epochs=${epochs}&batch_size=${batchSize}`, {
+    method: "POST",
+    ...options,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Unknown error" }));
+    throw new Error(err.detail ?? "Failed to start YOLO training");
+  }
+  return res.json();
+};
+
+export const getYoloTrainingStatus = async (
+  fetchWithInterceptor: any,
+  options?: RequestInit
+) => {
+  const res = await fetchWithInterceptor("/api/image/training-status", {
+    method: "GET",
+    ...options,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Unknown error" }));
+    throw new Error(err.detail ?? "Failed to fetch training status");
+  }
+  return res.json();
+};
+
+export const getYoloTrainingDataList = async (
+  fetchWithInterceptor: any,
+  options?: RequestInit
+): Promise<Array<{ pair_id: string; original_url: string; mask_url: string }>> => {
+  const res = await fetchWithInterceptor("/api/image/training-data-list", {
+    method: "GET",
+    ...options,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Unknown error" }));
+    throw new Error(err.detail ?? "Failed to fetch training data list");
+  }
+  return res.json();
+};
+
+export const deleteYoloTrainingDataPair = async (
+  fetchWithInterceptor: any,
+  pairId: string,
+  options?: RequestInit
+) => {
+  const res = await fetchWithInterceptor(`/api/image/training-data-pair/${pairId}`, {
+    method: "DELETE",
+    ...options,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Unknown error" }));
+    throw new Error(err.detail ?? "Failed to delete training pair");
+  }
+  return res.json();
+};
+
+

@@ -2,6 +2,8 @@ import React from "react";
 import { Undo2, Trash2, RefreshCw, Scissors } from "lucide-react";
 import { Slice } from "../../shared";
 
+import { ImageTool } from "@/hooks/useImageEditorState";
+
 interface ImageEditorFooterProps {
   slices: Slice[];
   historyLength: number;
@@ -9,7 +11,8 @@ interface ImageEditorFooterProps {
   isSavingEdit: boolean;
   setEditingImageIdx: (idx: number | null) => void;
   handleDeleteCurrentImage: () => void;
-  activeTab: "adjust" | "edit" | "eraser" | "slice" | "crop" | "merge" | "draw" | "separate";
+  activeTab: ImageTool;
+
 
   isTransforming: boolean;
   addNotification: (msg: string, type: any) => void;

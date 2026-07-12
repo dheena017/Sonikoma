@@ -15,6 +15,7 @@ import {
   Sparkles,
   Shield,
   Zap,
+  Database,
 } from "lucide-react";
 import TooltipPortal from "./TooltipPortal";
 
@@ -40,7 +41,6 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
   const isWorkspace = currentPath.startsWith("/workspace");
   const isProjects = currentPath.startsWith("/projects");
   const isAutoCrop = currentPath.startsWith("/auto-crop");
-  const isBubbleCleaner = currentPath.startsWith("/bubble-cleaner");
   const isEditor =
     currentPath.startsWith("/editor") ||
     currentPath.startsWith("/workspace/editor");
@@ -48,6 +48,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
   const isLogs = currentPath.startsWith("/logs");
   const isStatus = currentPath.startsWith("/status");
   const isAIModels = currentPath.startsWith("/ai-models");
+  const isModelTraining = currentPath.startsWith("/model-training");
   const isShortcuts = currentPath.startsWith("/shortcuts");
   const isSettings = currentPath.startsWith("/settings");
   const isAdminPath = currentPath.startsWith("/admin");
@@ -118,12 +119,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           active: isAutoCrop,
           onClick: () => navigateTo("/auto-crop"),
         },
-        {
-          label: "Clean-Bubbles",
-          icon: Brain,
-          active: isBubbleCleaner,
-          onClick: () => navigateTo("/bubble-cleaner"),
-        },
+
         {
           label: "Video Studio",
           icon: Film,
@@ -168,6 +164,12 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           icon: Award,
           active: isAIModels,
           onClick: () => navigateTo("/ai-models"),
+        },
+        {
+          label: "Model Training",
+          icon: Database,
+          active: isModelTraining,
+          onClick: () => navigateTo("/model-training"),
         },
         {
           label: "Keys",

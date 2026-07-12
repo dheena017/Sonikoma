@@ -3,12 +3,12 @@ import { useImageEditorStore, ImageTool } from "@/hooks/useImageEditorState";
 import {
   Sparkles,
   Settings2,
-  Eraser,
   Scissors,
   Crop,
   Layers,
   Brush,
-  Link2
+  Link2,
+  Database
 } from "lucide-react";
 import TooltipPortal from "@/components/TooltipPortal";
 
@@ -30,9 +30,9 @@ export const ImageEditorMiniSidebar: React.FC = () => {
       name: "Retouch",
       items: [
         { id: "draw", label: "Draw", icon: Brush },
-        { id: "eraser", label: "Erase", icon: Eraser },
       ],
     },
+
     {
       name: "Layout",
       items: [
@@ -45,9 +45,11 @@ export const ImageEditorMiniSidebar: React.FC = () => {
       name: "AI",
       items: [
         { id: "separate", label: "Separate", icon: Layers },
+        { id: "train", label: "Train YOLO", icon: Database },
       ],
     },
   ];
+
 
   const SidebarItem: React.FC<{ item: { id: ImageTool; label: string; icon: React.ElementType } }> = ({ item }) => {
     const [hover, setHover] = useState(false);

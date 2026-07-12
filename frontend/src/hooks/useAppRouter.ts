@@ -193,6 +193,7 @@ export function useAppRouter({
             path === "/ai-translation" ||
             path === "/ai-audio-lab" ||
             path === "/ai-thumbnails" ||
+            path === "/model-training" ||
             path === "/ai-engagement" ||
             path === "/ai-voice" ||
             path === "/ai-analytics" ||
@@ -200,7 +201,6 @@ export function useAppRouter({
             path === "/profile" ||
             path === "/notifications" ||
             path === "/auto-crop" ||
-            path === "/bubble-cleaner" ||
             path === "/projects" ||
             path === "/project-details" ||
             path === "/project-editor" ||
@@ -297,10 +297,6 @@ export function useAppRouter({
       } else if (path === "/auto-crop") {
         setShowAutoCropModal(true);
         setShowBubbleModal(false);
-        setEditingImageIdx(null);
-      } else if (path === "/bubble-cleaner") {
-        setShowAutoCropModal(false);
-        setShowBubbleModal(true);
         setEditingImageIdx(null);
       } else if (
         path.startsWith("/editor") ||

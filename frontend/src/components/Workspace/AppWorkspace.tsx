@@ -754,28 +754,6 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
               </div>
             </div>
 
-            {/* Card 3: Clean-Bubbles */}
-            <div
-              onClick={() => navigateTo?.("/bubble-cleaner")}
-              className="group cursor-pointer bg-neutral-905/40 hover:bg-purple-955/20 border border-neutral-800 hover:border-purple-500/30 rounded-2xl p-5 backdrop-blur-md transition-all duration-300 flex flex-col justify-between gap-6 hover:shadow-[0_0_20px_rgba(168,85,247,0.1)] active:scale-[0.98]"
-            >
-              <div className="space-y-3">
-                <div className="icon-pill icon-pill--purple">
-                  <Brain className="h-5 w-5 text-purple-400" />
-                </div>
-                <h4 className="text-sm font-bold text-white group-hover:text-purple-300 transition-colors">
-                  Bubble Cleaner
-                </h4>
-                <p className="text-xs text-neutral-400 leading-relaxed font-medium">
-                  Erase speech bubbles and inpaint underlying panel artwork
-                  using AI models.
-                </p>
-              </div>
-              <div className="flex items-center gap-1 text-[10px] font-black text-purple-400 uppercase tracking-widest group-hover:translate-x-1 transition-transform">
-                Open Cleaner <ArrowRight className="h-3.5 w-3.5" />
-              </div>
-            </div>
-
             {/* Card 4: AI Models & Keys */}
             <div
               onClick={() => navigateTo?.("/ai-models")}

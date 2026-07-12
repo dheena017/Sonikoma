@@ -178,13 +178,7 @@ export function useGlobalShortcuts({
             addNotification("No scraped frames available.", "info");
           }
           break;
-        case "nav_bubble":
-          if (scrapedImages.length > 0) {
-            navigateTo("/bubble-cleaner");
-          } else {
-            addNotification("No scraped frames available.", "info");
-          }
-          break;
+
         case "nav_logs":
           navigateTo("/logs");
           break;

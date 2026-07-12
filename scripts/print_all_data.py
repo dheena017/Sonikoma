@@ -158,6 +158,33 @@ def main():
         "SELECT * FROM system_logs ORDER BY created_at DESC LIMIT 100",
     )
 
+    print_training_data_summary()
+
+
+def print_training_data_summary():
+    training_dir = os.path.join(PROJECT_ROOT, "training_data")
+    logger.info("=" * 80)
+    logger.info("📂 LOCAL TRAINING DATA SAMPLES (DATA FLYWHEEL)")
+    logger.info("=" * 80)
+    if os.path.exists(training_dir):
+        import glob
+        orig_files = glob.glob(os.path.join(training_dir, "original_*.*"))
+        mask_files = glob.glob(os.path.join(training_dir, "mask_*.*"))
+        logger.info(f"  Training Directory: {training_dir}")
+        logger.info(f"  Total Original Panels: {len(orig_files)}")
+        logger.info(f"  Total Segment Masks:   {len(mask_files)}")
+        if orig_files:
+            logger.info("  Saved Sample Pairs:")
+            for f in sorted(orig_files)[:10]:
+                filename = os.path.basename(f)
+                pair_id = filename.replace("original_", "").split(".")[0]
+                logger.info(f"    - Pair ID: {pair_id} ({filename})")
+            if len(orig_files) > 10:
+                logger.info(f"    ... and {len(orig_files) - 10} more samples")
+    else:
+        logger.info("  Training Directory does not exist.")
+    logger.info("")
+
 
 if __name__ == "__main__":
     main()
