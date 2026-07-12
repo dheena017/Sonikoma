@@ -238,42 +238,52 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
                                 break
 
                 if not bubble_found:
-                    # Fallback: Float text, mask only thresholded pixels
+                    # Fallback: Isolate Text/SFX cleanly (Solves "Better Text/SFX Isolation")
+                    # Step 1: Smooth out background textures using a Bilateral Filter while keeping text edges sharp
                     tx1, ty1 = max(0, x), max(0, y)
                     tx2, ty2 = min(width, x + w), min(height, y + h_box)
                     exact_roi = original_img[ty1:ty2, tx1:tx2]
                     if exact_roi.size > 0:
-                        exact_roi_gray = cv2.cvtColor(exact_roi, cv2.COLOR_BGR2GRAY)
-                        exact_thresh_inv = cv2.adaptiveThreshold(
-                            exact_roi_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2
-                        )
-                        exact_thresh_bin = cv2.adaptiveThreshold(
-                            exact_roi_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
-                        )
+                        # Apply Bilateral Filter
+                        smoothed_roi = cv2.bilateralFilter(exact_roi, d=9, sigmaColor=75, sigmaSpace=75)
+                        smoothed_roi_gray = cv2.cvtColor(smoothed_roi, cv2.COLOR_BGR2GRAY)
 
-                        # Leverage _detect_bg_color_and_threshold from detect_panels.py to stay DRY and robust
-                        is_white, _ = _detect_bg_color_and_threshold(exact_roi_gray, bg_mode="auto", sensitivity=30.0)
-                        raw_text_pixels = exact_thresh_inv if is_white else exact_thresh_bin
+                        # Step 2: Use Canny Edge Detection to capture character and text outlines cleanly
+                        canny_edges = cv2.Canny(smoothed_roi_gray, 50, 150)
 
-                        # Filter screentones and background textures
-                        num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(raw_text_pixels, connectivity=8)
-                        filtered_text_pixels = np.zeros_like(raw_text_pixels)
+                        # Step 3: Dilate Canny edges slightly to close individual character boundary loops
+                        edge_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+                        dilated_edges = cv2.dilate(canny_edges, edge_kernel, iterations=1)
 
+                        # Step 4: Find contours on the dilated edge mask
+                        roi_contours, _ = cv2.findContours(dilated_edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+                        # Step 5: Draw filled contours to isolate the text/SFX characters cleanly
+                        filled_text_mask = np.zeros_like(smoothed_roi_gray)
                         roi_w, roi_h = tx2 - tx1, ty2 - ty1
                         min_pixel_area = max(2, int((roi_w * roi_h) * 0.0005))
-                        max_pixel_area = int((roi_w * roi_h) * 0.2)
+                        max_pixel_area = int((roi_w * roi_h) * 0.35)
 
+                        for c in roi_contours:
+                            c_area = cv2.contourArea(c)
+                            if min_pixel_area <= c_area <= max_pixel_area:
+                                # Smooth contour to ensure high-fidelity boundaries
+                                smoothed_c = smooth_contour(c, factor=0.005)
+                                # Obtain bounding box properties to filter out extreme border lines
+                                _, _, cw, ch = cv2.boundingRect(smoothed_c)
+                                aspect_ratio = float(cw) / ch if ch > 0 else 0
+                                if 0.05 < aspect_ratio < 20.0:
+                                    cv2.drawContours(filled_text_mask, [smoothed_c], -1, 255, -1)
+
+                        # Clean isolated text mask using statistical component analysis to completely bypass screentone noise
+                        num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(filled_text_mask, connectivity=8)
+                        final_roi_mask = np.zeros_like(filled_text_mask)
                         for label_idx in range(1, num_labels):
                             comp_area = stats[label_idx, cv2.CC_STAT_AREA]
-                            comp_w = stats[label_idx, cv2.CC_STAT_WIDTH]
-                            comp_h = stats[label_idx, cv2.CC_STAT_HEIGHT]
+                            if comp_area >= min_pixel_area:
+                                final_roi_mask[labels == label_idx] = 255
 
-                            if min_pixel_area <= comp_area <= max_pixel_area:
-                                aspect_ratio = float(comp_w) / comp_h if comp_h > 0 else 0
-                                if 0.05 < aspect_ratio < 20.0:
-                                    filtered_text_pixels[labels == label_idx] = 255
-
-                        text_mask[ty1:ty2, tx1:tx2] = cv2.bitwise_or(text_mask[ty1:ty2, tx1:tx2], filtered_text_pixels)
+                        text_mask[ty1:ty2, tx1:tx2] = cv2.bitwise_or(text_mask[ty1:ty2, tx1:tx2], final_roi_mask)
 
             # Subtract character bounding mask from the text layer so speech bubbles never clip the main character details (Step 1 Integration)
             if np.any(global_char_mask > 0):
@@ -288,9 +298,9 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
             _, buffer = cv2.imencode('.webp', text_layer)
             text_layer_bytes = buffer.tobytes()
 
-            # Clean text/bubbles out of working image immediately to prevent "Sticky Text"
-            text_dilate_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-            dilated_text_mask = cv2.dilate(text_mask, text_dilate_kernel, iterations=1)
+            # Clean text/bubbles out of working image immediately to prevent "Sticky Text" (Solves "Dilate Before Inpainting")
+            # Dilate the text_mask heavily to completely cover outer letter borders and black outlines
+            dilated_text_mask = cv2.dilate(text_mask, np.ones((5, 5), np.uint8), iterations=2)
             textless_img = cv2.inpaint(original_img, dilated_text_mask, inpaintRadius=5, flags=cv2.INPAINT_TELEA)
 
         except Exception as e:
