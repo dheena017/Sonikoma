@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Layers, Volume2, RefreshCw, CheckCircle2, AlertCircle } from "lucide-react";
 import { GeneratedPanel } from "@/types";
+import * as api from "@/api";
 
 interface LayerSeparationPanelProps {
   activeStoryboardPanel: GeneratedPanel | null;
@@ -35,12 +36,11 @@ export default function LayerSeparationPanel({
     addNotification("Starting AI layer separation...", "info");
 
     try {
-      const res = await fetchWithInterceptor(`/api/image/process-layers/${activeStoryboardPanel.id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: activeStoryboardPanel.image_url }),
-      });
-      const data = await res.json();
+      const data = await api.processLayers(
+        fetchWithInterceptor,
+        activeStoryboardPanel.id,
+        { url: activeStoryboardPanel.image_url }
+      );
 
       if (data.success && data.layers) {
         setPanels((prev) =>

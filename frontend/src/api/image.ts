@@ -87,6 +87,24 @@ export const transformImage = async (
   return res.json();
 };
 
+export const processLayers = async (
+  fetchWithInterceptor: any,
+  panelId: string | number,
+  data: { url: string },
+  options?: RequestInit
+) => {
+  const res = await fetchWithInterceptor(
+    `/api/image/process-layers/${panelId}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+      ...options,
+    }
+  );
+  return res.json();
+};
+
 export const downloadZip = async (
   fetchWithInterceptor: any,
   data: any,
