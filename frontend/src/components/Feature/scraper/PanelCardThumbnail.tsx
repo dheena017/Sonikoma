@@ -18,6 +18,7 @@ interface PanelCardThumbnailProps {
   handleRotateClockwise: () => void;
   handleFlipHorizontal: () => void;
   handleUndo: () => void;
+  onCheckboxClick?: (e: React.MouseEvent) => void;
 }
 
 const getScrapedImageStatus = (url: string) => {
@@ -137,6 +138,7 @@ export function PanelCardThumbnail({
           <div className="absolute inset-0 rounded-full bg-purple-500/35 animate-ping" />
         )}
         <div
+          onClick={onCheckboxClick}
           className={[
             "relative rounded-full p-1 border transition-all duration-300 ease-out cursor-pointer active:scale-90",
             isSelected

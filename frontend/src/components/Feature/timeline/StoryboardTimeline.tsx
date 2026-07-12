@@ -125,9 +125,8 @@ const StoryboardTimeline = React.memo(
           );
           setLastSelectedIndex(idx);
         } else {
-          setSelectedPanelIds((prev) =>
-            updateSelection(prev, { type: "single", item: panelId }) as Set<number>
-          );
+          // Single-click (no modifiers) does NOT select/deselect the panel or change selected items.
+          // It strictly sets/updates lastSelectedIndex.
           setLastSelectedIndex(idx);
         }
       },

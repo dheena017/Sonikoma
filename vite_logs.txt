@@ -3245,3 +3245,7 @@
 [90m3:09:06 PM[0m [35m[Vite][0m [32mGET[0m [36m/api/auth/credits[0m [31m502[0m [90m(0ms)[0m
 [31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
 [31m[Vite Proxy][0m [33m/api proxy error:[0m connect ECONNREFUSED 127.0.0.1:5173
+3:49:46 PM [vite] (client) hmr update /src/components/Feature/scraper/LiveScraperDeck.tsx, /src/index.css
+3:49:57 PM [vite] (client) hmr update /src/components/Feature/scraper/PanelCard.tsx, /src/index.css
+3:50:10 PM [vite] (client) hmr update /src/components/Feature/scraper/PanelCardThumbnail.tsx, /src/index.css
+3:50:30 PM [vite] (client) hmr update /src/components/Feature/timeline/StoryboardTimeline.tsx, /src/index.css
