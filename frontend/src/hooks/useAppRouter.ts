@@ -319,7 +319,7 @@ export function useAppRouter({
           return;
         }
 
-        const hasProjId = params.has("id") || params.has("project_id");
+        const hasProjId = params.has("id") || params.has("project_id") || (params.has("series") && params.has("chapter"));
         const hasSlugs = /^\/workspace\/editor\/series\/[^\/]+\/chapters\/[^\/]+\/?$/.test(path);
         if (
           scrapedImagesRef.current.length === 0 &&

@@ -31,6 +31,8 @@ interface EditorMiniSidebarProps {
   isCleaningBubbles: boolean;
   navigateTo?: (path: string) => void;
   projectId?: string | null;
+  seriesSlug?: string | null;
+  chapterSlug?: string | null;
   settingsPath?: string;
   topOffsetPx?: number;
 }
@@ -55,6 +57,8 @@ const EditorMiniSidebarInner = ({
   isCleaningBubbles,
   navigateTo,
   projectId,
+  seriesSlug,
+  chapterSlug,
   settingsPath = "/settings",
   topOffsetPx = 59,
 }: EditorMiniSidebarProps) => {
@@ -64,6 +68,7 @@ const EditorMiniSidebarInner = ({
   const activeTool = useImageEditorStore((state) => state.activeTool);
   const setActiveTool = useImageEditorStore((state) => state.setActiveTool);
   const slicesCount = useImageEditorStore((state) => state.slicesCount);
+  const editingImageIdx = useImageEditorStore((state) => state.editingImageIdx);
 
   const [hoveredTool, setHoveredTool] = useState<string | null>(null);
   const [hoveredRect, setHoveredRect] = useState<DOMRect | null>(null);
@@ -232,7 +237,15 @@ const EditorMiniSidebarInner = ({
 
         <button
           onClick={() => {
-            if (item.id === "autocrop" || item.id === "bubbles" || item.id === "image-editor") {
+            if (item.id === "image-editor") {
+              const target = `/editor/adjust?idx=${editingImageIdx ?? 0}&series=${seriesSlug || ""}&chapter=${chapterSlug || ""}`;
+              if (navigateTo) {
+                navigateTo(target);
+              } else {
+                window.history.pushState({}, "", target);
+                window.dispatchEvent(new Event("popstate"));
+              }
+            } else if (item.id === "autocrop" || item.id === "bubbles") {
               setCurrentSection(item.id);
             } else if (item.id === "settings") {
               if (navigateTo) {

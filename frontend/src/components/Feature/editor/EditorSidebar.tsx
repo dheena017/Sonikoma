@@ -13,6 +13,7 @@ import {
   Edit2,
   type LucideIcon,
 } from "lucide-react";
+import { useImageEditorStore } from "../../../hooks/useImageEditorState";
 
 interface EditorSidebarProps {
   isCollapsed: boolean;
@@ -26,6 +27,8 @@ interface EditorSidebarProps {
   isCleaningBubbles: boolean;
   navigateTo?: (path: string) => void;
   projectId?: string | null;
+  seriesSlug?: string | null;
+  chapterSlug?: string | null;
 }
 
 interface SidebarMenuItem {
@@ -54,7 +57,10 @@ const EditorSidebar = ({
   isCleaningBubbles,
   navigateTo,
   projectId,
+  seriesSlug,
+  chapterSlug,
 }: EditorSidebarProps) => {
+  const editingImageIdx = useImageEditorStore((state) => state.editingImageIdx);
   const menuGroups: SidebarGroup[] = [
     {
       title: "Workspace Navigation",
@@ -198,7 +204,15 @@ const EditorSidebar = ({
 
                     <button
                       onClick={() => {
-                        if (item.type === "tool") {
+                        if (item.id === "image-editor") {
+                          const target = `/editor/adjust?idx=${editingImageIdx ?? 0}&series=${seriesSlug || ""}&chapter=${chapterSlug || ""}`;
+                          if (navigateTo) {
+                            navigateTo(target);
+                          } else {
+                            window.history.pushState({}, "", target);
+                            window.dispatchEvent(new Event("popstate"));
+                          }
+                        } else if (item.type === "tool") {
                           setCurrentSection(item.id);
                         } else if (item.type === "link") {
                           if (navigateTo) {

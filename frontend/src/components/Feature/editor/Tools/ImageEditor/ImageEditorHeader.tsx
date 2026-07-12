@@ -30,6 +30,7 @@ interface ImageEditorHeaderProps {
   slices: any[];
   isToolsPanelOpen: boolean;
   setIsToolsPanelOpen: (val: boolean | ((prev: boolean) => boolean)) => void;
+  handleExecuteSave?: () => void;
 }
 
 export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({ 
@@ -48,7 +49,8 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
   setIsPipMode,
   slices,
   isToolsPanelOpen,
-  setIsToolsPanelOpen
+  setIsToolsPanelOpen,
+  handleExecuteSave
 }) => {
   const hasMultipleImages = scrapedImages.length > 1;
 
@@ -137,7 +139,22 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
         <div className="w-px h-6 bg-gray-800 mx-2"></div>
 
         <button 
-          onClick={() => setEditingImageIdx(null)}
+          onClick={() => {
+            const params = new URLSearchParams(window.location.search);
+            const series = params.get("series");
+            const chapter = params.get("chapter");
+            if (series && chapter) {
+              const target = `/workspace/editor/series/${series}/chapters/${chapter}`;
+              if ((window as any).navigateTo) {
+                (window as any).navigateTo(target);
+              } else {
+                window.history.pushState({}, "", target);
+                window.dispatchEvent(new Event("popstate"));
+              }
+            } else {
+              setEditingImageIdx(null);
+            }
+          }}
           className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white bg-transparent hover:bg-gray-800 rounded-lg transition flex items-center"
         >
           <X className="w-4 h-4 mr-2" /> Cancel
@@ -145,9 +162,13 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
         
         <button 
           onClick={() => {
-            // Trigger your global save event here
-            window.dispatchEvent(new Event("FABRIC_REQUEST_SAVE"));
-            setEditingImageIdx(null);
+            if (handleExecuteSave) {
+              handleExecuteSave();
+            } else {
+              // Fallback
+              window.dispatchEvent(new Event("FABRIC_REQUEST_SAVE"));
+              setEditingImageIdx(null);
+            }
           }}
           className="px-4 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-500 rounded-lg transition flex items-center shadow-lg shadow-purple-900/20"
         >
