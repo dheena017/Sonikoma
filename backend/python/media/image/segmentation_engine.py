@@ -18,9 +18,13 @@ _yolo_model = None
 def get_yolo_model():
     """
     Lazily downloads and initializes the YOLO manga-segmentation model.
-    Uses keremberke/manga-speech-bubble-detection (YOLOv8n-seg), a well-supported
-    model trained specifically on manga speech bubbles and text regions.
-    Falls back to the generic YOLOv8n-seg pretrained model if HuggingFace download fails.
+
+    Tries models in priority order:
+    1. kitsumed/yolov8m_seg-speech-bubble  — YOLOv8m-seg, produces pixel masks, trained on manga/comic bubbles.
+    2. ogkalu/comic-speech-bubble-detector-yolov8m — YOLOv8m detection, broader comic coverage.
+    3. yolov8n-seg.pt — generic pretrained segmentation (last resort; not manga-specific).
+
+    The first successfully loaded model is cached in `_yolo_model`.
     """
     global _yolo_model
     if _yolo_model is not None:
@@ -29,25 +33,39 @@ def get_yolo_model():
     if not has_yolo_dependencies:
         return None
 
-    # Primary: manga-specific speech bubble detection model (YOLOv8n-seg)
+    # Priority 1: kitsumed YOLOv8m-seg — produces pixel-level masks (best for our use case)
     try:
-        logger.info("Downloading manga-speech-bubble YOLOv8n-seg checkpoint from HuggingFace Hub...")
+        logger.info("Downloading kitsumed/yolov8m_seg-speech-bubble (YOLOv8m-seg, manga/comic) from HuggingFace...")
         model_path = hf_hub_download(
-            repo_id="keremberke/manga-speech-bubble-detection",
-            filename="best.pt"
+            repo_id="kitsumed/yolov8m_seg-speech-bubble",
+            filename="model.pt"  # confirmed filename via HF API
         )
-        logger.info(f"Loading YOLO model from: {model_path}")
+        logger.info(f"Loading YOLO manga segmentation model from: {model_path}")
         _yolo_model = YOLO(model_path)
-        logger.info("YOLO manga-speech-bubble model loaded successfully.")
+        logger.info("kitsumed/yolov8m_seg-speech-bubble model loaded successfully.")
         return _yolo_model
     except Exception as e:
-        logger.warning(f"Failed to load manga-specific YOLO model from HuggingFace: {e}. Trying generic YOLOv8n-seg fallback...")
+        logger.warning(f"kitsumed model unavailable: {e}. Trying ogkalu fallback...")
 
-    # Fallback: generic YOLOv8n-seg pretrained model
+    # Priority 2: ogkalu YOLOv8m — broader comic/webtoon coverage (detection model, no masks)
     try:
-        logger.info("Loading generic YOLOv8n-seg pretrained model as YOLO fallback...")
+        logger.info("Downloading ogkalu/comic-speech-bubble-detector-yolov8m from HuggingFace...")
+        model_path = hf_hub_download(
+            repo_id="ogkalu/comic-speech-bubble-detector-yolov8m",
+            filename="comic-speech-bubble-detector.pt"
+        )
+        logger.info(f"Loading ogkalu YOLO fallback model from: {model_path}")
+        _yolo_model = YOLO(model_path)
+        logger.info("ogkalu/comic-speech-bubble-detector-yolov8m fallback model loaded successfully.")
+        return _yolo_model
+    except Exception as e:
+        logger.warning(f"ogkalu model unavailable: {e}. Trying generic YOLOv8n-seg last resort...")
+
+    # Priority 3: Generic YOLOv8n-seg — not manga-specific but better than nothing
+    try:
+        logger.info("Loading generic YOLOv8n-seg pretrained model as last-resort YOLO fallback...")
         _yolo_model = YOLO("yolov8n-seg.pt")
-        logger.info("Generic YOLOv8n-seg fallback model loaded successfully.")
+        logger.info("Generic YOLOv8n-seg loaded (not manga-specific, mask quality may be low).")
         return _yolo_model
     except Exception as e:
         logger.error(f"All YOLO model loading attempts failed: {e}", exc_info=True)
