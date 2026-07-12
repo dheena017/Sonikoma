@@ -84,24 +84,24 @@ export default function ChaptersTuner({
   };
 
   return (
-    <div className="bg-neutral-950/60 p-4 border border-neutral-850 rounded-xl space-y-3.5 font-mono text-xs text-neutral-400 animate-fade-in">
-      <div className="flex items-center justify-between border-b border-neutral-900 pb-1.5">
-        <span className="text-neutral-300 font-bold flex items-center gap-1.5">
+    <div className="bg-neutral-950/40 backdrop-blur-sm p-5 border border-neutral-900 rounded-2xl space-y-4 font-mono text-xs text-neutral-400 animate-fade-in">
+      <div className="flex items-center justify-between border-b border-neutral-900 pb-2">
+        <span className="text-neutral-200 font-bold flex items-center gap-1.5">
           <BookOpen className="h-4 w-4 text-purple-400" />
           Chapters Timeline Tuner
         </span>
         <button
           onClick={handleAutoLoad}
-          className="text-[9px] text-purple-400 hover:text-purple-300 flex items-center gap-0.5 cursor-pointer bg-purple-950/20 px-2 py-0.5 rounded border border-purple-900/30"
+          className="text-[10px] text-purple-400 hover:text-purple-300 flex items-center gap-1 cursor-pointer bg-purple-950/25 px-2.5 py-1 rounded-lg border border-purple-900/35 hover:bg-purple-900/20 transition-all duration-200"
           title="Re-estimate chapter offsets from active storyboard panels"
         >
           Load Storyboard Defaults
         </button>
       </div>
 
-      <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1 scrollbar-thin">
+      <div className="space-y-2.5 max-h-[220px] overflow-y-auto pr-1 scrollbar-thin">
         {chapters.length === 0 ? (
-          <div className="text-neutral-600 text-[10px] italic py-2">
+          <div className="text-neutral-500 text-[11px] italic py-3 text-center">
             No chapters created yet. Click default or add button below.
           </div>
         ) : (
@@ -117,7 +117,7 @@ export default function ChaptersTuner({
                   handleUpdateChapter(index, "time", e.target.value)
                 }
                 placeholder="MM:SS"
-                className="w-16 bg-neutral-900 border border-neutral-850 rounded px-2 py-1 text-[10.5px] text-white focus:outline-none focus:border-purple-500/60 text-center"
+                className="w-16 bg-neutral-905/40 border border-neutral-900 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 rounded-xl px-2 py-2 text-[11px] text-white focus:outline-none text-center shadow-inner"
               />
               <input
                 type="text"
@@ -126,11 +126,11 @@ export default function ChaptersTuner({
                   handleUpdateChapter(index, "title", e.target.value)
                 }
                 placeholder="Chapter Outline Title"
-                className="flex-1 bg-neutral-900 border border-neutral-850 rounded px-2 py-1 text-[10.5px] text-white focus:outline-none focus:border-purple-500/60"
+                className="flex-1 bg-neutral-905/40 border border-neutral-900 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 rounded-xl px-3 py-2 text-[11px] text-white focus:outline-none shadow-inner"
               />
               <button
                 onClick={() => handleRemoveChapter(index)}
-                className="p-1 bg-red-950/30 hover:bg-red-950/60 border border-red-900/35 hover:border-red-900/50 rounded text-red-400 hover:text-red-300 transition-all cursor-pointer"
+                className="p-2 bg-red-950/10 hover:bg-red-950/30 border border-red-900/20 hover:border-red-500/40 rounded-xl text-red-400 hover:text-red-300 transition-all duration-200 cursor-pointer"
                 title="Delete Chapter"
               >
                 <Trash2 className="h-3.5 w-3.5" />
@@ -140,19 +140,19 @@ export default function ChaptersTuner({
         )}
       </div>
 
-      <div className="flex justify-between items-center gap-2 pt-1 border-t border-neutral-900/60">
+      <div className="flex justify-between items-center gap-2 pt-2.5 border-t border-neutral-900">
         <button
           onClick={handleAddChapter}
-          className="flex items-center gap-1 px-2.5 py-1 text-[9.5px] font-bold bg-neutral-900 border border-neutral-850 hover:bg-neutral-800 text-neutral-350 hover:text-white rounded-lg transition-colors cursor-pointer"
+          className="flex items-center gap-1 px-3 py-1.5 text-[10px] font-bold bg-neutral-900/40 border border-neutral-850 hover:border-neutral-700 text-neutral-350 hover:text-white rounded-xl transition-all duration-200 cursor-pointer"
         >
-          <Plus className="h-3 w-3" />
+          <Plus className="h-3.5 w-3.5" />
           Add Chapter Offset
         </button>
 
         <button
           onClick={handleInsert}
           disabled={chapters.length === 0}
-          className="flex items-center gap-1.5 px-3 py-1 bg-purple-650 hover:bg-purple-550 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg text-[9.5px] font-bold transition-all cursor-pointer shadow shadow-purple-950/30"
+          className="flex items-center gap-1.5 px-4 py-1.5 bg-purple-600 hover:bg-purple-550 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-[10px] font-bold transition-all duration-200 cursor-pointer shadow-md shadow-purple-950/20"
         >
           <Check className="h-3.5 w-3.5" />
           Insert to Description

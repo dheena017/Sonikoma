@@ -1,5 +1,5 @@
 import React from "react";
-import { History, ExternalLink, Calendar, Video } from "lucide-react";
+import { History, ExternalLink, Calendar } from "lucide-react";
 
 interface UploadHistoryProps {
   history: Array<{
@@ -17,13 +17,13 @@ export default function UploadHistory({ history }: UploadHistoryProps) {
   }
 
   return (
-    <div className="bg-neutral-900/20 border border-neutral-855 rounded-2xl p-5 space-y-3.5 mt-5 animate-fade-in">
-      <h3 className="text-xs font-bold text-neutral-400 tracking-wider uppercase font-mono flex items-center gap-1.5">
-        <History className="h-4 w-4 text-purple-400" />
+    <div className="bg-neutral-950/40 backdrop-blur-md border border-neutral-900 rounded-3xl p-6 space-y-4 mt-5 animate-fade-in transition-all duration-305 hover:border-neutral-800">
+      <h3 className="text-xs font-bold text-neutral-300 tracking-wider uppercase font-mono flex items-center gap-2 border-b border-neutral-900 pb-3">
+        <History className="h-4.5 w-4.5 text-purple-405" />
         Upload & Export History
       </h3>
 
-      <div className="space-y-2.5 max-h-[220px] overflow-y-auto scrollbar-thin pr-1">
+      <div className="space-y-3 max-h-[220px] overflow-y-auto scrollbar-thin pr-1 shadow-inner">
         {history.map((pub) => {
           const dateStr = pub.published_at
             ? new Date(pub.published_at.replace(" ", "T")).toLocaleDateString(
@@ -40,9 +40,9 @@ export default function UploadHistory({ history }: UploadHistoryProps) {
           return (
             <div
               key={pub.id}
-              className="p-3 bg-neutral-950/40 border border-neutral-900/60 rounded-xl flex items-center justify-between gap-3 text-xs font-mono group hover:bg-neutral-950 transition-all duration-200"
+              className="p-3 bg-neutral-950/20 backdrop-blur-sm border border-neutral-900/60 rounded-2xl flex items-center justify-between gap-3 text-xs font-mono group hover:bg-neutral-950/40 transition-all duration-200"
             >
-              <div className="space-y-1 min-w-0 flex-1">
+              <div className="space-y-1.5 min-w-0 flex-1">
                 <span
                   className="text-white font-bold block truncate"
                   title={pub.title}
@@ -56,7 +56,7 @@ export default function UploadHistory({ history }: UploadHistoryProps) {
                     {dateStr}
                   </span>
                   <span>•</span>
-                  <span className="uppercase text-[9px] px-1.5 py-0.25 bg-neutral-900 text-neutral-400 rounded border border-neutral-805">
+                  <span className="uppercase text-[9px] px-2 py-0.5 bg-neutral-950/50 text-neutral-400 rounded-md border border-neutral-850">
                     {pub.privacy_status}
                   </span>
                 </div>
@@ -66,7 +66,7 @@ export default function UploadHistory({ history }: UploadHistoryProps) {
                 href={pub.youtube_url}
                 target="_blank"
                 rel="noreferrer"
-                className="p-2 bg-neutral-900 hover:bg-purple-950/20 border border-neutral-805 text-neutral-400 hover:text-purple-300 rounded-lg transition-all shrink-0 cursor-pointer"
+                className="p-2.5 bg-neutral-900/40 hover:bg-purple-950/20 border border-neutral-850 text-neutral-400 hover:text-purple-305 rounded-xl transition-all duration-200 shrink-0 cursor-pointer shadow-sm active:scale-95"
                 title="View on YouTube"
               >
                 <ExternalLink className="h-3.5 w-3.5" />

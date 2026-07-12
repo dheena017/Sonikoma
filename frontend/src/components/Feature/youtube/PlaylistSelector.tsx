@@ -18,10 +18,7 @@ export default function PlaylistSelector({
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // In a real implementation, we would fetch from YouTube API if authenticated.
-    // For now, we'll provide a placeholder or mock behavior.
     if (hasCustomCredentials) {
-      // Mocking dynamic fetch
       setIsLoading(true);
       setTimeout(() => {
         setPlaylists([
@@ -35,29 +32,34 @@ export default function PlaylistSelector({
   }, [hasCustomCredentials]);
 
   return (
-    <div className="space-y-1.5">
-      <label className="text-xs font-mono text-neutral-400 font-bold flex items-center gap-1.5">
-        <ListMusic className="h-3.5 w-3.5 text-purple-400" />
+    <div className="space-y-2">
+      <label className="text-xs font-mono text-neutral-300 font-bold flex items-center gap-2">
+        <ListMusic className="h-4 w-4 text-purple-400" />
         Add to Playlist
       </label>
       <div className="relative">
         <select
           value={playlist}
           onChange={(e) => setPlaylist(e.target.value)}
-          className="w-full bg-black/50 border border-neutral-855 rounded-xl px-4 py-3 text-xs text-neutral-305 focus:outline-none focus:border-purple-500/80 transition-all cursor-pointer appearance-none"
+          className="w-full bg-neutral-950/40 hover:bg-neutral-900/10 border border-neutral-900 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 rounded-xl px-4 py-3 text-xs text-neutral-300 focus:outline-none transition-all duration-250 cursor-pointer appearance-none shadow-inner"
         >
-          <option value="">-- No Playlist (Default) --</option>
+          <option value="" className="bg-neutral-950">-- No Playlist (Default) --</option>
           {playlists.map((pl) => (
-            <option key={pl.id} value={pl.id}>
+            <option key={pl.id} value={pl.id} className="bg-neutral-950">
               {pl.title}
             </option>
           ))}
           {!hasCustomCredentials && (
-            <option value="manual" disabled>
+            <option value="manual" disabled className="bg-neutral-950 text-neutral-600">
               (Connect API to fetch your playlists)
             </option>
           )}
         </select>
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-500">
+          <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
+            <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+          </svg>
+        </div>
         {isLoading && (
           <div className="absolute right-10 top-1/2 -translate-y-1/2">
             <Loader2 className="h-3.5 w-3.5 text-purple-400 animate-spin" />
