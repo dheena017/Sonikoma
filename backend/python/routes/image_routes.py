@@ -817,6 +817,14 @@ async def extract_panel_layers(panel_id: str, body: ProcessLayersRequest):
             )
 
             first_layers = results[0]["layers"] if results else None
+
+            # Trigger automatic training check
+            try:
+                from services.training_monitor import check_and_trigger_training
+                await asyncio.to_thread(check_and_trigger_training)
+            except Exception:
+                pass
+
             return {
                 "success": True,
                 "panel_id": panel_id,
