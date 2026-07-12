@@ -217,6 +217,18 @@ function PanelCard({
     }
   };
 
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setSelectedScraped?.((prev: string[]) => {
+      if (prev.includes(imgUrl)) {
+        return prev.filter((x) => x !== imgUrl);
+      } else {
+        return [...prev, imgUrl];
+      }
+    });
+  };
+
   return (
     <div
       onClick={handleClick}
@@ -237,6 +249,7 @@ function PanelCard({
         handleRotateClockwise={handleRotateClockwise}
         handleFlipHorizontal={handleFlipHorizontal}
         handleUndo={handleUndo}
+        onCheckboxClick={handleCheckboxClick}
       />
 
       {/* Dynamic Resolution & Aspect Ratio Badges */}

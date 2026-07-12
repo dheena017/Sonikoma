@@ -67,7 +67,7 @@ const LiveScraperDeck = React.memo(
     const [isBatchMerging, setIsBatchMerging] = useState(false);
     const activeFetch = fetchWithInterceptor || fetch;
 
-    /** Core card click handler — supports shift-range selection */
+    /** Core card click handler — supports shift-range selection and Ctrl/Cmd toggling */
     const handleCardClick = useCallback(
       (idx: number, imgUrl: string, shiftKey: boolean, ctrlOrMeta: boolean) => {
         if (shiftKey && lastSelectedIndex !== null) {
@@ -83,9 +83,8 @@ const LiveScraperDeck = React.memo(
           );
           setLastSelectedIndex(idx);
         } else {
-          setSelectedScraped((prev) =>
-            updateSelection(prev, { type: "single", item: imgUrl }) as string[]
-          );
+          // Single click (no modifiers) does NOT change/toggle selection now.
+          // It strictly sets/updates lastSelectedIndex.
           setLastSelectedIndex(idx);
         }
       },
