@@ -192,7 +192,7 @@ const EditorMiniSidebarInner = ({
     },
     {
       id: "settings",
-      label: "Editor Settings",
+      label: "Video Settings",
       icon: Settings,
     },
   ];
