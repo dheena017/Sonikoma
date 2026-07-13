@@ -73,13 +73,7 @@ router = APIRouter()
 # ─── Constants ───────────────────────────────────────────────────────────────
 VALID_MOTIONS = ['zoom_in', 'zoom_out', 'pan_left', 'pan_right', 'pan_up', 'pan_down']
 MODEL_FALLBACKS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-flash-latest']
-DEFAULT_ANALYSIS = {
-    "speech_text":         "Narrative caption for this storyboard panel scene.",
-    "sfx":                 "[Dramatic Beat]",
-    "duration":            0.0,
-    "motion_type":         "zoom_in",
-    "visual_description":  "A cropped illustration frame ready for cinematic playback.",
-}
+
 
 
 
@@ -338,11 +332,11 @@ def validate_analysis(raw: Dict[str, Any]) -> Dict[str, Any]:
     final_duration = max(2.0, min(45.0, round(final_duration, 1)))
 
     return {
-        "speech_text": speech_val if speech_val else DEFAULT_ANALYSIS["speech_text"],
-        "sfx": sfx.strip()[:50] if isinstance(sfx, str) and sfx.strip() else DEFAULT_ANALYSIS["sfx"],
+        "speech_text": speech_val,
+        "sfx": sfx.strip()[:50] if isinstance(sfx, str) and sfx.strip() else "",
         "duration": final_duration,
-        "motion_type": motion if motion in VALID_MOTIONS else DEFAULT_ANALYSIS["motion_type"],
-        "visual_description": vis.strip()[:400] if isinstance(vis, str) and vis.strip() else DEFAULT_ANALYSIS["visual_description"],
+        "motion_type": motion if motion in VALID_MOTIONS else "zoom_in",
+        "visual_description": vis.strip()[:400] if isinstance(vis, str) and vis.strip() else "",
     }
 
 
@@ -675,7 +669,14 @@ async def analyze_image(body: AnalyzeImageRequest, user_api_key: str = Depends(g
         img_buffer = resolved["data"]
     except Exception as e:
         logger.warning(f"[Analyze] Image fetch failed: {e}. Using default fallback.")
-        return {"success": False, "error": f"Image fetch failed: {e}", "analysis": DEFAULT_ANALYSIS, "source": "fallback:fetch_error"}
+        fallback_analysis = {
+            "speech_text": "",
+            "sfx": "",
+            "duration": 4.5,
+            "motion_type": "zoom_in",
+            "visual_description": ""
+        }
+        return {"success": False, "error": f"Image fetch failed: {e}", "analysis": fallback_analysis, "source": "fallback:fetch_error"}
 
     # 2. Get brightness hint
     brightness = None
@@ -771,7 +772,14 @@ async def analyze_image(body: AnalyzeImageRequest, user_api_key: str = Depends(g
             raise HTTPException(status_code=401, detail="Your API key is invalid.")
         elapsed = int((time.time() - start_time) * 1000)
         logger.error(f"[Analyze] AI generate failed: {e} ({elapsed}ms). Using fallback.")
-        return {"success": False, "error": f"AI generation failed: {e}", "analysis": DEFAULT_ANALYSIS, "source": "fallback:ai_error"}
+        fallback_analysis = {
+            "speech_text": "",
+            "sfx": "",
+            "duration": 4.5,
+            "motion_type": "zoom_in",
+            "visual_description": ""
+        }
+        return {"success": False, "error": f"AI generation failed: {e}", "analysis": fallback_analysis, "source": "fallback:ai_error"}
 
 
 @router.post("/analyze-batch", summary="Batch analysis of multiple storyboard panels (max 20)")
@@ -863,7 +871,14 @@ async def analyze_batch(body: AnalyzeBatchRequest, user_api_key: str = Depends(g
 
             except Exception as e:
                 logger.warning(f"[Batch] Failed {url[:50]}: {e}")
-                results.append({"url": url, "analysis": DEFAULT_ANALYSIS, "error": str(e)})
+                fallback_analysis = {
+                    "speech_text": "",
+                    "sfx": "",
+                    "duration": 4.5,
+                    "motion_type": "zoom_in",
+                    "visual_description": ""
+                }
+                results.append({"url": url, "analysis": fallback_analysis, "error": str(e)})
 
     tasks = [process_one(url, idx) for idx, url in enumerate(body.urls)]
     await asyncio.gather(*tasks)

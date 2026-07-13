@@ -11,7 +11,7 @@ load_dotenv(dotenv_path=os.path.join(PROJECT_ROOT, ".env"))
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from config.clients import genai_client, ai_initialized
-from routes.ai_routes import DEFAULT_ANALYSIS, MODEL_FALLBACKS, validate_analysis
+from routes.ai_routes import MODEL_FALLBACKS, validate_analysis
 from skills.registry import registry
 import json
 
