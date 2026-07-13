@@ -868,7 +868,7 @@ async def debug_yolo_detections(
         resolved = await img_utils.resolve_image_to_buffer(url)
         suffix = ".png"
         with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp_f:
-            tmp_f.write(resolved["buffer"])
+            tmp_f.write(resolved["data"])
             tmp_path = tmp_f.name
 
         # Draw detections
