@@ -1,7 +1,5 @@
 import React from "react";
-import { Film, RefreshCw, Play, Pause, SkipBack, SkipForward, ChevronsLeft, ChevronsRight, Volume2, VolumeX, Sliders } from "lucide-react";
 import { GeneratedPanel } from "@/types";
-import { getPanelFilterStyle } from "@/utils";
 import { VideoMonitorTabs } from "./VideoMonitorTabs.js";
 import CinemaPlayer from "./CinemaPlayer.js";
 
@@ -66,10 +64,12 @@ const VideoMonitor = React.memo(
               : ""
           }`}
         >
-          {/* CinemaPlayer renders beautifully as the premium main player for both Output MP4 and Timeline previews */}
+          {/* CinemaPlayer renders beautifully as the premium main player.
+              When activePreviewTab === "video", it plays back compiled MP4 content.
+              When activePreviewTab === "timeline", it plays back interactive canvas/panels. */}
           <CinemaPlayer
             panels={panels}
-            videoUrl={videoUrl}
+            videoUrl={activePreviewTab === "video" ? videoUrl : null}
             seriesSlug={null}
             chapterSlug={null}
             navigateTo={() => {}}
