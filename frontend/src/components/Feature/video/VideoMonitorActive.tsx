@@ -60,6 +60,12 @@ export function VideoMonitorActive({
     isHovering: false,
   });
 
+  // Fast-forward hold and HUD guide state parameters
+  const [isFastForwarding, setIsFastForwarding] = React.useState(false);
+  const [showHudHelp, setShowHudHelp] = React.useState(false);
+  const spaceTimerRef = React.useRef<any>(null);
+  const baseSpeedRef = React.useRef(1.0);
+
   const handleProgressBarMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const moveX = e.clientX - rect.left;
@@ -104,7 +110,7 @@ export function VideoMonitorActive({
     });
   }, [currentPanelIndex, panels]);
 
-  // Keydown event listener for comma/period frame stepping
+  // Keydown event listener for comma/period frame stepping & spacebar hold-to-2x fast-forward & HUD
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (activePreviewTab !== "timeline" || !activeStoryboardPanel) return;
@@ -122,14 +128,50 @@ export function VideoMonitorActive({
         e.preventDefault();
         const dur = activeStoryboardPanel.duration || 4.5;
         setPlaybackTime(Math.min(dur, parseFloat((playbackTime + 0.1).toFixed(1))));
+      } else if (e.key === "?" || e.key === "/") {
+        setShowHudHelp(true);
+      } else if (e.code === "Space") {
+        e.preventDefault();
+        if (!spaceTimerRef.current) {
+          spaceTimerRef.current = setTimeout(() => {
+            // Hold detected: enter fast-forward mode
+            setIsFastForwarding(true);
+            if (videoPlayerRef.current) {
+              videoPlayerRef.current.playbackRate = 2.0;
+            }
+          }, 450);
+        }
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === "?" || e.key === "/") {
+        setShowHudHelp(false);
+      } else if (e.code === "Space") {
+        if (spaceTimerRef.current) {
+          clearTimeout(spaceTimerRef.current);
+          spaceTimerRef.current = null;
+        }
+        if (isFastForwarding) {
+          setIsFastForwarding(false);
+          if (videoPlayerRef.current) {
+            videoPlayerRef.current.playbackRate = baseSpeedRef.current;
+          }
+        } else {
+          // Short press: trigger standard play/pause
+          toggleStoryboardPlayback();
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+      if (spaceTimerRef.current) clearTimeout(spaceTimerRef.current);
     };
-  }, [activePreviewTab, playbackTime, activeStoryboardPanel]);
+  }, [activePreviewTab, playbackTime, activeStoryboardPanel, isFastForwarding]);
 
   React.useEffect(() => {
     setBgDims(null);
@@ -501,6 +543,40 @@ export function VideoMonitorActive({
                 />
               )}
             </div>
+
+            {/* Visual HUD help overlay */}
+            {showHudHelp && (
+              <div className="absolute inset-0 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center space-y-4 z-40 animate-fade-in p-6">
+                <div className="h-10 w-10 rounded-full bg-purple-600/20 border border-purple-500/30 flex items-center justify-center mb-1">
+                  <Sliders className="h-5 w-5 text-purple-400 animate-pulse" />
+                </div>
+                <h4 className="text-xs font-mono text-purple-300 font-bold uppercase tracking-widest">
+                  Keyboard HUD Shortcuts
+                </h4>
+                <div className="grid grid-cols-2 gap-4 max-w-md text-left text-[10px] font-mono text-neutral-400">
+                  <div className="flex items-center gap-2">
+                    <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">Space</span>
+                    <span>Play/Pause / Hold to 2x</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">,</span>
+                    <span>Step Frame Back</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">.</span>
+                    <span>Step Frame Forward</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">Shift</span>
+                    <span>Snap to Panel Ends</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">?</span>
+                    <span>Show This HUD</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Reprocessing OCR/CV Recalculation overlay */}
             {reprocessingPanelId === activeStoryboardPanel.id && (
