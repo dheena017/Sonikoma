@@ -683,11 +683,28 @@ export default function CinemaPlayer({
           </div>
           <div className="flex-1 relative flex items-center justify-center bg-[#060608]">
             {activePanelNow ? (
-              <img
-                src={activePanelNow.image_url}
-                className="w-full h-full object-cover"
-                alt="PiP Current Panel"
-              />
+              <div className="relative w-full h-full flex items-center justify-center">
+                {activePanelNow.layers ? (
+                  <div className="relative w-full h-full flex items-center justify-center">
+                    <img
+                      src={activePanelNow.layers.background_url}
+                      className="absolute max-w-full max-h-full object-contain"
+                      alt="PiP Background"
+                    />
+                    <img
+                      src={activePanelNow.layers.character_url}
+                      className="absolute max-w-full max-h-full object-contain z-10"
+                      alt="PiP Character"
+                    />
+                  </div>
+                ) : (
+                  <img
+                    src={activePanelNow.image_url}
+                    className="w-full h-full object-cover"
+                    alt="PiP Current Panel"
+                  />
+                )}
+              </div>
             ) : (
               <span className="text-[10px] font-mono text-neutral-500">Preview Stream</span>
             )}
@@ -711,73 +728,82 @@ export default function CinemaPlayer({
 
       {/* RENDER ACTIVE SCREEN CANVAS CONTENT */}
       <div className="relative w-full h-full flex items-center justify-center z-10">
-        {videoUrl ? (
-          <video
-            ref={videoRef}
-            src={videoUrl}
-            className="w-full h-full object-contain max-h-full"
-            playsInline
-            onClick={togglePlay}
-          />
-        ) : (
-          /* High Fidelity Animated Canvas preview if no raw video is compiled */
-          <div className="relative w-full h-full flex items-center justify-center bg-[#060608]">
-            {activePanelNow ? (
-              <div className="relative max-w-full max-h-[85%] aspect-video overflow-hidden border border-neutral-900 rounded-3xl shadow-2xl flex items-center justify-center bg-neutral-950">
-                {activePanelNow.layers ? (
-                  <div className="relative w-full h-full flex items-center justify-center">
-                    {/* Stacks custom background and separate character elements for deep immersion */}
-                    <img
-                      src={activePanelNow.layers.background_url}
-                      className="absolute max-w-full max-h-full object-contain"
-                      alt="Background"
-                    />
-                    <img
-                      src={activePanelNow.layers.character_url}
-                      className="absolute max-w-full max-h-full object-contain z-10 transition-transform duration-300"
-                      style={{
-                        transform: isPlaying ? "scale(1.05) translateY(-4px)" : "scale(1)",
-                      }}
-                      alt="Character"
-                    />
-                    {showSubtitles && activePanelNow.layers.text_url && (
-                      <img
-                        src={activePanelNow.layers.text_url}
-                        className="absolute max-w-full max-h-full object-contain z-20"
-                        alt="Subtitles Layer"
-                      />
-                    )}
-                  </div>
-                ) : (
+        {/* High Fidelity Animated Canvas preview for all playback track rendering */}
+        <div className="relative w-full h-full flex items-center justify-center bg-[#060608]">
+          {activePanelNow ? (
+            <div className="relative max-w-full max-h-[85%] aspect-video overflow-hidden border border-neutral-900 rounded-3xl shadow-2xl flex items-center justify-center bg-neutral-950">
+              {activePanelNow.layers ? (
+                <div className="relative w-full h-full flex items-center justify-center">
+                  {/* Stacks custom background and separate character elements for deep immersion */}
                   <img
-                    src={activePanelNow.image_url}
-                    className="max-w-full max-h-full object-contain"
-                    alt="Current Panel"
+                    src={activePanelNow.layers.background_url}
+                    className="absolute max-w-full max-h-full object-contain"
+                    style={{
+                      transform: isPlaying
+                        ? subtitlesStyle === "karaoke"
+                          ? `scale(${1 + (currentTime % 4.5) * 0.015})`
+                          : "scale(1.05) translateY(-2px)"
+                        : "scale(1)",
+                      transition: "transform 100ms linear",
+                    }}
+                    alt="Background"
                   />
-                )}
-              </div>
-            ) : (
-              /* Simulated High Fidelity Cinematic Video Mock Screen */
-              <div className="flex flex-col items-center justify-center text-center px-4">
-                <div className="relative w-64 h-36 bg-neutral-900/50 border border-neutral-800 rounded-2xl flex flex-col items-center justify-center mb-6 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-purple-900/10 to-transparent animate-pulse" />
-                  <div className="h-10 w-10 rounded-full bg-purple-600/20 border border-purple-500/30 flex items-center justify-center mb-3">
-                    <Sliders className="h-5 w-5 text-purple-400 animate-pulse" />
-                  </div>
-                  <span className="text-[11px] font-mono text-neutral-400 font-bold uppercase tracking-wider">
-                    Simulated Cinematic Track
-                  </span>
+                  <img
+                    src={activePanelNow.layers.character_url}
+                    className="absolute max-w-full max-h-full object-contain z-10"
+                    style={{
+                      transform: isPlaying
+                        ? subtitlesStyle === "karaoke"
+                          ? `scale(${1 + (currentTime % 4.5) * 0.035}) translateY(-4px)`
+                          : "scale(1.08) translateY(-6px)"
+                        : "scale(1)",
+                      transition: "transform 100ms linear",
+                    }}
+                    alt="Character"
+                  />
+                  {showSubtitles && activePanelNow.layers.text_url && (
+                    <img
+                      src={activePanelNow.layers.text_url}
+                      className="absolute max-w-full max-h-full object-contain z-20"
+                      alt="Subtitles Layer"
+                    />
+                  )}
                 </div>
-                <h2 className="text-xl font-black font-sans text-neutral-100 tracking-tight mb-2">
-                  Adaptation Cinema Studio
-                </h2>
-                <p className="text-xs text-neutral-500 max-w-sm leading-relaxed font-mono">
-                  No direct MP4 compilation was found. Seamlessly playing back interactive storyboard timeline cuts and speech assets live.
-                </p>
+              ) : (
+                <img
+                  src={activePanelNow.image_url}
+                  className="max-w-full max-h-full object-contain"
+                  style={{
+                    transform: isPlaying
+                      ? `scale(${1 + (currentTime % 4.5) * 0.02})`
+                      : "scale(1)",
+                    transition: "transform 100ms linear",
+                  }}
+                  alt="Current Panel"
+                />
+              )}
+            </div>
+          ) : (
+            /* Simulated High Fidelity Cinematic Video Mock Screen */
+            <div className="flex flex-col items-center justify-center text-center px-4">
+              <div className="relative w-64 h-36 bg-neutral-900/50 border border-neutral-800 rounded-2xl flex flex-col items-center justify-center mb-6 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-tr from-purple-900/10 to-transparent animate-pulse" />
+                <div className="h-10 w-10 rounded-full bg-purple-600/20 border border-purple-500/30 flex items-center justify-center mb-3">
+                  <Sliders className="h-5 w-5 text-purple-400 animate-pulse" />
+                </div>
+                <span className="text-[11px] font-mono text-neutral-400 font-bold uppercase tracking-wider">
+                  Simulated Cinematic Track
+                </span>
               </div>
-            )}
-          </div>
-        )}
+              <h2 className="text-xl font-black font-sans text-neutral-100 tracking-tight mb-2">
+                Adaptation Cinema Studio
+              </h2>
+              <p className="text-xs text-neutral-500 max-w-sm leading-relaxed font-mono">
+                No direct MP4 compilation was found. Seamlessly playing back interactive storyboard timeline cuts and speech assets live.
+              </p>
+            </div>
+          )}
+        </div>
 
         {/* SUBTITLES CAPTIONS OVERLAY (classic / karaoke styles) */}
         {showSubtitles && activePanelNow && activePanelNow.speech_text && (
