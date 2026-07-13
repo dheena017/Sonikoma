@@ -31,10 +31,10 @@ try:
     # Save the currently wrapped stdout/stderr before restoring
     old_stdout = sys.stdout
     old_stderr = sys.stderr
-    
+
     # Restore original stdout/stderr if previously wrapped by uvicorn
     colorama.deinit()
-    
+
     # Override init to ensure colorama never strips or converts ANSI codes on Windows
     _orig_init = colorama.init
     def custom_init(*args, **kwargs):
@@ -43,7 +43,7 @@ try:
         return _orig_init(*args, **kwargs)
     colorama.init = custom_init
     colorama.init()
-    
+
     # Update existing logging handlers to use the new un-stripped stdout/stderr streams
     for name in list(logging.root.manager.loggerDict.keys()) + [""]:
         l = logging.getLogger(name)
@@ -66,12 +66,12 @@ if sys.platform == "win32":
         # FILE_SHARE_READ = 1, FILE_SHARE_WRITE = 2
         # OPEN_EXISTING = 3
         h_conout = kernel32.CreateFileW(
-            "CONOUT$", 
-            0x80000000 | 0x40000000, 
-            1 | 2, 
-            None, 
-            3, 
-            0, 
+            "CONOUT$",
+            0x80000000 | 0x40000000,
+            1 | 2,
+            None,
+            3,
+            0,
             None
         )
         if h_conout != -1:  # INVALID_HANDLE_VALUE
@@ -174,7 +174,7 @@ class ColoredFormatter(logging.Formatter):
         match = general_http_regex.match(message)
         if match:
             prefix, url, status, suffix = match.groups()
-            
+
             # Colorize prefix
             colorized_prefix = ""
             if prefix:
@@ -200,7 +200,7 @@ class ColoredFormatter(logging.Formatter):
                             pre_colorized += f"\x1b[90m{part}\x1b[0m"
                         else:
                             pre_colorized += f"\x1b[90m{part}\x1b[0m"
-                            
+
                     method_upper = method.upper()
                     if method_upper == "POST":
                         method_colorized = f"\x1b[1;33m{method}\x1b[0m"
@@ -270,11 +270,11 @@ class ColoredFormatter(logging.Formatter):
                 has_quotes = (clean_status.startswith('"') and clean_status.endswith('"')) or \
                              (clean_status.startswith("'") and clean_status.endswith("'"))
                 inner_status = clean_status[1:-1] if has_quotes else clean_status
-                
+
                 http_match = re.match(r'^(HTTP/\d\.\d)\s+(\d{3})\s*(.*)$', inner_status, re.IGNORECASE)
                 if http_match:
                     http_version, code, status_msg = http_match.groups()
-                    
+
                     if code.startswith('2'):
                         code_color = "\x1b[1;32m"
                         msg_color = "\x1b[32m"
@@ -290,11 +290,11 @@ class ColoredFormatter(logging.Formatter):
                     else:
                         code_color = "\x1b[37m"
                         msg_color = "\x1b[37m"
-                    
+
                     inner_colorized = f"\x1b[36m{http_version}\x1b[0m {code_color}{code}\x1b[0m"
                     if status_msg:
                         inner_colorized += f" {msg_color}{status_msg}\x1b[0m"
-                        
+
                     quotes_color = "\x1b[90m"
                     if has_quotes:
                         colorized_status = f" {quotes_color}\"{inner_colorized}{quotes_color}\""
@@ -312,7 +312,7 @@ class ColoredFormatter(logging.Formatter):
                             code_color = "\x1b[1;31m"
                         else:
                             code_color = "\x1b[37m"
-                        
+
                         quotes_color = "\x1b[90m"
                         if has_quotes:
                             colorized_status = f" {quotes_color}\"{code_color}{inner_status}\x1b[0m{quotes_color}\""
@@ -335,7 +335,7 @@ class ColoredFormatter(logging.Formatter):
             st_match = standalone_http_regex.match(message)
             if st_match:
                 prefix, method, suffix = st_match.groups()
-                
+
                 # Colorize prefix
                 colorized_prefix = ""
                 if prefix:
@@ -357,7 +357,7 @@ class ColoredFormatter(logging.Formatter):
                             colorized_prefix += f"\x1b[90m{part}\x1b[0m"
                         else:
                             colorized_prefix += f"\x1b[90m{part}\x1b[0m"
-                
+
                 method_upper = method.upper()
                 if method_upper == "POST":
                     method_colorized = f"\x1b[1;33m{method}\x1b[0m"
@@ -369,7 +369,7 @@ class ColoredFormatter(logging.Formatter):
                     method_colorized = f"\x1b[1;31m{method}\x1b[0m"
                 else:
                     method_colorized = f"\x1b[1;35m{method}\x1b[0m"
-                    
+
                 colorized_suffix = f"\x1b[90m{suffix}\x1b[0m" if suffix else ""
                 return f"{colorized_prefix}{method_colorized}{colorized_suffix}"
 
@@ -390,12 +390,12 @@ class ColoredFormatter(logging.Formatter):
             log_fmt = "%(asctime)s [BACKEND] [%(levelname)s] [%(filename)s] %(message)s"
         formatter = logging.Formatter(log_fmt, datefmt="%H:%M:%S")
         result = formatter.format(record)
-        
+
         # Restore original message to avoid side effects
         record.msg = orig_msg
         if hasattr(record, 'message'):
             delattr(record, 'message')
-            
+
         return result
 
 IS_PRODUCTION = os.getenv("NODE_ENV") == "production"
@@ -741,21 +741,21 @@ async def rate_limiting_middleware(request: Request, call_next):
     path = request.url.path
     if any(p in path for p in ["/system-logs", "/api/metrics", "/api/health", "/metrics", "/health", "/api/docs", "/api/openapi.json"]):
         return await call_next(request)
-        
+
     client_ip = request.client.host if request.client else "unknown"
     if client_ip in ("127.0.0.1", "localhost", "::1"):
         return await call_next(request)
-        
+
     now = time.time()
-    
+
     # Clean old requests and get the log
     timestamps = client_request_log.get(client_ip, [])
     timestamps = [t for t in timestamps if now - t < 60]
-    
+
     if len(timestamps) >= RATE_LIMIT_RPM:
         retry_after = int(60 - (now - timestamps[0]))
         retry_after = max(1, retry_after)
-        
+
         logger.warning(
             f"[API] Rate Limit Exceeded | Client: {client_ip} | "
             f"Requests in window: {len(timestamps)} | Limit: {RATE_LIMIT_RPM} RPM | "
@@ -770,10 +770,10 @@ async def rate_limiting_middleware(request: Request, call_next):
             },
             headers={"Retry-After": str(retry_after)}
         )
-        
+
     timestamps.append(now)
     client_request_log[client_ip] = timestamps
-    
+
     # Occasional cleanup to prevent memory leaks if many unique IPs connect
     if len(client_request_log) > 1000:
         expired_ips = []
@@ -785,7 +785,7 @@ async def rate_limiting_middleware(request: Request, call_next):
                 client_request_log[ip] = purged
         for ip in expired_ips:
             client_request_log.pop(ip, None)
-            
+
     return await call_next(request)
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -795,15 +795,15 @@ async def rate_limiting_middleware(request: Request, call_next):
 async def add_process_time_header(request: Request, call_next):
     # Tracing/Correlation Request ID
     request_id = request.headers.get("X-Request-ID", str(uuid.uuid4())[:8])
-    
+
     start = time.perf_counter()
     response = await call_next(request)
     elapsed_ms = round((time.perf_counter() - start) * 1000, 2)
-    
+
     response.headers["X-Request-ID"] = request_id
     response.headers["X-Process-Time"] = f"{elapsed_ms}ms"
     response.headers["X-API-Version"]  = API_VERSION
-    
+
     # Avoid logging SSE/logs polling endpoint spam
     if not any(path in request.url.path for path in ["/system-logs", "/api/metrics", "/api/health"]):
         method_colors = {
@@ -813,7 +813,7 @@ async def add_process_time_header(request: Request, call_next):
             "DELETE": "\x1b[31m"
         }
         m_color = method_colors.get(request.method, "\x1b[37m")
-        
+
         status = response.status_code
         if status >= 500:
             s_color = "\x1b[31m"
@@ -823,11 +823,11 @@ async def add_process_time_header(request: Request, call_next):
             s_color = "\x1b[36m"
         else:
             s_color = "\x1b[32m"
-            
+
         reset = "\x1b[0m"
         grey = "\x1b[90m"
         cyan = "\x1b[36m"
-        
+
         logger.info(
             f"{grey}[{request_id}]{reset} "
             f"{m_color}{request.method}{reset} "
@@ -981,14 +981,14 @@ def _print_startup_banner():
 
     py_ver  = sys.version.split(" ")[0]
     plat    = f"{platform.system()} {platform.machine()}"
-    
+
     # Check key environment variables
     gemini_key = os.getenv("GEMINI_API_KEY")
     if gemini_key:
         masked_gemini = f"{CLR_SUCCESS}✅ Set ({gemini_key[:4]}...{gemini_key[-4:] if len(gemini_key) > 8 else ''}){CLR_RESET}"
     else:
         masked_gemini = f"{CLR_ALERT}❌ Not set (AI features disabled){CLR_RESET}"
-        
+
     hf_key = os.getenv("HUGGINGFACE_API_KEY")
     if hf_key:
         masked_hf = f"{CLR_SUCCESS}✅ Set ({hf_key[:4]}...{hf_key[-4:] if len(hf_key) > 8 else ''}){CLR_RESET}"
@@ -1076,10 +1076,10 @@ def _print_startup_banner():
 
         url_api_ascii = f"http://localhost:{port}/api"
         url_docs_ascii = f"http://localhost:{port}/api/docs"
-        
+
         gemini_status_ascii = "Set" if os.getenv("GEMINI_API_KEY") else "Not set"
         prod_mode_ascii = "Production" if IS_PRODUCTION else "Development"
-        
+
         line_title_ascii = _format_ascii(f"  SONIKOMA UNIFIED PYTHON BACKEND  -  FastAPI v{API_VERSION}")
         line_py_ascii    = _format_ascii(f"  Python:    {py_ver}")
         line_plat_ascii  = _format_ascii(f"  Platform:  {plat}")
@@ -1164,4 +1164,3 @@ if __name__ == "__main__":
 
     uvicorn.run(**run_args)
     # Trigger auto-reload for database re-seeding config v3
-

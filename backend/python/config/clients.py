@@ -70,7 +70,7 @@ async def call_gemini_with_retry(
     attempt = 0
     import inspect
     import asyncio
-    
+
     async with _gemini_global_lock:
         while True:
             try:
@@ -82,7 +82,7 @@ async def call_gemini_with_retry(
             except Exception as err:
                 attempt += 1
                 err_msg = str(err).lower()
-            
+
                 # Check status code if available (e.g. from googleapi errors)
                 status_code = getattr(err, 'code', None)
                 if not status_code:
@@ -93,20 +93,20 @@ async def call_gemini_with_retry(
                             status_code = int(status_match.group(1))
                         except ValueError:
                             pass
-                            
+
                 is_rate_limit = (
-                    status_code == 429 or 
-                    "quota" in err_msg or 
-                    "limit" in err_msg or 
+                    status_code == 429 or
+                    "quota" in err_msg or
+                    "limit" in err_msg or
                     "rate limit" in err_msg
                 )
                 is_unavailable = (
-                    status_code == 503 or 
-                    "high demand" in err_msg or 
-                    "unavailable" in err_msg or 
+                    status_code == 503 or
+                    "high demand" in err_msg or
+                    "unavailable" in err_msg or
                     "service unavailable" in err_msg
                 )
-                
+
                 is_daily_exhausted = (
                     "limit: 0" in err_msg or
                     "perday" in err_msg or
@@ -120,7 +120,7 @@ async def call_gemini_with_retry(
                 if (is_rate_limit or is_unavailable) and attempt < max_attempts:
                     # Default delay: Exponential backoff with jitter
                     delay = initial_delay_sec * (2.2 ** (attempt - 1)) + random.uniform(0.1, 1.5)
-                    
+
                     # Try parsing the specific wait time requested by Google API
                     # Pattern 1: "Please retry in 43.31459721s."
                     retry_match = re.search(r'please retry in\s+(\d+(?:\.\d+)?)s', str(err), re.IGNORECASE)

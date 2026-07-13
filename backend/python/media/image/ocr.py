@@ -57,7 +57,7 @@ async def extract_full_ocr_data(panel_image_path: str, langs: List[str] = ['en']
         img_np = np.array(img)
         # EasyOCR readtext
         raw_results = await asyncio.to_thread(reader.readtext, img_np)
-        
+
         # Results format: [([[x, y], [x, y], [x, y], [x, y]], text, confidence), ...]
         structured_results = []
         for res in raw_results:

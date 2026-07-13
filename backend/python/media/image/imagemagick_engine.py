@@ -257,19 +257,19 @@ class ImageMagickEngine:
             with WandImage(filename=image_path) as img:
                 # Normalize first
                 img.normalize()
-                
+
                 # Apply brightness
                 if brightness != 1.0:
                     img.brightness_contrast(brightness * 10, 0)
-                
+
                 # Apply contrast
                 if contrast != 1.0:
                     img.brightness_contrast(0, contrast * 10)
-                
+
                 # Apply saturation (modulate)
                 if saturation != 1.0:
                     img.modulate(saturation=saturation * 100)
-                
+
                 img.save(filename=output_path)
 
         try:
@@ -302,16 +302,16 @@ class ImageMagickEngine:
                 # Convert to RGBA if needed
                 if not img.alpha_channel:
                     img.alpha_channel = True
-                
+
                 # Get the corner color (assume it's the background)
                 with img.clone() as corner_img:
                     corner_img.crop(0, 0, 1, 1)
                     bg_color = corner_img.sample(1, 1)[0]
-                
+
                 # Floodfill from corners
                 img.virtual_pixel = "transparent"
                 img.floodfill(bg_color, int(fuzz_threshold), 0, 0)
-                
+
                 img.save(filename=output_path)
 
         try:
@@ -351,17 +351,17 @@ class ImageMagickEngine:
             with WandImage(filename=image_path) as img:
                 with img.clone() as edited:
                     from wand.drawing import Drawing
-                    
+
                     with Drawing() as draw:
                         draw.font_size = font_size
                         draw.fill_color = Color(text_color)
                         draw.opacity = opacity
-                        
+
                         # Get text metrics
                         metrics = draw.get_font_metrics(edited, text)
                         text_width = metrics.text_width
                         text_height = metrics.text_height
-                        
+
                         # Calculate position
                         if position == "center":
                             x = (edited.width - text_width) / 2
@@ -379,10 +379,10 @@ class ImageMagickEngine:
                             y = edited.height - text_height - 10
                         else:
                             x, y = 10, 10
-                        
+
                         draw.text(int(x), int(y), text)
                         draw(edited)
-                    
+
                     edited.save(filename=output_path)
 
         try:

@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS chapters (
   status          TEXT    NOT NULL DEFAULT 'pending',
   panels_count    INTEGER NOT NULL DEFAULT 0,
   video_url       TEXT,
+  audio_settings  JSONB,
   created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (series_id) REFERENCES series(id) ON DELETE CASCADE

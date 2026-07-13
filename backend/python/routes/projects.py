@@ -67,6 +67,7 @@ class ProjectUpdateRequest(BaseModel):
     video_url: Optional[str] = Field(None, description="Video output URL")
     status: Optional[str] = Field(None, description="Project compilation status")
     panels: Optional[List[PanelSaveItem]] = Field(None, description="Storyboard panels list")
+    audio_settings: Optional[Dict[str, Any]] = Field(None, description="Audio settings JSON object (volumes, pitch, rate, BGM, ducking, etc.)")
 
 class TokenIncrementRequest(BaseModel):
     tokens: int = Field(..., description="Number of tokens to add")
@@ -105,32 +106,32 @@ def calculate_and_save_token_usage(project_id: str, panels: List[dict], price_pe
     input_tokens = sum(panel.get("inputTokens", 0) for panel in panels)
     output_tokens = sum(panel.get("outputTokens", 0) for panel in panels)
     total_tokens = input_tokens + output_tokens
-    
+
     # Calculate estimated cost based on variable price per 1M tokens
     cost = round((total_tokens / 1_000_000.0) * price_per_million, 6)
-    
+
     usage_metrics = {
         "inputTokens": input_tokens,
         "outputTokens": output_tokens,
         "totalTokens": total_tokens,
         "estimatedCostUSD": cost
     }
-    
+
     log_id = str(uuid.uuid4())
-    
+
     # Save to local SQLite time-series table
     try:
         db.insert_token_log(log_id, project_id, input_tokens, output_tokens, total_tokens, cost)
     except Exception as e:
         logger.error(f"Failed to insert local token usage log: {e}")
-    
+
     # Save to Supabase
     try:
         from db import supabase
         if supabase:
             # Update the existing project row with the new usage_metrics JSONB column (snapshot)
             supabase.table("projects").update({"usage_metrics": usage_metrics}).eq("id", project_id).execute()
-            
+
             # Insert into append-only time-series table
             supabase.table("token_usage_logs").insert({
                 "id": log_id,
@@ -140,11 +141,11 @@ def calculate_and_save_token_usage(project_id: str, panels: List[dict], price_pe
                 "total_tokens": total_tokens,
                 "estimated_cost_usd": cost
             }).execute()
-            
+
             logger.info(f"Saved usage metrics for project {project_id}: {usage_metrics}")
     except Exception as e:
         logger.error(f"Failed to save token usage metrics to Supabase: {e}")
-        
+
     return usage_metrics
 
 # ─── Routes ───────────────────────────────────────────────────────────────────
@@ -154,14 +155,14 @@ async def get_projects(current_user: dict = Depends(get_current_user)):
     try:
         logger.info(f"[Database] Fetching project histories for user {current_user['user_id']} from local SQLite...")
         projects = db.get_all_projects(user_id=current_user['user_id'])
-        
+
         # Ensure all project cover images are proxied if external
         for proj in projects:
             if proj.get("cover_image"):
                 proj["cover_image"] = wrap_proxy_url(proj["cover_image"])
             elif proj.get("first_panel_image"):
                 proj["cover_image"] = wrap_proxy_url(proj["first_panel_image"])
-                
+
         logger.info(f"[Database] Retrieved {len(projects)} projects.")
         return {"success": True, "projects": projects}
     except Exception as e:
@@ -184,7 +185,7 @@ async def get_single_project(
         if not project:
             logger.warning(f"[Database] Project {project_id_or_slug} not found.")
             raise HTTPException(status_code=404, detail="Project not found.")
-        
+
         # Verify ownership
         if project.get("user_id") != current_user["user_id"]:
             logger.warning(f"[Database] Access denied for user {current_user['user_id']} to project {project_id_or_slug}")
@@ -222,7 +223,7 @@ async def create_project(body: ProjectCreateRequest, current_user: dict = Depend
         if existing:
             logger.info(f"[Database] Project {body.project_id} already exists. Skipping insertion.")
             return {"success": True, "project_id": body.project_id, "message": "Project already exists."}
-            
+
         db.insert_project({
             "project_id": body.project_id,
             "url": unwrap_proxy_url(body.url),
@@ -293,14 +294,14 @@ async def save_project_panels(
                 "inpaint_radius": p.inpaint_radius,
                 "detection_style": p.detection_style
             })
-            
+
         db.insert_panels(projectId, db_panels)
         db.update_project(projectId, {"panels_count": len(body.panels)})
-        
+
         # Write to audit log
         ip_addr = request.client.host if request.client else "127.0.0.1"
         db.write_audit_log(current_user["user_id"], "Saved Storyboard Panels", ip_addr, "Success")
-        
+
         logger.info(f"[Database] Saved {len(body.panels)} panels and updated count for project: {projectId}")
         return {"success": True, "saved": len(body.panels)}
     except HTTPException:
@@ -323,7 +324,7 @@ async def increment_project_tokens(
             project = db.get_project_by_slug(projectId)
             if project:
                 projectId = project['project_id']
-                
+
         if not project:
             logger.warning(f"[Database] Cannot increment tokens, project {projectId} not found.")
             raise HTTPException(status_code=404, detail="Project not found.")
@@ -350,7 +351,7 @@ async def update_project_details(
 ):
     try:
         logger.info(f"[Database] Updating project details and/or panels for: {projectId}")
-        
+
         # Step 14: Database Project Persistence (Supabase PostgreSQL)
         try:
             from db import supabase
@@ -364,7 +365,8 @@ async def update_project_details(
                     "cover_image": body.cover_image or "",
                     "synopsis": body.synopsis or "",
                     "panels": [p.dict(exclude_none=True) for p in body.panels] if body.panels else [],
-                    "user_id": current_user["user_id"]
+                    "user_id": current_user["user_id"],
+                    "audio_settings": body.audio_settings
                 }
                 # Save the entire Project JSON to Supabase 'projects' table
                 supabase.table("projects").upsert(supabase_data).execute()
@@ -418,6 +420,8 @@ async def update_project_details(
             updates['video_url'] = body.video_url
         if body.status is not None:
             updates['status'] = body.status
+        if body.audio_settings is not None:
+            updates['audio_settings'] = body.audio_settings
 
         db_panels = None
         if body.panels is not None:
@@ -525,15 +529,15 @@ async def delete_series_route(seriesId: str = Path(...), current_user: dict = De
         conn = db.get_db_connection()
         row = conn.execute("SELECT user_id FROM series WHERE id = ?", (seriesId,)).fetchone()
         conn.close()
-        
+
         if not row:
             logger.warning(f"[Database] Series {seriesId} not found for deletion.")
             raise HTTPException(status_code=404, detail="Series not found.")
-            
+
         if row['user_id'] != current_user['user_id']:
             logger.warning(f"[Database] Access denied for user {current_user['user_id']} to delete series {seriesId}")
             raise HTTPException(status_code=403, detail="Access denied.")
-            
+
         db.delete_series(seriesId)
         logger.info(f"[Database] Deleted series successfully: {seriesId}")
         return {"success": True}

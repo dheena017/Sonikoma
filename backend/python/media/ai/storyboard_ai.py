@@ -42,10 +42,10 @@ def get_programmatic_panels(title: str, genre: str, episode: str, img_urls: List
                 "Silence fills the space as allies stand tall together, ready to confront the ultimate mystery."
             ]
             text = dynamic_texts[(i - 1) % len(dynamic_texts)]
-            
+
             sfxs = ["[Soft Whoosh]", "[Drums Rumble]", "[Sparkling Shimmer]", "[Energy Flare]", "[Low Resonance]"]
             sfx = sfxs[(i - 1) % len(sfxs)]
-            
+
             motions = ["pan_right", "pan_left", "pan_up", "zoom_out", "pan_down"]
             motion = motions[(i - 1) % len(motions)]
 
@@ -108,7 +108,7 @@ async def generate_dynamic_panels(
             client_to_use = InferenceClient(token=hf_key)
             skill = registry.get("storyboard_narrative")
             prompt = skill.build_prompt(**prompt_args)
-            
+
             loop = asyncio.get_event_loop()
             response = await loop.run_in_executor(
                 None,
@@ -130,7 +130,7 @@ async def generate_dynamic_panels(
                         duration_val = float(duration_val)
                     except (ValueError, TypeError):
                         duration_val = 5.0
-                    
+
                     result.append({
                         "id": idx + 1,
                         "image_url": img_urls[idx],
@@ -155,7 +155,7 @@ async def generate_dynamic_panels(
                 else:
                     target_model_name = "gemini-2.5-flash"
                 logger.info(f"[storyboard_ai] Translated gemini-3.5 model selection in storyboard generation to: {target_model_name}")
-                
+
             logger.info(f"[Gemini] Storyboard narrative generation using: {target_model_name}")
 
             skill = registry.get("storyboard_narrative")
@@ -189,6 +189,3 @@ async def generate_dynamic_panels(
             raise e
 
     raise RuntimeError("AI Storyboard generation failed: No active providers resolved the storyboard narrative script.")
-
-
-
