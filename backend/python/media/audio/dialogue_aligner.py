@@ -126,10 +126,13 @@ async def align_dialogue_and_extract_peaks(
         # Calculate RMS energy (root mean square) which gives a good proxy for volume/loudness
         rms = librosa.feature.rms(y=y, frame_length=2048, hop_length=512)[0]
 
+        # Ensure array consists of valid, finite values to prevent NaN propagation
+        rms = np.nan_to_num(rms, nan=0.0, posinf=1.0, neginf=0.0)
+
         # Normalize the RMS values between 0.0 and 1.0
         if len(rms) > 0:
             rms_max = np.max(rms)
-            if rms_max > 0:
+            if rms_max > 0 and np.isfinite(rms_max):
                 rms_normalized = rms / rms_max
             else:
                 rms_normalized = rms

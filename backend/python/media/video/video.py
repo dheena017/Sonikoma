@@ -97,20 +97,24 @@ async def compile_video_from_panels(
 
         # 3. Process images with PIL
         try:
-            img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-            img_w, img_h = img.size
+            with Image.open(io.BytesIO(image_bytes)).convert("RGB") as img:
+                img_w, img_h = img.size
 
-            # Create blurred background
-            bg_img = img.resize((target_width, target_height), Image.Resampling.LANCZOS)
-            bg_img = bg_img.filter(ImageFilter.GaussianBlur(30))
-            bg_array = np.array(bg_img)
+                # Protect against division-by-zero on malformed sizes
+                img_w = max(1, img_w)
+                img_h = max(1, img_h)
 
-            # Create foreground image maintaining aspect ratio
-            scale = min(target_width / img_w, target_height / img_h)
-            new_w = max(1, int(img_w * scale))
-            new_h = max(1, int(img_h * scale))
-            fg_img = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
-            fg_array = np.array(fg_img)
+                # Create blurred background
+                with img.resize((target_width, target_height), Image.Resampling.LANCZOS) as bg_img:
+                    with bg_img.filter(ImageFilter.GaussianBlur(30)) as bg_img_blurred:
+                        bg_array = np.array(bg_img_blurred)
+
+                # Create foreground image maintaining aspect ratio
+                scale = min(target_width / img_w, target_height / img_h)
+                new_w = max(1, int(img_w * scale))
+                new_h = max(1, int(img_h * scale))
+                with img.resize((new_w, new_h), Image.Resampling.LANCZOS) as fg_img:
+                    fg_array = np.array(fg_img)
 
         except Exception as e:
             logger.error(f"Failed to process PIL images for panel {idx + 1}: {e}")

@@ -768,7 +768,7 @@ def run_cv_detection(
 
     # 2. Detect background characteristics
     is_white_bg, threshold_val = _detect_bg_color_and_threshold(gray_arr_processed, bg_mode, sensitivity)
-    is_tall_strip = (h / w > 1.2)
+    is_tall_strip = (h / max(1, w) > 1.2)
 
     # 3. Dual-Pass Detection Orchestrator
     passes = [False, True] if has_cv else [False] # Pass 1: Standard, Pass 2: High Sensitivity (adaptive)
@@ -862,10 +862,13 @@ def run_cv_detection(
                 f"Panel coordinates out of bounds: x={x}, y={y}, w_box={w_box}, h_box={h_box} for image of size {orig_w}x{orig_h}"
             )
         
-        crop_top = (y / orig_h) * 100
-        crop_bottom = ((orig_h - (y + h_box)) / orig_h) * 100
-        crop_left = (x / orig_w) * 100
-        crop_right = ((orig_w - (x + w_box)) / orig_w) * 100
+        # Protect against division-by-zero on malformed original sizes
+        safe_orig_h = max(1, orig_h)
+        safe_orig_w = max(1, orig_w)
+        crop_top = (y / safe_orig_h) * 100
+        crop_bottom = ((safe_orig_h - (y + h_box)) / safe_orig_h) * 100
+        crop_left = (x / safe_orig_w) * 100
+        crop_right = ((safe_orig_w - (x + w_box)) / safe_orig_w) * 100
         
         final_panels.append({
             "cropTop": round(max(0.0, min(100.0, crop_top)), 2),

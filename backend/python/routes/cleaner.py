@@ -95,14 +95,16 @@ async def remove_bubbles_upload(
     OpenCV contour analysis, and removes them via inpainting or Gaussian blur.
     Returns the cleaned image as base64-encoded PNG.
     """
-    suffix = os.path.splitext(file.filename or ".png")[1] or ".png"
-    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp_in:
-        tmp_in.write(await file.read())
-        input_path = tmp_in.name
-
-    output_path = input_path.replace(suffix, "_clean.png")
-
+    input_path = None
+    output_path = None
     try:
+        suffix = os.path.splitext(file.filename or ".png")[1] or ".png"
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp_in:
+            tmp_in.write(await file.read())
+            input_path = tmp_in.name
+
+        output_path = input_path.replace(suffix, "_clean.png")
+
         logger.info(
             f"[Speech Bubbles] Received file upload: {file.filename} | method={method} "
             f"sensitivity={sensitivity} dilation={dilation}"
@@ -124,11 +126,12 @@ async def remove_bubbles_upload(
         raise HTTPException(status_code=500, detail=str(exc))
     finally:
         for p in (input_path, output_path):
-            try:
-                if os.path.exists(p):
-                    os.remove(p)
-            except OSError:
-                pass
+            if p:
+                try:
+                    if os.path.exists(p):
+                        os.remove(p)
+                except OSError:
+                    pass
 
 
 @router.post(
@@ -145,13 +148,15 @@ async def remove_bubbles_base64(body: CleanerBase64Request):
     except Exception:
         raise HTTPException(status_code=422, detail="Invalid base64 image data.")
 
-    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_in:
-        tmp_in.write(raw)
-        input_path = tmp_in.name
-
-    output_path = input_path.replace(".png", "_clean.png")
-
+    input_path = None
+    output_path = None
     try:
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_in:
+            tmp_in.write(raw)
+            input_path = tmp_in.name
+
+        output_path = input_path.replace(".png", "_clean.png")
+
         logger.info(
             f"[Speech Bubbles] Received base64 image request | method={body.method} "
             f"sensitivity={body.sensitivity}"
@@ -173,8 +178,9 @@ async def remove_bubbles_base64(body: CleanerBase64Request):
         raise HTTPException(status_code=500, detail=str(exc))
     finally:
         for p in (input_path, output_path):
-            try:
-                if os.path.exists(p):
-                    os.remove(p)
-            except OSError:
-                pass
+            if p:
+                try:
+                    if os.path.exists(p):
+                        os.remove(p)
+                except OSError:
+                    pass

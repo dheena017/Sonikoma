@@ -90,11 +90,7 @@ async def detect_panels_upload(
     panel bounding boxes expressed as crop percentages (top/bottom/left/right)
     along with pixel dimensions and area.
     """
-    suffix = os.path.splitext(file.filename or ".png")[1] or ".png"
-    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
-        tmp.write(await file.read())
-        image_path = tmp.name
-
+    image_path = None
     params = dict(
         sensitivity=sensitivity,
         background_mode=background_mode,
@@ -109,6 +105,11 @@ async def detect_panels_upload(
     )
 
     try:
+        suffix = os.path.splitext(file.filename or ".png")[1] or ".png"
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
+            tmp.write(await file.read())
+            image_path = tmp.name
+
         logger.info(f"[Panel Detection] Processing uploaded file: {file.filename}")
         panels = _detect(image_path, params)
         logger.info(f"[Panel Detection] Successfully detected {len(panels)} panels.")
@@ -122,11 +123,12 @@ async def detect_panels_upload(
         logger.error(f"Panel detection failed: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(exc))
     finally:
-        try:
-            if os.path.exists(image_path):
-                os.remove(image_path)
-        except OSError:
-            pass
+        if image_path:
+            try:
+                if os.path.exists(image_path):
+                    os.remove(image_path)
+            except OSError:
+                pass
 
 
 @router.post(
@@ -143,13 +145,14 @@ async def detect_panels_base64(body: DetectPanelsBase64Request):
     except Exception:
         raise HTTPException(status_code=422, detail="Invalid base64 image data.")
 
-    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
-        tmp.write(raw)
-        image_path = tmp.name
-
+    image_path = None
     params = body.model_dump(exclude={"image_base64"})
 
     try:
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+            tmp.write(raw)
+            image_path = tmp.name
+
         logger.info("[Panel Detection] Processing base64 image")
         panels = _detect(image_path, params)
         logger.info(f"[Panel Detection] Successfully detected {len(panels)} panels.")
@@ -163,8 +166,9 @@ async def detect_panels_base64(body: DetectPanelsBase64Request):
         logger.error(f"Panel detection (base64) failed: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(exc))
     finally:
-        try:
-            if os.path.exists(image_path):
-                os.remove(image_path)
-        except OSError:
-            pass
+        if image_path:
+            try:
+                if os.path.exists(image_path):
+                    os.remove(image_path)
+            except OSError:
+                pass
