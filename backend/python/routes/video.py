@@ -69,6 +69,14 @@ class PanelData(BaseModel):
 class RenderRequest(BaseModel):
     panels: List[PanelData]
     voice: Optional[str] = "en-US-GuyNeural"
+    music_theme: Optional[str] = "none"          # "none" | "action" | "adventure" | etc.
+    aspect_ratio: Optional[str] = "auto"          # "auto" | "9:16" | "16:9"
+    frame_rate: Optional[int] = 24
+    video_format: Optional[str] = "mp4"           # "mp4" | "webm" | "mkv"
+    background_style: Optional[str] = "black"     # "black" | "white" | "blurred"
+    subtitles_style: Optional[str] = "none"       # "none" | "burn-in"
+    audio_reactive_shake: Optional[bool] = False
+    shake_intensity: Optional[str] = "medium"     # "low" | "medium" | "high" | "extreme"
 
 async def download_asset(url: str, dest_path: str) -> bool:
     if not url:
@@ -242,6 +250,10 @@ def _get_char_zoompan(motion_type: str, w: int, h: int, duration: float, fps: in
     return f"zoompan=z=1.0:d={frames}:s={w}x{h}:fps={fps}:pix_fmt=yuva420p"
 
 
+# Shake intensity → pixel amplitude mapping
+_SHAKE_AMPLITUDES = {"low": 8, "medium": 16, "high": 24, "extreme": 40}
+
+
 def _render_panel_segment_ffmpeg(
     img_path: str,
     audio_path: str | None,
@@ -255,6 +267,7 @@ def _render_panel_segment_ffmpeg(
     sync_map: list | None = None,
     audio_peaks: list | None = None,
     audio_reactive_shake: bool = False,
+    shake_amplitude: int = 16,
 ) -> None:
     """
     Render a single panel as a self-contained .mp4 segment using pure ffmpeg.
@@ -279,7 +292,12 @@ def _render_panel_segment_ffmpeg(
         if len(spikes) > 0:
             between_conditions = [f"between(t,{s},{s+0.4})" for s in spikes]
             shake_active = "+".join(between_conditions)
-            shake_filter = f",crop=w='iw-32':h='ih-32':x='16+16*sin(80*t)*({shake_active})':y='16+16*cos(80*t)*({shake_active})',scale={w}:{h}"
+            border = shake_amplitude * 2
+            shake_filter = (
+                f",crop=w='iw-{border}':h='ih-{border}'"
+                f":x='{shake_amplitude}+{shake_amplitude}*sin(80*t)*({shake_active})'"
+                f":y='{shake_amplitude}+{shake_amplitude}*cos(80*t)*({shake_active})',scale={w}:{h}"
+            )
 
     if layers:
         # Load background layout size to align scaled layer offsets
@@ -439,23 +457,29 @@ def _render_panel_segment_ffmpeg(
             cmd += ["-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo",
                     "-c:a", "aac", "-b:a", "128k", "-shortest"]
 
-        cmd.append(out_path)
-
+    cmd.append(out_path)
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
     if result.returncode != 0:
         raise RuntimeError(f"ffmpeg panel render failed:\n{result.stderr[-800:]}")
 
 
-def render_pipeline_sync(video_id: str, panels_data: List[Dict[str, Any]], output_path: str):
+def render_pipeline_sync(
+    video_id: str,
+    panels_data: List[Dict[str, Any]],
+    output_path: str,
+    frame_rate: int = 24,
+    shake_amplitude: int = 16,
+    music_theme: str = "none",
+    video_format: str = "mp4",
+):
     """
     Stitches panels together into a final video file.
 
     Strategy (panel-count agnostic, fast for 160+ panels):
-      1. Render each panel as an individual .mp4 segment via ffmpeg (no Python loops per frame).
+      1. Render each panel as an individual .mp4 segment via ffmpeg.
       2. Concatenate all segments with the ffmpeg concat demuxer.
-      3. Optionally mix in BGM with a final ffmpeg pass.
-
-    Falls back to MoviePy only if ffmpeg is unavailable.
+      3. Optionally mix in synthetic BGM via FFmpeg sine oscillator.
+      4. Final re-encode to the requested codec / output format.
     """
     import subprocess
 
@@ -466,11 +490,10 @@ def render_pipeline_sync(video_id: str, panels_data: List[Dict[str, Any]], outpu
 
     with Image.open(first_img) as img:
         raw_w, raw_h = img.size
-    # Pick 1080p portrait or landscape based on image orientation
-    if raw_h > raw_w:
-        canvas_w, canvas_h = 1080, 1920
-    else:
-        canvas_w, canvas_h = 1920, 1080
+    # Use the already-prepared canvas size stored in the first panel dict,
+    # or fall back to orientation-based detection.
+    canvas_w = panels_data[0].get("canvas_w", 1080 if raw_h > raw_w else 1920)
+    canvas_h = panels_data[0].get("canvas_h", 1920 if raw_h > raw_w else 1080)
 
     total = len(panels_data)
     segment_paths: list[str] = []
@@ -496,24 +519,26 @@ def render_pipeline_sync(video_id: str, panels_data: List[Dict[str, Any]], outpu
             duration = p.get("duration", 3.0)
 
         duration = max(duration, 0.5)
+        durations.append(duration)
 
         seg_path = os.path.join(seg_dir, f"seg_{i:04d}.mp4")
         try:
             _render_panel_segment_ffmpeg(
-                img_path   = img_path,
-                audio_path = audio_path,
-                duration   = duration,
-                out_path   = seg_path,
-                w          = canvas_w,
-                h          = canvas_h,
-                motion_type= p.get("motion_type"),
-                layers     = p.get("layers"),
-                sync_map   = p.get("sync_map"),
-                audio_peaks = p.get("audio_peaks"),
+                img_path             = img_path,
+                audio_path           = audio_path,
+                duration             = duration,
+                out_path             = seg_path,
+                w                    = canvas_w,
+                h                    = canvas_h,
+                motion_type          = p.get("motion_type"),
+                fps                  = frame_rate,
+                layers               = p.get("layers"),
+                sync_map             = p.get("sync_map"),
+                audio_peaks          = p.get("audio_peaks"),
                 audio_reactive_shake = p.get("audio_reactive_shake", False),
+                shake_amplitude      = shake_amplitude,
             )
             segment_paths.append(seg_path)
-            durations.append(duration)
             logger.info(f"[Render] [{i+1}/{total}] Panel segment rendered ({duration:.2f}s)")
         except Exception as e:
             logger.error(f"[Render] Panel {i} segment failed: {e}")
@@ -547,54 +572,143 @@ def render_pipeline_sync(video_id: str, panels_data: List[Dict[str, Any]], outpu
     if video_id in RENDER_JOBS:
         RENDER_JOBS[video_id]["progress"] = 92
 
-    # ── Step 3: Mix in BGM (optional final pass) ──────────────────────────────
-    bgm_path = os.path.join(os.getcwd(), "public", "audio", "bgm", "theme.mp3")
-    if os.path.exists(bgm_path):
+    # ── Step 3: Mix in BGM (synthetic sine drone, no static files needed) ─────
+    # Map music themes to base frequencies (Hz)
+    _BGM_FREQS = {
+        "action":                  110,   # A2  — deep, driving
+        "orchestral battle theme": 110,
+        "adventure":               130,   # C3  — bold, heroic
+        "drama":                   98,    # G2  — tense, emotional
+        "mysterious ambience":     98,
+        "romance":                 220,   # A3  — warm, melodic
+        "calm acoustic melancholy": 220,
+        "horror":                  55,    # A1  — dark, unsettling
+        "comedy":                  174,   # F3  — bright, playful
+        "fantasy":                 165,   # E3  — ethereal, magical
+        "sci-fi":                  82,    # E2  — electronic, tense
+        "sci-fi synth wave":       82,
+    }
+    bgm_freq = _BGM_FREQS.get(music_theme.strip().lower()) if music_theme else None
+    if bgm_freq:
         try:
-            bgm_out = os.path.join(seg_dir, "with_bgm.mp4")
-            bgm_cmd = [
+            total_duration = sum(durations) + 2  # small tail
+            bgm_audio_path = os.path.join(seg_dir, "bgm_synth.aac")
+            # Generate synthetic ambient drone: base sine + slow pulsation
+            bgm_gen_cmd = [
                 "ffmpeg", "-y",
-                "-i", concat_out,
-                "-stream_loop", "-1", "-i", bgm_path,
-                "-filter_complex",
-                "[0:a]volume=1.0[va];[1:a]volume=0.10[bgm];[va][bgm]amix=inputs=2:duration=first[aout]",
-                "-map", "0:v", "-map", "[aout]",
-                "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
-                "-shortest",
-                bgm_out,
+                "-f", "lavfi",
+                "-i", f"sine=frequency={bgm_freq}:duration={int(total_duration + 5)}",
+                "-af", "apulsator=hz=0.2,atempo=1.0,volume=0.09",
+                "-c:a", "aac", "-b:a", "64k",
+                bgm_audio_path,
             ]
-            rb = subprocess.run(bgm_cmd, capture_output=True, text=True, timeout=300)
-            if rb.returncode == 0:
-                concat_out = bgm_out
+            rg = subprocess.run(bgm_gen_cmd, capture_output=True, text=True, timeout=30)
+            if rg.returncode == 0 and os.path.exists(bgm_audio_path):
+                bgm_out = os.path.join(seg_dir, "with_bgm.mp4")
+                bgm_mix_cmd = [
+                    "ffmpeg", "-y",
+                    "-i", concat_out,
+                    "-i", bgm_audio_path,
+                    "-filter_complex",
+                    "[0:a]volume=1.0[va];[1:a]volume=1.0[bgm];[va][bgm]amix=inputs=2:duration=first[aout]",
+                    "-map", "0:v", "-map", "[aout]",
+                    "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+                    "-shortest",
+                    bgm_out,
+                ]
+                rb = subprocess.run(bgm_mix_cmd, capture_output=True, text=True, timeout=300)
+                if rb.returncode == 0:
+                    concat_out = bgm_out
+                    logger.info(f"[Render] Synthetic BGM ({music_theme}, {bgm_freq}Hz) mixed in.")
+                else:
+                    logger.warning(f"[Render] BGM mix failed (skipped): {rb.stderr[-400:]}")
             else:
-                logger.warning(f"[Render] BGM mix failed (skipped): {rb.stderr[-400:]}")
+                logger.warning(f"[Render] BGM generation failed (skipped): {rg.stderr[-400:]}")
         except Exception as e:
             logger.warning(f"[Render] BGM error (skipped): {e}")
+    else:
+        # Legacy: attempt static file fallback
+        bgm_path = os.path.join(os.getcwd(), "public", "audio", "bgm", "theme.mp3")
+        if os.path.exists(bgm_path):
+            try:
+                bgm_out = os.path.join(seg_dir, "with_bgm.mp4")
+                bgm_cmd = [
+                    "ffmpeg", "-y",
+                    "-i", concat_out,
+                    "-stream_loop", "-1", "-i", bgm_path,
+                    "-filter_complex",
+                    "[0:a]volume=1.0[va];[1:a]volume=0.10[bgm];[va][bgm]amix=inputs=2:duration=first[aout]",
+                    "-map", "0:v", "-map", "[aout]",
+                    "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+                    "-shortest",
+                    bgm_out,
+                ]
+                rb = subprocess.run(bgm_cmd, capture_output=True, text=True, timeout=300)
+                if rb.returncode == 0:
+                    concat_out = bgm_out
+                else:
+                    logger.warning(f"[Render] BGM mix failed (skipped): {rb.stderr[-400:]}")
+            except Exception as e:
+                logger.warning(f"[Render] BGM error (skipped): {e}")
 
     if video_id in RENDER_JOBS:
         RENDER_JOBS[video_id]["progress"] = 95
 
-    # ── Step 4: Final re-encode to target bitrate / output path ──────────────
-    final_cmd = [
-        "ffmpeg", "-y",
-        "-i", concat_out,
-        "-c:v", "libx264", "-preset", "ultrafast",
-        "-b:v", "8000k", "-maxrate", "10000k", "-bufsize", "20000k",
-        "-c:a", "aac", "-b:a", "192k",
-        "-movflags", "+faststart",
-        output_path,
-    ]
+    # ── Step 4: Final re-encode to target codec / output format ──────────────
+    ext = video_format if video_format in ("mp4", "webm", "mkv") else "mp4"
+    # Swap output extension if needed (output_path was already created with the
+    # correct name by process_render_job; here we just build the codec flags).
+    if ext == "webm":
+        vcodec_flags = ["-c:v", "libvpx-vp9", "-b:v", "0", "-crf", "33", "-row-mt", "1"]
+        acodec_flags = ["-c:a", "libopus", "-b:a", "128k"]
+    elif ext == "mkv":
+        try:
+            # Try HEVC first; fall back to x264 if not available
+            probe = subprocess.run(
+                ["ffmpeg", "-hide_banner", "-encoders"],
+                capture_output=True, text=True, timeout=5
+            )
+            if "libx265" in probe.stdout:
+                vcodec_flags = ["-c:v", "libx265", "-preset", "ultrafast", "-crf", "28"]
+            else:
+                vcodec_flags = ["-c:v", "libx264", "-preset", "ultrafast", "-crf", "23"]
+        except Exception:
+            vcodec_flags = ["-c:v", "libx264", "-preset", "ultrafast", "-crf", "23"]
+        acodec_flags = ["-c:a", "aac", "-b:a", "192k"]
+    else:  # mp4 default
+        vcodec_flags = [
+            "-c:v", "libx264", "-preset", "ultrafast",
+            "-b:v", "8000k", "-maxrate", "10000k", "-bufsize", "20000k",
+            "-movflags", "+faststart",
+        ]
+        acodec_flags = ["-c:a", "aac", "-b:a", "192k"]
+
+    final_cmd = ["ffmpeg", "-y", "-i", concat_out] + vcodec_flags + acodec_flags + [output_path]
     rf = subprocess.run(final_cmd, capture_output=True, text=True, timeout=600)
     if rf.returncode != 0:
         raise RuntimeError(f"ffmpeg final encode failed:\n{rf.stderr[-800:]}")
 
     logger.info(f"[Render] Done — {len(segment_paths)} panels → {output_path}")
 
-async def process_render_job(video_id: str, panels: List[PanelData], voice: Optional[str]):
+
+async def process_render_job(
+    video_id: str,
+    panels: List[PanelData],
+    voice: Optional[str],
+    music_theme: str = "none",
+    aspect_ratio: str = "auto",
+    frame_rate: int = 24,
+    video_format: str = "mp4",
+    background_style: str = "black",
+    subtitles_style: str = "none",
+    audio_reactive_shake: bool = False,
+    shake_intensity: str = "medium",
+):
     work_dir = os.path.join(os.getcwd(), "temp", f"render_{video_id}")
     os.makedirs(work_dir, exist_ok=True)
-    
-    output_filename = f"final_render_{video_id}.mp4"
+
+    ext = video_format if video_format in ("mp4", "webm", "mkv") else "mp4"
+    output_filename = f"final_render_{video_id}.{ext}"
     output_path = os.path.join(os.getcwd(), "public", "videos", output_filename)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
@@ -725,25 +839,66 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
                 except Exception as e:
                     if "too tall" in str(e): raise e
 
-        target_w, target_h = (1080, 1920) if tall_count > len(panels_data)/2 else (1920, 1080)
+        # Determine canvas from aspect_ratio setting (overrides auto-detection)
+        if aspect_ratio == "9:16":
+            target_w, target_h = 1080, 1920
+        elif aspect_ratio == "16:9":
+            target_w, target_h = 1920, 1080
+        else:
+            # auto: pick based on majority image orientation
+            target_w, target_h = (1080, 1920) if tall_count > len(panels_data) / 2 else (1920, 1080)
+
+        # Resolve background fill colour for PIL letterbox
+        bg_color = (0, 0, 0)  # default black
+        if background_style == "white":
+            bg_color = (255, 255, 255)
+        # "blurred" is handled per-panel via a flag; PIL layer uses black for now
+
+        shake_amplitude = _SHAKE_AMPLITUDES.get(shake_intensity, 16)
 
         for idx, p in enumerate(panels_data):
+            # Store canvas dims so render_pipeline_sync can read them
+            p["canvas_w"] = target_w
+            p["canvas_h"] = target_h
+
             if os.path.exists(p["raw_img"]):
                 with Image.open(p["raw_img"]) as img:
                     img = img.convert("RGB")
                     scale = min(target_w / img.width, target_h / img.height)
                     nw, nh = int(img.width * scale), int(img.height * scale)
                     # Even dims for ffmpeg
-                    resized = img.resize((max(2, nw - nw%2), max(2, nh - nh%2)), Image.Resampling.LANCZOS)
-                    bg = Image.new("RGB", (target_w, target_h), (0, 0, 0))
-                    bg.paste(resized, ((target_w - resized.width)//2, (target_h - resized.height)//2))
-                    
-                    # Bake subtitles if present (Disabled as requested)
-                    # if p.get("speech_text") and p["speech_text"].strip():
-                    #     bg = draw_subtitles_on_image(bg, p["speech_text"].strip())
-                        
+                    resized = img.resize((max(2, nw - nw % 2), max(2, nh - nh % 2)), Image.Resampling.LANCZOS)
+
+                    if background_style == "blurred":
+                        # Blurred letterbox: scale image to fill canvas, blur, then overlay sharp centred
+                        fill_scale = max(target_w / img.width, target_h / img.height)
+                        fw = int(img.width * fill_scale)
+                        fh = int(img.height * fill_scale)
+                        fw = max(2, fw - fw % 2)
+                        fh = max(2, fh - fh % 2)
+                        blurred_bg = img.resize((fw, fh), Image.Resampling.LANCZOS)
+                        try:
+                            from PIL import ImageFilter
+                            blurred_bg = blurred_bg.filter(ImageFilter.GaussianBlur(radius=18))
+                        except Exception:
+                            pass
+                        bg = Image.new("RGB", (target_w, target_h), (0, 0, 0))
+                        bg.paste(blurred_bg, ((target_w - fw) // 2, (target_h - fh) // 2))
+                    else:
+                        bg = Image.new("RGB", (target_w, target_h), bg_color)
+
+                    bg.paste(resized, ((target_w - resized.width) // 2, (target_h - resized.height) // 2))
+
+                    # Burn-in subtitles if requested
+                    if subtitles_style == "burn-in" and p.get("speech_text") and p["speech_text"].strip():
+                        bg = draw_subtitles_on_image(bg, p["speech_text"].strip())
+
                     bg.save(p["local_img"], "JPEG")
-            
+
+                    # Also apply shake flag from global setting
+                    if audio_reactive_shake:
+                        p["audio_reactive_shake"] = True
+
             if len(panels_data) > 0:
                 progress = 40 + int(((idx + 1) / len(panels_data)) * 10)
                 RENDER_JOBS[video_id]["progress"] = min(progress, 50)
@@ -752,7 +907,11 @@ async def process_render_job(video_id: str, panels: List[PanelData], voice: Opti
 
         # 4. Rendering (50% to 95%)
         logger.info(f"[Render] Starting FFmpeg pipeline for {video_id}")
-        await asyncio.to_thread(render_pipeline_sync, video_id, panels_data, output_path)
+        await asyncio.to_thread(
+            render_pipeline_sync,
+            video_id, panels_data, output_path,
+            frame_rate, shake_amplitude, music_theme, ext,
+        )
 
         final_video_url = f"/videos/{output_filename}"
 
@@ -801,7 +960,20 @@ async def render_video(request: RenderRequest, background_tasks: BackgroundTasks
     # Record the deduction atomically before dispatching the background task
     new_balance = record_credit_transaction(current_user["user_id"], -COST, "video_render")
 
-    background_tasks.add_task(process_render_job, video_id, request.panels, request.voice)
+    background_tasks.add_task(
+        process_render_job,
+        video_id,
+        request.panels,
+        request.voice,
+        request.music_theme or "none",
+        request.aspect_ratio or "auto",
+        request.frame_rate or 24,
+        request.video_format or "mp4",
+        request.background_style or "black",
+        request.subtitles_style or "none",
+        request.audio_reactive_shake or False,
+        request.shake_intensity or "medium",
+    )
 
     return {"success": True, "job_id": video_id, "low_balance": new_balance < LOW_BALANCE_THRESHOLD}
 

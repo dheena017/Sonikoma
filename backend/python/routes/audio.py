@@ -177,5 +177,7 @@ async def list_voices():
             {"code": "ko-KR-InJoonNeural",     "label": "Korean — InJoon (Male)"},
             {"code": "ja-JP-NanamiNeural",     "label": "Japanese — Nanami (Female)"},
             {"code": "zh-CN-XiaoxiaoNeural",   "label": "Chinese (Mandarin) — Xiaoxiao (Female)"},
+            {"code": "ta-IN-PallaviNeural",    "label": "Tamil (India) — Pallavi (Female)"},
+            {"code": "ta-IN-ValluvarNeural",   "label": "Tamil (India) — Valluvar (Male)"},
         ],
     })

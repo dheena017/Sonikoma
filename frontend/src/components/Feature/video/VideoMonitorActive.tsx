@@ -1,5 +1,5 @@
 import React from "react";
-import { Film, RefreshCw } from "lucide-react";
+import { Film, RefreshCw, Play, Pause, SkipBack, SkipForward } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import { getPanelFilterStyle } from "@/utils";
 
@@ -7,14 +7,17 @@ interface VideoMonitorActiveProps {
   activePreviewTab: "video" | "timeline";
   videoUrl: string | null;
   panels: GeneratedPanel[];
-  aspectRatio: "9:16" | "16:9";
+  aspectRatio: "auto" | "9:16" | "16:9";
   videoPlayerRef: React.RefObject<HTMLVideoElement | null>;
   currentPanelIndex: number;
   playbackTime: number;
   reprocessingPanelId: number | null;
+  storyboardPlaying: boolean;
   setCurrentPanelIndex: (idx: number) => void;
   setPlaybackTime: (time: number) => void;
   setStoryboardPlaying: (playing: boolean) => void;
+  toggleStoryboardPlayback: () => void;
+  resetStoryboardPlayback: () => void;
 }
 
 export function VideoMonitorActive({
@@ -26,9 +29,12 @@ export function VideoMonitorActive({
   currentPanelIndex,
   playbackTime,
   reprocessingPanelId,
+  storyboardPlaying,
   setCurrentPanelIndex,
   setPlaybackTime,
   setStoryboardPlaying,
+  toggleStoryboardPlayback,
+  resetStoryboardPlayback,
 }: VideoMonitorActiveProps) {
   const [videoCurrentTime, setVideoCurrentTime] = React.useState(0);
   const [bgDims, setBgDims] = React.useState<{ w: number; h: number } | null>(null);
@@ -258,7 +264,7 @@ export function VideoMonitorActive({
         activePreviewTab === "timeline" &&
         activeStoryboardPanel && (
           <div
-            className="relative bg-neutral-950 border border-neutral-800/80 overflow-hidden rounded-xl flex flex-col justify-between transition-all duration-300 shadow w-full text-center"
+            className="group relative bg-neutral-950 border border-neutral-800/80 overflow-hidden rounded-xl flex flex-col justify-between transition-all duration-300 shadow w-full text-center"
             style={
               aspectRatio === "9:16"
                 ? { maxWidth: "270px", aspectRatio: "9/16" }
@@ -433,6 +439,54 @@ export function VideoMonitorActive({
               <span className="bg-purple-950/85 text-purple-400 px-2 py-0.5 rounded border border-purple-800/40">
                 TIMELINE PREVIEW
               </span>
+            </div>
+
+            {/* Playback Controls Overlay */}
+            <div className="absolute inset-x-0 bottom-[4.5rem] z-20 flex items-center justify-center gap-3 opacity-0 hover:opacity-100 transition-opacity duration-200 group-hover:opacity-100"
+              style={{ pointerEvents: "auto" }}
+            >
+              {/* Progress bar */}
+              <div className="absolute bottom-[-1.5rem] left-3 right-3 h-0.5 bg-white/10 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-purple-500 rounded-full transition-all duration-100"
+                  style={{
+                    width: activeStoryboardPanel
+                      ? `${Math.min((playbackTime / (activeStoryboardPanel.duration || 4.5)) * 100, 100)}%`
+                      : "0%",
+                  }}
+                />
+              </div>
+
+              {/* Prev panel */}
+              <button
+                onClick={(e) => { e.stopPropagation(); if (currentPanelIndex > 0) { setCurrentPanelIndex(currentPanelIndex - 1); setPlaybackTime(0); } }}
+                disabled={currentPanelIndex === 0}
+                className="flex items-center justify-center h-8 w-8 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white disabled:opacity-30 hover:bg-white/10 transition-all cursor-pointer"
+                title="Previous Panel"
+              >
+                <SkipBack className="h-3.5 w-3.5" />
+              </button>
+
+              {/* Play / Pause */}
+              <button
+                onClick={(e) => { e.stopPropagation(); toggleStoryboardPlayback(); }}
+                className="flex items-center justify-center h-11 w-11 rounded-full bg-purple-600/90 backdrop-blur-md border border-purple-400/30 text-white hover:bg-purple-500 active:scale-95 transition-all shadow-lg shadow-purple-900/40 cursor-pointer"
+                title={storyboardPlaying ? "Pause" : "Play"}
+              >
+                {storyboardPlaying
+                  ? <Pause className="h-5 w-5 fill-white" />
+                  : <Play className="h-5 w-5 fill-white translate-x-0.5" />}
+              </button>
+
+              {/* Next panel */}
+              <button
+                onClick={(e) => { e.stopPropagation(); if (currentPanelIndex < panels.length - 1) { setCurrentPanelIndex(currentPanelIndex + 1); setPlaybackTime(0); } }}
+                disabled={currentPanelIndex >= panels.length - 1}
+                className="flex items-center justify-center h-8 w-8 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white disabled:opacity-30 hover:bg-white/10 transition-all cursor-pointer"
+                title="Next Panel"
+              >
+                <SkipForward className="h-3.5 w-3.5" />
+              </button>
             </div>
 
             {/* Subtitles Overlay */}

@@ -398,9 +398,27 @@ export function useVideoGeneration({
     setRenderStartTime(startTime);
 
     try {
+      // Read all advanced settings from localStorage (set by AdvancedSettings.tsx and useAppState)
+      const music_theme = localStorage.getItem("ai_comic_music") || "none";
+      const aspect_ratio = localStorage.getItem("ai_comic_aspectRatio") || "auto";
+      const frame_rate = parseInt(localStorage.getItem("ai_comic_fps") || "24", 10);
+      const video_format = localStorage.getItem("ai_video_format") || "mp4";
+      const background_style = localStorage.getItem("ai_video_bg_style") || "black";
+      const subtitles_style = localStorage.getItem("ai_video_subtitles_style") || "none";
+      const audio_reactive_shake = localStorage.getItem("ai_video_shake") === "true";
+      const shake_intensity = localStorage.getItem("ai_video_shake_intensity") || "medium";
+
       const data = await api.renderVideo(fetchWithInterceptor, {
         panels,
         voice: voiceActor,
+        music_theme,
+        aspect_ratio,
+        frame_rate: isNaN(frame_rate) ? 24 : frame_rate,
+        video_format,
+        background_style,
+        subtitles_style,
+        audio_reactive_shake,
+        shake_intensity,
       });
       if (!data.success || !data.job_id) {
         throw new Error(

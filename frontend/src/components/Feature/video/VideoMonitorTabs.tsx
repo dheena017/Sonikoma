@@ -6,7 +6,7 @@ interface VideoMonitorTabsProps {
   setActivePreviewTab: (tab: "video" | "timeline") => void;
   videoUrl: string | null;
   panels: GeneratedPanel[];
-  aspectRatio: "9:16" | "16:9";
+  aspectRatio: "auto" | "9:16" | "16:9";
 }
 
 export function VideoMonitorTabs({
@@ -50,7 +50,9 @@ export function VideoMonitorTabs({
       <span className="self-start sm:self-auto text-[10px] font-mono bg-neutral-950 border border-neutral-800 px-2 py-0.5 rounded text-neutral-400">
         {aspectRatio === "9:16"
           ? "Portrait (1080x1920)"
-          : "Landscape (1920x1080)"}
+          : aspectRatio === "16:9"
+          ? "Landscape (1920x1080)"
+          : "Auto-Detect"}
       </span>
     </div>
   );

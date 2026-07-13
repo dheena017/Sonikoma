@@ -32,6 +32,8 @@ const DEFAULT_VOICES: VoiceOption[] = [
     code: "zh-CN-XiaoxiaoNeural",
     label: "Chinese (Mandarin) — Xiaoxiao (Female)",
   },
+  { code: "ta-IN-PallaviNeural", label: "Tamil (India) — Pallavi (Female)" },
+  { code: "ta-IN-ValluvarNeural", label: "Tamil (India) — Valluvar (Male)" },
 ];
 
 export default function VoiceSettingsPanel({

@@ -8,7 +8,7 @@ interface VideoMonitorProps {
   setActivePreviewTab: (tab: "video" | "timeline") => void;
   videoUrl: string | null;
   panels: GeneratedPanel[];
-  aspectRatio: "9:16" | "16:9";
+  aspectRatio: "auto" | "9:16" | "16:9";
   videoPlayerRef: React.RefObject<HTMLVideoElement | null>;
   currentPanelIndex: number;
   playbackTime: number;

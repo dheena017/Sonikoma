@@ -12,7 +12,7 @@ interface UseAppRouterProps {
   setSelectedSource: (v: string) => void;
   setVoiceActor: (v: string) => void;
   setMusicTheme: (v: string) => void;
-  setAspectRatio: (v: "9:16" | "16:9") => void;
+  setAspectRatio: (v: "auto" | "9:16" | "16:9") => void;
   setFrameRate: (v: number) => void;
   addNotification: (
     msg: string,
@@ -31,7 +31,7 @@ interface UseAppRouterProps {
   user: any;
   voiceActor: string;
   musicTheme: string;
-  aspectRatio: "9:16" | "16:9";
+  aspectRatio: "auto" | "9:16" | "16:9";
   frameRate: number;
   isDirty?: boolean;
   projectId: string | null;

@@ -24,8 +24,8 @@ interface AdvancedSettingsProps {
   setVoiceActor: (val: string) => void;
   musicTheme: string;
   setMusicTheme: (val: string) => void;
-  aspectRatio: "9:16" | "16:9";
-  setAspectRatio: (val: "9:16" | "16:9") => void;
+  aspectRatio: "auto" | "9:16" | "16:9";
+  setAspectRatio: (val: "auto" | "9:16" | "16:9") => void;
   frameRate: number;
   setFrameRate: (val: number) => void;
   activeTheme: string;
@@ -64,7 +64,7 @@ interface WorkspacePreset {
   name: string;
   voiceActor: string;
   musicTheme: string;
-  aspectRatio: "9:16" | "16:9";
+  aspectRatio: "auto" | "9:16" | "16:9";
   frameRate: number;
   activeTheme: string;
   audioReactiveShake?: boolean;
@@ -198,15 +198,63 @@ const AdvancedSettings = React.memo(
     }, [subtitlesStyle]);
 
     // Local states fallback if callbacks are not provided
-    const [localCropSensitivity, setLocalCropSensitivity] = React.useState(cropSensitivity);
-    const [localCropPaddingPx, setLocalCropPaddingPx] = React.useState(cropPaddingPx);
-    const [localCropFocusMode, setLocalCropFocusMode] = React.useState(cropFocusMode);
-    const [localCropModel, setLocalCropModel] = React.useState(cropModel);
+    const [localCropSensitivity, setLocalCropSensitivity] = React.useState(
+      () => parseInt(localStorage.getItem("ai_crop_sensitivity") || String(cropSensitivity), 10)
+    );
+    const [localCropPaddingPx, setLocalCropPaddingPx] = React.useState(
+      () => parseInt(localStorage.getItem("ai_crop_padding") || String(cropPaddingPx), 10)
+    );
+    const [localCropFocusMode, setLocalCropFocusMode] = React.useState<string>(
+      () => localStorage.getItem("ai_crop_focus_mode") || cropFocusMode
+    );
+    const [localCropModel, setLocalCropModel] = React.useState<string>(
+      () => localStorage.getItem("ai_crop_model") || cropModel
+    );
 
     const [localBubbleSensitivity, setLocalBubbleSensitivity] = React.useState(bubbleSensitivity);
     const [localBubbleDilation, setLocalBubbleDilation] = React.useState(bubbleDilation > 0 ? bubbleDilation : 5);
-    const [localBubbleEraseMethod, setLocalBubbleEraseMethod] = React.useState(bubbleEraseMethod);
-    const [localBubbleDetectionStyle, setLocalBubbleDetectionStyle] = React.useState(bubbleDetectionStyle);
+    const [localBubbleEraseMethod, setLocalBubbleEraseMethod] = React.useState<string>(
+      () => localStorage.getItem("ai_bubble_erase_method") || bubbleEraseMethod
+    );
+    const [localBubbleDetectionStyle, setLocalBubbleDetectionStyle] = React.useState<string>(
+      () => localStorage.getItem("ai_bubble_detection_style") || bubbleDetectionStyle
+    );
+
+    // Persist AI Crop settings to localStorage
+    React.useEffect(() => {
+      localStorage.setItem("ai_crop_sensitivity", String(localCropSensitivity));
+    }, [localCropSensitivity]);
+
+    React.useEffect(() => {
+      localStorage.setItem("ai_crop_padding", String(localCropPaddingPx));
+    }, [localCropPaddingPx]);
+
+    React.useEffect(() => {
+      localStorage.setItem("ai_crop_focus_mode", localCropFocusMode);
+    }, [localCropFocusMode]);
+
+    React.useEffect(() => {
+      localStorage.setItem("ai_crop_model", localCropModel);
+    }, [localCropModel]);
+
+    // Persist Bubble settings to localStorage
+    React.useEffect(() => {
+      localStorage.setItem("ai_bubble_sensitivity", String(localBubbleSensitivity));
+    }, [localBubbleSensitivity]);
+
+    React.useEffect(() => {
+      localStorage.setItem("ai_bubble_dilation", String(localBubbleDilation));
+    }, [localBubbleDilation]);
+
+    React.useEffect(() => {
+      localStorage.setItem("ai_bubble_erase_method", localBubbleEraseMethod);
+    }, [localBubbleEraseMethod]);
+
+    React.useEffect(() => {
+      localStorage.setItem("ai_bubble_detection_style", localBubbleDetectionStyle);
+    }, [localBubbleDetectionStyle]);
+
+
 
     // Sync state changes back to parent setters if they exist
     const handleCropSensitivityChange = (val: number) => {
@@ -513,10 +561,20 @@ const AdvancedSettings = React.memo(
                   <Tv className="h-3.5 w-3.5 text-purple-400" />
                   Aspect Ratio
                 </label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    onClick={() => setAspectRatio("auto")}
+                    className={`py-1.5 px-2 text-xs rounded-xl border text-center transition-all cursor-pointer font-bold font-mono ${
+                      aspectRatio === "auto" || !aspectRatio
+                        ? "bg-purple-950/20 border-purple-500 text-purple-300 shadow-inner"
+                        : "bg-neutral-950 border-neutral-800 text-neutral-400 hover:text-white"
+                    }`}
+                  >
+                    Auto-Detect
+                  </button>
                   <button
                     onClick={() => setAspectRatio("9:16")}
-                    className={`py-1.5 px-3 text-xs rounded-xl border text-center transition-all cursor-pointer font-bold font-mono ${
+                    className={`py-1.5 px-2 text-xs rounded-xl border text-center transition-all cursor-pointer font-bold font-mono ${
                       aspectRatio === "9:16"
                         ? "bg-purple-950/20 border-purple-500 text-purple-300 shadow-inner"
                         : "bg-neutral-950 border-neutral-800 text-neutral-400 hover:text-white"
@@ -526,7 +584,7 @@ const AdvancedSettings = React.memo(
                   </button>
                   <button
                     onClick={() => setAspectRatio("16:9")}
-                    className={`py-1.5 px-3 text-xs rounded-xl border text-center transition-all cursor-pointer font-bold font-mono ${
+                    className={`py-1.5 px-2 text-xs rounded-xl border text-center transition-all cursor-pointer font-bold font-mono ${
                       aspectRatio === "16:9"
                         ? "bg-purple-950/20 border-purple-500 text-purple-300 shadow-inner"
                         : "bg-neutral-950 border-neutral-800 text-neutral-400 hover:text-white"

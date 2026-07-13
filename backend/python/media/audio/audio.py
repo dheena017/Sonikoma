@@ -1,9 +1,11 @@
 import os
+import re
 import logging
 import tempfile
 import asyncio
-from typing import List, Optional
+from typing import List, Optional, Tuple
 import edge_tts
+from edge_tts.exceptions import NoAudioReceived
 from pydub import AudioSegment
 from pydub.effects import speedup
 
@@ -13,8 +15,93 @@ VOICE_MAP = {
     "Standard Comic Narrator (Male)": "en-US-GuyNeural",
     "Sultry Narrative Tone (Female)": "en-US-JennyNeural",
     "Shonen Protagonist (Energetic Male)": "en-US-JasonNeural",
-    "Dark Anti-Hero voice (Raspy Deep)": "en-US-TonyNeural"
+    "Dark Anti-Hero voice (Raspy Deep)": "en-US-TonyNeural",
+    
+    # Curated voice labels using EM-dashes
+    "English (US) — Guy (Male)": "en-US-GuyNeural",
+    "English (US) — Jenny (Female)": "en-US-JennyNeural",
+    "English (US) — Aria (Female)": "en-US-AriaNeural",
+    "English (UK) — Sonia (Female)": "en-GB-SoniaNeural",
+    "English (UK) — Ryan (Male)": "en-GB-RyanNeural",
+    "English (AU) — Natasha (Female)": "en-AU-NatashaNeural",
+    "Korean — SunHi (Female)": "ko-KR-SunHiNeural",
+    "Korean — InJoon (Male)": "ko-KR-InJoonNeural",
+    "Japanese — Nanami (Female)": "ja-JP-NanamiNeural",
+    "Chinese (Mandarin) — Xiaoxiao (Female)": "zh-CN-XiaoxiaoNeural",
+    "Tamil (India) — Pallavi (Female)": "ta-IN-PallaviNeural",
+    "Tamil (India) — Valluvar (Male)": "ta-IN-ValluvarNeural",
+
+    # Curated voice labels using hyphens
+    "English (US) - Guy (Male)": "en-US-GuyNeural",
+    "English (US) - Jenny (Female)": "en-US-JennyNeural",
+    "English (US) - Aria (Female)": "en-US-AriaNeural",
+    "English (UK) - Sonia (Female)": "en-GB-SoniaNeural",
+    "English (UK) - Ryan (Male)": "en-GB-RyanNeural",
+    "English (AU) - Natasha (Female)": "en-AU-NatashaNeural",
+    "Korean - SunHi (Female)": "ko-KR-SunHiNeural",
+    "Korean - InJoon (Male)": "ko-KR-InJoonNeural",
+    "Japanese - Nanami (Female)": "ja-JP-NanamiNeural",
+    "Chinese (Mandarin) - Xiaoxiao (Female)": "zh-CN-XiaoxiaoNeural",
+    "Tamil (India) - Pallavi (Female)": "ta-IN-PallaviNeural",
+    "Tamil (India) - Valluvar (Male)": "ta-IN-ValluvarNeural"
 }
+
+# Minimum number of alphabetic characters required for TTS to produce audio
+_TTS_MIN_ALPHA_CHARS = 3
+
+def sanitize_text_for_tts(text: str) -> str:
+    """
+    Cleans text before sending to edge-tts to prevent NoAudioReceived errors.
+    - Strips control characters and null bytes
+    - Collapses excessive whitespace
+    - Removes SSML-unsafe characters
+    """
+    # Remove null bytes and control characters (except newline/tab)
+    text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
+    # Normalize whitespace
+    text = re.sub(r"[ \t]+", " ", text).strip()
+    return text
+
+
+async def generate_segment_with_retry(
+    text: str,
+    voice: str,
+    temp_file_path: str,
+    max_retries: int = 3,
+    base_delay: float = 1.0
+) -> bool:
+    """
+    Attempts to generate a TTS audio segment with exponential backoff retries.
+
+    Returns:
+        True if audio was successfully saved, False if all retries were exhausted.
+    """
+    for attempt in range(1, max_retries + 1):
+        try:
+            communicate = edge_tts.Communicate(text, voice)
+            await communicate.save(temp_file_path)
+            # Verify the file was actually written with content
+            if os.path.exists(temp_file_path) and os.path.getsize(temp_file_path) > 0:
+                return True
+            logger.warning(f"[Narration/TTS] Attempt {attempt}: saved file is empty for text: '{text[:40]}'")
+        except NoAudioReceived as e:
+            logger.warning(
+                f"[Narration/TTS] Attempt {attempt}/{max_retries}: NoAudioReceived for text: '{text[:40]}'. "
+                f"Error: {e}"
+            )
+        except Exception as e:
+            logger.warning(
+                f"[Narration/TTS] Attempt {attempt}/{max_retries}: Unexpected error for text: '{text[:40]}'. "
+                f"Error: {e}"
+            )
+
+        if attempt < max_retries:
+            delay = base_delay * (2 ** (attempt - 1))
+            logger.info(f"[Narration/TTS] Retrying in {delay:.1f}s...")
+            await asyncio.sleep(delay)
+
+    logger.error(f"[Narration/TTS] All {max_retries} attempts failed for text: '{text[:40]}'. Falling back to silence.")
+    return False
 
 async def generate_panel_audio(
     dialogue_list: List[str],
@@ -22,7 +109,7 @@ async def generate_panel_audio(
     output_path: str,
     voice: Optional[str] = "en-US-GuyNeural",
     force_duration: bool = False
-) -> (str, float):
+) -> Tuple[str, float]:
     """
     Generates dynamic text-to-speech elements for an ordered sequence of storyboard dialogue transcripts,
     concatenates all sentences into a coherent wave, and applies advanced pitch-preserved time-stretching or
@@ -54,12 +141,17 @@ async def generate_panel_audio(
     temp_files = []
 
     actual_voice = VOICE_MAP.get(voice, voice) if voice else "en-US-GuyNeural"
+    if not actual_voice or "-" not in actual_voice or actual_voice.strip().lower() in ("undefined", "null", "default"):
+        actual_voice = "en-US-GuyNeural"
 
     try:
         # Phase 1: Generate individual audio strips asynchronously
         for idx, text in enumerate(dialogue_list):
             if not text.strip():
                 continue
+
+            # Sanitize text to prevent edge-tts control character / whitespace errors
+            text = sanitize_text_for_tts(text)
 
             # Escape or skip empty texts
             temp_file_path = os.path.join(temp_dir, f"dialog_segment_{uuid_hex()}_{idx}.mp3")
@@ -72,9 +164,23 @@ async def generate_panel_audio(
                 silence_seg.export(temp_file_path, format="mp3")
                 continue
 
+            # Guard: edge-tts requires a minimum amount of speakable content
+            alpha_count = sum(1 for c in text if c.isalpha())
+            if alpha_count < _TTS_MIN_ALPHA_CHARS:
+                logger.info(
+                    f"[Narration/TTS] Segment {idx+1}/{len(dialogue_list)}: '{text[:40]}' has too few "
+                    f"alphabetic characters ({alpha_count} < {_TTS_MIN_ALPHA_CHARS}). Using silence."
+                )
+                silence_seg = AudioSegment.silent(duration=1000)
+                silence_seg.export(temp_file_path, format="mp3")
+                continue
+
             logger.info(f"[Narration/TTS] Generating segment {idx+1}/{len(dialogue_list)}: '{text[:40]}...' using voice: {actual_voice}")
-            communicate = edge_tts.Communicate(text, actual_voice)
-            await communicate.save(temp_file_path)
+            success = await generate_segment_with_retry(text, actual_voice, temp_file_path)
+            if not success:
+                # Retry exhausted — substitute silence so pipeline continues
+                silence_seg = AudioSegment.silent(duration=1000)
+                silence_seg.export(temp_file_path, format="mp3")
 
         def process_audio_sync():
             # Phase 2: Loading & Concatenating files using defensive format normalizer

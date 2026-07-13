@@ -106,8 +106,12 @@ export function useAppState() {
   const [bubbleEraseMethod, setBubbleEraseMethod] = useState<
     "auto" | "inpaint" | "blur" | "solid_white" | "solid_black"
   >("auto");
-  const [bubbleSensitivity, setBubbleSensitivity] = useState<number>(50);
-  const [bubbleDilation, setBubbleDilation] = useState<number>(-1);
+  const [bubbleSensitivity, setBubbleSensitivity] = useState<number>(
+    () => parseInt(localStorage.getItem("ai_bubble_sensitivity") || "50", 10)
+  );
+  const [bubbleDilation, setBubbleDilation] = useState<number>(
+    () => parseInt(localStorage.getItem("ai_bubble_dilation") || "-1", 10)
+  );
   const [bubbleInpaintRadius, setBubbleInpaintRadius] = useState<number>(3);
   const [activeBubbleTab, setActiveBubbleTab] = useState<string>("general");
   const [isCleaningBubbles, setIsCleaningBubbles] = useState<boolean>(false);
@@ -121,8 +125,12 @@ export function useAppState() {
 
   // Auto crop states
   const [showAutoCropModal, setShowAutoCropModal] = useState<boolean>(false);
-  const [cropSensitivity, setCropSensitivity] = useState<number>(30);
-  const [cropPaddingPx, setCropPaddingPx] = useState<number>(10);
+  const [cropSensitivity, setCropSensitivity] = useState<number>(
+    () => parseInt(localStorage.getItem("ai_crop_sensitivity") || "30", 10)
+  );
+  const [cropPaddingPx, setCropPaddingPx] = useState<number>(
+    () => parseInt(localStorage.getItem("ai_crop_padding") || "10", 10)
+  );
   const [cropBackgroundMode, setCropBackgroundMode] = useState<string>("auto");
   const [autoSplitTallStrips, setAutoSplitTallStrips] = useState<boolean>(true);
   const [processingStrategy, setProcessingStrategy] =
@@ -138,14 +146,18 @@ export function useAppState() {
     total: number;
   } | null>(null);
   const [croppingImgUrl, setCroppingImgUrl] = useState<string | null>(null);
-  const [cropModel, setCropModel] = useState<string>("gemini-2.0-flash-lite");
+  const [cropModel, setCropModel] = useState<string>(
+    () => localStorage.getItem("ai_crop_model") || "gemini-2.0-flash-lite"
+  );
   const [cropMinHeightPx, setCropMinHeightPx] = useState<number>(60);
   const [cropCannyLow, setCropCannyLow] = useState<number>(20);
   const [cropCannyHigh, setCropCannyHigh] = useState<number>(100);
   const [cropCloseKernelSize, setCropCloseKernelSize] = useState<number>(15);
   const [activeAutoCropTab, setActiveAutoCropTab] = useState<string>("general");
   const [cropGuidance, setCropGuidance] = useState<string>("");
-  const [cropFocusMode, setCropFocusMode] = useState<string>("standard");
+  const [cropFocusMode, setCropFocusMode] = useState<string>(
+    () => localStorage.getItem("ai_crop_focus_mode") || "standard"
+  );
   const [showScrapeConfirmModal, setShowScrapeConfirmModal] =
     useState<boolean>(false);
   const [accumulatedTokens, setAccumulatedTokens] = useState<number>(0);
@@ -203,9 +215,9 @@ export function useAppState() {
   const [musicTheme, setMusicTheme] = useState<string>(
     () => localStorage.getItem("ai_comic_music") || "Orchestral Battle Theme"
   );
-  const [aspectRatio, setAspectRatio] = useState<"9:16" | "16:9">(
+  const [aspectRatio, setAspectRatio] = useState<"auto" | "9:16" | "16:9">(
     () =>
-      (localStorage.getItem("ai_comic_aspectRatio") as "9:16" | "16:9") ||
+      (localStorage.getItem("ai_comic_aspectRatio") as "auto" | "9:16" | "16:9") ||
       "9:16"
   );
   const [selectedModel, setSelectedModel] = useState<string>(
