@@ -78,33 +78,37 @@ export function useCropEditorHistory({
 
   const handleUndo = useCallback(() => {
     console.log("[ImageEditorHistory] Undo triggered");
-    setHistory((prev) => {
-      if (prev.length === 0) return prev;
-      const snap = prev[prev.length - 1];
+    if (history.length === 0) return;
 
-      setRedoHistory((prevRedo) => [
-        ...prevRedo,
-        {
-          cropTop: editCropTop,
-          cropBottom: editCropBottom,
-          cropLeft: editCropLeft,
-          cropRight: editCropRight,
-          slices,
-          splitLines,
-          selectedSliceId,
-        },
-      ]);
+    const snap = history[history.length - 1];
 
-      setEditCropTop(snap.cropTop);
-      setEditCropBottom(snap.cropBottom);
-      setEditCropLeft(snap.cropLeft);
-      setEditCropRight(snap.cropRight);
-      setSlices(snap.slices);
-      setSplitLines(snap.splitLines);
-      setSelectedSliceId(snap.selectedSliceId);
-      return prev.slice(0, -1);
-    });
+    // Save current state to redo stack BEFORE applying snapshot
+    setRedoHistory((prevRedo) => [
+      ...prevRedo,
+      {
+        cropTop: editCropTop,
+        cropBottom: editCropBottom,
+        cropLeft: editCropLeft,
+        cropRight: editCropRight,
+        slices,
+        splitLines,
+        selectedSliceId,
+      },
+    ]);
+
+    // Apply snapshot
+    setEditCropTop(snap.cropTop);
+    setEditCropBottom(snap.cropBottom);
+    setEditCropLeft(snap.cropLeft);
+    setEditCropRight(snap.cropRight);
+    setSlices(snap.slices);
+    setSplitLines(snap.splitLines);
+    setSelectedSliceId(snap.selectedSliceId);
+
+    // Remove last entry from undo history
+    setHistory((prev) => prev.slice(0, -1));
   }, [
+    history,
     editCropTop,
     editCropBottom,
     editCropLeft,
@@ -123,33 +127,37 @@ export function useCropEditorHistory({
 
   const handleRedo = useCallback(() => {
     console.log("[ImageEditorHistory] Redo triggered");
-    setRedoHistory((prevRedo) => {
-      if (prevRedo.length === 0) return prevRedo;
-      const snap = prevRedo[prevRedo.length - 1];
+    if (redoHistory.length === 0) return;
 
-      setHistory((prevUndo) => [
-        ...prevUndo,
-        {
-          cropTop: editCropTop,
-          cropBottom: editCropBottom,
-          cropLeft: editCropLeft,
-          cropRight: editCropRight,
-          slices,
-          splitLines,
-          selectedSliceId,
-        },
-      ]);
+    const snap = redoHistory[redoHistory.length - 1];
 
-      setEditCropTop(snap.cropTop);
-      setEditCropBottom(snap.cropBottom);
-      setEditCropLeft(snap.cropLeft);
-      setEditCropRight(snap.cropRight);
-      setSlices(snap.slices);
-      setSplitLines(snap.splitLines);
-      setSelectedSliceId(snap.selectedSliceId);
-      return prevRedo.slice(0, -1);
-    });
+    // Save current state to undo stack BEFORE applying snapshot
+    setHistory((prevUndo) => [
+      ...prevUndo,
+      {
+        cropTop: editCropTop,
+        cropBottom: editCropBottom,
+        cropLeft: editCropLeft,
+        cropRight: editCropRight,
+        slices,
+        splitLines,
+        selectedSliceId,
+      },
+    ]);
+
+    // Apply snapshot
+    setEditCropTop(snap.cropTop);
+    setEditCropBottom(snap.cropBottom);
+    setEditCropLeft(snap.cropLeft);
+    setEditCropRight(snap.cropRight);
+    setSlices(snap.slices);
+    setSplitLines(snap.splitLines);
+    setSelectedSliceId(snap.selectedSliceId);
+
+    // Remove last entry from redo stack
+    setRedoHistory((prev) => prev.slice(0, -1));
   }, [
+    redoHistory,
     editCropTop,
     editCropBottom,
     editCropLeft,

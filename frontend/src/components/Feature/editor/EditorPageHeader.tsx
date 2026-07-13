@@ -179,13 +179,13 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           <button
             onClick={() => navigateTo?.("/profile?tab=billing")}
             title="Your credit balance — click to top up"
-            className={`hidden sm:flex items-center gap-1.5 w-11 h-11 rounded-2xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all justify-center ${credits < 20
+            className={`hidden sm:flex items-center gap-1.5 h-11 px-3 rounded-2xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${credits < 20
                 ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 animate-pulse"
                 : "bg-neutral-800 border-neutral-700 text-purple-400 hover:bg-purple-500/10 hover:border-purple-500/20"
               }`}
           >
             <Zap className="h-3.5 w-3.5 shrink-0" />
-            <span className="text-[10px]">{credits.toLocaleString()}</span>
+            <span className="text-[11px]">{credits.toLocaleString()}</span>
           </button>
         )}
 
