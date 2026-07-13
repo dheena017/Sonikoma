@@ -7,6 +7,7 @@ import {
   Brain,
   Download,
   Settings,
+  ExternalLink,
   ArrowLeft,
   Sparkles,
   Edit2,
@@ -88,7 +89,7 @@ const EditorMiniSidebarInner = ({
     return (
       <aside
         style={{ top: `${topOffsetPx}px` }}
-        className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950/95 backdrop-blur-2xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[60] py-6 shadow-[4px_0_32px_rgba(0,0,0,0.4)] ${
+        className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[60] py-6 shadow-[4px_0_24px_rgba(0,0,0,0.3)] ${
           isCollapsed ? "w-16" : "w-20"
         }`}
       >
@@ -332,7 +333,7 @@ const EditorMiniSidebarInner = ({
     // Premium Glassmorphism Container
     <aside
       style={{ top: `${topOffsetPx}px` }}
-      className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950/95 backdrop-blur-2xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[60] py-4 shadow-[4px_0_32px_rgba(0,0,0,0.4)] ${
+      className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[60] py-4 shadow-[4px_0_24px_rgba(0,0,0,0.3)] ${
         isCollapsed ? "w-16" : "w-20"
       }`}
     >
@@ -350,7 +351,7 @@ const EditorMiniSidebarInner = ({
             onClick={handleReturnToWorkspace}
             className="p-3 rounded-2xl bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 text-white transition-all duration-300 shadow-[0_4px_14px_rgba(168,85,247,0.4)] hover:shadow-[0_6px_20px_rgba(168,85,247,0.6)] active:scale-90 border border-purple-400/30 outline-none focus:outline-none"
           >
-            <ArrowLeft className="w-[18px] h-[18px] shrink-0" strokeWidth={2.5} />
+            <ExternalLink className="w-[18px] h-[18px] shrink-0" strokeWidth={2.5} />
           </button>
 
           {/* Hover Tooltip for the Return Button */}

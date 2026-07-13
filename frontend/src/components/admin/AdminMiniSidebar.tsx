@@ -196,7 +196,7 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
         <div className="relative group w-full flex justify-center">
           <button
             onClick={() => navigateTo("/dashboard")}
-            className="p-3 rounded-2xl bg-gradient-to-b from-violet-500 to-violet-700 hover:from-violet-400 hover:to-violet-600 text-white transition-all shadow-[0_4px_14px_rgba(139,92,246,0.4)] hover:shadow-[0_6px_20px_rgba(139,92,246,0.6)] active:scale-90 border border-violet-400/30 cursor-pointer"
+            className="p-3 rounded-2xl bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 text-white transition-all shadow-[0_4px_14px_rgba(168,85,247,0.4)] hover:shadow-[0_6px_20px_rgba(168,85,247,0.6)] active:scale-90 border border-purple-400/30 cursor-pointer"
           >
             <ExternalLink className="w-[18px] h-[18px] shrink-0" />
           </button>

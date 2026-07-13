@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Slice } from "@/components/Feature/editor/shared";
 
 interface UseCropEditorHistoryProps {

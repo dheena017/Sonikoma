@@ -10,6 +10,7 @@ import { useBackendHealth } from "../../../../hooks/useBackendHealth.js";
 import { getUserCredits } from "../../../../api/auth";
 import { Sliders, X } from "lucide-react";
 import { useImageEditorStore } from "@/hooks/useImageEditorState";
+import { resolveWorkspaceReturnPath } from "../../../../utils/workspaceNavigation.js";
 
 
 interface EditorPageProps {
@@ -235,7 +236,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
   };
 
   const handleBackToApp = () => {
-    navigateTo("/creative-suite");
+    navigateTo("/workspace");
   };
 
   // SCROLL RESTORATION: Restore the scroll position when returning from the Image Editor

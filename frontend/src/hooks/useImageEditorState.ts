@@ -200,6 +200,9 @@ export function useImageEditorState({
   const [splitLines, setSplitLines] = useState<number[]>(
     savedState?.splitLines || []
   );
+
+  const [loadedImageUrl, setLoadedImageUrl] = useState<string | null>(null);
+
   const [showSplitPosition, setShowSplitPosition] = useState<boolean>(
     savedState?.activeTab === "slice" || false
   );
@@ -298,5 +301,7 @@ export function useImageEditorState({
     setIsCroppingSlice,
     slicesCroppedCount,
     setSlicesCroppedCount,
+    loadedImageUrl,
+    setLoadedImageUrl,
   };
 }

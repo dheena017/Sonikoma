@@ -273,6 +273,11 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
       setEditCropLeft(0);
       setEditCropRight(0);
       setEditAutoTrim(true);
+
+      // Mark local state as loaded for this active image
+      state.setLoadedImageUrl(state.imageUrl);
+    } else {
+      state.setLoadedImageUrl(null);
     }
   }, [
     state.imageUrl,
@@ -282,19 +287,24 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
     setEditCropLeft,
     setEditCropRight,
     setEditAutoTrim,
+    state.setSlices,
+    state.setSelectedSliceId,
+    state.setSplitLines,
+    state.setDetectedBoxes,
+    state.setZoom,
     setHistory,
     setRedoHistory,
+    state.setLoadedImageUrl,
   ]);
 
   // Sync state back to parent container if needed
   useEffect(() => {
-    // If imageUrl changed, don't sync stale data of the old image into the new image's slot!
-    if (state.imageUrl !== lastImageUrlRef.current) {
-      lastImageUrlRef.current = state.imageUrl;
+    // If local state hasn't finished loading/synchronizing for this imageUrl, don't sync back!
+    if (!state.imageUrl || state.imageUrl !== state.loadedImageUrl) {
       return;
     }
 
-    if (state.imageUrl && setImageEditStates) {
+    if (setImageEditStates) {
       setImageEditStates((prev) => ({
         ...prev,
         [state.imageUrl!]: {
@@ -309,6 +319,7 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
     }
   }, [
     state.imageUrl,
+    state.loadedImageUrl,
     history,
     state.slices,
     state.selectedSliceId,
@@ -369,18 +380,32 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
 
   const handlePrevImage = () => {
     if (editingImageIdx === null || editingImageIdx <= 0) return;
-    const activeTabVal = window.location.pathname.split("/")[2] || "adjust";
     const nextIdx = editingImageIdx - 1;
-    window.history.pushState({}, "", `/editor/${activeTabVal}?idx=${nextIdx}`);
+    const isProjectScoped = window.location.pathname.includes("/workspace/editor/series/");
+    let target = "";
+    if (isProjectScoped) {
+      target = `${window.location.pathname}?idx=${nextIdx}`;
+    } else {
+      const activeTabVal = window.location.pathname.split("/")[2] || "adjust";
+      target = `/editor/${activeTabVal}?idx=${nextIdx}`;
+    }
+    window.history.pushState({}, "", target);
     window.dispatchEvent(new Event("popstate"));
   };
 
   const handleNextImage = () => {
     if (editingImageIdx === null || editingImageIdx >= scrapedImages.length - 1)
       return;
-    const activeTabVal = window.location.pathname.split("/")[2] || "adjust";
     const nextIdx = editingImageIdx + 1;
-    window.history.pushState({}, "", `/editor/${activeTabVal}?idx=${nextIdx}`);
+    const isProjectScoped = window.location.pathname.includes("/workspace/editor/series/");
+    let target = "";
+    if (isProjectScoped) {
+      target = `${window.location.pathname}?idx=${nextIdx}`;
+    } else {
+      const activeTabVal = window.location.pathname.split("/")[2] || "adjust";
+      target = `/editor/${activeTabVal}?idx=${nextIdx}`;
+    }
+    window.history.pushState({}, "", target);
     window.dispatchEvent(new Event("popstate"));
   };
 

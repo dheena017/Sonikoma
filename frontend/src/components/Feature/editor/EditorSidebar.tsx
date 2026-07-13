@@ -8,6 +8,7 @@ import {
   Brain,
   Download,
   Settings,
+  ExternalLink,
   ArrowLeft,
   X,
   Edit2,
@@ -148,7 +149,7 @@ const EditorSidebar = ({
 
   return (
     <aside
-      className={`fixed top-0 bottom-0 left-0 h-screen bg-[#0a0a0e]/95 backdrop-blur-2xl border-r border-purple-900/10 flex flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-50 shadow-[8px_0_32px_rgba(0,0,0,0.6)] overflow-hidden ${
+      className={`fixed top-0 bottom-0 left-0 h-screen bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 flex flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-50 shadow-[4px_0_24px_rgba(0,0,0,0.3)] overflow-hidden ${
         isCollapsed ? "w-20" : "w-[280px]"
       }`}
     >
@@ -310,15 +311,15 @@ const EditorSidebar = ({
       </div>
 
       {/* Bottom Action Footer - Return to Workspace */}
-      <div className="p-4 border-t border-white/[0.02] bg-gradient-to-t from-black/20 to-transparent">
+      <div className="p-4 border-t border-white/[0.02] bg-gradient-to-t from-black/20 to-transparent flex justify-center w-full">
         <button
           onClick={handleReturnToWorkspace}
-          className={`flex items-center justify-center rounded-2xl bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white transition-all active:scale-95 border border-white/10 cursor-pointer ${
+          className={`flex items-center justify-center rounded-2xl bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 text-white transition-all active:scale-95 border border-purple-400/30 cursor-pointer shadow-[0_4px_14px_rgba(168,85,247,0.4)] hover:shadow-[0_6px_20px_rgba(168,85,247,0.6)] ${
             isCollapsed ? "h-12 w-12 p-0" : "w-full py-3 gap-3"
           }`}
           title="Return to Workspace"
         >
-          <ArrowLeft className="w-[18px] h-[18px] shrink-0" />
+          <ExternalLink className="w-[18px] h-[18px] shrink-0" />
           {!isCollapsed && (
             <span className="text-sm font-bold tracking-wide">
               Return to Workspace

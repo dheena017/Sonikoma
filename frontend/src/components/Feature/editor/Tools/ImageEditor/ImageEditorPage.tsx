@@ -28,7 +28,8 @@ const ImageEditorPage = React.memo(({
   seriesSlug,
   chapterSlug
 }: ImageEditorPageProps) => {
-  const { editingImageIdx, setEditingImageIdx, activeTool, setActiveTool } = useCropEditorStore();
+  const { editingImageIdx, setEditingImageIdx } = appLogic;
+  const { activeTool, setActiveTool } = useCropEditorStore();
   const [isToolsPanelOpen, setIsToolsPanelOpen] = useState(true);
 
   // Auto-select the first image if the user opens the editor but hasn't picked one yet

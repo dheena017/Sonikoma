@@ -506,12 +506,12 @@ const HeaderInner = ({
   return (
     <header
       id="header_pane"
-      className="fixed top-0 left-0 w-full border-b border-neutral-900 bg-neutral-950/80 backdrop-blur-md z-50 pl-4 lg:pl-0 pr-6 md:pr-8 py-3 flex items-center justify-between gap-4"
+      className="fixed top-0 left-0 w-full h-16 border-b border-neutral-900 bg-neutral-950/80 backdrop-blur-md z-50 pl-4 lg:pl-0 pr-6 md:pr-8 flex items-center justify-between gap-4"
     >
       {/* Left side: Hamburger and Brand */}
-      <div className="flex items-center gap-3 shrink-0">
+      <div className="flex items-center gap-3 shrink-0 h-full">
         {/* NEW: Wrapper added here to perfectly match the 80px (w-20) width of the mini sidebar */}
-        <div className="w-auto lg:w-20 flex items-center justify-center shrink-0">
+        <div className="w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900 h-full mr-4">
           <button
             onClick={onToggleSidebar}
             className="icon-pill cursor-pointer hover:icon-pill--purple transition-all"

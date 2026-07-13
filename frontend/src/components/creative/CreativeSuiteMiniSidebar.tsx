@@ -10,6 +10,7 @@ import {
   Mic,
   BarChart3,
   Youtube,
+  ExternalLink,
   ArrowLeft,
 } from "lucide-react";
 import TooltipPortal from "../TooltipPortal";
@@ -249,7 +250,7 @@ const CreativeSuiteMiniSidebarInner: React.FC<CreativeSuiteMiniSidebarProps> = (
             onClick={() => navigateTo("/dashboard")}
             className="p-3 rounded-2xl bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 text-white transition-all shadow-[0_4px_14px_rgba(168,85,247,0.4)] hover:shadow-[0_6px_20px_rgba(168,85,247,0.6)] active:scale-90 border border-purple-400/30 cursor-pointer"
           >
-            <ArrowLeft className="w-[18px] h-[18px] shrink-0" />
+            <ExternalLink className="w-[18px] h-[18px] shrink-0" />
           </button>
           
           <div className="absolute left-16 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 -translate-x-2 group-hover:translate-x-0 bg-neutral-900 border border-white/10 text-white text-xs px-3 py-1.5 rounded-lg whitespace-nowrap z-50 shadow-2xl font-medium tracking-wide">
