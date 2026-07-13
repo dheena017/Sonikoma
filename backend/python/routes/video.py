@@ -448,7 +448,15 @@ def _render_panel_segment_ffmpeg(
         cmd = [
             "ffmpeg", "-y",
             "-loop", "1",
-            "-i", img_path,
+            "-i", img_path
+        ]
+
+        if audio_path and os.path.exists(audio_path):
+            cmd += ["-i", audio_path]
+        else:
+            cmd += ["-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo"]
+
+        cmd += [
             "-t", str(duration),
             "-vf", vf,
             "-r", str(fps),
@@ -459,11 +467,9 @@ def _render_panel_segment_ffmpeg(
         ]
 
         if audio_path and os.path.exists(audio_path):
-            cmd += ["-i", audio_path, "-c:a", "aac", "-b:a", "192k",
-                    "-shortest", "-af", "apad"]
+            cmd += ["-c:a", "aac", "-b:a", "192k", "-shortest", "-af", "apad"]
         else:
-            cmd += ["-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo",
-                    "-c:a", "aac", "-b:a", "128k", "-shortest"]
+            cmd += ["-c:a", "aac", "-b:a", "128k", "-shortest"]
 
     cmd.append(out_path)
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
