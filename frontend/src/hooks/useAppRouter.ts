@@ -227,7 +227,10 @@ export function useAppRouter({
             path.startsWith("/editor/") ||
             path === "/image-editor" ||
             path === "/image-editor/" ||
-            path.startsWith("/image-editor/");
+            path.startsWith("/image-editor/") ||
+            path === "/player" ||
+            path === "/player/" ||
+            path.startsWith("/player/");
 
           if (isProtectedRoute) {
             window.history.replaceState({}, "", "/");
@@ -287,6 +290,9 @@ export function useAppRouter({
         path === "/episode-scraper" ||
         path.startsWith("/admin/") ||
         path.startsWith("/display") ||
+        path === "/player" ||
+        path === "/player/" ||
+        path.startsWith("/player/") ||
         isChapterDetails
       ) {
         setShowAutoCropModal(false);

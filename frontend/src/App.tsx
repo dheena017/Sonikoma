@@ -71,6 +71,7 @@ import {
   CreativeSuiteDashboardPage,
 } from "./components/creative";
 import ImageEditorPage from "./components/Feature/editor/Tools/ImageEditor/ImageEditorPage";
+import PlayerPage from "./components/Feature/video/PlayerPage";
 
 // ============================================================================
 // SECTION 2: MAIN APP COMPONENT
@@ -624,6 +625,12 @@ export default function App() {
       currentPath.startsWith("/image-editor/") ||
       currentPath.endsWith("/image-editor") ||
       currentPath.endsWith("/image-editor/");
+    const isPlayerPage =
+      currentPath === "/player" ||
+      currentPath === "/player/" ||
+      currentPath.startsWith("/player/") ||
+      currentPath.endsWith("/player") ||
+      currentPath.endsWith("/player/");
     const isWorkspaceEditorRoot =
       currentPath === "/workspace/editor" ||
       currentPath === "/workspace/editor/";
@@ -638,7 +645,7 @@ export default function App() {
       chapterPathMatch,
       isDetailsMode,
       isWorkspacePath,
-      isWorkspaceOnly: isWorkspacePath,
+      isWorkspaceOnly: isWorkspacePath && !isPlayerPage,
       isDashboardOverviewPath: currentPath === "/dashboard",
       isProjectsPath: currentPath === "/projects",
       isSettingsPath: currentPath === "/settings",
@@ -679,6 +686,7 @@ export default function App() {
         currentPath === "/landing" ||
         currentPath === "" ||
         currentPath === "/index.html",
+      isPlayerPage,
       isCreativeSuiteDashboardPath:
         currentPath === "/creative-suite" ||
         currentPath === "/creative-suite/" ||
@@ -747,6 +755,7 @@ export default function App() {
     isDisplayPath,
     editorRouteMatch,
     isImageEditorPage,
+    isPlayerPage,
   } = pathFlags;
 
   const isAnyAdmin = isAdminPath || isAdminDashboardPath;
@@ -1163,7 +1172,7 @@ export default function App() {
             />
           )}
         </>
-      ) : isImageEditorPage ? (
+      ) : (isImageEditorPage || isPlayerPage) ? (
         <Sidebar
           isProcessing={isProcessing}
           panels={panels}
@@ -1225,7 +1234,7 @@ export default function App() {
         } ${!isAnyAdmin && isSidebarOpen ? "overflow-hidden" : ""}`}
       >
         {/* Top Header */}
-        {!isSidebarOpen && !isProEditorPage && !isAnyAdmin && !isImageEditorPage && (
+        {!isSidebarOpen && !isProEditorPage && !isAnyAdmin && !isImageEditorPage && !isPlayerPage && (
           isCreativeSuitePath ? (
             <CreativeSuiteHeader
               currentPath={currentPath}
@@ -1289,8 +1298,8 @@ export default function App() {
         )}
 
         <div
-          className={`${!isSidebarOpen && !isImageEditorPage ? "lg:pl-20" : ""} ${
-            !isSidebarOpen && !isProEditorPage && !isImageEditorPage
+          className={`${!isSidebarOpen && !isImageEditorPage && !isPlayerPage ? "lg:pl-20" : ""} ${
+            !isSidebarOpen && !isProEditorPage && !isImageEditorPage && !isPlayerPage
               ? "pt-[59px] min-h-[calc(100vh-59px)]"
               : "min-h-screen"
           } flex-grow flex-1 flex flex-col transition-all duration-300`}
@@ -1879,8 +1888,21 @@ export default function App() {
             />
           )}
 
+          {/* PAGE VIEW 23: Independent Fullscreen Player Page */}
+          {isPlayerPage && (
+            <PlayerPage
+              panels={panels}
+              videoUrl={videoUrl}
+              seriesSlug={seriesSlugState}
+              chapterSlug={chapterSlugState}
+              navigateTo={navigateTo}
+              addNotification={addNotification}
+            />
+          )}
+
           {/* FALLBACK VIEW: 404 Route Not Found */}
           {!isWorkspacePath &&
+            !isPlayerPage &&
             !isDashboardOverviewPath &&
             !isProjectsPath &&
             !isSettingsPath &&
