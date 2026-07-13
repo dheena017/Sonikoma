@@ -1,5 +1,5 @@
 import React from "react";
-import { Film, RefreshCw, Play, Pause, SkipBack, SkipForward } from "lucide-react";
+import { Film, RefreshCw, Play, Pause, SkipBack, SkipForward, ChevronsLeft, ChevronsRight, Volume2, VolumeX } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import { getPanelFilterStyle } from "@/utils";
 
@@ -13,9 +13,11 @@ interface VideoMonitorActiveProps {
   playbackTime: number;
   reprocessingPanelId: number | null;
   storyboardPlaying: boolean;
+  isMuted?: boolean;
   setCurrentPanelIndex: (idx: number) => void;
   setPlaybackTime: (time: number) => void;
   setStoryboardPlaying: (playing: boolean) => void;
+  setIsMuted?: (muted: boolean) => void;
   toggleStoryboardPlayback: () => void;
   resetStoryboardPlayback: () => void;
 }
@@ -30,9 +32,11 @@ export function VideoMonitorActive({
   playbackTime,
   reprocessingPanelId,
   storyboardPlaying,
+  isMuted = false,
   setCurrentPanelIndex,
   setPlaybackTime,
   setStoryboardPlaying,
+  setIsMuted,
   toggleStoryboardPlayback,
   resetStoryboardPlayback,
 }: VideoMonitorActiveProps) {
@@ -441,63 +445,143 @@ export function VideoMonitorActive({
               </span>
             </div>
 
-            {/* Playback Controls Overlay */}
-            <div className="absolute inset-x-0 bottom-[4.5rem] z-20 flex items-center justify-center gap-3 opacity-0 hover:opacity-100 transition-opacity duration-200 group-hover:opacity-100"
+            {/* Playback Controls — YouTube-style bar always at bottom */}
+            <div
+              className="absolute inset-x-0 bottom-0 z-20"
               style={{ pointerEvents: "auto" }}
             >
-              {/* Progress bar */}
-              <div className="absolute bottom-[-1.5rem] left-3 right-3 h-0.5 bg-white/10 rounded-full overflow-hidden">
+              {/* Scrubber row */}
+              <div className="px-2 pt-2 group/scrub">
                 <div
-                  className="h-full bg-purple-500 rounded-full transition-all duration-100"
-                  style={{
-                    width: activeStoryboardPanel
-                      ? `${Math.min((playbackTime / (activeStoryboardPanel.duration || 4.5)) * 100, 100)}%`
-                      : "0%",
+                  className="relative h-1 hover:h-1.5 bg-white/15 rounded-full overflow-visible cursor-pointer transition-all duration-150"
+                  onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                    const dur = activeStoryboardPanel?.duration || 4.5;
+                    setPlaybackTime(parseFloat((pct * dur).toFixed(1)));
                   }}
-                />
+                >
+                  {/* Buffered / total bg */}
+                  <div className="absolute inset-0 bg-white/8 rounded-full" />
+                  {/* Played fill */}
+                  <div
+                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-purple-500 via-violet-400 to-purple-300 rounded-full transition-all duration-100"
+                    style={{
+                      width: activeStoryboardPanel
+                        ? `${Math.min((playbackTime / (activeStoryboardPanel.duration || 4.5)) * 100, 100)}%`
+                        : "0%",
+                    }}
+                  />
+                  {/* Scrubber knob — appears on hover */}
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 h-3.5 w-3.5 bg-white rounded-full shadow-lg opacity-0 group-hover/scrub:opacity-100 transition-opacity duration-100 pointer-events-none"
+                    style={{
+                      left: activeStoryboardPanel
+                        ? `${Math.min((playbackTime / (activeStoryboardPanel.duration || 4.5)) * 100, 100)}%`
+                        : "0%",
+                    }}
+                  />
+                </div>
               </div>
 
-              {/* Prev panel */}
-              <button
-                onClick={(e) => { e.stopPropagation(); if (currentPanelIndex > 0) { setCurrentPanelIndex(currentPanelIndex - 1); setPlaybackTime(0); } }}
-                disabled={currentPanelIndex === 0}
-                className="flex items-center justify-center h-8 w-8 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white disabled:opacity-30 hover:bg-white/10 transition-all cursor-pointer"
-                title="Previous Panel"
+              {/* Control row */}
+              <div
+                className="flex items-center justify-between px-2.5 py-1.5 gap-2"
+                style={{ background: "linear-gradient(to top, rgba(0,0,0,0.95) 80%, transparent)" }}
               >
-                <SkipBack className="h-3.5 w-3.5" />
-              </button>
+                {/* LEFT: Play + Prev/Next + Mute + Time */}
+                <div className="flex items-center gap-1.5">
+                  {/* Play / Pause */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); toggleStoryboardPlayback(); }}
+                    className="flex items-center justify-center h-8 w-8 rounded-full text-white hover:bg-white/10 active:scale-90 transition-all duration-100 cursor-pointer"
+                    title={storyboardPlaying ? "Pause" : "Play"}
+                  >
+                    {storyboardPlaying
+                      ? <Pause className="h-5 w-5 fill-white" />
+                      : <Play className="h-5 w-5 fill-white translate-x-px" />}
+                  </button>
 
-              {/* Play / Pause */}
-              <button
-                onClick={(e) => { e.stopPropagation(); toggleStoryboardPlayback(); }}
-                className="flex items-center justify-center h-11 w-11 rounded-full bg-purple-600/90 backdrop-blur-md border border-purple-400/30 text-white hover:bg-purple-500 active:scale-95 transition-all shadow-lg shadow-purple-900/40 cursor-pointer"
-                title={storyboardPlaying ? "Pause" : "Play"}
-              >
-                {storyboardPlaying
-                  ? <Pause className="h-5 w-5 fill-white" />
-                  : <Play className="h-5 w-5 fill-white translate-x-0.5" />}
-              </button>
+                  {/* Previous panel */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); if (currentPanelIndex > 0) { setCurrentPanelIndex(currentPanelIndex - 1); setPlaybackTime(0); } }}
+                    disabled={currentPanelIndex === 0}
+                    className="flex items-center justify-center h-7 w-7 rounded-full text-neutral-300 hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed active:scale-90 transition-all duration-100 cursor-pointer"
+                    title="Previous Panel"
+                  >
+                    <SkipBack className="h-4 w-4" />
+                  </button>
 
-              {/* Next panel */}
-              <button
-                onClick={(e) => { e.stopPropagation(); if (currentPanelIndex < panels.length - 1) { setCurrentPanelIndex(currentPanelIndex + 1); setPlaybackTime(0); } }}
-                disabled={currentPanelIndex >= panels.length - 1}
-                className="flex items-center justify-center h-8 w-8 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white disabled:opacity-30 hover:bg-white/10 transition-all cursor-pointer"
-                title="Next Panel"
-              >
-                <SkipForward className="h-3.5 w-3.5" />
-              </button>
+                  {/* Next panel */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); if (currentPanelIndex < panels.length - 1) { setCurrentPanelIndex(currentPanelIndex + 1); setPlaybackTime(0); } }}
+                    disabled={currentPanelIndex >= panels.length - 1}
+                    className="flex items-center justify-center h-7 w-7 rounded-full text-neutral-300 hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed active:scale-90 transition-all duration-100 cursor-pointer"
+                    title="Next Panel"
+                  >
+                    <SkipForward className="h-4 w-4" />
+                  </button>
+
+                  {/* Mute / Unmute */}
+                  {setIsMuted && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }}
+                      className="flex items-center justify-center h-7 w-7 rounded-full text-neutral-300 hover:bg-white/10 hover:text-white active:scale-90 transition-all duration-100 cursor-pointer"
+                      title={isMuted ? "Unmute" : "Mute"}
+                    >
+                      {isMuted
+                        ? <VolumeX className="h-4 w-4" />
+                        : <Volume2 className="h-4 w-4" />}
+                    </button>
+                  )}
+
+                  {/* Time display */}
+                  <span className="text-[10px] font-mono text-neutral-300 tabular-nums select-none pl-0.5">
+                    {Math.floor(playbackTime)}s
+                    <span className="text-neutral-500"> / {Math.floor(activeStoryboardPanel?.duration || 4.5)}s</span>
+                  </span>
+
+                  {/* Chapter/Panel label */}
+                  {activeStoryboardPanel?.sfx && (
+                    <span className="text-[10px] font-mono text-neutral-400 hidden sm:inline truncate max-w-[80px]">
+                      · {activeStoryboardPanel.sfx}
+                    </span>
+                  )}
+                </div>
+
+                {/* RIGHT: Restart + Skip-to-end + Panel counter */}
+                <div className="flex items-center gap-1.5">
+                  {/* Panel counter badge */}
+                  <span className="text-[9px] font-mono text-neutral-500 tabular-nums hidden sm:inline">
+                    {currentPanelIndex + 1}/{panels.length}
+                  </span>
+
+                  {/* Restart */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); resetStoryboardPlayback(); }}
+                    className="flex items-center justify-center h-7 w-7 rounded-full text-neutral-400 hover:bg-white/10 hover:text-white active:scale-90 transition-all duration-100 cursor-pointer"
+                    title="Restart from beginning"
+                  >
+                    <ChevronsLeft className="h-4 w-4" />
+                  </button>
+
+                  {/* Skip to last panel */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); if (panels.length > 0) { setCurrentPanelIndex(panels.length - 1); setPlaybackTime(0); } }}
+                    disabled={currentPanelIndex >= panels.length - 1}
+                    className="flex items-center justify-center h-7 w-7 rounded-full text-neutral-400 hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed active:scale-90 transition-all duration-100 cursor-pointer"
+                    title="Last Panel"
+                  >
+                    <ChevronsRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
             </div>
 
-            {/* Subtitles Overlay */}
-            <div className="absolute bottom-4 left-3 right-3 z-10 text-center pointer-events-none">
-              {activeStoryboardPanel.sfx && (
-                <span className="hidden sm:inline-block transform -rotate-2 bg-yellow-500 text-black font-extrabold text-[10px] px-2 py-0.5 rounded shadow-lg font-mono tracking-widest uppercase mb-1">
-                  {activeStoryboardPanel.sfx}
-                </span>
-              )}
+            {/* Subtitles Overlay — sits just above the control bar */}
+            <div className="absolute bottom-14 left-3 right-3 z-10 text-center pointer-events-none">
               {activeStoryboardPanel.speech_text?.trim() && (
-                <p className="text-white font-bold text-xs leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,1)] bg-black/75 p-2.5 rounded-lg border border-white/5 backdrop-blur-xs text-center font-sans max-w-lg mx-auto">
+                <p className="text-white font-bold text-xs leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,1)] bg-black/75 px-2.5 py-1.5 rounded-lg border border-white/5 backdrop-blur-xs text-center font-sans max-w-lg mx-auto">
                   {getSubtitleChunk(
                     activeStoryboardPanel.speech_text,
                     activeStoryboardPanel.duration || 4.5,

@@ -445,9 +445,12 @@ const EditorPage: React.FC<EditorPageProps> = ({
                     playbackTime={playbackTime}
                     reprocessingPanelId={reprocessingPanelId}
                     quality={previewQuality}
+                    storyboardPlaying={storyboardPlaying}
                     setCurrentPanelIndex={setCurrentPanelIndex}
                     setPlaybackTime={setPlaybackTime}
                     setStoryboardPlaying={setStoryboardPlaying}
+                    toggleStoryboardPlayback={toggleStoryboardPlayback}
+                    resetStoryboardPlayback={resetStoryboardPlayback}
                   />
                 </div>
               </div>

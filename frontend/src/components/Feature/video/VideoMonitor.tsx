@@ -14,9 +14,14 @@ interface VideoMonitorProps {
   playbackTime: number;
   reprocessingPanelId: number | null;
   quality?: "draft" | "high";
+  storyboardPlaying: boolean;
+  isMuted?: boolean;
   setCurrentPanelIndex: (idx: number) => void;
   setPlaybackTime: (time: number) => void;
   setStoryboardPlaying: (playing: boolean) => void;
+  setIsMuted?: (muted: boolean) => void;
+  toggleStoryboardPlayback: () => void;
+  resetStoryboardPlayback: () => void;
 }
 
 const VideoMonitor = React.memo(
@@ -31,9 +36,14 @@ const VideoMonitor = React.memo(
     playbackTime,
     reprocessingPanelId,
     quality,
+    storyboardPlaying,
+    isMuted,
     setCurrentPanelIndex,
     setPlaybackTime,
     setStoryboardPlaying,
+    setIsMuted,
+    toggleStoryboardPlayback,
+    resetStoryboardPlayback,
   }: VideoMonitorProps) => {
     return (
       <div className="relative w-full h-full flex flex-col items-center justify-center">
@@ -63,9 +73,14 @@ const VideoMonitor = React.memo(
             currentPanelIndex={currentPanelIndex}
             playbackTime={playbackTime}
             reprocessingPanelId={reprocessingPanelId}
+            storyboardPlaying={storyboardPlaying}
+            isMuted={isMuted}
             setCurrentPanelIndex={setCurrentPanelIndex}
             setPlaybackTime={setPlaybackTime}
             setStoryboardPlaying={setStoryboardPlaying}
+            setIsMuted={setIsMuted}
+            toggleStoryboardPlayback={toggleStoryboardPlayback}
+            resetStoryboardPlayback={resetStoryboardPlayback}
           />
         </div>
       </div>
