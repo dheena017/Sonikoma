@@ -278,12 +278,27 @@ const TimelineCard = ({
       const ttsRes = await generateTts(fetchWithInterceptor, {
         panel_id: panel.id,
         text: panel.speech_text,
+        dialogue_list: [panel.speech_text],
+        target_duration: panel.duration > 0 ? panel.duration : 4.5,
       });
 
       let audioUrl = null;
+      // Audio may come back as a cached URL or as base64
       if (ttsRes && ttsRes.success && ttsRes.audio_url) {
         audioUrl = ttsRes.audio_url;
+      } else if (ttsRes && ttsRes.success && ttsRes.audio_base64) {
+        // Convert base64 to a blob URL so the player can use it
+        const binary = atob(ttsRes.audio_base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        audioUrl = URL.createObjectURL(new Blob([bytes], { type: "audio/mpeg" }));
       }
+
+      // Capture the actual audio duration from TTS (precise timing)
+      const audioDuration: number =
+        ttsRes && ttsRes.duration_actual_s && ttsRes.duration_actual_s > 0
+          ? Math.round(ttsRes.duration_actual_s * 10) / 10
+          : 0;
 
       // 3. Dialogue Sync Alignment (only if audio succeeded)
       let syncMapObj = null;
@@ -309,14 +324,22 @@ const TimelineCard = ({
         }
       }
 
-      // 4. Update the panel state atomically with all results + default Zoom preset
+      // 4. Update the panel state atomically with all results.
+      //    - TIMING: always sync to actual audio duration (never estimate).
+      //    - CAM MOTION: preserve the AI-decided motion from "Analyze Image".
+      //      Only fall back to "zoom_in" when the panel has no motion yet.
       if (setPanels) {
         setPanels((prev: any[]) =>
           prev.map((p) =>
             p.id === panel.id
               ? {
                   ...p,
-                  motion_type: "zoom_in",
+                  // Preserve AI-decided motion; only default if completely unset
+                  motion_type: p.motion_type && p.motion_type.trim().length > 0
+                    ? p.motion_type
+                    : "zoom_in",
+                  // Sync timing to actual audio length
+                  duration: audioDuration > 0 ? audioDuration : p.duration,
                   audio_url: audioUrl || p.audio_url,
                   layers: layersObj || p.layers,
                   syncMap: syncMapObj || p.syncMap,

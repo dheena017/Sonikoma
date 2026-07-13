@@ -690,12 +690,9 @@ def render_pipeline_sync(
             vcodec_flags = ["-c:v", "libx264", "-preset", "ultrafast", "-crf", "23"]
         acodec_flags = ["-c:a", "aac", "-b:a", "192k"]
     else:  # mp4 default
-        vcodec_flags = [
-            "-c:v", "libx264", "-preset", "ultrafast",
-            "-b:v", "8000k", "-maxrate", "10000k", "-bufsize", "20000k",
-            "-movflags", "+faststart",
-        ]
-        acodec_flags = ["-c:a", "aac", "-b:a", "192k"]
+        # Stream copy to avoid re-encoding overhead and potential ffmpeg crashes from concat timestamp issues.
+        vcodec_flags = ["-c:v", "copy"]
+        acodec_flags = ["-c:a", "copy", "-movflags", "+faststart"]
 
     final_cmd = ["ffmpeg", "-y", "-i", concat_out] + vcodec_flags + acodec_flags + [output_path]
     rf = subprocess.run(final_cmd, capture_output=True, text=True, timeout=600)

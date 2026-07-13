@@ -502,32 +502,12 @@ const AdvancedSettings = React.memo(
                   Advanced Render Compile Specifications
                 </h3>
                 <p className="text-[10px] text-neutral-400 font-mono">
-                  Customize audio, aspect ratios, and visual output presets
+                  Customize layout aspect ratios and visual output frame rates
                 </p>
               </div>
             </div>
 
             <div className="space-y-4">
-              {/* Music Select */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-neutral-400 flex items-center gap-1.5 font-mono">
-                  <Music className="h-3.5 w-3.5 text-purple-400" />
-                  Thematic Soundtrack Loop
-                </label>
-                <select
-                  id="bg_music_select"
-                  value={musicTheme}
-                  onChange={(e) => setMusicTheme(e.target.value)}
-                  className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2 text-neutral-350 focus:border-purple-500 outline-none"
-                >
-                  <option>Orchestral Battle Theme</option>
-                  <option>Mysterious Ambience</option>
-                  <option>Sci-Fi Synth Wave</option>
-                  <option>Calm Acoustic Melancholy</option>
-                  <option>No Music (Dialogue Only)</option>
-                </select>
-              </div>
-
               {/* Aspect Ratio */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-neutral-400 flex items-center gap-1.5 font-mono">

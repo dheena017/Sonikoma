@@ -564,7 +564,10 @@ class BaseAISkill:
 
                 # Simple validation check
                 import json
-                parsed_json = json.loads(raw_text)
+                try:
+                    parsed_json = json.loads(raw_text)
+                except Exception:
+                    parsed_json = {"raw_text": raw_text}
 
                 # Retrieve actual token counts from response
                 usage = getattr(response, 'usage_metadata', None)
@@ -657,7 +660,11 @@ class BaseAISkill:
                 self.last_output_tokens = usage.get("completion_tokens", 0)
 
                 cleaned_json_text = extract_json(raw_text)
-                parsed_json = json.loads(cleaned_json_text)
+                try:
+                    parsed_json = json.loads(cleaned_json_text)
+                except Exception:
+                    parsed_json = {"raw_text": raw_text}
+                    cleaned_json_text = raw_text
 
                 elapsed_ms = int((time.monotonic() - start_time) * 1000)
                 self.logger.log_execution(self.name, elapsed_ms, True, kwargs, parsed_json, self.last_input_tokens, self.last_output_tokens)
@@ -745,7 +752,11 @@ class BaseAISkill:
                 self.last_output_tokens = usage.get("output_tokens", 0)
 
                 cleaned_json_text = extract_json(raw_text)
-                parsed_json = json.loads(cleaned_json_text)
+                try:
+                    parsed_json = json.loads(cleaned_json_text)
+                except Exception:
+                    parsed_json = {"raw_text": raw_text}
+                    cleaned_json_text = raw_text
 
                 elapsed_ms = int((time.monotonic() - start_time) * 1000)
                 self.logger.log_execution(self.name, elapsed_ms, True, kwargs, parsed_json, self.last_input_tokens, self.last_output_tokens)
@@ -792,7 +803,11 @@ class BaseAISkill:
                 self.last_output_tokens = len(raw_text) // 4
 
                 cleaned_json_text = extract_json(raw_text)
-                parsed_json = json.loads(cleaned_json_text)
+                try:
+                    parsed_json = json.loads(cleaned_json_text)
+                except Exception:
+                    parsed_json = {"raw_text": raw_text}
+                    cleaned_json_text = raw_text
 
                 elapsed_ms = int((time.monotonic() - start_time) * 1000)
                 self.logger.log_execution(self.name, elapsed_ms, True, kwargs, parsed_json, self.last_input_tokens, self.last_output_tokens)

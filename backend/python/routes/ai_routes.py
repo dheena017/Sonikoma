@@ -713,6 +713,27 @@ async def analyze_image(body: AnalyzeImageRequest, user_api_key: str = Depends(g
         else:
             narrative_length_hint = "30-65 words, highly engaging and detailed for YouTube story narration, describing what the characters do, think, or speak."
 
+        # 4. Check OCR text to determine if we should trigger the storyteller narrator
+        has_dialogue = True
+        try:
+            from media.image.ocr import extract_dialogue_from_panel
+            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_ocr:
+                tmp_ocr.write(img_buffer)
+                tmp_ocr_path = tmp_ocr.name
+            ocr_dialogue = await extract_dialogue_from_panel(tmp_ocr_path, langs=['en'])
+            if os.path.exists(tmp_ocr_path):
+                os.remove(tmp_ocr_path)
+            
+            ocr_text_combined = "".join(ocr_dialogue).strip()
+            if not ocr_text_combined:
+                has_dialogue = False
+                logger.info("[Model] OCR check: zero text/dialogue detected in the panel.")
+            else:
+                logger.info(f"[Model] OCR check: detected dialogue text: '{ocr_text_combined}'")
+        except Exception as ocr_err:
+            logger.error(f"[analyze_image] OCR check failed: {ocr_err}")
+            has_dialogue = True
+
         # Execute using panel_analysis skill
         skill = registry.get("panel_analysis")
         logger.info(f"[Model] Executing 'panel_analysis' skill using {target_model} (narration_style={narration_style})...")
@@ -720,6 +741,24 @@ async def analyze_image(body: AnalyzeImageRequest, user_api_key: str = Depends(g
 
         analysis = validate_analysis(json.loads(raw_text))
         logger.info(f"[Model] Analysis completed for panel.")
+
+        # If zero OCR text, overwrite speech_text with dramatic storyteller narration
+        if not has_dialogue:
+            try:
+                logger.info("[Model] Automatically triggering Storyteller prompt for silent panel...")
+                storyteller_skill = registry.get("panel_storyteller")
+                narration = await storyteller_skill.execute(
+                    model=target_model,
+                    image_bytes=img_buffer,
+                    user_keys=user_api_key,
+                    visual_scene_description=analysis.get("visual_description", ""),
+                    sound_effect=analysis.get("sfx", "")
+                )
+                narration_clean = narration.strip().strip('"').strip("'")
+                analysis["speech_text"] = narration_clean
+                logger.info(f"[Model] Storyteller narrator returned: {narration_clean}")
+            except Exception as narrator_err:
+                logger.error(f"[analyze_image] Storyteller prompt failed: {narrator_err}", exc_info=True)
 
         # Generate and cache panel TTS audio
         audio_url = None

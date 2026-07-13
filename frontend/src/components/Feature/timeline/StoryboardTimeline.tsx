@@ -252,11 +252,25 @@ const StoryboardTimeline = React.memo(
                 const ttsRes = await api.generateTts(activeFetch, {
                   panel_id: panel.id,
                   text: panel.speech_text,
+                  dialogue_list: [panel.speech_text],
+                  target_duration: panel.duration > 0 ? panel.duration : 4.5,
                 });
                 let audioUrl = null;
+                // Audio may come back as a cached URL or as base64
                 if (ttsRes && ttsRes.success && ttsRes.audio_url) {
                   audioUrl = ttsRes.audio_url;
+                } else if (ttsRes && ttsRes.success && ttsRes.audio_base64) {
+                  const binary = atob(ttsRes.audio_base64);
+                  const bytes = new Uint8Array(binary.length);
+                  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+                  audioUrl = URL.createObjectURL(new Blob([bytes], { type: "audio/mpeg" }));
                 }
+
+                // Capture actual audio duration for precise timing sync
+                const audioDuration: number =
+                  ttsRes && ttsRes.duration_actual_s && ttsRes.duration_actual_s > 0
+                    ? Math.round(ttsRes.duration_actual_s * 10) / 10
+                    : 0;
 
                 // 3. Dialogue Sync Alignment
                 let syncMapObj = null;
@@ -280,13 +294,21 @@ const StoryboardTimeline = React.memo(
                   }
                 }
 
-                // Update this panel state incrementally
+                // Update this panel state incrementally.
+                // - TIMING: sync to actual audio duration (never estimate).
+                // - CAM MOTION: preserve the AI-decided motion from "Analyze Image".
+                //   Only fall back to "zoom_in" when the panel has no motion set yet.
                 setPanels((prev) =>
                   prev.map((p) =>
                     p.id === panel.id
                       ? {
                           ...p,
-                          motion_type: "zoom_in",
+                          // Preserve AI-decided motion; only default if completely unset
+                          motion_type: p.motion_type && p.motion_type.trim().length > 0
+                            ? p.motion_type
+                            : "zoom_in",
+                          // Sync timing to actual audio length
+                          duration: audioDuration > 0 ? audioDuration : p.duration,
                           audio_url: audioUrl || p.audio_url,
                           layers: layersObj || p.layers,
                           syncMap: syncMapObj || p.syncMap,
