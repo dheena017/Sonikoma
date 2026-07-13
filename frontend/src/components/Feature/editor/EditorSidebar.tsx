@@ -12,6 +12,7 @@ import {
   ArrowLeft,
   X,
   Edit2,
+  Mic,
   type LucideIcon,
 } from "lucide-react";
 import { useImageEditorStore } from "../../../hooks/useImageEditorState";
@@ -123,6 +124,12 @@ const EditorSidebar = ({
           icon: Settings,
           type: "link",
         },
+        {
+          id: "audio-settings",
+          label: "Audio Settings",
+          icon: Mic,
+          type: "link",
+        },
       ],
     },
   ];
@@ -190,11 +197,11 @@ const EditorSidebar = ({
               {group.items.map((item) => {
                 const Icon = item.icon;
                 const params = new URLSearchParams(locationSearch || window.location.search);
-                const isSettingsActive = params.get("tab") === "settings";
+                const activeTab = params.get("tab");
                 const isActive =
-                  item.id === "settings"
-                    ? isSettingsActive
-                    : !isSettingsActive && currentSection === item.id;
+                  item.id === "settings" || item.id === "audio-settings"
+                    ? activeTab === item.id
+                    : !activeTab && currentSection === item.id;
 
                 return (
                   <div key={item.id} className="relative flex justify-center">
@@ -210,7 +217,7 @@ const EditorSidebar = ({
                     <button
                       onClick={() => {
                         // Remove ?tab query param if navigating to a different section
-                        if (item.id !== "settings") {
+                        if (item.id !== "settings" && item.id !== "audio-settings") {
                           const p = new URLSearchParams(window.location.search);
                           if (p.has("tab")) {
                             p.delete("tab");
@@ -233,14 +240,14 @@ const EditorSidebar = ({
                             window.history.pushState({}, "", target);
                             window.dispatchEvent(new Event("popstate"));
                           }
-                        } else if (item.id === "settings") {
+                        } else if (item.id === "settings" || item.id === "audio-settings") {
                           const p = new URLSearchParams(window.location.search);
-                          p.set("tab", "settings");
+                          p.set("tab", item.id);
                           const newPath = `${window.location.pathname}?${p.toString()}`;
                           if (navigateTo) {
                             navigateTo(newPath);
                           } else {
-                            window.history.pushState({}, "", newPath); // Corrected: This was inside the `if (item.type === "tool")` block
+                            window.history.pushState({}, "", newPath);
                             window.dispatchEvent(new Event("popstate"));
                           }
                         } else {

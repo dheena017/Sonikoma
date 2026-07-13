@@ -6,9 +6,10 @@ import OutputMetadataPanel from "../../video/OutputMetadataPanel";
 import LayoutEditorPage from "../EditorPageLayout.js";
 import ImageEditorPage from "../Tools/ImageEditor/ImageEditorPage";
 import AdvancedSettings from "../../video/AdvancedSettings";
+import AudioSettingsPage from "../../audio_settings/AudioSettingsPage";
 import { useBackendHealth } from "../../../../hooks/useBackendHealth.js";
 import { getUserCredits } from "../../../../api/auth";
-import { Sliders, X } from "lucide-react";
+import { Sliders, X, Mic } from "lucide-react";
 import { useImageEditorStore } from "@/hooks/useImageEditorState";
 import { resolveWorkspaceReturnPath } from "../../../../utils/workspaceNavigation.js";
 
@@ -424,7 +425,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
         ) : (
           <>
             {/* Primary Canvas: Video Monitor (Sticky Background) */}
-            {activeTab !== "settings" && (
+            {activeTab !== "settings" && activeTab !== "audio-settings" && (
               <div
                 id="section-monitor"
                 className={`relative md:sticky w-full max-w-[1600px] mx-auto flex flex-col z-0 transition-all duration-500 px-4 md:px-6 py-4 ${
@@ -461,7 +462,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
             {/* Scrolling Overlay Content (Timeline, Assets, Meta) */}
             <div
               className={`relative z-10 bg-[#070709] min-h-screen min-w-0 ${
-                activeTab === "settings"
+                activeTab === "settings" || activeTab === "audio-settings"
                   ? "px-4 md:px-8 py-8 flex flex-col gap-8"
                   : `border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] px-4 md:px-6 py-8 flex flex-col gap-12 ${
                       isFocusMode ? "hidden" : "block"
@@ -530,6 +531,43 @@ const EditorPage: React.FC<EditorPageProps> = ({
                       setBubbleEraseMethod={setBubbleEraseMethod}
                       bubbleDetectionStyle={bubbleDetectionStyle}
                       setBubbleDetectionStyle={setBubbleDetectionStyle}
+                    />
+                  </div>
+                </div>
+              ) : activeTab === "audio-settings" ? (
+                <div className="w-full max-w-[1600px] mx-auto space-y-6">
+                  {/* Settings Header */}
+                  <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20">
+                        <Mic className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-bold text-white tracking-wide">Audio Settings</h2>
+                        <p className="text-xs text-neutral-400 font-mono mt-0.5">
+                          Synchronize narration character, configure pitch and rate, and mix sound loop presets
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleCloseSettings}
+                      className="p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-all flex items-center gap-2 cursor-pointer text-xs font-bold font-mono active:scale-95 shadow-sm"
+                    >
+                      <X className="h-4 w-4" />
+                      Close Settings
+                    </button>
+                  </div>
+
+                  {/* Render AudioSettingsPage */}
+                  <div className="pt-2">
+                    <AudioSettingsPage
+                      projectId={projectId}
+                      onNavigateHome={handleCloseSettings}
+                      addNotification={addNotification}
+                      fetchWithInterceptor={fetchWithInterceptor}
+                      isEmbed={true}
+                      onVoiceActorChange={appLogic.setVoiceActor}
+                      onMusicThemeChange={appLogic.setMusicTheme}
                     />
                   </div>
                 </div>

@@ -14,9 +14,12 @@ import {
 
 interface AudioSettingsPageProps {
   projectId?: string | null;
-  onNavigateHome: () => void;
+  onNavigateHome?: () => void;
   addNotification?: (msg: string, type: "success" | "info" | "warning" | "error") => void;
   fetchWithInterceptor?: any;
+  isEmbed?: boolean;
+  onVoiceActorChange?: (val: string) => void;
+  onMusicThemeChange?: (val: string) => void;
 }
 
 const DEFAULT_AUDIO_SETTINGS = {
@@ -36,6 +39,9 @@ export default function AudioSettingsPage({
   onNavigateHome,
   addNotification,
   fetchWithInterceptor,
+  isEmbed = false,
+  onVoiceActorChange,
+  onMusicThemeChange,
 }: AudioSettingsPageProps) {
   const [projectId, setProjectId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -113,9 +119,15 @@ export default function AudioSettingsPage({
 
           setSpeechRate(loadedSettings.speechRate ?? DEFAULT_AUDIO_SETTINGS.speechRate);
           setSpeechPitch(loadedSettings.speechPitch ?? DEFAULT_AUDIO_SETTINGS.speechPitch);
-          setVoiceActor(loadedSettings.voiceActor ?? loadedSettings.voice ?? DEFAULT_AUDIO_SETTINGS.voiceActor);
+          
+          const loadedVoice = loadedSettings.voiceActor ?? loadedSettings.voice ?? DEFAULT_AUDIO_SETTINGS.voiceActor;
+          setVoiceActor(loadedVoice);
+          onVoiceActorChange?.(loadedVoice);
 
-          setMusicTheme(loadedSettings.musicTheme ?? loadedSettings.music ?? DEFAULT_AUDIO_SETTINGS.musicTheme);
+          const loadedMusic = loadedSettings.musicTheme ?? loadedSettings.music ?? DEFAULT_AUDIO_SETTINGS.musicTheme;
+          setMusicTheme(loadedMusic);
+          onMusicThemeChange?.(loadedMusic);
+
           setAudioDucking(loadedSettings.audioDucking ?? DEFAULT_AUDIO_SETTINGS.audioDucking);
         }
       } catch (e) {
@@ -129,7 +141,7 @@ export default function AudioSettingsPage({
     };
 
     loadProjectSettings();
-  }, [projectId, fetchWithInterceptor]);
+  }, [projectId, fetchWithInterceptor, onVoiceActorChange, onMusicThemeChange]);
 
   // 4. Save Audio Mixer Profile
   const handleSaveSettings = async () => {
@@ -205,38 +217,40 @@ export default function AudioSettingsPage({
   const displayVoices = availableVoices.length > 0 ? availableVoices : defaultVoices;
 
   return (
-    <div className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6">
+    <div className={isEmbed ? "w-full space-y-6 pt-2" : "flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6"}>
       {/* HEADER SECTION */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1.5">
-            <span
-              className="hover:text-purple-400 cursor-pointer"
-              onClick={onNavigateHome}
-            >
-              Dashboard
-            </span>
-            <span>&gt;</span>
-            <span className="text-purple-400">Audio & TTS Mixer</span>
-          </div>
-          <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
-            <div className="icon-pill icon-pill--purple">
-              <Mic className="h-5 w-5" />
+      {!isEmbed && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1.5">
+              <span
+                className="hover:text-purple-400 cursor-pointer"
+                onClick={onNavigateHome}
+              >
+                Dashboard
+              </span>
+              <span>&gt;</span>
+              <span className="text-purple-400">Audio & TTS Mixer</span>
             </div>
-            Audio & TTS Settings
-          </h2>
-          <p className="text-xs text-neutral-400 font-mono mt-0.5">
-            Synchronize narration character, configure pitch and rate, and mix sound loop presets
-          </p>
+            <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+              <div className="icon-pill icon-pill--purple">
+                <Mic className="h-5 w-5" />
+              </div>
+              Audio & TTS Settings
+            </h2>
+            <p className="text-xs text-neutral-400 font-mono mt-0.5">
+              Synchronize narration character, configure pitch and rate, and mix sound loop presets
+            </p>
+          </div>
+          <button
+            onClick={onNavigateHome}
+            className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 border border-neutral-800 hover:text-white text-neutral-450 rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Return
+          </button>
         </div>
-        <button
-          onClick={onNavigateHome}
-          className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 border border-neutral-800 hover:text-white text-neutral-450 rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Return
-        </button>
-      </div>
+      )}
 
       {loading ? (
         <div className="h-64 flex flex-col items-center justify-center space-y-3">
@@ -371,7 +385,11 @@ export default function AudioSettingsPage({
                   <select
                     id="voice_select"
                     value={voiceActor}
-                    onChange={(e) => setVoiceActor(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setVoiceActor(val);
+                      onVoiceActorChange?.(val);
+                    }}
                     className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2.5 text-neutral-300 focus:border-purple-500 outline-none"
                   >
                     {displayVoices.map((voice) => (
@@ -442,7 +460,11 @@ export default function AudioSettingsPage({
                   <select
                     id="bg_music_select"
                     value={musicTheme}
-                    onChange={(e) => setMusicTheme(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setMusicTheme(val);
+                      onMusicThemeChange?.(val);
+                    }}
                     className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2.5 text-neutral-300 focus:border-purple-500 outline-none"
                   >
                     <option>Orchestral Battle Theme</option>

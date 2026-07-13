@@ -1,5 +1,5 @@
 import React from "react";
-import { Film, RefreshCw, Play, Pause, SkipBack, SkipForward, ChevronsLeft, ChevronsRight, Volume2, VolumeX } from "lucide-react";
+import { Film, RefreshCw, Play, Pause, SkipBack, SkipForward, ChevronsLeft, ChevronsRight, Volume2, VolumeX, Sliders } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import { getPanelFilterStyle } from "@/utils";
 
