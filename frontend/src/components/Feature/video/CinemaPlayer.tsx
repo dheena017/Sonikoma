@@ -96,6 +96,12 @@ export default function CinemaPlayer({
   const [videoQuality, setVideoQuality] = useState("1080p");
   const [subtitlesStyle, setSubtitlesStyle] = useState("classic");
 
+  // Fast-forward hold and HUD guide state parameters
+  const [isFastForwarding, setIsFastForwarding] = useState(false);
+  const [showHudHelp, setShowHudHelp] = useState(false);
+  const spaceTimerRef = useRef<any>(null);
+  const baseSpeedRef = useRef(1.0);
+
   // Hover states for Precise Seeking
   const [hoverProgress, setHoverProgress] = useState<{
     percent: number;
@@ -309,7 +315,15 @@ export default function CinemaPlayer({
 
       if (e.code === "Space") {
         e.preventDefault();
-        togglePlay();
+        if (!spaceTimerRef.current) {
+          spaceTimerRef.current = setTimeout(() => {
+            setIsFastForwarding(true);
+            setPlaybackSpeed(2.0);
+            if (videoRef.current) {
+              videoRef.current.playbackRate = 2.0;
+            }
+          }, 450);
+        }
       } else if (e.code === "ArrowRight") {
         const next = Math.min(currentTime + 5, totalDuration);
         setCurrentTime(next);
@@ -336,12 +350,39 @@ export default function CinemaPlayer({
         const next = Math.min(totalDuration, parseFloat((currentTime + 0.1).toFixed(1)));
         setCurrentTime(next);
         if (videoRef.current) videoRef.current.currentTime = next;
+      } else if (e.key === "?" || e.key === "/") {
+        setShowHudHelp(true);
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === "?" || e.key === "/") {
+        setShowHudHelp(false);
+      } else if (e.code === "Space") {
+        if (spaceTimerRef.current) {
+          clearTimeout(spaceTimerRef.current);
+          spaceTimerRef.current = null;
+        }
+        if (isFastForwarding) {
+          setIsFastForwarding(false);
+          setPlaybackSpeed(baseSpeedRef.current);
+          if (videoRef.current) {
+            videoRef.current.playbackRate = baseSpeedRef.current;
+          }
+        } else {
+          togglePlay();
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentTime, totalDuration, isMuted, isTheaterMode]);
+    window.addEventListener("keyup", handleKeyUp);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+      if (spaceTimerRef.current) clearTimeout(spaceTimerRef.current);
+    };
+  }, [currentTime, totalDuration, isMuted, isTheaterMode, isFastForwarding]);
 
   // Fullscreen toggle API
   const toggleFullscreen = () => {
@@ -402,6 +443,40 @@ export default function CinemaPlayer({
     >
       {/* BACKGROUND GRAPHIC COMIC STYLED OVERLAYS */}
       <div className="absolute inset-0 bg-radial-gradient from-purple-950/20 via-black to-black opacity-95 pointer-events-none z-0" />
+
+      {/* Visual HUD help overlay */}
+      {showHudHelp && (
+        <div className="absolute inset-0 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center space-y-4 z-[60] animate-fade-in p-6">
+          <div className="h-10 w-10 rounded-full bg-purple-600/20 border border-purple-500/30 flex items-center justify-center mb-1">
+            <Sliders className="h-5 w-5 text-purple-400 animate-pulse" />
+          </div>
+          <h4 className="text-xs font-mono text-purple-300 font-bold uppercase tracking-widest">
+            Keyboard HUD Shortcuts
+          </h4>
+          <div className="grid grid-cols-2 gap-4 max-w-md text-left text-[10px] font-mono text-neutral-400">
+            <div className="flex items-center gap-2">
+              <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">Space</span>
+              <span>Play/Pause / Hold to 2x</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">,</span>
+              <span>Step Frame Back</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">.</span>
+              <span>Step Frame Forward</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">Shift</span>
+              <span>Snap to Chapter Boundaries</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">?</span>
+              <span>Show This HUD</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* RENDER ACTIVE SCREEN CANVAS CONTENT */}
       <div className="relative w-full h-full flex items-center justify-center z-10">
