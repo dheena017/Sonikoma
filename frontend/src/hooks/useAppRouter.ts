@@ -151,7 +151,11 @@ export function useAppRouter({
       }
 
       const isLegacyProjectPagePath =
-        path === "/project-details" || path === "/project-editor";
+        path === "/project-details" ||
+        path === "/project-editor" ||
+        path === "/editor/editor" ||
+        path === "/editor/editor/" ||
+        path.startsWith("/editor/editor/");
 
       if (isLegacyProjectPagePath) {
         const activeProjId =
@@ -163,7 +167,13 @@ export function useAppRouter({
         let target = "/dashboard";
 
         if (activeProjId && activeSeriesSlug && activeChapterSlug) {
-          target = `/workspace/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
+          if (path.startsWith("/editor/editor")) {
+            const params = new URLSearchParams(window.location.search);
+            const idx = params.get("idx") || "0";
+            target = `/workspace/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}/image-editor?idx=${idx}`;
+          } else {
+            target = `/workspace/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
+          }
         } else if (activeProjId) {
           target = `/workspace?id=${activeProjId}`;
         }

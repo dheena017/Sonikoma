@@ -623,10 +623,7 @@ export default function App() {
       currentPath === "/image-editor/" ||
       currentPath.startsWith("/image-editor/") ||
       currentPath.endsWith("/image-editor") ||
-      currentPath.endsWith("/image-editor/") ||
-      currentPath === "/editor/editor" ||
-      currentPath === "/editor/editor/" ||
-      currentPath.startsWith("/editor/editor/");
+      currentPath.endsWith("/image-editor/");
     const isWorkspaceEditorRoot =
       currentPath === "/workspace/editor" ||
       currentPath === "/workspace/editor/";
@@ -1852,6 +1849,8 @@ export default function App() {
               isSidebarOpen={isSidebarOpen}
               setIsSidebarOpen={setIsSidebarOpen}
               navigateTo={navigateTo}
+              seriesSlug={editorSeriesSlug}
+              chapterSlug={editorChapterSlug}
             />
           )}
 

@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { ImageTool } from "@/hooks/useImageEditorState"; // Adjust path if needed
 import NotificationDropdown from "@/components/notification/NotificationDropdown";
+import { resolveWorkspaceReturnPath } from "@/utils/workspaceNavigation";
 
 interface ImageEditorHeaderProps {
   editingImageIdx: number | null;
@@ -50,6 +51,8 @@ interface ImageEditorHeaderProps {
   onToggleSidebar?: () => void;
   isSidebarOpen?: boolean;
   navigateTo?: (path: string) => void;
+  seriesSlug?: string | null;
+  chapterSlug?: string | null;
 }
 
 export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({ 
@@ -84,7 +87,9 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
   toggleThemeMode,
   onToggleSidebar,
   isSidebarOpen = false,
-  navigateTo
+  navigateTo,
+  seriesSlug,
+  chapterSlug,
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationsRef = useRef<HTMLDivElement>(null);
@@ -106,36 +111,27 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const handleLogoClick = () => {
-    const params = new URLSearchParams(window.location.search);
-    const path = window.location.pathname;
-    const match = path.match(
-      /^\/workspace\/editor\/series\/([^\/]+)\/chapters\/([^\/]+)(?:\/image-editor)?\/?$/
-    );
-    const series = match ? match[1] : params.get("series");
-    const chapter = match ? match[2] : params.get("chapter");
-    if (series && chapter) {
-      const target = `/workspace/editor/series/${series}/chapters/${chapter}`;
-      if (navigateTo) {
-        navigateTo(target);
-      } else {
-        window.history.pushState({}, "", target);
-        window.dispatchEvent(new Event("popstate"));
-      }
+    const target = resolveWorkspaceReturnPath({
+      seriesSlug,
+      chapterSlug,
+      searchParams: window.location.search,
+    });
+    if (navigateTo) {
+      navigateTo(target);
     } else {
-      if (navigateTo) {
-        navigateTo("/dashboard");
-      }
+      window.history.pushState({}, "", target);
+      window.dispatchEvent(new Event("popstate"));
     }
   };
 
   const hasMultipleImages = scrapedImages.length > 1;
 
   return (
-    <header className="h-16 w-full bg-[#0B0F19]/80 backdrop-blur-md border-b border-gray-800/40 flex items-center justify-between px-6 flex-shrink-0 z-50 selection:bg-purple-650">
+    <header className="h-16 w-full bg-neutral-950/80 backdrop-blur-md border-b border-neutral-900 flex items-center justify-between pl-4 lg:pl-0 pr-6 md:pr-8 flex-shrink-0 z-50 selection:bg-purple-650">
       {/* Left: Hamburger, Brand / Logo & Navigation */}
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-4 h-full">
         {onToggleSidebar && (
-          <div className="w-auto lg:w-20 flex items-center justify-center shrink-0">
+          <div className="w-auto lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900/80 h-full mr-4">
             <button
               onClick={onToggleSidebar}
               className="icon-pill cursor-pointer hover:icon-pill--purple transition-all"
@@ -326,23 +322,16 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
 
         <button 
           onClick={() => {
-            const params = new URLSearchParams(window.location.search);
-            const path = window.location.pathname;
-            const match = path.match(
-              /^\/workspace\/editor\/series\/([^\/]+)\/chapters\/([^\/]+)(?:\/image-editor)?\/?$/
-            );
-            const series = match ? match[1] : params.get("series");
-            const chapter = match ? match[2] : params.get("chapter");
-            if (series && chapter) {
-              const target = `/workspace/editor/series/${series}/chapters/${chapter}`;
-              if (navigateTo) {
-                navigateTo(target);
-              } else {
-                window.history.pushState({}, "", target);
-                window.dispatchEvent(new Event("popstate"));
-              }
+            const target = resolveWorkspaceReturnPath({
+              seriesSlug,
+              chapterSlug,
+              searchParams: window.location.search,
+            });
+            if (navigateTo) {
+              navigateTo(target);
             } else {
-              setEditingImageIdx(null);
+              window.history.pushState({}, "", target);
+              window.dispatchEvent(new Event("popstate"));
             }
           }}
           className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white bg-transparent hover:bg-gray-800 rounded-lg transition flex items-center"

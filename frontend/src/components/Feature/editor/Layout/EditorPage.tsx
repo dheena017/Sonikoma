@@ -9,6 +9,7 @@ import AdvancedSettings from "../../video/AdvancedSettings";
 import { useBackendHealth } from "../../../../hooks/useBackendHealth.js";
 import { getUserCredits } from "../../../../api/auth";
 import { Sliders, X } from "lucide-react";
+import { useImageEditorStore } from "@/hooks/useImageEditorState";
 
 
 interface EditorPageProps {
@@ -237,6 +238,51 @@ const EditorPage: React.FC<EditorPageProps> = ({
     navigateTo("/creative-suite");
   };
 
+  // SCROLL RESTORATION: Restore the scroll position when returning from the Image Editor
+  React.useEffect(() => {
+    const savedWindowScroll = sessionStorage.getItem("editor_page_scroll_top_window");
+    const savedContainerScroll = sessionStorage.getItem("editor_page_scroll_top_container");
+    if (!savedWindowScroll && !savedContainerScroll) return;
+
+    const windowVal = savedWindowScroll ? parseInt(savedWindowScroll, 10) : 0;
+    const containerVal = savedContainerScroll ? parseInt(savedContainerScroll, 10) : 0;
+
+    const restoreScroll = () => {
+      if (savedWindowScroll) {
+        window.scrollTo(0, windowVal);
+      }
+      if (savedContainerScroll) {
+        const container = document.getElementById("main-scroll-container");
+        if (container) {
+          container.scrollTop = containerVal;
+        }
+      }
+    };
+
+    // Restore immediately on mount
+    restoreScroll();
+
+    // Restore at multiple intervals to handle async rendering and shifting heights
+    const t1 = setTimeout(restoreScroll, 50);
+    const t2 = setTimeout(restoreScroll, 150);
+    const t3 = setTimeout(restoreScroll, 300);
+    const t4 = setTimeout(restoreScroll, 600);
+
+    // Cleanup sessionStorage after applying the scroll
+    const tClean = setTimeout(() => {
+      sessionStorage.removeItem("editor_page_scroll_top_window");
+      sessionStorage.removeItem("editor_page_scroll_top_container");
+    }, 700);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      clearTimeout(t4);
+      clearTimeout(tClean);
+    };
+  }, []);
+
   // LISTEN FOR THE EDIT BUTTON CLICK (tab switching via CustomEvent)
   React.useEffect(() => {
     const handleSwitchTab = (e: Event) => {
@@ -245,7 +291,14 @@ const EditorPage: React.FC<EditorPageProps> = ({
       if (!detail) return;
 
       if (detail === "image-editor") {
-        const idx = appLogic.editingImageIdx ?? 0;
+        // Save current scroll position before navigating (both window scroll and main container scroll)
+        sessionStorage.setItem("editor_page_scroll_top_window", String(window.scrollY));
+        const container = document.getElementById("main-scroll-container");
+        if (container) {
+          sessionStorage.setItem("editor_page_scroll_top_container", String(container.scrollTop));
+        }
+
+        const idx = useImageEditorStore.getState().editingImageIdx ?? appLogic.editingImageIdx ?? 0;
         const target = `/workspace/editor/series/${seriesSlug}/chapters/${chapterSlug}/image-editor?idx=${idx}`;
         navigateTo(target);
       } else {
@@ -255,7 +308,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
 
     window.addEventListener("SWITCH_TAB", handleSwitchTab);
     return () => window.removeEventListener("SWITCH_TAB", handleSwitchTab);
-  }, []);
+  }, [seriesSlug, chapterSlug, navigateTo, appLogic.editingImageIdx]);
 
   // Sync section with modals if needed
   React.useEffect(() => {

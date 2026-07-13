@@ -14,6 +14,8 @@ interface ImageEditorPageProps {
   isSidebarOpen?: boolean;
   setIsSidebarOpen?: (val: boolean) => void;
   navigateTo?: (path: string) => void;
+  seriesSlug?: string | null;
+  chapterSlug?: string | null;
 }
 
 const ImageEditorPage = React.memo(({
@@ -22,7 +24,9 @@ const ImageEditorPage = React.memo(({
   toggleThemeMode,
   isSidebarOpen,
   setIsSidebarOpen,
-  navigateTo
+  navigateTo,
+  seriesSlug,
+  chapterSlug
 }: ImageEditorPageProps) => {
   const { editingImageIdx, setEditingImageIdx, activeTool, setActiveTool } = useCropEditorStore();
   const [isToolsPanelOpen, setIsToolsPanelOpen] = useState(true);
@@ -149,6 +153,8 @@ const ImageEditorPage = React.memo(({
           onToggleSidebar={() => setIsToolsPanelOpen(!isToolsPanelOpen)}
           isSidebarOpen={isSidebarOpen}
           navigateTo={navigateTo}
+          seriesSlug={seriesSlug}
+          chapterSlug={chapterSlug}
         />
       }
     >

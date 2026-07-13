@@ -17,7 +17,7 @@ export const ImageEditorLayout: React.FC<ImageEditorLayoutProps> = ({
 
       <div className="flex-grow flex flex-row overflow-hidden w-full min-h-0">
         {/* Left Column: Mini Sidebar */}
-        <aside className="w-20 h-full bg-neutral-950 border-r border-gray-800/40 flex-shrink-0 z-10">
+        <aside className="w-20 h-full bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 shadow-[4px_0_24px_rgba(0,0,0,0.3)] flex-shrink-0 z-10">
           <ImageEditorMiniSidebar />
         </aside>
 
