@@ -90,7 +90,7 @@ const EditorMiniSidebarInner = ({
       <aside
         style={{ top: `${topOffsetPx}px` }}
         className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[60] py-6 shadow-[4px_0_24px_rgba(0,0,0,0.3)] ${
-          isCollapsed ? "w-16" : "w-20"
+          isCollapsed ? "w-20" : "w-24"
         }`}
       >
         <div className="flex-1 w-full flex flex-col items-center space-y-4 pt-4">
@@ -331,7 +331,7 @@ const EditorMiniSidebarInner = ({
     <aside
       style={{ top: `${topOffsetPx}px` }}
       className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[60] py-4 shadow-[4px_0_24px_rgba(0,0,0,0.3)] ${
-        isCollapsed ? "w-16" : "w-20"
+        isCollapsed ? "w-20" : "w-24"
       }`}
     >
       {/* Scrollable Tools Area */}

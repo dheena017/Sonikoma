@@ -167,7 +167,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
       */}
       <div
         className={`flex flex-1 flex-col min-w-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] min-h-screen ${
-          isFocusMode ? "pt-0 pl-0 pr-0" : "pt-16 pl-0 pr-0 md:pl-16 md:pr-16"
+          isFocusMode ? "pt-0 pl-0 pr-0" : "pt-16 pl-0 pr-0 md:pl-20 md:pr-20"
         }`}
       >
         {/* Inner container — allow overflow so the parent scrollbar handles scrolling */}

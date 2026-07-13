@@ -94,9 +94,8 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 h-16 flex min-w-0 flex-wrap items-center justify-between gap-2 border-b border-neutral-900 bg-neutral-950/80 backdrop-blur-md shadow-2xl shadow-black/40 pl-4 lg:pl-0 pr-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${
-        className || ""
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 h-16 flex min-w-0 flex-wrap items-center justify-between gap-2 border-b border-neutral-900 bg-neutral-950/80 backdrop-blur-md shadow-2xl shadow-black/40 pl-4 lg:pl-0 pr-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${className || ""
+        }`}
       style={style}
     >
       {/* Left Section - Menu Icon + Title */}
@@ -148,11 +147,10 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
       {/* Center: Live Stats Chips */}
       <div className="hidden md:flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
         {/* Backend status */}
-        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest ${
-          backendOnline
+        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest ${backendOnline
             ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
             : "bg-red-500/10 border-red-500/20 text-red-400"
-        }`}>
+          }`}>
           {backendOnline
             ? <Wifi className="h-2.5 w-2.5" />
             : <WifiOff className="h-2.5 w-2.5" />}
@@ -181,11 +179,10 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           <button
             onClick={() => navigateTo?.("/profile?tab=billing")}
             title="Your credit balance — click to top up"
-            className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${
-              credits < 20
+            className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${credits < 20
                 ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 animate-pulse"
                 : "bg-white/5 border-white/10 text-purple-400 hover:border-purple-500/40 hover:bg-purple-500/5"
-            }`}
+              }`}
           >
             <Zap className="h-3.5 w-3.5 shrink-0" />
             {credits.toLocaleString()}
@@ -194,11 +191,10 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
         <button
           type="button"
           onClick={() => setIsFocusMode((value) => !value)}
-          className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-bold transition-all active:scale-95 cursor-pointer ${
-            isFocusMode
+          className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-bold transition-all active:scale-95 cursor-pointer ${isFocusMode
               ? "border-purple-500/50 bg-purple-500/10 text-purple-300 shadow-[inset_0_0_12px_rgba(168,85,247,0.15)]"
               : "border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
-          }`}
+            }`}
         >
           <Focus className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">
