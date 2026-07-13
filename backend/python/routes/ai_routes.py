@@ -313,23 +313,27 @@ def validate_analysis(raw: Dict[str, Any]) -> Dict[str, Any]:
     vis = raw.get("visual_description", "")
     motion = raw.get("motion_type", "")
 
-    # 1. Get raw suggested duration from AI, defaulting to 4.5
+    # 1. Get raw suggested duration from AI, defaulting to 0.0
     raw_duration = raw.get("duration")
     try:
-        suggested_duration = float(raw_duration) if raw_duration is not None else 4.5
+        suggested_duration = float(raw_duration) if raw_duration is not None else 0.0
     except (ValueError, TypeError):
-        suggested_duration = 4.5
+        suggested_duration = 0.0
 
-    # Clamp suggested duration between 2.0 and 45.0 seconds
-    suggested_duration = max(2.0, min(45.0, suggested_duration))
+    # Clamp suggested duration between 2.0 and 45.0 seconds if it's explicitly provided
+    if suggested_duration > 0:
+        suggested_duration = max(2.0, min(45.0, suggested_duration))
 
     # 2. Extract and sanitize speech text (limit increased to 800 characters)
     speech_val = speech.strip()[:800] if isinstance(speech, str) and speech.strip() else ""
 
     # 3. Respect AI's suggested duration or dynamically align with speech voice track length
     speech_duration = estimate_duration_from_speech(speech_val)
-    final_duration = max(suggested_duration, speech_duration)
-    final_duration = max(2.0, min(45.0, round(final_duration, 1)))
+    if suggested_duration > 0 or speech_duration > 0:
+        final_duration = max(suggested_duration, speech_duration)
+        final_duration = max(2.0, min(45.0, round(final_duration, 1)))
+    else:
+        final_duration = 0.0
 
     return {
         "speech_text": speech_val,
@@ -672,7 +676,7 @@ async def analyze_image(body: AnalyzeImageRequest, user_api_key: str = Depends(g
         fallback_analysis = {
             "speech_text": "",
             "sfx": "",
-            "duration": 4.5,
+            "duration": 0.0,
             "motion_type": "zoom_in",
             "visual_description": ""
         }
@@ -775,7 +779,7 @@ async def analyze_image(body: AnalyzeImageRequest, user_api_key: str = Depends(g
         fallback_analysis = {
             "speech_text": "",
             "sfx": "",
-            "duration": 4.5,
+            "duration": 0.0,
             "motion_type": "zoom_in",
             "visual_description": ""
         }
@@ -874,7 +878,7 @@ async def analyze_batch(body: AnalyzeBatchRequest, user_api_key: str = Depends(g
                 fallback_analysis = {
                     "speech_text": "",
                     "sfx": "",
-                    "duration": 4.5,
+                    "duration": 0.0,
                     "motion_type": "zoom_in",
                     "visual_description": ""
                 }
