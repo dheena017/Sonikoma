@@ -67,6 +67,13 @@ const EditorPage: React.FC<EditorPageProps> = ({
   };
 
   const { status: backendStatus } = useBackendHealth();
+  const isImageEditorRoute = window.location.pathname.endsWith("/image-editor");
+
+  React.useEffect(() => {
+    if (window.location.pathname.endsWith("/image-editor")) {
+      setCurrentSection("image-editor");
+    }
+  }, [window.location.pathname]);
 
   const {
     projectId,
@@ -356,6 +363,10 @@ const EditorPage: React.FC<EditorPageProps> = ({
         {isInitializing && scrapedImages.length === 0 ? (
           <div className="w-full h-full flex flex-col items-center justify-center">
             {skeletonLoader}
+          </div>
+        ) : isImageEditorRoute ? (
+          <div className="w-full h-full min-h-[calc(100vh-64px)] flex flex-col">
+            <ImageEditorPage appLogic={appLogic} />
           </div>
         ) : (
           <>

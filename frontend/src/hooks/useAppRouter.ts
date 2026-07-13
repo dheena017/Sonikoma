@@ -71,7 +71,7 @@ export function useAppRouter({
     window.location.pathname
   );
   const [lastEditorPath, setLastEditorPath] = React.useState<string>(
-    "/image-editor?idx=0"
+    "/editor/adjust?idx=0"
   );
   const [activeTheme, setActiveTheme] = React.useState<string>(
     () => localStorage.getItem("ai_comic_theme") || "obsidian"
@@ -212,7 +212,6 @@ export function useAppRouter({
             path === "/workspace/editor" ||
             path === "/workspace/editor/" ||
             path.startsWith("/workspace/editor/") ||
-            path.startsWith("/image-editor") ||
             path === "/editor" ||
             path === "/editor/" ||
             path.startsWith("/editor/");
@@ -301,7 +300,6 @@ export function useAppRouter({
         setEditingImageIdx(null);
       } else if (
         path.startsWith("/editor") ||
-        path.startsWith("/image-editor") ||
         path.startsWith("/workspace/editor")
       ) {
         const params = new URLSearchParams(window.location.search);
@@ -322,7 +320,7 @@ export function useAppRouter({
         }
 
         const hasProjId = params.has("id") || params.has("project_id") || (params.has("series") && params.has("chapter"));
-        const hasSlugs = /^\/workspace\/editor\/series\/[^\/]+\/chapters\/[^\/]+\/?$/.test(path);
+        const hasSlugs = /^\/workspace\/editor\/series\/[^\/]+\/chapters\/[^\/]+(?:\/image-editor)?\/?$/.test(path);
         if (
           scrapedImagesRef.current.length === 0 &&
           panelsRef.current.length === 0 &&

@@ -258,7 +258,7 @@ const EditorMiniSidebarInner = ({
             }
 
             if (item.id === "image-editor") {
-              const target = `/image-editor?idx=${editingImageIdx ?? 0}&series=${seriesSlug || ""}&chapter=${chapterSlug || ""}`;
+              const target = `/workspace/editor/series/${seriesSlug || ""}/chapters/${chapterSlug || ""}/image-editor?idx=${editingImageIdx ?? 0}`;
               if (navigateTo) {
                 navigateTo(target);
               } else {
