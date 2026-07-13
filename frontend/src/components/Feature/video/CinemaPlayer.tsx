@@ -35,7 +35,7 @@ interface Chapter {
   endTime: number; // in seconds
 }
 
-export default function PlayerPage({
+export default function CinemaPlayer({
   panels = [],
   videoUrl,
   seriesSlug,
