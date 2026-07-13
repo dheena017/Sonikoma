@@ -148,6 +148,7 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
   });
 
   const handleSelectSlice = (slice: Slice) => {
+    if (state.imageUrl !== activeImageUrlRef.current) return;
     state.setSelectedSliceId(slice.id);
     setEditCropTop(slice.cropTop);
     setEditCropBottom(slice.cropBottom);
@@ -253,10 +254,16 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
 
   const lastImageUrlRef = useRef<string | null>(null);
 
+  // Keep a reference to the active image URL to shield against async race conditions
+  const activeImageUrlRef = useRef<string | null>(null);
+  useEffect(() => {
+    activeImageUrlRef.current = state.imageUrl;
+  }, [state.imageUrl]);
+
   // Handle resetting and loading states when the active image changes
   useEffect(() => {
     if (state.imageUrl) {
-      const saved = imageEditStates?.[state.imageUrl];
+      const saved = imageEditStates ? imageEditStates[state.imageUrl] : null;
       state.setSlices(saved?.slices || []);
       state.setSelectedSliceId(saved?.selectedSliceId || null);
       state.setSplitLines(saved?.splitLines || []);
@@ -279,9 +286,10 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
     } else {
       state.setLoadedImageUrl(null);
     }
+    // Explicitly exclude 'imageEditStates' to terminate the circular parent-child re-render trigger loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     state.imageUrl,
-    imageEditStates,
     setEditCropTop,
     setEditCropBottom,
     setEditCropLeft,
@@ -300,7 +308,11 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
   // Sync state back to parent container if needed
   useEffect(() => {
     // If local state hasn't finished loading/synchronizing for this imageUrl, don't sync back!
-    if (!state.imageUrl || state.imageUrl !== state.loadedImageUrl) {
+    if (
+      !state.imageUrl ||
+      state.imageUrl !== state.loadedImageUrl ||
+      state.imageUrl !== activeImageUrlRef.current
+    ) {
       return;
     }
 

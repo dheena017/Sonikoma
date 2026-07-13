@@ -15,6 +15,7 @@ import zipfile
 import asyncio
 import mimetypes
 import glob
+import base64
 
 from typing import List, Optional, Literal, Dict, Any
 from fastapi import APIRouter, HTTPException, Response, Query, Body, Path, Request
@@ -734,7 +735,19 @@ async def extract_panel_layers(panel_id: str, body: ProcessLayersRequest):
             # If no panels detected, fallback to the entire page as a single panel
             if not detected_panels:
                 logger.info("[Layer Segmentation] No individual panels detected. Processing entire page as a single panel.")
-                layers = await process_layers(tmp_in_path, panel_id)
+                try:
+                    layers = await process_layers(tmp_in_path, panel_id)
+                    warnings = []
+                except Exception as ex:
+                    logger.error(f"[Layer Segmentation] Sliceless single panel processing failed: {ex}. Initiating fallback layers.", exc_info=True)
+                    from media.image.layer_segmentation import create_blank_webp
+                    layers = {
+                        "background_url": body.url,
+                        "character_url": f"data:image/webp;base64,{base64.b64encode(create_blank_webp(100, 100)).decode('utf-8')}",
+                        "text_url": f"data:image/webp;base64,{base64.b64encode(create_blank_webp(100, 100)).decode('utf-8')}",
+                    }
+                    warnings = [f"Full-page fallback: AI Separation failed: {str(ex)}"]
+
                 return {
                     "success": True,
                     "panel_id": panel_id,
@@ -751,7 +764,8 @@ async def extract_panel_layers(panel_id: str, body: ProcessLayersRequest):
                             "area": w * h
                         },
                         "layers": layers
-                    }]
+                    }],
+                    "warnings": warnings
                 }
                 
             logger.info(f"[Layer Segmentation] Sliced manga page into {len(detected_panels)} panels — processing in parallel.")
@@ -797,8 +811,22 @@ async def extract_panel_layers(panel_id: str, body: ProcessLayersRequest):
                             "layers": panel_layers
                         }
                     except Exception as panel_err:
-                        logger.error(f"[Layer Segmentation] Panel {idx} failed: {panel_err}", exc_info=True)
-                        return None
+                        logger.error(f"[Layer Segmentation] Panel {idx} failed: {panel_err}. Initiating graceful fallback.", exc_info=True)
+                        # Graceful Fallback: original panel slice becomes background, char/text are transparent placeholders
+                        from media.image.layer_segmentation import create_blank_webp
+                        fallback_bg_url = box.get("url") or body.url
+
+                        fallback_layers = {
+                            "background_url": fallback_bg_url,
+                            "character_url": f"data:image/webp;base64,{base64.b64encode(create_blank_webp(100, 100)).decode('utf-8')}",
+                            "text_url": f"data:image/webp;base64,{base64.b64encode(create_blank_webp(100, 100)).decode('utf-8')}",
+                        }
+                        return {
+                            "panel_index": idx,
+                            "box": box,
+                            "layers": fallback_layers,
+                            "warning": f"Panel #{idx + 1} fallback: AI Separation failed: {str(panel_err)}"
+                        }
                     finally:
                         if tmp_panel_path and os.path.exists(tmp_panel_path):
                             try:
@@ -817,6 +845,17 @@ async def extract_panel_layers(panel_id: str, body: ProcessLayersRequest):
             )
 
             first_layers = results[0]["layers"] if results else None
+            warnings = [r.get("warning") for r in results if r and r.get("warning")]
+
+            # Explicit garbage collection and VRAM release to prevent memory leak
+            import gc
+            gc.collect()
+            try:
+                import torch
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+            except ImportError:
+                pass
 
             # Trigger automatic training check
             try:
@@ -829,7 +868,8 @@ async def extract_panel_layers(panel_id: str, body: ProcessLayersRequest):
                 "success": True,
                 "panel_id": panel_id,
                 "layers": first_layers,
-                "panels": results
+                "panels": results,
+                "warnings": warnings
             }
         finally:
             if tmp_in_path and os.path.exists(tmp_in_path):

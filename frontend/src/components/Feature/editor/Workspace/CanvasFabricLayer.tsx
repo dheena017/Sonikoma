@@ -23,12 +23,21 @@ export default function CanvasFabricLayer({
   const fabricCanvas = useRef<fabric.Canvas | null>(null);
 
   useEffect(() => {
-    if (!isActive || !canvasEl.current || !containerRef.current) return;
+    // Clean up previous canvas proactively when tab becomes inactive
+    if (!isActive) {
+      if (fabricCanvas.current) {
+        fabricCanvas.current.dispose();
+        fabricCanvas.current = null;
+      }
+      return;
+    }
+
+    if (!canvasEl.current || !containerRef.current) return;
 
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => {
-      if (!canvasEl.current || !containerRef.current) return;
+      if (!canvasEl.current || !containerRef.current || !isActive) return;
 
       canvasEl.current.width = img.width;
       canvasEl.current.height = img.height;
@@ -47,8 +56,10 @@ export default function CanvasFabricLayer({
 
       fabric.Image.fromURL(imgUrl, { crossOrigin: "anonymous" }).then(
         (fabImg) => {
-          fCanvas.backgroundImage = fabImg;
-          fCanvas.renderAll();
+          if (fabricCanvas.current === fCanvas) {
+            fCanvas.backgroundImage = fabImg;
+            fCanvas.renderAll();
+          }
         }
       );
 
@@ -114,6 +125,8 @@ export default function CanvasFabricLayer({
   }, [brushSize, brushAction, fillColor, textBgColor, isActive]);
 
   useEffect(() => {
+    if (!isActive) return;
+
     const handleSaveRequest = () => {
       if (fabricCanvas.current) {
         const dataUrl = fabricCanvas.current.toDataURL({
@@ -147,7 +160,7 @@ export default function CanvasFabricLayer({
       window.removeEventListener("FABRIC_SAVE_REQUEST", handleSaveRequest);
       window.removeEventListener("FABRIC_CLEAR_REQUEST", handleClearRequest);
     };
-  }, [imgUrl]);
+  }, [imgUrl, isActive]);
 
   if (!isActive) return null;
 

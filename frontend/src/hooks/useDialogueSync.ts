@@ -16,18 +16,26 @@ export function useDialogueSync({
   textVisible = true,
 }: UseDialogueSyncProps) {
   useEffect(() => {
+    let isMounted = true;
+
     const handleTimeUpdate = (e: Event) => {
+      if (!isMounted) return;
       const time = (e as CustomEvent).detail;
       const textObj = fabricTextObjectRef.current;
       const canvas = canvasRef.current;
 
+      // Protect against disposed or nonexistent canvas context
       if (!textObj || !canvas) return;
 
       // If text layer visibility is globally disabled, hide it
       if (!textVisible) {
         if (textObj.opacity !== 0) {
           textObj.set({ opacity: 0 });
-          canvas.renderAll();
+          try {
+            canvas.renderAll();
+          } catch (err) {
+            console.debug("Canvas render bypassed:", err);
+          }
         }
         return;
       }
@@ -37,7 +45,11 @@ export function useDialogueSync({
         // If there is no sync map, keep the text layer fully visible
         if (textObj.opacity !== 1) {
           textObj.set({ opacity: 1 });
-          canvas.renderAll();
+          try {
+            canvas.renderAll();
+          } catch (err) {
+            console.debug("Canvas render bypassed:", err);
+          }
         }
         return;
       }
@@ -51,12 +63,17 @@ export function useDialogueSync({
 
       if (textObj.opacity !== targetOpacity) {
         textObj.set({ opacity: targetOpacity });
-        canvas.renderAll();
+        try {
+          canvas.renderAll();
+        } catch (err) {
+          console.debug("Canvas render bypassed:", err);
+        }
       }
     };
 
     window.addEventListener("storyboard-time-update", handleTimeUpdate);
     return () => {
+      isMounted = false;
       window.removeEventListener("storyboard-time-update", handleTimeUpdate);
     };
   }, [syncMap, textVisible, fabricTextObjectRef, canvasRef]);
