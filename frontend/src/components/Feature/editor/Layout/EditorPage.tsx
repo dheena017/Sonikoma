@@ -446,9 +446,11 @@ const EditorPage: React.FC<EditorPageProps> = ({
                     reprocessingPanelId={reprocessingPanelId}
                     quality={previewQuality}
                     storyboardPlaying={storyboardPlaying}
+                    isMuted={isMuted}
                     setCurrentPanelIndex={setCurrentPanelIndex}
                     setPlaybackTime={setPlaybackTime}
                     setStoryboardPlaying={setStoryboardPlaying}
+                    setIsMuted={setIsMuted}
                     toggleStoryboardPlayback={toggleStoryboardPlayback}
                     resetStoryboardPlayback={resetStoryboardPlayback}
                   />
