@@ -48,12 +48,13 @@ async def extract_text_upload(
     langs: str = Form("en", description="Comma-separated language codes, e.g. 'en,ko'"),
 ):
     lang_list = [l.strip() for l in langs.split(",") if l.strip()]
-    suffix = os.path.splitext(file.filename or ".png")[1] or ".png"
-    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
-        tmp.write(await file.read())
-        image_path = tmp.name
-
+    image_path = None
     try:
+        suffix = os.path.splitext(file.filename or ".png")[1] or ".png"
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
+            tmp.write(await file.read())
+            image_path = tmp.name
+
         logger.info(f"[OCR] Extracting dialogue from uploaded file: {file.filename}")
         dialogue = await extract_dialogue_from_panel(image_path, langs=lang_list)
         logger.info(f"[OCR] Extraction successful. Text length: {len(dialogue)}")
@@ -61,7 +62,11 @@ async def extract_text_upload(
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
     finally:
-        if os.path.exists(image_path): os.remove(image_path)
+        if image_path and os.path.exists(image_path):
+            try:
+                os.remove(image_path)
+            except OSError:
+                pass
 
 
 @router.post(
@@ -73,12 +78,13 @@ async def extract_text_full(
     langs: str = Form("en"),
 ):
     lang_list = [l.strip() for l in langs.split(",") if l.strip()]
-    suffix = os.path.splitext(file.filename or ".png")[1] or ".png"
-    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
-        tmp.write(await file.read())
-        image_path = tmp.name
-
+    image_path = None
     try:
+        suffix = os.path.splitext(file.filename or ".png")[1] or ".png"
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
+            tmp.write(await file.read())
+            image_path = tmp.name
+
         logger.info(f"[OCR] Extracting full OCR data from uploaded file: {file.filename}")
         results = await extract_full_ocr_data(image_path, langs=lang_list)
         logger.info(f"[OCR] Full extraction successful. Segments found: {len(results)}")
@@ -86,7 +92,11 @@ async def extract_text_full(
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
     finally:
-        if os.path.exists(image_path): os.remove(image_path)
+        if image_path and os.path.exists(image_path):
+            try:
+                os.remove(image_path)
+            except OSError:
+                pass
 
 
 @router.post("/extract-b64", summary="Extract text from base64")
@@ -96,17 +106,22 @@ async def extract_text_base64(body: OCRBase64Request):
     except Exception:
         raise HTTPException(status_code=422, detail="Invalid base64 image data.")
 
-    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
-        tmp.write(raw)
-        image_path = tmp.name
-
+    image_path = None
     try:
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+            tmp.write(raw)
+            image_path = tmp.name
+
         dialogue = await extract_dialogue_from_panel(image_path, langs=body.langs)
         return {"success": True, "text": dialogue}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
     finally:
-        if os.path.exists(image_path): os.remove(image_path)
+        if image_path and os.path.exists(image_path):
+            try:
+                os.remove(image_path)
+            except OSError:
+                pass
 
 
 @router.post("/extract-full-b64", summary="Extract full OCR data from base64")
@@ -116,14 +131,19 @@ async def extract_text_full_base64(body: OCRBase64Request):
     except Exception:
         raise HTTPException(status_code=422, detail="Invalid base64 image data.")
 
-    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
-        tmp.write(raw)
-        image_path = tmp.name
-
+    image_path = None
     try:
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+            tmp.write(raw)
+            image_path = tmp.name
+
         results = await extract_full_ocr_data(image_path, langs=body.langs)
         return {"success": True, "results": results}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
     finally:
-        if os.path.exists(image_path): os.remove(image_path)
+        if image_path and os.path.exists(image_path):
+            try:
+                os.remove(image_path)
+            except OSError:
+                pass

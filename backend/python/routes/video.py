@@ -290,6 +290,14 @@ def _render_panel_segment_ffmpeg(
         with Image.open(layers["text"]) as text_img:
             text_w, text_h = text_img.size
 
+        # Protect against division-by-zero on malformed sizes
+        bg_w = max(1, bg_w)
+        bg_h = max(1, bg_h)
+        char_w = max(1, char_w)
+        char_h = max(1, char_h)
+        text_w = max(1, text_w)
+        text_h = max(1, text_h)
+
         scale_ratio = min(w / bg_w, h / bg_h)
         offset_x = (w - bg_w * scale_ratio) / 2
         offset_y = (h - bg_h * scale_ratio) / 2
@@ -300,8 +308,8 @@ def _render_panel_segment_ffmpeg(
         # 2. Character layout
         char_x = layers.get("char_x")
         char_y = layers.get("char_y")
-        char_scale_x = layers.get("char_scale_x")
-        char_scale_y = layers.get("char_scale_y")
+        char_scale_x = layers.get("char_scale_x") if layers.get("char_scale_x") is not None else 1.0
+        char_scale_y = layers.get("char_scale_y") if layers.get("char_scale_y") is not None else 1.0
 
         if char_x is not None and char_y is not None:
             char_x_px = int(offset_x + char_x * scale_ratio)
@@ -327,8 +335,8 @@ def _render_panel_segment_ffmpeg(
         # 3. Text layout
         text_x = layers.get("text_x")
         text_y = layers.get("text_y")
-        text_scale_x = layers.get("text_scale_x")
-        text_scale_y = layers.get("text_scale_y")
+        text_scale_x = layers.get("text_scale_x") if layers.get("text_scale_x") is not None else 1.0
+        text_scale_y = layers.get("text_scale_y") if layers.get("text_scale_y") is not None else 1.0
 
         if text_x is not None and text_y is not None:
             text_x_px = int(offset_x + text_x * scale_ratio)

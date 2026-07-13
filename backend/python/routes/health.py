@@ -180,6 +180,8 @@ async def system_logs_stream(request: Request):
                 except asyncio.TimeoutError:
                     # Keep-alive heartbeat comment
                     yield ": ping\n\n"
+        except (asyncio.CancelledError, GeneratorExit):
+            logger.debug("[System Logs Stream] Client disconnected from SSE console logs stream.")
         finally:
             remove_log_listener(listener)
 
