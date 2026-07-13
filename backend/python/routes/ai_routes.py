@@ -1282,7 +1282,10 @@ async def ai_smart_crop(body: SmartCropRequest, user_api_key: str = Depends(get_
                 ai_error_msg = "Gemini client not initialized"
 
         # Strategy 2: Local CV panel detection (Pillow/OpenCV)
+        # NOTE: Keep asyncio referenced from module scope; do NOT re-import/assign it
+        # inside this function, otherwise Python may treat it as a local variable.
         if body.strategy == "local-cv" or body.model == "local-cv" or ai_failed:
+
             with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_in:
                 tmp_in.write(image_buffer)
                 temp_in_path = tmp_in.name
@@ -1409,10 +1412,10 @@ async def ai_smart_crop(body: SmartCropRequest, user_api_key: str = Depends(get_
         # Trigger automatic training check
         try:
             from services.training_monitor import check_and_trigger_training
-            import asyncio
             await asyncio.to_thread(check_and_trigger_training)
         except Exception:
             pass
+
 
         return {
             "success": True,

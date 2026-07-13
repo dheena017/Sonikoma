@@ -24,7 +24,7 @@ const ImageEditorPage = React.memo(({
   setIsSidebarOpen,
   navigateTo
 }: ImageEditorPageProps) => {
-  const { editingImageIdx, setEditingImageIdx } = useCropEditorStore();
+  const { editingImageIdx, setEditingImageIdx, activeTool, setActiveTool } = useCropEditorStore();
   const [isToolsPanelOpen, setIsToolsPanelOpen] = useState(true);
 
   // Auto-select the first image if the user opens the editor but hasn't picked one yet
@@ -129,7 +129,7 @@ const ImageEditorPage = React.memo(({
           redoHistoryLength={editorProps.redoHistory.length}
           handleDeleteCurrentImage={editorProps.handleDeleteCurrentImage}
           setEditingImageIdx={setEditingImageIdx}
-          activeTab={editorProps.activeTab}
+          activeTab={activeTool}
           isPipMode={false}
           setIsPipMode={() => {}}
           slices={editorProps.slices}
@@ -146,33 +146,22 @@ const ImageEditorPage = React.memo(({
           setNotificationsMuted={appLogic.setNotificationsMuted}
           themeMode={themeMode}
           toggleThemeMode={toggleThemeMode}
-          onToggleSidebar={setIsSidebarOpen ? () => setIsSidebarOpen(!isSidebarOpen) : undefined}
+          onToggleSidebar={() => setIsToolsPanelOpen(!isToolsPanelOpen)}
           isSidebarOpen={isSidebarOpen}
           navigateTo={navigateTo}
         />
       }
     >
       <div className="flex-1 flex flex-row overflow-hidden w-full relative">
-        {/* Center Canvas */}
-        <main className="flex-1 h-full relative overflow-hidden bg-black/50 flex items-center justify-center">
-          <div
-            className="absolute inset-0 opacity-20 pointer-events-none"
-            style={{ backgroundImage: "radial-gradient(#374151 1px, transparent 0)", backgroundSize: "20px 20px" }}
-          />
-          <div className="relative w-full h-full z-10 flex items-center justify-center p-4">
-            {canvasSubtree}
-          </div>
-        </main>
-
-        {/* Right Tools Sidebar */}
+        {/* Left Tools Sidebar */}
         <aside
-          className={`h-full bg-[#121826] border-l border-gray-800 flex-shrink-0 z-20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          className={`h-full bg-[#121826] border-r border-gray-800/40 flex-shrink-0 z-20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
             isToolsPanelOpen ? "w-[360px] lg:w-[420px] opacity-100" : "w-0 opacity-0 border-none"
           }`}
         >
           <div className="w-[360px] lg:w-[420px] h-full overflow-y-auto custom-scrollbar p-5">
               <ImageEditorSidebar
-              setActiveTab={editorProps.setActiveTab}
+              setActiveTab={setActiveTool}
               slices={editorProps.slices}
               setSlices={editorProps.setSlices}
               editingImageIdx={editingImageIdx ?? 0}
@@ -283,10 +272,21 @@ const ImageEditorPage = React.memo(({
               handleClearDetectedBoxes={editorProps.handleClearDetectedBoxes}
               handleExecuteSave={editorProps.handleExecuteSave}
               handleSaveTrainingData={editorProps.handleSaveTrainingData}
-              activeTab={editorProps.activeTab as any}
+              activeTab={activeTool as any}
             />
           </div>
         </aside>
+
+        {/* Center Canvas */}
+        <main className="flex-1 h-full relative overflow-hidden bg-black/50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 opacity-20 pointer-events-none"
+            style={{ backgroundImage: "radial-gradient(#374151 1px, transparent 0)", backgroundSize: "20px 20px" }}
+          />
+          <div className="relative w-full h-full z-10 flex items-center justify-center p-4">
+            {canvasSubtree}
+          </div>
+        </main>
       </div>
     </ImageEditorLayout>
   );

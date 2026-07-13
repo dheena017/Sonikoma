@@ -11,18 +11,18 @@ export const ImageEditorLayout: React.FC<ImageEditorLayoutProps> = ({
   header
 }) => {
   return (
-    <div className="w-full min-h-screen bg-[#0B0F19] text-white flex flex-col overflow-hidden relative">
+    <div className="w-full h-screen max-h-screen bg-[#0B0F19] text-white flex flex-col overflow-hidden relative">
       {/* Top Header */}
       {header}
 
-      <div className="flex-grow flex flex-row overflow-hidden w-full">
+      <div className="flex-grow flex flex-row overflow-hidden w-full min-h-0">
         {/* Left Column: Mini Sidebar */}
-        <aside className="w-20 h-full bg-[#121826] border-r border-gray-800 flex-shrink-0 z-10">
+        <aside className="w-20 h-full bg-neutral-950 border-r border-gray-800/40 flex-shrink-0 z-10">
           <ImageEditorMiniSidebar />
         </aside>
 
         {/* Center Canvas & Right properties sidebar (handled by children) */}
-        <main className="flex-grow flex flex-row overflow-hidden relative">
+        <main className="flex-grow flex flex-row overflow-hidden relative min-h-0">
           {children}
         </main>
       </div>

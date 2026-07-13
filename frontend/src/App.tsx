@@ -623,7 +623,10 @@ export default function App() {
       currentPath === "/image-editor/" ||
       currentPath.startsWith("/image-editor/") ||
       currentPath.endsWith("/image-editor") ||
-      currentPath.endsWith("/image-editor/");
+      currentPath.endsWith("/image-editor/") ||
+      currentPath === "/editor/editor" ||
+      currentPath === "/editor/editor/" ||
+      currentPath.startsWith("/editor/editor/");
     const isWorkspaceEditorRoot =
       currentPath === "/workspace/editor" ||
       currentPath === "/workspace/editor/";

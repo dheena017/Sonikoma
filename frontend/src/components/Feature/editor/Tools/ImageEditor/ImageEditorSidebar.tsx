@@ -1,5 +1,5 @@
-import React, { useCallback } from "react";
-import { RefreshCw, Layers, Database, Brush, Eraser, Trash2, Save } from "lucide-react";
+import React from "react";
+import { RefreshCw, Layers, Database } from "lucide-react";
 import MergePanel from "./MergePanel/MergePanel";
 import { ImageEditorPanel, FreehandPanel } from ".";
 import EnhancementsPanel from "./EnhancementsPanel";
@@ -233,7 +233,7 @@ function ImageEditorSidebar({
   handleClearDetectedBoxes,
   handleExecuteSave,
   handleSaveTrainingData,
-}: ImageEditorSidebarProps) {
+}: ImageEditorSidebarProps & { handleSaveTrainingData: () => Promise<void> }) {
   const [sampleCount, setSampleCount] = React.useState<number | null>(null);
   const [isTraining, setIsTraining] = React.useState(false);
   const [trainingEpoch, setTrainingEpoch] = React.useState(0);
@@ -273,7 +273,6 @@ function ImageEditorSidebar({
         setTrainingMetrics(data.metrics || {});
         setTrainingError(data.error);
 
-        // If training just stopped, refresh the sample count too
         if (!data.is_training && isTraining) {
           const countRes = await fetchWithInterceptor("/api/image/training-data-count");
           const countData = await countRes.json();
@@ -286,10 +285,8 @@ function ImageEditorSidebar({
       }
     };
 
-    // Check status immediately
     checkStatus();
 
-    // Poll every 3 seconds if active or training tab is open
     if (activeTab === "train" || isTraining) {
       intervalId = setInterval(checkStatus, 3000);
     }
@@ -300,34 +297,29 @@ function ImageEditorSidebar({
   }, [fetchWithInterceptor, isTraining, activeTab]);
 
   return (
-    <div className="w-full h-full flex flex-col space-y-3 lg:h-full lg:min-h-0 overflow-hidden pr-0 sm:pr-1.5 scrollbar-thin overscroll-contain shrink-0 max-h-[45vh] lg:max-h-none pb-4 lg:pb-0">
+    <div className="w-full h-full flex flex-col min-h-0 overflow-hidden pb-4">
       {/* Tab Contents */}
-      <div className="flex-1 min-h-0 overflow-y-auto space-y-4 scrollbar-thin pr-0 sm:pr-1">
+      <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-1 scrollbar-thin">
         {activeTab === "merge" && (
-          <div className="rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
-            <MergePanel
-              editingImageIdx={editingImageIdx}
-              scrapedImages={scrapedImages}
-              isMerging={isMerging}
-              onMerge={handleMergeWithNext}
-            />
-          </div>
+          <MergePanel
+            editingImageIdx={editingImageIdx}
+            scrapedImages={scrapedImages}
+            isMerging={isMerging}
+            onMerge={handleMergeWithNext}
+          />
         )}
 
         {activeTab === "separate" && (
-          <div className="rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
-            <LayerSeparationPanel
-              activeStoryboardPanel={activeStoryboardPanel}
-              setPanels={setPanels}
-              addNotification={addNotification}
-              fetchWithInterceptor={fetchWithInterceptor}
-            />
-          </div>
+          <LayerSeparationPanel
+            activeStoryboardPanel={activeStoryboardPanel}
+            setPanels={setPanels}
+            addNotification={addNotification}
+            fetchWithInterceptor={fetchWithInterceptor}
+          />
         )}
 
-
         {activeTab === "train" && (
-          <div className="space-y-4 rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)] animate-in fade-in slide-in-from-right-4 duration-300">
+          <div className="space-y-4">
             {/* Header */}
             <div className="flex items-center gap-2 pb-2 border-b border-white/5">
               <div className="p-1.5 rounded-lg bg-purple-500/10">
@@ -383,14 +375,12 @@ function ImageEditorSidebar({
                     <span className="font-mono">Epoch {trainingEpoch} / {totalTrainingEpochs}</span>
                     <span className="font-mono text-neutral-500">{Math.floor(trainingElapsed / 60)}m {trainingElapsed % 60}s</span>
                   </div>
-                  {/* Progress bar */}
                   <div className="w-full bg-neutral-900 h-1.5 rounded-full overflow-hidden">
                     <div
                       className="bg-purple-500 h-full rounded-full transition-all duration-500"
                       style={{ width: `${(trainingEpoch / (totalTrainingEpochs || 1)) * 100}%` }}
                     ></div>
                   </div>
-                  {/* Metrics if any */}
                   {Object.keys(trainingMetrics).length > 0 && (
                     <div className="grid grid-cols-2 gap-1 text-[8px] font-mono text-neutral-500 bg-neutral-950 p-2 rounded-xl border border-white/5">
                       {Object.entries(trainingMetrics).map(([k, v]: [string, any]) => (
@@ -457,90 +447,82 @@ function ImageEditorSidebar({
         )}
 
         {activeTab === "draw" && (
-          <div className="rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
-            <FreehandPanel
-              brushSize={brushSize}
-              setBrushSize={setBrushSize}
-              brushAction={brushAction}
-              setBrushAction={setBrushAction}
-              fillColor={fillColor}
-              setFillColor={setFillColor}
-              textBgColor={textBgColor || "#ffffff"}
-              setTextBgColor={setTextBgColor || (() => { })}
-            />
-          </div>
+          <FreehandPanel
+            brushSize={brushSize}
+            setBrushSize={setBrushSize}
+            brushAction={brushAction}
+            setBrushAction={setBrushAction}
+            fillColor={fillColor}
+            setFillColor={setFillColor}
+            textBgColor={textBgColor || "#ffffff"}
+            setTextBgColor={setTextBgColor || (() => { })}
+          />
         )}
 
         {activeTab === "edit" && (
-          <div className="rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
-            <ImageEditorPanel
-              editCropTop={editCropTop}
-              editCropBottom={editCropBottom}
-              editCropLeft={editCropLeft}
-              editCropRight={editCropRight}
-              setEditCropTop={setEditCropTop}
-              setEditCropBottom={setEditCropBottom}
-              setEditCropLeft={setEditCropLeft}
-              setEditCropRight={setEditCropRight}
-              zoom={zoom}
-              setZoom={setZoom}
-              isTransforming={isTransforming}
-              onRotate={(deg) => handleTransform("rotate", String(deg))}
-              onFlip={(axis) => handleTransform("flip", axis)}
-              onReset={handleResetCropBounds}
-              handleNudge={handleNudge}
-            />
-          </div>
+          <ImageEditorPanel
+            editCropTop={editCropTop}
+            editCropBottom={editCropBottom}
+            editCropLeft={editCropLeft}
+            editCropRight={editCropRight}
+            setEditCropTop={setEditCropTop}
+            setEditCropBottom={setEditCropBottom}
+            setEditCropLeft={setEditCropLeft}
+            setEditCropRight={setEditCropRight}
+            zoom={zoom}
+            setZoom={setZoom}
+            isTransforming={isTransforming}
+            onRotate={(deg) => handleTransform("rotate", String(deg))}
+            onFlip={(axis) => handleTransform("flip", axis)}
+            onReset={handleResetCropBounds}
+            handleNudge={handleNudge}
+          />
         )}
 
         {activeTab === "adjust" && (
-          <div className="space-y-4 rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
-            <EnhancementsPanel
-              activeStoryboardPanel={activeStoryboardPanel}
-              handleModifyBrightness={handleModifyBrightness}
-              handleModifyContrast={handleModifyContrast}
-              handleModifySaturation={handleModifySaturation}
-              handleModifyFilterPreset={handleModifyFilterPreset}
-              handleModifyGrayscale={handleModifyGrayscale}
-              handleModifyDuration={handleModifyDuration}
-              handleModifyMotionType={handleModifyMotionType}
-              handleModifySpeechText={handleModifySpeechText}
-              handleModifySfx={handleModifySfx}
-              handleModifyCropPadding={handleModifyCropPadding}
-              setPanels={setPanels}
-            />
-          </div>
+          <EnhancementsPanel
+            activeStoryboardPanel={activeStoryboardPanel}
+            handleModifyBrightness={handleModifyBrightness}
+            handleModifyContrast={handleModifyContrast}
+            handleModifySaturation={handleModifySaturation}
+            handleModifyFilterPreset={handleModifyFilterPreset}
+            handleModifyGrayscale={handleModifyGrayscale}
+            handleModifyDuration={handleModifyDuration}
+            handleModifyMotionType={handleModifyMotionType}
+            handleModifySpeechText={handleModifySpeechText}
+            handleModifySfx={handleModifySfx}
+            handleModifyCropPadding={handleModifyCropPadding}
+            setPanels={setPanels}
+          />
         )}
 
         {activeTab === "slice" && (
-          <div className="space-y-4 rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
-            <HorizontalSplitter
-              splitPosition={splitPosition}
-              setSplitPosition={setSplitPosition}
-              splitLines={splitLines}
-              setSplitLines={setSplitLines}
-              showSplitPosition={showSplitPosition}
-              setShowSplitPosition={setShowSplitPosition}
-              setEditCropTop={setEditCropTop}
-              setEditCropBottom={setEditCropBottom}
-              setEditCropLeft={setEditCropLeft}
-              setEditCropRight={setEditCropRight}
-              setSelectedSliceId={setSelectedSliceId}
-              handleAddSplitLine={handleAddSplitLine}
-              handleRemoveSplitLine={handleRemoveSplitLine}
-              handleExecuteHorizontalSplit={handleExecuteHorizontalSplit}
-              isSavingEdit={isSavingEdit}
-              imageUrl={imageUrl}
-              magneticSnap={magneticSnap}
-              setMagneticSnap={setMagneticSnap}
-              detectedGutters={detectedGutters}
-              setDetectedGutters={setDetectedGutters}
-            />
-          </div>
+          <HorizontalSplitter
+            splitPosition={splitPosition}
+            setSplitPosition={setSplitPosition}
+            splitLines={splitLines}
+            setSplitLines={setSplitLines}
+            showSplitPosition={showSplitPosition}
+            setShowSplitPosition={setShowSplitPosition}
+            setEditCropTop={setEditCropTop}
+            setEditCropBottom={setEditCropBottom}
+            setEditCropLeft={setEditCropLeft}
+            setEditCropRight={setEditCropRight}
+            setSelectedSliceId={setSelectedSliceId}
+            handleAddSplitLine={handleAddSplitLine}
+            handleRemoveSplitLine={handleRemoveSplitLine}
+            handleExecuteHorizontalSplit={handleExecuteHorizontalSplit}
+            isSavingEdit={isSavingEdit}
+            imageUrl={imageUrl}
+            magneticSnap={magneticSnap}
+            setMagneticSnap={setMagneticSnap}
+            detectedGutters={detectedGutters}
+            setDetectedGutters={setDetectedGutters}
+          />
         )}
 
         {activeTab === "crop" && (
-          <div className="space-y-4 rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
+          <div className="space-y-4">
             <CutsRegistry
               slices={slices}
               setSlices={setSlices}

@@ -67,13 +67,6 @@ const EditorPage: React.FC<EditorPageProps> = ({
   };
 
   const { status: backendStatus } = useBackendHealth();
-  const isImageEditorRoute = window.location.pathname.endsWith("/image-editor");
-
-  React.useEffect(() => {
-    if (window.location.pathname.endsWith("/image-editor")) {
-      setCurrentSection("image-editor");
-    }
-  }, [window.location.pathname]);
 
   const {
     projectId,
@@ -251,12 +244,12 @@ const EditorPage: React.FC<EditorPageProps> = ({
       const detail = customEvent?.detail;
       if (!detail) return;
 
-      // keep current behavior for other tabs if any are added later
-      setCurrentSection(detail);
-
-      // Auto-collapse sidebar when opening Image Editor for more canvas space
       if (detail === "image-editor") {
-        setIsSidebarCollapsed(true);
+        const idx = appLogic.editingImageIdx ?? 0;
+        const target = `/workspace/editor/series/${seriesSlug}/chapters/${chapterSlug}/image-editor?idx=${idx}`;
+        navigateTo(target);
+      } else {
+        setCurrentSection(detail);
       }
     };
 
@@ -374,10 +367,6 @@ const EditorPage: React.FC<EditorPageProps> = ({
           <div className="w-full h-full flex flex-col items-center justify-center">
             {skeletonLoader}
           </div>
-        ) : isImageEditorRoute ? (
-          <div className="w-full h-full min-h-[calc(100vh-64px)] flex flex-col">
-            <ImageEditorPage appLogic={appLogic} />
-          </div>
         ) : (
           <>
             {/* Primary Canvas: Video Monitor (Sticky Background) */}
@@ -420,11 +409,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                     }`
               }`}
             >
-              {currentSection === "image-editor" ? (
-                <div id="section-image-editor" className="w-full">
-                  <ImageEditorPage appLogic={appLogic} />
-                </div>
-              ) : activeTab === "settings" ? (
+              {activeTab === "settings" ? (
                 <div className="w-full max-w-[1600px] mx-auto space-y-6">
                   {/* Settings Header */}
                   <div className="flex items-center justify-between border-b border-white/5 pb-4">

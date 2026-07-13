@@ -131,7 +131,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
   const hasMultipleImages = scrapedImages.length > 1;
 
   return (
-    <header className="h-16 w-full bg-[#0B0F19] border-b border-gray-800 flex items-center justify-between px-6 flex-shrink-0 z-50">
+    <header className="h-16 w-full bg-[#0B0F19]/80 backdrop-blur-md border-b border-gray-800/40 flex items-center justify-between px-6 flex-shrink-0 z-50 selection:bg-purple-650">
       {/* Left: Hamburger, Brand / Logo & Navigation */}
       <div className="flex items-center space-x-4">
         {onToggleSidebar && (
