@@ -253,7 +253,26 @@ export default function CinemaPlayer({
     const rect = progressBarRef.current.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const percentage = Math.max(0, Math.min(1, clickX / rect.width));
-    const targetTime = percentage * totalDuration;
+    let targetTime = percentage * totalDuration;
+
+    // Shift-key boundary snapping to closest chapter start or end
+    if (e.shiftKey) {
+      const closestChapter = chapters.reduce((prev, curr) => {
+        const prevDiffStart = Math.abs(prev.startTime - targetTime);
+        const prevDiffEnd = Math.abs(prev.endTime - targetTime);
+        const currDiffStart = Math.abs(curr.startTime - targetTime);
+        const currDiffEnd = Math.abs(curr.endTime - targetTime);
+
+        const minPrev = Math.min(prevDiffStart, prevDiffEnd);
+        const minCurr = Math.min(currDiffStart, currDiffEnd);
+
+        return minPrev < minCurr ? prev : curr;
+      });
+
+      const startDiff = Math.abs(closestChapter.startTime - targetTime);
+      const endDiff = Math.abs(closestChapter.endTime - targetTime);
+      targetTime = startDiff < endDiff ? closestChapter.startTime : closestChapter.endTime;
+    }
 
     setCurrentTime(targetTime);
     if (videoRef.current) {
@@ -284,6 +303,10 @@ export default function CinemaPlayer({
   // Keyboard controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if typing in inputs
+      const activeTag = document.activeElement?.tagName.toLowerCase();
+      if (activeTag === "input" || activeTag === "textarea") return;
+
       if (e.code === "Space") {
         e.preventDefault();
         togglePlay();
@@ -301,6 +324,18 @@ export default function CinemaPlayer({
         toggleFullscreen();
       } else if (e.code === "KeyT") {
         setIsTheaterMode(!isTheaterMode);
+      } else if (e.key === "," || e.key === "<") {
+        // Frame step backward
+        e.preventDefault();
+        const prev = Math.max(0, parseFloat((currentTime - 0.1).toFixed(1)));
+        setCurrentTime(prev);
+        if (videoRef.current) videoRef.current.currentTime = prev;
+      } else if (e.key === "." || e.key === ">") {
+        // Frame step forward
+        e.preventDefault();
+        const next = Math.min(totalDuration, parseFloat((currentTime + 0.1).toFixed(1)));
+        setCurrentTime(next);
+        if (videoRef.current) videoRef.current.currentTime = next;
       }
     };
 
