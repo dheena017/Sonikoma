@@ -101,11 +101,11 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
       {/* Left Section - Menu Icon + Title */}
       <div className="flex items-center shrink-0 h-full">
         {/* PREMIUM ALIGNMENT FIX: w-20 wrapper perfectly aligns the menu button above the mini-sidebar */}
-        <div className="w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900 h-full mr-4">
+        <div className="w-20 flex items-center justify-center shrink-0 border-r border-neutral-900 h-full mr-4">
           {onToggleSidebar && (
             <button
               onClick={onToggleSidebar}
-              className="p-1.5 rounded-lg border border-white/10 bg-white/5 text-neutral-400 hover:text-white cursor-pointer transition-colors active:scale-95"
+              className="w-11 h-11 rounded-2xl bg-neutral-800 border border-neutral-700 hover:bg-purple-500/10 hover:border-purple-500/20 text-neutral-400 hover:text-purple-300 cursor-pointer transition-all duration-300 active:scale-95 flex items-center justify-center"
               title={isSidebarCollapsed ? "Open sidebar" : "Close sidebar"}
             >
               <Menu className="h-5 w-5" />
@@ -179,27 +179,27 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           <button
             onClick={() => navigateTo?.("/profile?tab=billing")}
             title="Your credit balance — click to top up"
-            className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${credits < 20
+            className={`hidden sm:flex items-center gap-1.5 w-11 h-11 rounded-2xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all justify-center ${credits < 20
                 ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 animate-pulse"
-                : "bg-white/5 border-white/10 text-purple-400 hover:border-purple-500/40 hover:bg-purple-500/5"
+                : "bg-neutral-800 border-neutral-700 text-purple-400 hover:bg-purple-500/10 hover:border-purple-500/20"
               }`}
           >
             <Zap className="h-3.5 w-3.5 shrink-0" />
-            {credits.toLocaleString()}
+            <span className="text-[10px]">{credits.toLocaleString()}</span>
           </button>
         )}
+
+        {/* Focus Mode */}
         <button
           type="button"
           onClick={() => setIsFocusMode((value) => !value)}
-          className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-bold transition-all active:scale-95 cursor-pointer ${isFocusMode
+          title={isFocusMode ? "Exit Focus Mode" : "Focus Mode"}
+          className={`flex items-center justify-center gap-1.5 w-11 h-11 rounded-2xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${isFocusMode
               ? "border-purple-500/50 bg-purple-500/10 text-purple-300 shadow-[inset_0_0_12px_rgba(168,85,247,0.15)]"
-              : "border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
+              : "border-neutral-700 bg-neutral-800 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300"
             }`}
         >
-          <Focus className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">
-            {isFocusMode ? "Exit Focus" : "Focus Mode"}
-          </span>
+          <Focus className="h-4 w-4" />
         </button>
 
         {/* Notifications */}
@@ -207,7 +207,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           <button
             onClick={() => setShowNotifications((v) => !v)}
             title="Notifications"
-            className="p-2 rounded-xl border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white transition-colors cursor-pointer active:scale-95"
+            className="w-11 h-11 rounded-2xl border border-neutral-700 bg-neutral-800 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300 transition-all cursor-pointer active:scale-95 flex items-center justify-center"
           >
             {notificationsMuted ? (
               <BellOff className="h-4 w-4" />
@@ -235,13 +235,15 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           )}
         </div>
 
+        {/* Save Project */}
         <button
           type="button"
           onClick={onSave}
           disabled={isSaving}
-          className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-1.5 text-xs font-bold text-white transition-all hover:from-purple-500 hover:to-indigo-500 hover:shadow-[0_4px_14px_rgba(168,85,247,0.4)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 cursor-pointer"
+          title={isSaving ? "Saving..." : "Save Project"}
+          className="flex items-center gap-1.5 h-11 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 px-4 text-xs font-bold text-white transition-all hover:from-purple-500 hover:to-indigo-500 hover:shadow-[0_4px_14px_rgba(168,85,247,0.4)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 cursor-pointer"
         >
-          <Save className={`h-3.5 w-3.5 ${isSaving ? "animate-pulse" : ""}`} />
+          <Save className={`h-4 w-4 ${isSaving ? "animate-pulse" : ""}`} />
           {isSaving ? (
             "Saving..."
           ) : (
@@ -252,12 +254,13 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           )}
         </button>
 
+        {/* Share */}
         <button
           type="button"
           title="Share project link"
-          className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 px-3 py-1.5 text-xs font-bold text-neutral-300 transition-all hover:text-white active:scale-95 cursor-pointer"
+          className="flex items-center justify-center gap-1.5 h-11 rounded-2xl border border-neutral-700 bg-neutral-800 px-4 text-xs font-bold text-neutral-400 transition-all hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300 active:scale-95 cursor-pointer"
         >
-          <Share2 className="h-3.5 w-3.5" />
+          <Share2 className="h-4 w-4" />
           <span className="hidden lg:inline">Share</span>
         </button>
 

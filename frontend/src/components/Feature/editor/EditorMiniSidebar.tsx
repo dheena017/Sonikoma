@@ -89,9 +89,8 @@ const EditorMiniSidebarInner = ({
     return (
       <aside
         style={{ top: `${topOffsetPx}px` }}
-        className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[60] py-6 shadow-[4px_0_24px_rgba(0,0,0,0.3)] ${
-          isCollapsed ? "w-20" : "w-24"
-        }`}
+        className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[60] py-6 shadow-[4px_0_24px_rgba(0,0,0,0.3)] ${isCollapsed ? "w-20" : "w-24"
+          }`}
       >
         <div className="flex-1 w-full flex flex-col items-center space-y-4 pt-4">
           {cropTools.map((tool) => {
@@ -103,11 +102,10 @@ const EditorMiniSidebarInner = ({
               <div key={tool.key} className="relative group w-full flex justify-center py-1">
                 {/* Active Pill */}
                 <div
-                  className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
-                    isActive
+                  className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${isActive
                       ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] opacity-100"
                       : "h-0 bg-transparent opacity-0"
-                  }`}
+                    }`}
                 />
 
                 <button
@@ -123,18 +121,16 @@ const EditorMiniSidebarInner = ({
                 >
                   {/* Icon pill */}
                   <div
-                    className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${
-                      isActive
+                    className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${isActive
                         ? "bg-purple-500/20 border border-purple-500/40 shadow-[0_0_14px_rgba(168,85,247,0.25)]"
                         : "bg-neutral-800 border border-neutral-700 group-hover:bg-purple-500/10 group-hover:border-purple-500/20"
-                    }`}
+                      }`}
                   >
                     <Icon
-                      className={`w-[18px] h-[18px] transition-colors duration-300 ${
-                        isActive
+                      className={`w-5 h-5 transition-colors duration-300 ${isActive
                           ? "text-purple-400"
                           : "text-neutral-400 group-hover:text-purple-300"
-                      }`}
+                        }`}
                     />
                   </div>
 
@@ -231,11 +227,10 @@ const EditorMiniSidebarInner = ({
       <div className="relative group w-full flex justify-center py-0.5">
         {/* Active Pill */}
         <div
-          className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
-            isActive
+          className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${isActive
               ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] opacity-100"
               : "h-0 bg-transparent opacity-0"
-          }`}
+            }`}
         />
 
         <button
@@ -291,18 +286,16 @@ const EditorMiniSidebarInner = ({
         >
           {/* Icon pill */}
           <div
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${
-              isActive
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${isActive
                 ? "bg-purple-500/20 border border-purple-500/40 shadow-[0_0_14px_rgba(168,85,247,0.25)]"
                 : "bg-neutral-800 border border-neutral-700 group-hover:bg-purple-500/10 group-hover:border-purple-500/20"
-            }`}
+              }`}
           >
             <Icon
-              className={`w-[18px] h-[18px] transition-colors duration-300 ${
-                isActive
+              className={`w-5 h-5 transition-colors duration-300 ${isActive
                   ? "text-purple-400"
                   : "text-neutral-400 group-hover:text-purple-300"
-              }`}
+                }`}
             />
           </div>
 
@@ -330,9 +323,8 @@ const EditorMiniSidebarInner = ({
     // Premium Glassmorphism Container
     <aside
       style={{ top: `${topOffsetPx}px` }}
-      className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[60] py-4 shadow-[4px_0_24px_rgba(0,0,0,0.3)] ${
-        isCollapsed ? "w-20" : "w-24"
-      }`}
+      className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[60] py-4 shadow-[4px_0_24px_rgba(0,0,0,0.3)] ${isCollapsed ? "w-20" : "w-24"
+        }`}
     >
       {/* Scrollable Tools Area */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
@@ -346,9 +338,9 @@ const EditorMiniSidebarInner = ({
         <div className="relative group w-full flex justify-center">
           <button
             onClick={handleReturnToWorkspace}
-            className="p-3 rounded-2xl bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 text-white transition-all duration-300 shadow-[0_4px_14px_rgba(168,85,247,0.4)] hover:shadow-[0_6px_20px_rgba(168,85,247,0.6)] active:scale-90 border border-purple-400/30 outline-none focus:outline-none"
+            className="w-11 h-11 rounded-2xl bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 text-white transition-all duration-300 shadow-[0_4px_14px_rgba(168,85,247,0.4)] hover:shadow-[0_6px_20px_rgba(168,85,247,0.6)] active:scale-90 border border-purple-400/30 outline-none focus:outline-none flex items-center justify-center"
           >
-            <ExternalLink className="w-[18px] h-[18px] shrink-0" strokeWidth={2.5} />
+            <ExternalLink className="w-5 h-5 shrink-0" strokeWidth={2.5} />
           </button>
 
           {/* Hover Tooltip for the Return Button */}
