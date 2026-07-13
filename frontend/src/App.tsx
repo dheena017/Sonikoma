@@ -53,6 +53,7 @@ import PanelAssistantPage from "./components/Feature/panel_assistant/PanelAssist
 import CharacterProfilePage from "./components/Feature/characters/CharacterProfilePage";
 import TranslationStudioPage from "./components/Feature/translation/TranslationStudioPage";
 import AudioLabPage from "./components/Feature/audio_lab/AudioLabPage";
+import AudioSettingsPage from "./components/Feature/audio_settings/AudioSettingsPage";
 import ThumbnailStudioPage from "./components/Feature/thumbnails/ThumbnailStudioPage";
 import EngagementPage from "./components/Feature/engagement/EngagementPage";
 import VoiceStudioPage from "./components/Feature/voice/VoiceStudioPage";
@@ -654,6 +655,7 @@ export default function App() {
       isAIModelsPath: currentPath === "/ai-models",
       isModelTrainingPath: currentPath === "/model-training",
       isShortcutsPath: currentPath === "/shortcuts",
+      isAudioSettingsPath: currentPath === "/workspace/audio-settings",
       isOptimizerPath: currentPath === "/ai-optimizer",
       isPanelAssistantPath: currentPath.startsWith("/panel-assistant"),
       isCharacterPath: currentPath === "/ai-characters",
@@ -721,6 +723,7 @@ export default function App() {
     isAIModelsPath,
     isModelTrainingPath,
     isShortcutsPath,
+    isAudioSettingsPath,
     isOptimizerPath,
     isPanelAssistantPath,
     isCharacterPath,
@@ -1585,6 +1588,18 @@ export default function App() {
             </div>
           )}
 
+          {/* PAGE VIEW 2.5: Dedicated Audio & TTS Mixer Settings */}
+          {isAudioSettingsPath && (
+            <div className="page-transition w-full flex-1 flex flex-col">
+              <AudioSettingsPage
+                projectId={projectId}
+                onNavigateHome={handleNavigateHome}
+                addNotification={addNotification}
+                fetchWithInterceptor={fetchWithInterceptor}
+              />
+            </div>
+          )}
+
           {/* PAGE VIEW 3: Real-Time Engine Logs Console */}
           {isLogsPath && (
             <div className="page-transition w-full flex-1 flex flex-col">
@@ -1892,6 +1907,7 @@ export default function App() {
             !isAIModelsPath &&
             !isModelTrainingPath &&
             !isShortcutsPath &&
+            !isAudioSettingsPath &&
             !isOptimizerPath &&
             !isPanelAssistantPath &&
             !isCharacterPath &&

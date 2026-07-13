@@ -54,7 +54,7 @@ def spoof_referer(url: str) -> str:
             return "https://manhwatop.com/"
         if "manhuato" in host or "manhua" in host:
             return "https://manhuato.com/"
-        
+
         # Remove common CDN subdomains to construct a clean fallback base domain referer
         clean_host = host
         for prefix in ["cdn.", "img.", "images.", "pic.", "pics.", "static.", "assets.", "media.", "uploads.", "files.", "storage."]:
@@ -78,7 +78,7 @@ async def fetch_with_retry(
         try:
             async with httpx.AsyncClient(follow_redirects=True, timeout=30.0) as client:
                 resp = await client.get(url, headers=headers)
-                
+
                 # Retry on 5xx
                 if resp.status_code >= 500 and attempt < retries - 1:
                     delay = base_delay * (2 ** attempt)
@@ -97,7 +97,7 @@ async def fetch_with_retry(
                     f"[Proxy] Network error (retry {attempt + 1}/{retries}): {e} — waiting {delay:.2f}s"
                 )
                 await asyncio.sleep(delay)
-                
+
     raise last_err or RuntimeError("Max retries reached")
 
 
@@ -110,9 +110,9 @@ async def proxy_image(
     url: str = Query(..., description="Target image URL to fetch")
 ):
     import asyncio  # Re-import to guarantee availability in route task thread
-    
+
     start_time = time.time()
-    
+
     fetch_url = url
     visited = set()
     while "/api/proxy-image" in fetch_url:
@@ -176,7 +176,7 @@ async def proxy_image(
 
         elapsed = int((time.time() - start_time) * 1000)
         logger.info(f"[Proxy] 200 CACHE HIT | {fetch_url[:55]} ({cached['size'] / 1024:.1f}KB) ({elapsed}ms)")
-        
+
         return Response(
             content=cached["data"],
             media_type=cached["contentType"],

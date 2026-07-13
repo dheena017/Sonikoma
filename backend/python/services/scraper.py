@@ -120,13 +120,13 @@ def parse_episode_index(title_or_url: str) -> Optional[float]:
 
 class EpisodeCacheManager:
     """SQLite-based caching for scraped WEBTOON episodes."""
-    
+
     def __init__(self, db_path: Optional[str] = None):
         self.db_path = db_path or os.path.join(
             os.path.dirname(__file__), "..", "..", "database", "webtoon_episodes_cache.db"
         )
         self._init_db()
-    
+
     def _init_db(self):
         """Initialize SQLite database schema if needed."""
         try:
@@ -147,23 +147,23 @@ class EpisodeCacheManager:
                     )
                 """)
                 cursor.execute("""
-                    CREATE INDEX IF NOT EXISTS idx_title_no_genre 
+                    CREATE INDEX IF NOT EXISTS idx_title_no_genre
                     ON episode_cache(title_no, genre)
                 """)
                 cursor.execute("""
-                    CREATE INDEX IF NOT EXISTS idx_expires_at 
+                    CREATE INDEX IF NOT EXISTS idx_expires_at
                     ON episode_cache(expires_at)
                 """)
                 conn.commit()
             logger.info(f"[Cache Manager] Database initialized at {self.db_path}")
         except Exception as e:
             logger.warning(f"[Cache Manager] Failed to initialize: {e}")
-    
+
     def _make_cache_key(self, title_no: str, genre: Optional[str] = None) -> str:
         """Generate cache key."""
         key_str = f"{title_no}:{genre or 'any'}"
         return hashlib.md5(key_str.encode()).hexdigest()
-    
+
     def save_episodes(
         self,
         title_no: str,
@@ -176,30 +176,30 @@ class EpisodeCacheManager:
         try:
             cache_key = self._make_cache_key(title_no, genre)
             expires_at = datetime.utcnow() + timedelta(hours=ttl_hours)
-            
+
             episodes_json = json.dumps(episodes)
             metadata_json = json.dumps(series_metadata) if series_metadata else None
-            
+
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 cursor.execute("""
-                    INSERT OR REPLACE INTO episode_cache 
+                    INSERT OR REPLACE INTO episode_cache
                     (title_no, genre, cache_key, episodes_json, series_metadata, expires_at)
                     VALUES (?, ?, ?, ?, ?, ?)
                 """, (title_no, genre, cache_key, episodes_json, metadata_json, expires_at))
                 conn.commit()
-            
+
             logger.info(f"[Cache Manager] Cached {len(episodes)} episodes for {title_no}")
             return True
         except Exception as e:
             logger.warning(f"[Cache Manager] Save failed: {e}")
             return False
-    
+
     def get_episodes(self, title_no: str, genre: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """Retrieve episodes from cache if valid."""
         try:
             cache_key = self._make_cache_key(title_no, genre)
-            
+
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 cursor.execute("""
@@ -207,34 +207,34 @@ class EpisodeCacheManager:
                     FROM episode_cache
                     WHERE cache_key = ? AND (expires_at IS NULL OR expires_at > datetime('now'))
                 """, (cache_key,))
-                
+
                 row = cursor.fetchone()
                 if row:
                     episodes_json, metadata_json, hit_count, _ = row
-                    
+
                     # Update hit count
                     cursor.execute(
                         "UPDATE episode_cache SET hit_count = hit_count + 1 WHERE cache_key = ?",
                         (cache_key,)
                     )
                     conn.commit()
-                    
+
                     episodes = json.loads(episodes_json)
                     metadata = json.loads(metadata_json) if metadata_json else None
-                    
+
                     logger.info(f"[Cache Manager] Cache HIT for {title_no} ({len(episodes)} episodes, hits: {hit_count + 1})")
                     return {
                         "episodes": episodes,
                         "series_metadata": metadata,
                         "from_cache": True
                     }
-                
+
                 logger.debug(f"[Cache Manager] Cache MISS for {title_no}")
                 return None
         except Exception as e:
             logger.warning(f"[Cache Manager] Retrieval failed: {e}")
             return None
-    
+
     def clear_expired(self) -> int:
         """Remove expired cache entries."""
         try:
@@ -245,7 +245,7 @@ class EpisodeCacheManager:
                 )
                 deleted = cursor.rowcount
                 conn.commit()
-            
+
             if deleted > 0:
                 logger.info(f"[Cache Manager] Cleared {deleted} expired entries")
             return deleted
@@ -344,16 +344,16 @@ def scrape_local_archive(path: str) -> List[str]:
     """Extracts image files from a local .zip or .cbz file and flat-stores them in temporary paths."""
     if not os.path.exists(path):
         raise FileNotFoundError(f"Local archive not found: {path}")
-        
+
     temp_parent = os.path.join(tempfile.gettempdir(), "webtoon_scraped_archives")
     os.makedirs(temp_parent, exist_ok=True)
     session_id = str(uuid.uuid4())[:8]
     extract_dir = os.path.join(temp_parent, session_id)
     os.makedirs(extract_dir, exist_ok=True)
-    
+
     extracted_files = []
     valid_exts = ('.png', '.jpg', '.jpeg', '.webp', '.gif')
-    
+
     if zipfile.is_zipfile(path):
         with zipfile.ZipFile(path, 'r') as zf:
             for name in zf.namelist():
@@ -368,10 +368,10 @@ def scrape_local_archive(path: str) -> List[str]:
                     extracted_files.append(target_path)
     else:
         raise ValueError("Unsupported archive format. Only ZIP and CBZ packages are supported.")
-        
+
     extracted_files.sort(key=natural_sort_key)
     logger.info(f"[Scraper] Extracted {len(extracted_files)} panels from local file: {path}")
-    
+
     file_urls = []
     for p in extracted_files:
         clean_p = p.replace('\\', '/')
@@ -645,10 +645,10 @@ def extract_metadata(html: str, url: str) -> Dict[str, str]:
             soup = BeautifulSoup(html, 'lxml')
         except Exception:
             soup = BeautifulSoup(html, 'html.parser')
-            
+
         og_title = soup.find('meta', attrs={'property': 'og:title'}) or soup.find('meta', attrs={'name': 'twitter:title'})
         metadata["title"] = og_title['content'] if og_title and og_title.has_attr('content') else (soup.title.string if soup.title else "")
-        
+
         # Clean up title: remove common site suffix brandings
         title_str = metadata["title"]
         if title_str:
@@ -657,11 +657,11 @@ def extract_metadata(html: str, url: str) -> Dict[str, str]:
 
         og_desc = soup.find('meta', attrs={'property': 'og:description'}) or soup.find('meta', attrs={'name': 'description'})
         metadata["description"] = og_desc['content'] if og_desc and og_desc.has_attr('content') else ""
-        
+
         og_img = soup.find('meta', attrs={'property': 'og:image'}) or soup.find('meta', attrs={'name': 'twitter:image'})
         if og_img and og_img.has_attr('content'):
             metadata["cover_image"] = urljoin(url, og_img['content'])
-            
+
         # Fallback selectors for cover image from DOM if meta tag missing or empty
         if not metadata["cover_image"]:
             cover_selectors = [
@@ -730,7 +730,7 @@ def extract_metadata(html: str, url: str) -> Dict[str, str]:
                         break
                 except Exception:
                     continue
-        
+
         for k in metadata:
             if isinstance(metadata[k], str):
                 metadata[k] = metadata[k].strip()
@@ -747,31 +747,31 @@ def parse_with_bs4(html: str, base_url: str, custom_selectors: Optional[List[str
         soup = BeautifulSoup(html, 'html.parser')
     except Exception:
         return []
-        
+
     selectors = custom_selectors or [
         '.viewer_lst', '._imageList', '.wt_viewer', '.reader-area', '.comic-page',
         '.chapter-content', '.episode-view', '.comic-content', '.panel-container',
         '#comic_view_area', '#comic-image', '#comic-view', '.ep-contents', '.chapter-img',
         '#readerarea', '.readerarea', '#reader-area', '.wp-manga-chapter-img'
     ]
-    
+
     container = None
     for sel in selectors:
         container = soup.select_one(sel)
         if container:
             logger.info(f"[Scraper] BS4 isolated reader container: {sel}")
             break
-            
+
     search_root = container if container else soup
     images = []
     for img in search_root.find_all('img'):
         src = (
-            img.get('data-url') or 
-            img.get('data-src') or 
-            img.get('data-lazy-src') or 
-            img.get('data-original') or 
-            img.get('src') or 
-            img.get('origin-src') or 
+            img.get('data-url') or
+            img.get('data-src') or
+            img.get('data-lazy-src') or
+            img.get('data-original') or
+            img.get('src') or
+            img.get('origin-src') or
             img.get('lazy-src')
         )
         if src:
@@ -790,14 +790,14 @@ def extract_images_from_nuxt_payload(html: str) -> List[str]:
 
     end_script_index = html.find('</script>', nuxt_index)
     script_block = html[nuxt_index:] if end_script_index == -1 else html[nuxt_index:end_script_index]
-    
+
     pages_match = re.search(r'pages:\s*\[([\s\S]*?)\]', script_block)
     if not pages_match:
         return page_images
 
     pages_content = pages_match.group(1)
     src_matches = re.findall(r'src:\s*"((?:\\.|[^"\\])*)"', pages_content)
-    
+
     for src in src_matches:
         decoded = decode_escaped_js_string(src)
         if decoded.startswith(('http://', 'https://')):
@@ -819,14 +819,14 @@ async def try_fetch_url_resilient(
     headers = dict(base_headers)
     headers["Referer"] = f"{parsed_domain.scheme}://{parsed_domain.netloc}/"
     headers["Origin"] = f"{parsed_domain.scheme}://{parsed_domain.netloc}"
-    
+
     if cookies:
         cookie_str = "; ".join([f"{k}={v}" for k, v in cookies.items()])
         if "Cookie" in headers:
             headers["Cookie"] = headers["Cookie"] + "; " + cookie_str
         else:
             headers["Cookie"] = cookie_str
-            
+
     clients = []
     if httpx:
         clients.append("httpx")
@@ -834,16 +834,16 @@ async def try_fetch_url_resilient(
         clients.append("aiohttp")
     if requests:
         clients.append("requests")
-        
+
     if not clients:
         logger.error("[Scraper] No active HTTP request client library (httpx, aiohttp, requests) found.")
         return None
-        
+
     for attempt in range(1, retries + 1):
         headers["User-Agent"] = random.choice(USER_AGENTS)
         client_type = clients[(attempt - 1) % len(clients)]
         logger.info(f"[Scraper] HTTP client request {attempt}/{retries} via {client_type}")
-        
+
         start_t = time.time()
         try:
             if client_type == "httpx":
@@ -878,10 +878,10 @@ async def try_fetch_url_resilient(
                     return None
         except Exception as e:
             logger.warning(f"[Scraper] Attempt {attempt} via {client_type} failed: {e}")
-            
+
         if attempt < retries:
             await asyncio.sleep(0.5 + random.random())
-            
+
     return None
 
 
@@ -899,7 +899,7 @@ async def try_fetch_with_playwright(
     except ImportError:
         logger.warning("[Scraper] Playwright not found. Browser rendering fallback bypassed.")
         return None
-        
+
     logger.info("[Scraper] Launching Playwright browser instance...")
     start_t = time.time()
     try:
@@ -909,7 +909,7 @@ async def try_fetch_with_playwright(
                 user_agent=user_agent,
                 extra_http_headers={"Referer": referer}
             )
-            
+
             if cookies:
                 parsed = urlparse(url)
                 playwright_cookies = [
@@ -917,11 +917,11 @@ async def try_fetch_with_playwright(
                     for k, v in cookies.items()
                 ]
                 await context.add_cookies(playwright_cookies)
-                
+
             page = await context.new_page()
             await page.set_viewport_size({"width": 1280, "height": 1080})
             await page.goto(url, wait_until="domcontentloaded", timeout=45000)
-            
+
             # Interactive click expansions
             if interactive:
                 try:
@@ -940,14 +940,14 @@ async def try_fetch_with_playwright(
                                 await asyncio.sleep(0.5)
                 except Exception as click_err:
                     logger.debug(f"[Scraper] Interactive clicker exception: {click_err}")
-                    
+
             # Scrolling script to trigger lazy loading
             logger.info("[Scraper] Running scroll script for lazy-loaded assets...")
             # Scroll down incrementally with pauses to allow lazy-loaded assets to load and render
             for _ in range(8):
                 await page.evaluate("window.scrollBy(0, 2000)")
                 await page.wait_for_timeout(1000)
-            
+
             # Extract HTML5 canvases to base64 Data URLs
             logger.info("[Scraper] Running canvas extraction script...")
             await page.evaluate("""() => {
@@ -966,7 +966,7 @@ async def try_fetch_with_playwright(
                     }
                 });
             }""")
-            
+
             await page.wait_for_timeout(200)
             html = await page.content()
             await browser.close()
@@ -993,7 +993,7 @@ async def scrape_images_from_url(
     fetch_url = extract_webtoon_url(url)
     if not fetch_url:
         return []
-        
+
     # Check if data URL image
     if fetch_url.startswith("data:image/"):
         logger.info("[Scraper] Direct Data URL image detected")
@@ -1016,13 +1016,13 @@ async def scrape_images_from_url(
                             is_img = True
             except Exception:
                 pass
-        
+
         if is_img:
             logger.info(f"[Scraper] Direct image URL detected: {fetch_url}")
             return [f"/api/proxy-image?url={quote(fetch_url)}"]
-        
+
     start_time = time.time()
-    
+
     # Check if local path ZIP or CBZ
     if fetch_url.startswith("file://") or fetch_url.lower().endswith(('.zip', '.cbz')) or os.path.exists(fetch_url):
         local_path = fetch_url
@@ -1037,17 +1037,17 @@ async def scrape_images_from_url(
             logger.error(f"[Scraper] Archive extract failed: {e}")
             if fetch_url.startswith("file://"):
                 return []
-                
+
     # Cache lookup
     if not bypass_cache:
         cached = check_sqlite_cache(fetch_url)
         if cached:
             return [f"/api/proxy-image?url={quote(img)}" for img in cached]
-            
+
     parsed_domain = urlparse(fetch_url)
     base_domain = f"{parsed_domain.scheme}://{parsed_domain.netloc}/"
     referer = "https://www.webcomicsapp.com/" if source == 'webcomicsapp' else base_domain
-    
+
     fetch_headers = {
         "User-Agent": USER_AGENTS[0],
         "Referer": referer,
@@ -1056,7 +1056,7 @@ async def scrape_images_from_url(
         "Cache-Control": "no-cache",
         "Pragma": "no-cache"
     }
-    
+
     merged_cookies = {
         "needZoneZone": "true",
         "locale": "en",
@@ -1066,10 +1066,10 @@ async def scrape_images_from_url(
     }
     if cookies:
         merged_cookies.update(cookies)
-        
+
     logger.info(f"[Scraper] Commencing scrape for url: {fetch_url}")
     html = await try_fetch_url_resilient(fetch_url, fetch_headers, cookies=merged_cookies)
-    
+
     if not html:
         # Regional fallback checks
         try:
@@ -1081,7 +1081,7 @@ async def scrape_images_from_url(
                 html = await try_fetch_url_resilient(fallback_url, fetch_headers, cookies=merged_cookies)
         except Exception as e:
             logger.debug(f"[Scraper] Regional completion fallback failed: {e}")
-            
+
     if not html:
         logger.info("[Scraper] Standard request fallbacks failed. Initializing Playwright browser crawling...")
         html = await try_fetch_with_playwright(
@@ -1090,7 +1090,7 @@ async def scrape_images_from_url(
             referer=fetch_headers["Referer"],
             cookies=merged_cookies
         )
-        
+
     # HTML Dump for diagnostics
     if html:
         try:
@@ -1101,10 +1101,10 @@ async def scrape_images_from_url(
                 f.write(html)
         except Exception:
             pass
-            
+
     if not html:
         return []
-        
+
     # Metadata extraction
     meta = extract_metadata(html, fetch_url)
     if meta:
@@ -1112,43 +1112,43 @@ async def scrape_images_from_url(
         scraped_metadata_cache[fetch_url] = meta
     else:
         logger.warning(f"[Scraper] Metadata extraction failed for: {fetch_url}")
-        
+
     image_dict = {}
-    
+
     # 1. BeautifulSoup parsing
     bs_imgs = parse_with_bs4(html, fetch_url)
     if bs_imgs:
         logger.info(f"[Scraper] Found {len(bs_imgs)} images using BS4.")
     for img in bs_imgs:
         image_dict[img] = True
-        
+
     # 2. Nuxt payload extraction
     nuxt_imgs = extract_images_from_nuxt_payload(html)
     if nuxt_imgs:
         logger.info(f"[Scraper] Found {len(nuxt_imgs)} images using Nuxt payload extraction.")
     for img in nuxt_imgs:
         image_dict[urljoin(fetch_url, img)] = True
-        
+
     # 3. Regex parser fallback
     if not image_dict:
         logger.info("[Scraper] Standard DOM parser returned empty results. Running regex extraction fallback...")
         search_block = html
         start_idx = -1
-        
+
         container_match = re.search(r'<(div|ul|section)\s+[^>]*?class=["\'][^"\']*?viewer_lst[^"\']*?["\'][^>]*?>', html, re.IGNORECASE)
         if not container_match:
             container_match = re.search(r'<(div|ul|section)\s+[^>]*?(?:id=["\']_imageList["\']|class=["\'][^"\']*?_imageList[^"\']*?")[^>]*?>', html, re.IGNORECASE)
-            
+
         if container_match:
             start_idx = container_match.start()
             start_tag = container_match.group(0)
             tag_type = container_match.group(1)
-            
+
             after_start = html[start_idx + len(start_tag):]
             balance = 1
             end_idx_in_after = -1
             tag_regex = re.compile(rf'</?{tag_type}\b[^>]*>', re.IGNORECASE)
-            
+
             for m in tag_regex.finditer(after_start):
                 matched_tag = m.group(0)
                 if matched_tag.startswith('</'):
@@ -1158,7 +1158,7 @@ async def scrape_images_from_url(
                 if balance == 0:
                     end_idx_in_after = m.end()
                     break
-                    
+
             if end_idx_in_after != -1:
                 search_block = html[start_idx:start_idx + len(start_tag) + end_idx_in_after]
             else:
@@ -1196,13 +1196,13 @@ async def scrape_images_from_url(
             class_name = class_match.group(1) if class_match else ""
             data_url_match = re.search(r'data-url=["\']([^"\']+)["\']', attrs, re.IGNORECASE)
             src_match = re.search(r'src=["\']([^"\']+)["\']', attrs, re.IGNORECASE)
-            
+
             candidate = (data_url_match.group(1) if data_url_match else (src_match.group(1) if src_match else "")).strip()
             candidate = candidate.replace('\\u002F', '/').replace('\\', '').replace('&amp;', '&')
             if candidate:
                 abs_cand = urljoin(fetch_url, candidate)
                 image_dict[abs_cand] = True
-                
+
         # Regex scanner matching phinf URLs
         fallback_regexes = [
             re.compile(r'https?://webtoon-phinf\.pstatic\.net/[^"\'\s>]+', re.IGNORECASE),
@@ -1212,7 +1212,7 @@ async def scrape_images_from_url(
             for m in rx.finditer(search_block):
                  img = m.group(0).replace('\\u002F', '/').replace('\\', '').replace('&amp;', '&')
                  image_dict[urljoin(fetch_url, img)] = True
-                 
+
     if not image_dict:
         logger.info("[Scraper] No images found with standard HTML fetch. Initializing Playwright browser crawling fallback...")
         html = await try_fetch_with_playwright(
@@ -1226,17 +1226,17 @@ async def scrape_images_from_url(
             meta = extract_metadata(html, fetch_url)
             if meta:
                 scraped_metadata_cache[fetch_url] = meta
-                
+
             bs_imgs = parse_with_bs4(html, fetch_url)
             if bs_imgs:
                 logger.info(f"[Scraper] Found {len(bs_imgs)} images using BS4 after Playwright render.")
             for img in bs_imgs:
                 image_dict[img] = True
-                
+
             nuxt_imgs = extract_images_from_nuxt_payload(html)
             for img in nuxt_imgs:
                 image_dict[urljoin(fetch_url, img)] = True
-                
+
             if not image_dict:
                 img_regex = re.compile(r'<img\s+([^>]+)>', re.IGNORECASE)
                 for m in img_regex.finditer(html):
@@ -1250,7 +1250,7 @@ async def scrape_images_from_url(
 
     raw_images = list(image_dict.keys())
     filtered_images = []
-    
+
     # Blacklist filter check
     for img in raw_images:
         lower = img.lower()
@@ -1259,18 +1259,18 @@ async def scrape_images_from_url(
         if 'type=' in lower and 'type=q90' not in lower:
             continue
         filtered_images.append(img)
-    
+
     if limit:
         filtered_images = filtered_images[:limit]
-        
+
     logger.info(f"[Scraper] Final parsed panel candidates count: {len(filtered_images)} (elapsed: {int((time.time() - start_time)*1000)}ms)")
-    
+
     if not filtered_images:
         return []
-        
+
     # Save cache
     save_sqlite_cache(fetch_url, filtered_images)
-    
+
     return [f"/api/proxy-image?url={quote(img)}" for img in filtered_images]
 
 
@@ -1284,12 +1284,12 @@ async def scrape_webtoon_episodes(
     """
     Scrapes episode metadata from WEBTOON series list page.
     Extracts: episode number, title, date, thumbnail, episode URL.
-    
+
     Args:
         series_url: WEBTOON series URL or just the title_no parameter
         title_no: Override series ID if URL doesn't contain it
         max_episodes: Limit total episodes to scrape
-        
+
     Returns:
         Dict with series metadata and list of episodes
     """
@@ -1298,9 +1298,9 @@ async def scrape_webtoon_episodes(
     except ImportError:
         logger.error("[Episode Scraper] Playwright not installed")
         return {"success": False, "error": "Playwright not available"}
-    
+
     logger.info(f"[Episode Scraper] Starting episode list scrape: {series_url}")
-    
+
     # Parse URL to get title_no
     if not title_no:
         # Extract from URL if not provided
@@ -1313,10 +1313,10 @@ async def scrape_webtoon_episodes(
             path_parts = [p for p in parsed.path.split('/') if p]
             if len(path_parts) >= 2:
                 title_no = path_parts[1].split('?')[0]
-    
+
     if not title_no:
         return {"success": False, "error": "Could not extract title_no from URL"}
-    
+
     # Check cache first
     cache_mgr = get_episode_cache()
     cached = cache_mgr.get_episodes(title_no)
@@ -1330,7 +1330,7 @@ async def scrape_webtoon_episodes(
             "episodes": cached.get("episodes", []),
             "from_cache": True
         }
-    
+
     # Determine candidate fetch URLs. If a full URL provided, use it directly.
     candidate_urls = []
     if series_url and series_url.startswith("http"):
@@ -1359,17 +1359,17 @@ async def scrape_webtoon_episodes(
             break
         else:
             logger.info(f"[Episode Scraper] Fetch returned no/short HTML for: {test_url}")
-    
+
     if not html:
         logger.warning(f"[Episode Scraper] Failed to fetch episode list HTML")
         return {"success": False, "error": "Failed to fetch episode list"}
-    
+
     # Extract series metadata
     series_metadata = extract_metadata(html, fetch_url)
-    
+
     # Parse episodes from HTML
     episodes = []
-    
+
     if not BeautifulSoup:
         logger.error("[Episode Scraper] BeautifulSoup not available")
         return {
@@ -1377,10 +1377,10 @@ async def scrape_webtoon_episodes(
             "error": "BeautifulSoup not available",
             "series": series_metadata
         }
-    
+
     try:
         soup = BeautifulSoup(html, 'html.parser')
-        
+
         # WEBTOON episode list selectors
         episode_selectors = [
             '.episode_lst li',  # Main episode list item
@@ -1389,7 +1389,7 @@ async def scrape_webtoon_episodes(
             '[data-episode-no]',
             '.ep_item'
         ]
-        
+
         episode_container = None
         for sel in episode_selectors:
             items = soup.select(sel)
@@ -1397,37 +1397,37 @@ async def scrape_webtoon_episodes(
                 logger.info(f"[Episode Scraper] Found {len(items)} episodes with selector: {sel}")
                 episode_container = items
                 break
-        
+
         if not episode_container:
             logger.warning("[Episode Scraper] Could not find episode container")
             # Try to find any links that look like episodes
             all_links = soup.find_all('a')
             logger.info(f"[Episode Scraper] Found {len(all_links)} total links, analyzing...")
-            
+
             for link in all_links:
                 href = link.get('href', '')
                 if 'episode_no=' in href or '/episode/' in href:
                     episode_container = [link]
                     break
-        
+
         # Extract episode data
         for idx, ep_elem in enumerate(episode_container or []):
             if max_episodes and len(episodes) >= max_episodes:
                 break
-            
+
             try:
                 # Extract episode number
                 ep_no_elem = ep_elem.find(attrs={'class': re.compile(r'ep.*no|episode.*no', re.I)})
                 ep_no = ep_no_elem.get_text(strip=True) if ep_no_elem else f"Episode {idx + 1}"
-                
+
                 # Extract episode title
                 title_elem = ep_elem.find(attrs={'class': re.compile(r'title|ep.*title|subject', re.I)})
                 ep_title = title_elem.get_text(strip=True) if title_elem else ep_no
-                
+
                 # Extract episode date
                 date_elem = ep_elem.find(attrs={'class': re.compile(r'date|time|upload', re.I)})
                 ep_date = date_elem.get_text(strip=True) if date_elem else ""
-                
+
                 # Extract thumbnail
                 img_elem = ep_elem.find('img')
                 thumbnail = ""
@@ -1435,7 +1435,7 @@ async def scrape_webtoon_episodes(
                     thumbnail = img_elem.get('src') or img_elem.get('data-src') or img_elem.get('data-lazy-src')
                     if thumbnail:
                         thumbnail = urljoin(fetch_url, thumbnail)
-                
+
                 # Extract episode link
                 link_elem = ep_elem.find('a')
                 ep_url = ""
@@ -1443,7 +1443,7 @@ async def scrape_webtoon_episodes(
                     ep_url = link_elem.get('href', '')
                     if ep_url:
                         ep_url = urljoin(fetch_url, ep_url)
-                
+
                 # Extract ratings (new enhancement)
                 rating = None
                 likes = None
@@ -1457,14 +1457,14 @@ async def scrape_webtoon_episodes(
                             rating = float(rating_match.group(1))
                         except ValueError:
                             pass
-                
+
                 likes_elem = ep_elem.find(attrs={'class': re.compile(r'likes?|thumbs?up|favorites?', re.I)})
                 if likes_elem:
                     likes_text = likes_elem.get_text(strip=True)
                     likes_match = re.search(r'(\d+(?:[KMB])?)', likes_text)
                     if likes_match:
                         likes = likes_match.group(1)
-                
+
                 episode_data = {
                     "number": ep_no,
                     "title": ep_title,
@@ -1475,21 +1475,21 @@ async def scrape_webtoon_episodes(
                     "rating": rating,
                     "likes": likes
                 }
-                
+
                 episodes.append(episode_data)
                 logger.debug(f"[Episode Scraper] Extracted: {ep_no} - {ep_title} (rating: {rating})")
-                
+
             except Exception as e:
                 logger.debug(f"[Episode Scraper] Error parsing episode {idx}: {e}")
                 continue
-        
+
         logger.info(f"[Episode Scraper] Successfully extracted {len(episodes)} episodes")
-        
+
         # Cache the episodes
         cache_mgr = get_episode_cache()
         genre = series_metadata.get("genre") if series_metadata else None
         cache_mgr.save_episodes(title_no, episodes, series_metadata, genre, ttl_hours=24)
-        
+
         return {
             "success": True,
             "series": series_metadata,
@@ -1498,7 +1498,7 @@ async def scrape_webtoon_episodes(
             "total_episodes": len(episodes),
             "episodes": episodes
         }
-        
+
     except Exception as e:
         logger.error(f"[Episode Scraper] Parsing error: {e}")
         return {
@@ -1521,7 +1521,7 @@ async def scrape_webtoon_episodes_advanced(
 ) -> Dict[str, Any]:
     """
     Advanced episode scraper with pagination, ratings, sorting, and caching.
-    
+
     Args:
         series_url: WEBTOON series URL
         title_no: Series ID override
@@ -1532,20 +1532,20 @@ async def scrape_webtoon_episodes_advanced(
         sort_by: Sorting preference (latest, oldest, rating, likes)
     """
     from urllib.parse import urlparse, parse_qs, urljoin
-    
+
     # First, get all episodes using base scraper
     result = await scrape_webtoon_episodes(
         series_url=series_url,
         title_no=title_no,
         max_episodes=None  # Get all first
     )
-    
+
     if not result.get("success"):
         return result
-    
+
     episodes = result.get("episodes", [])
     title_no = result.get("title_no")
-    
+
     # Apply sorting
     if sort_by == "oldest":
         episodes = list(reversed(episodes))
@@ -1553,29 +1553,29 @@ async def scrape_webtoon_episodes_advanced(
         episodes.sort(key=lambda e: e.get("rating") or 0, reverse=True)
     elif sort_by == "likes" and include_ratings:
         episodes.sort(key=lambda e: e.get("likes") or "0", reverse=True)
-    
+
     # Apply max_episodes limit if specified (before pagination)
     if max_episodes:
         episodes = episodes[:max_episodes]
-    
+
     # Apply pagination
     total_episodes = len(episodes)
-    
+
     # If no per_page specified or we want all, return all on page 1
     if not per_page or per_page <= 0:
         per_page = total_episodes if total_episodes > 0 else 1
-    
+
     total_pages = max(1, (total_episodes + per_page - 1) // per_page)
-    
+
     if page < 1:
         page = 1
     if page > total_pages:
         page = total_pages
-    
+
     start_idx = (page - 1) * per_page
     end_idx = start_idx + per_page
     paginated_episodes = episodes[start_idx:end_idx]
-    
+
     result["episodes"] = paginated_episodes
     result["pagination"] = {
         "page": page,
@@ -1586,9 +1586,9 @@ async def scrape_webtoon_episodes_advanced(
         "has_prev": page > 1
     }
     result["sort_by"] = sort_by
-    
+
     logger.info(f"[Episode Scraper] Pagination: page {page}/{total_pages}, returned {len(paginated_episodes)} episodes")
-    
+
     return result
 
 
@@ -1599,11 +1599,11 @@ async def scrape_webtoon_episodes_paginated(
     """
     Scrape episodes with built-in pagination handler.
     Automatically handles large series (100+ episodes).
-    
+
     Args:
         title_no: Series ID
         max_episodes: Maximum episodes to fetch across all pages
-        
+
     Returns:
         All episodes from all pages, up to max_episodes limit
     """
@@ -1611,9 +1611,9 @@ async def scrape_webtoon_episodes_paginated(
     page = 1
     per_page = 100
     series_metadata = None
-    
+
     logger.info(f"[Paginated Scraper] Starting multi-page scrape for title_no={title_no}")
-    
+
     while True:
         result = await scrape_webtoon_episodes_advanced(
             series_url="",
@@ -1622,31 +1622,31 @@ async def scrape_webtoon_episodes_paginated(
             per_page=per_page,
             include_ratings=True
         )
-        
+
         if not result.get("success"):
             logger.warning(f"[Paginated Scraper] Page {page} failed, stopping pagination")
             break
-        
+
         if series_metadata is None:
             series_metadata = result.get("series")
-        
+
         page_episodes = result.get("episodes", [])
         all_episodes.extend(page_episodes)
-        
+
         pagination = result.get("pagination", {})
         logger.info(f"[Paginated Scraper] Page {page}: fetched {len(page_episodes)} episodes, total now {len(all_episodes)}")
-        
+
         # Check if we've reached the limit
         if max_episodes and len(all_episodes) >= max_episodes:
             all_episodes = all_episodes[:max_episodes]
             break
-        
+
         # Check if there are more pages
         if not pagination.get("has_next"):
             break
-        
+
         page += 1
-    
+
     return {
         "success": True,
         "series": series_metadata,
@@ -1663,11 +1663,11 @@ async def batch_scrape_series(
 ) -> Dict[str, Any]:
     """
     Batch scrape multiple WEBTOON series.
-    
+
     Args:
         series_list: List of {"url": "...", "title_no": "..."} or {"title_no": "..."}
         max_episodes_per_series: Max episodes per series
-    
+
     Returns:
         Aggregated results with success/failure counts
     """
@@ -1677,19 +1677,19 @@ async def batch_scrape_series(
         "failed": 0,
         "series": []
     }
-    
+
     logger.info(f"[Batch Scraper] Starting batch scrape of {len(series_list)} series")
-    
+
     for idx, series_info in enumerate(series_list):
         try:
             logger.info(f"[Batch Scraper] Scraping {idx + 1}/{len(series_list)}")
-            
+
             result = await scrape_webtoon_episodes(
                 series_url=series_info.get("url", ""),
                 title_no=series_info.get("title_no"),
                 max_episodes=max_episodes_per_series
             )
-            
+
             if result.get("success"):
                 results["successful"] += 1
                 results["series"].append({
@@ -1704,7 +1704,7 @@ async def batch_scrape_series(
                     "title_no": series_info.get("title_no"),
                     "error": result.get("error")
                 })
-                
+
         except Exception as e:
             logger.error(f"[Batch Scraper] Series {idx} failed: {e}")
             results["failed"] += 1
@@ -1712,7 +1712,7 @@ async def batch_scrape_series(
                 "title_no": series_info.get("title_no"),
                 "error": str(e)
             })
-    
+
     logger.info(f"[Batch Scraper] Completed: {results['successful']} successful, {results['failed']} failed")
     return results
 
@@ -1721,23 +1721,23 @@ async def batch_scrape_series(
 
 if __name__ == "__main__":
     import argparse
-    
+
     parser = argparse.ArgumentParser(description="Sonikoma Webtoon Scraper CLI tool")
     parser.add_argument("--url", required=True, help="URL or local ZIP/CBZ path to scrape panels from")
     parser.add_argument("--source", default=None, help="Referer source identifier override (e.g. webcomicsapp)")
     parser.add_argument("--limit", type=int, default=None, help="Limit maximum extracted panels count")
     parser.add_argument("--bypass_cache", action="store_true", help="Bypass local SQLite session cache reading")
     parser.add_argument("--cookies", default=None, help="Custom cookies payload string formatted as key=val; key2=val2")
-    
+
     args = parser.parse_args()
-    
+
     parsed_cookies = {}
     if args.cookies:
         for item in args.cookies.split(';'):
             if '=' in item:
                 k, v = item.split('=', 1)
                 parsed_cookies[k.strip()] = v.strip()
-                
+
     # Run the scraping routine synchronously
     try:
         urls = asyncio.run(scrape_images_from_url(

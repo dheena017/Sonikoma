@@ -315,6 +315,13 @@ def init_db() -> None:
         except Exception:
             pass
 
+        try:
+            cursor.execute("ALTER TABLE chapters ADD COLUMN audio_settings TEXT")
+            conn.commit()
+            logger.info("[Database] Migration: added 'audio_settings' column to 'chapters' table.")
+        except Exception:
+            pass
+
         # Create missing indexes for slugs
         try:
             cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_series_slug ON series(slug)")
@@ -1547,6 +1554,20 @@ def insert_project(data: Dict[str, Any]) -> None:
     finally:
         conn.close()
 
+def _parse_audio_settings(proj_dict: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    if not proj_dict:
+        return None
+    audio_set = proj_dict.get("audio_settings")
+    if isinstance(audio_set, str) and audio_set.strip():
+        import json
+        try:
+            proj_dict["audio_settings"] = json.loads(audio_set)
+        except Exception:
+            proj_dict["audio_settings"] = None
+    elif not audio_set:
+        proj_dict["audio_settings"] = None
+    return proj_dict
+
 def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
     """Get all projects ordered by most recent first."""
     conn = get_db_connection()
@@ -1556,7 +1577,7 @@ def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
                 SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                        c.episode_number AS episode, c.status, c.panels_count, c.video_url,
                        c.created_at, c.updated_at, s.user_id, s.id AS series_id,
-                       s.slug AS series_slug, c.slug AS chapter_slug
+                       s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings
                 FROM chapters c
                 JOIN series s ON c.series_id = s.id
                 WHERE s.user_id = ?
@@ -1567,12 +1588,12 @@ def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
                 SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                        c.episode_number AS episode, c.status, c.panels_count, c.video_url,
                        c.created_at, c.updated_at, s.user_id, s.id AS series_id,
-                       s.slug AS series_slug, c.slug AS chapter_slug
+                       s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings
                 FROM chapters c
                 JOIN series s ON c.series_id = s.id
                 ORDER BY c.created_at DESC
             """).fetchall()
-        return [dict(r) for r in rows]
+        return [_parse_audio_settings(dict(r)) for r in rows]
     finally:
         conn.close()
 
@@ -1584,12 +1605,12 @@ def get_project(project_id: str) -> Optional[Dict[str, Any]]:
             SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                    c.episode_number AS episode, c.status, c.panels_count, c.video_url,
                    c.created_at, c.updated_at, s.user_id, s.id AS series_id,
-                   s.slug AS series_slug, c.slug AS chapter_slug
+                   s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings
             FROM chapters c
             JOIN series s ON c.series_id = s.id
             WHERE c.id = ?
         """, (project_id,)).fetchone()
-        return dict(row) if row else None
+        return _parse_audio_settings(dict(row)) if row else None
     finally:
         conn.close()
 
@@ -1601,12 +1622,12 @@ def get_project_by_slug(chapter_slug: str) -> Optional[Dict[str, Any]]:
             SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                    c.episode_number AS episode, c.status, c.panels_count, c.video_url,
                    c.created_at, c.updated_at, s.user_id, s.id AS series_id,
-                   s.slug AS series_slug, c.slug AS chapter_slug
+                   s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings
             FROM chapters c
             JOIN series s ON c.series_id = s.id
             WHERE c.slug = ?
         """, (chapter_slug,)).fetchone()
-        return dict(row) if row else None
+        return _parse_audio_settings(dict(row)) if row else None
     finally:
         conn.close()
 
@@ -1694,6 +1715,13 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
             if 'panels_count' in updates:
                 chapter_set_parts.append("panels_count = ?")
                 chapter_params.append(updates['panels_count'])
+            if 'audio_settings' in updates:
+                chapter_set_parts.append("audio_settings = ?")
+                import json
+                val = updates['audio_settings']
+                if isinstance(val, (dict, list)):
+                    val = json.dumps(val)
+                chapter_params.append(val)
 
             if chapter_set_parts:
                 chapter_set_parts.append("updated_at = datetime('now')")
@@ -1780,7 +1808,7 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                 for p in panels:
                     if p.get('image_url'): new_urls.add(unwrap_proxy_url(p.get('image_url')))
                     if p.get('audio_url'): new_urls.add(unwrap_proxy_url(p.get('audio_url')))
-                
+
                 deleted_urls = old_urls - new_urls
                 for url in deleted_urls:
                     cleanup_cached_url(url)
@@ -1814,16 +1842,16 @@ def delete_project(project_id: str) -> None:
         for r in rows:
             if r['image_url']: panel_urls.append(r['image_url'])
             if r['audio_url']: panel_urls.append(r['audio_url'])
-            
+
         chap = conn.execute('SELECT video_url FROM chapters WHERE id = ?', (project_id,)).fetchone()
-        
+
         conn.execute('DELETE FROM chapters WHERE id = ?', (project_id,))
         conn.commit()
-        
+
         # Clean up cached panel files
         for url in panel_urls:
             cleanup_cached_url(url)
-            
+
         # Clean up compiled video file
         if chap and chap['video_url']:
             video_path = os.path.abspath(os.path.join(_BACKEND_ROOT, 'public', chap['video_url'].lstrip('/')))
@@ -1842,24 +1870,24 @@ def delete_series(series_id: str) -> None:
     try:
         # Fetch all panel URLs and compiled video URLs under this series
         rows = conn.execute("""
-            SELECT image_url, audio_url 
-            FROM panels 
+            SELECT image_url, audio_url
+            FROM panels
             WHERE chapter_id IN (SELECT id FROM chapters WHERE series_id = ?)
         """, (series_id,)).fetchall()
         panel_urls = []
         for r in rows:
             if r['image_url']: panel_urls.append(r['image_url'])
             if r['audio_url']: panel_urls.append(r['audio_url'])
-            
+
         chaps = conn.execute('SELECT video_url FROM chapters WHERE series_id = ?', (series_id,)).fetchall()
-        
+
         conn.execute('DELETE FROM series WHERE id = ?', (series_id,))
         conn.commit()
-        
+
         # Clean up cached panel files
         for url in panel_urls:
             cleanup_cached_url(url)
-            
+
         # Clean up compiled video files
         for c in chaps:
             if c['video_url']:
@@ -2260,25 +2288,25 @@ def get_global_analytics() -> dict:
         # User Growth
         total_users = conn.execute('SELECT COUNT(*) as c FROM users').fetchone()
         new_users_today = conn.execute("SELECT COUNT(*) as c FROM users WHERE date(created_at) = date('now')").fetchone()
-        
+
         # Credit Velocity
         total_credits_assigned = conn.execute('SELECT SUM(credits) as c FROM users').fetchone()
-        
+
         # Compute Time (Total duration of panels in completed chapters)
         duration_row = conn.execute('''
-            SELECT SUM(p.duration) as d FROM panels p 
-            JOIN chapters c ON p.chapter_id = c.id 
+            SELECT SUM(p.duration) as d FROM panels p
+            JOIN chapters c ON p.chapter_id = c.id
             WHERE c.status = 'completed'
         ''').fetchone()
-        
+
         # Content Volume
         total_series = conn.execute('SELECT COUNT(*) as c FROM series').fetchone()
         total_chapters = conn.execute('SELECT COUNT(*) as c FROM chapters').fetchone()
-        
+
         # Chart data: Signups by Day (last 7 days)
         signups_chart = conn.execute('''
-            SELECT date(created_at) as date, COUNT(*) as count 
-            FROM users 
+            SELECT date(created_at) as date, COUNT(*) as count
+            FROM users
             WHERE created_at >= date('now', '-7 days')
             GROUP BY date(created_at)
             ORDER BY date(created_at) ASC
@@ -2286,8 +2314,8 @@ def get_global_analytics() -> dict:
 
         # Chart data: Projects by Day (last 7 days)
         projects_chart = conn.execute('''
-            SELECT date(created_at) as date, COUNT(*) as count 
-            FROM series 
+            SELECT date(created_at) as date, COUNT(*) as count
+            FROM series
             WHERE created_at >= date('now', '-7 days')
             GROUP BY date(created_at)
             ORDER BY date(created_at) ASC
@@ -2305,11 +2333,11 @@ def get_global_analytics() -> dict:
 
         # Top Creators (limit to 5)
         top_creators_rows = conn.execute('''
-            SELECT u.full_name, u.username, COUNT(s.id) as count 
-            FROM users u 
-            JOIN series s ON u.id = s.user_id 
-            GROUP BY u.id 
-            ORDER BY count DESC 
+            SELECT u.full_name, u.username, COUNT(s.id) as count
+            FROM users u
+            JOIN series s ON u.id = s.user_id
+            GROUP BY u.id
+            ORDER BY count DESC
             LIMIT 5
         ''').fetchall()
         top_creators = [dict(r) for r in top_creators_rows]
@@ -2317,8 +2345,8 @@ def get_global_analytics() -> dict:
         # Avg duration of chapters (Render Time)
         avg_duration_row = conn.execute('''
             SELECT AVG(duration_sum) as avg_d FROM (
-                SELECT SUM(p.duration) as duration_sum 
-                FROM panels p 
+                SELECT SUM(p.duration) as duration_sum
+                FROM panels p
                 GROUP BY p.chapter_id
             )
         ''').fetchone()
@@ -2359,15 +2387,15 @@ def get_global_analytics() -> dict:
         active_subscriptions = 0
         if has_invoices:
             mrr_row = conn.execute('''
-                SELECT SUM(amount) as s FROM user_invoices 
-                WHERE status IN ('paid', 'completed', 'Paid', 'Completed') 
+                SELECT SUM(amount) as s FROM user_invoices
+                WHERE status IN ('paid', 'completed', 'Paid', 'Completed')
                 AND datetime(created_at) >= datetime('now', '-30 days')
             ''').fetchone()
             mrr = round(mrr_row['s'], 2) if mrr_row and mrr_row['s'] else 0.0
 
             active_subs_row = conn.execute('''
-                SELECT COUNT(DISTINCT user_id) as c FROM user_invoices 
-                WHERE status IN ('paid', 'completed', 'Paid', 'Completed') 
+                SELECT COUNT(DISTINCT user_id) as c FROM user_invoices
+                WHERE status IN ('paid', 'completed', 'Paid', 'Completed')
                 AND datetime(created_at) >= datetime('now', '-30 days')
             ''').fetchone()
             active_subscriptions = active_subs_row['c'] if active_subs_row else 0
@@ -2772,4 +2800,3 @@ def update_series_admin(series_id: str, updates: dict):
         conn.commit()
     finally:
         conn.close()
-

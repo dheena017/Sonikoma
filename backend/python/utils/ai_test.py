@@ -51,7 +51,7 @@ def pad_cell(content: str, width: int, align: str = 'left') -> str:
 
 async def test_single_gemini(model_name: str) -> dict:
     from config.clients import genai_client, call_gemini_with_retry
-    
+
     start_time = time.monotonic()
     try:
         response = await asyncio.wait_for(
@@ -69,20 +69,20 @@ async def test_single_gemini(model_name: str) -> dict:
         reply = (response.text or "").strip().replace("\n", " ")
         if len(reply) > 14:
             reply = reply[:11] + "..."
-            
+
         usage = getattr(response, 'usage_metadata', None)
         tokens_str = "-"
         if usage:
             p_tokens = getattr(usage, 'prompt_token_count', 0)
             c_tokens = getattr(usage, 'candidates_token_count', 0)
             tokens_str = f"{p_tokens} / {c_tokens}"
-            
+
         display_name = model_name
         if model_name == "gemini-2.0-flash-lite":
             display_name = "gemini-2.0-fl-lite"
         elif model_name == "gemini-3.1-flash-lite":
             display_name = "gemini-3.1-fl-lite"
-            
+
         return {
             "model": display_name,
             "status": "\x1b[32mOK\x1b[0m",  # Green
@@ -122,7 +122,7 @@ async def test_single_gemini(model_name: str) -> dict:
 
 async def test_single_hf() -> dict:
     from config.clients import hf_client
-    
+
     start_time = time.monotonic()
     model_name = 'mistralai/Mistral-7B-Instruct-v0.3'
     try:
@@ -171,18 +171,18 @@ async def test_single_hf() -> dict:
 
 async def run_ai_connection_tests():
     from config.clients import ai_initialized, hf_client
-    
+
     gemini_key = os.getenv("GEMINI_API_KEY")
     hf_key = os.getenv("HUGGINGFACE_API_KEY")
-    
+
     if not gemini_key and not hf_key:
         logger.info("Skipping AI startup tests: No API keys configured.")
         return
-        
+
     logger.info("Initializing sequential connection tests for configured AI models...")
-    
+
     results = []
-    
+
     if gemini_key and ai_initialized:
         gemini_models = [
             "gemini-2.5-flash",
@@ -200,26 +200,26 @@ async def run_ai_connection_tests():
             # Add a small delay between requests to prevent hitting concurrency rate limits
             if idx < len(gemini_models) - 1:
                 await asyncio.sleep(0.8)
-            
+
     if hf_key and hf_client:
         if results:
             await asyncio.sleep(0.8)
         res = await test_single_hf()
         results.append(res)
-        
+
     if not results:
         logger.warning("No AI clients were successfully initialized. Skipping tests.")
         return
-    
+
     CLR_BORDER = "\x1b[32m"  # Green border to match startup banner
     CLR_RESET = "\x1b[0m"
-    
+
     border_top = CLR_BORDER + "╔" + ("═" * 21) + "╦" + ("═" * 10) + "╦" + ("═" * 9) + "╦" + ("═" * 11) + "╦" + ("═" * 16) + "╗" + CLR_RESET
     border_mid = CLR_BORDER + "╠" + ("═" * 21) + "╬" + ("═" * 10) + "╬" + ("═" * 9) + "╬" + ("═" * 11) + "╬" + ("═" * 16) + "╣" + CLR_RESET
     border_bot = CLR_BORDER + "╚" + ("═" * 21) + "╩" + ("═" * 10) + "╩" + ("═" * 9) + "╩" + ("═" * 11) + "╩" + ("═" * 16) + "╝" + CLR_RESET
-    
+
     print("\n" + border_top)
-    
+
     header_row = (
         CLR_BORDER + "║ " + CLR_RESET + pad_cell("\x1b[1;36mModel\x1b[0m", 19) + CLR_BORDER + " ║ " + CLR_RESET +
         pad_cell("\x1b[1;36mStatus\x1b[0m", 8) + CLR_BORDER + " ║ " + CLR_RESET +
@@ -229,7 +229,7 @@ async def run_ai_connection_tests():
     )
     print(header_row)
     print(border_mid)
-    
+
     for r in results:
         row_str = (
             CLR_BORDER + "║ " + CLR_RESET + pad_cell(r["model"], 19) + CLR_BORDER + " ║ " + CLR_RESET +
@@ -239,7 +239,7 @@ async def run_ai_connection_tests():
             pad_cell(r["details"], 14) + CLR_BORDER + " ║" + CLR_RESET
         )
         print(row_str)
-        
+
     print(border_bot + "\n")
 
 
@@ -248,7 +248,7 @@ if __name__ == "__main__":
     import os
     # Add backend/python to sys.path
     sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-    
+
     from dotenv import load_dotenv
     # Load dotenv from project root
     PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
@@ -257,10 +257,10 @@ if __name__ == "__main__":
         load_dotenv(dotenv_path=dotenv_path)
     else:
         load_dotenv()
-        
+
     async def main():
         # Setup basic logging to stdout so we can see any warnings/errors
         logging.basicConfig(level=logging.INFO)
         await run_ai_connection_tests()
-        
+
     asyncio.run(main())

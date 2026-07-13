@@ -128,7 +128,7 @@ class LibrosaEngine:
         logger.info(f"Extracting features from {audio_path}...")
 
         # Asynchronously compute all features
-        (energy, mfcc, spectral_centroid, spectral_bandwidth, 
+        (energy, mfcc, spectral_centroid, spectral_bandwidth,
          spectral_rolloff, zcr, chroma, tempo, beats) = await asyncio.gather(
             asyncio.to_thread(self._compute_energy, y),
             asyncio.to_thread(self._compute_mfcc, y),

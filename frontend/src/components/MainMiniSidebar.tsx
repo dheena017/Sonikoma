@@ -16,6 +16,7 @@ import {
   Shield,
   Zap,
   Database,
+  Mic,
 } from "lucide-react";
 import TooltipPortal from "./TooltipPortal";
 
@@ -52,6 +53,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
   const isShortcuts = currentPath.startsWith("/shortcuts");
   const isSettings = currentPath.startsWith("/settings");
   const isAdminPath = currentPath.startsWith("/admin");
+  const isAudioSettings = currentPath === "/workspace/audio-settings";
   const isProEditorPage =
     currentPath === "/editor" ||
     currentPath === "/editor/" ||
@@ -95,6 +97,19 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           icon: Layout,
           active: isWorkspace,
           onClick: handleNavigateToWorkspace,
+        },
+        {
+          label: "Audio & TTS",
+          icon: Mic,
+          active: isAudioSettings,
+          onClick: () => {
+            const activeProjId = projectId || localStorage.getItem("active_project_id");
+            if (activeProjId) {
+              navigateTo(`/workspace/audio-settings?id=${activeProjId}`);
+            } else {
+              navigateTo("/workspace/audio-settings");
+            }
+          },
         },
         {
           label: "Projects",

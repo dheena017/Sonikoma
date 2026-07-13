@@ -88,7 +88,7 @@ def remove_speech_bubbles(
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_size, kernel_size))
         closed_dark = cv2.morphologyEx(dark_mask, cv2.MORPH_CLOSE, kernel)
         text_contours, _ = cv2.findContours(closed_dark, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        
+
         region_mask = np.zeros_like(gray)
         for tc in text_contours:
             tx, ty, tw, th = cv2.boundingRect(tc)
@@ -96,7 +96,7 @@ def remove_speech_bubbles(
             if (width * height) * 0.0001 < t_area < (width * height) * 0.25:
                 if tw > 6 and th > 6:
                     cv2.drawContours(region_mask, [tc], -1, 255, -1)
-                    
+
         # Intersect region masks with dark letter strokes to build a tight text mask
         tight_text_strokes = cv2.bitwise_and(region_mask, dark_mask)
         if np.count_nonzero(tight_text_strokes) > 15:
@@ -123,7 +123,7 @@ def remove_speech_bubbles(
             out[mask == 255] = (0, 0, 0)
         else:
             out = cv2.inpaint(image, mask, inpaint_radius, cv2.INPAINT_TELEA)
-        
+
         cv2.imwrite(output_path, out)
     else:
         logger.info("[Speech Bubbles] No bubbles detected.")

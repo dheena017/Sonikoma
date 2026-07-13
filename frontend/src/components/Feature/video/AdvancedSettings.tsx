@@ -508,33 +508,6 @@ const AdvancedSettings = React.memo(
             </div>
 
             <div className="space-y-4">
-              {/* Dynamic Voice Select */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-neutral-400 flex items-center justify-between gap-1.5 font-mono">
-                  <span className="flex items-center gap-1.5">
-                    <Mic2 className="h-3.5 w-3.5 text-purple-400" />
-                    AI Voice Speaker Character
-                  </span>
-                  {loadingVoices && (
-                    <span className="text-[10px] text-purple-400 animate-pulse font-bold">
-                      Loading server voices...
-                    </span>
-                  )}
-                </label>
-                <select
-                  id="voice_select"
-                  value={voiceActor}
-                  onChange={(e) => setVoiceActor(e.target.value)}
-                  className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2 text-neutral-350 focus:border-purple-500 outline-none"
-                >
-                  {displayVoices.map((voice) => (
-                    <option key={voice.code} value={voice.code}>
-                      {voice.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
               {/* Music Select */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-neutral-400 flex items-center gap-1.5 font-mono">

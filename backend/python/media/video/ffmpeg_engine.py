@@ -219,7 +219,7 @@ class FFmpegEngine:
 
         try:
             await asyncio.to_thread(subprocess.run, cmd, capture_output=True, text=True, check=True, timeout=300)
-            
+
             # Find extracted files
             output_dir = os.path.dirname(output_pattern)
             base_name = os.path.basename(output_pattern).split("%")[0]
@@ -227,7 +227,7 @@ class FFmpegEngine:
                 os.path.join(output_dir, f) for f in os.listdir(output_dir)
                 if f.startswith(base_name) and f.endswith(('.png', '.jpg'))
             ])
-            
+
             logger.info(f"✓ Extracted {len(frames)} frames")
             return frames
         except Exception as e:
@@ -356,11 +356,11 @@ class FFmpegEngine:
 
         # Build concat demuxer for cuts
         concat_file = os.path.join(tempfile.gettempdir(), "cuts_list.txt")
-        
+
         with open(concat_file, "w") as f:
             for i, cut in enumerate(cuts):
                 segment_path = os.path.join(tempfile.gettempdir(), f"cut_segment_{i}.mp4")
-                
+
                 # Extract each segment
                 cmd = [
                     self.ffmpeg_path, "-y",
@@ -370,7 +370,7 @@ class FFmpegEngine:
                     "-c", "copy",
                     segment_path
                 ]
-                
+
                 await asyncio.to_thread(subprocess.run, cmd, capture_output=True, text=True, check=True, timeout=120)
                 f.write(f"file '{os.path.abspath(segment_path)}'\n")
 
@@ -420,12 +420,12 @@ class FFmpegEngine:
 
         # Video filter
         video_filter = f"setpts=PTS/{speed_factor}"
-        
+
         # Audio filter (with pitch preservation)
         audio_filter = f"atempo={speed_factor}" if speed_factor != 1.0 else None
 
         cmd = [self.ffmpeg_path, "-y", "-i", video_path]
-        
+
         if audio_filter:
             cmd.extend(["-filter:v", video_filter, "-filter:a", audio_filter])
         else:

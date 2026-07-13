@@ -21,6 +21,7 @@ import {
   Menu,
   Zap,
   Database,
+  Mic,
 } from "lucide-react";
 
 import { useThemeMode } from "../hooks/useThemeMode";
@@ -86,6 +87,7 @@ const SidebarInner = ({
   const isShortcuts = currentPath === "/shortcuts";
   const isAIModels = currentPath === "/ai-models";
   const isProjects = currentPath === "/projects";
+  const isAudioSettings = currentPath === "/workspace/audio-settings";
 
   const activeProjectId = useMemo(() => {
     const params = new URLSearchParams(window.location.search);
@@ -157,6 +159,20 @@ const SidebarInner = ({
           icon: Layout,
           active: isWorkspace,
           onClick: handleNavigateToWorkspace,
+          enabled: true,
+        },
+        {
+          label: "Audio & TTS",
+          icon: Mic,
+          active: isAudioSettings,
+          onClick: () => {
+            const activeProjId = activeProjectId || projectId;
+            if (activeProjId) {
+              navigateTo(`/workspace/audio-settings?id=${activeProjId}`);
+            } else {
+              navigateTo("/workspace/audio-settings");
+            }
+          },
           enabled: true,
         },
         {
