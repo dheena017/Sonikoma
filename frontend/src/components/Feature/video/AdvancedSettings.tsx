@@ -14,6 +14,9 @@ import {
   Subtitles,
   Paintbrush,
   Disc,
+  Scissors,
+  MessageSquare,
+  Sparkle,
 } from "lucide-react";
 
 interface AdvancedSettingsProps {
@@ -35,6 +38,26 @@ interface AdvancedSettingsProps {
     type: "success" | "info" | "warning" | "error"
   ) => void;
   fetchWithInterceptor?: any;
+
+  // Dynamic AI Crop settings
+  cropSensitivity?: number;
+  setCropSensitivity?: (val: number) => void;
+  cropPaddingPx?: number;
+  setCropPaddingPx?: (val: number) => void;
+  cropFocusMode?: string;
+  setCropFocusMode?: (val: string) => void;
+  cropModel?: string;
+  setCropModel?: (val: string) => void;
+
+  // Dynamic Speech Bubble settings
+  bubbleSensitivity?: number;
+  setBubbleSensitivity?: (val: number) => void;
+  bubbleDilation?: number;
+  setBubbleDilation?: (val: number) => void;
+  bubbleEraseMethod?: string;
+  setBubbleEraseMethod?: (val: string) => void;
+  bubbleDetectionStyle?: string;
+  setBubbleDetectionStyle?: (val: string) => void;
 }
 
 interface WorkspacePreset {
@@ -49,6 +72,16 @@ interface WorkspacePreset {
   videoFormat?: "mp4" | "webm" | "mkv";
   backgroundStyle?: "black" | "white" | "transparent" | "blurred";
   subtitlesStyle?: "none" | "burn-in" | "soft";
+
+  // AI states
+  cropSensitivity?: number;
+  cropPaddingPx?: number;
+  cropFocusMode?: string;
+  cropModel?: string;
+  bubbleSensitivity?: number;
+  bubbleDilation?: number;
+  bubbleEraseMethod?: string;
+  bubbleDetectionStyle?: string;
 }
 
 const AdvancedSettings = React.memo(
@@ -68,6 +101,26 @@ const AdvancedSettings = React.memo(
     selectedSource = "",
     addNotification,
     fetchWithInterceptor,
+
+    // AI Crop Props (with local fallback if unpassed)
+    cropSensitivity = 30,
+    setCropSensitivity,
+    cropPaddingPx = 10,
+    setCropPaddingPx,
+    cropFocusMode = "standard",
+    setCropFocusMode,
+    cropModel = "gemini-2.0-flash-lite",
+    setCropModel,
+
+    // Speech Bubble Props (with local fallback if unpassed)
+    bubbleSensitivity = 50,
+    setBubbleSensitivity,
+    bubbleDilation = 5,
+    setBubbleDilation,
+    bubbleEraseMethod = "telea",
+    setBubbleEraseMethod,
+    bubbleDetectionStyle = "hybrid",
+    setBubbleDetectionStyle,
   }: AdvancedSettingsProps) => {
     const [presetName, setPresetName] = React.useState("");
 
@@ -144,6 +197,52 @@ const AdvancedSettings = React.memo(
       localStorage.setItem("ai_video_subtitles_style", subtitlesStyle);
     }, [subtitlesStyle]);
 
+    // Local states fallback if callbacks are not provided
+    const [localCropSensitivity, setLocalCropSensitivity] = React.useState(cropSensitivity);
+    const [localCropPaddingPx, setLocalCropPaddingPx] = React.useState(cropPaddingPx);
+    const [localCropFocusMode, setLocalCropFocusMode] = React.useState(cropFocusMode);
+    const [localCropModel, setLocalCropModel] = React.useState(cropModel);
+
+    const [localBubbleSensitivity, setLocalBubbleSensitivity] = React.useState(bubbleSensitivity);
+    const [localBubbleDilation, setLocalBubbleDilation] = React.useState(bubbleDilation > 0 ? bubbleDilation : 5);
+    const [localBubbleEraseMethod, setLocalBubbleEraseMethod] = React.useState(bubbleEraseMethod);
+    const [localBubbleDetectionStyle, setLocalBubbleDetectionStyle] = React.useState(bubbleDetectionStyle);
+
+    // Sync state changes back to parent setters if they exist
+    const handleCropSensitivityChange = (val: number) => {
+      setLocalCropSensitivity(val);
+      setCropSensitivity?.(val);
+    };
+    const handleCropPaddingChange = (val: number) => {
+      setLocalCropPaddingPx(val);
+      setCropPaddingPx?.(val);
+    };
+    const handleCropFocusChange = (val: string) => {
+      setLocalCropFocusMode(val);
+      setCropFocusMode?.(val);
+    };
+    const handleCropModelChange = (val: string) => {
+      setLocalCropModel(val);
+      setCropModel?.(val);
+    };
+
+    const handleBubbleSensitivityChange = (val: number) => {
+      setLocalBubbleSensitivity(val);
+      setBubbleSensitivity?.(val);
+    };
+    const handleBubbleDilationChange = (val: number) => {
+      setLocalBubbleDilation(val);
+      setBubbleDilation?.(val);
+    };
+    const handleBubbleEraseChange = (val: string) => {
+      setLocalBubbleEraseMethod(val);
+      setBubbleEraseMethod?.(val);
+    };
+    const handleBubbleDetectionChange = (val: string) => {
+      setLocalBubbleDetectionStyle(val);
+      setBubbleDetectionStyle?.(val);
+    };
+
     const [presets, setPresets] = React.useState<WorkspacePreset[]>(() => {
       try {
         const stored = localStorage.getItem("ai_comic_presets");
@@ -166,6 +265,14 @@ const AdvancedSettings = React.memo(
           videoFormat: "mp4",
           backgroundStyle: "black",
           subtitlesStyle: "burn-in",
+          cropSensitivity: 30,
+          cropPaddingPx: 10,
+          cropFocusMode: "standard",
+          cropModel: "gemini-2.0-flash-lite",
+          bubbleSensitivity: 50,
+          bubbleDilation: 5,
+          bubbleEraseMethod: "telea",
+          bubbleDetectionStyle: "hybrid",
         },
         {
           name: "B&W Manga Preset",
@@ -179,6 +286,14 @@ const AdvancedSettings = React.memo(
           videoFormat: "mp4",
           backgroundStyle: "white",
           subtitlesStyle: "none",
+          cropSensitivity: 40,
+          cropPaddingPx: 15,
+          cropFocusMode: "face",
+          cropModel: "local-opencv",
+          bubbleSensitivity: 60,
+          bubbleDilation: 3,
+          bubbleEraseMethod: "ns",
+          bubbleDetectionStyle: "yolo",
         },
       ];
     });
@@ -199,6 +314,14 @@ const AdvancedSettings = React.memo(
         videoFormat,
         backgroundStyle,
         subtitlesStyle,
+        cropSensitivity: localCropSensitivity,
+        cropPaddingPx: localCropPaddingPx,
+        cropFocusMode: localCropFocusMode,
+        cropModel: localCropModel,
+        bubbleSensitivity: localBubbleSensitivity,
+        bubbleDilation: localBubbleDilation,
+        bubbleEraseMethod: localBubbleEraseMethod,
+        bubbleDetectionStyle: localBubbleDetectionStyle,
       };
 
       const updatedPresets = [
@@ -232,6 +355,16 @@ const AdvancedSettings = React.memo(
       if (preset.backgroundStyle !== undefined) setBackgroundStyle(preset.backgroundStyle);
       if (preset.subtitlesStyle !== undefined) setSubtitlesStyle(preset.subtitlesStyle);
 
+      if (preset.cropSensitivity !== undefined) handleCropSensitivityChange(preset.cropSensitivity);
+      if (preset.cropPaddingPx !== undefined) handleCropPaddingChange(preset.cropPaddingPx);
+      if (preset.cropFocusMode !== undefined) handleCropFocusChange(preset.cropFocusMode);
+      if (preset.cropModel !== undefined) handleCropModelChange(preset.cropModel);
+
+      if (preset.bubbleSensitivity !== undefined) handleBubbleSensitivityChange(preset.bubbleSensitivity);
+      if (preset.bubbleDilation !== undefined) handleBubbleDilationChange(preset.bubbleDilation);
+      if (preset.bubbleEraseMethod !== undefined) handleBubbleEraseChange(preset.bubbleEraseMethod);
+      if (preset.bubbleDetectionStyle !== undefined) handleBubbleDetectionChange(preset.bubbleDetectionStyle);
+
       if (addNotification) {
         addNotification(`Loaded preset "${name}"`, "info");
       }
@@ -261,6 +394,14 @@ const AdvancedSettings = React.memo(
           videoFormat,
           backgroundStyle,
           subtitlesStyle,
+          cropSensitivity: localCropSensitivity,
+          cropPaddingPx: localCropPaddingPx,
+          cropFocusMode: localCropFocusMode,
+          cropModel: localCropModel,
+          bubbleSensitivity: localBubbleSensitivity,
+          bubbleDilation: localBubbleDilation,
+          bubbleEraseMethod: localBubbleEraseMethod,
+          bubbleDetectionStyle: localBubbleDetectionStyle,
         };
         const hash = btoa(JSON.stringify(stateObj));
         const shareUrl = `${window.location.origin}${window.location.pathname}?state=${hash}`;
@@ -336,7 +477,7 @@ const AdvancedSettings = React.memo(
                   id="voice_select"
                   value={voiceActor}
                   onChange={(e) => setVoiceActor(e.target.value)}
-                  className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2 text-neutral-300 focus:border-purple-500 outline-none"
+                  className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2 text-neutral-350 focus:border-purple-500 outline-none"
                 >
                   {displayVoices.map((voice) => (
                     <option key={voice.code} value={voice.code}>
@@ -356,7 +497,7 @@ const AdvancedSettings = React.memo(
                   id="bg_music_select"
                   value={musicTheme}
                   onChange={(e) => setMusicTheme(e.target.value)}
-                  className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2 text-neutral-300 focus:border-purple-500 outline-none"
+                  className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2 text-neutral-350 focus:border-purple-500 outline-none"
                 >
                   <option>Orchestral Battle Theme</option>
                   <option>Mysterious Ambience</option>
@@ -559,88 +700,289 @@ const AdvancedSettings = React.memo(
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Workspace Profiles & Themes */}
+        {/* RIGHT COLUMN: AI Smart Crop, Bubble settings, and Preset management */}
         <div className="space-y-6">
-          {/* Visual Themes Card */}
+          {/* Card 3: AI Panel Segmentation & Smart Crop Settings */}
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-4">
+            <div className="flex items-center gap-2 border-b border-neutral-800 pb-3">
+              <Scissors className="h-4 w-4 text-purple-400" />
+              <div>
+                <h3 className="font-bold text-sm text-white font-sans">
+                  AI Panel Segmentation & Smart Crop Settings
+                </h3>
+                <p className="text-[10px] text-neutral-400 font-mono">
+                  Fine-tune automated panel boundary detection and visual reframing focus
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {/* Crop Sensitivity */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-neutral-400 flex items-center gap-1.5 font-mono">
+                  <Sliders className="h-3.5 w-3.5 text-purple-400" />
+                  Panel Edge Detection Sensitivity
+                </label>
+                <div className="flex items-center gap-3 bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-1.5">
+                  <input
+                    type="range"
+                    min={10}
+                    max={90}
+                    step={5}
+                    value={localCropSensitivity}
+                    onChange={(e) => handleCropSensitivityChange(Number(e.target.value))}
+                    className="w-full accent-purple-500 bg-neutral-800 cursor-pointer"
+                  />
+                  <span className="text-xs font-mono text-[#dcdcdc] shrink-0 font-semibold w-10 text-right">
+                    {localCropSensitivity}%
+                  </span>
+                </div>
+              </div>
+
+              {/* Crop Padding */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-neutral-400 flex items-center gap-1.5 font-mono">
+                  <Sliders className="h-3.5 w-3.5 text-purple-400" />
+                  Safety Padding Margin (pixels)
+                </label>
+                <div className="flex items-center gap-3 bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-1.5">
+                  <input
+                    type="range"
+                    min={0}
+                    max={50}
+                    step={2}
+                    value={localCropPaddingPx}
+                    onChange={(e) => handleCropPaddingChange(Number(e.target.value))}
+                    className="w-full accent-purple-500 bg-neutral-800 cursor-pointer"
+                  />
+                  <span className="text-xs font-mono text-[#dcdcdc] shrink-0 font-semibold w-10 text-right">
+                    {localCropPaddingPx}px
+                  </span>
+                </div>
+              </div>
+
+              {/* Crop Focus Mode */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-neutral-400 flex items-center gap-1.5 font-mono">
+                  <Tv className="h-3.5 w-3.5 text-purple-400" />
+                  Smart Crop Framing Focus Mode
+                </label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {[
+                    { id: "standard", label: "Standard" },
+                    { id: "tight", label: "Tight Fit" },
+                    { id: "face", label: "Face Zoom" },
+                  ].map((modeItem) => (
+                    <button
+                      key={modeItem.id}
+                      onClick={() => handleCropFocusChange(modeItem.id)}
+                      className={`py-1.5 px-1 rounded-xl border text-[10px] text-center font-bold font-mono transition-all cursor-pointer ${
+                        localCropFocusMode === modeItem.id
+                          ? "bg-purple-950/20 border-purple-500 text-purple-300"
+                          : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
+                      }`}
+                    >
+                      {modeItem.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Crop Model */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-neutral-400 flex items-center gap-1.5 font-mono">
+                  <Sparkle className="h-3.5 w-3.5 text-purple-400" />
+                  AI Segmentation Backend Vision Engine
+                </label>
+                <select
+                  value={localCropModel}
+                  onChange={(e) => handleCropModelChange(e.target.value)}
+                  className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2 text-neutral-300 focus:border-purple-500 outline-none font-mono"
+                >
+                  <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash Lite (Cloud AI)</option>
+                  <option value="gemini-2.0-pro-exp">Gemini 2.0 Pro Experimental (High-precision)</option>
+                  <option value="local-opencv">Local OpenCV (Sub-second Edge Detection)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 4: Speech Bubble & OCR Erase Settings */}
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-4">
+            <div className="flex items-center gap-2 border-b border-neutral-800 pb-3">
+              <MessageSquare className="h-4 w-4 text-purple-400" />
+              <div>
+                <h3 className="font-bold text-sm text-white font-sans">
+                  Speech Bubble Detection & Text Eraser Settings
+                </h3>
+                <p className="text-[10px] text-neutral-400 font-mono">
+                  Configure text inpainting models and dialogue translation thresholds
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {/* Bubble Detection Style */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-neutral-400 flex items-center gap-1.5 font-mono">
+                  <Sparkles className="h-3.5 w-3.5 text-purple-400" />
+                  Dialogue Balloon Detection Method
+                </label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {[
+                    { id: "yolo", label: "YOLO Segment" },
+                    { id: "opencv", label: "OpenCV Mask" },
+                    { id: "hybrid", label: "AI Hybrid" },
+                  ].map((balloonItem) => (
+                    <button
+                      key={balloonItem.id}
+                      onClick={() => handleBubbleDetectionChange(balloonItem.id)}
+                      className={`py-1.5 px-1 rounded-xl border text-[10px] text-center font-bold font-mono transition-all cursor-pointer ${
+                        localBubbleDetectionStyle === balloonItem.id
+                          ? "bg-purple-950/20 border-purple-500 text-purple-300"
+                          : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
+                      }`}
+                    >
+                      {balloonItem.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Bubble Sensitivity */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-neutral-400 flex items-center gap-1.5 font-mono">
+                  <Sliders className="h-3.5 w-3.5 text-purple-400" />
+                  Dialogue Threshold Sensitivity
+                </label>
+                <div className="flex items-center gap-3 bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-1.5">
+                  <input
+                    type="range"
+                    min={10}
+                    max={90}
+                    step={5}
+                    value={localBubbleSensitivity}
+                    onChange={(e) => handleBubbleSensitivityChange(Number(e.target.value))}
+                    className="w-full accent-purple-500 bg-neutral-800 cursor-pointer"
+                  />
+                  <span className="text-xs font-mono text-[#dcdcdc] shrink-0 font-semibold w-10 text-right">
+                    {localBubbleSensitivity}%
+                  </span>
+                </div>
+              </div>
+
+              {/* Bubble Dilation */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-neutral-400 flex items-center gap-1.5 font-mono">
+                  <Sliders className="h-3.5 w-3.5 text-purple-400" />
+                  Erosion/Dilation Size (kernelpx)
+                </label>
+                <div className="flex items-center gap-3 bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-1.5">
+                  <input
+                    type="range"
+                    min={1}
+                    max={15}
+                    step={1}
+                    value={localBubbleDilation}
+                    onChange={(e) => handleBubbleDilationChange(Number(e.target.value))}
+                    className="w-full accent-purple-500 bg-neutral-800 cursor-pointer"
+                  />
+                  <span className="text-xs font-mono text-[#dcdcdc] shrink-0 font-semibold w-10 text-right">
+                    {localBubbleDilation}px
+                  </span>
+                </div>
+              </div>
+
+              {/* Bubble Erase Method */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-neutral-400 flex items-center gap-1.5 font-mono">
+                  <Paintbrush className="h-3.5 w-3.5 text-purple-400" />
+                  Text Inpaint Reconstruction Algorithm
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => handleBubbleEraseChange("telea")}
+                    className={`py-1.5 px-3 text-xs rounded-xl border text-center transition-all cursor-pointer font-bold font-mono ${
+                      localBubbleEraseMethod === "telea"
+                        ? "bg-purple-950/20 border-purple-500 text-purple-300"
+                        : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
+                    }`}
+                  >
+                    FMM (Telea)
+                  </button>
+                  <button
+                    onClick={() => handleBubbleEraseChange("ns")}
+                    className={`py-1.5 px-3 text-xs rounded-xl border text-center transition-all cursor-pointer font-bold font-mono ${
+                      localBubbleEraseMethod === "ns"
+                        ? "bg-purple-950/20 border-purple-500 text-purple-300"
+                        : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
+                    }`}
+                  >
+                    Navier-Stokes
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 5: Themes, Presets & Sharing */}
           <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-4">
             <div className="flex items-center gap-2 border-b border-neutral-800 pb-3">
               <Palette className="h-4 w-4 text-purple-400" />
               <div>
                 <h3 className="font-bold text-sm text-white font-sans">
-                  Custom visual UI Themes
+                  Themes, Presets & Session Sharing
                 </h3>
                 <p className="text-[10px] text-neutral-400 font-mono">
-                  Instantly customize visual color schemes
+                  Manage interface skins, load workspace bundles and export config hashes
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                {
-                  id: "obsidian",
-                  name: "Midnight Obsidian",
-                  color: "bg-purple-600",
-                },
-                {
-                  id: "cyberpunk",
-                  name: "Neon Cyberpunk",
-                  color: "bg-cyan-500",
-                },
-                { id: "slate", name: "Slate Minimal", color: "bg-zinc-400" },
-                {
-                  id: "indigo",
-                  name: "Electric Indigo",
-                  color: "bg-indigo-500",
-                },
-              ].map((theme) => (
-                <button
-                  key={theme.id}
-                  onClick={() => setActiveTheme(theme.id)}
-                  className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-left transition-all cursor-pointer font-bold text-xs ${
-                    activeTheme === theme.id
-                      ? "bg-neutral-800 border-purple-500/80 text-white shadow-md"
-                      : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-neutral-200"
-                  }`}
-                >
-                  <span
-                    className={`h-3 w-3 rounded-full ${theme.color} shrink-0`}
-                  />
-                  <span className="font-mono">{theme.name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Profile Presets Manager */}
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-4">
-            <div className="flex items-center gap-2 border-b border-neutral-800 pb-3">
-              <Save className="h-4 w-4 text-purple-400" />
-              <div>
-                <h3 className="font-bold text-sm text-white font-sans">
-                  Workspace Preset Profiles
-                </h3>
-                <p className="text-[10px] text-neutral-400 font-mono">
-                  Store and load config bundles instantly
-                </p>
+            <div className="space-y-4">
+              {/* Visual Themes selection */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-neutral-400 font-mono uppercase">
+                  Interface Visual Theme Choice
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { id: "obsidian", name: "Obsidian", color: "bg-purple-600" },
+                    { id: "cyberpunk", name: "Cyberpunk", color: "bg-cyan-500" },
+                    { id: "slate", name: "Slate", color: "bg-zinc-400" },
+                    { id: "indigo", name: "Indigo", color: "bg-indigo-500" },
+                  ].map((theme) => (
+                    <button
+                      key={theme.id}
+                      onClick={() => setActiveTheme(theme.id)}
+                      className={`flex items-center gap-2 p-2 rounded-xl border text-left transition-all cursor-pointer font-bold text-xs ${
+                        activeTheme === theme.id
+                          ? "bg-neutral-800 border-purple-500/80 text-white shadow-md"
+                          : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-neutral-200"
+                      }`}
+                    >
+                      <span className={`h-2.5 w-2.5 rounded-full ${theme.color} shrink-0`} />
+                      <span className="font-mono">{theme.name}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            <div className="space-y-3">
-              {/* Load preset */}
-              {presets.length > 0 && (
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-neutral-500 font-mono uppercase">
-                    Load Preset Profile
-                  </label>
-                  <div className="flex gap-2">
+              {/* Profiles preset manager */}
+              <div className="space-y-2 border-t border-neutral-800/60 pt-3">
+                {/* Load preset */}
+                {presets.length > 0 && (
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-neutral-500 font-mono uppercase">
+                      Load Preset Profile
+                    </label>
                     <select
                       onChange={(e) => {
                         if (e.target.value) handleLoadPreset(e.target.value);
                         e.target.value = "";
                       }}
                       defaultValue=""
-                      className="flex-1 bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2 text-neutral-350 focus:border-purple-500 outline-none"
+                      className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2 text-neutral-300 focus:border-purple-500 outline-none"
                     >
                       <option value="" disabled>
                         -- Choose a profile to load --
@@ -652,80 +994,66 @@ const AdvancedSettings = React.memo(
                       ))}
                     </select>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* List of profiles with delete options */}
-              {presets.length > 0 && (
-                <div className="max-h-24 overflow-y-auto border border-neutral-800 rounded-xl bg-neutral-950/40 p-2 divide-y divide-neutral-800 scrollbar-thin">
-                  {presets.map((p) => (
-                    <div
-                      key={p.name}
-                      className="flex items-center justify-between py-1 px-1.5 text-xs"
-                    >
-                      <span className="font-semibold text-neutral-300 font-mono">
-                        {p.name}
-                      </span>
-                      <button
-                        onClick={() => handleDeletePreset(p.name)}
-                        className="text-neutral-500 hover:text-red-400 p-0.5 rounded transition-colors cursor-pointer"
-                        title="Delete Preset"
+                {/* Profiles lists */}
+                {presets.length > 0 && (
+                  <div className="max-h-20 overflow-y-auto border border-neutral-800 rounded-xl bg-neutral-950/40 p-2 divide-y divide-neutral-800 scrollbar-thin">
+                    {presets.map((p) => (
+                      <div
+                        key={p.name}
+                        className="flex items-center justify-between py-0.5 px-1 text-xs"
                       >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
+                        <span className="font-semibold text-neutral-350 font-mono">
+                          {p.name}
+                        </span>
+                        <button
+                          onClick={() => handleDeletePreset(p.name)}
+                          className="text-neutral-500 hover:text-red-400 p-0.5 rounded transition-colors cursor-pointer"
+                          title="Delete Preset"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-              {/* Create new preset */}
-              <form onSubmit={handleSavePreset} className="space-y-1 pt-1">
-                <label className="text-[10px] font-bold text-neutral-500 font-mono uppercase">
-                  Save Current Config As Preset
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="E.g., Action Comic Preset"
-                    value={presetName}
-                    onChange={(e) => setPresetName(e.target.value)}
-                    className="flex-1 bg-neutral-950 border border-neutral-850 text-xs rounded-xl px-3 py-2 text-neutral-300 focus:border-purple-500 outline-none"
-                  />
-                  <button
-                    type="submit"
-                    disabled={!presetName.trim()}
-                    className="px-3.5 bg-purple-600 hover:bg-purple-500 disabled:opacity-40 text-white rounded-xl text-xs font-bold font-sans cursor-pointer transition-colors active:scale-95 flex items-center justify-center"
-                  >
-                    Save
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
+                {/* Create profile preset */}
+                <form onSubmit={handleSavePreset} className="space-y-1">
+                  <label className="text-[10px] font-bold text-neutral-500 font-mono uppercase">
+                    Save Config bundle
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="E.g., Action Comic Preset"
+                      value={presetName}
+                      onChange={(e) => setPresetName(e.target.value)}
+                      className="flex-1 bg-neutral-950 border border-neutral-850 text-xs rounded-xl px-3 py-2 text-neutral-300 focus:border-purple-500 outline-none"
+                    />
+                    <button
+                      type="submit"
+                      disabled={!presetName.trim()}
+                      className="px-3 bg-purple-600 hover:bg-purple-500 disabled:opacity-40 text-white rounded-xl text-xs font-bold font-sans cursor-pointer transition-colors active:scale-95"
+                    >
+                      Save
+                    </button>
+                  </div>
+                </form>
+              </div>
 
-          {/* Share session generator */}
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-3.5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Share2 className="h-4 w-4 text-purple-400" />
-                <div>
-                  <h3 className="font-bold text-sm text-white font-sans">
-                    Workspace Session Sharing
-                  </h3>
-                  <p className="text-[10px] text-neutral-400 font-mono">
-                    Create an instant share link containing active
-                    configurations
-                  </p>
-                </div>
+              {/* Share session generator */}
+              <div className="space-y-1 border-t border-neutral-800/60 pt-3">
+                <button
+                  onClick={handleCopyShareLink}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold font-sans transition-all active:scale-[0.98] cursor-pointer shadow-md"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                  Copy Shareable Session Link
+                </button>
               </div>
             </div>
-            <button
-              onClick={handleCopyShareLink}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold font-sans transition-all active:scale-[0.98] shadow-lg shadow-purple-900/20 cursor-pointer"
-            >
-              <Copy className="h-4 w-4" />
-              Copy Shareable Session Link
-            </button>
           </div>
         </div>
       </div>

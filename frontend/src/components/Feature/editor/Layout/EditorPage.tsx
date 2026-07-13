@@ -140,11 +140,20 @@ const EditorPage: React.FC<EditorPageProps> = ({
     voiceActor,
     narrationStyle,
     bubbleSensitivity,
+    setBubbleSensitivity,
     bubbleDetectionStyle,
+    setBubbleDetectionStyle,
     bubbleEraseMethod,
+    setBubbleEraseMethod,
     bubbleDilation,
+    setBubbleDilation,
     bubbleInpaintRadius,
     cropSensitivity,
+    setCropSensitivity,
+    cropPaddingPx,
+    setCropPaddingPx,
+    cropFocusMode,
+    setCropFocusMode,
     cropBackgroundMode,
     aspectRatioLock,
     minPanelAreaPct,
@@ -152,6 +161,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
     useLocalCV,
     autoSplitTallStrips,
     cropModel,
+    setCropModel,
     cropMinHeightPx,
     cropCannyLow,
     cropCannyHigh,
@@ -456,6 +466,26 @@ const EditorPage: React.FC<EditorPageProps> = ({
                       selectedSource={selectedSource}
                       addNotification={addNotification}
                       fetchWithInterceptor={fetchWithInterceptor}
+
+                      // Crop Settings
+                      cropSensitivity={cropSensitivity}
+                      setCropSensitivity={setCropSensitivity}
+                      cropPaddingPx={cropPaddingPx}
+                      setCropPaddingPx={setCropPaddingPx}
+                      cropFocusMode={cropFocusMode}
+                      setCropFocusMode={setCropFocusMode}
+                      cropModel={cropModel}
+                      setCropModel={setCropModel}
+
+                      // Bubble Settings
+                      bubbleSensitivity={bubbleSensitivity}
+                      setBubbleSensitivity={setBubbleSensitivity}
+                      bubbleDilation={bubbleDilation}
+                      setBubbleDilation={setBubbleDilation}
+                      bubbleEraseMethod={bubbleEraseMethod}
+                      setBubbleEraseMethod={setBubbleEraseMethod}
+                      bubbleDetectionStyle={bubbleDetectionStyle}
+                      setBubbleDetectionStyle={setBubbleDetectionStyle}
                     />
                   </div>
                 </div>
