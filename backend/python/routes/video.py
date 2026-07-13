@@ -77,6 +77,11 @@ class RenderRequest(BaseModel):
     subtitles_style: Optional[str] = "none"       # "none" | "burn-in"
     audio_reactive_shake: Optional[bool] = False
     shake_intensity: Optional[str] = "medium"     # "low" | "medium" | "high" | "extreme"
+    master_volume: Optional[float] = 1.0          # 0.0 to 1.0
+    narration_volume: Optional[float] = 1.0       # 0.0 to 1.0
+    bgm_volume: Optional[float] = 1.0             # 0.0 to 1.0
+    speech_rate: Optional[float] = 1.0            # Speed factor
+    speech_pitch: Optional[float] = 1.0           # Pitch factor
 
 async def download_asset(url: str, dest_path: str) -> bool:
     if not url:
@@ -485,6 +490,9 @@ def render_pipeline_sync(
     shake_amplitude: int = 16,
     music_theme: str = "none",
     video_format: str = "mp4",
+    master_volume: float = 1.0,
+    narration_volume: float = 1.0,
+    bgm_volume: float = 1.0,
 ):
     """
     Stitches panels together into a final video file.
@@ -602,8 +610,36 @@ def render_pipeline_sync(
         "sci-fi":                  82,    # E2  — electronic, tense
         "sci-fi synth wave":       82,
     }
+
+    va_vol = narration_volume * master_volume
+    bgm_vol = bgm_volume * master_volume
+
+    is_explicit_no_music = music_theme and music_theme.strip().lower() in ("none", "no music (dialogue only)", "no music")
+
     bgm_freq = _BGM_FREQS.get(music_theme.strip().lower()) if music_theme else None
-    if bgm_freq:
+
+    if is_explicit_no_music:
+        # Explicitly no music, skip BGM overlay. Adjust narration volume if not 1.0
+        logger.info("[Render] Explicitly no background music requested.")
+        if abs(va_vol - 1.0) > 0.01:
+            try:
+                vol_out = os.path.join(seg_dir, "with_volume.mp4")
+                vol_cmd = [
+                    "ffmpeg", "-y",
+                    "-i", concat_out,
+                    "-af", f"volume={va_vol:.2f}",
+                    "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+                    vol_out,
+                ]
+                rv = subprocess.run(vol_cmd, capture_output=True, text=True, timeout=300)
+                if rv.returncode == 0:
+                    concat_out = vol_out
+                    logger.info(f"[Render] Narration volume adjusted to {va_vol:.2f}.")
+                else:
+                    logger.warning(f"[Render] Narration volume filter failed (skipped): {rv.stderr[-400:]}")
+            except Exception as e:
+                logger.warning(f"[Render] Volume filter error: {e}")
+    elif bgm_freq:
         try:
             total_duration = sum(durations) + 2  # small tail
             bgm_audio_path = os.path.join(seg_dir, "bgm_synth.aac")
@@ -624,7 +660,7 @@ def render_pipeline_sync(
                     "-i", concat_out,
                     "-i", bgm_audio_path,
                     "-filter_complex",
-                    "[0:a]volume=1.0[va];[1:a]volume=1.0[bgm];[va][bgm]amix=inputs=2:duration=first[aout]",
+                    f"[0:a]volume={va_vol:.2f}[va];[1:a]volume={bgm_vol:.2f}[bgm];[va][bgm]amix=inputs=2:duration=first[aout]",
                     "-map", "0:v", "-map", "[aout]",
                     "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
                     "-shortest",
@@ -633,7 +669,7 @@ def render_pipeline_sync(
                 rb = subprocess.run(bgm_mix_cmd, capture_output=True, text=True, timeout=300)
                 if rb.returncode == 0:
                     concat_out = bgm_out
-                    logger.info(f"[Render] Synthetic BGM ({music_theme}, {bgm_freq}Hz) mixed in.")
+                    logger.info(f"[Render] Synthetic BGM ({music_theme}, {bgm_freq}Hz) mixed in (BGM Vol: {bgm_vol:.2f}, Narration Vol: {va_vol:.2f}).")
                 else:
                     logger.warning(f"[Render] BGM mix failed (skipped): {rb.stderr[-400:]}")
             else:
@@ -641,7 +677,7 @@ def render_pipeline_sync(
         except Exception as e:
             logger.warning(f"[Render] BGM error (skipped): {e}")
     else:
-        # Legacy: attempt static file fallback
+        # Legacy: attempt static file fallback (ONLY if BGM is NOT explicitly disabled)
         bgm_path = os.path.join(os.getcwd(), "public", "audio", "bgm", "theme.mp3")
         if os.path.exists(bgm_path):
             try:
@@ -651,7 +687,7 @@ def render_pipeline_sync(
                     "-i", concat_out,
                     "-stream_loop", "-1", "-i", bgm_path,
                     "-filter_complex",
-                    "[0:a]volume=1.0[va];[1:a]volume=0.10[bgm];[va][bgm]amix=inputs=2:duration=first[aout]",
+                    f"[0:a]volume={va_vol:.2f}[va];[1:a]volume={0.10 * bgm_vol:.2f}[bgm];[va][bgm]amix=inputs=2:duration=first[aout]",
                     "-map", "0:v", "-map", "[aout]",
                     "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
                     "-shortest",
@@ -714,6 +750,11 @@ async def process_render_job(
     subtitles_style: str = "none",
     audio_reactive_shake: bool = False,
     shake_intensity: str = "medium",
+    master_volume: float = 1.0,
+    narration_volume: float = 1.0,
+    bgm_volume: float = 1.0,
+    speech_rate: float = 1.0,
+    speech_pitch: float = 1.0,
 ):
     work_dir = os.path.join(os.getcwd(), "temp", f"render_{video_id}")
     os.makedirs(work_dir, exist_ok=True)
@@ -814,7 +855,9 @@ async def process_render_job(
                     target_duration=p_dict["duration"],
                     output_path=audio_path,
                     voice=voice or "en-US-GuyNeural",
-                    force_duration=False
+                    force_duration=False,
+                    speech_rate=speech_rate,
+                    speech_pitch=speech_pitch,
                 ))
                 tts_mapping.append(p_dict)
 
@@ -922,6 +965,7 @@ async def process_render_job(
             render_pipeline_sync,
             video_id, panels_data, output_path,
             frame_rate, shake_amplitude, music_theme, ext,
+            master_volume, narration_volume, bgm_volume,
         )
 
         final_video_url = f"/videos/{output_filename}"
@@ -984,6 +1028,11 @@ async def render_video(request: RenderRequest, background_tasks: BackgroundTasks
         request.subtitles_style or "none",
         request.audio_reactive_shake or False,
         request.shake_intensity or "medium",
+        request.master_volume if request.master_volume is not None else 1.0,
+        request.narration_volume if request.narration_volume is not None else 1.0,
+        request.bgm_volume if request.bgm_volume is not None else 1.0,
+        request.speech_rate if request.speech_rate is not None else 1.0,
+        request.speech_pitch if request.speech_pitch is not None else 1.0,
     )
 
     return {"success": True, "job_id": video_id, "low_balance": new_balance < LOW_BALANCE_THRESHOLD}

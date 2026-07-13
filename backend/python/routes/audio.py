@@ -55,6 +55,14 @@ class AudioGenerateRequest(BaseModel):
         default=True,
         description="If true, returns audio as base64 string; if false, saves to a temp file and returns its path"
     )
+    speech_rate: Optional[float] = Field(
+        default=1.0,
+        description="Speed of generated TTS audio"
+    )
+    speech_pitch: Optional[float] = Field(
+        default=1.0,
+        description="Pitch of generated TTS audio"
+    )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -108,7 +116,7 @@ async def generate_audio(body: AudioGenerateRequest):
     try:
         logger.info(
             f"[Narration/TTS] Generating audio: {len(body.dialogue_list)} segments, "
-            f"target={body.target_duration}s, voice={body.voice}"
+            f"target={body.target_duration}s, voice={body.voice}, rate={body.speech_rate}, pitch={body.speech_pitch}"
         )
 
         saved_path, actual_dur = await generate_panel_audio(
@@ -116,6 +124,8 @@ async def generate_audio(body: AudioGenerateRequest):
             target_duration=body.target_duration,
             output_path=output_path,
             voice=body.voice,
+            speech_rate=body.speech_rate if body.speech_rate is not None else 1.0,
+            speech_pitch=body.speech_pitch if body.speech_pitch is not None else 1.0,
         )
 
         if not os.path.exists(saved_path) or os.path.getsize(saved_path) == 0:

@@ -39,6 +39,17 @@ interface AdvancedSettingsProps {
   ) => void;
   fetchWithInterceptor?: any;
 
+  audioReactiveShake: boolean;
+  setAudioReactiveShake: (val: boolean) => void;
+  shakeIntensity: "low" | "medium" | "high" | "extreme";
+  setShakeIntensity: (val: "low" | "medium" | "high" | "extreme") => void;
+  videoFormat: "mp4" | "webm" | "mkv";
+  setVideoFormat: (val: "mp4" | "webm" | "mkv") => void;
+  backgroundStyle: "black" | "white" | "transparent" | "blurred";
+  setBackgroundStyle: (val: "black" | "white" | "transparent" | "blurred") => void;
+  subtitlesStyle: "none" | "burn-in" | "soft";
+  setSubtitlesStyle: (val: "none" | "burn-in" | "soft") => void;
+
   // Dynamic AI Crop settings
   cropSensitivity?: number;
   setCropSensitivity?: (val: number) => void;
@@ -102,6 +113,17 @@ const AdvancedSettings = React.memo(
     addNotification,
     fetchWithInterceptor,
 
+    audioReactiveShake,
+    setAudioReactiveShake,
+    shakeIntensity,
+    setShakeIntensity,
+    videoFormat,
+    setVideoFormat,
+    backgroundStyle,
+    setBackgroundStyle,
+    subtitlesStyle,
+    setSubtitlesStyle,
+
     // AI Crop Props (with local fallback if unpassed)
     cropSensitivity = 30,
     setCropSensitivity,
@@ -159,43 +181,6 @@ const AdvancedSettings = React.memo(
     ];
 
     const displayVoices = availableVoices.length > 0 ? availableVoices : defaultVoices;
-
-    // Advanced Video/Rendering states
-    const [audioReactiveShake, setAudioReactiveShake] = React.useState<boolean>(() => {
-      return localStorage.getItem("ai_video_shake") === "true";
-    });
-    const [shakeIntensity, setShakeIntensity] = React.useState<"low" | "medium" | "high" | "extreme">(() => {
-      return (localStorage.getItem("ai_video_shake_intensity") as any) || "medium";
-    });
-    const [videoFormat, setVideoFormat] = React.useState<"mp4" | "webm" | "mkv">(() => {
-      return (localStorage.getItem("ai_video_format") as any) || "mp4";
-    });
-    const [backgroundStyle, setBackgroundStyle] = React.useState<"black" | "white" | "transparent" | "blurred">(() => {
-      return (localStorage.getItem("ai_video_bg_style") as any) || "black";
-    });
-    const [subtitlesStyle, setSubtitlesStyle] = React.useState<"none" | "burn-in" | "soft">(() => {
-      return (localStorage.getItem("ai_video_subtitles_style") as any) || "none";
-    });
-
-    React.useEffect(() => {
-      localStorage.setItem("ai_video_shake", String(audioReactiveShake));
-    }, [audioReactiveShake]);
-
-    React.useEffect(() => {
-      localStorage.setItem("ai_video_shake_intensity", shakeIntensity);
-    }, [shakeIntensity]);
-
-    React.useEffect(() => {
-      localStorage.setItem("ai_video_format", videoFormat);
-    }, [videoFormat]);
-
-    React.useEffect(() => {
-      localStorage.setItem("ai_video_bg_style", backgroundStyle);
-    }, [backgroundStyle]);
-
-    React.useEffect(() => {
-      localStorage.setItem("ai_video_subtitles_style", subtitlesStyle);
-    }, [subtitlesStyle]);
 
     // Local states fallback if callbacks are not provided
     const [localCropSensitivity, setLocalCropSensitivity] = React.useState(

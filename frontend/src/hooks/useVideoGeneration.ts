@@ -37,6 +37,17 @@ interface UseVideoGenerationProps {
       overrideVideoUrl?: string | null;
     }
   ) => Promise<boolean>;
+  aspectRatio: string;
+  videoFormat: string;
+  backgroundStyle: string;
+  subtitlesStyle: string;
+  audioReactiveShake: boolean;
+  shakeIntensity: string;
+  volume: number;
+  narrationVolume: number;
+  bgmVolume: number;
+  speechRate: number;
+  speechPitch: number;
 }
 
 export function useVideoGeneration({
@@ -63,6 +74,17 @@ export function useVideoGeneration({
   seriesSynopsis,
   audioFeedback,
   saveProject,
+  aspectRatio,
+  videoFormat,
+  backgroundStyle,
+  subtitlesStyle,
+  audioReactiveShake,
+  shakeIntensity,
+  volume,
+  narrationVolume,
+  bgmVolume,
+  speechRate,
+  speechPitch,
 }: UseVideoGenerationProps) {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [progressStatus, setProgressStatus] = useState<string>("");
@@ -398,27 +420,22 @@ export function useVideoGeneration({
     setRenderStartTime(startTime);
 
     try {
-      // Read all advanced settings from localStorage (set by AdvancedSettings.tsx and useAppState)
-      const music_theme = localStorage.getItem("ai_comic_music") || "none";
-      const aspect_ratio = localStorage.getItem("ai_comic_aspectRatio") || "auto";
-      const frame_rate = parseInt(localStorage.getItem("ai_comic_fps") || "24", 10);
-      const video_format = localStorage.getItem("ai_video_format") || "mp4";
-      const background_style = localStorage.getItem("ai_video_bg_style") || "black";
-      const subtitles_style = localStorage.getItem("ai_video_subtitles_style") || "none";
-      const audio_reactive_shake = localStorage.getItem("ai_video_shake") === "true";
-      const shake_intensity = localStorage.getItem("ai_video_shake_intensity") || "medium";
-
       const data = await api.renderVideo(fetchWithInterceptor, {
         panels,
         voice: voiceActor,
-        music_theme,
-        aspect_ratio,
-        frame_rate: isNaN(frame_rate) ? 24 : frame_rate,
-        video_format,
-        background_style,
-        subtitles_style,
-        audio_reactive_shake,
-        shake_intensity,
+        music_theme: musicTheme || "none",
+        aspect_ratio: aspectRatio || "auto",
+        frame_rate: isNaN(frameRate) ? 24 : frameRate,
+        video_format: videoFormat,
+        background_style: backgroundStyle,
+        subtitles_style: subtitlesStyle,
+        audio_reactive_shake: audioReactiveShake,
+        shake_intensity: shakeIntensity,
+        master_volume: volume / 100, // API expects 0.0 to 1.0
+        narration_volume: narrationVolume / 100,
+        bgm_volume: bgmVolume / 100,
+        speech_rate: speechRate,
+        speech_pitch: speechPitch,
       });
       if (!data.success || !data.job_id) {
         throw new Error(
@@ -485,6 +502,19 @@ export function useVideoGeneration({
   }, [
     panels,
     voiceActor,
+    musicTheme,
+    aspectRatio,
+    frameRate,
+    videoFormat,
+    backgroundStyle,
+    subtitlesStyle,
+    audioReactiveShake,
+    shakeIntensity,
+    volume,
+    narrationVolume,
+    bgmVolume,
+    speechRate,
+    speechPitch,
     fetchWithInterceptor,
     addNotification,
     setVideoUrl,

@@ -379,6 +379,28 @@ export default function App() {
     setCurrentPanelIndex,
     playbackTime,
     setPlaybackTime,
+    narrationVolume,
+    setNarrationVolume,
+    bgmVolume,
+    setBgmVolume,
+    sfxVolume,
+    setSfxVolume,
+    speechRate,
+    setSpeechRate,
+    speechPitch,
+    setSpeechPitch,
+    audioDucking,
+    setAudioDucking,
+    audioReactiveShake,
+    setAudioReactiveShake,
+    shakeIntensity,
+    setShakeIntensity,
+    videoFormat,
+    setVideoFormat,
+    backgroundStyle,
+    setBackgroundStyle,
+    subtitlesStyle,
+    setSubtitlesStyle,
     storyboardPlaying,
     toggleStoryboardPlayback,
     resetStoryboardPlayback,
@@ -467,6 +489,21 @@ export default function App() {
     audioFeedback,
     videoUrl,
     setVideoUrl,
+    voiceActor,
+    musicTheme,
+    aspectRatio,
+    frameRate,
+    volume,
+    narrationVolume: appLogic.narrationVolume,
+    bgmVolume: appLogic.bgmVolume,
+    audioDucking: appLogic.audioDucking,
+    speechRate: appLogic.speechRate,
+    speechPitch: appLogic.speechPitch,
+    audioReactiveShake: appLogic.audioReactiveShake,
+    shakeIntensity: appLogic.shakeIntensity,
+    videoFormat: appLogic.videoFormat,
+    backgroundStyle: appLogic.backgroundStyle,
+    subtitlesStyle: appLogic.subtitlesStyle,
   });
 
   React.useEffect(() => {
@@ -928,7 +965,8 @@ export default function App() {
                   target_duration: 4.5,
                   voice: voiceActor || undefined,
                   return_base64: true,
-
+                  speech_rate: appLogic.speechRate,
+                  speech_pitch: appLogic.speechPitch,
                 })
               );
               const ttsResults = await Promise.all(ttsPromises);
@@ -1584,6 +1622,16 @@ export default function App() {
                 selectedSource={selectedSource}
                 addNotification={addNotification}
                 fetchWithInterceptor={fetchWithInterceptor}
+                audioReactiveShake={audioReactiveShake}
+                setAudioReactiveShake={setAudioReactiveShake}
+                shakeIntensity={shakeIntensity}
+                setShakeIntensity={setShakeIntensity}
+                videoFormat={videoFormat}
+                setVideoFormat={setVideoFormat}
+                backgroundStyle={backgroundStyle}
+                setBackgroundStyle={setBackgroundStyle}
+                subtitlesStyle={subtitlesStyle}
+                setSubtitlesStyle={setSubtitlesStyle}
               />
             </div>
           )}
@@ -1596,6 +1644,24 @@ export default function App() {
                 onNavigateHome={handleNavigateHome}
                 addNotification={addNotification}
                 fetchWithInterceptor={fetchWithInterceptor}
+                volume={volume}
+                setVolume={setVolume}
+                narrationVolume={narrationVolume}
+                setNarrationVolume={setNarrationVolume}
+                bgmVolume={bgmVolume}
+                setBgmVolume={setBgmVolume}
+                sfxVolume={sfxVolume}
+                setSfxVolume={setSfxVolume}
+                speechRate={speechRate}
+                setSpeechRate={setSpeechRate}
+                speechPitch={speechPitch}
+                setSpeechPitch={setSpeechPitch}
+                voiceActor={voiceActor}
+                setVoiceActor={setVoiceActor}
+                musicTheme={musicTheme}
+                setMusicTheme={setMusicTheme}
+                audioDucking={audioDucking}
+                setAudioDucking={setAudioDucking}
               />
             </div>
           )}

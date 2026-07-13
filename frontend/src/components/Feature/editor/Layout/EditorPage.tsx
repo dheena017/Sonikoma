@@ -512,6 +512,17 @@ const EditorPage: React.FC<EditorPageProps> = ({
                       addNotification={addNotification}
                       fetchWithInterceptor={fetchWithInterceptor}
 
+                      audioReactiveShake={appLogic.audioReactiveShake}
+                      setAudioReactiveShake={appLogic.setAudioReactiveShake}
+                      shakeIntensity={appLogic.shakeIntensity}
+                      setShakeIntensity={appLogic.setShakeIntensity}
+                      videoFormat={appLogic.videoFormat}
+                      setVideoFormat={appLogic.setVideoFormat}
+                      backgroundStyle={appLogic.backgroundStyle}
+                      setBackgroundStyle={appLogic.setBackgroundStyle}
+                      subtitlesStyle={appLogic.subtitlesStyle}
+                      setSubtitlesStyle={appLogic.setSubtitlesStyle}
+
                       // Crop Settings
                       cropSensitivity={cropSensitivity}
                       setCropSensitivity={setCropSensitivity}
@@ -566,8 +577,24 @@ const EditorPage: React.FC<EditorPageProps> = ({
                       addNotification={addNotification}
                       fetchWithInterceptor={fetchWithInterceptor}
                       isEmbed={true}
-                      onVoiceActorChange={appLogic.setVoiceActor}
-                      onMusicThemeChange={appLogic.setMusicTheme}
+                      volume={appLogic.volume}
+                      setVolume={appLogic.setVolume}
+                      narrationVolume={appLogic.narrationVolume}
+                      setNarrationVolume={appLogic.setNarrationVolume}
+                      bgmVolume={appLogic.bgmVolume}
+                      setBgmVolume={appLogic.setBgmVolume}
+                      sfxVolume={appLogic.sfxVolume}
+                      setSfxVolume={appLogic.setSfxVolume}
+                      speechRate={appLogic.speechRate}
+                      setSpeechRate={appLogic.setSpeechRate}
+                      speechPitch={appLogic.speechPitch}
+                      setSpeechPitch={appLogic.setSpeechPitch}
+                      voiceActor={voiceActor}
+                      setVoiceActor={appLogic.setVoiceActor}
+                      musicTheme={musicTheme}
+                      setMusicTheme={appLogic.setMusicTheme}
+                      audioDucking={appLogic.audioDucking}
+                      setAudioDucking={appLogic.setAudioDucking}
                     />
                   </div>
                 </div>
@@ -600,6 +627,8 @@ const EditorPage: React.FC<EditorPageProps> = ({
                       setConsoleLogs={() => {}}
                       voiceActor={voiceActor}
                       musicTheme={musicTheme}
+                      speechRate={appLogic.speechRate}
+                      speechPitch={appLogic.speechPitch}
                       narrationStyle={narrationStyle}
                       playStoryboardAudio={playStoryboardAudio}
                       autoPlayAudio={autoPlayAudio}

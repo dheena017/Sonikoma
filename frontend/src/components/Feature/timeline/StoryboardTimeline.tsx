@@ -30,6 +30,8 @@ interface StoryboardTimelineProps {
   setConsoleLogs?: React.Dispatch<React.SetStateAction<any[]>>;
   voiceActor?: string;
   musicTheme?: string;
+  speechRate?: number;
+  speechPitch?: number;
   narrationStyle?: string;
   bubbleSensitivity?: number;
   bubbleDetectionStyle?: string;
@@ -75,6 +77,8 @@ const StoryboardTimeline = React.memo(
     setConsoleLogs,
     voiceActor,
     musicTheme,
+    speechRate = 1.0,
+    speechPitch = 1.0,
     narrationStyle = "long",
     bubbleSensitivity = 50,
     bubbleDetectionStyle = "all",
@@ -254,6 +258,9 @@ const StoryboardTimeline = React.memo(
                   text: panel.speech_text,
                   dialogue_list: [panel.speech_text],
                   target_duration: panel.duration > 0 ? panel.duration : 4.5,
+                  voice: voiceActor || undefined,
+                  speech_rate: speechRate,
+                  speech_pitch: speechPitch,
                 });
                 let audioUrl = null;
                 // Audio may come back as a cached URL or as base64
@@ -905,6 +912,9 @@ const StoryboardTimeline = React.memo(
               isDragOver={dragOverIndex === idx}
               setPanels={setPanels}
               fetchWithInterceptor={fetchWithInterceptor}
+              voiceActor={voiceActor}
+              speechRate={speechRate}
+              speechPitch={speechPitch}
             />
           ))}
         </div>

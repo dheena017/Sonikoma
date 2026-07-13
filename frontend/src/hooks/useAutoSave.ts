@@ -36,6 +36,21 @@ interface AutoSaveState {
   audioFeedback?: any;
   videoUrl?: string | null;
   setVideoUrl?: (url: string | null) => void;
+  voiceActor: string;
+  musicTheme: string;
+  aspectRatio: string;
+  frameRate: number;
+  volume: number;
+  narrationVolume: number;
+  bgmVolume: number;
+  audioDucking: boolean;
+  speechRate: number;
+  speechPitch: number;
+  audioReactiveShake: boolean;
+  shakeIntensity: string;
+  videoFormat: string;
+  backgroundStyle: string;
+  subtitlesStyle: string;
 }
 
 export function useAutoSave(state: AutoSaveState) {
@@ -53,6 +68,23 @@ export function useAutoSave(state: AutoSaveState) {
       cover_image: state.seriesCoverImage.trim(),
       synopsis: state.seriesSynopsis.trim(),
       scraped_images: state.scrapedImages,
+      audio_settings: {
+        voiceActor: state.voiceActor,
+        musicTheme: state.musicTheme,
+        aspectRatio: state.aspectRatio,
+        frameRate: state.frameRate,
+        masterVolume: state.volume,
+        narrationVolume: state.narrationVolume,
+        bgmVolume: state.bgmVolume,
+        audioDucking: state.audioDucking,
+        speechRate: state.speechRate,
+        speechPitch: state.speechPitch,
+        audioReactiveShake: state.audioReactiveShake,
+        shakeIntensity: state.shakeIntensity,
+        videoFormat: state.videoFormat,
+        backgroundStyle: state.backgroundStyle,
+        subtitlesStyle: state.subtitlesStyle,
+      },
       panels: state.panels.map((p) => ({
         image_url: p.image_url,
         original_url: p.original_url || null,
@@ -83,6 +115,21 @@ export function useAutoSave(state: AutoSaveState) {
     state.seriesSynopsis,
     state.scrapedImages,
     state.panels,
+    state.voiceActor,
+    state.musicTheme,
+    state.aspectRatio,
+    state.frameRate,
+    state.volume,
+    state.narrationVolume,
+    state.bgmVolume,
+    state.audioDucking,
+    state.speechRate,
+    state.speechPitch,
+    state.audioReactiveShake,
+    state.shakeIntensity,
+    state.videoFormat,
+    state.backgroundStyle,
+    state.subtitlesStyle,
   ]);
 
   // Helper to serialize all editable aspects of the project
@@ -254,6 +301,23 @@ export function useAutoSave(state: AutoSaveState) {
           synopsis: synopsis || null,
           video_url: finalVideoUrl,
           status: statusValue,
+          audio_settings: {
+            voiceActor: state.voiceActor,
+            musicTheme: state.musicTheme,
+            aspectRatio: state.aspectRatio,
+            frameRate: state.frameRate,
+            masterVolume: state.volume,
+            narrationVolume: state.narrationVolume,
+            bgmVolume: state.bgmVolume,
+            audioDucking: state.audioDucking,
+            speechRate: state.speechRate,
+            speechPitch: state.speechPitch,
+            audioReactiveShake: state.audioReactiveShake,
+            shakeIntensity: state.shakeIntensity,
+            videoFormat: state.videoFormat,
+            backgroundStyle: state.backgroundStyle,
+            subtitlesStyle: state.subtitlesStyle,
+          },
           panels: targetPanels.map((p) => ({
             image_url: p.image_url,
             original_url: p.original_url || null,

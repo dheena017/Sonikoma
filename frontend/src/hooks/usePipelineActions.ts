@@ -137,6 +137,17 @@ export function usePipelineActions({
     seriesSynopsis: state.seriesSynopsis,
     audioFeedback: state.audioFeedback,
     saveProject,
+    aspectRatio: state.aspectRatio,
+    videoFormat: state.videoFormat,
+    backgroundStyle: state.backgroundStyle,
+    subtitlesStyle: state.subtitlesStyle,
+    audioReactiveShake: state.audioReactiveShake,
+    shakeIntensity: state.shakeIntensity,
+    volume: state.volume,
+    narrationVolume: state.narrationVolume,
+    bgmVolume: state.bgmVolume,
+    speechRate: state.speechRate,
+    speechPitch: state.speechPitch,
   });
 
   const {

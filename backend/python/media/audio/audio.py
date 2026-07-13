@@ -67,6 +67,8 @@ async def generate_segment_with_retry(
     text: str,
     voice: str,
     temp_file_path: str,
+    rate: Optional[str] = None,
+    pitch: Optional[str] = None,
     max_retries: int = 3,
     base_delay: float = 1.0
 ) -> bool:
@@ -78,7 +80,7 @@ async def generate_segment_with_retry(
     """
     for attempt in range(1, max_retries + 1):
         try:
-            communicate = edge_tts.Communicate(text, voice)
+            communicate = edge_tts.Communicate(text, voice, rate=rate, pitch=pitch)
             await communicate.save(temp_file_path)
             # Verify the file was actually written with content
             if os.path.exists(temp_file_path) and os.path.getsize(temp_file_path) > 0:
@@ -108,7 +110,9 @@ async def generate_panel_audio(
     target_duration: float,
     output_path: str,
     voice: Optional[str] = "en-US-GuyNeural",
-    force_duration: bool = False
+    force_duration: bool = False,
+    speech_rate: float = 1.0,
+    speech_pitch: float = 1.0,
 ) -> Tuple[str, float]:
     """
     Generates dynamic text-to-speech elements for an ordered sequence of storyboard dialogue transcripts,
@@ -122,6 +126,8 @@ async def generate_panel_audio(
         voice (Optional[str]): Standard edge-tts voice code or friendly UI name.
         force_duration (bool): If True, audio will be stretched/padded to match target_duration exactly.
                                If False, audio will retain natural length (unless longer than target_duration).
+        speech_rate (float): Vocal playback speed multiplier (default: 1.0).
+        speech_pitch (float): Vocal pitch shift multiplier (default: 1.0).
 
     Returns:
         (str, float): Tuple of (Absolute destination path, Actual duration in seconds).
@@ -143,6 +149,12 @@ async def generate_panel_audio(
     actual_voice = VOICE_MAP.get(voice, voice) if voice else "en-US-GuyNeural"
     if not actual_voice or "-" not in actual_voice or actual_voice.strip().lower() in ("undefined", "null", "default"):
         actual_voice = "en-US-GuyNeural"
+
+    # Format speed/pitch as required by edge-tts (+10% / -5%)
+    rate_percent = int((speech_rate - 1.0) * 100)
+    rate_str = f"{rate_percent:+}%"
+    pitch_percent = int((speech_pitch - 1.0) * 100)
+    pitch_str = f"{pitch_percent:+}%"
 
     try:
         # Phase 1: Generate individual audio strips asynchronously
@@ -175,8 +187,8 @@ async def generate_panel_audio(
                 silence_seg.export(temp_file_path, format="mp3")
                 continue
 
-            logger.info(f"[Narration/TTS] Generating segment {idx+1}/{len(dialogue_list)}: '{text[:40]}...' using voice: {actual_voice}")
-            success = await generate_segment_with_retry(text, actual_voice, temp_file_path)
+            logger.info(f"[Narration/TTS] Generating segment {idx+1}/{len(dialogue_list)}: '{text[:40]}...' using voice: {actual_voice} (rate={rate_str}, pitch={pitch_str})")
+            success = await generate_segment_with_retry(text, actual_voice, temp_file_path, rate=rate_str, pitch=pitch_str)
             if not success:
                 # Retry exhausted — substitute silence so pipeline continues
                 silence_seg = AudioSegment.silent(duration=1000)

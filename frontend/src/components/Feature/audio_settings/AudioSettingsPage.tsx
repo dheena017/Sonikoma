@@ -34,33 +34,68 @@ const DEFAULT_AUDIO_SETTINGS = {
   voiceActor: "en-US-GuyNeural",
 };
 
+interface AudioSettingsPageProps {
+  projectId?: string | null;
+  onNavigateHome?: () => void;
+  addNotification?: (msg: string, type: "success" | "info" | "warning" | "error") => void;
+  fetchWithInterceptor?: any;
+  isEmbed?: boolean;
+  
+  volume: number;
+  setVolume: (val: number) => void;
+  narrationVolume: number;
+  setNarrationVolume: (val: number) => void;
+  bgmVolume: number;
+  setBgmVolume: (val: number) => void;
+  sfxVolume: number;
+  setSfxVolume: (val: number) => void;
+  speechRate: number;
+  setSpeechRate: (val: number) => void;
+  speechPitch: number;
+  setSpeechPitch: (val: number) => void;
+  voiceActor: string;
+  setVoiceActor: (val: string) => void;
+  musicTheme: string;
+  setMusicTheme: (val: string) => void;
+  audioDucking: boolean;
+  setAudioDucking: (val: boolean) => void;
+  onSave?: () => void;
+}
+
 export default function AudioSettingsPage({
   projectId: propProjectId,
   onNavigateHome,
   addNotification,
   fetchWithInterceptor,
   isEmbed = false,
-  onVoiceActorChange,
-  onMusicThemeChange,
+
+  volume,
+  setVolume,
+  narrationVolume,
+  setNarrationVolume,
+  bgmVolume,
+  setBgmVolume,
+  sfxVolume,
+  setSfxVolume,
+  speechRate,
+  setSpeechRate,
+  speechPitch,
+  setSpeechPitch,
+  voiceActor,
+  setVoiceActor,
+  musicTheme,
+  setMusicTheme,
+  audioDucking,
+  setAudioDucking,
+  onSave,
 }: AudioSettingsPageProps) {
   const [projectId, setProjectId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Mixer States
-  const [masterVolume, setMasterVolume] = useState(DEFAULT_AUDIO_SETTINGS.masterVolume);
-  const [narrationVolume, setNarrationVolume] = useState(DEFAULT_AUDIO_SETTINGS.narrationVolume);
-  const [bgmVolume, setBgmVolume] = useState(DEFAULT_AUDIO_SETTINGS.bgmVolume);
-  const [sfxVolume, setSfxVolume] = useState(DEFAULT_AUDIO_SETTINGS.sfxVolume);
-
-  // TTS States
-  const [speechRate, setSpeechRate] = useState(DEFAULT_AUDIO_SETTINGS.speechRate);
-  const [speechPitch, setSpeechPitch] = useState(DEFAULT_AUDIO_SETTINGS.speechPitch);
-  const [voiceActor, setVoiceActor] = useState(DEFAULT_AUDIO_SETTINGS.voiceActor);
-
-  // BGM States
-  const [musicTheme, setMusicTheme] = useState(DEFAULT_AUDIO_SETTINGS.musicTheme);
-  const [audioDucking, setAudioDucking] = useState(DEFAULT_AUDIO_SETTINGS.audioDucking);
+  // Aliases to match parent state prop names to variables used in the JSX
+  const masterVolume = volume;
+  const setMasterVolume = setVolume;
 
   // Available Voices
   const [availableVoices, setAvailableVoices] = useState<Array<{ code: string; label: string }>>([]);
@@ -99,56 +134,17 @@ export default function AudioSettingsPage({
     };
   }, [fetchWithInterceptor]);
 
-  // 3. Load existing audio settings if active project exists
-  useEffect(() => {
-    if (!projectId) return;
-
-    const loadProjectSettings = async () => {
-      setLoading(true);
-      try {
-        const fetchFn = fetchWithInterceptor || window.fetch.bind(window);
-        const res = await fetchFn(`/api/projects/${projectId}`);
-        const data = await res.json();
-        if (data?.success && data?.project) {
-          const loadedSettings = data.project.audio_settings || {};
-
-          setMasterVolume(loadedSettings.masterVolume ?? DEFAULT_AUDIO_SETTINGS.masterVolume);
-          setNarrationVolume(loadedSettings.narrationVolume ?? DEFAULT_AUDIO_SETTINGS.narrationVolume);
-          setBgmVolume(loadedSettings.bgmVolume ?? DEFAULT_AUDIO_SETTINGS.bgmVolume);
-          setSfxVolume(loadedSettings.sfxVolume ?? DEFAULT_AUDIO_SETTINGS.sfxVolume);
-
-          setSpeechRate(loadedSettings.speechRate ?? DEFAULT_AUDIO_SETTINGS.speechRate);
-          setSpeechPitch(loadedSettings.speechPitch ?? DEFAULT_AUDIO_SETTINGS.speechPitch);
-          
-          const loadedVoice = loadedSettings.voiceActor ?? loadedSettings.voice ?? DEFAULT_AUDIO_SETTINGS.voiceActor;
-          setVoiceActor(loadedVoice);
-          onVoiceActorChange?.(loadedVoice);
-
-          const loadedMusic = loadedSettings.musicTheme ?? loadedSettings.music ?? DEFAULT_AUDIO_SETTINGS.musicTheme;
-          setMusicTheme(loadedMusic);
-          onMusicThemeChange?.(loadedMusic);
-
-          setAudioDucking(loadedSettings.audioDucking ?? DEFAULT_AUDIO_SETTINGS.audioDucking);
-        }
-      } catch (e) {
-        console.error("Failed to load project audio settings:", e);
-        if (addNotification) {
-          addNotification("Could not retrieve stored audio mixing profile.", "warning");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProjectSettings();
-  }, [projectId, fetchWithInterceptor, onVoiceActorChange, onMusicThemeChange]);
-
   // 4. Save Audio Mixer Profile
   const handleSaveSettings = async () => {
+    if (onSave) {
+      onSave();
+      return;
+    }
+
     if (!projectId) {
       // Local Storage Fallback if no project is active
       const localSettings = {
-        masterVolume,
+        masterVolume: volume,
         narrationVolume,
         bgmVolume,
         sfxVolume,
@@ -171,7 +167,7 @@ export default function AudioSettingsPage({
 
       const payload = {
         audio_settings: {
-          masterVolume,
+          masterVolume: volume,
           narrationVolume,
           bgmVolume,
           sfxVolume,
@@ -388,7 +384,6 @@ export default function AudioSettingsPage({
                     onChange={(e) => {
                       const val = e.target.value;
                       setVoiceActor(val);
-                      onVoiceActorChange?.(val);
                     }}
                     className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2.5 text-neutral-300 focus:border-purple-500 outline-none"
                   >
@@ -463,7 +458,6 @@ export default function AudioSettingsPage({
                     onChange={(e) => {
                       const val = e.target.value;
                       setMusicTheme(val);
-                      onMusicThemeChange?.(val);
                     }}
                     className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2.5 text-neutral-300 focus:border-purple-500 outline-none"
                   >

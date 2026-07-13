@@ -246,6 +246,37 @@ export function useAppState() {
     () => localStorage.getItem("app-autoplay-audio") === "true"
   );
 
+  const [narrationVolume, setNarrationVolume] = useState<number>(
+    () => parseInt(localStorage.getItem("ai_comic_narration_volume") || "90", 10)
+  );
+  const [bgmVolume, setBgmVolume] = useState<number>(
+    () => parseInt(localStorage.getItem("ai_comic_bgm_volume") || "50", 10)
+  );
+  const [audioDucking, setAudioDucking] = useState<boolean>(
+    () => localStorage.getItem("ai_comic_audio_ducking") !== "false"
+  );
+  const [speechRate, setSpeechRate] = useState<number>(
+    () => parseFloat(localStorage.getItem("ai_comic_speech_rate") || "1.0")
+  );
+  const [speechPitch, setSpeechPitch] = useState<number>(
+    () => parseFloat(localStorage.getItem("ai_comic_speech_pitch") || "1.0")
+  );
+  const [audioReactiveShake, setAudioReactiveShake] = useState<boolean>(
+    () => localStorage.getItem("ai_video_shake") === "true"
+  );
+  const [shakeIntensity, setShakeIntensity] = useState<"low" | "medium" | "high" | "extreme">(
+    () => (localStorage.getItem("ai_video_shake_intensity") as any) || "medium"
+  );
+  const [videoFormat, setVideoFormat] = useState<"mp4" | "webm" | "mkv">(
+    () => (localStorage.getItem("ai_video_format") as any) || "mp4"
+  );
+  const [backgroundStyle, setBackgroundStyle] = useState<"black" | "white" | "transparent" | "blurred">(
+    () => (localStorage.getItem("ai_video_bg_style") as any) || "black"
+  );
+  const [subtitlesStyle, setSubtitlesStyle] = useState<"none" | "burn-in" | "soft">(
+    () => (localStorage.getItem("ai_video_subtitles_style") as any) || "none"
+  );
+
   const audioFeedback = useAudioFeedback(sfxVolume, !sfxEnabled);
 
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
@@ -654,6 +685,56 @@ export function useAppState() {
           setVideoUrl(data.project.video_url || null);
 
           // Populate details from loaded project
+          const loadedSettings = data.project.audio_settings || {};
+          if (loadedSettings.masterVolume !== undefined) {
+            setVolume(loadedSettings.masterVolume);
+          }
+          if (loadedSettings.narrationVolume !== undefined) {
+            setNarrationVolume(loadedSettings.narrationVolume);
+          }
+          if (loadedSettings.bgmVolume !== undefined) {
+            setBgmVolume(loadedSettings.bgmVolume);
+          }
+          if (loadedSettings.sfxVolume !== undefined) {
+            setSfxVolume(loadedSettings.sfxVolume);
+          }
+          if (loadedSettings.speechRate !== undefined) {
+            setSpeechRate(loadedSettings.speechRate);
+          }
+          if (loadedSettings.speechPitch !== undefined) {
+            setSpeechPitch(loadedSettings.speechPitch);
+          }
+          if (loadedSettings.voiceActor ?? loadedSettings.voice) {
+            setVoiceActor(loadedSettings.voiceActor ?? loadedSettings.voice);
+          }
+          if (loadedSettings.musicTheme ?? loadedSettings.music) {
+            setMusicTheme(loadedSettings.musicTheme ?? loadedSettings.music);
+          }
+          if (loadedSettings.audioDucking !== undefined) {
+            setAudioDucking(loadedSettings.audioDucking);
+          }
+          if (loadedSettings.aspectRatio) {
+            setAspectRatio(loadedSettings.aspectRatio);
+          }
+          if (loadedSettings.frameRate) {
+            setFrameRate(loadedSettings.frameRate);
+          }
+          if (loadedSettings.audioReactiveShake !== undefined) {
+            setAudioReactiveShake(loadedSettings.audioReactiveShake);
+          }
+          if (loadedSettings.shakeIntensity) {
+            setShakeIntensity(loadedSettings.shakeIntensity);
+          }
+          if (loadedSettings.videoFormat) {
+            setVideoFormat(loadedSettings.videoFormat);
+          }
+          if (loadedSettings.backgroundStyle) {
+            setBackgroundStyle(loadedSettings.backgroundStyle);
+          }
+          if (loadedSettings.subtitlesStyle) {
+            setSubtitlesStyle(loadedSettings.subtitlesStyle);
+          }
+
           if (data.project.cover_image) {
             setSeriesCoverImage(data.project.cover_image);
           }
@@ -805,6 +886,46 @@ export function useAppState() {
   useEffect(() => {
     localStorage.setItem("ai_comic_sfx_volume", sfxVolume.toString());
   }, [sfxVolume]);
+
+  useEffect(() => {
+    localStorage.setItem("ai_comic_narration_volume", narrationVolume.toString());
+  }, [narrationVolume]);
+
+  useEffect(() => {
+    localStorage.setItem("ai_comic_bgm_volume", bgmVolume.toString());
+  }, [bgmVolume]);
+
+  useEffect(() => {
+    localStorage.setItem("ai_comic_audio_ducking", String(audioDucking));
+  }, [audioDucking]);
+
+  useEffect(() => {
+    localStorage.setItem("ai_comic_speech_rate", speechRate.toString());
+  }, [speechRate]);
+
+  useEffect(() => {
+    localStorage.setItem("ai_comic_speech_pitch", speechPitch.toString());
+  }, [speechPitch]);
+
+  useEffect(() => {
+    localStorage.setItem("ai_video_shake", String(audioReactiveShake));
+  }, [audioReactiveShake]);
+
+  useEffect(() => {
+    localStorage.setItem("ai_video_shake_intensity", shakeIntensity);
+  }, [shakeIntensity]);
+
+  useEffect(() => {
+    localStorage.setItem("ai_video_format", videoFormat);
+  }, [videoFormat]);
+
+  useEffect(() => {
+    localStorage.setItem("ai_video_bg_style", backgroundStyle);
+  }, [backgroundStyle]);
+
+  useEffect(() => {
+    localStorage.setItem("ai_video_subtitles_style", subtitlesStyle);
+  }, [subtitlesStyle]);
 
   useEffect(() => {
     localStorage.setItem("ai_comic_sfx_enabled", sfxEnabled.toString());
@@ -999,6 +1120,26 @@ export function useAppState() {
       setSfxVolume,
       sfxEnabled,
       setSfxEnabled,
+      narrationVolume,
+      setNarrationVolume,
+      bgmVolume,
+      setBgmVolume,
+      audioDucking,
+      setAudioDucking,
+      speechRate,
+      setSpeechRate,
+      speechPitch,
+      setSpeechPitch,
+      audioReactiveShake,
+      setAudioReactiveShake,
+      shakeIntensity,
+      setShakeIntensity,
+      videoFormat,
+      setVideoFormat,
+      backgroundStyle,
+      setBackgroundStyle,
+      subtitlesStyle,
+      setSubtitlesStyle,
       videoUrl,
       setVideoUrl,
       isSavingEdit,
@@ -1114,6 +1255,16 @@ export function useAppState() {
       isMuted,
       sfxVolume,
       sfxEnabled,
+      narrationVolume,
+      bgmVolume,
+      audioDucking,
+      speechRate,
+      speechPitch,
+      audioReactiveShake,
+      shakeIntensity,
+      videoFormat,
+      backgroundStyle,
+      subtitlesStyle,
       videoUrl,
       isSavingEdit,
       isScraping,

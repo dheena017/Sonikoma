@@ -39,6 +39,9 @@ interface TimelineCardProps {
   isDragOver?: boolean;
   setPanels?: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
   fetchWithInterceptor?: any;
+  voiceActor?: string;
+  speechRate?: number;
+  speechPitch?: number;
 }
 
 interface DialogueClipSliderProps {
@@ -236,6 +239,9 @@ const TimelineCard = ({
   isDragOver,
   setPanels,
   fetchWithInterceptor,
+  voiceActor,
+  speechRate,
+  speechPitch,
 }: TimelineCardProps) => {
   const [isTracksExpanded, setIsTracksExpanded] = React.useState(false);
   const [isMagicProcessing, setIsMagicProcessing] = React.useState(false);
@@ -259,18 +265,20 @@ const TimelineCard = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: panel.image_url }),
       });
-      const layerData = await layerRes.json();
 
       let layersObj = null;
-      if (layerData.success && layerData.layers) {
-        layersObj = {
-          background_url: layerData.layers.background_url,
-          character_url: layerData.layers.character_url,
-          text_url: layerData.layers.text_url,
-          bg_visible: true,
-          char_visible: true,
-          text_visible: true,
-        };
+      if (layerRes.ok) {
+        const layerData = await layerRes.json();
+        if (layerData.success && layerData.layers) {
+          layersObj = {
+            background_url: layerData.layers.background_url,
+            character_url: layerData.layers.character_url,
+            text_url: layerData.layers.text_url,
+            bg_visible: true,
+            char_visible: true,
+            text_visible: true,
+          };
+        }
       }
 
       // 2. Generate Audio TTS
@@ -280,6 +288,9 @@ const TimelineCard = ({
         text: panel.speech_text,
         dialogue_list: [panel.speech_text],
         target_duration: panel.duration > 0 ? panel.duration : 4.5,
+        voice: voiceActor || undefined,
+        speech_rate: speechRate,
+        speech_pitch: speechPitch,
       });
 
       let audioUrl = null;
