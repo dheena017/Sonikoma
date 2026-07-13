@@ -1,7 +1,7 @@
 import React from "react";
 import LiveScraperDeck from "../../scraper/LiveScraperDeck";
 import StoryboardTimeline from "../../timeline/StoryboardTimeline";
-import VideoMonitor from "../../video/VideoMonitor";
+import CinemaPlayer from "../../video/CinemaPlayer";
 import OutputMetadataPanel from "../../video/OutputMetadataPanel";
 import LayoutEditorPage from "../EditorPageLayout.js";
 import ImageEditorPage from "../Tools/ImageEditor/ImageEditorPage";
@@ -424,7 +424,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
           </div>
         ) : (
           <>
-            {/* Primary Canvas: Video Monitor (Sticky Background) */}
+            {/* Primary Canvas: CinemaPlayer renders directly to handle preview screen displays */}
             {activeTab !== "settings" && activeTab !== "audio-settings" && (
               <div
                 id="section-monitor"
@@ -435,25 +435,13 @@ const EditorPage: React.FC<EditorPageProps> = ({
                 }`}
               >
                 <div className="flex-1 w-full h-full relative">
-                  <VideoMonitor
-                    activePreviewTab={activePreviewTab}
-                    setActivePreviewTab={setActivePreviewTab}
-                    videoUrl={videoUrl}
+                  <CinemaPlayer
                     panels={panels}
-                    aspectRatio={aspectRatio}
-                    videoPlayerRef={videoPlayerRef}
-                    currentPanelIndex={currentPanelIndex}
-                    playbackTime={playbackTime}
-                    reprocessingPanelId={reprocessingPanelId}
-                    quality={previewQuality}
-                    storyboardPlaying={storyboardPlaying}
-                    isMuted={isMuted}
-                    setCurrentPanelIndex={setCurrentPanelIndex}
-                    setPlaybackTime={setPlaybackTime}
-                    setStoryboardPlaying={setStoryboardPlaying}
-                    setIsMuted={setIsMuted}
-                    toggleStoryboardPlayback={toggleStoryboardPlayback}
-                    resetStoryboardPlayback={resetStoryboardPlayback}
+                    videoUrl={activePreviewTab === "video" ? videoUrl : null}
+                    seriesSlug={null}
+                    chapterSlug={null}
+                    navigateTo={() => {}}
+                    addNotification={addNotification}
                   />
                 </div>
               </div>
