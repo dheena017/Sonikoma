@@ -101,18 +101,17 @@ const EditorMiniSidebarInner = ({
 
             return (
               <div key={tool.key} className="relative group w-full flex justify-center py-1">
-                {/* Premium Floating Active Pill */}
+                {/* Active Pill */}
                 <div
-                  className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-500 ease-out z-10 ${
+                  className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
                     isActive
-                      ? "h-6 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.9)] opacity-100"
+                      ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] opacity-100"
                       : "h-0 bg-transparent opacity-0"
                   }`}
                 />
 
                 <button
                   onClick={() => {
-                    console.log(`[EditorMiniSidebar] Selecting tool: ${tool.key}`);
                     setActiveTool(tool.key);
                   }}
                   onMouseEnter={(e) => {
@@ -120,22 +119,21 @@ const EditorMiniSidebarInner = ({
                     setHoveredTool(tool.key);
                   }}
                   onMouseLeave={() => setHoveredTool(null)}
-                  className="p-1.5 transition-all duration-300 cursor-pointer relative flex items-center justify-center outline-none focus:outline-none"
+                  className="p-1.5 transition-all duration-300 cursor-pointer relative flex items-center justify-center group-active:scale-95"
                 >
-                  {/* iOS-style icon pill container with inner shadow */}
+                  {/* Icon pill */}
                   <div
-                    className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 group-active:scale-90 ${
+                    className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${
                       isActive
-                        ? "bg-purple-500/20 border border-purple-500/50 shadow-[inset_0_0_12px_rgba(168,85,247,0.2),0_0_14px_rgba(168,85,247,0.3)]"
-                        : "bg-neutral-800/80 border border-neutral-700/50 shadow-sm group-hover:bg-purple-500/10 group-hover:border-purple-500/30 group-hover:shadow-[0_0_10px_rgba(168,85,247,0.15)]"
+                        ? "bg-purple-500/20 border border-purple-500/40 shadow-[0_0_14px_rgba(168,85,247,0.25)]"
+                        : "bg-neutral-800 border border-neutral-700 group-hover:bg-purple-500/10 group-hover:border-purple-500/20"
                     }`}
                   >
                     <Icon
-                      strokeWidth={isActive ? 2.5 : 2}
-                      className={`w-[18px] h-[18px] transition-all duration-300 ${
+                      className={`w-[18px] h-[18px] transition-colors duration-300 ${
                         isActive
-                          ? "text-purple-300 drop-shadow-[0_0_8px_rgba(216,180,254,0.5)]"
-                          : "text-neutral-400 group-hover:text-purple-300 group-hover:scale-110"
+                          ? "text-purple-400"
+                          : "text-neutral-400 group-hover:text-purple-300"
                       }`}
                     />
                   </div>
@@ -230,12 +228,12 @@ const EditorMiniSidebarInner = ({
     const Icon = item.icon;
 
     return (
-      <div className="relative group w-full flex justify-center py-1">
-        {/* Premium Floating Active Pill */}
+      <div className="relative group w-full flex justify-center py-0.5">
+        {/* Active Pill */}
         <div
-          className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-500 ease-out z-10 ${
+          className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
             isActive
-              ? "h-6 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.9)] opacity-100"
+              ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] opacity-100"
               : "h-0 bg-transparent opacity-0"
           }`}
         />
@@ -289,22 +287,21 @@ const EditorMiniSidebarInner = ({
             setHover(true);
           }}
           onMouseLeave={() => setHover(false)}
-          className="p-1.5 transition-all duration-300 cursor-pointer relative flex items-center justify-center outline-none focus:outline-none"
+          className="p-1.5 transition-all duration-300 cursor-pointer relative flex items-center justify-center group-active:scale-95"
         >
-          {/* iOS-style icon pill container with inner shadow */}
+          {/* Icon pill */}
           <div
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 group-active:scale-90 ${
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${
               isActive
-                ? "bg-purple-500/20 border border-purple-500/50 shadow-[inset_0_0_12px_rgba(168,85,247,0.2),0_0_14px_rgba(168,85,247,0.3)]"
-                : "bg-neutral-800/80 border border-neutral-700/50 shadow-sm group-hover:bg-purple-500/10 group-hover:border-purple-500/30 group-hover:shadow-[0_0_10px_rgba(168,85,247,0.15)]"
+                ? "bg-purple-500/20 border border-purple-500/40 shadow-[0_0_14px_rgba(168,85,247,0.25)]"
+                : "bg-neutral-800 border border-neutral-700 group-hover:bg-purple-500/10 group-hover:border-purple-500/20"
             }`}
           >
             <Icon
-              strokeWidth={isActive ? 2.5 : 2}
-              className={`w-[18px] h-[18px] transition-all duration-300 ${
+              className={`w-[18px] h-[18px] transition-colors duration-300 ${
                 isActive
-                  ? "text-purple-300 drop-shadow-[0_0_8px_rgba(216,180,254,0.5)]"
-                  : "text-neutral-400 group-hover:text-purple-300 group-hover:scale-110"
+                  ? "text-purple-400"
+                  : "text-neutral-400 group-hover:text-purple-300"
               }`}
             />
           </div>
