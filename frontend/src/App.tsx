@@ -618,6 +618,12 @@ export default function App() {
       /^\/workspace\/editor\/series\/([^\/]+)\/chapters\/([^\/]+)(?:\/image-editor)?\/?$/
     );
     const isDetailsMode = currentPath.endsWith("/details");
+    const isImageEditorPage =
+      currentPath === "/image-editor" ||
+      currentPath === "/image-editor/" ||
+      currentPath.startsWith("/image-editor/") ||
+      currentPath.endsWith("/image-editor") ||
+      currentPath.endsWith("/image-editor/");
     const isWorkspaceEditorRoot =
       currentPath === "/workspace/editor" ||
       currentPath === "/workspace/editor/";
@@ -696,6 +702,7 @@ export default function App() {
       isForgotPasswordPath: currentPath === "/forgot-password",
       isDisplayPath: currentPath.startsWith("/display/"),
       editorRouteMatch,
+      isImageEditorPage,
     };
   }, [currentPath]);
 
@@ -739,6 +746,7 @@ export default function App() {
     isForgotPasswordPath,
     isDisplayPath,
     editorRouteMatch,
+    isImageEditorPage,
   } = pathFlags;
 
   const isAnyAdmin = isAdminPath || isAdminDashboardPath;
@@ -757,12 +765,12 @@ export default function App() {
   const isWorkspaceEditorRoot =
     currentPath === "/workspace/editor" || currentPath === "/workspace/editor/";
   const isProEditorPage =
-    Boolean(editorRouteMatch) ||
+    (Boolean(editorRouteMatch) ||
     currentPath === "/editor" ||
     currentPath === "/editor/" ||
     currentPath === "/workspace/editor" ||
     currentPath === "/workspace/editor/" ||
-    currentPath.startsWith("/workspace/editor/");
+    currentPath.startsWith("/workspace/editor/")) && !isImageEditorPage;
   const editorSeriesSlug = editorRouteMatch?.[1] || seriesSlugState || null;
   const editorChapterSlug = editorRouteMatch?.[2] || chapterSlugState || null;
 
@@ -1155,6 +1163,26 @@ export default function App() {
             />
           )}
         </>
+      ) : isImageEditorPage ? (
+        <Sidebar
+          isProcessing={isProcessing}
+          panels={panels}
+          scrapedImages={scrapedImages}
+          totalCalculatedDuration={totalCalculatedDuration}
+          currentPath={currentPath}
+          editingImageIdx={editingImageIdx}
+          lastEditorPath={lastEditorPath}
+          isBatchCropping={isBatchCropping}
+          isCleaningBubbles={isCleaningBubbles}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          projectId={projectId}
+          isDirty={isWorkspaceDirty}
+          navigateTo={navigateTo}
+          notifications={notifications}
+          seriesSlug={seriesSlugState}
+          chapterSlug={chapterSlugState}
+        />
       ) : (
         <>
           <Sidebar
@@ -1197,7 +1225,7 @@ export default function App() {
         } ${!isAnyAdmin && isSidebarOpen ? "overflow-hidden" : ""}`}
       >
         {/* Top Header */}
-        {!isSidebarOpen && !isProEditorPage && !isAnyAdmin && (
+        {!isSidebarOpen && !isProEditorPage && !isAnyAdmin && !isImageEditorPage && (
           isCreativeSuitePath ? (
             <CreativeSuiteHeader
               currentPath={currentPath}
@@ -1261,8 +1289,8 @@ export default function App() {
         )}
 
         <div
-          className={`${!isSidebarOpen ? "lg:pl-20" : ""} ${
-            !isSidebarOpen && !isProEditorPage
+          className={`${!isSidebarOpen && !isImageEditorPage ? "lg:pl-20" : ""} ${
+            !isSidebarOpen && !isProEditorPage && !isImageEditorPage
               ? "pt-[59px] min-h-[calc(100vh-59px)]"
               : "min-h-screen"
           } flex-grow flex-1 flex flex-col transition-all duration-300`}
@@ -1813,20 +1841,16 @@ export default function App() {
           )}
 
           {/* PAGE VIEW 20: Advanced Crop & Trim Editor Page */}
-          {isEditorPath &&
-            !isPipMode &&
-            !isProEditorPage &&
-            editingImageIdx !== null &&
-            (scrapedImages.length === 0 ? (
-              <div className="flex-1 flex flex-col items-center justify-center min-h-[500px] text-neutral-400">
-                <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4" />
-                <p className="text-sm font-semibold font-mono text-purple-300">
-                  Loading project storyboard panels...
-                </p>
-              </div>
-            ) : (
-              <ImageEditorPage appLogic={memoizedAppLogic} />
-            ))}
+          {(isImageEditorPage || (isEditorPath && !isProEditorPage)) && !isPipMode && (
+            <ImageEditorPage
+              appLogic={memoizedAppLogic}
+              themeMode={themeMode}
+              toggleThemeMode={toggleThemeMode}
+              isSidebarOpen={isSidebarOpen}
+              setIsSidebarOpen={setIsSidebarOpen}
+              navigateTo={navigateTo}
+            />
+          )}
 
           {/* PAGE VIEW 21: Admin Dashboard */}
           {isAdminPath && (

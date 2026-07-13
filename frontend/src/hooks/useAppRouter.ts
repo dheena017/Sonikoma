@@ -214,7 +214,10 @@ export function useAppRouter({
             path.startsWith("/workspace/editor/") ||
             path === "/editor" ||
             path === "/editor/" ||
-            path.startsWith("/editor/");
+            path.startsWith("/editor/") ||
+            path === "/image-editor" ||
+            path === "/image-editor/" ||
+            path.startsWith("/image-editor/");
 
           if (isProtectedRoute) {
             window.history.replaceState({}, "", "/");
@@ -300,7 +303,8 @@ export function useAppRouter({
         setEditingImageIdx(null);
       } else if (
         path.startsWith("/editor") ||
-        path.startsWith("/workspace/editor")
+        path.startsWith("/workspace/editor") ||
+        path.startsWith("/image-editor")
       ) {
         const params = new URLSearchParams(window.location.search);
 

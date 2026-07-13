@@ -5,12 +5,25 @@ import { useAppLogic } from "../../../../../hooks/useAppLogic";
 import { ImageEditorHeader } from "./ImageEditorHeader";
 import ImageEditorCanvasContainer from "./ImageEditorCanvasContainer";
 import ImageEditorSidebar from "./ImageEditorSidebar";
+import { ImageEditorLayout } from "./ImageEditorLayout";
 
 interface ImageEditorPageProps {
   appLogic: ReturnType<typeof useAppLogic>;
+  themeMode?: "dark" | "light";
+  toggleThemeMode?: () => void;
+  isSidebarOpen?: boolean;
+  setIsSidebarOpen?: (val: boolean) => void;
+  navigateTo?: (path: string) => void;
 }
 
-const ImageEditorPage = React.memo(({ appLogic }: ImageEditorPageProps) => {
+const ImageEditorPage = React.memo(({
+  appLogic,
+  themeMode,
+  toggleThemeMode,
+  isSidebarOpen,
+  setIsSidebarOpen,
+  navigateTo
+}: ImageEditorPageProps) => {
   const { editingImageIdx, setEditingImageIdx } = useCropEditorStore();
   const [isToolsPanelOpen, setIsToolsPanelOpen] = useState(true);
 
@@ -103,27 +116,42 @@ const ImageEditorPage = React.memo(({ appLogic }: ImageEditorPageProps) => {
 
   // Render standard inline layout (No Modal/Fixed overlays!)
   return (
-    <div className="w-full h-full bg-[#0B0F19] text-white flex flex-col overflow-hidden relative">
-      <ImageEditorHeader
-        editingImageIdx={editingImageIdx ?? 0}
-        scrapedImages={appLogic.scrapedImages}
-        handlePrevImage={editorProps.handlePrevImage}
-        handleNextImage={editorProps.handleNextImage}
-        handleUndo={editorProps.handleUndo}
-        historyLength={editorProps.history.length}
-        handleRedo={editorProps.handleRedo}
-        redoHistoryLength={editorProps.redoHistory.length}
-        handleDeleteCurrentImage={editorProps.handleDeleteCurrentImage}
-        setEditingImageIdx={setEditingImageIdx}
-        activeTab={editorProps.activeTab}
-        isPipMode={false}
-        setIsPipMode={() => {}}
-        slices={editorProps.slices}
-        isToolsPanelOpen={isToolsPanelOpen}
-        setIsToolsPanelOpen={setIsToolsPanelOpen}
-        handleExecuteSave={editorProps.handleExecuteSave}
-      />
-
+    <ImageEditorLayout
+      header={
+        <ImageEditorHeader
+          editingImageIdx={editingImageIdx ?? 0}
+          scrapedImages={appLogic.scrapedImages}
+          handlePrevImage={editorProps.handlePrevImage}
+          handleNextImage={editorProps.handleNextImage}
+          handleUndo={editorProps.handleUndo}
+          historyLength={editorProps.history.length}
+          handleRedo={editorProps.handleRedo}
+          redoHistoryLength={editorProps.redoHistory.length}
+          handleDeleteCurrentImage={editorProps.handleDeleteCurrentImage}
+          setEditingImageIdx={setEditingImageIdx}
+          activeTab={editorProps.activeTab}
+          isPipMode={false}
+          setIsPipMode={() => {}}
+          slices={editorProps.slices}
+          isToolsPanelOpen={isToolsPanelOpen}
+          setIsToolsPanelOpen={setIsToolsPanelOpen}
+          handleExecuteSave={editorProps.handleExecuteSave}
+          user={appLogic.user}
+          notifications={appLogic.notifications}
+          markNotificationAsRead={appLogic.markNotificationAsRead}
+          markAllNotificationsAsRead={appLogic.markAllNotificationsAsRead}
+          deleteNotification={appLogic.deleteNotification}
+          clearAllNotifications={appLogic.clearAllNotifications}
+          notificationsMuted={appLogic.notificationsMuted}
+          setNotificationsMuted={appLogic.setNotificationsMuted}
+          themeMode={themeMode}
+          toggleThemeMode={toggleThemeMode}
+          onToggleSidebar={setIsSidebarOpen ? () => setIsSidebarOpen(!isSidebarOpen) : undefined}
+          isSidebarOpen={isSidebarOpen}
+          navigateTo={navigateTo}
+        />
+      }
+    >
       <div className="flex-1 flex flex-row overflow-hidden w-full relative">
         {/* Center Canvas */}
         <main className="flex-1 h-full relative overflow-hidden bg-black/50 flex items-center justify-center">
@@ -260,7 +288,7 @@ const ImageEditorPage = React.memo(({ appLogic }: ImageEditorPageProps) => {
           </div>
         </aside>
       </div>
-    </div>
+    </ImageEditorLayout>
   );
 });
 

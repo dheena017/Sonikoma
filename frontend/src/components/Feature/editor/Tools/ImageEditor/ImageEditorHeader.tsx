@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   X,
   Check,
@@ -9,9 +9,13 @@ import {
   Trash2,
   PanelRightClose,
   PanelRightOpen,
-  Minimize2
+  Minimize2,
+  Bell,
+  BellOff,
+  Menu
 } from "lucide-react";
 import { ImageTool } from "@/hooks/useImageEditorState"; // Adjust path if needed
+import NotificationDropdown from "@/components/notification/NotificationDropdown";
 
 interface ImageEditorHeaderProps {
   editingImageIdx: number | null;
@@ -31,6 +35,21 @@ interface ImageEditorHeaderProps {
   isToolsPanelOpen: boolean;
   setIsToolsPanelOpen: (val: boolean | ((prev: boolean) => boolean)) => void;
   handleExecuteSave?: () => void;
+
+  // New Header Props:
+  user?: any;
+  notifications?: any[];
+  markNotificationAsRead?: (id: number) => void;
+  markAllNotificationsAsRead?: () => void;
+  deleteNotification?: (id: number) => void;
+  clearAllNotifications?: () => void;
+  notificationsMuted?: boolean;
+  setNotificationsMuted?: (muted: boolean) => void;
+  themeMode?: "dark" | "light";
+  toggleThemeMode?: () => void;
+  onToggleSidebar?: () => void;
+  isSidebarOpen?: boolean;
+  navigateTo?: (path: string) => void;
 }
 
 export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({ 
@@ -50,14 +69,104 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
   slices,
   isToolsPanelOpen,
   setIsToolsPanelOpen,
-  handleExecuteSave
+  handleExecuteSave,
+
+  // New Header Props:
+  user,
+  notifications = [],
+  markNotificationAsRead = () => {},
+  markAllNotificationsAsRead = () => {},
+  deleteNotification = () => {},
+  clearAllNotifications = () => {},
+  notificationsMuted = false,
+  setNotificationsMuted,
+  themeMode = "dark",
+  toggleThemeMode,
+  onToggleSidebar,
+  isSidebarOpen = false,
+  navigateTo
 }) => {
+  const [showNotifications, setShowNotifications] = useState(false);
+  const notificationsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+      if (
+        notificationsRef.current &&
+        !notificationsRef.current.contains(target)
+      ) {
+        setShowNotifications(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
+
+  const handleLogoClick = () => {
+    const params = new URLSearchParams(window.location.search);
+    const path = window.location.pathname;
+    const match = path.match(
+      /^\/workspace\/editor\/series\/([^\/]+)\/chapters\/([^\/]+)(?:\/image-editor)?\/?$/
+    );
+    const series = match ? match[1] : params.get("series");
+    const chapter = match ? match[2] : params.get("chapter");
+    if (series && chapter) {
+      const target = `/workspace/editor/series/${series}/chapters/${chapter}`;
+      if (navigateTo) {
+        navigateTo(target);
+      } else {
+        window.history.pushState({}, "", target);
+        window.dispatchEvent(new Event("popstate"));
+      }
+    } else {
+      if (navigateTo) {
+        navigateTo("/dashboard");
+      }
+    }
+  };
+
   const hasMultipleImages = scrapedImages.length > 1;
 
   return (
     <header className="h-16 w-full bg-[#0B0F19] border-b border-gray-800 flex items-center justify-between px-6 flex-shrink-0 z-50">
-      {/* Left: Title, Badge & Navigation */}
+      {/* Left: Hamburger, Brand / Logo & Navigation */}
       <div className="flex items-center space-x-4">
+        {onToggleSidebar && (
+          <div className="w-auto lg:w-20 flex items-center justify-center shrink-0">
+            <button
+              onClick={onToggleSidebar}
+              className="icon-pill cursor-pointer hover:icon-pill--purple transition-all"
+              title="Toggle Navigation Menu"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          </div>
+        )}
+
+        <div
+          className="flex items-center gap-3 cursor-pointer select-none transition-all duration-300 group/brand"
+          onClick={handleLogoClick}
+        >
+          <img
+            key={themeMode}
+            src={themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"}
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = "/logo.png";
+            }}
+            className="h-10 w-10 rounded-full shadow-lg shadow-purple-900/40 shrink-0 object-cover transition-all duration-300 animate-[fadeIn_0.3s_ease-out] group-hover/brand:scale-105 group-hover/brand:rotate-[6deg]"
+            style={{
+              background: themeMode === "light" ? "#ffffff" : "#000000",
+            }}
+            alt="Sonikoma Logo"
+          />
+          <span className="font-black text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-white group-hover/brand:brightness-110 transition-all duration-300 font-sans hidden sm:inline-block">
+            Sonikoma
+          </span>
+        </div>
+
         <span className="px-3 py-1 text-[10px] font-bold tracking-wider text-purple-400 bg-purple-900/30 rounded-full border border-purple-700/50">
           IMAGE EDITOR
         </span>
@@ -83,10 +192,6 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
             </button>
           </div>
         )}
-
-        <div className="hidden md:block">
-          <h1 className="text-sm font-semibold text-white">Advanced Image & Style Editor</h1>
-        </div>
       </div>
 
       {/* Center: History & Canvas Tools */}
@@ -126,8 +231,9 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
         )}
       </div>
 
-      {/* Right: Toggle Sidebar & Exit Actions */}
+      {/* Right: Toggle Sidebar, Notifications, Profile & Exit Actions */}
       <div className="flex items-center space-x-3">
+        {/* Toggle properties panel */}
         <button
           onClick={() => setIsToolsPanelOpen((prev) => !prev)}
           className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800 transition border border-transparent hover:border-gray-700"
@@ -135,6 +241,86 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
         >
           {isToolsPanelOpen ? <PanelRightClose className="w-5 h-5" /> : <PanelRightOpen className="w-5 h-5" />}
         </button>
+
+        {/* Notifications Bell */}
+        <div className="relative" ref={notificationsRef}>
+          <button
+            onClick={() => setShowNotifications(!showNotifications)}
+            className={`p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800 transition border border-transparent hover:border-gray-700 relative ${
+              showNotifications ? "bg-gray-800 text-white border-gray-700" : ""
+            }`}
+            title="Notifications"
+          >
+            {notificationsMuted ? (
+              <BellOff className="h-5 w-5 text-rose-500" />
+            ) : (
+              <Bell className="h-5 w-5" />
+            )}
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-purple-600 text-[9px] font-bold text-white ring-2 ring-neutral-950">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
+          </button>
+
+          {showNotifications && (
+            <NotificationDropdown
+              notifications={notifications}
+              onClose={() => setShowNotifications(false)}
+              onMarkAsRead={markNotificationAsRead}
+              onMarkAllAsRead={markAllNotificationsAsRead}
+              onDelete={deleteNotification}
+              onClearAll={clearAllNotifications}
+              onNavigateToAll={() => {
+                setShowNotifications(false);
+                if (navigateTo) navigateTo("/notifications");
+              }}
+              notificationsMuted={notificationsMuted}
+              onToggleMute={() =>
+                setNotificationsMuted &&
+                setNotificationsMuted(!notificationsMuted)
+              }
+            />
+          )}
+        </div>
+
+        {/* User Profile */}
+        {user && (
+          <button
+            onClick={() => navigateTo && navigateTo("/profile")}
+            className="flex items-center gap-2 px-1.5 py-1 rounded-xl bg-neutral-900 border border-neutral-850 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer overflow-hidden max-w-[120px] h-[34px]"
+            title="View Profile"
+          >
+            <div className="w-6 h-6 rounded-lg bg-purple-600/20 flex items-center justify-center overflow-hidden shrink-0 border border-purple-500/30">
+              {user.avatar_url &&
+              !user.avatar_url.startsWith("linear-gradient") ? (
+                <div className="w-full h-full relative">
+                  <img
+                    src={user.avatar_url}
+                    alt="Profile"
+                    className="w-full h-full object-cover relative z-10"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white select-none">
+                    {(user.full_name || "U").charAt(0).toUpperCase()}
+                  </div>
+                </div>
+              ) : (
+                <div
+                  className="w-full h-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white select-none"
+                  style={user.avatar_url ? { background: user.avatar_url } : {}}
+                >
+                  {(user.full_name || "U").charAt(0).toUpperCase()}
+                </div>
+              )}
+            </div>
+            <span className="text-[10px] font-bold text-neutral-300 truncate hidden sm:inline">
+              {user.full_name?.split(" ")[0] || "User"}
+            </span>
+          </button>
+        )}
 
         <div className="w-px h-6 bg-gray-800 mx-2"></div>
 
@@ -149,8 +335,8 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
             const chapter = match ? match[2] : params.get("chapter");
             if (series && chapter) {
               const target = `/workspace/editor/series/${series}/chapters/${chapter}`;
-              if ((window as any).navigateTo) {
-                (window as any).navigateTo(target);
+              if (navigateTo) {
+                navigateTo(target);
               } else {
                 window.history.pushState({}, "", target);
                 window.dispatchEvent(new Event("popstate"));
