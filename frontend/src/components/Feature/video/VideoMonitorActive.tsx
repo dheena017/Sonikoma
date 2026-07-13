@@ -79,6 +79,58 @@ export function VideoMonitorActive({
     setHoverProgress((prev) => ({ ...prev, isHovering: false }));
   };
 
+  // Image preloading effect to prevent visual flashing during scrubbing
+  React.useEffect(() => {
+    if (panels.length === 0) return;
+    const indices = [currentPanelIndex - 1, currentPanelIndex + 1];
+    indices.forEach(idx => {
+      if (idx >= 0 && idx < panels.length) {
+        const p = panels[idx];
+        if (p.image_url) {
+          const img = new Image();
+          img.src = p.image_url;
+        }
+        if (p.layers) {
+          if (p.layers.background_url) {
+            const bg = new Image();
+            bg.src = p.layers.background_url;
+          }
+          if (p.layers.character_url) {
+            const char = new Image();
+            char.src = p.layers.character_url;
+          }
+        }
+      }
+    });
+  }, [currentPanelIndex, panels]);
+
+  // Keydown event listener for comma/period frame stepping
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (activePreviewTab !== "timeline" || !activeStoryboardPanel) return;
+
+      // Don't trigger if user is typing in form inputs
+      const activeTag = document.activeElement?.tagName.toLowerCase();
+      if (activeTag === "input" || activeTag === "textarea") return;
+
+      if (e.key === "," || e.key === "<") {
+        // Step back 1 frame (0.1 seconds)
+        e.preventDefault();
+        setPlaybackTime(Math.max(0, parseFloat((playbackTime - 0.1).toFixed(1))));
+      } else if (e.key === "." || e.key === ">") {
+        // Step forward 1 frame (0.1 seconds)
+        e.preventDefault();
+        const dur = activeStoryboardPanel.duration || 4.5;
+        setPlaybackTime(Math.min(dur, parseFloat((playbackTime + 0.1).toFixed(1))));
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [activePreviewTab, playbackTime, activeStoryboardPanel]);
+
   React.useEffect(() => {
     setBgDims(null);
   }, [currentPanelIndex]);
@@ -531,16 +583,42 @@ export function VideoMonitorActive({
                 )}
 
                 <div
-                  className="relative h-1.5 bg-white/10 rounded-full overflow-visible cursor-pointer transition-all duration-150 flex items-center"
+                  className="relative h-2 bg-white/10 rounded-full overflow-visible cursor-pointer transition-all duration-150 flex items-center"
                   onClick={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
                     const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
                     const dur = activeStoryboardPanel?.duration || 4.5;
-                    setPlaybackTime(parseFloat((pct * dur).toFixed(1)));
+                    let targetTime = pct * dur;
+
+                    // Shift-key boundary snapping to 0 or panel end
+                    if (e.shiftKey) {
+                      if (targetTime < dur / 2) {
+                        targetTime = 0;
+                      } else {
+                        targetTime = dur;
+                      }
+                    }
+
+                    setPlaybackTime(parseFloat(targetTime.toFixed(1)));
                   }}
                   onMouseMove={handleProgressBarMouseMove}
                   onMouseLeave={handleProgressBarMouseLeave}
                 >
+                  {/* Faint Audio Peaks Waveform in scrubber background */}
+                  {activeStoryboardPanel?.syncMap?.audio_peaks && (
+                    <div className="absolute inset-0 flex items-center justify-between px-1 pointer-events-none opacity-30">
+                      {activeStoryboardPanel.syncMap.audio_peaks.filter((_, i) => i % 2 === 0).map((peak, idx) => (
+                        <div
+                          key={idx}
+                          className="w-[1.5px] bg-[#b249f8]/45 rounded-full"
+                          style={{
+                            height: `${Math.max(15, peak * 100)}%`,
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
+
                   {/* Played fill - Styled with exact brilliant purple matching the screenshot */}
                   <div
                     className="absolute top-0 left-0 h-full bg-[#b249f8] rounded-full transition-all duration-100"
