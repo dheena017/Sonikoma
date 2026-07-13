@@ -15,6 +15,184 @@ if (typeof window !== "undefined" && window.speechSynthesis) {
   };
 }
 
+function parseVoiceCharacteristics(voiceActor: string) {
+  const actorLower = voiceActor.toLowerCase();
+
+  // 1. Detect language prefix & full code
+  let targetLangPrefix = "en";
+  let targetFullLang = "en-US";
+
+  if (actorLower.includes("korean") || actorLower.includes("ko-kr") || actorLower.includes("sunhi") || actorLower.includes("injoon")) {
+    targetLangPrefix = "ko";
+    targetFullLang = "ko-KR";
+  } else if (actorLower.includes("japanese") || actorLower.includes("ja-jp") || actorLower.includes("nanami")) {
+    targetLangPrefix = "ja";
+    targetFullLang = "ja-JP";
+  } else if (actorLower.includes("chinese") || actorLower.includes("mandarin") || actorLower.includes("zh-cn") || actorLower.includes("xiaoxiao")) {
+    targetLangPrefix = "zh";
+    targetFullLang = "zh-CN";
+  } else if (actorLower.includes("tamil") || actorLower.includes("ta-in") || actorLower.includes("pallavi") || actorLower.includes("valluvar")) {
+    targetLangPrefix = "ta";
+    targetFullLang = "ta-IN";
+  } else if (actorLower.includes("en-gb") || actorLower.includes("sonia") || actorLower.includes("ryan") || actorLower.includes("uk") || actorLower.includes("english (uk)")) {
+    targetLangPrefix = "en";
+    targetFullLang = "en-GB";
+  } else if (actorLower.includes("en-au") || actorLower.includes("natasha") || actorLower.includes("australia") || actorLower.includes("english (au)")) {
+    targetLangPrefix = "en";
+    targetFullLang = "en-AU";
+  } else if (actorLower.includes("en-us") || actorLower.includes("guy") || actorLower.includes("jenny") || actorLower.includes("aria") || actorLower.includes("jason") || actorLower.includes("tony") || actorLower.includes("narrator") || actorLower.includes("shonen") || actorLower.includes("sultry") || actorLower.includes("anti-hero")) {
+    targetLangPrefix = "en";
+    targetFullLang = "en-US";
+  } else {
+    // Check if there is an explicit standard format in the string (e.g. "ko-KR-something" or "ta-IN-something")
+    const match = voiceActor.match(/([a-zA-Z]{2})-([a-zA-Z]{2})/);
+    if (match) {
+      targetLangPrefix = match[1].toLowerCase();
+      targetFullLang = match[0];
+    }
+  }
+
+  // 2. Detect gender
+  let targetGender: "male" | "female" | "neutral" = "male"; // default to male
+  if (
+    actorLower.includes("female") ||
+    actorLower.includes("sultry") ||
+    actorLower.includes("jenny") ||
+    actorLower.includes("aria") ||
+    actorLower.includes("sonia") ||
+    actorLower.includes("natasha") ||
+    actorLower.includes("sunhi") ||
+    actorLower.includes("nanami") ||
+    actorLower.includes("xiaoxiao") ||
+    actorLower.includes("pallavi")
+  ) {
+    targetGender = "female";
+  } else if (
+    actorLower.includes("male") ||
+    actorLower.includes("guy") ||
+    actorLower.includes("ryan") ||
+    actorLower.includes("injoon") ||
+    actorLower.includes("jason") ||
+    actorLower.includes("tony") ||
+    actorLower.includes("valluvar") ||
+    actorLower.includes("shonen") ||
+    actorLower.includes("narrator") ||
+    actorLower.includes("anti-hero")
+  ) {
+    targetGender = "male";
+  }
+
+  return { targetLangPrefix, targetFullLang, targetGender };
+}
+
+const matchVoice = (voices: SpeechSynthesisVoice[], voiceActor: string) => {
+  const { targetLangPrefix, targetFullLang, targetGender } = parseVoiceCharacteristics(voiceActor);
+
+  // Filter voices by the target language prefix (e.g. "ko", "ja", "ta", "zh", "en")
+  // We normalize the voice language tags to lowercase and replace underscores with hyphens
+  const langFiltered = voices.filter((v) => {
+    const vLang = v.lang.toLowerCase().replace("_", "-");
+    return vLang === targetFullLang.toLowerCase() || vLang.startsWith(targetLangPrefix + "-") || vLang === targetLangPrefix;
+  });
+
+  // Fallback: if absolutely no voice matches targetLangPrefix (e.g., Korean or Tamil voice is not installed),
+  // then we fall back to any voice that matches the language code, but if none exist, then we fall back to the entire voice list
+  // so we at least speak something.
+  const candidateVoices = langFiltered.length > 0 ? langFiltered : voices;
+
+  // Now, score each candidate voice
+  let bestVoice: SpeechSynthesisVoice | null = null;
+  let highestScore = -1;
+
+  for (const v of candidateVoices) {
+    let score = 0;
+    const vLang = v.lang.toLowerCase().replace("_", "-");
+    const vName = v.name.toLowerCase();
+
+    // 1. Language matching (max score: 100)
+    if (vLang === targetFullLang.toLowerCase()) {
+      score += 100; // Perfect full language & region match (e.g. ko-KR -> ko-KR)
+    } else if (vLang.startsWith(targetLangPrefix)) {
+      score += 50;  // Matching language prefix (e.g. en-GB -> en)
+    }
+
+    // 2. Gender matching (max score: 50)
+    if (targetGender === "female") {
+      const isFemaleKeyword =
+        vName.includes("female") ||
+        vName.includes("zira") ||
+        vName.includes("samantha") ||
+        vName.includes("hazel") ||
+        vName.includes("karen") ||
+        vName.includes("yuna") ||
+        vName.includes("haruka") ||
+        vName.includes("heera") ||
+        vName.includes("sun-hi") ||
+        vName.includes("nanami") ||
+        vName.includes("xiaoxiao") ||
+        vName.includes("pallavi");
+      const isMaleKeyword =
+        vName.includes("male") ||
+        vName.includes("david") ||
+        vName.includes("george") ||
+        vName.includes("injoon") ||
+        vName.includes("valluvar") ||
+        vName.includes("ryan") ||
+        vName.includes("guy");
+
+      if (isFemaleKeyword) {
+        score += 50;
+      } else if (!isMaleKeyword) {
+        score += 20; // fallback if gender is not explicitly male
+      }
+    } else if (targetGender === "male") {
+      const isMaleKeyword =
+        vName.includes("male") ||
+        vName.includes("david") ||
+        vName.includes("george") ||
+        vName.includes("injoon") ||
+        vName.includes("valluvar") ||
+        vName.includes("ryan") ||
+        vName.includes("guy") ||
+        vName.includes("jason") ||
+        vName.includes("tony");
+      const isFemaleKeyword =
+        vName.includes("female") ||
+        vName.includes("zira") ||
+        vName.includes("samantha") ||
+        vName.includes("hazel") ||
+        vName.includes("karen") ||
+        vName.includes("yuna") ||
+        vName.includes("haruka") ||
+        vName.includes("heera") ||
+        vName.includes("sun-hi") ||
+        vName.includes("nanami") ||
+        vName.includes("xiaoxiao") ||
+        vName.includes("pallavi");
+
+      if (isMaleKeyword) {
+        score += 50;
+      } else if (!isFemaleKeyword) {
+        score += 20; // fallback if gender is not explicitly female
+      }
+    }
+
+    // 3. Exact voice actor name matching (extra bonus 10)
+    const voiceActorPart = voiceActor.split(/[-—]/).pop()?.trim().toLowerCase() || "";
+    if (voiceActorPart && vName.includes(voiceActorPart)) {
+      score += 10;
+    }
+
+    // Keep track of the highest score
+    if (score > highestScore) {
+      highestScore = score;
+      bestVoice = v;
+    }
+  }
+
+  return bestVoice;
+};
+
 interface UsePlaybackEngineProps {
   panels: GeneratedPanel[];
   volume: number;
@@ -70,28 +248,15 @@ export function usePlaybackEngine({
             ? cachedVoices
             : window.speechSynthesis.getVoices();
 
-        let selectedVoice = null;
-        if (
-          voiceActor.toLowerCase().includes("sultry") ||
-          voiceActor.toLowerCase().includes("female")
-        ) {
-          selectedVoice = voices.find(
-            (v) =>
-              v.name.toLowerCase().includes("female") ||
-              v.name.toLowerCase().includes("zira") ||
-              v.name.toLowerCase().includes("samantha")
-          );
-        } else {
-          selectedVoice = voices.find(
-            (v) =>
-              v.name.toLowerCase().includes("male") ||
-              v.name.toLowerCase().includes("david") ||
-              v.name.toLowerCase().includes("premium")
-          );
-        }
+        const selectedVoice = matchVoice(voices, voiceActor);
 
         if (selectedVoice) {
           utterance.voice = selectedVoice;
+          utterance.lang = selectedVoice.lang;
+        } else {
+          // If no specific voice is returned, try to set lang from parsed characteristics
+          const { targetFullLang } = parseVoiceCharacteristics(voiceActor);
+          utterance.lang = targetFullLang;
         }
         utterance.volume = volume / 100;
 
