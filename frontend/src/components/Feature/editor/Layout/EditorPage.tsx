@@ -599,7 +599,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                       </div>
 
                       {/* Video Player */}
-                      <div className="max-w-4xl mx-auto w-full aspect-video rounded-xl overflow-hidden border border-neutral-800 shadow-2xl relative bg-black">
+                      <div className="w-full aspect-video rounded-xl overflow-hidden border border-neutral-800 shadow-2xl relative bg-black">
                         <CinemaPlayer
                           panels={panels}
                           videoUrl={activePreviewTab === "video" ? videoUrl : null}

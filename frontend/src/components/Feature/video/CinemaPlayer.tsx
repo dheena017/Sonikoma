@@ -740,7 +740,7 @@ export default function CinemaPlayer({
         {/* High Fidelity Animated Canvas preview for all playback track rendering */}
         <div className="relative w-full h-full flex items-center justify-center bg-[#060608]">
           {activePanelNow ? (
-            <div className="relative max-w-full max-h-[85%] aspect-video overflow-hidden border border-neutral-900 rounded-3xl shadow-2xl flex items-center justify-center bg-neutral-950">
+            <div className="relative max-w-full max-h-[92%] aspect-video overflow-hidden border border-neutral-900 rounded-3xl shadow-2xl flex items-center justify-center bg-neutral-950">
               {activePanelNow.layers ? (
                 <div className="relative w-full h-full flex items-center justify-center">
                   {/* Stacks custom background and separate character elements for deep immersion */}
