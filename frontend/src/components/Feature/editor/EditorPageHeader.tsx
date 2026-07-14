@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Focus, LayoutPanelTop, Save, Menu, Layers, Clock, Wifi, WifiOff, Share2, Bell, BellOff, Zap } from "lucide-react";
+import { Focus, LayoutPanelTop, Save, Menu, Layers, Clock, Wifi, WifiOff, Share2, Bell, BellOff, Zap, Monitor } from "lucide-react";
 import NotificationDropdown from "../../notification/NotificationDropdown";
 import { Notification } from "../../notification/NotificationStack";
 import { getUserCreditsPayload } from "../../../api/auth";
+import { useImageEditorStore } from "@/hooks/useImageEditorState";
 
 interface EditorPageHeaderProps {
   title: string;
@@ -58,6 +59,8 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
   fetchWithInterceptor,
   navigateTo,
 }) => {
+  const isPlayerOpen = useImageEditorStore((state) => state.playerSettings.isPlayerOpen);
+
   // Smoothly slide out of view if the mobile/drawer sidebar is open
   const headerVisibilityClass = isSidebarOpen
     ? "-translate-y-full opacity-0 pointer-events-none"
@@ -188,6 +191,23 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
             <span className="text-[11px]">{credits.toLocaleString()}</span>
           </button>
         )}
+
+        {/* Player Toggle Button */}
+        <button
+          type="button"
+          onClick={() => {
+            const current = useImageEditorStore.getState().playerSettings.isPlayerOpen;
+            useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: !current });
+          }}
+          title="Toggle Floating Player"
+          className={`flex items-center justify-center gap-1.5 w-11 h-11 rounded-2xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${
+            isPlayerOpen
+              ? "border-purple-500/50 bg-purple-500/10 text-purple-300 shadow-[inset_0_0_12px_rgba(168,85,247,0.15)]"
+              : "border-neutral-700 bg-neutral-800 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300"
+          }`}
+        >
+          <Monitor className="h-4 w-4" />
+        </button>
 
         {/* Focus Mode */}
         <button
