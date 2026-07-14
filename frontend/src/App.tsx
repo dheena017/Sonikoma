@@ -483,6 +483,8 @@ export default function App() {
     scrapedImages,
     targetUrl,
     fetchWithInterceptor: fetchWithInterceptor as typeof fetch,
+    narrative: appLogic.narrative,
+    setNarrative: appLogic.setNarrative,
     addNotification,
     accumulatedTokens,
     setAccumulatedTokens,

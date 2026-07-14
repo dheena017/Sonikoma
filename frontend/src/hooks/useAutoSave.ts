@@ -20,6 +20,8 @@ interface AutoSaveState {
   scrapedImages: string[];
   targetUrl: string;
   fetchWithInterceptor: typeof fetch;
+  narrative: any | null;
+  setNarrative?: (val: any | null) => void;
   addNotification?: (
     message: string,
     type: any,
@@ -68,6 +70,7 @@ export function useAutoSave(state: AutoSaveState) {
       cover_image: state.seriesCoverImage.trim(),
       synopsis: state.seriesSynopsis.trim(),
       scraped_images: state.scrapedImages,
+      narrative: state.narrative,
       audio_settings: {
         voiceActor: state.voiceActor,
         musicTheme: state.musicTheme,
@@ -114,6 +117,7 @@ export function useAutoSave(state: AutoSaveState) {
     state.seriesCoverImage,
     state.seriesSynopsis,
     state.scrapedImages,
+    state.narrative,
     state.panels,
     state.voiceActor,
     state.musicTheme,
@@ -265,6 +269,7 @@ export function useAutoSave(state: AutoSaveState) {
         cover_image: coverImage,
         synopsis,
         scraped_images: state.scrapedImages,
+        narrative: state.narrative,
         panels: serializePanels(targetPanels),
       });
 
@@ -301,6 +306,7 @@ export function useAutoSave(state: AutoSaveState) {
           synopsis: synopsis || null,
           video_url: finalVideoUrl,
           status: statusValue,
+          narrative: state.narrative,
           audio_settings: {
             voiceActor: state.voiceActor,
             musicTheme: state.musicTheme,

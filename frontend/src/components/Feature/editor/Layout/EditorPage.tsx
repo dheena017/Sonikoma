@@ -7,8 +7,10 @@ import LayoutEditorPage from "../EditorPageLayout.js";
 import ImageEditorPage from "../Tools/ImageEditor/ImageEditorPage";
 import AdvancedSettings from "../../video/AdvancedSettings";
 import AudioSettingsPage from "../../audio_settings/AudioSettingsPage";
+import NarrativeSection from "./NarrativeSection";
 import { useBackendHealth } from "../../../../hooks/useBackendHealth.js";
 import { getUserCredits } from "../../../../api/auth";
+import * as api from "../../../../api";
 import { Sliders, X, Mic } from "lucide-react";
 import { useImageEditorStore } from "@/hooks/useImageEditorState";
 import { resolveWorkspaceReturnPath } from "../../../../utils/workspaceNavigation.js";
@@ -70,6 +72,91 @@ const EditorPage: React.FC<EditorPageProps> = ({
   };
 
   const { status: backendStatus } = useBackendHealth();
+
+  const [isStoryDirectorProcessing, setIsStoryDirectorProcessing] = React.useState(false);
+
+  const handleStoryDirectorAction = async (
+    action: "analyze" | "regenerate" | "improve" | "apply_narrative",
+    modifier?: string
+  ) => {
+    if (panels.length === 0) {
+      addNotification("The timeline is empty. Please scrape some panels first.", "warning");
+      return;
+    }
+    setIsStoryDirectorProcessing(true);
+    addNotification(`AI Story Director is running: ${action}${modifier ? ` (${modifier})` : ""}...`, "info");
+    try {
+      const activeModel = selectedModel || "gemini-2.5-flash";
+      const payload = {
+        project_id: projectId,
+        panels: panels.map((p) => ({
+          id: p.id,
+          image_url: p.image_url,
+          speech_text: p.speech_text,
+          sfx: p.sfx,
+          visual_description: p.visual_description,
+          dialogue: p.dialogue,
+          subtitle: p.subtitle,
+          scene_description: p.sceneDescription,
+        })),
+        model: activeModel,
+        action,
+        modifier_instruction: modifier || "",
+        narrative: appLogic.narrative,
+      };
+
+      const res = await api.runStoryDirector(fetchWithInterceptor, payload);
+      if (res.success) {
+        if (res.narrative) {
+          appLogic.setNarrative(res.narrative);
+        }
+        if (Array.isArray(res.panels)) {
+          // Map backend panels to updated state panels
+          const updatedPanels = panels.map((p) => {
+            const improved = res.panels.find((ip: any) => ip.id === p.id);
+            if (improved) {
+              const aiDuration = Number(improved.duration);
+              const aiMotion = String(improved.motion_type || "").trim();
+              return {
+                ...p,
+                speech_text: improved.subtitle || improved.dialogue || p.speech_text,
+                sfx: improved.sfx || p.sfx,
+                duration: aiDuration > 0 ? aiDuration : p.duration,
+                motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
+                visual_description: improved.sceneDescription || p.visual_description,
+
+                // AI Story Director Fields
+                dialogue: improved.dialogue || "",
+                subtitle: improved.subtitle || "",
+                sceneDescription: improved.sceneDescription || "",
+                voiceEmotion: improved.voiceEmotion || "Normal",
+                backgroundMusic: improved.backgroundMusic || "",
+                soundEffects: improved.soundEffects || "",
+                speechSpeed: improved.speechSpeed || "Normal",
+                voiceIntensity: improved.voiceIntensity !== undefined ? improved.voiceIntensity : 5,
+                transitionSuggestion: improved.transitionSuggestion || "Cut",
+                storyConsistencyScore: improved.storyConsistencyScore !== undefined ? improved.storyConsistencyScore : 100,
+                dialogueQualityScore: improved.dialogueQualityScore !== undefined ? improved.dialogueQualityScore : 100,
+                visualContinuityScore: improved.visualContinuityScore !== undefined ? improved.visualContinuityScore : 100,
+                audioQualityScore: improved.audioQualityScore !== undefined ? improved.audioQualityScore : 100,
+              };
+            }
+            return p;
+          });
+          setPanels(updatedPanels);
+        }
+        addNotification("AI Story Director action completed successfully!", "success");
+        audioFeedback?.playSuccess();
+      } else {
+        throw new Error(res.error || "Failed to process AI Story Director action.");
+      }
+    } catch (err: any) {
+      console.error("[Story Director] Action failed:", err);
+      addNotification(`AI Story Director failed: ${err.message || String(err)}`, "error");
+    } finally {
+      setIsStoryDirectorProcessing(false);
+    }
+  };
 
   const {
     projectId,
@@ -600,6 +687,25 @@ const EditorPage: React.FC<EditorPageProps> = ({
                 </div>
               ) : (
                 <>
+                  {/* Narrative (AI Story Director) Section */}
+                  <div
+                    id="section-narrative"
+                    className="w-full max-w-[1600px] mx-auto space-y-4"
+                  >
+                    <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                      <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono">
+                        Narrative (AI Story Director)
+                      </h3>
+                    </div>
+                    <NarrativeSection
+                      narrative={appLogic.narrative}
+                      onUpdateNarrative={appLogic.setNarrative}
+                      onAction={handleStoryDirectorAction}
+                      isProcessing={isStoryDirectorProcessing}
+                      panelsLength={panels.length}
+                    />
+                  </div>
+
                   {/* MIDDLE: Storyboard Timeline */}
                   <div
                     id="section-timeline"
@@ -654,6 +760,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                       audioFeedback={audioFeedback}
                       selectedPanelIds={selectedPanelIds}
                       setSelectedPanelIds={handleSetSelectedPanelIds}
+                      handleAnalyzeAllPanels={() => handleStoryDirectorAction("analyze")}
                     />
                   </div>
 

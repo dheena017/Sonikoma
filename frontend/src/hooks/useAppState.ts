@@ -64,6 +64,7 @@ export function useAppState() {
   const [chapterSlugState, setChapterSlugState] = useState<string | null>(null);
   const [consoleLogs, setRawConsoleLogs] = useState<LogEntry[]>([]);
   const [characters, setCharacters] = useState<CharacterBio[]>([]);
+  const [narrative, setNarrative] = useState<any | null>(null);
 
   const projectIdRef = useRef(projectId);
   projectIdRef.current = projectId;
@@ -683,6 +684,11 @@ export function useAppState() {
           }
           setTargetUrl(data.project.url || "");
           setVideoUrl(data.project.video_url || null);
+          if (data.project.narrative) {
+            setNarrative(data.project.narrative);
+          } else {
+            setNarrative(null);
+          }
 
           // Populate details from loaded project
           const loadedSettings = data.project.audio_settings || {};
@@ -960,6 +966,7 @@ export function useAppState() {
     setSeriesAuthor("");
     setSeriesCoverImage("");
     setSeriesSynopsis("");
+    setNarrative(null);
     setRawConsoleLogs([
       normalizeLog(`[System] Workspace initialized for new project.`),
     ]);
@@ -1181,6 +1188,8 @@ export function useAppState() {
       markAllNotificationsAsRead,
       markNotificationAsRead,
       deleteNotification,
+      narrative,
+      setNarrative,
     }),
     [
       user,
@@ -1288,6 +1297,8 @@ export function useAppState() {
       markAllNotificationsAsRead,
       markNotificationAsRead,
       deleteNotification,
+      narrative,
+      setNarrative,
     ]
   );
 }

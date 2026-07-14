@@ -29,7 +29,7 @@ from media.audio.audio import generate_panel_audio
 
 # AI Skills registry and models imports
 from skills.registry import registry
-from skills.base import GeminiAnalysisModel, CropBox, CropList
+from skills.base import GeminiAnalysisModel, CropBox, CropList, StoryDirectorModel, NarrativeModel, PanelImprovementModel
 
 logger = logging.getLogger("sonikoma.routes.ai_routes")
 def clean_api_key(key: Optional[str]) -> Optional[str]:
@@ -97,6 +97,28 @@ class AnalyzeSequenceRequest(BaseModel):
     model: Optional[str] = "gemini-2.5-flash"
     narrationStyle: Optional[str] = "long"
     voice: Optional[str] = "en-US-GuyNeural"
+
+
+class NarrativeDataInput(BaseModel):
+    title: str
+    summary: str
+    genre: str
+    tone: str
+    targetAudience: str
+    characters: List[str]
+    storyGoal: str
+    emotionCurve: List[str]
+    audioDirection: str
+
+class StoryDirectorRequest(BaseModel):
+    project_id: str
+    panels: List[Dict[str, Any]]
+    model: Optional[str] = "gemini-2.5-flash"
+    narrationStyle: Optional[str] = "long"
+    voice: Optional[str] = "en-US-GuyNeural"
+    action: str = "analyze"  # "analyze" | "regenerate" | "improve" | "apply_narrative"
+    modifier_instruction: Optional[str] = ""
+    narrative: Optional[NarrativeDataInput] = None
 
 
 class ListModelsRequest(BaseModel):
@@ -1250,6 +1272,172 @@ async def analyze_sequence(body: AnalyzeSequenceRequest, user_api_key: str = Dep
         if "API_KEY_INVALID" in str(e).upper() or "API KEY NOT VALID" in str(e).upper():
             raise HTTPException(status_code=401, detail="Your API key is invalid.")
         logger.error(f"[Sequence] Analysis failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/story-director", summary="AI Story Director sequence-wide connected analysis")
+async def story_director_route(body: StoryDirectorRequest, user_api_key: str = Depends(get_user_gemini_key), current_user: dict = Depends(get_current_user)):
+    start_time = time.time()
+    logger.info(f"[Story Director] Received sequence-wide connected analysis for {len(body.panels)} panels. Action: '{body.action}'")
+
+    if not body.panels:
+        raise HTTPException(status_code=400, detail="Field 'panels' cannot be empty")
+
+    COST = 20
+    if get_available_credits(current_user["user_id"]) < COST:
+        raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
+
+    target_model = body.model or MODEL_FALLBACKS[0]
+    if target_model.lower().startswith("gemini") and "gemini-3.5" in target_model.lower():
+        if "pro" in target_model.lower():
+            target_model = "gemini-2.5-pro"
+        else:
+            target_model = "gemini-2.5-flash"
+        logger.info(f"[Story Director] Translated gemini-3.5 model to: {target_model}")
+
+    # 1. Resolve all images
+    image_parts = []
+    for p in body.panels:
+        url = p.get("image_url") or p.get("url")
+        if not url:
+            continue
+        try:
+            res = await img_utils.resolve_image_to_buffer(url)
+            resized = img_utils.resize_fit(res["data"], max_w=800, max_h=800, output_format="jpeg", quality=85)
+            image_parts.append({
+                "mime_type": "image/jpeg",
+                "data": resized["data"]
+            })
+        except Exception as e:
+            logger.warning(f"[Story Director] Failed to load image {url}: {e}")
+
+    # 2. Compile prompt and contexts
+    skill = registry.get("story_director")
+
+    panels_input_list = []
+    for idx, p in enumerate(body.panels):
+        panels_input_list.append({
+            "id": p.get("id") or idx + 1,
+            "existing_dialogue": p.get("speech_text") or p.get("dialogue") or "",
+            "existing_sfx": p.get("sfx") or "",
+            "existing_description": p.get("visual_description") or p.get("scene_description") or p.get("sceneDescription") or ""
+        })
+    panels_context_str = json.dumps(panels_input_list, indent=2)
+
+    existing_narrative_str = ""
+    if body.narrative:
+        existing_narrative_str = json.dumps(body.narrative.dict(), indent=2)
+
+    prompt = skill.build_prompt(
+        action=body.action,
+        modifier_instruction=body.modifier_instruction or "",
+        existing_narrative=existing_narrative_str,
+        panels_context=panels_context_str
+    )
+
+    # 3. Call AI provider
+    try:
+        from skills.base import get_provider_and_model, resolve_api_key, extract_json
+        provider, clean_model = get_provider_and_model(target_model)
+
+        if provider == "huggingface":
+            provider = "gemini"
+            clean_model = "gemini-2.5-flash"
+
+        if provider == "gemini":
+            from google import genai
+            from google.genai import types
+
+            gemini_key = resolve_api_key("gemini", user_keys=user_api_key)
+            client = genai.Client(api_key=gemini_key)
+
+            contents = [prompt]
+            for img in image_parts:
+                contents.append(types.Part.from_bytes(data=img["data"], mime_type=img["mime_type"]))
+
+            response = await call_gemini_with_retry(
+                lambda: client.models.generate_content(
+                    model=clean_model,
+                    contents=contents,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema=StoryDirectorModel
+                    )
+                )
+            )
+            raw_text = getattr(response, "text", None)
+
+            if not raw_text:
+                logger.warning("[Story Director] Empty response with structured schema constraint. Retrying without constraint.")
+                response2 = await call_gemini_with_retry(
+                    lambda: client.models.generate_content(
+                        model=clean_model,
+                        contents=contents,
+                    )
+                )
+                raw_text = getattr(response2, "text", None)
+
+        elif provider == "openai":
+            import requests
+            import base64
+            openai_key = resolve_api_key("openai", user_keys=user_api_key)
+            headers = {"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"}
+            messages = [{"role": "user", "content": [{"type": "text", "text": prompt}]}]
+            for img in image_parts:
+                b64 = base64.b64encode(img["data"]).decode("utf-8")
+                messages[0]["content"].append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}})
+            payload = {
+                "model": clean_model,
+                "messages": messages,
+                "response_format": {"type": "json_object"}
+            }
+            loop = asyncio.get_running_loop()
+            res = await loop.run_in_executor(None, lambda: requests.post("https://api.openai.com/v1/chat/completions", json=payload, headers=headers, timeout=60))
+            raw_text = res.json()["choices"][0]["message"]["content"]
+
+        elif provider == "anthropic":
+            import requests
+            import base64
+            anthropic_key = resolve_api_key("anthropic", user_keys=user_api_key)
+            headers = {"x-api-key": anthropic_key, "anthropic-version": "2023-06-01", "Content-Type": "application/json"}
+            messages = [{"role": "user", "content": []}]
+            for img in image_parts:
+                b64 = base64.b64encode(img["data"]).decode("utf-8")
+                messages[0]["content"].append({"type": "image", "source": {"type": "base64", "media_type": img["mime_type"], "data": b64}})
+            messages[0]["content"].append({"type": "text", "text": prompt})
+            payload = {
+                "model": clean_model,
+                "max_tokens": 4096,
+                "messages": messages,
+                "system": "Return ONLY a valid JSON object of StoryDirectorModel format."
+            }
+            loop = asyncio.get_running_loop()
+            res = await loop.run_in_executor(None, lambda: requests.post("https://api.anthropic.com/v1/messages", json=payload, headers=headers, timeout=60))
+            raw_text = res.json()["content"][0]["text"]
+
+        else:
+            raise RuntimeError(f"Provider '{provider}' is not supported for multimodal connected story analysis.")
+
+        if not raw_text:
+            raise HTTPException(status_code=500, detail="AI Story Director returned empty response.")
+
+        parsed_data = json.loads(extract_json(raw_text))
+
+        # Deduct credits and audit log
+        record_credit_transaction(current_user["user_id"], -COST, "story_director")
+
+        elapsed = int((time.time() - start_time) * 1000)
+        logger.info(f"[Story Director] Successfully completed AI analysis in {elapsed}ms.")
+
+        return {
+            "success": True,
+            "narrative": parsed_data.get("narrative"),
+            "panels": parsed_data.get("panels"),
+            "latencyMs": elapsed
+        }
+
+    except Exception as e:
+        logger.error(f"[Story Director] AI Story Director call failed: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 

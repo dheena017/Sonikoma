@@ -195,8 +195,10 @@ async def get_current_user(request: Request, token: Optional[str] = Depends(oaut
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: str = payload.get("sub")
         if user_id is None:
+            logger.warning("[Auth] Token missing sub claim.")
             raise credentials_exception
-    except jwt.PyJWTError:
+    except jwt.PyJWTError as jwt_err:
+        logger.warning(f"[Auth] Token decoding failed: {jwt_err}")
         raise credentials_exception
 
     user = get_user_by_id(user_id)

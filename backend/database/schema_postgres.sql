@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS chapters (
   panels_count    INTEGER NOT NULL DEFAULT 0,
   video_url       TEXT,
   audio_settings  JSONB,
+  narrative       TEXT,
   created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (series_id) REFERENCES series(id) ON DELETE CASCADE
@@ -83,6 +84,19 @@ CREATE TABLE IF NOT EXISTS panels (
   smart_crop       INTEGER NOT NULL DEFAULT 0,
   crop_padding     INTEGER,
   is_sanitized     INTEGER NOT NULL DEFAULT 0,
+  dialogue                TEXT,
+  subtitle                TEXT,
+  scene_description       TEXT,
+  voice_emotion           TEXT,
+  background_music        TEXT,
+  sound_effects           TEXT,
+  speech_speed            TEXT,
+  voice_intensity         INTEGER,
+  transition_suggestion   TEXT,
+  story_consistency_score REAL,
+  dialogue_quality_score  REAL,
+  visual_continuity_score REAL,
+  audio_quality_score     REAL,
   created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (chapter_id) REFERENCES chapters(id) ON DELETE CASCADE
 );
