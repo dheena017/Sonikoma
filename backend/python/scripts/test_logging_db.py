@@ -5,7 +5,7 @@ import asyncio
 from typing import Optional
 
 # Add backend/python to sys.path
-sys.path.append(os.path.join(os.getcwd(), "backend", "python"))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from database.db import insert_system_log, get_system_logs, wipe_system_logs
 

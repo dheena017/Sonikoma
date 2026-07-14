@@ -7,6 +7,7 @@ import LayoutEditorPage from "../EditorPageLayout.js";
 import ImageEditorPage from "../Tools/ImageEditor/ImageEditorPage";
 import AdvancedSettings from "../../video/AdvancedSettings";
 import AudioSettingsPage from "../../audio_settings/AudioSettingsPage";
+import ProcessBar from "../../pipeline/ProcessBar";
 import { useBackendHealth } from "../../../../hooks/useBackendHealth.js";
 import { getUserCredits } from "../../../../api/auth";
 import { Sliders, X, Mic } from "lucide-react";
@@ -20,6 +21,9 @@ interface EditorPageProps {
   onRequestProjectConfirmation: () => void;
   seriesSlug?: string | null;
   chapterSlug?: string | null;
+  rating?: number;
+  likes?: string;
+  views?: number;
 }
 
 const EditorPage: React.FC<EditorPageProps> = ({
@@ -28,6 +32,9 @@ const EditorPage: React.FC<EditorPageProps> = ({
   onRequestProjectConfirmation,
   seriesSlug,
   chapterSlug,
+  rating,
+  likes,
+  views,
 }: EditorPageProps) => {
   void seriesSlug;
   void chapterSlug;
@@ -352,26 +359,25 @@ const EditorPage: React.FC<EditorPageProps> = ({
               Compile all storyboard panels into a high-res video. <span className="text-purple-400 font-bold">(Cost: 20 Credits)</span>
             </p>
           </div>
-          <button
-            onClick={handleRenderFinalVideo}
-            disabled={isRendering || !hasEnoughCredits}
-            className={`relative z-10 w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg transition-all flex items-center justify-center gap-3 ${
-              isRendering || !hasEnoughCredits
-                ? "bg-neutral-900/50 text-neutral-500 cursor-not-allowed border border-neutral-800"
-                : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border border-white/10"
-            }`}
-          >
-            {isRendering ? (
-              <>
-                <div className="h-4 w-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                Rendering {Math.round(renderProgress)}%
-              </>
-            ) : !hasEnoughCredits ? (
-              <>⚠️ Insufficient Credits (20 required)</>
-            ) : (
-              <>🎬 Export Master Video</>
-            )}
-          </button>
+          {isRendering ? (
+            <ProcessBar progressStatus={progressStatus} />
+          ) : (
+            <button
+              onClick={handleRenderFinalVideo}
+              disabled={!hasEnoughCredits}
+              className={`relative z-10 w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg transition-all flex items-center justify-center gap-3 ${
+                !hasEnoughCredits
+                  ? "bg-neutral-900/50 text-neutral-500 cursor-not-allowed border border-neutral-800"
+                  : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border border-white/10"
+              }`}
+            >
+              {!hasEnoughCredits ? (
+                <>⚠️ Insufficient Credits (20 required)</>
+              ) : (
+                <>🎬 Export Master Video</>
+              )}
+            </button>
+          )}
         </div>
       </div>
     );
@@ -699,6 +705,9 @@ const EditorPage: React.FC<EditorPageProps> = ({
                         chapterTitle={chapterTitle}
                         targetUrl={targetUrl}
                         selectedSource={selectedSource}
+                        rating={rating}
+                        likes={likes}
+                        views={views}
                       />
                     </div>
                   </div>

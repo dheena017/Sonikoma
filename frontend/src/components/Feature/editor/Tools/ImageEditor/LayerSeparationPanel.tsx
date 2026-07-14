@@ -241,25 +241,25 @@ export default function LayerSeparationPanel({
             <div className="bg-[#111115] border border-emerald-950/40 rounded-xl p-3 flex flex-col gap-2">
               <div className="flex items-center gap-1.5 text-emerald-400 text-[10px] font-bold">
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                <span>Transparent WebP Layers Generated</span>
+                <span>Transparent Layers Generated</span>
               </div>
               <div className="text-[9px] font-mono text-neutral-500 space-y-1 pl-5">
                 <div className="truncate">
                   <span className="text-neutral-450">BG: </span>
                   <a href={activeStoryboardPanel.layers?.background_url} target="_blank" rel="noreferrer" className="text-purple-400 underline hover:text-purple-300">
-                    bg.webp
+                    {activeStoryboardPanel.layers?.background_url?.split('/').pop() || 'bg.png'}
                   </a>
                 </div>
                 <div className="truncate">
                   <span className="text-neutral-450">Char: </span>
                   <a href={activeStoryboardPanel.layers?.character_url} target="_blank" rel="noreferrer" className="text-purple-400 underline hover:text-purple-300">
-                    char.webp
+                    {activeStoryboardPanel.layers?.character_url?.split('/').pop() || 'char.png'}
                   </a>
                 </div>
                 <div className="truncate">
                   <span className="text-neutral-450">Text: </span>
                   <a href={activeStoryboardPanel.layers?.text_url} target="_blank" rel="noreferrer" className="text-purple-400 underline hover:text-purple-300">
-                    text.webp
+                    {activeStoryboardPanel.layers?.text_url?.split('/').pop() || 'text.png'}
                   </a>
                 </div>
               </div>

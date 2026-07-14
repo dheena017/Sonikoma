@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { getProxiedImageUrl } from "@/utils";
+import { adminGetProjects } from "../../../api";
 
 export function AdminContentTab({
   fetchWithInterceptor,
@@ -39,11 +40,8 @@ export function AdminContentTab({
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const res = await fetchWithInterceptor("/api/auth/admin/projects");
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success) setProjects(data.projects);
-      }
+      const data = await adminGetProjects(fetchWithInterceptor);
+      if (data.success) setProjects(data.projects);
     } catch (err) {
       console.error("Failed to fetch projects:", err);
     } finally {

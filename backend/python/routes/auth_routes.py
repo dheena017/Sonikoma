@@ -38,7 +38,7 @@ import jwt
 import requests
 from google_auth_oauthlib.flow import Flow
 from database.db import (
-    create_user, get_user_by_email, get_user_by_id, update_user,
+    create_user, create_user_relational, get_user_by_email, get_user_by_id, update_user,
     create_user_session, get_user_sessions, terminate_user_session,
     write_audit_log, get_audit_logs, get_user_invoices,
     seed_default_invoices_if_empty, get_user_api_keys,
@@ -468,15 +468,19 @@ async def google_callback(request: Request):
         user = get_user_by_email(email)
         if not user:
             user_uuid = f"user_{uuid.uuid4().hex[:8]}"
-            user_data = {
-                "id": user_uuid,
-                "email": email,
+            password_hash = get_password_hash(f"google_oauth_{uuid.uuid4().hex}")
+            create_user_relational(
+                user_id=user_uuid,
+                username=name,
+                email=email,
+                password_hash=password_hash,
+                preferences="{}"
+            )
+            update_user(user_uuid, {
                 "google_id": google_id,
                 "full_name": name,
-                "avatar_url": picture,
-                "password_hash": get_password_hash(f"google_oauth_{uuid.uuid4().hex}"),
-            }
-            create_user(user_data)
+                "avatar_url": picture
+            })
             user = get_user_by_email(email)
         elif not user.get("google_id"):
             update_user(user["user_id"], {"google_id": google_id})

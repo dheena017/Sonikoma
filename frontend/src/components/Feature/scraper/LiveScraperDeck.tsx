@@ -21,6 +21,7 @@ import {
 import LiveScraperDeckEmptyState from "./LiveScraperDeckEmptyState.js";
 import { parseWebtoonUrl, getSourceName } from "../../../utils.js";
 import { updateSelection } from "@/utils/selection";
+import { EpisodeRatingDisplay } from "../episode-scraper/EpisodeRatingDisplay.js";
 
 const LiveScraperDeck = React.memo(
   ({
@@ -59,6 +60,9 @@ const LiveScraperDeck = React.memo(
     targetUrl = "",
     handleSaveAssets,
     handleCancelBatch,
+    rating,
+    likes,
+    views,
   }: LiveScraperDeckProps) => {
     const [isZipping, setIsZipping] = useState(false);
     const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(
@@ -412,6 +416,7 @@ const LiveScraperDeck = React.memo(
                   </span>
                 )}
               </div>
+              <EpisodeRatingDisplay rating={rating} likes={likes} views={views} compact={true} />
             </div>
 
             <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2 self-start sm:self-end lg:self-auto w-full lg:w-auto mt-2 lg:mt-0">

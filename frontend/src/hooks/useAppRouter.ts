@@ -193,6 +193,8 @@ export function useAppRouter({
             path === "/creative-suite-dashboard" ||
             path === "/workspace" ||
             path === "/settings" ||
+            path === "/settings/account" ||
+            path === "/settings/account/" ||
             path === "/logs" ||
             path === "/status" ||
             path === "/ai-models" ||
@@ -260,6 +262,8 @@ export function useAppRouter({
 
       if (
         path === "/settings" ||
+        path === "/settings/account" ||
+        path === "/settings/account/" ||
         path === "/creative-suite" ||
         path === "/creative-suite/" ||
         path === "/creative-suite-dashboard" ||

@@ -87,14 +87,51 @@ export const EpisodeScraperPage: React.FC<EpisodeScraperPageProps> = ({
               .toString(36)
               .substring(2, 10)}`;
             localStorage.setItem("auto_import_url", episode.url);
+            
+            // Save visual metadata to localStorage
+            if (episode.rating !== undefined && episode.rating !== null) {
+              localStorage.setItem("active_episode_rating", String(episode.rating));
+            } else {
+              localStorage.removeItem("active_episode_rating");
+            }
+            if (episode.likes !== undefined && episode.likes !== null) {
+              localStorage.setItem("active_episode_likes", String(episode.likes));
+            } else {
+              localStorage.removeItem("active_episode_likes");
+            }
+            if (episode.views !== undefined && episode.views !== null) {
+              localStorage.setItem("active_episode_views", String(episode.views));
+            } else {
+              localStorage.removeItem("active_episode_views");
+            }
+
             navigateTo(`/workspace/editor?id=${temporaryProjectId}`);
           }}
           onMultipleEpisodesSelect={(episodes) => {
             if (episodes.length > 0) {
+              const episode = episodes[0];
               const temporaryProjectId = `temp_${Date.now()}_${Math.random()
                 .toString(36)
                 .substring(2, 10)}`;
-              localStorage.setItem("auto_import_url", episodes[0].url);
+              localStorage.setItem("auto_import_url", episode.url);
+
+              // Save visual metadata to localStorage
+              if (episode.rating !== undefined && episode.rating !== null) {
+                localStorage.setItem("active_episode_rating", String(episode.rating));
+              } else {
+                localStorage.removeItem("active_episode_rating");
+              }
+              if (episode.likes !== undefined && episode.likes !== null) {
+                localStorage.setItem("active_episode_likes", String(episode.likes));
+              } else {
+                localStorage.removeItem("active_episode_likes");
+              }
+              if (episode.views !== undefined && episode.views !== null) {
+                localStorage.setItem("active_episode_views", String(episode.views));
+              } else {
+                localStorage.removeItem("active_episode_views");
+              }
+
               navigateTo(`/workspace/editor?id=${temporaryProjectId}`);
             }
           }}

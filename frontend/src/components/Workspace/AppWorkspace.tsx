@@ -405,6 +405,23 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
     setChapterNumber(num || "");
     setChapterTitle(episode.title || "");
 
+    // Save visual metadata to localStorage
+    if (episode.rating !== undefined && episode.rating !== null) {
+      localStorage.setItem("active_episode_rating", String(episode.rating));
+    } else {
+      localStorage.removeItem("active_episode_rating");
+    }
+    if (episode.likes !== undefined && episode.likes !== null) {
+      localStorage.setItem("active_episode_likes", String(episode.likes));
+    } else {
+      localStorage.removeItem("active_episode_likes");
+    }
+    if (episode.views !== undefined && episode.views !== null) {
+      localStorage.setItem("active_episode_views", String(episode.views));
+    } else {
+      localStorage.removeItem("active_episode_views");
+    }
+
     const temporaryProjectId = `temp_${Date.now()}_${Math.random()
       .toString(36)
       .substring(2, 10)}`;

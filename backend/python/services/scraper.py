@@ -1467,6 +1467,7 @@ async def scrape_webtoon_episodes(
 
                 episode_data = {
                     "number": ep_no,
+                    "chapter_number": parse_episode_index(ep_no) or parse_episode_index(ep_title) or (idx + 1),
                     "title": ep_title,
                     "date": ep_date,
                     "thumbnail": thumbnail,

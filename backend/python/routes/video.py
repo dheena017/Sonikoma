@@ -792,9 +792,12 @@ async def process_render_job(
             }
             
             if panel.layers:
-                bg_path = os.path.join(work_dir, f"panel_{idx}_bg.webp")
-                char_path = os.path.join(work_dir, f"panel_{idx}_char.webp")
-                text_path = os.path.join(work_dir, f"panel_{idx}_text.webp")
+                bg_ext = "png" if ".png" in panel.layers.background_url.lower() else "webp"
+                char_ext = "png" if ".png" in panel.layers.character_url.lower() else "webp"
+                text_ext = "png" if ".png" in panel.layers.text_url.lower() else "webp"
+                bg_path = os.path.join(work_dir, f"panel_{idx}_bg.{bg_ext}")
+                char_path = os.path.join(work_dir, f"panel_{idx}_char.{char_ext}")
+                text_path = os.path.join(work_dir, f"panel_{idx}_text.{text_ext}")
 
                 bg_ok = await download_asset(panel.layers.background_url, bg_path)
                 char_ok = await download_asset(panel.layers.character_url, char_path)
