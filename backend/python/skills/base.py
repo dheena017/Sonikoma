@@ -200,9 +200,47 @@ class YouTubeChapterModel(BaseModel):
     chapters: List[YouTubeChapterItem] = Field(description="List of chronological video chapters")
 
 
+class NarrativeModel(BaseModel):
+    title: str = Field(description="Story Title")
+    summary: str = Field(description="Narrative text summary around 300-600 words")
+    genre: str = Field(description="Genre of the story")
+    tone: str = Field(description="Tone of the story")
+    targetAudience: str = Field(description="Target audience of the story")
+    characters: List[str] = Field(description="List of main characters")
+    storyGoal: str = Field(description="Story Goal")
+    emotionCurve: List[str] = Field(description="Emotion curve of the story")
+    audioDirection: str = Field(description="Cinematic audio direction guidance")
+
+class PanelImprovementModel(BaseModel):
+    id: int = Field(description="Panel ID matching input panels list")
+    dialogue: str = Field(description="Improved dialogue matching story narrative and context")
+    subtitle: str = Field(description="Improved subtitle text")
+    sceneDescription: str = Field(description="Improved scene/visual description")
+    sfx: str = Field(description="Punchy sound effect in brackets")
+    backgroundMusic: str = Field(description="Background music cinematic guidance for this panel")
+    soundEffects: str = Field(description="Specific sound effects list for this panel")
+    voiceEmotion: str = Field(description="Voice emotion guidance, e.g. Scared, Happy")
+    speechSpeed: str = Field(description="Speech speed: Slow, Normal, Fast")
+    voiceIntensity: int = Field(description="Voice intensity scale from 1 to 10")
+    transitionSuggestion: str = Field(description="Suggested transition effect, e.g., Cut, Crossfade, Flash")
+    duration: float = Field(description="Suggested duration in seconds (pacing-aware)")
+    motion_type: str = Field(description="Suggested camera motion (zoom_in, zoom_out, pan_left, pan_right, pan_up, pan_down)")
+    storyConsistencyScore: int = Field(description="AI Story Consistency Score (0-100)")
+    dialogueQualityScore: int = Field(description="AI Dialogue Quality Score (0-100)")
+    visualContinuityScore: int = Field(description="AI Visual Continuity Score (0-100)")
+    audioQualityScore: int = Field(description="AI Audio Quality Score (0-100)")
+
+class StoryDirectorModel(BaseModel):
+    narrative: NarrativeModel = Field(description="Generated unified story narrative")
+    panels: List[PanelImprovementModel] = Field(description="chronological list of all panels improved to match story")
+
+
 # ─── Pydantic Dynamic Schema Mapper ───────────────────────────────────────────
 
 SCHEMA_MAP: Dict[str, Type[BaseModel]] = {
+    "NarrativeModel":          NarrativeModel,
+    "PanelImprovementModel":   PanelImprovementModel,
+    "StoryDirectorModel":      StoryDirectorModel,
     "GeminiAnalysisModel":     GeminiAnalysisModel,
     "StoryboardModel":         StoryboardModel,
     "CropList":                CropList,

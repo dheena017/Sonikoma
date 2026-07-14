@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS chapters (
   video_url       TEXT,                             -- Path or URL to completed video output (.mp4)
   total_tokens_used INTEGER NOT NULL DEFAULT 0,
   audio_settings  TEXT,                             -- Serialized JSONB string of audio mixer settings
+  narrative       TEXT,                             -- Serialized JSON of unified story narrative
   created_at      TEXT    NOT NULL DEFAULT (datetime('now')),
   updated_at      TEXT    NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (series_id) REFERENCES series(id) ON DELETE CASCADE
@@ -87,6 +88,19 @@ CREATE TABLE IF NOT EXISTS panels (
   smart_crop       INTEGER NOT NULL DEFAULT 0,
   crop_padding     INTEGER,
   is_sanitized     INTEGER NOT NULL DEFAULT 0,
+  dialogue                TEXT,
+  subtitle                TEXT,
+  scene_description       TEXT,
+  voice_emotion           TEXT,
+  background_music        TEXT,
+  sound_effects           TEXT,
+  speech_speed            TEXT,
+  voice_intensity         INTEGER,
+  transition_suggestion   TEXT,
+  story_consistency_score REAL,
+  dialogue_quality_score  REAL,
+  visual_continuity_score REAL,
+  audio_quality_score     REAL,
   created_at       TEXT    NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (chapter_id) REFERENCES chapters(id) ON DELETE CASCADE
 );

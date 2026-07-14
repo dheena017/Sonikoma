@@ -234,6 +234,36 @@ def init_db() -> None:
                 logger.info("[Database] Migration: adding 'credit_balance' column to 'users' table...")
                 conn.execute("ALTER TABLE users ADD COLUMN credit_balance INTEGER NOT NULL DEFAULT 840")
                 conn.commit()
+
+            # Check and add narrative column to chapters table if missing
+            row_nar = conn.execute("SELECT EXISTS (SELECT FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'chapters' AND column_name = 'narrative') as exists").fetchone()
+            if not row_nar or not row_nar.get('exists'):
+                logger.info("[Database] Migration: adding 'narrative' column to 'chapters' table...")
+                conn.execute("ALTER TABLE chapters ADD COLUMN narrative TEXT")
+                conn.commit()
+
+            # Add panel columns to panels table if missing
+            new_panel_cols_pg = [
+                ("dialogue", "TEXT"),
+                ("subtitle", "TEXT"),
+                ("scene_description", "TEXT"),
+                ("voice_emotion", "TEXT"),
+                ("background_music", "TEXT"),
+                ("sound_effects", "TEXT"),
+                ("speech_speed", "TEXT"),
+                ("voice_intensity", "INTEGER"),
+                ("transition_suggestion", "TEXT"),
+                ("story_consistency_score", "REAL"),
+                ("dialogue_quality_score", "REAL"),
+                ("visual_continuity_score", "REAL"),
+                ("audio_quality_score", "REAL"),
+            ]
+            for col_name, col_type in new_panel_cols_pg:
+                row_col_p = conn.execute(f"SELECT EXISTS (SELECT FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'panels' AND column_name = '{col_name}') as exists").fetchone()
+                if not row_col_p or not row_col_p.get('exists'):
+                    logger.info(f"[Database] Migration: adding '{col_name}' column to 'panels' table...")
+                    conn.execute(f"ALTER TABLE panels ADD COLUMN {col_name} {col_type}")
+                    conn.commit()
         except Exception as e:
             logger.error(f"[Database] Error checking PostgreSQL schema: {e}")
         finally:
@@ -503,6 +533,36 @@ def init_db() -> None:
         """)
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_credit_transactions_user ON credit_transactions(user_id)")
         logger.info("[Database] Migration: verified credit_transactions table.")
+
+        # SQLite: Add narrative to chapters table
+        try:
+            cursor.execute("ALTER TABLE chapters ADD COLUMN narrative TEXT")
+            logger.info("[Database] Migration: added 'narrative' column to 'chapters' table.")
+        except Exception:
+            pass
+
+        # SQLite: Add columns to panels table
+        new_panel_cols_sq = [
+            ("dialogue", "TEXT"),
+            ("subtitle", "TEXT"),
+            ("scene_description", "TEXT"),
+            ("voice_emotion", "TEXT"),
+            ("background_music", "TEXT"),
+            ("sound_effects", "TEXT"),
+            ("speech_speed", "TEXT"),
+            ("voice_intensity", "INTEGER"),
+            ("transition_suggestion", "TEXT"),
+            ("story_consistency_score", "REAL"),
+            ("dialogue_quality_score", "REAL"),
+            ("visual_continuity_score", "REAL"),
+            ("audio_quality_score", "REAL"),
+        ]
+        for col_name, col_type in new_panel_cols_sq:
+            try:
+                cursor.execute(f"ALTER TABLE panels ADD COLUMN {col_name} {col_type}")
+                logger.info(f"[Database] Migration: added '{col_name}' column to 'panels' table.")
+            except Exception:
+                pass
 
         conn.commit()
 
@@ -1566,6 +1626,17 @@ def _parse_audio_settings(proj_dict: Optional[Dict[str, Any]]) -> Optional[Dict[
             proj_dict["audio_settings"] = None
     elif not audio_set:
         proj_dict["audio_settings"] = None
+
+    narrative_set = proj_dict.get("narrative")
+    if isinstance(narrative_set, str) and narrative_set.strip():
+        import json
+        try:
+            proj_dict["narrative"] = json.loads(narrative_set)
+        except Exception:
+            proj_dict["narrative"] = None
+    elif not narrative_set:
+        proj_dict["narrative"] = None
+
     return proj_dict
 
 def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
@@ -1577,7 +1648,7 @@ def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
                 SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                        c.episode_number AS episode, c.status, c.panels_count, c.video_url,
                        c.created_at, c.updated_at, s.user_id, s.id AS series_id,
-                       s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings
+                       s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings, c.narrative
                 FROM chapters c
                 JOIN series s ON c.series_id = s.id
                 WHERE s.user_id = ?
@@ -1588,7 +1659,7 @@ def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
                 SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                        c.episode_number AS episode, c.status, c.panels_count, c.video_url,
                        c.created_at, c.updated_at, s.user_id, s.id AS series_id,
-                       s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings
+                       s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings, c.narrative
                 FROM chapters c
                 JOIN series s ON c.series_id = s.id
                 ORDER BY c.created_at DESC
@@ -1605,7 +1676,7 @@ def get_project(project_id: str) -> Optional[Dict[str, Any]]:
             SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                    c.episode_number AS episode, c.status, c.panels_count, c.video_url,
                    c.created_at, c.updated_at, s.user_id, s.id AS series_id,
-                   s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings
+                   s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings, c.narrative
             FROM chapters c
             JOIN series s ON c.series_id = s.id
             WHERE c.id = ?
@@ -1622,7 +1693,7 @@ def get_project_by_slug(chapter_slug: str) -> Optional[Dict[str, Any]]:
             SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                    c.episode_number AS episode, c.status, c.panels_count, c.video_url,
                    c.created_at, c.updated_at, s.user_id, s.id AS series_id,
-                   s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings
+                   s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings, c.narrative
             FROM chapters c
             JOIN series s ON c.series_id = s.id
             WHERE c.slug = ?
@@ -1723,6 +1794,14 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                     val = json.dumps(val)
                 chapter_params.append(val)
 
+            if 'narrative' in updates:
+                chapter_set_parts.append("narrative = ?")
+                import json
+                val = updates['narrative']
+                if isinstance(val, (dict, list)):
+                    val = json.dumps(val)
+                chapter_params.append(val)
+
             if chapter_set_parts:
                 chapter_set_parts.append("updated_at = datetime('now')")
                 chapter_params.append(project_id)
@@ -1772,8 +1851,11 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                             chapter_id, panel_index, image_url, original_url, speech_text, sfx,
                             duration, motion_type, visual_description, brightness, contrast, saturation,
                             grayscale, filter_preset, bubble_method, bubble_sensitivity, bubble_dilation,
-                            inpaint_radius, detection_style, audio_url, smart_crop, crop_padding, is_sanitized
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            inpaint_radius, detection_style, audio_url, smart_crop, crop_padding, is_sanitized,
+                            dialogue, subtitle, scene_description, voice_emotion, background_music, sound_effects,
+                            speech_speed, voice_intensity, transition_suggestion, story_consistency_score,
+                            dialogue_quality_score, visual_continuity_score, audio_quality_score
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """, (
                         project_id,
                         i,
@@ -1797,7 +1879,20 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                         p.get('audio_url'),
                         1 if p.get('smart_crop') else 0,
                         p.get('crop_padding'),
-                        1 if p.get('is_sanitized') else 0
+                        1 if p.get('is_sanitized') else 0,
+                        p.get('dialogue'),
+                        p.get('subtitle'),
+                        p.get('scene_description') or p.get('sceneDescription'),
+                        p.get('voice_emotion') or p.get('voiceEmotion'),
+                        p.get('background_music') or p.get('backgroundMusic'),
+                        p.get('sound_effects') or p.get('soundEffects'),
+                        p.get('speech_speed') or p.get('speechSpeed'),
+                        p.get('voice_intensity') or p.get('voiceIntensity'),
+                        p.get('transition_suggestion') or p.get('transitionSuggestion'),
+                        p.get('story_consistency_score') or p.get('storyConsistencyScore'),
+                        p.get('dialogue_quality_score') or p.get('dialogueQualityScore'),
+                        p.get('visual_continuity_score') or p.get('visualContinuityScore'),
+                        p.get('audio_quality_score') or p.get('audioQualityScore')
                     ))
 
                 # Sync panel count
@@ -1916,8 +2011,11 @@ def insert_panels(project_id: str, panels: List[Dict[str, Any]]) -> None:
                         chapter_id, panel_index, image_url, original_url, speech_text, sfx,
                         duration, motion_type, visual_description, brightness, contrast, saturation,
                         grayscale, filter_preset, bubble_method, bubble_sensitivity, bubble_dilation,
-                        inpaint_radius, detection_style
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        inpaint_radius, detection_style, audio_url, smart_crop, crop_padding, is_sanitized,
+                        dialogue, subtitle, scene_description, voice_emotion, background_music, sound_effects,
+                        speech_speed, voice_intensity, transition_suggestion, story_consistency_score,
+                        dialogue_quality_score, visual_continuity_score, audio_quality_score
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     project_id,
                     i,
@@ -1937,7 +2035,24 @@ def insert_panels(project_id: str, panels: List[Dict[str, Any]]) -> None:
                     p.get('bubble_sensitivity'),
                     p.get('bubble_dilation'),
                     p.get('inpaint_radius'),
-                    p.get('detection_style')
+                    p.get('detection_style'),
+                    p.get('audio_url'),
+                    1 if p.get('smart_crop') else 0,
+                    p.get('crop_padding'),
+                    1 if p.get('is_sanitized') else 0,
+                    p.get('dialogue'),
+                    p.get('subtitle'),
+                    p.get('scene_description') or p.get('sceneDescription'),
+                    p.get('voice_emotion') or p.get('voiceEmotion'),
+                    p.get('background_music') or p.get('backgroundMusic'),
+                    p.get('sound_effects') or p.get('soundEffects'),
+                    p.get('speech_speed') or p.get('speechSpeed'),
+                    p.get('voice_intensity') or p.get('voiceIntensity'),
+                    p.get('transition_suggestion') or p.get('transitionSuggestion'),
+                    p.get('story_consistency_score') or p.get('storyConsistencyScore'),
+                    p.get('dialogue_quality_score') or p.get('dialogueQualityScore'),
+                    p.get('visual_continuity_score') or p.get('visualContinuityScore'),
+                    p.get('audio_quality_score') or p.get('audioQualityScore')
                 ))
     finally:
         conn.close()

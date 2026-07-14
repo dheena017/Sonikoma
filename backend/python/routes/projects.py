@@ -48,6 +48,24 @@ class PanelSaveItem(BaseModel):
     bubble_dilation: Optional[float] = Field(None)
     inpaint_radius: Optional[int] = Field(None)
     detection_style: Optional[str] = Field(None)
+    audio_url: Optional[str] = Field(None)
+    smart_crop: Optional[bool] = Field(False)
+    crop_padding: Optional[int] = Field(None)
+    is_sanitized: Optional[bool] = Field(False)
+
+    dialogue: Optional[str] = Field(None)
+    subtitle: Optional[str] = Field(None)
+    scene_description: Optional[str] = Field(None, alias="sceneDescription")
+    voice_emotion: Optional[str] = Field(None, alias="voiceEmotion")
+    background_music: Optional[str] = Field(None, alias="backgroundMusic")
+    sound_effects: Optional[str] = Field(None, alias="soundEffects")
+    speech_speed: Optional[str] = Field(None, alias="speechSpeed")
+    voice_intensity: Optional[int] = Field(None, alias="voiceIntensity")
+    transition_suggestion: Optional[str] = Field(None, alias="transitionSuggestion")
+    story_consistency_score: Optional[float] = Field(None, alias="storyConsistencyScore")
+    dialogue_quality_score: Optional[float] = Field(None, alias="dialogueQualityScore")
+    visual_continuity_score: Optional[float] = Field(None, alias="visualContinuityScore")
+    audio_quality_score: Optional[float] = Field(None, alias="audioQualityScore")
 
     class Config:
         populate_by_name = True
@@ -68,6 +86,7 @@ class ProjectUpdateRequest(BaseModel):
     status: Optional[str] = Field(None, description="Project compilation status")
     panels: Optional[List[PanelSaveItem]] = Field(None, description="Storyboard panels list")
     audio_settings: Optional[Dict[str, Any]] = Field(None, description="Audio settings JSON object (volumes, pitch, rate, BGM, ducking, etc.)")
+    narrative: Optional[Dict[str, Any]] = Field(None, description="Unified Narrative object JSON")
 
 class TokenIncrementRequest(BaseModel):
     tokens: int = Field(..., description="Number of tokens to add")
@@ -422,6 +441,8 @@ async def update_project_details(
             updates['status'] = body.status
         if body.audio_settings is not None:
             updates['audio_settings'] = body.audio_settings
+        if body.narrative is not None:
+            updates['narrative'] = body.narrative
 
         db_panels = None
         if body.panels is not None:
@@ -444,7 +465,24 @@ async def update_project_details(
                     "bubble_sensitivity": p.bubble_sensitivity,
                     "bubble_dilation": p.bubble_dilation,
                     "inpaint_radius": p.inpaint_radius,
-                    "detection_style": p.detection_style
+                    "detection_style": p.detection_style,
+                    "audio_url": p.audio_url,
+                    "smart_crop": p.smart_crop,
+                    "crop_padding": p.crop_padding,
+                    "is_sanitized": p.is_sanitized,
+                    "dialogue": p.dialogue,
+                    "subtitle": p.subtitle,
+                    "sceneDescription": p.scene_description,
+                    "voiceEmotion": p.voice_emotion,
+                    "backgroundMusic": p.background_music,
+                    "soundEffects": p.sound_effects,
+                    "speechSpeed": p.speech_speed,
+                    "voiceIntensity": p.voice_intensity,
+                    "transitionSuggestion": p.transition_suggestion,
+                    "storyConsistencyScore": p.story_consistency_score,
+                    "dialogueQualityScore": p.dialogue_quality_score,
+                    "visualContinuityScore": p.visual_continuity_score,
+                    "audioQualityScore": p.audio_quality_score
                 })
 
         db.update_project_full(projectId, updates, db_panels)

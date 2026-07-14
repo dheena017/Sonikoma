@@ -57,6 +57,7 @@ interface StoryboardTimelineProps {
   audioFeedback?: any;
   selectedPanelIds?: Set<number>;
   setSelectedPanelIds?: React.Dispatch<React.SetStateAction<Set<number>>>;
+  handleAnalyzeAllPanels?: () => void;
 }
 
 const StoryboardTimeline = React.memo(
@@ -104,6 +105,7 @@ const StoryboardTimeline = React.memo(
     audioFeedback,
     selectedPanelIds: propSelectedPanelIds,
     setSelectedPanelIds: propSetSelectedPanelIds,
+    handleAnalyzeAllPanels,
   }: StoryboardTimelineProps) => {
     // ── Panel selection state ────────────────────────────────────────────────
     const [localSelectedPanelIds, setLocalSelectedPanelIds] = useState<Set<number>>(
@@ -783,7 +785,7 @@ const StoryboardTimeline = React.memo(
       handleBulkSetPreset,
       handleClearTimeline,
       handleAnalyzePanel,
-      handleAnalyzeAllPanels,
+      handleAnalyzeAllPanels: operationsAnalyzeAllPanels,
       handleAnalyzeSelectedPanels,
       isAnalyzingAll,
       handleCancelAnalysis,
@@ -818,6 +820,8 @@ const StoryboardTimeline = React.memo(
 
     const selectedCount = selectedPanelIds.size;
 
+    const activeAnalyzeAllPanels = handleAnalyzeAllPanels || operationsAnalyzeAllPanels;
+
     return (
       <div
         id="panels_timeline_section"
@@ -832,7 +836,7 @@ const StoryboardTimeline = React.memo(
           totalCount={panels.length}
           handleDownloadZip={handleDownloadZip}
           isAnalyzingAll={isAnalyzingAll}
-          handleAnalyzeAllPanels={handleAnalyzeAllPanels}
+          handleAnalyzeAllPanels={activeAnalyzeAllPanels}
           handleAnalyzeSelected={() => {
             handleAnalyzeSelectedPanels(Array.from(selectedPanelIds));
             clearSelection();

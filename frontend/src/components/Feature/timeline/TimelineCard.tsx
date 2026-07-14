@@ -561,6 +561,42 @@ const TimelineCard = ({
         )}
       </div>
 
+      {/* AI Confidence Scores */}
+      {(panel.storyConsistencyScore !== undefined || panel.dialogueQualityScore !== undefined || panel.visualContinuityScore !== undefined || panel.audioQualityScore !== undefined) && (
+        <div className="bg-neutral-900/60 border border-neutral-850 rounded-lg p-2 space-y-1.5 no-drag text-[9px] font-mono">
+          <div className="flex items-center justify-between text-neutral-450 border-b border-neutral-850/50 pb-1">
+            <span className="font-bold uppercase tracking-wider text-purple-400 text-[8px]">AI Screenplay Evaluation</span>
+            <span className="text-[8px] bg-purple-500/10 text-purple-300 px-1 rounded">Metrics</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-[9px]">
+            {panel.storyConsistencyScore !== undefined && (
+              <div className="flex flex-col">
+                <span className="text-neutral-500 text-[8px]">Consistency</span>
+                <span className={`font-extrabold ${panel.storyConsistencyScore >= 90 ? 'text-emerald-400' : panel.storyConsistencyScore >= 80 ? 'text-yellow-400' : 'text-amber-500'}`}>{panel.storyConsistencyScore}%</span>
+              </div>
+            )}
+            {panel.dialogueQualityScore !== undefined && (
+              <div className="flex flex-col">
+                <span className="text-neutral-500 text-[8px]">Dialogue Q.</span>
+                <span className={`font-extrabold ${panel.dialogueQualityScore >= 90 ? 'text-emerald-400' : panel.dialogueQualityScore >= 80 ? 'text-yellow-400' : 'text-amber-500'}`}>{panel.dialogueQualityScore}%</span>
+              </div>
+            )}
+            {panel.visualContinuityScore !== undefined && (
+              <div className="flex flex-col">
+                <span className="text-neutral-500 text-[8px]">Visual Cont.</span>
+                <span className={`font-extrabold ${panel.visualContinuityScore >= 90 ? 'text-emerald-400' : panel.visualContinuityScore >= 80 ? 'text-yellow-400' : 'text-amber-500'}`}>{panel.visualContinuityScore}%</span>
+              </div>
+            )}
+            {panel.audioQualityScore !== undefined && (
+              <div className="flex flex-col">
+                <span className="text-neutral-500 text-[8px]">Audio Q.</span>
+                <span className={`font-extrabold ${panel.audioQualityScore >= 90 ? 'text-emerald-400' : panel.audioQualityScore >= 80 ? 'text-yellow-400' : 'text-amber-500'}`}>{panel.audioQualityScore}%</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Dialogue/Subtitle Text OCR Editable Input */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">

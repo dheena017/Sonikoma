@@ -31,6 +31,18 @@ export interface PanelSyncMap {
   peaks_fps?: number;
 }
 
+export interface Narrative {
+  title: string;
+  summary: string;
+  genre: string;
+  tone: string;
+  targetAudience: string;
+  characters: string[];
+  storyGoal: string;
+  emotionCurve: string[];
+  audioDirection: string;
+}
+
 export interface GeneratedPanel {
   id: number;
   image_url: string;
@@ -57,6 +69,21 @@ export interface GeneratedPanel {
   layers?: PanelLayers;
   syncMap?: PanelSyncMap;
   audio_reactive_shake?: boolean;
+
+  // AI Story Director Fields
+  dialogue?: string;
+  subtitle?: string;
+  sceneDescription?: string;
+  voiceEmotion?: string;
+  backgroundMusic?: string;
+  soundEffects?: string;
+  speechSpeed?: string;
+  voiceIntensity?: number;
+  transitionSuggestion?: string;
+  storyConsistencyScore?: number;
+  dialogueQualityScore?: number;
+  visualContinuityScore?: number;
+  audioQualityScore?: number;
 }
 
 export interface CharacterBio {
