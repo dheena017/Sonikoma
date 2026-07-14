@@ -133,13 +133,6 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
       name: "Distribution",
       items: [
         {
-          id: "engagement",
-          label: "Community Coach",
-          icon: MessageSquare,
-          path: "/ai-engagement",
-          requiresPanels: false,
-        },
-        {
           id: "youtube",
           label: "YouTube Publisher",
           icon: Youtube,

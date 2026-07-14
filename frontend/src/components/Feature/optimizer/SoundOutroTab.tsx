@@ -19,16 +19,6 @@ interface SoundOutroTabProps {
   addNotification?: (msg: string, type: any) => void;
 }
 
-interface CliffhangerData {
-  ending_narration: string;
-  suspense_question: string;
-}
-
-interface OutroData {
-  outro_script: string;
-  cta_focus: string;
-}
-
 interface BGMData {
   music_vibe_tags: string[];
   target_bpm: number;
@@ -42,8 +32,6 @@ export default function SoundOutroTab({
   addNotification,
 }: SoundOutroTabProps) {
   const [loading, setLoading] = useState(false);
-  const [cliffhanger, setCliffhanger] = useState<CliffhangerData | null>(null);
-  const [outro, setOutro] = useState<OutroData | null>(null);
   const [bgm, setBgm] = useState<BGMData | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
@@ -51,7 +39,7 @@ export default function SoundOutroTab({
     if (!videoUrl) {
       if (addNotification) {
         addNotification(
-          "Please compile your video first on the Dashboard before generating soundtrack vibes & outro CTAs.",
+          "Please compile your video first on the Dashboard before generating soundtrack vibes.",
           "warning"
         );
       }
@@ -60,27 +48,6 @@ export default function SoundOutroTab({
 
     setLoading(true);
     try {
-      // 1. Cliffhanger generator
-      const cliffJson = await api.runCliffhangerSkill(fetchWithAuth, {
-        story_outline: storyboardSummary || "The recap story outline details.",
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-      });
-      let cliffText = "";
-      if (cliffJson.success && cliffJson.result) {
-        setCliffhanger(cliffJson.result);
-        cliffText = cliffJson.result.ending_narration;
-      }
-
-      // 2. Outro CTA
-      const outroJson = await api.runOutroCtaSkill(fetchWithAuth, {
-        title: title || "This Webtoon",
-        ending_cliffhanger: cliffText || "epic resolution reveal",
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-      });
-      if (outroJson.success && outroJson.result) {
-        setOutro(outroJson.result);
-      }
-
       // 3. BGM vibe selector
       const bgmJson = await api.runBgmVibeSkill(fetchWithAuth, {
         narrative_mood: "tense antihero action",
@@ -93,7 +60,7 @@ export default function SoundOutroTab({
 
       if (addNotification) {
         addNotification(
-          "Successfully compiled soundtrack recommendations and endings!",
+          "Successfully compiled soundtrack recommendations!",
           "success"
         );
       }
@@ -101,7 +68,7 @@ export default function SoundOutroTab({
       console.error(e);
       if (addNotification) {
         addNotification(
-          "Failed to generate soundtrack vibes or end CTAs.",
+          "Failed to generate soundtrack vibes.",
           "error"
         );
       }
@@ -201,10 +168,10 @@ export default function SoundOutroTab({
         <div className="bg-neutral-950/40 p-4 rounded-xl border border-neutral-800 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
           <div>
             <h4 className="text-xs font-mono font-bold text-neutral-400 uppercase">
-              Soundtrack Vibe & Dynamic Outro Optimizer
+              Soundtrack Vibe Optimizer
             </h4>
             <p className="text-[10px] text-neutral-500 font-mono mt-0.5">
-              Select musical moods, outro CTA speech, and ending hooks
+              Select musical moods for your video
             </p>
           </div>
           <button
@@ -229,8 +196,7 @@ export default function SoundOutroTab({
                 ⚠️ COMPILATION CHECK REQUIRED
               </span>
               <p className="text-neutral-400 leading-relaxed font-sans">
-                Audio transitions and dynamic ending narrations cannot be
-                computed accurately without the completed video duration. Please
+                Audio transitions cannot be computed accurately without the completed video duration. Please
                 compile the video on the Dashboard first.
               </p>
             </div>
@@ -241,111 +207,48 @@ export default function SoundOutroTab({
           <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-8 text-center animate-pulse">
             <Sparkles className="h-6 w-6 text-purple-400 animate-spin mx-auto" />
             <p className="text-[11px] font-mono text-purple-300 mt-2">
-              Selecting Soundtrack Tags & End CTAs...
+              Selecting Soundtrack Tags...
             </p>
           </div>
         )}
 
-        {!loading && (cliffhanger || outro || bgm) && (
+        {!loading && bgm && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
-            {cliffhanger && (
-              <div className="bg-neutral-900/40 border border-neutral-800 rounded-xl p-4 space-y-3 md:col-span-2">
-                <div className="flex justify-between items-center border-b border-neutral-800 pb-2">
-                  <span className="text-[10px] font-mono font-bold text-purple-400">
-                    Suspense Cliffhanger Narration
-                  </span>
-                  <button
-                    onClick={() =>
-                      copyToClipboard(
-                        cliffhanger.ending_narration,
-                        "ending_narration"
-                      )
-                    }
-                    className="text-neutral-500 hover:text-white p-1 rounded"
-                  >
-                    {copiedField === "ending_narration" ? (
-                      <Check className="h-3 w-3 text-emerald-400" />
-                    ) : (
-                      <Copy className="h-3 w-3" />
-                    )}
-                  </button>
-                </div>
-                <p className="text-xs font-sans text-neutral-200 font-semibold italic">
-                  "{cliffhanger.ending_narration}"
-                </p>
-                <div className="bg-neutral-950 p-2.5 rounded border border-neutral-850 text-[10px] font-mono text-purple-300 mt-1">
-                  <span className="text-neutral-500">Suggested Question:</span>{" "}
-                  {cliffhanger.suspense_question}
-                </div>
+            <div className="bg-neutral-900/40 border border-neutral-800 rounded-xl p-4 space-y-3 md:col-span-2">
+              <div className="flex justify-between items-center border-b border-neutral-800 pb-2">
+                <span className="text-[10px] font-mono font-bold text-purple-400">
+                  Soundtrack Vibe Recommendation
+                </span>
+                <button
+                  onClick={() =>
+                    copyToClipboard(bgm.music_vibe_tags.join(", "), "bgm")
+                  }
+                  className="text-neutral-500 hover:text-white p-1 rounded"
+                >
+                  {copiedField === "bgm" ? (
+                    <Check className="h-3 w-3 text-emerald-400" />
+                  ) : (
+                    <Copy className="h-3 w-3" />
+                  )}
+                </button>
               </div>
-            )}
-
-            {outro && (
-              <div className="bg-neutral-900/40 border border-neutral-800 rounded-xl p-4 space-y-3">
-                <div className="flex justify-between items-center border-b border-neutral-800 pb-2">
-                  <span className="text-[10px] font-mono font-bold text-purple-400">
-                    Subscription Outro CTA (Max 15 words)
-                  </span>
-                  <button
-                    onClick={() => copyToClipboard(outro.outro_script, "outro")}
-                    className="text-neutral-500 hover:text-white p-1 rounded"
+              <div className="flex flex-wrap gap-1.5">
+                {bgm.music_vibe_tags.map((tag, idx) => (
+                  <span
+                    key={idx}
+                    className="text-[9px] font-mono bg-neutral-950 px-2 py-0.5 rounded border border-neutral-850 text-neutral-300"
                   >
-                    {copiedField === "outro" ? (
-                      <Check className="h-3 w-3 text-emerald-400" />
-                    ) : (
-                      <Copy className="h-3 w-3" />
-                    )}
-                  </button>
-                </div>
-                <p className="text-xs font-sans text-neutral-350 leading-relaxed bg-neutral-950 p-3 rounded-lg font-semibold">
-                  "{outro.outro_script}"
-                </p>
-                <p className="text-[9px] font-mono text-neutral-500 mt-1">
-                  CTA focus target:{" "}
-                  <span className="text-purple-300 font-semibold">
-                    {outro.cta_focus}
+                    {tag}
                   </span>
-                </p>
+                ))}
               </div>
-            )}
-
-            {bgm && (
-              <div className="bg-neutral-900/40 border border-neutral-800 rounded-xl p-4 space-y-3">
-                <div className="flex justify-between items-center border-b border-neutral-800 pb-2">
-                  <span className="text-[10px] font-mono font-bold text-purple-400">
-                    Soundtrack Vibe Recommendation
-                  </span>
-                  <button
-                    onClick={() =>
-                      copyToClipboard(bgm.music_vibe_tags.join(", "), "bgm")
-                    }
-                    className="text-neutral-500 hover:text-white p-1 rounded"
-                  >
-                    {copiedField === "bgm" ? (
-                      <Check className="h-3 w-3 text-emerald-400" />
-                    ) : (
-                      <Copy className="h-3 w-3" />
-                    )}
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {bgm.music_vibe_tags.map((tag, idx) => (
-                    <span
-                      key={idx}
-                      className="text-[9px] font-mono bg-neutral-950 px-2 py-0.5 rounded border border-neutral-850 text-neutral-300"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                <p className="text-[10px] font-mono text-neutral-500 mt-2">
-                  Suggested tempo BPM:{" "}
-                  <span className="text-purple-300 font-semibold">
-                    {bgm.target_bpm} BPM
-                  </span>
-                </p>
-              </div>
-            )}
+              <p className="text-[10px] font-mono text-neutral-500 mt-2">
+                Suggested tempo BPM:{" "}
+                <span className="text-purple-300 font-semibold">
+                  {bgm.target_bpm} BPM
+                </span>
+              </p>
+            </div>
           </div>
         )}
       </div>

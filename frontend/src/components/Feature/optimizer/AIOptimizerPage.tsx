@@ -14,7 +14,6 @@ import SeoOptimizationTab from "./SeoOptimizationTab.js";
 import ShortsScriptTab from "./ShortsScriptTab.js";
 import SoundOutroTab from "./SoundOutroTab.js";
 import AdPlacementTab from "./AdPlacementTab.js";
-import EngagementTab from "./EngagementTab.js";
 
 interface AIOptimizerPageProps {
   panels: GeneratedPanel[];
@@ -50,7 +49,7 @@ const AIOptimizerPage = React.memo(
 
 
     const [activeTab, setActiveTab] = useState<
-      "seo" | "shorts" | "sound" | "ads" | "engagement"
+      "seo" | "shorts" | "sound" | "ads"
     >("seo");
 
     // Compile overall storyboard details for prompts
@@ -128,16 +127,6 @@ const AIOptimizerPage = React.memo(
           >
             ✦ Ad Placements
           </button>
-          <button
-            onClick={() => setActiveTab("engagement")}
-            className={`px-4 py-2 text-xs font-bold transition-all border-b-2 cursor-pointer whitespace-nowrap ${
-              activeTab === "engagement"
-                ? "border-purple-500 text-white"
-                : "border-transparent text-neutral-400 hover:text-neutral-250"
-            }`}
-          >
-            ✦ Engagement & Outros
-          </button>
         </div>
 
         {/* ACTIVE TAB VIEWS */}
@@ -173,15 +162,6 @@ const AIOptimizerPage = React.memo(
           {activeTab === "ads" && (
             <AdPlacementTab
               compiledScript={compiledScript}
-              videoUrl={videoUrl}
-              panels={panels}
-              addNotification={addNotification}
-            />
-          )}
-          {activeTab === "engagement" && (
-            <EngagementTab
-              title={title}
-              storyboardSummary={storyboardSummary}
               videoUrl={videoUrl}
               panels={panels}
               addNotification={addNotification}
