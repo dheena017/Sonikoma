@@ -1,3 +1,20 @@
+export interface LayerAnimationTimings {
+  delay: number;
+  duration: number;
+  effect?: string;
+}
+
+export interface PanelLayerItem {
+  id: string;
+  type: "background" | "character" | "bubble";
+  url: string;
+  x: number;
+  y: number;
+  scale: number;
+  zIndex: number;
+  animationTimings: LayerAnimationTimings;
+}
+
 export interface PanelLayers {
   background_url: string;
   character_url: string;
@@ -55,6 +72,7 @@ export interface GeneratedPanel {
   bubble_method?: string;
   audio_url?: string;
   layers?: PanelLayers;
+  layersArray?: PanelLayerItem[];
   syncMap?: PanelSyncMap;
   audio_reactive_shake?: boolean;
 }
