@@ -432,79 +432,6 @@ const EditorPage: React.FC<EditorPageProps> = ({
           </div>
         ) : (
           <>
-            {/* Draggable & Resizable Floating CinemaPlayer Panel */}
-            {activeTab !== "settings" && activeTab !== "audio-settings" && playerSettings.isPlayerOpen && (
-              <Rnd
-                size={{
-                  width: playerSettings.playerSize.width,
-                  height: playerSettings.playerSize.height,
-                }}
-                position={{
-                  x: playerSettings.playerPos.x,
-                  y: playerSettings.playerPos.y,
-                }}
-                onDragStop={(e, d) => {
-                  useImageEditorStore.getState().setPlayerSettings({
-                    playerPos: { x: d.x, y: d.y },
-                  });
-                }}
-                onResizeStop={(e, direction, ref, delta, position) => {
-                  useImageEditorStore.getState().setPlayerSettings({
-                    playerSize: {
-                      width: parseInt(ref.style.width, 10),
-                      height: parseInt(ref.style.height, 10),
-                    },
-                    playerPos: { x: position.x, y: position.y },
-                  });
-                }}
-                minWidth={320}
-                minHeight={180}
-                lockAspectRatio={16 / 9}
-                bounds="window"
-                style={{ zIndex: 50 }}
-                dragHandleClassName="custom-drag-handle"
-              >
-                <div className="bg-neutral-900/60 rounded-2xl border border-neutral-800 p-3 flex flex-col h-full w-full shadow-2xl backdrop-blur-md">
-                  {/* Header Title & Drag Handle */}
-                  <div className="custom-drag-handle flex items-center justify-between border-b border-neutral-800 pb-2 mb-2 select-none cursor-move shrink-0">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-xs text-white uppercase tracking-wider font-sans">
-                        ADAPTATION PLAYER
-                      </h4>
-                      <span className="text-[10px] bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded-full font-mono shrink-0 uppercase tracking-widest font-black">
-                        LIVE
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
-                      }}
-                      className="text-neutral-400 hover:text-white bg-neutral-800/40 hover:bg-neutral-800 p-1 rounded-md transition-all cursor-pointer"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-
-                  {/* Player Content */}
-                  <div className="flex-1 relative min-h-0 overflow-hidden rounded-xl">
-                    <CinemaPlayer
-                      panels={panels}
-                      videoUrl={activePreviewTab === "video" ? videoUrl : null}
-                      seriesSlug={null}
-                      chapterSlug={null}
-                      navigateTo={() => {}}
-                      addNotification={addNotification}
-                      variant="floating"
-                      onCloseFloating={() => {
-                        useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
-                      }}
-                    />
-                  </div>
-                </div>
-              </Rnd>
-            )}
-
             {/* Scrolling Overlay Content (Timeline, Assets, Meta) */}
             <div
               className={`relative z-10 bg-[#070709] min-h-screen min-w-0 ${
@@ -646,6 +573,49 @@ const EditorPage: React.FC<EditorPageProps> = ({
                 </div>
               ) : (
                 <>
+                  {/* TOP: Inline CinemaPlayer */}
+                  {playerSettings.isPlayerOpen && (
+                    <div className="w-full max-w-[1600px] mx-auto bg-neutral-900/60 rounded-2xl border border-neutral-800 p-4 sm:p-6 space-y-4 mb-4">
+                      {/* Header */}
+                      <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-bold text-sm text-white uppercase tracking-wider font-sans">
+                            ADAPTATION PLAYER
+                          </h3>
+                          <span className="text-[10px] bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded-full font-mono shrink-0 uppercase tracking-widest font-black">
+                            LIVE
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
+                          }}
+                          className="p-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer text-[10px] font-bold font-mono active:scale-95"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                          Hide Player
+                        </button>
+                      </div>
+
+                      {/* Video Player */}
+                      <div className="max-w-4xl mx-auto w-full aspect-video rounded-xl overflow-hidden border border-neutral-800 shadow-2xl relative bg-black">
+                        <CinemaPlayer
+                          panels={panels}
+                          videoUrl={activePreviewTab === "video" ? videoUrl : null}
+                          seriesSlug={null}
+                          chapterSlug={null}
+                          navigateTo={() => {}}
+                          addNotification={addNotification}
+                          variant="floating"
+                          onCloseFloating={() => {
+                            useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   {/* MIDDLE: Storyboard Timeline */}
                   <div
                     id="section-timeline"
