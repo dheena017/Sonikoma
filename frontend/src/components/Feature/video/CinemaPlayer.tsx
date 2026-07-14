@@ -30,6 +30,8 @@ interface PlayerPageProps {
   chapterSlug: string | null;
   navigateTo: (path: string) => void;
   addNotification?: (msg: string, type: any) => void;
+  variant?: "floating" | "theater";
+  onCloseFloating?: () => void;
 }
 
 interface Chapter {
@@ -45,6 +47,8 @@ export default function CinemaPlayer({
   chapterSlug,
   navigateTo,
   addNotification,
+  variant = "theater",
+  onCloseFloating,
 }: PlayerPageProps) {
   // Use either actual panels/video duration or fallback to high-fidelity mock duration (16:38 = 998 seconds)
   const isMock = !videoUrl && panels.length === 0;
@@ -576,10 +580,11 @@ export default function CinemaPlayer({
 
   // Is Skip Intro Button active? (Only when current chapter title is "Intro" and currentTime has elapsed less than its duration)
   const isIntroActive = useMemo(() => {
+    if (variant === "floating") return false;
     const introChapter = chapters.find((c) => c.title.toLowerCase() === "intro");
     if (!introChapter) return false;
     return currentTime >= introChapter.startTime && currentTime < introChapter.endTime;
-  }, [currentTime, chapters]);
+  }, [currentTime, chapters, variant]);
 
   const handleSkipIntro = () => {
     const introChapter = chapters.find((c) => c.title.toLowerCase() === "intro");
@@ -595,7 +600,11 @@ export default function CinemaPlayer({
     <div
       ref={containerRef}
       className={`relative select-none flex flex-col justify-center items-center bg-black overflow-hidden transition-all duration-300 ${
-        isTheaterMode ? "w-full h-[85vh] lg:h-[90vh]" : "fixed inset-0 z-50 w-screen h-screen"
+        variant === "floating"
+          ? "w-full h-full rounded-2xl border border-neutral-800"
+          : isTheaterMode
+          ? "w-full h-[85vh] lg:h-[90vh]"
+          : "fixed inset-0 z-50 w-screen h-screen"
       }`}
     >
       {/* BACKGROUND GRAPHIC COMIC STYLED OVERLAYS */}
@@ -847,13 +856,23 @@ export default function CinemaPlayer({
           </div>
         </div>
 
-        <button
-          onClick={handleClose}
-          className="h-10 w-10 rounded-full bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white flex items-center justify-center transition-all cursor-pointer shadow-lg active:scale-95"
-          title="Back to Studio Workspace"
-        >
-          <X className="h-4 w-4" />
-        </button>
+        {variant === "floating" ? (
+          <button
+            onClick={onCloseFloating}
+            className="h-8 w-8 rounded-full bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white flex items-center justify-center transition-all cursor-pointer shadow-lg active:scale-95"
+            title="Close Player"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        ) : (
+          <button
+            onClick={handleClose}
+            className="h-10 w-10 rounded-full bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white flex items-center justify-center transition-all cursor-pointer shadow-lg active:scale-95"
+            title="Back to Studio Workspace"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
       {/* BOTTOM CONTROL AND TIMELINE OVERLAYS */}
@@ -1095,17 +1114,19 @@ export default function CinemaPlayer({
             </button>
 
             {/* PICTURE-IN-PICTURE BUTTON */}
-            <button
-              onClick={togglePictureInPicture}
-              className={`h-9 w-9 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
-                isPiPActive
-                  ? "bg-purple-900/25 border-purple-800/40 text-purple-400 hover:text-purple-300"
-                  : "hover:bg-neutral-800 text-neutral-400 hover:text-white border-transparent"
-              }`}
-              title="Picture-in-Picture (P)"
-            >
-              <PictureInPicture className="h-4.5 w-4.5" />
-            </button>
+            {variant !== "floating" && (
+              <button
+                onClick={togglePictureInPicture}
+                className={`h-9 w-9 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
+                  isPiPActive
+                    ? "bg-purple-900/25 border-purple-800/40 text-purple-400 hover:text-purple-300"
+                    : "hover:bg-neutral-800 text-neutral-400 hover:text-white border-transparent"
+                }`}
+                title="Picture-in-Picture (P)"
+              >
+                <PictureInPicture className="h-4.5 w-4.5" />
+              </button>
+            )}
 
             {/* SUBTITLES CAPTIONS TOGGLER */}
             <button
@@ -1245,17 +1266,19 @@ export default function CinemaPlayer({
             </div>
 
             {/* THEATER MODE TOGGLER */}
-            <button
-              onClick={() => setIsTheaterMode(!isTheaterMode)}
-              className={`h-9 w-9 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
-                isTheaterMode
-                  ? "bg-purple-900/25 border-purple-800/40 text-purple-400 hover:text-purple-300"
-                  : "hover:bg-neutral-800 text-neutral-400 hover:text-white border-transparent"
-              }`}
-              title="Theater Mode (T)"
-            >
-              <Monitor className="h-4.5 w-4.5" />
-            </button>
+            {variant !== "floating" && (
+              <button
+                onClick={() => setIsTheaterMode(!isTheaterMode)}
+                className={`h-9 w-9 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
+                  isTheaterMode
+                    ? "bg-purple-900/25 border-purple-800/40 text-purple-400 hover:text-purple-300"
+                    : "hover:bg-neutral-800 text-neutral-400 hover:text-white border-transparent"
+                }`}
+                title="Theater Mode (T)"
+              >
+                <Monitor className="h-4.5 w-4.5" />
+              </button>
+            )}
 
             {/* FULLSCREEN TOGGLER */}
             <button

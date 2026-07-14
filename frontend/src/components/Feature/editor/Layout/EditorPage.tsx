@@ -13,6 +13,7 @@ import { getUserCredits } from "../../../../api/auth";
 import { Sliders, X, Mic } from "lucide-react";
 import { useImageEditorStore } from "@/hooks/useImageEditorState";
 import { resolveWorkspaceReturnPath } from "../../../../utils/workspaceNavigation.js";
+import { Rnd } from "react-rnd";
 
 
 interface EditorPageProps {
@@ -38,6 +39,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
 }: EditorPageProps) => {
   void seriesSlug;
   void chapterSlug;
+  const playerSettings = useImageEditorStore((state) => state.playerSettings);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(true);
   const [currentSection, setCurrentSection] = React.useState("timeline");
   const [isFocusMode, setIsFocusMode] = React.useState(false);
@@ -430,17 +432,39 @@ const EditorPage: React.FC<EditorPageProps> = ({
           </div>
         ) : (
           <>
-            {/* Primary Canvas: CinemaPlayer renders directly to handle preview screen displays */}
-            {activeTab !== "settings" && activeTab !== "audio-settings" && (
-              <div
-                id="section-monitor"
-                className={`relative md:sticky w-full max-w-[1600px] mx-auto flex flex-col z-0 transition-all duration-500 px-4 md:px-6 py-4 ${
-                  isFocusMode
-                    ? "top-0 h-screen"
-                    : "top-0 md:top-16 h-[40vh] min-h-[300px] md:h-[calc(100vh-64px)]"
-                }`}
+            {/* Draggable & Resizable Floating CinemaPlayer Panel */}
+            {activeTab !== "settings" && activeTab !== "audio-settings" && playerSettings.isPlayerOpen && (
+              <Rnd
+                size={{
+                  width: playerSettings.playerSize.width,
+                  height: playerSettings.playerSize.height,
+                }}
+                position={{
+                  x: playerSettings.playerPos.x,
+                  y: playerSettings.playerPos.y,
+                }}
+                onDragStop={(e, d) => {
+                  useImageEditorStore.getState().setPlayerSettings({
+                    playerPos: { x: d.x, y: d.y },
+                  });
+                }}
+                onResizeStop={(e, direction, ref, delta, position) => {
+                  useImageEditorStore.getState().setPlayerSettings({
+                    playerSize: {
+                      width: parseInt(ref.style.width, 10),
+                      height: parseInt(ref.style.height, 10),
+                    },
+                    playerPos: { x: position.x, y: position.y },
+                  });
+                }}
+                minWidth={320}
+                minHeight={180}
+                lockAspectRatio={16 / 9}
+                bounds="window"
+                style={{ zIndex: 40 }}
+                dragHandleClassName="absolute top-0 inset-x-0 h-12 cursor-move"
               >
-                <div className="flex-1 w-full h-full relative">
+                <div className="w-full h-full relative">
                   <CinemaPlayer
                     panels={panels}
                     videoUrl={activePreviewTab === "video" ? videoUrl : null}
@@ -448,9 +472,13 @@ const EditorPage: React.FC<EditorPageProps> = ({
                     chapterSlug={null}
                     navigateTo={() => {}}
                     addNotification={addNotification}
+                    variant="floating"
+                    onCloseFloating={() => {
+                      useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
+                    }}
                   />
                 </div>
-              </div>
+              </Rnd>
             )}
 
             {/* Scrolling Overlay Content (Timeline, Assets, Meta) */}

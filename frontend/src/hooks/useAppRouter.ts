@@ -229,7 +229,8 @@ export function useAppRouter({
             path.startsWith("/editor/") ||
             path === "/image-editor" ||
             path === "/image-editor/" ||
-            path.startsWith("/image-editor/");
+            path.startsWith("/image-editor/") ||
+            /^\/workspace\/editor\/[^\/]+\/[^\/]+\/player\/?$/.test(path);
 
           if (isProtectedRoute) {
             window.history.replaceState({}, "", "/");
@@ -321,6 +322,16 @@ export function useAppRouter({
         path.startsWith("/image-editor")
       ) {
         const params = new URLSearchParams(window.location.search);
+
+        // Skip editor redirects or checks if this is the theater player mode
+        const isTheaterRoute = /^\/workspace\/editor\/[^\/]+\/[^\/]+\/player\/?$/.test(path);
+        if (isTheaterRoute) {
+          setIsPipMode(false);
+          setShowAutoCropModal(false);
+          setShowBubbleModal(false);
+          setEditingImageIdx(null);
+          return;
+        }
 
         // Redirect /editor?importUrl=... to /workspace/editor?id=temp_...
         if (params.has("importUrl") && !params.has("id")) {

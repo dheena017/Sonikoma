@@ -73,6 +73,7 @@ import {
   CreativeSuiteDashboardPage,
 } from "./components/creative";
 import ImageEditorPage from "./components/Feature/editor/Tools/ImageEditor/ImageEditorPage";
+import TheaterModePage from "./components/Feature/video/TheaterModePage";
 
 // ============================================================================
 // SECTION 2: MAIN APP COMPONENT
@@ -677,6 +678,7 @@ export default function App() {
       /^\/workspace\/editor\/series\/([^\/]+)\/chapters\/([^\/]+)(?:\/image-editor)?\/?$/
     );
     const isDetailsMode = currentPath.endsWith("/details");
+    const isTheaterModePath = /^\/workspace\/editor\/[^\/]+\/[^\/]+\/player\/?$/.test(currentPath);
     const isImageEditorPage =
       currentPath === "/image-editor" ||
       currentPath === "/image-editor/" ||
@@ -735,6 +737,7 @@ export default function App() {
       isProjectEditorPath: false,
       isSeriesDetailsPath:
         !chapterPathMatch && currentPath.match(/\/series\/([^\/]+)$/) !== null,
+      isTheaterModePath,
       isLandingPath:
         currentPath === "/" ||
         currentPath === "/landing" ||
@@ -801,6 +804,7 @@ export default function App() {
     isChapterDetailsPath,
     isProjectEditorPath,
     isSeriesDetailsPath,
+    isTheaterModePath,
     isLandingPath,
     isCreativeSuitePath,
     isCreativeSuiteDashboardPath,
@@ -833,7 +837,7 @@ export default function App() {
     currentPath === "/editor/" ||
     currentPath === "/workspace/editor" ||
     currentPath === "/workspace/editor/" ||
-    currentPath.startsWith("/workspace/editor/")) && !isImageEditorPage;
+    currentPath.startsWith("/workspace/editor/")) && !isImageEditorPage && !isTheaterModePath;
   const editorSeriesSlug = editorRouteMatch?.[1] || seriesSlugState || null;
   const editorChapterSlug = editorRouteMatch?.[2] || chapterSlugState || null;
 
@@ -1193,7 +1197,7 @@ export default function App() {
       }`}
     >
       {/* --- Page Navigation Sidebar --- */}
-      {isAnyAdmin ? (
+      {isTheaterModePath ? null : isAnyAdmin ? (
         <>
           <AdminSidebar
             currentPath={currentPath}
@@ -1289,7 +1293,7 @@ export default function App() {
         } ${!isAnyAdmin && isSidebarOpen ? "overflow-hidden" : ""}`}
       >
         {/* Top Header */}
-        {!isSidebarOpen && !isProEditorPage && !isAnyAdmin && !isImageEditorPage && (
+        {!isSidebarOpen && !isProEditorPage && !isAnyAdmin && !isImageEditorPage && !isTheaterModePath && (
           isCreativeSuitePath ? (
             <CreativeSuiteHeader
               currentPath={currentPath}
@@ -1353,8 +1357,8 @@ export default function App() {
         )}
 
         <div
-          className={`${!isSidebarOpen && !isImageEditorPage ? "lg:pl-20" : ""} ${
-            !isSidebarOpen && !isProEditorPage && !isImageEditorPage
+          className={`${!isSidebarOpen && !isImageEditorPage && !isTheaterModePath ? "lg:pl-20" : ""} ${
+            !isSidebarOpen && !isProEditorPage && !isImageEditorPage && !isTheaterModePath
               ? "pt-[59px] min-h-[calc(100vh-59px)]"
               : "min-h-screen"
           } flex-grow flex-1 flex flex-col transition-all duration-300`}
@@ -1996,6 +2000,16 @@ export default function App() {
               fetchWithInterceptor={fetchWithInterceptor}
               addNotification={addNotification}
               audioFeedback={audioFeedback}
+            />
+          )}
+
+          {/* PAGE VIEW 23: Standalone Theater Mode Page */}
+          {isTheaterModePath && (
+            <TheaterModePage
+              seriesSlug={currentPath.split("/")[3]}
+              chapterSlug={currentPath.split("/")[4]}
+              navigateTo={navigateTo}
+              appLogic={memoizedAppLogic}
             />
           )}
 

@@ -3,6 +3,7 @@ import { Sparkles, RefreshCw, X, Eye, EyeOff, ChevronDown, ChevronUp, Layers } f
 import { GeneratedPanel } from "@/types";
 import { getPanelFilterStyle } from "@/utils";
 import { generateTts } from "../../../api";
+import { useImageEditorStore } from "../../../hooks/useImageEditorState";
 
 let autoPlayHintShown = false;
 
@@ -407,7 +408,16 @@ const TimelineCard = ({
     if (clickTimeoutRef.current) {
       clearTimeout(clickTimeoutRef.current);
       clickTimeoutRef.current = null;
+
+      // Perform double click actions
       onPanelDoubleClick?.(idx, panel.id);
+
+      // Snap floating player coordinates to { x: 20, y: 80 } and set isPlayerOpen: true
+      useImageEditorStore.getState().setPlayerSettings({
+        isPlayerOpen: true,
+        playerPos: { x: 20, y: 80 }
+      });
+
     } else {
       clickTimeoutRef.current = setTimeout(() => {
         clickTimeoutRef.current = null;

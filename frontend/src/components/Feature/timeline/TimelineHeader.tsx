@@ -28,6 +28,8 @@ interface TimelineHeaderProps {
   handleCancelAnalysis?: () => void;
 }
 
+import { Tv } from "lucide-react";
+
 export default function TimelineHeader({
   panelsLength,
   selectedCount = 0,
@@ -52,6 +54,24 @@ export default function TimelineHeader({
   handleCancelBatch,
   handleCancelAnalysis,
 }: TimelineHeaderProps) {
+  const handleOpenTheaterMode = () => {
+    // Extract series and chapter from path
+    const path = window.location.pathname;
+    const match = path.match(/\/workspace\/editor\/series\/([^\/]+)\/chapters\/([^\/]+)/);
+    if (match) {
+      const seriesSlug = match[1];
+      const chapterSlug = match[2];
+      const target = `/workspace/editor/${seriesSlug}/${chapterSlug}/player`;
+      const navigateTo = (window as any).navigateTo;
+      if (typeof navigateTo === "function") {
+        navigateTo(target);
+      } else {
+        window.history.pushState({}, "", target);
+        window.dispatchEvent(new Event("popstate"));
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-neutral-800 pb-4">
       <div>
@@ -79,6 +99,17 @@ export default function TimelineHeader({
               Analyze Full Sequence
             </button>
           )}
+
+          {/* Standalone Full Screen Theater Mode Button */}
+          <button
+            type="button"
+            onClick={handleOpenTheaterMode}
+            className="text-[10px] font-bold border border-purple-500/30 bg-purple-900/40 hover:bg-purple-800/60 text-purple-300 rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors shadow-md active:scale-95 cursor-pointer"
+            title="Open Theater Mode"
+          >
+            <Tv className="w-3.5 h-3.5" />
+            Open Theater Mode
+          </button>
 
           {handleDownloadZip && (
             <button
