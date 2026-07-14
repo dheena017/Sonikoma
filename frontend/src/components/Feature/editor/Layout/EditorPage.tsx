@@ -469,8 +469,8 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   <CinemaPlayer
                     panels={panels}
                     videoUrl={activePreviewTab === "video" ? videoUrl : null}
-                    seriesSlug={seriesSlug}
-                    chapterSlug={chapterSlug}
+                    seriesSlug={seriesSlug || null}
+                    chapterSlug={chapterSlug || null}
                     navigateTo={navigateTo}
                     addNotification={addNotification}
                     variant="floating"
