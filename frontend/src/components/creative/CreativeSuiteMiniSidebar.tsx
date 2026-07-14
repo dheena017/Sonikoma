@@ -116,13 +116,6 @@ const CreativeSuiteMiniSidebarInner: React.FC<CreativeSuiteMiniSidebarProps> = (
       name: "Dist",
       items: [
         {
-          id: "engagement",
-          label: "Community Coach",
-          icon: MessageSquare,
-          path: "/ai-engagement",
-          requiresPanels: false,
-        },
-        {
           id: "youtube",
           label: "YouTube Publisher",
           icon: Youtube,

@@ -544,12 +544,6 @@ const AIModelsPage = React.memo(
           ],
         },
         {
-          id: "cliffhanger",
-          endpoint: "/api/skills/cliffhanger",
-          name: "Cliffhanger Generator",
-          inputs: [{ name: "story_outline" }],
-        },
-        {
           id: "voice-cast",
           endpoint: "/api/skills/voice-cast",
           name: "Voice Casting Profiler",
@@ -596,12 +590,6 @@ const AIModelsPage = React.memo(
             { name: "genre" },
             { name: "storyboard_summary" },
           ],
-        },
-        {
-          id: "cliffhanger",
-          endpoint: api.SKILL_ENDPOINTS.CLIFFHANGER,
-          name: "Cliffhanger Generator",
-          inputs: [{ name: "story_outline" }],
         },
         {
           id: "voice-cast",

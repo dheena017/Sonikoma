@@ -2,7 +2,6 @@ export const SKILL_ENDPOINTS = {
   TRANSLATE: "/api/skills/translate",
   DRAMATIZE: "/api/skills/dramatize",
   SEO: "/api/skills/seo",
-  CLIFFHANGER: "/api/skills/cliffhanger",
   VOICE_CAST: "/api/skills/voice-cast",
   COPYRIGHT_SCRUB: "/api/skills/copyright-scrub",
   COPYRIGHT_SCRUB_BATCH: "/api/skills/copyright-scrub-batch",
@@ -22,8 +21,6 @@ export const SKILL_ENDPOINTS = {
   SHORTS_HOOK: "/api/skills/shorts-hook",
   CHARACTER_BIO: "/api/skills/character-bio",
   TITLE_AB: "/api/skills/title-ab",
-  OUTRO_CTA: "/api/skills/outro-cta",
-  COMMENT_REPLY: "/api/skills/comment-reply",
 };
 
 export const runSkill = async (
@@ -89,12 +86,6 @@ export const runDramatizeSkill = (fetchWithInterceptor: any, data: any) =>
   runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.DRAMATIZE, data);
 export const runVoiceCastSkill = (fetchWithInterceptor: any, data: any) =>
   runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.VOICE_CAST, data);
-export const runCliffhangerSkill = (fetchWithInterceptor: any, data: any) =>
-  runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.CLIFFHANGER, data);
-export const runOutroCtaSkill = (fetchWithInterceptor: any, data: any) =>
-  runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.OUTRO_CTA, data);
-export const runCommentReplySkill = (fetchWithInterceptor: any, data: any) =>
-  runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.COMMENT_REPLY, data);
 export const runSeoSkill = (fetchWithInterceptor: any, data: any) =>
   runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.SEO, data);
 export const runShortsScriptSkill = (fetchWithInterceptor: any, data: any) =>

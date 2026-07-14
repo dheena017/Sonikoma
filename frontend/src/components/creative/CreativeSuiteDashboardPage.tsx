@@ -151,15 +151,6 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
       badge: "Context",
     },
     {
-      id: "engagement",
-      label: "Community Coach",
-      desc: "Fetch audience sentiment summaries and optimization hints.",
-      icon: MessageSquare,
-      path: "/ai-engagement",
-      requiresPanels: false,
-      badge: "Distribution",
-    },
-    {
       id: "youtube",
       label: "YouTube Publisher",
       desc: "Push completed video exports to YouTube Shorts or channel feed.",

@@ -300,11 +300,6 @@ class FallbackCoordinator:
                     {"timestamp": "01:15", "tension_reason": "High cliffhanger point before revelation."}
                 ]
             }
-        elif skill_name == "outro_cta_generator":
-            return {
-                "outro_script": f"Subscribe to read the next peak chapter of {kwargs.get('title', 'this series')}!",
-                "cta_focus": "subscribe"
-            }
         elif skill_name == "scene_composition_desc":
             return {
                 "visual_prompt": "Cinematic manhwa page close-up, dramatic shadows, soft backlight",

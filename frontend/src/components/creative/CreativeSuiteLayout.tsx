@@ -60,7 +60,6 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
       "/ai-voice": "Voice Studio",
       "/ai-characters": "Character Database",
       "/ai-translation": "Translation Studio",
-      "/ai-engagement": "Community Coach",
       "/youtube": "YouTube Publisher",
     };
     

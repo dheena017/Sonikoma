@@ -56,7 +56,6 @@ import TranslationStudioPage from "./components/Feature/translation/TranslationS
 import AudioLabPage from "./components/Feature/audio_lab/AudioLabPage";
 import AudioSettingsPage from "./components/Feature/audio_settings/AudioSettingsPage";
 import ThumbnailStudioPage from "./components/Feature/thumbnails/ThumbnailStudioPage";
-import EngagementPage from "./components/Feature/engagement/EngagementPage";
 import VoiceStudioPage from "./components/Feature/voice/VoiceStudioPage";
 import CTRAnalyticsPage from "./components/Feature/analytics/CTRAnalyticsPage";
 import NotificationsPage from "./components/notification/NotificationsPage";
@@ -723,7 +722,7 @@ export default function App() {
       isTranslationPath: currentPath === "/ai-translation",
       isAudioLabPath: currentPath === "/ai-audio-lab",
       isThumbnailPath: currentPath === "/ai-thumbnails",
-      isEngagementPath: currentPath === "/ai-engagement",
+      isEngagementPath: false,
       isVoicePath: currentPath === "/ai-voice",
       isAnalyticsPath: currentPath === "/ai-analytics",
       isYouTubePath: currentPath === "/youtube",
@@ -757,7 +756,6 @@ export default function App() {
         currentPath === "/ai-translation" ||
         currentPath === "/ai-audio-lab" ||
         currentPath === "/ai-thumbnails" ||
-        currentPath === "/ai-engagement" ||
         currentPath === "/ai-voice" ||
         currentPath === "/ai-analytics" ||
         currentPath === "/youtube",
@@ -793,7 +791,6 @@ export default function App() {
     isTranslationPath,
     isAudioLabPath,
     isThumbnailPath,
-    isEngagementPath,
     isVoicePath,
     isAnalyticsPath,
     isYouTubePath,
@@ -1823,11 +1820,6 @@ export default function App() {
                   scrapedTitle={scrapedTitle}
                   scrapedGenre={scrapedGenre}
                 />
-              ) : isEngagementPath ? (
-                <EngagementPage
-                  onNavigateHome={handleNavigateHome}
-                  scrapedTitle={scrapedTitle}
-                />
               ) : isVoicePath ? (
                 <VoiceStudioPage
                   panels={panels}
@@ -2033,7 +2025,6 @@ export default function App() {
             !isTranslationPath &&
             !isAudioLabPath &&
             !isThumbnailPath &&
-            !isEngagementPath &&
             !isVoicePath &&
             !isAnalyticsPath &&
             !isYouTubePath &&

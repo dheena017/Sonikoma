@@ -204,11 +204,6 @@ class NarrativePacingRequest(BaseModel):
     sfx: str
     model: Optional[str] = "gemini-2.5-flash"
 
-class CommentReplyRequest(BaseModel):
-    user_comment: str
-    video_title: str
-    model: Optional[str] = "gemini-2.5-flash"
-
 class BGMVibeRequest(BaseModel):
     narrative_mood: str
     action_scale: str
@@ -216,10 +211,6 @@ class BGMVibeRequest(BaseModel):
 
 class ShortsScriptRequest(BaseModel):
     storyboard_summary: str
-    model: Optional[str] = "gemini-2.5-flash"
-
-class CliffhangerRequest(BaseModel):
-    story_outline: str
     model: Optional[str] = "gemini-2.5-flash"
 
 class TitleABRequest(BaseModel):
@@ -280,11 +271,6 @@ class TransitionSpeedRequest(BaseModel):
 
 class ThumbnailVisualRequest(BaseModel):
     thumbnail_concept: str
-    model: Optional[str] = "gemini-2.5-flash"
-
-class OutroCTARequest(BaseModel):
-    title: str
-    ending_cliffhanger: str
     model: Optional[str] = "gemini-2.5-flash"
 
 class CopyrightScrubRequest(BaseModel):
@@ -1610,10 +1596,6 @@ async def get_character_bio(body: CharacterBioRequest, user_api_key: str = Depen
 async def get_pacing(body: NarrativePacingRequest, user_api_key: str = Depends(get_user_gemini_key)):
     return await run_md_skill("narrative_pace_controller", body.model, api_key=user_api_key, visual_description=body.visual_description, speech_text=body.speech_text, sfx=body.sfx)
 
-@router.post("/skills/comment-reply")
-async def get_comment_reply(body: CommentReplyRequest, user_api_key: str = Depends(get_user_gemini_key)):
-    return await run_md_skill("youtube_comment_coach", body.model, api_key=user_api_key, user_comment=body.user_comment, video_title=body.video_title)
-
 @router.post("/skills/bgm-vibe")
 async def get_bgm_vibe(body: BGMVibeRequest, user_api_key: str = Depends(get_user_gemini_key)):
     return await run_md_skill("bgm_vibe_selector", body.model, api_key=user_api_key, narrative_mood=body.narrative_mood, action_scale=body.action_scale)
@@ -1621,10 +1603,6 @@ async def get_bgm_vibe(body: BGMVibeRequest, user_api_key: str = Depends(get_use
 @router.post("/skills/shorts-script")
 async def get_shorts_script(body: ShortsScriptRequest, user_api_key: str = Depends(get_user_gemini_key)):
     return await run_md_skill("shorts_script_adapter", body.model, api_key=user_api_key, storyboard_summary=body.storyboard_summary)
-
-@router.post("/skills/cliffhanger")
-async def get_cliffhanger(body: CliffhangerRequest, user_api_key: str = Depends(get_user_gemini_key)):
-    return await run_md_skill("cliffhanger_generator", body.model, api_key=user_api_key, story_outline=body.story_outline)
 
 @router.post("/skills/title-ab")
 async def get_title_ab(body: TitleABRequest, user_api_key: str = Depends(get_user_gemini_key)):
@@ -1714,10 +1692,6 @@ async def generate_thumbnail_variation(body: GenerateThumbnailRequest, user_api_
     except Exception as e:
         logger.error(f"Thumbnail composition failed: {e}")
         raise HTTPException(status_code=500, detail=f"Thumbnail composition failed: {e}")
-
-@router.post("/skills/outro-cta")
-async def get_outro_cta(body: OutroCTARequest, user_api_key: str = Depends(get_user_gemini_key)):
-    return await run_md_skill("outro_cta_generator", body.model, api_key=user_api_key, title=body.title, ending_cliffhanger=body.ending_cliffhanger)
 
 @router.post("/skills/copyright-scrub")
 async def get_copyright_scrub(body: CopyrightScrubRequest, user_api_key: str = Depends(get_user_gemini_key)):
