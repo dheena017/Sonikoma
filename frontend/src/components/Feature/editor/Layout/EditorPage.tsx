@@ -575,7 +575,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                 <>
                   {/* TOP: Inline CinemaPlayer */}
                   {playerSettings.isPlayerOpen && (
-                    <div className="w-full max-w-[1600px] mx-auto bg-neutral-900/60 rounded-2xl border border-neutral-800 p-4 sm:p-6 space-y-4 mb-4">
+                    <div className="w-full max-w-[1600px] ml-0 mr-0 bg-neutral-900/60 rounded-2xl border border-neutral-800 p-4 sm:p-6 space-y-4 mb-4">
                       {/* Header */}
                       <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
                         <div className="flex items-center gap-2">
@@ -617,9 +617,9 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   )}
 
                   {/* MIDDLE: Storyboard Timeline */}
-                  <div
+                    <div
                     id="section-timeline"
-                    className="w-full max-w-[1600px] mx-auto space-y-4"
+                    className="w-full max-w-[1600px] ml-0 mr-0 space-y-4"
                   >
                     <div className="flex items-center justify-between border-b border-white/5 pb-2">
                       <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono">
@@ -672,11 +672,10 @@ const EditorPage: React.FC<EditorPageProps> = ({
                       setSelectedPanelIds={handleSetSelectedPanelIds}
                     />
                   </div>
-
                   {/* BOTTOM: Imported Assets (Resource Pool) */}
-                  <div
+                    <div
                     id="section-assets"
-                    className="w-full max-w-[1600px] mx-auto space-y-4"
+                    className="w-full max-w-[1600px] ml-0 mr-0 space-y-4"
                   >
                     <div className="flex items-center justify-between border-b border-white/5 pb-2">
                       <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono">
@@ -733,11 +732,10 @@ const EditorPage: React.FC<EditorPageProps> = ({
                       />
                     </div>
                   </div>
-
                   {/* Final Production panel and metadata below timeline */}
-                  <div
+                    <div
                     id="section-production"
-                    className="w-full max-w-[1600px] mx-auto mt-12 space-y-6 pt-8 border-t border-white/5"
+                    className="w-full max-w-[1600px] ml-0 mr-0 mt-12 space-y-6 pt-8 border-t border-white/5"
                   >
                     <FinalProductionPanel />
                     <OutputMetadataPanel

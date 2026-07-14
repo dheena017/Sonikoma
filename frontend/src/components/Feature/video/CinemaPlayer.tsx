@@ -133,11 +133,16 @@ export default function CinemaPlayer({
   const playbackIntervalRef = useRef<any>(null);
 
   // Auto-close overlay timers
-  const [controlsVisible, setControlsVisible] = useState(true);
+  const [controlsVisible, setControlsVisible] = useState(variant === "floating" ? false : true);
   const lastActiveRef = useRef<number>(Date.now());
 
-  // Mouse activity tracker for auto-hiding player control overlay
+  // Hover behavior for control overlays.
+  // - In floating mode: show controls only while user hovers the player container.
+  // - In theater mode: keep existing auto-hide behavior based on mouse activity.
   useEffect(() => {
+    if (variant === "floating") return;
+
+    // Mouse activity tracker for auto-hiding player control overlay
     const handleMouseMove = () => {
       setControlsVisible(true);
       lastActiveRef.current = Date.now();
@@ -156,7 +161,8 @@ export default function CinemaPlayer({
       window.removeEventListener("mousemove", handleMouseMove);
       clearInterval(interval);
     };
-  }, [isPlaying]);
+  }, [isPlaying, variant]);
+
 
   // Handle play/pause toggle
   const togglePlay = () => {
@@ -599,6 +605,18 @@ export default function CinemaPlayer({
   return (
     <div
       ref={containerRef}
+      onMouseEnter={() => {
+        if (variant === "floating") {
+          setControlsVisible(true);
+        }
+      }}
+      onMouseLeave={() => {
+        if (variant === "floating") {
+          setControlsVisible(false);
+          setShowSettings(false);
+          setShowChaptersMenu(false);
+        }
+      }}
       className={`relative select-none flex flex-col justify-center items-center bg-black overflow-hidden transition-all duration-300 ${
         variant === "floating"
           ? "w-full h-full rounded-xl"
@@ -678,7 +696,8 @@ export default function CinemaPlayer({
 
       {/* SIMULATED FLOATING PIP PREVIEW WINDOW */}
       {isPiPActive && isMock && (
-        <div className="fixed bottom-24 right-6 w-72 aspect-video bg-neutral-900/95 border-2 border-purple-600 rounded-2xl shadow-2xl z-[80] flex flex-col overflow-hidden animate-fade-in pointer-events-auto">
+        <div className="fixed bottom-24 right-6 w-72 h-60 bg-neutral-900/95 border-2 border-purple-600 rounded-2xl shadow-2xl z-[80] flex flex-col overflow-hidden animate-fade-in pointer-events-auto">
+
           <div className="bg-neutral-950 px-3 py-1.5 flex items-center justify-between border-b border-neutral-800">
             <span className="text-[9px] font-mono text-purple-400 font-bold uppercase tracking-wider flex items-center gap-1">
               <Tv className="h-3 w-3" /> PiP Preview Mode
@@ -697,21 +716,21 @@ export default function CinemaPlayer({
                   <div className="relative w-full h-full flex items-center justify-center">
                     <img
                       src={activePanelNow.layers.background_url}
-                      className="absolute max-w-full max-h-full object-contain"
+                      className="absolute inset-0 w-full h-full object-cover player-content"
                       alt="PiP Background"
                     />
                     <img
                       src={activePanelNow.layers.character_url}
-                      className="absolute max-w-full max-h-full object-contain z-10"
+                      className="absolute max-w-full max-h-full object-fill z-10"
                       alt="PiP Character"
                     />
                   </div>
                 ) : (
-                  <img
-                    src={activePanelNow.image_url}
-                    className="w-full h-full object-cover"
-                    alt="PiP Current Panel"
-                  />
+                    <img
+                      src={activePanelNow.image_url}
+                      className="w-full h-full object-cover"
+                      alt="PiP Current Panel"
+                    />
                 )}
               </div>
             ) : (
@@ -736,60 +755,78 @@ export default function CinemaPlayer({
       )}
 
       {/* RENDER ACTIVE SCREEN CANVAS CONTENT */}
-      <div className="relative w-full h-full flex items-center justify-center z-10">
+          <div className="relative w-full h-full flex items-center justify-center z-10 overflow-hidden">
         {/* High Fidelity Animated Canvas preview for all playback track rendering */}
         <div className="relative w-full h-full flex items-center justify-center bg-[#060608]">
           {activePanelNow ? (
-            <div className="relative max-w-full max-h-[92%] aspect-video overflow-hidden border border-neutral-900 rounded-3xl shadow-2xl flex items-center justify-center bg-neutral-950">
+              <div className="relative w-full h-full flex items-center justify-center overflow-hidden border border-neutral-900 rounded-3xl shadow-2xl bg-neutral-950">
               {activePanelNow.layers ? (
                 <div className="relative w-full h-full flex items-center justify-center">
-                  {/* Stacks custom background and separate character elements for deep immersion */}
-                  <img
-                    src={activePanelNow.layers.background_url}
-                    className="absolute max-w-full max-h-full object-contain"
-                    style={{
-                      transform: isPlaying
-                        ? subtitlesStyle === "karaoke"
-                          ? `scale(${1 + (currentTime % 4.5) * 0.015})`
-                          : "scale(1.05) translateY(-2px)"
-                        : "scale(1)",
-                      transition: "transform 100ms linear",
-                    }}
-                    alt="Background"
-                  />
-                  <img
-                    src={activePanelNow.layers.character_url}
-                    className="absolute max-w-full max-h-full object-contain z-10"
-                    style={{
-                      transform: isPlaying
-                        ? subtitlesStyle === "karaoke"
-                          ? `scale(${1 + (currentTime % 4.5) * 0.035}) translateY(-4px)`
-                          : "scale(1.08) translateY(-6px)"
-                        : "scale(1)",
-                      transition: "transform 100ms linear",
-                    }}
-                    alt="Character"
-                  />
-                  {showSubtitles && activePanelNow.layers.text_url && (
+                  {/* Stacks custom background and separate character elements for deep immersion.
+                      Use contain so we avoid pillar-boxing during responsive resizing. */}
+                  <div className="absolute inset-0 w-full h-full flex items-center justify-center">
                     <img
-                      src={activePanelNow.layers.text_url}
-                      className="absolute max-w-full max-h-full object-contain z-20"
-                      alt="Subtitles Layer"
+                      src={activePanelNow.layers.background_url}
+                      className="absolute w-auto h-auto max-w-full max-h-full object-contain player-panel-image"
+                      style={{ width: "auto", height: "auto" }}
+                      alt="Background"
                     />
-                  )}
+                    <img
+                      src={activePanelNow.layers.background_url}
+                      className="absolute w-auto h-auto max-w-full max-h-full object-contain player-panel-image"
+                      style={{
+                        width: "auto",
+                        height: "auto",
+                        transform: isPlaying
+                          ? subtitlesStyle === "karaoke"
+                            ? `scale(${1 + (currentTime % 4.5) * 0.015})`
+                            : "scale(1.05) translateY(-2px)"
+                          : "scale(1)",
+                        transition: "transform 100ms linear",
+                      }}
+                      alt="Background"
+                    />
+                    <img
+                      src={activePanelNow.layers.character_url}
+                      className="absolute w-auto h-auto max-w-full max-h-full object-contain z-10 player-panel-image"
+                      style={{
+                        width: "auto",
+                        height: "auto",
+                        transform: isPlaying
+                          ? subtitlesStyle === "karaoke"
+                            ? `scale(${1 + (currentTime % 4.5) * 0.035}) translateY(-4px)`
+                            : "scale(1.08) translateY(-6px)"
+                          : "scale(1)",
+                        transition: "transform 100ms linear",
+                      }}
+                      alt="Character"
+                    />
+                    {showSubtitles && activePanelNow.layers.text_url && (
+                      <img
+                      src={activePanelNow.layers.text_url}
+                        className="absolute w-auto h-auto max-w-full max-h-full object-contain z-20 player-panel-image"
+                        style={{ width: "auto", height: "auto" }}
+                        alt="Subtitles Layer"
+                      />
+                    )}
+                  </div>
                 </div>
               ) : (
-                <img
-                  src={activePanelNow.image_url}
-                  className="max-w-full max-h-full object-contain"
-                  style={{
-                    transform: isPlaying
-                      ? `scale(${1 + (currentTime % 4.5) * 0.02})`
-                      : "scale(1)",
-                    transition: "transform 100ms linear",
-                  }}
-                  alt="Current Panel"
-                />
+                <div className="absolute inset-0 w-full h-full flex items-center justify-center">
+                    <img
+                      src={activePanelNow.image_url}
+                      className="w-auto h-auto max-w-full max-h-full object-contain player-panel-image"
+                      style={{
+                        width: "auto",
+                        height: "auto",
+                        transform: isPlaying
+                          ? `scale(${1 + (currentTime % 4.5) * 0.02})`
+                          : "scale(1)",
+                        transition: "transform 100ms linear",
+                      }}
+                      alt="Current Panel"
+                    />
+                </div>
               )}
             </div>
           ) : (
@@ -947,7 +984,7 @@ export default function CinemaPlayer({
             onClick={handleProgressBarInteraction}
             onMouseMove={handleProgressBarMouseMove}
             onMouseLeave={handleProgressBarMouseLeave}
-            className="relative h-1.5 group-hover/scrub:h-2.5 bg-neutral-800 rounded-full cursor-pointer transition-all duration-150 flex items-center"
+            className="relative h-1 bg-neutral-700 rounded-full cursor-pointer transition-all duration-200 flex items-center group/scrub"
           >
             {/* Visual Chapter Markers */}
             {chapters.map((chapter, idx) => {
@@ -962,24 +999,25 @@ export default function CinemaPlayer({
               );
             })}
 
-            {/* Playing progress bar */}
+            {/* Playing progress line */}
             <div
-              className="absolute top-0 left-0 h-full bg-gradient-to-r from-purple-600 to-violet-400 rounded-full z-10"
+              className="absolute top-0 left-0 h-full bg-purple-600 rounded-full z-10"
               style={{ width: `${(currentTime / totalDuration) * 100}%` }}
             />
 
-            {/* Sliding cursor knob */}
+            {/* Hover-only thumb knob */}
             <div
-              className="absolute h-3.5 w-3.5 bg-white border border-neutral-300 rounded-full shadow-lg opacity-0 group-hover/scrub:opacity-100 pointer-events-none transition-opacity duration-150 z-30"
+              className="absolute top-1/2 -translate-y-1/2 h-0 w-0 bg-purple-600 rounded-full opacity-0 group-hover/scrub:opacity-100 group-hover/scrub:h-3.5 group-hover/scrub:w-3.5 pointer-events-none transition-all duration-200 z-30"
               style={{
                 left: `calc(${(currentTime / totalDuration) * 100}% - 7px)`,
+                boxShadow: "0 0 0 2px rgba(255,255,255,0.06), 0 0 16px rgba(168,85,247,0.25)",
               }}
             />
           </div>
         </div>
 
         {/* BUTTON CONTROLS LINE */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-4 px-4 py-2">
 
           {/* LEFT COMMANDS (Play/Pause, Skip Back/Forward 10s, volume, timers, chapters label) */}
           <div className="flex items-center gap-4 flex-wrap">
@@ -1013,29 +1051,36 @@ export default function CinemaPlayer({
             <div className="flex items-center gap-2 group/volume">
               <button
                 onClick={() => setIsMuted(!isMuted)}
-                className="h-8 w-8 rounded-full hover:bg-neutral-800 border border-transparent hover:border-white/5 text-neutral-300 hover:text-white flex items-center justify-center transition-all cursor-pointer"
+                className="h-8 w-8 rounded-full hover:bg-neutral-800 border border-transparent hover:border-white/5 text-neutral-300 hover:text-white flex items-center justify-center transition-all cursor-pointer hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
               >
                 {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
               </button>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.05"
-                value={isMuted ? 0 : volume}
-                onChange={(e) => {
-                  const val = parseFloat(e.target.value);
-                  setVolume(val);
-                  if (val > 0) setIsMuted(false);
-                }}
-                className="w-16 accent-purple-500 bg-neutral-800 rounded-full h-1 cursor-pointer"
-              />
+
+              {/* Slider expands on hover */}
+              <div className="flex items-center overflow-hidden transition-all duration-200 max-w-0 opacity-0 group-hover/volume:max-w-44 group-hover/volume:opacity-100">
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  value={isMuted ? 0 : volume}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value);
+                    setVolume(val);
+                    if (val > 0) setIsMuted(false);
+                  }}
+                  className="w-24 accent-purple-500 bg-neutral-800 rounded-full h-1 cursor-pointer"
+                />
+              </div>
             </div>
 
             {/* TIMERS INDICATORS */}
-            <span className="text-[11px] font-mono text-neutral-300 tabular-nums select-none">
-              {formatTime(currentTime)} <span className="text-neutral-600">/</span> {formatTime(totalDuration)}
-            </span>
+            <div className="flex items-center gap-3">
+              {/* TIMESTAMP (right of volume slider) */}
+              <span className="text-xs font-mono text-neutral-300 tabular-nums select-none">
+                {formatTime(currentTime)} <span className="text-neutral-600">/</span> {formatTime(totalDuration)}
+              </span>
+            </div>
 
             {/* CHAPTER DROPDOWN SELECTION */}
             <div className="relative">
