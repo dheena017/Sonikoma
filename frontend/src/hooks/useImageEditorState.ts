@@ -39,8 +39,8 @@ export const useImageEditorStore = create<ImageEditorGlobalState & {
 }>((set) => ({
   playerSettings: {
     isPlayerOpen: false,
-    playerPos: { x: 20, y: 80 },
-    playerSize: { width: 320, height: 180 },
+    playerPos: { x: 50, y: 150 },
+    playerSize: { width: 384, height: 216 },
   },
   setPlayerSettings: (settings) => {
     set((state) => ({

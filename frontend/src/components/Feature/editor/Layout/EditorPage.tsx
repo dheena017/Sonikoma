@@ -461,22 +461,46 @@ const EditorPage: React.FC<EditorPageProps> = ({
                 minHeight={180}
                 lockAspectRatio={16 / 9}
                 bounds="window"
-                style={{ zIndex: 40 }}
-                dragHandleClassName="absolute top-0 inset-x-0 h-12 cursor-move"
+                style={{ zIndex: 50 }}
+                dragHandleClassName="custom-drag-handle"
               >
-                <div className="w-full h-full relative">
-                  <CinemaPlayer
-                    panels={panels}
-                    videoUrl={activePreviewTab === "video" ? videoUrl : null}
-                    seriesSlug={null}
-                    chapterSlug={null}
-                    navigateTo={() => {}}
-                    addNotification={addNotification}
-                    variant="floating"
-                    onCloseFloating={() => {
-                      useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
-                    }}
-                  />
+                <div className="bg-neutral-900/60 rounded-2xl border border-neutral-800 p-3 flex flex-col h-full w-full shadow-2xl backdrop-blur-md">
+                  {/* Header Title & Drag Handle */}
+                  <div className="custom-drag-handle flex items-center justify-between border-b border-neutral-800 pb-2 mb-2 select-none cursor-move shrink-0">
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-bold text-xs text-white uppercase tracking-wider font-sans">
+                        ADAPTATION PLAYER
+                      </h4>
+                      <span className="text-[10px] bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded-full font-mono shrink-0 uppercase tracking-widest font-black">
+                        LIVE
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
+                      }}
+                      className="text-neutral-400 hover:text-white bg-neutral-800/40 hover:bg-neutral-800 p-1 rounded-md transition-all cursor-pointer"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+
+                  {/* Player Content */}
+                  <div className="flex-1 relative min-h-0 overflow-hidden rounded-xl">
+                    <CinemaPlayer
+                      panels={panels}
+                      videoUrl={activePreviewTab === "video" ? videoUrl : null}
+                      seriesSlug={null}
+                      chapterSlug={null}
+                      navigateTo={() => {}}
+                      addNotification={addNotification}
+                      variant="floating"
+                      onCloseFloating={() => {
+                        useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
+                      }}
+                    />
+                  </div>
                 </div>
               </Rnd>
             )}
